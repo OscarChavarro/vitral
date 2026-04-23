@@ -34,6 +34,67 @@ final class _PolyhedralBoundedSolidSetFinisher
         System.out.println("[SetOpPipelineTrace] " + message);
     }
 
+    private static int sanitizePairedFaces(
+        ArrayList<_PolyhedralBoundedSolidFace> sonfa,
+        ArrayList<_PolyhedralBoundedSolidFace> sonfb)
+    {
+        ArrayList<_PolyhedralBoundedSolidFace> matchedA;
+        ArrayList<_PolyhedralBoundedSolidFace> matchedB;
+        boolean[] usedB;
+        int i;
+        int j;
+
+        if ( sonfa == null || sonfb == null ) {
+            return 0;
+        }
+
+        matchedA = new ArrayList<_PolyhedralBoundedSolidFace>();
+        matchedB = new ArrayList<_PolyhedralBoundedSolidFace>();
+        usedB = new boolean[sonfb.size()];
+
+        for ( i = 0; i < sonfa.size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = sonfa.get(i);
+            int pairIndexA;
+            boolean foundMatch = false;
+            boolean validA = faceA != null && faceA.boundariesList.size() >= 2;
+
+            if ( !validA ) {
+                continue;
+            }
+
+            pairIndexA = _PolyhedralBoundedSolidSetNullEdgesConnector
+                .getSonfaPairIndex(faceA);
+            for ( j = 0; j < sonfb.size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = sonfb.get(j);
+                int pairIndexB;
+                boolean validB;
+
+                if ( usedB[j] ) {
+                    continue;
+                }
+                validB = faceB != null && faceB.boundariesList.size() >= 2;
+                if ( !validB ) {
+                    continue;
+                }
+                pairIndexB = _PolyhedralBoundedSolidSetNullEdgesConnector
+                    .getSonfbPairIndex(faceB);
+                if ( pairIndexA != -1 && pairIndexA == pairIndexB ) {
+                    matchedA.add(faceA);
+                    matchedB.add(faceB);
+                    usedB[j] = true;
+                    foundMatch = true;
+                    break;
+                }
+            }
+        }
+
+        sonfa.clear();
+        sonfa.addAll(matchedA);
+        sonfb.clear();
+        sonfb.addAll(matchedB);
+        return matchedA.size();
+    }
+
     /**
     Answer integrator for the set-operations pipeline.
     Following program [MANT1988].15.15.
@@ -63,10 +124,9 @@ final class _PolyhedralBoundedSolidSetFinisher
             " sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size());
 
+        int oldsize = sanitizePairedFaces(sonfa, sonfb);
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
-
-        int oldsize = sonfa.size();
 
         for ( i = 0; i < oldsize; i++ ) {
             f = inSolidA.lmfkrh(sonfa.get(i).boundariesList.get(1),

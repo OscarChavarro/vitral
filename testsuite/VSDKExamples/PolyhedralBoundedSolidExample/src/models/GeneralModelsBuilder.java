@@ -26,6 +26,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.awt.AwtFontReader;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
@@ -198,9 +199,6 @@ public final class GeneralModelsBuilder
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
             mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
             model.setDebugCsg(false);
-            break;
-          case CSG_KURLANDER_BOWL:
-            mySolid = CsgKurlanderBowl.create();
             break;
           case FEATURED_OBJECT:
             mySolid = featuredObject();
@@ -1214,9 +1212,13 @@ public final class GeneralModelsBuilder
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
                 break;
             case MANT1988_15_1:
-            default:
                 operands =
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+                break;
+            case KURLANDER_BOWL_FIRST_STAR:
+            default:
+                operands =
+                    CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
                 break;
         }
 
@@ -1248,6 +1250,8 @@ public final class GeneralModelsBuilder
             case MANT1988_15_1:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+            case KURLANDER_BOWL_FIRST_STAR:
+                return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
             default:
                 return createCsgOperands(sample);
         }

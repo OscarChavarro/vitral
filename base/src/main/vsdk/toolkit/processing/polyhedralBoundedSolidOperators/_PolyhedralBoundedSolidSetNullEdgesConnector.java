@@ -6,6 +6,8 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -140,11 +142,14 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
     private static ArrayList<OpenChain> openChains;
+    private static Map<Integer, Integer> sonfaPairIndexByFaceId;
+    private static Map<Integer, Integer> sonfbPairIndexByFaceId;
     private static int lastLooseACount;
     private static int lastLooseBCount;
     private static int lastSonfaCount;
     private static int lastSonfbCount;
     private static int lastPairCount;
+    private static int currentConnectPairIndex;
 
     private static boolean isPipelineSummaryTraceEnabled()
     {
@@ -268,47 +273,31 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             summarizeHalfEdge(edge.e.leftHalf);
     }
 
-    private static String summarizeLoop(_PolyhedralBoundedSolidLoop loop)
+    private static void setCurrentConnectContext(int pairIndex)
     {
-        if ( loop == null ) {
-            return "null";
-        }
-
-        StringBuilder out = new StringBuilder();
-        int i;
-
-        out.append("size=").append(loop.halfEdgesList.size()).append(" path=");
-        for ( i = 0; i < loop.halfEdgesList.size(); i++ ) {
-            if ( i > 0 ) {
-                out.append(" -> ");
-            }
-            out.append(loop.halfEdgesList.get(i).startingVertex.position);
-        }
-        return out.toString();
+        currentConnectPairIndex = pairIndex;
     }
 
-    private static String summarizeFace(_PolyhedralBoundedSolidFace face)
+    static int getSonfaPairIndex(_PolyhedralBoundedSolidFace face)
     {
-        if ( face == null ) {
-            return "null";
-        }
+        Integer pairIndex;
 
-        StringBuilder out = new StringBuilder();
-        int i;
-
-        out.append("face=").append(face.id)
-           .append(" loops=").append(face.boundariesList.size());
-        for ( i = 0; i < face.boundariesList.size(); i++ ) {
-            out.append(" [").append(i).append("] ")
-               .append(summarizeLoop(face.boundariesList.get(i)));
+        if ( face == null || sonfaPairIndexByFaceId == null ) {
+            return -1;
         }
-        return out.toString();
+        pairIndex = sonfaPairIndexByFaceId.get(Integer.valueOf(face.id));
+        return pairIndex != null ? pairIndex.intValue() : -1;
     }
 
-    private static void traceFaceState(String prefix,
-        _PolyhedralBoundedSolidFace face)
+    static int getSonfbPairIndex(_PolyhedralBoundedSolidFace face)
     {
-        tracePipelineSummary(prefix + " " + summarizeFace(face));
+        Integer pairIndex;
+
+        if ( face == null || sonfbPairIndexByFaceId == null ) {
+            return -1;
+        }
+        pairIndex = sonfbPairIndexByFaceId.get(Integer.valueOf(face.id));
+        return pairIndex != null ? pairIndex.intValue() : -1;
     }
 
     private static String summarizeLooseEnds(
@@ -363,6 +352,20 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
         out.append("]");
         return out.toString();
+    }
+
+    private static ChainEndpoint endpointForSolid(OpenChain chain, int solid)
+    {
+        if ( chain == null ) {
+            return null;
+        }
+        if ( chain.first != null && chain.first.solid == solid ) {
+            return chain.first;
+        }
+        if ( chain.second != null && chain.second.solid == solid ) {
+            return chain.second;
+        }
+        return null;
     }
 
     private static int countOpenEndpoints(int solid)
@@ -500,6 +503,262 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             first.startingVertex.position,
             second.startingVertex.position,
             numericContext);
+    }
+
+    private static boolean isSamePoint(ChainEndpoint first, ChainEndpoint second)
+    {
+        if ( first == null || second == null ) {
+            return false;
+        }
+        return isSamePoint(first.halfEdge, second.halfEdge);
+    }
+
+    private static boolean canCutCoincidentHalfEdge(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        _PolyhedralBoundedSolidEdge edge;
+        _PolyhedralBoundedSolidLoop loop;
+
+        if ( he == null ) {
+            return false;
+        }
+        edge = he.parentEdge;
+        loop = he.parentLoop;
+        if ( edge == null || loop == null ) {
+            return false;
+        }
+        if ( edge.rightHalf == null || edge.leftHalf == null ) {
+            return false;
+        }
+        if ( edge.rightHalf.parentLoop != edge.leftHalf.parentLoop ) {
+            return true;
+        }
+        return loop.halfEdgesList.size() > 2;
+    }
+
+    private static boolean canCutCoincidentEndpoint(ChainEndpoint endpoint)
+    {
+        if ( endpoint == null ) {
+            return false;
+        }
+        return canCutCoincidentHalfEdge(endpoint.halfEdge);
+    }
+
+    private static boolean hasReusableCoincidentCutFace(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        _PolyhedralBoundedSolidFace face;
+
+        if ( he == null || he.parentLoop == null ) {
+            return false;
+        }
+        face = he.parentLoop.parentFace;
+        return face != null && face.boundariesList.size() > 1;
+    }
+
+    private static boolean canCutCoincidentFinishFace(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        _PolyhedralBoundedSolidEdge edge;
+        _PolyhedralBoundedSolidLoop loop;
+
+        if ( he == null ) {
+            return false;
+        }
+        edge = he.parentEdge;
+        loop = he.parentLoop;
+        if ( edge == null || loop == null ||
+             edge.rightHalf == null || edge.leftHalf == null ) {
+            return false;
+        }
+        if ( edge.rightHalf.parentLoop != edge.leftHalf.parentLoop ) {
+            return false;
+        }
+        return loop.halfEdgesList.size() > 2;
+    }
+
+    private static _PolyhedralBoundedSolidFace registerCoincidentCutFace(
+        _PolyhedralBoundedSolidHalfEdge he,
+        ArrayList<_PolyhedralBoundedSolidFace> target,
+        String label)
+    {
+        _PolyhedralBoundedSolidFace face;
+
+        if ( he == null || he.parentLoop == null ) {
+            return null;
+        }
+        face = he.parentLoop.parentFace;
+        if ( face == null || face.boundariesList.size() <= 1 ) {
+            return null;
+        }
+        target.add(face);
+        return face;
+    }
+
+    private static _PolyhedralBoundedSolidFace registerCoincidentCutFace(
+        ChainEndpoint endpoint,
+        ArrayList<_PolyhedralBoundedSolidFace> target,
+        String label)
+    {
+        if ( endpoint == null ) {
+            return null;
+        }
+        return registerCoincidentCutFace(endpoint.halfEdge, target, label);
+    }
+
+    private static _PolyhedralBoundedSolidFace
+    finalizeCoincidentChainEndpointA(ChainEndpoint endpoint)
+    {
+        if ( canCutCoincidentEndpoint(endpoint) ) {
+            return cutA(endpoint.halfEdge);
+        }
+        return registerCoincidentCutFace(endpoint, sonfa, "reuse-sonfa");
+    }
+
+    private static _PolyhedralBoundedSolidFace
+    finalizeCoincidentChainEndpointB(ChainEndpoint endpoint)
+    {
+        if ( canCutCoincidentEndpoint(endpoint) ) {
+            return cutB(endpoint.halfEdge);
+        }
+        return registerCoincidentCutFace(endpoint, sonfb, "reuse-sonfb");
+    }
+
+    private static boolean canFinalizeCoincidentLooseA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return canCutCoincidentFinishFace(he) ||
+            hasReusableCoincidentCutFace(he);
+    }
+
+    private static boolean canFinalizeCoincidentLooseB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return canCutCoincidentFinishFace(he) ||
+            hasReusableCoincidentCutFace(he);
+    }
+
+    private static void finalizeCoincidentLooseA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( canCutCoincidentFinishFace(he) ) {
+            cutA(he);
+        }
+        else {
+            registerCoincidentCutFace(he, sonfa, "reuse-sonfa");
+        }
+    }
+
+    private static void finalizeCoincidentLooseB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( canCutCoincidentFinishFace(he) ) {
+            cutB(he);
+        }
+        else {
+            registerCoincidentCutFace(he, sonfb, "reuse-sonfb");
+        }
+    }
+
+    private static void removeLoosePair(int index)
+    {
+        endsa.remove(index);
+        endsb.remove(index);
+    }
+
+    private static boolean closeLegacyCoincidentLooseEnds()
+    {
+        int i, j;
+
+        if ( endsa == null || endsb == null ) {
+            return false;
+        }
+
+        for ( i = 0; i < endsa.size() && i < endsb.size(); i++ ) {
+            for ( j = i + 1; j < endsa.size() && j < endsb.size(); j++ ) {
+                if ( !isSamePoint(endsa.get(i), endsa.get(j)) ||
+                     !isSamePoint(endsb.get(i), endsb.get(j)) ) {
+                    continue;
+                }
+                if ( !canFinalizeCoincidentLooseA(endsa.get(i)) ||
+                     !canFinalizeCoincidentLooseB(endsb.get(i)) ) {
+                    tracePipelineSummary(
+                        "connect coincident-loose skip i=" + i + " j=" + j +
+                        " A0=" + summarizeHalfEdge(endsa.get(i)) +
+                        " A1=" + summarizeHalfEdge(endsa.get(j)) +
+                        " B0=" + summarizeHalfEdge(endsb.get(i)) +
+                        " B1=" + summarizeHalfEdge(endsb.get(j)));
+                    continue;
+                }
+                tracePipelineSummary(
+                    "connect coincident-loose close i=" + i + " j=" + j +
+                    " A0=" + summarizeHalfEdge(endsa.get(i)) +
+                    " A1=" + summarizeHalfEdge(endsa.get(j)) +
+                    " B0=" + summarizeHalfEdge(endsb.get(i)) +
+                    " B1=" + summarizeHalfEdge(endsb.get(j)));
+                finalizeCoincidentLooseA(endsa.get(i));
+                finalizeCoincidentLooseB(endsb.get(i));
+                removeLoosePair(j);
+                removeLoosePair(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean closeFlexibleChainsByCoincidentEndpoints()
+    {
+        int i, j;
+
+        if ( openChains == null ) {
+            return false;
+        }
+
+        for ( i = 0; i < openChains.size(); i++ ) {
+            ChainEndpoint a0 = endpointForSolid(openChains.get(i),
+                ENDPOINT_SOLID_A);
+            ChainEndpoint b0 = endpointForSolid(openChains.get(i),
+                ENDPOINT_SOLID_B);
+            if ( a0 == null || b0 == null ) {
+                continue;
+            }
+
+            for ( j = i + 1; j < openChains.size(); j++ ) {
+                ChainEndpoint a1 = endpointForSolid(openChains.get(j),
+                    ENDPOINT_SOLID_A);
+                ChainEndpoint b1 = endpointForSolid(openChains.get(j),
+                    ENDPOINT_SOLID_B);
+                _PolyhedralBoundedSolidFace addedA;
+                _PolyhedralBoundedSolidFace addedB;
+
+                if ( a1 == null || b1 == null ) {
+                    continue;
+                }
+                if ( !isSamePoint(a0, a1) || !isSamePoint(b0, b1) ) {
+                    continue;
+                }
+
+                tracePipelineSummary(
+                    "connect coincident-chain closure i=" + i + " j=" + j +
+                    " A0=" + summarizeChainEndpoint(a0) +
+                    " A1=" + summarizeChainEndpoint(a1) +
+                    " B0=" + summarizeChainEndpoint(b0) +
+                    " B1=" + summarizeChainEndpoint(b1));
+
+                addedA = finalizeCoincidentChainEndpointA(a0);
+                addedB = finalizeCoincidentChainEndpointB(b0);
+                if ( addedA == null || addedB == null ) {
+                    keepOnlyPairedFlexibleCutFaces(addedA, addedB,
+                        "coincident-chain");
+                    continue;
+                }
+
+                openChains.remove(j);
+                openChains.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     static int getLastLooseACount()
@@ -705,23 +964,24 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
 
         s = he.parentLoop.parentFace.parentSolid;
-        tracePipelineSummary("cutA start " +
-            summarizeHalfEdge(he) + " mirror=" +
-            summarizeHalfEdge(he.mirrorHalfEdge()));
-
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             addedFace = he.parentLoop.parentFace;
-            sonfa.add(addedFace);
-            traceFaceState("cutA add-sonfa", addedFace);
             s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            if ( addedFace.boundariesList.size() >= 2 ) {
+                sonfa.add(addedFace);
+                if ( sonfaPairIndexByFaceId != null ) {
+                    sonfaPairIndexByFaceId.put(Integer.valueOf(addedFace.id),
+                        Integer.valueOf(currentConnectPairIndex));
+                }
+            }
+            else {
+                addedFace = null;
+            }
         }
         else {
             s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
-        tracePipelineSummary("cutA end solidFaces=" + s.polygonsList.size() +
-            " solidEdges=" + s.edgesList.size() +
-            " solidVertices=" + s.verticesList.size());
         return addedFace;
     }
 
@@ -739,23 +999,24 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
 
         s = he.parentLoop.parentFace.parentSolid;
-        tracePipelineSummary("cutB start " +
-            summarizeHalfEdge(he) + " mirror=" +
-            summarizeHalfEdge(he.mirrorHalfEdge()));
-
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             addedFace = he.parentLoop.parentFace;
-            sonfb.add(addedFace);
-            traceFaceState("cutB add-sonfb", addedFace);
             s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            if ( addedFace.boundariesList.size() >= 2 ) {
+                sonfb.add(addedFace);
+                if ( sonfbPairIndexByFaceId != null ) {
+                    sonfbPairIndexByFaceId.put(Integer.valueOf(addedFace.id),
+                        Integer.valueOf(currentConnectPairIndex));
+                }
+            }
+            else {
+                addedFace = null;
+            }
         }
         else {
             s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
-        tracePipelineSummary("cutB end solidFaces=" + s.polygonsList.size() +
-            " solidEdges=" + s.edgesList.size() +
-            " solidVertices=" + s.verticesList.size());
         return addedFace;
     }
 
@@ -961,6 +1222,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
         sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
         sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
+        sonfaPairIndexByFaceId = new HashMap<Integer, Integer>();
+        sonfbPairIndexByFaceId = new HashMap<Integer, Integer>();
 
         if ( sonea.size() != soneb.size() ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
@@ -1044,14 +1307,20 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             " sonfb=" + sonfb.size() +
             " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
             " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
+        while ( closeFlexibleChainsByCoincidentEndpoints() ) {
+            tracePipelineSummary(
+                "connect coincident-chain pass sonfa=" + sonfa.size() +
+                " sonfb=" + sonfb.size() +
+                " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
+                " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
+        }
+        tracePipelineSummary(
+            "connect post-pass sonfa=" + sonfa.size() +
+            " sonfb=" + sonfb.size() +
+            " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
+            " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
         updateLastSnapshotFromOpenChains();
 
-        for ( i = 0; i < sonfa.size(); i++ ) {
-            traceFaceState("connect sonfa[" + i + "]", sonfa.get(i));
-        }
-        for ( i = 0; i < sonfb.size(); i++ ) {
-            traceFaceState("connect sonfb[" + i + "]", sonfb.get(i));
-        }
         for ( i = 0; i < openChains.size(); i++ ) {
             tracePipelineSummary("connect chain[" + i + "] " +
                 summarizeChainEndpoint(openChains.get(i).first) + " " +
@@ -1096,6 +1365,9 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
         sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
         sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
+        sonfaPairIndexByFaceId = new HashMap<Integer, Integer>();
+        sonfbPairIndexByFaceId = new HashMap<Integer, Integer>();
+        setCurrentConnectContext(-1);
         int j;
 
         if ( sonea.size() != soneb.size() ) {
@@ -1160,6 +1432,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 nextedgeb.leftHalf = tmp;
             }
 
+            setCurrentConnectContext(i);
             r = canJoin(nextedgea.rightHalf, nextedgeb.leftHalf);
             if ( r != null ) {
                 h1a = r[0];
@@ -1177,6 +1450,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 }
             }
 
+            setCurrentConnectContext(i);
             r = canJoin(nextedgea.leftHalf, nextedgeb.rightHalf);
             if ( r != null ) {
                 h2a = r[0];
@@ -1229,14 +1503,20 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             " sonfb=" + sonfb.size() +
             " looseA=" + endsa.size() +
             " looseB=" + endsb.size());
+        while ( closeLegacyCoincidentLooseEnds() ) {
+            tracePipelineSummary(
+                "connect coincident-loose pass sonfa=" + sonfa.size() +
+                " sonfb=" + sonfb.size() +
+                " looseA=" + endsa.size() +
+                " looseB=" + endsb.size());
+        }
+        tracePipelineSummary(
+            "connect post-pass sonfa=" + sonfa.size() +
+            " sonfb=" + sonfb.size() +
+            " looseA=" + endsa.size() +
+            " looseB=" + endsb.size());
         updateLastSnapshot();
 
-        for ( i = 0; i < sonfa.size(); i++ ) {
-            traceFaceState("connect sonfa[" + i + "]", sonfa.get(i));
-        }
-        for ( i = 0; i < sonfb.size(); i++ ) {
-            traceFaceState("connect sonfb[" + i + "]", sonfb.get(i));
-        }
         for ( i = 0; i < endsa.size() && i < endsb.size(); i++ ) {
             tracePipelineSummary(
                 "connect loose[" + i + "] A=" + summarizeHalfEdge(endsa.get(i)) +
