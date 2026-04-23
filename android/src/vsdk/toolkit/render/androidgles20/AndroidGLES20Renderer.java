@@ -459,9 +459,9 @@ public class AndroidGLES20Renderer extends RenderingElement
         
         try {
             vertexShaderSource = loadAsStringTrimmingComments(
-                loader.open("constantvertexshader.glsl"));
+                loader.open("constantVertexShader.glsl"));
             pixelShaderSource = loadAsStringTrimmingComments(
-                loader.open("constantpixelshader.glsl"));
+                loader.open("constantPixelShader.glsl"));
             AndroidGLES20GpuProgramConstant
                 = createProgram(vertexShaderSource, pixelShaderSource);
             if ( AndroidGLES20GpuProgramConstant == 0 ) {

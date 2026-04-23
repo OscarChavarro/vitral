@@ -115,8 +115,8 @@ public class Jogl4SimpleCorridorSample
 
         shaderProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
             gl,
-            "constantvertexshader.glsl",
-            "constantpixelshader.glsl");
+            "constantVertexShader.glsl",
+            "constantPixelShader.glsl");
 
         modelViewProjectionLocalLoc = gl.glGetUniformLocation(shaderProgramId, "modelViewProjectionLocal");
         if ( modelViewProjectionLocalLoc < 0 ) {

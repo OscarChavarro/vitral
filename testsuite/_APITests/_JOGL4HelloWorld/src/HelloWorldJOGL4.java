@@ -210,8 +210,8 @@ public class HelloWorldJOGL4 implements GLEventListener
 
     private int createShaderProgram(GL4 gl)
     {
-        String vertexSource = readShaderSource("constantvertexshader.glsl");
-        String fragmentSource = readShaderSource("constantpixelshader.glsl");
+        String vertexSource = readShaderSource("constantVertexShader.glsl");
+        String fragmentSource = readShaderSource("constantPixelShader.glsl");
 
         int vertexShader = compileShader(gl, GL4.GL_VERTEX_SHADER, vertexSource);
         int fragmentShader = compileShader(gl, GL4.GL_FRAGMENT_SHADER, fragmentSource);
