@@ -13,7 +13,10 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import models.CsgSampleNames;
 import models.SolidModelNames;
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
@@ -197,21 +200,86 @@ public class JoglDebuggerHudRenderer
         gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, modelview, 0);
         gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
         gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+        if ( viewport[2] > 0 && viewport[3] > 0 ) {
+            model.getCamera().updateViewportResize(viewport[2], viewport[3]);
+        }
 
         ArrayList<VertexLabelGroup> vertexGroups = buildVertexGroups(solid,
             modelview, projection, viewport);
 
         vertexLabelRenderer.beginRendering(width, height);
-        vertexLabelRenderer.setColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         for ( int i = 0; i < vertexGroups.size(); i++ ) {
             VertexLabelGroup group = vertexGroups.get(i);
             Vector3D projectedPosition = group.projectedPosition;
-            vertexLabelRenderer.draw(buildVertexIdsLabel(group.vertices),
-                (int)Math.round(projectedPosition.x()) + 4,
-                (int)Math.round(projectedPosition.y()) + 4);
+            ArrayList<_PolyhedralBoundedSolidVertex> visibleVertices =
+                filterVisibleVertices(group.vertices, solid, model.getCamera());
+
+            if ( !visibleVertices.isEmpty() ) {
+                vertexLabelRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+                vertexLabelRenderer.draw(buildVertexIdsLabel(visibleVertices),
+                    (int)Math.round(projectedPosition.x()) + 4,
+                    (int)Math.round(projectedPosition.y()) + 4);
+            }
         }
         vertexLabelRenderer.endRendering();
+    }
+
+    private static ArrayList<_PolyhedralBoundedSolidVertex> filterVisibleVertices(
+        ArrayList<_PolyhedralBoundedSolidVertex> vertices,
+        PolyhedralBoundedSolid solid,
+        Camera camera)
+    {
+        ArrayList<_PolyhedralBoundedSolidVertex> visibleVertices =
+            new ArrayList<_PolyhedralBoundedSolidVertex>();
+
+        for ( int i = 0; i < vertices.size(); i++ ) {
+            _PolyhedralBoundedSolidVertex vertex = vertices.get(i);
+            boolean isVisible = isVertexLabelVisible(vertex, solid, camera);
+            if ( isVisible ) {
+                visibleVertices.add(vertex);
+            }
+        }
+        return visibleVertices;
+    }
+
+    private static boolean isVertexLabelVisible(
+        _PolyhedralBoundedSolidVertex vertex,
+        PolyhedralBoundedSolid solid,
+        Camera camera)
+    {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
+        Ray visibilityRay;
+        double vertexRayT;
+        Vector3D closestPointOnRay;
+        Ray hit;
+
+        if ( vertex == null || vertex.position == null || camera == null ) {
+            return true;
+        }
+
+        visibilityRay = new Ray(camera.getPosition(),
+            vertex.position.subtract(camera.getPosition()));
+        vertexRayT = vertex.position.subtract(visibilityRay.origin())
+            .dotProduct(visibilityRay.direction());
+        if ( vertexRayT <= VSDK.EPSILON ) {
+            return true;
+        }
+
+        numericContext = PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+        closestPointOnRay = visibilityRay.origin().add(
+            visibilityRay.direction().multiply(vertexRayT));
+        if ( closestPointOnRay.subtract(vertex.position).length() >=
+             numericContext.bigEpsilon() ) {
+            return true;
+        }
+
+        hit = solid.doIntersection(visibilityRay);
+        if ( hit == null ) {
+            return true;
+        }
+
+        return !(vertexRayT - hit.t() >= numericContext.bigEpsilon());
     }
 
     private static ArrayList<VertexLabelGroup> buildVertexGroups(

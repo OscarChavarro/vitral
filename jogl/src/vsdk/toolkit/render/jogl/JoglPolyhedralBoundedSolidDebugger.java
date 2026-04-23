@@ -124,7 +124,8 @@ implements GLEventListener
         JoglLightRenderer.draw(gl, light2);
         gl.glEnable(GL2.GL_LIGHTING);
         JoglPolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality);
-        JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, solid, camera);
+        JoglPolyhedralBoundedSolidRenderer.drawDebugVertices(gl, solid, camera,
+            quality);
         
         image=JoglRGBImageRenderer.getImageJOGL(gl);
         ImagePersistence.exportPNG(new File(filename), image);

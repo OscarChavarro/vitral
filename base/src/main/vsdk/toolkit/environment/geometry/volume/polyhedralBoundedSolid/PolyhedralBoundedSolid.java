@@ -9,9 +9,11 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.io.Serial;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.CircularDoubleLinkedList;
@@ -25,6 +27,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.processing.ComputationalGeometry;
+import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
 
 /**
 This class encapsulates a polyhedral boundary representation for 2-manifold
@@ -1326,7 +1330,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 if ( hit.t() < min_t ) {
                     hit = hit.withDirection(hit.direction().normalized());
                     p = hit.origin().add(hit.direction().multiply(hit.t()));
-                    pos = face.testPointInside(p, numericContext.bigEpsilon());
+                    pos = testPointInsideForRayIntersection(
+                        face, p, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
                         min_t = hit.t();
                         bestInfo = new RayHit(planeHit);
@@ -1343,6 +1348,100 @@ public class PolyhedralBoundedSolid extends Solid {
             outHit.setRay(inRay.withT(min_t));
         }
         return true;
+    }
+
+    private static Vector3D dropCoordinate(Vector3D in, int coord)
+    {
+        switch ( coord ) {
+          case 1:
+            return new Vector3D(in.y(), in.z(), 0);
+          case 2:
+            return new Vector3D(in.x(), in.z(), 0);
+          case 3:
+          default:
+            return new Vector3D(in.x(), in.y(), 0);
+        }
+    }
+
+    private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
+    {
+        Vector3D n = face.getContainingPlane().getNormal();
+
+        if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
+             Math.abs(n.x()) >= Math.abs(n.z()) ) {
+            return 1;
+        }
+        if ( Math.abs(n.y()) >= Math.abs(n.x()) &&
+             Math.abs(n.y()) >= Math.abs(n.z()) ) {
+            return 2;
+        }
+        return 3;
+    }
+
+    private static int testPointInsideForRayIntersection(
+        _PolyhedralBoundedSolidFace face,
+        Vector3D point,
+        double tolerance)
+    {
+        int dominantCoordinate;
+        int insideLoopCount;
+        int i;
+        Vector3D projectedPoint;
+        Vertex2D projectedPoint2D;
+
+        if ( face == null || face.getContainingPlane() == null ) {
+            return Geometry.OUTSIDE;
+        }
+
+        dominantCoordinate = dominantCoordinateForFace(face);
+        projectedPoint = dropCoordinate(point, dominantCoordinate);
+        projectedPoint2D = new Vertex2D(projectedPoint.x(), projectedPoint.y());
+        insideLoopCount = 0;
+
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge he = loop.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge start;
+            List<Vertex2D> projectedLoopVertices;
+            byte loopStatus;
+
+            if ( he == null ) {
+                return Geometry.OUTSIDE;
+            }
+            start = he;
+            projectedLoopVertices = new ArrayList<Vertex2D>();
+
+            do {
+                if ( VSDK.vectorDistance(point, he.startingVertex.position)
+                     < 2 * tolerance ) {
+                    return Geometry.LIMIT;
+                }
+                if ( ComputationalGeometry.lineSegmentContainmentTest(
+                         he.startingVertex.position,
+                         he.next().startingVertex.position,
+                         point, tolerance) == Geometry.LIMIT ) {
+                    return Geometry.LIMIT;
+                }
+
+                projectedPoint = dropCoordinate(he.startingVertex.position,
+                    dominantCoordinate);
+                projectedLoopVertices.add(
+                    new Vertex2D(projectedPoint.x(), projectedPoint.y()));
+                he = he.next();
+            } while ( he != start );
+
+            loopStatus = PolygonProcessor.isPointInsidePolygon2D(
+                projectedPoint2D, projectedLoopVertices);
+            if ( loopStatus == 0 ) {
+                return Geometry.LIMIT;
+            }
+            if ( loopStatus > 0 ) {
+                insideLoopCount++;
+            }
+        }
+
+        return ((insideLoopCount % 2) == 1) ?
+            Geometry.INSIDE : Geometry.OUTSIDE;
     }
 
     public void doExtraInformation(Ray inRay, double inT, 

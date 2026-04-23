@@ -73,10 +73,13 @@ public class JoglPolyhedralBoundedSolidRenderer extends JoglRenderer
     }
 
     public static void
-    drawDebugVertices(GL2 gl, PolyhedralBoundedSolid solid, Camera camera)
+    drawDebugVertices(GL2 gl,
+                      PolyhedralBoundedSolid solid,
+                      Camera camera,
+                      RendererConfiguration quality)
     {
         JoglPolyhedralBoundedSolidVertexRenderer.drawDebugVertices(gl, solid,
-            camera);
+            camera, quality);
     }
 
     public static void
