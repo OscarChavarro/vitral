@@ -8,24 +8,8 @@ import com.jogamp.opengl.GL4;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 
 final class Jogl4LineRenderer {
-    private static final String VERTEX_SHADER =
-        "#version 410 core\n"
-        + "layout(location = 0) in vec3 PObject;\n"
-        + "layout(location = 1) in vec3 emissionColor;\n"
-        + "uniform mat4 modelViewProjectionLocal;\n"
-        + "out vec3 vertexColor;\n"
-        + "void main() {\n"
-        + "    gl_Position = modelViewProjectionLocal * vec4(PObject, 1.0);\n"
-        + "    vertexColor = emissionColor;\n"
-        + "}\n";
-
-    private static final String FRAGMENT_SHADER =
-        "#version 410 core\n"
-        + "in vec3 vertexColor;\n"
-        + "layout(location = 0) out vec4 fragColor;\n"
-        + "void main() {\n"
-        + "    fragColor = vec4(vertexColor, 1.0);\n"
-        + "}\n";
+    private static final String VERTEX_SHADER_FILE = "lineVertexShader.glsl";
+    private static final String FRAGMENT_SHADER_FILE = "linePixelShader.glsl";
 
     private static boolean initialized;
     private static int programId;
@@ -33,6 +17,7 @@ final class Jogl4LineRenderer {
     private static int positionVboId;
     private static int colorVboId;
     private static int mvpLocation;
+    private static int depthBiasLocation;
 
     private Jogl4LineRenderer() {
     }
@@ -43,6 +28,17 @@ final class Jogl4LineRenderer {
         float[] positions,
         float[] colors,
         float lineWidth)
+    {
+        drawLines(gl, modelViewProjection, positions, colors, lineWidth, 0.0f);
+    }
+
+    static void drawLines(
+        GL4 gl,
+        Matrix4x4 modelViewProjection,
+        float[] positions,
+        float[] colors,
+        float lineWidth,
+        float depthBiasNdc)
     {
         if ( positions == null || colors == null || positions.length == 0 ) {
             return;
@@ -60,6 +56,7 @@ final class Jogl4LineRenderer {
             false,
             Jogl4MatrixRenderer.toColumnMajorFloatArray(modelViewProjection),
             0);
+        gl.glUniform1f(depthBiasLocation, depthBiasNdc);
 
         gl.glBindVertexArray(vaoId);
 
@@ -126,6 +123,7 @@ final class Jogl4LineRenderer {
 
         initialized = false;
         mvpLocation = -1;
+        depthBiasLocation = -1;
     }
 
     private static void ensureInitialized(GL4 gl)
@@ -134,33 +132,18 @@ final class Jogl4LineRenderer {
             return;
         }
 
-        int vertexShader = compileShader(gl, GL4.GL_VERTEX_SHADER, VERTEX_SHADER);
-        int fragmentShader = compileShader(gl, GL4.GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
-
-        programId = gl.glCreateProgram();
-        gl.glAttachShader(programId, vertexShader);
-        gl.glAttachShader(programId, fragmentShader);
-        gl.glLinkProgram(programId);
-
-        int[] linkStatus = new int[1];
-        gl.glGetProgramiv(programId, GL4.GL_LINK_STATUS, linkStatus, 0);
-        if ( linkStatus[0] == GL4.GL_FALSE ) {
-            String log = Jogl4ShaderProgramUtil.getProgramInfoLog(gl, programId);
-            gl.glDeleteShader(vertexShader);
-            gl.glDeleteShader(fragmentShader);
-            gl.glDeleteProgram(programId);
-            programId = 0;
-            throw new IllegalStateException("Jogl4LineRenderer link error: " + log);
-        }
-
-        gl.glDetachShader(programId, vertexShader);
-        gl.glDetachShader(programId, fragmentShader);
-        gl.glDeleteShader(vertexShader);
-        gl.glDeleteShader(fragmentShader);
+        programId = Jogl4ShaderProgramUtil.createProgramFromFiles(
+            gl,
+            VERTEX_SHADER_FILE,
+            FRAGMENT_SHADER_FILE);
 
         mvpLocation = gl.glGetUniformLocation(programId, "modelViewProjectionLocal");
         if ( mvpLocation < 0 ) {
             throw new IllegalStateException("Missing uniform modelViewProjectionLocal");
+        }
+        depthBiasLocation = gl.glGetUniformLocation(programId, "depthBiasNdc");
+        if ( depthBiasLocation < 0 ) {
+            throw new IllegalStateException("Missing uniform depthBiasNdc");
         }
 
         int[] tmp = new int[1];
@@ -175,24 +158,5 @@ final class Jogl4LineRenderer {
         colorVboId = tmp[0];
 
         initialized = true;
-    }
-
-    private static int compileShader(GL4 gl, int shaderType, String source)
-    {
-        int shader = gl.glCreateShader(shaderType);
-        String[] sources = new String[] { source };
-        int[] lengths = new int[] { source.length() };
-        gl.glShaderSource(shader, 1, sources, lengths, 0);
-        gl.glCompileShader(shader);
-
-        int[] compileStatus = new int[1];
-        gl.glGetShaderiv(shader, GL4.GL_COMPILE_STATUS, compileStatus, 0);
-        if ( compileStatus[0] == GL4.GL_FALSE ) {
-            String log = Jogl4ShaderProgramUtil.getShaderInfoLog(gl, shader);
-            gl.glDeleteShader(shader);
-            throw new IllegalStateException("Jogl4LineRenderer compile error: " + log);
-        }
-
-        return shader;
     }
 }

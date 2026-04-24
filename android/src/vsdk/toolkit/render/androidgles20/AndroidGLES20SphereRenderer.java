@@ -188,7 +188,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         vertexDataArray[index] = (float)(1.0-s);index++;
         vertexDataArray[index] = (float)(t);    index++;
 
-        //- If inside a Cg schema, pass non standard OpenGL parameters ----
+        //- Optional extended per-vertex parameters -----------------------
         //CGparameter tangentParam;
         //CGparameter binormalParam;
         //double vectorarray[];

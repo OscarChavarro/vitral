@@ -64,11 +64,6 @@ cd ..
 cd PolyhedralBoundedSolidExample
 ./run.sh
 cd ..
-#cd CgShaderExample
-#./run1.sh
-#./run2.sh
-#./run3.sh
-#cd ..
 cd WireframeExample
 ./run.sh
 cd ..

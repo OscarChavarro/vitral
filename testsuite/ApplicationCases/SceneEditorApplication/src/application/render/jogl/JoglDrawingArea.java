@@ -104,7 +104,6 @@ public class JoglDrawingArea implements
     public int lastInteractionMode;
     private boolean translationGizmoDrawn;
 
-    private boolean firstTimer = true;
     public boolean wantToGetColor;
     public boolean wantToGetDepth;
     public boolean wantToGetContourns;
@@ -883,11 +882,6 @@ public class JoglDrawingArea implements
     public void display(GLAutoDrawable drawable)
     {
         GL2 gl = drawable.getGL().getGL2();
-
-        if ( firstTimer ) {
-            firstTimer = false;
-            //JoglCgRenderer.createDefaultAutomaticNvidiaCgShaders("../../../etc/cgShaders");
-        }
 
         debugProjectedViewsIfNeeded(gl);
         syncViewportStateFromCanvas();

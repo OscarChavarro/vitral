@@ -86,8 +86,8 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
         gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
 
-        int programId = Jogl4RendererConfigurationRenderer.selectShaderProgram(gl, TEXTURE_QUALITY);
-        Jogl4RendererConfigurationRenderer.activateShader(
+        int programId = Jogl4RendererConfigurationShaderSelector.selectShaderProgram(gl, TEXTURE_QUALITY);
+        Jogl4RendererConfigurationShaderSelector.activateShader(
             gl,
             programId,
             modelViewProjection,
@@ -127,7 +127,7 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
         gl.glBindVertexArray(0);
         gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
 
-        Jogl4RendererConfigurationRenderer.deactivateShader(gl);
+        Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
     }
 
     static void drawLowerLeftOverlay(GL4 gl, int textureId, int width, int height)
@@ -176,7 +176,7 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static void dispose(GL4 gl)
     {
-        Jogl4RendererConfigurationRenderer.dispose(gl);
+        Jogl4RendererConfigurationShaderSelector.dispose(gl);
 
         int[] tmp = new int[1];
 

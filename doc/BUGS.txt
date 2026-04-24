@@ -26,8 +26,8 @@ Following a list of detected BUGS.
       normal map.
     . Display lists freezes CG parameters to the values valid only for
       object when compiling the list, making object inalterable.
-  - On testsuite/VSDKExamples/CgShaderExample CgAutomaticShaderExample.java
-    test object fails to activate texture map on first frame.
+  - On testsuite/Jogl4Examples/ShadersExample
+    validate that texture map activation is correct on first frame.
   - Torus
 
 Previous working things that have detected errors:
@@ -41,4 +41,3 @@ Previous working things that have detected errors:
 
 There are some warnings that may reflect hidden bugs, to check:
   - Implementation of ComputationalGeometry.cohenSutherlandLineClipping2D
-

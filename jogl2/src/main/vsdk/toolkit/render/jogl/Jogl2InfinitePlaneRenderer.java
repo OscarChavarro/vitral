@@ -62,7 +62,6 @@ public class Jogl2InfinitePlaneRenderer extends Jogl2Renderer {
     public static void draw(GL2 gl, InfinitePlane s, Camera c, RendererConfiguration q,
                             int slices, int stacks)
     {
-        //JoglCgGeometryRenderer.activateShaders(gl, s, c);
         if ( q.isSurfacesSet() ) {
             Jogl2GeometryRenderer.prepareSurfaceQuality(gl, q);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
@@ -71,7 +70,6 @@ public class Jogl2InfinitePlaneRenderer extends Jogl2Renderer {
             drawInfinitePlaneElements(gl, s, slices, stacks);
         }
         if ( q.isWiresSet() ) {
-            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);

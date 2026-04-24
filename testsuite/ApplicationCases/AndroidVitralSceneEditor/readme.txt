@@ -12,7 +12,7 @@ In order to build this project:
   - Make the folder res/raw
   - Make the folder assets (on project main folder, at the same level that
     "src" and "res")
-  - Copy into res/raw render.png and *.glsl from etc/cgShaders folder on vitral
+  - Copy into res/raw render.png and *.glsl from etc/glslShaders folder on vitral
   - Copy into res/raw miniearth.png etc/textures folder on vitral
   - Copy AndroidManifest.xml from vitral/testsuite/ApplicationCases/
     AndroidVitralSceneEditor/AndroidManifest.xml to project

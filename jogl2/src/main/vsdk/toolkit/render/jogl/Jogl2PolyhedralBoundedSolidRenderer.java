@@ -239,7 +239,6 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
          Camera c, RendererConfiguration quality)
     {
         //-----------------------------------------------------------------
-        //JoglCgRenderer.disableNvidiaCgProfiles();
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glEnable(GL2.GL_NORMALIZE);
 

@@ -61,7 +61,6 @@ public class Jogl2ArrowRenderer extends Jogl2Renderer {
         }
 
         if ( q.isWiresSet() ) {
-            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);
@@ -78,7 +77,6 @@ public class Jogl2ArrowRenderer extends Jogl2Renderer {
         }
 
         if ( q.isPointsSet() ) {
-            //JoglCgRenderer.disableNvidiaCgProfiles();
             gl.glDisable(GL2.GL_LIGHTING);
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glShadeModel(GL2.GL_FLAT);

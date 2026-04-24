@@ -34,7 +34,7 @@ example, under testsuite/VSDKExamples directory in its main distribution.
 Those examples are characterized by the following general principles:
 
   - There is one example for each specific shader technology.  For example,
-    for the case of Nvidia Cg, there is a "CgShaderExample". As more
+    for GLSL there is a "Jogl4Examples/ShadersExample". As more
     shader language platforms start to be integrated in the VitralSDK
     toolkit, one such example should be added.
   - The example is always functionally the same: one simple application
@@ -159,10 +159,10 @@ Other textures must be defined by name.
 = NVidia Cg support code in VitralSDK toolkit                             =
 ===========================================================================
 
-For understanding and testing current VitralSDK shader implementation of
-Nvidia Cg, remember to check the example program
-testsuite/VSDKExamples/CgShaderExample, and compare it with simple
-examples provided by jogl demos.
+For understanding and testing current VitralSDK shader implementation,
+remember to check the example program
+testsuite/Jogl4Examples/ShadersExample, and compare it with simple
+examples provided by JOGL demos.
 
 The following are the general VitralSDK aids to make general unrestricted
 Nvidia Cg shader programming:
