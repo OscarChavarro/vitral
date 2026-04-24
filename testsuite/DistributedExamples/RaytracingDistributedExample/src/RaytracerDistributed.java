@@ -10,7 +10,7 @@ import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 

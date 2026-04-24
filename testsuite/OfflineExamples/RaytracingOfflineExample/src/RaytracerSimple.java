@@ -14,7 +14,7 @@ import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 

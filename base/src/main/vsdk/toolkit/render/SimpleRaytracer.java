@@ -35,7 +35,7 @@ import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 /**
 This class provides an encaptulation for a rendering algorithm, 

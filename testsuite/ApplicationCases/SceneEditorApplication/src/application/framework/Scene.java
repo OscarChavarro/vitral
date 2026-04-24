@@ -8,7 +8,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.image.ImagePersistence;

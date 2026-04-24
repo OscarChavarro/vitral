@@ -37,7 +37,7 @@ import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.media.IndexedColorImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.media.RGBPixel;

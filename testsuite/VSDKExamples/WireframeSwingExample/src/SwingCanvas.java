@@ -34,7 +34,7 @@ import vsdk.toolkit.gui.AwtSystem;                      // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.KeyEvent;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 
 public class SwingCanvas extends JPanel implements
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener

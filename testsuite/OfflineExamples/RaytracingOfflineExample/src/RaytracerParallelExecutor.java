@@ -9,7 +9,10 @@ import java.util.concurrent.Future;
 
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorConsumer;
+import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorEvent;
+import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorProducer;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.render.Tile;
@@ -31,13 +34,20 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
             resultingImage.getXSize(),
             resultingImage.getYSize(),
             numberOfThreads);
+        List<Tile> generatedTiles = tileGenerator.getTiles();
         ConcurrentLinkedQueue<Tile> pendingTiles =
-            new ConcurrentLinkedQueue<>(tileGenerator.getTiles());
+            new ConcurrentLinkedQueue<>(generatedTiles);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents =
+            new ConcurrentLinkedQueue<>();
+        ParallelProgressMonitorProducer producer =
+            new ParallelProgressMonitorProducer(progressEvents);
+        ParallelProgressMonitorConsumer consumer =
+            new ParallelProgressMonitorConsumer(progressEvents);
+        Thread consumerThread = new Thread(consumer, "parallel-progress-monitor-consumer");
+        producer.init(calculateTotalProgressElements(generatedTiles));
+        consumerThread.start();
 
-        if ( reporter != null ) {
-            reporter.begin();
-        }
         try {
             List<Future<Void>> futures =
                 startWorkers(
@@ -46,7 +56,8 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
                     pendingTiles,
                     resultingImage,
                     rendererConfiguration,
-                    sceneSnapshot);
+                    sceneSnapshot,
+                    producer);
             awaitWorkers(pendingTiles, futures);
         }
         catch ( InterruptedException e ) {
@@ -57,11 +68,25 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
             throw new IllegalStateException("Parallel raytracing failed", e);
         }
         finally {
+            producer.finish();
             executorService.shutdownNow();
-            if ( reporter != null ) {
-                reporter.end();
+            try {
+                consumerThread.join();
+            }
+            catch ( InterruptedException e ) {
+                Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private long calculateTotalProgressElements(List<Tile> generatedTiles)
+    {
+        long totalElements = 0;
+
+        for ( Tile tile : generatedTiles ) {
+            totalElements += tile.getDy();
+        }
+        return totalElements;
     }
 
     private List<Future<Void>> startWorkers(
@@ -70,7 +95,8 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         ConcurrentLinkedQueue<Tile> pendingTiles,
         RGBImage resultingImage,
         RendererConfiguration rendererConfiguration,
-        SimpleSceneSnapshot sceneSnapshot)
+        SimpleSceneSnapshot sceneSnapshot,
+        ProgressMonitor progressReporter)
     {
         ArrayList<Future<Void>> futures =
             new ArrayList<>(numberOfThreads);
@@ -80,7 +106,8 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
                 pendingTiles,
                 resultingImage,
                 rendererConfiguration,
-                sceneSnapshot)));
+                sceneSnapshot,
+                progressReporter)));
         }
         return futures;
     }
@@ -102,7 +129,8 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         ConcurrentLinkedQueue<Tile> pendingTiles,
         RGBImage resultingImage,
         RendererConfiguration rendererConfiguration,
-        SimpleSceneSnapshot sceneSnapshot)
+        SimpleSceneSnapshot sceneSnapshot,
+        ProgressMonitor progressReporter)
         implements Callable<Void> {
 
         @Override
@@ -116,7 +144,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
                     resultingImage,
                     rendererConfiguration,
                     sceneSnapshot,
-                    null,
+                    progressReporter,
                     null,
                     tile.getX0(),
                     tile.getY0(),

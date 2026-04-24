@@ -26,7 +26,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.processing.ComputationalGeometry;
 
 /**

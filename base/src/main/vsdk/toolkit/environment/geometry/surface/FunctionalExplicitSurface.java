@@ -10,7 +10,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class FunctionalExplicitSurface extends Surface
 {

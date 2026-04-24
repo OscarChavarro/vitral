@@ -1,4 +1,6 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.feedback;
+
+import vsdk.toolkit.gui.PresentationElement;
 
 /**
 This interface is designed to set a standard a way in which any slow or heavy

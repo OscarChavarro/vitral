@@ -10,7 +10,7 @@ import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class TriangleMeshGroup extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;

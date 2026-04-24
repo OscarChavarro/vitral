@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL2;
 
 // VSDK classes
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class Jogl2ProgressMonitorRenderer extends Jogl2Renderer {
 

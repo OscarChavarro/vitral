@@ -12,7 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**

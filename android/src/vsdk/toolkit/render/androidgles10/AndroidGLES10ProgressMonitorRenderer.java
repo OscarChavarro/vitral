@@ -1,7 +1,7 @@
 package vsdk.toolkit.render.androidgles10;
 
 // VSDK classes
-import vsdk.toolkit.gui.ProgressMonitor;
+import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 // Android GLES 1.0 classes
 import android.opengl.GLES10;

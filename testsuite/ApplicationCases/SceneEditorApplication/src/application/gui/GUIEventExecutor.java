@@ -32,7 +32,7 @@ import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.gui.CommandListener;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImage;

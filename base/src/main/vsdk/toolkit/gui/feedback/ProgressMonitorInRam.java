@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.feedback;
 
 import vsdk.toolkit.common.VSDK;
 

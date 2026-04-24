@@ -19,7 +19,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.render.SimpleRaytracer;
-import vsdk.toolkit.gui.ProgressMonitorConsole;
+import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.media.RGBImage;
