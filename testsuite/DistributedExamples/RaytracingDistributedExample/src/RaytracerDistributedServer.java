@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 
 import vsdk.toolkit.io.image.ImagePersistence;
 
@@ -25,7 +25,7 @@ class VitralVisualizationServerProtocol implements Runnable
 {
     private Socket socket;
     private SimpleScene theScene;
-    private Raytracer visualizationEngine;
+    private SimpleRaytracer visualizationEngine;
     private RendererConfiguration rendererConfiguration;
     private RGBImage theResultingImage;
     private ProgressMonitorConsole reporter;
@@ -48,7 +48,7 @@ class VitralVisualizationServerProtocol implements Runnable
     {
         this.socket = socket;
         theScene = null;
-        visualizationEngine = new Raytracer();
+        visualizationEngine = new SimpleRaytracer();
         rendererConfiguration = new RendererConfiguration();
         theResultingImage = new RGBImage();
         id = 0;

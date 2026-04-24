@@ -29,7 +29,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;     // View elements
 import vsdk.toolkit.render.awt.AwtCalligraphic2DBufferRenderer;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.gui.AwtSystem;                      // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -125,7 +125,7 @@ public class SwingCanvas extends JPanel implements
         if ( renderingMode == 3 ) {
             ProgressMonitorConsole reporter = new ProgressMonitorConsole();
             RendererConfiguration q = new RendererConfiguration();
-            Raytracer visualizationEngine = new Raytracer();
+            SimpleRaytracer visualizationEngine = new SimpleRaytracer();
             CameraSnapshot cameraSnapshot =
                 camera.exportToCameraSnapshot(width, height);
             SimpleSceneSnapshot sceneSnapshot =

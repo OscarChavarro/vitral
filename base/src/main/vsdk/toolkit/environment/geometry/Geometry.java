@@ -47,7 +47,7 @@ public abstract class Geometry extends Entity {
     limited to:
     <UL>
         <LI> Rendering scenes using Raytracing or Raycasting like methods.
-        Currently, the class Raytracer makes use of this operation for 
+        Currently, the class SimpleRaytracer makes use of this operation for 
         visualizing scenes.
         <LI> Selecting objects interactively from a mouse click specified
         by a user, in cooperation with the Camera.generateRay method.

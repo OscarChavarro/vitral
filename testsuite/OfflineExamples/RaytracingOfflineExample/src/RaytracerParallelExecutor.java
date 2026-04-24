@@ -11,14 +11,14 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.ProgressMonitor;
 import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.render.Tile;
 import vsdk.toolkit.render.TileGenerationStrategy;
 import vsdk.toolkit.render.TileGenerator;
 
 final class RaytracerParallelExecutor implements RaytracerExecutor {
     @Override
-    public void run(Raytracer visualizationEngine,
+    public void run(SimpleRaytracer visualizationEngine,
                     RGBImage resultingImage,
                     RendererConfiguration rendererConfiguration,
                     SimpleSceneSnapshot sceneSnapshot,
@@ -109,7 +109,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         public Void call()
         {
             Tile tile;
-            Raytracer raytracer = new Raytracer();
+            SimpleRaytracer raytracer = new SimpleRaytracer();
 
             while ( (tile = pendingTiles.poll()) != null ) {
                 raytracer.execute(

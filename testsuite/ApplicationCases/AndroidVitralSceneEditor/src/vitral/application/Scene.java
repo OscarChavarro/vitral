@@ -18,7 +18,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.Background;
@@ -204,7 +204,7 @@ public class Scene
 
         //-----------------------------------------------------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
-        Raytracer visualizationEngine;
+        SimpleRaytracer visualizationEngine;
 
         Background activeBackground;
 /*
@@ -237,7 +237,7 @@ public class Scene
         }
 */
         activeBackground = simpleBackground;
-        visualizationEngine = new Raytracer();
+        visualizationEngine = new SimpleRaytracer();
         SimpleSceneSnapshot sceneSnapshot =
             scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();

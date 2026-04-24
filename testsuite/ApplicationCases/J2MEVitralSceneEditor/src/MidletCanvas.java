@@ -34,7 +34,7 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.j2me.J2meRGBImageRenderer;   // View elements
 import vsdk.toolkit.render.j2me.J2meCalligraphic2DBufferRenderer;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.gui.J2meSystem;                     // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
@@ -158,7 +158,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         //- (3/4): Visualization process ----------------------------------
         if ( renderingMode == 3 ) {
             RendererConfiguration q = new RendererConfiguration();
-            Raytracer visualizationEngine = new Raytracer();
+            SimpleRaytracer visualizationEngine = new SimpleRaytracer();
             CameraSnapshot cameraSnapshot =
                 camera.exportToCameraSnapshot(width, height);
             SimpleSceneSnapshot sceneSnapshot =

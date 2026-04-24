@@ -15,7 +15,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.ProgressMonitorConsole;
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 
 public class RaytracerSimple {
@@ -91,7 +91,7 @@ public class RaytracerSimple {
         RendererConfiguration rendererConfiguration = new RendererConfiguration();
         optimizeRendererConfigurationForScene(rendererConfiguration);
 
-        Raytracer visualizationEngine = new Raytracer();
+        SimpleRaytracer visualizationEngine = new SimpleRaytracer();
         CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
             resultingImage.getXSize(), resultingImage.getYSize());
         SimpleSceneSnapshot sceneSnapshot =

@@ -26,7 +26,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.render.Raytracer;
+import vsdk.toolkit.render.SimpleRaytracer;
 
 // Application classes
 import application.render.jogl.SimpleCorridor;
@@ -315,7 +315,7 @@ public class Scene
 
         //-----------------------------------------------------------------
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
-        Raytracer visualizationEngine;
+        SimpleRaytracer visualizationEngine;
 
         Background activeBackground;
         switch ( selectedBackground ) {
@@ -346,7 +346,7 @@ public class Scene
             break;
         }
 
-        visualizationEngine = new Raytracer();
+        visualizationEngine = new SimpleRaytracer();
         SimpleSceneSnapshot sceneSnapshot =
             scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();
