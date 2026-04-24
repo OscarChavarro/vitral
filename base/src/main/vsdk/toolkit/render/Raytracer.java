@@ -55,7 +55,6 @@ public class Raytracer extends RenderingElement {
         TileGenerationStrategy.SERIAL;
     private static final int TILE_WORKERS_HINT = 1;
 
-    private static final Vector3D BUMP_TANGENT_FALLBACK = new Vector3D(0, 1, 0);
     private final ThreadLocal<TraceWorkspace> traceWorkspace =
         ThreadLocal.withInitial(() -> new TraceWorkspace(MAX_RECURSION_LEVEL));
 
@@ -323,13 +322,12 @@ public class Raytracer extends RenderingElement {
         if ( info.normalMap != null ) {
             // Information inherent to current geometry
             Vector3D N;                      // Normal vector on surface
-            Vector3D Ps;                     // Tangent vector on surface
-            Vector3D Pt;                     // Binormal vector on surface
-            // Information extracted from precomputed normal map (after F)
-            Vector3D normalVariation;        // Normal variation for point
-                                             // at texture coordinates (u, v)
-            double Bu;                       // dF/du for bumpmap F
-            double Bv;                       // dF/dv for bumpmap F
+            Vector3D Pu;                     // Local tangent basis (u direction)
+            Vector3D Pv;                     // Local tangent basis (v direction)
+            // Information extracted from precomputed bump-derived field
+            Vector3D normalVariation;        // Sampled vector at (u, v)
+            double Fu;                       // dF/du term for bumpmap F
+            double Fv;                       // dF/dv term for bumpmap F
             // Auxiliary variables
             Vector3D normalPerturbation;
             Vector3D NxPt;
@@ -337,23 +335,31 @@ public class Raytracer extends RenderingElement {
 
             normalVariation = info.normalMap.getNormal(info.u, 1-info.v);
             if ( normalVariation != null ) {
-                // Evaluation of [BLIN1978b]/[FOLE1992].16.23 equation
+                // [BLIN1978b] Section 2:
+                // N' = N + D, where D = (Fu (N x Pv) - Fv (N x Pu)) / |N|
+                // Here Fu/Fv are reconstructed from the sampled bump-derived
+                // vector field produced by NormalMap.importBumpMap.
+                // `Pu`/`Pv` are built from the available tangent direction in
+                // RayHit (orthonormal local frame approximation).
                 N = surfaceNormal.normalized();
-                Ps = info.t.normalized();
+                Pu = info.t.normalized();
+                Pv = N.crossProduct(Pu).normalized();
+                NxPt = N.crossProduct(Pv);
+                NxPs = N.crossProduct(Pu);
 
-                // This is non-sense, but it works! Currently not using
-                // tangent vector from geometry! Explain this!
-                Ps = BUMP_TANGENT_FALLBACK;
-
-                Pt = N.crossProduct(Ps);
-                NxPt = N.crossProduct(Pt);
-                NxPs = N.crossProduct(Ps);
-                Bu = normalVariation.x();
-                Bv = normalVariation.y();
-                // Note: this only works when `N` is a unit vector. If not,
-                //      `normalPerturbation` must be divided by N's length
+                Vector3D bumpScale = info.normalMap.getBumpMapScale();
+                double nz = normalVariation.z();
+                if ( Math.abs(nz) <= VSDK.EPSILON ) {
+                    nz = (nz < 0) ? -VSDK.EPSILON : VSDK.EPSILON;
+                }
+                // In NormalMap.importBumpMap we build vectors from:
+                // cross((2,0,du),(0,2,dv)) = (-2du, -2dv, 4), then apply
+                // anisotropic scale and normalize. Ratios against z recover
+                // derivative-like terms up to known scaling factors.
+                Fu = -2.0 * (bumpScale.z() / bumpScale.x()) * (normalVariation.x() / nz);
+                Fv = -2.0 * (bumpScale.z() / bumpScale.y()) * (normalVariation.y() / nz);
                 normalPerturbation =
-                    NxPt.multiply(Bu).subtract(NxPs.multiply(Bv));
+                    NxPt.multiply(Fu).subtract(NxPs.multiply(Fv));
                 surfaceNormal = surfaceNormal.add(normalPerturbation).normalized();
             }
         }

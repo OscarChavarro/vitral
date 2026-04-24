@@ -26,6 +26,8 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static final float TRIANGLE_NORMAL_SCALE = 0.12f;
     private static final float NORMAL_START_EPSILON = 0.002f;
     private static final float NORMAL_LINE_DEPTH_BIAS_NDC = -1.0e-4f;
+    // [BLIN1978b] bump scales used by both shader and raytracer examples.
+    private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
     private static final float[] VERTEX_NORMAL_COLOR = new float[] { 1.0f, 1.0f, 0.0f };
     private static final float[] TRIANGLE_NORMAL_COLOR = new float[] { 0.0f, 1.0f, 1.0f };
 
@@ -351,6 +353,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         setVector3(gl, programId, "ambientColor", material.getAmbient());
         setVector3(gl, programId, "diffuseColor", material.getDiffuse());
         setVector3(gl, programId, "specularColor", material.getSpecular());
+        setVector3(gl, programId, "bumpScale", DEFAULT_BUMP_SCALE);
         setFloat(gl, programId, "phongExponent", (float)material.getPhongExponent());
         setInt(gl, programId, "withTexture", (quality.isTextureSet() && textureId > 0) ? 1 : 0);
 

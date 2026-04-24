@@ -17,12 +17,17 @@ public class NormalMap extends MediaEntity
     private int xSize;
     private int ySize;
     private ArrayList<Vector3D> data;
+    // Scale used when converting a bump height map into derivative-like normals.
+    // Stored to allow later reconstruction of Fu/Fv-style terms from the sampled
+    // vector field.
+    private Vector3D bumpMapScale;
 
     public NormalMap()
     {
         xSize = 0;
         ySize = 0;
         data = null;
+        bumpMapScale = new Vector3D(1, 1, 1);
     }
 
     public boolean init(int width, int height)
@@ -50,6 +55,11 @@ public class NormalMap extends MediaEntity
     public int getYSize()
     {
         return ySize;
+    }
+
+    public Vector3D getBumpMapScale()
+    {
+        return Vector3D.copyOf(bumpMapScale);
     }
 
     public void putNormal(int i, int j, Vector3D n)
@@ -271,6 +281,7 @@ public class NormalMap extends MediaEntity
                 scale = new Vector3D(val, 1.0, 1.0);
             }
         }
+        bumpMapScale = Vector3D.copyOf(scale);
         init(xxSize, yySize);
 
         //- 2. Calculo de las derivadas parciales al interior de la imagen --

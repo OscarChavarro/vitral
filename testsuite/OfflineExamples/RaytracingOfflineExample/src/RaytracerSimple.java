@@ -50,12 +50,8 @@ public class RaytracerSimple {
             }
         }
 
-        if ( !hasTextures ) {
-            rendererConfiguration.setTexture(false);
-        }
-        if ( !hasNormalMaps ) {
-            rendererConfiguration.setBumpMap(false);
-        }
+        rendererConfiguration.setTexture(hasTextures);
+        rendererConfiguration.setBumpMap(hasNormalMaps);
     }
 
     private void

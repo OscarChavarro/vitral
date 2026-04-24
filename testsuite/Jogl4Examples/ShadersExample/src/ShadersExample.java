@@ -152,7 +152,7 @@ public class ShadersExample extends JFrame implements
             model.getMaterial(),
             model.getQuality(),
             model.getTextureMap(),
-            model.getNormalMapRgb(),
+            model.getBumpMapHeightRgb(),
             modelRotation,
             model.getSphereMeridians(),
             model.getSphereParallels());
@@ -168,7 +168,7 @@ public class ShadersExample extends JFrame implements
             }
             Jogl4SphereRenderer.dispose(gl);
             Jogl4ImageRenderer.unload(gl, model.getTextureMap());
-            Jogl4ImageRenderer.unload(gl, model.getNormalMapRgb());
+            Jogl4ImageRenderer.unload(gl, model.getBumpMapHeightRgb());
             Jogl4ImageRenderer.dispose(gl);
             Jogl4CameraRenderer.dispose(gl);
             glResourcesReleased = true;

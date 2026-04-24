@@ -14,7 +14,6 @@ import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImage;
 
 public class ShadersModel
@@ -30,7 +29,7 @@ public class ShadersModel
     private Light light;
     private Material material;
     private RGBImage textureMap;
-    private RGBImage normalMapRgb;
+    private RGBImage bumpMapHeightRgb;
     private boolean animationEnabled;
     private double sphereRotationAngleRadians;
     private int sphereMeridians;
@@ -74,9 +73,11 @@ public class ShadersModel
             textureMap = ImagePersistence.importRGB(new File("../../../etc/textures/miniearth.png"));
 
             IndexedColorImage bump = ImagePersistence.importIndexedColor(new File("../../../etc/bumpmaps/earth.bw"));
-            NormalMap normalMap = new NormalMap();
-            normalMap.importBumpMap(bump, new Vector3D(1, 1, 0.2));
-            normalMapRgb = normalMap.exportToRgbImage();
+            // [BLIN1978b] Section 3:
+            // bump mapping is driven by a scalar height function F(u,v).
+            // The shader computes Fu/Fv with central differences directly
+            // from this grayscale height map.
+            bumpMapHeightRgb = bump.exportToRgbImage();
         }
         catch (Exception e) {
             throw new IllegalStateException("Failed loading textures for ShadersExample", e);
@@ -128,9 +129,9 @@ public class ShadersModel
         return textureMap;
     }
 
-    public RGBImage getNormalMapRgb()
+    public RGBImage getBumpMapHeightRgb()
     {
-        return normalMapRgb;
+        return bumpMapHeightRgb;
     }
 
     public boolean isAnimationEnabled()

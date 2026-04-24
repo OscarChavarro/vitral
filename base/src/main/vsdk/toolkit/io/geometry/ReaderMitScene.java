@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 // VSDK classes
 import vsdk.toolkit.common.Triangle;
@@ -42,7 +43,10 @@ import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
@@ -141,6 +145,37 @@ public class ReaderMitScene extends PersistenceElement
         material.setReflectionCoefficient(kr);
         material.setRefractionCoefficient(kt);
         return material;
+    }
+
+    private RGBImage
+    loadRgbTexture(
+        String texturePath,
+        HashMap<String, RGBImage> textureCache) throws Exception
+    {
+        RGBImage texture = textureCache.get(texturePath);
+        if ( texture == null ) {
+            texture = ImagePersistence.importRGB(new File(texturePath));
+            textureCache.put(texturePath, texture);
+        }
+        return texture;
+    }
+
+    private NormalMap
+    loadNormalMapFromBump(
+        String bumpPath,
+        Vector3D bumpScale,
+        HashMap<String, NormalMap> normalMapCache) throws Exception
+    {
+        String cacheKey =
+            bumpPath + "|" + bumpScale.x() + "|" + bumpScale.y() + "|" + bumpScale.z();
+        NormalMap normalMap = normalMapCache.get(cacheKey);
+        if ( normalMap == null ) {
+            IndexedColorImage bumpMap = ImagePersistence.importIndexedColor(new File(bumpPath));
+            normalMap = new NormalMap();
+            normalMap.importBumpMap(bumpMap, bumpScale);
+            normalMapCache.put(cacheKey, normalMap);
+        }
+        return normalMap;
     }
 
     private void
@@ -296,6 +331,10 @@ public class ReaderMitScene extends PersistenceElement
         Material currentMaterial;
         Material currentTrianglesMaterial = null;
         Material currentQuadsMaterial = null;
+        RGBImage currentTexture = null;
+        NormalMap currentNormalMap = null;
+        HashMap<String, RGBImage> textureCache = new HashMap<String, RGBImage>();
+        HashMap<String, NormalMap> normalMapCache = new HashMap<String, NormalMap>();
 
         // Material por defecto...
         /*
@@ -443,6 +482,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Sphere(r));
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
@@ -456,6 +497,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Box(r, r, r));
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 } 
@@ -471,6 +514,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Cone(r1, r2, h));
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
@@ -485,6 +530,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(new Torus(majorRadius, minorRadius));
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
@@ -502,6 +549,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(solid);
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
@@ -540,6 +589,8 @@ public class ReaderMitScene extends PersistenceElement
                   thing = new SimpleBody();
                   thing.setGeometry(solid);
                   thing.setMaterial(currentMaterial);
+                  thing.setTexture(currentTexture);
+                  thing.setNormalMap(currentNormalMap);
                   thing.setScale(new Vector3D(uniformScale, uniformScale, uniformScale));
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
@@ -696,6 +747,32 @@ public class ReaderMitScene extends PersistenceElement
                 else if ( st.sval.equals("surface") ) {
                   showDebugMessage("surface");
                   currentMaterial = readSurfaceDefinition(st);
+                }
+                else if ( st.sval.equals("texture") ) {
+                  String texturePath = readStringToken(st);
+                  currentTexture = loadRgbTexture(texturePath, textureCache);
+                }
+                else if ( st.sval.equals("notexture") ) {
+                  currentTexture = null;
+                }
+                else if ( st.sval.equals("bumpmap") ) {
+                  String bumpPath = readStringToken(st);
+                  Vector3D bumpScale = new Vector3D(1, 1, 0.2);
+                  int nextToken = st.nextToken();
+                  if ( nextToken == StreamTokenizer.TT_NUMBER ) {
+                      double sx = st.nval;
+                      double sy = readNumber(st);
+                      double sz = readNumber(st);
+                      bumpScale = new Vector3D(sx, sy, sz);
+                  }
+                  else {
+                      st.pushBack();
+                  }
+                  currentNormalMap =
+                      loadNormalMapFromBump(bumpPath, bumpScale, normalMapCache);
+                }
+                else if ( st.sval.equals("nobumpmap") ) {
+                  currentNormalMap = null;
                 }
                 else {
                   System.err.println("ERROR: unsupported token \"" + st.sval +
