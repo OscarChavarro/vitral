@@ -37,6 +37,23 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static final int SUBTRACT = 3;
 
     /**
+    Applies a transformation matrix to all vertices in the solid.
+    @param solid target solid instance.
+    @param transformation transformation matrix to apply.
+    */
+    public static void applyTransformation(
+        PolyhedralBoundedSolid solid,
+        Matrix4x4 transformation
+    )
+    {
+        int i;
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);
+            vertex.position = transformation.multiply(vertex.position);
+        }
+    }
+
+    /**
     Implements the construction style from [MANT1988] section 12.2 / program
     12.1.
 
@@ -209,7 +226,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         _PolyhedralBoundedSolidHalfEdge first;
         _PolyhedralBoundedSolidHalfEdge last;
 
-        first = solid.polygonsList.get(0).boundariesList.get(0)
+        first = solid.getPolygonsList().get(0).boundariesList.get(0)
             .boundaryStartHalfEdge;
         while ( first.parentEdge != first.next().parentEdge ) {
             first = first.next();
@@ -260,14 +277,14 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void rotationalSweepExtrudeWireAroundXAxis(
         PolyhedralBoundedSolid solid, int numberOfFaces)
     {
-        if ( solid == null || solid.polygonsList.size() < 1 || numberOfFaces < 3 ) {
+        if ( solid == null || solid.getPolygonsList().size() < 1 || numberOfFaces < 3 ) {
             return;
         }
 
         _PolyhedralBoundedSolidHalfEdge[] ends = findWireSweepEnds(solid);
         _PolyhedralBoundedSolidHalfEdge first = ends[0];
         _PolyhedralBoundedSolidHalfEdge last = ends[1];
-        _PolyhedralBoundedSolidFace headf = solid.polygonsList.get(0);
+        _PolyhedralBoundedSolidFace headf = solid.getPolygonsList().get(0);
 
         double axisTolerance = VSDK.EPSILON * 100.0;
         Vector3D firstEndpointPosition = new Vector3D(

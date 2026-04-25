@@ -11,7 +11,6 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -33,29 +32,11 @@ public final class PolyhedralBoundedSolidEulerOperators
     private static final String EDGE_NOT_FOUND_IN_FACE_MESSAGE =
         " not found in face ";
     private static final String LRINGMV_MESSAGE = "lringmv";
+    private static final String ADDHE_MESSAGE = "addhe";
     private static final String DOT = ".";
 
     private PolyhedralBoundedSolidEulerOperators()
     {
-    }
-
-    /**
-    Applies a transformation matrix to all vertices in the solid.
-    @param solid target solid instance.
-    @param transformation transformation matrix to apply.
-    */
-    public static void applyTransformation(
-        PolyhedralBoundedSolid solid,
-        Matrix4x4 transformation
-    )
-    {
-        int i;
-
-        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            _PolyhedralBoundedSolidVertex vertex;
-            vertex = solid.getVerticesList().get(i);
-            vertex.position = transformation.multiply(vertex.position);
-        }
     }
 
     private static _PolyhedralBoundedSolidHalfEdge addhe(PolyhedralBoundedSolid solid, 
@@ -68,12 +49,24 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidHalfEdge he;
 
         if ( where == null ) {
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "addhe",
-            "Trying to build a half-edge from another, non-existing half-edge!");
+            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            "Cannot create a half-edge because the reference half-edge is null.");
+            return null;
+        }
+        if ( where.parentLoop == null ) {
+            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            "Cannot create a half-edge because the reference half-edge has no parent loop.");
+            return null;
+        }
+        if ( where.parentLoop.halfEdgesList == null ) {
+            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            "Cannot create a half-edge because the parent loop half-edge list is null.");
+            return null;
         }
         if ( e == null ) {
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "addhe",
-            "Trying to associate a half-edge to a non-existing edge!");
+            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            "Cannot create a half-edge because the target edge is null.");
+            return null;
         }
 
         if ( where != null && where.parentEdge == null ) {
@@ -470,7 +463,33 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidHalfEdge nhe1;
         _PolyhedralBoundedSolidHalfEdge nhe2;
-        _PolyhedralBoundedSolidHalfEdge temp;
+
+        if ( he1 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because first half-edge is null.");
+            return null;
+        }
+        if ( he2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because second half-edge is null.");
+            return null;
+        }
+        if ( he1.parentLoop == null || he2.parentLoop == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because one input half-edge has no parent loop.");
+            return null;
+        }
+        if ( he1.startingVertex == null || he2.startingVertex == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because one input half-edge has null starting vertex.");
+            return null;
+        }
 
         if ( newFaceId > solid.getMaxFaceId() ) solid.setMaxFaceId(newFaceId);
 
@@ -497,21 +516,14 @@ public final class PolyhedralBoundedSolidEulerOperators
             newLoop.halfEdgesList.add(he);
         }
 
-        if ( he1 == null ) {
-            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lmef",
-            "Non-existing half-edge 1!");
-        }
-        if ( he2 == null ) {
-            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lmef",
-            "Non-existing half-edge 2!");
-        }
-
         nhe1 = addhe(solid, newEdge, he2.startingVertex, he1, PolyhedralBoundedSolid.MINUS);
         nhe2 = addhe(solid, newEdge, he1.startingVertex, he2, PolyhedralBoundedSolid.PLUS);
+        if ( nhe1 == null || nhe2 == null ) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            "Cannot split face because one generated half-edge is null.");
+            return null;
+        }
 
         newLoop.boundaryStartHalfEdge = nhe1;
         he2.parentLoop.boundaryStartHalfEdge = nhe2;
@@ -705,6 +717,110 @@ public final class PolyhedralBoundedSolidEulerOperators
         return lmfkrh(solid, l, newFaceId);
     }
 
+    private static boolean failLringmv(PolyhedralBoundedSolid solid, String message)
+    {
+        PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+        VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE, message);
+        return false;
+    }
+
+    private static _PolyhedralBoundedSolidFace validateLringmvInput(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace destinationFace)
+    {
+        if ( loop == null || destinationFace == null ) {
+            failLringmv(solid, "Null input loop or destination face.");
+            return null;
+        }
+
+        _PolyhedralBoundedSolidFace sourceFace = loop.parentFace;
+        if ( sourceFace == null ) {
+            failLringmv(solid, "Given loop does not have a parent face.");
+            return null;
+        }
+        if ( sourceFace.parentSolid != destinationFace.parentSolid ) {
+            failLringmv(solid, "Loop move across different solids is not supported.");
+            return null;
+        }
+        return sourceFace;
+    }
+
+    private static boolean reorderLoopInSameFace(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace face,
+        boolean setAsOuterLoop)
+    {
+        if ( !face.boundariesList.locateWindowAtElem(loop) ) {
+            return failLringmv(solid,
+                "Given loop was not found in its parent face boundaries.");
+        }
+        if ( setAsOuterLoop ) {
+            promoteLoopAsOuter(face, loop);
+            return true;
+        }
+        return demoteLoopAsInner(solid, face, loop);
+    }
+
+    private static void promoteLoopAsOuter(
+        _PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        int numberOfLoops = face.boundariesList.size();
+        if ( numberOfLoops <= 0 || face.boundariesList.get(0) == loop ) {
+            return;
+        }
+        face.boundariesList.swapElements(loop, face.boundariesList.get(0));
+    }
+
+    private static boolean demoteLoopAsInner(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        int numberOfLoops = face.boundariesList.size();
+        if ( numberOfLoops <= 1 ) {
+            return failLringmv(solid, "Cannot mark the only boundary loop as inner.");
+        }
+        if ( face.boundariesList.get(0) != loop ) {
+            return true;
+        }
+        face.boundariesList.swapElements(loop, face.boundariesList.get(1));
+        return true;
+    }
+
+    private static boolean moveLoopAcrossFaces(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidLoop loop,
+        _PolyhedralBoundedSolidFace sourceFace,
+        _PolyhedralBoundedSolidFace destinationFace,
+        boolean setAsOuterLoop)
+    {
+        if ( sourceFace.boundariesList.size() <= 1 ) {
+            return failLringmv(solid, "Cannot move the only boundary loop of a face.");
+        }
+        if ( !setAsOuterLoop && destinationFace.boundariesList.size() <= 0 ) {
+            return failLringmv(solid,
+                "Cannot insert an inner loop into a face without outer loop.");
+        }
+        if ( !sourceFace.boundariesList.locateWindowAtElem(loop) ) {
+            return failLringmv(solid,
+                "Given loop was not found in source face boundaries.");
+        }
+
+        sourceFace.boundariesList.removeElemAtWindow();
+        loop.parentFace = destinationFace;
+
+        if ( setAsOuterLoop ) {
+            destinationFace.boundariesList.push(loop);
+        }
+        else {
+            destinationFace.boundariesList.add(loop);
+        }
+        return true;
+    }
+
     /**
     Method `lringmv` moves the loop `l` from its parent face to face `toFace`.
     If `setAsOuterLoop` is false, `l` becomes an "inner" loop of `toFace`.
@@ -730,97 +846,15 @@ public final class PolyhedralBoundedSolidEulerOperators
     public static boolean lringmv(PolyhedralBoundedSolid solid, _PolyhedralBoundedSolidLoop l, _PolyhedralBoundedSolidFace toFace, boolean setAsOuterLoop)
     {
         PolyhedralBoundedSolidStatistics.recordLringmvCall();
-        _PolyhedralBoundedSolidFace fromFace;
-        boolean sameFace;
-        int numberOfLoops;
-
-        if ( l == null || toFace == null ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Null input loop or destination face.");
-            return false;
-        }
-
-        fromFace = l.parentFace;
+        _PolyhedralBoundedSolidFace fromFace =
+            validateLringmvInput(solid, l, toFace);
         if ( fromFace == null ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Given loop does not have a parent face.");
             return false;
         }
-        if ( fromFace.parentSolid != toFace.parentSolid ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Loop move across different solids is not supported.");
-            return false;
+        if ( fromFace == toFace ) {
+            return reorderLoopInSameFace(solid, l, toFace, setAsOuterLoop);
         }
-
-        sameFace = (fromFace == toFace);
-        numberOfLoops = toFace.boundariesList.size();
-
-        //-----------------------------------------------------------------
-        // Same-face case: only reorder to satisfy outer/inner intent.
-        if ( sameFace ) {
-            if ( !toFace.boundariesList.locateWindowAtElem(l) ) {
-                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-                VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                    "Given loop was not found in its parent face boundaries.");
-                return false;
-            }
-
-            if ( setAsOuterLoop ) {
-                if ( numberOfLoops <= 0 || toFace.boundariesList.get(0) == l ) {
-                    return true;
-                }
-                toFace.boundariesList.swapElements(l, toFace.boundariesList.get(0));
-                return true;
-            }
-
-            // setAsOuterLoop == false
-            if ( numberOfLoops <= 1 ) {
-                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-                VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                    "Cannot mark the only boundary loop as inner.");
-                return false;
-            }
-            if ( toFace.boundariesList.get(0) != l ) {
-                return true;
-            }
-            toFace.boundariesList.swapElements(l, toFace.boundariesList.get(1));
-            return true;
-        }
-
-        //-----------------------------------------------------------------
-        // Cross-face case: move loop and place it as outer/inner.
-        if ( fromFace.boundariesList.size() <= 1 ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Cannot move the only boundary loop of a face.");
-            return false;
-        }
-        if ( !setAsOuterLoop && toFace.boundariesList.size() <= 0 ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Cannot insert an inner loop into a face without outer loop.");
-            return false;
-        }
-        if ( !fromFace.boundariesList.locateWindowAtElem(l) ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE,
-                "Given loop was not found in source face boundaries.");
-            return false;
-        }
-
-        fromFace.boundariesList.removeElemAtWindow();
-        l.parentFace = toFace;
-
-        if ( setAsOuterLoop ) {
-            toFace.boundariesList.push(l);
-        }
-        else {
-            toFace.boundariesList.add(l);
-        }
-        return true;
+        return moveLoopAcrossFaces(solid, l, fromFace, toFace, setAsOuterLoop);
     }
 
     /**
@@ -1173,7 +1207,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     }
 
     /**
-    kfmrh: (High level version) KillFaceMakeRingHole
+    kfmrh: (high level version) KillFaceMakeRingHole
     (connected sum topological operation, global manipulation).
     Operator `kfmrhSameShell` "merges" two faces `f1` and `f2` by making
     the latter an interior loop of the former. Face `f2` is removed.

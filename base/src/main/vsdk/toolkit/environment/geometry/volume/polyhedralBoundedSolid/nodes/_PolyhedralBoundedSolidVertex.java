@@ -42,7 +42,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         this.id = id;
         emanatingHalfEdge = null;
         this.position = new Vector3D(position);
-        parentSolid.verticesList.add(this);
+        parentSolid.getVerticesList().add(this);
         debugColor = new ColorRgb(1, 0, 0);
     }
 

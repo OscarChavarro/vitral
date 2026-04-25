@@ -158,10 +158,10 @@ final class _PolyhedralBoundedSolidSetFinisher
             PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i+inda));
         }
         cleanup(outRes);
-        outRes.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(outRes);
         tracePipelineSummary(
-            "finish end outRes faces=" + outRes.polygonsList.size() +
-            " edges=" + outRes.edgesList.size() +
-            " vertices=" + outRes.verticesList.size());
+            "finish end outRes faces=" + outRes.getPolygonsList().size() +
+            " edges=" + outRes.getEdgesList().size() +
+            " vertices=" + outRes.getVerticesList().size());
     }
 }

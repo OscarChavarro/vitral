@@ -34,8 +34,8 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
         gl.glPointSize(2.0f);
 
         int i;
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
-            _PolyhedralBoundedSolidVertex v = solid.verticesList.get(i);
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v = solid.getVerticesList().get(i);
             Vector3D p = v.position;
 
             c = v.debugColor;
@@ -80,9 +80,9 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
         Vertex vertex = new Vertex(p0);
 
         gl.glBegin(GL.GL_LINES);
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             // Logic
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             if ( face.getContainingPlane() != null ) {
                 vertex.normal = face.getContainingPlane().getNormal();
             }

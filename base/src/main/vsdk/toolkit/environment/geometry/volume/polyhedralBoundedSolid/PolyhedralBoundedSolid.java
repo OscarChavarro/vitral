@@ -6,11 +6,13 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
-import java.io.Serial;
 
+// Java classes
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+// Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -68,11 +70,11 @@ public class PolyhedralBoundedSolid extends Solid {
     private static final String SOLID_WITH_MESSAGE = "Solid with ";
 
     //= Main boundary representation solid data structure =============
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList;
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList;
-    public CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
-    public int maxVertexId;
-    public int maxFaceId;
+    private CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList;
+    private CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList;
+    private CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList;
+    private int maxVertexId;
+    private int maxFaceId;
     private boolean modelIsValid;
 
     //=================================================================
@@ -141,6 +143,16 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    Replaces the internal face list.
+    @param polygonsList new face list.
+    */
+    public void setPolygonsList(
+        CircularDoubleLinkedList<_PolyhedralBoundedSolidFace> polygonsList)
+    {
+        this.polygonsList = polygonsList;
+    }
+
+    /**
     Returns the list of edges stored in this solid.
     @return internal edge list.
     */
@@ -151,6 +163,16 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     /**
+    Replaces the internal edge list.
+    @param edgesList new edge list.
+    */
+    public void setEdgesList(
+        CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> edgesList)
+    {
+        this.edgesList = edgesList;
+    }
+
+    /**
     Returns the list of vertices stored in this solid.
     @return internal vertex list.
     */
@@ -158,6 +180,16 @@ public class PolyhedralBoundedSolid extends Solid {
     getVerticesList()
     {
         return verticesList;
+    }
+
+    /**
+    Replaces the internal vertex list.
+    @param verticesList new vertex list.
+    */
+    public void setVerticesList(
+        CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex> verticesList)
+    {
+        this.verticesList = verticesList;
     }
 
     //=================================================================
@@ -440,23 +472,23 @@ public class PolyhedralBoundedSolid extends Solid {
         _PolyhedralBoundedSolidVertex v;
 
         //-----------------------------------------------------------------
-        while ( other.polygonsList.size() > 0 ) {
-            f = other.polygonsList.get(0);
+        while ( other.getPolygonsList().size() > 0 ) {
+            f = other.getPolygonsList().get(0);
             f.id += offsetFacesId;
             if ( f.id > maxFaceId ) maxFaceId = f.id;
             polygonsList.add(f);
-            other.polygonsList.remove(0);
+            other.getPolygonsList().remove(0);
         }
-        while ( other.edgesList.size() > 0 ) {
-            edgesList.add(other.edgesList.get(0));
-            other.edgesList.remove(0);
+        while ( other.getEdgesList().size() > 0 ) {
+            edgesList.add(other.getEdgesList().get(0));
+            other.getEdgesList().remove(0);
         }
-        while ( other.verticesList.size() > 0 ) {
-            v = other.verticesList.get(0);
+        while ( other.getVerticesList().size() > 0 ) {
+            v = other.getVerticesList().get(0);
             v.id += offsetVertexId;
             if ( v.id > maxVertexId ) maxVertexId = v.id;
             verticesList.add(v);
-            other.verticesList.remove(0);
+            other.getVerticesList().remove(0);
         }
     }
 
@@ -486,7 +518,6 @@ public class PolyhedralBoundedSolid extends Solid {
     This is not well understood for cases of intersection with face limits
     (vertices and edges). In some cases, computation of quantitative
     invisibility seems to be failing.
-    \todo  check well all limiting cases.
     @param origin ray origin.
     @param p target point.
     @return  the number of front facing surface elements (with
@@ -558,24 +589,37 @@ public class PolyhedralBoundedSolid extends Solid {
 
         for ( int i = 0; i < polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-
-            if ( Math.abs(face.getContainingPlane().pointDistance(hitPoint)) >
-                 tolerance ) {
-                continue;
-            }
-            int pointStatus = face.testPointInside(hitPoint, tolerance);
-            if ( pointStatus == Geometry.OUTSIDE ) {
+            if ( !isFaceBoundaryTouchAtHit(face, hitPoint, tolerance) ) {
                 continue;
             }
 
             touchesBoundary = true;
-            int halfSpaceStatus = face.getContainingPlane().doContainmentTestHalfSpace(
-                afterHit, tolerance);
-            if ( halfSpaceStatus != Geometry.INSIDE ) {
+            if ( !isForwardProbeInsideFaceHalfSpace(face, afterHit, tolerance) ) {
                 return false;
             }
         }
         return touchesBoundary;
+    }
+
+    private boolean isFaceBoundaryTouchAtHit(_PolyhedralBoundedSolidFace face,
+                                             Vector3D hitPoint,
+                                             double tolerance)
+    {
+        if ( Math.abs(face.getContainingPlane().pointDistance(hitPoint)) >
+             tolerance ) {
+            return false;
+        }
+        return face.testPointInside(hitPoint, tolerance) != Geometry.OUTSIDE;
+    }
+
+    private boolean isForwardProbeInsideFaceHalfSpace(
+        _PolyhedralBoundedSolidFace face,
+        Vector3D probePoint,
+        double tolerance)
+    {
+        int halfSpaceStatus = face.getContainingPlane()
+            .doContainmentTestHalfSpace(probePoint, tolerance);
+        return halfSpaceStatus == Geometry.INSIDE;
     }
 
     /**
@@ -616,56 +660,6 @@ public class PolyhedralBoundedSolid extends Solid {
         for ( i = 0; i < polygonsList.size(); i++ ) {
             polygonsList.get(i).revert();
         }
-    }
-
-
-    /**
-    Modifies ids for current solid's vertices, edges, faces and half-edges to
-    make them consecutive from 1. Note that ids does not impact current
-    solid geometry or topology, as they are use only for debugging and
-    further construction / modification support.
-    User of this class should keep in mind id changes when using this method.
-    */
-    public void compactIds()
-    {
-        int i;
-        int j;
-
-        for ( i = 0; i < verticesList.size(); i++ ) {
-            verticesList.get(i).id = i+1;
-        }
-        maxVertexId = i;
-        for ( i = 0; i < edgesList.size(); i++ ) {
-            edgesList.get(i).id = i+1;
-        }
-
-        int k = 1;
-        for ( i = 0; i < polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            face.id = i+1;
-            for ( j = 0; j < face.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he;
-                _PolyhedralBoundedSolidHalfEdge heStart;
-
-                loop = face.boundariesList.get(j);
-
-                he = loop.boundaryStartHalfEdge;
-                if ( he == null ) {
-                    continue;
-                }
-                heStart = he;
-                do {
-                    he.id = k;
-                    k++;
-                    he = he.next();
-                    if ( he == null ) {
-                        break;
-                    }
-                } while( he != heStart );
-            }
-        }
-        maxFaceId = i;
     }
 
     @Override

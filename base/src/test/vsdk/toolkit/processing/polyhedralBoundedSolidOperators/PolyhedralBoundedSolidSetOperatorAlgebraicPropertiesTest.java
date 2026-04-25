@@ -54,9 +54,9 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
         boolean unionMatches = isBoundingBoxClose(unionResult, baselineMinMax);
         boolean intersectionMatches = isBoundingBoxClose(intersectionResult,
             baselineMinMax);
-        boolean differenceIsEmpty = differenceResult.polygonsList.size() == 0 &&
-            differenceResult.edgesList.size() == 0 &&
-            differenceResult.verticesList.size() == 0;
+        boolean differenceIsEmpty = differenceResult.getPolygonsList().size() == 0 &&
+            differenceResult.getEdgesList().size() == 0 &&
+            differenceResult.getVerticesList().size() == 0;
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(unionResult)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -134,18 +134,18 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
             false);
 
         // Assert
-        assertThat(differenceABFirst.polygonsList.size())
-            .isEqualTo(differenceABSecond.polygonsList.size());
-        assertThat(differenceABFirst.edgesList.size())
-            .isEqualTo(differenceABSecond.edgesList.size());
-        assertThat(differenceABFirst.verticesList.size())
-            .isEqualTo(differenceABSecond.verticesList.size());
-        assertThat(differenceBAFirst.polygonsList.size())
-            .isEqualTo(differenceBASecond.polygonsList.size());
-        assertThat(differenceBAFirst.edgesList.size())
-            .isEqualTo(differenceBASecond.edgesList.size());
-        assertThat(differenceBAFirst.verticesList.size())
-            .isEqualTo(differenceBASecond.verticesList.size());
+        assertThat(differenceABFirst.getPolygonsList().size())
+            .isEqualTo(differenceABSecond.getPolygonsList().size());
+        assertThat(differenceABFirst.getEdgesList().size())
+            .isEqualTo(differenceABSecond.getEdgesList().size());
+        assertThat(differenceABFirst.getVerticesList().size())
+            .isEqualTo(differenceABSecond.getVerticesList().size());
+        assertThat(differenceBAFirst.getPolygonsList().size())
+            .isEqualTo(differenceBASecond.getPolygonsList().size());
+        assertThat(differenceBAFirst.getEdgesList().size())
+            .isEqualTo(differenceBASecond.getEdgesList().size());
+        assertThat(differenceBAFirst.getVerticesList().size())
+            .isEqualTo(differenceBASecond.getVerticesList().size());
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(differenceABFirst)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine

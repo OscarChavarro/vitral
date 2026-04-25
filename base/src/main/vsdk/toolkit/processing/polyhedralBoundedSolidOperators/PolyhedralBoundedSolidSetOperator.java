@@ -204,19 +204,19 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         _PolyhedralBoundedSolidFace f;
         int i;
 
-        for ( i = 0; i < solidToUpdate.verticesList.size(); i++ ) {
-            v = solidToUpdate.verticesList.get(i);
+        for ( i = 0; i < solidToUpdate.getVerticesList().size(); i++ ) {
+            v = solidToUpdate.getVerticesList().get(i);
             v.id += referenceSolid.getMaxVertexId();
-            if ( v.id > solidToUpdate.maxVertexId ) {
-                solidToUpdate.maxVertexId = v.id;
+            if ( v.id > solidToUpdate.getMaxVertexId() ) {
+                solidToUpdate.setMaxVertexId(v.id);
             }
         }
 
-        for ( i = 0; i < solidToUpdate.polygonsList.size(); i++ ) {
-            f = solidToUpdate.polygonsList.get(i);
+        for ( i = 0; i < solidToUpdate.getPolygonsList().size(); i++ ) {
+            f = solidToUpdate.getPolygonsList().get(i);
             f.id += referenceSolid.getMaxFaceId();
-            if ( f.id > solidToUpdate.maxFaceId ) {
-                solidToUpdate.maxFaceId = f.id;
+            if ( f.id > solidToUpdate.getMaxFaceId() ) {
+                solidToUpdate.setMaxFaceId(f.id);
             }
         }
     }
@@ -2032,10 +2032,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         boolean maximizeResultFaces)
     {
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
-        res.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(res);
         if ( maximizeResultFaces ) {
             PolyhedralBoundedSolidTopologyEditing.maximizeFaces(res);
-            res.compactIds();
+            PolyhedralBoundedSolidTopologyEditing.compactIds(res);
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
     }
@@ -2093,9 +2093,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int i;
 
         values = new ArrayList<Double>();
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
             addUniqueCoordinate(values,
-                coordinate(solid.verticesList.get(i).position, axis));
+                coordinate(solid.getVerticesList().get(i).position, axis));
         }
         return values;
     }
@@ -2127,11 +2127,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         best = null;
         bestArea = 0.0;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidFace face;
             int j;
 
-            face = solid.polygonsList.get(i);
+            face = solid.getPolygonsList().get(i);
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
                 ArrayList<Vector3D> profile;
@@ -2288,8 +2288,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         // Covers profile-subtraction cases where connect emits only
         // degenerate vertex/face rings and finish returns the full minuend.
         if ( op != SUBTRACT ||
-             minuend.verticesList.size() <= 0 ||
-             subtrahend.verticesList.size() <= 0 ) {
+             minuend.getVerticesList().size() <= 0 ||
+             subtrahend.getVerticesList().size() <= 0 ) {
             return null;
         }
 
@@ -2352,7 +2352,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         translation = translation.translation(spec.xMax - spec.xCut, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), translation);
-        solid.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(solid);
         return solid;
     }
 
@@ -2420,7 +2420,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             vertex = new _PolyhedralBoundedSolidVertex(solid,
                 new Vector3D(xs.get(ix), ys.get(iy), zs.get(iz)),
                 nextVertexId);
-            solid.maxVertexId = nextVertexId;
+            solid.setMaxVertexId(nextVertexId);
             nextVertexId++;
             vertices.put(key, vertex);
             return vertex;
@@ -2467,7 +2467,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             int i;
 
             face = new _PolyhedralBoundedSolidFace(solid, nextFaceId);
-            solid.maxFaceId = nextFaceId;
+            solid.setMaxFaceId(nextFaceId);
             nextFaceId++;
             loop = new _PolyhedralBoundedSolidLoop(face);
             halfEdges = new _PolyhedralBoundedSolidHalfEdge[corners.length];
@@ -2526,11 +2526,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         int i;
 
-        if ( solid == null || solid.edgesList.size() <= 0 ) {
+        if ( solid == null || solid.getEdgesList().size() <= 0 ) {
             return false;
         }
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            if ( !isAxisAlignedEdge(solid.edgesList.get(i)) ) {
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            if ( !isAxisAlignedEdge(solid.getEdgesList().get(i)) ) {
                 return false;
             }
         }
@@ -2547,7 +2547,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int hits;
         double eps;
 
-        if ( solid == null || solid.polygonsList.size() <= 0 ) {
+        if ( solid == null || solid.getPolygonsList().size() <= 0 ) {
             return Geometry.OUTSIDE;
         }
 
@@ -2556,7 +2556,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         distances = new ArrayList<Double>();
         hits = 0;
 
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidFace face;
             Ray hit;
             Vector3D p;
@@ -2564,7 +2564,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             int j;
             boolean duplicate;
 
-            face = solid.polygonsList.get(i);
+            face = solid.getPolygonsList().get(i);
             if ( face.getContainingPlane() == null ) {
                 continue;
             }
@@ -2675,8 +2675,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         xs = uniqueVertexCoordinates(inSolidA, 0);
         ys = uniqueVertexCoordinates(inSolidA, 1);
         zs = uniqueVertexCoordinates(inSolidA, 2);
-        for ( ix = 0; ix < inSolidB.verticesList.size(); ix++ ) {
-            Vector3D p = inSolidB.verticesList.get(ix).position;
+        for ( ix = 0; ix < inSolidB.getVerticesList().size(); ix++ ) {
+            Vector3D p = inSolidB.getVerticesList().get(ix).position;
             addUniqueCoordinate(xs, p.x());
             addUniqueCoordinate(ys, p.y());
             addUniqueCoordinate(zs, p.z());
@@ -2913,7 +2913,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
             vertex = new _PolyhedralBoundedSolidVertex(solid, point,
                 nextVertexId);
-            solid.maxVertexId = nextVertexId;
+            solid.setMaxVertexId(nextVertexId);
             nextVertexId++;
             vertices.put(key, vertex);
             return vertex;
@@ -2978,7 +2978,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             }
 
             face = new _PolyhedralBoundedSolidFace(solid, nextFaceId);
-            solid.maxFaceId = nextFaceId;
+            solid.setMaxFaceId(nextFaceId);
             nextFaceId++;
             loop = new _PolyhedralBoundedSolidLoop(face);
             halfEdges = new _PolyhedralBoundedSolidHalfEdge[corners.length];
@@ -3051,7 +3051,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         double[] bounds;
 
         if ( xs.size() != 2 || ys.size() != 4 || zs.size() != 3 ||
-             solid.verticesList.size() != 16 ) {
+             solid.getVerticesList().size() != 16 ) {
             return null;
         }
         bounds = solid.getMinMax();
@@ -3078,7 +3078,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int i;
 
         if ( xs.size() != 3 || ys.size() != 2 || zs.size() != 3 ||
-             solid.verticesList.size() != 10 ) {
+             solid.getVerticesList().size() != 10 ) {
             return null;
         }
 
@@ -3092,10 +3092,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
             z = zs.get(i);
             maxX = -Double.MAX_VALUE;
-            for ( j = 0; j < solid.verticesList.size(); j++ ) {
+            for ( j = 0; j < solid.getVerticesList().size(); j++ ) {
                 Vector3D p;
 
-                p = solid.verticesList.get(j).position;
+                p = solid.getVerticesList().get(j).position;
                 if ( sameCoordinate(p.z(), z) && p.x() > maxX ) {
                     maxX = p.x();
                 }
@@ -3163,10 +3163,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         ys = uniqueVertexCoordinates(inSolidA, 1);
         zs = uniqueVertexCoordinates(inSolidA, 2);
-        for ( i = 0; i < inSolidB.verticesList.size(); i++ ) {
+        for ( i = 0; i < inSolidB.getVerticesList().size(); i++ ) {
             Vector3D p;
 
-            p = inSolidB.verticesList.get(i).position;
+            p = inSolidB.getVerticesList().get(i).position;
             addUniqueCoordinate(ys, p.y());
             addUniqueCoordinate(zs, p.z());
         }
@@ -3336,10 +3336,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         if ( solid == null ) {
             return true;
         }
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidFace face;
 
-            face = solid.polygonsList.get(i);
+            face = solid.getPolygonsList().get(i);
             if ( face.boundariesList.size() < 1 ||
                  face.boundariesList.get(0).halfEdgesList.size() < 3 ||
                  face.getContainingPlane() == null ) {
@@ -3353,10 +3353,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid fallback,
         PolyhedralBoundedSolid result)
     {
-        if ( fallback == null || fallback.polygonsList.size() <= 0 ) {
+        if ( fallback == null || fallback.getPolygonsList().size() <= 0 ) {
             return false;
         }
-        if ( result == null || result.polygonsList.size() <= 0 ) {
+        if ( result == null || result.getPolygonsList().size() <= 0 ) {
             return true;
         }
         if ( hasDegenerateFace(result) ) {
@@ -3434,16 +3434,16 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidB, "outputB_stage00");
         }
 
-        inSolidA.compactIds();
-        inSolidB.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
-        inSolidA.compactIds();
-        inSolidB.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
         updmaxnames(inSolidB, inSolidA);
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
@@ -3466,7 +3466,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 .runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op);
         if ( coplanarAreaContactResult != null ) {
             res = coplanarAreaContactResult;
-            if ( res.polygonsList.size() > 0 ) {
+            if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }
             return res;
@@ -3474,7 +3474,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.polygonsList.size() > 0 ) {
+            if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }
             return res;
@@ -3497,7 +3497,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         if ( sonea.isEmpty() && sonvv.isEmpty() ) {
             // No intersections found
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.polygonsList.size() > 0 ) {
+            if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }
             return res;

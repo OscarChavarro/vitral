@@ -39,7 +39,6 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -50,6 +49,7 @@ import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 import vsdk.toolkit.environment.LightType;
 
@@ -586,7 +586,7 @@ public class ReaderMitScene extends PersistenceElement
                   }
 
                   // APPEL solids are defined in [0,1]^3; recenter for scene placement.
-                  PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, new Matrix4x4().translation(-0.5, -0.5, -0.5));
+                  PolyhedralBoundedSolidModeler.applyTransformation(solid, new Matrix4x4().translation(-0.5, -0.5, -0.5));
 
                   thing = new SimpleBody();
                   thing.setGeometry(solid);

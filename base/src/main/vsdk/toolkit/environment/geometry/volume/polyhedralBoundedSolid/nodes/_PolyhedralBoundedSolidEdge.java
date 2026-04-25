@@ -46,7 +46,7 @@ public class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
 
     private void init(PolyhedralBoundedSolid parentSolid)
     {
-        parentSolid.edgesList.add(this);
+        parentSolid.getEdgesList().add(this);
         rightHalf = null;
         leftHalf = null;
 

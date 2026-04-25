@@ -158,8 +158,8 @@ public class JoglDebuggerHudRenderer
 
         int currentFace = model.getFaceIndex() + 1;
         int totalFaces = 0;
-        if ( model.getSolid() != null && model.getSolid().polygonsList != null ) {
-            totalFaces = model.getSolid().polygonsList.size();
+        if ( model.getSolid() != null && model.getSolid().getPolygonsList() != null ) {
+            totalFaces = model.getSolid().getPolygonsList().size();
         }
         return "[" + currentFace + "/" + totalFaces + "]";
     }
@@ -188,7 +188,7 @@ public class JoglDebuggerHudRenderer
     private void drawDebugVertexLabels(GLAutoDrawable drawable, int width, int height)
     {
         PolyhedralBoundedSolid solid = model.getSolid();
-        if ( !model.isDebugVertices() || solid == null || solid.verticesList == null ) {
+        if ( !model.isDebugVertices() || solid == null || solid.getVerticesList() == null ) {
             return;
         }
 
@@ -295,8 +295,8 @@ public class JoglDebuggerHudRenderer
         double spatialTolerance = numericContext.bigEpsilon() *
             VERTEX_LABEL_GROUPING_EPSILON_FACTOR;
 
-        for ( int i = 0; i < solid.verticesList.size(); i++ ) {
-            _PolyhedralBoundedSolidVertex vertex = solid.verticesList.get(i);
+        for ( int i = 0; i < solid.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);
             Vector3D projectedPosition = projectVertexToViewport(
                 vertex.position, modelview, projection, viewport);
             VertexLabelGroup group;

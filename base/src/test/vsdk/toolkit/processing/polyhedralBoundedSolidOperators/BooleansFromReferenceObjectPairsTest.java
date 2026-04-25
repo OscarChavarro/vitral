@@ -360,7 +360,7 @@ class BooleansFromReferenceObjectPairsTest
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 cubeMove = new Matrix4x4();
         cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(clipCube, cubeMove);
+        PolyhedralBoundedSolidModeler.applyTransformation(clipCube, cubeMove);
 
         return PolyhedralBoundedSolidModeler.setOp(
             sphericalShell, clipCube,
@@ -376,7 +376,7 @@ class BooleansFromReferenceObjectPairsTest
         Sphere sphere = new Sphere(radius);
         PolyhedralBoundedSolid solid = sphere.exportToPolyhedralBoundedSolid(
             subdivisionsC, subdivisionsH);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
         return solid;
     }
 
@@ -482,9 +482,9 @@ class BooleansFromReferenceObjectPairsTest
 
         static TopologicalSummary from(PolyhedralBoundedSolid solid)
         {
-            int faceCount = solid.polygonsList.size();
-            int edgeCount = solid.edgesList.size();
-            int vertexCount = solid.verticesList.size();
+            int faceCount = solid.getPolygonsList().size();
+            int edgeCount = solid.getEdgesList().size();
+            int vertexCount = solid.getVerticesList().size();
             int eulerCharacteristic = vertexCount - edgeCount + faceCount;
             ArrayList<Integer> loopsPerFace = new ArrayList<Integer>();
             ArrayList<Integer> verticesPerLoop = new ArrayList<Integer>();
@@ -493,8 +493,8 @@ class BooleansFromReferenceObjectPairsTest
 
             int i;
             int j;
-            for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-                _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+                _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
                 int loopsInFace = face.boundariesList.size();
                 loopsPerFace.add(Integer.valueOf(loopsInFace));
                 loopCount += loopsInFace;
@@ -602,15 +602,15 @@ class BooleansFromReferenceObjectPairsTest
 
         private static int[] computeShellFaceCounts(PolyhedralBoundedSolid solid)
         {
-            int faceCount = solid.polygonsList.size();
+            int faceCount = solid.getPolygonsList().size();
             if ( faceCount == 0 ) {
                 return new int[0];
             }
 
             DisjointSet dsu = new DisjointSet(faceCount);
             int i;
-            for ( i = 0; i < solid.edgesList.size(); i++ ) {
-                _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(i);
+            for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+                _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
                 if ( edge.leftHalf == null || edge.rightHalf == null ) {
                     continue;
                 }
@@ -649,8 +649,8 @@ class BooleansFromReferenceObjectPairsTest
                                        _PolyhedralBoundedSolidFace face)
         {
             int i;
-            for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-                if ( solid.polygonsList.get(i) == face ) {
+            for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+                if ( solid.getPolygonsList().get(i) == face ) {
                     return i;
                 }
             }
@@ -804,7 +804,7 @@ class BooleansFromReferenceObjectPairsTest
                 .exportToPolyhedralBoundedSolid();
             Matrix4x4 t = new Matrix4x4();
             t = t.translation(center);
-            PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, t);
+            PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
             return solid;
         }
 
@@ -821,7 +821,7 @@ class BooleansFromReferenceObjectPairsTest
 
             Matrix4x4 move = new Matrix4x4();
             move = move.translation(translation);
-            PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
+            PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
             return solid;
         }
 
@@ -882,7 +882,7 @@ class BooleansFromReferenceObjectPairsTest
             ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
             rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
             m = rz.multiply(ry.multiply(t));
-            PolyhedralBoundedSolidEulerOperators.applyTransformation(motif, m);
+            PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
             return motif;
         }
 

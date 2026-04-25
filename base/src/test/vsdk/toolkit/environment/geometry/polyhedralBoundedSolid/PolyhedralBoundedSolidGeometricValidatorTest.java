@@ -92,8 +92,8 @@ class PolyhedralBoundedSolidGeometricValidatorTest
 
         Stream.Builder<Arguments> builder = Stream.builder();
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            builder.add(Arguments.of(solid.polygonsList.get(i)));
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            builder.add(Arguments.of(solid.getPolygonsList().get(i)));
         }
         return builder.build();
     }

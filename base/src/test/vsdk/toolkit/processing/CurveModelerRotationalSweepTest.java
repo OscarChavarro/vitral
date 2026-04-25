@@ -32,9 +32,9 @@ class CurveModelerRotationalSweepTest
         PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 16);
 
         // Assert
-        assertThat(wire.polygonsList.size()).isGreaterThan(0);
-        assertThat(wire.edgesList.size()).isGreaterThan(0);
-        assertThat(wire.verticesList.size()).isGreaterThan(3);
+        assertThat(wire.getPolygonsList().size()).isGreaterThan(0);
+        assertThat(wire.getEdgesList().size()).isGreaterThan(0);
+        assertThat(wire.getVerticesList().size()).isGreaterThan(3);
     }
 
     @Test
@@ -50,9 +50,9 @@ class CurveModelerRotationalSweepTest
         PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 18);
 
         // Assert
-        assertThat(wire.polygonsList.size()).isGreaterThan(0);
-        assertThat(wire.edgesList.size()).isGreaterThan(0);
-        assertThat(wire.verticesList.size()).isGreaterThan(3);
+        assertThat(wire.getPolygonsList().size()).isGreaterThan(0);
+        assertThat(wire.getEdgesList().size()).isGreaterThan(0);
+        assertThat(wire.getVerticesList().size()).isGreaterThan(3);
     }
 
     private static PolyhedralBoundedSolid createWireProfile(Vector3D p0,

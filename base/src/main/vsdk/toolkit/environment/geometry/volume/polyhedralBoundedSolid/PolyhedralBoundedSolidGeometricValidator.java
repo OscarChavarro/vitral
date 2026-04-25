@@ -203,8 +203,8 @@ public class PolyhedralBoundedSolidGeometricValidator
     {
         int i;
         boolean test = true;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             if ( validateFaceIsPlanar(face, numericContext) ) {
                 if ( face.getContainingPlane() == null ) {
                     msg.append("  - Face [").append(face.id)
@@ -412,8 +412,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         int i;
         int j;
         int k;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             if ( face.getContainingPlane() == null ) {
                 msg.append("  - Face [").append(face.id)
                    .append("] has no containing plane for strict checks.\n");
@@ -641,10 +641,10 @@ public class PolyhedralBoundedSolidGeometricValidator
     {
         int i;
         int j;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace faceA = solid.polygonsList.get(i);
-            for ( j = i+1; j < solid.polygonsList.size(); j++ ) {
-                _PolyhedralBoundedSolidFace faceB = solid.polygonsList.get(j);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solid.getPolygonsList().get(i);
+            for ( j = i+1; j < solid.getPolygonsList().size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = solid.getPolygonsList().get(j);
                 if ( facesHaveImproperIntersection(faceA, faceB, numericContext,
                                                    msg) ) {
                     return false;

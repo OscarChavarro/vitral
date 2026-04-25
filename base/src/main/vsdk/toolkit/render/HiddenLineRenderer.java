@@ -135,8 +135,8 @@ public class HiddenLineRenderer extends RenderingElement
         _AppelEdgeCache materialLine;
         Vector3D prevEnd = new Vector3D();
 
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = solid.getEdgesList().get(i);
 
             int start, end;
             start = e.getStartingVertexId();

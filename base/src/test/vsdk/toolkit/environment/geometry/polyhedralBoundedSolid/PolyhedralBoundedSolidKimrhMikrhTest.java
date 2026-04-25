@@ -28,12 +28,12 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
-        _PolyhedralBoundedSolidFace face1 = solid.polygonsList.get(0);
-        _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
+        _PolyhedralBoundedSolidFace face1 = solid.getPolygonsList().get(0);
+        _PolyhedralBoundedSolidFace face2 = solid.getPolygonsList().get(1);
         _PolyhedralBoundedSolidLoop migratedLoop = face2.boundariesList.get(0);
         _PolyhedralBoundedSolidHalfEdge migratedHalfEdge =
             migratedLoop.boundaryStartHalfEdge;
-        int faceCountBefore = solid.polygonsList.size();
+        int faceCountBefore = solid.getPolygonsList().size();
         int face1LoopsBefore = face1.boundariesList.size();
         int face2LoopsBefore = face2.boundariesList.size();
         int removedFaceId = face2.id;
@@ -42,7 +42,7 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         PolyhedralBoundedSolidEulerOperators.lkimrh(solid, face1, face2);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(faceCountBefore - 1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(faceCountBefore - 1);
         assertThat(solid.findFace(removedFaceId)).isNull();
         assertThat(face1.boundariesList.size())
             .isEqualTo(face1LoopsBefore + face2LoopsBefore);
@@ -58,12 +58,12 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
-        _PolyhedralBoundedSolidFace face1 = solid.polygonsList.get(0);
-        _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
+        _PolyhedralBoundedSolidFace face1 = solid.getPolygonsList().get(0);
+        _PolyhedralBoundedSolidFace face2 = solid.getPolygonsList().get(1);
         _PolyhedralBoundedSolidLoop loopToPromote = face2.boundariesList.get(0);
 
         PolyhedralBoundedSolidEulerOperators.lkimrh(solid, face1, face2);
-        int facesAfterLkimrh = solid.polygonsList.size();
+        int facesAfterLkimrh = solid.getPolygonsList().size();
         int newFaceId = solid.getMaxFaceId() + 1;
 
         // Action
@@ -73,7 +73,7 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         // Assert
         assertThat(newFace).isNotNull();
         assertThat(newFace.id).isEqualTo(newFaceId);
-        assertThat(solid.polygonsList.size()).isEqualTo(facesAfterLkimrh + 1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(facesAfterLkimrh + 1);
         assertThat(loopToPromote.parentFace).isSameAs(newFace);
         assertThat(newFace.boundariesList.size()).isEqualTo(1);
         assertThat(newFace.boundariesList.get(0)).isSameAs(loopToPromote);

@@ -210,16 +210,16 @@ public final class Mant1988Section15_2UnionDiagnostic
         _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(
             numericContext);
 
-        solidA.compactIds();
-        solidB.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(solidA);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(solidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solidA);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB);
-        solidA.compactIds();
-        solidB.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(solidA);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(solidB);
         PolyhedralBoundedSolidSetOperator.updmaxnames(solidB, solidA);
 
         numericContext = PolyhedralBoundedSolidNumericPolicy.forSolids(
@@ -239,9 +239,9 @@ public final class Mant1988Section15_2UnionDiagnostic
     {
         System.out.println();
         System.out.println("=== " + label + " ===");
-        System.out.println("faces=" + solid.polygonsList.size() +
-            " edges=" + solid.edgesList.size() +
-            " vertices=" + solid.verticesList.size() +
+        System.out.println("faces=" + solid.getPolygonsList().size() +
+            " edges=" + solid.getEdgesList().size() +
+            " vertices=" + solid.getVerticesList().size() +
             " loops=" + computeLoopCount(solid) +
             " multiLoopFaces=" + computeMultiLoopFaceCount(solid) +
             " shells=" + computeShellCount(solid) +
@@ -258,8 +258,8 @@ public final class Mant1988Section15_2UnionDiagnostic
     {
         int i;
         int j;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             System.out.println("face[" + face.id + "] loops=" +
                 face.boundariesList.size());
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
@@ -333,9 +333,9 @@ public final class Mant1988Section15_2UnionDiagnostic
 
             System.out.println(
                 "finalCut[A=" + sourceA + ",B=" + sourceB + "] " +
-                "faces=" + result.polygonsList.size() +
-                " edges=" + result.edgesList.size() +
-                " vertices=" + result.verticesList.size() +
+                "faces=" + result.getPolygonsList().size() +
+                " edges=" + result.getEdgesList().size() +
+                " vertices=" + result.getVerticesList().size() +
                 " shells=" + computeShellCount(result) +
                 " shellFaceCounts=" + formatIntArray(
                     computeShellFaceCounts(result)) +
@@ -435,8 +435,8 @@ public final class Mant1988Section15_2UnionDiagnostic
     {
         int count = 0;
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            count += solid.polygonsList.get(i).boundariesList.size();
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            count += solid.getPolygonsList().get(i).boundariesList.size();
         }
         return count;
     }
@@ -445,8 +445,8 @@ public final class Mant1988Section15_2UnionDiagnostic
     {
         int count = 0;
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            if ( solid.polygonsList.get(i).boundariesList.size() > 1 ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            if ( solid.getPolygonsList().get(i).boundariesList.size() > 1 ) {
                 count++;
             }
         }
@@ -461,7 +461,7 @@ public final class Mant1988Section15_2UnionDiagnostic
     private static int computeShellFaceCount(PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace targetFace)
     {
-        int faceCount = solid.polygonsList.size();
+        int faceCount = solid.getPolygonsList().size();
         if ( faceCount == 0 || targetFace == null ) {
             return 0;
         }
@@ -469,8 +469,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         DisjointSet dsu = new DisjointSet(faceCount);
         int i;
 
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
             if ( edge.leftHalf == null || edge.rightHalf == null ) {
                 continue;
             }
@@ -498,7 +498,7 @@ public final class Mant1988Section15_2UnionDiagnostic
 
     private static int[] computeShellFaceCounts(PolyhedralBoundedSolid solid)
     {
-        int faceCount = solid.polygonsList.size();
+        int faceCount = solid.getPolygonsList().size();
         if ( faceCount == 0 ) {
             return new int[0];
         }
@@ -506,8 +506,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         DisjointSet dsu = new DisjointSet(faceCount);
         int i;
 
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
             if ( edge.leftHalf == null || edge.rightHalf == null ) {
                 continue;
             }
@@ -561,8 +561,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         _PolyhedralBoundedSolidFace face)
     {
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            if ( solid.polygonsList.get(i) == face ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            if ( solid.getPolygonsList().get(i) == face ) {
                 return i;
             }
         }
@@ -586,7 +586,7 @@ public final class Mant1988Section15_2UnionDiagnostic
 
     private static void printShells(String label, PolyhedralBoundedSolid solid)
     {
-        int faceCount = solid.polygonsList.size();
+        int faceCount = solid.getPolygonsList().size();
         if ( faceCount == 0 ) {
             System.out.println("shells[" + label + "] = []");
             return;
@@ -594,8 +594,8 @@ public final class Mant1988Section15_2UnionDiagnostic
 
         DisjointSet dsu = new DisjointSet(faceCount);
         int i;
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
             if ( edge.leftHalf == null || edge.rightHalf == null ) {
                 continue;
             }
@@ -615,7 +615,7 @@ public final class Mant1988Section15_2UnionDiagnostic
                 faces = new ArrayList<_PolyhedralBoundedSolidFace>();
                 shells.put(Integer.valueOf(root), faces);
             }
-            faces.add(solid.polygonsList.get(i));
+            faces.add(solid.getPolygonsList().get(i));
         }
 
         int shellIndex = 0;
@@ -764,7 +764,7 @@ public final class Mant1988Section15_2UnionDiagnostic
             PolyhedralBoundedSolidEulerOperators.lkfmrh(outRes, sonfa.get(i + inda), sonfb.get(i + indb));
             PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i + inda));
         }
-        outRes.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(outRes);
 
         return outRes;
     }
@@ -844,7 +844,7 @@ public final class Mant1988Section15_2UnionDiagnostic
             PolyhedralBoundedSolidEulerOperators.lkfmrh(outRes, sonfa.get(i), sonfb.get(i + indb));
             PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i));
         }
-        outRes.compactIds();
+        PolyhedralBoundedSolidTopologyEditing.compactIds(outRes);
 
         return outRes;
     }
@@ -853,9 +853,9 @@ public final class Mant1988Section15_2UnionDiagnostic
         PolyhedralBoundedSolid solid, int faceId)
     {
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            if ( solid.polygonsList.get(i).id == faceId ) {
-                return solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            if ( solid.getPolygonsList().get(i).id == faceId ) {
+                return solid.getPolygonsList().get(i);
             }
         }
         return null;

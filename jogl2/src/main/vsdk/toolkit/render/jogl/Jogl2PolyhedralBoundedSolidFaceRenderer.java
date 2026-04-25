@@ -368,9 +368,9 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         //-----------------------------------------------------------------
         Vector3D p0;
         Vector3D n;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             // Logic
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             if ( shouldDrawFaceAsBoundaryOnly(face) ) {
                 drawSuspiciousFaceBoundary(gl, face);
                 continue;
@@ -512,8 +512,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         gl.glLineWidth(1.0f);
 
         //- Draw face boundaries, one for each loop -----------------------
-        for ( i = 0; faceIndex >= -1 && i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; faceIndex >= -1 && i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             //n = face.getContainingPlane().getNormal();
 
             if ( i != faceIndex && faceIndex > -1 ) {
@@ -591,10 +591,10 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         //-----------------------------------------------------------------
         Vector3D n;
         for ( i = faceIndex;
-              i >= 0 && i == faceIndex && i < solid.polygonsList.size();
+              i >= 0 && i == faceIndex && i < solid.getPolygonsList().size();
               i++ ) {
             // Logic
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             if ( shouldDrawFaceAsBoundaryOnly(face) ) {
                 drawSuspiciousFaceBoundary(gl, face);
                 continue;

@@ -57,7 +57,7 @@ class PolyhedralBoundedSolidValidationEngineTest
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
-        _PolyhedralBoundedSolidFace face = solid.polygonsList.get(0);
+        _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(0);
         _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(0);
         loop.boundaryStartHalfEdge = null;
 

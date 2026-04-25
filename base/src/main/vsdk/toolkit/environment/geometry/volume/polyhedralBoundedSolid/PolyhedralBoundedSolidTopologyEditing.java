@@ -153,6 +153,53 @@ public final class PolyhedralBoundedSolidTopologyEditing
     }
 
     /**
+    Modifies ids for current solid's vertices, edges, faces and half-edges to
+    make them consecutive from 1.
+    @param solid target solid instance.
+    */
+    public static void compactIds(PolyhedralBoundedSolid solid)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            solid.getVerticesList().get(i).id = i + 1;
+        }
+        solid.setMaxVertexId(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            solid.getEdgesList().get(i).id = i + 1;
+        }
+
+        int k = 1;
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
+            face.id = i + 1;
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
+
+                loop = face.boundariesList.get(j);
+
+                he = loop.boundaryStartHalfEdge;
+                if ( he == null ) {
+                    continue;
+                }
+                heStart = he;
+                do {
+                    he.id = k;
+                    k++;
+                    he = he.next();
+                    if ( he == null ) {
+                        break;
+                    }
+                } while( he != heStart );
+            }
+        }
+        solid.setMaxFaceId(i);
+    }
+
+    /**
     Finds a pair of coincident vertices between two loops so `loopGlue` can
     start from a geometrically meaningful bridge instead of assuming each loop
     starts at the matching vertex.

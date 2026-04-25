@@ -40,7 +40,7 @@ class PolyhedralBoundedSolidTopologicalValidatorTest
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
-        _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(0);
+        _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(0);
         edge.leftHalf = null;
 
         // Action

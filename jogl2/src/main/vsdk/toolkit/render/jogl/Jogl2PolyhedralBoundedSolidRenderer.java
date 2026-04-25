@@ -37,8 +37,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 
         gl.glDisable(GL.GL_TEXTURE_2D);
 
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = solid.getEdgesList().get(i);
             int start;
             int end;
             start = e.getStartingVertexId();
@@ -102,8 +102,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
         boolean f1;
         boolean f2;
 
-        for ( i = 0; edgeIndex >= -1 && i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
+        for ( i = 0; edgeIndex >= -1 && i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = solid.getEdgesList().get(i);
 
             if ( i != edgeIndex && edgeIndex > -1 ) {
                 continue;

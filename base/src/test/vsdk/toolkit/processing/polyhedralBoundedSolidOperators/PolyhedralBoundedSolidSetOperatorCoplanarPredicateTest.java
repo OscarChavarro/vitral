@@ -223,9 +223,9 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
-        assertThat(result.polygonsList.size()).isEqualTo(2);
-        assertThat(result.edgesList.size()).isEqualTo(4);
-        assertThat(result.verticesList.size()).isEqualTo(4);
+        assertThat(result.getPolygonsList().size()).isEqualTo(2);
+        assertThat(result.getEdgesList().size()).isEqualTo(4);
+        assertThat(result.getVerticesList().size()).isEqualTo(4);
         assertThat(minmax)
             .containsExactly(0.25, 0.25, 0.3, 0.75, 0.75, 0.3);
     }
@@ -325,7 +325,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
         Matrix4x4 translation = new Matrix4x4();
         translation = translation.translation(tx, ty, tz);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         return solid;
     }
 
@@ -334,8 +334,8 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         Vector3D normalHint)
     {
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             InfinitePlane plane = face.getContainingPlane();
             if ( plane != null &&
                  plane.getNormal().dotProduct(normalHint) > 0.9 ) {
@@ -351,8 +351,8 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         Vector3D normalHint)
     {
         int i;
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             InfinitePlane plane = face.getContainingPlane();
             if ( plane == null ) {
                 continue;

@@ -294,8 +294,8 @@ final class _PolyhedralBoundedSolidSetIntersector
         _PolyhedralBoundedSolidEdge generatedEdge;
         int i;
 
-        for ( i = 0; i < s.polygonsList.size(); i++ ) {
-            f = s.polygonsList.get(i);
+        for ( i = 0; i < s.getPolygonsList().size(); i++ ) {
+            f = s.getPolygonsList().get(i);
             generatedEdge = doSetOpGenerate(e, f, BvsA, s, other, sonvv,
                 sonva, sonvb);
             if ( generatedEdge != null ) {
@@ -323,12 +323,12 @@ final class _PolyhedralBoundedSolidSetIntersector
         sonva = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();
         sonvb = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();
 
-        for ( i = 0; i < inSolidA.edgesList.size(); i++ ) {
-            e = inSolidA.edgesList.get(i);
+        for ( i = 0; i < inSolidA.getEdgesList().size(); i++ ) {
+            e = inSolidA.getEdgesList().get(i);
             processEdge(e, inSolidB, 0, inSolidA, sonvv, sonva, sonvb);
         }
-        for ( i = 0; i < inSolidB.edgesList.size(); i++ ) {
-            e = inSolidB.edgesList.get(i);
+        for ( i = 0; i < inSolidB.getEdgesList().size(); i++ ) {
+            e = inSolidB.getEdgesList().get(i);
             processEdge(e, inSolidA, 1, inSolidB, sonvv, sonva, sonvb);
         }
 

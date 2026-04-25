@@ -55,7 +55,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(0.275, 0.0, -0.5);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(cylinderB, translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(cylinderB, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderB);
 
@@ -72,7 +72,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(0.55, 0.55, 0.05);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -130,7 +130,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(tx, ty, tz);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }

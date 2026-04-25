@@ -14,6 +14,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -114,7 +115,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             outRes.merge(inSolidA);
             inSolidB.revert();
             outRes.merge(inSolidB);
-            outRes.compactIds();
+            PolyhedralBoundedSolidTopologyEditing.compactIds(outRes);
             return outRes;
         }
         outRes.merge(inSolidA);
@@ -157,7 +158,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         for ( i = 0; i < contactPolygons.size(); i++ ) {
             PolyhedralBoundedSolid lamina =
                 createLaminaFromPolygon(contactPolygons.get(i));
-            if ( lamina.polygonsList.size() > 0 ) {
+            if ( lamina.getPolygonsList().size() > 0 ) {
                 outRes.merge(lamina);
             }
         }
@@ -188,12 +189,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         int insideVotes = 0;
         int outsideVotes = 0;
 
-        if ( solid == null || solid.polygonsList.size() < 1 ) {
+        if ( solid == null || solid.getPolygonsList().size() < 1 ) {
             return Geometry.OUTSIDE;
         }
 
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            face = solid.getPolygonsList().get(i);
             if ( face.getContainingPlane() == null ) {
                 continue;
             }
@@ -216,8 +217,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             ArrayList<Double> distances = new ArrayList<Double>();
             Ray ray = new Ray(point, dirs[j]);
 
-            for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-                face = solid.polygonsList.get(i);
+            for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+                face = solid.getPolygonsList().get(i);
                 if ( face.getContainingPlane() == null ) {
                     ambiguous = true;
                     break;
@@ -326,8 +327,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return;
         }
 
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
-            double c = vertexCoordinate(solid.verticesList.get(i), axis);
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            double c = vertexCoordinate(solid.getVerticesList().get(i), axis);
             if ( c > min + eps && c < max - eps ) {
                 coords.add(Double.valueOf(c));
             }
@@ -461,12 +462,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         boolean sawLimit = false;
         boolean sawOutside = false;
 
-        if ( solidA == null || solidA.verticesList.size() < 1 ) {
+        if ( solidA == null || solidA.getVerticesList().size() < 1 ) {
             return Geometry.OUTSIDE;
         }
 
-        for ( i = 0; i < solidA.verticesList.size(); i++ ) {
-            _PolyhedralBoundedSolidVertex v = solidA.verticesList.get(i);
+        for ( i = 0; i < solidA.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex v = solidA.getVerticesList().get(i);
             int status = classifyPointAgainstSolid(solidB, v.position);
             if ( status == Geometry.INSIDE ) {
                 return Geometry.INSIDE;
@@ -524,8 +525,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        for ( i = 0; i < current.edgesList.size(); i++ ) {
-            edge = current.edgesList.get(i);
+        for ( i = 0; i < current.getEdgesList().size(); i++ ) {
+            edge = current.getEdgesList().get(i);
             if ( edge == null || edge.rightHalf == null ||
                  edge.leftHalf == null ) {
                 continue;
@@ -536,8 +537,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 continue;
             }
 
-            for ( j = 0; j < other.polygonsList.size(); j++ ) {
-                face = other.polygonsList.get(j);
+            for ( j = 0; j < other.getPolygonsList().size(); j++ ) {
+                face = other.getPolygonsList().get(j);
                 if ( face == null || face.getContainingPlane() == null ) {
                     continue;
                 }
@@ -578,10 +579,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        for ( i = 0; i < solidA.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace faceA = solidA.polygonsList.get(i);
-            for ( j = 0; j < solidB.polygonsList.size(); j++ ) {
-                _PolyhedralBoundedSolidFace faceB = solidB.polygonsList.get(j);
+        for ( i = 0; i < solidA.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solidA.getPolygonsList().get(i);
+            for ( j = 0; j < solidB.getPolygonsList().size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = solidB.getPolygonsList().get(j);
                 if ( coplanarFaces(faceA, faceB) &&
                      partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
                     return true;
@@ -605,10 +606,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return polygons;
         }
 
-        for ( i = 0; i < solidA.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace faceA = solidA.polygonsList.get(i);
-            for ( j = 0; j < solidB.polygonsList.size(); j++ ) {
-                _PolyhedralBoundedSolidFace faceB = solidB.polygonsList.get(j);
+        for ( i = 0; i < solidA.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace faceA = solidA.getPolygonsList().get(i);
+            for ( j = 0; j < solidB.getPolygonsList().size(); j++ ) {
+                _PolyhedralBoundedSolidFace faceB = solidB.getPolygonsList().get(j);
                 if ( coplanarFaces(faceA, faceB) &&
                      partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
                     ArrayList<Vector3D> polygon =

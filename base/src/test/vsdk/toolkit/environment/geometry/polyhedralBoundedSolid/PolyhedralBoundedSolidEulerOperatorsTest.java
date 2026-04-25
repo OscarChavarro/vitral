@@ -37,13 +37,13 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(1.0, 2.0, 3.0), 7, 11);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(1);
-        assertThat(solid.verticesList.size()).isEqualTo(1);
-        assertThat(solid.edgesList.size()).isZero();
+        assertThat(solid.getPolygonsList().size()).isEqualTo(1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(1);
+        assertThat(solid.getEdgesList().size()).isZero();
         assertThat(solid.getMaxVertexId()).isEqualTo(7);
         assertThat(solid.getMaxFaceId()).isEqualTo(11);
 
-        _PolyhedralBoundedSolidFace face = solid.polygonsList.get(0);
+        _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(0);
         _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(0);
         _PolyhedralBoundedSolidHalfEdge halfEdge = loop.boundaryStartHalfEdge;
 
@@ -52,7 +52,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         assertThat(loop.halfEdgesList.size()).isEqualTo(1);
         assertThat(halfEdge.parentEdge).isNull();
         assertThat(halfEdge.parentLoop).isSameAs(loop);
-        assertThat(halfEdge.startingVertex).isSameAs(solid.verticesList.get(0));
+        assertThat(halfEdge.startingVertex).isSameAs(solid.getVerticesList().get(0));
         assertThat(halfEdge.next()).isSameAs(halfEdge);
         assertThat(halfEdge.previous()).isSameAs(halfEdge);
     }
@@ -69,13 +69,13 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(1);
-        assertThat(solid.edgesList.size()).isEqualTo(1);
-        assertThat(solid.verticesList.size()).isEqualTo(2);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(2);
         assertThat(solid.findFace(1).boundariesList.get(0).halfEdgesList.size())
             .isEqualTo(2);
 
-        _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(0);
+        _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(0);
         assertThat(edge.leftHalf).isNotNull();
         assertThat(edge.rightHalf).isNotNull();
         assertThat(edge.leftHalf.parentLoop).isSameAs(edge.rightHalf.parentLoop);
@@ -93,15 +93,15 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         _PolyhedralBoundedSolidHalfEdge seed =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
         PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
-        _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(0);
+        _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(0);
 
         // Action
         PolyhedralBoundedSolidEulerOperators.lkev(solid, edge.rightHalf, edge.leftHalf);
 
         // Assert
-        assertThat(solid.edgesList.size()).isZero();
-        assertThat(solid.verticesList.size()).isEqualTo(1);
-        assertThat(solid.polygonsList.size()).isEqualTo(1);
+        assertThat(solid.getEdgesList().size()).isZero();
+        assertThat(solid.getVerticesList().size()).isEqualTo(1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(1);
         assertThat(solid.findFace(1).boundariesList.get(0).halfEdgesList.size())
             .isEqualTo(1);
         assertThat(solid.findFace(1).boundariesList.get(0)
@@ -117,18 +117,18 @@ class PolyhedralBoundedSolidEulerOperatorsTest
                 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge[] pair =
             firstDistinctHalfEdgesStartingAtSameVertex(solid);
-        int faceCount = solid.polygonsList.size();
-        int edgeCount = solid.edgesList.size();
-        int vertexCount = solid.verticesList.size();
+        int faceCount = solid.getPolygonsList().size();
+        int edgeCount = solid.getEdgesList().size();
+        int vertexCount = solid.getVerticesList().size();
         int newVertexId = solid.getMaxVertexId() + 1;
 
         // Action
         PolyhedralBoundedSolidEulerOperators.lmev(solid, pair[0], pair[1], newVertexId, pair[0].startingVertex.position);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(faceCount);
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
-        assertThat(solid.verticesList.size()).isEqualTo(vertexCount + 1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(faceCount);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount + 1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(vertexCount + 1);
         assertThat(solid.findVertex(newVertexId)).isNotNull();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -142,17 +142,17 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(4);
         _PolyhedralBoundedSolidHalfEdge he2 = face.findHalfEdge(1);
-        int edgeCount = solid.edgesList.size();
-        int vertexCount = solid.verticesList.size();
+        int edgeCount = solid.getEdgesList().size();
+        int vertexCount = solid.getVerticesList().size();
 
         // Action
         _PolyhedralBoundedSolidFace newFace = PolyhedralBoundedSolidEulerOperators.lmef(solid, he1, he2, 2);
 
         // Assert
         assertThat(newFace).isNotNull();
-        assertThat(solid.polygonsList.size()).isEqualTo(2);
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
-        assertThat(solid.verticesList.size()).isEqualTo(vertexCount);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(2);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount + 1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(vertexCount);
         assertThat(newFace.boundariesList.size()).isEqualTo(1);
         assertThat(newFace.boundariesList.get(0).halfEdgesList.size())
             .isGreaterThanOrEqualTo(1);
@@ -168,14 +168,14 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             PolyhedralBoundedSolidEulerOperators.lmef(solid, face.findHalfEdge(4), face.findHalfEdge(1), 2);
         _PolyhedralBoundedSolidEdge edgeToKill =
             newFace.boundariesList.get(0).boundaryStartHalfEdge.parentEdge;
-        int edgeCount = solid.edgesList.size();
+        int edgeCount = solid.getEdgesList().size();
 
         // Action
         PolyhedralBoundedSolidEulerOperators.lkef(solid, edgeToKill.rightHalf, edgeToKill.leftHalf);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(1);
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount - 1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount - 1);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
     }
@@ -188,14 +188,14 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(1, 5);
         _PolyhedralBoundedSolidHalfEdge he2 = face.findHalfEdge(5, 1);
-        int edgeCount = solid.edgesList.size();
+        int edgeCount = solid.getEdgesList().size();
         int loopCount = face.boundariesList.size();
 
         // Action
         PolyhedralBoundedSolidEulerOperators.lkemr(solid, he1, he2);
 
         // Assert
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount - 1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount - 1);
         assertThat(face.boundariesList.size()).isEqualTo(loopCount + 1);
     }
 
@@ -208,7 +208,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(1, 5);
         _PolyhedralBoundedSolidHalfEdge he2 = face.findHalfEdge(5, 1);
         PolyhedralBoundedSolidEulerOperators.lkemr(solid, he1, he2);
-        int edgeCount = solid.edgesList.size();
+        int edgeCount = solid.getEdgesList().size();
         _PolyhedralBoundedSolidLoop outer = face.boundariesList.get(0);
         _PolyhedralBoundedSolidLoop ring = face.boundariesList.get(1);
 
@@ -216,7 +216,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolidEulerOperators.lmekr(solid, outer.boundaryStartHalfEdge, ring.boundaryStartHalfEdge);
 
         // Assert
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount + 1);
         assertThat(face.boundariesList.size()).isEqualTo(1);
     }
 
@@ -278,9 +278,9 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolidEulerOperators.kvfs(solid);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isZero();
-        assertThat(solid.edgesList.size()).isZero();
-        assertThat(solid.verticesList.size()).isZero();
+        assertThat(solid.getPolygonsList().size()).isZero();
+        assertThat(solid.getEdgesList().size()).isZero();
+        assertThat(solid.getVerticesList().size()).isZero();
     }
 
     @Test
@@ -294,9 +294,9 @@ class PolyhedralBoundedSolidEulerOperatorsTest
 
         // Assert
         assertThat(result).isTrue();
-        assertThat(solid.polygonsList.size()).isEqualTo(1);
-        assertThat(solid.edgesList.size()).isEqualTo(1);
-        assertThat(solid.verticesList.size()).isEqualTo(2);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(2);
     }
 
     @Test
@@ -308,8 +308,8 @@ class PolyhedralBoundedSolidEulerOperatorsTest
                 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge[] pair =
             firstDistinctHalfEdgesStartingAtSameVertex(solid);
-        int vertexCount = solid.verticesList.size();
-        int edgeCount = solid.edgesList.size();
+        int vertexCount = solid.getVerticesList().size();
+        int edgeCount = solid.getEdgesList().size();
         int newVertexId = solid.getMaxVertexId() + 1;
 
         // Action
@@ -324,8 +324,8 @@ class PolyhedralBoundedSolidEulerOperatorsTest
 
         // Assert
         assertThat(result).isTrue();
-        assertThat(solid.verticesList.size()).isEqualTo(vertexCount + 1);
-        assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
+        assertThat(solid.getVerticesList().size()).isEqualTo(vertexCount + 1);
+        assertThat(solid.getEdgesList().size()).isEqualTo(edgeCount + 1);
         assertThat(solid.findVertex(newVertexId)).isNotNull();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -342,8 +342,8 @@ class PolyhedralBoundedSolidEulerOperatorsTest
 
         // Assert
         assertThat(result).isTrue();
-        assertThat(solid.polygonsList.size()).isEqualTo(2);
-        assertThat(solid.edgesList.size()).isEqualTo(4);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(2);
+        assertThat(solid.getEdgesList().size()).isEqualTo(4);
     }
 
     @Test
@@ -362,8 +362,8 @@ class PolyhedralBoundedSolidEulerOperatorsTest
 
         // Assert
         assertThat(result).isTrue();
-        assertThat(solid.polygonsList.size()).isEqualTo(2);
-        assertThat(solid.edgesList.size()).isEqualTo(4);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(2);
+        assertThat(solid.getEdgesList().size()).isEqualTo(4);
     }
 
     @Test
@@ -389,9 +389,9 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
-        _PolyhedralBoundedSolidFace face1 = solid.polygonsList.get(0);
-        _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
-        int faceCount = solid.polygonsList.size();
+        _PolyhedralBoundedSolidFace face1 = solid.getPolygonsList().get(0);
+        _PolyhedralBoundedSolidFace face2 = solid.getPolygonsList().get(1);
+        int faceCount = solid.getPolygonsList().size();
         int loopCount = face1.boundariesList.size();
 
         // Action
@@ -399,7 +399,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
 
         // Assert
         assertThat(result).isTrue();
-        assertThat(solid.polygonsList.size()).isEqualTo(faceCount - 1);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(faceCount - 1);
         assertThat(face1.boundariesList.size())
             .isEqualTo(loopCount + face2.boundariesList.size());
         assertThat(solid.findFace(face2.id)).isNull();
@@ -478,8 +478,8 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
         TopologicalSignature before = TopologicalSignature.from(solid);
-        _PolyhedralBoundedSolidFace face1 = solid.polygonsList.get(0);
-        _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
+        _PolyhedralBoundedSolidFace face1 = solid.getPolygonsList().get(0);
+        _PolyhedralBoundedSolidFace face2 = solid.getPolygonsList().get(1);
         int newFaceId = solid.getMaxFaceId() + 1;
 
         // Action
@@ -511,9 +511,9 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             solid.findFace(1).findHalfEdge(1), 2);
 
         // Assert
-        assertThat(solid.polygonsList.size()).isEqualTo(2);
-        assertThat(solid.edgesList.size()).isEqualTo(3);
-        assertThat(solid.verticesList.size()).isEqualTo(3);
+        assertThat(solid.getPolygonsList().size()).isEqualTo(2);
+        assertThat(solid.getEdgesList().size()).isEqualTo(3);
+        assertThat(solid.getVerticesList().size()).isEqualTo(3);
         assertThat(TopologicalSignature.from(solid).loopHalfEdgeCounts)
             .containsExactly(3, 3);
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -567,25 +567,25 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         int i;
         int j;
 
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge a =
-                solid.polygonsList.get(i).boundariesList.get(0)
+                solid.getPolygonsList().get(i).boundariesList.get(0)
                     .boundaryStartHalfEdge;
             do {
-                for ( j = i; j < solid.polygonsList.size(); j++ ) {
+                for ( j = i; j < solid.getPolygonsList().size(); j++ ) {
                     _PolyhedralBoundedSolidHalfEdge b =
-                        solid.polygonsList.get(j).boundariesList.get(0)
+                        solid.getPolygonsList().get(j).boundariesList.get(0)
                             .boundaryStartHalfEdge;
                     do {
                         if ( a != b && a.startingVertex == b.startingVertex ) {
                             return new _PolyhedralBoundedSolidHalfEdge[] { a, b  };
                         }
                         b = b.next();
-                    } while ( b != solid.polygonsList.get(j).boundariesList.get(0)
+                    } while ( b != solid.getPolygonsList().get(j).boundariesList.get(0)
                         .boundaryStartHalfEdge );
                 }
                 a = a.next();
-            } while ( a != solid.polygonsList.get(i).boundariesList.get(0)
+            } while ( a != solid.getPolygonsList().get(i).boundariesList.get(0)
                 .boundaryStartHalfEdge );
         }
         throw new IllegalStateException("Expected at least one split vertex.");
@@ -604,14 +604,14 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             int i;
             int j;
 
-            faceCount = solid.polygonsList.size();
-            edgeCount = solid.edgesList.size();
-            vertexCount = solid.verticesList.size();
+            faceCount = solid.getPolygonsList().size();
+            edgeCount = solid.getEdgesList().size();
+            vertexCount = solid.getVerticesList().size();
             loopsPerFace = new ArrayList<>();
             loopHalfEdgeCounts = new ArrayList<>();
 
-            for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-                _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+            for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+                _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
                 loopsPerFace.add(face.boundariesList.size());
                 for ( j = 0; j < face.boundariesList.size(); j++ ) {
                     loopHalfEdgeCounts.add(

@@ -94,7 +94,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.3, 0.1+0.4, 0.1+0.4);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -102,7 +102,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.5, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1.0));
         b = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -110,7 +110,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.7, 0.5, 0.9);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -118,7 +118,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.9, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1.0, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -158,7 +158,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -166,7 +166,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -174,7 +174,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -182,7 +182,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -195,7 +195,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(e, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(e, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
 
         //-----------------------------------------------------------------
@@ -203,7 +203,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(f, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(f, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
 
         //-----------------------------------------------------------------
@@ -211,7 +211,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.1, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(g, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(g, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
 
         //-----------------------------------------------------------------
@@ -219,7 +219,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.9, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(h, T);
+        PolyhedralBoundedSolidModeler.applyTransformation(h, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------
@@ -290,7 +290,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(1, 0.5, 0.6));
         a = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, R);
+        PolyhedralBoundedSolidModeler.applyTransformation(a, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -299,7 +299,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         box = new Box(new Vector3D(1, 0.5, 0.6));
         b = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, R);
+        PolyhedralBoundedSolidModeler.applyTransformation(b, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -352,7 +352,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
         b = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, transformationMatrix);
+        PolyhedralBoundedSolidModeler.applyTransformation(b, transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -494,7 +494,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(0.5, 1, 0.6));
         block = box.exportToPolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(block, transformationMatrix);
+        PolyhedralBoundedSolidModeler.applyTransformation(block, transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(block);
 
         //-----------------------------------------------------------------

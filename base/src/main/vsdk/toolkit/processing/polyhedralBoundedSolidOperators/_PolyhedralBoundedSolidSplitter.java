@@ -222,8 +222,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         int i;
 
         soov = new ArrayList<_PolyhedralBoundedSolidVertex>();
-        for ( i = 0; i < inSolid.edgesList.size(); i++ ) {
-            e = inSolid.edgesList.get(i);
+        for ( i = 0; i < inSolid.getEdgesList().size(); i++ ) {
+            e = inSolid.getEdgesList().get(i);
             v1 = e.rightHalf.startingVertex;
             v2 = e.leftHalf.startingVertex;
             d1 = inSplittingPlane.pointDistance(v1.position);
@@ -675,12 +675,12 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
 
     private static void destroy(PolyhedralBoundedSolid inSolid)
     {
-        inSolid.polygonsList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>();
-        inSolid.edgesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>();
-        inSolid.verticesList =
-            new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>();
+        inSolid.setPolygonsList(
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidFace>());
+        inSolid.setEdgesList(
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge>());
+        inSolid.setVerticesList(
+            new CircularDoubleLinkedList<_PolyhedralBoundedSolidVertex>());
     }
 
     /**

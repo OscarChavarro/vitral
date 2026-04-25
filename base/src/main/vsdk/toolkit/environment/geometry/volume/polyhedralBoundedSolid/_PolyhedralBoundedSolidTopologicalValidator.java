@@ -36,8 +36,8 @@ public class _PolyhedralBoundedSolidTopologicalValidator
         _PolyhedralBoundedSolidFace f;
         _PolyhedralBoundedSolidLoop l;
 
-        for ( i = 0; i < solid.edgesList.size(); i++ ) {
-            e = solid.edgesList.get(i);
+        for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+            e = solid.getEdgesList().get(i);
             h1 = e.rightHalf;
             h2 = e.leftHalf;
             if ( h1 == null || h2 == null ) {
@@ -54,13 +54,13 @@ public class _PolyhedralBoundedSolidTopologicalValidator
         }
 
         int edgeCount[];
-        edgeCount = new int[solid.edgesList.size()];
+        edgeCount = new int[solid.getEdgesList().size()];
         for ( i = 0; i < edgeCount.length; i++ ) {
             edgeCount[i] = 0;
         }
 
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            f = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            f = solid.getPolygonsList().get(i);
             for ( j = 0; j < f.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidHalfEdge he;
                 _PolyhedralBoundedSolidHalfEdge heStart;
@@ -85,7 +85,7 @@ public class _PolyhedralBoundedSolidTopologicalValidator
                     }
 
                     for ( k = 0; k < edgeCount.length; k++ ) {
-                        if ( he.parentEdge == solid.edgesList.get(k) ) {
+                        if ( he.parentEdge == solid.getEdgesList().get(k) ) {
                             edgeCount[k]++;
                             break;
                         }
@@ -115,12 +115,12 @@ public class _PolyhedralBoundedSolidTopologicalValidator
         int i;
         int j;
 
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
-            solid.verticesList.get(i).emanatingHalfEdge = null;
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            solid.getVerticesList().get(i).emanatingHalfEdge = null;
         }
 
-        for ( i = 0; i < solid.polygonsList.size(); i++ ) {
-            _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
                 _PolyhedralBoundedSolidHalfEdge he;
@@ -142,10 +142,10 @@ public class _PolyhedralBoundedSolidTopologicalValidator
             }
         }
 
-        for ( i = 0; i < solid.verticesList.size(); i++ ) {
-            if ( solid.verticesList.get(i).emanatingHalfEdge == null ) {
-                solid.verticesList.locateWindowAtElem(solid.verticesList.get(i));
-                solid.verticesList.removeElemAtWindow();
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            if ( solid.getVerticesList().get(i).emanatingHalfEdge == null ) {
+                solid.getVerticesList().locateWindowAtElem(solid.getVerticesList().get(i));
+                solid.getVerticesList().removeElemAtWindow();
                 i--;
             }
         }

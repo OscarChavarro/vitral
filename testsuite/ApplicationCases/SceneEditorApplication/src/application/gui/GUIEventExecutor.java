@@ -38,6 +38,7 @@ import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class GUIEventExecutor extends CommandListener{
     
@@ -199,7 +200,7 @@ public class GUIEventExecutor extends CommandListener{
             brep = (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
             Matrix4x4 R = new Matrix4x4();
             R = R.translation(0.55, 0.55, 0.55);
-            PolyhedralBoundedSolidEulerOperators.applyTransformation(brep, R);
+            PolyhedralBoundedSolidModeler.applyTransformation(brep, R);
             //- Cube modification to holed box ----------------------------
             PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 5, 9, new Vector3D(0.3, 0.3, 1));
             PolyhedralBoundedSolidEulerOperators.kemr(brep, 6, 6, 5, 9, 9, 5);
@@ -222,7 +223,7 @@ public class GUIEventExecutor extends CommandListener{
             PolyhedralBoundedSolidEulerOperators.kfmrh(brep, 2, 11);
 
             R = R.translation(-0.55, -0.55, -0.55);
-            PolyhedralBoundedSolidEulerOperators.applyTransformation(brep, R);
+            PolyhedralBoundedSolidModeler.applyTransformation(brep, R);
             PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
 
             //brep = createCircle(0.5, 0.5, 0.5, 0.1, 12);

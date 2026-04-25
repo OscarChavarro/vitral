@@ -97,8 +97,8 @@ class HiddenLineRendererTest
                                          Vector3D point,
                                          double tolerance)
     {
-        for ( int i = 0; i < solid.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(i);
+        for ( int i = 0; i < solid.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
             if ( edge.leftHalf == null || edge.rightHalf == null ) {
                 continue;
             }

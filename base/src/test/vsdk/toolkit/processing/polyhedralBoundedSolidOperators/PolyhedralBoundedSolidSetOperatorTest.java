@@ -40,9 +40,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(expectedFaceCount);
-        assertThat(result.edgesList.size()).isEqualTo(expectedEdgeCount);
-        assertThat(result.verticesList.size()).isEqualTo(expectedVertexCount);
+        assertThat(result.getPolygonsList().size()).isEqualTo(expectedFaceCount);
+        assertThat(result.getEdgesList().size()).isEqualTo(expectedEdgeCount);
+        assertThat(result.getVerticesList().size()).isEqualTo(expectedVertexCount);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
     }
@@ -65,19 +65,19 @@ class PolyhedralBoundedSolidSetOperatorTest
         // Assert
         assertThat(result).isNotNull();
         if ( op == PolyhedralBoundedSolidModeler.INTERSECTION ) {
-            assertThat(result.polygonsList.size()).isEqualTo(0);
-            assertThat(result.edgesList.size()).isEqualTo(0);
-            assertThat(result.verticesList.size()).isEqualTo(0);
+            assertThat(result.getPolygonsList().size()).isEqualTo(0);
+            assertThat(result.getEdgesList().size()).isEqualTo(0);
+            assertThat(result.getVerticesList().size()).isEqualTo(0);
         }
         else if ( op == PolyhedralBoundedSolidModeler.UNION ) {
-            assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(1);
-            assertThat(result.edgesList.size()).isGreaterThanOrEqualTo(1);
-            assertThat(result.verticesList.size()).isGreaterThanOrEqualTo(1);
+            assertThat(result.getPolygonsList().size()).isGreaterThanOrEqualTo(1);
+            assertThat(result.getEdgesList().size()).isGreaterThanOrEqualTo(1);
+            assertThat(result.getVerticesList().size()).isGreaterThanOrEqualTo(1);
         }
         else {
-            assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(0);
-            assertThat(result.edgesList.size()).isGreaterThanOrEqualTo(0);
-            assertThat(result.verticesList.size()).isGreaterThanOrEqualTo(0);
+            assertThat(result.getPolygonsList().size()).isGreaterThanOrEqualTo(0);
+            assertThat(result.getEdgesList().size()).isGreaterThanOrEqualTo(0);
+            assertThat(result.getVerticesList().size()).isGreaterThanOrEqualTo(0);
         }
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
@@ -101,9 +101,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(expectedFaceCount);
-        assertThat(result.edgesList.size()).isEqualTo(expectedEdgeCount);
-        assertThat(result.verticesList.size()).isEqualTo(expectedVertexCount);
+        assertThat(result.getPolygonsList().size()).isEqualTo(expectedFaceCount);
+        assertThat(result.getEdgesList().size()).isEqualTo(expectedEdgeCount);
+        assertThat(result.getVerticesList().size()).isEqualTo(expectedVertexCount);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
     }
@@ -126,12 +126,12 @@ class PolyhedralBoundedSolidSetOperatorTest
             disjointPairB[1], disjointPairB[0], op, false);
 
         // Assert
-        assertThat(resultAB.polygonsList.size())
-            .isEqualTo(resultBA.polygonsList.size());
-        assertThat(resultAB.edgesList.size())
-            .isEqualTo(resultBA.edgesList.size());
-        assertThat(resultAB.verticesList.size())
-            .isEqualTo(resultBA.verticesList.size());
+        assertThat(resultAB.getPolygonsList().size())
+            .isEqualTo(resultBA.getPolygonsList().size());
+        assertThat(resultAB.getEdgesList().size())
+            .isEqualTo(resultBA.getEdgesList().size());
+        assertThat(resultAB.getVerticesList().size())
+            .isEqualTo(resultBA.getVerticesList().size());
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(resultAB)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -153,9 +153,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(expectedFaceCount);
-        assertThat(result.edgesList.size()).isEqualTo(expectedEdgeCount);
-        assertThat(result.verticesList.size()).isEqualTo(expectedVertexCount);
+        assertThat(result.getPolygonsList().size()).isEqualTo(expectedFaceCount);
+        assertThat(result.getEdgesList().size()).isEqualTo(expectedEdgeCount);
+        assertThat(result.getVerticesList().size()).isEqualTo(expectedVertexCount);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
     }
@@ -178,7 +178,7 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isGreaterThanOrEqualTo(0);
+        assertThat(result.getPolygonsList().size()).isGreaterThanOrEqualTo(0);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -246,9 +246,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(14);
-        assertThat(result.edgesList.size()).isEqualTo(30);
-        assertThat(result.verticesList.size()).isEqualTo(20);
+        assertThat(result.getPolygonsList().size()).isEqualTo(14);
+        assertThat(result.getEdgesList().size()).isEqualTo(30);
+        assertThat(result.getVerticesList().size()).isEqualTo(20);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -273,9 +273,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Assert
         assertThat(result).isNotNull();
-        assertThat(result.polygonsList.size()).isEqualTo(8);
-        assertThat(result.edgesList.size()).isEqualTo(18);
-        assertThat(result.verticesList.size()).isEqualTo(12);
+        assertThat(result.getPolygonsList().size()).isEqualTo(8);
+        assertThat(result.getEdgesList().size()).isEqualTo(18);
+        assertThat(result.getVerticesList().size()).isEqualTo(12);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -313,9 +313,9 @@ class PolyhedralBoundedSolidSetOperatorTest
 
             // Assert
             assertThat(result).isNotNull();
-            assertThat(result.polygonsList.size()).isEqualTo(8);
-            assertThat(result.edgesList.size()).isEqualTo(18);
-            assertThat(result.verticesList.size()).isEqualTo(12);
+            assertThat(result.getPolygonsList().size()).isEqualTo(8);
+            assertThat(result.getEdgesList().size()).isEqualTo(18);
+            assertThat(result.getVerticesList().size()).isEqualTo(12);
             assertThat(PolyhedralBoundedSolidValidationEngine
                 .validateIntermediate(result)).isTrue();
             assertThat(PolyhedralBoundedSolidValidationEngine
@@ -361,12 +361,12 @@ class PolyhedralBoundedSolidSetOperatorTest
             .validateStrict(withMax)).isFalse();
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateStrict(withoutMax)).isFalse();
-        assertThat(withMax.polygonsList.size())
-            .isEqualTo(withoutMax.polygonsList.size());
-        assertThat(withMax.edgesList.size())
-            .isEqualTo(withoutMax.edgesList.size());
-        assertThat(withMax.verticesList.size())
-            .isEqualTo(withoutMax.verticesList.size());
+        assertThat(withMax.getPolygonsList().size())
+            .isEqualTo(withoutMax.getPolygonsList().size());
+        assertThat(withMax.getEdgesList().size())
+            .isEqualTo(withoutMax.getEdgesList().size());
+        assertThat(withMax.getVerticesList().size())
+            .isEqualTo(withoutMax.getVerticesList().size());
     }
 
     private static Stream<Arguments> disjointSetOperationSamples()
@@ -376,12 +376,12 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidA = operands[0];
         PolyhedralBoundedSolid solidB = operands[1];
 
-        int facesA = solidA.polygonsList.size();
-        int edgesA = solidA.edgesList.size();
-        int verticesA = solidA.verticesList.size();
-        int facesB = solidB.polygonsList.size();
-        int edgesB = solidB.edgesList.size();
-        int verticesB = solidB.verticesList.size();
+        int facesA = solidA.getPolygonsList().size();
+        int edgesA = solidA.getEdgesList().size();
+        int verticesA = solidA.getVerticesList().size();
+        int facesB = solidB.getPolygonsList().size();
+        int edgesB = solidB.getEdgesList().size();
+        int verticesB = solidB.getVerticesList().size();
 
         return Stream.of(
             Arguments.of(PolyhedralBoundedSolidModeler.UNION,
@@ -407,12 +407,12 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid inner = operands[0];
         PolyhedralBoundedSolid outer = operands[1];
 
-        int facesInner = inner.polygonsList.size();
-        int edgesInner = inner.edgesList.size();
-        int verticesInner = inner.verticesList.size();
-        int facesOuter = outer.polygonsList.size();
-        int edgesOuter = outer.edgesList.size();
-        int verticesOuter = outer.verticesList.size();
+        int facesInner = inner.getPolygonsList().size();
+        int edgesInner = inner.getEdgesList().size();
+        int verticesInner = inner.getVerticesList().size();
+        int facesOuter = outer.getPolygonsList().size();
+        int edgesOuter = outer.getEdgesList().size();
+        int verticesOuter = outer.getVerticesList().size();
 
         return Stream.of(
             Arguments.of(PolyhedralBoundedSolidModeler.UNION,

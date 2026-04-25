@@ -97,7 +97,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     {
         this.id = id;
         parentSolid = parent;
-        parentSolid.polygonsList.add(this);
+        parentSolid.getPolygonsList().add(this);
         boundariesList =
             new CircularDoubleLinkedList<_PolyhedralBoundedSolidLoop>();
     }

@@ -114,10 +114,10 @@ public class DebuggerModel
 
     public int getFaceCount()
     {
-        if ( solid == null || solid.polygonsList == null ) {
+        if ( solid == null || solid.getPolygonsList() == null ) {
             return 0;
         }
-        return solid.polygonsList.size();
+        return solid.getPolygonsList().size();
     }
 
     public void clampFaceIndex()

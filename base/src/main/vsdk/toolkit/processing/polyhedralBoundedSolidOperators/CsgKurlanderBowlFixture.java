@@ -35,7 +35,7 @@ public class CsgKurlanderBowlFixture
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 t = new Matrix4x4();
         t = t.translation(center);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, t);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
         return solid;
     }
 
@@ -52,7 +52,7 @@ public class CsgKurlanderBowlFixture
 
         Matrix4x4 move = new Matrix4x4();
         move = move.translation(translation);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -118,7 +118,7 @@ public class CsgKurlanderBowlFixture
         rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
         t = t.translation(x, y, scale(z));
         m = t.multiply(rz.multiply(ry));
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(motif, m);
+        PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
         return motif;
     }
 

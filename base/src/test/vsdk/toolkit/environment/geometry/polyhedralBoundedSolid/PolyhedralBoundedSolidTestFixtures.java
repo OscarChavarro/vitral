@@ -4,8 +4,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
 /**
@@ -30,7 +30,7 @@ public class PolyhedralBoundedSolidTestFixtures
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
         Matrix4x4 translation = new Matrix4x4();
         translation = translation.translation(tx, ty, tz);
-        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }

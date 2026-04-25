@@ -69,8 +69,8 @@ public class WireframeRenderer extends RenderingElement
         cp0 = new Vector3D();
         cp1 = new Vector3D();
 
-        for ( i = 0; i < brep.edgesList.size(); i++ ) {
-            _PolyhedralBoundedSolidEdge e = brep.edgesList.get(i);
+        for ( i = 0; i < brep.getEdgesList().size(); i++ ) {
+            _PolyhedralBoundedSolidEdge e = brep.getEdgesList().get(i);
             int start, end;
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();

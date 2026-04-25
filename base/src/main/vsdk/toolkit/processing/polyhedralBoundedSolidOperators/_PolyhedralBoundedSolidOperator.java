@@ -97,18 +97,18 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge he;
 
-        for ( i = 0; i < s.polygonsList.size(); i++ ) {
-            f = s.polygonsList.get(i);
+        for ( i = 0; i < s.getPolygonsList().size(); i++ ) {
+            f = s.getPolygonsList().get(i);
             for ( j = 0; j < f.boundariesList.size(); j++ ) {
                 l = f.boundariesList.get(j);
                 he = l.boundaryStartHalfEdge;
                 do {
                     //
-                    if ( !searchForEdge(s.edgesList, he.parentEdge) ) {
-                        s.edgesList.add(he.parentEdge);
+                    if ( !searchForEdge(s.getEdgesList(), he.parentEdge) ) {
+                        s.getEdgesList().add(he.parentEdge);
                     }
-                    if ( !searchForVertex(s.verticesList, he.startingVertex) ) {
-                        s.verticesList.add(he.startingVertex);
+                    if ( !searchForVertex(s.getVerticesList(), he.startingVertex) ) {
+                        s.getVerticesList().add(he.startingVertex);
                         he.startingVertex.emanatingHalfEdge = he;
                     }
                     //
@@ -129,9 +129,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         _PolyhedralBoundedSolidFace f2;
         int i;
 
-        f.parentSolid.polygonsList.locateWindowAtElem(f);
-        f.parentSolid.polygonsList.removeElemAtWindow();
-        s.polygonsList.add(f);
+        f.parentSolid.getPolygonsList().locateWindowAtElem(f);
+        f.parentSolid.getPolygonsList().removeElemAtWindow();
+        s.getPolygonsList().add(f);
         f.parentSolid = s;
 
         for ( i = 0; i < f.boundariesList.size(); i++ ) {
