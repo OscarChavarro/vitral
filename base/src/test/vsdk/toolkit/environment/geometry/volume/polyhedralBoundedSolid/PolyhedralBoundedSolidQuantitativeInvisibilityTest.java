@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
+package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import org.junit.jupiter.api.Test;
 

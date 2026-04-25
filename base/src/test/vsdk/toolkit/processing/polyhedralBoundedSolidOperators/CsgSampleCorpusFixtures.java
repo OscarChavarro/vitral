@@ -2,7 +2,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;

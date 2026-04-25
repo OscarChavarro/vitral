@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
+package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

@@ -37,7 +37,7 @@ Note that in the sake of simplify and eficiency current programming
 implementation of this class exhibit public access attributes. It is important
 to note that those attributes will only be accessed directly from related 
 classes in the same package
-(vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.nodes) and
+(vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes) and
 from methods in the `PolyhedralBoundedSolid` class, and that they should
 not be used from outer classes.
 */

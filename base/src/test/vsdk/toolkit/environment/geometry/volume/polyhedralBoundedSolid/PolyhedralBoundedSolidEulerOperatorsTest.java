@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
+package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
