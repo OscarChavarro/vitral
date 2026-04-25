@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
+
 import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
@@ -13,7 +14,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 /**
 As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidVertex` contains
 a vertex position for the geometric information of the boundary model,
-and a reference to one of the halfedges emanating from it.
+and a reference to one of the half-edges emanating from it.
 */
 public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
     @Serial private static final long serialVersionUID = 20061118L;
@@ -52,7 +53,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
         String msg;
         msg = "vertex id " + id + ". Position " + position + ". ";
         if ( emanatingHalfEdge == null ) {
-            msg = msg + "No associated halfedge.";
+            msg = msg + "No associated half-edge.";
         }
         else {
             msg = msg + "H.E. " + emanatingHalfEdge.id;

@@ -26,7 +26,7 @@ public class JoglDebuggerHudRenderer
 {
     private static final int LINE_HEIGHT = 34;
     private static final double VERTEX_LABEL_GROUPING_PIXELS = 18.0;
-    private static final double VERTEX_LABEL_GROUPING_EPSILON_FACTOR = 1000.0;
+    private static final double SCREEN_DISTANCE_DELTA = 1;
 
     private final DebuggerModel model;
     private TextRenderer hudTextRenderer;
@@ -292,8 +292,7 @@ public class JoglDebuggerHudRenderer
             new ArrayList<VertexLabelGroup>();
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
-        double spatialTolerance = numericContext.bigEpsilon() *
-            VERTEX_LABEL_GROUPING_EPSILON_FACTOR;
+        double spatialTolerance = numericContext.bigEpsilon() * SCREEN_DISTANCE_DELTA;
 
         for ( int i = 0; i < solid.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);

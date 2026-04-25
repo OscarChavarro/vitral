@@ -21,6 +21,11 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 {
+    private static final float SURFACE_DEPTH_OFFSET_FACTOR = 2.0f;
+    private static final float SURFACE_DEPTH_OFFSET_UNITS = 2.0f;
+    private static final double LINES_DEPTH_RANGE_FAR = 0.99995;
+    private static final double POINTS_DEPTH_RANGE_FAR = 0.99990;
+
     private static void
     drawEdges(GL2 gl, PolyhedralBoundedSolid solid)
     {
@@ -250,14 +255,33 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
             Jogl2GeometryRenderer.prepareSurfaceQuality(gl, quality);
             gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_FILL);
-            //gl.glPolygonOffset(1.0f, 1.0f);
+            gl.glPolygonOffset(
+                SURFACE_DEPTH_OFFSET_FACTOR,
+                SURFACE_DEPTH_OFFSET_UNITS);
             Jogl2PolyhedralBoundedSolidFaceRenderer.drawSurfaces(gl, solid);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_FILL);
         }
         if ( quality.isWiresSet() ) {
+            gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_ENABLE_BIT);
+            gl.glEnable(GL.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDepthMask(false);
+            gl.glDepthRange(0.0, LINES_DEPTH_RANGE_FAR);
             drawEdges(gl, solid);
+            gl.glDepthRange(0.0, 1.0);
+            gl.glDepthMask(true);
+            gl.glPopAttrib();
         }
         if ( quality.isPointsSet() ) {
+            gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_ENABLE_BIT);
+            gl.glEnable(GL.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDepthMask(false);
+            gl.glDepthRange(0.0, POINTS_DEPTH_RANGE_FAR);
             Jogl2PolyhedralBoundedSolidVertexRenderer.drawPoints(gl, solid);
+            gl.glDepthRange(0.0, 1.0);
+            gl.glDepthMask(true);
+            gl.glPopAttrib();
         }
         if ( quality.isNormalsSet() ) {
             Jogl2PolyhedralBoundedSolidVertexRenderer.drawVertexNormals(gl,

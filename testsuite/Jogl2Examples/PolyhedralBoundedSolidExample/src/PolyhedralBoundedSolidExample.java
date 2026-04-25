@@ -15,6 +15,8 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
 // JOGL classes
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
 // Vitral classes
@@ -85,10 +87,14 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private GLCanvas createGUI()
     {
-        model.setCanvas(new GLCanvas());
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities caps = new GLCapabilities(profile);
+        caps.setDepthBits(64);
+        model.setCanvas(new GLCanvas(caps));
         model.getCanvas().addGLEventListener(joglDebuggerRenderer);
         model.getCanvas().addMouseListener(this);
         model.getCanvas().addMouseMotionListener(this);
+        model.getCanvas().addMouseWheelListener(this);
         model.getCanvas().addKeyListener(this);
 
         return model.getCanvas();
