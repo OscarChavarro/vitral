@@ -134,12 +134,27 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         private _PolyhedralBoundedSolidHalfEdge matchedB;
     }
 
+    private static final class DeferredCut
+    {
+        private final _PolyhedralBoundedSolidHalfEdge halfEdge;
+        private final int pairIndex;
+
+        private DeferredCut(_PolyhedralBoundedSolidHalfEdge halfEdge,
+                            int pairIndex)
+        {
+            this.halfEdge = halfEdge;
+            this.pairIndex = pairIndex;
+        }
+    }
+
     private static int debugFlags;
     private static int operation;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
+    private static ArrayList<DeferredCut> deferredCutsA;
+    private static ArrayList<DeferredCut> deferredCutsB;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
     private static ArrayList<OpenChain> openChains;
@@ -151,6 +166,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static int lastSonfbCount;
     private static int lastPairCount;
     private static int currentConnectPairIndex;
+    private static int nextSyntheticPairIndex;
 
     private static boolean isPipelineSummaryTraceEnabled()
     {
@@ -169,7 +185,13 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static boolean isKeepInsertionOrderEnabled()
     {
-        return Boolean.getBoolean(KEEP_INSERTION_ORDER_PROPERTY);
+        String propertyValue;
+
+        propertyValue = System.getProperty(KEEP_INSERTION_ORDER_PROPERTY);
+        if ( propertyValue == null ) {
+            return true;
+        }
+        return Boolean.parseBoolean(propertyValue);
     }
 
     private static boolean isFlexibleEndpointChainsEnabled()
@@ -277,6 +299,15 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static void setCurrentConnectContext(int pairIndex)
     {
         currentConnectPairIndex = pairIndex;
+    }
+
+    private static int allocateSyntheticPairIndex()
+    {
+        int pairIndex;
+
+        pairIndex = nextSyntheticPairIndex;
+        nextSyntheticPairIndex++;
+        return pairIndex;
     }
 
     static int getSonfaPairIndex(_PolyhedralBoundedSolidFace face)
@@ -698,6 +729,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " A1=" + summarizeHalfEdge(endsa.get(j)) +
                     " B0=" + summarizeHalfEdge(endsb.get(i)) +
                     " B1=" + summarizeHalfEdge(endsb.get(j)));
+                setCurrentConnectContext(allocateSyntheticPairIndex());
                 finalizeCoincidentLooseA(endsa.get(i));
                 finalizeCoincidentLooseB(endsb.get(i));
                 removeLoosePair(j);
@@ -748,6 +780,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " B0=" + summarizeChainEndpoint(b0) +
                     " B1=" + summarizeChainEndpoint(b1));
 
+                setCurrentConnectContext(allocateSyntheticPairIndex());
                 addedA = finalizeCoincidentChainEndpointA(a0);
                 addedB = finalizeCoincidentChainEndpointB(b0);
                 if ( addedA == null || addedB == null ) {
@@ -797,6 +830,221 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         lastSonfbCount = (sonfb != null) ? sonfb.size() : 0;
     }
 
+    private static boolean isLiveHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        return he != null &&
+            he.parentEdge != null &&
+            he.parentLoop != null &&
+            he.parentLoop.parentFace != null;
+    }
+
+    private static boolean sharesParentFace(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second)
+    {
+        return isLiveHalfEdge(first) &&
+            isLiveHalfEdge(second) &&
+            first.parentLoop.parentFace == second.parentLoop.parentFace;
+    }
+
+    private static boolean hasPendingNullEdgeOnSameFace(
+        _PolyhedralBoundedSolidHalfEdge he,
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> pendingNullEdges)
+    {
+        int i;
+
+        if ( !isLiveHalfEdge(he) ||
+             pendingNullEdges == null ||
+             currentConnectPairIndex < 0 ) {
+            return false;
+        }
+
+        for ( i = currentConnectPairIndex + 1; i < pendingNullEdges.size(); i++ ) {
+            _PolyhedralBoundedSolidEdge edge;
+
+            edge = pendingNullEdges.get(i).e;
+            if ( edge == null ) {
+                continue;
+            }
+            if ( sharesParentFace(he, edge.rightHalf) ||
+                 sharesParentFace(he, edge.leftHalf) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void rememberDeferredCut(
+        ArrayList<DeferredCut> deferredCuts,
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        int i;
+
+        if ( !isLiveHalfEdge(he) || deferredCuts == null ) {
+            return;
+        }
+
+        for ( i = 0; i < deferredCuts.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge existing;
+
+            existing = deferredCuts.get(i).halfEdge;
+            if ( existing == he ) {
+                return;
+            }
+            if ( isLiveHalfEdge(existing) &&
+                 existing.parentEdge == he.parentEdge ) {
+                return;
+            }
+        }
+        deferredCuts.add(new DeferredCut(he, currentConnectPairIndex));
+    }
+
+    private static boolean shouldDeferClassicCutA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return hasPendingNullEdgeOnSameFace(he, sonea);
+    }
+
+    private static boolean shouldDeferClassicCutB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return hasPendingNullEdgeOnSameFace(he, soneb);
+    }
+
+    private static boolean shouldDeferFlexibleCutA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return false;
+    }
+
+    private static boolean shouldDeferFlexibleCutB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return false;
+    }
+
+    private static _PolyhedralBoundedSolidFace cutOrDeferClassicA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( shouldDeferClassicCutA(he) ) {
+            rememberDeferredCut(deferredCutsA, he);
+            tracePipelineSummary(
+                "connect defer cutA " + summarizeHalfEdge(he));
+            return null;
+        }
+        return cutA(he);
+    }
+
+    private static _PolyhedralBoundedSolidFace cutOrDeferClassicB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( shouldDeferClassicCutB(he) ) {
+            rememberDeferredCut(deferredCutsB, he);
+            tracePipelineSummary(
+                "connect defer cutB " + summarizeHalfEdge(he));
+            return null;
+        }
+        return cutB(he);
+    }
+
+    private static _PolyhedralBoundedSolidFace cutOrDeferFlexibleA(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( shouldDeferFlexibleCutA(he) ) {
+            rememberDeferredCut(deferredCutsA, he);
+            tracePipelineSummary(
+                "connect defer cutA " + summarizeHalfEdge(he));
+            return null;
+        }
+        return cutA(he);
+    }
+
+    private static _PolyhedralBoundedSolidFace cutOrDeferFlexibleB(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( shouldDeferFlexibleCutB(he) ) {
+            rememberDeferredCut(deferredCutsB, he);
+            tracePipelineSummary(
+                "connect defer cutB " + summarizeHalfEdge(he));
+            return null;
+        }
+        return cutB(he);
+    }
+
+    private static boolean flushDeferredCuts(
+        ArrayList<DeferredCut> deferredCuts,
+        boolean onSolidA,
+        boolean flexibleMode)
+    {
+        boolean progress;
+        int i;
+
+        progress = false;
+        if ( deferredCuts == null ) {
+            return false;
+        }
+
+        for ( i = deferredCuts.size() - 1; i >= 0; i-- ) {
+            DeferredCut deferredCut;
+            _PolyhedralBoundedSolidHalfEdge he;
+            boolean stillBlocked;
+            int previousPairIndex;
+
+            deferredCut = deferredCuts.get(i);
+            he = deferredCut.halfEdge;
+            if ( !isLiveHalfEdge(he) ) {
+                deferredCuts.remove(i);
+                continue;
+            }
+
+            stillBlocked = onSolidA ?
+                (flexibleMode ? shouldDeferFlexibleCutA(he) :
+                    shouldDeferClassicCutA(he)) :
+                (flexibleMode ? shouldDeferFlexibleCutB(he) :
+                    shouldDeferClassicCutB(he));
+            if ( stillBlocked ) {
+                continue;
+            }
+
+            previousPairIndex = currentConnectPairIndex;
+            setCurrentConnectContext(deferredCut.pairIndex);
+            if ( onSolidA ) {
+                cutA(he);
+            }
+            else {
+                cutB(he);
+            }
+            setCurrentConnectContext(previousPairIndex);
+            deferredCuts.remove(i);
+            progress = true;
+        }
+        return progress;
+    }
+
+    private static void flushDeferredClassicCuts()
+    {
+        boolean progress;
+
+        setCurrentConnectContext(-1);
+        do {
+            progress = false;
+            progress |= flushDeferredCuts(deferredCutsA, true, false);
+            progress |= flushDeferredCuts(deferredCutsB, false, false);
+        } while ( progress );
+    }
+
+    private static void flushDeferredFlexibleCuts()
+    {
+        boolean progress;
+
+        setCurrentConnectContext(-1);
+        do {
+            progress = false;
+            progress |= flushDeferredCuts(deferredCutsA, true, true);
+            progress |= flushDeferredCuts(deferredCutsB, false, true);
+        } while ( progress );
+    }
+
     static ConnectResult connect(
         int op,
         int flags,
@@ -813,6 +1061,9 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         lastSonfaCount = 0;
         lastSonfbCount = 0;
         openChains = null;
+        nextSyntheticPairIndex = lastPairCount;
+        deferredCutsA = new ArrayList<DeferredCut>();
+        deferredCutsB = new ArrayList<DeferredCut>();
         if ( isFlexibleEndpointChainsEnabled() ) {
             setOpConnectWithFlexibleChains();
         }
@@ -1171,10 +1422,10 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
              !isFlexibleLooseA(matchA.endpoint.halfEdge.mirrorHalfEdge()) ) {
             _PolyhedralBoundedSolidFace addedA = null;
             _PolyhedralBoundedSolidFace addedB = null;
-            addedA = cutA(matchA.endpoint.halfEdge);
+            addedA = cutOrDeferFlexibleA(matchA.endpoint.halfEdge);
             if ( matchB != null &&
                  !isFlexibleLooseB(matchB.endpoint.halfEdge.mirrorHalfEdge()) ) {
-                addedB = cutB(matchB.endpoint.halfEdge);
+                addedB = cutOrDeferFlexibleB(matchB.endpoint.halfEdge);
             }
             keepOnlyPairedFlexibleCutFaces(addedA, addedB, "point");
         }
@@ -1182,7 +1433,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
              !isFlexibleSkipCutsEnabled() &&
              !isFlexibleLooseB(matchB.endpoint.halfEdge.mirrorHalfEdge()) ) {
             _PolyhedralBoundedSolidFace addedB;
-            addedB = cutB(matchB.endpoint.halfEdge);
+            addedB = cutOrDeferFlexibleB(matchB.endpoint.halfEdge);
             keepOnlyPairedFlexibleCutFaces(null, addedB, "point");
         }
         if ( isFlexibleSkipCutsEnabled() && (matchA != null || matchB != null) ) {
@@ -1231,6 +1482,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
         sonfaPairIndexByFaceId = new HashMap<Integer, Integer>();
         sonfbPairIndexByFaceId = new HashMap<Integer, Integer>();
+        setCurrentConnectContext(-1);
 
         if ( sonea.size() != soneb.size() ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
@@ -1248,6 +1500,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             ham = sonea.get(i).e.leftHalf;
             hb = soneb.get(i).e.rightHalf;
             hbm = soneb.get(i).e.leftHalf;
+            setCurrentConnectContext(i);
             tracePipelineSummary(
                 "connect pair[" + i + "] A{" + summarizeNullEdge(sonea.get(i)) +
                 "} B{" + summarizeNullEdge(soneb.get(i)) + "}");
@@ -1287,8 +1540,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 else {
                     _PolyhedralBoundedSolidFace addedA;
                     _PolyhedralBoundedSolidFace addedB;
-                    addedA = cutA(nextedgea.rightHalf);
-                    addedB = cutB(nextedgeb.rightHalf);
+                    addedA = cutOrDeferFlexibleA(nextedgea.rightHalf);
+                    addedB = cutOrDeferFlexibleB(nextedgeb.rightHalf);
                     keepOnlyPairedFlexibleCutFaces(addedA, addedB,
                         "pair[" + i + "]");
                 }
@@ -1323,6 +1576,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
                 " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
         }
+        flushDeferredFlexibleCuts();
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size() +
@@ -1457,12 +1711,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     allowRingMoveOnAJoin);
                 removeLooseEndsA(h1a);
                 if ( !isLooseA(h1a.mirrorHalfEdge()) ) {
-                    cutA(h1a);
+                    cutOrDeferClassicA(h1a);
                 }
                 join(h2b, nextedgeb.leftHalf, withDebug);
                 removeLooseEndsB(h2b);
                 if ( !isLooseB(h2b.mirrorHalfEdge()) ) {
-                    cutB(h2b);
+                    cutOrDeferClassicB(h2b);
                 }
             }
 
@@ -1475,18 +1729,18 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     allowRingMoveOnAJoin);
                 removeLooseEndsA(h2a);
                 if ( !isLooseA(h2a.mirrorHalfEdge()) ) {
-                    cutA(h2a);
+                    cutOrDeferClassicA(h2a);
                 }
                 join(h1b, nextedgeb.rightHalf, withDebug);
                 removeLooseEndsB(h1b);
                 if ( !isLooseB(h1b.mirrorHalfEdge()) ) {
-                    cutB(h1b);
+                    cutOrDeferClassicB(h1b);
                 }
             }
 
             if ( h1a != null && h1b != null && h2a != null && h2b != null ) {
-                cutA(nextedgea.rightHalf);
-                cutB(nextedgeb.rightHalf);
+                cutOrDeferClassicA(nextedgea.rightHalf);
+                cutOrDeferClassicB(nextedgeb.rightHalf);
                 tracePipelineSummary(
                     "connect pair[" + i + "] produced cuts h1a=" +
                     summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +
@@ -1526,6 +1780,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 " looseA=" + endsa.size() +
                 " looseB=" + endsb.size());
         }
+        flushDeferredClassicCuts();
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size() +
