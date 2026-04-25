@@ -22,6 +22,7 @@ import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 
 // Application classes
 import application.SceneEditorApplication;
+import java.awt.Color;
 
 public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel implements ActionListener
 {
@@ -92,7 +93,7 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
         //JComboBox jcb = new JComboBox();
 
         // This is strange, but makes combobox heavyweight and integrable with JOGL!
-        jcb.getEditor().getEditorComponent().setBackground(java.awt.Color.WHITE);
+        jcb.getEditor().getEditorComponent().setBackground(Color.WHITE);
 
         jcb.setLightWeightPopupEnabled(false);
         jcb.addActionListener(this);

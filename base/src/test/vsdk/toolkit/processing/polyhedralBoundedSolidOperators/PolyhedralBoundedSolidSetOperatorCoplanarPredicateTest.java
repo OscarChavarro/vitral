@@ -11,6 +11,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
@@ -66,6 +67,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_coplanarSectors_when_angularIntervalsOverlap_then_sectoroverlapReturnsTrue()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
@@ -75,10 +77,12 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid));
 
+        // Action
         boolean relation = invokeSectorOverlap(
             createSector(he, 0.0, 60.0),
             createSector(he, 30.0, 90.0));
 
+        // Assert
         assertThat(relation).isTrue();
     }
 
@@ -87,6 +91,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsFalse()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
@@ -96,10 +101,12 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid));
 
+        // Action
         boolean relation = invokeSectorOverlap(
             createSector(he, 0.0, 60.0),
             createSector(he, 60.0, 120.0));
 
+        // Assert
         assertThat(relation).isFalse();
     }
 
@@ -108,6 +115,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_coplanarDisjointSectorsOnSameAngularSide_when_intervalsDoNotIntersect_then_sectoroverlapReturnsFalse()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
@@ -117,10 +125,12 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid));
 
+        // Action
         boolean relation = invokeSectorOverlap(
             createSector(he, -60.0, 0.0),
             createSector(he, -120.0, -80.0));
 
+        // Assert
         assertThat(relation).isFalse();
     }
 
@@ -128,6 +138,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_coincidentCoplanarFaces_when_classifyingLocalSectorAgainstReferenceFace_then_relationIsOverlap()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair =
             PolyhedralBoundedSolidTestFixtures.createTouchingBoxPair();
         PolyhedralBoundedSolid solidA = pair[0];
@@ -145,10 +156,12 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolids(solidA, solidB));
 
+        // Action
         sectorInfo.sector = faceA.boundariesList.get(0).boundaryStartHalfEdge;
         int relation = ((Integer)classifyCoplanarSectorRelationMethod.invoke(
             null, sectorInfo, faceB)).intValue();
 
+        // Assert
         assertThat(relation).isEqualTo(
             _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
                 .COPLANAR_OVERLAP);
@@ -158,16 +171,19 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_touchingBoxes_when_runningTouchingOnlyPreflight_then_itRecognizesNoVolumetricIntersection()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair =
             PolyhedralBoundedSolidTestFixtures.createTouchingBoxPair();
 
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
 
+        // Action
         boolean touchingOnly =
             ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
                 pair[1])).booleanValue();
 
+        // Assert
         assertThat(touchingOnly).isTrue();
     }
 
@@ -175,30 +191,36 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_stackedBlocksWithPartialFaceOverlap_when_runningTouchingOnlyPreflight_then_itDoesNotDowngradeToTouching()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair = CsgSampleCorpusFixtures.createPair(
             CsgSampleCorpus.STACKED_BLOCKS);
 
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
 
+        // Action
         boolean touchingOnly =
             ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
                 pair[1])).booleanValue();
 
+        // Assert
         assertThat(touchingOnly).isFalse();
     }
 
     @Test
     void given_stackedBlocksWithPartialFaceOverlap_when_intersecting_then_itReturnsContactLamina()
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair = CsgSampleCorpusFixtures.createPair(
             CsgSampleCorpus.STACKED_BLOCKS);
 
+        // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             pair[0], pair[1], PolyhedralBoundedSolidModeler.INTERSECTION,
             false);
         double[] minmax = result.getMinMax();
 
+        // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(result.polygonsList.size()).isEqualTo(2);
@@ -212,16 +234,19 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_knownIntersectingMant1986Case_when_runningTouchingOnlyPreflight_then_itDoesNotDowngradeToTouching()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair =
             SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
 
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
 
+        // Action
         boolean touchingOnly =
             ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
                 pair[1])).booleanValue();
 
+        // Assert
         assertThat(touchingOnly).isFalse();
     }
 
@@ -229,15 +254,18 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     void given_hollowBrickLOperands_when_runningTouchingOnlyPreflight_then_itDoesNotDowngradeCornerOverlapsToTouching()
         throws Exception
     {
+        // Arrange
         PolyhedralBoundedSolid[] pair = createHollowBrickOperands();
 
         setNumericContextMethod.invoke(null,
             PolyhedralBoundedSolidNumericPolicy.forSolids(pair[0], pair[1]));
 
+        // Action
         boolean touchingOnly =
             ((Boolean)touchingOnlyPreflightCaseMethod.invoke(null, pair[0],
                 pair[1])).booleanValue();
 
+        // Assert
         assertThat(touchingOnly).isFalse();
     }
 
@@ -297,7 +325,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
         Matrix4x4 translation = new Matrix4x4();
         translation = translation.translation(tx, ty, tz);
-        solid.applyTransformation(translation);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
         return solid;
     }
 

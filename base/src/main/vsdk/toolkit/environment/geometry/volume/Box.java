@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
@@ -371,28 +372,28 @@ public class Box extends Solid {
     {
         PolyhedralBoundedSolid solid;
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, 
             new Vector3D(-size.x()/2, -size.y()/2, -size.z()/2), 1, 1);
-        solid.smev(1, 1, 4,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 4,
             new Vector3D(-size.x()/2, size.y()/2, -size.z()/2));
-        solid.smev(1, 4, 3,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 3,
             new Vector3D(size.x()/2, size.y()/2, -size.z()/2));
-        solid.smev(1, 3, 2,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2,
             new Vector3D(size.x()/2, -size.y()/2, -size.z()/2));
-        solid.mef(1, 1, 1, 4, 2, 3, 2);
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 4, 2, 3, 2);
         
-        solid.smev(1, 1, 5,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 5,
             new Vector3D(-size.x()/2, -size.y()/2, size.z()/2));
-        solid.smev(1, 2, 6,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 6,
             new Vector3D(size.x()/2, -size.y()/2, size.z()/2));
-        solid.mef(1, 1, 5, 1, 6, 2, 3);
-        solid.smev(1, 3, 7,
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 5, 1, 6, 2, 3);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 7,
             new Vector3D(size.x()/2, size.y()/2, size.z()/2));
-        solid.mef(1, 1, 6, 2, 7, 3, 4);
-        solid.smev(1, 4, 8,
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 6, 2, 7, 3, 4);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 8,
             new Vector3D(-size.x()/2, size.y()/2, size.z()/2));
-        solid.mef(1, 1, 7, 3, 8, 4, 5);
-        solid.mef(1, 1, 5, 6, 8, 4, 6);
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 7, 3, 8, 4, 5);
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 5, 6, 8, 4, 6);
         return solid;
     }
 }

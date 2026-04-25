@@ -10,6 +10,7 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.LightType;
 
 public class Jogl2LightRenderer extends Jogl2Renderer {
 
@@ -40,7 +41,7 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
 
         lightPosition[3]=1.0f;
 /*
-        if ( l.getLightType() == vsdk.toolkit.environment.LightType.DIRECTIONAL ) { // Why?
+        if ( l.getLightType() == LightType.DIRECTIONAL ) { // Why?
             lightPosition[3]=0;
         }
 */

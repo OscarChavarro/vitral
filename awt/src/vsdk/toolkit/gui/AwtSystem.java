@@ -86,7 +86,7 @@ public class AwtSystem extends PresentationElement
         if ( eawt.getKeyLocation() == java.awt.event.KeyEvent.KEY_LOCATION_NUMPAD ) {
             switch ( keycode ) {
             /*case 110:
-                evsdk.keycode = java.awt.event.KeyEvent.KEY_NUMPERIOD;
+                evsdk.keycode = KeyEvent.KEY_NUMPERIOD;
                 break;*/
             }
         }

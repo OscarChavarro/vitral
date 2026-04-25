@@ -1,5 +1,7 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,15 +25,18 @@ manipulations; Ch. 11.3 low-level Euler operators, including Programs
 11.5-11.8 and the inverse-operator exercises; and Ch. 11.5 high-level
 wrappers over the low-level operators.</p>
  */
-class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
+class PolyhedralBoundedSolidEulerOperatorsTest
 {
     @Test
     void given_emptySolid_when_mvfs_then_createsSkeletalHalfEdgeStructure()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
 
-        solid.mvfs(new Vector3D(1.0, 2.0, 3.0), 7, 11);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(1.0, 2.0, 3.0), 7, 11);
 
+        // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(1);
         assertThat(solid.verticesList.size()).isEqualTo(1);
         assertThat(solid.edgesList.size()).isZero();
@@ -55,12 +60,15 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_skeletalSolid_when_lmevReceivesSameHalfEdge_then_createsStrut()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createSkeletalSolid();
         _PolyhedralBoundedSolidHalfEdge seed =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
-        solid.lmev(seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
 
+        // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(1);
         assertThat(solid.edgesList.size()).isEqualTo(1);
         assertThat(solid.verticesList.size()).isEqualTo(2);
@@ -80,14 +88,17 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_strut_when_lkevKillsItsEdge_then_returnsToSkeletalState()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createSkeletalSolid();
         _PolyhedralBoundedSolidHalfEdge seed =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
-        solid.lmev(seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
         _PolyhedralBoundedSolidEdge edge = solid.edgesList.get(0);
 
-        solid.lkev(edge.rightHalf, edge.leftHalf);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lkev(solid, edge.rightHalf, edge.leftHalf);
 
+        // Assert
         assertThat(solid.edgesList.size()).isZero();
         assertThat(solid.verticesList.size()).isEqualTo(1);
         assertThat(solid.polygonsList.size()).isEqualTo(1);
@@ -100,6 +111,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_boxVertexNeighborhood_when_lmevSplitsVertex_then_addsOneEdgeAndOneVertex()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
@@ -110,8 +122,10 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         int vertexCount = solid.verticesList.size();
         int newVertexId = solid.getMaxVertexId() + 1;
 
-        solid.lmev(pair[0], pair[1], newVertexId, pair[0].startingVertex.position);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, pair[0], pair[1], newVertexId, pair[0].startingVertex.position);
 
+        // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(faceCount);
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
         assertThat(solid.verticesList.size()).isEqualTo(vertexCount + 1);
@@ -123,6 +137,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_openWire_when_lmefClosesLoop_then_addsOneEdgeAndOneFace()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createThreeEdgeWire();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(4);
@@ -130,8 +145,10 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         int edgeCount = solid.edgesList.size();
         int vertexCount = solid.verticesList.size();
 
-        _PolyhedralBoundedSolidFace newFace = solid.lmef(he1, he2, 2);
+        // Action
+        _PolyhedralBoundedSolidFace newFace = PolyhedralBoundedSolidEulerOperators.lmef(solid, he1, he2, 2);
 
+        // Assert
         assertThat(newFace).isNotNull();
         assertThat(solid.polygonsList.size()).isEqualTo(2);
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
@@ -144,16 +161,19 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_lmefResult_when_lkefKillsCreatedEdge_then_mergesFaces()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createThreeEdgeWire();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidFace newFace =
-            solid.lmef(face.findHalfEdge(4), face.findHalfEdge(1), 2);
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, face.findHalfEdge(4), face.findHalfEdge(1), 2);
         _PolyhedralBoundedSolidEdge edgeToKill =
             newFace.boundariesList.get(0).boundaryStartHalfEdge.parentEdge;
         int edgeCount = solid.edgesList.size();
 
-        solid.lkef(edgeToKill.rightHalf, edgeToKill.leftHalf);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lkef(solid, edgeToKill.rightHalf, edgeToKill.leftHalf);
 
+        // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(1);
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount - 1);
         assertThat(PolyhedralBoundedSolidValidationEngine
@@ -163,6 +183,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_faceWithBridgeEdge_when_lkemrKillsEdge_then_createsRing()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(1, 5);
@@ -170,8 +191,10 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         int edgeCount = solid.edgesList.size();
         int loopCount = face.boundariesList.size();
 
-        solid.lkemr(he1, he2);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, he1, he2);
 
+        // Assert
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount - 1);
         assertThat(face.boundariesList.size()).isEqualTo(loopCount + 1);
     }
@@ -179,17 +202,20 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_lkemrResult_when_lmekrConnectsLoops_then_restoresSingleLoop()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(1, 5);
         _PolyhedralBoundedSolidHalfEdge he2 = face.findHalfEdge(5, 1);
-        solid.lkemr(he1, he2);
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, he1, he2);
         int edgeCount = solid.edgesList.size();
         _PolyhedralBoundedSolidLoop outer = face.boundariesList.get(0);
         _PolyhedralBoundedSolidLoop ring = face.boundariesList.get(1);
 
-        solid.lmekr(outer.boundaryStartHalfEdge, ring.boundaryStartHalfEdge);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmekr(solid, outer.boundaryStartHalfEdge, ring.boundaryStartHalfEdge);
 
+        // Assert
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
         assertThat(face.boundariesList.size()).isEqualTo(1);
     }
@@ -197,15 +223,18 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_faceWithRing_when_lringmvReordersOuterLoop_then_keepsSameFace()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
-        solid.lkemr(face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
         _PolyhedralBoundedSolidLoop ring = face.boundariesList.get(1);
 
-        boolean movedToOuter = solid.lringmv(ring, face, true);
+        // Action
+        boolean movedToOuter = PolyhedralBoundedSolidEulerOperators.lringmv(solid, ring, face, true);
         boolean ringBecameOuter = (face.boundariesList.get(0) == ring);
-        boolean movedBackToInner = solid.lringmv(ring, face, false);
+        boolean movedBackToInner = PolyhedralBoundedSolidEulerOperators.lringmv(solid, ring, face, false);
 
+        // Assert
         assertThat(movedToOuter).isTrue();
         assertThat(ringBecameOuter).isTrue();
         assertThat(movedBackToInner).isTrue();
@@ -216,17 +245,20 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_faceWithRing_when_lringmvMovesLoopToAnotherFace_then_updatesOwnership()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         _PolyhedralBoundedSolidFace sourceFace = solid.findFace(1);
         _PolyhedralBoundedSolidFace targetFace = solid.findFace(2);
-        solid.lkemr(sourceFace.findHalfEdge(1, 5),
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, sourceFace.findHalfEdge(1, 5),
             sourceFace.findHalfEdge(5, 1));
         _PolyhedralBoundedSolidLoop ring = sourceFace.boundariesList.get(1);
         int sourceLoopCount = sourceFace.boundariesList.size();
         int targetLoopCount = targetFace.boundariesList.size();
 
-        boolean result = solid.lringmv(ring, targetFace, false);
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.lringmv(solid, ring, targetFace, false);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(sourceFace.boundariesList.size())
             .isEqualTo(sourceLoopCount - 1);
@@ -239,10 +271,13 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_skeletalSolid_when_kvfs_then_clearsSolid()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createSkeletalSolid();
 
-        solid.kvfs();
+        // Action
+        PolyhedralBoundedSolidEulerOperators.kvfs(solid);
 
+        // Assert
         assertThat(solid.polygonsList.size()).isZero();
         assertThat(solid.edgesList.size()).isZero();
         assertThat(solid.verticesList.size()).isZero();
@@ -251,10 +286,13 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_skeletalSolid_when_smev_then_delegatesToRobustLmev()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createSkeletalSolid();
 
-        boolean result = solid.smev(1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(solid.polygonsList.size()).isEqualTo(1);
         assertThat(solid.edgesList.size()).isEqualTo(1);
@@ -264,6 +302,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_boxVertexNeighborhood_when_mev_then_splitsVertex()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
@@ -273,7 +312,8 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         int edgeCount = solid.edgesList.size();
         int newVertexId = solid.getMaxVertexId() + 1;
 
-        boolean result = solid.mev(
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.mev(solid, 
             pair[0].parentLoop.parentFace.id,
             pair[1].parentLoop.parentFace.id,
             pair[0].startingVertex.id,
@@ -282,6 +322,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
             newVertexId,
             pair[0].startingVertex.position);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(solid.verticesList.size()).isEqualTo(vertexCount + 1);
         assertThat(solid.edgesList.size()).isEqualTo(edgeCount + 1);
@@ -293,10 +334,13 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_openWire_when_smef_then_closesLoop()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createThreeEdgeWire();
 
-        boolean result = solid.smef(1, 4, 1, 2);
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.smef(solid, 1, 4, 1, 2);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(solid.polygonsList.size()).isEqualTo(2);
         assertThat(solid.edgesList.size()).isEqualTo(4);
@@ -305,15 +349,18 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_openWire_when_mef_then_closesLoop()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createThreeEdgeWire();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidHalfEdge he1 = face.findHalfEdge(4);
         _PolyhedralBoundedSolidHalfEdge he2 = face.findHalfEdge(1);
 
-        boolean result = solid.mef(1, 1,
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1,
             he1.startingVertex.id, he1.next().startingVertex.id,
             he2.startingVertex.id, he2.next().startingVertex.id, 2);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(solid.polygonsList.size()).isEqualTo(2);
         assertThat(solid.edgesList.size()).isEqualTo(4);
@@ -322,12 +369,15 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_faceWithBridgeEdge_when_kemr_then_createsRing()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         int loopCount = face.boundariesList.size();
 
-        boolean result = solid.kemr(1, 1, 1, 5, 5, 1);
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.kemr(solid, 1, 1, 1, 5, 5, 1);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(face.boundariesList.size()).isEqualTo(loopCount + 1);
     }
@@ -335,6 +385,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_twoFaces_when_kfmrh_then_secondFaceBecomesInnerLoop()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
@@ -343,8 +394,10 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         int faceCount = solid.polygonsList.size();
         int loopCount = face1.boundariesList.size();
 
-        boolean result = solid.kfmrh(face1.id, face2.id);
+        // Action
+        boolean result = PolyhedralBoundedSolidEulerOperators.kfmrh(solid, face1.id, face2.id);
 
+        // Assert
         assertThat(result).isTrue();
         assertThat(solid.polygonsList.size()).isEqualTo(faceCount - 1);
         assertThat(face1.boundariesList.size())
@@ -355,6 +408,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_boxNeighborhood_when_lmevThenLkev_then_restoresTopologicalIdentity()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
@@ -363,11 +417,13 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
             firstDistinctHalfEdgesStartingAtSameVertex(solid);
         int newVertexId = solid.getMaxVertexId() + 1;
 
-        solid.lmev(pair[0], pair[1], newVertexId, pair[0].startingVertex.position);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, pair[0], pair[1], newVertexId, pair[0].startingVertex.position);
         _PolyhedralBoundedSolidHalfEdge newVertexHalfEdge =
             solid.findVertex(newVertexId).emanatingHalfEdge;
-        solid.lkev(newVertexHalfEdge, newVertexHalfEdge.mirrorHalfEdge());
+        PolyhedralBoundedSolidEulerOperators.lkev(solid, newVertexHalfEdge, newVertexHalfEdge.mirrorHalfEdge());
 
+        // Assert
         assertThat(TopologicalSignature.from(solid)).isEqualTo(before);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -376,16 +432,19 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_openWire_when_lmefThenLkef_then_restoresTopologicalIdentity()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createThreeEdgeWire();
         TopologicalSignature before = TopologicalSignature.from(solid);
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
         _PolyhedralBoundedSolidFace newFace =
-            solid.lmef(face.findHalfEdge(4), face.findHalfEdge(1), 2);
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, face.findHalfEdge(4), face.findHalfEdge(1), 2);
         _PolyhedralBoundedSolidEdge edgeToKill =
             newFace.boundariesList.get(0).boundaryStartHalfEdge.parentEdge;
 
-        solid.lkef(edgeToKill.rightHalf, edgeToKill.leftHalf);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lkef(solid, edgeToKill.rightHalf, edgeToKill.leftHalf);
 
+        // Assert
         assertThat(TopologicalSignature.from(solid)).isEqualTo(before);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -394,15 +453,18 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_faceWithBridge_when_lkemrThenLmekr_then_restoresTopologicalIdentity()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createPlanarFaceWithBridgeToHoleSeed();
         TopologicalSignature before = TopologicalSignature.from(solid);
         _PolyhedralBoundedSolidFace face = solid.findFace(1);
-        solid.lkemr(face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, face.findHalfEdge(1, 5), face.findHalfEdge(5, 1));
         _PolyhedralBoundedSolidLoop outer = face.boundariesList.get(0);
         _PolyhedralBoundedSolidLoop ring = face.boundariesList.get(1);
 
-        solid.lmekr(outer.boundaryStartHalfEdge, ring.boundaryStartHalfEdge);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmekr(solid, outer.boundaryStartHalfEdge, ring.boundaryStartHalfEdge);
 
+        // Assert
         assertThat(TopologicalSignature.from(solid)).isEqualTo(before);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -411,6 +473,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_twoFaces_when_lkfmrhThenLmfkrh_then_restoresTopologicalIdentity()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
                 0.0, 0.0, 0.0);
@@ -419,11 +482,13 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
         int newFaceId = solid.getMaxFaceId() + 1;
 
-        solid.lkfmrh(face1, face2);
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lkfmrh(solid, face1, face2);
         _PolyhedralBoundedSolidLoop loopToPromote =
             face1.boundariesList.get(face1.boundariesList.size() - 1);
-        solid.lmfkrh(loopToPromote, newFaceId);
+        PolyhedralBoundedSolidEulerOperators.lmfkrh(solid, loopToPromote, newFaceId);
 
+        // Assert
         assertThat(TopologicalSignature.from(solid)).isEqualTo(before);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(solid)).isTrue();
@@ -432,17 +497,20 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     @Test
     void given_skeletalSolid_when_twoStrutsThenLmef_then_createsTriangularLaminaTopology()
     {
+        // Arrange
         PolyhedralBoundedSolid solid = createSkeletalSolid();
         _PolyhedralBoundedSolidHalfEdge seed =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
-        solid.lmev(seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
-        solid.lmev(solid.findVertex(2).emanatingHalfEdge,
+        // Action
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(2).emanatingHalfEdge,
             solid.findVertex(2).emanatingHalfEdge, 3,
             new Vector3D(0.0, 1.0, 0.0));
-        solid.lmef(solid.findFace(1).findHalfEdge(3),
+        PolyhedralBoundedSolidEulerOperators.lmef(solid, solid.findFace(1).findHalfEdge(3),
             solid.findFace(1).findHalfEdge(1), 2);
 
+        // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(2);
         assertThat(solid.edgesList.size()).isEqualTo(3);
         assertThat(solid.verticesList.size()).isEqualTo(3);
@@ -455,7 +523,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
     private static PolyhedralBoundedSolid createSkeletalSolid()
     {
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.0, 0.0, 0.0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.0, 0.0, 0.0), 1, 1);
         return solid;
     }
 
@@ -465,29 +533,29 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
         _PolyhedralBoundedSolidHalfEdge he =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
-        solid.lmev(he, he, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 2, new Vector3D(1.0, 0.0, 0.0));
         he = solid.findVertex(2).emanatingHalfEdge;
-        solid.lmev(he, he, 3, new Vector3D(1.0, 1.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 3, new Vector3D(1.0, 1.0, 0.0));
         he = solid.findVertex(3).emanatingHalfEdge;
-        solid.lmev(he, he, 4, new Vector3D(0.0, 1.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 4, new Vector3D(0.0, 1.0, 0.0));
         return solid;
     }
 
     private static PolyhedralBoundedSolid createPlanarFaceWithBridgeToHoleSeed()
     {
         PolyhedralBoundedSolid solid = createSkeletalSolid();
-        solid.lmev(solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge,
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge,
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge,
             2, new Vector3D(1.0, 0.0, 0.0));
-        solid.lmev(solid.findVertex(2).emanatingHalfEdge,
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(2).emanatingHalfEdge,
             solid.findVertex(2).emanatingHalfEdge, 3,
             new Vector3D(1.0, 1.0, 0.0));
-        solid.lmev(solid.findVertex(3).emanatingHalfEdge,
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(3).emanatingHalfEdge,
             solid.findVertex(3).emanatingHalfEdge, 4,
             new Vector3D(0.0, 1.0, 0.0));
-        solid.lmef(solid.findFace(1).findHalfEdge(4),
+        PolyhedralBoundedSolidEulerOperators.lmef(solid, solid.findFace(1).findHalfEdge(4),
             solid.findFace(1).findHalfEdge(1), 2);
-        solid.lmev(solid.findFace(1).findHalfEdge(1),
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findFace(1).findHalfEdge(1),
             solid.findFace(1).findHalfEdge(1), 5,
             new Vector3D(0.25, 0.25, 0.0));
         return solid;
@@ -510,7 +578,7 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
                             .boundaryStartHalfEdge;
                     do {
                         if ( a != b && a.startingVertex == b.startingVertex ) {
-                            return new _PolyhedralBoundedSolidHalfEdge[] { a, b };
+                            return new _PolyhedralBoundedSolidHalfEdge[] { a, b  };
                         }
                         b = b.next();
                     } while ( b != solid.polygonsList.get(j).boundariesList.get(0)
@@ -539,8 +607,8 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
             faceCount = solid.polygonsList.size();
             edgeCount = solid.edgesList.size();
             vertexCount = solid.verticesList.size();
-            loopsPerFace = new ArrayList<Integer>();
-            loopHalfEdgeCounts = new ArrayList<Integer>();
+            loopsPerFace = new ArrayList<>();
+            loopHalfEdgeCounts = new ArrayList<>();
 
             for ( i = 0; i < solid.polygonsList.size(); i++ ) {
                 _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
@@ -565,15 +633,14 @@ class PolyhedralBoundedSolidLowLevelEulerOperatorsTest
             if ( this == other ) {
                 return true;
             }
-            if ( !(other instanceof TopologicalSignature) ) {
+            if ( !(other instanceof TopologicalSignature topologicalSignature) ) {
                 return false;
             }
-            TopologicalSignature that = (TopologicalSignature)other;
-            return faceCount == that.faceCount &&
-                edgeCount == that.edgeCount &&
-                vertexCount == that.vertexCount &&
-                loopsPerFace.equals(that.loopsPerFace) &&
-                loopHalfEdgeCounts.equals(that.loopHalfEdgeCounts);
+            return faceCount == topologicalSignature.faceCount &&
+                edgeCount == topologicalSignature.edgeCount &&
+                vertexCount == topologicalSignature.vertexCount &&
+                loopsPerFace.equals(topologicalSignature.loopsPerFace) &&
+                loopHalfEdgeCounts.equals(topologicalSignature.loopHalfEdgeCounts);
         }
 
         @Override

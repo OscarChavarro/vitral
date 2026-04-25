@@ -52,7 +52,9 @@ public class PolyhedralBoundedSolidGeometricValidator
             numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
         }
 
-        Vector3D p0, p1, p2;
+        Vector3D p0;
+        Vector3D p1;
+        Vector3D p2;
         p0 = points.get(0);
         boolean foundSeparatedPair = false;
 
@@ -69,10 +71,13 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D a, b, n;
+        Vector3D a;
+        Vector3D b;
+        Vector3D n;
         double aDotB;
         InfinitePlane facePlane = null;
-        int j, k;
+        int j;
+        int k;
 
         for ( i = 0; i < points.size(); i++ ) {
             for ( j = 0; j < points.size(); j++ ) {
@@ -127,7 +132,8 @@ public class PolyhedralBoundedSolidGeometricValidator
 
         for ( j = 0; j < face.boundariesList.size(); j++ ) {
             _PolyhedralBoundedSolidLoop loop;
-            _PolyhedralBoundedSolidHalfEdge he, heStart;
+            _PolyhedralBoundedSolidHalfEdge he;
+            _PolyhedralBoundedSolidHalfEdge heStart;
 
             loop = face.boundariesList.get(j);
             he = loop.boundaryStartHalfEdge;
@@ -306,7 +312,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         }
 
         int dominantCoordinate = dominantCoordinateForFace(face);
-        int i, j;
+        int i;
+        int j;
         for ( i = 0; i < n; i++ ) {
             _PolyhedralBoundedSolidHalfEdge heA = loop.halfEdgesList.get(i);
             _PolyhedralBoundedSolidHalfEdge heANext = heA.next();
@@ -349,7 +356,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                                           StringBuilder msg)
     {
         int dominantCoordinate = dominantCoordinateForFace(face);
-        int i, j;
+        int i;
+        int j;
         for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);
             _PolyhedralBoundedSolidHalfEdge heANext = heA.next();
@@ -401,7 +409,9 @@ public class PolyhedralBoundedSolidGeometricValidator
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         StringBuilder msg)
     {
-        int i, j, k;
+        int i;
+        int j;
+        int k;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
             if ( face.getContainingPlane() == null ) {
@@ -526,7 +536,9 @@ public class PolyhedralBoundedSolidGeometricValidator
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
                                                          StringBuilder msg)
     {
-        int i, j, k;
+        int i;
+        int j;
+        int k;
         _PolyhedralBoundedSolidHalfEdge he;
 
         for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
@@ -627,7 +639,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         StringBuilder msg)
     {
-        int i, j;
+        int i;
+        int j;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             _PolyhedralBoundedSolidFace faceA = solid.polygonsList.get(i);
             for ( j = i+1; j < solid.polygonsList.size(); j++ ) {

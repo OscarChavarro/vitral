@@ -41,7 +41,8 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 
         // Action
         PolyhedralBoundedSolid unionResult = PolyhedralBoundedSolidModeler.setOp(
-            unionPair[0], unionPair[1], PolyhedralBoundedSolidModeler.UNION, false);
+            unionPair[0], unionPair[1], PolyhedralBoundedSolidModeler.UNION,
+            false);
         PolyhedralBoundedSolid intersectionResult = PolyhedralBoundedSolidModeler.setOp(
             intersectionPair[0], intersectionPair[1],
             PolyhedralBoundedSolidModeler.INTERSECTION, false);
@@ -89,7 +90,8 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
             false);
 
         PolyhedralBoundedSolid aUnionB = PolyhedralBoundedSolidModeler.setOp(
-            pairForUnion[0], pairForUnion[1], PolyhedralBoundedSolidModeler.UNION, false);
+            pairForUnion[0], pairForUnion[1],
+            PolyhedralBoundedSolidModeler.UNION, false);
         PolyhedralBoundedSolid secondAbsorption = PolyhedralBoundedSolidModeler.setOp(
             pairForFinalIntersection[0], aUnionB,
             PolyhedralBoundedSolidModeler.INTERSECTION, false);
@@ -118,14 +120,18 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 
         // Action
         PolyhedralBoundedSolid differenceABFirst = PolyhedralBoundedSolidModeler.setOp(
-            pairA[0], pairA[1], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            pairA[0], pairA[1], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
         PolyhedralBoundedSolid differenceABSecond = PolyhedralBoundedSolidModeler.setOp(
-            pairB[0], pairB[1], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            pairB[0], pairB[1], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
 
         PolyhedralBoundedSolid differenceBAFirst = PolyhedralBoundedSolidModeler.setOp(
-            pairC[1], pairC[0], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            pairC[1], pairC[0], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
         PolyhedralBoundedSolid differenceBASecond = PolyhedralBoundedSolidModeler.setOp(
-            pairD[1], pairD[0], PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            pairD[1], pairD[0], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
 
         // Assert
         assertThat(differenceABFirst.polygonsList.size())
@@ -186,7 +192,7 @@ class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
         PolyhedralBoundedSolid[] pair = createPair(corpusKey);
         PolyhedralBoundedSolid left = pair[solidIndex];
         PolyhedralBoundedSolid right = createPair(corpusKey)[solidIndex];
-        return new PolyhedralBoundedSolid[] { left, right };
+        return new PolyhedralBoundedSolid[] { left, right  };
     }
 
     private static PolyhedralBoundedSolid[] createPair(String corpusKey)

@@ -16,6 +16,7 @@ class CameraControllerInteractionTest
     @Test
     void given_orbiterSecondaryDrag_when_rotating_then_cameraKeepsOriginalBasisAndAppliesSingleDelta()
     {
+        // Arrange
         Camera camera = new Camera();
         CameraControllerOrbiter controller = new CameraControllerOrbiter(camera);
         Matrix4x4 originalRotation = camera.getRotation();
@@ -24,10 +25,12 @@ class CameraControllerInteractionTest
             .axisRotation(0.05, frontAxis.x(), frontAxis.y(), frontAxis.z())
             .multiply(originalRotation);
 
+        // Action
         controller.processMousePressedEvent(mouseEvent(10, 10, 0));
         boolean updated = controller.processMouseDraggedEvent(
             mouseEvent(15, 10, MouseEvent.BUTTON3_DOWN_MASK));
 
+        // Assert
         assertThat(updated).isTrue();
         assertMatrixEquals(camera.getRotation(), expectedRotation);
     }
@@ -35,6 +38,7 @@ class CameraControllerInteractionTest
     @Test
     void given_aquynzaPrimaryDrag_when_rotating_then_cameraAppliesBothDragDeltasOverOriginalRotation()
     {
+        // Arrange
         Camera camera = new Camera();
         CameraControllerAquynza controller = new CameraControllerAquynza(camera);
         Matrix4x4 originalRotation = camera.getRotation();
@@ -47,10 +51,12 @@ class CameraControllerInteractionTest
                     .axisRotation(0.03, leftAxis.x(), leftAxis.y(), leftAxis.z())
                     .multiply(originalRotation));
 
+        // Action
         controller.processMousePressedEvent(mouseEvent(10, 10, 0));
         boolean updated = controller.processMouseDraggedEvent(
             mouseEvent(15, 13, MouseEvent.BUTTON1_DOWN_MASK));
 
+        // Assert
         assertThat(updated).isTrue();
         assertMatrixEquals(camera.getRotation(), expectedRotation);
     }
@@ -58,6 +64,7 @@ class CameraControllerInteractionTest
     @Test
     void given_aquynzaSecondaryAdvanceAfterPress_when_dragging_then_verticalDeltaUsesPressedYCoordinate()
     {
+        // Arrange
         Camera camera = new Camera();
         CameraControllerAquynza controller = new CameraControllerAquynza(camera);
         Vector3D originalPosition = camera.getPosition();
@@ -65,10 +72,12 @@ class CameraControllerInteractionTest
         Vector3D expectedPosition = originalPosition.subtract(
             frontAxis.multiply(0.05));
 
+        // Action
         controller.processMousePressedEvent(mouseEvent(0, 100, 0));
         boolean updated = controller.processMouseDraggedEvent(
             mouseEvent(0, 101, MouseEvent.BUTTON3_DOWN_MASK));
 
+        // Assert
         assertThat(updated).isTrue();
         assertVectorEquals(camera.getPosition(), expectedPosition);
     }

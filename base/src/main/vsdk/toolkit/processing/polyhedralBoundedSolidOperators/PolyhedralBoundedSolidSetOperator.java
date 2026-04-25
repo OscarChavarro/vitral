@@ -9,6 +9,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Java classes
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 /**
 This class encapsulates the set operations algorithms for boundary
@@ -222,7 +224,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static int nextVertexId(PolyhedralBoundedSolid current,
                              PolyhedralBoundedSolid other)
     {
-        int a, b, m;
+        int a;
+        int b;
+        int m;
 
         a = current.getMaxVertexId();
         b = other.getMaxVertexId();
@@ -486,8 +490,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int BvsA, PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        int start, i;
-        _PolyhedralBoundedSolidHalfEdge head, tail;
+        int start;
+        int i;
+        _PolyhedralBoundedSolidHalfEdge head;
+        _PolyhedralBoundedSolidHalfEdge tail;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
         PolyhedralBoundedSolid solida;
         int nnbr = nbr.size();
@@ -530,7 +536,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
 
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
                 head.startingVertex.position);
 
             if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
@@ -571,8 +577,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int BvsA, PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        int start, i;
-        _PolyhedralBoundedSolidHalfEdge head, tail;
+        int start;
+        int i;
+        _PolyhedralBoundedSolidHalfEdge head;
+        _PolyhedralBoundedSolidHalfEdge tail;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
         PolyhedralBoundedSolid solida;
         int nnbr = nbr.size();
@@ -615,7 +623,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 System.out.println("          . (" + start + ") H1: " + head);
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
                 head.startingVertex.position);
 
             if ( BvsA != 0 ) {
@@ -711,7 +719,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolid solida, solidb;
+        PolyhedralBoundedSolid solida;
+        PolyhedralBoundedSolid solidb;
         _PolyhedralBoundedSolidHalfEdge he;
 
         solida = inSolidA;
@@ -725,14 +734,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         he = f.boundariesList.get(0).boundaryStartHalfEdge;
 
-        int vn1, vn2;
+        int vn1;
+        int vn2;
         vn1 = nextVertexId(solida, solidb);
-        solidb.lmev(he, he, vn1, v.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn1, v.position);
         he = solidb.findVertex(vn1).emanatingHalfEdge;
-        solidb.lkemr(he.mirrorHalfEdge(), he);
+        PolyhedralBoundedSolidEulerOperators.lkemr(solidb, he.mirrorHalfEdge(), he);
 
         vn2 = nextVertexId(solida, solidb);
-        solidb.lmev(he, he, vn2, v.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn2, v.position);
 
         if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
@@ -758,7 +768,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     protected static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
     {
         Vector3D middle = null;
-        Vector3D a, b, n;
+        Vector3D a;
+        Vector3D b;
+        Vector3D n;
 
         a = (he.next()).startingVertex.position.subtract(he.startingVertex.position);
         b = (he.previous()).startingVertex.position.subtract(he.startingVertex.position);
@@ -781,7 +793,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>
     nbrpreproc(_PolyhedralBoundedSolidVertex v)
     {
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n, nold;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nold;
         Vector3D bisec;
         _PolyhedralBoundedSolidHalfEdge he;
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb;
@@ -895,9 +908,12 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static boolean vertexVertexSectorIntersectionTest(int i, int j)
     {
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge h1, h2;
-        boolean c1, c2;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na, nb;
+        _PolyhedralBoundedSolidHalfEdge h1;
+        _PolyhedralBoundedSolidHalfEdge h2;
+        boolean c1;
+        boolean c2;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb;
 
         na = nba.get(i);
         nb = nbb.get(j);
@@ -907,7 +923,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         //-----------------------------------------------------------------
         // Here, n1 and n2 are the plane normals for containing faces of
         // sectors i and j, as in figure [MANT1988].15.7.
-        Vector3D n1, n2;
+        Vector3D n1;
+        Vector3D n2;
         Vector3D intrs;
 
         n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
@@ -983,12 +1000,18 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge ha, hb;
-        double d1, d2, d3, d4;
+        _PolyhedralBoundedSolidHalfEdge ha;
+        _PolyhedralBoundedSolidHalfEdge hb;
+        double d1;
+        double d2;
+        double d3;
+        double d4;
         int j;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s;
-        Vector3D na, nb;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa, xb;
+        Vector3D na;
+        Vector3D nb;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xb;
 
         if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0 ) {
             System.out.println("   - Initial intersection tests between sectors (false intersections are sectors touching on a single point):");
@@ -1044,14 +1067,24 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     */
     private static void vertexVertexReclassifyOnSectors(int op)
     {
-        _PolyhedralBoundedSolidHalfEdge ha, hb;
-        int i, j, newsa, newsb;
+        _PolyhedralBoundedSolidHalfEdge ha;
+        _PolyhedralBoundedSolidHalfEdge hb;
+        int i;
+        int j;
+        int newsa;
+        int newsb;
         boolean sameOrientation;
-        int secta, prevsecta, nextsecta;
-        int sectb, prevsectb, nextsectb;
+        int secta;
+        int prevsecta;
+        int nextsecta;
+        int sectb;
+        int prevsectb;
+        int nextsectb;
         double d;
-        Vector3D n1, n2;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si, sj;
+        Vector3D n1;
+        Vector3D n2;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sj;
 
         for ( i = 0; i < sectors.size(); i++ ) {
             if ( sectors.get(i).s1a == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON &&
@@ -1216,9 +1249,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     */
     private static void vertexVertexReclassifyOnEdges(int op)
     {
-        int i, j, newsa, newsb;
-        int secta, prevsecta;
-        int sectb, prevsectb;
+        int i;
+        int j;
+        int newsa;
+        int newsb;
+        int secta;
+        int prevsecta;
+        int sectb;
+        int prevsectb;
         Boolean sameOrientation;
 
         // Search for doubly coplanar edges
@@ -1540,7 +1578,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         int id = nextVertexId(inSolidA, inSolidB);
 
-        s.lmev(to, from, id, to.startingVertex.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(s, to, from, id, to.startingVertex.position);
 
         if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
@@ -1595,7 +1633,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
 
         int id = nextVertexId(inSolidA, inSolidB);
-        he.parentLoop.parentFace.parentSolid.lmev(he, he, id,
+        PolyhedralBoundedSolidEulerOperators.lmev(he.parentLoop.parentFace.parentSolid, he, he, id,
             he.startingVertex.position);
 
         if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 &&
@@ -1648,7 +1686,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static boolean convexedg(_PolyhedralBoundedSolidHalfEdge he)
     {
         _PolyhedralBoundedSolidHalfEdge h2;
-        Vector3D dir, cr;
+        Vector3D dir;
+        Vector3D cr;
 
         h2 = he.next();
         if ( nulledge(he) ) {
@@ -1678,7 +1717,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         _PolyhedralBoundedSolidHalfEdge he1,
         _PolyhedralBoundedSolidHalfEdge he2)
     {
-        _PolyhedralBoundedSolidHalfEdge mhe1, mhe2;
+        _PolyhedralBoundedSolidHalfEdge mhe1;
+        _PolyhedralBoundedSolidHalfEdge mhe2;
         boolean retcode = false;
 
         mhe1 = he1.mirrorHalfEdge().next();
@@ -1994,7 +2034,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
         res.compactIds();
         if ( maximizeResultFaces ) {
-            res.maximizeFaces();
+            PolyhedralBoundedSolidTopologyEditing.maximizeFaces(res);
             res.compactIds();
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
@@ -2301,11 +2341,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(spec.clippedProfileAtCut.get(0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, spec.clippedProfileAtCut.get(0), 1, 1);
         for ( i = 1; i < spec.clippedProfileAtCut.size(); i++ ) {
-            solid.smev(1, i, i + 1, spec.clippedProfileAtCut.get(i));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i + 1, spec.clippedProfileAtCut.get(i));
         }
-        solid.mef(1, 1, spec.clippedProfileAtCut.size(),
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, spec.clippedProfileAtCut.size(),
             spec.clippedProfileAtCut.size() - 1, 1, 2, 2);
 
         translation = new Matrix4x4();
@@ -2623,7 +2663,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         ArrayList<Double> zs;
         boolean[][][] occupied;
         AxisAlignedCellBooleanBuilder builder;
-        int ix, iy, iz;
+        int ix;
+        int iy;
+        int iz;
 
         if ( !isAxisAlignedSolid(inSolidA) ||
              !isAxisAlignedSolid(inSolidB) ) {
@@ -3396,8 +3438,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         inSolidB.compactIds();
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
-        inSolidA.maximizeFaces();
-        inSolidB.maximizeFaces();
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidA);
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
         inSolidA.compactIds();

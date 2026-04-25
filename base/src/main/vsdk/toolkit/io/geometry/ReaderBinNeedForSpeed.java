@@ -23,6 +23,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.media.RGBAImage;
 import vsdk.toolkit.io.PersistenceElement;
+import java.util.Collections;
 
 public class ReaderBinNeedForSpeed extends PersistenceElement
 {
@@ -321,7 +322,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             //if ( a != b || a != c || b != c ) {
                 int index;
                 Long l = Long.valueOf(val);
-                index = java.util.Collections.binarySearch(vals, l);
+                index = Collections.binarySearch(vals, l);
                 if ( index < 0 ) {
                     vals.add((-index)-1, l);
                 }

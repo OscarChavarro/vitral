@@ -21,6 +21,8 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
 import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import java.awt.GraphicsEnvironment;
+import java.awt.Transparency;
 
 public class ImagePersistenceAwt extends ImagePersistenceHelper
 {
@@ -199,13 +201,13 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         // Create a buffered image with a format that's compatible with the screen
         BufferedImage bimage = null;
         java.awt.GraphicsEnvironment ge;
-        ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         try 
         {
             // Determine the type of transparency of the new buffered image
-            int transparency = java.awt.Transparency.OPAQUE;
+            int transparency = Transparency.OPAQUE;
             if ( hasAlpha ) {
-                transparency = java.awt.Transparency.BITMASK;
+                transparency = Transparency.BITMASK;
             }
     
             // Create the buffered image

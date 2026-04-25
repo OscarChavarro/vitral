@@ -49,6 +49,7 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.Jogl2TorusRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
+import vsdk.toolkit.environment.LightType;
 
 /**
 This is a simple program recommended for use as a template in the development
@@ -187,7 +188,7 @@ public class TorusExample implements
         
         light = 
             new Light(
-                vsdk.toolkit.environment.LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+                LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
         light.setId(0);
         material = new Material();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));

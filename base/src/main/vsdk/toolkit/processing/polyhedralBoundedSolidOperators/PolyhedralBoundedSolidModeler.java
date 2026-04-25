@@ -1,5 +1,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 // Java classes
 import java.util.ArrayList;
 
@@ -19,6 +21,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.processing.ProcessingElement;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 /**
 Utility class with static modeling and boolean operations specific to
@@ -70,7 +73,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             x = cx + radius * Math.cos(angle);
             y = cy + radius * Math.sin(angle);
             nextVertexId = solid.getMaxVertexId() + 1;
-            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, height));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3D(x, y, height));
             prev = nextVertexId;
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -90,10 +93,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         PolyhedralBoundedSolid solid;
 
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(cx + rad, cy, h), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(cx + rad, cy, h), 1, 1);
         addArcToExistingFace(solid, 1, 1, cx, cy, rad, h, 0,
             (n - 1) * 360.0 / n, n-1);
-        solid.smef(1, n, 1, 2);
+        PolyhedralBoundedSolidEulerOperators.smef(solid, 1, n, 1, 2);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -124,17 +127,17 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             scan = first.next();
             v = scan.startingVertex;
             newPos = transformationMatrix.multiply(v.position);
-            solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, scan, scan, solid.getMaxVertexId()+1, newPos);
             while ( scan != first ) {
                 v = scan.next().startingVertex;
                 newPos = transformationMatrix.multiply(v.position);
-                solid.lmev(scan.next(), scan.next(),
+                PolyhedralBoundedSolidEulerOperators.lmev(solid, scan.next(), scan.next(),
                     solid.getMaxVertexId()+1, newPos);
-                solid.lmef(scan.previous(), scan.next().next(),
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous(), scan.next().next(),
                     solid.getMaxFaceId()+1);
                 scan = (scan.next().mirrorHalfEdge()).next();
             }
-            solid.lmef(scan.previous(), scan.next().next(),
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous(), scan.next().next(),
                 solid.getMaxFaceId()+1);
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -166,19 +169,19 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             scan = first.next();
             v = scan.startingVertex;
             newPos = transformationMatrix.multiply(v.position);
-            solid.lmev(scan, scan, solid.getMaxVertexId()+1, newPos);
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, scan, scan, solid.getMaxVertexId()+1, newPos);
             while ( scan != first ) {
                 v = scan.next().startingVertex;
                 newPos = transformationMatrix.multiply(v.position);
-                solid.lmev(scan.next(), scan.next(),
+                PolyhedralBoundedSolidEulerOperators.lmev(solid, scan.next(), scan.next(),
                     solid.getMaxVertexId()+1, newPos);
                 newFaceId = solid.getMaxFaceId()+1;
-                solid.lmef(scan.previous(), scan.next().next(), newFaceId);
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous(), scan.next().next(), newFaceId);
                 newFaces.add(newFaceId);
                 scan = (scan.next().mirrorHalfEdge()).next();
             }
             newFaceId = solid.getMaxFaceId()+1;
-            solid.lmef(scan.previous(), scan.next().next(), newFaceId);
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous(), scan.next().next(), newFaceId);
             newFaces.add(newFaceId);
         }
 
@@ -189,7 +192,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             if ( !PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(newFace) ) {
                 scan = newFace.boundariesList.get(0).boundaryStartHalfEdge;
                 newFaceId = solid.getMaxFaceId()+1;
-                solid.lmef(scan.next(), scan.previous(), newFaceId);
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.next(), scan.previous(), newFaceId);
             }
         }
 
@@ -215,7 +218,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         while ( last.parentEdge != last.next().parentEdge ) {
             last = last.next();
         }
-        return new _PolyhedralBoundedSolidHalfEdge[] { first, last };
+        return new _PolyhedralBoundedSolidHalfEdge[] { first, last  };
     }
 
     private static boolean isOnXAxis(Vector3D p, double tolerance)
@@ -289,15 +292,15 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         int i;
         for ( i = 0; i < numberOfFaces-1; i++ ) {
             v = rotation.multiply(cfirst.next().startingVertex.position);
-            solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1,
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1,
                 v);
             scan = cfirst.next();
 
             while ( scan != last.next() ) {
                 v = rotation.multiply(scan.previous().startingVertex.position);
-                solid.lmev(scan.previous(), scan.previous(),
+                PolyhedralBoundedSolidEulerOperators.lmev(solid, scan.previous(), scan.previous(),
                     solid.getMaxVertexId()+1, v);
-                solid.lmef(scan.previous().previous(), scan.next(),
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous().previous(), scan.next(),
                     solid.getMaxFaceId()+1);
                 scan = (scan.next().next()).mirrorHalfEdge();
             }
@@ -305,10 +308,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             cfirst = (cfirst.next().next()).mirrorHalfEdge();
         }
 
-        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(),
+        tailf = PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst.next(), first.mirrorHalfEdge(),
             solid.getMaxFaceId()+1);
         while ( cfirst != scan ) {
-            solid.lmef(cfirst, cfirst.next().next().next(),
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst, cfirst.next().next().next(),
                 solid.getMaxFaceId()+1);
             cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
         }
@@ -323,7 +326,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             collapseFaceToAxisVertex(tailf, lastEndpointPosition.x());
         }
         if ( firstEndpointOnAxis || lastEndpointOnAxis ) {
-            solid.maximizeFaces();
+            PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solid);
         }
 
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -347,17 +350,17 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         state.beginningOfLoop = false;
         if ( state.firstLoop ) {
             // [MANT1988] 12.2: first contour starts with MVFS.
-            state.solid.mvfs(new Vector3D(point), state.nextVertexId,
+            PolyhedralBoundedSolidEulerOperators.mvfs(state.solid, new Vector3D(point), state.nextVertexId,
                 state.nextFaceId);
             state.nextVertexId++;
             state.nextFaceId++;
         }
         else {
             // Additional contours are connected and converted into rings.
-            state.solid.smev(1, state.nextVertexId-1, state.nextVertexId,
+            PolyhedralBoundedSolidEulerOperators.smev(state.solid, 1, state.nextVertexId-1, state.nextVertexId,
                 new Vector3D(point));
             state.nextVertexId++;
-            state.solid.kemr(1, 1, state.nextVertexId-2, state.nextVertexId-1,
+            PolyhedralBoundedSolidEulerOperators.kemr(state.solid, 1, 1, state.nextVertexId-2, state.nextVertexId-1,
                 state.nextVertexId-1, state.nextVertexId-2);
             state.lastLoopStartVertexId = state.nextVertexId-1;
         }
@@ -377,7 +380,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     private static void appendPointToCurrentLoop(_BoundaryRepresentationFromCurveBuildState state,
                                                  Vector3D point)
     {
-        state.solid.smev(1, state.nextVertexId-1, state.nextVertexId,
+        PolyhedralBoundedSolidEulerOperators.smev(state.solid, 1, state.nextVertexId-1, state.nextVertexId,
             new Vector3D(point));
         state.nextVertexId++;
         state.lastAcceptedPoint = new Vector3D(point);
@@ -401,14 +404,14 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     private static void closeLoopWithMef(_BoundaryRepresentationFromCurveBuildState state)
     {
         // [MANT1988] 12.2: close current wire by creating the face boundary.
-        state.solid.mef(1, 1,
+        PolyhedralBoundedSolidEulerOperators.mef(state.solid, 1, 1,
             state.lastLoopStartVertexId, state.lastLoopStartVertexId+1,
             state.nextVertexId-1, state.nextVertexId-2, state.nextFaceId);
         state.nextFaceId++;
 
         if ( !state.firstLoop ) {
             // For inner contours, merge ring into the first face.
-            state.solid.kfmrh(2, state.nextFaceId-1);
+            PolyhedralBoundedSolidEulerOperators.kfmrh(state.solid, 2, state.nextFaceId-1);
         }
         state.firstLoop = false;
         state.beginningOfLoop = true;

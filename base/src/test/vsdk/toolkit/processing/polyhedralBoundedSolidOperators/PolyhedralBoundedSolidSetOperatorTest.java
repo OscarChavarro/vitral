@@ -145,9 +145,13 @@ class PolyhedralBoundedSolidSetOperatorTest
         PolyhedralBoundedSolid solidB,
         int expectedFaceCount, int expectedEdgeCount, int expectedVertexCount)
     {
+        // Arrange
+
+        // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             solidA, solidB, PolyhedralBoundedSolidModeler.UNION, false);
 
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.polygonsList.size()).isEqualTo(expectedFaceCount);
         assertThat(result.edgesList.size()).isEqualTo(expectedEdgeCount);
@@ -231,12 +235,16 @@ class PolyhedralBoundedSolidSetOperatorTest
     @org.junit.jupiter.api.Test
     void given_mant1988Section15_2HoledUnion_when_currentKernelRuns_then_resultBecomesStrictAndKeepsBlockWithTriangularWings()
     {
+        // Arrange
         PolyhedralBoundedSolid[] operands =
             PolyhedralBoundedSolidTestFixtures.createMant1988_15_2Pair(-1);
+
+        // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             operands[0], operands[1], PolyhedralBoundedSolidModeler.UNION,
             false);
 
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.polygonsList.size()).isEqualTo(14);
         assertThat(result.edgesList.size()).isEqualTo(30);
@@ -254,12 +262,16 @@ class PolyhedralBoundedSolidSetOperatorTest
     @org.junit.jupiter.api.Test
     void given_mant1988Section15_1DifferenceBA_when_currentKernelRuns_then_resultClosesDoubleLoop()
     {
+        // Arrange
         PolyhedralBoundedSolid[] operands =
             PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
+
+        // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
             false);
 
+        // Assert
         assertThat(result).isNotNull();
         assertThat(result.polygonsList.size()).isEqualTo(8);
         assertThat(result.edgesList.size()).isEqualTo(18);
@@ -275,6 +287,7 @@ class PolyhedralBoundedSolidSetOperatorTest
     @org.junit.jupiter.api.Test
     void given_mant1988Section15_1DifferenceBA_when_flexibleBilateralConnectRuns_then_resultClosesDoubleLoop()
     {
+        // Arrange
         String[] properties = new String[] {
             "vsdk.setop.connect.keepInsertionOrder",
             "vsdk.setop.connect.flexibleEndpointChains",
@@ -290,6 +303,7 @@ class PolyhedralBoundedSolidSetOperatorTest
             System.setProperty(properties[i], "true");
         }
 
+        // Action
         try {
             PolyhedralBoundedSolid[] operands =
                 PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
@@ -297,6 +311,7 @@ class PolyhedralBoundedSolidSetOperatorTest
                 operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
                 false);
 
+            // Assert
             assertThat(result).isNotNull();
             assertThat(result.polygonsList.size()).isEqualTo(8);
             assertThat(result.edgesList.size()).isEqualTo(18);

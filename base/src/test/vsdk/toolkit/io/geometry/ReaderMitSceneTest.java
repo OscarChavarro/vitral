@@ -17,6 +17,7 @@ class ReaderMitSceneTest
     void givenSameReader_whenImportingMultipleScenes_thenScenesKeepIndependentCameras()
         throws Exception
     {
+        // Arrange
         ReaderMitScene reader = new ReaderMitScene();
 
         SimpleScene firstScene = importScene(reader, 123, 45);
@@ -25,6 +26,9 @@ class ReaderMitSceneTest
         SimpleScene secondScene = importScene(reader, 640, 480);
         Camera secondCamera = secondScene.getActiveCamera();
 
+        // Action
+
+        // Assert
         assertThat(firstCamera).isNotSameAs(secondCamera);
         assertThat(firstCamera.getViewportXSize()).isEqualTo(123.0);
         assertThat(firstCamera.getViewportYSize()).isEqualTo(45.0);

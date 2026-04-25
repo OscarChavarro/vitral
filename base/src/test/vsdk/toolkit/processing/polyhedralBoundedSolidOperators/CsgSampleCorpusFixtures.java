@@ -6,6 +6,7 @@ import vsdk.toolkit.environment.geometry.polyhedralBoundedSolid.PolyhedralBounde
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
 /**
@@ -54,7 +55,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(0.275, 0.0, -0.5);
-        cylinderB.applyTransformation(translation);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(cylinderB, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderB);
 
@@ -71,7 +72,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(0.55, 0.55, 0.05);
-        solid.applyTransformation(translation);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -129,7 +130,7 @@ final class CsgSampleCorpusFixtures
         Matrix4x4 translation = new Matrix4x4();
 
         translation = translation.translation(tx, ty, tz);
-        solid.applyTransformation(translation);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }

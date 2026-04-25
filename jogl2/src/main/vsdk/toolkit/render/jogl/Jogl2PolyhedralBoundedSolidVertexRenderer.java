@@ -72,7 +72,8 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
         // Warning: Change with configured color for vertex normals
         gl.glColor3d(1, 1, 0);
         gl.glLineWidth(1.0f);
-        int i, j;
+        int i;
+        int j;
 
         //-----------------------------------------------------------------
         Vector3D p0 = null;
@@ -92,7 +93,8 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
             // Face polygon processing via JOGL GLU tesselator
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;

@@ -27,9 +27,12 @@ public class _PolyhedralBoundedSolidTopologicalValidator
     */
     public static boolean validateTopologicalIntegrity(PolyhedralBoundedSolid solid)
     {
-        int i, j, k;
+        int i;
+        int j;
+        int k;
         _PolyhedralBoundedSolidEdge e;
-        _PolyhedralBoundedSolidHalfEdge h1, h2;
+        _PolyhedralBoundedSolidHalfEdge h1;
+        _PolyhedralBoundedSolidHalfEdge h2;
         _PolyhedralBoundedSolidFace f;
         _PolyhedralBoundedSolidLoop l;
 
@@ -59,7 +62,8 @@ public class _PolyhedralBoundedSolidTopologicalValidator
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             f = solid.polygonsList.get(i);
             for ( j = 0; j < f.boundariesList.size(); j++ ) {
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
                 l = f.boundariesList.get(j);
 
                 he = l.boundaryStartHalfEdge;
@@ -108,7 +112,8 @@ public class _PolyhedralBoundedSolidTopologicalValidator
     */
     public static void remakeEmanatingHalfedgesReferences(PolyhedralBoundedSolid solid)
     {
-        int i, j;
+        int i;
+        int j;
 
         for ( i = 0; i < solid.verticesList.size(); i++ ) {
             solid.verticesList.get(i).emanatingHalfEdge = null;
@@ -118,7 +123,8 @@ public class _PolyhedralBoundedSolidTopologicalValidator
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;

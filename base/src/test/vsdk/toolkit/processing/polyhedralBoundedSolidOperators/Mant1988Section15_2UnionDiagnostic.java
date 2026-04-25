@@ -1,5 +1,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 /**
  * Ad-hoc console diagnostic for the MANT1988 15.2 holed UNION case.
@@ -211,8 +214,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         solidB.compactIds();
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB);
-        solidA.maximizeFaces();
-        solidB.maximizeFaces();
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solidA);
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solidB);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB);
         solidA.compactIds();
@@ -736,12 +739,12 @@ public final class Mant1988Section15_2UnionDiagnostic
         int i;
         for ( i = 0; i < oldsize; i++ ) {
             _PolyhedralBoundedSolidFace newFaceA =
-                solidA.lmfkrh(sonfa.get(i).boundariesList.get(1),
+                PolyhedralBoundedSolidEulerOperators.lmfkrh(solidA, sonfa.get(i).boundariesList.get(1),
                     solidA.getMaxFaceId() + 1);
             sonfa.add(newFaceA);
 
             _PolyhedralBoundedSolidFace newFaceB =
-                solidB.lmfkrh(sonfb.get(i).boundariesList.get(1),
+                PolyhedralBoundedSolidEulerOperators.lmfkrh(solidB, sonfb.get(i).boundariesList.get(1),
                     solidB.getMaxFaceId() + 1);
             sonfb.add(newFaceB);
         }
@@ -758,8 +761,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         _PolyhedralBoundedSolidOperator.cleanup(outRes);
 
         for ( i = 0; i < oldsize; i++ ) {
-            outRes.lkfmrh(sonfa.get(i + inda), sonfb.get(i + indb));
-            outRes.loopGlue(sonfa.get(i + inda));
+            PolyhedralBoundedSolidEulerOperators.lkfmrh(outRes, sonfa.get(i + inda), sonfb.get(i + indb));
+            PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i + inda));
         }
         outRes.compactIds();
 
@@ -817,12 +820,12 @@ public final class Mant1988Section15_2UnionDiagnostic
                     "Face A[" + faceIdsA[i] + "] has fewer than 2 loops after connect");
             }
             _PolyhedralBoundedSolidFace newFaceA =
-                solidA.lmfkrh(sonfa.get(i).boundariesList.get(1),
+                PolyhedralBoundedSolidEulerOperators.lmfkrh(solidA, sonfa.get(i).boundariesList.get(1),
                     solidA.getMaxFaceId() + 1);
             sonfa.add(newFaceA);
 
             _PolyhedralBoundedSolidFace newFaceB =
-                solidB.lmfkrh(sonfb.get(i).boundariesList.get(1),
+                PolyhedralBoundedSolidEulerOperators.lmfkrh(solidB, sonfb.get(i).boundariesList.get(1),
                     solidB.getMaxFaceId() + 1);
             sonfb.add(newFaceB);
         }
@@ -838,8 +841,8 @@ public final class Mant1988Section15_2UnionDiagnostic
         _PolyhedralBoundedSolidOperator.cleanup(outRes);
 
         for ( i = 0; i < oldsize; i++ ) {
-            outRes.lkfmrh(sonfa.get(i), sonfb.get(i + indb));
-            outRes.loopGlue(sonfa.get(i));
+            PolyhedralBoundedSolidEulerOperators.lkfmrh(outRes, sonfa.get(i), sonfb.get(i + indb));
+            PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i));
         }
         outRes.compactIds();
 

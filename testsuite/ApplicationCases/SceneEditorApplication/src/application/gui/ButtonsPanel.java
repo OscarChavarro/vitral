@@ -1,5 +1,7 @@
 package application.gui;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 // Java basic classes
 import java.io.File;
 
@@ -92,10 +94,10 @@ public class ButtonsPanel extends JPanel implements ActionListener
         PolyhedralBoundedSolid solid;
 
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(cx + rad, cy, h), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(cx + rad, cy, h), 1, 1);
         addArc(solid, 1, 1, cx, cy, rad, h, 0, 
             ((double)(n-1))*360.0/((double)n), n-1);
-        solid.smef(1, n, 1, 2);
+        PolyhedralBoundedSolidEulerOperators.smef(solid, 1, n, 1, 2);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -116,7 +118,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             x = cx + rad * Math.cos(angle);
             y = cy + rad * Math.sin(angle);
             nextVertexId = solid.getMaxVertexId() + 1;
-            solid.smev(faceId, prev, nextVertexId, new Vector3D(x, y, h));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3D(x, y, h));
             prev = nextVertexId;
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);

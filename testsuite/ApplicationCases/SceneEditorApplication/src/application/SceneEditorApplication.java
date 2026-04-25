@@ -53,6 +53,7 @@ import application.gui.SwingImageControlWindow;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
 import application.render.jogl.JoglDrawingArea;
+import javax.swing.SwingUtilities;
 
 
 public class SceneEditorApplication {
@@ -462,7 +463,7 @@ public class SceneEditorApplication {
     public static void main(String[] args) {
         // Note that this is a thread-safe invocation of the GUI
         MainThread mt = new MainThread(args);
-        javax.swing.SwingUtilities.invokeLater(mt);
+        SwingUtilities.invokeLater(mt);
     }
 
 }

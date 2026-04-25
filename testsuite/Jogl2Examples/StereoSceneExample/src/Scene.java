@@ -11,6 +11,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;  // Persistence elements
+import vsdk.toolkit.environment.LightType;
 
 public class Scene
 {
@@ -65,7 +66,7 @@ public class Scene
         //-----------------------------------------------------------------
         lights = new ArrayList<Light>();
         Light l;
-        l = new Light(vsdk.toolkit.environment.LightType.POINT, 
+        l = new Light(LightType.POINT, 
                       new Vector3D(5, -5, 10), 
                       new ColorRgb(1, 1, 1));
         lights.add(l);

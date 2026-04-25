@@ -32,6 +32,8 @@ import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.render.jogl.Jogl2SphereRenderer;
 
 public class JoglPreviewGenerator
 {
@@ -98,7 +100,7 @@ public class JoglPreviewGenerator
             quality2 = new RendererConfiguration();
             quality2.setWires(true);
             quality2.setSurfaces(false);
-            vsdk.toolkit.render.jogl.Jogl2SphereRenderer.draw(gl, sphere, camera, quality2);
+            Jogl2SphereRenderer.draw(gl, sphere, camera, quality2);
 */
         }
 
@@ -207,8 +209,8 @@ public class JoglPreviewGenerator
         Light light2;
         Vector3D p;
 
-        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
-        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
+        light1 = new Light(LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
+        light2 = new Light(LightType.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
         Jogl2LightRenderer.activate(gl, light1);

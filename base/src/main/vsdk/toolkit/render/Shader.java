@@ -18,6 +18,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.LightType;
 
 final class Shader {
     private Shader()
@@ -102,7 +103,7 @@ final class Shader {
             Light light = lights.get(i);
             ColorRgb lightEmission = light.getSpecularReference();
 
-            if ( light.tipo_de_luz == vsdk.toolkit.environment.LightType.AMBIENT ) {
+            if ( light.tipo_de_luz == LightType.AMBIENT ) {
                 ColorRgb ambient = material.getAmbientReference();
                 outColor.r += ambient.r*lightEmission.r;
                 outColor.g += ambient.g*lightEmission.g;
@@ -116,7 +117,7 @@ final class Shader {
                 double ly;
                 double lz;
                 double maxShadowDistance = Double.MAX_VALUE;
-                if ( light.tipo_de_luz == vsdk.toolkit.environment.LightType.POINT ) {
+                if ( light.tipo_de_luz == LightType.POINT ) {
                     lx = light.lvec.x() - info.p.x();
                     ly = light.lvec.y() - info.p.y();
                     lz = light.lvec.z() - info.p.z();

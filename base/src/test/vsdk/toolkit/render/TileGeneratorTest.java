@@ -13,14 +13,17 @@ class TileGeneratorTest
     @Test
     void given_serialStrategy_when_generatingTiles_then_returnsSingleFullImageTile()
     {
+        // Arrange
         RGBImage image = new RGBImage();
         image.init(10, 6);
 
         TileGenerator generator = new TileGenerator(
             TileGenerationStrategy.SERIAL, image, 10, 6, 4);
 
+        // Action
         List<Tile> tiles = generator.getTiles();
 
+        // Assert
         assertThat(tiles).hasSize(1);
         Tile tile = tiles.get(0);
         assertThat(tile.getImage()).isSameAs(image);
@@ -35,14 +38,17 @@ class TileGeneratorTest
     @Test
     void given_linearStrategy_when_generatingTiles_then_splitsInHorizontalBands()
     {
+        // Arrange
         RGBImage image = new RGBImage();
         image.init(8, 7);
 
         TileGenerator generator = new TileGenerator(
             TileGenerationStrategy.LINEAR, image, 8, 7, 3);
 
+        // Action
         List<Tile> tiles = generator.getTiles();
 
+        // Assert
         assertThat(tiles).hasSize(3);
         assertThat(tiles.get(0).getImage()).isSameAs(image);
         assertThat(tiles.get(0).getX0()).isEqualTo(0);
@@ -63,14 +69,17 @@ class TileGeneratorTest
     @Test
     void given_regionOrigin_when_generatingTiles_then_preservesTileAbsolutePosition()
     {
+        // Arrange
         RGBImage image = new RGBImage();
         image.init(20, 20);
 
         TileGenerator generator = new TileGenerator(
             TileGenerationStrategy.SERIAL, image, 4, 6, 9, 5, 1);
 
+        // Action
         Tile tile = generator.getTiles().get(0);
 
+        // Assert
         assertThat(tile.getImage()).isSameAs(image);
         assertThat(tile.getX0()).isEqualTo(4);
         assertThat(tile.getY0()).isEqualTo(6);

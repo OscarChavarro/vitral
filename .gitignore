@@ -1,4 +1,7 @@
-.idea
+**/.idea/*
+!**/.idea/dictionaries/
+**/.idea/dictionaries/*
+!**/.idea/dictionaries/vitral.xml
 master.iml
 .gradle/
 .gradle-home/
@@ -18,7 +21,6 @@ pkgs/NativeImageReader/tmp/
 pkgs/SpharmonicKit27/bin/
 pkgs/SpharmonicKit27/classes/
 pkgs/SpharmonicKit27/tmp/
-gradle/wrapper/gradle-wrapper.jar
 
 # testsuite generated assets
 testsuite/**/output/

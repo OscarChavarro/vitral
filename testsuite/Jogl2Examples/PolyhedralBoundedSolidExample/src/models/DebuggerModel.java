@@ -19,6 +19,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.environment.LightType;
 
 public class DebuggerModel
 {
@@ -70,8 +71,8 @@ public class DebuggerModel
         cameraController = new CameraControllerOrbiter(camera);
 
         material = defaultMaterial();
-        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
-        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
+        light1 = new Light(LightType.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
+        light2 = new Light(LightType.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
     }

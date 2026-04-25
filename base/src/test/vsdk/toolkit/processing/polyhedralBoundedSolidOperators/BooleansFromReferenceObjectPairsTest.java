@@ -1,5 +1,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,12 +53,15 @@ class BooleansFromReferenceObjectPairsTest
         PolyhedralBoundedSolid inputOperandB,
         TopologicalSummary expected)
     {
+        // Arrange
         operandA = inputOperandA;
         operandB = inputOperandB;
 
+        // Action
         PolyhedralBoundedSolid result = runBooleanOperation(operation);
         TopologicalSummary actual = TopologicalSummary.from(result);
 
+        // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(actual).isEqualTo(expected);
@@ -65,10 +70,14 @@ class BooleansFromReferenceObjectPairsTest
     @Test
     void given_csgLampShell_when_buildingReferenceSolid_then_topologySummaryMatchesReference()
     {
+        // Arrange
+
+        // Action
         PolyhedralBoundedSolid result = createCsgLampShellReference();
         TopologicalSummary actual = TopologicalSummary.from(result);
         TopologicalSummary expected = expectedLampShellSummary();
 
+        // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(actual).isEqualTo(expected);
@@ -77,11 +86,15 @@ class BooleansFromReferenceObjectPairsTest
     @Test
     void given_featuredObject_when_buildingReferenceSolid_then_topologySummaryMatchesReference()
     {
+        // Arrange
+
+        // Action
         PolyhedralBoundedSolid result =
             SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
         TopologicalSummary actual = TopologicalSummary.from(result);
         TopologicalSummary expected = expectedFeaturedObjectSummary();
 
+        // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(actual).isEqualTo(expected);
@@ -91,10 +104,14 @@ class BooleansFromReferenceObjectPairsTest
     @Test
     void given_csgKurlanderBowl_when_buildingReferenceSolid_then_topologySummaryMatchesReference()
     {
+        // Arrange
+
+        // Action
         PolyhedralBoundedSolid result = createCsgKurlanderBowlReference();
         TopologicalSummary actual = TopologicalSummary.from(result);
         TopologicalSummary expected = expectedKurlanderBowlSummary();
 
+        // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
         assertThat(actual).isEqualTo(expected);
@@ -104,6 +121,9 @@ class BooleansFromReferenceObjectPairsTest
     @Test
     void dumpReferenceSummariesForBaselineRefresh()
     {
+        // Arrange
+
+        // Action
         legacyPassingReferencePairs().forEach(arguments -> {
             Object[] args = arguments.get();
             CsgSampleCorpus sample = (CsgSampleCorpus)args[0];
@@ -127,6 +147,9 @@ class BooleansFromReferenceObjectPairsTest
             TopologicalSummary.from(featured).toLiteral());
         System.out.println("CSG_KURLANDER_BOWL => " +
             TopologicalSummary.from(kurlander).toLiteral());
+
+        // Assert
+        // TODO: Add assertions once this utility test is converted into a deterministic baseline check.
     }
 
     private PolyhedralBoundedSolid
@@ -337,7 +360,7 @@ class BooleansFromReferenceObjectPairsTest
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 cubeMove = new Matrix4x4();
         cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
-        clipCube.applyTransformation(cubeMove);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(clipCube, cubeMove);
 
         return PolyhedralBoundedSolidModeler.setOp(
             sphericalShell, clipCube,
@@ -353,7 +376,7 @@ class BooleansFromReferenceObjectPairsTest
         Sphere sphere = new Sphere(radius);
         PolyhedralBoundedSolid solid = sphere.exportToPolyhedralBoundedSolid(
             subdivisionsC, subdivisionsH);
-        solid.applyTransformation(move);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
         return solid;
     }
 
@@ -781,7 +804,7 @@ class BooleansFromReferenceObjectPairsTest
                 .exportToPolyhedralBoundedSolid();
             Matrix4x4 t = new Matrix4x4();
             t = t.translation(center);
-            solid.applyTransformation(t);
+            PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, t);
             return solid;
         }
 
@@ -798,7 +821,7 @@ class BooleansFromReferenceObjectPairsTest
 
             Matrix4x4 move = new Matrix4x4();
             move = move.translation(translation);
-            solid.applyTransformation(move);
+            PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
             return solid;
         }
 
@@ -807,11 +830,11 @@ class BooleansFromReferenceObjectPairsTest
         {
             PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
             int i;
-            solid.mvfs(points[0], 1, 1);
+            PolyhedralBoundedSolidEulerOperators.mvfs(solid, points[0], 1, 1);
             for ( i = 1; i < points.length; i++ ) {
-                solid.smev(1, i, i + 1, points[i]);
+                PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i + 1, points[i]);
             }
-            solid.smef(1, points.length, 1, 2);
+            PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
 
             Matrix4x4 t = new Matrix4x4();
             t = t.translation(0.0, 0.0, thickness);
@@ -859,7 +882,7 @@ class BooleansFromReferenceObjectPairsTest
             ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
             rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
             m = rz.multiply(ry.multiply(t));
-            motif.applyTransformation(m);
+            PolyhedralBoundedSolidEulerOperators.applyTransformation(motif, m);
             return motif;
         }
 

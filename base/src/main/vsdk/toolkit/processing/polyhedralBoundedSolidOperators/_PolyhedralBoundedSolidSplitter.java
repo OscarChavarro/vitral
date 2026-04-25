@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Java classes
 import java.util.ArrayList;
@@ -210,10 +211,14 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
     {
         _PolyhedralBoundedSolidEdge e;
         _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidVertex v1, v2;
+        _PolyhedralBoundedSolidVertex v1;
+        _PolyhedralBoundedSolidVertex v2;
         Vector3D p;
-        double d1, d2, t;
-        int s1, s2;
+        double d1;
+        double d2;
+        double t;
+        int s1;
+        int s2;
         int i;
 
         soov = new ArrayList<_PolyhedralBoundedSolidVertex>();
@@ -229,7 +234,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
                 t = d1 / (d1 - d2);
                 p = v1.position.add((v2.position.subtract(v1.position)).multiply(t));
                 he = e.leftHalf.next();
-                inSolid.lmev(e.rightHalf, he, inSolid.getMaxVertexId()+1, p);
+                PolyhedralBoundedSolidEulerOperators.lmev(inSolid, e.rightHalf, he, inSolid.getMaxVertexId()+1, p);
                 addsoov(he.previous().startingVertex);
             }
             else {
@@ -413,8 +418,10 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification> nbr,
         PolyhedralBoundedSolid inSolid, InfinitePlane inSplittingPlane)
     {
-        int start, i;
-        _PolyhedralBoundedSolidHalfEdge head, tail;
+        int start;
+        int i;
+        _PolyhedralBoundedSolidHalfEdge head;
+        _PolyhedralBoundedSolidHalfEdge tail;
         _PolyhedralBoundedSolidSplitterSectorClassification n;
         int nnbr = nbr.size();
 
@@ -452,14 +459,14 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             if ( d1 != Geometry.OUTSIDE ) {
                 //System.out.println("  - H1: " + tail);
                 //System.out.println("  - H2: " + head);
-                inSolid.lmev(tail, head, inSolid.getMaxVertexId()+1,
+                PolyhedralBoundedSolidEulerOperators.lmev(inSolid, tail, head, inSolid.getMaxVertexId()+1,
                     head.startingVertex.position);
                 sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(tail.previous().parentEdge));
             }
             else {
                 //System.out.println("  - H1: " + head);
                 //System.out.println("  - H2: " + tail);
-                inSolid.lmev(head, tail, inSolid.getMaxVertexId()+1,
+                PolyhedralBoundedSolidEulerOperators.lmev(inSolid, head, tail, inSolid.getMaxVertexId()+1,
                     head.startingVertex.position);
                 sone.add(new _PolyhedralBoundedSolidSplitterNullEdge(head.previous().parentEdge));
             }
@@ -556,10 +563,10 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             sonf.add(he.parentLoop.parentFace);
-            s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkemr(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
         else {
-            s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkef(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
     }
 
@@ -586,7 +593,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
 
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidEdge nextedge;
-        _PolyhedralBoundedSolidHalfEdge h1, h2;
+        _PolyhedralBoundedSolidHalfEdge h1;
+        _PolyhedralBoundedSolidHalfEdge h2;
 
         sonf = new ArrayList<_PolyhedralBoundedSolidFace>();
 
@@ -686,7 +694,8 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
     {
         int i;
         _PolyhedralBoundedSolidLoop l;
-        _PolyhedralBoundedSolidHalfEdge he, heStart;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidHalfEdge heStart;
 
         for ( i = 0; i < b.boundariesList.size(); i++ ) {
             heStart = b.boundariesList.get(i).boundaryStartHalfEdge;
@@ -709,13 +718,15 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             return;
         }
 
-        int i, j;
+        int i;
+        int j;
 
         for ( i = 0; i < l.size(); i++ ) {
             for ( j = 0; j < l.size(); j++ ) {
                 if ( i == j ) continue;
                 if ( faceInsideFace(l.get(j), l.get(i) ) ) {
-                    l.get(i).parentSolid.lkfmrh(l.get(i), l.get(j));
+                    PolyhedralBoundedSolidEulerOperators.lkfmrh(
+                        l.get(i).parentSolid, l.get(i), l.get(j));
                     l.remove(j);
                     // Repeat he process with remaining list
                     fixNullFaces(l);
@@ -735,11 +746,12 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         int i;
         int firstHalfSize;
         _PolyhedralBoundedSolidFace newface;
-        PolyhedralBoundedSolid newAbove, newBelow;
+        PolyhedralBoundedSolid newAbove;
+        PolyhedralBoundedSolid newBelow;
 
         firstHalfSize = sonf.size();
         for ( i = 0; i < firstHalfSize; i++ ) {
-            newface = inSolid.lmfkrh(sonf.get(i).boundariesList.get(1), inSolid.getMaxFaceId()+1);
+            newface = PolyhedralBoundedSolidEulerOperators.lmfkrh(inSolid, sonf.get(i).boundariesList.get(1), inSolid.getMaxFaceId()+1);
             sonf.add(newface);
         }
         newAbove = new PolyhedralBoundedSolid();

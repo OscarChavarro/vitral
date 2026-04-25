@@ -2,6 +2,7 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 package models;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Java classes
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 public final class GeneralModelsBuilder
 {
@@ -50,16 +52,16 @@ public final class GeneralModelsBuilder
         switch ( model.getSolidModelName() ) {
           case MVFS_SMEV_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
-            mySolid.mvfs(new Vector3D(0.1, 0.1, 0.1), 1, 1);
-            mySolid.smev(1, 1, 4, new Vector3D(0.1, 1, 0.1));
-            mySolid.smev(1, 4, 3, new Vector3D(1, 1, 0.1));
+            PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3D(0.1, 0.1, 0.1), 1, 1);
+            PolyhedralBoundedSolidEulerOperators.smev(mySolid, 1, 1, 4, new Vector3D(0.1, 1, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(mySolid, 1, 4, 3, new Vector3D(1, 1, 0.1));
             break;
           case BOX:
             mySolid = createBox(new Vector3D(0.9, 0.9, 0.9));
             break;
           case ARC_SAMPLE:
             mySolid = new PolyhedralBoundedSolid();
-            mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3D(1, 0.5, 0.1), 1, 1);
             PolyhedralBoundedSolidModeler.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 9);
             break;
@@ -70,7 +72,7 @@ public final class GeneralModelsBuilder
             break;
           case TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC:
             mySolid = new PolyhedralBoundedSolid();
-            mySolid.mvfs(new Vector3D(1, 0.5, 0.1), 1, 1);
+            PolyhedralBoundedSolidEulerOperators.mvfs(mySolid, new Vector3D(1, 0.5, 0.1), 1, 1);
             PolyhedralBoundedSolidModeler.addArcToExistingFace(
                 mySolid, 1, 1, 0.5, 0.5, 0.5, 0.1, 0, 270, 18);
 
@@ -263,7 +265,7 @@ public final class GeneralModelsBuilder
 
         Box b = new Box(boxSize);
         solid = b.exportToPolyhedralBoundedSolid();
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -284,7 +286,7 @@ public final class GeneralModelsBuilder
         Sphere s = new Sphere(r);
         solid = s.exportToPolyhedralBoundedSolid(subdivisionCircunference,
             subdivisionHeight);
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -305,7 +307,7 @@ public final class GeneralModelsBuilder
         Cone c = new Cone(r1, r2, h);
         solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
             subdivisionHeight);
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -326,7 +328,7 @@ public final class GeneralModelsBuilder
         Cone c = new Cone(r, r, h);
         solid = c.exportToPolyhedralBoundedSolid(subdivisionCircunference,
             subdivisionHeight);
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -338,7 +340,7 @@ public final class GeneralModelsBuilder
 
         Matrix4x4 T = new Matrix4x4();
         T = T.translation(0.275, 0.0, -0.5);
-        cylinderB.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(cylinderB, T);
 
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderB);
@@ -362,7 +364,8 @@ public final class GeneralModelsBuilder
 
         PolyhedralBoundedSolidStatistics.reset();
         PolyhedralBoundedSolid sphericalShell = PolyhedralBoundedSolidModeler.setOp(
-            outerSphere, innerSphere, PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            outerSphere, innerSphere, PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
 
         // Cube fully contains shell in X/Y, starts below it in Z and stops at
         // ~80% of shell height to mimic the unperforated lamp bowl profile.
@@ -371,11 +374,12 @@ public final class GeneralModelsBuilder
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 cubeMove = new Matrix4x4();
         cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
-        clipCube.applyTransformation(cubeMove);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(clipCube, cubeMove);
 
         PolyhedralBoundedSolidStatistics.reset();
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
-            sphericalShell, clipCube, PolyhedralBoundedSolidModeler.INTERSECTION, false);
+            sphericalShell, clipCube,
+            PolyhedralBoundedSolidModeler.INTERSECTION, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
         return result;
     }
@@ -389,7 +393,7 @@ public final class GeneralModelsBuilder
 
         Arrow a = new Arrow(p1, p2, p3, p4);
         solid = a.exportToPolyhedralBoundedSolid();
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -402,22 +406,22 @@ public final class GeneralModelsBuilder
     public static void extrudeBox(PolyhedralBoundedSolid solid)
     {
         //- Cube modification to holed box --------------------------------
-        solid.smev(6, 5, 9, new Vector3D(0.3, 0.3, 1));
-        solid.kemr(6, 6, 5, 9, 9, 5);
-        solid.smev(6, 9, 10, new Vector3D(0.8, 0.3, 1));
-        solid.smev(6, 10, 11, new Vector3D(0.8, 0.8, 1));
-        solid.smev(6, 11, 12, new Vector3D(0.3, 0.8, 1));
-        solid.mef(6, 6, 9, 10, 12, 11, 7);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 6, 5, 9, new Vector3D(0.3, 0.3, 1));
+        PolyhedralBoundedSolidEulerOperators.kemr(solid, 6, 6, 5, 9, 9, 5);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 6, 9, 10, new Vector3D(0.8, 0.3, 1));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 6, 10, 11, new Vector3D(0.8, 0.8, 1));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 6, 11, 12, new Vector3D(0.3, 0.8, 1));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 6, 6, 9, 10, 12, 11, 7);
 
         //- Box extrusion -------------------------------------------------
-        solid.smev(7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
-        solid.smev(7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
-        solid.mef(7, 7, 13, 9, 14, 10, 8);
-        solid.smev(7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
-        solid.mef(7, 7, 14, 10, 15, 11, 9);
-        solid.smev(7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
-        solid.mef(7, 7, 15, 11, 16, 12, 10);
-        solid.mef(7, 7, 13, 14, 16, 12, 11);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 7, 7, 13, 9, 14, 10, 8);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 7, 7, 14, 10, 15, 11, 9);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 7, 7, 15, 11, 16, 12, 10);
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 7, 7, 13, 14, 16, 12, 11);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
     }
 
@@ -431,9 +435,9 @@ public final class GeneralModelsBuilder
 
         solid = GeneralModelsBuilder.createBox(new Vector3D(0.9, 0.9, 0.9));
         GeneralModelsBuilder.extrudeBox(solid);
-        solid.kfmrh(2, 11);
+        PolyhedralBoundedSolidEulerOperators.kfmrh(solid, 2, 11);
         //R = R.translation(-0.55, -0.55, -0.55);
-        //solid.applyTransformation(R);
+        //PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
@@ -469,18 +473,18 @@ public final class GeneralModelsBuilder
 
         R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
-        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.0, 0));
-        solid.smev(1, 4, 3, new Vector3D(0.5, 0.0, 0));
-        solid.smev(1, 3, 2, new Vector3D(0.5, -0.5, 0));
-        solid.mef(1, 1, 1, 4, 2, 3, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(-0.5, -0.5, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 4, new Vector3D(-0.5, 0.0, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 3, new Vector3D(0.5, 0.0, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2, new Vector3D(0.5, -0.5, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 4, 2, 3, 2);
 
         //- Hole ----------------------------------------------------------
-        solid.smev(1, 1, 5, new Vector3D(-0.3, 0.1, 0));
-        solid.kemr(1, 1, 1, 5, 5, 1);
-        solid.smev(1, 5, 6, new Vector3D(0.0, 0.4, 0));
-        solid.smev(1, 6, 7, new Vector3D(0.3, 0.1, 0));
-        solid.mef(1, /* face1 */
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 5, new Vector3D(-0.3, 0.1, 0));
+        PolyhedralBoundedSolidEulerOperators.kemr(solid, 1, 1, 1, 5, 5, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 5, 6, new Vector3D(0.0, 0.4, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 6, 7, new Vector3D(0.3, 0.1, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, /* face1 */
                   1, /* face2 */
                   5, /* v1 */
                   6, /* v2 */
@@ -488,10 +492,10 @@ public final class GeneralModelsBuilder
                   6, /* v4 */
                   3  /* newfaceid */);
 
-        solid.kfmrh(2, 3);
+        PolyhedralBoundedSolidEulerOperators.kfmrh(solid, 2, 3);
 
         //-----------------------------------------------------------------
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
 
@@ -505,18 +509,18 @@ public final class GeneralModelsBuilder
 
         R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(-0.5, -0.5, 0), 1, 1);
-        solid.smev(1, 1, 4, new Vector3D(-0.5, 0.5, 0));
-        solid.smev(1, 4, 3, new Vector3D(0.5, 0.5, 0));
-        solid.smev(1, 3, 2, new Vector3D(0.5, -0.5, 0));
-        solid.mef(1, 1, 1, 4, 2, 3, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(-0.5, -0.5, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 4, new Vector3D(-0.5, 0.5, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 3, new Vector3D(0.5, 0.5, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2, new Vector3D(0.5, -0.5, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 4, 2, 3, 2);
 
         //- Hole ----------------------------------------------------------
-        solid.smev(1, 1, 5, new Vector3D(-0.3, -0.3, 0));
-        solid.kemr(1, 1, 1, 5, 5, 1);
-        solid.smev(1, 5, 6, new Vector3D(0.0, 0.3, 0));
-        solid.smev(1, 6, 7, new Vector3D(0.3, -0.3, 0));
-        solid.mef(1, /* face1 */
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 5, new Vector3D(-0.3, -0.3, 0));
+        PolyhedralBoundedSolidEulerOperators.kemr(solid, 1, 1, 1, 5, 5, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 5, 6, new Vector3D(0.0, 0.3, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 6, 7, new Vector3D(0.3, -0.3, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, /* face1 */
                   1, /* face2 */
                   5, /* v1 */
                   6, /* v2 */
@@ -524,10 +528,10 @@ public final class GeneralModelsBuilder
                   6, /* v4 */
                   3  /* newfaceid */);
 
-        solid.kfmrh(2, 3);
+        PolyhedralBoundedSolidEulerOperators.kfmrh(solid, 2, 3);
 
         //-----------------------------------------------------------------
-        solid.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -563,8 +567,8 @@ public final class GeneralModelsBuilder
          int faceid1, int faceid2)
     {
         solid1.merge(solid2);
-        solid1.kfmrh(faceid1, faceid2);
-        solid1.loopGlue(faceid1);
+        PolyhedralBoundedSolidEulerOperators.kfmrh(solid1, faceid1, faceid2);
+        PolyhedralBoundedSolidTopologyEditing.loopGlue(solid1, faceid1);
     }
 
     /**
@@ -595,7 +599,7 @@ public final class GeneralModelsBuilder
         Vector3D c = a.add(b);
         c = c.multiply(0.5);
         R = R.translation(-c.x(), c.y(), c.z());
-        solid1.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid1, R);
 
         //- Create cilynder 2 ---------------------------------------------
         PolyhedralBoundedSolid solid2;
@@ -609,14 +613,14 @@ public final class GeneralModelsBuilder
 
         //-----------------------------------------------------------------
         R = R.translation(c.x(), -c.y(), c.z());
-        solid2.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid2, R);
 
         //-----------------------------------------------------------------
         glue(solid1, solid2, 8, 13);
 
         //-----------------------------------------------------------------
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
-        solid1.maximizeFaces();
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solid1);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid1);
 
         return solid1;
@@ -625,30 +629,31 @@ public final class GeneralModelsBuilder
     public static PolyhedralBoundedSolid eulerOperatorsTest()
     {
         PolyhedralBoundedSolid solid;
-        _PolyhedralBoundedSolidHalfEdge h1, h2;
+        _PolyhedralBoundedSolidHalfEdge h1;
+        _PolyhedralBoundedSolidHalfEdge h2;
         _PolyhedralBoundedSolidFace face;
 
 /*
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.1, 0.1, 0), 1, 1);
-        solid.smev(1, 1, 2, new Vector3D(1.0, 0.2, 0));
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.1, 0.1, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(1.0, 0.2, 0));
 
         face = solid.findFace(1);
-        //solid.lkev(face.findHalfEdge(2), face.findHalfEdge(1));
+        //PolyhedralBoundedSolidEulerOperators.lkev(solid, face.findHalfEdge(2), face.findHalfEdge(1));
 
-        solid.smev(1, 2, 3, new Vector3D(0.5, 1, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 3, new Vector3D(0.5, 1, 0));
 
         //-----------------------------------------------------------------
 
         h1 = face.findHalfEdge(3);
         h2 = face.findHalfEdge(1);
 
-        solid.lmef(h1, h2, 2);
+        PolyhedralBoundedSolidEulerOperators.lmef(solid, h1, h2, 2);
 
         //-----------------------------------------------------------------
 
         h1 = face.findHalfEdge(1);
-        solid.lmev(h1, h1, solid.getMaxVertexId()+1, new Vector3D(0.1, 0.1, 0.4));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, h1, h1, solid.getMaxVertexId()+1, new Vector3D(0.1, 0.1, 0.4));
 */
 
 /*
@@ -660,16 +665,16 @@ public final class GeneralModelsBuilder
         face = solid.findFace(2);
         h2 = face.findHalfEdge(1);
 
-        solid.lmev(h1, h2, solid.getMaxVertexId()+1, new Vector3D(0.55, 0.05, 0.05));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, h1, h2, solid.getMaxVertexId()+1, new Vector3D(0.55, 0.05, 0.05));
 
-        solid.lkev(h1, h1.mirrorHalfEdge());
+        PolyhedralBoundedSolidEulerOperators.lkev(solid, h1, h1.mirrorHalfEdge());
 */
 
         //-----------------------------------------------------------------
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.0, 0.0, 0.0), 1, 1);
-        solid.smev(1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
-        solid.smev(1, 2, 3, new Vector3D(1.0, 1.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.0, 0.0, 0.0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 3, new Vector3D(1.0, 1.0, 0.0));
 
         //-----------------------------------------------------------------
         //PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -695,7 +700,10 @@ public final class GeneralModelsBuilder
     */
     private static void rotationalSweepVersion1(PolyhedralBoundedSolid solid, int nfaces)
     {
-        _PolyhedralBoundedSolidHalfEdge first, cfirst, last, scan = null;
+        _PolyhedralBoundedSolidHalfEdge first;
+        _PolyhedralBoundedSolidHalfEdge cfirst;
+        _PolyhedralBoundedSolidHalfEdge last;
+        _PolyhedralBoundedSolidHalfEdge scan = null;
         _PolyhedralBoundedSolidFace tailf;
         Vector3D v;
         Matrix4x4 M;
@@ -715,20 +723,20 @@ public final class GeneralModelsBuilder
         int i;
         for ( i = 0; i < nfaces-1; i++ ) {
             v = M.multiply(cfirst.next().startingVertex.position);
-            solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
             scan = cfirst.next();
             while ( scan != last.next() ) {
                 v = M.multiply(scan.previous().startingVertex.position);
-                solid.lmev(scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
-                solid.lmef(scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
+                PolyhedralBoundedSolidEulerOperators.lmev(solid, scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
                 scan = (scan.next().next()).mirrorHalfEdge();
             }
             last = scan;
             cfirst = (cfirst.next().next()).mirrorHalfEdge();
         }
-        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
+        tailf = PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
         while ( cfirst != scan ) {
-            solid.lmef(cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
             cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
         }
     }
@@ -742,7 +750,10 @@ public final class GeneralModelsBuilder
     private static void rotationalSweepVersion2(PolyhedralBoundedSolid solid, int nfaces)
     {
         //-----------------------------------------------------------------
-        _PolyhedralBoundedSolidHalfEdge first, cfirst, last, scan = null;
+        _PolyhedralBoundedSolidHalfEdge first;
+        _PolyhedralBoundedSolidHalfEdge cfirst;
+        _PolyhedralBoundedSolidHalfEdge last;
+        _PolyhedralBoundedSolidHalfEdge scan = null;
         _PolyhedralBoundedSolidHalfEdge h;
         _PolyhedralBoundedSolidFace tailf = null;
         _PolyhedralBoundedSolidFace headf = null;
@@ -755,10 +766,10 @@ public final class GeneralModelsBuilder
             // Assume it's a lamina
             closedFigure = true;
             h = solid.polygonsList.get(0).boundariesList.get(0).boundaryStartHalfEdge;
-            solid.lmev(h, (h.mirrorHalfEdge()).next(),
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, h, (h.mirrorHalfEdge()).next(),
                        solid.getMaxVertexId()+1, h.startingVertex.position);
 
-            solid.lkef(h.previous(), (h.previous()).mirrorHalfEdge());
+            PolyhedralBoundedSolidEulerOperators.lkef(solid, h.previous(), (h.previous()).mirrorHalfEdge());
             headf = solid.polygonsList.get(0);
 
         }
@@ -779,27 +790,27 @@ public final class GeneralModelsBuilder
         int i;
         for ( i = 0; i < nfaces-1; i++ ) {
             v = M.multiply(cfirst.next().startingVertex.position);
-            solid.lmev(cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
+            PolyhedralBoundedSolidEulerOperators.lmev(solid, cfirst.next(), cfirst.next(), solid.getMaxVertexId()+1, v);
             scan = cfirst.next();
             while ( scan != last.next() ) {
                 v = M.multiply(scan.previous().startingVertex.position);
-                solid.lmev(scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
-                solid.lmef(scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
+                PolyhedralBoundedSolidEulerOperators.lmev(solid, scan.previous(), scan.previous(), solid.getMaxVertexId()+1, v);
+                PolyhedralBoundedSolidEulerOperators.lmef(solid, scan.previous().previous(), scan.next(), solid.getMaxFaceId()+1);
                 scan = (scan.next().next()).mirrorHalfEdge();
             }
             last = scan;
             cfirst = (cfirst.next().next()).mirrorHalfEdge();
         }
-        tailf = solid.lmef(cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
+        tailf = PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst.next(), first.mirrorHalfEdge(), solid.getMaxFaceId()+1);
         while ( cfirst != scan ) {
-            solid.lmef(cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
+            PolyhedralBoundedSolidEulerOperators.lmef(solid, cfirst, cfirst.next().next().next(), solid.getMaxFaceId()+1);
             cfirst = (cfirst.previous()).mirrorHalfEdge().previous();
         }
 
         //-----------------------------------------------------------------
         if ( closedFigure ) {
-            solid.lkfmrh(headf, tailf);
-            solid.loopGlue(headf.id);
+            PolyhedralBoundedSolidEulerOperators.lkfmrh(solid, headf, tailf);
+            PolyhedralBoundedSolidTopologyEditing.loopGlue(solid, headf.id);
         }
 
         //-----------------------------------------------------------------
@@ -831,7 +842,7 @@ public final class GeneralModelsBuilder
         T2 = T2.translation(center);
         R = R.axisRotation(Math.PI/((double)nsides), 0, 0, 1);
         M = T2.multiply(R.multiply(T1));
-        solid.applyTransformation(M);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, M);
 
         rotationalSweepVersion2(solid, nrad);
         return solid;
@@ -844,7 +855,7 @@ public final class GeneralModelsBuilder
         //-----------------------------------------------------------------
 /*
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.75, 0.25, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.75, 0.25, 0), 1, 1);
         PolyhedralBoundedSolidModeler.addArc(solid, 1, 1, 0.5, 0.25, 0.25, 0.0, 0.0, 90.0, 10);
         rotationalSweepVersion1(solid, 20);
 */
@@ -868,11 +879,11 @@ public final class GeneralModelsBuilder
         PolyhedralBoundedSolid solid;
         R = R.translation(0.55, 0.55, 0.55);
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.00+0.05, 0.00+0.05, 0), 1, 1);
-        solid.smev(1, 1, 2, new Vector3D(0.94+0.05, 0.00+0.05, 0));
-        solid.smev(1, 2, 3, new Vector3D(0.94+0.05, 0.46+0.05, 0));
-        solid.smev(1, 3, 4, new Vector3D(0.00+0.05, 0.30+0.05, 0));
-        solid.mef(1, 1, 4, 3, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.00+0.05, 0.00+0.05, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(0.94+0.05, 0.00+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 3, new Vector3D(0.94+0.05, 0.46+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 4, new Vector3D(0.00+0.05, 0.30+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 4, 3, 1, 2, 2);
         Matrix4x4 T = new Matrix4x4();
         T = T.translation(0, 0, 0.4);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
@@ -910,7 +921,7 @@ public final class GeneralModelsBuilder
             solid = solidsAbove.get(0);
         }
 
-        solid.maximizeFaces();
+        PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solid);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
         return solid;
@@ -929,7 +940,8 @@ public final class GeneralModelsBuilder
     private static PolyhedralBoundedSolid[] buildCsgTest2()
     {
         PolyhedralBoundedSolid operands[];
-        PolyhedralBoundedSolid a, b;
+        PolyhedralBoundedSolid a;
+        PolyhedralBoundedSolid b;
 
         operands = new PolyhedralBoundedSolid[2];
 
@@ -939,7 +951,7 @@ public final class GeneralModelsBuilder
 
         Box box = new Box(new Vector3D(1, 0.5, 0.3));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -948,7 +960,7 @@ public final class GeneralModelsBuilder
 
         box = new Box(new Vector3D(0.5, 1, 0.3));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -982,7 +994,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -990,7 +1002,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -998,7 +1010,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -1006,7 +1018,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -1046,7 +1058,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -1054,7 +1066,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -1062,7 +1074,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -1070,7 +1082,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -1078,7 +1090,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
-        e.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(e, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
 
         //-----------------------------------------------------------------
@@ -1086,7 +1098,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
-        f.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(f, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
 
         //-----------------------------------------------------------------
@@ -1094,7 +1106,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.1, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
-        g.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(g, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
 
         //-----------------------------------------------------------------
@@ -1102,7 +1114,7 @@ public final class GeneralModelsBuilder
         T = T.translation(0.1, 0.9, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
-        h.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(h, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------

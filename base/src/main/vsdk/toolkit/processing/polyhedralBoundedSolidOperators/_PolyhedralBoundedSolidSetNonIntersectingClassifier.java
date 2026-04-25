@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -180,7 +181,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
         Vector3D point)
     {
-        int i, j;
+        int i;
+        int j;
         _PolyhedralBoundedSolidFace face;
         double eps = numericContext.bigEpsilon();
         int insideVotes = 0;
@@ -504,12 +506,18 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid current,
         PolyhedralBoundedSolid other)
     {
-        int i, j;
+        int i;
+        int j;
         _PolyhedralBoundedSolidEdge edge;
         _PolyhedralBoundedSolidFace face;
-        _PolyhedralBoundedSolidVertex v1, v2;
-        double d1, d2, d3, t;
-        int s1, s2;
+        _PolyhedralBoundedSolidVertex v1;
+        _PolyhedralBoundedSolidVertex v2;
+        double d1;
+        double d2;
+        double d3;
+        double t;
+        int s1;
+        int s2;
         Vector3D p;
 
         if ( current == null || other == null ) {
@@ -563,7 +571,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid solidA,
         PolyhedralBoundedSolid solidB)
     {
-        int i, j;
+        int i;
+        int j;
 
         if ( solidA == null || solidB == null ) {
             return false;
@@ -588,7 +597,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                                            PolyhedralBoundedSolid solidB)
     {
         ArrayList<ArrayList<Vector3D>> polygons;
-        int i, j;
+        int i;
+        int j;
 
         polygons = new ArrayList<ArrayList<Vector3D>>();
         if ( solidA == null || solidB == null ) {
@@ -701,7 +711,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         _PolyhedralBoundedSolidFace faceA,
         _PolyhedralBoundedSolidFace faceB)
     {
-        int i, j;
+        int i;
+        int j;
         int dominantCoordinate = dominantCoordinateForFace(faceA);
 
         for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
@@ -725,7 +736,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         _PolyhedralBoundedSolidLoop loopB,
         int dominantCoordinate)
     {
-        int i, j;
+        int i;
+        int j;
 
         for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);
@@ -874,11 +886,11 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return solid;
         }
 
-        solid.mvfs(points.get(0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, points.get(0), 1, 1);
         for ( i = 1; i < points.size(); i++ ) {
-            solid.smev(1, i, i+1, points.get(i));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i+1, points.get(i));
         }
-        solid.smef(1, points.size(), 1, 2);
+        PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.size(), 1, 2);
         return solid;
     }
 
@@ -925,7 +937,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         _PolyhedralBoundedSolidFace faceA,
         _PolyhedralBoundedSolidFace faceB)
     {
-        int i, j;
+        int i;
+        int j;
         int dominantCoordinate = dominantCoordinateForFace(faceA);
 
         for ( i = 0; i < faceA.boundariesList.size(); i++ ) {
@@ -949,7 +962,8 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                                               _PolyhedralBoundedSolidLoop loopB,
                                               int dominantCoordinate)
     {
-        int i, j;
+        int i;
+        int j;
 
         for ( i = 0; i < loopA.halfEdgesList.size(); i++ ) {
             _PolyhedralBoundedSolidHalfEdge heA = loopA.halfEdgesList.get(i);

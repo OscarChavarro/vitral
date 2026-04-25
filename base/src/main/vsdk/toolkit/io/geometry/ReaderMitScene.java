@@ -39,6 +39,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -50,6 +51,7 @@ import vsdk.toolkit.media.RGBImage;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
+import vsdk.toolkit.environment.LightType;
 
 /**
 This class implements an scene reader based on the instructional raytracer
@@ -584,7 +586,7 @@ public class ReaderMitScene extends PersistenceElement
                   }
 
                   // APPEL solids are defined in [0,1]^3; recenter for scene placement.
-                  solid.applyTransformation(new Matrix4x4().translation(-0.5, -0.5, -0.5));
+                  PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, new Matrix4x4().translation(-0.5, -0.5, -0.5));
 
                   thing = new SimpleBody();
                   thing.setGeometry(solid);
@@ -716,21 +718,21 @@ public class ReaderMitScene extends PersistenceElement
                   }
                   if ( st.sval.equals("ambient") ) {
                       showDebugMessage("ambient");
-                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.AMBIENT, null, new ColorRgb(r,g,b)));
+                      theScene.addLight(new Light(LightType.AMBIENT, null, new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       showDebugMessage("directional");
                       Vector3D v = new Vector3D(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
-                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.DIRECTIONAL, v, new ColorRgb(r,g,b)));
+                      theScene.addLight(new Light(LightType.DIRECTIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       showDebugMessage("point");
                       Vector3D v = new Vector3D(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
-                      theScene.addLight(new Light(vsdk.toolkit.environment.LightType.POINT, v, new ColorRgb(r, g, b)));
+                      theScene.addLight(new Light(LightType.POINT, v, new ColorRgb(r, g, b)));
                     } 
                     else {
                       System.err.println("ERROR: in line " + 

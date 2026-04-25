@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
 import vsdk.toolkit.common.RaytraceStatistics;
@@ -272,24 +273,24 @@ public class Sphere extends Solid {
         //- Build triangles for lower cap ---------------------------------
         solid = new PolyhedralBoundedSolid();
         pos = new Vector3D(0, 0, -_radius);
-        solid.mvfs(pos, 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, pos, 1, 1);
 
         pos = new Vector3D();
         pos = spherePosition(dtheta, dphi, _radius);
-        solid.smev(1, 1, 3, pos);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 3, pos);
         pos = new Vector3D();
         pos = spherePosition(0, dphi, _radius);
-        solid.smev(1, 3, 2, pos);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2, pos);
 
-        solid.mef(1, 1, 1, 3, 2, 3, 2);
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 3, 2, 3, 2);
 
         for ( i = 2; i < nmeridians; i++ ) {
             theta = dtheta * ((double)i);
             pos = new Vector3D();
             pos = spherePosition(theta, dphi, _radius);
-            solid.smev(1, 1, (i+1)+1, pos);
+            PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, (i+1)+1, pos);
             // Next face is <(1), (i+1), (i+0)>
-            solid.mef(1,        /* seed face, always face 1 */
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,        /* seed face, always face 1 */
                       1,        /* seed face, always face 1 */
                       (i+0)+1,  /* start of half edge 1 */
                       (1),      /* end of half edge 1 */
@@ -298,7 +299,7 @@ public class Sphere extends Solid {
                       i+1       /* new face id */);
         }
         // Next face is <(1), (2), (i+1)>
-        solid.mef(1,        /* seed face, always face 1 */
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1,        /* seed face, always face 1 */
                   1,        /* seed face, always face 1 */
                   (i+1),    /* start of half edge 1 */
                   (1),      /* end of half edge 1 */
@@ -316,10 +317,10 @@ public class Sphere extends Solid {
                 theta = dtheta * ((double)i);
                 pos = new Vector3D();
                 pos = spherePosition(theta, phi, _radius);
-                solid.smev(1, (i)+base1, (i)+base2, pos);
+                PolyhedralBoundedSolidEulerOperators.smev(solid, 1, (i)+base1, (i)+base2, pos);
                 if ( i > 0 ) {
                     // Next face is <(i), (i+base2), (i-1+base2), (i-1)>
-                    solid.mef(1,           /* seed face, always face 1 */
+                    PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                               1,           /* seed face, always face 1 */
                               (i-1)+base2, /* start of half edge 1 */
                               (i-1)+base1, /* end of half edge 1 */
@@ -328,7 +329,7 @@ public class Sphere extends Solid {
                               base2+i+1    /* new face id */);
                 }
             }
-            solid.mef(1,           /* seed face, always face 1 */
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                       1,           /* seed face, always face 1 */
                       (i+base2-1), /* start of half edge 1 */
                       (base1+i-1), /* end of half edge 1 */
@@ -341,10 +342,10 @@ public class Sphere extends Solid {
 
         //- Build triangles for upper cap --------------------------------
         pos = new Vector3D(0, 0, _radius);
-        solid.smev(1, base1, base2, pos);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, pos);
 
         for ( i = 0; i < nmeridians-2; i++ ) {
-            solid.mef(1,           /* seed face, always face 1 */
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                       1,           /* seed face, always face 1 */
                       base2,       /* start of half edge 1 */
                       base1+i,     /* end of half edge 1 */
@@ -353,7 +354,7 @@ public class Sphere extends Solid {
                       base2+i+1    /* new face id */);
         }
 
-        solid.mef(1,           /* seed face, always face 1 */
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                   1,           /* seed face, always face 1 */
                   base2,       /* start of half edge 1 */
                   base1+i,     /* end of half edge 1 */

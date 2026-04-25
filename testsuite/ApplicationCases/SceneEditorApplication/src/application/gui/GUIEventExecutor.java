@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package application.gui;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import application.SceneEditorApplication;
 import application.render.jogl.JoglDrawingArea;
@@ -36,6 +37,7 @@ import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.environment.LightType;
 
 public class GUIEventExecutor extends CommandListener{
     
@@ -197,30 +199,30 @@ public class GUIEventExecutor extends CommandListener{
             brep = (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
             Matrix4x4 R = new Matrix4x4();
             R = R.translation(0.55, 0.55, 0.55);
-            brep.applyTransformation(R);
+            PolyhedralBoundedSolidEulerOperators.applyTransformation(brep, R);
             //- Cube modification to holed box ----------------------------
-            brep.smev(6, 5, 9, new Vector3D(0.3, 0.3, 1));
-            brep.kemr(6, 6, 5, 9, 9, 5);
-            brep.smev(6, 9, 10, new Vector3D(0.8, 0.3, 1));
-            brep.smev(6, 10, 11, new Vector3D(0.8, 0.8, 1));
-            brep.smev(6, 11, 12, new Vector3D(0.3, 0.8, 1));
-            brep.mef(6, 6, 9, 10, 12, 11, 7);
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 5, 9, new Vector3D(0.3, 0.3, 1));
+            PolyhedralBoundedSolidEulerOperators.kemr(brep, 6, 6, 5, 9, 9, 5);
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 9, 10, new Vector3D(0.8, 0.3, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 10, 11, new Vector3D(0.8, 0.8, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 11, 12, new Vector3D(0.3, 0.8, 1));
+            PolyhedralBoundedSolidEulerOperators.mef(brep, 6, 6, 9, 10, 12, 11, 7);
 
             //- Box extrusion ---------------------------------------------
-            brep.smev(7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
-            brep.smev(7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
-            brep.mef(7, 7, 13, 9, 14, 10, 8);
-            brep.smev(7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
-            brep.mef(7, 7, 14, 10, 15, 11, 9);
-            brep.smev(7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
-            brep.mef(7, 7, 15, 11, 16, 12, 10);
-            brep.mef(7, 7, 13, 14, 16, 12, 11);
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
+            PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 13, 9, 14, 10, 8);
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
+            PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 14, 10, 15, 11, 9);
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
+            PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 15, 11, 16, 12, 10);
+            PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 13, 14, 16, 12, 11);
 
             //- Hole creation ---------------------------------------------
-            brep.kfmrh(2, 11);
+            PolyhedralBoundedSolidEulerOperators.kfmrh(brep, 2, 11);
 
             R = R.translation(-0.55, -0.55, -0.55);
-            brep.applyTransformation(R);
+            PolyhedralBoundedSolidEulerOperators.applyTransformation(brep, R);
             PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
 
             //brep = createCircle(0.5, 0.5, 0.5, 0.1, 12);
@@ -498,7 +500,7 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
+            light = new Light(LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
             //light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
             parent.theScene.scene.getLights().add(light);
         }

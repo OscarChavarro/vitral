@@ -39,6 +39,7 @@ import vsdk.transition.render.swing.SwingGuiCacheRenderer;
 // Application classes
 import scivis.Study;
 import scivis.TimeTake;
+import javax.swing.SwingUtilities;
 
 public class SciVisApplication
 {
@@ -311,7 +312,7 @@ public class SciVisApplication
     public static void main(String args[])
     {
         // Note that this is a thread-safe invocation of the GUI
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new SciVisApplication();
             }

@@ -1,5 +1,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -33,7 +35,7 @@ public class CsgKurlanderBowlFixture
             .exportToPolyhedralBoundedSolid();
         Matrix4x4 t = new Matrix4x4();
         t = t.translation(center);
-        solid.applyTransformation(t);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, t);
         return solid;
     }
 
@@ -50,7 +52,7 @@ public class CsgKurlanderBowlFixture
 
         Matrix4x4 move = new Matrix4x4();
         move = move.translation(translation);
-        solid.applyTransformation(move);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, move);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -60,12 +62,12 @@ public class CsgKurlanderBowlFixture
     {
         int i;
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-        solid.mvfs(points[0], 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, points[0], 1, 1);
 
         for ( i = 1; i < points.length; i++ ) {
-            solid.smev(1, i, i + 1, points[i]);
+            PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i, i + 1, points[i]);
         }
-        solid.smef(1, points.length, 1, 2);
+        PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
 
         Matrix4x4 t = new Matrix4x4();
         t = t.translation(0.0, 0.0, thickness);
@@ -116,7 +118,7 @@ public class CsgKurlanderBowlFixture
         rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
         t = t.translation(x, y, scale(z));
         m = t.multiply(rz.multiply(ry));
-        motif.applyTransformation(m);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(motif, m);
         return motif;
     }
 

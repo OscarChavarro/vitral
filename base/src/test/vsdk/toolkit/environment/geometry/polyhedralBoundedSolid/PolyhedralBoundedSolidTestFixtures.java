@@ -4,6 +4,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 
@@ -29,7 +30,7 @@ public class PolyhedralBoundedSolidTestFixtures
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
         Matrix4x4 translation = new Matrix4x4();
         translation = translation.translation(tx, ty, tz);
-        solid.applyTransformation(translation);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
     }
@@ -40,7 +41,7 @@ public class PolyhedralBoundedSolidTestFixtures
             0.0, 0.0, 0.0);
         PolyhedralBoundedSolid solidB = createBoxSolid(1.0, 1.0, 1.0,
             4.0, 0.0, 0.0);
-        return new PolyhedralBoundedSolid[] { solidA, solidB };
+        return new PolyhedralBoundedSolid[] { solidA, solidB  };
     }
 
     public static PolyhedralBoundedSolid[] createTouchingBoxPair()
@@ -49,7 +50,7 @@ public class PolyhedralBoundedSolidTestFixtures
             0.0, 0.0, 0.0);
         PolyhedralBoundedSolid solidB = createBoxSolid(1.0, 1.0, 1.0,
             1.0, 0.0, 0.0);
-        return new PolyhedralBoundedSolid[] { solidA, solidB };
+        return new PolyhedralBoundedSolid[] { solidA, solidB  };
     }
 
     public static PolyhedralBoundedSolid[] createContainmentBoxPair()
@@ -58,7 +59,7 @@ public class PolyhedralBoundedSolidTestFixtures
             0.0, 0.0, 0.0);
         PolyhedralBoundedSolid outer = createBoxSolid(4.0, 4.0, 4.0,
             0.0, 0.0, 0.0);
-        return new PolyhedralBoundedSolid[] { inner, outer };
+        return new PolyhedralBoundedSolid[] { inner, outer  };
     }
 
     public static PolyhedralBoundedSolid createMant1986_1Solid()

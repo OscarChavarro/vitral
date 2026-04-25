@@ -24,6 +24,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.gui.AwtSystem;
 
 public class PolygonClippingExample extends JFrame implements MouseListener,
     MouseMotionListener, MouseWheelListener, KeyListener
@@ -337,7 +338,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     public void keyPressed(java.awt.event.KeyEvent e)
     {
         vsdk.toolkit.gui.KeyEvent event =
-            vsdk.toolkit.gui.AwtSystem.awt2vsdkEvent(e);
+            AwtSystem.awt2vsdkEvent(e);
 
         if ( keyboardInteractionTechniques.processPressed(model, event,
             new PolygonClippingKeyboardInteractionTechniques.Actions() {
@@ -373,7 +374,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
     @Override
     public void keyReleased(java.awt.event.KeyEvent e)
     {
-        vsdk.toolkit.gui.KeyEvent event = vsdk.toolkit.gui.AwtSystem.awt2vsdkEvent(e);
+        vsdk.toolkit.gui.KeyEvent event = AwtSystem.awt2vsdkEvent(e);
         if ( model.getCameraController().processKeyReleasedEvent(event) ) {
             repaintCanvas();
         }

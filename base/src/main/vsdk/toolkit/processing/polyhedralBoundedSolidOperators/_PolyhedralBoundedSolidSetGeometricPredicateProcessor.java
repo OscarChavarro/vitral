@@ -176,8 +176,10 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
                                Vector3D ref2, Vector3D ref12)
     {
-        Vector3D c1, c2;
-        int t1, t2;
+        Vector3D c1;
+        Vector3D c2;
+        int t1;
+        int t2;
 
         c1 = dir.crossProduct(ref1);
         if ( PolyhedralBoundedSolidNumericPolicy.vectorsColinear(
@@ -219,9 +221,16 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
         boolean withDebug)
     {
-        double a1, a2;
-        double b1, b2;
-        Vector3D u, v, a, b, c, n;
+        double a1;
+        double a2;
+        double b1;
+        double b2;
+        Vector3D u;
+        Vector3D v;
+        Vector3D a;
+        Vector3D b;
+        Vector3D c;
+        Vector3D n;
 
         n = na.he.parentLoop.parentFace.getContainingPlane().getNormal();
         u = new Vector3D(na.ref1).normalized();
@@ -698,7 +707,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidFace referenceFace,
         _PolyhedralBoundedSolidVertex referenceVertex)
     {
-        int i, j;
+        int i;
+        int j;
         int bestRelation;
         CoplanarAngularInterval referenceInterval;
 

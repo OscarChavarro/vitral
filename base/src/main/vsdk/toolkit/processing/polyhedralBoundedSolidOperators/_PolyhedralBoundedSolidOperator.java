@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -90,7 +91,8 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     */
     protected static void cleanup(PolyhedralBoundedSolid s)
     {
-        int i, j;
+        int i;
+        int j;
         _PolyhedralBoundedSolidFace f;
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge he;
@@ -167,7 +169,8 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     protected static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
         Vector3D middle;
-        Vector3D a, b;
+        Vector3D a;
+        Vector3D b;
 
         a = (he.next()).startingVertex.position.subtract(he.startingVertex.position);
         b = (he.previous()).startingVertex.position.subtract(he.startingVertex.position);
@@ -198,7 +201,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         // using PolyhedralBoundedSolid.lringmv
         for ( i = 1; i < f1.boundariesList.size(); i++ ) {
         l = f1.boundariesList.get(i);
-            if ( f1.parentSolid.lringmv(l, f2, false) ) {
+            if ( PolyhedralBoundedSolidEulerOperators.lringmv(f1.parentSolid, l, f2, false) ) {
                 i--;
             }
         }
@@ -219,7 +222,8 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
                                boolean allowRingMove)
     {
         PolyhedralBoundedSolidStatistics.recordJoinCall();
-        _PolyhedralBoundedSolidFace oldf, newf;
+        _PolyhedralBoundedSolidFace oldf;
+        _PolyhedralBoundedSolidFace newf;
         PolyhedralBoundedSolid s;
 
         if ( withDebug ) {
@@ -233,21 +237,21 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         s = oldf.parentSolid;
         if ( h1.parentLoop == h2.parentLoop ) {
             if ( h1.previous().previous() != h2 ) {
-                newf = s.lmef(h1, h2.next(), s.getMaxFaceId()+1);
+                newf = PolyhedralBoundedSolidEulerOperators.lmef(s, h1, h2.next(), s.getMaxFaceId()+1);
                 if ( withDebug ) {
                     //h1.next().parentEdge.debugColor = new ColorRgb(1, 0, 0);
                 }
             }
         }
         else {
-            s.lmekr(h1, h2.next());
+            PolyhedralBoundedSolidEulerOperators.lmekr(s, h1, h2.next());
             if ( withDebug ) {
                 //h1.next().parentEdge.debugColor = new ColorRgb(0, 1, 0);
             }
         }
 
         if ( h1.next().next() != h2 ) {
-            s.lmef(h2, h1.next(), s.getMaxFaceId()+1);
+            PolyhedralBoundedSolidEulerOperators.lmef(s, h2, h1.next(), s.getMaxFaceId()+1);
             if ( withDebug ) {
                 //h2.next().parentEdge.debugColor = new ColorRgb(0, 0, 1);
             }

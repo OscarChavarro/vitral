@@ -1,5 +1,7 @@
 package vsdk.toolkit.processing;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -58,9 +60,9 @@ class CurveModelerRotationalSweepTest
                                                             Vector3D p2)
     {
         PolyhedralBoundedSolid wire = new PolyhedralBoundedSolid();
-        wire.mvfs(p0, 1, 1);
-        wire.smev(1, 1, 2, p1);
-        wire.smev(1, 2, 3, p2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(wire, p0, 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(wire, 1, 1, 2, p1);
+        PolyhedralBoundedSolidEulerOperators.smev(wire, 1, 2, 3, p2);
         return wire;
     }
 

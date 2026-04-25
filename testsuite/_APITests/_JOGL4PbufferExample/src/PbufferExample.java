@@ -19,6 +19,8 @@ import com.jogamp.opengl.GLException;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImage;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
 This application example is used to test JOGL's / OpenGL's Pbuffer offline
@@ -282,23 +284,23 @@ public class PbufferExample implements GLEventListener {
 
     private static String readShaderSource(String shaderFileName)
     {
-        Path path = java.nio.file.Paths.get("../../../etc/glslShaders", shaderFileName);
+        Path path = Paths.get("../../../etc/glslShaders", shaderFileName);
         try {
-            return java.nio.file.Files.readString(path);
+            return Files.readString(path);
         }
         catch ( Exception ignored ) {
         }
 
-        path = java.nio.file.Paths.get("etc", "glslShaders", shaderFileName);
+        path = Paths.get("etc", "glslShaders", shaderFileName);
         try {
-            return java.nio.file.Files.readString(path);
+            return Files.readString(path);
         }
         catch ( Exception ignored ) {
         }
 
-        path = java.nio.file.Paths.get(System.getProperty("user.dir"), "etc", "glslShaders", shaderFileName);
+        path = Paths.get(System.getProperty("user.dir"), "etc", "glslShaders", shaderFileName);
         try {
-            return java.nio.file.Files.readString(path);
+            return Files.readString(path);
         }
         catch ( Exception e ) {
             throw new IllegalStateException("Failed to read shader: " + shaderFileName, e);

@@ -47,6 +47,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
+import vsdk.toolkit.environment.LightType;
 
 /**
 The Drawing Area is the main Vitral application element responsible for managing
@@ -266,7 +267,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         int i;
         for ( i = 0; i < n; i++ ) {
-            l = new Light(vsdk.toolkit.environment.LightType.POINT, 
+            l = new Light(LightType.POINT, 
                 new Vector3D(p[6*(i%3)+0], p[6*(i%3)+1], p[6*(i%3)+2]), 
                 new ColorRgb(p[6*(i%3)+3], p[6*(i%3)+4], p[6*(i%3)+5]));
             list.add(l);

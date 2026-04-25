@@ -19,42 +19,51 @@ class PolyhedralBoundedSolidQuantitativeInvisibilityTest
     @Test
     void given_rayEnteringBoxThroughEdge_when_measuringQuantitativeInvisibility_then_countsSinglePiercing()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(2.0, 2.0, 2.0,
                 0.0, 0.0, 0.0);
 
+        // Action
         int qi = solid.computeQuantitativeInvisibility(
             new Vector3D(-3.0, -2.0, 0.0),
             new Vector3D(-0.5, -0.75, 0.0));
 
+        // Assert
         assertThat(qi).isEqualTo(1);
     }
 
     @Test
     void given_rayEnteringBoxThroughVertex_when_measuringQuantitativeInvisibility_then_countsSinglePiercing()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(2.0, 2.0, 2.0,
                 0.0, 0.0, 0.0);
 
+        // Action
         int qi = solid.computeQuantitativeInvisibility(
             new Vector3D(-3.0, -2.0, -2.0),
             new Vector3D(-0.5, -0.75, -0.75));
 
+        // Assert
         assertThat(qi).isEqualTo(1);
     }
 
     @Test
     void given_raySlidingAlongBoundaryWithoutEnteringVolume_when_measuringQuantitativeInvisibility_then_itDoesNotCountTangentialContact()
     {
+        // Arrange
         PolyhedralBoundedSolid solid =
             PolyhedralBoundedSolidTestFixtures.createBoxSolid(2.0, 2.0, 2.0,
                 0.0, 0.0, 0.0);
 
+        // Action
         int qi = solid.computeQuantitativeInvisibility(
             new Vector3D(-3.0, -2.0, -1.0),
             new Vector3D(3.0, 1.0, -1.0));
 
+        // Assert
         assertThat(qi).isEqualTo(0);
     }
 }

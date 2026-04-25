@@ -36,6 +36,7 @@ import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
+import vsdk.toolkit.environment.LightType;
 
 /**
 This class provides an encaptulation for a rendering algorithm, 
@@ -116,7 +117,7 @@ public class SimpleRaytracer extends RenderingElement {
     private static boolean hasNonAmbientLights(List<Light> lights)
     {
         for ( Light light : lights ) {
-            if ( light.tipo_de_luz != vsdk.toolkit.environment.LightType.AMBIENT ) {
+            if ( light.tipo_de_luz != LightType.AMBIENT ) {
                 return true;
             }
         }

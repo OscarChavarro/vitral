@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 
@@ -178,7 +179,7 @@ final class _PolyhedralBoundedSolidSetIntersector
             }
             else if ( cont == Geometry.LIMIT &&
                       intersectedHalfedge != null ) {
-                current.lmev(
+                PolyhedralBoundedSolidEulerOperators.lmev(current, 
                     intersectedHalfedge,
                     intersectedHalfedge.mirrorHalfEdge().next(),
                     nextVertexId(current, other), v.position);
@@ -207,10 +208,16 @@ final class _PolyhedralBoundedSolidSetIntersector
         ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva,
         ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb)
     {
-        _PolyhedralBoundedSolidVertex v1, v2;
-        double d1, d2, d3, t;
+        _PolyhedralBoundedSolidVertex v1;
+        _PolyhedralBoundedSolidVertex v2;
+        double d1;
+        double d2;
+        double d3;
+        double t;
         Vector3D p;
-        int s1, s2, cont;
+        int s1;
+        int s2;
+        int cont;
         _PolyhedralBoundedSolidFace.PointInsideResult containment;
         _PolyhedralBoundedSolidHalfEdge intersectedHalfedge;
         _PolyhedralBoundedSolidVertex intersectedVertex;
@@ -234,7 +241,7 @@ final class _PolyhedralBoundedSolidSetIntersector
                 cont = containment.status();
 
                 if ( cont != Geometry.OUTSIDE ) {
-                    current.lmev(e.rightHalf, e.leftHalf.next(),
+                    PolyhedralBoundedSolidEulerOperators.lmev(current, e.rightHalf, e.leftHalf.next(),
                                        nextVertexId(current, other), p);
 
                     if ( cont == Geometry.INSIDE ) {
@@ -244,7 +251,7 @@ final class _PolyhedralBoundedSolidSetIntersector
                               containment.intersectedHalfedge() != null ) {
                         intersectedHalfedge =
                             containment.intersectedHalfedge();
-                        current.lmev(intersectedHalfedge,
+                        PolyhedralBoundedSolidEulerOperators.lmev(current, intersectedHalfedge,
                             intersectedHalfedge.mirrorHalfEdge().next(),
                                      nextVertexId(current, other), p);
                         addsovv(e.rightHalf.startingVertex,

@@ -9,6 +9,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 // Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
@@ -93,7 +94,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.3, 0.1+0.4, 0.1+0.4);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -101,7 +102,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.5, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1.0));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -109,7 +110,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.7, 0.5, 0.9);
         box = new Box(new Vector3D(0.6, 0.2, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -117,7 +118,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.9, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1.0, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -157,7 +158,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.1, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -165,7 +166,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.5, 0.9, 0.1);
         box = new Box(new Vector3D(1, 0.2, 0.2));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -173,7 +174,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         c = box.exportToPolyhedralBoundedSolid();
-        c.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(c, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
 
         //-----------------------------------------------------------------
@@ -181,7 +182,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.9, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         d = box.exportToPolyhedralBoundedSolid();
-        d.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(d, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
 
         //-----------------------------------------------------------------
@@ -194,7 +195,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.1);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         e = box.exportToPolyhedralBoundedSolid();
-        e.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(e, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
 
         //-----------------------------------------------------------------
@@ -202,7 +203,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.5, 0.9);
         box = new Box(new Vector3D(0.2, 1, 0.2));
         f = box.exportToPolyhedralBoundedSolid();
-        f.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(f, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
 
         //-----------------------------------------------------------------
@@ -210,7 +211,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.1, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         g = box.exportToPolyhedralBoundedSolid();
-        g.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(g, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
 
         //-----------------------------------------------------------------
@@ -218,7 +219,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         T = T.translation(0.1, 0.9, 0.5);
         box = new Box(new Vector3D(0.2, 0.2, 1));
         h = box.exportToPolyhedralBoundedSolid();
-        h.applyTransformation(T);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(h, T);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
 
         //-----------------------------------------------------------------
@@ -245,14 +246,14 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         PolyhedralBoundedSolid solid;
 
         solid = new PolyhedralBoundedSolid();
-        solid.mvfs(new Vector3D(0.00, 0.40, 0.00), 1, 1);
-        solid.smev(1, 1, 2, new Vector3D(0.94, 0.40, 0.00));
-        solid.smev(1, 2, 3, new Vector3D(0.94, 0.40, 0.46));
-        solid.smev(1, 3, 4, new Vector3D(0.60, 0.40, 0.30));
-        solid.smev(1, 4, 5, new Vector3D(0.37, 0.40, 0.30));
-        solid.smev(1, 5, 6, new Vector3D(0.18, 0.40, 0.46));
-        solid.smev(1, 6, 7, new Vector3D(0.00, 0.40, 0.30));
-        solid.mef(1, 1, 7, 6, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.00, 0.40, 0.00), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(0.94, 0.40, 0.00));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 3, new Vector3D(0.94, 0.40, 0.46));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 4, new Vector3D(0.60, 0.40, 0.30));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 5, new Vector3D(0.37, 0.40, 0.30));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 5, 6, new Vector3D(0.18, 0.40, 0.46));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 6, 7, new Vector3D(0.00, 0.40, 0.30));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 7, 6, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
         T = T.translation(0, -0.4, 0);
@@ -289,7 +290,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(1, 0.5, 0.6));
         a = box.exportToPolyhedralBoundedSolid();
-        a.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(a, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         //-----------------------------------------------------------------
@@ -298,7 +299,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         box = new Box(new Vector3D(1, 0.5, 0.6));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(R);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, R);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -329,13 +330,13 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         //-----------------------------------------------------------------
         a = new PolyhedralBoundedSolid();
-        a.mvfs(         new Vector3D(0.00+0.05, 0.42+0.05, 0.00+0.05), 1, 1);
-        a.smev(1, 1, 2, new Vector3D(0.92+0.05, 0.42+0.05, 0.00+0.05));
-        a.smev(1, 2, 3, new Vector3D(0.92+0.05, 0.42+0.05, 0.72+0.05));
-        a.smev(1, 3, 4, new Vector3D(0.70+0.05, 0.42+0.05, 0.72+0.05));
-        a.smev(1, 4, 5, new Vector3D(0.70+0.05, 0.42+0.05, 0.18+0.05));
-        a.smev(1, 5, 6, new Vector3D(0.00+0.05, 0.42+0.05, 0.18+0.05));
-        a.mef(1, 1, 6, 5, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(a,          new Vector3D(0.00+0.05, 0.42+0.05, 0.00+0.05), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(a, 1, 1, 2, new Vector3D(0.92+0.05, 0.42+0.05, 0.00+0.05));
+        PolyhedralBoundedSolidEulerOperators.smev(a, 1, 2, 3, new Vector3D(0.92+0.05, 0.42+0.05, 0.72+0.05));
+        PolyhedralBoundedSolidEulerOperators.smev(a, 1, 3, 4, new Vector3D(0.70+0.05, 0.42+0.05, 0.72+0.05));
+        PolyhedralBoundedSolidEulerOperators.smev(a, 1, 4, 5, new Vector3D(0.70+0.05, 0.42+0.05, 0.18+0.05));
+        PolyhedralBoundedSolidEulerOperators.smev(a, 1, 5, 6, new Vector3D(0.00+0.05, 0.42+0.05, 0.18+0.05));
+        PolyhedralBoundedSolidEulerOperators.mef(a, 1, 1, 6, 5, 1, 2, 2);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
 
         Matrix4x4 T = new Matrix4x4();
@@ -351,7 +352,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(0.58, 0.42, 0.18));
         b = box.exportToPolyhedralBoundedSolid();
-        b.applyTransformation(transformationMatrix);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(b, transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
 
         //-----------------------------------------------------------------
@@ -377,12 +378,12 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid leftView;
         leftView = new PolyhedralBoundedSolid();
-        leftView.mvfs(new Vector3D(0, 1, 0), 1, 1);
-        leftView.smev(1, 1, 2, new Vector3D(3.1/3.7, 1, 0));
-        leftView.smev(1, 2, 3, new Vector3D(3.1/3.7, 1, 0.6/3.7));
-        leftView.smev(1, 3, 4, new Vector3D(1.6/3.7, 1, 1.2/3.7));
-        leftView.smev(1, 4, 5, new Vector3D(0, 1, 1.2/3.7));
-        leftView.mef(1, 1, 5, 4, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(leftView, new Vector3D(0, 1, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 1, 2, new Vector3D(3.1/3.7, 1, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 2, 3, new Vector3D(3.1/3.7, 1, 0.6/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 3, 4, new Vector3D(1.6/3.7, 1, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 4, 5, new Vector3D(0, 1, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.mef(leftView, 1, 1, 5, 4, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
         T = T.translation(0, -1.0, 0);
@@ -392,15 +393,15 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid frontView;
         frontView = new PolyhedralBoundedSolid();
-        frontView.mvfs(new Vector3D(0, 0, 0), 1, 1);
-        frontView.smev(1, 1, 2, new Vector3D(0, 1, 0));
-        frontView.smev(1, 2, 3, new Vector3D(0, 1, 1.2/3.7));
-        frontView.smev(1, 3, 4, new Vector3D(0, 2.8/3.7, 1.2/3.7));
-        frontView.smev(1, 4, 5, new Vector3D(0, 2.8/3.7, 0.3/3.7));
-        frontView.smev(1, 5, 6, new Vector3D(0, 0.9/3.7, 0.3/3.7));
-        frontView.smev(1, 6, 7, new Vector3D(0, 0.9/3.7, 1.2/3.7));
-        frontView.smev(1, 7, 8, new Vector3D(0, 0, 1.2/3.7));
-        frontView.mef(1, 1, 8, 7, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(frontView, new Vector3D(0, 0, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 1, 2, new Vector3D(0, 1, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 2, 3, new Vector3D(0, 1, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 3, 4, new Vector3D(0, 2.8/3.7, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 4, 5, new Vector3D(0, 2.8/3.7, 0.3/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 5, 6, new Vector3D(0, 0.9/3.7, 0.3/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 6, 7, new Vector3D(0, 0.9/3.7, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 7, 8, new Vector3D(0, 0, 1.2/3.7));
+        PolyhedralBoundedSolidEulerOperators.mef(frontView, 1, 1, 8, 7, 1, 2, 2);
 
         T = new Matrix4x4();
         T = T.translation(1, 0, 0);
@@ -432,13 +433,13 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid leftView;
         leftView = new PolyhedralBoundedSolid();
-        leftView.mvfs(new Vector3D(0, 1, 0), 1, 1);
-        leftView.smev(1, 1, 2, new Vector3D(1, 1, 0));
-        leftView.smev(1, 2, 3, new Vector3D(1, 1, 0.25));
-        leftView.smev(1, 3, 4, new Vector3D(1.0/3.0, 1, 0.25));
-        leftView.smev(1, 4, 5, new Vector3D(1.0/3.0, 1, 1));
-        leftView.smev(1, 5, 6, new Vector3D(0, 1, 1));
-        leftView.mef(1, 1, 6, 5, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(leftView, new Vector3D(0, 1, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 1, 2, new Vector3D(1, 1, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 2, 3, new Vector3D(1, 1, 0.25));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 3, 4, new Vector3D(1.0/3.0, 1, 0.25));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 4, 5, new Vector3D(1.0/3.0, 1, 1));
+        PolyhedralBoundedSolidEulerOperators.smev(leftView, 1, 5, 6, new Vector3D(0, 1, 1));
+        PolyhedralBoundedSolidEulerOperators.mef(leftView, 1, 1, 6, 5, 1, 2, 2);
 
         Matrix4x4 T = new Matrix4x4();
         T = T.translation(0, -1.0, 0);
@@ -448,13 +449,13 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid frontView;
         frontView = new PolyhedralBoundedSolid();
-        frontView.mvfs(new Vector3D(0, 0, 0), 1, 1);
-        frontView.smev(1, 1, 2, new Vector3D(0, 1, 0));
-        frontView.smev(1, 2, 3, new Vector3D(0, 1, 7.0/12.0));
-        frontView.smev(1, 3, 4, new Vector3D(0, 5.0/6.0, 1));
-        frontView.smev(1, 4, 5, new Vector3D(0, 1.0/6.0, 1));
-        frontView.smev(1, 5, 6, new Vector3D(0, 0, 7.0/12.0));
-        frontView.mef(1, 1, 6, 5, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mvfs(frontView, new Vector3D(0, 0, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 1, 2, new Vector3D(0, 1, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 2, 3, new Vector3D(0, 1, 7.0/12.0));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 3, 4, new Vector3D(0, 5.0/6.0, 1));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 4, 5, new Vector3D(0, 1.0/6.0, 1));
+        PolyhedralBoundedSolidEulerOperators.smev(frontView, 1, 5, 6, new Vector3D(0, 0, 7.0/12.0));
+        PolyhedralBoundedSolidEulerOperators.mef(frontView, 1, 1, 6, 5, 1, 2, 2);
 
         T = new Matrix4x4();
         T = T.translation(1, 0, 0);
@@ -493,7 +494,7 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
 
         Box box = new Box(new Vector3D(0.5, 1, 0.6));
         block = box.exportToPolyhedralBoundedSolid();
-        block.applyTransformation(transformationMatrix);
+        PolyhedralBoundedSolidEulerOperators.applyTransformation(block, transformationMatrix);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(block);
 
         //-----------------------------------------------------------------
@@ -505,25 +506,25 @@ public class SimpleTestGeometryLibrary extends ProcessingElement
         switch (situation) {
             case -1 -> {
                 // Lowered wedge, generating a closed holed object
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3 - facesModelDelta), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 - facesModelDelta));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 - facesModelDelta));
+                PolyhedralBoundedSolidEulerOperators.mvfs(wedge, new Vector3D(0, 0.225, 0.3 - facesModelDelta), 1, 1);
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 1, 2, new Vector3D(0, 0.775, 0.3 - facesModelDelta));
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 2, 3, new Vector3D(0, 0.5, 0.6 - facesModelDelta));
             }
             case 1 -> {
                 // Raised wedge, generating an open object with no holes
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3 + facesModelDelta), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3 + facesModelDelta));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6 + facesModelDelta));
+                PolyhedralBoundedSolidEulerOperators.mvfs(wedge, new Vector3D(0, 0.225, 0.3 + facesModelDelta), 1, 1);
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 1, 2, new Vector3D(0, 0.775, 0.3 + facesModelDelta));
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 2, 3, new Vector3D(0, 0.5, 0.6 + facesModelDelta));
             }
             default -> {
                 // Original on edge wedge, generating non-manifold object
-                wedge.mvfs(new Vector3D(0, 0.225, 0.3), 1, 1);
-                wedge.smev(1, 1, 2, new Vector3D(0, 0.775, 0.3));
-                wedge.smev(1, 2, 3, new Vector3D(0, 0.5, 0.6));
+                PolyhedralBoundedSolidEulerOperators.mvfs(wedge, new Vector3D(0, 0.225, 0.3), 1, 1);
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 1, 2, new Vector3D(0, 0.775, 0.3));
+                PolyhedralBoundedSolidEulerOperators.smev(wedge, 1, 2, 3, new Vector3D(0, 0.5, 0.6));
             }
         }
 
-        wedge.mef(1, 1, 3, 2, 1, 2, 2);
+        PolyhedralBoundedSolidEulerOperators.mef(wedge, 1, 1, 3, 2, 1, 2, 2);
 
         transformationMatrix = new Matrix4x4();
         transformationMatrix = transformationMatrix.translation(0.775, 0, 0);

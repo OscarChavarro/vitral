@@ -35,6 +35,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
+import vsdk.toolkit.environment.LightType;
 
 public class SwingCanvas extends JPanel implements
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener
@@ -84,7 +85,7 @@ public class SwingCanvas extends JPanel implements
         background = new SimpleBackground();
         background.setColor(0.5, 0.5, 0.9);
 
-        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
 
         scene = new SimpleScene();
         scene.addBackground(background);

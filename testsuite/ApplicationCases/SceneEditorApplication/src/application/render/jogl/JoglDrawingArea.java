@@ -75,6 +75,7 @@ import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
+import java.awt.event.MouseEvent;
 
 public class JoglDrawingArea implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
@@ -1153,15 +1154,15 @@ public class JoglDrawingArea implements
         int m = e.getModifiersEx();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             (m & java.awt.event.MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
+             (m & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             canvas.setCursor(camrotateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & java.awt.event.MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
+                  (m & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
             canvas.setCursor(camtranslateCursor);
         }
         else if ( interactionMode == CAMERA_INTERACTION_MODE &&
-                  (m & java.awt.event.MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
+                  (m & MouseEvent.BUTTON3_DOWN_MASK) != 0 ) {
             canvas.setCursor(camadvanceCursor);
         }
         else {
@@ -1178,7 +1179,7 @@ public class JoglDrawingArea implements
                   interactionMode == SCALE_INTERACTION_MODE 
                   ) {
             boolean composite = false;
-            if ( ((e.getModifiersEx()) & java.awt.event.MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
+            if ( ((e.getModifiersEx()) & MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();

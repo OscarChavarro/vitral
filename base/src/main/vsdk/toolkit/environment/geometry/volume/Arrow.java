@@ -1,4 +1,6 @@
 package vsdk.toolkit.environment.geometry.volume;
+
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
 import vsdk.toolkit.common.Ray;
@@ -275,10 +277,10 @@ public class Arrow extends Solid {
         int base2 = 3*nsides+1;
 
         apex = new Vector3D(0, 0, baseLength + headLength);
-        solid.smev(1, base1, base2, apex);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, apex);
 
         for ( i = 0; i < nsides-2; i++ ) {
-            solid.mef(1,           /* seed face, always face 1 */
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                       1,           /* seed face, always face 1 */
                       base2,       /* start of half edge 1 */
                       base1+i,     /* end of half edge 1 */
@@ -287,7 +289,7 @@ public class Arrow extends Solid {
                       base2+i+1    /* new face id */);
         }
 
-        solid.mef(1,           /* seed face, always face 1 */
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                   1,           /* seed face, always face 1 */
                   base2,       /* start of half edge 1 */
                   base1+i,     /* end of half edge 1 */

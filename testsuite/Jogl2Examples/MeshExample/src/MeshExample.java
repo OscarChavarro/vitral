@@ -41,6 +41,7 @@ import vsdk.toolkit.gui.AwtSystem;
 
 // Application classes
 import util.filters.ObjectFilter;
+import vsdk.toolkit.environment.LightType;
 
 public class MeshExample
     extends JFrame implements GLEventListener, MouseListener,
@@ -137,7 +138,7 @@ public class MeshExample
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
 
-        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
         light.setId(0);
     }
 

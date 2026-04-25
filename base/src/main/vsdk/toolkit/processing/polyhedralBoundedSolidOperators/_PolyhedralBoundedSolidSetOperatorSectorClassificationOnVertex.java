@@ -38,7 +38,8 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
             return -1000;
         }
 
-        double x, y;
+        double x;
+        double y;
         double an;
         Vector3D a = ref1;
 
@@ -46,7 +47,8 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
             a = ref2;
         }
 
-        Vector3D u, v;
+        Vector3D u;
+        Vector3D v;
 
         u = new Vector3D(referenceU);
         u = u.normalized();
@@ -74,7 +76,8 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
 
     public int compareTo(_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex other)
     {
-        double a, b;
+        double a;
+        double b;
 
         a = this.getAngle();
         b = other.getAngle();

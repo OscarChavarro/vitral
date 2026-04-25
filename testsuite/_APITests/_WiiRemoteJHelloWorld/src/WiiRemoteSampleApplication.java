@@ -49,6 +49,8 @@ import wiiremotej.event.WRExtensionEvent;
 import wiiremotej.event.WRIREvent;
 import wiiremotej.event.WRNunchukExtensionEvent;
 import wiiremotej.event.WRStatusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 /**
 Implements WiiRemoteListener and acts as a general test class. Note that you
@@ -289,11 +291,11 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
             remote.setLEDIlluminated(0, true);
 
             ButtonMap bm;
-            int bmData[] = new int[]{java.awt.event.KeyEvent.VK_CONTROL};
+            int bmData[] = new int[]{KeyEvent.VK_CONTROL};
 
             bm = new ButtonMap(WRButtonEvent.HOME, ButtonMap.NUNCHUK,
                                WRNunchukExtensionEvent.C, bmData,
-                               java.awt.event.InputEvent.BUTTON1_MASK, 0, -1);
+                               InputEvent.BUTTON1_MASK, 0, -1);
             remote.getButtonMaps().add(bm);
             
             // Prebuffer a preformatted audio file
@@ -597,8 +599,8 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
                 boolean lightChanged = false;
                 if ( evt.wasPressed(WRButtonEvent.PLUS) && !mouseTestingOn ) {
                     mouseTestingOn = true;
-                    remote.getButtonMaps().add(new ButtonMouseMap(WRButtonEvent.B, java.awt.event.InputEvent.BUTTON1_MASK));
-                    remote.getButtonMaps().add(new ButtonMouseMap(WRButtonEvent.A, java.awt.event.InputEvent.BUTTON3_MASK));
+                    remote.getButtonMaps().add(new ButtonMouseMap(WRButtonEvent.B, InputEvent.BUTTON1_MASK));
+                    remote.getButtonMaps().add(new ButtonMouseMap(WRButtonEvent.A, InputEvent.BUTTON3_MASK));
                     remote.getButtonMaps().add(new ButtonMouseWheelMap(WRButtonEvent.UP, -5, 100));
                     remote.getButtonMaps().add(new ButtonMouseWheelMap(WRButtonEvent.DOWN, 5, 100));
                     mouseTestFrame.setVisible(true);
@@ -606,8 +608,8 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
                 }
                 else if ( evt.wasPressed(WRButtonEvent.MINUS) && mouseTestingOn ) {
                     mouseTestingOn = false;
-                    remote.getButtonMaps().remove(new ButtonMouseMap(WRButtonEvent.B, java.awt.event.InputEvent.BUTTON1_MASK));
-                    remote.getButtonMaps().remove(new ButtonMouseMap(WRButtonEvent.A, java.awt.event.InputEvent.BUTTON3_MASK));
+                    remote.getButtonMaps().remove(new ButtonMouseMap(WRButtonEvent.B, InputEvent.BUTTON1_MASK));
+                    remote.getButtonMaps().remove(new ButtonMouseMap(WRButtonEvent.A, InputEvent.BUTTON3_MASK));
                     remote.getButtonMaps().remove(new ButtonMouseWheelMap(WRButtonEvent.UP, -5, 100));
                     remote.getButtonMaps().remove(new ButtonMouseWheelMap(WRButtonEvent.DOWN, 5, 100));
                     mouseTestFrame.setVisible(false);

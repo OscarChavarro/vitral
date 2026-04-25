@@ -34,6 +34,7 @@ import vsdk.toolkit.gui.RendererConfigurationController;
         import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl2TriangleMeshRenderer;
+import vsdk.toolkit.environment.LightType;
 
 // Application classes
 
@@ -257,16 +258,16 @@ public class IlluminationTest
         qualityController = new RendererConfigurationController(qualitySelection1);
 
         lightPosition = new Vector3D(0, 0, 3);
-        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, lightPosition, 
+        light1 = new Light(LightType.POINT, lightPosition, 
                 new ColorRgb(1, 1, 1));
         light1.setPosition(lightPosition);
         showVectors = false;
 
 
 
-        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(30, -70, 50), 
+        light2 = new Light(LightType.POINT, new Vector3D(30, -70, 50), 
                 new ColorRgb(1, 1, 1));
-        light3 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-40, 60, 30), 
+        light3 = new Light(LightType.POINT, new Vector3D(-40, 60, 30), 
                 new ColorRgb(1, 1, 1));
         light1.setId(0);
         light2.setId(1);

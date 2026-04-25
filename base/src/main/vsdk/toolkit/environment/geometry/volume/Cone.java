@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.environment.geometry.volume;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
 import java.util.ArrayList;
@@ -552,12 +553,12 @@ public class Cone extends Solid {
         }
 
         int apexVertexId = solid.getMaxVertexId() + 1;
-        solid.smev(1, ringVertexIds.get(0).intValue(), apexVertexId,
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, ringVertexIds.get(0).intValue(), apexVertexId,
             new Vector3D(0.0, 0.0, apexZ));
 
         int i;
         for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
-            solid.mef(1, 1,
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1,
                 apexVertexId,
                 ringVertexIds.get(i).intValue(),
                 ringVertexIds.get(i+1).intValue(),
@@ -565,7 +566,7 @@ public class Cone extends Solid {
                 solid.getMaxFaceId() + 1);
         }
 
-        solid.mef(1, 1,
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1,
             apexVertexId,
             ringVertexIds.get(ringVertexIds.size()-2).intValue(),
             ringVertexIds.get(ringVertexIds.size()-1).intValue(),

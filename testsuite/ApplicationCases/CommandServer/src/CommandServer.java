@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.text.PlainDocument;
+import javax.swing.SwingUtilities;
 
 class MainThread implements Runnable
 {
@@ -208,7 +209,7 @@ public class CommandServer
     {
         // Note that this is a thread-safe invocation of the GUI
         MainThread mt = new MainThread(args);
-        javax.swing.SwingUtilities.invokeLater(mt);
+        SwingUtilities.invokeLater(mt);
     }
 
     public void notifySpeech()

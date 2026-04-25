@@ -160,7 +160,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>
     nbrpreproc(_PolyhedralBoundedSolidVertex v)
     {
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n, nold;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nold;
         Vector3D bisec;
         _PolyhedralBoundedSolidHalfEdge he;
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb;
@@ -260,16 +261,20 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     */
     private static boolean vertexVertexSectorIntersectionTest(int i, int j)
     {
-        _PolyhedralBoundedSolidHalfEdge h1, h2;
-        boolean c1, c2;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na, nb;
+        _PolyhedralBoundedSolidHalfEdge h1;
+        _PolyhedralBoundedSolidHalfEdge h2;
+        boolean c1;
+        boolean c2;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb;
 
         na = nba.get(i);
         nb = nbb.get(j);
         h1 = na.he;
         h2 = nb.he;
 
-        Vector3D n1, n2;
+        Vector3D n1;
+        Vector3D n2;
         Vector3D intrs;
 
         n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
@@ -337,12 +342,18 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
             }
         }
 
-        _PolyhedralBoundedSolidHalfEdge ha, hb;
-        double d1, d2, d3, d4;
+        _PolyhedralBoundedSolidHalfEdge ha;
+        _PolyhedralBoundedSolidHalfEdge hb;
+        double d1;
+        double d2;
+        double d3;
+        double d4;
         int j;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s;
-        Vector3D na, nb;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa, xb;
+        Vector3D na;
+        Vector3D nb;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xb;
 
         if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
             System.out.println(
@@ -392,14 +403,24 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     */
     private static void vertexVertexReclassifyOnSectors(int op)
     {
-        _PolyhedralBoundedSolidHalfEdge ha, hb;
-        int i, j, newsa, newsb;
+        _PolyhedralBoundedSolidHalfEdge ha;
+        _PolyhedralBoundedSolidHalfEdge hb;
+        int i;
+        int j;
+        int newsa;
+        int newsb;
         boolean nonopposite;
-        int secta, prevsecta, nextsecta;
-        int sectb, prevsectb, nextsectb;
+        int secta;
+        int prevsecta;
+        int nextsecta;
+        int sectb;
+        int prevsectb;
+        int nextsectb;
         double d;
-        Vector3D n1, n2;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si, sj;
+        Vector3D n1;
+        Vector3D n2;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si;
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sj;
 
         for ( i = 0; i < sectors.size(); i++ ) {
             if ( sectors.get(i).s1a ==
@@ -500,9 +521,14 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     */
     private static void vertexVertexReclassifyOnEdges(int op)
     {
-        int i, j, newsa, newsb;
-        int secta, prevsecta;
-        int sectb, prevsectb;
+        int i;
+        int j;
+        int newsa;
+        int newsb;
+        int secta;
+        int prevsecta;
+        int sectb;
+        int prevsectb;
 
         for ( i = 0; i < sectors.size(); i++ ) {
             if ( sectors.get(i).intersect &&

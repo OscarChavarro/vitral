@@ -69,7 +69,8 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     */
     public _PolyhedralBoundedSolidHalfEdge halfEdgeVertices(int a, int b)
     {
-        _PolyhedralBoundedSolidHalfEdge he, oldhe;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidHalfEdge oldhe;
         he = boundaryStartHalfEdge;
         do {
             oldhe = he;
@@ -91,7 +92,8 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
     id `b`.  Returns null if no such half edge exists in this loop. */
     public _PolyhedralBoundedSolidHalfEdge firstHalfEdgeAtVertex(int a)
     {
-        _PolyhedralBoundedSolidHalfEdge he, oldhe;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidHalfEdge oldhe;
         he = boundaryStartHalfEdge;
         do {
             oldhe = he;
@@ -134,8 +136,10 @@ public class _PolyhedralBoundedSolidLoop extends FundamentalEntity {
 
         //-----------------------------------------------------------------
         _PolyhedralBoundedSolidHalfEdge he;
-        _PolyhedralBoundedSolidEdge edges[], elast;
-        boolean sides[], slast;
+        _PolyhedralBoundedSolidEdge edges[];
+        _PolyhedralBoundedSolidEdge elast;
+        boolean sides[];
+        boolean slast;
         int i;
 
         edges = new _PolyhedralBoundedSolidEdge[halfEdgesList.size()];

@@ -23,6 +23,7 @@ import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.framework.Component;
+import vsdk.toolkit.render.jogl.Jogl2SphereRenderer;
 
 public class Jogl2ProjectedViewRenderer extends Component {
     public Image image;
@@ -189,7 +190,7 @@ public class Jogl2ProjectedViewRenderer extends Component {
             quality2 = new RendererConfiguration();
             quality2.setWires(true);
             quality2.setSurfaces(false);
-            vsdk.toolkit.render.jogl.Jogl2SphereRenderer.draw(gl, sphere, camera, quality2);
+            Jogl2SphereRenderer.draw(gl, sphere, camera, quality2);
 */
         }
 

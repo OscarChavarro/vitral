@@ -285,28 +285,28 @@ public class CameraControllerGoogleEarth extends CameraController {
 
         // 3. Event processing: update the copy of the camera's internal parameters
         switch (keyEvent.keycode) {
-            case vsdk.toolkit.gui.KeyEvent.KEY_UP:
+            case KeyEvent.KEY_UP:
                 pitch -= angleInc;
                 if (pitch < Math.toRadians(-90)) {
                     pitch = Math.toRadians(-90);
                 }
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_DOWN:
+            case KeyEvent.KEY_DOWN:
                 pitch += angleInc;
                 if (pitch > Math.toRadians(90)) {
                     pitch = Math.toRadians(90);
                 }
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_LEFT:
+            case KeyEvent.KEY_LEFT:
                 yaw += angleInc;
                 while (yaw >= Math.toRadians(360)) {
                     yaw -= Math.toRadians(360);
                 }
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_RIGHT:
+            case KeyEvent.KEY_RIGHT:
                 yaw -= angleInc;
                 while (yaw < 0) {
                     yaw += Math.toRadians(360);
@@ -315,26 +315,26 @@ public class CameraControllerGoogleEarth extends CameraController {
                 break;
 
             // Position
-            case vsdk.toolkit.gui.KeyEvent.KEY_x:
+            case KeyEvent.KEY_x:
                 eyePosition = eyePosition.withX(eyePosition.x() - jumpStep);
                 focusedPosition = focusedPosition.withX(focusedPosition.x() - jumpStep);
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_X:
+            case KeyEvent.KEY_X:
                 eyePosition = eyePosition.withX(eyePosition.x() + jumpStep);
                 focusedPosition = focusedPosition.withX(focusedPosition.x() + jumpStep);
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_y:
+            case KeyEvent.KEY_y:
                 eyePosition = eyePosition.withY(eyePosition.y() - jumpStep);
                 focusedPosition = focusedPosition.withY(focusedPosition.y() - jumpStep);
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_Y:
+            case KeyEvent.KEY_Y:
                 eyePosition = eyePosition.withY(eyePosition.y() + jumpStep); //focusedPosition.y() += deltaMov;
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_z:
+            case KeyEvent.KEY_z:
                 //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
                 double expo = Math.round(Math.log10(eyePosition.z())) - 1;
                 jumpStep = Math.pow(10, expo);//
@@ -355,7 +355,7 @@ public class CameraControllerGoogleEarth extends CameraController {
                 break;
               //---------------------------------------------------------------
 
-            case vsdk.toolkit.gui.KeyEvent.KEY_Z:
+            case KeyEvent.KEY_Z:
 
                 //Limite superior
                 if ((eyePosition.z() + jumpStep) >= Math.pow(10, 4)) {
@@ -375,14 +375,14 @@ public class CameraControllerGoogleEarth extends CameraController {
                 updated = true;
                 break;
             // Rotation
-            case vsdk.toolkit.gui.KeyEvent.KEY_S:
+            case KeyEvent.KEY_S:
                 roll -= Math.toRadians(5);
                 while (roll < 0) {
                     roll += Math.toRadians(360);
                 }
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_s:
+            case KeyEvent.KEY_s:
                 roll += Math.toRadians(5);
                 while (roll > Math.toRadians(360)) {
                     roll -= Math.toRadians(360);
@@ -391,7 +391,7 @@ public class CameraControllerGoogleEarth extends CameraController {
                 break;
 
             // View volume modification
-            case vsdk.toolkit.gui.KeyEvent.KEY_A:
+            case KeyEvent.KEY_A:
                 if (camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL) {
                     orthogonalZoom /= 2;
                 } else {
@@ -405,7 +405,7 @@ public class CameraControllerGoogleEarth extends CameraController {
                 }
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_a:
+            case KeyEvent.KEY_a:
                 if (camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL) {
                     orthogonalZoom *= 2;
                 } else {
@@ -420,25 +420,25 @@ public class CameraControllerGoogleEarth extends CameraController {
                 updated = true;
                 break;
 
-            case vsdk.toolkit.gui.KeyEvent.KEY_N:
+            case KeyEvent.KEY_N:
                 nearPlaneDistance = nearPlaneDistance + 0.5;// augmentLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_n:
+            case KeyEvent.KEY_n:
                 nearPlaneDistance = nearPlaneDistance - 0.5;//diminishLogarithmic(nearPlaneDistance, EPSILON);
                 updated = true;
                 break;
 
-            case vsdk.toolkit.gui.KeyEvent.KEY_F:
+            case KeyEvent.KEY_F:
                 farPlaneDistance = farPlaneDistance + 0.5;//augmentLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
                 break;
-            case vsdk.toolkit.gui.KeyEvent.KEY_f:
+            case KeyEvent.KEY_f:
                 farPlaneDistance = farPlaneDistance - 0.5;//diminishLogarithmic(farPlaneDistance, EPSILON);
                 updated = true;
                 break;
 
-            case vsdk.toolkit.gui.KeyEvent.KEY_p: // Rote el modo de proyeccion
+            case KeyEvent.KEY_p: // Rote el modo de proyeccion
                 switch (projectionMode) {
                     case Camera.PROJECTION_MODE_PERSPECTIVE:
                         projectionMode = Camera.PROJECTION_MODE_ORTHOGONAL;
@@ -451,7 +451,7 @@ public class CameraControllerGoogleEarth extends CameraController {
                 break;
 
             // Queries
-            case vsdk.toolkit.gui.KeyEvent.KEY_i:
+            case KeyEvent.KEY_i:
                 System.out.println(camera);
                 break;
         }

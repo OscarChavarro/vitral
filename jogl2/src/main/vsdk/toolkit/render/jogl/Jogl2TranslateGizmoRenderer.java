@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Cone;
+import vsdk.toolkit.environment.LightType;
 
 public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer 
 {
@@ -178,10 +179,10 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         lp2 = lp2.withX(lp2.x() - 20);
         lp2 = lp2.withY(lp2.y() - 20);
         if ( light1 == null ) {
-            light1 = new Light(vsdk.toolkit.environment.LightType.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
+            light1 = new Light(LightType.DIRECTIONAL, lp1, new ColorRgb(1, 1, 1));
         }
         if ( light2 == null ) {
-            light2 = new Light(vsdk.toolkit.environment.LightType.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
+            light2 = new Light(LightType.DIRECTIONAL, lp2, new ColorRgb(1, 1, 1));
         }
         light1.setPosition(lp1);
         light2.setPosition(lp2);

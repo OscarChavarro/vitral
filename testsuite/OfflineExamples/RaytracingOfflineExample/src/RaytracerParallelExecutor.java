@@ -34,6 +34,8 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
             resultingImage.getXSize(),
             resultingImage.getYSize(),
             numberOfThreads);
+        System.out.println(
+            "Starting parallel raytracing with " + numberOfThreads + " threads.");
         List<Tile> generatedTiles = tileGenerator.getTiles();
         ConcurrentLinkedQueue<Tile> pendingTiles =
             new ConcurrentLinkedQueue<>(generatedTiles);

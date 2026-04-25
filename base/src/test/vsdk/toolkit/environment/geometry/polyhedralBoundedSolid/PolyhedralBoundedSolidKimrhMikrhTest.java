@@ -1,5 +1,7 @@
 package vsdk.toolkit.environment.geometry.polyhedralBoundedSolid;
 
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -37,7 +39,7 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         int removedFaceId = face2.id;
 
         // Action
-        solid.lkimrh(face1, face2);
+        PolyhedralBoundedSolidEulerOperators.lkimrh(solid, face1, face2);
 
         // Assert
         assertThat(solid.polygonsList.size()).isEqualTo(faceCountBefore - 1);
@@ -60,12 +62,12 @@ class PolyhedralBoundedSolidKimrhMikrhTest
         _PolyhedralBoundedSolidFace face2 = solid.polygonsList.get(1);
         _PolyhedralBoundedSolidLoop loopToPromote = face2.boundariesList.get(0);
 
-        solid.lkimrh(face1, face2);
+        PolyhedralBoundedSolidEulerOperators.lkimrh(solid, face1, face2);
         int facesAfterLkimrh = solid.polygonsList.size();
         int newFaceId = solid.getMaxFaceId() + 1;
 
         // Action
-        _PolyhedralBoundedSolidFace newFace = solid.lmikrh(loopToPromote,
+        _PolyhedralBoundedSolidFace newFace = PolyhedralBoundedSolidEulerOperators.lmikrh(solid, loopToPromote,
             newFaceId);
 
         // Assert

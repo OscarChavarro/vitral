@@ -12,6 +12,8 @@ import java.awt.geom.AffineTransform;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.geometry.FontReader;
 import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.io.image.ImagePersistence;
+import java.awt.Color;
 
 /**
 This is an implementation of the persistence interface FontReader. It is
@@ -99,15 +101,15 @@ public class AwtFontReader extends FontReader
         img.init(640, 480);
 
         java.awt.image.BufferedImage bi;
-        bi = vsdk.toolkit.render.awt.AwtRGBImageRenderer.exportToAwtBufferedImage(img);
+        bi = AwtRGBImageRenderer.exportToAwtBufferedImage(img);
 
         java.awt.Graphics2D offlineContext = (java.awt.Graphics2D)bi.getGraphics();
         offlineContext.setFont(currentFont);
-        offlineContext.setColor(java.awt.Color.RED);
+        offlineContext.setColor(Color.RED);
         offlineContext.drawString(characterAndItsContext, 100, 100);
 
-        vsdk.toolkit.render.awt.AwtRGBImageRenderer.importFromAwtBufferedImage(bi, img);
-        vsdk.toolkit.io.image.ImagePersistence.exportJPG(new File("output.jpg"), img);
+        AwtRGBImageRenderer.importFromAwtBufferedImage(bi, img);
+        ImagePersistence.exportJPG(new File("output.jpg"), img);
 */
 //*****************************************************************
 

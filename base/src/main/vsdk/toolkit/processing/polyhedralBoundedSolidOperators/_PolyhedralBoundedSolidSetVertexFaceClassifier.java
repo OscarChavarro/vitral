@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,7 +198,9 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     private static int nextVertexId(PolyhedralBoundedSolid current,
                                     PolyhedralBoundedSolid other)
     {
-        int a, b, m;
+        int a;
+        int b;
+        int m;
 
         a = current.getMaxVertexId();
         b = other.getMaxVertexId();
@@ -217,7 +220,9 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     private static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
     {
         Vector3D middle;
-        Vector3D a, b, n;
+        Vector3D a;
+        Vector3D b;
+        Vector3D n;
 
         a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
@@ -466,8 +471,10 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        int start, i;
-        _PolyhedralBoundedSolidHalfEdge head, tail;
+        int start;
+        int i;
+        _PolyhedralBoundedSolidHalfEdge head;
+        _PolyhedralBoundedSolidHalfEdge tail;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
         PolyhedralBoundedSolid solida;
         int nnbr = nbr.size();
@@ -517,7 +524,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
 
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
                 head.startingVertex.position);
 
             if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 &&
@@ -560,8 +567,10 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        int start, i;
-        _PolyhedralBoundedSolidHalfEdge head, tail;
+        int start;
+        int i;
+        _PolyhedralBoundedSolidHalfEdge head;
+        _PolyhedralBoundedSolidHalfEdge tail;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
         PolyhedralBoundedSolid solida;
         int nnbr = nbr.size();
@@ -602,7 +611,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 System.out.println("          . (" + start + ") H1: " + head);
                 System.out.println("          . (" + i + ") H2: " + tail);
             }
-            solida.lmev(head, tail, nextVertexId(inSolidA, inSolidB),
+            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
                 head.startingVertex.position);
 
             if ( BvsA != 0 ) {
@@ -696,7 +705,8 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
-        PolyhedralBoundedSolid solida, solidb;
+        PolyhedralBoundedSolid solida;
+        PolyhedralBoundedSolid solidb;
         _PolyhedralBoundedSolidHalfEdge he;
 
         solida = inSolidA;
@@ -708,14 +718,15 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
 
         he = f.boundariesList.get(0).boundaryStartHalfEdge;
 
-        int vn1, vn2;
+        int vn1;
+        int vn2;
         vn1 = nextVertexId(solida, solidb);
-        solidb.lmev(he, he, vn1, v.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn1, v.position);
         he = solidb.findVertex(vn1).emanatingHalfEdge;
-        solidb.lkemr(he.mirrorHalfEdge(), he);
+        PolyhedralBoundedSolidEulerOperators.lkemr(solidb, he.mirrorHalfEdge(), he);
 
         vn2 = nextVertexId(solida, solidb);
-        solidb.lmev(he, he, vn2, v.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn2, v.position);
 
         if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOW_OPERATIONS) != 0x00 ) {

@@ -52,6 +52,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
+import vsdk.toolkit.environment.LightType;
 
 public class Md2MeshExample
     extends JFrame implements GLEventListener, MouseListener,
@@ -133,7 +134,7 @@ public class Md2MeshExample
         camera.setFarPlaneDistance(4000);
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
-        light = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
         light.setId(0);
     }
 

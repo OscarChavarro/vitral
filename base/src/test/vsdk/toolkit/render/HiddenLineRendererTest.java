@@ -30,6 +30,7 @@ class HiddenLineRendererTest
     @Test
     void given_appe1967FeaturedSolid_when_executingAppelAlgorithm_then_allGeneratedEndpointsStayOnSolidEdges()
     {
+        // Arrange
         PolyhedralBoundedSolid solid;
         try {
             solid = SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
@@ -46,6 +47,7 @@ class HiddenLineRendererTest
         ArrayList<Vector3D> visibleLines = new ArrayList<Vector3D>();
         ArrayList<Vector3D> hiddenLines = new ArrayList<Vector3D>();
 
+        // Action
         HiddenLineRenderer.executeAppelAlgorithm(createSingleBodyScene(solid),
             createFeaturedCamera(), contourLines, visibleLines, hiddenLines);
 
@@ -54,6 +56,8 @@ class HiddenLineRendererTest
         allPoints.addAll(visibleLines);
         allPoints.addAll(hiddenLines);
 
+        // Assert
+        // TODO: Re-enable endpoint assertions after APPEL fixture construction is stable.
         // TODO: Re-enable after APPEL fixture construction is made stable.
         // assertThat(allPoints).isNotEmpty();
         // for ( int i = 0; i < allPoints.size(); i++ ) {

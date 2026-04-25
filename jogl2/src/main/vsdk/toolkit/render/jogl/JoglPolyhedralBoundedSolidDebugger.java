@@ -24,6 +24,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
+import vsdk.toolkit.environment.LightType;
 
 /**
 Warning: check why this class implements a GLEventListener. Advanced debug
@@ -83,8 +84,8 @@ implements GLEventListener
         quality.setWires(true);
 
         material = defaultMaterial();
-        light1 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
-        light2 = new Light(vsdk.toolkit.environment.LightType.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
+        light1 = new Light(LightType.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
+        light2 = new Light(LightType.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
     }

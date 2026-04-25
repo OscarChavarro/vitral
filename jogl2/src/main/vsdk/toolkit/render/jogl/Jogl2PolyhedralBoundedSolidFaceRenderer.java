@@ -50,10 +50,13 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         int N = 10;
 
         // Local variables
-        Vector3D u, v;
-        double factor, t;
+        Vector3D u;
+        Vector3D v;
+        double factor;
+        double t;
         int i;
-        Vector3D P, n;
+        Vector3D P;
+        Vector3D n;
 
         n = loopPlane.getNormal();
         v = endP.subtract(startP);
@@ -347,7 +350,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
     public static void
     drawSurfaces(GL2 gl, PolyhedralBoundedSolid solid)
     {
-        int i, j;
+        int i;
+        int j;
 
         //- Prepare tesselator --------------------------------------------
         if ( tesselatorProcessor == null ) {
@@ -362,7 +366,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         gl.glEnable(GL.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
-        Vector3D p0, n;
+        Vector3D p0;
+        Vector3D n;
         for ( i = 0; i < solid.polygonsList.size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.polygonsList.get(i);
@@ -380,7 +385,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {
@@ -428,7 +434,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         // Face polygon generation via JOGL GLU tesselator
         for ( j = 0; j < face.boundariesList.size(); j++ ) {
             _PolyhedralBoundedSolidLoop loop;
-            _PolyhedralBoundedSolidHalfEdge he, heStart;
+            _PolyhedralBoundedSolidHalfEdge he;
+            _PolyhedralBoundedSolidHalfEdge heStart;
 
             GLU.gluTessBeginContour(tesselator);
 
@@ -487,8 +494,10 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
     public static void
     drawDebugFaceBoundary(GL2 gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
-        int i, j;
-        Vector3D startP, endP;
+        int i;
+        int j;
+        Vector3D startP;
+        Vector3D endP;
         Vector3D p0;
         Vector3D p1;
         Vector3D p2;
@@ -513,7 +522,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
 
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
@@ -563,7 +573,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
     drawDebugFace(GL2 gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
         //- Draw face boundaries, one for each loop -----------------------
-        int i, j;
+        int i;
+        int j;
 
         //- Prepare tesselator --------------------------------------------
         if ( tesselatorProcessor == null ) {
@@ -598,7 +609,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
                 loop = face.boundariesList.get(j);
                 he = loop.boundaryStartHalfEdge;
                 if ( he == null ) {

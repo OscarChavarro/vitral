@@ -3,11 +3,13 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 /**
 Finish stage (big phase 4) for set operations, corresponding to the answer
@@ -108,7 +110,9 @@ final class _PolyhedralBoundedSolidSetFinisher
         ArrayList<_PolyhedralBoundedSolidFace> sonfa,
         ArrayList<_PolyhedralBoundedSolidFace> sonfb)
     {
-        int i, inda, indb;
+        int i;
+        int inda;
+        int indb;
         _PolyhedralBoundedSolidFace f;
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
@@ -129,11 +133,11 @@ final class _PolyhedralBoundedSolidSetFinisher
         indb = (op == UNION) ? 0 : sonfb.size();
 
         for ( i = 0; i < oldsize; i++ ) {
-            f = inSolidA.lmfkrh(sonfa.get(i).boundariesList.get(1),
+            f = PolyhedralBoundedSolidEulerOperators.lmfkrh(inSolidA, sonfa.get(i).boundariesList.get(1),
                                 inSolidA.getMaxFaceId()+1);
             sonfa.add(f);
 
-            f = inSolidB.lmfkrh(sonfb.get(i).boundariesList.get(1),
+            f = PolyhedralBoundedSolidEulerOperators.lmfkrh(inSolidB, sonfb.get(i).boundariesList.get(1),
                                 inSolidB.getMaxFaceId()+1);
             sonfb.add(f);
         }
@@ -150,8 +154,8 @@ final class _PolyhedralBoundedSolidSetFinisher
         cleanup(outRes);
 
         for ( i = 0; i < oldsize; i++ ) {
-            outRes.lkfmrh(sonfa.get(i+inda), sonfb.get(i+indb));
-            outRes.loopGlue(sonfa.get(i+inda));
+            PolyhedralBoundedSolidEulerOperators.lkfmrh(outRes, sonfa.get(i+inda), sonfb.get(i+indb));
+            PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i+inda));
         }
         cleanup(outRes);
         outRes.compactIds();

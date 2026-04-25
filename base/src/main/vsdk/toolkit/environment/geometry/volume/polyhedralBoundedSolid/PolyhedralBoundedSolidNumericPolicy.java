@@ -170,7 +170,8 @@ public class PolyhedralBoundedSolidNumericPolicy
         double maxZ = -Double.POSITIVE_INFINITY;
         boolean found = false;
 
-        int i, j;
+        int i;
+        int j;
         for ( i = 0; i < face.boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
             if ( loop == null ) {

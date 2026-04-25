@@ -233,14 +233,17 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             PolyhedralBoundedSolidNumericPolicy.forFace(this);
         double nonColinearDotTolerance = numericContext.coplanarDotTolerance();
         _PolyhedralBoundedSolidLoop loop;
-        _PolyhedralBoundedSolidHalfEdge he, heStart, heInferior;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidHalfEdge heStart;
+        _PolyhedralBoundedSolidHalfEdge heInferior;
         Vector3D p0 = new Vector3D ();
         Vector3D p1;
         Vector3D a = new Vector3D ();
         Vector3D b = new Vector3D ();
         Vector3D n1;
         Vector3D temp = new Vector3D ();
-        boolean readyVecA, readyVecB;
+        boolean readyVecA;
+        boolean readyVecB;
         double dotP;
         //domPlane: 1=xy, 2=xz, 3=yz
         byte domPlane;
@@ -423,7 +426,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         ArrayListOfDoubles polygon2Dv = new ArrayListOfDoubles(100);
         ArrayList<_PolyhedralBoundedSolidHalfEdge> polygon2Dh;
         ArrayList<_PolyhedralBoundedSolidVertex> polygon2Dvv;
-        double u, v;
+        double u;
+        double v;
         Vector3D projectedPoint = new Vector3D();
         int dominantCoordinate;
         int i;
@@ -449,7 +453,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
         for ( i = 0; i < boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidLoop loop;
-            _PolyhedralBoundedSolidHalfEdge heStart, heOld;
+            _PolyhedralBoundedSolidHalfEdge heStart;
+            _PolyhedralBoundedSolidHalfEdge heOld;
 
             loop = boundariesList.get(i);
             he = loop.boundaryStartHalfEdge;            
@@ -516,8 +521,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
         //-----------------------------------------------------------------
         //- 3. Iterate edges
-        double ua, va, ub, vb;
-        _PolyhedralBoundedSolidVertex vva, vvb;
+        double ua;
+        double va;
+        double ub;
+        double vb;
+        _PolyhedralBoundedSolidVertex vva;
+        _PolyhedralBoundedSolidVertex vvb;
 
         for ( i = 0; i < polygon2Du.size() - 1; i += 2 ) {
             // This iteration tests the line segment (ua, va) - (ub, vb)
@@ -582,7 +591,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         Vector3D viewingVector;
         viewingVector = c.getRotation().multiply(iv);
         Vector3D n = getContainingPlane().getNormal();
-        Vector3D cp, t;
+        Vector3D cp;
+        Vector3D t;
         n = n.normalized();
         double dot;
         int i;
@@ -605,7 +615,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             for ( i = 0; i < boundariesList.size(); i++ ) {
                 //System.out.println("  - Testing boundary " + i + " of " + boundariesList.size());
                 l = boundariesList.get(i);
-                _PolyhedralBoundedSolidHalfEdge he, heStart;
+                _PolyhedralBoundedSolidHalfEdge he;
+                _PolyhedralBoundedSolidHalfEdge heStart;
 
                 he = l.boundaryStartHalfEdge;
                 heStart = he;

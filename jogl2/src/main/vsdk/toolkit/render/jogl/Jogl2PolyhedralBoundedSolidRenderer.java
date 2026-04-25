@@ -39,7 +39,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 
         for ( i = 0; i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
-            int start, end;
+            int start;
+            int end;
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();
 
@@ -98,7 +99,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 
         _PolyhedralBoundedSolidFace face1;
         _PolyhedralBoundedSolidFace face2;
-        boolean f1, f2;
+        boolean f1;
+        boolean f2;
 
         for ( i = 0; edgeIndex >= -1 && i < solid.edgesList.size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.edgesList.get(i);
@@ -107,7 +109,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
                 continue;
             }
 
-            int start, end;
+            int start;
+            int end;
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {

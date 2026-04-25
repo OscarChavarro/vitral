@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -668,7 +669,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static boolean closeLegacyCoincidentLooseEnds()
     {
-        int i, j;
+        int i;
+        int j;
 
         if ( endsa == null || endsb == null ) {
             return false;
@@ -708,7 +710,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static boolean closeFlexibleChainsByCoincidentEndpoints()
     {
-        int i, j;
+        int i;
+        int j;
 
         if ( openChains == null ) {
             return false;
@@ -967,7 +970,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             addedFace = he.parentLoop.parentFace;
-            s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkemr(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
             if ( addedFace.boundariesList.size() >= 2 ) {
                 sonfa.add(addedFace);
                 if ( sonfaPairIndexByFaceId != null ) {
@@ -980,7 +983,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             }
         }
         else {
-            s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkef(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
         return addedFace;
     }
@@ -1002,7 +1005,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         if ( he.parentEdge.rightHalf.parentLoop ==
              he.parentEdge.leftHalf.parentLoop ) {
             addedFace = he.parentLoop.parentFace;
-            s.lkemr(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkemr(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
             if ( addedFace.boundariesList.size() >= 2 ) {
                 sonfb.add(addedFace);
                 if ( sonfbPairIndexByFaceId != null ) {
@@ -1015,7 +1018,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             }
         }
         else {
-            s.lkef(he.parentEdge.rightHalf, he.parentEdge.leftHalf);
+            PolyhedralBoundedSolidEulerOperators.lkef(s, he.parentEdge.rightHalf, he.parentEdge.leftHalf);
         }
         return addedFace;
     }
@@ -1206,8 +1209,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
         }
 
-        _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
-        _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
+        _PolyhedralBoundedSolidEdge nextedgea;
+        _PolyhedralBoundedSolidEdge nextedgeb;
+        _PolyhedralBoundedSolidHalfEdge h1a = null;
+        _PolyhedralBoundedSolidHalfEdge h2a = null;
+        _PolyhedralBoundedSolidHalfEdge h1b = null;
+        _PolyhedralBoundedSolidHalfEdge h2b = null;
         PointJoinResult pointResult;
         boolean allowRingMoveOnAJoin = (operation == INTERSECTION) ||
             isForceARingMoveEnabled();
@@ -1231,8 +1238,10 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
 
         for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
-            _PolyhedralBoundedSolidHalfEdge ha, ham;
-            _PolyhedralBoundedSolidHalfEdge hb, hbm;
+            _PolyhedralBoundedSolidHalfEdge ha;
+            _PolyhedralBoundedSolidHalfEdge ham;
+            _PolyhedralBoundedSolidHalfEdge hb;
+            _PolyhedralBoundedSolidHalfEdge hbm;
             _PolyhedralBoundedSolidHalfEdge tmp;
 
             ha = sonea.get(i).e.rightHalf;
@@ -1352,8 +1361,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
         }
 
-        _PolyhedralBoundedSolidEdge nextedgea, nextedgeb;
-        _PolyhedralBoundedSolidHalfEdge h1a = null, h2a = null, h1b = null, h2b = null;
+        _PolyhedralBoundedSolidEdge nextedgea;
+        _PolyhedralBoundedSolidEdge nextedgeb;
+        _PolyhedralBoundedSolidHalfEdge h1a = null;
+        _PolyhedralBoundedSolidHalfEdge h2a = null;
+        _PolyhedralBoundedSolidHalfEdge h1b = null;
+        _PolyhedralBoundedSolidHalfEdge h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
         boolean allowRingMoveOnAJoin = (operation == INTERSECTION) ||
             isForceARingMoveEnabled();
@@ -1376,8 +1389,10 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
 
         for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
-            _PolyhedralBoundedSolidHalfEdge ha, ham;
-            _PolyhedralBoundedSolidHalfEdge hb, hbm;
+            _PolyhedralBoundedSolidHalfEdge ha;
+            _PolyhedralBoundedSolidHalfEdge ham;
+            _PolyhedralBoundedSolidHalfEdge hb;
+            _PolyhedralBoundedSolidHalfEdge hbm;
             _PolyhedralBoundedSolidHalfEdge tmp;
 
             ha = sonea.get(i).e.rightHalf;
@@ -1394,7 +1409,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " loose ends before processing pair [" + i + "]:");
 
                 for ( j = 0; j < endsa.size(); j++ ) {
-                    _PolyhedralBoundedSolidHalfEdge hat, hbt;
+                    _PolyhedralBoundedSolidHalfEdge hat;
+                    _PolyhedralBoundedSolidHalfEdge hbt;
                     hat = endsa.get(j);
                     hbt = endsb.get(j);
                     System.out.println("    . [" + j + "]: He(A): " +

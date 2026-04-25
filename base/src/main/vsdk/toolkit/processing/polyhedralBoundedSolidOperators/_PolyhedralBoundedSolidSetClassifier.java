@@ -3,6 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import java.util.ArrayList;
 
@@ -339,7 +340,9 @@ final class _PolyhedralBoundedSolidSetClassifier
     private static int nextVertexId(PolyhedralBoundedSolid current,
                                     PolyhedralBoundedSolid other)
     {
-        int a, b, m;
+        int a;
+        int b;
+        int m;
 
         a = current.getMaxVertexId();
         b = other.getMaxVertexId();
@@ -360,7 +363,9 @@ final class _PolyhedralBoundedSolidSetClassifier
     protected static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
     {
         Vector3D middle = null;
-        Vector3D a, b, n;
+        Vector3D a;
+        Vector3D b;
+        Vector3D n;
 
         a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
@@ -537,7 +542,7 @@ final class _PolyhedralBoundedSolidSetClassifier
 
         int id = nextVertexId(inSolidA, inSolidB);
 
-        s.lmev(to, from, id, to.startingVertex.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(s, to, from, id, to.startingVertex.position);
 
         if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOW_OPERATIONS) != 0x00 ) {
@@ -613,7 +618,7 @@ final class _PolyhedralBoundedSolidSetClassifier
 
 
         int id = nextVertexId(inSolidA, inSolidB);
-        he.parentLoop.parentFace.parentSolid.lmev(he, he, id,
+        PolyhedralBoundedSolidEulerOperators.lmev(he.parentLoop.parentFace.parentSolid, he, he, id,
             he.startingVertex.position);
 
         if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 &&
@@ -686,7 +691,8 @@ final class _PolyhedralBoundedSolidSetClassifier
     private static boolean convexedg(_PolyhedralBoundedSolidHalfEdge he)
     {
         _PolyhedralBoundedSolidHalfEdge h2;
-        Vector3D dir, cr;
+        Vector3D dir;
+        Vector3D cr;
 
         h2 = he.next();
         if ( nulledge(he) ) {
@@ -716,7 +722,8 @@ final class _PolyhedralBoundedSolidSetClassifier
         _PolyhedralBoundedSolidHalfEdge he1,
         _PolyhedralBoundedSolidHalfEdge he2)
     {
-        _PolyhedralBoundedSolidHalfEdge mhe1, mhe2;
+        _PolyhedralBoundedSolidHalfEdge mhe1;
+        _PolyhedralBoundedSolidHalfEdge mhe2;
         boolean retcode = false;
 
         mhe1 = he1.mirrorHalfEdge().next();
@@ -849,7 +856,7 @@ final class _PolyhedralBoundedSolidSetClassifier
             " hb1=" + summarizeHalfEdge(hb1) +
             " hb2=" + summarizeHalfEdge(hb2));
 
-        return new _PolyhedralBoundedSolidHalfEdge[] { ha1, ha2, hb1, hb2 };
+        return new _PolyhedralBoundedSolidHalfEdge[] { ha1, ha2, hb1, hb2  };
     }
 
     /**
