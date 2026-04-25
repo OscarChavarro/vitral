@@ -46,7 +46,8 @@ public class DebuggerModel
     private RendererConfigurationController qualityController;
     private CameraController cameraController;
     private GLCanvas canvas;
-    private CsgOperationNames csgOperation = CsgOperationNames.UNION;
+    private CsgOperationNames csgOperation =
+        CsgOperationNames.DIFFERENCE_A_MINUS_B;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
     private boolean debugCsg = false;

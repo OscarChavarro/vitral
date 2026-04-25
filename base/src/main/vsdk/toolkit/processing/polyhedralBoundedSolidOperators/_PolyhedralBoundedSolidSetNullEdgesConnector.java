@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -874,6 +876,162 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return false;
     }
 
+    private static boolean isOppositeHalfEdgeSide(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second)
+    {
+        if ( first == null || second == null ||
+             first.parentEdge == null || second.parentEdge == null ) {
+            return false;
+        }
+
+        return (first == first.parentEdge.rightHalf &&
+                second == second.parentEdge.leftHalf) ||
+               (first == first.parentEdge.leftHalf &&
+                second == second.parentEdge.rightHalf);
+    }
+
+    private static _PolyhedralBoundedSolidFace
+    findUniqueClassicRebindTargetFace(
+        _PolyhedralBoundedSolidHalfEdge currentARight,
+        _PolyhedralBoundedSolidHalfEdge currentALeft,
+        _PolyhedralBoundedSolidHalfEdge currentBLeft,
+        _PolyhedralBoundedSolidHalfEdge currentBRight)
+    {
+        _PolyhedralBoundedSolidFace candidateFace = null;
+        int i;
+        int j;
+        int pairCount;
+
+        if ( !isLiveHalfEdge(currentARight) ||
+             !isLiveHalfEdge(currentALeft) ||
+             !isLiveHalfEdge(currentBLeft) ||
+             !isLiveHalfEdge(currentBRight) ||
+             endsa == null || endsb == null ) {
+            return null;
+        }
+
+        pairCount = Math.min(endsa.size(), endsb.size());
+        for ( i = 0; i < pairCount; i++ ) {
+            _PolyhedralBoundedSolidHalfEdge looseARight;
+            _PolyhedralBoundedSolidHalfEdge looseBLeft;
+
+            looseARight = endsa.get(i);
+            looseBLeft = endsb.get(i);
+            if ( !isLiveHalfEdge(looseARight) ||
+                 !isLiveHalfEdge(looseBLeft) ||
+                 !isOppositeHalfEdgeSide(currentARight, looseARight) ||
+                 !neighbor(currentBLeft, looseBLeft) ) {
+                continue;
+            }
+
+            for ( j = 0; j < pairCount; j++ ) {
+                _PolyhedralBoundedSolidHalfEdge looseALeft;
+                _PolyhedralBoundedSolidHalfEdge looseBRight;
+                _PolyhedralBoundedSolidFace looseFace;
+
+                if ( i == j ) {
+                    continue;
+                }
+
+                looseALeft = endsa.get(j);
+                looseBRight = endsb.get(j);
+                if ( !isLiveHalfEdge(looseALeft) ||
+                     !isLiveHalfEdge(looseBRight) ||
+                     !isOppositeHalfEdgeSide(currentALeft, looseALeft) ||
+                     !neighbor(currentBRight, looseBRight) ) {
+                    continue;
+                }
+
+                looseFace = looseARight.parentLoop.parentFace;
+                if ( looseFace != looseALeft.parentLoop.parentFace ||
+                     looseFace == currentARight.parentLoop.parentFace ) {
+                    continue;
+                }
+
+                if ( candidateFace == null ) {
+                    candidateFace = looseFace;
+                }
+                else if ( candidateFace != looseFace ) {
+                    return null;
+                }
+            }
+        }
+        return candidateFace;
+    }
+
+    private static boolean isStrictRebindTargetFace(
+        _PolyhedralBoundedSolidFace targetFace,
+        _PolyhedralBoundedSolidHalfEdge currentARight)
+    {
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
+        Vector3D point;
+
+        if ( targetFace == null ||
+             !isLiveHalfEdge(currentARight) ||
+             currentARight.startingVertex == null ||
+             targetFace.getContainingPlane() == null ) {
+            return false;
+        }
+
+        numericContext = PolyhedralBoundedSolidNumericPolicy.forFace(targetFace);
+        point = currentARight.startingVertex.position;
+        if ( Math.abs(targetFace.getContainingPlane().pointDistance(point)) >
+             numericContext.bigEpsilon() ) {
+            return false;
+        }
+
+        return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
+            .pointInFace(targetFace, point) == Geometry.INSIDE;
+    }
+
+    private static void rebindClassicCurrentNullEdgeAIfNeeded(
+        _PolyhedralBoundedSolidHalfEdge currentARight,
+        _PolyhedralBoundedSolidHalfEdge currentALeft,
+        _PolyhedralBoundedSolidHalfEdge currentBLeft,
+        _PolyhedralBoundedSolidHalfEdge currentBRight)
+    {
+        _PolyhedralBoundedSolidFace targetFace;
+        _PolyhedralBoundedSolidFace sourceFace;
+        _PolyhedralBoundedSolidLoop sourceLoop;
+        PolyhedralBoundedSolid solid;
+
+        if ( operation != SUBTRACT ||
+             !isLiveHalfEdge(currentARight) ||
+             !isLiveHalfEdge(currentALeft) ||
+             currentARight.parentLoop != currentALeft.parentLoop ) {
+            return;
+        }
+
+        sourceLoop = currentARight.parentLoop;
+        sourceFace = sourceLoop.parentFace;
+        if ( sourceLoop.halfEdgesList.size() != 2 ) {
+            return;
+        }
+
+        targetFace = findUniqueClassicRebindTargetFace(
+            currentARight, currentALeft, currentBLeft, currentBRight);
+        if ( targetFace == null ||
+             targetFace == sourceFace ||
+             !isStrictRebindTargetFace(targetFace, currentARight) ) {
+            return;
+        }
+
+        solid = currentARight.parentLoop.parentFace.parentSolid;
+        if ( !PolyhedralBoundedSolidEulerOperators.lringmv(
+                 solid, sourceLoop, targetFace, false) ) {
+            tracePipelineSummary(
+                "connect rebindA failed sourceFace=" +
+                sourceFace.id + " targetFace=" +
+                targetFace.id + " edge=" + summarizeHalfEdge(currentARight));
+            return;
+        }
+        tracePipelineSummary(
+            "connect rebindA sourceFace=" +
+            sourceFace.id + " targetFace=" +
+            targetFace.id + " edge=" + summarizeHalfEdge(currentARight));
+    }
+
     private static void rememberDeferredCut(
         ArrayList<DeferredCut> deferredCuts,
         _PolyhedralBoundedSolidHalfEdge he)
@@ -1701,6 +1859,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 nextedgeb.rightHalf = nextedgeb.leftHalf;
                 nextedgeb.leftHalf = tmp;
             }
+
+            rebindClassicCurrentNullEdgeAIfNeeded(
+                nextedgea.rightHalf,
+                nextedgea.leftHalf,
+                nextedgeb.leftHalf,
+                nextedgeb.rightHalf);
 
             setCurrentConnectContext(i);
             r = canJoin(nextedgea.rightHalf, nextedgeb.leftHalf);

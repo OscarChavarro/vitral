@@ -38,7 +38,8 @@ public enum CsgSampleNames
         CsgOperationNames currentOperation)
     {
         if ( this == MANT1988_15_2_LIMIT_DIFFERENCE ||
-             this == MANT1988_15_2_OPEN_DIFFERENCE ) {
+             this == MANT1988_15_2_OPEN_DIFFERENCE ||
+             this == KURLANDER_BOWL_FIRST_STAR ) {
             return CsgOperationNames.DIFFERENCE_A_MINUS_B;
         }
         return currentOperation;
