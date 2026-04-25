@@ -179,27 +179,39 @@ public final class GeneralModelsBuilder
             mySolid = splitTest(3);
             break;
           case CSG_DIRECT:
+            printKurlanderAllMotifsProgressHint(model.getCsgSample(), 1);
             csgPreviewOperands = createCsgHudPreviewOperands(
-                model.getCsgSample());
+                model.getCsgSample(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
-            mySolid = csgTest(1, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            mySolid = csgTest(1, model.getCsgOperation(),
+                model.getCsgSample(), model.isDebugCsg(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setDebugCsg(false);
             break;
           case CSG_OPERAND1_PARTIAL:
+            printKurlanderAllMotifsProgressHint(model.getCsgSample(), 2);
             csgPreviewOperands = createCsgHudPreviewOperands(
-                model.getCsgSample());
+                model.getCsgSample(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
-            mySolid = csgTest(2, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            mySolid = csgTest(2, model.getCsgOperation(),
+                model.getCsgSample(), model.isDebugCsg(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setDebugCsg(false);
             break;
           case CSG_OPERAND2_PARTIAL:
+            printKurlanderAllMotifsProgressHint(model.getCsgSample(), 3);
             csgPreviewOperands = createCsgHudPreviewOperands(
-                model.getCsgSample());
+                model.getCsgSample(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setCsgPreviewOperandA(csgPreviewOperands[0]);
             model.setCsgPreviewOperandB(csgPreviewOperands[1]);
-            mySolid = csgTest(3, model.getCsgOperation(), model.getCsgSample(), model.isDebugCsg());
+            mySolid = csgTest(3, model.getCsgOperation(),
+                model.getCsgSample(), model.isDebugCsg(),
+                model.getKurlanderBowlSingleMotifIndex());
             model.setDebugCsg(false);
             break;
           case FEATURED_OBJECT:
@@ -224,6 +236,31 @@ public final class GeneralModelsBuilder
         }
 
         return mySolid;
+    }
+
+    private static void printKurlanderAllMotifsProgressHint(
+        CsgSampleNames sample,
+        int part)
+    {
+        if ( sample != CsgSampleNames.KURLANDER_BOWL_ALL_MOTIFS ) {
+            return;
+        }
+        if ( part != 1 ) {
+            printProgressMessage(
+                "KURLANDER_BOWL_ALL_MOTIFS selected as operand preview; " +
+                "full motif processing only runs in CSG_DIRECT.");
+            return;
+        }
+        printProgressMessage(
+            "KURLANDER_BOWL_ALL_MOTIFS selected; full motif processing will start.");
+    }
+
+    private static void printProgressMessage(String message)
+    {
+        System.out.println(message);
+        System.out.flush();
+        System.err.println(message);
+        System.err.flush();
     }
 
     private static PolyhedralBoundedSolid importFromFile(String filename)
@@ -1139,6 +1176,15 @@ public final class GeneralModelsBuilder
         CsgSampleNames sample,
         boolean withDebug)
     {
+        return csgTest(part, op, sample, withDebug, 0);
+    }
+
+    public static PolyhedralBoundedSolid csgTest(int part,
+        CsgOperationNames op,
+        CsgSampleNames sample,
+        boolean withDebug,
+        int kurlanderSingleMotifIndex)
+    {
         PolyhedralBoundedSolid res = null;
         PolyhedralBoundedSolid operands[];
 
@@ -1146,7 +1192,13 @@ public final class GeneralModelsBuilder
             "operation %s, and sample pair %s\n", part,
             op.getLabel(), sample.getLabel());
 
-        operands = createCsgOperands(sample);
+        if ( sample == CsgSampleNames.KURLANDER_BOWL_ALL_MOTIFS &&
+             part == 1 ) {
+            PolyhedralBoundedSolidStatistics.reset();
+            return CsgKurlanderBowlFixture.create();
+        }
+
+        operands = createCsgOperands(sample, kurlanderSingleMotifIndex);
         PolyhedralBoundedSolidStatistics.reset();
 
         //-----------------------------------------------------------------
@@ -1183,6 +1235,13 @@ public final class GeneralModelsBuilder
 
     private static PolyhedralBoundedSolid[] createCsgOperands(
         CsgSampleNames sample)
+    {
+        return createCsgOperands(sample, 0);
+    }
+
+    private static PolyhedralBoundedSolid[] createCsgOperands(
+        CsgSampleNames sample,
+        int kurlanderSingleMotifIndex)
     {
         PolyhedralBoundedSolid[] operands;
 
@@ -1227,7 +1286,12 @@ public final class GeneralModelsBuilder
                 operands =
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
                 break;
-            case KURLANDER_BOWL_FIRST_STAR:
+            case KURLANDER_BOWL_SINGLE_MOTIF:
+                operands =
+                    CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
+                        kurlanderSingleMotifIndex);
+                break;
+            case KURLANDER_BOWL_ALL_MOTIFS:
             default:
                 operands =
                     CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
@@ -1239,6 +1303,13 @@ public final class GeneralModelsBuilder
 
     private static PolyhedralBoundedSolid[] createCsgHudPreviewOperands(
         CsgSampleNames sample)
+    {
+        return createCsgHudPreviewOperands(sample, 0);
+    }
+
+    private static PolyhedralBoundedSolid[] createCsgHudPreviewOperands(
+        CsgSampleNames sample,
+        int kurlanderSingleMotifIndex)
     {
         switch ( sample ) {
             case MANT1986_2:
@@ -1262,10 +1333,13 @@ public final class GeneralModelsBuilder
             case MANT1988_15_1:
                 return
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
-            case KURLANDER_BOWL_FIRST_STAR:
+            case KURLANDER_BOWL_SINGLE_MOTIF:
+                return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
+                    kurlanderSingleMotifIndex);
+            case KURLANDER_BOWL_ALL_MOTIFS:
                 return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
             default:
-                return createCsgOperands(sample);
+                return createCsgOperands(sample, kurlanderSingleMotifIndex);
         }
     }
 

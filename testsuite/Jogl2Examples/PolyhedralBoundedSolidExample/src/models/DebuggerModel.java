@@ -20,6 +20,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 
 public class DebuggerModel
 {
@@ -27,33 +28,30 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
     private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
-    private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_FIRST_STAR;
+    private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
+    private int kurlanderBowlSingleMotifIndex = 4;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
-
-    private Camera camera;
-    private Material material;
-    private Light light1;
-    private Light light2;
+    private final Camera camera;
+    private final Material material;
+    private final Light light1;
+    private final Light light2;
     private PolyhedralBoundedSolid solid;
     private PolyhedralBoundedSolid csgPreviewOperandA;
     private PolyhedralBoundedSolid csgPreviewOperandB;
     private int faceIndex = -2;
     private int edgeIndex = -2;
     private boolean debugVertices = false;
-
-    private RendererConfiguration quality;
-    private RendererConfigurationController qualityController;
-    private CameraController cameraController;
+    private final RendererConfiguration quality;
+    private final RendererConfigurationController qualityController;
+    private final CameraController cameraController;
     private GLCanvas canvas;
-    private CsgOperationNames csgOperation =
-        CsgOperationNames.DIFFERENCE_A_MINUS_B;
+    private CsgOperationNames csgOperation = CsgOperationNames.DIFFERENCE_A_MINUS_B;
     private boolean debugEdges = false;
     private boolean showCoordinateSystem = true;
     private boolean debugCsg = false;
     private boolean errorState = false;
     private String errorMessage = "";
-
     private JFrame mainFrame;
     private Rectangle windowedBounds;
     private boolean fullScreenMode = false;
@@ -62,9 +60,9 @@ public class DebuggerModel
     {
         camera = new Camera();
         camera.setPosition(new Vector3D(2, -1, 2));
-        Matrix4x4 R = new Matrix4x4();
-        R = R.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
-        camera.setRotation(R);
+        Matrix4x4 rotationMatrix = new Matrix4x4();
+        rotationMatrix = rotationMatrix.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
+        camera.setRotation(rotationMatrix);
 
         quality = new RendererConfiguration();
         quality.changeWires();
@@ -170,19 +168,9 @@ public class DebuggerModel
         return camera;
     }
 
-    public void setCamera(Camera camera)
-    {
-        this.camera = camera;
-    }
-
     public Material getMaterial()
     {
         return material;
-    }
-
-    public void setMaterial(Material material)
-    {
-        this.material = material;
     }
 
     public Light getLight1()
@@ -190,19 +178,9 @@ public class DebuggerModel
         return light1;
     }
 
-    public void setLight1(Light light1)
-    {
-        this.light1 = light1;
-    }
-
     public Light getLight2()
     {
         return light2;
-    }
-
-    public void setLight2(Light light2)
-    {
-        this.light2 = light2;
     }
 
     public PolyhedralBoundedSolid getSolid()
@@ -255,9 +233,9 @@ public class DebuggerModel
         this.edgeIndex = edgeIndex;
     }
 
-    public boolean isDebugVertices()
+    public boolean notDebugVertices()
     {
-        return debugVertices;
+        return !debugVertices;
     }
 
     public void setDebugVertices(boolean debugVertices)
@@ -270,29 +248,14 @@ public class DebuggerModel
         return quality;
     }
 
-    public void setQuality(RendererConfiguration quality)
-    {
-        this.quality = quality;
-    }
-
     public RendererConfigurationController getQualityController()
     {
         return qualityController;
     }
 
-    public void setQualityController(RendererConfigurationController qualityController)
-    {
-        this.qualityController = qualityController;
-    }
-
     public CameraController getCameraController()
     {
         return cameraController;
-    }
-
-    public void setCameraController(CameraController cameraController)
-    {
-        this.cameraController = cameraController;
     }
 
     public GLCanvas getCanvas()
@@ -324,6 +287,33 @@ public class DebuggerModel
     {
         this.csgSample = csgSample;
         this.csgOperation = csgSample.getPreferredOperation(csgOperation);
+    }
+
+    public int getKurlanderBowlSingleMotifIndex()
+    {
+        return kurlanderBowlSingleMotifIndex;
+    }
+
+    public void setKurlanderBowlSingleMotifIndex(int motifIndex)
+    {
+        kurlanderBowlSingleMotifIndex =
+            CsgKurlanderBowlFixture.normalizeSingleMotifIndex(motifIndex);
+    }
+
+    public String getKurlanderBowlSingleMotifLabel()
+    {
+        return CsgKurlanderBowlFixture.describeSingleMotif(
+            kurlanderBowlSingleMotifIndex);
+    }
+
+    public boolean usesKurlanderBowlSingleMotifControls()
+    {
+        if ( csgSample != CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF ) {
+            return false;
+        }
+        return solidModelName == SolidModelNames.CSG_DIRECT ||
+            solidModelName == SolidModelNames.CSG_OPERAND1_PARTIAL ||
+            solidModelName == SolidModelNames.CSG_OPERAND2_PARTIAL;
     }
 
     public boolean isDebugEdges()

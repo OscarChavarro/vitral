@@ -18,10 +18,32 @@ class CsgKurlanderBowlFirstStarRegressionTest
     private static final int STAR_VERTEX_COUNT = 10;
 
     @Test
+    void given_kurlanderSingleMotifSelector_whenIndexing_thenStarsComeBeforeMoonsAndWrapsCircularly()
+    {
+        int starCount = CsgKurlanderBowlFixture.getSingleMotifStarCount();
+        int moonCount = CsgKurlanderBowlFixture.getSingleMotifMoonCount();
+        int motifCount = CsgKurlanderBowlFixture.getSingleMotifCount();
+
+        assertThat(starCount).isEqualTo(20);
+        assertThat(moonCount).isEqualTo(20);
+        assertThat(motifCount).isEqualTo(40);
+        assertThat(CsgKurlanderBowlFixture.normalizeSingleMotifIndex(0))
+            .isZero();
+        assertThat(CsgKurlanderBowlFixture.normalizeSingleMotifIndex(
+            motifCount)).isZero();
+        assertThat(CsgKurlanderBowlFixture.normalizeSingleMotifIndex(-1))
+            .isEqualTo(motifCount - 1);
+        assertThat(CsgKurlanderBowlFixture.describeSingleMotif(0))
+            .startsWith("STAR 1/20");
+        assertThat(CsgKurlanderBowlFixture.describeSingleMotif(starCount))
+            .startsWith("MOON 1/20");
+    }
+
+    @Test
     void given_kurlanderBowlAndFirstStar_when_subtractingStarFromBowl_then_resultStaysNonEmptyAndIntermediateValid()
     {
         PolyhedralBoundedSolid[] operands =
-            CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
+            CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(0);
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             operands[0], operands[1], PolyhedralBoundedSolidModeler.SUBTRACT,
             false);

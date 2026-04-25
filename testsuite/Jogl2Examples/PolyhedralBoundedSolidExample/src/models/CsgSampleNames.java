@@ -13,7 +13,8 @@ public enum CsgSampleNames
     MANT1988_15_2_HOLED(9),
     MANT1988_15_2_LIMIT_DIFFERENCE(10),
     MANT1988_15_2_OPEN_DIFFERENCE(11),
-    KURLANDER_BOWL_FIRST_STAR(12);
+    KURLANDER_BOWL_SINGLE_MOTIF(12),
+    KURLANDER_BOWL_ALL_MOTIFS(13);
 
     private final int id;
 
@@ -39,7 +40,8 @@ public enum CsgSampleNames
     {
         if ( this == MANT1988_15_2_LIMIT_DIFFERENCE ||
              this == MANT1988_15_2_OPEN_DIFFERENCE ||
-             this == KURLANDER_BOWL_FIRST_STAR ) {
+             this == KURLANDER_BOWL_SINGLE_MOTIF ||
+             this == KURLANDER_BOWL_ALL_MOTIFS ) {
             return CsgOperationNames.DIFFERENCE_A_MINUS_B;
         }
         return currentOperation;

@@ -707,6 +707,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     {
         PolyhedralBoundedSolid solida;
         PolyhedralBoundedSolid solidb;
+        PolyhedralBoundedSolid ringSolid;
         _PolyhedralBoundedSolidHalfEdge he;
 
         solida = inSolidA;
@@ -717,16 +718,20 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         }
 
         he = f.boundariesList.get(0).boundaryStartHalfEdge;
+        ringSolid = he.parentLoop.parentFace.parentSolid;
 
         int vn1;
         int vn2;
         vn1 = nextVertexId(solida, solidb);
-        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn1, v.position);
-        he = solidb.findVertex(vn1).emanatingHalfEdge;
-        PolyhedralBoundedSolidEulerOperators.lkemr(solidb, he.mirrorHalfEdge(), he);
+        PolyhedralBoundedSolidEulerOperators.lmev(
+            ringSolid, he, he, vn1, v.position);
+        he = he.previous();
+        PolyhedralBoundedSolidEulerOperators.lkemr(
+            ringSolid, he.mirrorHalfEdge(), he);
 
         vn2 = nextVertexId(solida, solidb);
-        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn2, v.position);
+        PolyhedralBoundedSolidEulerOperators.lmev(
+            ringSolid, he, he, vn2, v.position);
 
         if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOW_OPERATIONS) != 0x00 ) {

@@ -32,7 +32,7 @@ public class DebuggerKeyboardInteractionTechniques
         switch (event.keycode) {
             // Show vertex numbers
             case KeyEvent.KEY_v -> {
-                model.setDebugVertices(!model.isDebugVertices());
+                model.setDebugVertices(model.notDebugVertices());
                 handled = true;
             }
 
@@ -134,6 +134,22 @@ public class DebuggerKeyboardInteractionTechniques
                 model.setDebugCsg(!model.isDebugCsg());
                 actions.rebuildSolid();
                 handled = true;
+            }
+            case KeyEvent.KEY_e -> {
+                if ( model.usesKurlanderBowlSingleMotifControls() ) {
+                    model.setKurlanderBowlSingleMotifIndex(
+                        model.getKurlanderBowlSingleMotifIndex() - 1);
+                    actions.rebuildSolid();
+                    handled = true;
+                }
+            }
+            case KeyEvent.KEY_E -> {
+                if ( model.usesKurlanderBowlSingleMotifControls() ) {
+                    model.setKurlanderBowlSingleMotifIndex(
+                        model.getKurlanderBowlSingleMotifIndex() + 1);
+                    actions.rebuildSolid();
+                    handled = true;
+                }
             }
         }
 

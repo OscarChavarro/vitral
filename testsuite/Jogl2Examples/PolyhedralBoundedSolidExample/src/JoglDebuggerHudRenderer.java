@@ -73,6 +73,8 @@ public class JoglDebuggerHudRenderer
         String csgSampleMessage = "CSG sample [6]: " + model.getCsgSample().getLabel()
             + " (" + model.getCsgSample().getDisplayIndex()
             + "/" + CsgSampleNames.getTotalSamples() + ")";
+        String kurlanderMotifMessage = "Motif [e, E]: " +
+            model.getKurlanderBowlSingleMotifLabel();
         String csgOperationMessage = "CSG op [5]: " + model.getCsgOperation().getLabel();
         String referenceFrameMessage = "Reference frame [Space]: " +
             (model.isShowCoordinateSystem() ? "ON" : "OFF");
@@ -88,6 +90,11 @@ public class JoglDebuggerHudRenderer
             hudTextRenderer.draw(csgSampleMessage, 16,
                 height - (28 + nextLeftLine*LINE_HEIGHT));
             nextLeftLine++;
+            if ( model.usesKurlanderBowlSingleMotifControls() ) {
+                hudTextRenderer.draw(kurlanderMotifMessage, 16,
+                    height - (28 + nextLeftLine*LINE_HEIGHT));
+                nextLeftLine++;
+            }
             hudTextRenderer.draw(csgOperationMessage, 16,
                 height - (28 + nextLeftLine*LINE_HEIGHT));
             nextLeftLine++;
@@ -188,7 +195,7 @@ public class JoglDebuggerHudRenderer
     private void drawDebugVertexLabels(GLAutoDrawable drawable, int width, int height)
     {
         PolyhedralBoundedSolid solid = model.getSolid();
-        if ( !model.isDebugVertices() || solid == null || solid.getVerticesList() == null ) {
+        if ( model.notDebugVertices() || solid == null || solid.getVerticesList() == null ) {
             return;
         }
 
