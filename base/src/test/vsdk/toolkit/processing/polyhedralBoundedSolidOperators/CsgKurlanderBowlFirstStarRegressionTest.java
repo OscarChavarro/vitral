@@ -10,6 +10,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,6 +86,27 @@ class CsgKurlanderBowlFirstStarRegressionTest
 
         assertThat(countZeroAreaClosedStarDoubleWalkLoops(result,
             numericContext)).isZero();
+    }
+
+    @Test
+    void given_kurlanderBowlAndFifthStar_when_inspectingPartialOperandB_then_twoDoubleBoundaryContoursAreClosed()
+    {
+        PolyhedralBoundedSolid[] operands =
+            CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(4);
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            operands[0], operands[1], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
+        PolyhedralBoundedSolid partialOperandB = operands[1];
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(partialOperandB);
+
+        assertThat(result).isNotNull();
+        assertThat(countClosedDoubleBoundaryContours(partialOperandB,
+            numericContext))
+            .as("The fifth Kurlander star partial operand B should preserve " +
+                "the two closed duplicated intersection contours seen in " +
+                "the preceding star motifs")
+            .isEqualTo(2);
     }
 
     @Test
@@ -172,6 +194,90 @@ class CsgKurlanderBowlFirstStarRegressionTest
             return false;
         }
         return countUniqueLoopPositions(loop, numericContext) <= STAR_VERTEX_COUNT;
+    }
+
+    private static int countClosedDoubleBoundaryContours(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        int count = 0;
+        int i;
+        int j;
+
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
+            for ( j = 0; j < face.boundariesList.size(); j++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(j);
+                if ( isClosedDoubleBoundaryContour(solid, loop,
+                     numericContext) ) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private static boolean isClosedDoubleBoundaryContour(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidLoop loop,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        int i;
+
+        if ( loop == null ||
+             loop.boundaryStartHalfEdge == null ||
+             loop.halfEdgesList.size() < STAR_VERTEX_COUNT ) {
+            return false;
+        }
+
+        for ( i = 0; i < loop.halfEdgesList.size(); i++ ) {
+            _PolyhedralBoundedSolidHalfEdge halfEdge = loop.halfEdgesList.get(i);
+            if ( halfEdge == null ||
+                 halfEdge.next() == null ||
+                 halfEdge.parentEdge == null ||
+                 !hasCoincidentPartnerVertex(solid, halfEdge.startingVertex,
+                     numericContext) ) {
+                return false;
+            }
+        }
+        return loopWalkReturnsToStart(loop);
+    }
+
+    private static boolean loopWalkReturnsToStart(
+        _PolyhedralBoundedSolidLoop loop)
+    {
+        _PolyhedralBoundedSolidHalfEdge halfEdge =
+            loop.boundaryStartHalfEdge;
+        int i;
+
+        for ( i = 0; i < loop.halfEdgesList.size(); i++ ) {
+            if ( halfEdge == null ) {
+                return false;
+            }
+            halfEdge = halfEdge.next();
+        }
+        return halfEdge == loop.boundaryStartHalfEdge;
+    }
+
+    private static boolean hasCoincidentPartnerVertex(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidVertex vertex,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        int i;
+
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex candidate =
+                solid.getVerticesList().get(i);
+            if ( candidate != vertex &&
+                 PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                     candidate.position,
+                     vertex.position,
+                     numericContext) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static double loopAreaMagnitude(_PolyhedralBoundedSolidLoop loop)
