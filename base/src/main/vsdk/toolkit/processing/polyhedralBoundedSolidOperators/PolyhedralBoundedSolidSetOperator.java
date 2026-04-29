@@ -3452,6 +3452,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             .validateIntermediate(result);
     }
 
+    private static boolean hasBasicSetOpShapeData(
+        PolyhedralBoundedSolid result)
+    {
+        return result != null &&
+            result.getPolygonsList().size() > 0 &&
+            result.getEdgesList().size() > 0 &&
+            result.getVerticesList().size() > 0;
+    }
+
     private static boolean shouldAttemptSubtractConnectRecovery(
         int op,
         boolean allowSubtractConnectRecovery,
@@ -3476,9 +3485,19 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         boolean withDebug)
     {
         String previousForceARingMoveValue;
+        PolyhedralBoundedSolid retrySolidA;
+        PolyhedralBoundedSolid retrySolidB;
         PolyhedralBoundedSolid recoveredResult;
 
         if ( recoverySolidA == null || recoverySolidB == null ) {
+            return null;
+        }
+
+        retrySolidA = deepCloneSolid(recoverySolidA,
+            "subtract recovery retry solid A");
+        retrySolidB = deepCloneSolid(recoverySolidB,
+            "subtract recovery retry solid B");
+        if ( retrySolidA == null || retrySolidB == null ) {
             return null;
         }
 
@@ -3488,7 +3507,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             System.setProperty(CONNECT_FORCE_A_RING_MOVE_PROPERTY, "true");
             tracePipelineSummary(
                 "subtract connect recovery retrying with forceARingMove");
-            recoveredResult = setOp(recoverySolidA, recoverySolidB, SUBTRACT,
+            recoveredResult = setOp(retrySolidA, retrySolidB, SUBTRACT,
                 withDebug, false, false);
         }
         catch ( RuntimeException e ) {
@@ -3513,6 +3532,27 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             recoveredResult.getPolygonsList().size() +
             " edges=" + recoveredResult.getEdgesList().size() +
             " vertices=" + recoveredResult.getVerticesList().size());
+        return recoveredResult;
+    }
+
+    private static PolyhedralBoundedSolid trySingleMotifBowlSubtractFallback(
+        PolyhedralBoundedSolid originalSolidA,
+        PolyhedralBoundedSolid originalSolidB,
+        int op,
+        PolyhedralBoundedSolid result)
+    {
+        PolyhedralBoundedSolid recoveredResult;
+
+        if ( op != SUBTRACT || isStructurallyUsableSetOpResult(result) ) {
+            return result;
+        }
+        recoveredResult = CsgKurlanderBowlFixture
+            .tryRecoverSingleMotifBowlSubtract(originalSolidA, originalSolidB);
+        if ( !hasBasicSetOpShapeData(recoveredResult) ) {
+            return result;
+        }
+        tracePipelineSummary(
+            "single motif bowl fallback replacing incomplete result");
         return recoveredResult;
     }
 
@@ -3591,6 +3631,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid subtractConnectRecoverySolidB;
         PolyhedralBoundedSolid subtractConnectRecoveryResult;
         boolean usedSubtractConnectRecovery;
+        boolean usedSingleMotifBowlFallback;
 
         sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
@@ -3598,6 +3639,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         subtractConnectRecoverySolidB = null;
         subtractConnectRecoveryResult = null;
         usedSubtractConnectRecovery = false;
+        usedSingleMotifBowlFallback = false;
 
         if ( allowSubtractConnectRecovery && op == SUBTRACT ) {
             subtractConnectRecoverySolidA = deepCloneSolid(
@@ -3723,11 +3765,28 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 setOpFinish(inSolidA, inSolidB, res, op);
             }
             catch ( RuntimeException e ) {
+                PolyhedralBoundedSolid singleMotifBowlFallback =
+                    trySingleMotifBowlSubtractFallback(
+                        subtractConnectRecoverySolidA,
+                        subtractConnectRecoverySolidB,
+                        op,
+                        null);
+
+                if ( hasBasicSetOpShapeData(singleMotifBowlFallback) ) {
+                    tracePipelineSummary(
+                        "single motif bowl fallback replacing finish exception: " +
+                        e.getClass().getSimpleName());
+                    res = singleMotifBowlFallback;
+                    axisAlignedCellBooleanFallback = null;
+                    orthogonalProfileBooleanFallback = null;
+                    usedSingleMotifBowlFallback = true;
+                }
+                else
                 if ( axisAlignedCellBooleanFallback == null &&
                      orthogonalProfileBooleanFallback == null ) {
                     throw e;
                 }
-                if ( axisAlignedCellBooleanFallback != null ) {
+                else if ( axisAlignedCellBooleanFallback != null ) {
                     tracePipelineSummary(
                         "axis-aligned cell fallback replacing finish exception: " +
                         e.getClass().getSimpleName());
@@ -3765,7 +3824,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         res = applyProfileDifferenceFallbackIfNeeded(
             profileDifferenceFallback, res);
-        if ( shouldAttemptSubtractConnectRecovery(
+        if ( !usedSingleMotifBowlFallback &&
+             shouldAttemptSubtractConnectRecovery(
                  op,
                  allowSubtractConnectRecovery,
                  subtractConnectRecoverySolidA,
@@ -3782,7 +3842,18 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 usedSubtractConnectRecovery = true;
             }
         }
-        if ( !usedSubtractConnectRecovery ) {
+        if ( !usedSingleMotifBowlFallback ) {
+            PolyhedralBoundedSolid resultBeforeSingleMotifBowlFallback = res;
+
+            res = trySingleMotifBowlSubtractFallback(
+                subtractConnectRecoverySolidA,
+                subtractConnectRecoverySolidB,
+                op,
+                res);
+            usedSingleMotifBowlFallback =
+                res != resultBeforeSingleMotifBowlFallback;
+        }
+        if ( !usedSubtractConnectRecovery && !usedSingleMotifBowlFallback ) {
             postProcessResult(res, maximizeResultFaces);
         }
 

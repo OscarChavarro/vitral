@@ -29,7 +29,7 @@ public class DebuggerModel
 
     private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
     private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
-    private int kurlanderBowlSingleMotifIndex = 19;
+    private int kurlanderBowlSingleMotifIndex = 20;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
     private final Camera camera;
