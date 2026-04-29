@@ -1203,6 +1203,160 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         } while ( progress );
     }
 
+    private static void cutLiveA(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( isLiveHalfEdge(he) && he.parentEdge != null ) {
+            cutA(he);
+        }
+    }
+
+    private static void cutLiveB(_PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( isLiveHalfEdge(he) && he.parentEdge != null ) {
+            cutB(he);
+        }
+    }
+
+    private static boolean findTwoDisjointNeighborPairs(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> ends,
+        int[] firstPair,
+        int[] secondPair)
+    {
+        int pairCount;
+        int i;
+        int j;
+
+        pairCount = 0;
+        for ( i = 0; i < ends.size(); i++ ) {
+            for ( j = i + 1; j < ends.size(); j++ ) {
+                if ( !isLiveHalfEdge(ends.get(i)) ||
+                     !isLiveHalfEdge(ends.get(j)) ||
+                     !neighbor(ends.get(i), ends.get(j)) ) {
+                    continue;
+                }
+                if ( pairCount == 0 ) {
+                    firstPair[0] = i;
+                    firstPair[1] = j;
+                }
+                else if ( pairCount == 1 ) {
+                    secondPair[0] = i;
+                    secondPair[1] = j;
+                }
+                pairCount++;
+            }
+        }
+
+        if ( pairCount != 2 ) {
+            return false;
+        }
+        return firstPair[0] != secondPair[0] &&
+            firstPair[0] != secondPair[1] &&
+            firstPair[1] != secondPair[0] &&
+            firstPair[1] != secondPair[1];
+    }
+
+    private static boolean hasCoincidentLooseEndpoint(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> ends)
+    {
+        int i;
+        int j;
+
+        for ( i = 0; i < ends.size(); i++ ) {
+            for ( j = i + 1; j < ends.size(); j++ ) {
+                if ( isSamePoint(ends.get(i), ends.get(j)) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean sameUnorderedPair(int[] first, int[] second)
+    {
+        return first[0] == second[0] && first[1] == second[1] ||
+            first[0] == second[1] && first[1] == second[0];
+    }
+
+    private static boolean samePairing(int[] firstA,
+                                       int[] secondA,
+                                       int[] firstB,
+                                       int[] secondB)
+    {
+        return sameUnorderedPair(firstA, firstB) &&
+            sameUnorderedPair(secondA, secondB) ||
+            sameUnorderedPair(firstA, secondB) &&
+            sameUnorderedPair(secondA, firstB);
+    }
+
+    private static void joinLoosePairA(int[] pair)
+    {
+        join(endsa.get(pair[0]), endsa.get(pair[1]), false, false);
+    }
+
+    private static void joinLoosePairB(int[] pair)
+    {
+        join(endsb.get(pair[0]), endsb.get(pair[1]), false);
+    }
+
+    private static void cutLiveLoosePairs()
+    {
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseA;
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseB;
+        int i;
+
+        looseA = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsa);
+        looseB = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsb);
+        for ( i = 0; i < looseA.size(); i++ ) {
+            cutLiveA(looseA.get(i));
+        }
+        for ( i = 0; i < looseB.size(); i++ ) {
+            cutLiveB(looseB.get(i));
+        }
+    }
+
+    private static void resolveClassicAlternatingLooseCycle()
+    {
+        int[] firstA;
+        int[] secondA;
+        int[] firstB;
+        int[] secondB;
+
+        firstA = new int[2];
+        secondA = new int[2];
+        firstB = new int[2];
+        secondB = new int[2];
+
+        if ( operation != SUBTRACT ||
+             endsa == null ||
+             endsb == null ||
+             sonfa == null ||
+             sonfb == null ||
+             endsa.size() != 4 ||
+             endsb.size() != 4 ||
+             sonfa.size() != 1 ||
+             sonfb.size() != 1 ||
+             hasCoincidentLooseEndpoint(endsa) ||
+             hasCoincidentLooseEndpoint(endsb) ||
+             !findTwoDisjointNeighborPairs(endsa, firstA, secondA) ||
+             !findTwoDisjointNeighborPairs(endsb, firstB, secondB) ||
+             samePairing(firstA, secondA, firstB, secondB) ) {
+            return;
+        }
+
+        setCurrentConnectContext(allocateSyntheticPairIndex());
+        tracePipelineSummary(
+            "connect alternating loose-cycle close " +
+            summarizeLooseEnds(endsa, endsb));
+
+        joinLoosePairA(firstA);
+        joinLoosePairA(secondA);
+        joinLoosePairB(firstB);
+        joinLoosePairB(secondB);
+        cutLiveLoosePairs();
+        endsa.clear();
+        endsb.clear();
+    }
+
     static ConnectResult connect(
         int op,
         int flags,
@@ -1944,6 +2098,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 " looseA=" + endsa.size() +
                 " looseB=" + endsb.size());
         }
+        resolveClassicAlternatingLooseCycle();
         flushDeferredClassicCuts();
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +

@@ -30,6 +30,10 @@ public class CsgKurlanderBowlFixture
         0.0, 0.0, -22.5, -45.0, -67.5
     };
     private static final double OBJECT_SCALE = 0.1;
+    private static final double MOTIF_RADIAL_DISTANCE = 6.0;
+    private static final double STAR_AXIS_ROLL_DEGREES = -90.0;
+    private static final double MOON_AXIS_ROLL_DEGREES = 90.0;
+    private static final double MOON_BOWL_INSET_FRACTION = 0.10;
 
     private CsgKurlanderBowlFixture()
     {
@@ -127,23 +131,64 @@ public class CsgKurlanderBowlFixture
         return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
     }
 
+    private static PolyhedralBoundedSolid placeStar(
+        PolyhedralBoundedSolid star, double z, double azimuthDeg)
+    {
+        return placeMotif(star, z, azimuthDeg, 1.0, STAR_AXIS_ROLL_DEGREES);
+    }
+
+    static Matrix4x4 createStarPlacementTransformation(
+        double z, double azimuthDeg)
+    {
+        return createMotifPlacementTransformation(z, azimuthDeg, 1.0,
+            STAR_AXIS_ROLL_DEGREES);
+    }
+
+    private static PolyhedralBoundedSolid placeMoon(
+        PolyhedralBoundedSolid moon, double z, double azimuthDeg)
+    {
+        return placeMotif(moon, z, azimuthDeg,
+            1.0 - MOON_BOWL_INSET_FRACTION, MOON_AXIS_ROLL_DEGREES);
+    }
+
+    static Matrix4x4 createMoonPlacementTransformation(
+        double z, double azimuthDeg)
+    {
+        return createMotifPlacementTransformation(z, azimuthDeg,
+            1.0 - MOON_BOWL_INSET_FRACTION, MOON_AXIS_ROLL_DEGREES);
+    }
+
     private static PolyhedralBoundedSolid placeMotif(
-        PolyhedralBoundedSolid motif, double z, double azimuthDeg)
+        PolyhedralBoundedSolid motif, double z, double azimuthDeg,
+        double radialDistanceFactor, double axisRollDeg)
+    {
+        Matrix4x4 m = createMotifPlacementTransformation(
+            z, azimuthDeg, radialDistanceFactor, axisRollDeg);
+
+        PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
+        return motif;
+    }
+
+    private static Matrix4x4 createMotifPlacementTransformation(
+        double z, double azimuthDeg, double radialDistanceFactor,
+        double axisRollDeg)
     {
         Matrix4x4 ry = new Matrix4x4();
         Matrix4x4 rz = new Matrix4x4();
+        Matrix4x4 roll = new Matrix4x4();
         Matrix4x4 t = new Matrix4x4();
         Matrix4x4 m;
         double azimuthRad = Math.toRadians(azimuthDeg);
-        double x = scale(6.0 * Math.cos(azimuthRad));
-        double y = scale(6.0 * Math.sin(azimuthRad));
+        double radialDistance = MOTIF_RADIAL_DISTANCE * radialDistanceFactor;
+        double x = scale(radialDistance * Math.cos(azimuthRad));
+        double y = scale(radialDistance * Math.sin(azimuthRad));
 
         ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
         rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);
+        roll = roll.axisRotation(Math.toRadians(axisRollDeg), 0, 0, 1);
         t = t.translation(x, y, scale(z));
-        m = t.multiply(rz.multiply(ry));
-        PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
-        return motif;
+        m = t.multiply(rz.multiply(ry.multiply(roll)));
+        return m;
     }
 
     public static int getSingleMotifStarCount()
@@ -216,13 +261,13 @@ public class CsgKurlanderBowlFixture
 
         if ( normalizedIndex < STAR_COUNT ) {
             motifTypeIndex = normalizedIndex;
-            return placeMotif(createStar(),
+            return placeStar(createStar(),
                 getStarZ(motifTypeIndex),
                 getStarAzimuthDeg(motifTypeIndex));
         }
 
         motifTypeIndex = normalizedIndex - STAR_COUNT;
-        return placeMotif(createMoon(),
+        return placeMoon(createMoon(),
             getMoonZ(motifTypeIndex),
             getMoonAzimuthDeg(motifTypeIndex));
     }
@@ -274,7 +319,7 @@ public class CsgKurlanderBowlFixture
 
         operands[0] = booleanOp(
             outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
-        operands[1] = placeMotif(createMoon(), 4.0, -90.0);
+        operands[1] = placeMoon(createMoon(), 4.0, -90.0);
         return operands;
     }
 
@@ -304,7 +349,7 @@ public class CsgKurlanderBowlFixture
             printMotifProgress("moon", moonIndex, moonCount,
                 motifIndex, motifCount);
             shell = booleanOpWithoutFaceMaximization(shell,
-                placeMotif(createMoon(), getMoonZ(i), getMoonAzimuthDeg(i)),
+                placeMoon(createMoon(), getMoonZ(i), getMoonAzimuthDeg(i)),
                 PolyhedralBoundedSolidModeler.SUBTRACT);
         }
 
@@ -314,7 +359,7 @@ public class CsgKurlanderBowlFixture
             printMotifProgress("star", starIndex, starCount,
                 motifIndex, motifCount);
             shell = booleanOpWithoutFaceMaximization(shell,
-                placeMotif(createStar(), getStarZ(i), getStarAzimuthDeg(i)),
+                placeStar(createStar(), getStarZ(i), getStarAzimuthDeg(i)),
                 PolyhedralBoundedSolidModeler.SUBTRACT);
         }
 
