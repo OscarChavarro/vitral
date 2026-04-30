@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageCompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
@@ -151,6 +154,76 @@ public class ImagePersistence extends PersistenceElement
         return createNotAvailableImageRGB();
     }
 
+    private static RGBAImageCompressed importDDSCompressed(File inImageFd)
+        throws ImageNotRecognizedException, Exception
+    {
+        byte fileData[];
+        fileData = Files.readAllBytes(inImageFd.toPath());
+
+        if ( fileData.length < 128 ) {
+            throw new ImageNotRecognizedException("DDS file too short", inImageFd);
+        }
+        if ( fileData[0] != 'D' || fileData[1] != 'D' ||
+             fileData[2] != 'S' || fileData[3] != ' ' ) {
+            throw new ImageNotRecognizedException("DDS signature not recognized", inImageFd);
+        }
+
+        int headerSize = readIntLE(fileData, 4);
+        if ( headerSize != 124 ) {
+            throw new ImageNotRecognizedException("DDS header size not recognized", inImageFd);
+        }
+
+        int height = readIntLE(fileData, 12);
+        int width = readIntLE(fileData, 16);
+        int pixelFormatFlags = readIntLE(fileData, 80);
+        String fourCC;
+        fourCC = new String(fileData, 84, 4, StandardCharsets.US_ASCII);
+
+        if ( (pixelFormatFlags & 0x04) == 0 ) {
+            throw new ImageNotRecognizedException("DDS file does not use a FourCC compressed format", inImageFd);
+        }
+
+        int compressionFormat = ddsFourCCToCompressionFormat(fourCC);
+        if ( compressionFormat == RGBAImageCompressed.COMPRESSION_UNKNOWN ) {
+            throw new ImageNotRecognizedException("DDS compressed format not supported: " + fourCC, inImageFd);
+        }
+
+        int dataOffset = 128;
+        int dataSize = fileData.length - dataOffset;
+        byte compressedData[];
+        compressedData = new byte[dataSize];
+        System.arraycopy(fileData, dataOffset, compressedData, 0, dataSize);
+
+        RGBAImageCompressed image;
+        image = new RGBAImageCompressed();
+        if ( !image.initCompressed(width, height, compressionFormat, compressedData) ) {
+            throw new ImageNotRecognizedException("Could not initialize compressed DDS image", inImageFd);
+        }
+        return image;
+    }
+
+    private static int ddsFourCCToCompressionFormat(String fourCC)
+    {
+        if ( fourCC.equals("DXT1") ) {
+            return RGBAImageCompressed.COMPRESSION_DXT1;
+        }
+        if ( fourCC.equals("DXT3") ) {
+            return RGBAImageCompressed.COMPRESSION_DXT3;
+        }
+        if ( fourCC.equals("DXT5") ) {
+            return RGBAImageCompressed.COMPRESSION_DXT5;
+        }
+        return RGBAImageCompressed.COMPRESSION_UNKNOWN;
+    }
+
+    private static int readIntLE(byte data[], int offset)
+    {
+        return (data[offset] & 0xFF) |
+            ((data[offset + 1] & 0xFF) << 8) |
+            ((data[offset + 2] & 0xFF) << 16) |
+            ((data[offset + 3] & 0xFF) << 24);
+    }
+
     /**
     Given the filename of an input data file which contains an image, this
     method tries to recognize the file format and load the contents of it
@@ -274,11 +347,16 @@ public class ImagePersistence extends PersistenceElement
       - Do not recieve a File, but a Stream of bytes
     @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static RGBImageUncompressed importRGB(File inImageFd)
+    @SuppressWarnings("unchecked")
+    public static <T extends Image> T importRGB(File inImageFd)
         throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
         RGBImageUncompressed retImage = new RGBImageUncompressed();
+
+        if( type.equals("dds") ) {
+            return (T)importDDSCompressed(inImageFd);
+        }
 
         //- Try optimized reading, if native library is available ---------
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
@@ -288,7 +366,7 @@ public class ImagePersistence extends PersistenceElement
                 inImageFd.getAbsolutePath());
             retImage.initNoFill((int)header.xSize, (int)header.ySize);
             NativeImageReaderWrapper.readPngDataRGB(header, retImage.getRawImageDirectBuffer());
-            return retImage;
+            return (T)retImage;
         }
 
         if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
@@ -301,15 +379,11 @@ public class ImagePersistence extends PersistenceElement
         int i;
         for ( i = 0; i < helpers.size(); i++ ) {
             if ( helpers.get(i).rgbFormatSupported(type) ) {
-                return helpers.get(i).importRGB(inImageFd);
+                return (T)helpers.get(i).importRGB(inImageFd);
             }
         }
 
-        if( type.equals("dds") ) {
-            //delete retImage;
-            return importDDSRGB(inImageFd);
-        }
-        else if( type.equals("ppm") )  {
+        if( type.equals("ppm") )  {
             try {
                 BufferedInputStream bis;
                 FileInputStream fis;
@@ -382,7 +456,7 @@ public class ImagePersistence extends PersistenceElement
 
                 bis.close();
                 fis.close();
-                return retImage;
+                return (T)retImage;
               }
               catch ( Exception e ) {
                   VSDK.reportMessage(null, VSDK.ERROR, "importRGB (B)",
@@ -390,7 +464,7 @@ public class ImagePersistence extends PersistenceElement
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
         }
-        return createNotAvailableImageRGB();
+        return (T)createNotAvailableImageRGB();
     }
 
     /**

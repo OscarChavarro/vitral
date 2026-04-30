@@ -30,7 +30,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageCompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
@@ -44,6 +44,10 @@ public class ImageExample extends JFrame implements
     MouseWheelListener,
     KeyListener
 {
+    private static final int DEPTH_BUFFER_BITS = 64;
+    private static final float IMAGE_DEPTH_BIAS_FACTOR = -1.0f;
+    private static final float IMAGE_DEPTH_BIAS_UNITS = -8.0f;
+
     private Camera camera;
     private CameraController cameraController;
     private GLCanvas canvas;
@@ -60,6 +64,7 @@ public class ImageExample extends JFrame implements
 
         GLProfile profile = GLProfile.get(GLProfile.GL4);
         GLCapabilities caps = new GLCapabilities(profile);
+        caps.setDepthBits(DEPTH_BUFFER_BITS);
         canvas = new GLCanvas(caps);
 
         canvas.addGLEventListener(this);
@@ -88,7 +93,7 @@ public class ImageExample extends JFrame implements
         earthImage = loadImage("../../../etc/textures/earth.dds");
     }
 
-    private RGBImageUncompressed loadImage(String imageFilename)
+    private Image loadImage(String imageFilename)
     {
         try {
             return ImagePersistence.importRGB(new File(imageFilename));
@@ -177,6 +182,19 @@ public class ImageExample extends JFrame implements
         drawTexturedPolygon(gl, projection, earthImage, 0.0f, -1.0f, 1.0f, 1.0f);
     }
 
+    private void drawWorldImagesDepthBiased(GL4 gl, Matrix4x4 projection)
+    {
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthFunc(GL4.GL_LEQUAL);
+        gl.glEnable(GL4.GL_POLYGON_OFFSET_FILL);
+        gl.glPolygonOffset(IMAGE_DEPTH_BIAS_FACTOR, IMAGE_DEPTH_BIAS_UNITS);
+
+        drawWorldImages(gl, projection);
+
+        gl.glDisable(GL4.GL_POLYGON_OFFSET_FILL);
+        gl.glDepthFunc(GL4.GL_LESS);
+    }
+
     private void drawHudImage(GL4 gl, Image image, boolean upperLeft)
     {
         int textureId = Jogl4ImageRenderer.activate(gl, image);
@@ -216,7 +234,8 @@ public class ImageExample extends JFrame implements
         };
 
         gl.glDisable(GL4.GL_CULL_FACE);
-        if ( image instanceof RGBAImageUncompressed ) {
+        if ( image instanceof RGBAImageUncompressed ||
+             image instanceof RGBAImageCompressed ) {
             gl.glEnable(GL4.GL_BLEND);
             gl.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
         }
@@ -231,7 +250,8 @@ public class ImageExample extends JFrame implements
             1.0f,
             1.0f);
 
-        if ( image instanceof RGBAImageUncompressed ) {
+        if ( image instanceof RGBAImageUncompressed ||
+             image instanceof RGBAImageCompressed ) {
             gl.glDisable(GL4.GL_BLEND);
         }
     }
@@ -250,7 +270,7 @@ public class ImageExample extends JFrame implements
 
         corridor.drawGL(gl, projection);
         Jogl4MatrixRenderer.draw(gl, projection, Matrix4x4.identityMatrix());
-        drawWorldImages(gl, projection);
+        drawWorldImagesDepthBiased(gl, projection);
         drawHud(gl);
     }
 

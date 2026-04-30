@@ -7,6 +7,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageCompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class Jogl4ImageRenderer extends Jogl4Renderer {
@@ -23,6 +24,9 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static int activate(GL4 gl, Image img)
     {
+        if ( img instanceof RGBAImageCompressed ) {
+            return Jogl4RGBAImageCompressedRenderer.activate(gl, (RGBAImageCompressed)img);
+        }
         if ( img instanceof RGBAImageUncompressed ) {
             return Jogl4RGBAImageUncompressedRenderer.activate(gl, (RGBAImageUncompressed)img);
         }
@@ -34,7 +38,10 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static void deactivate(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImageUncompressed ) {
+        if ( img instanceof RGBAImageCompressed ) {
+            Jogl4RGBAImageCompressedRenderer.deactivate(gl, (RGBAImageCompressed)img);
+        }
+        else if ( img instanceof RGBAImageUncompressed ) {
             Jogl4RGBAImageUncompressedRenderer.deactivate(gl, (RGBAImageUncompressed)img);
         }
         else if ( img instanceof RGBImageUncompressed ) {
@@ -44,7 +51,10 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static void unload(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImageUncompressed ) {
+        if ( img instanceof RGBAImageCompressed ) {
+            Jogl4RGBAImageCompressedRenderer.unload(gl, (RGBAImageCompressed)img);
+        }
+        else if ( img instanceof RGBAImageUncompressed ) {
             Jogl4RGBAImageUncompressedRenderer.unload(gl, (RGBAImageUncompressed)img);
         }
         else if ( img instanceof RGBImageUncompressed ) {
@@ -54,7 +64,10 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static void draw(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImageUncompressed ) {
+        if ( img instanceof RGBAImageCompressed ) {
+            Jogl4RGBAImageCompressedRenderer.draw(gl, (RGBAImageCompressed)img);
+        }
+        else if ( img instanceof RGBAImageUncompressed ) {
             Jogl4RGBAImageUncompressedRenderer.draw(gl, (RGBAImageUncompressed)img);
         }
         else if ( img instanceof RGBImageUncompressed ) {
