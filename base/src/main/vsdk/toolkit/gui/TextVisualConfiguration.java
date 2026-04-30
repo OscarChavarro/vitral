@@ -2,7 +2,7 @@ package vsdk.toolkit.gui;
 
 import java.util.HashMap;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 /**
 This class is used to set visual characteristics for text rendering.
@@ -13,11 +13,11 @@ public class TextVisualConfiguration extends PresentationElement {
     private ColorRgb foregroundColor;
     private ColorRgb backgroundColor;
     private int borderSize;
-    private final HashMap<String, RGBAImage> characterSprites;
+    private final HashMap<String, RGBAImageUncompressed> characterSprites;
 
     public TextVisualConfiguration()
     {
-        characterSprites = new HashMap<String, RGBAImage>();
+        characterSprites = new HashMap<String, RGBAImageUncompressed>();
         fontSize = 16;
         borderSize = 1;
         foregroundColor = new ColorRgb(1, 1, 1);
@@ -83,7 +83,7 @@ public class TextVisualConfiguration extends PresentationElement {
     /**
     @return the characterSprites
     */
-    public HashMap<String, RGBAImage> getCharacterSprites() {
+    public HashMap<String, RGBAImageUncompressed> getCharacterSprites() {
         return characterSprites;
     }
 

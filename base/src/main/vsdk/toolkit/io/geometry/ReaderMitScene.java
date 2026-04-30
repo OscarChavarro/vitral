@@ -43,10 +43,10 @@ import vsdk.toolkit.environment.geometry.surface.QuadMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
@@ -149,12 +149,12 @@ public class ReaderMitScene extends PersistenceElement
         return material;
     }
 
-    private RGBImage
+    private RGBImageUncompressed
     loadRgbTexture(
         String texturePath,
-        HashMap<String, RGBImage> textureCache) throws Exception
+        HashMap<String, RGBImageUncompressed> textureCache) throws Exception
     {
-        RGBImage texture = textureCache.get(texturePath);
+        RGBImageUncompressed texture = textureCache.get(texturePath);
         if ( texture == null ) {
             texture = ImagePersistence.importRGB(new File(texturePath));
             textureCache.put(texturePath, texture);
@@ -172,7 +172,7 @@ public class ReaderMitScene extends PersistenceElement
             bumpPath + "|" + bumpScale.x() + "|" + bumpScale.y() + "|" + bumpScale.z();
         NormalMap normalMap = normalMapCache.get(cacheKey);
         if ( normalMap == null ) {
-            IndexedColorImage bumpMap = ImagePersistence.importIndexedColor(new File(bumpPath));
+            IndexedColorImageUncompressed bumpMap = ImagePersistence.importIndexedColor(new File(bumpPath));
             normalMap = new NormalMap();
             normalMap.importBumpMap(bumpMap, bumpScale);
             normalMapCache.put(cacheKey, normalMap);
@@ -333,9 +333,9 @@ public class ReaderMitScene extends PersistenceElement
         Material currentMaterial;
         Material currentTrianglesMaterial = null;
         Material currentQuadsMaterial = null;
-        RGBImage currentTexture = null;
+        RGBImageUncompressed currentTexture = null;
         NormalMap currentNormalMap = null;
-        HashMap<String, RGBImage> textureCache = new HashMap<String, RGBImage>();
+        HashMap<String, RGBImageUncompressed> textureCache = new HashMap<String, RGBImageUncompressed>();
         HashMap<String, NormalMap> normalMapCache = new HashMap<String, NormalMap>();
 
         // Material por defecto...
@@ -672,7 +672,7 @@ public class ReaderMitScene extends PersistenceElement
                 }
                 else if (st.sval.equals("backgroundcubemap")) {
 
-            RGBAImage front, right, back, left, down, up;
+            RGBAImageUncompressed front, right, back, left, down, up;
 
                     try {
 

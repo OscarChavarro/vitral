@@ -2,10 +2,10 @@ import java.io.File;
 import java.util.Locale;
 
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 final class ImageExporter {
-    boolean export(String outputFileName, RGBImage image)
+    boolean export(String outputFileName, RGBImageUncompressed image)
     {
         File outputFile = new File(outputFileName);
 
@@ -17,7 +17,7 @@ final class ImageExporter {
         return exported;
     }
 
-    private boolean export(File outputFile, RGBImage image)
+    private boolean export(File outputFile, RGBImageUncompressed image)
     {
         String lowerName = outputFile.getName().toLowerCase(Locale.ROOT);
         if ( lowerName.endsWith(".png") ) {

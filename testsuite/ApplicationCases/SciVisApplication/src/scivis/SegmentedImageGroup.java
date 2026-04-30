@@ -2,7 +2,7 @@ package scivis;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 
 /**
 A `SegmentedImageGroup` is the segmented image set equivalent to the normal
@@ -13,16 +13,16 @@ be another (possibly null) in the former. One TimeTake can have multiple
 */
 public class SegmentedImageGroup
 {
-    private ArrayList<IndexedColorImage> segmentedImagesArray;
+    private ArrayList<IndexedColorImageUncompressed> segmentedImagesArray;
     private ArrayList <StartPointPosition> startingPositionsArray;
 
     public SegmentedImageGroup()
     {
-        segmentedImagesArray = new ArrayList <IndexedColorImage>();
+        segmentedImagesArray = new ArrayList <IndexedColorImageUncompressed>();
         startingPositionsArray = new ArrayList<StartPointPosition>();
     }
 
-    public void setSegmentedImageAt(IndexedColorImage img, int relativeSlice,
+    public void setSegmentedImageAt(IndexedColorImageUncompressed img, int relativeSlice,
                                     int xpos, int ypos)
     {
         while ( segmentedImagesArray.size() <= relativeSlice ) {

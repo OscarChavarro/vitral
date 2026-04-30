@@ -2,8 +2,8 @@ package vsdk.toolkit.render.androidgles20;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class AndroidGLES20ImageRenderer extends AndroidGLES20Renderer
 {
@@ -14,11 +14,11 @@ public class AndroidGLES20ImageRenderer extends AndroidGLES20Renderer
             "Trying to activate a NULL Image!");
         }
 
-        if ( img instanceof RGBAImage ) {
-            return AndroidGLES20RGBAImageRenderer.activate((RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            return AndroidGLES20RGBAImageUncompressedRenderer.activate((RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            return AndroidGLES20RGBImageRenderer.activate((RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            return AndroidGLES20RGBImageUncompressedRenderer.activate((RGBImageUncompressed)img);
         }
         else {
             String c = img.getClass().getName();

@@ -13,14 +13,14 @@ import java.awt.image.BufferedImage;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.render.awt.AwtIndexedColorImageRenderer;
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.render.awt.AwtIndexedColorImageUncompressedRenderer;
+import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
+import vsdk.toolkit.render.awt.AwtRGBAImageUncompressedRenderer;
 import java.awt.GraphicsEnvironment;
 import java.awt.Transparency;
 
@@ -66,9 +66,9 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
     }
 
     @Override
-    public IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException
+    public IndexedColorImageUncompressed importIndexedColor(File inImageFd) throws ImageNotRecognizedException
     {
-        IndexedColorImage retImage;
+        IndexedColorImageUncompressed retImage;
         BufferedImage bi = null;
 
         try {
@@ -86,16 +86,16 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
-        retImage = new IndexedColorImage();
-        AwtIndexedColorImageRenderer.importFromAwtBufferedImage(bi, retImage, inImageFd.getPath());
+        retImage = new IndexedColorImageUncompressed();
+        AwtIndexedColorImageUncompressedRenderer.importFromAwtBufferedImage(bi, retImage, inImageFd.getPath());
 
         return retImage;
     }
 
     @Override
-    public RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
     {
-        RGBImage retImage = new RGBImage();
+        RGBImageUncompressed retImage = new RGBImageUncompressed();
         BufferedImage bi = null;
 
         // OLD SLOW METHOD, DO NOT USE!
@@ -119,15 +119,15 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
-        AwtRGBImageRenderer.importFromAwtBufferedImage(bi, retImage /*, inImageFd.getPath()*/);
+        AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage(bi, retImage /*, inImageFd.getPath()*/);
 
         return retImage;
     }
 
     @Override
-    public RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
-        RGBAImage retImage = new RGBAImage();
+        RGBAImageUncompressed retImage = new RGBAImageUncompressed();
         BufferedImage bi;
 
         // OLD SLOW METHOD, DO NOT USE!
@@ -143,7 +143,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             fis = new FileInputStream(inImageFd);
             bis = new BufferedInputStream(fis);
             bi = ImageIO.read(bis);
-            AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, retImage/*, inImageFd.getPath()*/);
+            AwtRGBAImageUncompressedRenderer.importFromAwtBufferedImage(bi, retImage/*, inImageFd.getPath()*/);
             bis.close();
             fis.close();
             
@@ -327,9 +327,9 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
         throws Exception
     {
 /*
-        if ( img instanceof IndexedColorImage ) {
+        if ( img instanceof IndexedColorImageUncompressed ) {
 //NOT WORKING
-            exportPNG_8bitGrayscale(os, (IndexedColorImage)img);
+            exportPNG_8bitGrayscale(os, (IndexedColorImageUncompressed)img);
         }
         else {
 */

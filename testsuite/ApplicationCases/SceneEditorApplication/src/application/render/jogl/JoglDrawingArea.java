@@ -36,8 +36,8 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
@@ -56,7 +56,7 @@ import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl2TranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2RotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ScaleGizmoRenderer;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
@@ -429,7 +429,7 @@ public class JoglDrawingArea implements
         }
 
         //- Render will proceed in a PBuffer ------------------------------
-        IndexedColorImage distanceFieldIndexed;
+        IndexedColorImageUncompressed distanceFieldIndexed;
 
         projectedViewRenderer.configureScene(bodySet, cam);
         projectedViewRenderer.draw(gl);
@@ -442,12 +442,12 @@ public class JoglDrawingArea implements
         }
         else {
             System.out.print("Processing maps for view " + cam + "... ");
-            distanceFieldIndexed = new IndexedColorImage();
+            distanceFieldIndexed = new IndexedColorImageUncompressed();
             distanceFieldIndexed.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(projectedViewRenderer.image, distanceFieldIndexed, 1);
             ImageProcessing.gammaCorrection(distanceFieldIndexed, 2.0);
 
-            RGBAImage distanceFieldRgba;
+            RGBAImageUncompressed distanceFieldRgba;
             distanceFieldRgba = distanceFieldIndexed.exportToRgbaImage();
             int x, y;
 
@@ -704,7 +704,7 @@ public class JoglDrawingArea implements
     private void copyColorBufferIfNeeded(GL2 gl)
     {
         if ( wantToGetColor ) {
-            parent.zbufferImage = Jogl2RGBImageRenderer.getImageJOGL(gl);
+            parent.zbufferImage = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
             if ( parent.imageControlWindow == null ) {
                 parent.imageControlWindow = new SwingImageControlWindow(parent.zbufferImage, parent.gui, parent.executorPanel);
             }
@@ -721,7 +721,7 @@ public class JoglDrawingArea implements
     {
         if ( wantToGetDepth ) {
             if ( wantToGetContourns ) {
-                IndexedColorImage zbuffer;
+                IndexedColorImageUncompressed zbuffer;
                 NormalMap nm;
                 zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
                 nm = new NormalMap();
@@ -1784,9 +1784,9 @@ public class JoglDrawingArea implements
               case 'B':
                 if ( firstThingSelected >= 0 ) {
                     SimpleBody gi;
-                    IndexedColorImage source;
+                    IndexedColorImageUncompressed source;
                     NormalMap normalMap;
-                    //RGBImage exported;
+                    //RGBImageUncompressed exported;
                     gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
                     normalMap = gi.getNormalMap();
                     if ( normalMap == null ) {

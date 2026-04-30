@@ -2,7 +2,7 @@ import java.io.File;
 
 import vsdk.toolkit.io.image.NativeImageReaderWrapper;
 import vsdk.toolkit.io.image._NativeImageReaderWrapperHeaderInfo;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 public class testImageReader
@@ -14,7 +14,7 @@ public class testImageReader
         try {
             NativeImageReaderWrapper.readPngHeader(header, "input.png");
 
-            RGBImage img = new RGBImage();
+            RGBImageUncompressed img = new RGBImageUncompressed();
             img.initNoFill((int)header.xSize, (int)header.ySize);
 
             System.out.printf("Processing image of %d x %d pixels... ", header.xSize, header.ySize);

@@ -11,9 +11,9 @@ import android.graphics.Typeface;
 // VSDK Classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBAPixel;
-import vsdk.toolkit.render.android.AndroidRGBAImageRenderer;
+import vsdk.toolkit.render.android.AndroidRGBAImageUncompressedRenderer;
 
 public class AndroidSystem extends PresentationElement
 {
@@ -30,7 +30,7 @@ public class AndroidSystem extends PresentationElement
         return evsdk;
     }
 
-    public static RGBAImage calculateLabelImage(String label, 
+    public static RGBAImageUncompressed calculateLabelImage(String label,
         ColorRgb foregroundColor, ColorRgb backgroundColor)
     {
         return calculateLabelImage(label, foregroundColor, backgroundColor, 14);
@@ -39,47 +39,47 @@ public class AndroidSystem extends PresentationElement
     /**
     Given a new desired unicode (UTF-16) character and a raster bitmapped font
     map image, this methods adds a new corresponding glyph to font map.
-     
+
     This method also computes a texture transform to be applied to font map when
     drawing the glyph on a unit square.
-    
+
     On null or full glyph map, this method creates a new map.
     @param inOutFontMap
-    @param inOutCurrentPosition a two sized array. currentPos[0] is next x span 
+    @param inOutCurrentPosition a two sized array. currentPos[0] is next x span
     for glyph, currentPos[1] is y span for glyph.
     @param inOutGlyphTextureTransform
     @param inCharacter
     @param inForegroundColor
     @param inBackgroundColor
     @param inFontSize
-    @return 
+    @return
     */
-    public static RGBAImage addGlyphToFontMap(
-        RGBAImage inOutFontMap,
+    public static RGBAImageUncompressed addGlyphToFontMap(
+        RGBAImageUncompressed inOutFontMap,
         int inOutCurrentPosition[],
         Matrix4x4[] inOutGlyphTextureTransform,
-        final String inCharacter, 
-        final ColorRgb inForegroundColor, 
+        final String inCharacter,
+        final ColorRgb inForegroundColor,
         final ColorRgb inBackgroundColor,
         final int inFontSize)
     {
         // Prepare raster font map and coordinates for drawing
         if ( inOutFontMap == null ) {
-            inOutFontMap = new RGBAImage();
+            inOutFontMap = new RGBAImageUncompressed();
             inOutFontMap.init(256, 256);
             fillTransparent(inOutFontMap);
             inOutCurrentPosition[0] = inOutCurrentPosition[1] = 0;
         }
-        RGBAImage newGlyph = calculateLabelImage(
+        RGBAImageUncompressed newGlyph = calculateLabelImage(
             inCharacter, inForegroundColor, inBackgroundColor, inFontSize);
-        if ( inOutCurrentPosition[1] + 2*newGlyph.getYSize() > 
+        if ( inOutCurrentPosition[1] + 2*newGlyph.getYSize() >
              inOutFontMap.getYSize() ) {
-            inOutFontMap = new RGBAImage();
+            inOutFontMap = new RGBAImageUncompressed();
             inOutFontMap.init(256, 256);
             fillTransparent(inOutFontMap);
             inOutCurrentPosition[0] = inOutCurrentPosition[1] = 0;
         }
-        if ( inOutCurrentPosition[0] + newGlyph.getXSize() > 
+        if ( inOutCurrentPosition[0] + newGlyph.getXSize() >
              inOutFontMap.getYSize() ) {
             inOutCurrentPosition[0] = 1;
             inOutCurrentPosition[1] += newGlyph.getYSize() + 1;
@@ -93,17 +93,17 @@ public class AndroidSystem extends PresentationElement
             for ( x = 0; x < newGlyph.getXSize(); x++ ) {
                 newGlyph.getPixelRgba(x, y, p);
                 inOutFontMap.putPixel(
-                    x + inOutCurrentPosition[0], 
+                    x + inOutCurrentPosition[0],
                     y + inOutCurrentPosition[1], p);
             }
-        }    
+        }
 
         // Compute transform
         Matrix4x4 S = new Matrix4x4();
         Matrix4x4 T = new Matrix4x4();
         double ux = inOutFontMap.getXSize();
         double uy = inOutFontMap.getYSize();
-        double dx = newGlyph.getXSize()+1; 
+        double dx = newGlyph.getXSize()+1;
         double dy = newGlyph.getYSize();
         double px = inOutCurrentPosition[0];
         double py = -inOutCurrentPosition[1] - dy;
@@ -120,7 +120,7 @@ public class AndroidSystem extends PresentationElement
 
         return inOutFontMap;
     }
-    
+
     /**
     This method generates a texture from a text to be displayed.
     @param label
@@ -130,9 +130,9 @@ public class AndroidSystem extends PresentationElement
     @return a new image containing a transparent representation of given text
     color, using a mono-spaced default font
     */
-    public static RGBAImage calculateLabelImage(
-        String label, 
-        ColorRgb foreColor, 
+    public static RGBAImageUncompressed calculateLabelImage(
+        String label,
+        ColorRgb foreColor,
         ColorRgb backColor,
         int size)
     {
@@ -144,7 +144,7 @@ public class AndroidSystem extends PresentationElement
         r = (int)(foreColor.r * 255.0);
         g = (int)(foreColor.g * 255.0);
         b = (int)(foreColor.b * 255.0);
-        foregroundColor = (0xFF << 24) + (r << 16) + (g << 8) + b; 
+        foregroundColor = (0xFF << 24) + (r << 16) + (g << 8) + b;
 
         Typeface tf = Typeface.MONOSPACE;
         Paint foregroundPaintConfig = new Paint();
@@ -155,7 +155,7 @@ public class AndroidSystem extends PresentationElement
 
         Paint.FontMetrics fm = foregroundPaintConfig.getFontMetrics();
 
-        //float fontHeight = (float)Math.ceil(Math.abs(fm.bottom) + 
+        //float fontHeight = (float)Math.ceil(Math.abs(fm.bottom) +
         //    Math.abs(fm.top));
         float fontAscent = (float)Math.ceil(Math.abs(fm.ascent));
         float fontDescent = (float)Math.ceil(Math.abs(fm.descent));
@@ -176,7 +176,7 @@ public class AndroidSystem extends PresentationElement
         int w = (int)(l+1.0); //size * label.length();
 
         bitmap = Bitmap.createBitmap(
-            w, 
+            w,
             (int)(fontAscent+fontDescent),
             Bitmap.Config.ARGB_8888);
 
@@ -210,13 +210,13 @@ public class AndroidSystem extends PresentationElement
         //gc.drawLine(0, fontAscent+fontDescent-1, w, fontAscent+fontDescent-1, paint);
 
         //---------------------------------------------------------------------
-        RGBAImage img;
-        img = new RGBAImage();
-        AndroidRGBAImageRenderer.importFromAndroidBitmap(bitmap, img);
+        RGBAImageUncompressed img;
+        img = new RGBAImageUncompressed();
+        AndroidRGBAImageUncompressedRenderer.importFromAndroidBitmap(bitmap, img);
         return img;
     }
 
-    private static void fillTransparent(RGBAImage inOutFontMap) {
+    private static void fillTransparent(RGBAImageUncompressed inOutFontMap) {
         int x;
         int y;
         RGBAPixel p = new RGBAPixel();
@@ -224,7 +224,7 @@ public class AndroidSystem extends PresentationElement
         p.g = 0;
         p.b = 0;
         p.a = 0;
-        
+
         for ( y = 0; y < inOutFontMap.getYSize(); y++ ) {
             for ( x = 0; x < inOutFontMap.getXSize(); x++ ) {
                 inOutFontMap.putPixel(x, y, p);

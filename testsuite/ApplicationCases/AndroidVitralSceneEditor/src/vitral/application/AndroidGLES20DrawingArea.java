@@ -25,9 +25,9 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -72,10 +72,10 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private Material material;
     private SimpleScene preloadedCow;
     private SimpleScene preloadedMug;
-    private RGBImage texture;
-    private RGBImage raytracingImage;
-    private RGBImage testImage;
-    private IndexedColorImage bumpmap;
+    private RGBImageUncompressed texture;
+    private RGBImageUncompressed raytracingImage;
+    private RGBImageUncompressed testImage;
+    private IndexedColorImageUncompressed bumpmap;
     private NormalMap normalMap;
     private boolean highResSphere = false;
     private boolean withReferenceSquare = false;
@@ -93,7 +93,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     // Hud & statistics
     private HashMap<String, TimeReport>timers;
-    private HashMap<String, RGBAImage>characterSprites;
+    private HashMap<String, RGBAImageUncompressed>characterSprites;
 
     // Interaction
     private int interaction;
@@ -313,7 +313,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
         selectObject(1);
         
-        characterSprites = new HashMap<String, RGBAImage>();
+        characterSprites = new HashMap<String, RGBAImageUncompressed>();
         //fillBitmapFontSprites();
 
         bumpmap = null;
@@ -323,7 +323,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         preloadedMug = null;
         
         //-----------------------------------------------------------------
-        //testImage = new RGBImage();
+        //testImage = new RGBImageUncompressed();
         //testImage.init(128, 128);
         //testImage.createTestPattern();
 
@@ -347,7 +347,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         //-----------------------------------------------------------------
         char c;
         String s;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         for ( c = 'a'; c <= 'z'; c++ ) {
             s = "" + c;
@@ -703,7 +703,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         int x = x0, y = y0;
         int i;
         String key;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         for ( i = 0; i < msg.length(); i++ ) {
             key = "" + msg.charAt(i);
@@ -741,7 +741,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     */
     private void raytrace()
     {
-        raytracingImage = new RGBImage();
+        raytracingImage = new RGBImageUncompressed();
         raytracingImage.init(256, 256);
         getScene().raytrace(raytracingImage, quality);
     }
@@ -793,14 +793,14 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     /**
     @return the texture
     */
-    public RGBImage getTexture() {
+    public RGBImageUncompressed getTexture() {
         return texture;
     }
 
     /**
     @param texture the texture to set
     */
-    public void setTexture(RGBImage texture) {
+    public void setTexture(RGBImageUncompressed texture) {
         this.texture = texture;
     }
 

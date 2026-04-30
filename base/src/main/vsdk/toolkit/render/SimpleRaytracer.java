@@ -25,7 +25,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.CameraSnapshot;
@@ -523,7 +523,7 @@ public class SimpleRaytracer extends RenderingElement {
         }
     }
 
-    public void execute(RGBImage inoutViewport,
+    public void execute(RGBImageUncompressed inoutViewport,
                         RendererConfiguration inQualitySelection,
                         SimpleSceneSnapshot sceneSnapshot,
                         ProgressMonitor report)
@@ -533,7 +533,7 @@ public class SimpleRaytracer extends RenderingElement {
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
-    public void execute(RGBImage inoutViewport,
+    public void execute(RGBImageUncompressed inoutViewport,
                         RendererConfiguration inQualitySelection,
                         SimpleSceneSnapshot sceneSnapshot,
                         ProgressMonitor report,
@@ -544,7 +544,7 @@ public class SimpleRaytracer extends RenderingElement {
                 inoutViewport.getXSize(), inoutViewport.getYSize());
     }
 
-    public void execute(RGBImage inoutViewport,
+    public void execute(RGBImageUncompressed inoutViewport,
                         RendererConfiguration inQualitySelection,
                         SimpleSceneSnapshot sceneSnapshot,
                         ProgressMonitor liveReport,
@@ -610,7 +610,7 @@ public class SimpleRaytracer extends RenderingElement {
           considerarse que es una re-escritura y re-estructuraci&oacute;n 
           completa de Oscar Chavarro.
     */
-    private void execute(RGBImage inoutViewport,
+    private void execute(RGBImageUncompressed inoutViewport,
                          RendererConfiguration inQualitySelection,
                          List<SimpleBody> inSimpleBodiesArray,
                          List<Light> inLightsArray,

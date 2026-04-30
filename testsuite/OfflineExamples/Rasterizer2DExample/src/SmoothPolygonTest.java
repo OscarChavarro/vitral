@@ -7,7 +7,7 @@
 import java.io.File;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.render.Rasterizer2D;
@@ -17,7 +17,7 @@ public class SmoothPolygonTest
 {
     public static void main (String[] args) {
         //-----------------------------------------------------------------
-        RGBImage img = null;
+        RGBImageUncompressed img = null;
         RGBPixel fillcolor = new RGBPixel();
         RGBPixel bordercolor = new RGBPixel();
 
@@ -29,7 +29,7 @@ public class SmoothPolygonTest
         bordercolor.g = -1;
         bordercolor.b = 0;
 
-        img = new RGBImage();
+        img = new RGBImageUncompressed();
         img.init(640, 480);
         img.createTestPattern();
 

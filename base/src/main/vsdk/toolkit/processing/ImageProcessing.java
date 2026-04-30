@@ -3,7 +3,7 @@ package vsdk.toolkit.processing;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 
 /**
@@ -32,7 +32,7 @@ public abstract class ImageProcessing extends ProcessingElement {
     }
 
     public static void
-    gammaCorrection(IndexedColorImage img, double gamma)
+    gammaCorrection(IndexedColorImageUncompressed img, double gamma)
     {
         int x, y;
         int val;
@@ -127,7 +127,7 @@ public abstract class ImageProcessing extends ProcessingElement {
     /**
     Copies the contents from the `input` image to the `output` image. Note that
     this method can serve also as a format conversion between different Image
-    formats (i.e. convert an RGBImage to an IndexedColorImage).
+    formats (i.e. convert an RGBImageUncompressed to an IndexedColorImageUncompressed).
     */
     public static void copy(Image input, Image output)
     {
@@ -259,7 +259,7 @@ public abstract class ImageProcessing extends ProcessingElement {
     instead.
     */
     public static boolean
-    processDistanceField(Image inInput, IndexedColorImage outOutput,
+    processDistanceField(Image inInput, IndexedColorImageUncompressed outOutput,
         int threshold)
     {
         if ( inInput == null || outOutput == null ) {
@@ -340,7 +340,7 @@ public abstract class ImageProcessing extends ProcessingElement {
     instead.
     */
     public static boolean
-    processDistanceFieldWithArray(Image inInput, IndexedColorImage outOutput,
+    processDistanceFieldWithArray(Image inInput, IndexedColorImageUncompressed outOutput,
         int threshold)
     {
         if ( inInput == null || outOutput == null ) {

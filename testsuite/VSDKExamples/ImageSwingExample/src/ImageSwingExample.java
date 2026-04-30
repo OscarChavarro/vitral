@@ -1,8 +1,8 @@
 //= This example serves as a testbed for basic RGB image manipulation,      =
 //= dependent of Java's Swing, but not dependent on JOGL/OpenGL.            =
 //= Proposed exercises based on this program:                               =
-//=     that manages other types of Image, such as RGBAImage or             =
-//=     IndexedColorImage                                                   =
+//=     that manages other types of Image, such as RGBAImageUncompressed or             =
+//=     IndexedColorImageUncompressed                                                   =
 //=     that does not use any vsdk.toolkit.io.image.* persistence class.    =
 //=     image processing operations like thresholding, color inversion      =
 //=     (negative image generation), 90 degrees rotations and others.       =
@@ -36,10 +36,10 @@ import javax.swing.JPanel;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;                      // Utilities
 import vsdk.toolkit.media.Image;                      // Model elements
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;        // Persistence elements
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;   // View elements
+import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;   // View elements
 
 // Note that this code defines 2 internal private classes:
 // MyButtonsPanel & MyCanvasPanel
@@ -53,7 +53,7 @@ public class ImageSwingExample
     private JMenuBar menubarWidget;
 
     public ImageSwingExample() {
-        super("VSDK concept test - An RGBImage in swing test");
+        super("VSDK concept test - An RGBImageUncompressed in swing test");
 
         canvasWidget = new MyCanvasPanel();
         controlsPanelWidget = new MyButtonsPanel(canvasWidget);
@@ -212,7 +212,7 @@ class MyButtonsPanel extends JPanel implements ActionListener
 
 class MyCanvasPanel extends JPanel
 {
-    public RGBImage img;
+    public RGBImageUncompressed img;
     String imageFilename = "../../../etc/images/render.jpg";
 
     public MyCanvasPanel() {
@@ -220,11 +220,11 @@ class MyCanvasPanel extends JPanel
             img = ImagePersistence.importRGB(new File(imageFilename));
 
             /*
-            // If using IndexedColorImage, try this code, and think on it...
+            // If using IndexedColorImageUncompressed, try this code, and think on it...
             GrayScalePalette p = new GrayScalePalette();
             //p.setColorAt(254, 1, 0, 0); // Try to enable this 2 lines...
             //p.setColorAt(255, 0, 1, 0); // explain performance change!
-            img = new IndexedColorImage(p);
+            img = new IndexedColorImageUncompressed(p);
             img.init(640, 480);
             img.createTestPattern();
             */
@@ -239,7 +239,7 @@ class MyCanvasPanel extends JPanel
 
     public void paint(Graphics dc) {
         super.paint(dc);
-        AwtRGBImageRenderer.draw(dc, img, 100, 50);
+        AwtRGBImageUncompressedRenderer.draw(dc, img, 100, 50);
     }
 
 }

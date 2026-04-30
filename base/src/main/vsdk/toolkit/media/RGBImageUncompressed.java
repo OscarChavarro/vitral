@@ -38,7 +38,7 @@ Another reason for using this "comment-based conditional compilation" is
 to keep this class conceptually consistent with non-java VSDK realizations
 (particulary the corresponding C++ AQUYNZA class).
 */
-public class RGBImage extends Image
+public class RGBImageUncompressed extends Image
 {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20060502L;
@@ -61,7 +61,7 @@ public class RGBImage extends Image
     Check the general signature contract in superclass method
     Image.init.
     */
-    public RGBImage()
+    public RGBImageUncompressed()
     {
         xSize = 0;
         ySize = 0;
@@ -408,16 +408,16 @@ public class RGBImage extends Image
      * @return 
      * @throws java.lang.CloneNotSupportedException */
     @Override
-    public RGBImage clone() throws CloneNotSupportedException
+    public RGBImageUncompressed clone() throws CloneNotSupportedException
     {
         super.clone();
         //Image parentCopy = (Image)super.clone();
-        RGBImage copy;
+        RGBImageUncompressed copy;
         int xxSize = getXSize();
         int yySize = getYSize();
         int x, y;
 
-        copy = new RGBImage();
+        copy = new RGBImageUncompressed();
         copy.init(xxSize, yySize);
         for ( x = 0; x < xxSize; x++ ) {
             for ( y = 0; y < yySize; y++ ) {
@@ -431,16 +431,16 @@ public class RGBImage extends Image
     Returns a copy of current image in its own memory 
     @return 
     */
-    public RGBAImage cloneToRgba()
+    public RGBAImageUncompressed cloneToRgba()
     {
-        RGBAImage copy;
+        RGBAImageUncompressed copy;
         int xxSize = getXSize();
         int yySize = getYSize();
         int x, y;
         RGBPixel source;
         RGBAPixel target = new RGBAPixel();
 
-        copy = new RGBAImage();
+        copy = new RGBAImageUncompressed();
         copy.init(xxSize, yySize);
         for ( x = 0; x < xxSize; x++ ) {
             for ( y = 0; y < yySize; y++ ) {
@@ -475,7 +475,7 @@ public class RGBImage extends Image
             }
         }
         catch ( Exception e ) {
-            throw new IOException("Error in custom RGBAImage writeObject");
+            throw new IOException("Error in custom RGBAImageUncompressed writeObject");
         }
     }
 

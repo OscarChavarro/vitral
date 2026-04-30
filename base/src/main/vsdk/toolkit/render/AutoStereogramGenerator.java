@@ -1,6 +1,6 @@
 package vsdk.toolkit.render;
 
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.processing.ImageProcessing;
@@ -17,14 +17,14 @@ public class AutoStereogramGenerator extends RenderingElement
     private static int getMinDepth(double separationFactor, int maxdepth, int observationDistance, int suppliedMinDepth) {
         int computedMinDepth = (int)( (separationFactor * maxdepth * observationDistance) /
             (((1 - separationFactor) * maxdepth) + observationDistance) );
-        
+
         return Math.min( Math.max( computedMinDepth, suppliedMinDepth), maxdepth);
     }
 
     private static int getMaxDepth(int suppliedMaxDepth, int observationDistance) {
         return Math.max( Math.min( suppliedMaxDepth, observationDistance), 0);
     }
-    
+
     private static int convertoToPixels(double valueInches, int ppi) {
         return (int)(valueInches * ppi);
     }
@@ -35,7 +35,7 @@ public class AutoStereogramGenerator extends RenderingElement
     private static int getZ(double depth, int maxDepth, int minDepth) {
         return (((int)(depth * 255)) * (maxDepth - minDepth) / 255);
     }
-    
+
     private static int getSeparation(int observationDistance, int eyeSeparation, int depth) {
         return (eyeSeparation * depth) / (depth + observationDistance);
     }
@@ -44,7 +44,7 @@ public class AutoStereogramGenerator extends RenderingElement
     Easy to use version of `generate` method with some common defaults.
     */
     public static void generate(
-        RGBImage result, RGBImage tilePattern, ZBuffer depthMap)
+        RGBImageUncompressed result, RGBImageUncompressed tilePattern, ZBuffer depthMap)
     {
         generate(result, tilePattern, depthMap, 14.0, 2.5, 12, 0, 81, 81, 0, 0);
     }
@@ -59,8 +59,8 @@ public class AutoStereogramGenerator extends RenderingElement
     Requires result and depthMap to be of equal size
     */
     public static void generate(
-        RGBImage result, RGBImage tilePattern, ZBuffer depthMap, 
-        double observationDistanceInches, 
+        RGBImageUncompressed result, RGBImageUncompressed tilePattern, ZBuffer depthMap,
+        double observationDistanceInches,
         double eyeSeparationInches,
         double maxDepthInches, double minDepthInches,
         int horizontalPPI, int verticalPPI,
@@ -96,9 +96,9 @@ public class AutoStereogramGenerator extends RenderingElement
         int verticalShift = verticalPPI / 16;
         int maxSeparation = getSeparation(observationDistance, eyeSeparation, maxDepth);
 
-        RGBImage scaledTilePattern = new RGBImage();
+        RGBImageUncompressed scaledTilePattern = new RGBImageUncompressed();
         scaledTilePattern.initNoFill(maxSeparation, (int)(
-            ((double)maxSeparation) * ((double)tilePattern.getYSize()) / 
+            ((double)maxSeparation) * ((double)tilePattern.getYSize()) /
             ((double)tilePattern.getXSize())
         ));
 
@@ -117,10 +117,10 @@ public class AutoStereogramGenerator extends RenderingElement
                 int separation = getSeparation(observationDistance, eyeSeparation, depth);
                 int left = x - (separation / 2);
                 int right = left + separation;
-                
+
                 if ( left >= 0 && right < rdx ) {
                     boolean visible = true;
-                    
+
                     if ( linksL[right] != right) {
                         if ( linksL[right] < left) {
                             linksR[linksL[right]] = linksL[right];
@@ -139,14 +139,14 @@ public class AutoStereogramGenerator extends RenderingElement
                             visible = false;
                         }
                     }
-                    
+
                     if ( visible ) {
                         linksL[right] = left;
                         linksR[left] = right;
                     }
                 }
             }
-            
+
             int lastLinked = -10;
             for ( x = 0; x < rdx; x++ ) {
 
@@ -158,7 +158,7 @@ public class AutoStereogramGenerator extends RenderingElement
                     else {
                         scaledTilePattern.getPixelRgb(
                             (x + animationXOffset) % maxSeparation,
-                            ((y + animationYOffset) + ((x / maxSeparation) * verticalShift)) % tdy, 
+                            ((y + animationYOffset) + ((x / maxSeparation) * verticalShift)) % tdy,
                             p);
                         result.putPixelRgb(x, y, p);
                     }

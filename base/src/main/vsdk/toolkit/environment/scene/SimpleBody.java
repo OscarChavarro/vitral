@@ -12,7 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Quaternion;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -51,7 +51,7 @@ public class SimpleBody extends Entity {
     private Material globalMaterial;
     private Image globalTextureMap;
     private NormalMap globalNormalMap;
-    private RGBImage globalNormalMapRgb;
+    private RGBImageUncompressed globalNormalMapRgb;
 
     //- Model (4/6): body physical data -------------------------------
 
@@ -219,7 +219,7 @@ public class SimpleBody extends Entity {
     /**
     @return RGB preview image for the current normal map, or {@code null}
     */
-    public RGBImage getNormalMapRgb()
+    public RGBImageUncompressed getNormalMapRgb()
     {
         return globalNormalMapRgb;
     }

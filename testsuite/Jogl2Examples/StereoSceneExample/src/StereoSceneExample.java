@@ -21,8 +21,8 @@ import com.jogamp.opengl.GLDrawable;
 import com.jogamp.opengl.util.Animator;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -46,7 +46,7 @@ public class StereoSceneExample {
     private JoglDrawingArea drawingArea;
     private EventDispatcher eventDispatcher;
     private RGBColorPalette palette;
-    private RGBImage stereogramTilePattern;
+    private RGBImageUncompressed stereogramTilePattern;
 
     private boolean fullScreenGuiMode;
     private int stereoStrategyId;
@@ -115,8 +115,8 @@ public class StereoSceneExample {
             break;
 
           case 5:
-            RGBImage rightImage = new RGBImage();
-            RGBImage leftImage = new RGBImage();
+            RGBImageUncompressed rightImage = new RGBImageUncompressed();
+            RGBImageUncompressed leftImage = new RGBImageUncompressed();
             stereoStrategy = new Jogl2StereoStrategyPBufferRenderer(
                 new LeftRenderer(drawingArea, leftImage),
                 new RightRenderer(drawingArea, rightImage),

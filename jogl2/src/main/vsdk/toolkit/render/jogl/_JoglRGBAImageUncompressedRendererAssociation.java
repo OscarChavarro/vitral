@@ -4,11 +4,11 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.util.texture.Texture;
 
 // VitralSDK classes
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
-public class _JoglRGBAImageRendererAssociation extends Jogl2Renderer
+public class _JoglRGBAImageUncompressedRendererAssociation extends Jogl2Renderer
 {
     public int glList;
     public Texture renderer;
-    public RGBAImage image;
+    public RGBAImageUncompressed image;
 }

@@ -32,7 +32,7 @@ import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 
@@ -793,7 +793,7 @@ public class Reader3ds extends PersistenceElement
         }
 
         //-----------------------------------------------------------------
-        RGBImage img;
+        RGBImageUncompressed img;
         String fullFilename = workingDirectory + "/" + imageFilename.toLowerCase();
 
         try {
@@ -803,7 +803,7 @@ public class Reader3ds extends PersistenceElement
             System.err.println("Error: could not read the image file \"" + fullFilename + "\".");
             System.err.println("Check you have access to that file from current working directory.");
             System.err.println(e);
-            img = new RGBImage();
+            img = new RGBImageUncompressed();
             img.init(64, 64);
             img.createTestPattern();
         }

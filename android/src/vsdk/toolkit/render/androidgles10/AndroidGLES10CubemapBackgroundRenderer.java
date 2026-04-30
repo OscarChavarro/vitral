@@ -6,14 +6,14 @@ import android.opengl.GLES10;
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class AndroidGLES10CubemapBackgroundRenderer extends 
     AndroidGLES10BackgroundRenderer {
 
     public static void draw(CubemapBackground background) {
         //- General setup -----------------------------------------------------
-        RGBAImage images[] = background.getImages();
+        RGBAImageUncompressed images[] = background.getImages();
 
         RendererConfiguration q;
         q = new RendererConfiguration();

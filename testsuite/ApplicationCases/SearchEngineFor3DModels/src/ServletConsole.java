@@ -21,8 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.ShapeDescriptor;
@@ -39,7 +39,7 @@ public class ServletConsole extends HttpServlet {
 
     /// Warning: this code makes current implementation NOT THREAD SAFE,
     /// so will not work with multiple connections!
-    private ArrayList<IndexedColorImage> workingImages;
+    private ArrayList<IndexedColorImageUncompressed> workingImages;
     private SearchEngine searchEngine;
     private ShapeDatabaseFile shapeDatabase;
     private int distanceFieldSide = 64;
@@ -53,12 +53,12 @@ public class ServletConsole extends HttpServlet {
 
         //-----------------------------------------------------------------
         int i;
-        IndexedColorImage workingImage;
+        IndexedColorImageUncompressed workingImage;
 
         if ( workingImages == null ) {
-            workingImages = new ArrayList<IndexedColorImage>();
+            workingImages = new ArrayList<IndexedColorImageUncompressed>();
             for ( i = 0; i < 3; i++ ) {
-                workingImage = new IndexedColorImage();
+                workingImage = new IndexedColorImageUncompressed();
                 workingImages.add(workingImage);
                 workingImage.init(0, 0);
             }
@@ -81,7 +81,7 @@ public class ServletConsole extends HttpServlet {
         searchEngine = null;
     }
 
-    private void extractImage(IndexedColorImage img, String cad)
+    private void extractImage(IndexedColorImageUncompressed img, String cad)
     {
         StringTokenizer auxStringTokenizer;
         auxStringTokenizer = new StringTokenizer(cad, " \n");
@@ -142,7 +142,7 @@ public class ServletConsole extends HttpServlet {
         Enumeration parametersList;
 
         parametersList = request.getParameterNames();
-        IndexedColorImage img;
+        IndexedColorImageUncompressed img;
         int i;
         long sessionId = 0;
         ServletSessionInformation currentSession = null;
@@ -230,7 +230,7 @@ public class ServletConsole extends HttpServlet {
             return;
         }
 
-        Image destiny = new RGBImage();
+        Image destiny = new RGBImageUncompressed();
 
         ImageProcessing.copy(target, destiny);
 
@@ -251,11 +251,11 @@ public class ServletConsole extends HttpServlet {
     }
 
     private void extractOutlineImage(
-        IndexedColorImage source, IndexedColorImage target)
+        IndexedColorImageUncompressed source, IndexedColorImageUncompressed target)
     {
         int x, y;
         int x0Roi, y0Roi, x1Roi, y1Roi;
-        IndexedColorImage roi, squaredRoi, framedRoi;
+        IndexedColorImageUncompressed roi, squaredRoi, framedRoi;
         int val;
 
         x1Roi = 0;
@@ -273,9 +273,9 @@ public class ServletConsole extends HttpServlet {
                 }
             }
         }
-        roi = new IndexedColorImage();
-        squaredRoi = new IndexedColorImage();
-        framedRoi = new IndexedColorImage();
+        roi = new IndexedColorImageUncompressed();
+        squaredRoi = new IndexedColorImageUncompressed();
+        framedRoi = new IndexedColorImageUncompressed();
 
         ImageProcessing.extractRoi(source, roi, x0Roi, y0Roi, x1Roi, y1Roi);
         ImageProcessing.squareFill(roi, squaredRoi);
@@ -308,9 +308,9 @@ public class ServletConsole extends HttpServlet {
     {
         ArrayList<Result> similarModels = new ArrayList<Result>();
 
-        IndexedColorImage img1 = workingImages.get(0);
-        IndexedColorImage img2 = workingImages.get(1);
-        IndexedColorImage img3 = workingImages.get(2);
+        IndexedColorImageUncompressed img1 = workingImages.get(0);
+        IndexedColorImageUncompressed img2 = workingImages.get(1);
+        IndexedColorImageUncompressed img3 = workingImages.get(2);
 
         if ( (img1 == null) && (img2 == null) && (img3 == null) ) {
             out.println("No images. Error importing distance field. Query aborted.");
@@ -319,19 +319,19 @@ public class ServletConsole extends HttpServlet {
 
         //-----------------------------------------------------------------
         int i, j;
-        IndexedColorImage img, outline, distanceField;
+        IndexedColorImageUncompressed img, outline, distanceField;
 
         for ( i = 0, j = 0; i < 3; i++ ) {
             img = workingImages.get(i);
             if ( img == null || img.getXSize() <= 0 || img.getYSize() <= 0 ) {
                 continue;
             }
-            outline = new IndexedColorImage();
+            outline = new IndexedColorImageUncompressed();
             outline.init(distanceFieldSide, distanceFieldSide);
             extractOutlineImage(img, outline);
             currentSession.setOutline(outline, i);
 
-            distanceField = new IndexedColorImage();
+            distanceField = new IndexedColorImageUncompressed();
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
             if ( j == 0 ) {
@@ -344,7 +344,7 @@ public class ServletConsole extends HttpServlet {
             }
 
             //
-            RGBImage distanceFieldRgb;
+            RGBImageUncompressed distanceFieldRgb;
             ImageProcessing.gammaCorrection(distanceField, 2.0);
             distanceFieldRgb = distanceField.exportToRgbImage();
             int x, y;
@@ -444,7 +444,7 @@ public class ServletConsole extends HttpServlet {
                          GeometryMetadata data, PrintWriter out)
     {
         int i;
-        IndexedColorImage img;
+        IndexedColorImageUncompressed img;
 
         //-----------------------------------------------------------------
         out.println("Current reported model was retrieved from a 2D SKETCH commit. The following table sumarize drawings given by end user:<P>");
@@ -637,7 +637,7 @@ public class ServletConsole extends HttpServlet {
                 img = currentSession.getDistanceField(Integer.parseInt(source.substring(14)));
             }
             else {
-                img = new RGBImage();
+                img = new RGBImageUncompressed();
                 img.init(640, 480);
                 img.createTestPattern();
             }

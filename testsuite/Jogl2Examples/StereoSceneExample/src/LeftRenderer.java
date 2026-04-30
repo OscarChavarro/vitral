@@ -2,15 +2,15 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 
 public class LeftRenderer implements GLEventListener {
 
     private JoglDrawingArea parent;
-    private RGBImage resultImage;
+    private RGBImageUncompressed resultImage;
 
-    public LeftRenderer(JoglDrawingArea parent, RGBImage resultImage)
+    public LeftRenderer(JoglDrawingArea parent, RGBImageUncompressed resultImage)
     {
         this.parent = parent;
         this.resultImage = resultImage;
@@ -25,7 +25,7 @@ public class LeftRenderer implements GLEventListener {
 
         parent.drawLeftModel(gl);
 
-        Jogl2RGBImageRenderer.getImageJOGL(gl, resultImage);
+        Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl, resultImage);
     }
 
     public void displayChanged(GLAutoDrawable drawable, boolean a, boolean b) {

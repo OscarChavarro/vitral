@@ -8,7 +8,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RaytraceStatistics;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -61,7 +61,7 @@ public class RaytracerSimple {
         String outputFileName,
         boolean parallel)
     {
-        RGBImage resultingImage;
+        RGBImageUncompressed resultingImage;
 
         //- 1. Import the scene from scene description file to RAM -----
         System.out.println("Loading scene from " + fileName + ": ");
@@ -77,7 +77,7 @@ public class RaytracerSimple {
         System.out.println("Scene loaded OK!");
 
         //- 2. Create an empty image --------------------------------------
-        resultingImage = new RGBImage();
+        resultingImage = new RGBImageUncompressed();
         Camera activeCamera = scene.getActiveCamera();
         if ( !resultingImage.initNoFill(
             (int)activeCamera.getViewportXSize(),

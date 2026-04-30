@@ -19,7 +19,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.PrimitiveCountShapeDescriptor;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -45,20 +45,20 @@ public class ShapeDescriptor3DGenerator extends Component
     OpenGL / JOGL, so it needs a working GL context, large enough to contain
     the viewport image to be rendered.
     */
-    private IndexedColorImage
+    private IndexedColorImageUncompressed
     createCube13ProjectedViewDistanceField(GL2 gl, SimpleBodyGroup referenceBodies, int cam, int distanceFieldSide, Jogl2ProjectedViewRenderer projectedViewRenderer)
     {
         //- Execute posing ------------------------------------------------
         SimpleBodyGroup bodySet = calculateUnitCubePosing(referenceBodies);
 
         //- Render will proceed in a PBuffer ------------------------------
-        IndexedColorImage distanceFieldIndexed;
+        IndexedColorImageUncompressed distanceFieldIndexed;
 
         projectedViewRenderer.configureScene(bodySet, cam);
         projectedViewRenderer.draw(gl);
 
         //-----------------------------------------------------------------
-        distanceFieldIndexed = new IndexedColorImage();
+        distanceFieldIndexed = new IndexedColorImageUncompressed();
         distanceFieldIndexed.init(distanceFieldSide, distanceFieldSide);
         ImageProcessing.processDistanceFieldWithArray(projectedViewRenderer.image, distanceFieldIndexed, 1);
 
@@ -79,7 +79,7 @@ public class ShapeDescriptor3DGenerator extends Component
     coefficient in to the shape description.
     */
     private boolean
-    computeSphericalHarmonicsCoefficients(IndexedColorImage texture,
+    computeSphericalHarmonicsCoefficients(IndexedColorImageUncompressed texture,
                            FourierShapeDescriptor fourierShapeDescriptor,
                            int groupIndex, double r)
     {
@@ -127,14 +127,14 @@ public class ShapeDescriptor3DGenerator extends Component
         double tetha, phi;
 
         Sphere sphere;
-        IndexedColorImage texture;
+        IndexedColorImageUncompressed texture;
         int s, t;
         int voxelValue;
         Vector3D p = new Vector3D();
 
         sphere = new Sphere(r);
 
-        texture = new IndexedColorImage();
+        texture = new IndexedColorImageUncompressed();
         texture.init(64, 64);
 
         //- Build sphere's texture map from voxel grid --------------------
@@ -313,16 +313,16 @@ public class ShapeDescriptor3DGenerator extends Component
         (trigonometrics decomposition)
       - Adds newly computed shape descriptor to specified `descriptorsList`
     */
-    public IndexedColorImage[]
+    public IndexedColorImageUncompressed[]
     calculateCube13ProjectedViewsShapeDescriptors(GL2 gl, SimpleBodyGroup referenceBodies, ArrayList<ShapeDescriptor> descriptorsList, int distanceFieldSide, Jogl2ProjectedViewRenderer projectedViewRenderer, boolean exportDistanceFields) throws Exception
     {
         FourierShapeDescriptor fourierShapeDescriptor;
-        IndexedColorImage distanceField;
+        IndexedColorImageUncompressed distanceField;
         int i;
-        IndexedColorImage array[] = null;
+        IndexedColorImageUncompressed array[] = null;
 
         if ( exportDistanceFields ) {
-            array = new IndexedColorImage[13];
+            array = new IndexedColorImageUncompressed[13];
         }
 
         for ( i = 1; i <= 13; i++ ) {

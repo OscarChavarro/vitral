@@ -25,7 +25,7 @@ import javax.swing.JFrame;
 // VSDK classes
 
 import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.gui.CameraController;
@@ -42,7 +42,7 @@ public class ImageExample extends JFrame implements
     private CameraController cameraController;
     private GLCanvas canvas;
     private SimpleCorridor corridor;
-    private RGBImage img;
+    private RGBImageUncompressed img;
     private boolean closing;
     private boolean glResourcesReleased;
 

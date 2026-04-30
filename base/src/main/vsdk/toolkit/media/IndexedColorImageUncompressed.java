@@ -4,7 +4,7 @@ import java.io.Serial;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 
-public class IndexedColorImage extends Image
+public class IndexedColorImageUncompressed extends Image
 {
     @Serial private static final long serialVersionUID = 20060821L;
 
@@ -21,7 +21,7 @@ public class IndexedColorImage extends Image
     If the recieved colorTable is null, this method creates a 256 level
     grayscale palette.
     */
-    public IndexedColorImage(RGBColorPalette colorTable)
+    public IndexedColorImageUncompressed(RGBColorPalette colorTable)
     {
         xSize = 0;
         ySize = 0;
@@ -39,7 +39,7 @@ public class IndexedColorImage extends Image
     Image.init.
     This method creates a 256 level grayscale palette.
     */
-    public IndexedColorImage()
+    public IndexedColorImageUncompressed()
     {
         xSize = 0;
         ySize = 0;
@@ -191,16 +191,16 @@ public class IndexedColorImage extends Image
         putPixel(x, y, index);
     }
 
-    public RGBImage exportToRgbImage()
+    public RGBImageUncompressed exportToRgbImage()
     {
-        RGBImage copy;
+        RGBImageUncompressed copy;
         int xxSize = getXSize();
         int yySize = getYSize();
         int x, y;
         int source;
         RGBPixel target = new RGBPixel();
 
-        copy = new RGBImage();
+        copy = new RGBImageUncompressed();
         copy.init(xxSize, yySize);
         for ( x = 0; x < xxSize; x++ ) {
             for ( y = 0; y < yySize; y++ ) {
@@ -213,16 +213,16 @@ public class IndexedColorImage extends Image
         return copy;
     }
 
-    public RGBAImage exportToRgbaImage()
+    public RGBAImageUncompressed exportToRgbaImage()
     {
-        RGBAImage copy;
+        RGBAImageUncompressed copy;
         int xxSize = getXSize();
         int yySize = getYSize();
         int x, y;
         int source;
         RGBAPixel target = new RGBAPixel();
 
-        copy = new RGBAImage();
+        copy = new RGBAImageUncompressed();
         copy.init(xxSize, yySize);
         target.a = VSDK.unsigned8BitInteger2signedByte(128);
         for ( x = 0; x < xxSize; x++ ) {

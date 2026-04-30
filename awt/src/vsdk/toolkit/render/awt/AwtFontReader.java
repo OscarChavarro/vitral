@@ -97,18 +97,18 @@ public class AwtFontReader extends FontReader
 // This code can be used to debug rasterization of corresponding font in
 // raster technique
 /*
-        vsdk.toolkit.media.RGBImage img = new vsdk.toolkit.media.RGBImage();
+        vsdk.toolkit.media.RGBImageUncompressed img = new vsdk.toolkit.media.RGBImageUncompressed();
         img.init(640, 480);
 
         java.awt.image.BufferedImage bi;
-        bi = AwtRGBImageRenderer.exportToAwtBufferedImage(img);
+        bi = AwtRGBImageUncompressedRenderer.exportToAwtBufferedImage(img);
 
         java.awt.Graphics2D offlineContext = (java.awt.Graphics2D)bi.getGraphics();
         offlineContext.setFont(currentFont);
         offlineContext.setColor(Color.RED);
         offlineContext.drawString(characterAndItsContext, 100, 100);
 
-        AwtRGBImageRenderer.importFromAwtBufferedImage(bi, img);
+        AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage(bi, img);
         ImagePersistence.exportJPG(new File("output.jpg"), img);
 */
 //*****************************************************************

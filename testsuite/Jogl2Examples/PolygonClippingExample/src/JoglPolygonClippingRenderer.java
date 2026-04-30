@@ -15,10 +15,10 @@ import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;
 import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;
 import vsdk.toolkit.processing.polygonClipper._VertexNode2D;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.render.jogl._JoglPolygonTesselatorRoutines;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class JoglPolygonClippingRenderer implements GLEventListener
 {
@@ -63,7 +63,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
 
         if ( model.isTakeSnapshot() ) {
             model.setTakeSnapshot(false);
-            RGBImage snapshot = Jogl2RGBImageRenderer.getImageJOGL(gl);
+            RGBImageUncompressed snapshot = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
             File output = new File("frame"
                 + VSDK.formatNumberWithinZeroes(model.getSnapshotNumber(), 4)
                 + ".png");

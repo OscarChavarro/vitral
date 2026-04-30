@@ -1,19 +1,19 @@
 package vsdk.toolkit.render.awt;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 
-public class AwtRGBImageRenderer extends AwtRenderer
+public class AwtIndexedColorImageUncompressedRenderer extends AwtRenderer
 {
-    public static void draw(Graphics dc, RGBImage img, int x0, int y0)
+    public static void draw(Graphics dc, IndexedColorImageUncompressed img, int x0, int y0)
     {
-/*
         int x, y;
         RGBPixel pixel;
 
@@ -28,25 +28,22 @@ public class AwtRGBImageRenderer extends AwtRenderer
                 dc.drawLine(x+x0, y+y0, x+x0, y+y0);
             }
         }
-*/
-        BufferedImage i = exportToAwtBufferedImage(img);
-        dc.drawImage(i, x0, y0, null);
     }
 
-    public static void draw(Graphics dc, RGBImage img)
+    public static void draw(Graphics dc, IndexedColorImageUncompressed img)
     {
         draw(dc, img, 0, 0);
     }
 
-    /**
-    Given an input BufferedImage, this method copies its contents to the
-    specified output image. If output image currently exists, this method
-    doesn't initialize its contents, but merely copies pixels. If the
-    output image previously had a different size that the input's size,
-    then is initialized.
-    */
     public static boolean importFromAwtBufferedImage(
-        BufferedImage input, RGBImage output
+        BufferedImage input, IndexedColorImageUncompressed output
+    )
+    {
+	return importFromAwtBufferedImage(input, output, null);
+    }
+    
+    public static boolean importFromAwtBufferedImage(
+        BufferedImage input, IndexedColorImageUncompressed output, String filename
     )
     {
         int w = input.getWidth();
@@ -63,6 +60,7 @@ public class AwtRGBImageRenderer extends AwtRenderer
         ColorModel cm = input.getColorModel();
         int x, y;
         int pixel;
+        int val;
         RGBPixel p = new RGBPixel();
 
         if ( cm.getNumColorComponents() == 3 ) {
@@ -73,7 +71,11 @@ public class AwtRGBImageRenderer extends AwtRenderer
                     p.r = (byte)((pixel & 0x00FF0000) >> 16);
                     p.g = (byte)((pixel & 0x0000FF00) >> 8);
                     p.b = (byte)((pixel & 0x000000FF));
-                    output.putPixelRgb(x, y, p);
+                    val = VSDK.signedByte2unsignedInteger(p.r);
+                    val += VSDK.signedByte2unsignedInteger(p.g);
+                    val += VSDK.signedByte2unsignedInteger(p.b);
+                    val /= 3;
+                    output.putPixel(x, y, val);
                 }
             }
         }
@@ -82,39 +84,16 @@ public class AwtRGBImageRenderer extends AwtRenderer
             int i;
             for ( i = 0, y = 0; y < h; y++ ) {
                 for ( x = 0; x < w; x++, i++ ) {
-                    p.r = p.g = p.b = VSDK.unsigned8BitInteger2signedByte((db.getElem(i) & 0x000000FF));
+                    val = db.getElem(i) & 0x000000FF;
                     // Warning: This method call is so slow...
-                    output.putPixelRgb(x, y, p);
+                    output.putPixel(x, y, val);
                 }
             }
         }
         else {
-            VSDK.reportMessage(null, VSDK.WARNING, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
+            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "importFromAwtBufferedImage", "ColorSpace encoding not supported (file [" + filename + "])!");
         }
         return true;
-    }
-
-    public static BufferedImage exportToAwtBufferedImage(RGBImage img)
-    {
-        BufferedImage bi;
-        RGBPixel p;
-        int x, y;
-        int val;
-        int r, g, b;
-
-        bi = new BufferedImage(img.getXSize(), img.getYSize(), 
-             BufferedImage.TYPE_INT_ARGB);
-        for ( y = 0; y < img.getYSize(); y++ ) {
-            for ( x = 0; x < img.getXSize(); x++ ) {
-                p = img.getPixelRgb(x, y);
-                r = VSDK.signedByte2unsignedInteger(p.r);
-                g = VSDK.signedByte2unsignedInteger(p.g);
-                b = VSDK.signedByte2unsignedInteger(p.b);
-                val = 0xFF000000 | (r << 16) | (g << 8) | b;
-                bi.setRGB(x, y, val);
-            }
-        }
-        return bi;
     }
 
 }

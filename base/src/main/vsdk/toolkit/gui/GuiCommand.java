@@ -1,8 +1,8 @@
 package vsdk.toolkit.gui;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAPixel;
 
@@ -15,10 +15,10 @@ public class GuiCommand extends GuiElement {
     private String name;
     private String briefDescription;
     private String help; // Could contain HTML tags
-    private RGBAImage icon;
-    private RGBImage iconTransparency;
-    private RGBAImage secondaryIcon;
-    private RGBImage secondaryIconTransparency;
+    private RGBAImageUncompressed icon;
+    private RGBImageUncompressed iconTransparency;
+    private RGBAImageUncompressed secondaryIcon;
+    private RGBImageUncompressed secondaryIconTransparency;
 
     public GuiCommand()
     {
@@ -72,7 +72,7 @@ public class GuiCommand extends GuiElement {
     
     @return 
     */
-    public RGBAImage getIcon()
+    public RGBAImageUncompressed getIcon()
     {
         return icon;
     }
@@ -81,7 +81,7 @@ public class GuiCommand extends GuiElement {
     
     @return 
     */
-    public RGBImage getIconTransparency()
+    public RGBImageUncompressed getIconTransparency()
     {
         return iconTransparency;
     }
@@ -198,7 +198,7 @@ public class GuiCommand extends GuiElement {
     
     @param i 
     */
-    public void setIcon(RGBAImage i)
+    public void setIcon(RGBAImageUncompressed i)
     {
         icon = i;
     }
@@ -207,7 +207,7 @@ public class GuiCommand extends GuiElement {
     
     @param i 
     */
-    public void setIconTransparency(RGBImage i)
+    public void setIconTransparency(RGBImageUncompressed i)
     {
         iconTransparency = i;
     }
@@ -235,7 +235,7 @@ public class GuiCommand extends GuiElement {
     /**
     @return the secondaryIcon
     */
-    public RGBAImage getSecondaryIcon()
+    public RGBAImageUncompressed getSecondaryIcon()
     {
         return secondaryIcon;
     }
@@ -243,7 +243,7 @@ public class GuiCommand extends GuiElement {
     /**
     @param secondaryIcon the secondaryIcon to set
     */
-    public void setSecondaryIcon(RGBAImage secondaryIcon)
+    public void setSecondaryIcon(RGBAImageUncompressed secondaryIcon)
     {
         this.secondaryIcon = secondaryIcon;
     }
@@ -251,7 +251,7 @@ public class GuiCommand extends GuiElement {
     /**
     @return the secondaryIconTransparency
     */
-    public RGBImage getSecondaryIconTransparency()
+    public RGBImageUncompressed getSecondaryIconTransparency()
     {
         return secondaryIconTransparency;
     }
@@ -259,7 +259,7 @@ public class GuiCommand extends GuiElement {
     /**
     @param secondaryIconTransparency the secondaryIconTransparency to set
     */
-    public void setSecondaryIconTransparency(RGBImage secondaryIconTransparency)
+    public void setSecondaryIconTransparency(RGBImageUncompressed secondaryIconTransparency)
     {
         this.secondaryIconTransparency = secondaryIconTransparency;
     }

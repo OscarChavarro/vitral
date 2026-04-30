@@ -7,24 +7,24 @@ import java.util.ArrayList;
 import android.opengl.GLES10;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
-public class AndroidGLES10RGBAImageRenderer extends AndroidGLES10Renderer
+public class AndroidGLES10RGBImageUncompressedRenderer extends AndroidGLES10Renderer
 {
-    private static ArrayList<_AndroidGLES10RGBAImageRendererAssociation> compiledImages;
+    private static ArrayList<_AndroidGLES10RGBImageUncompressedRendererAssociation> compiledImages;
 
     static {
-        compiledImages = new ArrayList<_AndroidGLES10RGBAImageRendererAssociation>();
+        compiledImages = new ArrayList<_AndroidGLES10RGBImageUncompressedRendererAssociation>();
     }
 
-    public static int activate(RGBAImage img)
+    public static int activate(RGBImageUncompressed img)
     {
         int list = activateBase(img);
 
         return list;
     }
 
-    private static int activateBase(RGBAImage img)
+    private static int activateBase(RGBImageUncompressed img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -43,7 +43,7 @@ public class AndroidGLES10RGBAImageRenderer extends AndroidGLES10Renderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _AndroidGLES10RGBAImageRendererAssociation item = null;
+        _AndroidGLES10RGBImageUncompressedRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -59,19 +59,20 @@ public class AndroidGLES10RGBAImageRenderer extends AndroidGLES10Renderer
         GLES10.glEnable(GLES10.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
-            item = new _AndroidGLES10RGBAImageRendererAssociation();
+            GLES10.glGenTextures(1, lists, 0);
+            item = new _AndroidGLES10RGBImageUncompressedRendererAssociation();
             item.image = img;
-            item.glList = 1;
+            item.glList = lists[0];
             compiledImages.add(item);
 
             //----
-            GLES10.glGenTextures(1, lists, 0);
-            item.glList = lists[0];
             GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, item.glList);
 
             GLES10.glTexImage2D(
-                GLES10.GL_TEXTURE_2D, 0, GLES10.GL_RGBA, x_tam, y_tam, 0, GLES10.GL_RGBA,
-                GLES10.GL_UNSIGNED_BYTE, item.image.getRawImageDirectBuffer());
+                GLES10.GL_TEXTURE_2D, 0, GLES10.GL_RGB, x_tam, y_tam, 0, 
+                GLES10.GL_RGB, GLES10.GL_UNSIGNED_BYTE, 
+                item.image.getRawImageDirectBuffer());
+
             checkGlError("glTexImage2D");
         }
 
@@ -81,11 +82,11 @@ public class AndroidGLES10RGBAImageRenderer extends AndroidGLES10Renderer
         return item.glList;
     }
     
-    public static void disable(RGBAImage img)
+    public static void disable(RGBImageUncompressed img)
     {
         //- 1. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _AndroidGLES10RGBAImageRendererAssociation item = null;
+        _AndroidGLES10RGBImageUncompressedRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -102,5 +103,4 @@ public class AndroidGLES10RGBAImageRenderer extends AndroidGLES10Renderer
             GLES10.glDeleteTextures(1, arr, 0);
         }
     }
-
 }

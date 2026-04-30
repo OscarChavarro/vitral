@@ -21,7 +21,7 @@ public class ZBuffer extends MediaEntity {
     private int ySize;
 
     /**
-    Consructs a Z buffer with the specified parameters; the depth data is 
+    Consructs a Z buffer with the specified parameters; the depth data is
     initialized to value 0.0
     @param width The width of the z buffer
     @param height The height of the z buffer
@@ -33,11 +33,11 @@ public class ZBuffer extends MediaEntity {
     }
 
     /**
-    Creates a z buffer given the z buffer's raw data. The stored z buffer will have 
+    Creates a z buffer given the z buffer's raw data. The stored z buffer will have
     an inverse row order than that of the parameter's data
     @param width The width of the z buffer and the parameter input data
     @param height The height of the z buffer and the parameter input data
-    @param dep The z buffer data to store in this z buffer  
+    @param dep The z buffer data to store in this z buffer
     */
     public ZBuffer(float[] dep, int width, int height) {
         xSize = width;
@@ -104,7 +104,7 @@ public class ZBuffer extends MediaEntity {
     }
 
     /**
-    Sets the Z buffer value from the input parameter in a specified position 
+    Sets the Z buffer value from the input parameter in a specified position
     @param x the horizontal position of the value to change
     @param y the vertical position of the value to change
     @param v The value to replace in the z buffer
@@ -115,11 +115,11 @@ public class ZBuffer extends MediaEntity {
     }
 
     /**
-    This method converts this Z buffer into an RGBImage using the specified
+    This method converts this Z buffer into an RGBImageUncompressed using the specified
     ColorPalette
     */
-    public IndexedColorImage exportIndexedColorImage() {
-        IndexedColorImage image = new IndexedColorImage();
+    public IndexedColorImageUncompressed exportIndexedColorImage() {
+        IndexedColorImageUncompressed image = new IndexedColorImageUncompressed();
         image.init(xSize, ySize);
         int pos = 0;
         int val;
@@ -138,13 +138,13 @@ public class ZBuffer extends MediaEntity {
     }
 
     /**
-    This method converts this Z buffer into an RGBImage using the specified
+    This method converts this Z buffer into an RGBImageUncompressed using the specified
     ColorPalette
-    @param p The color palete used to convert this z buffer into an RGBImage
-    @return An RGBAImage that represents this z buffer
+    @param p The color palete used to convert this z buffer into an RGBImageUncompressed
+    @return An RGBAImageUncompressed that represents this z buffer
     */
-    public RGBImage exportRGBImage(RGBColorPalette p) {
-        RGBImage image = new RGBImage();
+    public RGBImageUncompressed exportRGBImage(RGBColorPalette p) {
+        RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(xSize, ySize);
         int pos = 0;
 
@@ -156,7 +156,7 @@ public class ZBuffer extends MediaEntity {
                 if ( f < 0.0 ) f = 0.0f;
                 if ( f > 1.0 ) f = 1.0f;
                 c = p.evalLinear(f);
-                image.putPixel(x, y, 
+                image.putPixel(x, y,
                     (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
                 pos++;
             }
@@ -165,13 +165,13 @@ public class ZBuffer extends MediaEntity {
     }
 
     /**
-    This method converts this Z buffer into an RGBAImage using the specified 
+    This method converts this Z buffer into an RGBAImageUncompressed using the specified
     ColorPalette
-    @param p The color palete used to convert this Z buffer into an RGBAImage
-    @return An RGBAImage that represents this Z buffer
+    @param p The color palete used to convert this Z buffer into an RGBAImageUncompressed
+    @return An RGBAImageUncompressed that represents this Z buffer
     */
-    public RGBAImage exportRGBAImage(RGBColorPalette p) {
-        RGBAImage image = new RGBAImage();
+    public RGBAImageUncompressed exportRGBAImage(RGBColorPalette p) {
+        RGBAImageUncompressed image = new RGBAImageUncompressed();
         image.init(xSize, ySize);
         int pos = 0;
 
@@ -183,7 +183,7 @@ public class ZBuffer extends MediaEntity {
                 if ( f < 0.0 ) f = 0.0f;
                 if ( f > 1.0 ) f = 1.0f;
                 c = p.evalLinear(f);
-                image.putPixel(x, y, 
+                image.putPixel(x, y,
                     (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
                 pos++;
             }

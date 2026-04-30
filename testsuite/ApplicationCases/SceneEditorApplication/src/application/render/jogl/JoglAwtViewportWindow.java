@@ -23,7 +23,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.gui.AwtSystem;
@@ -61,13 +61,13 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
     //
     private String title;
-    private RGBAImage titleImage;
-    private RGBAImage xLabelImage;
-    private RGBAImage yLabelImage;
-    private RGBAImage zLabelImage;
-    private RGBAImage xLabelImageSelected;
-    private RGBAImage yLabelImageSelected;
-    private RGBAImage zLabelImageSelected;
+    private RGBAImageUncompressed titleImage;
+    private RGBAImageUncompressed xLabelImage;
+    private RGBAImageUncompressed yLabelImage;
+    private RGBAImageUncompressed zLabelImage;
+    private RGBAImageUncompressed xLabelImageSelected;
+    private RGBAImageUncompressed yLabelImageSelected;
+    private RGBAImageUncompressed zLabelImageSelected;
 
     // Each JoglAwtViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = 1;
@@ -566,7 +566,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         if ( showGrid ) drawGridRectangle(gl);
     }
 
-    public void drawTextureString2D(GL2 gl, int x, int y, RGBAImage i)
+    public void drawTextureString2D(GL2 gl, int x, int y, RGBAImageUncompressed i)
     {
         double dx;
         double dy;
@@ -590,7 +590,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
-    private void drawTextureString3D(GL2 gl, RGBAImage i)
+    private void drawTextureString3D(GL2 gl, RGBAImageUncompressed i)
     {
         gl.glPushAttrib(GL2.GL_ENABLE_BIT);
         gl.glRasterPos3d(-1, -1, 0);

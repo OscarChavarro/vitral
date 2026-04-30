@@ -5,12 +5,12 @@ import java.io.File;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;                      // Utilities
-import vsdk.toolkit.media.RGBImage;                   // Model elements
+import vsdk.toolkit.media.RGBImageUncompressed;                   // Model elements
 import vsdk.toolkit.io.image.ImagePersistence;        // Persistence elements
 
 public class ImageOfflineExample 
 {
-    private static void performImageOperation1(RGBImage img)
+    private static void performImageOperation1(RGBImageUncompressed img)
     {
         int x, y;
         int xSize, ySize;
@@ -29,7 +29,7 @@ public class ImageOfflineExample
     }
 
     public static void main (String[] args) {
-        RGBImage img = null;
+        RGBImageUncompressed img = null;
         String imageFilename = "../../../etc/images/render.jpg";
 
         try {

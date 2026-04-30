@@ -15,10 +15,10 @@ import java.util.ArrayList;
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
@@ -27,8 +27,8 @@ exported and/or imported to/from files.
 
 This class follows a Singleton design pattern.
 
-\todo  Does this implements a "Builder" design pattern??? A Factory design 
-      pattern... possibly some of that combined with a Facade design 
+\todo  Does this implements a "Builder" design pattern??? A Factory design
+      pattern... possibly some of that combined with a Facade design
       pattern?
  */
 public class ImagePersistence extends PersistenceElement
@@ -66,7 +66,7 @@ public class ImagePersistence extends PersistenceElement
         if ( helpers == null  ) {
             helpers = new ArrayList<ImagePersistenceHelper>();
         }
-        
+
         // Call order reflects prefered order
         loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceAwt");
         loadPluginHelper("vsdk.toolkit.io.image.ImagePersistenceTarga");
@@ -80,7 +80,7 @@ public class ImagePersistence extends PersistenceElement
         helpers.add(h);
     }
 
-    private static RGBAImage importDDSRGBA(File inImageFd)
+    private static RGBAImageUncompressed importDDSRGBA(File inImageFd)
     {
         try {
             int i;
@@ -96,46 +96,46 @@ public class ImagePersistence extends PersistenceElement
         return createNotAvailableImageRGBA();
     }
 
-    private static RGBAImage createNotAvailableImageRGBA()
+    private static RGBAImageUncompressed createNotAvailableImageRGBA()
     {
-        RGBAImage data;
-        data = new RGBAImage();
+        RGBAImageUncompressed data;
+        data = new RGBAImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test RGBA image"
         );
         return data;
     }
 
-    private static RGBImage createNotAvailableImageRGB()
+    private static RGBImageUncompressed createNotAvailableImageRGB()
     {
-        RGBImage data;
-        data = new RGBImage();
+        RGBImageUncompressed data;
+        data = new RGBImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test RGB image"
         );
         return data;
     }
 
-    private static IndexedColorImage createNotAvailableImageIndexedColor()
+    private static IndexedColorImageUncompressed createNotAvailableImageIndexedColor()
     {
-        IndexedColorImage data;
-        data = new IndexedColorImage();
+        IndexedColorImageUncompressed data;
+        data = new IndexedColorImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test IndexedColor image"
         );
         return data;
     }
 
-    private static RGBImage importDDSRGB(File inImageFd)
+    private static RGBImageUncompressed importDDSRGB(File inImageFd)
     {
         try {
             int i;
@@ -160,19 +160,19 @@ public class ImagePersistence extends PersistenceElement
     but trying to detect file headers.
 
     @param inImageFd - The file containing the image
-    @return An RGBAImage entity that contains the image loaded in memory.
+    @return An RGBAImageUncompressed entity that contains the image loaded in memory.
 
     Will change:
       - Choose a better name for this method
       - Do not receive a File, but a Stream of bytes
      * @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static RGBAImage importRGBA(File inImageFd) 
+    public static RGBAImageUncompressed importRGBA(File inImageFd)
         throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
-        RGBAImage retImage;
-        retImage = new RGBAImage();
+        RGBAImageUncompressed retImage;
+        retImage = new RGBAImageUncompressed();
 
         //- Try optimized reading, if native library is available ---------
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
@@ -203,7 +203,7 @@ public class ImagePersistence extends PersistenceElement
             //delete retImage;
             return importDDSRGBA(inImageFd);
         }
-        
+
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
 
@@ -217,8 +217,8 @@ public class ImagePersistence extends PersistenceElement
         char arr[] = line.toCharArray();
         int i;
 
-        for ( i = 0; 
-              i < arr.length && (arr[i] != ' ' && arr[i] != '\t'); 
+        for ( i = 0;
+              i < arr.length && (arr[i] != ' ' && arr[i] != '\t');
               i++ ) {
             // Skip comment
         }
@@ -226,7 +226,7 @@ public class ImagePersistence extends PersistenceElement
         return i < arr.length && arr[i] == '#';
     }
 
-    public static RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
+    public static RGBImageUncompressed importRGB(InputStream is) throws ImageNotRecognizedException, Exception
     {
         try {
             int i;
@@ -242,7 +242,7 @@ public class ImagePersistence extends PersistenceElement
         return createNotAvailableImageRGB();
     }
 
-    public static RGBAImage importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
+    public static RGBAImageUncompressed importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
     {
         try {
             int i;
@@ -267,18 +267,18 @@ public class ImagePersistence extends PersistenceElement
     but trying to detect file headers.
 
     @param inImageFd - The file respesenting the image
-    @return An RGBImage entity that contains the image loaded in memory.
+    @return An RGBImageUncompressed entity that contains the image loaded in memory.
 
     Will change:
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static RGBImage importRGB(File inImageFd) 
+    public static RGBImageUncompressed importRGB(File inImageFd)
         throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
-        RGBImage retImage = new RGBImage();
+        RGBImageUncompressed retImage = new RGBImageUncompressed();
 
         //- Try optimized reading, if native library is available ---------
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
@@ -352,7 +352,7 @@ public class ImagePersistence extends PersistenceElement
                     }
                 } while ( !exit );
 
-                retImage = new RGBImage();
+                retImage = new RGBImageUncompressed();
                 retImage.initNoFill(xSize, ySize);
                 //byte barr[] = retImage.getRawImage();
                 //readBytes(bis, barr);
@@ -402,18 +402,18 @@ public class ImagePersistence extends PersistenceElement
     but trying to detect file headers.
 
     @param inImageFd - The file respesenting the image
-    @return An IndexedColorImage entity that contains the image loaded in memory.
+    @return An IndexedColorImageUncompressed entity that contains the image loaded in memory.
 
     Will change:
       - Choose a better name for this method
       - Do not recieve a File, but a Stream of bytes
     @throws vsdk.toolkit.io.image.ImageNotRecognizedException
     */
-    public static IndexedColorImage importIndexedColor(File inImageFd) 
+    public static IndexedColorImageUncompressed importIndexedColor(File inImageFd)
         throws ImageNotRecognizedException, Exception
     {
         String type = extractExtensionFromFile(inImageFd);
-        IndexedColorImage retImage;
+        IndexedColorImageUncompressed retImage;
         Image img;
 
         int i;
@@ -425,18 +425,18 @@ public class ImagePersistence extends PersistenceElement
 
         if( type.equals("bw") ) {
             img = ImagePersistenceSGI.readImageSGI(inImageFd.getAbsolutePath());
-            if ( img instanceof IndexedColorImage ) {
-                retImage = (IndexedColorImage)img;
+            if ( img instanceof IndexedColorImageUncompressed ) {
+                retImage = (IndexedColorImageUncompressed)img;
             }
             else {
-                throw new ImageNotRecognizedException("Convertion needed", 
+                throw new ImageNotRecognizedException("Convertion needed",
                 inImageFd);
             }
             return retImage;
         }
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
     }
-   
+
     private static void transferPixels(int[] ori, byte[] dest, int w, int h, int pixelDepth)
     {
         int bPos=0;
@@ -455,15 +455,15 @@ public class ImagePersistence extends PersistenceElement
             }
         }
     }
-    
+
     /**
-    This method writes the contents of the specified image to a file in 
+    This method writes the contents of the specified image to a file in
     binary JPEG image format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
     @param fd
     @param img
-    @return 
+    @return
     */
     public static boolean exportJPG(File fd, Image img)
     {
@@ -490,8 +490,8 @@ public class ImagePersistence extends PersistenceElement
                 return helpers.get(i).exportGIF(fd, img);
             }
         }
-            
-        VSDK.reportMessage(null, VSDK.WARNING, 
+
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving GIF image"
         );
@@ -508,7 +508,7 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving JPG image");
     }
@@ -523,11 +523,11 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving PNG image");
     }
- 
+
     public static void exportPNG(File fd, Image img)
     {
         try {
@@ -540,7 +540,7 @@ public class ImagePersistence extends PersistenceElement
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
+            VSDK.reportMessage(null, VSDK.WARNING,
                 "ImagePersistence",
                 "Error saving PNG image");
         }
@@ -555,19 +555,19 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING, 
+        VSDK.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving PNG image");
     }
 
     /**
-    This method writes the contents of the specified image to a file in 
+    This method writes the contents of the specified image to a file in
     binary RGB PPM format (i.e. P6 PPM sub-format). Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
     @param fd
     @param img
-    @return 
+    @return
     */
     public static boolean exportPPM(File fd, Image img)
     {
@@ -615,13 +615,13 @@ public class ImagePersistence extends PersistenceElement
     }
 
     /**
-    This method writes the contents of the specified image to a file in 
+    This method writes the contents of the specified image to a file in
     binary RGB uncompressed BMP format. Returns true if everything
     works fine, false if something fails, like a permission access denied
     or if storage device runs out of space.
     @param fd
     @param img
-    @return 
+    @return
     */
     public static boolean exportBMP(File fd, Image img)
     {
@@ -679,13 +679,13 @@ public class ImagePersistence extends PersistenceElement
     }
 
     /**
-    This method writes the contents of the specified image to a file in 
+    This method writes the contents of the specified image to a file in
     binary GrayScale PPM format (i.e. P5 PPM sub-format). Returns true if
     everything works fine, false if something fails, like a permission access
     denied or if storage device runs out of space.
     @param fd
     @param img
-    @return 
+    @return
     */
     public static boolean exportPNM(File fd, Image img)
     {
@@ -727,5 +727,5 @@ public class ImagePersistence extends PersistenceElement
         }
         return true;
     }
-    
+
 }

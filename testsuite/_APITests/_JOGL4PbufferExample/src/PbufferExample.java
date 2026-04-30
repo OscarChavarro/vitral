@@ -18,7 +18,7 @@ import com.jogamp.opengl.GLException;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -126,7 +126,7 @@ public class PbufferExample implements GLEventListener {
         gl.glUseProgram(0);
         gl.glFinish();
 
-        RGBImage image = captureRgbImage(gl, IMAGE_WIDTH, IMAGE_HEIGHT);
+        RGBImageUncompressed image = captureRgbImage(gl, IMAGE_WIDTH, IMAGE_HEIGHT);
         ImagePersistence.exportJPG(new File("./output.jpg"), image);
         System.out.println("PbufferExample: exported ./output.jpg");
 
@@ -168,13 +168,13 @@ public class PbufferExample implements GLEventListener {
         gl.glViewport(0, 0, width, height);
     }
 
-    private static RGBImage captureRgbImage(GL4 gl, int width, int height)
+    private static RGBImageUncompressed captureRgbImage(GL4 gl, int width, int height)
     {
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
         gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
         gl.glReadPixels(0, 0, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, bb);
 
-        RGBImage image = new RGBImage();
+        RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(width, height);
 
         int pos = 0;

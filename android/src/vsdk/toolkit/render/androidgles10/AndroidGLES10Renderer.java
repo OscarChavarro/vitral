@@ -23,7 +23,7 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.TextVisualConfiguration;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class AndroidGLES10Renderer extends RenderingElement {
     private static final String TAG = "AndroidGLES10Renderer";
@@ -426,7 +426,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
     
     public static void buildFontMaps(TextVisualConfiguration characterStyle) {
         final int currentPos[] = new int[2];
-        RGBAImage glyphMap = null;
+        RGBAImageUncompressed glyphMap = null;
 
         Matrix4x4[] glyphTextureTransform = {new Matrix4x4()};
         ColorRgb fg = characterStyle.getForegroundColor();
@@ -437,7 +437,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
             '#', '$', '%', '&', '(', ')', '=', '?', '<', '>', ',', '.',
             ';', ':', '_', '{', '}', '[', ']', 'á', 'é', 'í', 'ó', 'ú', 'ñ',
             'ü', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', ' '};
-        HashMap<String, RGBAImage> characterSpriteCaches;
+        HashMap<String, RGBAImageUncompressed> characterSpriteCaches;
         HashMap<String, Matrix4x4> characterTransformCaches;
         Matrix4x4 M;
 
@@ -507,9 +507,9 @@ public class AndroidGLES10Renderer extends RenderingElement {
         int x = x0, y = y0;
         int i;
         String key;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
-        HashMap<String, RGBAImage> characterSpriteCaches;
+        HashMap<String, RGBAImageUncompressed> characterSpriteCaches;
         characterSpriteCaches = characterStyle.getCharacterSprites();
         HashMap<String, Matrix4x4> characterTransformCaches;
         characterTransformCaches = characterStyle.getCharacterTransforms();

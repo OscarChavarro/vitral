@@ -13,8 +13,8 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class ShadersModel
 {
@@ -28,8 +28,8 @@ public class ShadersModel
     private Sphere sphere;
     private Light light;
     private Material material;
-    private RGBImage textureMap;
-    private RGBImage bumpMapHeightRgb;
+    private RGBImageUncompressed textureMap;
+    private RGBImageUncompressed bumpMapHeightRgb;
     private boolean animationEnabled;
     private double sphereRotationAngleRadians;
     private int sphereMeridians;
@@ -72,7 +72,7 @@ public class ShadersModel
         try {
             textureMap = ImagePersistence.importRGB(new File("../../../etc/textures/miniearth.png"));
 
-            IndexedColorImage bump = ImagePersistence.importIndexedColor(new File("../../../etc/bumpmaps/earth.bw"));
+            IndexedColorImageUncompressed bump = ImagePersistence.importIndexedColor(new File("../../../etc/bumpmaps/earth.bw"));
             // [BLIN1978b] Section 3:
             // bump mapping is driven by a scalar height function F(u,v).
             // The shader computes Fu/Fv with central differences directly
@@ -124,12 +124,12 @@ public class ShadersModel
         return material;
     }
 
-    public RGBImage getTextureMap()
+    public RGBImageUncompressed getTextureMap()
     {
         return textureMap;
     }
 
-    public RGBImage getBumpMapHeightRgb()
+    public RGBImageUncompressed getBumpMapHeightRgb()
     {
         return bumpMapHeightRgb;
     }

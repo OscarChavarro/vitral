@@ -9,7 +9,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
@@ -79,13 +79,13 @@ public class WireframeOfflineExample {
     }
 
     public void rasterOutput(Calligraphic2DBuffer lineSet) {
-        RGBImage outputImageRasterViewport;
+        RGBImageUncompressed outputImageRasterViewport;
 
         //- (1/2) line rasterization in to output image -------------------
         double xt = camera.getViewportXSize();
         double yt = camera.getViewportYSize();
 
-        outputImageRasterViewport = new RGBImage();
+        outputImageRasterViewport = new RGBImageUncompressed();
         outputImageRasterViewport.init((int)xt, (int)yt);
 
         lineSet.exportRgbImage(outputImageRasterViewport);

@@ -31,8 +31,8 @@ import javax.swing.border.Border;
 
 
 // VSDK classes
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.render.awt.AwtRGBAImageUncompressedRenderer;
 import vsdk.toolkit.gui.PresentationElement;
 import vsdk.toolkit.gui.variable.GuiBooleanVariable;
 import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
@@ -252,7 +252,7 @@ public class SwingGuiRenderer extends PresentationElement {
         ArrayList<GuiCommand> list = group.getCommands();
         int i;
         GuiCommand element;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         for ( i = 0; i < list.size(); i++ ) {
             element = list.get(i);
@@ -267,7 +267,7 @@ public class SwingGuiRenderer extends PresentationElement {
             else {
                 final ImageIcon primaryIcon;
                 primaryIcon = new ImageIcon(
-                        AwtRGBAImageRenderer.exportToAwtBufferedImage(img));
+                        AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(img));
                 b = new JButton(primaryIcon);
                 b.setMargin(new Insets(0, 0, 0, 0));
                 final JButton bb = b;
@@ -275,7 +275,7 @@ public class SwingGuiRenderer extends PresentationElement {
                 if ( img != null ) {
                     final ImageIcon secondaryIcon;
                     secondaryIcon = new ImageIcon(
-                            AwtRGBAImageRenderer.exportToAwtBufferedImage(img));
+                            AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(img));
                     b.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e)
@@ -291,7 +291,7 @@ public class SwingGuiRenderer extends PresentationElement {
                     });
 
                     //b.setPressedIcon(new ImageIcon(
-                    //    AwtRGBAImageRenderer.exportToAwtBufferedImage(img)));
+                    //    AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(img)));
                 }
             }
             
@@ -431,7 +431,7 @@ public class SwingGuiRenderer extends PresentationElement {
         b = new JCheckBox("False");
         p.add(b);*/
         
-       // RGBAImage image = ImagePersistence.importRGBA(new File());
+       // RGBAImageUncompressed image = ImagePersistence.importRGBA(new File());
     
         /*
         getImageForTrueState

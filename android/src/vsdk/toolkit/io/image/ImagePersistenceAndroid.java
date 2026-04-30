@@ -14,11 +14,11 @@ import android.graphics.Color;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.render.android.AndroidRGBImageRenderer;
-import vsdk.toolkit.render.android.AndroidRGBAImageRenderer;
+import vsdk.toolkit.render.android.AndroidRGBImageUncompressedRenderer;
+import vsdk.toolkit.render.android.AndroidRGBAImageUncompressedRenderer;
 
 public class ImagePersistenceAndroid extends ImagePersistenceHelper
 {
@@ -48,10 +48,10 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
         return false;
     }
 
-    public RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(InputStream is) throws ImageNotRecognizedException, Exception
     {
-        RGBImage img;
-        img = new RGBImage();
+        RGBImageUncompressed img;
+        img = new RGBImageUncompressed();
 
         Bitmap bitmap = null;
         try {
@@ -63,22 +63,22 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
 
         img.init(bitmap.getWidth(), bitmap.getHeight());
 
-        AndroidRGBImageRenderer.importFromAndroidBitmap(bitmap, img);
+        AndroidRGBImageUncompressedRenderer.importFromAndroidBitmap(bitmap, img);
 
         bitmap.recycle();
 
         return img;
     }
 
-    public RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         if ( !inImageFd.exists() ) {
             VSDK.reportMessage(this, VSDK.WARNING,
                 "importRGBA", "ERROR: file +\"" + 
 			       inImageFd.getPath() + "\" does not exist!");
-            img = new RGBAImage();
+            img = new RGBAImageUncompressed();
             img.init(32, 32);
             img.createTestPattern();
             return img;
@@ -93,15 +93,15 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
         return img;
     }
 
-    public RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
     {
-        RGBImage img;
+        RGBImageUncompressed img;
 
         if ( !inImageFd.exists() ) {
             VSDK.reportMessage(this, VSDK.WARNING,
                 "importRGBA", "ERROR: file +\"" + 
                 inImageFd.getPath() + "\" does not exist!");
-            img = new RGBImage();
+            img = new RGBImageUncompressed();
             img.init(32, 32);
             img.createTestPattern();
             return img;
@@ -116,10 +116,10 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
         return img;
     }
 
-    public RGBAImage importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
     {
-        RGBAImage img;
-        img = new RGBAImage();
+        RGBAImageUncompressed img;
+        img = new RGBAImageUncompressed();
 
         Bitmap bitmap = null;
         try {
@@ -129,7 +129,7 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
           catch(IOException e) {
         }
 
-        AndroidRGBAImageRenderer.importFromAndroidBitmap(bitmap, img);
+        AndroidRGBAImageUncompressedRenderer.importFromAndroidBitmap(bitmap, img);
         bitmap.recycle();
 
         return img;

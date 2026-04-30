@@ -38,7 +38,7 @@ public class Jogl2FixedBackgroundRenderer extends Jogl2Renderer
 
         //- Put image background ------------------------------------------
         gl.glEnable(GL.GL_TEXTURE_2D);
-        Jogl2RGBAImageRenderer.activate(gl, background.getImage());
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, background.getImage());
 
         gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
             GL.GL_TRUE);

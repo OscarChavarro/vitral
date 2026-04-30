@@ -14,8 +14,8 @@ import java.awt.geom.Rectangle2D;
 
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.render.awt.AwtRGBAImageRenderer;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.render.awt.AwtRGBAImageUncompressedRenderer;
 
 /**
 This class gives VitralSDK access to GUI operations in the AwtSystem, as
@@ -403,54 +403,54 @@ public class AwtSystem extends PresentationElement
         }
     }
 
-    public static RGBAImage calculateLabelImage(String label, ColorRgb color, 
+    public static RGBAImageUncompressed calculateLabelImage(String label, ColorRgb color,
 						Font newfont)
     {
         font = newfont;
         return calculateLabelImage(label, color);
     }
 
-    public static RGBAImage calculateLabelImage(String label, ColorRgb color)
+    public static RGBAImageUncompressed calculateLabelImage(String label, ColorRgb color)
     {
         return calculateLabelImage(label, color, 14);
     }
-    
-    public static RGBAImage calculateLabelImageBordered(
-        String label, ColorRgb colorForeground, ColorRgb colorBackground, 
+
+    public static RGBAImageUncompressed calculateLabelImageBordered(
+        String label, ColorRgb colorForeground, ColorRgb colorBackground,
         int fontSize)
-    {        
+    {
         font = new Font("Arial", Font.PLAIN, fontSize);
 
         return calculateLabelImageBordered(
-            label, colorForeground, colorBackground, fontSize, font);        
+            label, colorForeground, colorBackground, fontSize, font);
     }
 
-    public static RGBAImage calculateLabelImage(
+    public static RGBAImageUncompressed calculateLabelImage(
         String label, ColorRgb color, int fontSize)
     {
         font = new Font("Arial", Font.PLAIN, fontSize);
 
         return calculateLabelImage(label, color, fontSize, font);
     }
-    
-    public static RGBAImage calculateLabelImage(
+
+    public static RGBAImageUncompressed calculateLabelImage(
         String label, ColorRgb color, int fontSize, Font newFont)
     {
-        
+
         font = newFont;
         Rectangle ri;
 
         //-----------------------------------------------------------------
 
         //- Obtain an offline Java2D graphics context ---------------------
-        RGBAImage tmpImage;
-        tmpImage = new RGBAImage();
+        RGBAImageUncompressed tmpImage;
+        tmpImage = new RGBAImageUncompressed();
         tmpImage.init(1, 1);
 
         BufferedImage bi;
         Graphics offlineContext;
 
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(tmpImage);
+        bi = AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(tmpImage);
         offlineContext = bi.getGraphics();
         offlineContext.setFont(font);
         FontMetrics fm = offlineContext.getFontMetrics();
@@ -467,32 +467,32 @@ public class AwtSystem extends PresentationElement
         up = (int)(Math.ceil(metrics.getAscent()));
 
         //- Calculate label image -----------------------------------------
-        RGBAImage labelImage;
-        labelImage = new RGBAImage();
+        RGBAImageUncompressed labelImage;
+        labelImage = new RGBAImageUncompressed();
         labelImage.init(ri.width, ri.height);
         labelImage = fillImageWithText(labelImage, color, label, 0, up);
 
         return labelImage;
     }
 
-    public static RGBAImage calculateLabelImageBordered(
-        String label, ColorRgb colorFg, ColorRgb colorBg, 
+    public static RGBAImageUncompressed calculateLabelImageBordered(
+        String label, ColorRgb colorFg, ColorRgb colorBg,
         int fontSize, Font newFont)
-    {        
+    {
         font = newFont;
         Rectangle ri;
 
         //-----------------------------------------------------------------
 
         //- Obtain an offline Java2D graphics context ---------------------
-        RGBAImage tmpImage;
-        tmpImage = new RGBAImage();
+        RGBAImageUncompressed tmpImage;
+        tmpImage = new RGBAImageUncompressed();
         tmpImage.init(1, 1);
 
         BufferedImage bi;
         Graphics offlineContext;
 
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(tmpImage);
+        bi = AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(tmpImage);
         offlineContext = bi.getGraphics();
         offlineContext.setFont(font);
         FontMetrics fm = offlineContext.getFontMetrics();
@@ -509,8 +509,8 @@ public class AwtSystem extends PresentationElement
         up = (int)(Math.ceil(metrics.getAscent()));
 
         //- Calculate label image -----------------------------------------
-        RGBAImage labelImage;
-        labelImage = new RGBAImage();
+        RGBAImageUncompressed labelImage;
+        labelImage = new RGBAImageUncompressed();
         labelImage.init(ri.width+2, ri.height+2);
         labelImage = fillImageWithText(labelImage, colorBg, label, 0, up+1);
         labelImage = fillImageWithText(labelImage, colorBg, label, 2, up+1);
@@ -521,17 +521,17 @@ public class AwtSystem extends PresentationElement
         return labelImage;
     }
 
-    private static RGBAImage fillImageWithText(
-        RGBAImage labelImage, ColorRgb color, String label, int dx, int dy) {        
+    private static RGBAImageUncompressed fillImageWithText(
+        RGBAImageUncompressed labelImage, ColorRgb color, String label, int dx, int dy) {
         BufferedImage bi;
         Graphics offlineContext;
-        bi = AwtRGBAImageRenderer.exportToAwtBufferedImage(labelImage);
+        bi = AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(labelImage);
         offlineContext = bi.getGraphics();
         offlineContext.setFont(font);
         offlineContext.setColor(
             new Color((float)color.r, (float)color.g, (float)color.b));
         offlineContext.drawString(label, dx, dy);
-        AwtRGBAImageRenderer.importFromAwtBufferedImage(bi, labelImage);
+        AwtRGBAImageUncompressedRenderer.importFromAwtBufferedImage(bi, labelImage);
         return labelImage;
     }
 }

@@ -31,7 +31,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import vsdk.toolkit.common.VSDK; 
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
@@ -59,8 +59,8 @@ import javax.swing.SwingUtilities;
 public class SceneEditorApplication {
     // Application model
     public Scene theScene;
-    public RGBImage raytracedImage;
-    public RGBImage zbufferImage;
+    public RGBImageUncompressed raytracedImage;
+    public RGBImageUncompressed zbufferImage;
     public int raytracedImageWidth;
     public int raytracedImageHeight;
     public RGBColorPalette palette;
@@ -130,7 +130,7 @@ public class SceneEditorApplication {
         //-----------------------------------------------------------------
         theScene = new Scene();
 
-        raytracedImage = new RGBImage();
+        raytracedImage = new RGBImageUncompressed();
         raytracedImageWidth = 320;
         raytracedImageHeight = 240;
 

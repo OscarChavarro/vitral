@@ -8,16 +8,16 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import javax.swing.border.Border; 
-import javax.swing.BorderFactory; 
+import javax.swing.border.Border;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
 
 // Application classes
 import vsdk.toolkit.gui.Gui;
@@ -27,10 +27,10 @@ public class SwingImageControlWindow
 {
     private JFrame windowWidget;
     public JLabel statusMessage;
-    private RGBImage controlledImage;
+    private RGBImageUncompressed controlledImage;
     private ImageDisplayPanel workArea;
 
-    public SwingImageControlWindow(RGBImage image, 
+    public SwingImageControlWindow(RGBImageUncompressed image,
                                  Gui gui, ActionListener executor) {
         controlledImage = image;
 
@@ -52,7 +52,7 @@ public class SwingImageControlWindow
         windowWidget.setVisible(true);
     }
 
-    public void setImage(RGBImage i)
+    public void setImage(RGBImageUncompressed i)
     {
         controlledImage = i;
         workArea.setImage(i);
@@ -86,18 +86,18 @@ public class SwingImageControlWindow
 
 class ImageDisplayPanel extends JPanel
 {
-    RGBImage imageToPaint;
+    RGBImageUncompressed imageToPaint;
 
-    public ImageDisplayPanel(RGBImage img)
+    public ImageDisplayPanel(RGBImageUncompressed img)
     {
         Dimension d = new Dimension(320+20, 240+30);
 
-        setMinimumSize(d);        
-        setSize(d);        
+        setMinimumSize(d);
+        setSize(d);
         imageToPaint = img;
     }
 
-    public void setImage(RGBImage i)
+    public void setImage(RGBImageUncompressed i)
     {
         imageToPaint = i;
     }
@@ -106,6 +106,6 @@ class ImageDisplayPanel extends JPanel
     public void paint(Graphics g)
     {
         super.paint(g);
-        AwtRGBImageRenderer.draw(g, imageToPaint, 10, 10);
+        AwtRGBImageUncompressedRenderer.draw(g, imageToPaint, 10, 10);
     }
 }

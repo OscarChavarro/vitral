@@ -5,12 +5,12 @@ import javax.microedition.lcdui.Graphics;
 
 // VitralSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 
-public class J2meRGBImageRenderer extends J2meRenderer
+public class J2meRGBImageUncompressedRenderer extends J2meRenderer
 {
-    public static void draw(Graphics g, RGBImage img, int x0, int y0)
+    public static void draw(Graphics g, RGBImageUncompressed img, int x0, int y0)
     {
         RGBPixel p;
         int rr, gg, bb;

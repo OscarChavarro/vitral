@@ -18,7 +18,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.Background;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -146,11 +146,11 @@ public class ReaderObj extends PersistenceElement
 
         //- Accumulated states for currently builded geometric object -----
         String nextGeometricObjectName;
-        ArrayList<RGBAImage> nextTexturesArray;
+        ArrayList<RGBAImageUncompressed> nextTexturesArray;
         ArrayList<Material> nextMaterialsArray;
 
         nextGeometricObjectName = "OBJ_default_material";
-        nextTexturesArray = new ArrayList<RGBAImage>();
+        nextTexturesArray = new ArrayList<RGBAImageUncompressed>();
         nextMaterialsArray = new ArrayList<Material>();        
 
         //- Aditional support data structures -----------------------------
@@ -158,12 +158,12 @@ public class ReaderObj extends PersistenceElement
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table;
         ArrayList<int[]> auxInitialTextureMapping;
         ArrayList<int[]> material_triangleRange_table;
-        HashMap<String, RGBAImage> texturesHashMap;
+        HashMap<String, RGBAImageUncompressed> texturesHashMap;
         HashMap<String, Material> materialsHashMap;
         int textureIndex;
 
         meshGroup = new ArrayList<TriangleMesh>();
-        texturesHashMap = new HashMap<String, RGBAImage>();
+        texturesHashMap = new HashMap<String, RGBAImageUncompressed>();
         materialsHashMap = new HashMap<String, Material>();        
         textureIndex = 0;
 
@@ -247,7 +247,7 @@ public class ReaderObj extends PersistenceElement
                 auxStringTokenizer.nextToken();
                 auxTextureName = auxStringTokenizer.nextToken();
                 if ( !texturesHashMap.containsKey(auxTextureName) ) {
-                    RGBAImage auxTexture;
+                    RGBAImageUncompressed auxTexture;
                     auxTexture = obtainTextureFromFile(lineOfText, fileName);
                     if ( auxTexture == null ) {
                         textureIndex = 0;
@@ -261,7 +261,7 @@ public class ReaderObj extends PersistenceElement
                     texturesHashMap.put(auxTextureName, auxTexture);
                 }
                 else {
-                    RGBAImage auxTexture = texturesHashMap.get(auxTextureName);
+                    RGBAImageUncompressed auxTexture = texturesHashMap.get(auxTextureName);
                     if( auxTexture == null ) {
                         textureIndex = 0;
                     }
@@ -305,7 +305,7 @@ public class ReaderObj extends PersistenceElement
 
                 // Clear accumulated states variables
                 if ( vertexPositionsArray.size() > 0 ) {
-                    nextTexturesArray = new ArrayList<RGBAImage>();
+                    nextTexturesArray = new ArrayList<RGBAImageUncompressed>();
                     nextMaterialsArray = new ArrayList<Material>();
                     triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
                     material_triangleRange_table = new ArrayList<int[]>();
@@ -355,7 +355,7 @@ public class ReaderObj extends PersistenceElement
         ArrayList<Vector3D> vertexNormalsArray,
         ArrayList<Vector3D> vertexTextureCoordinatesArray,
         ArrayList<_ReaderObjVertex[]> triangleDatasetsArray,
-        ArrayList<RGBAImage> nextTexturesArray,
+        ArrayList<RGBAImageUncompressed> nextTexturesArray,
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
         ArrayList<Material> nextMaterialsArray,
         ArrayList<int[]> material_triangleRange_table
@@ -490,9 +490,9 @@ public class ReaderObj extends PersistenceElement
         newTriangleMesh.setMaterialRanges(materialRanges);
 
         //- Process textures ----------------------------------------------
-        RGBAImage newTextureArray[];
+        RGBAImageUncompressed newTextureArray[];
 
-        newTextureArray = new RGBAImage[nextTexturesArray.size()];
+        newTextureArray = new RGBAImageUncompressed[nextTexturesArray.size()];
         for ( i = 0; i < newTextureArray.length; i++ ) {
             newTextureArray[i]=nextTexturesArray.get(i);
         }
@@ -561,7 +561,7 @@ public class ReaderObj extends PersistenceElement
         if ( i < der ) quickSortTriangleRange(a, i, der);
     }
 
-    private static RGBAImage
+    private static RGBAImageUncompressed
     obtainTextureFromFile(String lineOfText, String fileName)
     {
         StringTokenizer st = new StringTokenizer(lineOfText, " ");

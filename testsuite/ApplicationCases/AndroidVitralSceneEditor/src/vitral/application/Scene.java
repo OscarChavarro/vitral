@@ -22,7 +22,7 @@ import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 /**
 This should evolve to the point of being equivalent to "Scene" class used at
@@ -192,7 +192,7 @@ public class Scene
         return thing;
     }
 
-    public void raytrace(RGBImage out_Viewport, RendererConfiguration quality)
+    public void raytrace(RGBImageUncompressed out_Viewport, RendererConfiguration quality)
     {
         int originalWidth;
         int originalHeight;

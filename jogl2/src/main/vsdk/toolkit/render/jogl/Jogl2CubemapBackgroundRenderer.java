@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 import vsdk.toolkit.environment.Camera;
 
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.CubemapBackground;
 
 public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer 
@@ -50,7 +50,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 
         //- Put image background ------------------------------------------
-        RGBAImage images[] = background.getImages();
+        RGBAImageUncompressed images[] = background.getImages();
 
         if ( background.getCamera() != null ) {
            Jogl2CameraRenderer.activateCenter(gl, background.getCamera());
@@ -64,7 +64,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnable(GL.GL_TEXTURE_2D);
 
         // Front
-        Jogl2RGBAImageRenderer.activate(gl, images[0]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[0]);
 
         setTextureParameters(gl);
 
@@ -82,7 +82,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnd();
 
         // Right
-        Jogl2RGBAImageRenderer.activate(gl, images[1]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[1]);
 
         setTextureParameters(gl);
 
@@ -101,7 +101,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnd();
 
         // Left
-        Jogl2RGBAImageRenderer.activate(gl, images[3]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[3]);
 
         setTextureParameters(gl);
 
@@ -120,7 +120,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnd();
 
         // Back
-        Jogl2RGBAImageRenderer.activate(gl, images[2]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[2]);
 
         setTextureParameters(gl);
 
@@ -139,7 +139,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnd();
 
         // Down
-        Jogl2RGBAImageRenderer.activate(gl, images[4]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[4]);
 
         setTextureParameters(gl);
 
@@ -158,7 +158,7 @@ public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer
         gl.glEnd();
 
         // Up
-        Jogl2RGBAImageRenderer.activate(gl, images[5]);
+        Jogl2RGBAImageUncompressedRenderer.activate(gl, images[5]);
 
         setTextureParameters(gl);
 

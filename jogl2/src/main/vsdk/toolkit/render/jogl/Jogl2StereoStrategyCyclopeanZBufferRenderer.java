@@ -5,7 +5,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.media.ZBuffer;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBColorPalette;
 
 public class Jogl2StereoStrategyCyclopeanZBufferRenderer extends Jogl2StereoStrategyRenderer
@@ -44,7 +44,7 @@ public class Jogl2StereoStrategyCyclopeanZBufferRenderer extends Jogl2StereoStra
     public void deactivateStereoMode(GL2 gl)
     {
         ZBuffer zbuffer;
-        RGBImage image;
+        RGBImageUncompressed image;
 
         zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl);
 

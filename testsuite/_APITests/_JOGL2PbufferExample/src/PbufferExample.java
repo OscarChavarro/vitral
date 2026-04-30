@@ -14,8 +14,8 @@ import com.jogamp.opengl.GLException;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 
 /**
 This application example is used to test JOGL's / OpenGL's Pbuffer offline
@@ -29,7 +29,7 @@ public class PbufferExample implements GLEventListener {
     private static final int imageHeight = 240;
     //private GLPbuffer  pbuffer;
     private GLOffscreenAutoDrawable pbuffer;
-    private RGBImage  image;
+    private RGBImageUncompressed  image;
 
     public PbufferExample() {
         createElements();
@@ -85,7 +85,7 @@ public class PbufferExample implements GLEventListener {
         gl.glEnd();
         gl.glFlush();
         
-        image=Jogl2RGBImageRenderer.getImageJOGL(gl);
+        image=Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
         ImagePersistence.exportJPG(new File("./output.jpg"), image);
     }
 

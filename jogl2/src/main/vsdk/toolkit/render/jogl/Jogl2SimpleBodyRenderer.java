@@ -17,7 +17,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 /**
 The `Jogl2SimpleBodyRenderer` class is a helper for the JOGL/OpenGL rendering
@@ -143,7 +143,7 @@ public class Jogl2SimpleBodyRenderer extends Jogl2Renderer {
         }
 
         //-----------------------------------------------------------------
-        RGBImage nm = b.getNormalMapRgb();
+        RGBImageUncompressed nm = b.getNormalMapRgb();
         if ( q.isBumpMapSet() && (nm != null) ) {
             Jogl2ImageRenderer.activateAsNormalMap(gl, nm, q);
         }

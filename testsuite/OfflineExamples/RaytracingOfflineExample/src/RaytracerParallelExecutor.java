@@ -13,7 +13,7 @@ import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorConsumer;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorEvent;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorProducer;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.render.Tile;
 import vsdk.toolkit.render.TileGenerationStrategy;
@@ -22,7 +22,7 @@ import vsdk.toolkit.render.TileGenerator;
 final class RaytracerParallelExecutor implements RaytracerExecutor {
     @Override
     public void run(SimpleRaytracer visualizationEngine,
-                    RGBImage resultingImage,
+                    RGBImageUncompressed resultingImage,
                     RendererConfiguration rendererConfiguration,
                     SimpleSceneSnapshot sceneSnapshot,
                     ProgressMonitor reporter)
@@ -95,7 +95,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         ExecutorService executorService,
         int numberOfThreads,
         ConcurrentLinkedQueue<Tile> pendingTiles,
-        RGBImage resultingImage,
+        RGBImageUncompressed resultingImage,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot,
         ProgressMonitor progressReporter)
@@ -129,7 +129,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
 
     private record TileWorker(
         ConcurrentLinkedQueue<Tile> pendingTiles,
-        RGBImage resultingImage,
+        RGBImageUncompressed resultingImage,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot,
         ProgressMonitor progressReporter)

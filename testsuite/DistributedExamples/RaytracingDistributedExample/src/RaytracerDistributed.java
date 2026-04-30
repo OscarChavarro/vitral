@@ -8,7 +8,7 @@ import java.io.IOException;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -21,7 +21,7 @@ an stochastic raytracer (it is not).
 public class RaytracerDistributed {
     // Application model
     private SimpleScene theScene;
-    private RGBImage theResultingImage;
+    private RGBImageUncompressed theResultingImage;
     private DistributerByArea visualizationClient;
 
     public RaytracerDistributed()
@@ -50,7 +50,7 @@ public class RaytracerDistributed {
         System.out.println("Scene loaded OK!");
 
         //- 2. Create an empty image --------------------------------------
-        theResultingImage = new RGBImage();
+        theResultingImage = new RGBImageUncompressed();
         if ( !theResultingImage.initNoFill(
                   (int)theScene.getActiveCamera().getViewportXSize(),
                   (int)theScene.getActiveCamera().getViewportYSize()) ) {

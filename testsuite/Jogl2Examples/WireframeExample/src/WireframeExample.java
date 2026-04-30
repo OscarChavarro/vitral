@@ -28,7 +28,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.gui.CameraController;               // Interaction
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
@@ -36,7 +36,7 @@ import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;     // View elements
 import vsdk.toolkit.render.jogl.Jogl2Calligraphic2DBufferRenderer;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer; 
 
 /**
@@ -66,7 +66,7 @@ public class WireframeExample extends JFrame implements
 
     private RendererConfiguration qualitySelection;
     private Calligraphic2DBuffer lineSet;
-    private RGBImage img;
+    private RGBImageUncompressed img;
 
     private boolean drawJogl;
     private boolean drawWires;
@@ -101,7 +101,7 @@ public class WireframeExample extends JFrame implements
         drawWires = true;
         drawImage = false;
 
-        img = new RGBImage();
+        img = new RGBImageUncompressed();
 
     }
 
@@ -213,7 +213,7 @@ public class WireframeExample extends JFrame implements
             if ( drawImage ) {
                 img.init(img.getXSize(), img.getYSize());
                 lineSet.exportRgbImage(img);
-                Jogl2RGBImageRenderer.draw(gl, img);
+                Jogl2RGBImageUncompressedRenderer.draw(gl, img);
             }
             else {
                 gl.glLineWidth(1.0f);

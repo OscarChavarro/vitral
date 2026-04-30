@@ -38,8 +38,8 @@ import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
-import vsdk.toolkit.media.IndexedColorImage;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.GeometryMetadata;
 import vsdk.toolkit.media.FourierShapeDescriptor;
@@ -166,8 +166,8 @@ public class SearchEngine
             System.out.println("Ok.");
 
             //- Projection views image descriptor extraction [FUNK2003] ---
-            IndexedColorImage distanceFieldsArray[];
-            RGBImage distanceFieldRgb;
+            IndexedColorImageUncompressed distanceFieldsArray[];
+            RGBImageUncompressed distanceFieldRgb;
 
             if ( withProjection ) {
                 System.out.print("    . Projected views image descriptors (cube 13 setup) ... ");
@@ -340,7 +340,7 @@ public class SearchEngine
     }
 
     public ArrayList <Result> matchSketch(
-        IndexedColorImage distanceField,
+        IndexedColorImageUncompressed distanceField,
         ShapeDatabase shapeDatabase,
         double tolerance, int sketchId)
     {
@@ -375,7 +375,7 @@ public class SearchEngine
     }
 
     public ArrayList <Result> matchSketchRestricted(
-        IndexedColorImage distanceField,
+        IndexedColorImageUncompressed distanceField,
         double tolerance, ArrayList <Result> prevSearch,
         int sketchId)
     {
@@ -510,12 +510,12 @@ public class SearchEngine
         }
     }
 
-    public IndexedColorImage
+    public IndexedColorImageUncompressed
     readIndexedColorImage(String imageFilename, int distanceFieldSide)
     {
         System.out.println("Searching for sketches from image (distance field) " + imageFilename);
-        RGBImage img = null;
-        IndexedColorImage distanceField = new IndexedColorImage();
+        RGBImageUncompressed img = null;
+        IndexedColorImageUncompressed distanceField = new IndexedColorImageUncompressed();
         try {
             img = ImagePersistence.importRGB(new File(imageFilename));
         }
@@ -835,7 +835,7 @@ public class SearchEngine
         }
         //-----------------------------------------------------------------
         else if ( command[0].equals("searchDistanceField") ) {
-            IndexedColorImage distanceField = readIndexedColorImage(command[1], distanceFieldSide);
+            IndexedColorImageUncompressed distanceField = readIndexedColorImage(command[1], distanceFieldSide);
             if ( distanceField == null ) {
                 System.err.println("Error importing distance field. Program aborted.");
                 System.exit(1);
@@ -844,13 +844,13 @@ public class SearchEngine
         }
         //-----------------------------------------------------------------
         else if ( command[0].equals("searchSketch") ) {
-            IndexedColorImage outline = readIndexedColorImage(command[1], distanceFieldSide);
+            IndexedColorImageUncompressed outline = readIndexedColorImage(command[1], distanceFieldSide);
             if ( outline == null ) {
                 System.err.println("Error importing distance field. Program aborted.");
                 System.exit(1);
             }
-            IndexedColorImage distanceField;
-            distanceField = new IndexedColorImage();
+            IndexedColorImageUncompressed distanceField;
+            distanceField = new IndexedColorImageUncompressed();
             distanceField.init(distanceFieldSide, distanceFieldSide);
             ImageProcessing.processDistanceFieldWithArray(outline, distanceField, 1);
             similarModels = matchSketch(distanceField, shapeDatabase, 5, 0);

@@ -11,16 +11,16 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLDrawableFactory;
 
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class Jogl2StereoStrategyPBufferRenderer extends Jogl2StereoStrategyRenderer
 {
     private GLOffscreenAutoDrawable leftPbuffer;
     private GLOffscreenAutoDrawable rightPbuffer;
-    private RGBImage leftImage;
-    private RGBImage rightImage;
+    private RGBImageUncompressed leftImage;
+    private RGBImageUncompressed rightImage;
 
-    public Jogl2StereoStrategyPBufferRenderer(GLEventListener leftRenderer, GLEventListener rightRenderer, RGBImage leftImage, RGBImage rightImage, int imageWidth, int imageHeight)
+    public Jogl2StereoStrategyPBufferRenderer(GLEventListener leftRenderer, GLEventListener rightRenderer, RGBImageUncompressed leftImage, RGBImageUncompressed rightImage, int imageWidth, int imageHeight)
     {
         super();
 
@@ -96,20 +96,20 @@ public class Jogl2StereoStrategyPBufferRenderer extends Jogl2StereoStrategyRende
         gl.glDisable(GL.GL_TEXTURE_2D);
     }
 
-    private void drawResultSideBySide(GL2 gl, RGBImage a, RGBImage b)
+    private void drawResultSideBySide(GL2 gl, RGBImageUncompressed a, RGBImageUncompressed b)
     {
-        Jogl2RGBImageRenderer.activate(gl, a);
+        Jogl2RGBImageUncompressedRenderer.activate(gl, a);
         drawTexturedQuad(gl, -1, -1, 0, 1);
 
-        Jogl2RGBImageRenderer.activate(gl, b);
+        Jogl2RGBImageUncompressedRenderer.activate(gl, b);
         drawTexturedQuad(gl, 0, -1, 1, 1);
     }
 
     @Override
     public void deactivateStereoMode(GL2 gl)
     {
-        RGBImage a = leftImage;
-        RGBImage b = rightImage;
+        RGBImageUncompressed a = leftImage;
+        RGBImageUncompressed b = rightImage;
 
         if ( swapChannels  ) {
             a = rightImage;

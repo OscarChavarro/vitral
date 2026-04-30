@@ -7,19 +7,19 @@ import android.graphics.Color;
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.render.RenderingElement;
-import vsdk.toolkit.media.RGBAPixel;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBPixel;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
-public class AndroidRGBAImageRenderer extends AndroidRenderer {
+public class AndroidRGBImageUncompressedRenderer extends AndroidRenderer {
     public static boolean
-    importFromAndroidBitmap(Bitmap input, RGBAImage output)
+    importFromAndroidBitmap(Bitmap input, RGBImageUncompressed output)
     {
         output.init(input.getWidth(), input.getHeight());
 
         //input.copyPixelsToBuffer(output.getRawImageDirectBuffer());
         int x;
         int y;
-        RGBAPixel p = new RGBAPixel();
+        RGBPixel p = new RGBPixel();
         int c;
 
         for ( y = 0; y < output.getYSize(); y++ ) {
@@ -28,7 +28,6 @@ public class AndroidRGBAImageRenderer extends AndroidRenderer {
                 p.r = VSDK.unsigned8BitInteger2signedByte(Color.red(c));
                 p.g = VSDK.unsigned8BitInteger2signedByte(Color.green(c));
                 p.b = VSDK.unsigned8BitInteger2signedByte(Color.blue(c));
-                p.a = VSDK.unsigned8BitInteger2signedByte(Color.alpha(c));
                 output.putPixel(x, y, p);
             }
         }

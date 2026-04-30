@@ -2,8 +2,8 @@ package vsdk.toolkit.render.androidgles10;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class AndroidGLES10ImageRenderer extends AndroidGLES10Renderer
 {
@@ -14,11 +14,11 @@ public class AndroidGLES10ImageRenderer extends AndroidGLES10Renderer
             "Trying to activate a NULL Image!");
         }
 
-        if ( img instanceof RGBAImage ) {
-            return AndroidGLES10RGBAImageRenderer.activate((RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            return AndroidGLES10RGBAImageUncompressedRenderer.activate((RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            return AndroidGLES10RGBImageRenderer.activate((RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            return AndroidGLES10RGBImageUncompressedRenderer.activate((RGBImageUncompressed)img);
         }
         else {
             String c = img.getClass().getName();
@@ -35,11 +35,11 @@ public class AndroidGLES10ImageRenderer extends AndroidGLES10Renderer
             return;
         }
 
-        if ( img instanceof RGBAImage ) {
-            AndroidGLES10RGBAImageRenderer.disable((RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            AndroidGLES10RGBAImageUncompressedRenderer.disable((RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            AndroidGLES10RGBImageRenderer.disable((RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            AndroidGLES10RGBImageUncompressedRenderer.disable((RGBImageUncompressed)img);
         }
         else {
             String c = img.getClass().getName();

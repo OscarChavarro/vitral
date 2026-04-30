@@ -13,8 +13,8 @@ import com.jogamp.opengl.util.texture.spi.DDSImage.ImageInfo;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
@@ -42,9 +42,9 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
         return false;
     }
 
-    public RGBImage importRGB(File inImageFd)
+    public RGBImageUncompressed importRGB(File inImageFd)
     {
-        RGBImage retImage = new RGBImage();
+        RGBImageUncompressed retImage = new RGBImageUncompressed();
         try {
             DDSImage dximage = DDSImage.read(inImageFd);
             //System.out.println("Reading DirectX texture: ");
@@ -122,13 +122,13 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
     }
 
     /**
-    Reads an RGBAImage from a .dds (DirectDraw Surface) file format
+    Reads an RGBAImageUncompressed from a .dds (DirectDraw Surface) file format
     source.
     /todo recieve an input stream instead of a file.
     */
-    public RGBAImage importRGBA(File inImageFd)
+    public RGBAImageUncompressed importRGBA(File inImageFd)
     {
-         RGBAImage retImage = new RGBAImage();
+         RGBAImageUncompressed retImage = new RGBAImageUncompressed();
 
          try {
             DDSImage dximage = DDSImage.read(inImageFd);

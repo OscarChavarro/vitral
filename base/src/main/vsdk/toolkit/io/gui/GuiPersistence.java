@@ -24,8 +24,8 @@ import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
 import vsdk.toolkit.gui.variable.GuiVector3DVariable;
 import vsdk.toolkit.gui.variable.GuiStringVariable;
 import vsdk.toolkit.gui.variable.GuiBooleanVariable;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 
@@ -192,8 +192,8 @@ public class GuiPersistence extends PersistenceElement {
         StreamTokenizer parser, String globalDataPath) throws Exception 
     {
         GuiCommand item;
-        RGBAImage img;
-        RGBImage mask;
+        RGBAImageUncompressed img;
+        RGBImageUncompressed mask;
 
         item = new GuiCommand();
 

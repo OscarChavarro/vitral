@@ -21,7 +21,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAPixel;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.PersistenceElement;
 import java.util.Collections;
 
@@ -50,11 +50,11 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
     private static long skippedKeys;
 
-    private static ArrayList<RGBAImage> images = null;
+    private static ArrayList<RGBAImageUncompressed> images = null;
     private static ArrayList<Long> ids = null;
     private static ArrayList<String> labels = null;
 
-    public static void setTextures(ArrayList<RGBAImage> a, 
+    public static void setTextures(ArrayList<RGBAImageUncompressed> a,
                                     ArrayList<Long> b,
                                     ArrayList<String> c)
     {
@@ -97,7 +97,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         return m;
     }
 
-    private static void fillImageWithColor(RGBAImage img, RGBAPixel p)
+    private static void fillImageWithColor(RGBAImageUncompressed img, RGBAPixel p)
     {
         int xxx, yyy;
         for ( xxx = 0; xxx < img.getXSize(); xxx++ ) {
@@ -134,10 +134,10 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         // Base elements
 /*
         if (
-            id == 0x12A4882BL || id == 0x1B0763A0L || 
+            id == 0x12A4882BL || id == 0x1B0763A0L ||
             id == 0x21551B25L || id == 0x2433DF4EL || id == 0x29C86189L ||
             id == 0x3ED0EF41L || id == 0x3EDA2CA3L || id == 0x4C66A479L ||
-            id == 0x4CDA56E4L || id == 0x4CDEBFCAL || 
+            id == 0x4CDA56E4L || id == 0x4CDEBFCAL ||
             id == 0x5B979314L || id == 0x5E534BFAL || id == 0x60F8B13CL ||
             id == 0x67076CD2L || id == 0x6B79283AL || id == 0x7491F7BFL ||
             id == 0x77A20245L || id == 0x7B9B8F22L ||
@@ -152,7 +152,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
             id == 0xF95D432FL || id == 0xFC42D35CL || id == 0x7B220DDFL ||
             id == 0x027A43A7L || id == 0x06BCBD59L || id == 0x0AB88F5DL ||
             id == 0x0ECB3D67L || id == 0x11D467B1L || id == 0x12466978L ||
-            id == 0x1C8BF43EL || id == 0x5799E60BL ) {    
+            id == 0x1C8BF43EL || id == 0x5799E60BL ) {
             p.r = minp; p.g = maxp; p.b = minp;
         }
 */
@@ -204,7 +204,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         long textureid;
         long skip;
 
-        ArrayList<RGBAImage> localTextures = new ArrayList<RGBAImage>();
+        ArrayList<RGBAImageUncompressed> localTextures = new ArrayList<RGBAImageUncompressed>();
 
         for ( i = 0; i < ntextures; i++ ) {
             textureid = readLongLE(is);
@@ -216,7 +216,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 System.out.println("Texture chunk error!");
                 System.exit(0);
             }
-            RGBAImage img = null;
+            RGBAImageUncompressed img = null;
             if ( ids != null ) {
                 for ( int j = 0; j < ids.size(); j++ ) {
                     long id = ids.get(j).longValue();
@@ -230,7 +230,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 }
             }
             if ( img == null ) {
-                img = new RGBAImage();
+                img = new RGBAImageUncompressed();
                 img.init(64, 64);
 
                 //img.createTestPattern();
@@ -432,7 +432,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         boolean endIt = false;
         do {
             long surpriseMe = readLongLE(is);
-            if ( surpriseMe == MAGIC_MESHUNKNOWN4 || 
+            if ( surpriseMe == MAGIC_MESHUNKNOWN4 ||
                  surpriseMe == MAGIC_MESHUNKNOWN5 ||
                  surpriseMe == MAGIC_MESHUNKNOWN6 ) {
                 skippedKeys = 0;
@@ -599,7 +599,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 }
                 else {
                     System.out.println("Error!");
-                    System.exit(0);                
+                    System.exit(0);
                 }
                 started = false;
             }

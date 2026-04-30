@@ -5,7 +5,7 @@ import java.awt.Font;
 // VSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.gui.AwtSystem;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 /**
@@ -17,11 +17,11 @@ public class SpriteFontGenerator
 {
     private static void doGlyph(char c)
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
         Font font;
         String s = "" + c;
 	System.out.print(s);
-        img = new RGBAImage();
+        img = new RGBAImageUncompressed();
         img.init(320, 200);
         img.createTestPattern();
         font = new Font("Arial", Font.PLAIN, 50);

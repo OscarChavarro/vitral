@@ -6,8 +6,8 @@ import com.jogamp.opengl.GL4;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class Jogl4ImageRenderer extends Jogl4Renderer {
     private static final RendererConfiguration TEXTURE_QUALITY = new RendererConfiguration();
@@ -23,42 +23,42 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
 
     public static int activate(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImage ) {
-            return Jogl4RGBAImageRenderer.activate(gl, (RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            return Jogl4RGBAImageUncompressedRenderer.activate(gl, (RGBAImageUncompressed)img);
         }
-        if ( img instanceof RGBImage ) {
-            return Jogl4RGBImageRenderer.activate(gl, (RGBImage)img);
+        if ( img instanceof RGBImageUncompressed ) {
+            return Jogl4RGBImageUncompressedRenderer.activate(gl, (RGBImageUncompressed)img);
         }
         return -1;
     }
 
     public static void deactivate(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImage ) {
-            Jogl4RGBAImageRenderer.deactivate(gl, (RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            Jogl4RGBAImageUncompressedRenderer.deactivate(gl, (RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            Jogl4RGBImageRenderer.deactivate(gl, (RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            Jogl4RGBImageUncompressedRenderer.deactivate(gl, (RGBImageUncompressed)img);
         }
     }
 
     public static void unload(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImage ) {
-            Jogl4RGBAImageRenderer.unload(gl, (RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            Jogl4RGBAImageUncompressedRenderer.unload(gl, (RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            Jogl4RGBImageRenderer.unload(gl, (RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            Jogl4RGBImageUncompressedRenderer.unload(gl, (RGBImageUncompressed)img);
         }
     }
 
     public static void draw(GL4 gl, Image img)
     {
-        if ( img instanceof RGBAImage ) {
-            Jogl4RGBAImageRenderer.draw(gl, (RGBAImage)img);
+        if ( img instanceof RGBAImageUncompressed ) {
+            Jogl4RGBAImageUncompressedRenderer.draw(gl, (RGBAImageUncompressed)img);
         }
-        else if ( img instanceof RGBImage ) {
-            Jogl4RGBImageRenderer.draw(gl, (RGBImage)img);
+        else if ( img instanceof RGBImageUncompressed ) {
+            Jogl4RGBImageUncompressedRenderer.draw(gl, (RGBImageUncompressed)img);
         }
     }
 

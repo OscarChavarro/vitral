@@ -3,7 +3,7 @@ package scivis;
 import java.io.File;
 
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 public class CachedImage extends CachedInformation {
@@ -35,7 +35,7 @@ public class CachedImage extends CachedInformation {
     public boolean load()
     {
         // Pending: extend the source String format management...
-        RGBImage img = null;
+        RGBImageUncompressed img = null;
         try {
             img = ImagePersistence.importRGB(new File(source));
         }

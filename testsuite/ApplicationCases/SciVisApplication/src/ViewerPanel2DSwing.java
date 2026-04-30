@@ -2,8 +2,8 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.render.awt.AwtRGBImageRenderer;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
 
 // Application classes
 import scivis.Study;
@@ -35,7 +35,7 @@ public class ViewerPanel2DSwing extends ViewerPanel
         TimeTake timeTake = parent.study.getTimeTake(0);
 
         img = parent.study.getSliceImageAt(parent.currentTimeTake, pendingCycles);
-        AwtRGBImageRenderer.draw(dc, (RGBImage)img, 10, 10);
+        AwtRGBImageUncompressedRenderer.draw(dc, (RGBImageUncompressed)img, 10, 10);
     }
 
     public void setCyclePending(boolean flag)
@@ -65,7 +65,7 @@ public class ViewerPanel2DSwing extends ViewerPanel
         }
         else {
             if ( image != null ) {
-                AwtRGBImageRenderer.draw(dc, (RGBImage)image, 10, 10);
+                AwtRGBImageUncompressedRenderer.draw(dc, (RGBImageUncompressed)image, 10, 10);
             }
         }
     }

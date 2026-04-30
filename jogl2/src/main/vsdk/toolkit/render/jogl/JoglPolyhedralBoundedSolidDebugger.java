@@ -17,7 +17,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.Camera;
@@ -37,7 +37,7 @@ implements GLEventListener
     private int imageWidth = 800;
     private int imageHeight = 600;
     private GLOffscreenAutoDrawable pbuffer;
-    private RGBImage image;
+    private RGBImageUncompressed image;
     private String filename;
     private PolyhedralBoundedSolid solid;
     private Camera camera;
@@ -128,7 +128,7 @@ implements GLEventListener
         Jogl2PolyhedralBoundedSolidRenderer.drawDebugVertices(gl, solid, camera,
             quality);
         
-        image=Jogl2RGBImageRenderer.getImageJOGL(gl);
+        image=Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
         ImagePersistence.exportPNG(new File(filename), image);
     }
 

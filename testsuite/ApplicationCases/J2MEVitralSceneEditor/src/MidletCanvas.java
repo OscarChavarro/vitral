@@ -29,9 +29,9 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.render.j2me.J2meRGBImageRenderer;   // View elements
+import vsdk.toolkit.render.j2me.J2meRGBImageUncompressedRenderer;   // View elements
 import vsdk.toolkit.render.j2me.J2meCalligraphic2DBufferRenderer;
 import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
 import vsdk.toolkit.render.SimpleRaytracer;
@@ -49,7 +49,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
     // Model elements
     private Camera camera;
     private SimpleScene scene;
-    private RGBImage img;
+    private RGBImageUncompressed img;
     private Calligraphic2DBuffer lineSet;
     private CameraController cameraController;
 
@@ -128,7 +128,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         //-----------------------------------------------------------------
         cameraController = new CameraControllerAquynza(camera);
         lineSet = new Calligraphic2DBuffer();
-        img = new RGBImage();
+        img = new RGBImageUncompressed();
     }
 
     /**
@@ -170,7 +170,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             img.init(width, height);
             visualizationEngine.execute(img, q, sceneSnapshot, null, null);
 
-            J2meRGBImageRenderer.draw(g, img, 0, 0);
+            J2meRGBImageUncompressedRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 2 ) {
             camera.updateViewportResize(width, height);
@@ -179,7 +179,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
             img.init(width, height);
             img.createTestPattern();
             lineSet.exportRgbImage(img);
-            J2meRGBImageRenderer.draw(g, img, 0, 0);
+            J2meRGBImageUncompressedRenderer.draw(g, img, 0, 0);
         }
         else if ( renderingMode == 1 ) {
             camera.updateViewportResize(width, height);

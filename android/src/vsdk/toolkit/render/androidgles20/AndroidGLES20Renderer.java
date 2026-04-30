@@ -33,7 +33,7 @@ import vsdk.toolkit.gui.AndroidSystem;
 import vsdk.toolkit.gui.TextVisualConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.RenderingElement;
 
 public class AndroidGLES20Renderer extends RenderingElement
@@ -1426,9 +1426,9 @@ public class AndroidGLES20Renderer extends RenderingElement
         int x = x0, y = y0;
         int i;
         String key;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
-        HashMap<String, RGBAImage> characterSpriteCaches;
+        HashMap<String, RGBAImageUncompressed> characterSpriteCaches;
         characterSpriteCaches = characterStyle.getCharacterSprites();
         
         for ( i = 0; i < msg.length(); i++ ) {

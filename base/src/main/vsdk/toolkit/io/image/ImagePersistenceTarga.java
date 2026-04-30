@@ -9,8 +9,8 @@ import java.io.IOException;
 
 // VSDK classes
 import vsdk.toolkit.io.PersistenceElement;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 /**
 The ImagePersistenceTarga class represents a targa image (the image files with .tga
@@ -270,9 +270,9 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
     }
 
     @Override
-    public RGBImage importRGB(File inFileFd) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(File inFileFd) throws ImageNotRecognizedException, Exception
     {
-        RGBImage img;
+        RGBImageUncompressed img;
         try
         {
             open(inFileFd);
@@ -286,7 +286,7 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
         byte r, g, b;
         int i = 0;
 
-        img = new RGBImage();
+        img = new RGBImageUncompressed();
         img.init(xSize, ySize);
 
         for ( y = 0; y < ySize; y++ ) {
@@ -312,9 +312,9 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
     }
 
     @Override
-    public RGBAImage importRGBA(File inFileFd) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(File inFileFd) throws ImageNotRecognizedException, Exception
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
         int x, y;
         byte r, g, b, a;
         int i = 0;
@@ -328,7 +328,7 @@ public class ImagePersistenceTarga extends ImagePersistenceHelper
             throw new ImageNotRecognizedException("I/O Error while reading the image", inFileFd);
         }
 
-        img = new RGBAImage();
+        img = new RGBAImageUncompressed();
         img.init(xSize, ySize);
 
         for ( y = 0; y < ySize; y++ ) {

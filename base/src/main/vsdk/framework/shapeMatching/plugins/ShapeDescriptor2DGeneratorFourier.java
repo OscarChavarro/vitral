@@ -10,7 +10,7 @@ import java.io.File;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerator
@@ -35,7 +35,7 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
             }
 
             // 2. Reimport the exported data from temporary file
-            IndexedColorImage distanceField;
+            IndexedColorImageUncompressed distanceField;
             distanceField = ImagePersistence.importIndexedColor(new File("temp.png"));
 
             // 3. Do current work

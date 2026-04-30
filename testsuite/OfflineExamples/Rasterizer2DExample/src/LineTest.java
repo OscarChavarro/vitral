@@ -3,7 +3,7 @@ import java.io.File;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.Rasterizer2D;
@@ -12,14 +12,14 @@ public class LineTest
 {
     public static void main (String[] args) {
         //-----------------------------------------------------------------
-        RGBImage img = null;
+        RGBImageUncompressed img = null;
         RGBPixel color = new RGBPixel();
 
         color.r = -1;
         color.g = 0;
         color.b = 0;
 
-        img = new RGBImage();
+        img = new RGBImageUncompressed();
         img.init(640, 480);
         //img.createTestPattern();
 

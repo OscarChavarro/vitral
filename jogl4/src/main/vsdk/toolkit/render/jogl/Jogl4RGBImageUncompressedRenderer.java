@@ -4,13 +4,13 @@ import java.util.IdentityHashMap;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
-public class Jogl4RGBImageRenderer extends Jogl4Renderer {
-    private static final IdentityHashMap<RGBImage, Integer> COMPILED_IMAGES =
+public class Jogl4RGBImageUncompressedRenderer extends Jogl4Renderer {
+    private static final IdentityHashMap<RGBImageUncompressed, Integer> COMPILED_IMAGES =
         new IdentityHashMap<>();
 
-    public static int activate(GL4 gl, RGBImage img)
+    public static int activate(GL4 gl, RGBImageUncompressed img)
     {
         if ( img == null ) {
             return -1;
@@ -27,14 +27,14 @@ public class Jogl4RGBImageRenderer extends Jogl4Renderer {
         return textureId;
     }
 
-    public static void deactivate(GL4 gl, RGBImage img)
+    public static void deactivate(GL4 gl, RGBImageUncompressed img)
     {
         if ( img != null && COMPILED_IMAGES.containsKey(img) ) {
             gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
         }
     }
 
-    public static void unload(GL4 gl, RGBImage img)
+    public static void unload(GL4 gl, RGBImageUncompressed img)
     {
         Integer textureId = COMPILED_IMAGES.remove(img);
         if ( textureId == null ) {
@@ -45,7 +45,7 @@ public class Jogl4RGBImageRenderer extends Jogl4Renderer {
         gl.glDeleteTextures(1, tmp, 0);
     }
 
-    public static void draw(GL4 gl, RGBImage img)
+    public static void draw(GL4 gl, RGBImageUncompressed img)
     {
         int textureId = activate(gl, img);
         if ( textureId <= 0 ) {
@@ -60,7 +60,7 @@ public class Jogl4RGBImageRenderer extends Jogl4Renderer {
         gl.glEnable(GL4.GL_DEPTH_TEST);
     }
 
-    private static int upload(GL4 gl, RGBImage img)
+    private static int upload(GL4 gl, RGBImageUncompressed img)
     {
         int[] tmp = new int[1];
         gl.glGenTextures(1, tmp, 0);

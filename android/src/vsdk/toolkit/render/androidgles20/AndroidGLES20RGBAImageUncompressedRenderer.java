@@ -7,24 +7,24 @@ import java.util.ArrayList;
 import android.opengl.GLES20;
 
 // VSDK classes
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
-public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
+public class AndroidGLES20RGBAImageUncompressedRenderer extends AndroidGLES20Renderer
 {
-    private static ArrayList<_AndroidGLES20RGBImageRendererAssociation> compiledImages;
+    private static ArrayList<_AndroidGLES20RGBAImageUncompressedRendererAssociation> compiledImages;
 
     static {
-        compiledImages = new ArrayList<_AndroidGLES20RGBImageRendererAssociation>();
+        compiledImages = new ArrayList<_AndroidGLES20RGBAImageUncompressedRendererAssociation>();
     }
 
-    public static int activate(RGBImage img)
+    public static int activate(RGBAImageUncompressed img)
     {
         int list = activateBase(img);
 
         return list;
     }
 
-    private static int activateBase(RGBImage img)
+    private static int activateBase(RGBAImageUncompressed img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -43,7 +43,7 @@ public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _AndroidGLES20RGBImageRendererAssociation item = null;
+        _AndroidGLES20RGBAImageUncompressedRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -59,20 +59,19 @@ public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
         GLES20.glEnable(GLES20.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
-            GLES20.glGenTextures(1, lists, 0);
-            item = new _AndroidGLES20RGBImageRendererAssociation();
+            item = new _AndroidGLES20RGBAImageUncompressedRendererAssociation();
             item.image = img;
-            item.glList = lists[0];
+            item.glList = 1;
             compiledImages.add(item);
 
             //----
+            GLES20.glGenTextures(1, lists, 0);
+            item.glList = lists[0];
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, item.glList);
 
             GLES20.glTexImage2D(
-                GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, x_tam, y_tam, 0, 
-                GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, 
-                item.image.getRawImageDirectBuffer());
-
+                GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, x_tam, y_tam, 0, GLES20.GL_RGBA,
+                GLES20.GL_UNSIGNED_BYTE, item.image.getRawImageDirectBuffer());
             checkGlError("glTexImage2D");
         }
 
@@ -81,4 +80,5 @@ public class AndroidGLES20RGBImageRenderer extends AndroidGLES20Renderer
 
         return item.glList;
     }
+
 }

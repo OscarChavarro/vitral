@@ -10,7 +10,7 @@ import android.opengl.GLES20;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -24,13 +24,13 @@ import vsdk.toolkit.gui.dialog.InformationDialog;
 public class AndroidGLES20InformationDialogRenderer 
     extends AndroidGLES20Renderer {
     
-    private static RGBAImage backgroundTexture = null;
-    private static HashMap<String, RGBAImage> characterSprites;
+    private static RGBAImageUncompressed backgroundTexture = null;
+    private static HashMap<String, RGBAImageUncompressed> characterSprites;
     private static int fontSize;
 
     static {
         fontSize = 24;
-        characterSprites = new HashMap<String, RGBAImage>();
+        characterSprites = new HashMap<String, RGBAImageUncompressed>();
     }
     
     /**
@@ -41,7 +41,7 @@ public class AndroidGLES20InformationDialogRenderer
     public static void draw(InformationDialog dialog, Camera camera)
     {
         if ( backgroundTexture == null ) {
-            backgroundTexture = new RGBAImage();
+            backgroundTexture = new RGBAImageUncompressed();
             backgroundTexture.init(16, 16);
             
             //backgroundTexture.createTestPattern();
@@ -97,7 +97,7 @@ public class AndroidGLES20InformationDialogRenderer
         double y = y0;
         int i;
         String key;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         double unitsPerPixelX = 2.0 / c.getViewportXSize();
         double unitsPerPixelY = 2.0 / c.getViewportYSize();

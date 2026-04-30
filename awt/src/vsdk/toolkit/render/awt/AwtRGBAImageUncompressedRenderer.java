@@ -5,12 +5,12 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBAPixel;
 
-public class AwtRGBAImageRenderer extends AwtRenderer
+public class AwtRGBAImageUncompressedRenderer extends AwtRenderer
 {
-    public static void draw(Graphics dc, RGBAImage img, int x0, int y0)
+    public static void draw(Graphics dc, RGBAImageUncompressed img, int x0, int y0)
     {
         int x, y;
         RGBAPixel pixel;
@@ -28,7 +28,7 @@ public class AwtRGBAImageRenderer extends AwtRenderer
         }
     }
 
-    public static void draw(Graphics dc, RGBAImage img)
+    public static void draw(Graphics dc, RGBAImageUncompressed img)
     {
         draw(dc, img, 0, 0);
     }
@@ -41,7 +41,7 @@ public class AwtRGBAImageRenderer extends AwtRenderer
     then is initialized.
     */
     public static boolean importFromAwtBufferedImage(
-        BufferedImage input, RGBAImage output
+        BufferedImage input, RGBAImageUncompressed output
     )
     {
         int w = input.getWidth();
@@ -73,7 +73,7 @@ public class AwtRGBAImageRenderer extends AwtRenderer
         return true;
     }
 
-    public static BufferedImage exportToAwtBufferedImage(RGBAImage img)
+    public static BufferedImage exportToAwtBufferedImage(RGBAImageUncompressed img)
     {
         BufferedImage bi;
         RGBAPixel p;

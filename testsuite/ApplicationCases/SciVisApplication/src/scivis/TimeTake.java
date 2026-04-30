@@ -3,7 +3,7 @@ package scivis;
 import java.util.ArrayList;
 
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 
 /**
 A `TimeTake` is a set of slices for a current study in a given moment of time.
@@ -43,7 +43,7 @@ public class TimeTake
 
     /**
     For each slice in the TimeTake there is an associated image. Note that
-    for a yet unspecified image, its corresponding reference can be null 
+    for a yet unspecified image, its corresponding reference can be null
     inside this list.
     */
     private ArrayList <CachedImage> imageSlicesArray;
@@ -84,7 +84,7 @@ public class TimeTake
     (x, y) starting voxel position in the `startingPositionArray`. The
     relativeSlice given index is relative to `startingSliceIndex`.
     */
-    public void setSliceImageAt(String imageSource, int relativeSlice, 
+    public void setSliceImageAt(String imageSource, int relativeSlice,
                                 int xpos, int ypos)
     {
         while ( imageSlicesArray.size() <= relativeSlice ) {
@@ -118,7 +118,7 @@ public class TimeTake
         return imageSlicesArray.get(slice).getImage();
     }
 
-    public void setSegmentedImageAt(IndexedColorImage img, int group, 
+    public void setSegmentedImageAt(IndexedColorImageUncompressed img, int group,
                                 int relativeSlice, int xpos, int ypos)
     {
         while ( segmentedImageGroupsArray.size() <= group ) {

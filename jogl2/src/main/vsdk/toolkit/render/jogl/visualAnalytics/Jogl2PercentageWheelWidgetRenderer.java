@@ -19,7 +19,7 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.visualAnalytics.PercentageWheelWidget;
 import vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable;
@@ -43,13 +43,13 @@ three ways:
     never used textures.
 */
 public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
-    private static final HashMap<String, RGBAImage>characterSpritesSmall;
+    private static final HashMap<String, RGBAImageUncompressed>characterSpritesSmall;
     private static final TextRenderer joglTextRendererSmall;
     private static final TextRenderer joglTextRendererBig;
     private static final int fontSize = 20;
 
     static {
-        characterSpritesSmall = new HashMap<String, RGBAImage>();
+        characterSpritesSmall = new HashMap<String, RGBAImageUncompressed>();
         joglTextRendererSmall = new TextRenderer(new Font("Arial", Font.PLAIN, fontSize), true, true);
         joglTextRendererBig = new TextRenderer(new Font("Arial", Font.PLAIN, fontSize*3), true, true);
     }
@@ -77,7 +77,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
     private static double
     calculateTextWidth(String key)
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
         double dx = 0.0;
 
         if ( !characterSpritesSmall.containsKey(key) ) {
@@ -98,7 +98,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
     private static double
     drawChar(GL2 gl, String key)
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
         double dx = 0.0;
 
         if ( !characterSpritesSmall.containsKey(key) ) {

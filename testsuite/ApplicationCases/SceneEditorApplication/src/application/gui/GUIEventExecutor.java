@@ -36,7 +36,7 @@ import vsdk.toolkit.gui.CommandListener;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.LightType;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
@@ -652,7 +652,7 @@ public class GUIEventExecutor extends CommandListener{
         double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
         VoxelVolume vv = (VoxelVolume)voxelBody.getGeometry();
         Sphere sphere;
-        RGBAImage texture;
+        RGBAImageUncompressed texture;
         SimpleBody body;
         double tetha, phi;
         int s, t;
@@ -678,7 +678,7 @@ public class GUIEventExecutor extends CommandListener{
         body.setRotationInverse(new Matrix4x4());
         body.setName("Debug sphere for harmonics " + groupIndex);
 
-        texture = new RGBAImage();
+        texture = new RGBAImageUncompressed();
         texture.init(64, 64);
 
         //- Build sphere's texture map from voxel grid --------------------

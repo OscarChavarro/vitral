@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.media.ZBuffer;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.AutoStereogramGenerator;
 
 public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrategyRenderer
@@ -16,10 +16,10 @@ public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrate
     private Random randomNumberGenerator;
 
     /// Resulting image of the autostereogram generation to be displayed
-    private RGBImage stereogramTilePattern;
+    private RGBImageUncompressed stereogramTilePattern;
 
     /// Resulting image of the autostereogram generation to be displayed
-    private RGBImage stereogramResult;
+    private RGBImageUncompressed stereogramResult;
 
     /// A parameter for AutoStereogramGenerator, in inches
     private double observationDistanceSIRD;
@@ -39,7 +39,7 @@ public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrate
     /// A parameter for AutoStereogramGenerator, in points per inch
     private int verticalPPISIRD;
 
-    public Jogl2StereoStrategyAutostereogramRenderer(RGBImage stereogramTilePattern)
+    public Jogl2StereoStrategyAutostereogramRenderer(RGBImageUncompressed stereogramTilePattern)
     {
         super();
         this.stereogramTilePattern = stereogramTilePattern;
@@ -57,7 +57,7 @@ public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrate
     }
 
     public Jogl2StereoStrategyAutostereogramRenderer(
-        RGBImage stereogramTilePattern,
+        RGBImageUncompressed stereogramTilePattern,
         double observationDistanceSIRD,
         double eyeSeparationDistanceSIRD,
         double maxDistanceSIRD,
@@ -182,7 +182,7 @@ public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrate
         }
 
         if ( stereogramResult == null ) {
-            stereogramResult = new RGBImage();
+            stereogramResult = new RGBImageUncompressed();
         }
 
         if ( zbuffer.getXSize() != stereogramResult.getXSize() ||
@@ -191,7 +191,7 @@ public class Jogl2StereoStrategyAutostereogramRenderer extends Jogl2StereoStrate
         }
 
         if ( stereogramTilePattern == null ) {
-            stereogramTilePattern = new RGBImage();
+            stereogramTilePattern = new RGBImageUncompressed();
             stereogramTilePattern.initNoFill(64, 64);
             stereogramTilePattern.createTestPattern();
         }

@@ -9,8 +9,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Camera;
@@ -96,7 +96,7 @@ public class Scene
     public boolean
     buildCubemap()
     {
-        RGBAImage front, right, back, left, down, up;
+        RGBAImageUncompressed front, right, back, left, down, up;
 
         try {
             System.out.print("Loading background: 1");
@@ -133,7 +133,7 @@ public class Scene
     public boolean
     buildFixedmap()
     {
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         try {
             System.out.print("Loading background: ");
@@ -303,7 +303,7 @@ public class Scene
         System.out.println("= END OF REPORT ===========================================================");
     }
 
-    public void raytrace(RGBImage out_Viewport)
+    public void raytrace(RGBImageUncompressed out_Viewport)
     {
         int originalWidth;
         int originalHeight;

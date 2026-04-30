@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
@@ -26,13 +26,13 @@ class JobAssigment
     public int y0;
     public int x1;
     public int y1;
-    public RGBImage result;
+    public RGBImageUncompressed result;
     public String toString()
     {
         String msg = "<" + x0 + ", " + y0 + "> - <" + x1 + ", " + y1 + ">";
         return msg;
     }
-    public void merge(RGBImage tile)
+    public void merge(RGBImageUncompressed tile)
     {
         int x, y;
         RGBPixel p = new RGBPixel();
@@ -152,7 +152,7 @@ class RaytracerDistributedClient implements Runnable
 
                     PersistenceElement.writeAsciiString(os, "render");
                     ObjectInputStream ois = new ObjectInputStream(is);
-                    RGBImage img = (RGBImage)ois.readObject();
+                    RGBImageUncompressed img = (RGBImageUncompressed)ois.readObject();
                     PersistenceElement.readBytes(is, responseType);
 
                     task.merge(img);
@@ -185,7 +185,7 @@ public class DistributerByArea
     private LinkedBlockingQueue<JobAssigment> pendingends;
 
     public void
-    distributedControl(RGBImage theResultingImage,
+    distributedControl(RGBImageUncompressed theResultingImage,
                        RendererConfiguration rendererConfiguration,
                        SimpleScene theScene,
                        ProgressMonitor reporter)

@@ -13,7 +13,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.RayHit;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 
 /**
 VoxelVolume represents a voxelized paralelogram volume in memory, as the
@@ -37,7 +37,7 @@ format, use another toolkit, like ITK or VTK.
 public class VoxelVolume extends Solid {
     @Serial private static final long serialVersionUID = 20070222L;
 
-    private ArrayList<IndexedColorImage> data;
+    private ArrayList<IndexedColorImageUncompressed> data;
 
     public VoxelVolume()
     {
@@ -65,13 +65,13 @@ public class VoxelVolume extends Solid {
     public boolean init(int xSize, int ySize, int zSize)
     {
         int z;
-        ArrayList<IndexedColorImage> localData;
-        IndexedColorImage slice;
+        ArrayList<IndexedColorImageUncompressed> localData;
+        IndexedColorImageUncompressed slice;
 
-        localData = new ArrayList<IndexedColorImage>();
+        localData = new ArrayList<IndexedColorImageUncompressed>();
 
         for ( z = 0; z < zSize; z++ ) {
-            slice = new IndexedColorImage();
+            slice = new IndexedColorImageUncompressed();
             if ( !slice.init(xSize, ySize) ) {
                 return false;
             }
@@ -90,7 +90,7 @@ public class VoxelVolume extends Solid {
                  (z < 0 || z >= getZSize()) ) {
                 return;
             }
-            IndexedColorImage slice = data.get(z);
+            IndexedColorImageUncompressed slice = data.get(z);
             slice.putPixel(x, y, val);
         }
         catch ( Exception e ) {
@@ -237,7 +237,7 @@ public class VoxelVolume extends Solid {
     public int getVoxel(int x, int y, int z)
     {
         try {
-            IndexedColorImage slice = data.get(z);
+            IndexedColorImageUncompressed slice = data.get(z);
             return slice.getPixel(x, y);
         }
         catch ( Exception e ) {

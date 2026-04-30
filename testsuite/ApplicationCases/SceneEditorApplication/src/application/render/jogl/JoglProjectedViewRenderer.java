@@ -14,7 +14,7 @@ import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
@@ -184,7 +184,7 @@ public class JoglProjectedViewRenderer {
         gl.glFlush();
 
         //- Obtain ZBuffer ------------------------------------------------
-        IndexedColorImage zbuffer;
+        IndexedColorImageUncompressed zbuffer;
         NormalMap nm;
         zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
 
@@ -224,7 +224,7 @@ public class JoglProjectedViewRenderer {
         }
 
         //- Debug code (disabled) -----------------------------------------
-        //image=Jogl2RGBImageRenderer.getImageJOGL(gl);
+        //image=Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
         //vsdk.toolkit.io.image.ImagePersistence.exportPPM(new java.io.File("./output" + side + ".ppm"), image);
     }
 }

@@ -10,9 +10,9 @@ import java.io.RandomAccessFile;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.GrayScalePalette;
 import vsdk.toolkit.io.PersistenceElement;
 
@@ -29,7 +29,7 @@ public class ImagePersistenceSGI extends PersistenceElement
     private static
     void processScanLineCase8bpp(RandomAccessFile fd, FileInputStream is,
                                  long start, long length, 
-                                 IndexedColorImage img, int y) throws Exception
+                                 IndexedColorImageUncompressed img, int y) throws Exception
     {
         int x = 0;
         int pos;
@@ -129,13 +129,13 @@ public class ImagePersistenceSGI extends PersistenceElement
             switch ( numberOfChannels ) {
               case 1:
                 GrayScalePalette p = new GrayScalePalette();
-                img = new IndexedColorImage(p);
+                img = new IndexedColorImageUncompressed(p);
                 break;
               case 3:
-                img = new RGBImage();
+                img = new RGBImageUncompressed();
                 break;
               case 4:
-                img = new RGBAImage();
+                img = new RGBAImageUncompressed();
                 break;
               default:
                 throw new Exception("Not supported SGI subformat: " +
@@ -169,7 +169,7 @@ public class ImagePersistenceSGI extends PersistenceElement
             for ( y = 0; y < ySize; y++ ) {
                 processScanLineCase8bpp(fd, is, 
                                         startsTable[y], lengthsTable[y], 
-                                        (IndexedColorImage)img, ySize-y-1);
+                                        (IndexedColorImageUncompressed)img, ySize-y-1);
             }
             //------------------------------------------------------------
             is.close();

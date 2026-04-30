@@ -16,7 +16,7 @@ import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 
 /**
@@ -229,7 +229,7 @@ public class Md2Persistence extends PersistenceElement {
     }
     private static Image loadImagefile(String imageFilename)
     {
-        RGBImage img;
+        RGBImageUncompressed img;
 
         if ( imageFilename == null || imageFilename.length() < 1 ) {
             return null;
@@ -241,7 +241,7 @@ public class Md2Persistence extends PersistenceElement {
             System.err.println("Error: could not read the image file \"" + imageFilename + "\".");
             System.err.println("Check you have access to that file from current working directory.");
             System.err.println(e);
-            img = new RGBImage();
+            img = new RGBImageUncompressed();
             img.init(64, 64);
             img.createTestPattern();
         }

@@ -3,27 +3,27 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class FixedBackground extends Background {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    private RGBAImage backgroundImage;
+    private RGBAImageUncompressed backgroundImage;
     private Camera camera;
 
-    public FixedBackground(Camera camera, RGBAImage image) {
+    public FixedBackground(Camera camera, RGBAImageUncompressed image) {
         super();
 
         this.camera = camera;
         backgroundImage = image;
     }
 
-    public void setImage(RGBAImage image)
+    public void setImage(RGBAImageUncompressed image)
     {
         backgroundImage = image;
     }
 
-    public RGBAImage getImage()
+    public RGBAImageUncompressed getImage()
     {
         return backgroundImage;
     }

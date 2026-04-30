@@ -113,9 +113,9 @@ public class NormalMap extends MediaEntity
     method checkes this explicity.  Is there a better/clearer way to
     assure the correctness of this conversion?
     */
-    public RGBImage exportToRgbImage()
+    public RGBImageUncompressed exportToRgbImage()
     {
-        RGBImage output = new RGBImage();
+        RGBImageUncompressed output = new RGBImageUncompressed();
 
         if ( !output.init(xSize, ySize) ) {
             return null;
@@ -156,9 +156,9 @@ public class NormalMap extends MediaEntity
     method checkes this explicity.  Is there a better/clearer way to
     assure the correctness of this conversion?
     */
-    public RGBAImage exportToRgbaImage()
+    public RGBAImageUncompressed exportToRgbaImage()
     {
-        RGBAImage output = new RGBAImage();
+        RGBAImageUncompressed output = new RGBAImageUncompressed();
 
         if ( !output.init(xSize, ySize) ) {
             return null;
@@ -197,9 +197,9 @@ public class NormalMap extends MediaEntity
     Similar to exportToRgbImage, but each pixel is equivalent to a magnitude
     of displacement from <0, 0, 1> normal
     */
-    public RGBImage exportToRgbImageGradient()
+    public RGBImageUncompressed exportToRgbImageGradient()
     {
-        RGBImage output = new RGBImage();
+        RGBImageUncompressed output = new RGBImageUncompressed();
 
         if ( !output.init(xSize, ySize) ) {
             return null;
@@ -228,9 +228,9 @@ public class NormalMap extends MediaEntity
     Similar to exportToRgbaImage, but each pixel is equivalent to a magnitude
     of displacement from <0, 0, 1> normal
     */
-    public RGBAImage exportToRgbaImageGradient()
+    public RGBAImageUncompressed exportToRgbaImageGradient()
     {
-        RGBAImage output = new RGBAImage();
+        RGBAImageUncompressed output = new RGBAImageUncompressed();
 
         if ( !output.init(xSize, ySize) ) {
             return null;
@@ -263,7 +263,7 @@ public class NormalMap extends MediaEntity
         return output;
     }
 
-    public Vector3D importBumpMap(IndexedColorImage inBumpmap, Vector3D inScale)
+    public Vector3D importBumpMap(IndexedColorImageUncompressed inBumpmap, Vector3D inScale)
     {
         //-------------------------------------------------------------------
         int xxSize = inBumpmap.getXSize();

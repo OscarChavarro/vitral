@@ -8,9 +8,9 @@ import java.io.InputStream;
 // VitralSDK classes
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.media.RGBImage;
-import vsdk.toolkit.media.RGBAImage;
-import vsdk.toolkit.media.IndexedColorImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.media.IndexedColorImageUncompressed;
 
 /**
 An ImagePersistenceHelper is any class that implements an specific functionality
@@ -61,27 +61,27 @@ public abstract class ImagePersistenceHelper extends  PersistenceElement
         return false;
     }
 
-    public RGBImage importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }
 
-    public RGBImage importRGB(InputStream is) throws ImageNotRecognizedException, Exception
+    public RGBImageUncompressed importRGB(InputStream is) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }
 
-    public RGBAImage importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(InputStream is) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }
 
-    public RGBAImage importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
+    public RGBAImageUncompressed importRGBA(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }
 
-    public IndexedColorImage importIndexedColor(File inImageFd) throws ImageNotRecognizedException, Exception
+    public IndexedColorImageUncompressed importIndexedColor(File inImageFd) throws ImageNotRecognizedException, Exception
     {
         throw new ImageNotRecognizedException("Not implemented in helper", null);
     }

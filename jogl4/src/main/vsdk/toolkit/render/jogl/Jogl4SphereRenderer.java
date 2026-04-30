@@ -13,7 +13,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static final int DEFAULT_SLICES = 32;
@@ -57,8 +57,8 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Light light,
         Material material,
         RendererConfiguration quality,
-        RGBImage textureMap,
-        RGBImage normalMap)
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap)
     {
         draw(
             gl,
@@ -80,8 +80,8 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Light light,
         Material material,
         RendererConfiguration quality,
-        RGBImage textureMap,
-        RGBImage normalMap,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
         int slices,
         int stacks)
     {
@@ -106,8 +106,8 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Light light,
         Material material,
         RendererConfiguration quality,
-        RGBImage textureMap,
-        RGBImage normalMap,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
         Matrix4x4 modelViewLocal,
         int slices,
         int stacks)

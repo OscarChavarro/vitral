@@ -74,7 +74,7 @@ public class Calligraphic2DBuffer extends MediaEntity {
         return lineData.size()/8;
     }
 
-    public void exportRgbImage(RGBImage inOutRasterViewport)
+    public void exportRgbImage(RGBImageUncompressed inOutRasterViewport)
     {
         double xt = inOutRasterViewport.getXSize();
         double yt = inOutRasterViewport.getYSize();

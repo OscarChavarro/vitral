@@ -15,7 +15,7 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.render.SimpleRaytracer;
 
@@ -27,7 +27,7 @@ class VitralVisualizationServerProtocol implements Runnable
     private SimpleScene theScene;
     private SimpleRaytracer visualizationEngine;
     private RendererConfiguration rendererConfiguration;
-    private RGBImage theResultingImage;
+    private RGBImageUncompressed theResultingImage;
     private ProgressMonitorConsole reporter;
     private int id;
     private int x0;
@@ -50,7 +50,7 @@ class VitralVisualizationServerProtocol implements Runnable
         theScene = null;
         visualizationEngine = new SimpleRaytracer();
         rendererConfiguration = new RendererConfiguration();
-        theResultingImage = new RGBImage();
+        theResultingImage = new RGBImageUncompressed();
         id = 0;
         x0 = 0;
         y0 = 0;

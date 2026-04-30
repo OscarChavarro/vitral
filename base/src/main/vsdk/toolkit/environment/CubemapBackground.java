@@ -6,26 +6,26 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Box;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class CubemapBackground extends Background {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    private RGBAImage [] backgroundImages;
+    private RGBAImageUncompressed [] backgroundImages;
     private Camera camera;
     private Box boundingCube = null;
 
     public CubemapBackground(Camera camera,
-                             RGBAImage front,
-                             RGBAImage right,
-                             RGBAImage back,
-                             RGBAImage left,
-                             RGBAImage down,
-                             RGBAImage up) {
+                             RGBAImageUncompressed front,
+                             RGBAImageUncompressed right,
+                             RGBAImageUncompressed back,
+                             RGBAImageUncompressed left,
+                             RGBAImageUncompressed down,
+                             RGBAImageUncompressed up) {
         super();
 
         this.camera = camera;
-        backgroundImages = new RGBAImage[6];
+        backgroundImages = new RGBAImageUncompressed[6];
         backgroundImages[0] = front;
         backgroundImages[1] = right;
         backgroundImages[2] = back;
@@ -44,7 +44,7 @@ public class CubemapBackground extends Background {
     {
         double u;
         double v;
-        RGBAImage img;
+        RGBAImageUncompressed img;
 
         d = d.normalized();
         Ray r = new Ray(new Vector3D(0, 0, 0), d);
@@ -99,7 +99,7 @@ public class CubemapBackground extends Background {
         return normal.x() >= 0 ? 5 : 6;
     }
 
-    public RGBAImage [] getImages()
+    public RGBAImageUncompressed [] getImages()
     {
         return backgroundImages;
     }

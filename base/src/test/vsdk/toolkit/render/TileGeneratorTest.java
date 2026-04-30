@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +14,7 @@ class TileGeneratorTest
     void given_serialStrategy_when_generatingTiles_then_returnsSingleFullImageTile()
     {
         // Arrange
-        RGBImage image = new RGBImage();
+        RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(10, 6);
 
         TileGenerator generator = new TileGenerator(
@@ -39,7 +39,7 @@ class TileGeneratorTest
     void given_linearStrategy_when_generatingTiles_then_splitsInHorizontalBands()
     {
         // Arrange
-        RGBImage image = new RGBImage();
+        RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(8, 7);
 
         TileGenerator generator = new TileGenerator(
@@ -70,7 +70,7 @@ class TileGeneratorTest
     void given_regionOrigin_when_generatingTiles_then_preservesTileAbsolutePosition()
     {
         // Arrange
-        RGBImage image = new RGBImage();
+        RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(20, 20);
 
         TileGenerator generator = new TileGenerator(

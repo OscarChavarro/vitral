@@ -21,11 +21,11 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.media.RGBImage;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
@@ -229,10 +229,10 @@ public class JoglPreviewGenerator
             if ( canvas != null ) {
                 canvas.swapBuffers();
             }
-            RGBImage img = Jogl2RGBImageRenderer.getImageJOGL(gl);
+            RGBImageUncompressed img = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
             ImagePersistence.exportJPG(new File(filename), img);
-            RGBImage thumbnail;
-            thumbnail = new RGBImage();
+            RGBImageUncompressed thumbnail;
+            thumbnail = new RGBImageUncompressed();
             thumbnail.init(160, 120);
             ImageProcessing.resize(img, thumbnail);
             filename = dirName + "/" + VSDK.formatNumberWithinZeroes(i, 2) + "small.jpg";

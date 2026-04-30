@@ -16,12 +16,12 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.media.RGBAImage;
+import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.common.RendererConfiguration;
 
-public class Jogl2RGBAImageRenderer extends Jogl2Renderer
+public class Jogl2RGBAImageUncompressedRenderer extends Jogl2Renderer
 {
-    private static ArrayList<_JoglRGBAImageRendererAssociation> compiledImages = new ArrayList<_JoglRGBAImageRendererAssociation>();
+    private static ArrayList<_JoglRGBAImageUncompressedRendererAssociation> compiledImages = new ArrayList<_JoglRGBAImageUncompressedRendererAssociation>();
     //private static GLU glu = null;
 
     /**
@@ -38,7 +38,7 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
     and the list themselves should be cleared, or not used. This will lead to
     the creation of new methods.
     */
-    private static int activateBase(GL2 gl, RGBAImage img)
+    private static int activateBase(GL2 gl, RGBAImageUncompressed img)
     {
         //- 1. Initialization of texture parameters -----------------------
         int x_tam = img.getXSize();
@@ -63,7 +63,7 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
 
         //- 2. Seek if there is a precompiled glList for this image -------
         boolean glListIsCompiled = false;
-        _JoglRGBAImageRendererAssociation item = null;
+        _JoglRGBAImageUncompressedRendererAssociation item = null;
 
         int i;
         for ( i = 0; i < compiledImages.size(); i++ ) {
@@ -79,7 +79,7 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
         gl.glEnable(GL.GL_BLEND);
         if ( glListIsCompiled == false ) {
             //----
-            item = new _JoglRGBAImageRendererAssociation();
+            item = new _JoglRGBAImageUncompressedRendererAssociation();
             item.image = img;
             item.glList = 1;
             compiledImages.add(item);
@@ -148,23 +148,23 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
         return item.glList;
     }
 
-    public static int activate(GL2 gl, RGBAImage img)
+    public static int activate(GL2 gl, RGBAImageUncompressed img)
     {
         int list = activateBase(gl, img);
 
         return list;
     }
 
-    public static int activateAsNormalMap(GL2 gl, RGBAImage img, RendererConfiguration quality)
+    public static int activateAsNormalMap(GL2 gl, RGBAImageUncompressed img, RendererConfiguration quality)
     {
         int list = -1;
 
         return list;
     }
 
-    public static void unload(GL2 gl, RGBAImage img)
+    public static void unload(GL2 gl, RGBAImageUncompressed img)
     {
-        _JoglRGBAImageRendererAssociation item;
+        _JoglRGBAImageUncompressedRendererAssociation item;
 
         try { 
             int i;
@@ -180,12 +180,12 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBAImageRenderer.unload", "Error unloading image.");
+            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBAImageUncompressedRenderer.unload", "Error unloading image.");
 
         }
     }
 
-    public static void draw(GL2 gl, RGBAImage img)
+    public static void draw(GL2 gl, RGBAImageUncompressed img)
     {
         gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
         gl.glRasterPos2f(-1, -1);
@@ -210,7 +210,7 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
         return bb;
     }
 
-    public static void getImageJOGL(GL2 gl, RGBAImage image)
+    public static void getImageJOGL(GL2 gl, RGBAImageUncompressed image)
     {
         int[] view= new int[4];
         gl.glGetIntegerv(GL.GL_VIEWPORT, view,0);
@@ -232,8 +232,8 @@ public class Jogl2RGBAImageRenderer extends Jogl2Renderer
         }
     }
 
-    public static RGBAImage getImageJOGL(GL2 gl) {
-        RGBAImage image = new RGBAImage();
+    public static RGBAImageUncompressed getImageJOGL(GL2 gl) {
+        RGBAImageUncompressed image = new RGBAImageUncompressed();
 
         getImageJOGL(gl, image);
 
