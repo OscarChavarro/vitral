@@ -7,8 +7,12 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 /**
@@ -36,6 +40,117 @@ final class _PolyhedralBoundedSolidSetFinisher
         System.out.println("[SetOpPipelineTrace] " + message);
     }
 
+    private static boolean hasUsableIntegrationRing(
+        _PolyhedralBoundedSolidFace face)
+    {
+        _PolyhedralBoundedSolidLoop ring;
+        _PolyhedralBoundedSolidHalfEdge start;
+        _PolyhedralBoundedSolidHalfEdge current;
+        Vector3D reference;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context;
+        int guard;
+
+        if ( face == null ||
+             !hasCompleteHalfEdgeConnectivity(face) ||
+             face.boundariesList.size() < 2 ||
+             face.boundariesList.get(1) == null ||
+             face.boundariesList.get(1).halfEdgesList == null ) {
+            return false;
+        }
+        ring = face.boundariesList.get(1);
+        if ( ring.halfEdgesList.size() < 2 ) {
+            return false;
+        }
+        start = ring.boundaryStartHalfEdge;
+        if ( start == null || start.startingVertex == null ||
+             start.startingVertex.position == null ) {
+            return false;
+        }
+        reference = start.startingVertex.position;
+        context = PolyhedralBoundedSolidNumericPolicy.forFace(face);
+        current = start.next();
+        guard = 0;
+        while ( current != null && current != start &&
+                guard <= ring.halfEdgesList.size() ) {
+            if ( current.startingVertex != null &&
+                 current.startingVertex.position != null &&
+                 !PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                     reference, current.startingVertex.position, context) ) {
+                return true;
+            }
+            current = current.next();
+            guard++;
+        }
+        return false;
+    }
+
+    private static boolean hasCompleteHalfEdgeConnectivity(
+        _PolyhedralBoundedSolidFace face)
+    {
+        int i;
+
+        if ( face == null || face.boundariesList == null ) {
+            return false;
+        }
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge current;
+            int guard;
+
+            if ( loop == null ||
+                 loop.halfEdgesList == null ||
+                 loop.boundaryStartHalfEdge == null ) {
+                return false;
+            }
+            start = loop.boundaryStartHalfEdge;
+            current = start;
+            guard = 0;
+            do {
+                if ( current == null ||
+                     current.parentEdge == null ||
+                     current.parentLoop == null ||
+                     current.startingVertex == null ||
+                     current.mirrorHalfEdge() == null ||
+                     current.next() == null ||
+                     current.previous() == null ) {
+                    return false;
+                }
+                current = current.next();
+                guard++;
+            } while ( current != start &&
+                      guard <= loop.halfEdgesList.size() + 1 );
+            if ( current != start ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String integrationRingSummary(
+        _PolyhedralBoundedSolidFace face)
+    {
+        if ( face == null ) {
+            return "null";
+        }
+        if ( face.boundariesList.size() < 2 ||
+             face.boundariesList.get(1) == null ||
+             face.boundariesList.get(1).halfEdgesList == null ) {
+            return "face=" + face.id + " boundaries=" +
+                face.boundariesList.size();
+        }
+        return "face=" + face.id + " ringSize=" +
+            face.boundariesList.get(1).halfEdgesList.size() +
+            " usable=" + hasUsableIntegrationRing(face) +
+            " connected=" + hasCompleteHalfEdgeConnectivity(face) +
+            " pair=" +
+            _PolyhedralBoundedSolidSetNullEdgesConnector
+                .getSonfaPairIndex(face) +
+            "/" +
+            _PolyhedralBoundedSolidSetNullEdgesConnector
+                .getSonfbPairIndex(face);
+    }
+
     private static int sanitizePairedFaces(
         ArrayList<_PolyhedralBoundedSolidFace> sonfa,
         ArrayList<_PolyhedralBoundedSolidFace> sonfb)
@@ -58,9 +173,12 @@ final class _PolyhedralBoundedSolidSetFinisher
             _PolyhedralBoundedSolidFace faceA = sonfa.get(i);
             int pairIndexA;
             boolean foundMatch = false;
-            boolean validA = faceA != null && faceA.boundariesList.size() >= 2;
+            boolean validA = hasUsableIntegrationRing(faceA);
 
             if ( !validA ) {
+                tracePipelineSummary(
+                    "finish sanitize skip A " +
+                    integrationRingSummary(faceA));
                 continue;
             }
 
@@ -74,13 +192,21 @@ final class _PolyhedralBoundedSolidSetFinisher
                 if ( usedB[j] ) {
                     continue;
                 }
-                validB = faceB != null && faceB.boundariesList.size() >= 2;
+                validB = hasUsableIntegrationRing(faceB);
                 if ( !validB ) {
+                    tracePipelineSummary(
+                        "finish sanitize skip B " +
+                        integrationRingSummary(faceB));
                     continue;
                 }
                 pairIndexB = _PolyhedralBoundedSolidSetNullEdgesConnector
                     .getSonfbPairIndex(faceB);
                 if ( pairIndexA != -1 && pairIndexA == pairIndexB ) {
+                    tracePipelineSummary(
+                        "finish sanitize match A " +
+                        integrationRingSummary(faceA) +
+                        " B " +
+                        integrationRingSummary(faceB));
                     matchedA.add(faceA);
                     matchedB.add(faceB);
                     usedB[j] = true;
@@ -90,10 +216,19 @@ final class _PolyhedralBoundedSolidSetFinisher
             }
         }
 
+        if ( matchedA.isEmpty() && !sonfa.isEmpty() &&
+             sonfa.size() == sonfb.size() ) {
+            tracePipelineSummary(
+                "finish sanitize kept legacy ordering");
+            return sonfa.size();
+        }
+
         sonfa.clear();
         sonfa.addAll(matchedA);
         sonfb.clear();
         sonfb.addAll(matchedB);
+        tracePipelineSummary(
+            "finish sanitize matched=" + matchedA.size());
         return matchedA.size();
     }
 

@@ -51,6 +51,10 @@ class CsgKurlanderBowlAllMotifsRegressionTest
         PolyhedralBoundedSolid[] operands =
             CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
                 THIRD_MOON_MOTIF_INDEX);
+        int originalFaces = operands[0].getPolygonsList().size();
+        int originalEdges = operands[0].getEdgesList().size();
+        int originalVertices = operands[0].getVerticesList().size();
+        double[] originalBounds = operands[0].getMinMax();
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             operands[0], operands[1], PolyhedralBoundedSolidModeler.SUBTRACT,
             false);
@@ -61,6 +65,11 @@ class CsgKurlanderBowlAllMotifsRegressionTest
         assertThat(result.getVerticesList().size()).isGreaterThan(0);
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();
+        assertThat(hasSameShapeData(result, originalFaces, originalEdges,
+            originalVertices, originalBounds))
+            .as("Subtracting the third moon must actually modify the bowl; " +
+                "returning the unmodified operand A hides the failed cut")
+            .isFalse();
     }
 
     @Test
@@ -275,5 +284,34 @@ class CsgKurlanderBowlAllMotifsRegressionTest
             }
         }
         return count;
+    }
+
+    private static boolean hasSameShapeData(
+        PolyhedralBoundedSolid result,
+        int originalFaces,
+        int originalEdges,
+        int originalVertices,
+        double[] originalBounds)
+    {
+        return result.getPolygonsList().size() == originalFaces &&
+               result.getEdgesList().size() == originalEdges &&
+               result.getVerticesList().size() == originalVertices &&
+               hasSameBounds(result.getMinMax(), originalBounds);
+    }
+
+    private static boolean hasSameBounds(double[] actual, double[] expected)
+    {
+        int i;
+
+        if ( actual == null || expected == null ||
+             actual.length != expected.length ) {
+            return false;
+        }
+        for ( i = 0; i < actual.length; i++ ) {
+            if ( Math.abs(actual[i] - expected[i]) > GEOMETRY_TOLERANCE ) {
+                return false;
+            }
+        }
+        return true;
     }
 }

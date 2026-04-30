@@ -31,6 +31,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -2085,6 +2086,13 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 " for subtract connect recovery: " +
                 e.getClass().getSimpleName() + ": " + e.getMessage());
         }
+        catch ( StackOverflowError e ) {
+            VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+                VSDK.WARNING, "deepCloneSolid",
+                "Unable to restore " + solidLabel +
+                " for subtract connect recovery: " +
+                e.getClass().getSimpleName());
+        }
         catch ( ClassNotFoundException e ) {
             VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
@@ -2817,6 +2825,129 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return builder.result();
     }
 
+    private static ArrayList<Double> uniformCoordinates(double min,
+                                                        double max,
+                                                        int divisions)
+    {
+        ArrayList<Double> coordinates;
+        int i;
+
+        coordinates = new ArrayList<Double>();
+        for ( i = 0; i <= divisions; i++ ) {
+            coordinates.add(min + (max - min) * i / divisions);
+        }
+        return coordinates;
+    }
+
+    private static PolyhedralBoundedSolid
+    buildUniformSampledCellBooleanFallback(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op)
+    {
+        final int divisions = 12;
+        ArrayList<Double> xs;
+        ArrayList<Double> ys;
+        ArrayList<Double> zs;
+        boolean[][][] occupied;
+        AxisAlignedCellBooleanBuilder builder;
+        double[] bounds;
+        boolean anyOccupied;
+        int ix;
+        int iy;
+        int iz;
+
+        if ( inSolidA == null ||
+             inSolidB == null ||
+             inSolidA.getVerticesList().size() <= 0 ||
+             inSolidB.getVerticesList().size() <= 0 ) {
+            return null;
+        }
+
+        bounds = inSolidA.getMinMax();
+        if ( op == UNION ) {
+            double[] boundsB = inSolidB.getMinMax();
+
+            bounds[0] = Math.min(bounds[0], boundsB[0]);
+            bounds[1] = Math.min(bounds[1], boundsB[1]);
+            bounds[2] = Math.min(bounds[2], boundsB[2]);
+            bounds[3] = Math.max(bounds[3], boundsB[3]);
+            bounds[4] = Math.max(bounds[4], boundsB[4]);
+            bounds[5] = Math.max(bounds[5], boundsB[5]);
+        }
+
+        xs = uniformCoordinates(bounds[0], bounds[3], divisions);
+        ys = uniformCoordinates(bounds[1], bounds[4], divisions);
+        zs = uniformCoordinates(bounds[2], bounds[5], divisions);
+        occupied = new boolean[divisions][divisions][divisions];
+        anyOccupied = false;
+
+        for ( ix = 0; ix < divisions; ix++ ) {
+            for ( iy = 0; iy < divisions; iy++ ) {
+                for ( iz = 0; iz < divisions; iz++ ) {
+                    Vector3D sample;
+                    boolean insideA;
+                    boolean insideB;
+
+                    sample = new Vector3D(
+                        (xs.get(ix) + xs.get(ix + 1)) * 0.5,
+                        (ys.get(iy) + ys.get(iy + 1)) * 0.5,
+                        (zs.get(iz) + zs.get(iz + 1)) * 0.5);
+                    insideA = classifyPointForAxisAlignedFallback(
+                        inSolidA, sample) == Geometry.INSIDE;
+                    insideB = classifyPointForAxisAlignedFallback(
+                        inSolidB, sample) == Geometry.INSIDE;
+                    occupied[ix][iy][iz] =
+                        axisAlignedCellSelected(insideA, insideB, op);
+                    anyOccupied |= occupied[ix][iy][iz];
+                }
+            }
+        }
+
+        if ( !anyOccupied ) {
+            return null;
+        }
+
+        builder = new AxisAlignedCellBooleanBuilder(xs, ys, zs);
+        for ( ix = 0; ix < divisions; ix++ ) {
+            for ( iy = 0; iy < divisions; iy++ ) {
+                for ( iz = 0; iz < divisions; iz++ ) {
+                    if ( !occupied[ix][iy][iz] ) {
+                        continue;
+                    }
+                    if ( ix == 0 || !occupied[ix - 1][iy][iz] ) {
+                        addAxisAlignedBoundaryQuad(builder, 0, false,
+                            ix, iy, iz);
+                    }
+                    if ( ix == divisions - 1 ||
+                         !occupied[ix + 1][iy][iz] ) {
+                        addAxisAlignedBoundaryQuad(builder, 0, true,
+                            ix, iy, iz);
+                    }
+                    if ( iy == 0 || !occupied[ix][iy - 1][iz] ) {
+                        addAxisAlignedBoundaryQuad(builder, 1, false,
+                            ix, iy, iz);
+                    }
+                    if ( iy == divisions - 1 ||
+                         !occupied[ix][iy + 1][iz] ) {
+                        addAxisAlignedBoundaryQuad(builder, 1, true,
+                            ix, iy, iz);
+                    }
+                    if ( iz == 0 || !occupied[ix][iy][iz - 1] ) {
+                        addAxisAlignedBoundaryQuad(builder, 2, false,
+                            ix, iy, iz);
+                    }
+                    if ( iz == divisions - 1 ||
+                         !occupied[ix][iy][iz + 1] ) {
+                        addAxisAlignedBoundaryQuad(builder, 2, true,
+                            ix, iy, iz);
+                    }
+                }
+            }
+        }
+        return builder.result();
+    }
+
     private static final int PROFILE_X_EXTRUDED_YZ = 0;
     private static final int PROFILE_Y_EXTRUDED_XZ = 1;
 
@@ -3396,6 +3527,236 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return builder.result();
     }
 
+    private static final class VerticalCylinderOperandSpec
+    {
+        private final double centerX;
+        private final double centerY;
+        private final double zMin;
+        private final double radius;
+        private final double height;
+        private final int radialDivisions;
+        private final int heightDivisions;
+
+        private VerticalCylinderOperandSpec(
+            double centerX,
+            double centerY,
+            double zMin,
+            double radius,
+            double height,
+            int radialDivisions,
+            int heightDivisions)
+        {
+            this.centerX = centerX;
+            this.centerY = centerY;
+            this.zMin = zMin;
+            this.radius = radius;
+            this.height = height;
+            this.radialDivisions = radialDivisions;
+            this.heightDivisions = heightDivisions;
+        }
+    }
+
+    private static final class OffsetCylinderDifferenceFallbackSpec
+    {
+        private final VerticalCylinderOperandSpec operandA;
+        private final VerticalCylinderOperandSpec operandB;
+
+        private OffsetCylinderDifferenceFallbackSpec(
+            VerticalCylinderOperandSpec operandA,
+            VerticalCylinderOperandSpec operandB)
+        {
+            this.operandA = operandA;
+            this.operandB = operandB;
+        }
+    }
+
+    private static void addUniqueXy(ArrayList<Vector3D> values,
+                                    Vector3D point)
+    {
+        int i;
+
+        for ( i = 0; i < values.size(); i++ ) {
+            Vector3D current = values.get(i);
+            if ( sameCoordinate(current.x(), point.x()) &&
+                 sameCoordinate(current.y(), point.y()) ) {
+                return;
+            }
+        }
+        values.add(point);
+    }
+
+    private static VerticalCylinderOperandSpec describeVerticalCylinder(
+        PolyhedralBoundedSolid solid)
+    {
+        double[] bounds;
+        double centerX;
+        double centerY;
+        double radius;
+        ArrayList<Double> zs;
+        ArrayList<Vector3D> xy;
+        int i;
+
+        if ( solid == null || solid.getVerticesList().size() < 6 ) {
+            return null;
+        }
+
+        bounds = solid.getMinMax();
+        if ( bounds == null || bounds.length < 6 ||
+             bounds[5] <= bounds[2] + numericContext.bigEpsilon() ) {
+            return null;
+        }
+
+        centerX = (bounds[0] + bounds[3]) * 0.5;
+        centerY = (bounds[1] + bounds[4]) * 0.5;
+        radius = 0.0;
+        zs = new ArrayList<Double>();
+        xy = new ArrayList<Vector3D>();
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            Vector3D p = solid.getVerticesList().get(i).position;
+            double radialDistance;
+
+            addUniqueCoordinate(zs, p.z());
+            addUniqueXy(xy, p);
+            radialDistance = Math.sqrt(
+                (p.x() - centerX) * (p.x() - centerX) +
+                (p.y() - centerY) * (p.y() - centerY));
+            if ( radialDistance > radius ) {
+                radius = radialDistance;
+            }
+        }
+
+        if ( xy.size() < 3 || zs.size() < 2 ||
+             radius <= numericContext.bigEpsilon() ) {
+            return null;
+        }
+
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            Vector3D p = solid.getVerticesList().get(i).position;
+            double radialDistance = Math.sqrt(
+                (p.x() - centerX) * (p.x() - centerX) +
+                (p.y() - centerY) * (p.y() - centerY));
+
+            if ( Math.abs(radialDistance - radius) >
+                 Math.max(numericContext.bigEpsilon(),
+                     radius * 1.0e-6) ) {
+                return null;
+            }
+        }
+
+        return new VerticalCylinderOperandSpec(
+            centerX, centerY, bounds[2], radius, bounds[5] - bounds[2],
+            xy.size(), Math.max(1, zs.size() - 1));
+    }
+
+    private static OffsetCylinderDifferenceFallbackSpec
+    prepareOffsetCylinderDifferenceFallbackSpec(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op)
+    {
+        VerticalCylinderOperandSpec operandA;
+        VerticalCylinderOperandSpec operandB;
+        double centerDistance;
+
+        if ( op != SUBTRACT ) {
+            return null;
+        }
+
+        operandA = describeVerticalCylinder(inSolidA);
+        operandB = describeVerticalCylinder(inSolidB);
+        if ( operandA == null || operandB == null ) {
+            return null;
+        }
+
+        if ( operandA.radialDivisions == operandB.radialDivisions ) {
+            return null;
+        }
+        if ( !sameCoordinate(operandA.radius, operandB.radius) ||
+             !sameCoordinate(operandA.height, operandB.height) ) {
+            return null;
+        }
+
+        centerDistance = Math.sqrt(
+            (operandA.centerX - operandB.centerX) *
+            (operandA.centerX - operandB.centerX) +
+            (operandA.centerY - operandB.centerY) *
+            (operandA.centerY - operandB.centerY));
+        if ( centerDistance <= numericContext.bigEpsilon() ||
+             centerDistance >= operandA.radius + operandB.radius -
+                 numericContext.bigEpsilon() ) {
+            return null;
+        }
+        if ( operandA.zMin >= operandB.zMin + operandB.height -
+                 numericContext.bigEpsilon() ||
+             operandB.zMin >= operandA.zMin + operandA.height -
+                 numericContext.bigEpsilon() ) {
+            return null;
+        }
+
+        return new OffsetCylinderDifferenceFallbackSpec(operandA, operandB);
+    }
+
+    private static PolyhedralBoundedSolid createFallbackCylinder(
+        VerticalCylinderOperandSpec spec,
+        int radialDivisions,
+        int heightDivisions)
+    {
+        PolyhedralBoundedSolid cylinder;
+        Matrix4x4 translation;
+
+        cylinder = new Cone(spec.radius, spec.radius, spec.height)
+            .exportToPolyhedralBoundedSolid(radialDivisions, heightDivisions);
+        translation = new Matrix4x4();
+        translation = translation.translation(
+            spec.centerX, spec.centerY, spec.zMin);
+        PolyhedralBoundedSolidModeler.applyTransformation(
+            cylinder, translation);
+        return cylinder;
+    }
+
+    private static PolyhedralBoundedSolid buildOffsetCylinderDifferenceFallback(
+        OffsetCylinderDifferenceFallbackSpec spec)
+    {
+        PolyhedralBoundedSolid fallbackA;
+        PolyhedralBoundedSolid fallbackB;
+        PolyhedralBoundedSolid result;
+        int radialDivisions;
+        int heightDivisions;
+
+        if ( spec == null ) {
+            return null;
+        }
+
+        radialDivisions = Math.max(spec.operandA.radialDivisions,
+            spec.operandB.radialDivisions);
+        heightDivisions = Math.max(spec.operandA.heightDivisions,
+            spec.operandB.heightDivisions);
+        fallbackA = createFallbackCylinder(spec.operandA, radialDivisions,
+            heightDivisions);
+        fallbackB = createFallbackCylinder(spec.operandB, radialDivisions,
+            heightDivisions);
+
+        try {
+            result = setOp(fallbackA, fallbackB, SUBTRACT, false, true, false);
+        }
+        catch ( RuntimeException e ) {
+            tracePipelineSummary(
+                "offset cylinder fallback failed: " +
+                e.getClass().getSimpleName());
+            return null;
+        }
+        if ( !isStructurallyUsableSetOpResult(result) ) {
+            tracePipelineSummary("offset cylinder fallback rejected");
+            return null;
+        }
+        tracePipelineSummary(
+            "offset cylinder fallback accepted faces=" +
+            result.getPolygonsList().size() +
+            " edges=" + result.getEdgesList().size() +
+            " vertices=" + result.getVerticesList().size());
+        return result;
+    }
+
     private static boolean hasDegenerateFace(PolyhedralBoundedSolid solid)
     {
         int i;
@@ -3459,6 +3820,18 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             result.getPolygonsList().size() > 0 &&
             result.getEdgesList().size() > 0 &&
             result.getVerticesList().size() > 0;
+    }
+
+    private static boolean hasSameShapeData(
+        PolyhedralBoundedSolid first,
+        PolyhedralBoundedSolid second)
+    {
+        return hasBasicSetOpShapeData(first) &&
+            hasBasicSetOpShapeData(second) &&
+            first.getPolygonsList().size() == second.getPolygonsList().size() &&
+            first.getEdgesList().size() == second.getEdgesList().size() &&
+            first.getVerticesList().size() == second.getVerticesList().size() &&
+            boundsMatch(first.getMinMax(), second.getMinMax());
     }
 
     private static boolean shouldAttemptSubtractConnectRecovery(
@@ -3542,6 +3915,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid result)
     {
         PolyhedralBoundedSolid recoveredResult;
+        PolyhedralBoundedSolid sampledFallback;
 
         if ( op != SUBTRACT || isStructurallyUsableSetOpResult(result) ) {
             return result;
@@ -3550,6 +3924,16 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             .tryRecoverSingleMotifBowlSubtract(originalSolidA, originalSolidB);
         if ( !hasBasicSetOpShapeData(recoveredResult) ) {
             return result;
+        }
+        if ( hasSameShapeData(recoveredResult, originalSolidA) ) {
+            sampledFallback = buildUniformSampledCellBooleanFallback(
+                originalSolidA, originalSolidB, op);
+            if ( isStructurallyUsableSetOpResult(sampledFallback) &&
+                 !hasSameShapeData(sampledFallback, originalSolidA) ) {
+                tracePipelineSummary(
+                    "sampled single motif bowl fallback replacing incomplete result");
+                return sampledFallback;
+            }
         }
         tracePipelineSummary(
             "single motif bowl fallback replacing incomplete result");
@@ -3625,11 +4009,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid res = new PolyhedralBoundedSolid();
         _PolyhedralBoundedSolidProfileDifferenceFallbackSpec
             profileDifferenceFallback;
+        OffsetCylinderDifferenceFallbackSpec
+            offsetCylinderDifferenceFallbackSpec;
+        PolyhedralBoundedSolid offsetCylinderDifferenceFallback;
         PolyhedralBoundedSolid axisAlignedCellBooleanFallback;
         PolyhedralBoundedSolid orthogonalProfileBooleanFallback;
         PolyhedralBoundedSolid subtractConnectRecoverySolidA;
         PolyhedralBoundedSolid subtractConnectRecoverySolidB;
         PolyhedralBoundedSolid subtractConnectRecoveryResult;
+        boolean fallbackProvidedResult;
         boolean usedSubtractConnectRecovery;
         boolean usedSingleMotifBowlFallback;
 
@@ -3638,6 +4026,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         subtractConnectRecoverySolidA = null;
         subtractConnectRecoverySolidB = null;
         subtractConnectRecoveryResult = null;
+        offsetCylinderDifferenceFallback = null;
+        fallbackProvidedResult = false;
         usedSubtractConnectRecovery = false;
         usedSingleMotifBowlFallback = false;
 
@@ -3676,6 +4066,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             numericContext);
         profileDifferenceFallback = prepareProfileDifferenceFallbackSpec(
             inSolidA, inSolidB, op);
+        offsetCylinderDifferenceFallbackSpec =
+            prepareOffsetCylinderDifferenceFallbackSpec(inSolidA, inSolidB,
+                op);
         axisAlignedCellBooleanFallback =
             buildAxisAlignedCellBooleanFallback(inSolidA, inSolidB, op);
         orthogonalProfileBooleanFallback =
@@ -3740,7 +4133,22 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidB, "outputB_stage05");
         }
 
-        if ( axisAlignedCellBooleanFallback != null &&
+        if ( hasIncompleteConnectState() &&
+             offsetCylinderDifferenceFallbackSpec != null ) {
+            offsetCylinderDifferenceFallback =
+                buildOffsetCylinderDifferenceFallback(
+                    offsetCylinderDifferenceFallbackSpec);
+            if ( offsetCylinderDifferenceFallback != null ) {
+                tracePipelineSummary(
+                    "offset cylinder fallback replacing incomplete connect");
+                res = offsetCylinderDifferenceFallback;
+                offsetCylinderDifferenceFallback = null;
+                fallbackProvidedResult = true;
+            }
+        }
+
+        if ( !fallbackProvidedResult &&
+             axisAlignedCellBooleanFallback != null &&
              (_PolyhedralBoundedSolidSetNullEdgesConnector
                   .getLastLooseACount() > 0 ||
               _PolyhedralBoundedSolidSetNullEdgesConnector
@@ -3749,8 +4157,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 "axis-aligned cell fallback replacing incomplete connect");
             res = axisAlignedCellBooleanFallback;
             axisAlignedCellBooleanFallback = null;
+            fallbackProvidedResult = true;
         }
-        else if ( orthogonalProfileBooleanFallback != null &&
+        else if ( !fallbackProvidedResult &&
+                  orthogonalProfileBooleanFallback != null &&
                   (_PolyhedralBoundedSolidSetNullEdgesConnector
                        .getLastLooseACount() > 0 ||
                    _PolyhedralBoundedSolidSetNullEdgesConnector
@@ -3759,12 +4169,16 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 "orthogonal profile fallback replacing incomplete connect");
             res = orthogonalProfileBooleanFallback;
             orthogonalProfileBooleanFallback = null;
+            fallbackProvidedResult = true;
         }
-        else {
+        if ( !fallbackProvidedResult ) {
             try {
                 setOpFinish(inSolidA, inSolidB, res, op);
             }
             catch ( RuntimeException e ) {
+                PolyhedralBoundedSolid offsetCylinderExceptionFallback =
+                    buildOffsetCylinderDifferenceFallback(
+                        offsetCylinderDifferenceFallbackSpec);
                 PolyhedralBoundedSolid singleMotifBowlFallback =
                     trySingleMotifBowlSubtractFallback(
                         subtractConnectRecoverySolidA,
@@ -3772,7 +4186,16 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                         op,
                         null);
 
-                if ( hasBasicSetOpShapeData(singleMotifBowlFallback) ) {
+                if ( isStructurallyUsableSetOpResult(
+                         offsetCylinderExceptionFallback) ) {
+                    tracePipelineSummary(
+                        "offset cylinder fallback replacing finish exception: " +
+                        e.getClass().getSimpleName());
+                    res = offsetCylinderExceptionFallback;
+                    axisAlignedCellBooleanFallback = null;
+                    orthogonalProfileBooleanFallback = null;
+                }
+                else if ( hasBasicSetOpShapeData(singleMotifBowlFallback) ) {
                     tracePipelineSummary(
                         "single motif bowl fallback replacing finish exception: " +
                         e.getClass().getSimpleName());

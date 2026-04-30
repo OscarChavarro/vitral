@@ -129,6 +129,10 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         _PolyhedralBoundedSolidFace f2;
         int i;
 
+        if ( !canMoveFace(f) ) {
+            return;
+        }
+
         f.parentSolid.getPolygonsList().locateWindowAtElem(f);
         f.parentSolid.getPolygonsList().removeElemAtWindow();
         s.getPolygonsList().add(f);
@@ -138,13 +142,58 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             l = f.boundariesList.get(i);
             he = l.boundaryStartHalfEdge;
             do {
-                f2 = he.mirrorHalfEdge().parentLoop.parentFace;
-                if ( f2.parentSolid != s ) {
+                _PolyhedralBoundedSolidHalfEdge mirror = he.mirrorHalfEdge();
+                if ( mirror == null || mirror.parentLoop == null ||
+                     mirror.parentLoop.parentFace == null ) {
+                    he = he.next();
+                    continue;
+                }
+                f2 = mirror.parentLoop.parentFace;
+                if ( f2.parentSolid != s && canMoveFace(f2) ) {
                     movefac(f2, s);
                 }
                 he = he.next();
             } while( he != l.boundaryStartHalfEdge );
         }                
+    }
+
+    private static boolean canMoveFace(_PolyhedralBoundedSolidFace f)
+    {
+        int i;
+
+        if ( f == null || f.boundariesList == null ) {
+            return false;
+        }
+        for ( i = 0; i < f.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop l = f.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge he;
+            int guard;
+
+            if ( l == null || l.boundaryStartHalfEdge == null ||
+                 l.halfEdgesList == null ) {
+                return false;
+            }
+            start = l.boundaryStartHalfEdge;
+            he = start;
+            guard = 0;
+            do {
+                if ( he == null ||
+                     he.parentEdge == null ||
+                     he.parentLoop == null ||
+                     he.startingVertex == null ||
+                     he.mirrorHalfEdge() == null ||
+                     he.next() == null ) {
+                    return false;
+                }
+                he = he.next();
+                guard++;
+            } while ( he != start && guard <= l.halfEdgesList.size() + 1 );
+            if ( he != start ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

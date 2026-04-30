@@ -6,7 +6,12 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 
 public class CsgKurlanderBowlFixture
 {
@@ -354,9 +359,112 @@ public class CsgKurlanderBowlFixture
         if ( isUsableRecoveryResult(exactResult) ) {
             return exactResult;
         }
+        exactResult = repairRecoveryResultPlanarity(exactResult);
+        if ( isUsableRecoveryResult(exactResult) ) {
+            return exactResult;
+        }
         // Conservative fallback: preserve the valid bowl instead of
         // propagating the set-op failure for this single-motif regression.
         return bowl;
+    }
+
+    private static PolyhedralBoundedSolid repairRecoveryResultPlanarity(
+        PolyhedralBoundedSolid result)
+    {
+        if ( result == null ||
+             result.getPolygonsList().size() <= 0 ) {
+            return result;
+        }
+
+        detachNonPlanarRecoveryRings(result);
+        triangulateNonPlanarRecoveryFaces(result);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(result);
+        return result;
+    }
+
+    private static void detachNonPlanarRecoveryRings(
+        PolyhedralBoundedSolid result)
+    {
+        boolean changed;
+        int i;
+
+        do {
+            changed = false;
+            for ( i = 0; i < result.getPolygonsList().size(); i++ ) {
+                _PolyhedralBoundedSolidFace face =
+                    result.getPolygonsList().get(i);
+
+                if ( face.boundariesList.size() <= 1 ||
+                     PolyhedralBoundedSolidGeometricValidator
+                         .validateFaceIsPlanar(face) ) {
+                    continue;
+                }
+                PolyhedralBoundedSolidEulerOperators.lmfkrh(
+                    result,
+                    face.boundariesList.get(1),
+                    result.getMaxFaceId() + 1);
+                changed = true;
+                break;
+            }
+        } while ( changed );
+    }
+
+    private static void triangulateNonPlanarRecoveryFaces(
+        PolyhedralBoundedSolid result)
+    {
+        boolean changed;
+        int guard;
+        int i;
+
+        guard = 0;
+        do {
+            changed = false;
+            for ( i = 0; i < result.getPolygonsList().size(); i++ ) {
+                _PolyhedralBoundedSolidFace face =
+                    result.getPolygonsList().get(i);
+
+                if ( canSplitNonPlanarRecoveryFace(face) ) {
+                    splitRecoveryFaceOnce(result, face);
+                    changed = true;
+                    break;
+                }
+            }
+            guard++;
+        } while ( changed && guard < 1000 );
+    }
+
+    private static boolean canSplitNonPlanarRecoveryFace(
+        _PolyhedralBoundedSolidFace face)
+    {
+        if ( face == null ||
+             face.boundariesList.size() != 1 ||
+             face.boundariesList.get(0) == null ||
+             face.boundariesList.get(0).halfEdgesList.size() <= 3 ) {
+            return false;
+        }
+        return !PolyhedralBoundedSolidGeometricValidator
+            .validateFaceIsPlanar(face);
+    }
+
+    private static void splitRecoveryFaceOnce(
+        PolyhedralBoundedSolid result,
+        _PolyhedralBoundedSolidFace face)
+    {
+        _PolyhedralBoundedSolidLoop loop;
+        _PolyhedralBoundedSolidHalfEdge start;
+
+        loop = face.boundariesList.get(0);
+        start = loop.boundaryStartHalfEdge;
+        if ( start == null ||
+             start.next() == null ||
+             start.previous() == null ) {
+            return;
+        }
+        PolyhedralBoundedSolidEulerOperators.lmef(
+            result,
+            start.next(),
+            start.previous(),
+            result.getMaxFaceId() + 1);
     }
 
     private static PolyhedralBoundedSolid

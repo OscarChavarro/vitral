@@ -672,6 +672,27 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             hasReusableCoincidentCutFace(he);
     }
 
+    private static boolean isPointLikeHalfEdge(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        return isLiveHalfEdge(he) &&
+            he.next() != null &&
+            he.next().startingVertex != null &&
+            isSamePoint(he, he.next());
+    }
+
+    private static boolean isDegenerateCoincidentLooseClosure(
+        _PolyhedralBoundedSolidHalfEdge firstA,
+        _PolyhedralBoundedSolidHalfEdge secondA,
+        _PolyhedralBoundedSolidHalfEdge firstB,
+        _PolyhedralBoundedSolidHalfEdge secondB)
+    {
+        return isPointLikeHalfEdge(firstA) &&
+            isPointLikeHalfEdge(secondA) &&
+            isPointLikeHalfEdge(firstB) &&
+            isPointLikeHalfEdge(secondB);
+    }
+
     private static void finalizeCoincidentLooseA(
         _PolyhedralBoundedSolidHalfEdge he)
     {
@@ -731,6 +752,13 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " A1=" + summarizeHalfEdge(endsa.get(j)) +
                     " B0=" + summarizeHalfEdge(endsb.get(i)) +
                     " B1=" + summarizeHalfEdge(endsb.get(j)));
+                if ( isDegenerateCoincidentLooseClosure(
+                         endsa.get(i), endsa.get(j),
+                         endsb.get(i), endsb.get(j)) ) {
+                    removeLoosePair(j);
+                    removeLoosePair(i);
+                    return true;
+                }
                 setCurrentConnectContext(allocateSyntheticPairIndex());
                 finalizeCoincidentLooseA(endsa.get(i));
                 finalizeCoincidentLooseB(endsb.get(i));
@@ -893,59 +921,64 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static _PolyhedralBoundedSolidFace
     findUniqueClassicRebindTargetFace(
-        _PolyhedralBoundedSolidHalfEdge currentARight,
-        _PolyhedralBoundedSolidHalfEdge currentALeft,
-        _PolyhedralBoundedSolidHalfEdge currentBLeft,
-        _PolyhedralBoundedSolidHalfEdge currentBRight)
+        _PolyhedralBoundedSolidHalfEdge currentTargetFirst,
+        _PolyhedralBoundedSolidHalfEdge currentTargetSecond,
+        _PolyhedralBoundedSolidHalfEdge currentReferenceFirst,
+        _PolyhedralBoundedSolidHalfEdge currentReferenceSecond,
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> targetEnds,
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> referenceEnds)
     {
         _PolyhedralBoundedSolidFace candidateFace = null;
         int i;
         int j;
         int pairCount;
 
-        if ( !isLiveHalfEdge(currentARight) ||
-             !isLiveHalfEdge(currentALeft) ||
-             !isLiveHalfEdge(currentBLeft) ||
-             !isLiveHalfEdge(currentBRight) ||
-             endsa == null || endsb == null ) {
+        if ( !isLiveHalfEdge(currentTargetFirst) ||
+             !isLiveHalfEdge(currentTargetSecond) ||
+             !isLiveHalfEdge(currentReferenceFirst) ||
+             !isLiveHalfEdge(currentReferenceSecond) ||
+             targetEnds == null || referenceEnds == null ) {
             return null;
         }
 
-        pairCount = Math.min(endsa.size(), endsb.size());
+        pairCount = Math.min(targetEnds.size(), referenceEnds.size());
         for ( i = 0; i < pairCount; i++ ) {
-            _PolyhedralBoundedSolidHalfEdge looseARight;
-            _PolyhedralBoundedSolidHalfEdge looseBLeft;
+            _PolyhedralBoundedSolidHalfEdge looseTargetFirst;
+            _PolyhedralBoundedSolidHalfEdge looseReferenceFirst;
 
-            looseARight = endsa.get(i);
-            looseBLeft = endsb.get(i);
-            if ( !isLiveHalfEdge(looseARight) ||
-                 !isLiveHalfEdge(looseBLeft) ||
-                 !isOppositeHalfEdgeSide(currentARight, looseARight) ||
-                 !neighbor(currentBLeft, looseBLeft) ) {
+            looseTargetFirst = targetEnds.get(i);
+            looseReferenceFirst = referenceEnds.get(i);
+            if ( !isLiveHalfEdge(looseTargetFirst) ||
+                 !isLiveHalfEdge(looseReferenceFirst) ||
+                 !isOppositeHalfEdgeSide(
+                     currentTargetFirst, looseTargetFirst) ||
+                 !neighbor(currentReferenceFirst, looseReferenceFirst) ) {
                 continue;
             }
 
             for ( j = 0; j < pairCount; j++ ) {
-                _PolyhedralBoundedSolidHalfEdge looseALeft;
-                _PolyhedralBoundedSolidHalfEdge looseBRight;
+                _PolyhedralBoundedSolidHalfEdge looseTargetSecond;
+                _PolyhedralBoundedSolidHalfEdge looseReferenceSecond;
                 _PolyhedralBoundedSolidFace looseFace;
 
                 if ( i == j ) {
                     continue;
                 }
 
-                looseALeft = endsa.get(j);
-                looseBRight = endsb.get(j);
-                if ( !isLiveHalfEdge(looseALeft) ||
-                     !isLiveHalfEdge(looseBRight) ||
-                     !isOppositeHalfEdgeSide(currentALeft, looseALeft) ||
-                     !neighbor(currentBRight, looseBRight) ) {
+                looseTargetSecond = targetEnds.get(j);
+                looseReferenceSecond = referenceEnds.get(j);
+                if ( !isLiveHalfEdge(looseTargetSecond) ||
+                     !isLiveHalfEdge(looseReferenceSecond) ||
+                     !isOppositeHalfEdgeSide(
+                         currentTargetSecond, looseTargetSecond) ||
+                     !neighbor(currentReferenceSecond,
+                         looseReferenceSecond) ) {
                     continue;
                 }
 
-                looseFace = looseARight.parentLoop.parentFace;
-                if ( looseFace != looseALeft.parentLoop.parentFace ||
-                     looseFace == currentARight.parentLoop.parentFace ) {
+                looseFace = looseTargetFirst.parentLoop.parentFace;
+                if ( looseFace != looseTargetSecond.parentLoop.parentFace ||
+                     looseFace == currentTargetFirst.parentLoop.parentFace ) {
                     continue;
                 }
 
@@ -962,20 +995,20 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static boolean isStrictRebindTargetFace(
         _PolyhedralBoundedSolidFace targetFace,
-        _PolyhedralBoundedSolidHalfEdge currentARight)
+        _PolyhedralBoundedSolidHalfEdge currentTarget)
     {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
         Vector3D point;
 
         if ( targetFace == null ||
-             !isLiveHalfEdge(currentARight) ||
-             currentARight.startingVertex == null ||
+             !isLiveHalfEdge(currentTarget) ||
+             currentTarget.startingVertex == null ||
              targetFace.getContainingPlane() == null ) {
             return false;
         }
 
         numericContext = PolyhedralBoundedSolidNumericPolicy.forFace(targetFace);
-        point = currentARight.startingVertex.position;
+        point = currentTarget.startingVertex.position;
         if ( Math.abs(targetFace.getContainingPlane().pointDistance(point)) >
              numericContext.bigEpsilon() ) {
             return false;
@@ -985,11 +1018,14 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             .pointInFace(targetFace, point) == Geometry.INSIDE;
     }
 
-    private static void rebindClassicCurrentNullEdgeAIfNeeded(
-        _PolyhedralBoundedSolidHalfEdge currentARight,
-        _PolyhedralBoundedSolidHalfEdge currentALeft,
-        _PolyhedralBoundedSolidHalfEdge currentBLeft,
-        _PolyhedralBoundedSolidHalfEdge currentBRight)
+    private static void rebindClassicCurrentNullEdgeIfNeeded(
+        _PolyhedralBoundedSolidHalfEdge currentTargetFirst,
+        _PolyhedralBoundedSolidHalfEdge currentTargetSecond,
+        _PolyhedralBoundedSolidHalfEdge currentReferenceFirst,
+        _PolyhedralBoundedSolidHalfEdge currentReferenceSecond,
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> targetEnds,
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> referenceEnds,
+        String label)
     {
         _PolyhedralBoundedSolidFace targetFace;
         _PolyhedralBoundedSolidFace sourceFace;
@@ -997,39 +1033,59 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         PolyhedralBoundedSolid solid;
 
         if ( operation != SUBTRACT ||
-             !isLiveHalfEdge(currentARight) ||
-             !isLiveHalfEdge(currentALeft) ||
-             currentARight.parentLoop != currentALeft.parentLoop ) {
+             !isLiveHalfEdge(currentTargetFirst) ||
+             !isLiveHalfEdge(currentTargetSecond) ||
+             currentTargetFirst.parentLoop != currentTargetSecond.parentLoop ) {
             return;
         }
 
-        sourceLoop = currentARight.parentLoop;
+        sourceLoop = currentTargetFirst.parentLoop;
         sourceFace = sourceLoop.parentFace;
         if ( sourceLoop.halfEdgesList.size() != 2 ) {
             return;
         }
 
         targetFace = findUniqueClassicRebindTargetFace(
-            currentARight, currentALeft, currentBLeft, currentBRight);
+            currentTargetFirst, currentTargetSecond,
+            currentReferenceFirst, currentReferenceSecond,
+            targetEnds, referenceEnds);
         if ( targetFace == null ||
              targetFace == sourceFace ||
-             !isStrictRebindTargetFace(targetFace, currentARight) ) {
+             !isStrictRebindTargetFace(targetFace, currentTargetFirst) ) {
             return;
         }
 
-        solid = currentARight.parentLoop.parentFace.parentSolid;
+        solid = currentTargetFirst.parentLoop.parentFace.parentSolid;
         if ( !PolyhedralBoundedSolidEulerOperators.lringmv(
                  solid, sourceLoop, targetFace, false) ) {
             tracePipelineSummary(
-                "connect rebindA failed sourceFace=" +
+                "connect rebind" + label + " failed sourceFace=" +
                 sourceFace.id + " targetFace=" +
-                targetFace.id + " edge=" + summarizeHalfEdge(currentARight));
+                targetFace.id + " edge=" +
+                summarizeHalfEdge(currentTargetFirst));
             return;
         }
         tracePipelineSummary(
-            "connect rebindA sourceFace=" +
+            "connect rebind" + label + " sourceFace=" +
             sourceFace.id + " targetFace=" +
-            targetFace.id + " edge=" + summarizeHalfEdge(currentARight));
+            targetFace.id + " edge=" +
+            summarizeHalfEdge(currentTargetFirst));
+    }
+
+    private static void rebindClassicCurrentNullEdgesIfNeeded(
+        _PolyhedralBoundedSolidHalfEdge currentARight,
+        _PolyhedralBoundedSolidHalfEdge currentALeft,
+        _PolyhedralBoundedSolidHalfEdge currentBLeft,
+        _PolyhedralBoundedSolidHalfEdge currentBRight)
+    {
+        rebindClassicCurrentNullEdgeIfNeeded(
+            currentARight, currentALeft,
+            currentBLeft, currentBRight,
+            endsa, endsb, "A");
+        rebindClassicCurrentNullEdgeIfNeeded(
+            currentBLeft, currentBRight,
+            currentARight, currentALeft,
+            endsb, endsa, "B");
     }
 
     private static void rememberDeferredCut(
@@ -1298,6 +1354,18 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         join(endsb.get(pair[0]), endsb.get(pair[1]), false);
     }
 
+    private static void joinLoosePairA(_PolyhedralBoundedSolidHalfEdge first,
+                                       _PolyhedralBoundedSolidHalfEdge second)
+    {
+        join(first, second, false, false);
+    }
+
+    private static void joinLoosePairB(_PolyhedralBoundedSolidHalfEdge first,
+                                       _PolyhedralBoundedSolidHalfEdge second)
+    {
+        join(first, second, false);
+    }
+
     private static void cutLiveLoosePairs()
     {
         ArrayList<_PolyhedralBoundedSolidHalfEdge> looseA;
@@ -1353,6 +1421,414 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         joinLoosePairB(firstB);
         joinLoosePairB(secondB);
         cutLiveLoosePairs();
+        endsa.clear();
+        endsb.clear();
+    }
+
+    private static double pointDistance(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second)
+    {
+        Vector3D delta;
+
+        if ( first == null || second == null ||
+             first.startingVertex == null ||
+             second.startingVertex == null ||
+             first.startingVertex.position == null ||
+             second.startingVertex.position == null ) {
+            return Double.POSITIVE_INFINITY;
+        }
+        delta = first.startingVertex.position.subtract(
+            second.startingVertex.position);
+        return delta.length();
+    }
+
+    private static double loosePairWeight(
+        _PolyhedralBoundedSolidHalfEdge first,
+        _PolyhedralBoundedSolidHalfEdge second)
+    {
+        double weight;
+
+        if ( !isLiveHalfEdge(first) ||
+             !isLiveHalfEdge(second) ||
+             !neighbor(first, second) ) {
+            return Double.POSITIVE_INFINITY;
+        }
+        weight = pointDistance(first, second);
+        if ( first.parentLoop != second.parentLoop ) {
+            weight += 1000.0;
+        }
+        return weight;
+    }
+
+    private static double findMinimumLooseMatching(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> ends,
+        boolean[] used,
+        int[][] bestPairs,
+        int[][] currentPairs,
+        int depth,
+        double currentWeight,
+        double bestWeight)
+    {
+        int first;
+        int second;
+
+        first = -1;
+        for ( int i = 0; i < ends.size(); i++ ) {
+            if ( !used[i] ) {
+                first = i;
+                break;
+            }
+        }
+        if ( first < 0 ) {
+            for ( int i = 0; i < currentPairs.length; i++ ) {
+                bestPairs[i][0] = currentPairs[i][0];
+                bestPairs[i][1] = currentPairs[i][1];
+            }
+            return currentWeight;
+        }
+
+        used[first] = true;
+        for ( second = first + 1; second < ends.size(); second++ ) {
+            double pairWeight;
+            double candidateWeight;
+
+            if ( used[second] ) {
+                continue;
+            }
+            pairWeight = loosePairWeight(ends.get(first), ends.get(second));
+            if ( Double.isInfinite(pairWeight) ||
+                 currentWeight + pairWeight >= bestWeight ) {
+                continue;
+            }
+
+            used[second] = true;
+            currentPairs[depth][0] = first;
+            currentPairs[depth][1] = second;
+            candidateWeight = findMinimumLooseMatching(
+                ends, used, bestPairs, currentPairs, depth + 1,
+                currentWeight + pairWeight, bestWeight);
+            if ( candidateWeight < bestWeight ) {
+                bestWeight = candidateWeight;
+            }
+            used[second] = false;
+        }
+        used[first] = false;
+        return bestWeight;
+    }
+
+    private static int[][] findMinimumLooseMatching(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> ends)
+    {
+        boolean[] used;
+        int[][] bestPairs;
+        int[][] currentPairs;
+        double weight;
+
+        if ( ends == null || ends.size() < 2 || ends.size() % 2 != 0 ) {
+            return null;
+        }
+        used = new boolean[ends.size()];
+        bestPairs = new int[ends.size() / 2][2];
+        currentPairs = new int[ends.size() / 2][2];
+        weight = findMinimumLooseMatching(
+            ends, used, bestPairs, currentPairs, 0, 0.0,
+            Double.POSITIVE_INFINITY);
+        if ( Double.isInfinite(weight) ) {
+            return null;
+        }
+        return bestPairs;
+    }
+
+    private static boolean sameMatching(int[][] first, int[][] second)
+    {
+        int i;
+
+        if ( first == null || second == null ||
+             first.length != second.length ) {
+            return false;
+        }
+        for ( i = 0; i < first.length; i++ ) {
+            boolean found = false;
+
+            for ( int j = 0; j < second.length; j++ ) {
+                if ( sameUnorderedPair(first[i], second[j]) ) {
+                    found = true;
+                    break;
+                }
+            }
+            if ( !found ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void joinLoosePairsA(int[][] pairs)
+    {
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose;
+        int i;
+
+        loose = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsa);
+        for ( i = 0; i < pairs.length; i++ ) {
+            joinLoosePairA(loose.get(pairs[i][0]), loose.get(pairs[i][1]));
+        }
+    }
+
+    private static void joinLoosePairsB(int[][] pairs)
+    {
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose;
+        int i;
+
+        loose = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsb);
+        for ( i = 0; i < pairs.length; i++ ) {
+            joinLoosePairB(loose.get(pairs[i][0]), loose.get(pairs[i][1]));
+        }
+    }
+
+    private static void cutMatchedLoosePairsA(int[][] pairs)
+    {
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose;
+        int i;
+
+        loose = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsa);
+        for ( i = 0; i < pairs.length; i++ ) {
+            cutLiveA(loose.get(pairs[i][1]));
+        }
+    }
+
+    private static void cutMatchedLoosePairsB(int[][] pairs)
+    {
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose;
+        int i;
+
+        loose = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsb);
+        for ( i = 0; i < pairs.length; i++ ) {
+            cutLiveB(loose.get(pairs[i][1]));
+        }
+    }
+
+    private static int[] buildLoosePairMates(int size, int[][] pairs)
+    {
+        int[] mates;
+        int i;
+
+        if ( pairs == null ) {
+            return null;
+        }
+        mates = new int[size];
+        for ( i = 0; i < size; i++ ) {
+            mates[i] = -1;
+        }
+        for ( i = 0; i < pairs.length; i++ ) {
+            int first = pairs[i][0];
+            int second = pairs[i][1];
+
+            if ( first < 0 || second < 0 ||
+                 first >= size || second >= size ) {
+                return null;
+            }
+            mates[first] = second;
+            mates[second] = first;
+        }
+        for ( i = 0; i < size; i++ ) {
+            if ( mates[i] < 0 ) {
+                return null;
+            }
+        }
+        return mates;
+    }
+
+    private static ArrayList<int[]> findLooseNetworkCycles(
+        int[][] pairsA,
+        int[][] pairsB,
+        int size)
+    {
+        ArrayList<int[]> cycles;
+        boolean[] used;
+        int[] matesA;
+        int[] matesB;
+        int start;
+
+        matesA = buildLoosePairMates(size, pairsA);
+        matesB = buildLoosePairMates(size, pairsB);
+        if ( matesA == null || matesB == null ) {
+            return null;
+        }
+
+        cycles = new ArrayList<int[]>();
+        used = new boolean[size];
+        for ( start = 0; start < size; start++ ) {
+            ArrayList<Integer> cycle;
+            int current;
+            boolean useA;
+
+            if ( used[start] ) {
+                continue;
+            }
+            cycle = new ArrayList<Integer>();
+            current = start;
+            useA = true;
+            do {
+                if ( current < 0 || current >= size ) {
+                    return null;
+                }
+                if ( used[current] && current != start ) {
+                    return null;
+                }
+                if ( !used[current] ) {
+                    used[current] = true;
+                    cycle.add(Integer.valueOf(current));
+                }
+                current = useA ? matesA[current] : matesB[current];
+                useA = !useA;
+            } while ( current != start || !useA );
+
+            if ( cycle.size() < 4 || cycle.size() % 2 != 0 ) {
+                return null;
+            }
+            cycles.add(toIntArray(cycle));
+        }
+        return cycles;
+    }
+
+    private static int[] toIntArray(ArrayList<Integer> values)
+    {
+        int[] out;
+        int i;
+
+        out = new int[values.size()];
+        for ( i = 0; i < values.size(); i++ ) {
+            out[i] = values.get(i).intValue();
+        }
+        return out;
+    }
+
+    private static boolean cycleContains(int[] cycle, int value)
+    {
+        int i;
+
+        for ( i = 0; i < cycle.length; i++ ) {
+            if ( cycle[i] == value ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void joinLoosePairsInCycleA(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose,
+        int[][] pairs,
+        int[] cycle)
+    {
+        int i;
+
+        for ( i = 0; i < pairs.length; i++ ) {
+            if ( !cycleContains(cycle, pairs[i][0]) ||
+                 !cycleContains(cycle, pairs[i][1]) ) {
+                continue;
+            }
+            joinLoosePairA(loose.get(pairs[i][0]), loose.get(pairs[i][1]));
+        }
+    }
+
+    private static void joinLoosePairsInCycleB(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> loose,
+        int[][] pairs,
+        int[] cycle)
+    {
+        int i;
+
+        for ( i = 0; i < pairs.length; i++ ) {
+            if ( !cycleContains(cycle, pairs[i][0]) ||
+                 !cycleContains(cycle, pairs[i][1]) ) {
+                continue;
+            }
+            joinLoosePairB(loose.get(pairs[i][0]), loose.get(pairs[i][1]));
+        }
+    }
+
+    private static void cutLooseCycle(
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseA,
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseB,
+        int[] cycle)
+    {
+        int i;
+
+        for ( i = 0; i < cycle.length; i++ ) {
+            cutLiveA(looseA.get(cycle[i]));
+        }
+        for ( i = 0; i < cycle.length; i++ ) {
+            cutLiveB(looseB.get(cycle[i]));
+        }
+    }
+
+    private static String summarizeMatching(int[][] pairs)
+    {
+        StringBuilder out;
+        int i;
+
+        if ( pairs == null ) {
+            return "null";
+        }
+        out = new StringBuilder();
+        out.append("[");
+        for ( i = 0; i < pairs.length; i++ ) {
+            if ( i > 0 ) {
+                out.append(",");
+            }
+            out.append(pairs[i][0]).append("-").append(pairs[i][1]);
+        }
+        out.append("]");
+        return out.toString();
+    }
+
+    private static void resolveClassicLooseNetwork()
+    {
+        int[][] pairsA;
+        int[][] pairsB;
+        ArrayList<int[]> cycles;
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseA;
+        ArrayList<_PolyhedralBoundedSolidHalfEdge> looseB;
+        int i;
+
+        if ( operation != SUBTRACT ||
+             endsa == null ||
+             endsb == null ||
+             endsa.size() < 8 ||
+             endsa.size() != endsb.size() ||
+             endsa.size() % 2 != 0 ||
+             sonfa == null ||
+             sonfb == null ||
+             hasCoincidentLooseEndpoint(endsa) ||
+             hasCoincidentLooseEndpoint(endsb) ) {
+            return;
+        }
+
+        pairsA = findMinimumLooseMatching(endsa);
+        pairsB = findMinimumLooseMatching(endsb);
+        if ( pairsA == null || pairsB == null ||
+             sameMatching(pairsA, pairsB) ) {
+            return;
+        }
+        cycles = findLooseNetworkCycles(pairsA, pairsB, endsa.size());
+        if ( cycles == null || cycles.isEmpty() ) {
+            return;
+        }
+
+        tracePipelineSummary(
+            "connect loose-network close A=" + summarizeMatching(pairsA) +
+            " B=" + summarizeMatching(pairsB) + " " +
+            summarizeLooseEnds(endsa, endsb));
+
+        looseA = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsa);
+        looseB = new ArrayList<_PolyhedralBoundedSolidHalfEdge>(endsb);
+        for ( i = 0; i < cycles.size(); i++ ) {
+            setCurrentConnectContext(allocateSyntheticPairIndex());
+            joinLoosePairsInCycleA(looseA, pairsA, cycles.get(i));
+            joinLoosePairsInCycleB(looseB, pairsB, cycles.get(i));
+            cutLooseCycle(looseA, looseB, cycles.get(i));
+        }
         endsa.clear();
         endsb.clear();
     }
@@ -2014,7 +2490,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 nextedgeb.leftHalf = tmp;
             }
 
-            rebindClassicCurrentNullEdgeAIfNeeded(
+            rebindClassicCurrentNullEdgesIfNeeded(
                 nextedgea.rightHalf,
                 nextedgea.leftHalf,
                 nextedgeb.leftHalf,
@@ -2099,6 +2575,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 " looseB=" + endsb.size());
         }
         resolveClassicAlternatingLooseCycle();
+        resolveClassicLooseNetwork();
         flushDeferredClassicCuts();
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +
