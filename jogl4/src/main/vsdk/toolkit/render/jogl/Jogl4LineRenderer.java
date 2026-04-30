@@ -48,6 +48,7 @@ final class Jogl4LineRenderer {
         }
 
         ensureInitialized(gl);
+        disableTextureBindings(gl);
 
         gl.glUseProgram(programId);
         gl.glUniformMatrix4fv(
@@ -158,5 +159,13 @@ final class Jogl4LineRenderer {
         colorVboId = tmp[0];
 
         initialized = true;
+    }
+
+    private static void disableTextureBindings(GL4 gl)
+    {
+        gl.glActiveTexture(GL4.GL_TEXTURE1);
+        gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
+        gl.glActiveTexture(GL4.GL_TEXTURE0);
+        gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
     }
 }

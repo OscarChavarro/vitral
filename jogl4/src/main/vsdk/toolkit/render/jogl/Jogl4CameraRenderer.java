@@ -10,6 +10,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 
 public class Jogl4CameraRenderer extends Jogl4Renderer {
+    private static final float[] CAMERA_ORIGIN_COLOR = { 1.0f, 0.5f, 0.5f };
+    private static final float[] FRUSTUM_COLOR = { 0.0f, 1.0f, 1.0f };
 
     public static Matrix4x4 activate(GL4 gl, Camera cam)
     {
@@ -38,7 +40,7 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
         drawVolume(gl, cam, modelViewProjection);
     }
 
-    private static void drawVolume(GL4 gl, Camera cam, Matrix4x4 mvp)
+    public static void drawVolume(GL4 gl, Camera cam, Matrix4x4 mvp)
     {
         double npd = cam.getNearPlaneDistance();
         double fpd = cam.getFarPlaneDistance();
@@ -70,34 +72,36 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
             xf = yf * (cam.getViewportXSize() / cam.getViewportYSize());
         }
 
-        List<Float> positions = new ArrayList<>();
-        List<Float> colors = new ArrayList<>();
+        List<Float> originPositions = new ArrayList<>();
+        List<Float> originColors = new ArrayList<>();
 
         double delta = 0.1;
-        addLine(positions, colors, 0, 0, 0, delta, 0, 0, 1f, 0.5f, 0.5f);
-        addLine(positions, colors, 0, -delta, 0, 0, delta, 0, 1f, 0.5f, 0.5f);
-        addLine(positions, colors, 0, 0, -delta, 0, 0, delta, 1f, 0.5f, 0.5f);
+        addLine(originPositions, originColors, 0, 0, 0, delta, 0, 0, CAMERA_ORIGIN_COLOR);
+        addLine(originPositions, originColors, 0, -delta, 0, 0, delta, 0, CAMERA_ORIGIN_COLOR);
+        addLine(originPositions, originColors, 0, 0, -delta, 0, 0, delta, CAMERA_ORIGIN_COLOR);
 
-        addLoopRectangle(positions, colors, npd, xn, yn, 0f, 1f, 1f);
-        addLine(positions, colors, npd, -xn/10, -yn/10, npd, xn/10, yn/10, 0f, 1f, 1f);
-        addLine(positions, colors, npd, xn/10, -yn/10, npd, -xn/10, yn/10, 0f, 1f, 1f);
-        addLine(positions, colors, npd, -xn/10, yn/2, npd, 0, yn/2 + yn/10, 0f, 1f, 1f);
-        addLine(positions, colors, npd, 0, yn/2 + yn/10, npd, xn/10, yn/2, 0f, 1f, 1f);
+        List<Float> frustumPositions = new ArrayList<>();
+        List<Float> frustumColors = new ArrayList<>();
 
-        addLoopRectangle(positions, colors, fpd, xf, yf, 0f, 1f, 1f);
-        addLine(positions, colors, fpd, -xf/10, -yf/10, fpd, xf/10, yf/10, 0f, 1f, 1f);
-        addLine(positions, colors, fpd, xf/10, -yf/10, fpd, -xf/10, yf/10, 0f, 1f, 1f);
-        addLine(positions, colors, fpd, -xf/10, yf/2, fpd, 0, yf/2 + yf/10, 0f, 1f, 1f);
-        addLine(positions, colors, fpd, 0, yf/2 + yf/10, fpd, xf/10, yf/2, 0f, 1f, 1f);
+        addLoopRectangle(frustumPositions, frustumColors, npd, xn, yn, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, -xn/10, -yn/10, npd, xn/10, yn/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, xn/10, -yn/10, npd, -xn/10, yn/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, -xn/10, yn/2, npd, 0, yn/2 + yn/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, 0, yn/2 + yn/10, npd, xn/10, yn/2, FRUSTUM_COLOR);
 
-        addLine(positions, colors, npd, -xn/2, -yn/2, fpd, -xf/2, -yf/2, 0f, 1f, 1f);
-        addLine(positions, colors, npd, xn/2, -yn/2, fpd, xf/2, -yf/2, 0f, 1f, 1f);
-        addLine(positions, colors, npd, xn/2, yn/2, fpd, xf/2, yf/2, 0f, 1f, 1f);
-        addLine(positions, colors, npd, -xn/2, yn/2, fpd, -xf/2, yf/2, 0f, 1f, 1f);
+        addLoopRectangle(frustumPositions, frustumColors, fpd, xf, yf, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, fpd, -xf/10, -yf/10, fpd, xf/10, yf/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, fpd, xf/10, -yf/10, fpd, -xf/10, yf/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, fpd, -xf/10, yf/2, fpd, 0, yf/2 + yf/10, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, fpd, 0, yf/2 + yf/10, fpd, xf/10, yf/2, FRUSTUM_COLOR);
 
-        float[] pos = toArray(positions);
-        float[] col = toArray(colors);
-        Jogl4LineRenderer.drawLines(gl, mvp, pos, col, 2.0f);
+        addLine(frustumPositions, frustumColors, npd, -xn/2, -yn/2, fpd, -xf/2, -yf/2, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, xn/2, -yn/2, fpd, xf/2, -yf/2, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, xn/2, yn/2, fpd, xf/2, yf/2, FRUSTUM_COLOR);
+        addLine(frustumPositions, frustumColors, npd, -xn/2, yn/2, fpd, -xf/2, yf/2, FRUSTUM_COLOR);
+
+        Jogl4LineRenderer.drawLines(gl, mvp, toArray(originPositions), toArray(originColors), 1.0f);
+        Jogl4LineRenderer.drawLines(gl, mvp, toArray(frustumPositions), toArray(frustumColors), 2.0f);
     }
 
     public static void dispose(GL4 gl)
@@ -111,14 +115,12 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
         double x,
         double w,
         double h,
-        float r,
-        float g,
-        float b)
+        float[] rgb)
     {
-        addLine(positions, colors, x, -w/2, -h/2, x, w/2, -h/2, r, g, b);
-        addLine(positions, colors, x, w/2, -h/2, x, w/2, h/2, r, g, b);
-        addLine(positions, colors, x, w/2, h/2, x, -w/2, h/2, r, g, b);
-        addLine(positions, colors, x, -w/2, h/2, x, -w/2, -h/2, r, g, b);
+        addLine(positions, colors, x, -w/2, -h/2, x, w/2, -h/2, rgb);
+        addLine(positions, colors, x, w/2, -h/2, x, w/2, h/2, rgb);
+        addLine(positions, colors, x, w/2, h/2, x, -w/2, h/2, rgb);
+        addLine(positions, colors, x, -w/2, h/2, x, -w/2, -h/2, rgb);
     }
 
     private static void addLine(
@@ -130,12 +132,10 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
         double x2,
         double y2,
         double z2,
-        float r,
-        float g,
-        float b)
+        float[] rgb)
     {
-        addVertex(positions, colors, x1, y1, z1, r, g, b);
-        addVertex(positions, colors, x2, y2, z2, r, g, b);
+        addVertex(positions, colors, x1, y1, z1, rgb);
+        addVertex(positions, colors, x2, y2, z2, rgb);
     }
 
     private static void addVertex(
@@ -144,17 +144,15 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
         double x,
         double y,
         double z,
-        float r,
-        float g,
-        float b)
+        float[] rgb)
     {
         positions.add((float)x);
         positions.add((float)y);
         positions.add((float)z);
 
-        colors.add(r);
-        colors.add(g);
-        colors.add(b);
+        colors.add(rgb[0]);
+        colors.add(rgb[1]);
+        colors.add(rgb[2]);
     }
 
     private static float[] toArray(List<Float> input)
