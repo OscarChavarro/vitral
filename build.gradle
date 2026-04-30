@@ -10,6 +10,13 @@ allprojects {
     }
 }
 
+def vitralPublishableProjects = [
+    ':base',
+    ':awt',
+    ':jogl2',
+    ':jogl4'
+]
+
 tasks.register('verifyJavaUtf8') {
     group = 'verification'
     description = 'Validates that all Java sources (except android) are UTF-8 encoded.'
@@ -50,6 +57,10 @@ subprojects { subproject ->
     }
 
     apply plugin: 'java-library'
+
+    if (vitralPublishableProjects.contains(subproject.path)) {
+        apply plugin: 'maven-publish'
+    }
 
     java {
         toolchain {
@@ -112,6 +123,17 @@ subprojects { subproject ->
         }
     }
 
+    if (vitralPublishableProjects.contains(subproject.path)) {
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                    artifactId = subproject.name
+                }
+            }
+        }
+    }
+
     tasks.register('runMain', JavaExec) {
         group = 'application'
         description = 'Runs a module main class. Use -PrunMainClass=<fqcn> and optional -PrunJvmArgs=<a|b>.'
@@ -133,6 +155,14 @@ subprojects { subproject ->
                 throw new GradleException("Missing -PrunMainClass for ${project.path}:runMain")
             }
         }
+    }
+}
+
+tasks.register('publishToMavenLocal') {
+    group = 'publishing'
+    description = 'Publishes the Vitral library modules to the local Maven repository (~/.m2).'
+    dependsOn vitralPublishableProjects.collect {
+        project(it).tasks.named('publishToMavenLocal')
     }
 }
 
