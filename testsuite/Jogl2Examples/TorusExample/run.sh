@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-gradle :testsuite:Jogl2Examples:TorusExample:runMain -PrunMainClass=TorusExample
+gradle --quiet :testsuite:Jogl2Examples:TorusExample:runMain -PrunMainClass=TorusExample

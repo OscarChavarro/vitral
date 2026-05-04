@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-gradle :testsuite:OfflineExamples:AlgebraicExpressionExample:runMain -PrunMainClass=AlgebraicExpressionExample
+gradle --quiet :testsuite:OfflineExamples:AlgebraicExpressionExample:runMain -PrunMainClass=AlgebraicExpressionExample

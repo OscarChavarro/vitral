@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-gradle :testsuite:Techniques:IlluminationTest:runMain -PrunMainClass=IlluminationTest
+gradle --quiet :testsuite:Techniques:IlluminationTest:runMain -PrunMainClass=IlluminationTest

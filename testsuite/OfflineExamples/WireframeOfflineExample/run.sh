@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-gradle :testsuite:OfflineExamples:WireframeOfflineExample:runMain -PrunMainClass=WireframeOfflineExample
+gradle --quiet :testsuite:OfflineExamples:WireframeOfflineExample:runMain -PrunMainClass=WireframeOfflineExample

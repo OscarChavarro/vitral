@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-gradle :testsuite:Tools:LogAnalyzer:runMain -PrunMainClass=LogAnalyzer
+gradle --quiet :testsuite:Tools:LogAnalyzer:runMain -PrunMainClass=LogAnalyzer
