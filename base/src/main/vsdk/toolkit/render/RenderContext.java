@@ -1,4 +1,5 @@
 package vsdk.toolkit.render;
+import vsdk.toolkit.render.shaders.Shader;
 
 final class RenderContext {
     final boolean localLightingEnabled;

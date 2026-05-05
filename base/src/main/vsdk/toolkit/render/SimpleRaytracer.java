@@ -37,6 +37,8 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.render.shaders.Shader;
+import vsdk.toolkit.render.shaders.ShaderSelector;
 
 /**
 This class provides an encaptulation for a rendering algorithm, 
@@ -133,7 +135,7 @@ public class SimpleRaytracer extends RenderingElement {
         RendererConfiguration qualitySelection,
         List<Light> lights)
     {
-        Shader localShader = LocalShaderSelector.select(qualitySelection);
+        Shader localShader = ShaderSelector.select(qualitySelection);
         boolean localLightingEnabled =
             qualitySelection.getShadingType() != RendererConfiguration.SHADING_TYPE_NOLIGHT &&
             hasNonAmbientLights(lights);

@@ -34,4 +34,9 @@ public final class TraceWorkspace {
             reflectionColors[i] = new ColorRgb();
         }
     }
+
+    public RayHit shadowCandidateHit()
+    {
+        return shadowCandidateHit;
+    }
 }

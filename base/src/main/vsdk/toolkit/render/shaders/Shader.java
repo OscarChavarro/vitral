@@ -1,4 +1,5 @@
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.shaders;
+import vsdk.toolkit.render.TraceWorkspace;
 
 import java.util.List;
 
@@ -9,8 +10,8 @@ import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
-abstract class Shader {
-    abstract Vector3D shadeLocal(
+public abstract class Shader {
+    public abstract Vector3D shadeLocal(
         RayHit info,
         double viewX,
         double viewY,

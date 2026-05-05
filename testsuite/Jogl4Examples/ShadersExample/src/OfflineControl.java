@@ -19,6 +19,7 @@ public final class OfflineControl
     {
         ShadersModel model = ShadersModel.createDefault();
         model.updateSoftwareViewportAndCamera(options.getWidth(), options.getHeight());
+        applyRenderFeatureOverrides(model, options);
 
         if ( options.getRotationDegrees() != null ) {
             model.setSphereRotationAngleRadians(
@@ -53,5 +54,17 @@ public final class OfflineControl
         }
         ImagePersistence.exportPNG(outputFile, output);
         System.out.println("Offline render exported: " + outputFile.getAbsolutePath());
+    }
+
+    private static void applyRenderFeatureOverrides(
+        ShadersModel model,
+        CommandLineOptions options)
+    {
+        if ( options.getWithTexture() != null ) {
+            model.getQuality().setTexture(options.getWithTexture().booleanValue());
+        }
+        if ( options.getWithBumpMap() != null ) {
+            model.getQuality().setBumpMap(options.getWithBumpMap().booleanValue());
+        }
     }
 }

@@ -11,6 +11,8 @@ public class CommandLineOptions
     private String offlineOutputPath;
     private ShaderOperationMode method;
     private Double rotationDegrees;
+    private Boolean withTexture;
+    private Boolean withBumpMap;
     private int width;
     private int height;
 
@@ -21,6 +23,8 @@ public class CommandLineOptions
         options.offlineOutputPath = null;
         options.method = ShaderOperationMode.OPENGL_4_1;
         options.rotationDegrees = null;
+        options.withTexture = null;
+        options.withBumpMap = null;
         options.width = DEFAULT_OFFLINE_WIDTH;
         options.height = DEFAULT_OFFLINE_HEIGHT;
 
@@ -54,6 +58,30 @@ public class CommandLineOptions
             if ( arg.startsWith("--rotation=") ) {
                 options.rotationDegrees = parseDouble(
                     arg.substring("--rotation=".length()), "--rotation");
+                continue;
+            }
+            if ( "--with".equals(arg) ) {
+                ensureHasValue(args, i, "--with");
+                applyFeatureSwitches(options, args[++i], true);
+                continue;
+            }
+            if ( arg.startsWith("--with=") ) {
+                applyFeatureSwitches(
+                    options,
+                    arg.substring("--with=".length()),
+                    true);
+                continue;
+            }
+            if ( "--without".equals(arg) ) {
+                ensureHasValue(args, i, "--without");
+                applyFeatureSwitches(options, args[++i], false);
+                continue;
+            }
+            if ( arg.startsWith("--without=") ) {
+                applyFeatureSwitches(
+                    options,
+                    arg.substring("--without=".length()),
+                    false);
                 continue;
             }
             if ( "--width".equals(arg) ) {
@@ -131,6 +159,32 @@ public class CommandLineOptions
             "Unknown --method value: " + raw + ". Use opengl or software.");
     }
 
+    private static void applyFeatureSwitches(
+        CommandLineOptions options,
+        String rawList,
+        boolean enabled)
+    {
+        String[] tokens = rawList.split(",");
+        for ( String rawToken : tokens ) {
+            String token = rawToken.trim().toLowerCase();
+            if ( token.isEmpty() ) {
+                continue;
+            }
+            if ( token.equals("texture") || token.equals("textures") ) {
+                options.withTexture = Boolean.valueOf(enabled);
+                continue;
+            }
+            if ( token.equals("bumpmap") || token.equals("bump") ||
+                 token.equals("normalmap") ) {
+                options.withBumpMap = Boolean.valueOf(enabled);
+                continue;
+            }
+            throw new IllegalArgumentException(
+                "Unknown feature in --with/--without: " + rawToken +
+                ". Use texture,bumpmap");
+        }
+    }
+
     public boolean isOffline()
     {
         return offline;
@@ -159,5 +213,15 @@ public class CommandLineOptions
     public int getHeight()
     {
         return height;
+    }
+
+    public Boolean getWithTexture()
+    {
+        return withTexture;
+    }
+
+    public Boolean getWithBumpMap()
+    {
+        return withBumpMap;
     }
 }
