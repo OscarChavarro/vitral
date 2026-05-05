@@ -27,6 +27,7 @@ import gui.ShadersKeyboardInteractionTechniques;
 import gui.ShadersMouseInteractionTechniques;
 import model.ShaderOperationMode;
 import model.ShadersModel;
+import options.CommandLineOptions;
 import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.AwtSystem;
@@ -114,6 +115,12 @@ public class ShadersExample extends JFrame implements
 
     public static void main(String[] args)
     {
+        CommandLineOptions options = CommandLineOptions.parse(args);
+        if ( options.isOffline() ) {
+            OfflineControl.run(options);
+            return;
+        }
+
         if ( !Jogl4Renderer.verifyOpenGLAvailability() ) {
             System.out.println("Can not start OpenGL/JOGL.");
             return;
