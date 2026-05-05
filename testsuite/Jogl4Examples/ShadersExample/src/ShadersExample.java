@@ -22,6 +22,12 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
+import gui.Animation;
+import gui.ShadersKeyboardInteractionTechniques;
+import gui.ShadersMouseInteractionTechniques;
+import model.ShaderOperationMode;
+import model.ShadersModel;
+import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.media.Image;

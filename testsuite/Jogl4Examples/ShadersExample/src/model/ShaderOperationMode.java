@@ -1,3 +1,5 @@
+package model;
+
 public enum ShaderOperationMode
 {
     OPENGL_4_1,

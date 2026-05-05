@@ -1,3 +1,7 @@
+package gui;
+
+import model.ShadersModel;
+
 public class Animation
 {
     public static final int FRAMES_PER_SECOND = 30;
