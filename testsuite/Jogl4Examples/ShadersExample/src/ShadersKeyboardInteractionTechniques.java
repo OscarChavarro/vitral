@@ -8,7 +8,6 @@ public class ShadersKeyboardInteractionTechniques
     public interface Actions
     {
         void requestExit();
-        void reportQuality(RendererConfiguration quality);
         void animationToggled(boolean enabled);
     }
 
@@ -32,7 +31,6 @@ public class ShadersKeyboardInteractionTechniques
         }
 
         if ( model.getQualityController().processKeyPressedEvent(event) ) {
-            actions.reportQuality(quality);
             repaint = true;
         }
 
@@ -110,6 +108,10 @@ public class ShadersKeyboardInteractionTechniques
             case KeyEvent.KEY_SPACE:
                 model.toggleAnimationEnabled();
                 actions.animationToggled(model.isAnimationEnabled());
+                repaint = true;
+                break;
+            case KeyEvent.KEY_PERIOD:
+                model.rotateRenderingMode();
                 repaint = true;
                 break;
             default:

@@ -30,6 +30,8 @@ public class ShadersModel
     private Material material;
     private RGBImageUncompressed textureMap;
     private RGBImageUncompressed bumpMapHeightRgb;
+    private RGBImageUncompressed softwareFrameImage;
+    private ShaderOperationMode renderingMode;
     private boolean animationEnabled;
     private double sphereRotationAngleRadians;
     private int sphereMeridians;
@@ -84,9 +86,13 @@ public class ShadersModel
         }
 
         animationEnabled = false;
+        renderingMode = ShaderOperationMode.OPENGL_4_1;
         sphereRotationAngleRadians = 0.0;
         sphereMeridians = 64;
         sphereParallels = 32;
+        updateSoftwareViewportAndCamera(
+            (int)camera.getViewportXSize(),
+            (int)camera.getViewportYSize());
     }
 
     public Camera getCamera()
@@ -132,6 +138,43 @@ public class ShadersModel
     public RGBImageUncompressed getBumpMapHeightRgb()
     {
         return bumpMapHeightRgb;
+    }
+
+    public RGBImageUncompressed getSoftwareFrameImage()
+    {
+        return softwareFrameImage;
+    }
+
+    public ShaderOperationMode getRenderingMode()
+    {
+        return renderingMode;
+    }
+
+    public void setRenderingMode(ShaderOperationMode renderingMode)
+    {
+        this.renderingMode = renderingMode;
+    }
+
+    public void rotateRenderingMode()
+    {
+        renderingMode = renderingMode.next();
+    }
+
+    public void updateSoftwareViewportAndCamera(int viewportWidth, int viewportHeight)
+    {
+        int width = Math.max(1, viewportWidth);
+        int height = Math.max(1, viewportHeight);
+        camera.updateViewportResize(width, height);
+        if ( softwareFrameImage != null &&
+             softwareFrameImage.getXSize() == width &&
+             softwareFrameImage.getYSize() == height ) {
+            return;
+        }
+        softwareFrameImage = new RGBImageUncompressed();
+        if ( !softwareFrameImage.init(width, height) ) {
+            throw new IllegalStateException(
+                "Could not allocate software frame image " + width + "x" + height);
+        }
     }
 
     public boolean isAnimationEnabled()

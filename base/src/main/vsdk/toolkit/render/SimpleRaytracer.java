@@ -133,6 +133,7 @@ public class SimpleRaytracer extends RenderingElement {
         RendererConfiguration qualitySelection,
         List<Light> lights)
     {
+        Shader localShader = LocalShaderSelector.select(qualitySelection);
         boolean localLightingEnabled =
             qualitySelection.getShadingType() != RendererConfiguration.SHADING_TYPE_NOLIGHT &&
             hasNonAmbientLights(lights);
@@ -140,7 +141,8 @@ public class SimpleRaytracer extends RenderingElement {
         return new RenderContext(
             localLightingEnabled,
             qualitySelection.isTextureSet(),
-            qualitySelection.isBumpMapSet());
+            qualitySelection.isBumpMapSet(),
+            localShader);
     }
 
     private static int buildSurfaceDetailMask(
@@ -313,7 +315,7 @@ public class SimpleRaytracer extends RenderingElement {
         TraceWorkspace workspace,
         ColorRgb outColor)
     {
-        Vector3D surfaceNormal = Shader.shadeLocal(
+        Vector3D surfaceNormal = renderContext.localShader.shadeLocal(
             info,
             viewX,
             viewY,
@@ -321,7 +323,6 @@ public class SimpleRaytracer extends RenderingElement {
             lights,
             objects,
             material,
-            renderContext,
             workspace,
             outColor);
         double surfaceNormalX = surfaceNormal.x();

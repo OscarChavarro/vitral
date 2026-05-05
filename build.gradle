@@ -21,6 +21,29 @@ tasks.register('verifyJavaUtf8') {
     group = 'verification'
     description = 'Validates that all Java sources (except android) are UTF-8 encoded.'
 
+    // Optional allow-list (relative project paths) for legacy non-UTF8 files.
+    // Configure with:
+    //   -PverifyJavaUtf8Allowed="path/a.java|path/b.java"
+    def utf8AllowedFromProperty =
+        (project.findProperty('verifyJavaUtf8Allowed') ?: '')
+            .toString()
+            .split('\\|')
+            .findAll { !it.isBlank() }
+    def utf8AllowedFiles = utf8AllowedFromProperty
+        .collect { rootProject.layout.projectDirectory.file(it).asFile.canonicalFile }
+        .toSet()
+
+    def javaSourcesToValidate = rootProject.fileTree(rootProject.projectDir) {
+        include '**/*.java'
+        exclude 'android/**'
+        exclude '**/build/**'
+        exclude '.gradle/**'
+        exclude '.gradle-home/**'
+    }
+
+    inputs.files(javaSourcesToValidate)
+    inputs.property('verifyJavaUtf8Allowed', utf8AllowedFromProperty.join('|'))
+
     doLast {
         def invalid = []
         def decoder = java.nio.charset.StandardCharsets.UTF_8
@@ -28,13 +51,10 @@ tasks.register('verifyJavaUtf8') {
             .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
             .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
 
-        fileTree(rootDir) {
-            include '**/*.java'
-            exclude 'android/**'
-            exclude '**/build/**'
-            exclude '.gradle/**'
-            exclude '.gradle-home/**'
-        }.files.each { sourceFile ->
+        javaSourcesToValidate.files.each { sourceFile ->
+            if (utf8AllowedFiles.contains(sourceFile.canonicalFile)) {
+                return
+            }
             try {
                 decoder.reset()
                 decoder.decode(java.nio.ByteBuffer.wrap(sourceFile.bytes))
@@ -199,6 +219,9 @@ project(':base') {
 
     tasks.named('test') {
         useJUnitPlatform()
+        // Keep base tests in serial mode by default.
+        maxParallelForks = 1
+        systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
         finalizedBy(tasks.named('jacocoTestReport'))
     }
 

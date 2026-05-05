@@ -22,12 +22,12 @@ layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-    // [BLIN1978b] "Simulation of Wrinkled Surfaces", Sections 2 and 3.
+    // [BLIN1978b] "Simulation of Wrinkled Surfaces", Section 2.
     // We evaluate:
     //   N' = N + D
     //   D = (Fu (N x Pv) - Fv (N x Pu)) / |N|
-    // Fu/Fv are estimated from a scalar bump height map F(u,v) with
-    // central differences.
+    // where Fu/Fv are partial derivatives of scalar bump height F(u,v)
+    // estimated with central differences.
     //
     // NOTE: To stay numerically consistent with the current CPU pipeline
     // (NormalMap.importBumpMap + Raytracer), we use the same two-texel span
@@ -45,7 +45,10 @@ void main()
     float fPlusV = texture(sNormalMap, uvTextureCoordinate + dv).r;
     float fMinusV = texture(sNormalMap, uvTextureCoordinate - dv).r;
 
+    // u derivative directly in texture-space u axis.
     float Fu = (fPlusU - fMinusU) * bumpScale.x;
+    // v derivative with sign adapted to keep parameter-space v aligned with
+    // the CPU path (which samples with 1-v due to image-space origin).
     float Fv = (fMinusV - fPlusV) * bumpScale.y;
 
     vec3 D = (Fu * cross(Nn, Pv) - Fv * cross(Nn, Pu)) * bumpScale.z;

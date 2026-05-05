@@ -22,9 +22,9 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
-import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
@@ -42,8 +42,10 @@ public class ShadersExample extends JFrame implements
     private ShadersMouseInteractionTechniques mouseInteractionTechniques;
     private Animation animation;
     private Timer animationTimer;
+    private SoftwareRaycaster softwareRaycaster;
 
     private GLCanvas canvas;
+    private ShaderOperationMode lastRenderingMode;
 
     private boolean closing;
     private boolean glResourcesReleased;
@@ -83,8 +85,14 @@ public class ShadersExample extends JFrame implements
         keyboardInteractionTechniques = new ShadersKeyboardInteractionTechniques();
         mouseInteractionTechniques = new ShadersMouseInteractionTechniques();
         animation = new Animation();
+        softwareRaycaster = new SoftwareRaycaster();
+        lastRenderingMode = model.getRenderingMode();
         animationTimer = new Timer(Animation.FRAME_DELAY_MILLIS, e -> {
             animation.tick(model);
+            softwareRaycaster.invalidateSnapshot();
+            if ( model.getRenderingMode() == ShaderOperationMode.SOFTWARE ) {
+                renderSoftwareFrame();
+            }
             if ( canvas != null ) {
                 canvas.repaint();
             }
@@ -144,6 +152,23 @@ public class ShadersExample extends JFrame implements
             0.0,
             1.0);
 
+        if ( model.getRenderingMode() == ShaderOperationMode.SOFTWARE ) {
+            if ( lastRenderingMode != ShaderOperationMode.SOFTWARE ) {
+                softwareRaycaster.invalidateSnapshot();
+            }
+            if ( !model.isAnimationEnabled() ) {
+                // Keep CPU and GPU paths aligned: same camera + same model transform.
+                softwareRaycaster.render(
+                    model,
+                    model.getCamera(),
+                    modelRotation);
+            }
+            drawSoftwareHud(gl, model.getSoftwareFrameImage());
+            lastRenderingMode = ShaderOperationMode.SOFTWARE;
+            return;
+        }
+        lastRenderingMode = ShaderOperationMode.OPENGL_4_1;
+
         Jogl4SphereRenderer.draw(
             gl,
             model.getSphere(),
@@ -169,6 +194,7 @@ public class ShadersExample extends JFrame implements
             Jogl4SphereRenderer.dispose(gl);
             Jogl4ImageRenderer.unload(gl, model.getTextureMap());
             Jogl4ImageRenderer.unload(gl, model.getBumpMapHeightRgb());
+            Jogl4ImageRenderer.unload(gl, model.getSoftwareFrameImage());
             Jogl4ImageRenderer.dispose(gl);
             Jogl4CameraRenderer.dispose(gl);
             glResourcesReleased = true;
@@ -182,7 +208,13 @@ public class ShadersExample extends JFrame implements
         int surfaceWidth = Math.max(1, drawable.getSurfaceWidth());
         int surfaceHeight = Math.max(1, drawable.getSurfaceHeight());
         gl.glViewport(0, 0, surfaceWidth, surfaceHeight);
-        model.getCamera().updateViewportResize(surfaceWidth, surfaceHeight);
+        Image previousSoftwareImage = model.getSoftwareFrameImage();
+        model.updateSoftwareViewportAndCamera(surfaceWidth, surfaceHeight);
+        softwareRaycaster.invalidateSnapshot();
+        if ( previousSoftwareImage != null &&
+             previousSoftwareImage != model.getSoftwareFrameImage() ) {
+            Jogl4ImageRenderer.unload(gl, previousSoftwareImage);
+        }
     }
 
     @Override
@@ -260,12 +292,6 @@ public class ShadersExample extends JFrame implements
                 }
 
                 @Override
-                public void reportQuality(RendererConfiguration currentQuality)
-                {
-                    System.out.println(currentQuality);
-                }
-
-                @Override
                 public void animationToggled(boolean enabled)
                 {
                     if ( enabled ) {
@@ -277,6 +303,7 @@ public class ShadersExample extends JFrame implements
                         animation.reset();
                     }
                 }
+
             }) ) {
             canvas.repaint();
         }
@@ -328,5 +355,60 @@ public class ShadersExample extends JFrame implements
         else {
             SwingUtilities.invokeLater(shutdown);
         }
+    }
+
+    private void drawSoftwareHud(GL4 gl, Image image)
+    {
+        if ( image == null ) {
+            return;
+        }
+
+        // Force texture re-upload because the underlying RGB image buffer is
+        // rewritten by the software raytracer every frame.
+        Jogl4ImageRenderer.unload(gl, image);
+        int textureId = Jogl4ImageRenderer.activate(gl, image);
+        if ( textureId <= 0 ) {
+            return;
+        }
+
+        float[] positions = {
+            -1.0f, -1.0f, 0.0f,
+             1.0f, -1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f
+        };
+        float[] uvCoordinates = {
+            0.0f, 0.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 1.0f
+        };
+
+        gl.glDisable(GL4.GL_DEPTH_TEST);
+        gl.glDisable(GL4.GL_CULL_FACE);
+        Jogl4ImageRenderer.drawTexturedQuad(
+            gl,
+            textureId,
+            Matrix4x4.identityMatrix(),
+            positions,
+            uvCoordinates,
+            1.0f,
+            1.0f,
+            1.0f);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+    }
+
+    private void renderSoftwareFrame()
+    {
+        Matrix4x4 modelRotation = new Matrix4x4().axisRotation(
+            model.getSphereRotationAngleRadians(),
+            0.0,
+            0.0,
+            1.0);
+        softwareRaycaster.render(model, model.getCamera(), modelRotation);
     }
 }
