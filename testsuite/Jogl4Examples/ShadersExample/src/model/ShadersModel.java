@@ -35,6 +35,7 @@ public class ShadersModel
     private RGBImageUncompressed softwareFrameImage;
     private ShaderOperationMode renderingMode;
     private boolean animationEnabled;
+    private boolean lightAnimationEnabled;
     private double sphereRotationAngleRadians;
     private int sphereMeridians;
     private int sphereParallels;
@@ -88,6 +89,7 @@ public class ShadersModel
         }
 
         animationEnabled = false;
+        lightAnimationEnabled = false;
         renderingMode = ShaderOperationMode.OPENGL_4_1;
         sphereRotationAngleRadians = 0.0;
         sphereMeridians = 64;
@@ -192,6 +194,21 @@ public class ShadersModel
     public void toggleAnimationEnabled()
     {
         animationEnabled = !animationEnabled;
+    }
+
+    public boolean isLightAnimationEnabled()
+    {
+        return lightAnimationEnabled;
+    }
+
+    public void setLightAnimationEnabled(boolean lightAnimationEnabled)
+    {
+        this.lightAnimationEnabled = lightAnimationEnabled;
+    }
+
+    public void toggleLightAnimationEnabled()
+    {
+        lightAnimationEnabled = !lightAnimationEnabled;
     }
 
     public double getSphereRotationAngleRadians()

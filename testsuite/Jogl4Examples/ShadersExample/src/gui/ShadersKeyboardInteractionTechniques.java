@@ -12,7 +12,7 @@ public class ShadersKeyboardInteractionTechniques
     public interface Actions
     {
         void requestExit();
-        void animationToggled(boolean enabled);
+        void animationStateChanged();
     }
 
     public boolean processPressed(
@@ -109,9 +109,15 @@ public class ShadersKeyboardInteractionTechniques
                 model.changeSphereParallels(1);
                 repaint = true;
                 break;
-            case KeyEvent.KEY_SPACE:
+            case KeyEvent.KEY_r:
+            case KeyEvent.KEY_R:
                 model.toggleAnimationEnabled();
-                actions.animationToggled(model.isAnimationEnabled());
+                actions.animationStateChanged();
+                repaint = true;
+                break;
+            case KeyEvent.KEY_SPACE:
+                model.toggleLightAnimationEnabled();
+                actions.animationStateChanged();
                 repaint = true;
                 break;
             case KeyEvent.KEY_PERIOD:

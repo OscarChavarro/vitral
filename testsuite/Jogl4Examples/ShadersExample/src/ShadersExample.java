@@ -30,6 +30,7 @@ import model.ShadersModel;
 import options.CommandLineOptions;
 import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
@@ -53,6 +54,7 @@ public class ShadersExample extends JFrame implements
 
     private GLCanvas canvas;
     private ShaderOperationMode lastRenderingMode;
+    private double lightAnimationAngleRadians;
 
     private boolean closing;
     private boolean glResourcesReleased;
@@ -94,8 +96,10 @@ public class ShadersExample extends JFrame implements
         animation = new Animation();
         softwareRaycaster = new SoftwareRaycaster();
         lastRenderingMode = model.getRenderingMode();
+        lightAnimationAngleRadians = 0.0;
         animationTimer = new Timer(Animation.FRAME_DELAY_MILLIS, e -> {
             animation.tick(model);
+            animateLightIfNeeded();
             softwareRaycaster.invalidateSnapshot();
             if ( model.getRenderingMode() == ShaderOperationMode.SOFTWARE ) {
                 renderSoftwareFrame();
@@ -305,9 +309,10 @@ public class ShadersExample extends JFrame implements
                 }
 
                 @Override
-                public void animationToggled(boolean enabled)
+                public void animationStateChanged()
                 {
-                    if ( enabled ) {
+                    if ( model.isAnimationEnabled() ||
+                         model.isLightAnimationEnabled() ) {
                         animation.reset();
                         animationTimer.start();
                     }
@@ -423,5 +428,20 @@ public class ShadersExample extends JFrame implements
             0.0,
             1.0);
         softwareRaycaster.render(model, model.getCamera(), modelRotation);
+    }
+
+    private void animateLightIfNeeded()
+    {
+        if ( !model.isLightAnimationEnabled() ) {
+            return;
+        }
+        lightAnimationAngleRadians += Math.toRadians(2.0);
+        Matrix4x4 rotation = new Matrix4x4().axisRotation(
+            lightAnimationAngleRadians,
+            0.0,
+            -1.0,
+            0.0);
+        Vector3D baseLightPosition = new Vector3D(1.0, -3.0, 1.0);
+        model.getLight().setPosition(rotation.multiply(baseLightPosition));
     }
 }
