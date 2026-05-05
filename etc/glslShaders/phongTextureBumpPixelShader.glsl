@@ -26,32 +26,21 @@ void main()
     // We evaluate:
     //   N' = N + D
     //   D = (Fu (N x Pv) - Fv (N x Pu)) / |N|
-    // where Fu/Fv are partial derivatives of scalar bump height F(u,v)
-    // estimated with central differences.
-    //
-    // NOTE: To stay numerically consistent with the current CPU pipeline
-    // (NormalMap.importBumpMap + Raytracer), we use the same two-texel span
-    // differencing convention without dividing by texel size.
+    // using Fu/Fv reconstructed from the normal-map field exactly as in the
+    // Java CPU path (NormalMap.importBumpMap + LightingShader).
     vec3 Nn = normalize(N);
     vec3 Pu = normalize(T);
     vec3 Pv = normalize(B);
 
-    vec2 texel = 1.0 / vec2(textureSize(sNormalMap, 0));
-    vec2 du = vec2(texel.x, 0.0);
-    vec2 dv = vec2(0.0, texel.y);
+    vec3 normalVariation = texture(sNormalMap, uvTextureCoordinate).xyz * 2.0 - 1.0;
+    float nz = normalVariation.z;
+    if ( abs(nz) < 1e-6 ) {
+        nz = (nz < 0.0) ? -1e-6 : 1e-6;
+    }
 
-    float fPlusU = texture(sNormalMap, uvTextureCoordinate + du).r;
-    float fMinusU = texture(sNormalMap, uvTextureCoordinate - du).r;
-    float fPlusV = texture(sNormalMap, uvTextureCoordinate + dv).r;
-    float fMinusV = texture(sNormalMap, uvTextureCoordinate - dv).r;
-
-    // u derivative directly in texture-space u axis.
-    float Fu = (fPlusU - fMinusU) * bumpScale.x;
-    // v derivative with sign adapted to keep parameter-space v aligned with
-    // the CPU path (which samples with 1-v due to image-space origin).
-    float Fv = (fMinusV - fPlusV) * bumpScale.y;
-
-    vec3 D = (Fu * cross(Nn, Pv) - Fv * cross(Nn, Pu)) * bumpScale.z;
+    float Fu = -2.0 * (bumpScale.z / bumpScale.x) * (normalVariation.x / nz);
+    float Fv = -2.0 * (bumpScale.z / bumpScale.y) * (normalVariation.y / nz);
+    vec3 D = (Fu * cross(Nn, Pv) - Fv * cross(Nn, Pu));
     vec3 perturbedNormal = normalize(Nn + D);
 
     vec3 viewDir = normalize(V);

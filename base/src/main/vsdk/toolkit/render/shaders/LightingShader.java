@@ -11,8 +11,6 @@ import vsdk.toolkit.render.TraceWorkspace;
 import java.util.List;
 
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
@@ -73,7 +71,6 @@ public abstract class LightingShader extends Shader {
             double lx;
             double ly;
             double lz;
-            double maxShadowDistance = Double.MAX_VALUE;
             if ( light.tipo_de_luz == LightType.POINT ) {
                 lx = light.lvec.x() - info.p.x();
                 ly = light.lvec.y() - info.p.y();
@@ -87,7 +84,7 @@ public abstract class LightingShader extends Shader {
                 lx *= invLightDistance;
                 ly *= invLightDistance;
                 lz *= invLightDistance;
-                maxShadowDistance = lightDistance - VSDK.EPSILON;
+                double maxShadowDistance = lightDistance - VSDK.EPSILON;
                 if ( maxShadowDistance <= VSDK.EPSILON ) {
                     continue;
                 }
@@ -98,19 +95,9 @@ public abstract class LightingShader extends Shader {
                 lz = -light.lvec.z();
             }
 
-            Vector3D shadowOffset = new Vector3D(
-                info.p.x() + VSDK.EPSILON*lx,
-                info.p.y() + VSDK.EPSILON*ly,
-                info.p.z() + VSDK.EPSILON*lz);
-            RaytraceStatistics.recordShadowRay();
-            Ray shadowRay = new Ray(shadowOffset, new Vector3D(lx, ly, lz));
-            if ( anyThingInRayDirection(
-                     shadowRay,
-                     objects,
-                     maxShadowDistance,
-                     workspace.shadowCandidateHit()) ) {
-                continue;
-            }
+            // GLSL parity mode:
+            // Shaders used by JOGL4 sample perform local illumination only,
+            // without visibility/shadow queries. Keep CPU path equivalent.
 
             double lambert = normalX*lx + normalY*ly + normalZ*lz;
             if ( lambert <= 0 ) {
@@ -197,25 +184,4 @@ public abstract class LightingShader extends Shader {
         return surfaceNormal.add(normalPerturbation).normalized();
     }
 
-    private static boolean anyThingInRayDirection(
-        Ray inRay,
-        List<SimpleBody> objects,
-        double maxDistance,
-        RayHit candidateHit)
-    {
-        candidateHit.setStoreRay(false);
-        RaytraceStatistics.recordSceneTraversal();
-        for ( int i = 0; i < objects.size(); i++ ) {
-            SimpleBody body = objects.get(i);
-            candidateHit.resetForDistanceOnly();
-            RaytraceStatistics.recordObjectIntersectionTest();
-            if ( body.doIntersection(inRay, candidateHit) ) {
-                double hitDistance = candidateHit.hitDistance();
-                if ( hitDistance > VSDK.EPSILON && hitDistance < maxDistance ) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

@@ -157,7 +157,7 @@ public class SimpleRaytracer extends RenderingElement {
         boolean needsPoint = renderContext.localLightingEnabled || objectReflective;
         boolean needsNormal = needsPoint;
         boolean needsUv =
-            (renderContext.localLightingEnabled && texture != null) ||
+            (renderContext.textureEnabled && texture != null) ||
             ((renderContext.localLightingEnabled || objectReflective) &&
              normalMap != null);
         boolean needsTangent =

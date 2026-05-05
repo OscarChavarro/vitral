@@ -16,12 +16,14 @@ import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class ShadersModel
 {
     private static final int MIN_SPHERE_MERIDIANS = 12;
     private static final int MIN_SPHERE_PARALLELS = 8;
+    private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
 
     private Camera camera;
     private CameraController cameraController;
@@ -77,12 +79,13 @@ public class ShadersModel
         try {
             textureMap = ImagePersistence.importRGB(new File("../../../etc/textures/miniearth.png"));
 
-            IndexedColorImageUncompressed bump = ImagePersistence.importIndexedColor(new File("../../../etc/bumpmaps/earth.bw"));
-            // [BLIN1978b] Section 3:
-            // bump mapping is driven by a scalar height function F(u,v).
-            // The shader computes Fu/Fv with central differences directly
-            // from this grayscale height map.
-            bumpMapHeightRgb = bump.exportToRgbImage();
+            IndexedColorImageUncompressed bump = ImagePersistence.importIndexedColor(
+                new File("../../../etc/bumpmaps/earth.bw"));
+            NormalMap bumpNormalMap = new NormalMap();
+            bumpNormalMap.importBumpMap(bump, DEFAULT_BUMP_SCALE);
+            // Keep GLSL and CPU raytracer aligned: both consume the same
+            // precomputed normal field extracted from the bump map.
+            bumpMapHeightRgb = bumpNormalMap.exportToRgbImage();
         }
         catch (Exception e) {
             throw new IllegalStateException("Failed loading textures for ShadersExample", e);

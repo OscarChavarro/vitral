@@ -6,6 +6,7 @@ import options.CommandLineOptions;
 import render.OpenGlOfflineSphereRenderer;
 import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
@@ -24,6 +25,11 @@ public final class OfflineControl
         if ( options.getRotationDegrees() != null ) {
             model.setSphereRotationAngleRadians(
                 Math.toRadians(options.getRotationDegrees()));
+        }
+        if ( options.getLightRotationDegrees() != null ) {
+            applyOfflineLightRotation(
+                model,
+                Math.toRadians(options.getLightRotationDegrees().doubleValue()));
         }
 
         Matrix4x4 modelRotation = new Matrix4x4().axisRotation(
@@ -54,6 +60,19 @@ public final class OfflineControl
         }
         ImagePersistence.exportPNG(outputFile, output);
         System.out.println("Offline render exported: " + outputFile.getAbsolutePath());
+    }
+
+    private static void applyOfflineLightRotation(
+        ShadersModel model,
+        double lightRotationRadians)
+    {
+        Matrix4x4 rotation = new Matrix4x4().axisRotation(
+            lightRotationRadians,
+            0.0,
+            -1.0,
+            0.0);
+        Vector3D baseLightPosition = new Vector3D(1.0, -3.0, 1.0);
+        model.getLight().setPosition(rotation.multiply(baseLightPosition));
     }
 
     private static void applyRenderFeatureOverrides(

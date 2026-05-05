@@ -33,10 +33,12 @@ void main()
                         pow(max(dot(R, viewDir), 0.0), phongExponent);
     }
 
-    vec3 color = ambientTerm + diffuseTerm + specularTerm;
+    // Keep parity with CPU raytracer: texture modulates diffuse term only.
+    vec3 texturedDiffuseTerm = diffuseTerm;
     if ( withTexture > 0 ) {
-        color *= texture(sTexture, uvTextureCoordinate).xyz;
+        texturedDiffuseTerm *= texture(sTexture, uvTextureCoordinate).xyz;
     }
+    vec3 color = ambientTerm + texturedDiffuseTerm + specularTerm;
 
     fragColor = vec4(color, 1.0);
 }

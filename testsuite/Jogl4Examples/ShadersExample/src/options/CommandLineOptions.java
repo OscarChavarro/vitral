@@ -11,6 +11,7 @@ public class CommandLineOptions
     private String offlineOutputPath;
     private ShaderOperationMode method;
     private Double rotationDegrees;
+    private Double lightRotationDegrees;
     private Boolean withTexture;
     private Boolean withBumpMap;
     private int width;
@@ -23,6 +24,7 @@ public class CommandLineOptions
         options.offlineOutputPath = null;
         options.method = ShaderOperationMode.OPENGL_4_1;
         options.rotationDegrees = null;
+        options.lightRotationDegrees = null;
         options.withTexture = null;
         options.withBumpMap = null;
         options.width = DEFAULT_OFFLINE_WIDTH;
@@ -58,6 +60,18 @@ public class CommandLineOptions
             if ( arg.startsWith("--rotation=") ) {
                 options.rotationDegrees = parseDouble(
                     arg.substring("--rotation=".length()), "--rotation");
+                continue;
+            }
+            if ( "--light-rotation".equals(arg) ) {
+                ensureHasValue(args, i, "--light-rotation");
+                options.lightRotationDegrees =
+                    parseDouble(args[++i], "--light-rotation");
+                continue;
+            }
+            if ( arg.startsWith("--light-rotation=") ) {
+                options.lightRotationDegrees = parseDouble(
+                    arg.substring("--light-rotation=".length()),
+                    "--light-rotation");
                 continue;
             }
             if ( "--with".equals(arg) ) {
@@ -213,6 +227,11 @@ public class CommandLineOptions
     public int getHeight()
     {
         return height;
+    }
+
+    public Double getLightRotationDegrees()
+    {
+        return lightRotationDegrees;
     }
 
     public Boolean getWithTexture()

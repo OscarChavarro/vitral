@@ -46,7 +46,7 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
         }
 
         if ( shadingType == RendererConfiguration.SHADING_TYPE_PHONG ) {
-            if ( quality.isBumpMapSet() && hasTexture && hasNormalMap ) {
+            if ( quality.isBumpMapSet() && hasNormalMap ) {
                 return phongBumpProgramId;
             }
             return phongProgramId;
