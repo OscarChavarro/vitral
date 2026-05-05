@@ -9,6 +9,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.shaders.CpuTextureSamplingConfig;
 
 public final class OfflineControl
 {
@@ -84,6 +86,55 @@ public final class OfflineControl
         }
         if ( options.getWithBumpMap() != null ) {
             model.getQuality().setBumpMap(options.getWithBumpMap().booleanValue());
+        }
+        if ( options.getShadingType() != null ) {
+            model.getQuality().setShadingType(options.getShadingType().intValue());
+        }
+        if ( options.getMeridians() != null ) {
+            model.setSphereMeridians(options.getMeridians().intValue());
+        }
+        if ( options.getParallels() != null ) {
+            model.setSphereParallels(options.getParallels().intValue());
+        }
+        if ( options.getTextureFilter() != null ) {
+            if ( options.getTextureFilter() == CommandLineOptions.TextureFilterOption.NEAREST ) {
+                Jogl4ImageRenderer.setTextureFilterMode(
+                    Jogl4ImageRenderer.TextureFilterMode.NEAREST);
+            }
+            else {
+                Jogl4ImageRenderer.setTextureFilterMode(
+                    Jogl4ImageRenderer.TextureFilterMode.LINEAR);
+            }
+        }
+
+        if ( options.getCpuTextureOffsetUTexels() != null ||
+             options.getCpuTextureOffsetVTexels() != null ) {
+            double cpuTextureOffsetU = -0.5;
+            double cpuTextureOffsetV = -0.5;
+            if ( options.getCpuTextureOffsetUTexels() != null ) {
+                cpuTextureOffsetU = options.getCpuTextureOffsetUTexels().doubleValue();
+            }
+            if ( options.getCpuTextureOffsetVTexels() != null ) {
+                cpuTextureOffsetV = options.getCpuTextureOffsetVTexels().doubleValue();
+            }
+            CpuTextureSamplingConfig.setTextureOffsetTexels(
+                cpuTextureOffsetU,
+                cpuTextureOffsetV);
+        }
+
+        if ( options.getCpuNormalOffsetUTexels() != null ||
+             options.getCpuNormalOffsetVTexels() != null ) {
+            double cpuNormalOffsetU = 0.0;
+            double cpuNormalOffsetV = 0.0;
+            if ( options.getCpuNormalOffsetUTexels() != null ) {
+                cpuNormalOffsetU = options.getCpuNormalOffsetUTexels().doubleValue();
+            }
+            if ( options.getCpuNormalOffsetVTexels() != null ) {
+                cpuNormalOffsetV = options.getCpuNormalOffsetVTexels().doubleValue();
+            }
+            CpuTextureSamplingConfig.setNormalOffsetTexels(
+                cpuNormalOffsetU,
+                cpuNormalOffsetV);
         }
     }
 }

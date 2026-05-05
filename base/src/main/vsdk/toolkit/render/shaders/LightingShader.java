@@ -111,7 +111,7 @@ public abstract class LightingShader extends Shader {
 
             if ( textureEnabled && info.texture != null ) {
                 ColorRgb textureColor =
-                    info.texture.getColorRgbBiLinear(info.u, 1-info.v);
+                    CpuTextureSamplingConfig.sample(info.texture, info.u, 1-info.v);
                 diffuseR *= textureColor.r;
                 diffuseG *= textureColor.g;
                 diffuseB *= textureColor.b;
@@ -158,7 +158,8 @@ public abstract class LightingShader extends Shader {
         if ( info.normalMap == null ) {
             return surfaceNormal;
         }
-        Vector3D normalVariation = info.normalMap.getNormal(info.u, 1-info.v);
+        Vector3D normalVariation =
+            CpuTextureSamplingConfig.sampleNormal(info.normalMap, info.u, 1-info.v);
         if ( normalVariation == null ) {
             return surfaceNormal;
         }

@@ -31,4 +31,5 @@ testsuite/**/*.jpg
 testsuite/**/*.bmp
 testsuite/_APITests/_JOGL2HelloWorld/doc/javadoc/
 .codex
+.venv/
 hs_err_pid*.log

@@ -1,9 +1,14 @@
 package options;
 
 import model.ShaderOperationMode;
+import vsdk.toolkit.common.RendererConfiguration;
 
 public class CommandLineOptions
 {
+    public enum TextureFilterOption {
+        LINEAR,
+        NEAREST
+    }
     private static final int DEFAULT_OFFLINE_WIDTH = 1100;
     private static final int DEFAULT_OFFLINE_HEIGHT = 900;
 
@@ -14,6 +19,14 @@ public class CommandLineOptions
     private Double lightRotationDegrees;
     private Boolean withTexture;
     private Boolean withBumpMap;
+    private Integer shadingType;
+    private TextureFilterOption textureFilter;
+    private Integer meridians;
+    private Integer parallels;
+    private Double cpuTextureOffsetUTexels;
+    private Double cpuTextureOffsetVTexels;
+    private Double cpuNormalOffsetUTexels;
+    private Double cpuNormalOffsetVTexels;
     private int width;
     private int height;
 
@@ -27,6 +40,14 @@ public class CommandLineOptions
         options.lightRotationDegrees = null;
         options.withTexture = null;
         options.withBumpMap = null;
+        options.shadingType = null;
+        options.textureFilter = null;
+        options.meridians = null;
+        options.parallels = null;
+        options.cpuTextureOffsetUTexels = null;
+        options.cpuTextureOffsetVTexels = null;
+        options.cpuNormalOffsetUTexels = null;
+        options.cpuNormalOffsetVTexels = null;
         options.width = DEFAULT_OFFLINE_WIDTH;
         options.height = DEFAULT_OFFLINE_HEIGHT;
 
@@ -86,6 +107,16 @@ public class CommandLineOptions
                     true);
                 continue;
             }
+            if ( "--shading".equals(arg) ) {
+                ensureHasValue(args, i, "--shading");
+                options.shadingType = parseShading(args[++i]);
+                continue;
+            }
+            if ( arg.startsWith("--shading=") ) {
+                options.shadingType = parseShading(
+                    arg.substring("--shading=".length()));
+                continue;
+            }
             if ( "--without".equals(arg) ) {
                 ensureHasValue(args, i, "--without");
                 applyFeatureSwitches(options, args[++i], false);
@@ -96,6 +127,84 @@ public class CommandLineOptions
                     options,
                     arg.substring("--without=".length()),
                     false);
+                continue;
+            }
+            if ( "--texture-filter".equals(arg) ) {
+                ensureHasValue(args, i, "--texture-filter");
+                options.textureFilter = parseTextureFilter(args[++i]);
+                continue;
+            }
+            if ( arg.startsWith("--texture-filter=") ) {
+                options.textureFilter = parseTextureFilter(
+                    arg.substring("--texture-filter=".length()));
+                continue;
+            }
+            if ( "--meridians".equals(arg) ) {
+                ensureHasValue(args, i, "--meridians");
+                options.meridians = Integer.valueOf(Math.max(3, parseInt(args[++i], "--meridians")));
+                continue;
+            }
+            if ( arg.startsWith("--meridians=") ) {
+                options.meridians = Integer.valueOf(Math.max(3, parseInt(
+                    arg.substring("--meridians=".length()), "--meridians")));
+                continue;
+            }
+            if ( "--parallels".equals(arg) ) {
+                ensureHasValue(args, i, "--parallels");
+                options.parallels = Integer.valueOf(Math.max(2, parseInt(args[++i], "--parallels")));
+                continue;
+            }
+            if ( arg.startsWith("--parallels=") ) {
+                options.parallels = Integer.valueOf(Math.max(2, parseInt(
+                    arg.substring("--parallels=".length()), "--parallels")));
+                continue;
+            }
+            if ( "--cpu-texture-offset-u".equals(arg) ) {
+                ensureHasValue(args, i, "--cpu-texture-offset-u");
+                options.cpuTextureOffsetUTexels =
+                    Double.valueOf(parseDouble(args[++i], "--cpu-texture-offset-u"));
+                continue;
+            }
+            if ( arg.startsWith("--cpu-texture-offset-u=") ) {
+                options.cpuTextureOffsetUTexels = Double.valueOf(parseDouble(
+                    arg.substring("--cpu-texture-offset-u=".length()),
+                    "--cpu-texture-offset-u"));
+                continue;
+            }
+            if ( "--cpu-texture-offset-v".equals(arg) ) {
+                ensureHasValue(args, i, "--cpu-texture-offset-v");
+                options.cpuTextureOffsetVTexels =
+                    Double.valueOf(parseDouble(args[++i], "--cpu-texture-offset-v"));
+                continue;
+            }
+            if ( arg.startsWith("--cpu-texture-offset-v=") ) {
+                options.cpuTextureOffsetVTexels = Double.valueOf(parseDouble(
+                    arg.substring("--cpu-texture-offset-v=".length()),
+                    "--cpu-texture-offset-v"));
+                continue;
+            }
+            if ( "--cpu-normal-offset-u".equals(arg) ) {
+                ensureHasValue(args, i, "--cpu-normal-offset-u");
+                options.cpuNormalOffsetUTexels =
+                    Double.valueOf(parseDouble(args[++i], "--cpu-normal-offset-u"));
+                continue;
+            }
+            if ( arg.startsWith("--cpu-normal-offset-u=") ) {
+                options.cpuNormalOffsetUTexels = Double.valueOf(parseDouble(
+                    arg.substring("--cpu-normal-offset-u=".length()),
+                    "--cpu-normal-offset-u"));
+                continue;
+            }
+            if ( "--cpu-normal-offset-v".equals(arg) ) {
+                ensureHasValue(args, i, "--cpu-normal-offset-v");
+                options.cpuNormalOffsetVTexels =
+                    Double.valueOf(parseDouble(args[++i], "--cpu-normal-offset-v"));
+                continue;
+            }
+            if ( arg.startsWith("--cpu-normal-offset-v=") ) {
+                options.cpuNormalOffsetVTexels = Double.valueOf(parseDouble(
+                    arg.substring("--cpu-normal-offset-v=".length()),
+                    "--cpu-normal-offset-v"));
                 continue;
             }
             if ( "--width".equals(arg) ) {
@@ -199,6 +308,40 @@ public class CommandLineOptions
         }
     }
 
+    private static int parseShading(String raw)
+    {
+        String normalized = raw.trim().toLowerCase();
+        if ( normalized.equals("constant") || normalized.equals("nolight") ) {
+            return RendererConfiguration.SHADING_TYPE_NOLIGHT;
+        }
+        if ( normalized.equals("flat") ) {
+            return RendererConfiguration.SHADING_TYPE_FLAT;
+        }
+        if ( normalized.equals("gouraud") ) {
+            return RendererConfiguration.SHADING_TYPE_GOURAUD;
+        }
+        if ( normalized.equals("phong") ) {
+            return RendererConfiguration.SHADING_TYPE_PHONG;
+        }
+        throw new IllegalArgumentException(
+            "Unknown --shading value: " + raw +
+            ". Use constant, flat, gouraud, or phong.");
+    }
+
+    private static TextureFilterOption parseTextureFilter(String raw)
+    {
+        String normalized = raw.trim().toLowerCase();
+        if ( normalized.equals("linear") ) {
+            return TextureFilterOption.LINEAR;
+        }
+        if ( normalized.equals("nearest") ) {
+            return TextureFilterOption.NEAREST;
+        }
+        throw new IllegalArgumentException(
+            "Unknown --texture-filter value: " + raw +
+            ". Use linear or nearest.");
+    }
+
     public boolean isOffline()
     {
         return offline;
@@ -242,5 +385,45 @@ public class CommandLineOptions
     public Boolean getWithBumpMap()
     {
         return withBumpMap;
+    }
+
+    public Integer getShadingType()
+    {
+        return shadingType;
+    }
+
+    public TextureFilterOption getTextureFilter()
+    {
+        return textureFilter;
+    }
+
+    public Integer getMeridians()
+    {
+        return meridians;
+    }
+
+    public Integer getParallels()
+    {
+        return parallels;
+    }
+
+    public Double getCpuTextureOffsetUTexels()
+    {
+        return cpuTextureOffsetUTexels;
+    }
+
+    public Double getCpuTextureOffsetVTexels()
+    {
+        return cpuTextureOffsetVTexels;
+    }
+
+    public Double getCpuNormalOffsetUTexels()
+    {
+        return cpuNormalOffsetUTexels;
+    }
+
+    public Double getCpuNormalOffsetVTexels()
+    {
+        return cpuNormalOffsetVTexels;
     }
 }

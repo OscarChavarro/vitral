@@ -212,9 +212,11 @@ public class SimpleRaytracer extends RenderingElement {
     {
         double viewportXSize = cameraSnapshot.getViewportXSize();
         double viewportYSize = cameraSnapshot.getViewportYSize();
-        double u = ((double)x - viewportXSize/2.0) / viewportXSize;
+        double pixelCenterX = (double)x + 0.5;
+        double pixelCenterY = (double)y + 0.5;
+        double u = (pixelCenterX - viewportXSize/2.0) / viewportXSize;
         double v =
-            ((viewportYSize - (double)y - 1) - viewportYSize/2.0) / viewportYSize;
+            ((viewportYSize - pixelCenterY) - viewportYSize/2.0) / viewportYSize;
 
         if ( cameraSnapshot.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
             Vector3D left = cameraSnapshot.getLeft();

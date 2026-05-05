@@ -84,25 +84,38 @@ public class NormalMap extends MediaEntity
         //-----------------------------------------------------------------
         double u = x - Math.floor(x);
         double v = y - Math.floor(y);
-        double U = u * ((double)(getXSize()-2));
-        double V = v * ((double)(getYSize()-2));
-        int i = (int)Math.floor(U);
-        int j = (int)Math.floor(V);
-        double du = U - (double)i;
-        double dv = V - (double)j;
+        int width = getXSize();
+        int height = getYSize();
+        double U = u * ((double)width);
+        double V = v * ((double)height);
+        int i0 = positiveMod((int)Math.floor(U), width);
+        int j0 = positiveMod((int)Math.floor(V), height);
+        int i1 = positiveMod(i0 + 1, width);
+        int j1 = positiveMod(j0 + 1, height);
+        double du = U - (double)i0;
+        double dv = V - (double)j0;
 
         //-----------------------------------------------------------------
         Vector3D F00, F10, F01, F11, FU0, FU1, FVAL;
 
-        F00 = getNormal(i, j);
-        F01 = getNormal(i, j+1);
-        F10 = getNormal(i+1, j);
-        F11 = getNormal(i+1, j+1);
+        F00 = getNormal(i0, j0);
+        F01 = getNormal(i0, j1);
+        F10 = getNormal(i1, j0);
+        F11 = getNormal(i1, j1);
 
         FU0 = F00.add(F10.subtract(F00).multiply(du));
         FU1 = F01.add(F11.subtract(F01).multiply(du));
         FVAL = FU0.add(FU1.subtract(FU0).multiply(dv));
         return FVAL;
+    }
+
+    private static int positiveMod(int value, int modulus)
+    {
+        int result = value % modulus;
+        if ( result < 0 ) {
+            result += modulus;
+        }
+        return result;
     }
 
     /**

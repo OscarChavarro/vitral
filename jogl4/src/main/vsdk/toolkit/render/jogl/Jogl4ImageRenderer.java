@@ -11,7 +11,13 @@ import vsdk.toolkit.media.RGBAImageCompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class Jogl4ImageRenderer extends Jogl4Renderer {
+    public enum TextureFilterMode {
+        LINEAR,
+        NEAREST
+    }
+
     private static final RendererConfiguration TEXTURE_QUALITY = new RendererConfiguration();
+    private static TextureFilterMode textureFilterMode = TextureFilterMode.LINEAR;
 
     private static int quadVaoId;
     private static int quadPositionVboId;
@@ -34,6 +40,36 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
             return Jogl4RGBImageUncompressedRenderer.activate(gl, (RGBImageUncompressed)img);
         }
         return -1;
+    }
+
+    public static void setTextureFilterMode(TextureFilterMode mode)
+    {
+        if ( mode == null ) {
+            textureFilterMode = TextureFilterMode.LINEAR;
+            return;
+        }
+        textureFilterMode = mode;
+    }
+
+    public static TextureFilterMode getTextureFilterMode()
+    {
+        return textureFilterMode;
+    }
+
+    static int minFilterParam()
+    {
+        if ( textureFilterMode == TextureFilterMode.NEAREST ) {
+            return GL4.GL_NEAREST;
+        }
+        return GL4.GL_LINEAR_MIPMAP_LINEAR;
+    }
+
+    static int magFilterParam()
+    {
+        if ( textureFilterMode == TextureFilterMode.NEAREST ) {
+            return GL4.GL_NEAREST;
+        }
+        return GL4.GL_LINEAR;
     }
 
     public static void deactivate(GL4 gl, Image img)

@@ -30,7 +30,8 @@ public final class ConstantTextureShader extends Shader {
         double b = diffuse.b;
 
         if ( info.texture != null ) {
-            ColorRgb textureColor = info.texture.getColorRgbBiLinear(info.u, 1 - info.v);
+            ColorRgb textureColor =
+                CpuTextureSamplingConfig.sample(info.texture, info.u, 1 - info.v);
             r *= textureColor.r;
             g *= textureColor.g;
             b *= textureColor.b;

@@ -45,6 +45,11 @@ public class ShadersExample extends JFrame implements
     MouseWheelListener,
     KeyListener
 {
+    private static final double FULL_ROTATION_RADIANS = 2.0 * Math.PI;
+    private static final double LIGHT_ROTATION_PERIOD_SECONDS = 8.0;
+    private static final double LIGHT_ANGULAR_SPEED_RAD_PER_SECOND =
+        FULL_ROTATION_RADIANS / LIGHT_ROTATION_PERIOD_SECONDS;
+
     private ShadersModel model;
     private ShadersKeyboardInteractionTechniques keyboardInteractionTechniques;
     private ShadersMouseInteractionTechniques mouseInteractionTechniques;
@@ -55,6 +60,7 @@ public class ShadersExample extends JFrame implements
     private GLCanvas canvas;
     private ShaderOperationMode lastRenderingMode;
     private double lightAnimationAngleRadians;
+    private long lastLightTickNanos;
 
     private boolean closing;
     private boolean glResourcesReleased;
@@ -97,6 +103,7 @@ public class ShadersExample extends JFrame implements
         softwareRaycaster = new SoftwareRaycaster();
         lastRenderingMode = model.getRenderingMode();
         lightAnimationAngleRadians = 0.0;
+        lastLightTickNanos = -1L;
         animationTimer = new Timer(Animation.FRAME_DELAY_MILLIS, e -> {
             animation.tick(model);
             animateLightIfNeeded();
@@ -384,40 +391,7 @@ public class ShadersExample extends JFrame implements
         // Force texture re-upload because the underlying RGB image buffer is
         // rewritten by the software raytracer every frame.
         Jogl4ImageRenderer.unload(gl, image);
-        int textureId = Jogl4ImageRenderer.activate(gl, image);
-        if ( textureId <= 0 ) {
-            return;
-        }
-
-        float[] positions = {
-            -1.0f, -1.0f, 0.0f,
-             1.0f, -1.0f, 0.0f,
-             1.0f,  1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-             1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f
-        };
-        float[] uvCoordinates = {
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f
-        };
-
-        gl.glDisable(GL4.GL_DEPTH_TEST);
-        gl.glDisable(GL4.GL_CULL_FACE);
-        Jogl4ImageRenderer.drawTexturedQuad(
-            gl,
-            textureId,
-            Matrix4x4.identityMatrix(),
-            positions,
-            uvCoordinates,
-            1.0f,
-            1.0f,
-            1.0f);
-        gl.glEnable(GL4.GL_DEPTH_TEST);
+        Jogl4ImageRenderer.draw(gl, image);
     }
 
     private void renderSoftwareFrame()
@@ -433,9 +407,27 @@ public class ShadersExample extends JFrame implements
     private void animateLightIfNeeded()
     {
         if ( !model.isLightAnimationEnabled() ) {
+            lastLightTickNanos = -1L;
             return;
         }
-        lightAnimationAngleRadians += Math.toRadians(2.0);
+
+        long now = System.nanoTime();
+        if ( lastLightTickNanos < 0L ) {
+            lastLightTickNanos = now;
+            return;
+        }
+
+        double elapsedSeconds = (now - lastLightTickNanos) / 1_000_000_000.0;
+        lastLightTickNanos = now;
+        if ( elapsedSeconds < 0.0 ) {
+            return;
+        }
+        if ( elapsedSeconds > 0.25 ) {
+            elapsedSeconds = 0.25;
+        }
+
+        lightAnimationAngleRadians +=
+            LIGHT_ANGULAR_SPEED_RAD_PER_SECOND * elapsedSeconds;
         Matrix4x4 rotation = new Matrix4x4().axisRotation(
             lightAnimationAngleRadians,
             0.0,
