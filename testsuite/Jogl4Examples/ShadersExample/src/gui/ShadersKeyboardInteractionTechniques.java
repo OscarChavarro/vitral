@@ -42,6 +42,11 @@ public class ShadersKeyboardInteractionTechniques
         switch ( event.keycode ) {
             case KeyEvent.KEY_h:
             case KeyEvent.KEY_H:
+                model.toggleShowHud();
+                repaint = true;
+                break;
+            case KeyEvent.KEY_l:
+            case KeyEvent.KEY_L:
                 light.setPosition(lp.withX(lp.x() - 0.1));
                 repaint = true;
                 break;

@@ -36,6 +36,7 @@ public class ShadersModel
     private RGBImageUncompressed bumpMapHeightRgb;
     private RGBImageUncompressed softwareFrameImage;
     private ShaderOperationMode renderingMode;
+    private boolean showHud;
     private boolean animationEnabled;
     private boolean lightAnimationEnabled;
     private double sphereRotationAngleRadians;
@@ -94,9 +95,10 @@ public class ShadersModel
         animationEnabled = false;
         lightAnimationEnabled = false;
         renderingMode = ShaderOperationMode.OPENGL_4_1;
+        showHud = true;
         sphereRotationAngleRadians = 0.0;
-        sphereMeridians = 64;
-        sphereParallels = 32;
+        sphereMeridians = 100;
+        sphereParallels = 50;
         updateSoftwareViewportAndCamera(
             (int)camera.getViewportXSize(),
             (int)camera.getViewportYSize());
@@ -165,6 +167,21 @@ public class ShadersModel
     public void rotateRenderingMode()
     {
         renderingMode = renderingMode.next();
+    }
+
+    public boolean isShowHud()
+    {
+        return showHud;
+    }
+
+    public void setShowHud(boolean showHud)
+    {
+        this.showHud = showHud;
+    }
+
+    public void toggleShowHud()
+    {
+        showHud = !showHud;
     }
 
     public void updateSoftwareViewportAndCamera(int viewportWidth, int viewportHeight)

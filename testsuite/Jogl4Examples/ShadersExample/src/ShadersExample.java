@@ -28,6 +28,7 @@ import gui.ShadersMouseInteractionTechniques;
 import model.ShaderOperationMode;
 import model.ShadersModel;
 import options.CommandLineOptions;
+import render.JogHudRenderer;
 import render.SoftwareRaycaster;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -56,6 +57,7 @@ public class ShadersExample extends JFrame implements
     private Animation animation;
     private Timer animationTimer;
     private SoftwareRaycaster softwareRaycaster;
+    private JogHudRenderer hudRenderer;
 
     private GLCanvas canvas;
     private ShaderOperationMode lastRenderingMode;
@@ -101,6 +103,7 @@ public class ShadersExample extends JFrame implements
         mouseInteractionTechniques = new ShadersMouseInteractionTechniques();
         animation = new Animation();
         softwareRaycaster = new SoftwareRaycaster();
+        hudRenderer = new JogHudRenderer();
         lastRenderingMode = model.getRenderingMode();
         lightAnimationAngleRadians = 0.0;
         lastLightTickNanos = -1L;
@@ -188,6 +191,7 @@ public class ShadersExample extends JFrame implements
                     modelRotation);
             }
             drawSoftwareHud(gl, model.getSoftwareFrameImage());
+            hudRenderer.draw(gl, model);
             lastRenderingMode = ShaderOperationMode.SOFTWARE;
             return;
         }
@@ -205,6 +209,7 @@ public class ShadersExample extends JFrame implements
             modelRotation,
             model.getSphereMeridians(),
             model.getSphereParallels());
+        hudRenderer.draw(gl, model);
     }
 
     @Override
@@ -221,6 +226,9 @@ public class ShadersExample extends JFrame implements
             Jogl4ImageRenderer.unload(gl, model.getSoftwareFrameImage());
             Jogl4ImageRenderer.dispose(gl);
             Jogl4CameraRenderer.dispose(gl);
+            if ( hudRenderer != null ) {
+                hudRenderer.dispose();
+            }
             glResourcesReleased = true;
         }
     }
