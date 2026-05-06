@@ -358,9 +358,9 @@ public class MicroFacetedMaterial extends Material
         String keyB,
         ColorRgb defaultValue)
     {
-        double r = doubleField(row, headerIndex, keyR, defaultValue.r);
-        double g = doubleField(row, headerIndex, keyG, defaultValue.g);
-        double b = doubleField(row, headerIndex, keyB, defaultValue.b);
+        double r = doubleField(row, headerIndex, keyR, defaultValue.r());
+        double g = doubleField(row, headerIndex, keyG, defaultValue.g());
+        double b = doubleField(row, headerIndex, keyB, defaultValue.b());
         return new ColorRgb(r, g, b);
     }
 }

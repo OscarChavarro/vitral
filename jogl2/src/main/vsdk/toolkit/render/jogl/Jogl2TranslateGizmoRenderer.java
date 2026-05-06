@@ -52,7 +52,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         gl.glPushMatrix();
         gl.glRotated(180, 1, 0, 0);
         double p = 0.5;
-        gl.glColor3d(color.r*p, color.g*p, color.b*p);
+        gl.glColor3d(color.r()*p, color.g()*p, color.b()*p);
         glu.gluDisk(gluQuadric, 0, r1, slices, 1);
         gl.glPopMatrix();
     }
@@ -93,7 +93,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
                 Jogl2MatrixRenderer.activate(gl, r.getRotation());
                 gl.glDisable(GL2.GL_LIGHTING);
                 c = r.getMaterial().getDiffuse();
-                gl.glColor3d(c.r, c.g, c.b);
+                gl.glColor3d(c.r(), c.g(), c.b());
                 q.setWireColor(c);
                 if ( g instanceof Cone ) {
                     drawConeWithShadow(gl, (Cone)g, c);

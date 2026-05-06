@@ -63,7 +63,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         gl.glPushMatrix();
         
         r.begin3DRendering();
-        r.setColor((float)c.r, (float)c.g, (float)c.b, 1.0f); // Recuerda RGB son los tres primeros
+        r.setColor((float)c.r(), (float)c.g(), (float)c.b(), 1.0f); // Recuerda RGB son los tres primeros
         r.draw3D(key, 0.0f, 0.0f, 0.0f, 0.05f); // La cadena y la posicion
         r.endRendering();
         
@@ -239,7 +239,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         r1 = widget.getInnerRadius();
         r2 = widget.getOuterRadius() + widget.getBorderWidth();
         ColorRgb c = widget.getSectorLineColor();
-        gl.glColor3d(c.r, c.g, c.b);
+        gl.glColor3d(c.r(), c.g(), c.b());
         gl.glBegin(GL2.GL_LINES);
         for ( i = 0, angle = 0.0;
                 i < dataset.size();
@@ -329,7 +329,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         double angle;
         double x;
         double y;
-        gl.glColor3d(lineColor.r, lineColor.g, lineColor.b);
+        gl.glColor3d(lineColor.r(), lineColor.g(), lineColor.b());
         gl.glBegin(GL2.GL_LINE_LOOP);
         for ( angle = 0.0; angle < 360.0 - VSDK.EPSILON; angle += delta ) {
             x = r*Math.cos(Math.toRadians(angle));
@@ -349,7 +349,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         double x;
         double y;
         
-        gl.glColor3d(sectorBackgroundColor.r, sectorBackgroundColor.g, sectorBackgroundColor.b);
+        gl.glColor3d(sectorBackgroundColor.r(), sectorBackgroundColor.g(), sectorBackgroundColor.b());
         gl.glBegin(GL2.GL_QUAD_STRIP);
         for ( angle = 0.0; angle < 360.0 + VSDK.EPSILON; angle += delta ) {
             x = innerRadius*Math.cos(Math.toRadians(angle));
@@ -380,7 +380,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         
         dataRadius = innerRadius + currentValue*(outerRadius-innerRadius);
         
-        gl.glColor3d(backgroundColor.r, backgroundColor.g, backgroundColor.b);
+        gl.glColor3d(backgroundColor.r(), backgroundColor.g(), backgroundColor.b());
         gl.glBegin(GL2.GL_QUAD_STRIP);
         for ( angle = startAngle; angle < endAngle + VSDK.EPSILON; angle += delta ) {
             x = innerRadius*Math.cos(Math.toRadians(angle));

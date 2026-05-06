@@ -76,7 +76,7 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_TEXTURE_2D);
         // Warning: Change with configured color for bounding volume
-        gl.glColor3d(c.r, c.g, c.b);
+        gl.glColor3d(c.r(), c.g(), c.b());
         gl.glLineWidth(1.0f);
         gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(minmax[0], minmax[1], minmax[5]); // 6

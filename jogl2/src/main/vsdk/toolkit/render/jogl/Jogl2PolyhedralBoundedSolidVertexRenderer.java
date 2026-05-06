@@ -39,15 +39,15 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
             Vector3D p = v.position;
 
             c = v.debugColor;
-            if ( c.r >= 1 - VSDK.EPSILON &&
-                 c.g <= VSDK.EPSILON &&
-                 c.b <= VSDK.EPSILON ) {
+            if ( c.r() >= 1 - VSDK.EPSILON &&
+                 c.g() <= VSDK.EPSILON &&
+                 c.b() <= VSDK.EPSILON ) {
                 gl.glPointSize(5.0f);
             }
             else {
                 gl.glPointSize(15.0f);
             }
-            gl.glColor3d(c.r, c.g, c.b);
+            gl.glColor3d(c.r(), c.g(), c.b());
 
             gl.glBegin(GL.GL_POINTS);
                 gl.glVertex3d(p.x(), p.y(), p.z());

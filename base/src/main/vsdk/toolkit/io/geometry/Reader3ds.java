@@ -1336,12 +1336,10 @@ public class Reader3ds extends PersistenceElement
             readBytes(is, g);
             readBytes(is, b);
             if ( currentColor != null ) {
-                currentColor.r = 
-                    (double)(VSDK.signedByte2unsignedInteger(r[0])) / 255.0;
-                currentColor.g = 
-                    (double)(VSDK.signedByte2unsignedInteger(g[0])) / 255.0;
-                currentColor.b = 
-                    (double)(VSDK.signedByte2unsignedInteger(b[0])) / 255.0;
+                currentColor = new ColorRgb(
+                    (double)(VSDK.signedByte2unsignedInteger(r[0])) / 255.0,
+                    (double)(VSDK.signedByte2unsignedInteger(g[0])) / 255.0,
+                    (double)(VSDK.signedByte2unsignedInteger(b[0])) / 255.0);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_AMOUNT ) {

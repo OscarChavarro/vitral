@@ -36,7 +36,7 @@ public class Jogl2SimpleBackgroundRenderer extends Jogl2Renderer
         gl.glDisable(GL2.GL_LIGHTING);
         gl.glDisable(GL.GL_DEPTH_TEST);
         gl.glDisable(GL.GL_TEXTURE_2D);
-        gl.glColor3d(color.r, color.g, color.b);
+        gl.glColor3d(color.r(), color.g(), color.b());
         gl.glFrontFace(GL.GL_CCW);
         gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 

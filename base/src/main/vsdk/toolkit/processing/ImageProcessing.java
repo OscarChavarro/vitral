@@ -73,9 +73,9 @@ public abstract class ImageProcessing extends ProcessingElement {
                     u = ((double)x)/((double)(xSizeOut));
                     v = ((double)y)/((double)(ySizeOut));
                     source = input.getColorRgbBiLinear(u, v);
-                    target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r*255));
-                    target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g*255));
-                    target.b = VSDK.unsigned8BitInteger2signedByte((int)(source.b*255));
+                    target.r = VSDK.unsigned8BitInteger2signedByte((int)(source.r()*255));
+                    target.g = VSDK.unsigned8BitInteger2signedByte((int)(source.g()*255));
+                    target.b = VSDK.unsigned8BitInteger2signedByte((int)(source.b()*255));
                     output.putPixelRgb(x, y, target);
                 }
             }

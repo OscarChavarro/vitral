@@ -10,7 +10,6 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.LightType;
 
 public class Jogl2LightRenderer extends Jogl2Renderer {
 
@@ -54,9 +53,9 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
         gl.glEnable(GL2.GL_LIGHT0 + lightNumber);
 
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_POSITION, lightPosition, 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, l.getAmbient().exportToFloatArrayVect(), 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, l.getDiffuse().exportToFloatArrayVect(), 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, l.getSpecular().exportToFloatArrayVect(), 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, l.getAmbient().exportToFloatArrayVector(), 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, l.getDiffuse().exportToFloatArrayVector(), 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, l.getSpecular().exportToFloatArrayVector(), 0);
         
 /*
         gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_CONSTANT_ATTENUATION, constantAtenuation);
@@ -79,7 +78,7 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glLineWidth(2.0f);
         gl.glBegin(GL.GL_LINES);
-            gl.glColor3d(c.r, c.g, c.b);
+            gl.glColor3d(c.r(), c.g(), c.b());
             gl.glVertex3d(0 - delta, 0, 0);
             gl.glVertex3d(0 + delta, 0, 0);
             gl.glVertex3d(0, 0 - delta, 0);

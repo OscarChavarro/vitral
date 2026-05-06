@@ -11,7 +11,11 @@ import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 public abstract class Shader {
-    public abstract Vector3D shadeLocal(
+    public record LocalShadingResult(Vector3D normal, ColorRgb color)
+    {
+    }
+
+    public abstract LocalShadingResult shadeLocal(
         RayHit info,
         double viewX,
         double viewY,
@@ -19,6 +23,5 @@ public abstract class Shader {
         List<Light> lights,
         List<SimpleBody> objects,
         Material material,
-        TraceWorkspace workspace,
-        ColorRgb outColor);
+        TraceWorkspace workspace);
 }

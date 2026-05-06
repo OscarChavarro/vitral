@@ -91,9 +91,9 @@ public class RGBPixel extends MediaEntity {
 
     public void importFromColorRgb(ColorRgb c)
     {
-        double ir = c.r;
-        double ig = c.g;
-        double ib = c.b;
+        double ir = c.r();
+        double ig = c.g();
+        double ib = c.b();
 
         if ( ir < 0 ) ir = 0;
         if ( ig < 0 ) ig = 0;

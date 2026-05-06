@@ -303,7 +303,7 @@ public class SimpleRaytracer extends RenderingElement {
     \todo  Check the inconsistent use of tangent vector in bump mapping
     calculation... it is non sense to always be <0, 1, 0>.
     */
-    private void evaluateIlluminationModel(
+    private ColorRgb evaluateIlluminationModel(
         RayHit info,
         double viewX,
         double viewY,
@@ -316,10 +316,9 @@ public class SimpleRaytracer extends RenderingElement {
         RenderContext renderContext,
         int recursions,
         int recursionLevel,
-        TraceWorkspace workspace,
-        ColorRgb outColor)
+        TraceWorkspace workspace)
     {
-        Vector3D surfaceNormal = renderContext.localShader.shadeLocal(
+        Shader.LocalShadingResult localShading = renderContext.localShader.shadeLocal(
             info,
             viewX,
             viewY,
@@ -327,8 +326,12 @@ public class SimpleRaytracer extends RenderingElement {
             lights,
             objects,
             material,
-            workspace,
-            outColor);
+            workspace);
+        Vector3D surfaceNormal = localShading.normal();
+        ColorRgb localColor = localShading.color();
+        double outR = localColor.r();
+        double outG = localColor.g();
+        double outB = localColor.b();
         double surfaceNormalX = surfaceNormal.x();
         double surfaceNormalY = surfaceNormal.y();
         double surfaceNormalZ = surfaceNormal.z();
@@ -368,10 +371,6 @@ public class SimpleRaytracer extends RenderingElement {
                     SceneObjectRenderData objectData =
                         sceneRenderCache.objectData(nearestObjectIndex);
                     RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
-                    ColorRgb rcolor = workspace.reflectionColors[recursionLevel];
-                    rcolor.r = 0;
-                    rcolor.g = 0;
-                    rcolor.b = 0;
                     Ray reflectedHitRay =
                         reflected_ray.withT(reflectedHit.hitDistance());
 
@@ -380,7 +379,7 @@ public class SimpleRaytracer extends RenderingElement {
                         objectData,
                         reflectedHitRay,
                         subInfo);
-                    evaluateIlluminationModel(
+                    ColorRgb rcolor = evaluateIlluminationModel(
                         subInfo,
                         -reflected_ray.direction().x(),
                         -reflected_ray.direction().y(),
@@ -393,19 +392,18 @@ public class SimpleRaytracer extends RenderingElement {
                         renderContext,
                         recursions - 1,
                         recursionLevel + 1,
-                        workspace,
-                        rcolor);
+                        workspace);
 
-                    outColor.r += kr*rcolor.r;
-                    outColor.g += kr*rcolor.g;
-                    outColor.b += kr*rcolor.b;
+                    outR += rcolor.r() * kr;
+                    outG += rcolor.g() * kr;
+                    outB += rcolor.b() * kr;
                   }
                   else {
                     ColorRgb reflectedBackground =
                         background.colorInDireccion(reflect);
-                    outColor.r += kr*reflectedBackground.r;
-                    outColor.g += kr*reflectedBackground.g;
-                    outColor.b += kr*reflectedBackground.b;
+                    outR += reflectedBackground.r() * kr;
+                    outG += reflectedBackground.g() * kr;
+                    outB += reflectedBackground.b() * kr;
                 }
             }
         }
@@ -414,11 +412,10 @@ public class SimpleRaytracer extends RenderingElement {
         // <TODO>
 
         // Clamp outColor to MAX 1.0 intensity.
-        outColor.r = (outColor.r > 1) ? 1 : outColor.r;
-        outColor.g = (outColor.g > 1) ? 1 : outColor.g;
-        outColor.b = (outColor.b > 1) ? 1 : outColor.b;
-
-        //delete backgroundColor;
+        return new ColorRgb(
+            (outR > 1) ? 1 : outR,
+            (outG > 1) ? 1 : outG,
+            (outB > 1) ? 1 : outB);
     }
 
     /**
@@ -472,14 +469,13 @@ public class SimpleRaytracer extends RenderingElement {
     Note that this method can return null, that means a transparent pixel
     should be used.
     */
-    private void followRayPath(Ray inRay,
+    private ColorRgb followRayPath(Ray inRay,
                                List<SimpleBody> inSimpleBodiesArray,
                                List<Light> inLightsArray,
                                Background in_background,
                                RenderContext renderContext,
                                SceneRenderCache sceneRenderCache,
-                               TraceWorkspace workspace,
-                               ColorRgb outColor)
+                               TraceWorkspace workspace)
     {
         RayHit hitInfo = workspace.nearestHit;
 
@@ -503,7 +499,7 @@ public class SimpleRaytracer extends RenderingElement {
                 primaryHitRay,
                 shadingInfo);
 
-            evaluateIlluminationModel(
+            return evaluateIlluminationModel(
                 shadingInfo,
                 -inRay.direction().x(),
                 -inRay.direction().y(),
@@ -516,15 +512,10 @@ public class SimpleRaytracer extends RenderingElement {
                 renderContext,
                 MAX_RECURSION_LEVEL,
                 0,
-                workspace,
-                outColor);
+                workspace);
           }
           else {
-            ColorRgb c;
-            c = in_background.colorInDireccion(inRay.direction());
-            outColor.r = c.r;
-            outColor.g = c.g;
-            outColor.b = c.b;
+            return in_background.colorInDireccion(inRay.direction());
         }
     }
 
@@ -628,7 +619,7 @@ public class SimpleRaytracer extends RenderingElement {
     {
         int x, y;
         Ray rayo;
-        ColorRgb color = new ColorRgb();
+        ColorRgb color;
         RGBPixel outputPixel = new RGBPixel();
         RenderContext renderContext =
             buildRenderContext(inQualitySelection, inLightsArray);
@@ -667,19 +658,16 @@ public class SimpleRaytracer extends RenderingElement {
                     //- Trazado individual de un rayo --------------------------
                     RaytraceStatistics.recordPrimaryRay();
                     rayo = generateRay(cameraSnapshot, x, y);
-                    color.r = 0;
-                    color.g = 0;
-                    color.b = 0;
-                    followRayPath(rayo, inSimpleBodiesArray,
-                                  inLightsArray, inBackground, 
-                                  renderContext, sceneRenderCache, workspace, color);
+                    color = followRayPath(rayo, inSimpleBodiesArray,
+                                          inLightsArray, inBackground,
+                                          renderContext, sceneRenderCache, workspace);
                     if ( outDepthmap != null ) {
                         outDepthmap.setZ(x, y, (float)rayo.t());
                     }
                     //- Exporto el result de color del pixel ----------------
-                    outputPixel.r = (byte)(255 * color.r);
-                    outputPixel.g = (byte)(255 * color.g);
-                    outputPixel.b = (byte)(255 * color.b);
+                    outputPixel.r = (byte)(255 * color.r());
+                    outputPixel.g = (byte)(255 * color.g());
+                    outputPixel.b = (byte)(255 * color.b());
                     tileImage.putPixelRgb(x, y, outputPixel);
                 }
             }

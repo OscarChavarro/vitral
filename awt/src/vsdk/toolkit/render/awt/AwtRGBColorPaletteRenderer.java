@@ -31,7 +31,7 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
         for ( y = 0; y < dy; y++ ) {
             c = palette.evalNearest(delta*((double)y));
             try {
-                cawt = new Color(convert(c.r), convert(c.g), convert(c.b));
+                cawt = new Color(convert(c.r()), convert(c.g()), convert(c.b()));
             }
             catch( Exception e ){
                 System.out.println("Warning: initializing color " + c);
@@ -59,7 +59,7 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
         for ( y = 0; y < dy; y++ ) {
             c = palette.evalLinear(delta*((double)y));
             try {
-                cawt = new Color(convert(c.r), convert(c.g), convert(c.b));
+                cawt = new Color(convert(c.r()), convert(c.g()), convert(c.b()));
             }
             catch( Exception e ){
                 System.out.println("Warning: initializing color " + c);
@@ -87,7 +87,7 @@ public class AwtRGBColorPaletteRenderer extends AwtRenderer
         for ( x = 0; x < dx; x++ ) {
             c = palette.evalLinear(delta*((double)x));
             try {
-                cawt = new Color(convert(c.r), convert(c.g), convert(c.b));
+                cawt = new Color(convert(c.r()), convert(c.g()), convert(c.b()));
             }
             catch( Exception e ){
                 System.out.println("Warning: initializing color " + c);

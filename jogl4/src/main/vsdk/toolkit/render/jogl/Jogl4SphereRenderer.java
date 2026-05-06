@@ -337,9 +337,9 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             programId,
             modelViewProjection,
             quality,
-            (float)kd.r,
-            (float)kd.g,
-            (float)kd.b);
+            (float)kd.r(),
+            (float)kd.g(),
+            (float)kd.b());
 
         setMatrix(gl, programId, "modelViewLocal", modelViewLocal);
         setMatrix(gl, programId, "modelViewITLocal", modelViewITLocal);
@@ -396,7 +396,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     {
         int loc = gl.glGetUniformLocation(programId, name);
         if ( loc >= 0 ) {
-            gl.glUniform3f(loc, (float)value.r, (float)value.g, (float)value.b);
+            gl.glUniform3f(loc, (float)value.r(), (float)value.g(), (float)value.b());
         }
     }
 

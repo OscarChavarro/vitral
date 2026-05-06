@@ -767,28 +767,28 @@ public class ReaderObj extends PersistenceElement
                 if ( lineOfText.startsWith("Kd") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken(); // Kd
-                    ColorRgb color=new ColorRgb();
-                    color.r=Float.parseFloat(stMat.nextToken());
-                    color.g=Float.parseFloat(stMat.nextToken());
-                    color.b=Float.parseFloat(stMat.nextToken());
+                    ColorRgb color = new ColorRgb(
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()));
                     activeMaterial.setDiffuse(color);
                 }
                 if ( lineOfText.startsWith("Ka") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken(); // Ka
-                    ColorRgb color=new ColorRgb();
-                    color.r=Float.parseFloat(stMat.nextToken());
-                    color.g=Float.parseFloat(stMat.nextToken());
-                    color.b=Float.parseFloat(stMat.nextToken());
+                    ColorRgb color = new ColorRgb(
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()));
                     activeMaterial.setAmbient(color);
                 }
                 if ( lineOfText.startsWith("Ks") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken(); // Ks
-                    ColorRgb color=new ColorRgb();
-                    color.r=Float.parseFloat(stMat.nextToken());
-                    color.g=Float.parseFloat(stMat.nextToken());
-                    color.b=Float.parseFloat(stMat.nextToken());
+                    ColorRgb color = new ColorRgb(
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()));
                     activeMaterial.setSpecular(color);
                 }
                 if ( lineOfText.startsWith("d") ) {

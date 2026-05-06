@@ -106,7 +106,7 @@ public class WeilerAthertonPolygonClipper {
                 iterator = dllnNodeS;
                 do {
                     iterator.data.flags = (byte) (iterator.data.flags | 0x01); //Now this node may not be used in an interior polygon.
-                    innerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r, iterator.data.color.g, iterator.data.color.b);
+                    innerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r(), iterator.data.color.g(), iterator.data.color.b());
                     iterator = iterator.next;
                     iterator.data.flags = (byte) (iterator.data.flags | 0x01); //Now this node may not be used in an interior polygon.
                     if ( iterator.data.pairNode != null ) {
@@ -130,7 +130,7 @@ public class WeilerAthertonPolygonClipper {
                 isSubject = true;
                 do {
                     iterator.data.flags = (byte) (iterator.data.flags | 0x02); //Now this node may not be used in an outer polygon.
-                    outerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r, iterator.data.color.g, iterator.data.color.b);
+                    outerPolyOut.addVertex(iterator.data.x, iterator.data.y, iterator.data.color.r(), iterator.data.color.g(), iterator.data.color.b());
                     if ( isSubject ) {
                         iterator = iterator.next;
                     } else {
@@ -191,12 +191,12 @@ public class WeilerAthertonPolygonClipper {
                     }
                     dllnNode = head;
                     do {
-                        innerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
+                        innerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r(), dllnNode.data.color.g(), dllnNode.data.color.b());
                         dllnNode = dllnNode.next;
                     } while ( dllnNode != head );
                     dllnNode = head;
                     do {
-                        outerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
+                        outerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r(), dllnNode.data.color.g(), dllnNode.data.color.b());
                         dllnNode = dllnNode.previous;
                     } while ( dllnNode != head );
                 }
@@ -251,9 +251,9 @@ public class WeilerAthertonPolygonClipper {
                 dllnNode = head;
                 do {
                     if ( insideAContourNotAHole ) {
-                        innerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
+                        innerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r(), dllnNode.data.color.g(), dllnNode.data.color.b());
                     } else {
-                        outerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r, dllnNode.data.color.g, dllnNode.data.color.b);
+                        outerPolyOut.addVertex(dllnNode.data.x, dllnNode.data.y, dllnNode.data.color.r(), dllnNode.data.color.g(), dllnNode.data.color.b());
                     }
                     dllnNode = dllnNode.next;
                 } while ( dllnNode != head );

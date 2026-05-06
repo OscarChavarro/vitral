@@ -36,7 +36,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
         gl.glDisable(GL2.GL_LIGHTING);
 
-        gl.glColor3d(color.r, color.g, color.b);
+        gl.glColor3d(color.r(), color.g(), color.b());
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
                 i++;
@@ -141,7 +141,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
     }
 
     static public void drawOneControlPoints(GL2 gl, Vector3D vec, ColorRgb color) {
-        gl.glColor3d(color.r, color.g, color.b);
+        gl.glColor3d(color.r(), color.g(), color.b());
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
         gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
@@ -151,7 +151,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
     }
 
     static public void drawFirstControlPoint(GL2 gl, Vector3D vec, ColorRgb color) {
-        gl.glColor3d(color.r, color.g, color.b);
+        gl.glColor3d(color.r(), color.g(), color.b());
         gl.glBegin(GL.GL_LINE_STRIP);
         gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
@@ -167,7 +167,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
                                             ColorRgb colorTangPoint) {
 
         //p1
-        gl.glColor3d(colorCenterPoint.r, colorCenterPoint.g, colorCenterPoint.b);
+        gl.glColor3d(colorCenterPoint.r(), colorCenterPoint.g(), colorCenterPoint.b());
         Vector3D vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
@@ -177,7 +177,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glEnd();
 
         //p2
-        gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
+        gl.glColor3d(colorTangPoint.r(), colorTangPoint.g(), colorTangPoint.b());
         Vector3D vec2 = ptsB[tangPoint];
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
@@ -186,7 +186,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
         gl.glEnd();
 
-        gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
+        gl.glColor3d(colorLine.r(), colorLine.g(), colorLine.b());
         gl.glBegin(GL.GL_LINE_STRIP);
         gl.glVertex3d(vec.x(), vec.y(), vec.z());
         gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());
@@ -198,7 +198,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
                                               ColorRgb colorCenterPoint,
                                               ColorRgb colorTangPoint) {
 
-        gl.glColor3d(colorCenterPoint.r, colorCenterPoint.g, colorCenterPoint.b);
+        gl.glColor3d(colorCenterPoint.r(), colorCenterPoint.g(), colorCenterPoint.b());
         // p1
         Vector3D vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
@@ -209,7 +209,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glEnd();
 
         // p2
-        gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
+        gl.glColor3d(colorTangPoint.r(), colorTangPoint.g(), colorTangPoint.b());
         Vector3D vec2 = ptsB[1];
         gl.glBegin(GL.GL_LINES);
 
@@ -219,13 +219,13 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glVertex3d(vec2.x() - 0.02, vec2.y() - 0.02, vec2.z());
         gl.glEnd();
 
-        gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
+        gl.glColor3d(colorLine.r(), colorLine.g(), colorLine.b());
         gl.glBegin(GL.GL_LINE_STRIP);
         gl.glVertex3d(vec.x(), vec.y(), vec.z());
         gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());
         gl.glEnd();
 
-        gl.glColor3d(colorTangPoint.r, colorTangPoint.g, colorTangPoint.b);
+        gl.glColor3d(colorTangPoint.r(), colorTangPoint.g(), colorTangPoint.b());
         vec2 = ptsB[2];
         gl.glBegin(GL.GL_LINES);
 
@@ -235,7 +235,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glVertex3d(vec2.x() - 0.02, vec2.y() - 0.02, vec2.z());
         gl.glEnd();
 
-        gl.glColor3d(colorLine.r, colorLine.g, colorLine.b);
+        gl.glColor3d(colorLine.r(), colorLine.g(), colorLine.b());
         gl.glBegin(GL.GL_LINE_STRIP);
         gl.glVertex3d(vec.x(), vec.y(), vec.z());
         gl.glVertex3d(vec2.x(), vec2.y(), vec2.z());

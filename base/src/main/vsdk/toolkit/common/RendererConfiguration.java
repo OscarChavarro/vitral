@@ -124,8 +124,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.points = other.points;
         this.normals = other.normals;
         this.trianglesNormals = other.trianglesNormals;
-        this.wireColor.clone(other.wireColor);
-        this.boundingVolumeColor.clone(other.boundingVolumeColor);
+        this.wireColor = new ColorRgb(other.wireColor);
+        this.boundingVolumeColor = new ColorRgb(other.boundingVolumeColor);
         this.useVertexColors = other.useVertexColors;
     }
 
@@ -167,14 +167,12 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
 
     public void setWireColor(ColorRgb c)
     {
-        wireColor.clone(c);
+        wireColor = new ColorRgb(c);
     }
 
     public void setWireColor(double r, double g, double b)
     {
-        wireColor.r = r;
-        wireColor.g = g;
-        wireColor.b = b;
+        wireColor = new ColorRgb(r, g, b);
     }
 
     public ColorRgb getWireColor()
@@ -420,8 +418,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.normals = normals;
         copy.trianglesNormals = trianglesNormals;
         copy.lodHint = lodHint;
-        copy.wireColor.clone(wireColor);
-        copy.boundingVolumeColor.clone(boundingVolumeColor);
+        copy.wireColor = new ColorRgb(wireColor);
+        copy.boundingVolumeColor = new ColorRgb(boundingVolumeColor);
         copy.useVertexColors = useVertexColors;
         return copy;
     }

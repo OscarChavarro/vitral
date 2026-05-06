@@ -44,6 +44,8 @@ public class RGBColorPalettePersistence extends PersistenceElement {
         int tokenType;
         int startline = 0;
         ColorRgb col = null;
+        double r = 0.0;
+        double g = 0.0;
 
         do {
             try {
@@ -60,14 +62,13 @@ public class RGBColorPalettePersistence extends PersistenceElement {
               case StreamTokenizer.TT_NUMBER:
                 switch ( startline ) {
                   case 0:
-                    col = new ColorRgb();
-                    col.r = (parser.nval)/255.0;
+                    r = (parser.nval)/255.0;
                     break;
                   case 1:
-                    col.g = (parser.nval)/255.0;
+                    g = (parser.nval)/255.0;
                     break;
                   case 2:
-                    col.b = (parser.nval)/255.0;
+                    col = new ColorRgb(r, g, (parser.nval)/255.0);
                     p.addColor(col);
                     break;
                 }

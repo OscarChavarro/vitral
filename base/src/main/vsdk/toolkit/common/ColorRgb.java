@@ -1,31 +1,26 @@
 package vsdk.toolkit.common;
 import java.io.Serial;
+import java.util.Objects;
 
 /**
 Respect to data representation:
 
 The `r`, `g`, and `b` class attributes represent red, green and blue 
 components in a color specification, with values in the range [0, inf) when
-used in High Dinamic Range Imaginery (HDRI). Note that no restriction as been
-specified regarding to units to be used, and as of this revision the units
+used in High Dynamic Range Imaginary (HDRI). Note that no restriction as been
+specified regarding units to be used, and as of this revision the units
 must be application defined. When not used in HDRI, the values must be
 application-clamped to the range [0, 1]. A value of 0 always will represent
 'no contribution' or 'black', and a value of 1 will be 'white' in non HDRI
 applications. Interpretation in HDRI applications is pending to be defined.
-
-Note that the `r`, `g`, and `b` class attributes are PUBLIC, converting this
-class in an not evolvable structure, and IT MUST BE KEEP AS IS, due to
-performance issues in a lot of algorithms, as this avoids indirections.
-Nevertheless, get and set methods are provided.
 */
-public class ColorRgb extends FundamentalEntity
+public final class ColorRgb extends FundamentalEntity
 {
-    @Serial private static final long serialVersionUID = 20060502L;
+    @Serial private static final long serialVersionUID = 20260506L;
 
-    /// Contains the red component of a color 
-    public double r;
-    public double g;
-    public double b;
+    private final double r;
+    private final double g;
+    private final double b;
 
     /**
     Note that default assumed color in the toolkit is black. It is
@@ -34,27 +29,25 @@ public class ColorRgb extends FundamentalEntity
     */
     public ColorRgb()
     {
-        r = 0;
-        g = 0;
-        b = 0;
+        this(0, 0, 0);
     }
 
     /**
     This constructor builds a ColorRgb from another one.
-    @param c
+    @param c source color to copy
     */
     public ColorRgb(ColorRgb c)
     {
-        r = c.r;
-        g = c.g;
-        b = c.b;
+        this(Objects.requireNonNull(c, "ColorRgb to copy cannot be null").r,
+             c.g,
+             c.b);
     }
 
     /**
     This constructor builds a ColorRgb from individual component values.
-    @param r
-    @param g
-    @param b
+    @param r red component
+    @param g green component
+    @param b blue component
     */
     public ColorRgb(double r, double g, double b)
     {
@@ -63,28 +56,12 @@ public class ColorRgb extends FundamentalEntity
         this.b = b;
     }
 
-    /**
-    Given other color, this color gets combined with the another one.
-    @param other
-    */
-    public void modulate(ColorRgb other)
-    {
-        /*
-        this.r = (this.r + other.r) / 2.0;
-        this.g = (this.g + other.g) / 2.0;
-        this.b = (this.b + other.b) / 2.0;
-        */
-        this.r = (this.r * other.r);
-        this.g = (this.g * other.g);
-        this.b = (this.b * other.b);
-    }
-
     /** This method returns a copy of the value r. Note that this method does
-    NOT constitutes an encapsulation of the value, as the original attribute
+    NOT constitute an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods.
+    to the attribute and this intermediate use of get/set methods.
     @return red color component
     */
     public double getR()
@@ -93,11 +70,11 @@ public class ColorRgb extends FundamentalEntity
     }
 
     /** This method returns a copy of the value g. Note that this method does
-    NOT constitutes an encapsulation of the value, as the original attribute
+    NOT constitute an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods. 
+    to the attribute and this intermediate use of get/set methods.
     @return green color component
     */
     public double getG()
@@ -106,11 +83,11 @@ public class ColorRgb extends FundamentalEntity
     }
 
     /** This method returns a copy of the value b. Note that this method does
-    NOT constitutes an encapsulation of the value, as the original attribute
+    NOT constitute an encapsulation of the value, as the original attribute
     is public. This method is supplied for puritans that like to see a lot
     of long get/set code, and for testing the performance of different
     algorithms, as the access technique is changed between the direct access
-    to the attribute and this intermediated use of get/set methods. 
+    to the attribute and this intermediate use of get/set methods.
     @return blue color component
     */
     public double getB()
@@ -118,73 +95,23 @@ public class ColorRgb extends FundamentalEntity
         return b;
     }
 
-    /** This method sets the value r, as a copy of the parameter. Note that 
-    this method does NOT constitutes an encapsulation of the value, as the 
-    original attribute is public. This method is supplied for puritans that
-    like to see a lot of long get/set code, and for testing the performance of
-    different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods.
-    @param r 
-    */
-    public void setR(double r)
-    {
-        this.r = r;
-    }
-
-    /** This method sets the value g, as a copy of the parameter. Note that 
-    this method does NOT constitutes an encapsulation of the value, as the 
-    original attribute is public. This method is supplied for puritans that
-    like to see a lot of long get/set code, and for testing the performance of
-    different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods. 
-    @param g
-    */
-    public void setG(double g)
-    {
-        this.g = g;
-    }
-
-    /** This method sets the value b, as a copy of the parameter. Note that 
-    this method does NOT constitutes an encapsulation of the value, as the 
-    original attribute is public. This method is supplied for puritans that
-    like to see a lot of long get/set code, and for testing the performance of
-    different algorithms, as the access technique is changed between the direct
-    access to the attribute and this intermediated use of get/set methods. 
-    @param b
-    */
-    public void setB(double b)
-    {
-        this.b = b;
-    }
-
     /**
-    This method exports the color components to an static array of float
+    This method exports the color components to a static array of float
     values. It is supposed to help operations in APIs like OpenGL/JOGL where
     this representation form is commonly used.
-    @return a three element sized single precission float array containing 
+    @return a three element sized single precision float array containing
     r, g and b data
     */
-    public float[] exportToFloatArrayVect()
+    public float[] exportToFloatArrayVector()
     {
-        float[] ret={(float)r, (float)g, (float)b, 1};
-        return ret;
-    }
-
-    /**
-    @return a three element sized double precission float array containing 
-    r, g and b data
-    */
-    public double[] exportToDoubleArrayVect()
-    {
-        double[] ret={r, g, b, 1};
-        return ret;
+        return new float[]{(float)r, (float)g, (float)b, 1};
     }
 
     /**
     This method return a String representation of current color. In its
     current implementation it is biased for human readability, not for
     precision, so the use of an approximation formating.
-    @return human readable String representation of current color
+    @return human-readable String representation of current color
     */
     @Override
     public String toString()
@@ -197,7 +124,7 @@ public class ColorRgb extends FundamentalEntity
     /**
     Given current color space (RGB coordinates), this method returns the
     Euclidean distance between two points in such space: `this` and `other`.
-    @param other
+    @param other reference color to compare against
     @return color distance in RGB color coordinate space
     */
     public double distance(ColorRgb other) {
@@ -206,27 +133,29 @@ public class ColorRgb extends FundamentalEntity
                          (this.b - other.b)*(this.b - other.b));
     }
 
-    /**
-    @param other
-    */
-    public void clone(ColorRgb other) {
-        this.r = other.r;
-        this.g = other.g;
-        this.b = other.b;
+    public ColorRgb add(ColorRgb other)
+    {
+        return new ColorRgb(this.r + other.r, this.g + other.g, this.b + other.b);
     }
 
-    /**
-    Given a 8 bit signed RGB integer triplet, this method computes the
-    corresponding [0.0, 1.0] clamped interval values for color.
-    @param r
-    @param g
-    @param b
-    */
-    public void importFromSigned8bitPixel(byte r, byte g, byte b)
+    public ColorRgb multiply(double scalar)
     {
-        this.r = ((double)VSDK.signedByte2unsignedInteger(r)) / 255.0;
-        this.g = ((double)VSDK.signedByte2unsignedInteger(g)) / 255.0;
-        this.b = ((double)VSDK.signedByte2unsignedInteger(b)) / 255.0;
+        return new ColorRgb(this.r * scalar, this.g * scalar, this.b * scalar);
+    }
+
+    public double r()
+    {
+        return r;
+    }
+
+    public double g()
+    {
+        return g;
+    }
+
+    public double b()
+    {
+        return b;
     }
 
     /**
@@ -235,9 +164,9 @@ public class ColorRgb extends FundamentalEntity
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + (int) (Double.doubleToLongBits(this.r) ^ (Double.doubleToLongBits(this.r) >>> 32));
-        hash = 59 * hash + (int) (Double.doubleToLongBits(this.g) ^ (Double.doubleToLongBits(this.g) >>> 32));
-        hash = 59 * hash + (int) (Double.doubleToLongBits(this.b) ^ (Double.doubleToLongBits(this.b) >>> 32));
+        hash = 59 * hash + Long.hashCode(Double.doubleToLongBits(this.r));
+        hash = 59 * hash + Long.hashCode(Double.doubleToLongBits(this.g));
+        hash = 59 * hash + Long.hashCode(Double.doubleToLongBits(this.b));
         return hash;
     }
 
@@ -256,11 +185,6 @@ public class ColorRgb extends FundamentalEntity
         if (Double.doubleToLongBits(this.g) != Double.doubleToLongBits(other.g)) {
             return false;
         }
-        if (Double.doubleToLongBits(this.b) != Double.doubleToLongBits(other.b)) {
-            return false;
-        }
-        return true;
+        return Double.doubleToLongBits(this.b) == Double.doubleToLongBits(other.b);
     }
-    
-    
 }

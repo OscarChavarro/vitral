@@ -85,7 +85,7 @@ public class Jogl2TriangleStripMeshRenderer extends Jogl2Renderer {
 
             // Warning: Change with configured color for borders
             ColorRgb c = quality.getWireColor();
-            gl.glColor3d(c.r, c.g, c.b);
+            gl.glColor3d(c.r(), c.g(), c.b());
             gl.glDisable(GL.GL_TEXTURE_2D);
 
             // Warning: pending definition of this behavior...

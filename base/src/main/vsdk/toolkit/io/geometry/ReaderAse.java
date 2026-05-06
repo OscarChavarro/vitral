@@ -420,10 +420,7 @@ public class ReaderAse extends PersistenceElement
             i++;
         } while ( tokenType != StreamTokenizer.TT_EOF && i <= 2 );
 
-        c.r = vals[0];
-        c.g = vals[1];
-        c.b = vals[2];
-        return c;
+        return new ColorRgb(vals[0], vals[1], vals[2]);
     }
 
     private static Material defaultMaterial()

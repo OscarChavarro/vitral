@@ -150,9 +150,9 @@ public class IndexedColorImageUncompressed extends Image
 
         _static_color = colorTable.evalLinear(val);
         RGBPixel p = new RGBPixel();
-        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
-        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
-        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r()*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g()*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b()*255.0));
         return p;
     }
 
@@ -164,9 +164,9 @@ public class IndexedColorImageUncompressed extends Image
         val = (double)(VSDK.signedByte2unsignedInteger(data[index])) / 255.0;
 
         _static_color = colorTable.evalLinear(val);
-        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r*255.0));
-        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g*255.0));
-        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b*255.0));
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r()*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g()*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b()*255.0));
     }
 
     public RGBColorPalette getColorTable()
@@ -182,10 +182,10 @@ public class IndexedColorImageUncompressed extends Image
     @Override
     public void putPixelRgb(int x, int y, RGBPixel p)
     {
-        ColorRgb c = new ColorRgb();
-        c.r = (double)(VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        c.g = (double)(VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        c.b = (double)(VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        ColorRgb c = new ColorRgb(
+            (double)(VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            (double)(VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            (double)(VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
 
         int index = colorTable.selectNearestIndexToRgb(c);
         putPixel(x, y, index);

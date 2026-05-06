@@ -63,8 +63,8 @@ public class RGBColorPalette extends MediaEntity {
         int i;
 
         for ( i = 0; i < colors.size(); i++ ) {
-            ColorRgb c = colors.get(i);
-            c.r = c.g = c.b = val;
+            ColorRgb c = new ColorRgb(val, val, val);
+            colors.set(i, c);
             val += 1.0/((double)(colors.size()-1));
             pos++;        
         }
@@ -150,9 +150,9 @@ public class RGBColorPalette extends MediaEntity {
         ColorRgb a = colors.get(inf);
         ColorRgb b = colors.get(sup);
         ColorRgb c = new ColorRgb(
-            a.r + (b.r-a.r)*p,
-            a.g + (b.g-a.g)*p,
-            a.b + (b.b-a.b)*p    );
+            a.r() + (b.r()-a.r())*p,
+            a.g() + (b.g()-a.g())*p,
+            a.b() + (b.b()-a.b())*p    );
 
         return c;
     }

@@ -51,7 +51,7 @@ public class ShapeDescriptor2DGenerator extends Component
                 u = 0.5 + r * Math.cos(tetha);
                 v = 0.5 - r * Math.sin(tetha);
                 c = distanceField.getColorRgbBiLinear(u, v);
-                val = (int)(((c.r + c.g + c.b)/3.0) * 255.0);
+                val = (int)(((c.r() + c.g() + c.b())/3.0) * 255.0);
                 function[k] = new Complex((double)(val) / 255.0, 0.0);
             }
             fourierCoefficients = SignalProcessing.fft(function);

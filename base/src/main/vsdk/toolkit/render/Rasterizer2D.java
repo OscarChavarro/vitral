@@ -7,7 +7,6 @@
 package vsdk.toolkit.render;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.media.RGBPixel;
@@ -285,7 +284,11 @@ public class Rasterizer2D extends RenderingElement
     this method gives the interpolated color `outColor`.
     */
     public static void
-    fillSmoothPolygonCalculateColor(Polygon2D p, double x, double y, ColorRgb outColor)
+    fillSmoothPolygonCalculateColor(
+        Polygon2D p,
+        double x,
+        double y,
+        RGBPixel outPixel)
     {
         Vertex2D va;
         Vertex2D vb = null;
@@ -294,9 +297,9 @@ public class Rasterizer2D extends RenderingElement
         double distance;
         double totaldistance = 0.0;
 
-        outColor.r = 0.0;
-        outColor.g = 0.0;
-        outColor.b = 0.0;
+        double outR = 0.0;
+        double outG = 0.0;
+        double outB = 0.0;
 
         for ( i = 0; i < p.loops.size(); i++ ) {
             for ( j = 0; j < p.loops.get(i).vertices.size(); j++ ) {
@@ -304,15 +307,25 @@ public class Rasterizer2D extends RenderingElement
                 distance = 1.0/(1.0+Math.sqrt((va.x-x)*(va.x-x) + 
                                               (va.y-y)*(va.y-y)));
                 totaldistance += distance;
-                outColor.r += va.color.r * distance;
-                outColor.g += va.color.g * distance;
-                outColor.b += va.color.b * distance;
+                outR += va.color.r() * distance;
+                outG += va.color.g() * distance;
+                outB += va.color.b() * distance;
             }
         }
 
-        outColor.r /= totaldistance;
-        outColor.g /= totaldistance;
-        outColor.b /= totaldistance;
+        double normalizedR = outR / totaldistance;
+        double normalizedG = outG / totaldistance;
+        double normalizedB = outB / totaldistance;
+        double clippedR = Math.max(0.0, Math.min(1.0, normalizedR));
+        double clippedG = Math.max(0.0, Math.min(1.0, normalizedG));
+        double clippedB = Math.max(0.0, Math.min(1.0, normalizedB));
+        int rr = (int)(clippedR * 255.0);
+        int gg = (int)(clippedG * 255.0);
+        int bb = (int)(clippedB * 255.0);
+
+        outPixel.r = VSDK.unsigned8BitInteger2signedByte(rr);
+        outPixel.g = VSDK.unsigned8BitInteger2signedByte(gg);
+        outPixel.b = VSDK.unsigned8BitInteger2signedByte(bb);
     }
 
     /**
@@ -411,30 +424,9 @@ public class Rasterizer2D extends RenderingElement
 
                 // Draw from xs1 to xs2 if "interior" state flagged
                 RGBPixel color = new RGBPixel();
-                ColorRgb floatColor = new ColorRgb();
-
                 for ( x = (int)xs1; state == true && x < (int)xs2; x++ ) {
-                    // Interpolate color
-                    fillSmoothPolygonCalculateColor(p, x, y, floatColor);
-
-                    // Convert given color to pixel
-                    if ( floatColor.r > 1.0 ) floatColor.r = 1.0;
-                    if ( floatColor.g > 1.0 ) floatColor.g = 1.0;
-                    if ( floatColor.b > 1.0 ) floatColor.b = 1.0;
-                    if ( floatColor.r < 0.0 ) floatColor.r = 0.0;
-                    if ( floatColor.g < 0.0 ) floatColor.g = 0.0;
-                    if ( floatColor.b < 0.0 ) floatColor.b = 0.0;
-                    int rr;
-                    int gg;
-                    int bb;
-
-                    rr = (int)(floatColor.r * 255.0);
-                    gg = (int)(floatColor.g * 255.0);
-                    bb = (int)(floatColor.b * 255.0);
-
-                    color.r = VSDK.unsigned8BitInteger2signedByte(rr);
-                    color.g = VSDK.unsigned8BitInteger2signedByte(gg);
-                    color.b = VSDK.unsigned8BitInteger2signedByte(bb);
+                    // Interpolate and convert in place to avoid ColorRgb temporary allocation.
+                    fillSmoothPolygonCalculateColor(p, x, y, color);
 
                     // Write resulting pixel into image
                     img.putPixelRgb(x, y, color);

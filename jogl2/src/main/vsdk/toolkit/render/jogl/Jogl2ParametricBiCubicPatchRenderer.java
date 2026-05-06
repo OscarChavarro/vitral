@@ -196,7 +196,7 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
         // Now we draw the points
         if ( patch.type == ParametricCurve.BEZIER ) {
             gl.glDisable(GL2.GL_LIGHTING);
-            gl.glColor3d(color.r, color.g, color.b);
+            gl.glColor3d(color.r(), color.g(), color.b());
             gl.glLineWidth(1);
             for (int i = 0; i < 4; i++) {
                 gl.glBegin(GL.GL_LINE_STRIP);
@@ -290,7 +290,7 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
             gl.glLineWidth(1.0f);
 
             ColorRgb co = q.getWireColor();
-            gl.glColor3d(co.r, co.g, co.b);
+            gl.glColor3d(co.r(), co.g(), co.b());
             gl.glDisable(GL.GL_TEXTURE_2D);
 
             drawSurfaceGrid(gl, p, 1, 1, 0, 0, q);

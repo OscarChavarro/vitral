@@ -129,11 +129,10 @@ public abstract class Image extends MediaEntity
         int j = (int)Math.floor(v * ((double)(getYSize()-1)));
 
         RGBPixel p = getPixelRgb(i, j);
-        ColorRgb c = new ColorRgb();
-        c.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        c.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        c.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
-        return c;
+        return new ColorRgb(
+            ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
     }
 
     /**
@@ -166,46 +165,44 @@ public abstract class Image extends MediaEntity
 
         //-----------------------------------------------------------------
         p = getPixelRgb(i0, j0);
-        ColorRgb F00 = new ColorRgb();
-        F00.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        F00.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        F00.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        ColorRgb F00 = new ColorRgb(
+            ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
 
         p = getPixelRgb(i1, j0);
-        ColorRgb F10 = new ColorRgb();
-        F10.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        F10.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        F10.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        ColorRgb F10 = new ColorRgb(
+            ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
 
         p = getPixelRgb(i0, j1);
-        ColorRgb F01 = new ColorRgb();
-        F01.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        F01.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        F01.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        ColorRgb F01 = new ColorRgb(
+            ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
 
         p = getPixelRgb(i1, j1);
-        ColorRgb F11 = new ColorRgb();
-        F11.r = ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0;
-        F11.g = ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0;
-        F11.b = ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0;
+        ColorRgb F11 = new ColorRgb(
+            ((double)VSDK.signedByte2unsignedInteger(p.r)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.g)) / 255.0,
+            ((double)VSDK.signedByte2unsignedInteger(p.b)) / 255.0);
 
         //-----------------------------------------------------------------
-        ColorRgb FU0 = new ColorRgb();
-        FU0.r = F00.r + du * (F10.r-F00.r);
-        FU0.g = F00.g + du * (F10.g-F00.g);
-        FU0.b = F00.b + du * (F10.b-F00.b);
+        ColorRgb FU0 = new ColorRgb(
+            F00.r() + du * (F10.r()-F00.r()),
+            F00.g() + du * (F10.g()-F00.g()),
+            F00.b() + du * (F10.b()-F00.b()));
 
-        ColorRgb FU1 = new ColorRgb();
-        FU1.r = F01.r + du * (F11.r-F01.r);
-        FU1.g = F01.g + du * (F11.g-F01.g);
-        FU1.b = F01.b + du * (F11.b-F01.b);
+        ColorRgb FU1 = new ColorRgb(
+            F01.r() + du * (F11.r()-F01.r()),
+            F01.g() + du * (F11.g()-F01.g()),
+            F01.b() + du * (F11.b()-F01.b()));
 
-        ColorRgb FVAL = new ColorRgb();
-        FVAL.r = FU0.r + dv * (FU1.r-FU0.r);
-        FVAL.g = FU0.g + dv * (FU1.g-FU0.g);
-        FVAL.b = FU0.b + dv * (FU1.b-FU0.b);
-
-        return FVAL;
+        return new ColorRgb(
+            FU0.r() + dv * (FU1.r()-FU0.r()),
+            FU0.g() + dv * (FU1.g()-FU0.g()),
+            FU0.b() + dv * (FU1.b()-FU0.b()));
     }
 
     private static int positiveMod(int value, int modulus)

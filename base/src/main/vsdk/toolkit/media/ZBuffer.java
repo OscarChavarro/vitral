@@ -157,7 +157,7 @@ public class ZBuffer extends MediaEntity {
                 if ( f > 1.0 ) f = 1.0f;
                 c = p.evalLinear(f);
                 image.putPixel(x, y,
-                    (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
+                    (byte)(c.r()*256), (byte)(c.g()*256), (byte)(c.b()*256));
                 pos++;
             }
         }
@@ -184,7 +184,7 @@ public class ZBuffer extends MediaEntity {
                 if ( f > 1.0 ) f = 1.0f;
                 c = p.evalLinear(f);
                 image.putPixel(x, y,
-                    (byte)(c.r*256), (byte)(c.g*256), (byte)(c.b*256));
+                    (byte)(c.r()*256), (byte)(c.g()*256), (byte)(c.b()*256));
                 pos++;
             }
         }

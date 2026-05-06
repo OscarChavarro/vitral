@@ -50,15 +50,15 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
             end = e.getEndingVertexId();
 
             c = e.debugColor;
-            if ( c.r >= 1 - VSDK.EPSILON &&
-                 c.g >= 1 - VSDK.EPSILON &&
-                 c.b >= 1 - VSDK.EPSILON ) {
+            if ( c.r() >= 1 - VSDK.EPSILON &&
+                 c.g() >= 1 - VSDK.EPSILON &&
+                 c.b() >= 1 - VSDK.EPSILON ) {
                 gl.glLineWidth(1.0f);
             }
             else {
                 gl.glLineWidth(6f);
             }
-            gl.glColor3d(c.r, c.g, c.b);
+            gl.glColor3d(c.r(), c.g(), c.b());
 
             if ( start >= 0 && end >= 0 ) {
                 Vector3D startPosition;

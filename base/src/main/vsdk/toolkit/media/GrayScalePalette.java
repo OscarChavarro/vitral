@@ -20,7 +20,7 @@ public class GrayScalePalette extends RGBProceduralColorPalette {
             return super.selectNearestIndexToRgb(c);
         }
 
-        double gray = (c.r + c.g + c.b) / 3;
+        double gray = (c.r() + c.g() + c.b()) / 3;
 
         if ( gray < 0.0 ) gray = 0.0;
         if ( gray > 1.0 ) gray = 1.0;

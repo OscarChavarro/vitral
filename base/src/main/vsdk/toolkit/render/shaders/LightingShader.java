@@ -11,6 +11,7 @@ import vsdk.toolkit.render.TraceWorkspace;
 import java.util.List;
 
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
@@ -35,7 +36,7 @@ public abstract class LightingShader extends Shader {
     }
 
     @Override
-    public final Vector3D shadeLocal(
+    public final LocalShadingResult shadeLocal(
         RayHit info,
         double viewX,
         double viewY,
@@ -43,8 +44,7 @@ public abstract class LightingShader extends Shader {
         List<Light> lights,
         List<SimpleBody> objects,
         Material material,
-        TraceWorkspace workspace,
-        ColorRgb outColor)
+        TraceWorkspace workspace)
     {
         Vector3D surfaceNormal = info.n;
 
@@ -55,6 +55,9 @@ public abstract class LightingShader extends Shader {
         double normalX = surfaceNormal.x();
         double normalY = surfaceNormal.y();
         double normalZ = surfaceNormal.z();
+        double outR = 0.0;
+        double outG = 0.0;
+        double outB = 0.0;
 
         for ( int i = 0; i < lights.size(); i++ ) {
             Light light = lights.get(i);
@@ -62,15 +65,16 @@ public abstract class LightingShader extends Shader {
 
             if ( light.tipo_de_luz == LightType.AMBIENT ) {
                 ColorRgb ambient = material.getAmbientReference();
-                outColor.r += ambient.r*lightEmission.r;
-                outColor.g += ambient.g*lightEmission.g;
-                outColor.b += ambient.b*lightEmission.b;
+                outR += ambient.r()*lightEmission.r();
+                outG += ambient.g()*lightEmission.g();
+                outB += ambient.b()*lightEmission.b();
                 continue;
             }
 
             double lx;
             double ly;
             double lz;
+            double maxShadowDistance = Double.POSITIVE_INFINITY;
             if ( light.tipo_de_luz == LightType.POINT ) {
                 lx = light.lvec.x() - info.p.x();
                 ly = light.lvec.y() - info.p.y();
@@ -84,7 +88,7 @@ public abstract class LightingShader extends Shader {
                 lx *= invLightDistance;
                 ly *= invLightDistance;
                 lz *= invLightDistance;
-                double maxShadowDistance = lightDistance - VSDK.EPSILON;
+                maxShadowDistance = lightDistance - VSDK.EPSILON;
                 if ( maxShadowDistance <= VSDK.EPSILON ) {
                     continue;
                 }
@@ -95,9 +99,16 @@ public abstract class LightingShader extends Shader {
                 lz = -light.lvec.z();
             }
 
-            // GLSL parity mode:
-            // Shaders used by JOGL4 sample perform local illumination only,
-            // without visibility/shadow queries. Keep CPU path equivalent.
+            if ( isShadowed(
+                info,
+                lx,
+                ly,
+                lz,
+                maxShadowDistance,
+                objects,
+                workspace) ) {
+                continue;
+            }
 
             double lambert = normalX*lx + normalY*ly + normalZ*lz;
             if ( lambert <= 0 ) {
@@ -105,29 +116,29 @@ public abstract class LightingShader extends Shader {
             }
 
             ColorRgb diffuse = material.getDiffuseReference();
-            double diffuseR = diffuse.r;
-            double diffuseG = diffuse.g;
-            double diffuseB = diffuse.b;
+            double diffuseR = diffuse.r();
+            double diffuseG = diffuse.g();
+            double diffuseB = diffuse.b();
 
             if ( textureEnabled && info.texture != null ) {
                 ColorRgb textureColor =
                     CpuTextureSamplingConfig.sample(info.texture, info.u, 1-info.v);
-                diffuseR *= textureColor.r;
-                diffuseG *= textureColor.g;
-                diffuseB *= textureColor.b;
+                diffuseR *= textureColor.r();
+                diffuseG *= textureColor.g();
+                diffuseB *= textureColor.b();
             }
 
             if ( (diffuseR + diffuseG + diffuseB) > 0 ) {
-                outColor.r += lambert*diffuseR*lightEmission.r;
-                outColor.g += lambert*diffuseG*lightEmission.g;
-                outColor.b += lambert*diffuseB*lightEmission.b;
+                outR += lambert*diffuseR*lightEmission.r();
+                outG += lambert*diffuseG*lightEmission.g();
+                outB += lambert*diffuseB*lightEmission.b();
             }
             if ( !specularEnabled ) {
                 continue;
             }
 
             ColorRgb specular = material.getSpecularReference();
-            if ( (specular.r + specular.g + specular.b) <= 0 ) {
+            if ( (specular.r() + specular.g() + specular.b()) <= 0 ) {
                 continue;
             }
 
@@ -140,15 +151,46 @@ public abstract class LightingShader extends Shader {
                 viewY*reflectedViewY +
                 viewZ*reflectedViewZ;
             if ( spec > 0 ) {
-                spec = ((specular.r + specular.g + specular.b)/3)*(
+                spec = ((specular.r() + specular.g() + specular.b())/3)*(
                     Math.pow(spec, material.getPhongExponent()));
-                outColor.r += spec*lightEmission.r;
-                outColor.g += spec*lightEmission.g;
-                outColor.b += spec*lightEmission.b;
+                outR += spec*lightEmission.r();
+                outG += spec*lightEmission.g();
+                outB += spec*lightEmission.b();
             }
         }
 
-        return surfaceNormal;
+        return new LocalShadingResult(surfaceNormal, new ColorRgb(outR, outG, outB));
+    }
+
+    private static boolean isShadowed(
+        RayHit info,
+        double lightDirX,
+        double lightDirY,
+        double lightDirZ,
+        double maxShadowDistance,
+        List<SimpleBody> objects,
+        TraceWorkspace workspace)
+    {
+        Vector3D shadowOrigin = new Vector3D(
+            info.p.x() + VSDK.EPSILON * lightDirX,
+            info.p.y() + VSDK.EPSILON * lightDirY,
+            info.p.z() + VSDK.EPSILON * lightDirZ);
+        Vector3D shadowDirection = new Vector3D(lightDirX, lightDirY, lightDirZ);
+        Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
+        RayHit shadowCandidateHit = workspace.shadowCandidateHit();
+        shadowCandidateHit.setStoreRay(false);
+
+        for ( int i = 0; i < objects.size(); i++ ) {
+            SimpleBody candidateObject = objects.get(i);
+            shadowCandidateHit.resetForDistanceOnly();
+            if ( candidateObject.doIntersection(shadowRay, shadowCandidateHit) ) {
+                double hitDistance = shadowCandidateHit.hitDistance();
+                if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static Vector3D computeBlinnPerturbedNormal(

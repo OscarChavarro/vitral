@@ -529,7 +529,7 @@ public class AwtSystem extends PresentationElement
         offlineContext = bi.getGraphics();
         offlineContext.setFont(font);
         offlineContext.setColor(
-            new Color((float)color.r, (float)color.g, (float)color.b));
+            new Color((float)color.r(), (float)color.g(), (float)color.b()));
         offlineContext.drawString(label, dx, dy);
         AwtRGBAImageUncompressedRenderer.importFromAwtBufferedImage(bi, labelImage);
         return labelImage;

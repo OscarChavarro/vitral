@@ -12,10 +12,7 @@ public class SimpleBackground extends Background {
     public SimpleBackground() {
         super();
 
-        _color = new ColorRgb();
-        _color.r = 0;
-        _color.g = 0;
-        _color.b = 0;
+        _color = new ColorRgb(0, 0, 0);
     }
 
     @Override
@@ -26,8 +23,6 @@ public class SimpleBackground extends Background {
 
     public void setColor(double r, double g, double b)
     {
-        _color.r = r;
-        _color.g = g;
-        _color.b = b;
+        _color = new ColorRgb(r, g, b);
     }
 }

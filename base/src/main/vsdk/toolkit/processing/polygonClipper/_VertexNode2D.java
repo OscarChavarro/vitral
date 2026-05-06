@@ -46,7 +46,7 @@ public class _VertexNode2D {
     public _VertexNode2D(_VertexNode2D other) {
         this.x = other.x;
         this.y = other.y;
-        this.color = new ColorRgb(other.color.r, other.color.g, other.color.b);
+        this.color = new ColorRgb(other.color.r(), other.color.g(), other.color.b());
         this.flags = other.flags;
         this.pairNode = other.pairNode;
 //        isCut = other.isCut;

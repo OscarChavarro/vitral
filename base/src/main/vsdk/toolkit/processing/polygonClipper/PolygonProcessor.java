@@ -82,7 +82,7 @@ public class PolygonProcessor extends ProcessingElement {
             if(copy)
                 for(i=0;i<numVertex;++i) {
                         point = p2DContour.vertices.get(i);
-                        point = new Vertex2D(point.x, point.y, point.color.r, point.color.g, point.color.b);
+                        point = new Vertex2D(point.x, point.y, point.color.r(), point.color.g(), point.color.b());
                         p2DContourSimp.vertices.add(point);
                 }
             else
@@ -114,7 +114,7 @@ public class PolygonProcessor extends ProcessingElement {
             for(i=0;i<numVertex;++i) {
                 if(ContourSimpFlags[i]==1) {
                     point = p2DContour.vertices.get(i);
-                    point = new Vertex2D(point.x, point.y, point.color.r, point.color.g, point.color.b);
+                    point = new Vertex2D(point.x, point.y, point.color.r(), point.color.g(), point.color.b());
                     p2DContourSimp.vertices.add(point);
                 }
             }

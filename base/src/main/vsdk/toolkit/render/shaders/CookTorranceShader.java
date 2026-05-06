@@ -8,6 +8,7 @@ import vsdk.toolkit.render.TraceWorkspace;
 import java.util.List;
 
 import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Light;
@@ -32,7 +33,7 @@ public final class CookTorranceShader extends Shader {
     }
 
     @Override
-    public Vector3D shadeLocal(
+    public LocalShadingResult shadeLocal(
         RayHit info,
         double viewX,
         double viewY,
@@ -40,8 +41,7 @@ public final class CookTorranceShader extends Shader {
         List<Light> lights,
         List<SimpleBody> objects,
         Material material,
-        TraceWorkspace workspace,
-        ColorRgb outColor)
+        TraceWorkspace workspace)
     {
         Vector3D surfaceNormal = info.n;
         if ( bumpMapEnabled ) {
@@ -49,73 +49,115 @@ public final class CookTorranceShader extends Shader {
         }
 
         Vector3D normal = surfaceNormal.normalized();
-        Vector3D viewDir = new Vector3D(viewX, viewY, viewZ).normalized();
+        double normalX = normal.x();
+        double normalY = normal.y();
+        double normalZ = normal.z();
+        double viewLength = Math.sqrt(viewX * viewX + viewY * viewY + viewZ * viewZ);
+        if ( viewLength <= EPS ) {
+            return new LocalShadingResult(surfaceNormal, new ColorRgb(0.0, 0.0, 0.0));
+        }
+        double invViewLength = 1.0 / viewLength;
+        double viewDirX = viewX * invViewLength;
+        double viewDirY = viewY * invViewLength;
+        double viewDirZ = viewZ * invViewLength;
 
         ColorRgb ambient = material.getAmbientReference();
+        double outR = 0.0;
+        double outG = 0.0;
+        double outB = 0.0;
         for ( int i = 0; i < lights.size(); i++ ) {
             Light light = lights.get(i);
             ColorRgb lightEmission = light.getSpecularReference();
 
             if ( light.tipo_de_luz == LightType.AMBIENT ) {
-                outColor.r += ambient.r * lightEmission.r;
-                outColor.g += ambient.g * lightEmission.g;
-                outColor.b += ambient.b * lightEmission.b;
+                outR += ambient.r() * lightEmission.r();
+                outG += ambient.g() * lightEmission.g();
+                outB += ambient.b() * lightEmission.b();
                 continue;
             }
 
-            Vector3D lightDirection = resolveLightDirection(light, info);
+            LightDirection lightDirection = resolveLightDirection(light, info);
             if ( lightDirection == null ) {
                 continue;
             }
+            double lightDirX = lightDirection.x;
+            double lightDirY = lightDirection.y;
+            double lightDirZ = lightDirection.z;
+            if ( isShadowed(
+                info,
+                lightDirX,
+                lightDirY,
+                lightDirZ,
+                lightDirection.maxShadowDistance,
+                objects,
+                workspace) ) {
+                continue;
+            }
 
-            double ndotL = Math.max(0.0, normal.dotProduct(lightDirection));
+            double ndotL = Math.max(0.0, normalX * lightDirX + normalY * lightDirY + normalZ * lightDirZ);
             if ( ndotL <= 0.0 ) {
                 continue;
             }
 
-            double ndotV = Math.max(0.0, normal.dotProduct(viewDir));
+            double ndotV = Math.max(0.0, normalX * viewDirX + normalY * viewDirY + normalZ * viewDirZ);
             if ( ndotV <= 0.0 ) {
                 continue;
             }
 
-            Vector3D halfVector = lightDirection.add(viewDir).normalized();
-            double ndotH = Math.max(0.0, normal.dotProduct(halfVector));
-            double vdotH = Math.max(0.0, viewDir.dotProduct(halfVector));
+            double halfX = lightDirX + viewDirX;
+            double halfY = lightDirY + viewDirY;
+            double halfZ = lightDirZ + viewDirZ;
+            double halfLength = Math.sqrt(halfX * halfX + halfY * halfY + halfZ * halfZ);
+            if ( halfLength <= EPS ) {
+                continue;
+            }
+            double invHalfLength = 1.0 / halfLength;
+            halfX *= invHalfLength;
+            halfY *= invHalfLength;
+            halfZ *= invHalfLength;
+            double ndotH = Math.max(0.0, normalX * halfX + normalY * halfY + normalZ * halfZ);
+            double vdotH = Math.max(0.0, viewDirX * halfX + viewDirY * halfY + viewDirZ * halfZ);
 
             MicrofacetParams params = resolveMicrofacetParams(material);
             double roughness = Math.max(MIN_ROUGHNESS, params.roughness);
             double alpha = Math.max(MIN_ROUGHNESS * MIN_ROUGHNESS, params.alpha);
 
             ColorRgb baseDiffuse = material.getDiffuseReference();
-            double diffuseR = baseDiffuse.r;
-            double diffuseG = baseDiffuse.g;
-            double diffuseB = baseDiffuse.b;
+            double diffuseR = baseDiffuse.r();
+            double diffuseG = baseDiffuse.g();
+            double diffuseB = baseDiffuse.b();
             if ( textureEnabled && info.texture != null ) {
                 ColorRgb textureColor =
                     CpuTextureSamplingConfig.sample(info.texture, info.u, 1.0 - info.v);
-                diffuseR *= textureColor.r;
-                diffuseG *= textureColor.g;
-                diffuseB *= textureColor.b;
+                diffuseR *= textureColor.r();
+                diffuseG *= textureColor.g();
+                diffuseB *= textureColor.b();
             }
 
             double distribution = beckmannDistribution(ndotH, roughness);
             double geometry = smithSchlickGeometry(ndotV, ndotL, alpha);
-            ColorRgb fresnel = schlickFresnel(vdotH, params.fresnelF0);
+            double fresnelPower = Math.pow(Math.max(0.0, 1.0 - vdotH), 5.0);
+            double fresnelR =
+                params.fresnelF0.r() + (1.0 - params.fresnelF0.r()) * fresnelPower;
+            double fresnelG =
+                params.fresnelF0.g() + (1.0 - params.fresnelF0.g()) * fresnelPower;
+            double fresnelB =
+                params.fresnelF0.b() + (1.0 - params.fresnelF0.b()) * fresnelPower;
             double denominator = Math.max(EPS, 4.0 * ndotL * ndotV);
 
-            double specR = params.ks * distribution * geometry * fresnel.r / denominator;
-            double specG = params.ks * distribution * geometry * fresnel.g / denominator;
-            double specB = params.ks * distribution * geometry * fresnel.b / denominator;
+            double specR = params.ks * distribution * geometry * fresnelR / denominator;
+            double specG = params.ks * distribution * geometry * fresnelG / denominator;
+            double specB = params.ks * distribution * geometry * fresnelB / denominator;
 
-            outColor.r += lightEmission.r * (params.kd * diffuseR * ndotL + specR);
-            outColor.g += lightEmission.g * (params.kd * diffuseG * ndotL + specG);
-            outColor.b += lightEmission.b * (params.kd * diffuseB * ndotL + specB);
+            outR += lightEmission.r() * (params.kd * diffuseR * ndotL + specR);
+            outG += lightEmission.g() * (params.kd * diffuseG * ndotL + specG);
+            outB += lightEmission.b() * (params.kd * diffuseB * ndotL + specB);
         }
 
-        return surfaceNormal;
+        return new LocalShadingResult(surfaceNormal, new ColorRgb(outR, outG, outB));
     }
 
-    private static Vector3D resolveLightDirection(Light light, RayHit info)
+    private static LightDirection resolveLightDirection(Light light, RayHit info)
     {
         if ( light.tipo_de_luz == LightType.POINT ) {
             double lx = light.lvec.x() - info.p.x();
@@ -126,9 +168,25 @@ public final class CookTorranceShader extends Shader {
                 return null;
             }
             double invLength = 1.0 / Math.sqrt(lengthSquared);
-            return new Vector3D(lx * invLength, ly * invLength, lz * invLength);
+            return new LightDirection(
+                lx * invLength,
+                ly * invLength,
+                lz * invLength,
+                Math.sqrt(lengthSquared) - VSDK.EPSILON);
         }
-        return new Vector3D(-light.lvec.x(), -light.lvec.y(), -light.lvec.z()).normalized();
+        double lx = -light.lvec.x();
+        double ly = -light.lvec.y();
+        double lz = -light.lvec.z();
+        double lengthSquared = lx * lx + ly * ly + lz * lz;
+        if ( lengthSquared <= EPS ) {
+            return null;
+        }
+        double invLength = 1.0 / Math.sqrt(lengthSquared);
+        return new LightDirection(
+            lx * invLength,
+            ly * invLength,
+            lz * invLength,
+            Double.POSITIVE_INFINITY);
     }
 
     private static MicrofacetParams resolveMicrofacetParams(Material material)
@@ -168,15 +226,6 @@ public final class CookTorranceShader extends Shader {
         double gV = ndotV / (ndotV * (1.0 - k) + k);
         double gL = ndotL / (ndotL * (1.0 - k) + k);
         return gV * gL;
-    }
-
-    private static ColorRgb schlickFresnel(double vdotH, ColorRgb f0)
-    {
-        double power = Math.pow(Math.max(0.0, 1.0 - vdotH), 5.0);
-        return new ColorRgb(
-            f0.r + (1.0 - f0.r) * power,
-            f0.g + (1.0 - f0.g) * power,
-            f0.b + (1.0 - f0.b) * power);
     }
 
     private static Vector3D computeBlinnPerturbedNormal(
@@ -220,5 +269,47 @@ public final class CookTorranceShader extends Shader {
         double kd,
         double ks)
     {
+    }
+
+    private record LightDirection(
+        double x,
+        double y,
+        double z,
+        double maxShadowDistance)
+    {
+    }
+
+    private static boolean isShadowed(
+        RayHit info,
+        double lightDirX,
+        double lightDirY,
+        double lightDirZ,
+        double maxShadowDistance,
+        List<SimpleBody> objects,
+        TraceWorkspace workspace)
+    {
+        if ( maxShadowDistance <= VSDK.EPSILON ) {
+            return true;
+        }
+        Vector3D shadowOrigin = new Vector3D(
+            info.p.x() + VSDK.EPSILON * lightDirX,
+            info.p.y() + VSDK.EPSILON * lightDirY,
+            info.p.z() + VSDK.EPSILON * lightDirZ);
+        Vector3D shadowDirection = new Vector3D(lightDirX, lightDirY, lightDirZ);
+        Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
+        RayHit shadowCandidateHit = workspace.shadowCandidateHit();
+        shadowCandidateHit.setStoreRay(false);
+
+        for ( int i = 0; i < objects.size(); i++ ) {
+            SimpleBody candidateObject = objects.get(i);
+            shadowCandidateHit.resetForDistanceOnly();
+            if ( candidateObject.doIntersection(shadowRay, shadowCandidateHit) ) {
+                double hitDistance = shadowCandidateHit.hitDistance();
+                if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

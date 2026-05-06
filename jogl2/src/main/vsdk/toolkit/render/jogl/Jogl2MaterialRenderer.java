@@ -44,11 +44,11 @@ public class Jogl2MaterialRenderer extends Jogl2Renderer {
         }
 
         float phongExp = (float)m.getPhongExponent();
-        float ambient[] = m.getAmbient().exportToFloatArrayVect();
+        float ambient[] = m.getAmbient().exportToFloatArrayVector();
         ambient[3] = opacity;
-        float diffuse[] = m.getDiffuse().exportToFloatArrayVect();
+        float diffuse[] = m.getDiffuse().exportToFloatArrayVector();
         diffuse[3] = opacity;
-        float specular[]  = m.getSpecular().exportToFloatArrayVect();
+        float specular[]  = m.getSpecular().exportToFloatArrayVector();
         specular[3] = opacity;
         //float emission[] = m.getEmission().exportToFloatArrayVect();
         //emission[3] = opacity;

@@ -13,7 +13,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 // GLSL analogue: constantPixelShader.glsl
 public final class ConstantShader extends Shader {
     @Override
-    public Vector3D shadeLocal(
+    public LocalShadingResult shadeLocal(
         RayHit info,
         double viewX,
         double viewY,
@@ -21,13 +21,9 @@ public final class ConstantShader extends Shader {
         List<Light> lights,
         List<SimpleBody> objects,
         Material material,
-        TraceWorkspace workspace,
-        ColorRgb outColor)
+        TraceWorkspace workspace)
     {
         ColorRgb diffuse = material.getDiffuseReference();
-        outColor.r += diffuse.r;
-        outColor.g += diffuse.g;
-        outColor.b += diffuse.b;
-        return info.n;
+        return new LocalShadingResult(info.n, new ColorRgb(diffuse));
     }
 }

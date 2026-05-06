@@ -46,7 +46,7 @@ public class _Polygon2DWA {
             }
             if ( contourToCopy.vertices.size() == 1 ) {
                 prevV = contourToCopy.vertices.get(0);
-                addVertex(prevV.x, prevV.y, prevV.color.r, prevV.color.g, prevV.color.b);
+                addVertex(prevV.x, prevV.y, prevV.color.r(), prevV.color.g(), prevV.color.b());
             } else {
                 prevV = contourToCopy.vertices.get(contourToCopy.vertices.size() - 1);
                 prevPV = contourToCopy.vertices.get(contourToCopy.vertices.size() - 2);
@@ -57,7 +57,7 @@ public class _Polygon2DWA {
                     Vertex2D v = contourToCopy.vertices.get(j);
                     if ( copyClean ) {
                         if ( Math.abs(prevV.x - v.x) > 0.0001 || Math.abs(prevV.y - v.y) > 0.0001 ) {
-                            addVertex(v.x, v.y, v.color.r, v.color.g, v.color.b);
+                            addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
                             if ( areCollinearAndOposite2DVectors(prevPV, prevV, v) ) {
                                 if ( isFirst ) {
                                     removeLast = true;
@@ -73,7 +73,7 @@ public class _Polygon2DWA {
                         }
                         isFirst = false;
                     } else {
-                        addVertex(v.x, v.y, v.color.r, v.color.g, v.color.b);
+                        addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
                     }
                 }
                 if ( removeLast ) {
@@ -81,7 +81,7 @@ public class _Polygon2DWA {
                 }
                 if ( currentLoop.vertices.size() == 0 ) { //In the case of two or more repeated points.
                     prevV = contourToCopy.vertices.get(0);
-                    addVertex(prevV.x, prevV.y, prevV.color.r, prevV.color.g, prevV.color.b);
+                    addVertex(prevV.x, prevV.y, prevV.color.r(), prevV.color.g(), prevV.color.b());
                 }
             }
         }
