@@ -21,6 +21,7 @@ public final class OfflineControl
     public static void run(CommandLineOptions options)
     {
         ShadersModel model = ShadersModel.createDefault();
+        model.setShowHud(false);
         model.updateSoftwareViewportAndCamera(options.getWidth(), options.getHeight());
         applyRenderFeatureOverrides(model, options);
 
@@ -122,19 +123,6 @@ public final class OfflineControl
                 cpuTextureOffsetV);
         }
 
-        if ( options.getCpuNormalOffsetUTexels() != null ||
-             options.getCpuNormalOffsetVTexels() != null ) {
-            double cpuNormalOffsetU = 0.0;
-            double cpuNormalOffsetV = 0.0;
-            if ( options.getCpuNormalOffsetUTexels() != null ) {
-                cpuNormalOffsetU = options.getCpuNormalOffsetUTexels().doubleValue();
-            }
-            if ( options.getCpuNormalOffsetVTexels() != null ) {
-                cpuNormalOffsetV = options.getCpuNormalOffsetVTexels().doubleValue();
-            }
-            CpuTextureSamplingConfig.setNormalOffsetTexels(
-                cpuNormalOffsetU,
-                cpuNormalOffsetV);
-        }
+        model.setShowHud(options.getShowHud());
     }
 }

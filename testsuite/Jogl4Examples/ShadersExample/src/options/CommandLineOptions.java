@@ -25,8 +25,7 @@ public class CommandLineOptions
     private Integer parallels;
     private Double cpuTextureOffsetUTexels;
     private Double cpuTextureOffsetVTexels;
-    private Double cpuNormalOffsetUTexels;
-    private Double cpuNormalOffsetVTexels;
+    private boolean showHud;
     private int width;
     private int height;
 
@@ -46,8 +45,7 @@ public class CommandLineOptions
         options.parallels = null;
         options.cpuTextureOffsetUTexels = null;
         options.cpuTextureOffsetVTexels = null;
-        options.cpuNormalOffsetUTexels = null;
-        options.cpuNormalOffsetVTexels = null;
+        options.showHud = false;
         options.width = DEFAULT_OFFLINE_WIDTH;
         options.height = DEFAULT_OFFLINE_HEIGHT;
 
@@ -183,30 +181,6 @@ public class CommandLineOptions
                     "--cpu-texture-offset-v"));
                 continue;
             }
-            if ( "--cpu-normal-offset-u".equals(arg) ) {
-                ensureHasValue(args, i, "--cpu-normal-offset-u");
-                options.cpuNormalOffsetUTexels =
-                    Double.valueOf(parseDouble(args[++i], "--cpu-normal-offset-u"));
-                continue;
-            }
-            if ( arg.startsWith("--cpu-normal-offset-u=") ) {
-                options.cpuNormalOffsetUTexels = Double.valueOf(parseDouble(
-                    arg.substring("--cpu-normal-offset-u=".length()),
-                    "--cpu-normal-offset-u"));
-                continue;
-            }
-            if ( "--cpu-normal-offset-v".equals(arg) ) {
-                ensureHasValue(args, i, "--cpu-normal-offset-v");
-                options.cpuNormalOffsetVTexels =
-                    Double.valueOf(parseDouble(args[++i], "--cpu-normal-offset-v"));
-                continue;
-            }
-            if ( arg.startsWith("--cpu-normal-offset-v=") ) {
-                options.cpuNormalOffsetVTexels = Double.valueOf(parseDouble(
-                    arg.substring("--cpu-normal-offset-v=".length()),
-                    "--cpu-normal-offset-v"));
-                continue;
-            }
             if ( "--width".equals(arg) ) {
                 ensureHasValue(args, i, "--width");
                 options.width = Math.max(1, parseInt(args[++i], "--width"));
@@ -225,6 +199,17 @@ public class CommandLineOptions
             if ( arg.startsWith("--height=") ) {
                 options.height = Math.max(1, parseInt(
                     arg.substring("--height=".length()), "--height"));
+                continue;
+            }
+            if ( "--hud".equals(arg) ) {
+                ensureHasValue(args, i, "--hud");
+                options.showHud = parseBooleanSwitch(args[++i], "--hud");
+                continue;
+            }
+            if ( arg.startsWith("--hud=") ) {
+                options.showHud = parseBooleanSwitch(
+                    arg.substring("--hud=".length()),
+                    "--hud");
                 continue;
             }
 
@@ -267,6 +252,22 @@ public class CommandLineOptions
             throw new IllegalArgumentException(
                 "Invalid number for " + optionName + ": " + raw, e);
         }
+    }
+
+    private static boolean parseBooleanSwitch(String raw, String optionName)
+    {
+        String normalized = raw.trim().toLowerCase();
+        if ( normalized.equals("on") || normalized.equals("true") ||
+             normalized.equals("1") || normalized.equals("yes") ) {
+            return true;
+        }
+        if ( normalized.equals("off") || normalized.equals("false") ||
+             normalized.equals("0") || normalized.equals("no") ) {
+            return false;
+        }
+        throw new IllegalArgumentException(
+            "Unknown value for " + optionName + ": " + raw +
+            ". Use on/off.");
     }
 
     private static ShaderOperationMode parseMethod(String raw)
@@ -417,13 +418,8 @@ public class CommandLineOptions
         return cpuTextureOffsetVTexels;
     }
 
-    public Double getCpuNormalOffsetUTexels()
+    public boolean getShowHud()
     {
-        return cpuNormalOffsetUTexels;
-    }
-
-    public Double getCpuNormalOffsetVTexels()
-    {
-        return cpuNormalOffsetVTexels;
+        return showHud;
     }
 }

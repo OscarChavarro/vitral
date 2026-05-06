@@ -356,6 +356,11 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         setVector3(gl, programId, "bumpScale", DEFAULT_BUMP_SCALE);
         setFloat(gl, programId, "phongExponent", (float)material.getPhongExponent());
         setInt(gl, programId, "withTexture", (quality.isTextureSet() && textureId > 0) ? 1 : 0);
+        setInt(
+            gl,
+            programId,
+            "withBumpMap",
+            (quality.isBumpMapSet() && normalMapId > 0) ? 1 : 0);
 
         if ( textureId > 0 ) {
             gl.glActiveTexture(GL4.GL_TEXTURE0);
