@@ -558,7 +558,7 @@ MESSAGES {
     IDM_OPERATION_CANCELLED_BY_USER,
         "Operation cancelled by user."
     IDM_INTRO_MESSAGE,
-        "VSDK 3D Editor example - (c) Copyright, Pontificia Universidad Javeriana, 2005-2007"
+        "VSDK 3D Editor"
 }
 
 //===========================================================================

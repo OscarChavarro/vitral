@@ -503,7 +503,7 @@ MESSAGES {
     IDM_OPERATION_CANCELLED_BY_USER,
         "Operación cancelada por el usuario."
     IDM_INTRO_MESSAGE,
-        "Ejemplo de editor 3D VSDK - (c) derechos reservados, Pontificia Universidad Javeriana, 2005-2007"
+        "Ejemplo de editor 3D VSDK"
 }
 
 //===========================================================================
