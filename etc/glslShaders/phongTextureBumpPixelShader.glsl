@@ -30,7 +30,7 @@ void main()
     // Java CPU path (NormalMap.importBumpMap + LightingShader).
     vec3 Nn = normalize(N);
     vec3 Pu = normalize(T);
-    vec3 Pv = normalize(B);
+    vec3 Pv = normalize(cross(Nn, Pu));
 
     vec3 normalVariation = texture(sNormalMap, uvTextureCoordinate).xyz * 2.0 - 1.0;
     float nz = normalVariation.z;
