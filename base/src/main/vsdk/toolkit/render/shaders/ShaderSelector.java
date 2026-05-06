@@ -44,6 +44,10 @@ public final class ShaderSelector {
             return new PhongShader();
         }
 
+        if ( shadingType == RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
+            return new CookTorranceShader(textureEnabled, bumpMapEnabled);
+        }
+
         return new GouraudTextureShader(textureEnabled);
     }
 }

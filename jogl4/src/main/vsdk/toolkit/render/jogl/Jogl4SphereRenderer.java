@@ -12,6 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
@@ -355,6 +356,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         setVector3(gl, programId, "specularColor", material.getSpecular());
         setVector3(gl, programId, "bumpScale", DEFAULT_BUMP_SCALE);
         setFloat(gl, programId, "phongExponent", (float)material.getPhongExponent());
+        configureMicrofacetUniforms(gl, programId, material);
         setInt(gl, programId, "withTexture", (quality.isTextureSet() && textureId > 0) ? 1 : 0);
         setInt(
             gl,
@@ -412,6 +414,44 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         if ( loc >= 0 ) {
             gl.glUniform1f(loc, value);
         }
+    }
+
+    private static void configureMicrofacetUniforms(GL4 gl, int programId, Material material)
+    {
+        float roughness = 0.35f;
+        float alpha = roughness * roughness;
+        ColorRgb fresnelF0 = material.getSpecular();
+        float kd = 1.0f;
+        float ks = 1.0f;
+        int fresnelModel = MicroFacetedMaterial.FRESNEL_MODEL_SCHLICK;
+        int ndfModel = MicroFacetedMaterial.NDF_MODEL_BECKMANN;
+        int geometryModel = MicroFacetedMaterial.GEOMETRY_MODEL_SMITH;
+        ColorRgb eta = new ColorRgb(1.5, 1.5, 1.5);
+        ColorRgb kappa = new ColorRgb(0.0, 0.0, 0.0);
+
+        if ( material instanceof MicroFacetedMaterial microFacetedMaterial ) {
+            roughness = (float)microFacetedMaterial.getRoughness();
+            alpha = (float)microFacetedMaterial.getAlpha();
+            fresnelF0 = microFacetedMaterial.getFresnelF0();
+            kd = (float)microFacetedMaterial.getKd();
+            ks = (float)microFacetedMaterial.getKs();
+            fresnelModel = microFacetedMaterial.getFresnelModel();
+            ndfModel = microFacetedMaterial.getNdfModel();
+            geometryModel = microFacetedMaterial.getGeometryModel();
+            eta = microFacetedMaterial.getEta();
+            kappa = microFacetedMaterial.getKappa();
+        }
+
+        setFloat(gl, programId, "cookRoughness", roughness);
+        setFloat(gl, programId, "cookAlpha", alpha);
+        setFloat(gl, programId, "cookKd", kd);
+        setFloat(gl, programId, "cookKs", ks);
+        setVector3(gl, programId, "cookF0", fresnelF0);
+        setVector3(gl, programId, "cookEta", eta);
+        setVector3(gl, programId, "cookKappa", kappa);
+        setInt(gl, programId, "cookFresnelModel", fresnelModel);
+        setInt(gl, programId, "cookNdfModel", ndfModel);
+        setInt(gl, programId, "cookGeometryModel", geometryModel);
     }
 
     private static void renderMesh(GL4 gl)

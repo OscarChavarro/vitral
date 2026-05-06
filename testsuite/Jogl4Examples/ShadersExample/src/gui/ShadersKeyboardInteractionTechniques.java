@@ -98,6 +98,11 @@ public class ShadersKeyboardInteractionTechniques
                 quality.changeBumpMap();
                 repaint = true;
                 break;
+            case KeyEvent.KEY_m:
+            case KeyEvent.KEY_M:
+                model.cycleCookTorranceMaterial();
+                repaint = true;
+                break;
             case KeyEvent.KEY_q:
                 model.changeSphereMeridians(-1);
                 repaint = true;

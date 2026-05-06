@@ -13,6 +13,8 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
     private static int gouraudProgramId;
     private static int phongProgramId;
     private static int phongBumpProgramId;
+    private static int cookProgramId;
+    private static int cookBumpProgramId;
 
     public static int selectShaderProgram(GL4 gl, RendererConfiguration quality)
     {
@@ -50,6 +52,13 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
                 return phongBumpProgramId;
             }
             return phongProgramId;
+        }
+
+        if ( shadingType == RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
+            if ( quality.isBumpMapSet() && hasNormalMap ) {
+                return cookBumpProgramId;
+            }
+            return cookProgramId;
         }
 
         return gouraudProgramId;
@@ -139,6 +148,14 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
             gl.glDeleteProgram(phongBumpProgramId);
             phongBumpProgramId = 0;
         }
+        if ( cookProgramId != 0 ) {
+            gl.glDeleteProgram(cookProgramId);
+            cookProgramId = 0;
+        }
+        if ( cookBumpProgramId != 0 ) {
+            gl.glDeleteProgram(cookBumpProgramId);
+            cookBumpProgramId = 0;
+        }
     }
 
     private static void ensurePrograms(GL4 gl)
@@ -190,6 +207,20 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
                 gl,
                 "phongTextureBumpVertexShader.glsl",
                 "phongTextureBumpPixelShader.glsl");
+        }
+
+        if ( cookProgramId == 0 ) {
+            cookProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
+                gl,
+                "phongTextureVertexShader.glsl",
+                "cookTexturePixelShader.glsl");
+        }
+
+        if ( cookBumpProgramId == 0 ) {
+            cookBumpProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
+                gl,
+                "phongTextureBumpVertexShader.glsl",
+                "cookTextureBumpPixelShader.glsl");
         }
     }
 }

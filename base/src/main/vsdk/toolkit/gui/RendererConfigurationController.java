@@ -60,6 +60,9 @@ public class RendererConfigurationController extends Controller {
             else if ( st == RendererConfiguration.SHADING_TYPE_GOURAUD ) {
               st = RendererConfiguration.SHADING_TYPE_PHONG;
             }
+            else if ( st == RendererConfiguration.SHADING_TYPE_PHONG ) {
+              st = RendererConfiguration.SHADING_TYPE_COOK_TERRANCE;
+            }
             else {
               st = RendererConfiguration.SHADING_TYPE_NOLIGHT;
             }

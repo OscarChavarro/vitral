@@ -18,6 +18,43 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     public static final int SHADING_TYPE_FLAT     = 1;
     public static final int SHADING_TYPE_GOURAUD  = 2;
     public static final int SHADING_TYPE_PHONG    = 3;
+    public static final int SHADING_TYPE_COOK_TERRANCE   = 4;
+
+    public enum ShadingType {
+        NOLIGHT(SHADING_TYPE_NOLIGHT),
+        FLAT(SHADING_TYPE_FLAT),
+        GOURAUD(SHADING_TYPE_GOURAUD),
+        PHONG(SHADING_TYPE_PHONG),
+        COOK_TERRANCE(SHADING_TYPE_COOK_TERRANCE);
+
+        private final int code;
+
+        ShadingType(int code)
+        {
+            this.code = code;
+        }
+
+        public int getCode()
+        {
+            return code;
+        }
+
+        public static ShadingType fromCode(int code)
+        {
+            for ( ShadingType value : values() ) {
+                if ( value.code == code ) {
+                    return value;
+                }
+            }
+            return GOURAUD;
+        }
+
+        public ShadingType next()
+        {
+            ShadingType[] values = values();
+            return values[(ordinal() + 1) % values.length];
+        }
+    }
 
     // Indicates the type of shading algorithm to apply in shaders. This must
     // be one of the values defined in the constants SHADING_TYPE_* of this
@@ -200,6 +237,15 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.shadingType = shadingType;
     }
 
+    public void setShadingType(ShadingType shadingType)
+    {
+        if ( shadingType == null ) {
+            this.shadingType = SHADING_TYPE_GOURAUD;
+            return;
+        }
+        this.shadingType = shadingType.getCode();
+    }
+
     public boolean isSurfacesSet()
     {
         return this.surfaces;
@@ -250,6 +296,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         return this.shadingType;
     }
 
+    public ShadingType getShadingTypeEnum()
+    {
+        return ShadingType.fromCode(this.shadingType);
+    }
+
     public void changeSurfaces()
     {
         surfaces = !surfaces;
@@ -297,10 +348,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
 
     public void changeShadingType()
     {
-        shadingType++;
-        if ( shadingType == 4 ) {
-            shadingType = 0;
-        }
+        setShadingType(getShadingTypeEnum().next());
     }
 
     @Override
@@ -323,6 +371,9 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
             break;
           case SHADING_TYPE_PHONG:
             msg = msg + "PHONG\n";
+            break;
+          case SHADING_TYPE_COOK_TERRANCE:
+            msg = msg + "COOK-TERRANCE\n";
             break;
           default:
             msg = msg + "INVALID!\n";

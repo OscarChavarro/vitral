@@ -1,6 +1,11 @@
 package model;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -10,6 +15,7 @@ import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.LightType;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
@@ -24,6 +30,9 @@ public class ShadersModel
     private static final int MIN_SPHERE_MERIDIANS = 12;
     private static final int MIN_SPHERE_PARALLELS = 8;
     private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
+    private static final String MICROFACET_CSV_FILE =
+        "../../../etc/materials/microFacetMAterials.csv";
+    private static final String COOK_TORRANCE_MATERIAL_NAME = "Copper";
 
     private Camera camera;
     private CameraController cameraController;
@@ -32,6 +41,9 @@ public class ShadersModel
     private Sphere sphere;
     private Light light;
     private Material material;
+    private MicroFacetedMaterial cookTorranceCopperMaterial;
+    private List<String> cookTorranceMaterialNames;
+    private int cookTorranceMaterialIndex;
     private RGBImageUncompressed textureMap;
     private RGBImageUncompressed bumpMapHeightRgb;
     private RGBImageUncompressed softwareFrameImage;
@@ -76,6 +88,13 @@ public class ShadersModel
         material.setDiffuse(new ColorRgb(1, 1, 1));
         material.setSpecular(new ColorRgb(1, 1, 1));
         material.setPhongExponent(40);
+        cookTorranceCopperMaterial = new MicroFacetedMaterial(
+            MICROFACET_CSV_FILE,
+            COOK_TORRANCE_MATERIAL_NAME);
+        cookTorranceMaterialNames = loadMicroFacetMaterialNames(MICROFACET_CSV_FILE);
+        cookTorranceMaterialIndex = indexOfMaterialName(
+            cookTorranceMaterialNames,
+            COOK_TORRANCE_MATERIAL_NAME);
 
         try {
             textureMap = ImagePersistence.importRGB(new File("../../../etc/textures/miniearth.png"));
@@ -137,6 +156,37 @@ public class ShadersModel
     public Material getMaterial()
     {
         return material;
+    }
+
+    public Material getActiveMaterialForCurrentShading()
+    {
+        if ( quality.getShadingType() == RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
+            return cookTorranceCopperMaterial;
+        }
+        return material;
+    }
+
+    public void cycleCookTorranceMaterial()
+    {
+        if ( cookTorranceMaterialNames == null || cookTorranceMaterialNames.isEmpty() ) {
+            return;
+        }
+        cookTorranceMaterialIndex =
+            (cookTorranceMaterialIndex + 1) % cookTorranceMaterialNames.size();
+        String nextMaterialName = cookTorranceMaterialNames.get(cookTorranceMaterialIndex);
+        cookTorranceCopperMaterial = new MicroFacetedMaterial(
+            MICROFACET_CSV_FILE,
+            nextMaterialName);
+    }
+
+    public String getCookTorranceMaterialLabel()
+    {
+        if ( cookTorranceCopperMaterial == null ||
+             cookTorranceCopperMaterial.getName() == null ||
+             cookTorranceCopperMaterial.getName().isBlank() ) {
+            return COOK_TORRANCE_MATERIAL_NAME;
+        }
+        return cookTorranceCopperMaterial.getName();
     }
 
     public RGBImageUncompressed getTextureMap()
@@ -284,5 +334,56 @@ public class ShadersModel
             normalized += twoPi;
         }
         return normalized;
+    }
+
+    private static int indexOfMaterialName(
+        List<String> materialNames,
+        String targetName)
+    {
+        int i;
+        for ( i = 0; i < materialNames.size(); i++ ) {
+            if ( materialNames.get(i).equalsIgnoreCase(targetName) ) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private static List<String> loadMicroFacetMaterialNames(String csvPath)
+    {
+        ArrayList<String> materialNames = new ArrayList<String>();
+        File csvFile = new File(csvPath);
+        try {
+            List<String> lines = Files.readAllLines(
+                csvFile.toPath(),
+                StandardCharsets.UTF_8);
+            if ( lines.isEmpty() ) {
+                materialNames.add(COOK_TORRANCE_MATERIAL_NAME);
+                return materialNames;
+            }
+            int i;
+            for ( i = 1; i < lines.size(); i++ ) {
+                String line = lines.get(i).trim();
+                if ( line.isEmpty() ) {
+                    continue;
+                }
+                String[] fields = line.split(",", -1);
+                if ( fields.length == 0 ) {
+                    continue;
+                }
+                String materialName = fields[0].trim();
+                if ( materialName.isEmpty() ) {
+                    continue;
+                }
+                materialNames.add(materialName);
+            }
+        }
+        catch ( IOException e ) {
+            materialNames.clear();
+        }
+        if ( materialNames.isEmpty() ) {
+            materialNames.add(COOK_TORRANCE_MATERIAL_NAME);
+        }
+        return materialNames;
     }
 }

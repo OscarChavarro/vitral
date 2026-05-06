@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.CameraSnapshot;
 import vsdk.toolkit.environment.Light;
 import vsdk.toolkit.environment.LightType;
 import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.MicroFacetedMaterial;
 import vsdk.toolkit.environment.SimpleBackground;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -117,7 +118,13 @@ public class SoftwareRaycaster
 
         SimpleBody sphereBody = new SimpleBody();
         sphereBody.setGeometry(new Sphere(model.getSphere().getRadius()));
-        sphereBody.setMaterial(new Material(model.getMaterial()));
+        Material activeMaterial = model.getActiveMaterialForCurrentShading();
+        if ( activeMaterial instanceof MicroFacetedMaterial microFacetedMaterial ) {
+            sphereBody.setMaterial(new MicroFacetedMaterial(microFacetedMaterial));
+        }
+        else {
+            sphereBody.setMaterial(new Material(activeMaterial));
+        }
         sphereBody.setTexture(model.getTextureMap());
         sphereBody.setNormalMap(bumpNormalMap);
         sphereBody.setRotation(modelRotation);

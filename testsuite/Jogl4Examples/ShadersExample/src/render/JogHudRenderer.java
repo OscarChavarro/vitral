@@ -10,6 +10,7 @@ import com.jogamp.opengl.GL4;
 
 import model.ShaderOperationMode;
 import model.ShadersModel;
+import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 
@@ -64,6 +65,11 @@ public class JogHudRenderer
             ? "Mode [.]: GPU"
             : "Mode [.]: CPU";
         String line2Right = "Show HUD [h]";
+        String lineCookMaterial = null;
+        if ( model.getQuality().getShadingType() ==
+             RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
+            lineCookMaterial = "Material [m]: " + model.getCookTorranceMaterialLabel();
+        }
 
         Graphics2D g = bufferedHud.createGraphics();
         g.setRenderingHint(
@@ -78,6 +84,11 @@ public class JogHudRenderer
         int rightWidth = g.getFontMetrics().stringWidth(line2Right);
         int rightX = Math.max(HUD_LEFT, hudWidth - rightWidth - HUD_LEFT);
         g.drawString(line2Right, rightX, HUD_BASELINE_1);
+        if ( lineCookMaterial != null ) {
+            int materialWidth = g.getFontMetrics().stringWidth(lineCookMaterial);
+            int materialX = Math.max(HUD_LEFT, hudWidth - materialWidth - HUD_LEFT);
+            g.drawString(lineCookMaterial, materialX, HUD_BASELINE_2);
+        }
         g.dispose();
 
         for ( int y = 0; y < hudHeight; y++ ) {

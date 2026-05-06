@@ -324,9 +324,15 @@ public class CommandLineOptions
         if ( normalized.equals("phong") ) {
             return RendererConfiguration.SHADING_TYPE_PHONG;
         }
+        if ( normalized.equals("cook") ||
+             normalized.equals("cook_torrance") ||
+             normalized.equals("cook-torrance") ||
+             normalized.equals("cooktorrance") ) {
+            return RendererConfiguration.SHADING_TYPE_COOK_TERRANCE;
+        }
         throw new IllegalArgumentException(
             "Unknown --shading value: " + raw +
-            ". Use constant, flat, gouraud, or phong.");
+            ". Use constant, flat, gouraud, phong, or cook_torrance.");
     }
 
     private static TextureFilterOption parseTextureFilter(String raw)

@@ -202,7 +202,7 @@ public class ShadersExample extends JFrame implements
             model.getSphere(),
             model.getCamera(),
             model.getLight(),
-            model.getMaterial(),
+            model.getActiveMaterialForCurrentShading(),
             model.getQuality(),
             model.getTextureMap(),
             model.getBumpMapHeightRgb(),
