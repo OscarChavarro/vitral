@@ -8,7 +8,7 @@ import vsdk.toolkit.render.jogl.Jogl2StereoStrategyAutostereogramRenderer;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
 public class JoglDrawingArea implements GLEventListener

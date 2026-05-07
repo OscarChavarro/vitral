@@ -15,13 +15,13 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.LightType;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.MicroFacetedMaterial;
-import vsdk.toolkit.environment.SimpleBackground;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.material.MicroFacetedMaterial;
+import vsdk.toolkit.environment.background.SimpleBackground;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
@@ -118,12 +118,12 @@ public class SoftwareRaycaster
 
         SimpleBody sphereBody = new SimpleBody();
         sphereBody.setGeometry(new Sphere(model.getSphere().getRadius()));
-        Material activeMaterial = model.getActiveMaterialForCurrentShading();
+        SimpleMaterial activeMaterial = model.getActiveMaterialForCurrentShading();
         if ( activeMaterial instanceof MicroFacetedMaterial microFacetedMaterial ) {
             sphereBody.setMaterial(new MicroFacetedMaterial(microFacetedMaterial));
         }
         else {
-            sphereBody.setMaterial(new Material(activeMaterial));
+            sphereBody.setMaterial(new SimpleMaterial(activeMaterial));
         }
         sphereBody.setTexture(model.getTextureMap());
         sphereBody.setNormalMap(bumpNormalMap);

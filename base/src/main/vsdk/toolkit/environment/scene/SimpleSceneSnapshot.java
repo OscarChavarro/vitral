@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Objects;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.light.Light;
 
 /**
 Immutable scene container used by the raytracer for a consistent render pass.

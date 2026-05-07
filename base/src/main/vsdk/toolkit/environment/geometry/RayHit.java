@@ -8,7 +8,7 @@ import vsdk.toolkit.common.RaytraceStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 
 /**
 RayHit describes the result of a ray/geometry intersection.
@@ -37,7 +37,7 @@ public class RayHit extends FundamentalEntity {
     public double v;
 
     // This can be null.
-    public Material material; // Internal geometry selected material
+    public SimpleMaterial material; // Internal geometry selected material
 
     // This can be null.
     public Image texture; // Internal geometry selected texture map

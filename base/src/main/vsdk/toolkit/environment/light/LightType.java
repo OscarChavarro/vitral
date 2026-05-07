@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.light;
 
 public final class LightType
 {

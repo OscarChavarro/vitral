@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL2GL3;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
 public class Jogl2InfinitePlaneRenderer extends Jogl2Renderer {

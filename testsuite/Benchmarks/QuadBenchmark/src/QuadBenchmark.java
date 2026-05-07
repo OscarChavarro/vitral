@@ -24,7 +24,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.Animator;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.environment.camera.Camera;              // Model elements
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;

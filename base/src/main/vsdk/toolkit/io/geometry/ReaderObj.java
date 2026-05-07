@@ -19,10 +19,10 @@ import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
@@ -147,11 +147,11 @@ public class ReaderObj extends PersistenceElement
         //- Accumulated states for currently builded geometric object -----
         String nextGeometricObjectName;
         ArrayList<RGBAImageUncompressed> nextTexturesArray;
-        ArrayList<Material> nextMaterialsArray;
+        ArrayList<SimpleMaterial> nextMaterialsArray;
 
         nextGeometricObjectName = "OBJ_default_material";
         nextTexturesArray = new ArrayList<RGBAImageUncompressed>();
-        nextMaterialsArray = new ArrayList<Material>();        
+        nextMaterialsArray = new ArrayList<SimpleMaterial>();        
 
         //- Aditional support data structures -----------------------------
         ArrayList<TriangleMesh> meshGroup;
@@ -159,12 +159,12 @@ public class ReaderObj extends PersistenceElement
         ArrayList<int[]> auxInitialTextureMapping;
         ArrayList<int[]> material_triangleRange_table;
         HashMap<String, RGBAImageUncompressed> texturesHashMap;
-        HashMap<String, Material> materialsHashMap;
+        HashMap<String, SimpleMaterial> materialsHashMap;
         int textureIndex;
 
         meshGroup = new ArrayList<TriangleMesh>();
         texturesHashMap = new HashMap<String, RGBAImageUncompressed>();
-        materialsHashMap = new HashMap<String, Material>();        
+        materialsHashMap = new HashMap<String, SimpleMaterial>();        
         textureIndex = 0;
 
         texture_span_triangleRange_table = new ArrayList<ArrayList<int[]>>();
@@ -306,7 +306,7 @@ public class ReaderObj extends PersistenceElement
                 // Clear accumulated states variables
                 if ( vertexPositionsArray.size() > 0 ) {
                     nextTexturesArray = new ArrayList<RGBAImageUncompressed>();
-                    nextMaterialsArray = new ArrayList<Material>();
+                    nextMaterialsArray = new ArrayList<SimpleMaterial>();
                     triangleDatasetsArray = new ArrayList<_ReaderObjVertex[]>();
                     material_triangleRange_table = new ArrayList<int[]>();
                     texture_span_triangleRange_table =
@@ -357,7 +357,7 @@ public class ReaderObj extends PersistenceElement
         ArrayList<_ReaderObjVertex[]> triangleDatasetsArray,
         ArrayList<RGBAImageUncompressed> nextTexturesArray,
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
-        ArrayList<Material> nextMaterialsArray,
+        ArrayList<SimpleMaterial> nextMaterialsArray,
         ArrayList<int[]> material_triangleRange_table
     )
     {
@@ -367,8 +367,8 @@ public class ReaderObj extends PersistenceElement
 
         //- If there are no specified materials, add a default one --------
         if ( nextMaterialsArray.isEmpty() ) {
-            Material m;
-            m = new Material();
+            SimpleMaterial m;
+            m = new SimpleMaterial();
             m.setName("default obj material");
             m.setDoubleSided(false);
             nextMaterialsArray.add(m);
@@ -461,13 +461,13 @@ public class ReaderObj extends PersistenceElement
         newTriangleMesh.setTriangles(newTriangleArray);
         
         //- Process materials ---------------------------------------------
-        Material materials[];
-        materials = new Material[nextMaterialsArray.size()];
+        SimpleMaterial materials[];
+        materials = new SimpleMaterial[nextMaterialsArray.size()];
 
         for ( i = 0; i < materials.length; i++ ) {
             materials[i] = nextMaterialsArray.get(i);
             if ( materials[i] == null ) {
-                materials[i] = new Material();
+                materials[i] = new SimpleMaterial();
                 materials[i].setDoubleSided(false);
             }
         }
@@ -739,9 +739,9 @@ public class ReaderObj extends PersistenceElement
         return vert;
     }
 
-    private static HashMap<String, Material>
+    private static HashMap<String, SimpleMaterial>
     readMaterials(String material, String fileName) {
-        HashMap<String, Material> ret = new HashMap<String, Material>();
+        HashMap<String, SimpleMaterial> ret = new HashMap<String, SimpleMaterial>();
         StringTokenizer st = new StringTokenizer(material, " ");
         st.nextToken(); // "mtlib" token
         File arc = new File(fileName);
@@ -753,7 +753,7 @@ public class ReaderObj extends PersistenceElement
             BufferedReader in=new BufferedReader(new FileReader(nomArc));
             String lineOfText;
 
-            Material activeMaterial=new Material();
+            SimpleMaterial activeMaterial=new SimpleMaterial();
             activeMaterial.setDoubleSided(false);
             activeMaterial.setName("default");
 
@@ -800,7 +800,7 @@ public class ReaderObj extends PersistenceElement
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken();//newmtl
                     ret.put(activeMaterial.getName(), activeMaterial);
-                    activeMaterial = new Material();
+                    activeMaterial = new SimpleMaterial();
                     activeMaterial.setDoubleSided(false);
                     activeMaterial.setName(stMat.nextToken());
                 }
@@ -812,9 +812,9 @@ public class ReaderObj extends PersistenceElement
         return ret;
     }
 
-    private static Material defaultMaterial()
+    private static SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));

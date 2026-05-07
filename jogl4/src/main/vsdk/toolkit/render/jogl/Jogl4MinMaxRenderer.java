@@ -3,7 +3,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 public class Jogl4MinMaxRenderer extends Jogl4Renderer {

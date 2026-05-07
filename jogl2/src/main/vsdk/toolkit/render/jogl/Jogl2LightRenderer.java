@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL2;
 // VitralSDK classes
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.light.Light;
 
 public class Jogl2LightRenderer extends Jogl2Renderer {
 

@@ -20,7 +20,7 @@ import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.PrimitiveCountShapeDescriptor;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
@@ -218,7 +218,7 @@ public class ShapeDescriptor3DGenerator extends Component
             framedBody.setPosition(referenceBody.getPosition());
             framedBody.setRotation(referenceBody.getRotation());
             framedBody.setRotationInverse(referenceBody.getRotationInverse());
-            framedBody.setMaterial(new Material());
+            framedBody.setMaterial(new SimpleMaterial());
             bodySet.getBodies().add(framedBody);
         }
 

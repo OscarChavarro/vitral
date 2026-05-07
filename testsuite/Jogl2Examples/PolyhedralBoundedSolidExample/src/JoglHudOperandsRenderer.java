@@ -3,8 +3,8 @@ import com.jogamp.opengl.GL2;
 import models.DebuggerModel;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
@@ -14,8 +14,8 @@ public class JoglHudOperandsRenderer
     private static final double HUD_INSET_DEPTH = 2.8;
 
     private final DebuggerModel model;
-    private final Material csgOperandMaterialA;
-    private final Material csgOperandMaterialB;
+    private final SimpleMaterial csgOperandMaterialA;
+    private final SimpleMaterial csgOperandMaterialB;
 
     public JoglHudOperandsRenderer(DebuggerModel model)
     {
@@ -24,9 +24,9 @@ public class JoglHudOperandsRenderer
         this.csgOperandMaterialB = createInsetMaterial(0.502, 1.0, 0.502);
     }
 
-    private static Material createInsetMaterial(double r, double g, double b)
+    private static SimpleMaterial createInsetMaterial(double r, double g, double b)
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
         m.setAmbient(new ColorRgb(0.2 * r, 0.2 * g, 0.2 * b));
         m.setDiffuse(new ColorRgb(r, g, b));
         m.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
@@ -107,7 +107,7 @@ public class JoglHudOperandsRenderer
 
     private void drawInsetSolid(GL2 gl,
         PolyhedralBoundedSolid solid,
-        Material material,
+        SimpleMaterial material,
         Vector3D anchorPoint,
         double mainSolidExtent)
     {

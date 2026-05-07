@@ -12,10 +12,10 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -86,9 +86,9 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         return true;
     }
 
-    private static Material defaultMaterial()
+    private static SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.9, 0.9, 0.9));
@@ -417,7 +417,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
                 mesh.setTextureRanges(ranges);
             }
 
-            Material[] ma = new Material[1];
+            SimpleMaterial[] ma = new SimpleMaterial[1];
             ma[0] = defaultMaterial();
             int mranges[][] = new int[1][2];
             mranges[0][0] = (int)nt;
@@ -449,7 +449,7 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
         SimpleBody thing;
         Vector3D position = new Vector3D();
         Matrix4x4 R = new Matrix4x4();
-        Material material = defaultMaterial();
+        SimpleMaterial material = defaultMaterial();
 
         thing = new SimpleBody();
         thing.setName(name);

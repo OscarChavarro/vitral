@@ -3,10 +3,10 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.FixedBackground;
-import vsdk.toolkit.environment.SimpleBackground;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.background.CubemapBackground;
+import vsdk.toolkit.environment.background.FixedBackground;
+import vsdk.toolkit.environment.background.SimpleBackground;
 
 public class Jogl2BackgroundRenderer extends Jogl2Renderer 
 {

@@ -8,7 +8,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Box;
 
 public class Jogl2BoxRenderer extends Jogl2Renderer {

@@ -12,14 +12,14 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 
 public class DebuggerModel
@@ -33,7 +33,7 @@ public class DebuggerModel
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
     private final Camera camera;
-    private final Material material;
+    private final SimpleMaterial material;
     private final Light light1;
     private final Light light2;
     private PolyhedralBoundedSolid solid;
@@ -76,9 +76,9 @@ public class DebuggerModel
         light2.setId(1);
     }
 
-    private Material defaultMaterial()
+    private SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.5, 0.9));
@@ -168,7 +168,7 @@ public class DebuggerModel
         return camera;
     }
 
-    public Material getMaterial()
+    public SimpleMaterial getMaterial()
     {
         return material;
     }

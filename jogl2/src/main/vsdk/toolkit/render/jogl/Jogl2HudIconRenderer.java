@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import com.jogamp.opengl.GL2;
 
 // VSDK classes
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.HudIcon;
 import vsdk.toolkit.io.image.ImagePersistence;
 

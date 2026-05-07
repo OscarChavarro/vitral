@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Quaternion;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.PersistenceElement;
 
 class VitralCommandServerProtocol implements Runnable

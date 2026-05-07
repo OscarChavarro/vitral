@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl2CameraRenderer extends Jogl2Renderer
 {

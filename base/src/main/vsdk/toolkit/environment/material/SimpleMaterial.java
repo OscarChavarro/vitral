@@ -1,11 +1,11 @@
 //=   recursive raytracing ilumination model                                =
 
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.material;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.ColorRgb;
 
-public class Material extends Entity
+public class SimpleMaterial extends Entity
 {
     private ColorRgb ambient; 
     private ColorRgb diffuse; 
@@ -21,7 +21,7 @@ public class Material extends Entity
     private double phongExponent;
     
     /** Creates a new instance of MaterialGL */
-    public Material() 
+    public SimpleMaterial()
     {
         ambient=new ColorRgb(0.1, 0.1, 0.1);
         diffuse=new ColorRgb(0.9, 0.5, 0.5);
@@ -33,7 +33,7 @@ public class Material extends Entity
         phongExponent = 128;
     }
     
-    public Material(Material m) 
+    public SimpleMaterial(SimpleMaterial m)
     {
         name=m.name;
         ambient=new ColorRgb(m.getAmbient()); 
@@ -171,12 +171,12 @@ public class Material extends Entity
     Provides an object to text report convertion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return human readable representation of current Material information
+    @return human readable representation of current SimpleMaterial information
     */
     @Override
     public String toString()
     {
-        return "Material [" + name + "]:\n" +
+        return "SimpleMaterial [" + name + "]:\n" +
                "  - Specular " + specular + "\n" +
                "  - Diffuse " + diffuse + "\n" +
                "  - Ambient " + ambient + "\n" +

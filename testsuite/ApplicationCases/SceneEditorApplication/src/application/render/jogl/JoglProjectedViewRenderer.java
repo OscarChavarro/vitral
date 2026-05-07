@@ -16,7 +16,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;

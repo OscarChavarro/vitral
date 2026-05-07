@@ -18,10 +18,10 @@ import vsdk.toolkit.common.ArrayListOfInts;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -423,9 +423,9 @@ public class ReaderAse extends PersistenceElement
         return new ColorRgb(vals[0], vals[1], vals[2]);
     }
 
-    private static Material defaultMaterial()
+    private static SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
@@ -557,7 +557,7 @@ public class ReaderAse extends PersistenceElement
                         vals[2] = Integer.parseInt(parser.sval);
                     }
                     else if ( i == 16 ) {
-                        // Material ID
+                        // SimpleMaterial ID
                         vals[4] = Integer.parseInt(parser.sval);
                     }
                 }
@@ -854,7 +854,7 @@ public class ReaderAse extends PersistenceElement
         Vector3D position = new Vector3D();
         Matrix4x4 R = new Matrix4x4();
         Geometry g = null;
-        Material material = defaultMaterial();
+        SimpleMaterial material = defaultMaterial();
 
         thing = new SimpleBody();
 
@@ -950,7 +950,7 @@ public class ReaderAse extends PersistenceElement
         Vector3D position = new Vector3D();
         Matrix4x4 R = new Matrix4x4();
         Geometry g = null;
-        Material material = defaultMaterial();
+        SimpleMaterial material = defaultMaterial();
 
         thing = new SimpleBody();
 

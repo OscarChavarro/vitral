@@ -68,7 +68,7 @@ public class JogHudRenderer
         String lineCookMaterial = null;
         if ( model.getQuality().getShadingType() ==
              RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
-            lineCookMaterial = "Material [m]: " + model.getCookTorranceMaterialLabel();
+            lineCookMaterial = "SimpleMaterial [m]: " + model.getCookTorranceMaterialLabel();
         }
 
         Graphics2D g = bufferedHud.createGraphics();

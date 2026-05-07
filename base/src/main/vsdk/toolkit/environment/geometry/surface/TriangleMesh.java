@@ -24,7 +24,7 @@ import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.Image;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.processing.ComputationalGeometry;
@@ -94,7 +94,7 @@ public class TriangleMesh extends Surface {
     private double[] triangleNormals;
 
     // Auxiliary components for data model
-    private Material[] materials;
+    private SimpleMaterial[] materials;
     private Image[] textures;
 
     /**
@@ -217,7 +217,7 @@ public class TriangleMesh extends Surface {
          
 /*
         ArrayList<ArrayList<Integer>> incidentTrianglesPerVertexArray;
-        Material[] materials;
+        SimpleMaterial[] materials;
         Image[] textures;
         int[][] textureRanges;
         int[][] materialRanges;
@@ -254,7 +254,7 @@ public class TriangleMesh extends Surface {
         }
     }
 
-    public Material[] getMaterials() {
+    public SimpleMaterial[] getMaterials() {
         return this.materials;
     }
 
@@ -431,7 +431,7 @@ public class TriangleMesh extends Surface {
         this.textures = textures;
     }
 
-    public void setMaterials(Material[] materials) {
+    public void setMaterials(SimpleMaterial[] materials) {
         this.materials = materials;
     }
 

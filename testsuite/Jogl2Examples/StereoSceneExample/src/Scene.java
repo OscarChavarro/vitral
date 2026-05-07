@@ -5,13 +5,13 @@ import vsdk.toolkit.common.ColorRgb;                     // Model elements
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;  // Persistence elements
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 public class Scene
 {
@@ -77,11 +77,11 @@ public class Scene
         eyeTorsionAngle = 0.00;
     }
 
-    private Material defaultMaterial(ColorRgb d)
+    private SimpleMaterial defaultMaterial(ColorRgb d)
     {
-        Material m;
+        SimpleMaterial m;
 
-        m = new Material();
+        m = new SimpleMaterial();
         m.setAmbient(new ColorRgb(0, 0, 0));
         m.setDiffuse(new ColorRgb(d));
         m.setSpecular(new ColorRgb(1, 1, 1));

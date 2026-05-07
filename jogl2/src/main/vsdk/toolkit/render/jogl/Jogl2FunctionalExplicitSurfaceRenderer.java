@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl2FunctionalExplicitSurfaceRenderer extends Jogl2Renderer {
 

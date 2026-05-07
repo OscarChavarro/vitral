@@ -5,8 +5,8 @@ import java.util.List;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
@@ -20,7 +20,7 @@ public final class ConstantShader extends Shader {
         double viewZ,
         List<Light> lights,
         List<SimpleBody> objects,
-        Material material,
+        SimpleMaterial material,
         TraceWorkspace workspace)
     {
         ColorRgb diffuse = material.getDiffuseReference();

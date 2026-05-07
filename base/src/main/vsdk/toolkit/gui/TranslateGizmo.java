@@ -9,8 +9,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -147,9 +147,9 @@ public class TranslateGizmo extends Gizmo {
         int i;
         SimpleBody r, o, r2;
         Geometry g;
-        Material red = createMaterial(0.78, 0, 0);
-        Material green = createMaterial(0, 0.61, 0);
-        Material blue = createMaterial(0, 0, 0.76);
+        SimpleMaterial red = createMaterial(0.78, 0, 0);
+        SimpleMaterial green = createMaterial(0, 0.61, 0);
+        SimpleMaterial blue = createMaterial(0, 0, 0.76);
 
         Matrix4x4 R = new Matrix4x4(T).withoutTranslation();
         Matrix4x4 subR = new Matrix4x4();
@@ -248,9 +248,9 @@ public class TranslateGizmo extends Gizmo {
         return elementInstances3dsmax;
     }
 
-    private Material createMaterial(double r, double g, double b)
+    private SimpleMaterial createMaterial(double r, double g, double b)
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(r, g, b));
@@ -282,11 +282,11 @@ public class TranslateGizmo extends Gizmo {
     {
         //-----------------------------------------------------------------
         int i;
-        Material red = createMaterial(0.78, 0, 0);
-        Material green = createMaterial(0, 0.61, 0);
-        Material blue = createMaterial(0, 0, 0.76);
-        Material yellow = createMaterial(1, 1, 0);
-        Material yellowTransparent = createMaterial(1, 1, 0);
+        SimpleMaterial red = createMaterial(0.78, 0, 0);
+        SimpleMaterial green = createMaterial(0, 0.61, 0);
+        SimpleMaterial blue = createMaterial(0, 0, 0.76);
+        SimpleMaterial yellow = createMaterial(1, 1, 0);
+        SimpleMaterial yellowTransparent = createMaterial(1, 1, 0);
 
         yellowTransparent.setOpacity(0.2);
 

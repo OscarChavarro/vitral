@@ -28,12 +28,12 @@ import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.SimpleBackground;
-import vsdk.toolkit.environment.CubemapBackground;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.background.SimpleBackground;
+import vsdk.toolkit.environment.background.CubemapBackground;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -51,7 +51,7 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 /**
 This class implements an scene reader based on the instructional raytracer
@@ -125,7 +125,7 @@ public class ReaderMitScene extends PersistenceElement
         throw new IOException(st.toString());
     }
 
-    private Material
+    private SimpleMaterial
     readSurfaceDefinition(StreamTokenizer st) throws IOException
     {
         double r = readNumber(st);
@@ -139,7 +139,7 @@ public class ReaderMitScene extends PersistenceElement
         double kt = readNumber(st);
         double index = readNumber(st);
 
-        Material material = new Material();
+        SimpleMaterial material = new SimpleMaterial();
         material.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
         material.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
         material.setSpecular(new ColorRgb(ks, ks, ks));
@@ -198,7 +198,7 @@ public class ReaderMitScene extends PersistenceElement
     flushTriangleBatch(SimpleScene theScene,
                        ArrayList<Vertex> vertices,
                        ArrayList<Triangle> triangles,
-                       Material material,
+                       SimpleMaterial material,
                        double yaw, double pitch, double roll)
     {
         if ( triangles.isEmpty() ) {
@@ -220,7 +220,7 @@ public class ReaderMitScene extends PersistenceElement
     private void
     addImportedObj(SimpleScene theScene,
                    String objectPath,
-                   Material fallbackMaterial,
+                   SimpleMaterial fallbackMaterial,
                    double yaw, double pitch, double roll,
                    Vector3D translation,
                    double uniformScale) throws Exception
@@ -260,7 +260,7 @@ public class ReaderMitScene extends PersistenceElement
     flushQuadBatch(SimpleScene theScene,
                    ArrayList<Vertex> vertices,
                    ArrayList<int[]> quads,
-                   Material material,
+                   SimpleMaterial material,
                    double yaw, double pitch, double roll)
     {
         if ( quads.isEmpty() ) {
@@ -330,21 +330,21 @@ public class ReaderMitScene extends PersistenceElement
         st.quoteChar('"');
         st.eolIsSignificant(true);
         boolean fin_de_lectura = false;
-        Material currentMaterial;
-        Material currentTrianglesMaterial = null;
-        Material currentQuadsMaterial = null;
+        SimpleMaterial currentMaterial;
+        SimpleMaterial currentTrianglesMaterial = null;
+        SimpleMaterial currentQuadsMaterial = null;
         RGBImageUncompressed currentTexture = null;
         NormalMap currentNormalMap = null;
         HashMap<String, RGBImageUncompressed> textureCache = new HashMap<String, RGBImageUncompressed>();
         HashMap<String, NormalMap> normalMapCache = new HashMap<String, NormalMap>();
 
-        // Material por defecto...
+        // SimpleMaterial por defecto...
         /*
-        currentMaterial = new Material(0.8f, 0.2f, 0.9f, 
+        currentMaterial = new SimpleMaterial(0.8f, 0.2f, 0.9f, 
                                        0.2f, 0.4f, 0.4f, 
                                        10.0f, 0f, 0f, 1f);
         */
-        currentMaterial = new Material();
+        currentMaterial = new SimpleMaterial();
         currentMaterial.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
         currentMaterial.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
         currentMaterial.setSpecular(new ColorRgb(0.4, 0.4, 0.4));

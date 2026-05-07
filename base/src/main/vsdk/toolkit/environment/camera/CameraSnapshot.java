@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.camera;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 

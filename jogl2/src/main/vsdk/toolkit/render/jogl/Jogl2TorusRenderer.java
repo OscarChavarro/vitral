@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL2;
 // VSDK Classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 
 /**

@@ -12,13 +12,13 @@ import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.SimpleBackground;
-import vsdk.toolkit.environment.CubemapBackground;
-import vsdk.toolkit.environment.FixedBackground;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.background.SimpleBackground;
+import vsdk.toolkit.environment.background.CubemapBackground;
+import vsdk.toolkit.environment.background.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.RayHit;
@@ -150,9 +150,9 @@ public class Scene
         return true;
     }
 
-    public Material defaultMaterial()
+    public SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
 /*
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));

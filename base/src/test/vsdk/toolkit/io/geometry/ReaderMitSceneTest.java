@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleScene;
 
 import static org.assertj.core.api.Assertions.assertThat;

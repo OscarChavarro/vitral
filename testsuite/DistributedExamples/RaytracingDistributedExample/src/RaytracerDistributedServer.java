@@ -13,7 +13,7 @@ import java.io.File;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.environment.CameraSnapshot;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;

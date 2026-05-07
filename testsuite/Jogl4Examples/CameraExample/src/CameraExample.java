@@ -23,7 +23,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.fixtures.Jogl4SimpleCorridorSample;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;

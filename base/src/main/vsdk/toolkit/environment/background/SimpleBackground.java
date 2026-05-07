@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.background;
 import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;

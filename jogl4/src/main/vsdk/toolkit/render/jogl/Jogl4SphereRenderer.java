@@ -9,10 +9,10 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.MicroFacetedMaterial;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
@@ -56,7 +56,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Sphere sphere,
         Camera camera,
         Light light,
-        Material material,
+        SimpleMaterial material,
         RendererConfiguration quality,
         RGBImageUncompressed textureMap,
         RGBImageUncompressed normalMap)
@@ -79,7 +79,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Sphere sphere,
         Camera camera,
         Light light,
-        Material material,
+        SimpleMaterial material,
         RendererConfiguration quality,
         RGBImageUncompressed textureMap,
         RGBImageUncompressed normalMap,
@@ -105,7 +105,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Sphere sphere,
         Camera camera,
         Light light,
-        Material material,
+        SimpleMaterial material,
         RendererConfiguration quality,
         RGBImageUncompressed textureMap,
         RGBImageUncompressed normalMap,
@@ -177,7 +177,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 false,
                 false);
 
-            Material wireMaterial = new Material(material);
+            SimpleMaterial wireMaterial = new SimpleMaterial(material);
             wireMaterial.setDiffuse(new ColorRgb(1, 1, 1));
             wireMaterial.setSpecular(new ColorRgb(0, 0, 0));
             wireMaterial.setAmbient(new ColorRgb(0, 0, 0));
@@ -223,7 +223,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 false,
                 false);
 
-            Material pointMaterial = new Material(material);
+            SimpleMaterial pointMaterial = new SimpleMaterial(material);
             pointMaterial.setAmbient(new ColorRgb(0, 0, 0));
             pointMaterial.setDiffuse(new ColorRgb(1, 0, 0)); // #ff0000
             pointMaterial.setSpecular(new ColorRgb(0, 0, 0));
@@ -326,7 +326,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Matrix4x4 modelViewITLocal,
         Camera camera,
         Light light,
-        Material material,
+        SimpleMaterial material,
         RendererConfiguration quality,
         int textureId,
         int normalMapId)
@@ -416,7 +416,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         }
     }
 
-    private static void configureMicrofacetUniforms(GL4 gl, int programId, Material material)
+    private static void configureMicrofacetUniforms(GL4 gl, int programId, SimpleMaterial material)
     {
         float roughness = 0.35f;
         float alpha = roughness * roughness;

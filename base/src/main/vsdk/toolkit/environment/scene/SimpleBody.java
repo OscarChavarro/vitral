@@ -14,7 +14,7 @@ import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -48,7 +48,7 @@ public class SimpleBody extends Entity {
     private boolean hasTranslationOnlyTransform;
 
     //- Model (3/6): body visual data ---------------------------------
-    private Material globalMaterial;
+    private SimpleMaterial globalMaterial;
     private Image globalTextureMap;
     private NormalMap globalNormalMap;
     private RGBImageUncompressed globalNormalMapRgb;
@@ -67,7 +67,7 @@ public class SimpleBody extends Entity {
         setPosition(new Vector3D(0, 0, 0));
         setRotation(new Matrix4x4());
         setScale(new Vector3D(1, 1, 1));
-        globalMaterial = new Material();
+        globalMaterial = new SimpleMaterial();
         globalTextureMap = null;
         globalNormalMap = null;
     }
@@ -177,7 +177,7 @@ public class SimpleBody extends Entity {
     /**
     @return default material used by this body
     */
-    public Material getMaterial()
+    public SimpleMaterial getMaterial()
     {
         return globalMaterial;
     }
@@ -185,7 +185,7 @@ public class SimpleBody extends Entity {
     /**
     @param m default material used by this body
     */
-    public void setMaterial(Material m)
+    public void setMaterial(SimpleMaterial m)
     {
         globalMaterial = m;
         markModified();

@@ -11,10 +11,10 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.LightType;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.MicroFacetedMaterial;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
@@ -40,7 +40,7 @@ public final class CookTorranceShader extends Shader {
         double viewZ,
         List<Light> lights,
         List<SimpleBody> objects,
-        Material material,
+        SimpleMaterial material,
         TraceWorkspace workspace)
     {
         Vector3D surfaceNormal = info.n;
@@ -189,7 +189,7 @@ public final class CookTorranceShader extends Shader {
             Double.POSITIVE_INFINITY);
     }
 
-    private static MicrofacetParams resolveMicrofacetParams(Material material)
+    private static MicrofacetParams resolveMicrofacetParams(SimpleMaterial material)
     {
         double roughness = DEFAULT_ROUGHNESS;
         double alpha = roughness * roughness;

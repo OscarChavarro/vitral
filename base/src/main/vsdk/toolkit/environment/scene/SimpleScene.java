@@ -6,10 +6,10 @@ import java.util.ArrayList;
 
 // VSDK Classes
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.light.Light;
 
 public class SimpleScene extends Entity
 {

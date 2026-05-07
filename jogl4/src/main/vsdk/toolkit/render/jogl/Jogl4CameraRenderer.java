@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl4CameraRenderer extends Jogl4Renderer {
     private static final float[] CAMERA_ORIGIN_COLOR = { 1.0f, 0.5f, 0.5f };

@@ -36,9 +36,9 @@ import com.jogamp.opengl.GLEventListener;
 import vsdk.toolkit.common.ColorRgb;              // Model elements
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.Jogl2Renderer;
@@ -49,7 +49,7 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.Jogl2TorusRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 /**
 This is a simple program recommended for use as a template in the development
@@ -65,7 +65,7 @@ public class TorusExample implements
     private Camera camera;
     private CameraController cameraController;
     private Light light;
-    private Material material;
+    private SimpleMaterial material;
     private RendererConfiguration qualitySelection;
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;  
@@ -190,7 +190,7 @@ public class TorusExample implements
             new Light(
                 LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
         light.setId(0);
-        material = new Material();
+        material = new SimpleMaterial();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
         material.setSpecular(new ColorRgb(1, 1, 1));

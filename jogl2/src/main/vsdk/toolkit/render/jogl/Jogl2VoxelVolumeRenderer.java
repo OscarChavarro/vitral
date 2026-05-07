@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl2VoxelVolumeRenderer extends Jogl2Renderer
 {

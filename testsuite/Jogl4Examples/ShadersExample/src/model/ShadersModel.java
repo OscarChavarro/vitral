@@ -11,11 +11,11 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.LightType;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.MicroFacetedMaterial;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
@@ -40,7 +40,7 @@ public class ShadersModel
     private RendererConfigurationController qualityController;
     private Sphere sphere;
     private Light light;
-    private Material material;
+    private SimpleMaterial material;
     private MicroFacetedMaterial cookTorranceCopperMaterial;
     private List<String> cookTorranceMaterialNames;
     private int cookTorranceMaterialIndex;
@@ -83,7 +83,7 @@ public class ShadersModel
         light = new Light(LightType.POINT, new Vector3D(1, -3, 1), new ColorRgb(1, 1, 1));
         light.setId(0);
 
-        material = new Material();
+        material = new SimpleMaterial();
         material.setAmbient(new ColorRgb(0.1, 0.1, 0.1));
         material.setDiffuse(new ColorRgb(1, 1, 1));
         material.setSpecular(new ColorRgb(1, 1, 1));
@@ -153,12 +153,12 @@ public class ShadersModel
         return light;
     }
 
-    public Material getMaterial()
+    public SimpleMaterial getMaterial()
     {
         return material;
     }
 
-    public Material getActiveMaterialForCurrentShading()
+    public SimpleMaterial getActiveMaterialForCurrentShading()
     {
         if ( quality.getShadingType() == RendererConfiguration.SHADING_TYPE_COOK_TERRANCE ) {
             return cookTorranceCopperMaterial;

@@ -39,7 +39,7 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -96,7 +96,7 @@ public class JoglDrawingArea implements
     private final TranslateGizmo translationGizmo;
     private final RotateGizmo rotateGizmo;
     private final ScaleGizmo scaleGizmo;
-    private final Material visualDebugMaterial;
+    private final SimpleMaterial visualDebugMaterial;
 
     private final Scene theScene;
     private final JLabel statusMessage;
@@ -487,7 +487,7 @@ public class JoglDrawingArea implements
         Triangle[] triangleArray;
         Vector3D n;
         Image textureArray[];
-        Material materialArray[];
+        SimpleMaterial materialArray[];
         int materialRanges[][];
         int textureRanges[][];
 
@@ -620,7 +620,7 @@ public class JoglDrawingArea implements
             textureRanges = new int[1][2];
             textureRanges[0][0] = 2;
             textureRanges[0][1] = 1;
-            materialArray = new Material[1];
+            materialArray = new SimpleMaterial[1];
             materialArray[0] = theScene.defaultMaterial();
             materialArray[0].setDoubleSided(true);
             materialArray[0].setAmbient(new ColorRgb(1, 1, 1));

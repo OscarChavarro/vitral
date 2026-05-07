@@ -6,7 +6,7 @@
 //= [BECK1963] Beckmann, P.; Spizzichino, A. "The Scattering of              =
 //= Electromagnetic Waves from Rough Surfaces", 1963.                        =
 
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.material;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**
-Cook-Torrance oriented extension of {@link Material}.
+Cook-Torrance oriented extension of {@link SimpleMaterial}.
 
 This class stores the per-object microfacet parameters shared by CPU and GPU
 shaders. It does not implement shading by itself.
@@ -31,7 +31,7 @@ f_r ~ D * F * G / (4 * (N.L) * (N.V)), where:
 - F: Fresnel reflectance
 - G: geometric attenuation / masking-shadowing
 */
-public class MicroFacetedMaterial extends Material
+public class MicroFacetedMaterial extends SimpleMaterial
 {
     @Serial
     private static final long serialVersionUID = 20260506L;
@@ -280,7 +280,7 @@ public class MicroFacetedMaterial extends Material
         }
 
         throw new IllegalArgumentException(
-            "Material '" + materialName + "' not found in CSV: " + csvFile.getAbsolutePath());
+            "SimpleMaterial '" + materialName + "' not found in CSV: " + csvFile.getAbsolutePath());
     }
 
     private static File resolveCsvFile(String csvFileName)

@@ -20,11 +20,11 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 /**
 Warning: check why this class implements a GLEventListener. Advanced debug
@@ -42,7 +42,7 @@ implements GLEventListener
     private PolyhedralBoundedSolid solid;
     private Camera camera;
     private RendererConfiguration quality;
-    private Material material;
+    private SimpleMaterial material;
     private Light light1;
     private Light light2;
 
@@ -90,9 +90,9 @@ implements GLEventListener
         light2.setId(1);
     }
 
-    private Material defaultMaterial()
+    private SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.5, 0.9));

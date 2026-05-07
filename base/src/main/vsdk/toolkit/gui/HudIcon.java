@@ -2,7 +2,7 @@ package vsdk.toolkit.gui;
 
 import java.io.File;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAImageUncompressed;

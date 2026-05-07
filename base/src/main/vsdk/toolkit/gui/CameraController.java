@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 public abstract class CameraController extends Controller {
     public abstract boolean processKeyPressedEvent(KeyEvent keyEvent);

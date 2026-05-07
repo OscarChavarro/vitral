@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.light;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

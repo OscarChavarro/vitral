@@ -4,7 +4,7 @@
 //=   consistent with JOGL/OpenGL transformation interpretation.            =
 //=   clipping functionality                                                =
 
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.camera;
 import java.io.Serial;
 import java.util.concurrent.atomic.AtomicLong;
 

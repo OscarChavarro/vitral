@@ -60,7 +60,7 @@ public class QuadMesh extends Surface {
     private int[] quadIndices;
 
     // Auxiliary components for data model
-    //private Material[] materials;
+    //private SimpleMaterial[] materials;
     //private Image[] textures;
 
     // Auxiliary data structures for storage of parcial results and 

@@ -23,7 +23,7 @@ import javax.swing.JFrame;
 
 // VSDK classes
 
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBAImageCompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;

@@ -11,7 +11,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
 

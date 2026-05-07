@@ -20,7 +20,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
-import vsdk.toolkit.environment.Material;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 
 public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
 
@@ -357,7 +357,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int start = 0;
         int end = 0;
         int materialIndex;
-        Material materialsArray[] = mesh.getMaterials();
+        SimpleMaterial materialsArray[] = mesh.getMaterials();
         int i;
         for ( i = 0; i < materialRanges.length; i++ ) {
             end = materialRanges[i][0];
@@ -370,7 +370,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
             start = end;
         }
         if ( end <= nt ) {
-            Material m = new Material();
+            SimpleMaterial m = new SimpleMaterial();
             Jogl2MaterialRenderer.activate(gl, m);
             drawRangeWithoutTexture(gl, mesh, start, nt, flipNormals);
         }
@@ -402,7 +402,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int start = 0;
         int end = 0;
         int materialIndex;
-        Material materialsArray[] = mesh.getMaterials();
+        SimpleMaterial materialsArray[] = mesh.getMaterials();
         int i;
         for ( i = 0; i < materialRanges.length; i++ ) {
             end = materialRanges[i][0];
@@ -415,7 +415,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
             start = end;
         }
         if ( end <= nt ) {
-            Material m = new Material();
+            SimpleMaterial m = new SimpleMaterial();
             Jogl2MaterialRenderer.activate(gl, m);
             drawRangeWithVertexArrays(gl, mesh, start, nt, flipNormals, false);
         }
@@ -432,7 +432,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
     drawSurfacesWithTexture(GL2 gl, TriangleMesh mesh, boolean flip) {
         // Support variables
         Image[] texturesArray = mesh.getTextures();
-        Material materialsArray[] = mesh.getMaterials();
+        SimpleMaterial materialsArray[] = mesh.getMaterials();
         int texturesRanges[][] = mesh.getTextureRanges();
         int materialsRanges[][] = mesh.getMaterialRanges();
 

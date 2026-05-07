@@ -27,16 +27,16 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.ZBuffer;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Light;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.render.shaders.Shader;
 import vsdk.toolkit.render.shaders.ShaderSelector;
 
@@ -67,13 +67,13 @@ public class SimpleRaytracer extends RenderingElement {
     }
 
     private static final class SceneObjectRenderData {
-        final Material material;
+        final SimpleMaterial material;
         final Image texture;
         final NormalMap normalMap;
         final int detailMask;
 
         private SceneObjectRenderData(
-            Material material,
+            SimpleMaterial material,
             Image texture,
             NormalMap normalMap,
             int detailMask)
@@ -95,7 +95,7 @@ public class SimpleRaytracer extends RenderingElement {
             objects = new SceneObjectRenderData[bodies.size()];
             for ( int i = 0; i < bodies.size(); i++ ) {
                 SimpleBody body = bodies.get(i);
-                Material material = body.getMaterial();
+                SimpleMaterial material = body.getMaterial();
                 Image texture =
                     renderContext.textureEnabled ? body.getTexture() : null;
                 NormalMap normalMap =
@@ -126,7 +126,7 @@ public class SimpleRaytracer extends RenderingElement {
         return false;
     }
 
-    private static boolean isReflective(Material material)
+    private static boolean isReflective(SimpleMaterial material)
     {
         return material != null && material.getReflectionCoefficient() > 0;
     }
@@ -148,7 +148,7 @@ public class SimpleRaytracer extends RenderingElement {
     }
 
     private static int buildSurfaceDetailMask(
-        Material material,
+        SimpleMaterial material,
         Image texture,
         NormalMap normalMap,
         RenderContext renderContext)
@@ -277,7 +277,7 @@ public class SimpleRaytracer extends RenderingElement {
         }
     }
 
-    private static Material resolveMaterial(
+    private static SimpleMaterial resolveMaterial(
         RayHit hit,
         SceneObjectRenderData objectData)
     {
@@ -312,7 +312,7 @@ public class SimpleRaytracer extends RenderingElement {
         List<SimpleBody> objects,
         SceneRenderCache sceneRenderCache,
         Background background,
-        Material material,
+        SimpleMaterial material,
         RenderContext renderContext,
         int recursions,
         int recursionLevel,

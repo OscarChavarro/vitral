@@ -1,8 +1,9 @@
-package vsdk.toolkit.environment;
+package vsdk.toolkit.environment.background;
 import java.io.Serial;
 
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 
 public class FixedBackground extends Background {

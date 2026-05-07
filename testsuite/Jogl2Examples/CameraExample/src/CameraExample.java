@@ -18,7 +18,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.Camera;              // Model elements
+import vsdk.toolkit.environment.camera.Camera;              // Model elements
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;  // View elements
 import vsdk.toolkit.render.jogl.Jogl2Renderer;
 import vsdk.toolkit.gui.CameraController;            // Controller elements

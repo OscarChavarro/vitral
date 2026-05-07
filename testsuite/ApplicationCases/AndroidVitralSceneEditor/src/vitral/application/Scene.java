@@ -14,14 +14,14 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.render.SimpleRaytracer;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
-import vsdk.toolkit.environment.SimpleBackground;
-import vsdk.toolkit.environment.Background;
+import vsdk.toolkit.environment.background.SimpleBackground;
+import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 /**
@@ -144,9 +144,9 @@ public class Scene
         b.setPosition(randomPosition());
     }
 
-    public Material defaultMaterial()
+    public SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
 /*
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));

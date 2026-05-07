@@ -24,8 +24,8 @@ import com.jogamp.opengl.GLEventListener;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-        import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
+        import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
@@ -34,7 +34,7 @@ import vsdk.toolkit.gui.RendererConfigurationController;
         import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl2TriangleMeshRenderer;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 // Application classes
 

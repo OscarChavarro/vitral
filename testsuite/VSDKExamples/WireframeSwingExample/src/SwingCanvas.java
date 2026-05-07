@@ -15,15 +15,15 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4;    // Model elements
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.CameraSnapshot;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.camera.CameraSnapshot;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.environment.SimpleBackground;
+import vsdk.toolkit.environment.background.SimpleBackground;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;     // View elements
@@ -35,7 +35,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 public class SwingCanvas extends JPanel implements
     KeyListener, MouseListener, MouseMotionListener, MouseWheelListener

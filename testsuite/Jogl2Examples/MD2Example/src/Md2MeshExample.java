@@ -29,8 +29,8 @@ import com.jogamp.opengl.awt.GLJPanel;
 import vsdk.toolkit.common.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer; // View elements
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
@@ -52,7 +52,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 public class Md2MeshExample
     extends JFrame implements GLEventListener, MouseListener,

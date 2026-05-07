@@ -4,10 +4,10 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.environment.CubemapBackground;
+import vsdk.toolkit.environment.background.CubemapBackground;
 
 public class Jogl2CubemapBackgroundRenderer extends Jogl2Renderer 
 {

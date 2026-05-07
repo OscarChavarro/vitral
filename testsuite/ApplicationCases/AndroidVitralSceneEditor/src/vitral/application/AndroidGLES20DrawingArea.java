@@ -29,9 +29,9 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.Box;
 import vsdk.toolkit.environment.geometry.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -47,7 +47,7 @@ import vsdk.toolkit.render.androidgles20.AndroidGLES20MaterialRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20ImageRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SphereRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
-import vsdk.toolkit.environment.LightType;
+import vsdk.toolkit.environment.light.LightType;
 
 /**
 The Drawing Area is the main Vitral application element responsible for managing
@@ -69,7 +69,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     // Vitral model
     private Scene scene;
     private RendererConfiguration quality;
-    private Material material;
+    private SimpleMaterial material;
     private SimpleScene preloadedCow;
     private SimpleScene preloadedMug;
     private RGBImageUncompressed texture;
@@ -303,7 +303,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         quality.setUseVertexColors(false);
         quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
-        material = new Material();
+        material = new SimpleMaterial();
         material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         material.setDiffuse(new ColorRgb(1.0, 1.0, 1.0));
         material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));

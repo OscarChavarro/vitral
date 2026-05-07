@@ -9,7 +9,7 @@ import com.jogamp.opengl.glu.GLUquadric;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 
 public class Jogl2ArrowRenderer extends Jogl2Renderer {

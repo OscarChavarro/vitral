@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.Camera;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20SimpleBodyRenderer;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20CameraRenderer;

@@ -1,5 +1,5 @@
 //= References:                                                             =
-//= [FERC1996] Fercoq, Robin. "3D Studio Material Library File Format",     =
+//= [FERC1996] Fercoq, Robin. "3D Studio SimpleMaterial Library File Format",     =
 //=     internet document posted at alt.3d and alt.3d-studio                =
 //=     (usenet lists), revision 0.1, may 1996                              =
 //= [PITT1994] Pitts, Jim. "3D Studio File Format", internet document       =
@@ -23,10 +23,10 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.environment.Background;
-import vsdk.toolkit.environment.Camera;
-import vsdk.toolkit.environment.Material;
-import vsdk.toolkit.environment.Light;
+import vsdk.toolkit.environment.background.Background;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -734,11 +734,11 @@ public class Reader3ds extends PersistenceElement
     private static double currentVTextureMapping[] = null;
 
     // Current environment building elements
-    private static Material currentBuildingMaterial = null;
+    private static SimpleMaterial currentBuildingMaterial = null;
     private static String currentTextureFilename = null;
     private static ColorRgb currentColor = null;
     private static int currentAmount = 0;
-    private static ArrayList<Material> currentMaterialArray = null;
+    private static ArrayList<SimpleMaterial> currentMaterialArray = null;
     private static ArrayList<String> currentTextureFilenamesArray = null;
     private static ArrayList<SimpleBody> currentSimpleBodiesArray = null;
     private static String workingDirectory = null;
@@ -747,9 +747,9 @@ public class Reader3ds extends PersistenceElement
     private static boolean bumpNotImplementedReported = false;
     private static boolean t2NotImplementedReported = false;
 
-    private static Material defaultMaterial()
+    private static SimpleMaterial defaultMaterial()
     {
-        Material m = new Material();
+        SimpleMaterial m = new SimpleMaterial();
 
         m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
         m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
@@ -757,10 +757,10 @@ public class Reader3ds extends PersistenceElement
         return m;
     }
 
-    private static Material resolveMaterial(String name)
+    private static SimpleMaterial resolveMaterial(String name)
     {
         int i;
-        Material m;
+        SimpleMaterial m;
 
         for ( i = 0; i < currentMaterialArray.size(); i++ ) {
             m = currentMaterialArray.get(i);
@@ -774,7 +774,7 @@ public class Reader3ds extends PersistenceElement
     private static int resolveMaterialIndex(String name)
     {
         int i;
-        Material m;
+        SimpleMaterial m;
 
         for ( i = 0; i < currentMaterialArray.size(); i++ ) {
             m = currentMaterialArray.get(i);
@@ -1121,7 +1121,7 @@ public class Reader3ds extends PersistenceElement
             }
             if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL ) {
                 currentTextureFilename = null;
-                currentBuildingMaterial = new Material();
+                currentBuildingMaterial = new SimpleMaterial();
                 currentBuildingMaterial.setDoubleSided(false);
             }
 
@@ -1171,7 +1171,7 @@ public class Reader3ds extends PersistenceElement
                 }
                 else {
                     Triangle newTrianglesList[];
-                    Material newMaterials[];
+                    SimpleMaterial newMaterials[];
                     Image newTextures[];
                     int newMaterialRanges[][];
                     int newTextureRanges[][];
@@ -1179,7 +1179,7 @@ public class Reader3ds extends PersistenceElement
 
                     newTrianglesList = new Triangle[numMappedTriangles];
                     newMaterials =
-                        new Material[currentMaterialMappingArray.size()];
+                        new SimpleMaterial[currentMaterialMappingArray.size()];
                     newTextures = new Image[currentMaterialMappingArray.size()];
                     newMaterialRanges = new int[currentMaterialMappingArray.size()][2];
                     newTextureRanges = new int[currentMaterialMappingArray.size()][2];
@@ -1621,7 +1621,7 @@ public class Reader3ds extends PersistenceElement
         _Reader3dsChunk chunk = new _Reader3dsChunk();
 
         currentSimpleBodiesArray = simpleBodiesArray;
-        currentMaterialArray = new ArrayList<Material>();
+        currentMaterialArray = new ArrayList<SimpleMaterial>();
         currentTextureFilenamesArray = new ArrayList<String>();
 
         workingDirectory = pathname;

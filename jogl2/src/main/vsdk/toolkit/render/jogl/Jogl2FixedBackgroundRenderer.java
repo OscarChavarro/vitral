@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
 // VSDK classes
-import vsdk.toolkit.environment.FixedBackground;
+import vsdk.toolkit.environment.background.FixedBackground;
 
 public class Jogl2FixedBackgroundRenderer extends Jogl2Renderer 
 {
