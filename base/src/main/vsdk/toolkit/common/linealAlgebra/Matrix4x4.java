@@ -535,6 +535,29 @@ public final class Matrix4x4 extends FundamentalEntity
         return result;
     }
 
+    public boolean epsilonEquals(Matrix4x4 other)
+    {
+        return epsilonEquals(other, VSDK.EPSILON);
+    }
+
+    public boolean epsilonEquals(Matrix4x4 other, double epsilon)
+    {
+        if ( other == null ) {
+            return false;
+        }
+        if ( epsilon < 0.0 ) {
+            throw new IllegalArgumentException("epsilon must be >= 0");
+        }
+        for ( int i = 0; i < SIZE; i++ ) {
+            for ( int j = 0; j < SIZE; j++ ) {
+                if ( Math.abs(m[i][j] - other.m[i][j]) > epsilon ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private static double[][] buildIdentityValues()
     {
         return new double[][] {

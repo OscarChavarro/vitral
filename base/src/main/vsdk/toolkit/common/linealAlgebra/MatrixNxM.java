@@ -6,6 +6,10 @@ import java.util.Objects;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixDimensionMismatchException;
+import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixIndexOutOfBoundsException;
+import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixNotSquareException;
+import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixSingularException;
 
 /**
 This class is a data structure that represents a NxM matrix.
@@ -22,10 +26,11 @@ public final class MatrixNxM extends FundamentalEntity
     /**
     This constructor builds the NxM identity matrix.
     */
-    public MatrixNxM(int n, int m) throws Exception
+    public MatrixNxM(int n, int m)
     {
         if ( n <= 0 || m <= 0 ) {
-            throw new Exception("Invalid matrix size!");
+            throw new MatrixDimensionMismatchException(
+                "Invalid matrix size: rows and columns must be > 0");
         }
         this.numRows = n;
         this.numColumns = m;
@@ -73,13 +78,13 @@ public final class MatrixNxM extends FundamentalEntity
         return numColumns;
     }
 
-    public double getVal(int row, int column) throws Exception
+    public double getVal(int row, int column)
     {
         validatePosition(row, column);
         return m[row][column];
     }
 
-    public MatrixNxM withVal(int row, int column, double val) throws Exception
+    public MatrixNxM withVal(int row, int column, double val)
     {
         validatePosition(row, column);
         double[][] r = deepCopy(m);
@@ -87,18 +92,19 @@ public final class MatrixNxM extends FundamentalEntity
         return new MatrixNxM(numRows, numColumns, r, false);
     }
 
-    public MatrixNxM inverse() throws Exception
+    public MatrixNxM inverse()
     {
         double d = determinant();
         if ( Math.abs(d) < VSDK.EPSILON ) {
-            throw new Exception("Trying to invert a matrix with zero determinant!");
+            throw new MatrixSingularException(
+                "Trying to invert a matrix with zero determinant");
         }
         MatrixNxM cof = cofactors();
         MatrixNxM adj = cof.transpose();
         return adj.multiply(1.0 / d);
     }
 
-    public MatrixNxM cofactors() throws Exception
+    public MatrixNxM cofactors()
     {
         double[][] r = new double[numRows][numColumns];
 
@@ -134,10 +140,11 @@ public final class MatrixNxM extends FundamentalEntity
         return new MatrixNxM(numRows, numColumns, r, false);
     }
 
-    public MatrixNxM multiply(MatrixNxM other) throws Exception
+    public MatrixNxM multiply(MatrixNxM other)
     {
         if ( numColumns != other.numRows ) {
-            throw new Exception("When multiplying matrices, first operand number of columns must match second operand number of rows.");
+            throw new MatrixDimensionMismatchException(
+                "When multiplying matrices, first operand number of columns must match second operand number of rows.");
         }
 
         double[][] r = new double[numRows][other.numColumns];
@@ -153,10 +160,11 @@ public final class MatrixNxM extends FundamentalEntity
         return new MatrixNxM(numRows, other.numColumns, r, false);
     }
 
-    public MatrixNxM buildMinor(int row, int column) throws Exception
+    public MatrixNxM buildMinor(int row, int column)
     {
         if ( numColumns <= 1 || numRows <= 1 ) {
-            throw new Exception("Matrix must be at least of size 2x2 to have a minor matrix!");
+            throw new MatrixDimensionMismatchException(
+                "Matrix must be at least of size 2x2 to have a minor matrix");
         }
         validatePosition(row, column);
 
@@ -174,10 +182,11 @@ public final class MatrixNxM extends FundamentalEntity
         return new MatrixNxM(numRows - 1, numColumns - 1, minor, false);
     }
 
-    public double determinant() throws Exception
+    public double determinant()
     {
         if ( numColumns != numRows ) {
-            throw new Exception("Matrix must be square to have a determinant");
+            throw new MatrixNotSquareException(
+                "Matrix must be square to have a determinant");
         }
         if ( numColumns == 1 ) {
             return m[0][0];
@@ -231,10 +240,37 @@ public final class MatrixNxM extends FundamentalEntity
         return result;
     }
 
-    private void validatePosition(int row, int column) throws Exception
+    public boolean epsilonEquals(MatrixNxM other)
+    {
+        return epsilonEquals(other, VSDK.EPSILON);
+    }
+
+    public boolean epsilonEquals(MatrixNxM other, double epsilon)
+    {
+        if ( other == null ) {
+            return false;
+        }
+        if ( epsilon < 0.0 ) {
+            throw new IllegalArgumentException("epsilon must be >= 0");
+        }
+        if ( numRows != other.numRows || numColumns != other.numColumns ) {
+            return false;
+        }
+        for ( int i = 0; i < numRows; i++ ) {
+            for ( int j = 0; j < numColumns; j++ ) {
+                if ( Math.abs(m[i][j] - other.m[i][j]) > epsilon ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void validatePosition(int row, int column)
     {
         if ( row < 0 || row >= numRows || column < 0 || column >= numColumns ) {
-            throw new Exception("Invalid matrix position [" + row + "][" + column + "]");
+            throw new MatrixIndexOutOfBoundsException(
+                "Invalid matrix position [" + row + "][" + column + "]");
         }
     }
 

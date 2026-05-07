@@ -74,6 +74,23 @@ public final class Vector2D extends FundamentalEntity {
     public double x() { return x; }
     public double y() { return y; }
 
+    public boolean epsilonEquals(Vector2D other)
+    {
+        return epsilonEquals(other, VSDK.EPSILON);
+    }
+
+    public boolean epsilonEquals(Vector2D other, double epsilon)
+    {
+        if ( other == null ) {
+            return false;
+        }
+        if ( epsilon < 0.0 ) {
+            throw new IllegalArgumentException("epsilon must be >= 0");
+        }
+        return Math.abs(x - other.x) <= epsilon &&
+               Math.abs(y - other.y) <= epsilon;
+    }
+
     /**
     Provides an object to text report a convert, optimized for human
     readability and debugging. Do not use for serialization or persistence

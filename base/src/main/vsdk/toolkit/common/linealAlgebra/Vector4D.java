@@ -61,6 +61,25 @@ public final class Vector4D extends FundamentalEntity
     public double z() { return z; }
     public double w() { return w; }
 
+    public boolean epsilonEquals(Vector4D other)
+    {
+        return epsilonEquals(other, VSDK.EPSILON);
+    }
+
+    public boolean epsilonEquals(Vector4D other, double epsilon)
+    {
+        if ( other == null ) {
+            return false;
+        }
+        if ( epsilon < 0.0 ) {
+            throw new IllegalArgumentException("epsilon must be >= 0");
+        }
+        return Math.abs(x - other.x) <= epsilon &&
+               Math.abs(y - other.y) <= epsilon &&
+               Math.abs(z - other.z) <= epsilon &&
+               Math.abs(w - other.w) <= epsilon;
+    }
+
     /**
     Provides an object to text report conversion, optimized for human
     readability and debugging. Do not use for serialization or persistence

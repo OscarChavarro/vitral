@@ -116,6 +116,23 @@ public final class Quaternion extends FundamentalEntity
         return magnitude;
     }
 
+    public boolean epsilonEquals(Quaternion other)
+    {
+        return epsilonEquals(other, VSDK.EPSILON);
+    }
+
+    public boolean epsilonEquals(Quaternion other, double epsilon)
+    {
+        if ( other == null ) {
+            return false;
+        }
+        if ( epsilon < 0.0 ) {
+            throw new IllegalArgumentException("epsilon must be >= 0");
+        }
+        return direction.epsilonEquals(other.direction, epsilon) &&
+               Math.abs(magnitude - other.magnitude) <= epsilon;
+    }
+
     @Override
     public String toString()
     {
