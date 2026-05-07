@@ -1,7 +1,9 @@
+package gui;
+
 import java.awt.event.MouseEvent;
-import models.DebuggerModel;
 import java.awt.event.MouseWheelEvent;
 
+import models.DebuggerModel;
 import vsdk.toolkit.gui.AwtSystem;
 
 public class DebuggerMouseInteractionTechniques

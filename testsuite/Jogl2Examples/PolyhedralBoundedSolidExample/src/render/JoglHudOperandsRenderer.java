@@ -1,3 +1,5 @@
+package render;
+
 import com.jogamp.opengl.GL2;
 
 import models.DebuggerModel;

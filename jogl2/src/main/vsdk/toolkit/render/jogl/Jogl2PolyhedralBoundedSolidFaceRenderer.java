@@ -12,7 +12,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUtessellator;
 
-// VitralSDK classes
+// Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
@@ -25,77 +25,12 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 
 public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 {
+    private static final double EDGE_ARROW_SIZE = 0.5;
+    private static final double EDGE_ARROW_CURVE_OFFSET = 0.1;
     private static GLU glu;
-    private static _JoglPolygonTesselatorRoutines tesselatorProcessor;
+    private static _JoglPolygonTesselatorRoutines tessellateProcessor;
     static {
-        tesselatorProcessor = null;
-    }
-
-    private static double
-    curveFactor(double param, double factor)
-    {
-        double percent = param / factor;
-        return 0.1 * factor * Math.sin(0.5 * percent * Math.PI);
-    }
-
-    /**
-    Invert is 1.0 for first loop, -1.0 for remaining loops
-    */
-    private static void
-    drawHalfEdge(GL2 gl, _PolyhedralBoundedSolidHalfEdge he,
-                 Vector3D startP, Vector3D endP, InfinitePlane loopPlane,
-                 double invert)
-    {
-        // Algorithm parameters
-        int N = 10;
-
-        // Local variables
-        Vector3D u;
-        Vector3D v;
-        double factor;
-        double t;
-        int i;
-        Vector3D P;
-        Vector3D n;
-
-        n = loopPlane.getNormal();
-        v = endP.subtract(startP);
-        factor = v.length() / 2;
-        v = v.normalized();
-        u = v.crossProduct(n);
-        double delta = factor / ((double)N);
-
-        gl.glPushMatrix();
-
-        gl.glBegin(GL.GL_LINES);
-            for ( i = 0, t = 0; i < N; i++, t += delta ) {
-                P = startP.add(v.multiply(t).add(u.multiply(invert *
-                    curveFactor(t, factor))));
-                gl.glVertex3d(P.x(), P.y(), P.z());
-                P = startP.add(v.multiply(t + delta).add(u.multiply(invert *
-                    curveFactor(t + delta, factor))));
-                gl.glVertex3d(P.x(), P.y(), P.z());
-            }
-        gl.glEnd();
-        P = startP.add(v.multiply(factor).add(u.multiply(0)));
-        Vector3D Pi = u.multiply(invert * factor * 0.1);
-        gl.glTranslated(Pi.x(), Pi.y(), Pi.z());
-
-        gl.glBegin(GL.GL_LINES);
-            gl.glVertex3d(P.x(), P.y(), P.z());
-            P = startP.add(v.multiply(factor * 0.9).add(u.multiply(factor *
-                0.05)));
-            gl.glVertex3d(P.x(), P.y(), P.z());
-
-            P = startP.add(v.multiply(factor).add(u.multiply(0)));
-            gl.glVertex3d(P.x(), P.y(), P.z());
-            P = startP.add(v.multiply(factor * 0.9).add(u.multiply((-factor) *
-                0.05)));
-            gl.glVertex3d(P.x(), P.y(), P.z());
-
-        gl.glEnd();
-
-        gl.glPopMatrix();
+        tessellateProcessor = null;
     }
 
     private static void setColor(GL2 gl, int i)
@@ -354,8 +289,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         int j;
 
         //- Prepare tesselator --------------------------------------------
-        if ( tesselatorProcessor == null ) {
-            tesselatorProcessor =
+        if ( tessellateProcessor == null ) {
+            tessellateProcessor =
                 new _JoglPolygonTesselatorRoutines(gl, glu);
         }
 
@@ -422,13 +357,13 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         list = new double[totalNumberOfPoints][3];
         count = 0;
         GLU.gluTessCallback(tesselator,
-            GLU.GLU_TESS_VERTEX, tesselatorProcessor);
+            GLU.GLU_TESS_VERTEX, tessellateProcessor);
         GLU.gluTessCallback(tesselator,
-            GLU.GLU_TESS_BEGIN, tesselatorProcessor);
+            GLU.GLU_TESS_BEGIN, tessellateProcessor);
         GLU.gluTessCallback(tesselator,
-            GLU.GLU_TESS_END, tesselatorProcessor);
+            GLU.GLU_TESS_END, tessellateProcessor);
         GLU.gluTessCallback(tesselator,
-            GLU.GLU_TESS_ERROR, tesselatorProcessor);
+            GLU.GLU_TESS_ERROR, tessellateProcessor);
         GLU.gluTessBeginPolygon(tesselator, null);
 
         // Face polygon generation via JOGL GLU tesselator
@@ -559,10 +494,14 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
                     }
                     setColor(gl, i);
                     if ( j == 0 ) {
-                        drawHalfEdge(gl, he, p0, p1, loopPlane, 1.0);
+                        Jogl2CurvedArrowOverPlaneRenderer.draw(gl, p0, p1,
+                            loopPlane, 1.0, EDGE_ARROW_SIZE,
+                            EDGE_ARROW_CURVE_OFFSET);
                     }
                     else {
-                        drawHalfEdge(gl, he, p0, p1, loopPlane, -1.0);
+                        Jogl2CurvedArrowOverPlaneRenderer.draw(gl, p0, p1,
+                            loopPlane, -1.0, EDGE_ARROW_SIZE,
+                            EDGE_ARROW_CURVE_OFFSET);
                     }
                 } while( he != heStart );
             }
@@ -577,9 +516,9 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         int j;
 
         //- Prepare tesselator --------------------------------------------
-        if ( tesselatorProcessor == null ) {
+        if ( tessellateProcessor == null ) {
             glu = new GLU();
-            tesselatorProcessor =
+            tessellateProcessor =
                 new _JoglPolygonTesselatorRoutines(gl, glu);
         }
 

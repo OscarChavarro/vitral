@@ -28,7 +28,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
     private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
-    private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
+    private CsgSampleNames csgSample = CsgSampleNames.STACKED_BLOCKS;
     private int kurlanderBowlSingleMotifIndex = 20;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;
@@ -48,7 +48,7 @@ public class DebuggerModel
     private GLCanvas canvas;
     private CsgOperationNames csgOperation = CsgOperationNames.DIFFERENCE_A_MINUS_B;
     private boolean debugEdges = false;
-    private boolean showCoordinateSystem = true;
+    private boolean showCoordinateSystem = false;
     private boolean debugCsg = false;
     private boolean errorState = false;
     private String errorMessage = "";

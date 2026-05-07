@@ -28,8 +28,11 @@ import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.render.jogl.Jogl2Renderer;
 
 // Application classes
+import gui.DebuggerKeyboardInteractionTechniques;
+import gui.DebuggerMouseInteractionTechniques;
 import models.DebuggerModel;
 import models.SolidModelNames;
+import render.JoglDebuggerRenderer;
 
 public class PolyhedralBoundedSolidExample extends JFrame implements
     MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {

@@ -1,6 +1,8 @@
-import vsdk.toolkit.gui.KeyEvent;
+package gui;
+
 import models.DebuggerModel;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.gui.KeyEvent;
 
 public class DebuggerKeyboardInteractionTechniques
 {
