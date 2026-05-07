@@ -1,0 +1,4 @@
+// Gradle module descriptor migrated from Maven.
+dependencies {
+    implementation project(':jogl2')
+}

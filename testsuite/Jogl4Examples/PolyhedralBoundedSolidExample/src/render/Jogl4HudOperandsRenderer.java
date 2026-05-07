@@ -8,10 +8,10 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
-import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
 
-public class JoglHudOperandsRenderer
+public class Jogl4HudOperandsRenderer
 {
     private static final double HUD_INSET_DEPTH = 2.8;
 
@@ -19,7 +19,7 @@ public class JoglHudOperandsRenderer
     private final SimpleMaterial csgOperandMaterialA;
     private final SimpleMaterial csgOperandMaterialB;
 
-    public JoglHudOperandsRenderer(DebuggerModel model)
+    public Jogl4HudOperandsRenderer(DebuggerModel model)
     {
         this.model = model;
         this.csgOperandMaterialA = createInsetMaterial(1.0, 0.502, 0.502);
@@ -134,8 +134,8 @@ public class JoglHudOperandsRenderer
         gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
         gl.glScaled(scale, scale, scale);
         gl.glTranslated(-center.x(), -center.y(), -center.z());
-        Jogl2SimpleMaterialRenderer.activate(gl, material);
-        Jogl2PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
+        Jogl4SimpleMaterialRenderer.activate(gl, material);
+        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
             model.getQuality());
         gl.glPopMatrix();
     }
@@ -165,6 +165,6 @@ public class JoglHudOperandsRenderer
 
         drawInsetSolid(gl, operandA, csgOperandMaterialA, leftAnchor, mainExtent);
         drawInsetSolid(gl, operandB, csgOperandMaterialB, rightAnchor, mainExtent);
-        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
+        Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
     }
 }

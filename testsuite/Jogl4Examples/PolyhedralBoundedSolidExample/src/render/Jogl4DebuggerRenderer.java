@@ -22,23 +22,23 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.HiddenLineRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
-import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
-import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
-import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
 
-public class JoglDebuggerRenderer implements GLEventListener
+public class Jogl4DebuggerRenderer implements GLEventListener
 {
     private static final double HUD_INSET_DEPTH = 2.8;
 
     private final DebuggerModel model;
-    private final JoglDebuggerHudRenderer hudRenderer;
+    private final Jogl4DebuggerHudRenderer hudRenderer;
     private final SimpleMaterial csgOperandMaterialA;
     private final SimpleMaterial csgOperandMaterialB;
 
-    public JoglDebuggerRenderer(DebuggerModel model)
+    public Jogl4DebuggerRenderer(DebuggerModel model)
     {
         this.model = model;
-        this.hudRenderer = new JoglDebuggerHudRenderer(model);
+        this.hudRenderer = new Jogl4DebuggerHudRenderer(model);
         this.csgOperandMaterialA = createInsetMaterial(1.0, 0.502, 0.502);
         this.csgOperandMaterialB = createInsetMaterial(0.502, 1.0, 0.502);
     }
@@ -151,8 +151,8 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
         gl.glScaled(scale, scale, scale);
         gl.glTranslated(-center.x(), -center.y(), -center.z());
-        Jogl2SimpleMaterialRenderer.activate(gl, material);
-        Jogl2PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
+        Jogl4SimpleMaterialRenderer.activate(gl, material);
+        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
             model.getQuality());
         gl.glPopMatrix();
     }
@@ -182,7 +182,7 @@ public class JoglDebuggerRenderer implements GLEventListener
 
         drawInsetSolid(gl, operandA, csgOperandMaterialA, leftAnchor, mainExtent);
         drawInsetSolid(gl, operandB, csgOperandMaterialB, rightAnchor, mainExtent);
-        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
+        Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
     }
 
     public void refreshCanvasAfterWindowModeChange()
@@ -278,42 +278,47 @@ public class JoglDebuggerRenderer implements GLEventListener
     {
         gl.glLoadIdentity();
 
-        //-----------------------------------------------------------------
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glLineWidth((float)3.0);
+        if ( model.getSolid() == null ) {
+            return;
+        }
 
+        // Surface pass: farthest depth bias.
+        gl.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+        gl.glPolygonOffset(4.0f, 4.0f);
+        Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
+        Jogl4LightRenderer.activate(gl, model.getLight1());
+        Jogl4LightRenderer.draw(gl, model.getLight1());
+        Jogl4LightRenderer.activate(gl, model.getLight2());
+        Jogl4LightRenderer.draw(gl, model.getLight2());
+        gl.glEnable(GL2.GL_LIGHTING);
+        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
+        gl.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+
+        // Line pass: middle depth bias.
+        gl.glDisable(GL2.GL_LIGHTING);
+        gl.glLineWidth(3.0f);
+        gl.glEnable(GL2.GL_POLYGON_OFFSET_LINE);
+        gl.glPolygonOffset(2.0f, 2.0f);
         if ( model.getEdgeIndex() > -3 && model.isShowCoordinateSystem() ) {
             gl.glBegin(GL2.GL_LINES);
                 gl.glColor3d(1, 0, 0);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(1, 0, 0);
-    
+
                 gl.glColor3d(0, 1, 0);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(0, 1, 0);
-    
+
                 gl.glColor3d(0, 0, 1);
                 gl.glVertex3d(0, 0, 0);
                 gl.glVertex3d(0, 0, 1);
             gl.glEnd();
         }
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.getSolid(), model.getFaceIndex());
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(), model.getFaceIndex());
+        gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
 
-        if ( model.getSolid() == null ) {
-            return;
-        }
-
-        //-----------------------------------------------------------------
-        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
-        Jogl2LightRenderer.activate(gl, model.getLight1());
-        Jogl2LightRenderer.draw(gl, model.getLight1());
-        Jogl2LightRenderer.activate(gl, model.getLight2());
-        Jogl2LightRenderer.draw(gl, model.getLight2());
-        gl.glEnable(GL2.GL_LIGHTING);
-        Jogl2PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
-        Jogl2PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.getSolid(), model.getFaceIndex());
-        Jogl2PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(), model.getFaceIndex());
-
-        //-----------------------------------------------------------------
+        // Points pass: nearest depth bias.
         List<Vector3D> contourLines;
         List <Vector3D> visibleLines;
         List <Vector3D> hiddenLines;
@@ -321,7 +326,10 @@ public class JoglDebuggerRenderer implements GLEventListener
         SimpleBody body;
 
         if ( model.isDebugEdges() && model.getEdgeIndex() > -3 ) {
-            Jogl2PolyhedralBoundedSolidRenderer.drawDebugEdges(gl, model.getSolid(), model.getCamera(), model.getEdgeIndex());
+            gl.glEnable(GL2.GL_POLYGON_OFFSET_POINT);
+            gl.glPolygonOffset(1.0f, 1.0f);
+            Jogl4PolyhedralBoundedSolidRenderer.drawDebugEdges(gl, model.getSolid(), model.getCamera(), model.getEdgeIndex());
+            gl.glDisable(GL2.GL_POLYGON_OFFSET_POINT);
         }
         else if ( model.getEdgeIndex() == -3 ) {
             contourLines = new ArrayList <Vector3D>();

@@ -24,7 +24,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import com.jogamp.opengl.glu.GLU;
 
-public class JoglDebuggerHudRenderer
+public class Jogl4DebuggerHudRenderer
 {
     private static final int LINE_HEIGHT = 34;
     private static final double VERTEX_LABEL_GROUPING_PIXELS = 18.0;
@@ -35,7 +35,7 @@ public class JoglDebuggerHudRenderer
     private TextRenderer vertexLabelRenderer;
     private int viewportWidth;
     private int viewportHeight;
-    public JoglDebuggerHudRenderer(DebuggerModel model)
+    public Jogl4DebuggerHudRenderer(DebuggerModel model)
     {
         this.model = model;
         this.hudTextRenderer = null;

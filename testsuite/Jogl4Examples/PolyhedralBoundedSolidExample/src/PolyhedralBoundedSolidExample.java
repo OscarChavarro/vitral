@@ -6,6 +6,8 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseListener;
@@ -25,14 +27,14 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.KeyEvent;
-import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
 // Application classes
 import gui.DebuggerKeyboardInteractionTechniques;
 import gui.DebuggerMouseInteractionTechniques;
 import models.DebuggerModel;
 import models.SolidModelNames;
-import render.JoglDebuggerRenderer;
+import render.Jogl4DebuggerRenderer;
 
 public class PolyhedralBoundedSolidExample extends JFrame implements
     MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -44,13 +46,14 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
     private final DebuggerModel model;
     private final DebuggerKeyboardInteractionTechniques keyboardInteractionTechniques;
     private final DebuggerMouseInteractionTechniques mouseInteractionTechniques;
-    private final JoglDebuggerRenderer joglDebuggerRenderer;
+    private final Jogl4DebuggerRenderer joglDebuggerRenderer;
+    private boolean shutdownRequested;
 
     public PolyhedralBoundedSolidExample() {
         model = new DebuggerModel();
         keyboardInteractionTechniques = new DebuggerKeyboardInteractionTechniques();
         mouseInteractionTechniques = new DebuggerMouseInteractionTechniques();
-        joglDebuggerRenderer = new JoglDebuggerRenderer(model);
+        joglDebuggerRenderer = new Jogl4DebuggerRenderer(model);
 
         // Keep the debugger process alive and surface fatal kernel issues as exceptions.
         VSDK.setWithSystemExit(false);
@@ -61,6 +64,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         // Initial solid
         buildSolidWithRecovery();
         recenterOrbiterAfterModelChange(null, new Vector3D(0, 0, 0));
+        shutdownRequested = false;
     }
 
     private void configureInitialModelFromSystemProperty()
@@ -90,7 +94,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
     private GLCanvas createGUI()
     {
-        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLProfile profile = pickCompatibleProfile();
         GLCapabilities caps = new GLCapabilities(profile);
         caps.setDepthBits(64);
         model.setCanvas(new GLCanvas(caps));
@@ -103,8 +107,19 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         return model.getCanvas();
     }
 
+    private GLProfile pickCompatibleProfile()
+    {
+        if ( GLProfile.isAvailable(GLProfile.GL4bc) ) {
+            return GLProfile.get(GLProfile.GL4bc);
+        }
+        if ( GLProfile.isAvailable(GLProfile.GL2) ) {
+            return GLProfile.get(GLProfile.GL2);
+        }
+        return GLProfile.get(GLProfile.GL4);
+    }
+
     public static void main (String[] args) {
-        Jogl2Renderer.verifyOpenGLAvailability();
+        Jogl4Renderer.verifyOpenGLAvailability();
         PolyhedralBoundedSolidExample instance = new PolyhedralBoundedSolidExample();
         instance.createMainWindow(false);
     }
@@ -322,7 +337,14 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
 
         GLCanvas canvas = createGUI();
         frame.add(canvas, BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                shutdownApplication();
+            }
+        });
 
         if ( fullScreenMode ) {
             GraphicsDevice device = GraphicsEnvironment
@@ -366,6 +388,33 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
         }
 
         canvas.requestFocusInWindow();
+    }
+
+    private synchronized void shutdownApplication()
+    {
+        if ( shutdownRequested ) {
+            return;
+        }
+        shutdownRequested = true;
+
+        try {
+            if ( model.getCanvas() != null ) {
+                // Triggers GLEventListener.dispose for clean OpenGL resource release.
+                model.getCanvas().destroy();
+            }
+        }
+        catch ( Throwable ignored ) {
+        }
+
+        try {
+            if ( model.getMainFrame() != null ) {
+                model.getMainFrame().dispose();
+            }
+        }
+        catch ( Throwable ignored ) {
+        }
+
+        System.exit(0);
     }
 
     @Override
@@ -438,7 +487,7 @@ public class PolyhedralBoundedSolidExample extends JFrame implements
                  model, event, new DebuggerKeyboardInteractionTechniques.Actions() {
                      @Override
                      public void requestExit() {
-                         System.exit(0);
+                         PolyhedralBoundedSolidExample.this.shutdownApplication();
                      }
 
                      @Override
