@@ -149,18 +149,18 @@ public class Scene
         SimpleMaterial m = new SimpleMaterial();
 
 /*
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
-        m.setPhongExponent(100.0);
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
+        m = m.withPhongExponent(100.0);
 */
 
-        m.setAmbient(new ColorRgb(0, 0, 0));
-        m.setDiffuse(new ColorRgb(1, 1, 1));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
-        m.setPhongExponent(40.0);
+        m = m.withAmbient(new ColorRgb(0, 0, 0));
+        m = m.withDiffuse(new ColorRgb(1, 1, 1));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
+        m = m.withPhongExponent(40.0);
 
 
         return m;
@@ -170,7 +170,7 @@ public class Scene
     {
         SimpleBody thing;
         thing = addThing(g);
-        thing.getMaterial().setDiffuse(c);
+        thing.setMaterial(thing.getMaterial().withDiffuse(c));
         return thing;
     }
 

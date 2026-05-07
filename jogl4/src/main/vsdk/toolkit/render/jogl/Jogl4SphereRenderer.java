@@ -178,9 +178,9 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 false);
 
             SimpleMaterial wireMaterial = new SimpleMaterial(material);
-            wireMaterial.setDiffuse(new ColorRgb(1, 1, 1));
-            wireMaterial.setSpecular(new ColorRgb(0, 0, 0));
-            wireMaterial.setAmbient(new ColorRgb(0, 0, 0));
+            wireMaterial = wireMaterial.withDiffuse(new ColorRgb(1, 1, 1));
+            wireMaterial = wireMaterial.withSpecular(new ColorRgb(0, 0, 0));
+            wireMaterial = wireMaterial.withAmbient(new ColorRgb(0, 0, 0));
 
             configureProgram(
                 gl,
@@ -224,9 +224,9 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 false);
 
             SimpleMaterial pointMaterial = new SimpleMaterial(material);
-            pointMaterial.setAmbient(new ColorRgb(0, 0, 0));
-            pointMaterial.setDiffuse(new ColorRgb(1, 0, 0)); // #ff0000
-            pointMaterial.setSpecular(new ColorRgb(0, 0, 0));
+            pointMaterial = pointMaterial.withAmbient(new ColorRgb(0, 0, 0));
+            pointMaterial = pointMaterial.withDiffuse(new ColorRgb(1, 0, 0)); // #ff0000
+            pointMaterial = pointMaterial.withSpecular(new ColorRgb(0, 0, 0));
 
             configureProgram(
                 gl,

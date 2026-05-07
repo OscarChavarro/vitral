@@ -1,5 +1,3 @@
-//=   recursive raytracing ilumination model                                =
-
 package vsdk.toolkit.environment.material;
 
 import vsdk.toolkit.common.Entity;
@@ -7,104 +5,138 @@ import vsdk.toolkit.common.ColorRgb;
 
 public class SimpleMaterial extends Entity
 {
-    private ColorRgb ambient; 
-    private ColorRgb diffuse; 
-    private ColorRgb specular; 
-    private ColorRgb emission;
-    private boolean doubleSided;
-    private double reflectionCoefficient;
-    private double refractionCoefficient; // Also known as "transmition"
-
-    private String name="VSDK_default_material";
-    
-    private double opacity;
-    private double phongExponent;
+    private final ColorRgb ambient;
+    private final ColorRgb diffuse;
+    private final ColorRgb specular;
+    private final boolean doubleSided;
+    private final double reflectionCoefficient;
+    private final double refractionCoefficient; // Also known as "transmission"
+    private final String name;
+    private final double opacity;
+    private final double phongExponent;
     
     /** Creates a new instance of MaterialGL */
     public SimpleMaterial()
     {
-        ambient=new ColorRgb(0.1, 0.1, 0.1);
-        diffuse=new ColorRgb(0.9, 0.5, 0.5);
-        specular=new ColorRgb(1, 1, 1);
-        emission=new ColorRgb(0, 0, 0);
-        doubleSided = true;
-        reflectionCoefficient = 0;
-        opacity = 1.0;
-        phongExponent = 128;
+        this(
+            "VSDK_default_material",
+            new ColorRgb(0.1, 0.1, 0.1),
+            new ColorRgb(0.9, 0.5, 0.5),
+            new ColorRgb(1, 1, 1),
+            true,
+            0.0,
+            0.0,
+            1.0,
+            128.0);
     }
-    
+
     public SimpleMaterial(SimpleMaterial m)
     {
-        name=m.name;
-        ambient=new ColorRgb(m.getAmbient()); 
-        diffuse=new ColorRgb(m.getDiffuse()); 
-        specular=new ColorRgb(m.getSpecular()); 
-        emission=new ColorRgb(m.getEmission()); 
-        doubleSided=m.doubleSided;
-        opacity=m.getOpacity();
-        phongExponent=m.phongExponent;
-        reflectionCoefficient=m.reflectionCoefficient;
-        refractionCoefficient=m.refractionCoefficient;
+        this(
+            m.name,
+            m.ambient,
+            m.diffuse,
+            m.specular,
+            m.doubleSided,
+            m.reflectionCoefficient,
+            m.refractionCoefficient,
+            m.opacity,
+            m.phongExponent);
     }
-    
-    public void setName(String n)
+
+    public SimpleMaterial(
+        String name,
+        ColorRgb ambient,
+        ColorRgb diffuse,
+        ColorRgb specular,
+        boolean doubleSided,
+        double reflectionCoefficient,
+        double refractionCoefficient,
+        double opacity,
+        double phongExponent)
     {
-        name=n;
+        this.name = name;
+        this.ambient = new ColorRgb(ambient);
+        this.diffuse = new ColorRgb(diffuse);
+        this.specular = new ColorRgb(specular);
+        this.doubleSided = doubleSided;
+        this.reflectionCoefficient = reflectionCoefficient;
+        this.refractionCoefficient = refractionCoefficient;
+        this.opacity = opacity;
+        this.phongExponent = phongExponent;
     }
-    
+
     public String getName()
     {
         return name;
     }
-    
-    public void setAmbient(ColorRgb a)
+
+    public SimpleMaterial withName(String n)
     {
-        this.ambient=new ColorRgb(a);
-    }
-    
-    public void setDiffuse(ColorRgb d)
-    {
-        this.diffuse=new ColorRgb(d);
-    }
-    
-    public void setSpecular(ColorRgb s)
-    {
-        specular=new ColorRgb(s);
-    }
-    
-    public void setEmission(ColorRgb e)
-    {
-        emission=new ColorRgb(e);
-    }
-    
-    public void setPhongExponent(double p)
-    {
-        this.phongExponent=p;
+        return new SimpleMaterial(
+            n, ambient, diffuse, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, phongExponent);
     }
 
-    public void setReflectionCoefficient(double kr)
+    public SimpleMaterial withAmbient(ColorRgb a)
     {
-        this.reflectionCoefficient=kr;
+        return new SimpleMaterial(
+            name, a, diffuse, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, phongExponent);
     }
 
-    public void setRefractionCoefficient(double kr)
+    public SimpleMaterial withDiffuse(ColorRgb d)
     {
-        this.refractionCoefficient=kr;
+        return new SimpleMaterial(
+            name, ambient, d, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, phongExponent);
     }
-    
-    public void setOpacity(double a)
+
+    public SimpleMaterial withSpecular(ColorRgb s)
     {
-        this.opacity=a;
+        return new SimpleMaterial(
+            name, ambient, diffuse, s, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, phongExponent);
     }
-    
+
+    public SimpleMaterial withPhongExponent(double p)
+    {
+        return new SimpleMaterial(
+            name, ambient, diffuse, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, p);
+    }
+
+    public SimpleMaterial withReflectionCoefficient(double kr)
+    {
+        return new SimpleMaterial(
+            name, ambient, diffuse, specular, doubleSided,
+            kr, refractionCoefficient, opacity, phongExponent);
+    }
+
+    public SimpleMaterial withRefractionCoefficient(double kr)
+    {
+        return new SimpleMaterial(
+            name, ambient, diffuse, specular, doubleSided,
+            reflectionCoefficient, kr, opacity, phongExponent);
+    }
+
+    public SimpleMaterial withOpacity(double a)
+    {
+        return new SimpleMaterial(
+            name, ambient, diffuse, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, a, phongExponent);
+    }
+
     public boolean isDoubleSided()
     {
         return doubleSided;
     }
 
-    public void setDoubleSided(boolean doubleSided)
+    public SimpleMaterial withDoubleSided(boolean doubleSided)
     {
-        this.doubleSided = doubleSided;
+        return new SimpleMaterial(
+            name, ambient, diffuse, specular, doubleSided,
+            reflectionCoefficient, refractionCoefficient, opacity, phongExponent);
     }
 
     public ColorRgb getAmbient()
@@ -137,16 +169,6 @@ public class SimpleMaterial extends Entity
         return specular;
     }
 
-    public ColorRgb getEmission()
-    {
-        return new ColorRgb(emission);
-    }
-
-    public ColorRgb getEmissionReference()
-    {
-        return emission;
-    }
-
     public double getPhongExponent()
     {
         return phongExponent;
@@ -161,17 +183,17 @@ public class SimpleMaterial extends Entity
     {
         return refractionCoefficient;
     }
-    
+
     public double getOpacity()
     {
         return opacity;
     }
 
     /**
-    Provides an object to text report convertion, optimized for human
+    Provides an object to text report conversion, optimized for human
     readability and debugging. Do not use for serialization or persistence
     purposes.
-    @return human readable representation of current SimpleMaterial information
+    @return human-readable representation of current SimpleMaterial information
     */
     @Override
     public String toString()

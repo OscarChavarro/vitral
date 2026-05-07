@@ -622,10 +622,10 @@ public class JoglDrawingArea implements
             textureRanges[0][1] = 1;
             materialArray = new SimpleMaterial[1];
             materialArray[0] = theScene.defaultMaterial();
-            materialArray[0].setDoubleSided(true);
-            materialArray[0].setAmbient(new ColorRgb(1, 1, 1));
-            materialArray[0].setDiffuse(new ColorRgb(1, 1, 1));
-            materialArray[0].setSpecular(new ColorRgb(1, 1, 1));
+            materialArray[0] = materialArray[0].withDoubleSided(true);
+            materialArray[0] = materialArray[0].withAmbient(new ColorRgb(1, 1, 1));
+            materialArray[0] = materialArray[0].withDiffuse(new ColorRgb(1, 1, 1));
+            materialArray[0] = materialArray[0].withSpecular(new ColorRgb(1, 1, 1));
             materialRanges = new int[1][2];
             materialRanges[0][0] = 2;
             materialRanges[0][1] = 0;
@@ -646,10 +646,10 @@ public class JoglDrawingArea implements
             boxBody.setRotation(R);
             boxBody.setRotationInverse(R.inverse());
             boxBody.setMaterial(theScene.defaultMaterial());
-            boxBody.getMaterial().setDoubleSided(true);
-            boxBody.getMaterial().setAmbient(new ColorRgb(1, 1, 1));
-            boxBody.getMaterial().setDiffuse(new ColorRgb(1, 1, 1));
-            boxBody.getMaterial().setSpecular(new ColorRgb(1, 1, 1));
+            boxBody.setMaterial(boxBody.getMaterial().withDoubleSided(true));
+            boxBody.setMaterial(boxBody.getMaterial().withAmbient(new ColorRgb(1, 1, 1)));
+            boxBody.setMaterial(boxBody.getMaterial().withDiffuse(new ColorRgb(1, 1, 1)));
+            boxBody.setMaterial(boxBody.getMaterial().withSpecular(new ColorRgb(1, 1, 1)));
             boxBody.setName("Proyected view box");
             boxBody.setTexture(texture);
             //-----------------------------------------------------------------
@@ -910,14 +910,15 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip)
+    private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip,
+        SimpleMaterial segmentMaterial)
     {
         double l;
         Vector3D diff = end.subtract(start);
         l = diff.length();
 
         gl.glEnable(GL2.GL_LIGHTING);
-        Jogl2SimpleMaterialRenderer.activate(gl, visualDebugMaterial);
+        Jogl2SimpleMaterialRenderer.activate(gl, segmentMaterial);
 
         //-----------------------------------------------------------------
         Geometry a;
@@ -975,8 +976,8 @@ public class JoglDrawingArea implements
         info = new RayHit();
 
         //-----------------------------------------------------------------
-        visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.5, 0.0));
-        Jogl2SimpleMaterialRenderer.activate(gl, visualDebugMaterial);
+        SimpleMaterial rayOriginMaterial = visualDebugMaterial.withDiffuse(new ColorRgb(0.9, 0.5, 0.0));
+        Jogl2SimpleMaterialRenderer.activate(gl, rayOriginMaterial);
         Sphere s = new Sphere(0.05);
         gl.glPushMatrix();
         gl.glTranslated(ray.origin().x(), ray.origin().y(), ray.origin().z());
@@ -988,11 +989,11 @@ public class JoglDrawingArea implements
             d = d.multiply(ray.t());
             p = ray.origin().add(d);
 
-            drawVisualRayDebugSegment(gl, ray.origin(), p, false, 0.07, 0.4);
+            drawVisualRayDebugSegment(gl, ray.origin(), p, false, 0.07, 0.4, rayOriginMaterial);
             if ( level >= 1 ) {
                 // Draw normal
-                visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.9, 0.5));
-                drawVisualRayDebugSegment(gl, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2);
+                SimpleMaterial normalMaterial = visualDebugMaterial.withDiffuse(new ColorRgb(0.9, 0.9, 0.5));
+                drawVisualRayDebugSegment(gl, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2, normalMaterial);
             }
             // Reflection ray
             Vector3D dd = ray.direction().multiply(-1);
@@ -1006,7 +1007,7 @@ public class JoglDrawingArea implements
         else {
             d = d.multiply(1.4);
             p = ray.origin().add(d);
-            drawVisualRayDebugSegment(gl, ray.origin(), p, true, 0.07, 0.4);
+            drawVisualRayDebugSegment(gl, ray.origin(), p, true, 0.07, 0.4, rayOriginMaterial);
         }
         gl.glPopMatrix();
     }

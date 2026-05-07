@@ -191,9 +191,9 @@ public class TorusExample implements
                 LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
         light.setId(0);
         material = new SimpleMaterial();
-        material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        material.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        material.setSpecular(new ColorRgb(1, 1, 1));
+        material = material.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        material = material.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        material = material.withSpecular(new ColorRgb(1, 1, 1));
 
         torus = new Torus(1.8, 0.2);
     }

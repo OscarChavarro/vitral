@@ -52,7 +52,7 @@ public class Scene
             int i;
             for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
                 b = scene.getSimpleBodies().get(i);
-                b.getMaterial().setDoubleSided(false);
+                b.setMaterial(b.getMaterial().withDoubleSided(false));
                 b.setScale(new Vector3D(0.5, 0.5, 0.5));
                 bodies.add(b);
             }
@@ -82,11 +82,11 @@ public class Scene
         SimpleMaterial m;
 
         m = new SimpleMaterial();
-        m.setAmbient(new ColorRgb(0, 0, 0));
-        m.setDiffuse(new ColorRgb(d));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setPhongExponent(80);
-        m.setDoubleSided(false);
+        m = m.withAmbient(new ColorRgb(0, 0, 0));
+        m = m.withDiffuse(new ColorRgb(d));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withPhongExponent(80);
+        m = m.withDoubleSided(false);
         return m;
     }
 }

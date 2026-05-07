@@ -593,10 +593,10 @@ public class ReaderPly extends PersistenceElement
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(true);
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(true);
         return m;
     }
 
@@ -785,7 +785,7 @@ public class ReaderPly extends PersistenceElement
         thing = addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
 
         if ( allColorsAreTheSame && thing != null ) {
-            thing.getMaterial().setDiffuse(new ColorRgb(r, g, b));
+            thing.setMaterial(thing.getMaterial().withDiffuse(new ColorRgb(r, g, b)));
         }
     }
 }

@@ -304,10 +304,10 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         material = new SimpleMaterial();
-        material.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        material.setDiffuse(new ColorRgb(1.0, 1.0, 1.0));
-        material.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
-        material.setPhongExponent(20.0);
+        material = material.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        material = material.withDiffuse(new ColorRgb(1.0, 1.0, 1.0));
+        material = material.withSpecular(new ColorRgb(1.0, 1.0, 1.0));
+        material = material.withPhongExponent(20.0);
 
         prepareLights(1);
 

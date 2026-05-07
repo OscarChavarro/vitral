@@ -751,9 +751,9 @@ public class Reader3ds extends PersistenceElement
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
         return m;
     }
 
@@ -1122,7 +1122,7 @@ public class Reader3ds extends PersistenceElement
             if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL ) {
                 currentTextureFilename = null;
                 currentBuildingMaterial = new SimpleMaterial();
-                currentBuildingMaterial.setDoubleSided(false);
+                currentBuildingMaterial = currentBuildingMaterial.withDoubleSided(false);
             }
 
             // Generic recursive block processing
@@ -1323,7 +1323,7 @@ public class Reader3ds extends PersistenceElement
             //System.out.println(indent(level) + currentChunk);
             String materialName = readAsciiString(is);
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setName(materialName);
+                currentBuildingMaterial = currentBuildingMaterial.withName(materialName);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_COLOR_RGB2 ) {
@@ -1383,7 +1383,7 @@ public class Reader3ds extends PersistenceElement
             if ( currentBuildingMaterial != null && currentAmount > 0 ) {
                 if ( currentAmount > 100 ) currentAmount = 100;
                 // Warning: not verified yet
-                currentBuildingMaterial.setOpacity(1.0-((double)currentAmount)/100.0);
+                currentBuildingMaterial = currentBuildingMaterial.withOpacity(1.0-((double)currentAmount)/100.0);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TRANSPARENCY_F ) {
@@ -1407,7 +1407,7 @@ public class Reader3ds extends PersistenceElement
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_TWOSIDED ) {
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setDoubleSided(true);
+                currentBuildingMaterial = currentBuildingMaterial.withDoubleSided(true);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_REFLECT_BLUR ) {
@@ -1439,7 +1439,7 @@ public class Reader3ds extends PersistenceElement
             } while ( is.available() > 0 && 
                       (internalBytes < currentChunk.length) );
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setPhongExponent((double)currentAmount);
+                currentBuildingMaterial = currentBuildingMaterial.withPhongExponent((double)currentAmount);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_AMBIENT ) {
@@ -1457,7 +1457,7 @@ public class Reader3ds extends PersistenceElement
                       (internalBytes < currentChunk.length) );
             // Set color in the material
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setAmbient(currentColor);
+                currentBuildingMaterial = currentBuildingMaterial.withAmbient(currentColor);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_DIFFUSE ) {
@@ -1475,7 +1475,7 @@ public class Reader3ds extends PersistenceElement
                       (internalBytes < currentChunk.length) );
             // Set color in the material
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setDiffuse(currentColor);
+                currentBuildingMaterial = currentBuildingMaterial.withDiffuse(currentColor);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_SPECULAR ) {
@@ -1493,7 +1493,7 @@ public class Reader3ds extends PersistenceElement
                       (internalBytes < currentChunk.length) );
             // Set color in the material
             if ( currentBuildingMaterial != null ) {
-                currentBuildingMaterial.setSpecular(currentColor);
+                currentBuildingMaterial = currentBuildingMaterial.withSpecular(currentColor);
             }
         }
         else if ( currentChunk.id == _Reader3dsChunk.ID_MATERIAL_MAPPING_TABLE ) {

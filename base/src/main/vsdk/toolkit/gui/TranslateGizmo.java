@@ -252,9 +252,9 @@ public class TranslateGizmo extends Gizmo {
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(r, g, b));
-        m.setSpecular(new ColorRgb(1, 1, 1));
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(r, g, b));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
         return m;
     }
 
@@ -288,7 +288,7 @@ public class TranslateGizmo extends Gizmo {
         SimpleMaterial yellow = createMaterial(1, 1, 0);
         SimpleMaterial yellowTransparent = createMaterial(1, 1, 0);
 
-        yellowTransparent.setOpacity(0.2);
+        yellowTransparent = yellowTransparent.withOpacity(0.2);
 
         int currentSelection;
         if ( volatileSelection == NULL_GROUP ) {

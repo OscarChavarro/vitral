@@ -289,7 +289,7 @@ public class GUIEventExecutor extends CommandListener{
             functionalSurface.setBounds(-10, -10, -10, 10, 10, 10);
             functionalSurface.setTesselationHint(100, 100);
             newThing = parent.theScene.addThing(functionalSurface);
-            newThing.getMaterial().setDoubleSided(true);
+            newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             //- Create a Ferguson patch ---------------------------------------
@@ -333,7 +333,7 @@ public class GUIEventExecutor extends CommandListener{
             //parent.theScene.addThing(contourHermiteLine);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
-            newThing.getMaterial().setDoubleSided(true);
+            newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
             //-----------------------------------------------------------------
 
 /*
@@ -360,7 +360,7 @@ public class GUIEventExecutor extends CommandListener{
             patch.setApproximationSteps(20);
             SimpleBody newThing;
             newThing = parent.theScene.addThing(patch);
-            newThing.getMaterial().setDoubleSided(true);
+            newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
             //-----------------------------------------------------------------
 */
 
@@ -666,7 +666,7 @@ public class GUIEventExecutor extends CommandListener{
         body = new SimpleBody();
         body.setGeometry(sphere);
         body.setMaterial(parent.theScene.defaultMaterial());
-        body.getMaterial().setDoubleSided(true);
+        body.setMaterial(body.getMaterial().withDoubleSided(true));
         scale = voxelBody.getScale();
         S = S.scale(scale.x(), scale.y(), scale.z());
         scale = scale.multiply(r);

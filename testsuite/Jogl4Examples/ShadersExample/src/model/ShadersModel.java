@@ -84,10 +84,10 @@ public class ShadersModel
         light.setId(0);
 
         material = new SimpleMaterial();
-        material.setAmbient(new ColorRgb(0.1, 0.1, 0.1));
-        material.setDiffuse(new ColorRgb(1, 1, 1));
-        material.setSpecular(new ColorRgb(1, 1, 1));
-        material.setPhongExponent(40);
+        material = material.withAmbient(new ColorRgb(0.1, 0.1, 0.1));
+        material = material.withDiffuse(new ColorRgb(1, 1, 1));
+        material = material.withSpecular(new ColorRgb(1, 1, 1));
+        material = material.withPhongExponent(40);
         cookTorranceCopperMaterial = new MicroFacetedMaterial(
             MICROFACET_CSV_FILE,
             COOK_TORRANCE_MATERIAL_NAME);

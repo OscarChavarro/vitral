@@ -31,7 +31,7 @@ f_r ~ D * F * G / (4 * (N.L) * (N.V)), where:
 - F: Fresnel reflectance
 - G: geometric attenuation / masking-shadowing
 */
-public class MicroFacetedMaterial extends SimpleMaterial
+public final class MicroFacetedMaterial extends SimpleMaterial
 {
     @Serial
     private static final long serialVersionUID = 20260506L;
@@ -45,47 +45,46 @@ public class MicroFacetedMaterial extends SimpleMaterial
     public static final int GEOMETRY_MODEL_SMITH = 0;
     public static final int GEOMETRY_MODEL_IMPLICIT = 1;
 
-    // [COOK1982] RMS slope proxy ("m") controlling microfacet spread.
-    private double roughness;
-    // Helper used by common NDF/G parameterizations (often alpha = m^2).
-    private double alpha;
+    // [COOK1982] RMS slope proxy ("m") controlling micro-facet spread.
+    private final double roughness;
+    // Helper used by common NDF/G parameterization (often alpha = m^2).
+    private final double alpha;
 
     // [COOK1982] Reflectance at normal incidence (per channel), used as
     // practical Fresnel anchor when full spectral data is unavailable.
-    private ColorRgb fresnelF0;
+    private final ColorRgb fresnelF0;
     // [COOK1982] Complex refractive index terms for conductor Fresnel:
     // n (eta) and k (kappa), per channel.
-    private ColorRgb eta;
-    private ColorRgb kappa;
+    private final ColorRgb eta;
+    private final ColorRgb kappa;
 
     // Runtime diffuse/specular energy split (implementation policy).
-    private double kd;
-    private double ks;
+    private final double kd;
+    private final double ks;
 
     // Optional model selectors for runtime shader branching:
     // D term (Beckmann/GGX), F term (Schlick/Conductor), G term.
-    private int fresnelModel;
-    private int ndfModel;
-    private int geometryModel;
+    private final int fresnelModel;
+    private final int ndfModel;
+    private final int geometryModel;
 
     public MicroFacetedMaterial()
     {
-        super();
-        roughness = 0.35;
-        alpha = roughness * roughness;
-        fresnelF0 = new ColorRgb(0.04, 0.04, 0.04);
-        eta = new ColorRgb(1.5, 1.5, 1.5);
-        kappa = new ColorRgb(0.0, 0.0, 0.0);
-        kd = 1.0;
-        ks = 1.0;
-        fresnelModel = FRESNEL_MODEL_SCHLICK;
-        ndfModel = NDF_MODEL_BECKMANN;
-        geometryModel = GEOMETRY_MODEL_SMITH;
+        this(defaultConfig());
     }
 
     public MicroFacetedMaterial(MicroFacetedMaterial other)
     {
-        super(other);
+        super(
+            other.getName(),
+            other.getAmbientReference(),
+            other.getDiffuseReference(),
+            other.getSpecularReference(),
+            other.isDoubleSided(),
+            other.getReflectionCoefficient(),
+            other.getRefractionCoefficient(),
+            other.getOpacity(),
+            other.getPhongExponent());
         roughness = other.roughness;
         alpha = other.alpha;
         fresnelF0 = new ColorRgb(other.fresnelF0);
@@ -100,11 +99,31 @@ public class MicroFacetedMaterial extends SimpleMaterial
 
     public MicroFacetedMaterial(String csvFileName, String materialName)
     {
-        this();
-        if ( csvFileName == null || materialName == null ) {
-            return;
-        }
-        loadFromCsv(csvFileName, materialName);
+        this(loadConfigFromCsv(csvFileName, materialName));
+    }
+
+    private MicroFacetedMaterial(MicrofacetConfig config)
+    {
+        super(
+            config.name,
+            config.ambient,
+            config.diffuse,
+            config.specular,
+            config.doubleSided,
+            config.reflectionCoefficient,
+            config.refractionCoefficient,
+            config.opacity,
+            config.phongExponent);
+        roughness = config.roughness;
+        alpha = config.alpha;
+        fresnelF0 = new ColorRgb(config.fresnelF0);
+        eta = new ColorRgb(config.eta);
+        kappa = new ColorRgb(config.kappa);
+        kd = config.kd;
+        ks = config.ks;
+        fresnelModel = config.fresnelModel;
+        ndfModel = config.ndfModel;
+        geometryModel = config.geometryModel;
     }
 
     public double getRoughness()
@@ -112,21 +131,9 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return roughness;
     }
 
-    public void setRoughness(double roughness)
-    {
-        this.roughness = clampToUnitInterval(roughness);
-        alpha = this.roughness * this.roughness;
-    }
-
     public double getAlpha()
     {
         return alpha;
-    }
-
-    public void setAlpha(double alpha)
-    {
-        this.alpha = clampToUnitInterval(alpha);
-        roughness = Math.sqrt(this.alpha);
     }
 
     public ColorRgb getFresnelF0()
@@ -134,19 +141,9 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return new ColorRgb(fresnelF0);
     }
 
-    public void setFresnelF0(ColorRgb fresnelF0)
-    {
-        this.fresnelF0 = new ColorRgb(fresnelF0);
-    }
-
     public ColorRgb getEta()
     {
         return new ColorRgb(eta);
-    }
-
-    public void setEta(ColorRgb eta)
-    {
-        this.eta = new ColorRgb(eta);
     }
 
     public ColorRgb getKappa()
@@ -154,19 +151,9 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return new ColorRgb(kappa);
     }
 
-    public void setKappa(ColorRgb kappa)
-    {
-        this.kappa = new ColorRgb(kappa);
-    }
-
     public double getKd()
     {
         return kd;
-    }
-
-    public void setKd(double kd)
-    {
-        this.kd = clampToUnitInterval(kd);
     }
 
     public double getKs()
@@ -174,19 +161,9 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return ks;
     }
 
-    public void setKs(double ks)
-    {
-        this.ks = clampToUnitInterval(ks);
-    }
-
     public int getFresnelModel()
     {
         return fresnelModel;
-    }
-
-    public void setFresnelModel(int fresnelModel)
-    {
-        this.fresnelModel = fresnelModel;
     }
 
     public int getNdfModel()
@@ -194,19 +171,9 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return ndfModel;
     }
 
-    public void setNdfModel(int ndfModel)
-    {
-        this.ndfModel = ndfModel;
-    }
-
     public int getGeometryModel()
     {
         return geometryModel;
-    }
-
-    public void setGeometryModel(int geometryModel)
-    {
-        this.geometryModel = geometryModel;
     }
 
     private static double clampToUnitInterval(double value)
@@ -220,13 +187,17 @@ public class MicroFacetedMaterial extends SimpleMaterial
         return value;
     }
 
-    private void loadFromCsv(String csvFileName, String materialName)
+    private static MicrofacetConfig loadConfigFromCsv(String csvFileName, String materialName)
     {
+        if ( csvFileName == null || materialName == null ) {
+            return defaultConfig();
+        }
         File csvFile = resolveCsvFile(csvFileName);
         if ( csvFile == null || !csvFile.exists() ) {
             throw new IllegalArgumentException("Microfacet CSV file not found: " + csvFileName);
         }
 
+        MicrofacetConfig defaultConfig = defaultConfig();
         String normalizedName = materialName.trim().toLowerCase(Locale.ROOT);
         try (InputStream inputStream = new FileInputStream(csvFile)) {
             String headerLine = PersistenceElement.readAsciiLine(inputStream);
@@ -255,22 +226,38 @@ public class MicroFacetedMaterial extends SimpleMaterial
                     continue;
                 }
 
-                setName(rowName.trim());
-                setFresnelModel(intField(row, headerIndex, "fresnel_model", FRESNEL_MODEL_SCHLICK));
-                setNdfModel(intField(row, headerIndex, "ndf_model", NDF_MODEL_BECKMANN));
-                setGeometryModel(intField(row, headerIndex, "geometry_model", GEOMETRY_MODEL_SMITH));
-                setRoughness(doubleField(row, headerIndex, "roughness", roughness));
-                setAlpha(doubleField(row, headerIndex, "alpha", alpha));
-                setKd(doubleField(row, headerIndex, "kd", kd));
-                setKs(doubleField(row, headerIndex, "ks", ks));
-
-                ColorRgb diffuseColor = rgbField(row, headerIndex, "diffuse_r", "diffuse_g", "diffuse_b", getDiffuseReference());
-                setDiffuse(diffuseColor);
-                setFresnelF0(rgbField(row, headerIndex, "f0_r", "f0_g", "f0_b", fresnelF0));
-                setSpecular(getFresnelF0());
-                setEta(rgbField(row, headerIndex, "eta_r", "eta_g", "eta_b", eta));
-                setKappa(rgbField(row, headerIndex, "kappa_r", "kappa_g", "kappa_b", kappa));
-                return;
+                double roughness = clampToUnitInterval(doubleField(
+                    row, headerIndex, "roughness", defaultConfig.roughness));
+                double alpha = clampToUnitInterval(doubleField(
+                    row, headerIndex, "alpha", roughness * roughness));
+                ColorRgb diffuseColor = rgbField(
+                    row, headerIndex, "diffuse_r", "diffuse_g", "diffuse_b", defaultConfig.diffuse);
+                ColorRgb f0 = rgbField(
+                    row, headerIndex, "f0_r", "f0_g", "f0_b", defaultConfig.fresnelF0);
+                ColorRgb eta = rgbField(
+                    row, headerIndex, "eta_r", "eta_g", "eta_b", defaultConfig.eta);
+                ColorRgb kappa = rgbField(
+                    row, headerIndex, "kappa_r", "kappa_g", "kappa_b", defaultConfig.kappa);
+                return new MicrofacetConfig(
+                    rowName.trim(),
+                    defaultConfig.ambient,
+                    diffuseColor,
+                    f0,
+                    defaultConfig.doubleSided,
+                    defaultConfig.reflectionCoefficient,
+                    defaultConfig.refractionCoefficient,
+                    defaultConfig.opacity,
+                    defaultConfig.phongExponent,
+                    roughness,
+                    alpha,
+                    f0,
+                    eta,
+                    kappa,
+                    clampToUnitInterval(doubleField(row, headerIndex, "kd", defaultConfig.kd)),
+                    clampToUnitInterval(doubleField(row, headerIndex, "ks", defaultConfig.ks)),
+                    intField(row, headerIndex, "fresnel_model", FRESNEL_MODEL_SCHLICK),
+                    intField(row, headerIndex, "ndf_model", NDF_MODEL_BECKMANN),
+                    intField(row, headerIndex, "geometry_model", GEOMETRY_MODEL_SMITH));
             }
         }
         catch (Exception e) {
@@ -362,5 +349,52 @@ public class MicroFacetedMaterial extends SimpleMaterial
         double g = doubleField(row, headerIndex, keyG, defaultValue.g());
         double b = doubleField(row, headerIndex, keyB, defaultValue.b());
         return new ColorRgb(r, g, b);
+    }
+
+    private static MicrofacetConfig defaultConfig()
+    {
+        return new MicrofacetConfig(
+            "VSDK_default_material",
+            new ColorRgb(0.1, 0.1, 0.1),
+            new ColorRgb(0.9, 0.5, 0.5),
+            new ColorRgb(1, 1, 1),
+            true,
+            0.0,
+            0.0,
+            1.0,
+            128.0,
+            0.35,
+            0.35 * 0.35,
+            new ColorRgb(0.04, 0.04, 0.04),
+            new ColorRgb(1.5, 1.5, 1.5),
+            new ColorRgb(0.0, 0.0, 0.0),
+            1.0,
+            1.0,
+            FRESNEL_MODEL_SCHLICK,
+            NDF_MODEL_BECKMANN,
+            GEOMETRY_MODEL_SMITH);
+    }
+
+    private record MicrofacetConfig(
+        String name,
+        ColorRgb ambient,
+        ColorRgb diffuse,
+        ColorRgb specular,
+        boolean doubleSided,
+        double reflectionCoefficient,
+        double refractionCoefficient,
+        double opacity,
+        double phongExponent,
+        double roughness,
+        double alpha,
+        ColorRgb fresnelF0,
+        ColorRgb eta,
+        ColorRgb kappa,
+        double kd,
+        double ks,
+        int fresnelModel,
+        int ndfModel,
+        int geometryModel)
+    {
     }
 }

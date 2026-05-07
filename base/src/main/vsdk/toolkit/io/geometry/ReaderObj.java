@@ -369,8 +369,8 @@ public class ReaderObj extends PersistenceElement
         if ( nextMaterialsArray.isEmpty() ) {
             SimpleMaterial m;
             m = new SimpleMaterial();
-            m.setName("default obj material");
-            m.setDoubleSided(false);
+            m = m.withName("default obj material");
+            m = m.withDoubleSided(false);
             nextMaterialsArray.add(m);
         }
 
@@ -468,7 +468,7 @@ public class ReaderObj extends PersistenceElement
             materials[i] = nextMaterialsArray.get(i);
             if ( materials[i] == null ) {
                 materials[i] = new SimpleMaterial();
-                materials[i].setDoubleSided(false);
+                materials[i] = materials[i].withDoubleSided(false);
             }
         }
         newTriangleMesh.setMaterials(materials);
@@ -754,14 +754,14 @@ public class ReaderObj extends PersistenceElement
             String lineOfText;
 
             SimpleMaterial activeMaterial=new SimpleMaterial();
-            activeMaterial.setDoubleSided(false);
-            activeMaterial.setName("default");
+            activeMaterial = activeMaterial.withDoubleSided(false);
+            activeMaterial = activeMaterial.withName("default");
 
             while( (lineOfText = in.readLine()) != null ) {
                 if ( lineOfText.startsWith("Ns") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken(); // Ns
-                    activeMaterial.setPhongExponent(
+                    activeMaterial = activeMaterial.withPhongExponent(
                         Float.parseFloat(stMat.nextToken()));
                 }
                 if ( lineOfText.startsWith("Kd") ) {
@@ -771,7 +771,7 @@ public class ReaderObj extends PersistenceElement
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()));
-                    activeMaterial.setDiffuse(color);
+                    activeMaterial = activeMaterial.withDiffuse(color);
                 }
                 if ( lineOfText.startsWith("Ka") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
@@ -780,7 +780,7 @@ public class ReaderObj extends PersistenceElement
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()));
-                    activeMaterial.setAmbient(color);
+                    activeMaterial = activeMaterial.withAmbient(color);
                 }
                 if ( lineOfText.startsWith("Ks") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
@@ -789,7 +789,7 @@ public class ReaderObj extends PersistenceElement
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()),
                         Float.parseFloat(stMat.nextToken()));
-                    activeMaterial.setSpecular(color);
+                    activeMaterial = activeMaterial.withSpecular(color);
                 }
                 if ( lineOfText.startsWith("d") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
@@ -801,8 +801,8 @@ public class ReaderObj extends PersistenceElement
                     stMat.nextToken();//newmtl
                     ret.put(activeMaterial.getName(), activeMaterial);
                     activeMaterial = new SimpleMaterial();
-                    activeMaterial.setDoubleSided(false);
-                    activeMaterial.setName(stMat.nextToken());
+                    activeMaterial = activeMaterial.withDoubleSided(false);
+                    activeMaterial = activeMaterial.withName(stMat.nextToken());
                 }
             }
             ret.put(activeMaterial.getName(), activeMaterial);
@@ -816,10 +816,10 @@ public class ReaderObj extends PersistenceElement
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
         return m;
     }
 

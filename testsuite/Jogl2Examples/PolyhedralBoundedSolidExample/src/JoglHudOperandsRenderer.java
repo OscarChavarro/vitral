@@ -27,11 +27,11 @@ public class JoglHudOperandsRenderer
     private static SimpleMaterial createInsetMaterial(double r, double g, double b)
     {
         SimpleMaterial m = new SimpleMaterial();
-        m.setAmbient(new ColorRgb(0.2 * r, 0.2 * g, 0.2 * b));
-        m.setDiffuse(new ColorRgb(r, g, b));
-        m.setSpecular(new ColorRgb(1.0, 1.0, 1.0));
-        m.setDoubleSided(false);
-        m.setPhongExponent(100);
+        m = m.withAmbient(new ColorRgb(0.2 * r, 0.2 * g, 0.2 * b));
+        m = m.withDiffuse(new ColorRgb(r, g, b));
+        m = m.withSpecular(new ColorRgb(1.0, 1.0, 1.0));
+        m = m.withDoubleSided(false);
+        m = m.withPhongExponent(100);
         return m;
     }
 

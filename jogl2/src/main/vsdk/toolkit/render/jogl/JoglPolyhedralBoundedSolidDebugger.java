@@ -94,11 +94,11 @@ implements GLEventListener
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.5, 0.9));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
-        m.setPhongExponent(100);
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.5, 0.9));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
+        m = m.withPhongExponent(100);
         return m;
     }
 

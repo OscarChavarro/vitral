@@ -140,12 +140,12 @@ public class ReaderMitScene extends PersistenceElement
         double index = readNumber(st);
 
         SimpleMaterial material = new SimpleMaterial();
-        material.setAmbient(new ColorRgb(r*ka, g*ka, b*ka));
-        material.setDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
-        material.setSpecular(new ColorRgb(ks, ks, ks));
-        material.setPhongExponent(ns);
-        material.setReflectionCoefficient(kr);
-        material.setRefractionCoefficient(kt);
+        material = material.withAmbient(new ColorRgb(r*ka, g*ka, b*ka));
+        material = material.withDiffuse(new ColorRgb(r*kd, g*kd, b*kd));
+        material = material.withSpecular(new ColorRgb(ks, ks, ks));
+        material = material.withPhongExponent(ns);
+        material = material.withReflectionCoefficient(kr);
+        material = material.withRefractionCoefficient(kt);
         return material;
     }
 
@@ -345,12 +345,12 @@ public class ReaderMitScene extends PersistenceElement
                                        10.0f, 0f, 0f, 1f);
         */
         currentMaterial = new SimpleMaterial();
-        currentMaterial.setAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
-        currentMaterial.setDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
-        currentMaterial.setSpecular(new ColorRgb(0.4, 0.4, 0.4));
-        currentMaterial.setReflectionCoefficient(0);
-        currentMaterial.setRefractionCoefficient(0);
-        currentMaterial.setPhongExponent(10);
+        currentMaterial = currentMaterial.withAmbient(new ColorRgb(0.8*0.2, 0.2*0.2, 0.9*0.2));
+        currentMaterial = currentMaterial.withDiffuse(new ColorRgb(0.8*0.4, 0.2*0.4, 0.9*0.4));
+        currentMaterial = currentMaterial.withSpecular(new ColorRgb(0.4, 0.4, 0.4));
+        currentMaterial = currentMaterial.withReflectionCoefficient(0);
+        currentMaterial = currentMaterial.withRefractionCoefficient(0);
+        currentMaterial = currentMaterial.withPhongExponent(10);
 
         boolean readingTriangles = false;
         boolean readingQuads = false;

@@ -427,10 +427,10 @@ public class ReaderAse extends PersistenceElement
     {
         SimpleMaterial m = new SimpleMaterial();
 
-        m.setAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m.setDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m.setSpecular(new ColorRgb(1, 1, 1));
-        m.setDoubleSided(false);
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
         return m;
     }
 
