@@ -118,7 +118,7 @@ implements GLEventListener
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
         Jogl2CameraRenderer.activate(gl, camera);
-        Jogl2MaterialRenderer.activate(gl, material);
+        Jogl2SimpleMaterialRenderer.activate(gl, material);
         Jogl2LightRenderer.activate(gl, light1);
         Jogl2LightRenderer.draw(gl, light1);
         Jogl2LightRenderer.activate(gl, light2);

@@ -50,7 +50,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.render.jogl.Jogl2BackgroundRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
-import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl2TranslateGizmoRenderer;
@@ -917,7 +917,7 @@ public class JoglDrawingArea implements
         l = diff.length();
 
         gl.glEnable(GL2.GL_LIGHTING);
-        Jogl2MaterialRenderer.activate(gl, visualDebugMaterial);
+        Jogl2SimpleMaterialRenderer.activate(gl, visualDebugMaterial);
 
         //-----------------------------------------------------------------
         Geometry a;
@@ -976,7 +976,7 @@ public class JoglDrawingArea implements
 
         //-----------------------------------------------------------------
         visualDebugMaterial.setDiffuse(new ColorRgb(0.9, 0.5, 0.0));
-        Jogl2MaterialRenderer.activate(gl, visualDebugMaterial);
+        Jogl2SimpleMaterialRenderer.activate(gl, visualDebugMaterial);
         Sphere s = new Sphere(0.05);
         gl.glPushMatrix();
         gl.glTranslated(ray.origin().x(), ray.origin().y(), ray.origin().z());

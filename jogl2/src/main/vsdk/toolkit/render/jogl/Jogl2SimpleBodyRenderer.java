@@ -109,7 +109,7 @@ public class Jogl2SimpleBodyRenderer extends Jogl2Renderer {
         gl.glScaled(scale.x(), scale.y(), scale.z());
 
         gl.glColor3d(1, 1, 1);
-        Jogl2MaterialRenderer.activate(gl, b.getMaterial());
+        Jogl2SimpleMaterialRenderer.activate(gl, b.getMaterial());
 
         //-----------------------------------------------------------------
         Image texture;

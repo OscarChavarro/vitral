@@ -363,7 +363,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
             if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
-                Jogl2MaterialRenderer.activate(gl,
+                Jogl2SimpleMaterialRenderer.activate(gl,
                     materialsArray[materialIndex]);
             }
             drawRangeWithoutTexture(gl, mesh, start, end, flipNormals);
@@ -371,7 +371,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         }
         if ( end <= nt ) {
             SimpleMaterial m = new SimpleMaterial();
-            Jogl2MaterialRenderer.activate(gl, m);
+            Jogl2SimpleMaterialRenderer.activate(gl, m);
             drawRangeWithoutTexture(gl, mesh, start, nt, flipNormals);
         }
     }
@@ -408,7 +408,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
             end = materialRanges[i][0];
             materialIndex = materialRanges[i][1];
             if ( materialIndex >= 0 && materialIndex < materialsArray.length ) {
-                Jogl2MaterialRenderer.activate(gl,
+                Jogl2SimpleMaterialRenderer.activate(gl,
                     materialsArray[materialIndex]);
             }
             drawRangeWithVertexArrays(gl, mesh, start, end, flipNormals, false);
@@ -416,7 +416,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         }
         if ( end <= nt ) {
             SimpleMaterial m = new SimpleMaterial();
-            Jogl2MaterialRenderer.activate(gl, m);
+            Jogl2SimpleMaterialRenderer.activate(gl, m);
             drawRangeWithVertexArrays(gl, mesh, start, nt, flipNormals, false);
         }
     }
@@ -461,7 +461,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
 
             if ( currentMaterialIndex != previousMaterialIndex ) {
                 if ( currentMaterialIndex >= 0 ) {
-                    Jogl2MaterialRenderer.activate(gl,
+                    Jogl2SimpleMaterialRenderer.activate(gl,
                         materialsArray[currentMaterialIndex]);
                 }
                 previousMaterialIndex = currentMaterialIndex;

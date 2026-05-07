@@ -119,7 +119,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
                 position = r.getPosition();
                 gl.glTranslated(position.x(), position.y(), position.z());
                 Jogl2MatrixRenderer.activate(gl, r.getRotation());
-                Jogl2MaterialRenderer.activate(gl, r.getMaterial());
+                Jogl2SimpleMaterialRenderer.activate(gl, r.getMaterial());
                 Jogl2GeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
                 gl.glPopMatrix();
             }
@@ -156,7 +156,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
                 position = r.getPosition();
                 gl.glTranslated(position.x(), position.y(), position.z());
                 Jogl2MatrixRenderer.activate(gl, r.getRotation());
-                Jogl2MaterialRenderer.activate(gl, r.getMaterial());
+                Jogl2SimpleMaterialRenderer.activate(gl, r.getMaterial());
                 Jogl2GeometryRenderer.draw(gl, g, gizmo.getCamera(), q);
                 gl.glPopMatrix();
             }

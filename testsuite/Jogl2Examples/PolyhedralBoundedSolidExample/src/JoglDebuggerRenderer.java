@@ -20,7 +20,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.HiddenLineRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
-import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
 
@@ -149,7 +149,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
         gl.glScaled(scale, scale, scale);
         gl.glTranslated(-center.x(), -center.y(), -center.z());
-        Jogl2MaterialRenderer.activate(gl, material);
+        Jogl2SimpleMaterialRenderer.activate(gl, material);
         Jogl2PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
             model.getQuality());
         gl.glPopMatrix();
@@ -180,7 +180,7 @@ public class JoglDebuggerRenderer implements GLEventListener
 
         drawInsetSolid(gl, operandA, csgOperandMaterialA, leftAnchor, mainExtent);
         drawInsetSolid(gl, operandB, csgOperandMaterialB, rightAnchor, mainExtent);
-        Jogl2MaterialRenderer.activate(gl, model.getMaterial());
+        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
     }
 
     public void refreshCanvasAfterWindowModeChange()
@@ -301,7 +301,7 @@ public class JoglDebuggerRenderer implements GLEventListener
         }
 
         //-----------------------------------------------------------------
-        Jogl2MaterialRenderer.activate(gl, model.getMaterial());
+        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
         Jogl2LightRenderer.activate(gl, model.getLight1());
         Jogl2LightRenderer.draw(gl, model.getLight1());
         Jogl2LightRenderer.activate(gl, model.getLight2());

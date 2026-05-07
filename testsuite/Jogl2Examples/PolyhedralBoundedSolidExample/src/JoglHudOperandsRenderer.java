@@ -6,7 +6,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
-import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2PolyhedralBoundedSolidRenderer;
 
 public class JoglHudOperandsRenderer
@@ -132,7 +132,7 @@ public class JoglHudOperandsRenderer
         gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
         gl.glScaled(scale, scale, scale);
         gl.glTranslated(-center.x(), -center.y(), -center.z());
-        Jogl2MaterialRenderer.activate(gl, material);
+        Jogl2SimpleMaterialRenderer.activate(gl, material);
         Jogl2PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
             model.getQuality());
         gl.glPopMatrix();
@@ -163,6 +163,6 @@ public class JoglHudOperandsRenderer
 
         drawInsetSolid(gl, operandA, csgOperandMaterialA, leftAnchor, mainExtent);
         drawInsetSolid(gl, operandB, csgOperandMaterialB, rightAnchor, mainExtent);
-        Jogl2MaterialRenderer.activate(gl, model.getMaterial());
+        Jogl2SimpleMaterialRenderer.activate(gl, model.getMaterial());
     }
 }

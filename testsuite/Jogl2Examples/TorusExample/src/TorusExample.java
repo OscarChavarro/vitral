@@ -47,7 +47,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.Jogl2TorusRenderer;
-import vsdk.toolkit.render.jogl.Jogl2MaterialRenderer;
+import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.environment.light.LightType;
 
@@ -404,7 +404,7 @@ public class TorusExample implements
         Jogl2LightRenderer.draw(gl, light);
         gl.glEnable(GL2.GL_LIGHTING);
         Jogl2LightRenderer.activate(gl, light);
-        Jogl2MaterialRenderer.activate(gl, material);
+        Jogl2SimpleMaterialRenderer.activate(gl, material);
 
         Jogl2TorusRenderer.draw(gl, torus, camera, qualitySelection, n, N);
         
