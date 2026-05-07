@@ -29,6 +29,7 @@ testsuite/**/output/
 testsuite/**/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
+testsuite/**/PolyhedralBoundedSolidExample/*.png
 testsuite/_APITests/_JOGL2HelloWorld/doc/javadoc/
 .codex
 .venv/
