@@ -10,6 +10,7 @@ import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixDimensionMismatchExcep
 import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixIndexOutOfBoundsException;
 import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixNotSquareException;
 import vsdk.toolkit.common.linealAlgebra.exceptions.MatrixSingularException;
+import vsdk.toolkit.processing.linealAlgebra.LinearAlgebraEngine;
 
 /**
 This class is a data structure that represents a NxM matrix.
@@ -94,14 +95,7 @@ public final class MatrixNxM extends FundamentalEntity
 
     public MatrixNxM inverse()
     {
-        double d = determinant();
-        if ( Math.abs(d) < VSDK.EPSILON ) {
-            throw new MatrixSingularException(
-                "Trying to invert a matrix with zero determinant");
-        }
-        MatrixNxM cof = cofactors();
-        MatrixNxM adj = cof.transpose();
-        return adj.multiply(1.0 / d);
+        return LinearAlgebraEngine.defaultEngine().inverse(this);
     }
 
     public MatrixNxM cofactors()
@@ -184,21 +178,7 @@ public final class MatrixNxM extends FundamentalEntity
 
     public double determinant()
     {
-        if ( numColumns != numRows ) {
-            throw new MatrixNotSquareException(
-                "Matrix must be square to have a determinant");
-        }
-        if ( numColumns == 1 ) {
-            return m[0][0];
-        }
-
-        double accum = 0;
-        int row = 0;
-        for ( int col = 0, sign = 1; col < numColumns; col++, sign *= -1 ) {
-            MatrixNxM minor = buildMinor(row, col);
-            accum += ((double)sign) * minor.determinant() * m[row][col];
-        }
-        return accum;
+        return LinearAlgebraEngine.defaultEngine().determinant(this);
     }
 
     @Override
