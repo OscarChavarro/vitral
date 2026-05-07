@@ -5,7 +5,7 @@
 //= [.FONT2006] The FontForge project home page, available at               =
 //=            http://fontforge.sourceforge.net/bezier.html                 =
 
-package vsdk.toolkit.environment.geometry.surface;
+package vsdk.toolkit.environment.geometry.curve;
 import java.io.Serial;
 
 import java.util.ArrayList;

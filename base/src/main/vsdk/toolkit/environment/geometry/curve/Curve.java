@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.surface;
+package vsdk.toolkit.environment.geometry.curve;
 import java.io.Serial;
 
 import vsdk.toolkit.common.Ray;

@@ -11,7 +11,7 @@ import java.awt.geom.AffineTransform;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.io.geometry.FontReader;
-import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.io.image.ImagePersistence;
 import java.awt.Color;
 

@@ -16,7 +16,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
-import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.processing.CurveModeler;
 

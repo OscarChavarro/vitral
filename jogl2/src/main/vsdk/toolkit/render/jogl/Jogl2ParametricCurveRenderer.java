@@ -13,7 +13,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
-import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 
 public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
     private static GLU glu;

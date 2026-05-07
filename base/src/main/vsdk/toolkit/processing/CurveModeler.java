@@ -2,7 +2,7 @@ package vsdk.toolkit.processing;
 
 // Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.surface.ParametricCurve;
+import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 
 /**
 Utility class with static geometry algorithms, mostly for creating and
