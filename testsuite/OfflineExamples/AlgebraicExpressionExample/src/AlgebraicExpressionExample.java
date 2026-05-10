@@ -1,7 +1,7 @@
 //= This example serves as a testbed for AlgebraicExpression class.           =
 
 // VSDK classes
-import vsdk.toolkit.common.AlgebraicExpression;
+import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpression;
 
 public class AlgebraicExpressionExample 
 {

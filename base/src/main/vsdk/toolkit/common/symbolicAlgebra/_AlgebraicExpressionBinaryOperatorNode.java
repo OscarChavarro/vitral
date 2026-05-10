@@ -1,4 +1,4 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.symbolicAlgebra;
 
 import java.io.Serial;
 

@@ -1,4 +1,4 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.symbolicAlgebra;
 import java.io.Serial;
 
 // Java basic classes
@@ -9,6 +9,7 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 
 // VSDK classes
+import vsdk.toolkit.common.FundamentalEntity;
 
 /**
 A `AlgebraicExpression` is an algebraic expression composed of algebraic
@@ -235,7 +236,7 @@ public class AlgebraicExpression extends FundamentalEntity
 
     /**
     @param regexp
-    @throws vsdk.toolkit.common.AlgebraicExpressionException
+    @throws vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException
     */
     public void setExpression(String regexp) throws AlgebraicExpressionException
     {

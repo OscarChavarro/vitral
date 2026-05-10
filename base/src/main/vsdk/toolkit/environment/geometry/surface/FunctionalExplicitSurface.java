@@ -2,8 +2,8 @@ package vsdk.toolkit.environment.geometry.surface;
 import java.io.Serial;
 
 // VitralSDK classes
-import vsdk.toolkit.common.AlgebraicExpression;
-import vsdk.toolkit.common.AlgebraicExpressionException;
+import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpression;
+import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;

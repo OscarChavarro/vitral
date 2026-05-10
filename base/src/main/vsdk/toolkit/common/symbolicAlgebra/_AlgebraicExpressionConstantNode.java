@@ -1,5 +1,6 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.symbolicAlgebra;
 import java.io.Serial;
+import vsdk.toolkit.common.VSDK;
 
 public class _AlgebraicExpressionConstantNode extends _AlgebraicExpressionNode
 {

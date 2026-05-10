@@ -1,5 +1,6 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.symbolicAlgebra;
 import java.io.Serial;
+import vsdk.toolkit.common.FundamentalEntity;
 
 public abstract class _AlgebraicExpressionNode extends FundamentalEntity
 {
