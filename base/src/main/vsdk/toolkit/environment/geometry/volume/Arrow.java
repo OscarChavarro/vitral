@@ -3,10 +3,10 @@ package vsdk.toolkit.environment.geometry.volume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 

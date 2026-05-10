@@ -6,7 +6,7 @@ package application.render.jogl;
 import com.jogamp.opengl.GL2;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;

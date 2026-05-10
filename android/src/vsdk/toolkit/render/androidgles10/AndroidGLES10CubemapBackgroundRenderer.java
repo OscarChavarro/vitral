@@ -4,7 +4,7 @@ package vsdk.toolkit.render.androidgles10;
 import android.opengl.GLES10;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.CubemapBackground;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 

@@ -3,7 +3,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;

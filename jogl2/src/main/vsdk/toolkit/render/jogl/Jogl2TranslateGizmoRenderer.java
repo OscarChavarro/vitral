@@ -14,7 +14,7 @@ import com.jogamp.opengl.glu.GLUquadric;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.light.Light;

@@ -1,7 +1,7 @@
 package options;
 
 import model.ShaderOperationMode;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class CommandLineOptions
 {

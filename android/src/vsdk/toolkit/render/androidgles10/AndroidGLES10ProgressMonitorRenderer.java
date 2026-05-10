@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import static vsdk.toolkit.render.androidgles10.AndroidGLES10Renderer.FLOAT_SIZE_IN_BYTES;
 
 public class AndroidGLES10ProgressMonitorRenderer extends AndroidGLES10Renderer 

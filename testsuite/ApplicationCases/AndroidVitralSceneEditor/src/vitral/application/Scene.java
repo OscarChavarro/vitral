@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

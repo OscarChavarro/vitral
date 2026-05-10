@@ -1,7 +1,8 @@
 //=                     version                                             =
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.environment.material;
 import java.io.Serial;
+import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.color.ColorRgb;
 
 /**

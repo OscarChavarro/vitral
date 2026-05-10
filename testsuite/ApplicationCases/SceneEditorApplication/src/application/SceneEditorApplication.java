@@ -30,7 +30,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK; 
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBColorPalette;
@@ -39,7 +39,6 @@ import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
 import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.variable.GuiVariable;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 

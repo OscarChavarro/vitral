@@ -1,7 +1,9 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.environment.geometry.elements;
 import java.io.Serial;
 
 import java.util.ArrayList;
+import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
 /**

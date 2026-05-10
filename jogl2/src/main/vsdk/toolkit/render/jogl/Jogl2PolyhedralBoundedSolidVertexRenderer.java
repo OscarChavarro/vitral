@@ -10,7 +10,7 @@ import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
@@ -19,6 +19,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
 {
@@ -59,7 +60,7 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
     drawDebugVertices(GL2 gl,
                       PolyhedralBoundedSolid solid,
                       Camera camera,
-                      vsdk.toolkit.common.RendererConfiguration quality)
+                      RendererConfiguration quality)
     {
         // Vertex-id labels are painted in the example HUD, not here.
     }

@@ -8,7 +8,7 @@ package vsdk.toolkit.render;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
-import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.environment.geometry.elements.Vertex2D;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;

@@ -11,7 +11,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 // VSDK Classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
@@ -23,7 +23,6 @@ import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.framework.Component;
-import vsdk.toolkit.render.jogl.Jogl2SphereRenderer;
 
 public class Jogl2ProjectedViewRenderer extends Component {
     public Image image;

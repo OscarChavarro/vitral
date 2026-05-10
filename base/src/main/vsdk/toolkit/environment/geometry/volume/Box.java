@@ -8,8 +8,8 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class Box extends Solid {

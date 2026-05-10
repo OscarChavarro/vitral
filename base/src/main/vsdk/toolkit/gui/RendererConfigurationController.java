@@ -1,6 +1,6 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class RendererConfigurationController extends Controller {
 

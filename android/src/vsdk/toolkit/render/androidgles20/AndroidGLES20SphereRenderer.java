@@ -14,7 +14,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.geometry.Sphere;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 
 public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer

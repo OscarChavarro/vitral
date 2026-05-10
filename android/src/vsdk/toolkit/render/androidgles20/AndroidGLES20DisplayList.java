@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 // VSDK classes
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.Material;
 
 /**

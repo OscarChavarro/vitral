@@ -22,7 +22,7 @@ import com.jogamp.opengl.GLEventListener;
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;     // Model elements
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;

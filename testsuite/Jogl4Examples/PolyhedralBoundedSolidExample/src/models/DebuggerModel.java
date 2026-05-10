@@ -9,7 +9,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // Vitral classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;

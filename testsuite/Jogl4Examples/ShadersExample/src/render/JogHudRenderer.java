@@ -10,7 +10,7 @@ import com.jogamp.opengl.GL4;
 
 import model.ShaderOperationMode;
 import model.ShadersModel;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 

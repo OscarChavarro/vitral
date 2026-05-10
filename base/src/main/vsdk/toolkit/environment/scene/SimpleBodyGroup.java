@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 
 public class SimpleBodyGroup extends Entity {
     @Serial private static final long serialVersionUID = 20070526L;

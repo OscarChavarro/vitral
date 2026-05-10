@@ -18,7 +18,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class Jogl2RGBAImageUncompressedRenderer extends Jogl2Renderer
 {

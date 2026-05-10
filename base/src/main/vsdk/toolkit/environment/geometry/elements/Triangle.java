@@ -1,8 +1,9 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.environment.geometry.elements;
 import java.io.Serial;
+import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 
-public class Triangle extends FundamentalEntity 
+public class Triangle extends FundamentalEntity
 {
     @Serial private static final long serialVersionUID = 20060502L;
 

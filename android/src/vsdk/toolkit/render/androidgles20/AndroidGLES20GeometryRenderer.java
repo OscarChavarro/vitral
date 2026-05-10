@@ -13,7 +13,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;

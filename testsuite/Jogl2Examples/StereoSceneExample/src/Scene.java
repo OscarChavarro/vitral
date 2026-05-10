@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.io.File;
 
 import vsdk.toolkit.common.color.ColorRgb;                     // Model elements
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.material.SimpleMaterial;

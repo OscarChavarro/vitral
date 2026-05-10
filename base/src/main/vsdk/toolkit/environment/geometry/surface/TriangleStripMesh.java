@@ -4,9 +4,9 @@ import java.io.Serial;
 // Java basic classes
 
 // VitralSDK classes
-import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.Vertex;
+import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 
 public class TriangleStripMesh extends Surface {
 

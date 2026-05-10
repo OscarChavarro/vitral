@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
-import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.environment.geometry.elements.Vertex2D;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;

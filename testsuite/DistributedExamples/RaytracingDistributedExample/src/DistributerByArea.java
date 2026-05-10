@@ -12,12 +12,11 @@ import java.util.StringTokenizer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 // VitralSDK classes
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.io.PersistenceElement;
 
 class JobAssigment

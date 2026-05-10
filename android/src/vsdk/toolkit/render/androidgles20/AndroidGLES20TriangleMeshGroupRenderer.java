@@ -1,7 +1,7 @@
 package vsdk.toolkit.render.androidgles20;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.TriangleMeshGroup;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 

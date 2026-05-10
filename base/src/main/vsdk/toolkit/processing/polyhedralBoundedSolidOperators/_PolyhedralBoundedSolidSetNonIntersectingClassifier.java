@@ -8,7 +8,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.ArrayList;
 import java.util.Collections;
 
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;

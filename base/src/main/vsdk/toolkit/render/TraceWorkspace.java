@@ -1,7 +1,7 @@
 package vsdk.toolkit.render;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 
 public final class TraceWorkspace {
     public static final int DEFAULT_MAX_RECURSION_LEVEL = 8;

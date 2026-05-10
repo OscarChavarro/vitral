@@ -10,7 +10,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
 
 // VitralSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

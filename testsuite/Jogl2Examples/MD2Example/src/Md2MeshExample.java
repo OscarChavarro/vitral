@@ -26,7 +26,7 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 
 // VSDK classes
-import vsdk.toolkit.common.RendererConfiguration;    // Model elements
+import vsdk.toolkit.environment.material.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
@@ -50,7 +50,7 @@ import vsdk.toolkit.common.logging.Logger;
 //import util.filters.ObjectFilter;
 
 //Polygon simplify.
-import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.environment.geometry.elements.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
 import vsdk.toolkit.environment.light.LightType;

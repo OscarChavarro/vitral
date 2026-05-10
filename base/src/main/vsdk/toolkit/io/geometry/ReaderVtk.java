@@ -12,7 +12,7 @@ import java.util.StringTokenizer;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;

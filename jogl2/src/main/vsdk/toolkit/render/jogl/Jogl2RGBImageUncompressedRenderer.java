@@ -18,7 +18,7 @@ import com.jogamp.opengl.util.texture.TextureData;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public class Jogl2RGBImageUncompressedRenderer extends Jogl2Renderer
 {

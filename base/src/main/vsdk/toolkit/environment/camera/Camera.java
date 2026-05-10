@@ -13,7 +13,7 @@ import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Vector4D;
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;

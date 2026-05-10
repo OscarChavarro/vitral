@@ -2,7 +2,7 @@ package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 
 public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {

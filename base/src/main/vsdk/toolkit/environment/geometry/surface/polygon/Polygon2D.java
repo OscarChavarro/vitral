@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import vsdk.toolkit.common.Vertex2D;
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Vertex2D;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.surface.Surface;
 import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
 

@@ -7,19 +7,16 @@ import java.io.OutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
-import java.io.File;
 
 // VitralSDK classes
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.render.SimpleRaytracer;
-
-import vsdk.toolkit.io.image.ImagePersistence;
 
 class VitralVisualizationServerProtocol implements Runnable
 {

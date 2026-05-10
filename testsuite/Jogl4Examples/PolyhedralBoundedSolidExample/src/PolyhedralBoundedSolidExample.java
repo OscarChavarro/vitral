@@ -3,7 +3,7 @@ import models.SolidModelNames;
 import options.CommandLineOptions;
 import render.Jogl4HeadlessRenderer;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 import java.io.File;
 

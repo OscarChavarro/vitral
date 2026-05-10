@@ -2,14 +2,12 @@ package vsdk.toolkit.render.jogl;
 
 // Java classes
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;

@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 // VSDK classes
-import vsdk.toolkit.common.Triangle;
-import vsdk.toolkit.common.Vertex;
+import vsdk.toolkit.environment.geometry.elements.Triangle;
+import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.color.ColorRgb;

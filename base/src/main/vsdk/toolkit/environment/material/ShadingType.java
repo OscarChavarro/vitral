@@ -1,4 +1,4 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.environment.material;
 
 public enum ShadingType
 {

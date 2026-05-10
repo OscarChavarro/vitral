@@ -1,8 +1,7 @@
 package gui;
 
-import model.ShaderOperationMode;
 import model.ShadersModel;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.gui.KeyEvent;

@@ -12,7 +12,7 @@ import android.opengl.GLES11;
 import android.opengl.GLES20;
 import android.util.Log;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 // VSDK classes
 import vsdk.toolkit.render.RenderingElement;

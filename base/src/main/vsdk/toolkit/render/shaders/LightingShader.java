@@ -11,13 +11,13 @@ import vsdk.toolkit.render.TraceWorkspace;
 import java.util.List;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.Ray;
+import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.environment.geometry.RayHit;
+import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 public abstract class LightingShader extends Shader {

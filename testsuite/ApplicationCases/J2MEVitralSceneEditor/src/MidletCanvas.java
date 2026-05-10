@@ -18,7 +18,7 @@ import de.enough.polish.util.ArrayList;
 import vsdk.toolkit.common.Matrix4x4;                   // Model linealAlgebra.elements
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.light.Light;

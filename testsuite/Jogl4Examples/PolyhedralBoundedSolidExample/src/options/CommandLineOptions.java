@@ -1,7 +1,6 @@
 package options;
 
-import vsdk.toolkit.common.RendererConfiguration;
-import vsdk.toolkit.common.ShadingType;
+import vsdk.toolkit.environment.material.ShadingType;
 import models.CsgSampleNames;
 import models.SolidModelNames;
 

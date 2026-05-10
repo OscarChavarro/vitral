@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 // Vitral classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;

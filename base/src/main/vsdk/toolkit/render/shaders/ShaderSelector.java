@@ -1,6 +1,6 @@
 package vsdk.toolkit.render.shaders;
 
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 public final class ShaderSelector {
     private ShaderSelector()

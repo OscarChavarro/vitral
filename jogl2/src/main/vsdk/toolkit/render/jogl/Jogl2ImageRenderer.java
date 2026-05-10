@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageCompressed;

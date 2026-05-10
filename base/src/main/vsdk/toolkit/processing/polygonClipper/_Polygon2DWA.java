@@ -1,7 +1,7 @@
 package vsdk.toolkit.processing.polygonClipper;
 
 import java.util.ArrayList;
-import vsdk.toolkit.common.Vertex2D;
+import vsdk.toolkit.environment.geometry.elements.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 

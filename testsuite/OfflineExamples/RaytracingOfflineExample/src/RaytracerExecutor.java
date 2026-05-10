@@ -1,4 +1,4 @@
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.media.RGBImageUncompressed;

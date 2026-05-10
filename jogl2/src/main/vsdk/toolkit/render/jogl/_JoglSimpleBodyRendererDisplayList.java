@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 import java.util.HashMap;
 
 // VitralSDK classes
-import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 /**
