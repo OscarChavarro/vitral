@@ -6,7 +6,7 @@
 
 package vsdk.toolkit.processing;
 
-import vsdk.toolkit.common.Complex;
+import vsdk.toolkit.common.linealAlgebra.Complex;
 
 public class SignalProcessing extends ProcessingElement {
 

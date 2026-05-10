@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 // VSDK Classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.Complex;
+import vsdk.toolkit.common.linealAlgebra.Complex;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.processing.SignalProcessing;

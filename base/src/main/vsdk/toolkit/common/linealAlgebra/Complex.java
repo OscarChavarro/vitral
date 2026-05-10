@@ -4,8 +4,10 @@
 //=     http://www.cs.princeton.edu/introcs/97data/                         =
 //=     last accessed, june 8 2007.                                         =
 
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.linealAlgebra;
 import java.io.Serial;
+import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.VSDK;
 
 /**
 A complex child is one with a real mother and an imaginary father.
