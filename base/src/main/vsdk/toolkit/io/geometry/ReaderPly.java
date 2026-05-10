@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 // VSDK Classes
-import vsdk.toolkit.common.ArrayListOfInts;
+import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;

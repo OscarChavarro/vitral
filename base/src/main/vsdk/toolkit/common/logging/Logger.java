@@ -10,8 +10,6 @@ public final class Logger
     public static final int WARNING = 1;
     public static final int ERROR = 2;
     public static final int FATAL_ERROR = 3;
-    public static final int DEBUG = 4;
-    public static final int VERBOSE = 5;
 
     private static boolean withSystemExit;
     private static boolean withFatalExceptions;

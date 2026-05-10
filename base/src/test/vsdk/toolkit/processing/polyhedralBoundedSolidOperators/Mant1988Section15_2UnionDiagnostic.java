@@ -418,7 +418,7 @@ public final class Mant1988Section15_2UnionDiagnostic
     }
 
     private static String summarizeLoop(
-        vsdk.toolkit.common.CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdges)
+        vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList<_PolyhedralBoundedSolidHalfEdge> halfEdges)
     {
         StringBuilder out = new StringBuilder();
         int i;

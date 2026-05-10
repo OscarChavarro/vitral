@@ -1,7 +1,7 @@
 package vsdk.toolkit.media;
 import java.io.Serial;
 
-import vsdk.toolkit.common.ArrayListOfDoubles;
+import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.render.Rasterizer2D;
 

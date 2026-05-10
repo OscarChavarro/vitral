@@ -5,7 +5,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
 import java.io.Serial;
 
-import vsdk.toolkit.common.CircularDoubleLinkedList;
+import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.common.FundamentalEntity;
 
 /**

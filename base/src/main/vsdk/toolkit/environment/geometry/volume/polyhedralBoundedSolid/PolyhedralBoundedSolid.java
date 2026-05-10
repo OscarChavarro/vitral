@@ -16,7 +16,7 @@ import java.util.List;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.Vertex2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.CircularDoubleLinkedList;
+import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.RayHit;

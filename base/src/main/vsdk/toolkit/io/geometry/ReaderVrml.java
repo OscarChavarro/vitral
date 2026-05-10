@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
 // VSDK Classes
-import vsdk.toolkit.common.ArrayListOfDoubles;
-import vsdk.toolkit.common.ArrayListOfInts;
+import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
+import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;

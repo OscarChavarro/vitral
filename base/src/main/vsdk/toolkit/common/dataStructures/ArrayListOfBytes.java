@@ -1,5 +1,6 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.dataStructures;
 import java.io.Serial;
+import vsdk.toolkit.common.FundamentalEntity;
 
 public class ArrayListOfBytes extends FundamentalEntity {
     @Serial private static final long serialVersionUID = 20110104L;

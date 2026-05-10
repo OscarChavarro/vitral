@@ -12,8 +12,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.ArrayListOfInts;
-import vsdk.toolkit.common.ArrayListOfDoubles;
+import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
+import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
