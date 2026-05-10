@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.StreamTokenizer;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.io.PersistenceElement;
 

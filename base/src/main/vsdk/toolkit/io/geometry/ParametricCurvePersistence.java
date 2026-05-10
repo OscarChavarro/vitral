@@ -9,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
@@ -105,7 +106,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
         }
 
         catch (TransformerFactoryConfigurationError ex1) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "toElement", "" + ex1);
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "toElement", "" + ex1);
         }
 
         return nodeCurve;

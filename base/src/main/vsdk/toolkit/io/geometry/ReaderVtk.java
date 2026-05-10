@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.background.Background;
@@ -59,7 +60,7 @@ public class ReaderVtk extends PersistenceElement
                 //System.out.println("Ok.");
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING,
+                Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importVtkFragment",
                            "Current implementation does not implement reading points from type " + elementType);
                 return false;
@@ -120,21 +121,21 @@ public class ReaderVtk extends PersistenceElement
                     //System.out.println("Ok.");
                 }
                 else {
-                    VSDK.reportMessage(null, VSDK.WARNING,
+                    Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importVtkFragment",
                            "Current implementation can not read normals in data type " + elementType);
                     return false;
                 }
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING,
+                Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importVtkFragment",
                            "Current implementation does not implement reading point data from " + vtkDataFragment);
                 return false;
             }
         }
         else {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importVtkFragment",
                            "Current implementation does not implement reading data from " + vtkDataFragment);
             return false;
@@ -166,7 +167,7 @@ public class ReaderVtk extends PersistenceElement
         if ( header == null ||
              header.length() < 1 ||
              !header.startsWith("# vtk DataFile Version ") ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importEnvironment",
                            "Bad header, not in VTK format.");
             return;
@@ -182,7 +183,7 @@ public class ReaderVtk extends PersistenceElement
         if ( vtkBinaryMode == null ||
              vtkBinaryMode.length() < 1 ||
              !vtkBinaryMode.startsWith("BINARY") ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importEnvironment",
                            "Current reader implementation only supports BINARY data representation.\n" + vtkBinaryMode + " mode found and not supported.");
             return;
@@ -196,7 +197,7 @@ public class ReaderVtk extends PersistenceElement
         if ( vtkDataset == null ||
              vtkDataset.length() < 1 ||
              !vtkDataset.startsWith("DATASET") ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importEnvironment",
                            "DATASET not defined!");
             return;
@@ -279,7 +280,7 @@ public class ReaderVtk extends PersistenceElement
             for ( i = 0; i < polygonData.length; i++ ) {
                 p = polygonData[i];
                 if ( !warningDisplayed && p != 3  ) {
-                    VSDK.reportMessage(null, VSDK.WARNING,
+                    Logger.reportMessage(null, VSDK.WARNING,
                            "ReaderVtk.importEnvironment",
                            "Current implementation does not manage general polygon meshes, only triangles being added");
                     warningDisplayed = true;

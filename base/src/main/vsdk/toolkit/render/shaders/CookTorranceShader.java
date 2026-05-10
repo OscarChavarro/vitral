@@ -7,7 +7,7 @@ import vsdk.toolkit.render.TraceWorkspace;
 
 import java.util.List;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

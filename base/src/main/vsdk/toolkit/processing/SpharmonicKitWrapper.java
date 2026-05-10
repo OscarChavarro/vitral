@@ -1,6 +1,7 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.PersistenceElement;
 
 public class SpharmonicKitWrapper extends ProcessingElement {
@@ -25,7 +26,7 @@ public class SpharmonicKitWrapper extends ProcessingElement {
             //System.out.println(System.getProperty("java.library.path"));
 
             if ( !PersistenceElement.verifyLibrary("spharmonickit") ) {
-                VSDK.reportMessage(null, VSDK.ERROR,
+                Logger.reportMessage(null, VSDK.ERROR,
                   "SpharmonicKitWrapper.calculateSphericalHarmonicLenghts",
 "Native library spharmonickit not available. Check you have it installed\n" + 
 "globally, or that you used the -Djava.library.path=foldercontaning.dllor.so\n" +

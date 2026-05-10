@@ -49,7 +49,7 @@ public abstract class Jogl2Renderer extends RenderingElement {
     {
 /*
         if ( !PersistenceElement.verifyLibrary("jogl_gl2es12") ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, 
                 "Jogl2Renderer.verifyOpenGLAvailability",
                 "JOGL Library not found.  Check your installation.");
             return false;
@@ -57,7 +57,7 @@ public abstract class Jogl2Renderer extends RenderingElement {
 */
 /*
         if ( !PersistenceElement.verifyLibrary("jogl_awt") ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, 
                 "Jogl2Renderer.verifyOpenGLAvailability",
                 "JOGL-AWT Library not found.  Check your installation.");
             return false;
@@ -65,7 +65,7 @@ public abstract class Jogl2Renderer extends RenderingElement {
 */
 /*
         if ( !PersistenceElement.verifyLibrary("jogl_cg") ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, 
                 "Jogl2Renderer.verifyOpenGLAvailability",
                 "JOGL-CG Library not found.  Check your installation.");
             return false;

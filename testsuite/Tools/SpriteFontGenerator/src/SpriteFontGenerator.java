@@ -3,7 +3,7 @@ import java.io.File;
 import java.awt.Font;
 
 // VSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;

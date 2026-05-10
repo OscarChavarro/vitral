@@ -26,6 +26,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
@@ -276,14 +277,14 @@ public final class GeneralModelsBuilder
             fis.close();
         }
         catch ( IOException e ) {
-            VSDK.reportMessageWithException(
+            Logger.reportMessageWithException(
                 GeneralModelsBuilder.class,
                 VSDK.WARNING,
                 "importFromFile",
                 "Error reading solid from file " + filename, e);
         }
         catch ( ClassNotFoundException e ) {
-            VSDK.reportMessageWithException(
+            Logger.reportMessageWithException(
                 GeneralModelsBuilder.class,
                 VSDK.WARNING,
                 "importFromFile",

@@ -2,7 +2,7 @@ package vsdk.toolkit.media;
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 /**
 This class represents a depth map. A depth map can be used to:

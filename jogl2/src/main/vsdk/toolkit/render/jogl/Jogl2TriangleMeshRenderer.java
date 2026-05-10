@@ -13,8 +13,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
 // VitralSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -341,7 +342,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int nt;
         nt = mesh.getNumTriangles();
         if ( nt < 1 ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
+            Logger.reportMessage(null, VSDK.WARNING, 
                 "Jogl2TriangleMeshRenderer.activate",
                                "Trying to draw mesh without triangles?");
             return;
@@ -386,7 +387,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int nt;
         nt = mesh.getNumTriangles();
         if ( nt < 1 ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
+            Logger.reportMessage(null, VSDK.WARNING, 
                 "Jogl2TriangleMeshRenderer.activate",
                                "Trying to draw mesh without triangles?");
             return;
@@ -447,7 +448,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int previousMaterialIndex = -1;
 
         if ( materialsRanges == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
+            Logger.reportMessage(null, VSDK.WARNING, 
                 "Jogl2TriangleMeshRenderer.drawSurfacesWithTexture",
                 "Non implemented support for null materialsRanges.");
             return;

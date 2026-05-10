@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
@@ -176,7 +177,7 @@ public class ImagePersistenceSGI extends PersistenceElement
             fd.close();
           }
           catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.ERROR, 
+            Logger.reportMessage(null, VSDK.ERROR, 
                 "ImagePersistenceSGI.readImageSGI",
                                "Error reading image from " + filename + "\n" + e);
         }

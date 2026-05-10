@@ -1,7 +1,7 @@
 package vsdk.toolkit.media;
 import java.io.Serial;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 /**
 The RGBProceduralColorPalette abstract class provides an interface for

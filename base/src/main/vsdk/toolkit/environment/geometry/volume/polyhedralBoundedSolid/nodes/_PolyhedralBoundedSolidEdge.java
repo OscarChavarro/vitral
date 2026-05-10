@@ -6,7 +6,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
 import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**

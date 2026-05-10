@@ -11,6 +11,7 @@ import android.opengl.GLES20;
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.Camera;
@@ -50,7 +51,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         int nt;
         nt = mesh.getNumTriangles();
         if ( nt < 1 ) {
-            VSDK.reportMessage(null, VSDK.WARNING, 
+            Logger.reportMessage(null, VSDK.WARNING, 
                 "AndroidGLES20TriangleMeshRenderer.drawMeshSurface", 
                 "No triangles found!");
             return;

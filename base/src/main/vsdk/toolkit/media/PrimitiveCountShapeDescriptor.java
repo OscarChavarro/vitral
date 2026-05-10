@@ -2,6 +2,7 @@ package vsdk.toolkit.media;
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 Stores primitive counts as a feature vector. Based on the primitive types
@@ -52,7 +53,7 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
     @Override
     public void setFeatureVector(double vector[]) {
         if ( vector.length != numberOfElements ) {
-            VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
+            Logger.reportMessage(this, VSDK.ERROR, "setFeatureVector",
                 "Trying to set featurevector from incorrectly sized data!");
             return;
         }

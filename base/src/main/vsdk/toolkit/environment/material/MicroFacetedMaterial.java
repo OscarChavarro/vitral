@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.io.PersistenceElement;
 
 /**

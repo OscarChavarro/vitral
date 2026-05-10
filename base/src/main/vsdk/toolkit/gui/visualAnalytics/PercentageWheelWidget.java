@@ -1,7 +1,7 @@
 package vsdk.toolkit.gui.visualAnalytics;
 
 // VSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.gui.PresentationElement;
 

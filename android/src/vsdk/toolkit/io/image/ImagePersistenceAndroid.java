@@ -14,6 +14,7 @@ import android.graphics.Color;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
@@ -75,7 +76,7 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
         RGBAImageUncompressed img;
 
         if ( !inImageFd.exists() ) {
-            VSDK.reportMessage(this, VSDK.WARNING,
+            Logger.reportMessage(this, VSDK.WARNING,
                 "importRGBA", "ERROR: file +\"" + 
 			       inImageFd.getPath() + "\" does not exist!");
             img = new RGBAImageUncompressed();
@@ -98,7 +99,7 @@ public class ImagePersistenceAndroid extends ImagePersistenceHelper
         RGBImageUncompressed img;
 
         if ( !inImageFd.exists() ) {
-            VSDK.reportMessage(this, VSDK.WARNING,
+            Logger.reportMessage(this, VSDK.WARNING,
                 "importRGBA", "ERROR: file +\"" + 
                 inImageFd.getPath() + "\" does not exist!");
             img = new RGBImageUncompressed();

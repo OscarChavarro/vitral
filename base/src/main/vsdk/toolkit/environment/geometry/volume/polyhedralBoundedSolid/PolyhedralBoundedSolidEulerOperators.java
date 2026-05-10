@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -49,22 +50,22 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidHalfEdge he;
 
         if ( where == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            Logger.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
             "Cannot create a half-edge because the reference half-edge is null.");
             return null;
         }
         if ( where.parentLoop == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            Logger.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
             "Cannot create a half-edge because the reference half-edge has no parent loop.");
             return null;
         }
         if ( where.parentLoop.halfEdgesList == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            Logger.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
             "Cannot create a half-edge because the parent loop half-edge list is null.");
             return null;
         }
         if ( e == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
+            Logger.reportMessage(solid, VSDK.WARNING, ADDHE_MESSAGE,
             "Cannot create a half-edge because the target edge is null.");
             return null;
         }
@@ -152,17 +153,17 @@ public final class PolyhedralBoundedSolidEulerOperators
     public static void kvfs(PolyhedralBoundedSolid solid)
     {
         if ( solid.getPolygonsList().size() != 1 ) {
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
             "Not skeletal solid, not having exactly one loop!");
             return;
         }
         if ( solid.getEdgesList().size() != 0 ) {
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
             "Not skeletal solid, having some edges!");
             return;
         }
         if ( solid.getVerticesList().size() != 1 ) {
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs",
             "Not skeletal solid, not having exactly one vertex !");
             return;
         }
@@ -197,13 +198,13 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( he1 == null || he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmev",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmev",
             "Calling with empty half-edge!");
             return;
         }
         if ( he1.startingVertex != he2.startingVertex ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lmev",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lmev",
             "Half-edges not starting at the same vertex. Not supported case!");
             return;
         }
@@ -290,14 +291,14 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( he1 == null || he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lkev",
+            Logger.reportMessage(solid, VSDK.WARNING, "lkev",
             "Two half-edges are needed for this Euler operator two work!");
             return;
         }
 
         if ( he1.parentEdge != he2.parentEdge ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lkev",
+            Logger.reportMessage(solid, VSDK.WARNING, "lkev",
             "Given half-edges must lie over the same edge!");
             return;
         }        
@@ -305,7 +306,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( he1 == he2 ) {
             PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lkev",
+            Logger.reportMessage(solid, VSDK.WARNING, "lkev",
             "Given half-edges must be different!");
             return;
         }        
@@ -360,13 +361,13 @@ public final class PolyhedralBoundedSolidEulerOperators
         PolyhedralBoundedSolidStatistics.recordLkefCall();
         if ( he1.parentEdge != he2.parentEdge ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
             "Given half-edges must lie over the same edge. Operation aborted.");
             return;
         }
         if ( he1.parentLoop.parentFace == he2.parentLoop.parentFace ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkef",
             "Given half-edges must belong to different faces. Operation aborted.");
             return;
         }
@@ -391,7 +392,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         while ( he != he2 ) {
             if ( he == null || traversed > maxTraversal ) {
                 PolyhedralBoundedSolidStatistics.recordConsistencyWarningCase();
-                VSDK.reportMessage(solid, VSDK.WARNING, "lkef",
+                Logger.reportMessage(solid, VSDK.WARNING, "lkef",
                     "Detected inconsistent next-chain; falling back to halfEdgesList order.");
                 migratedHalfEdges.clear();
                 int idx;
@@ -467,26 +468,26 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
             "Cannot split face because first half-edge is null.");
             return null;
         }
         if ( he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
             "Cannot split face because second half-edge is null.");
             return null;
         }
         if ( he1.parentLoop == null || he2.parentLoop == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
             "Cannot split face because one input half-edge has no parent loop.");
             return null;
         }
         if ( he1.startingVertex == null || he2.startingVertex == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
             "Cannot split face because one input half-edge has null starting vertex.");
             return null;
         }
@@ -520,7 +521,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         nhe2 = addhe(solid, newEdge, he1.startingVertex, he2, PolyhedralBoundedSolid.PLUS);
         if ( nhe1 == null || nhe2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmef",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef",
             "Cannot split face because one generated half-edge is null.");
             return null;
         }
@@ -599,7 +600,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( newLoop.halfEdgesList.size() <= 1 ) {
             newLoop.boundaryStartHalfEdge.parentEdge = null;
             if ( newLoop.halfEdgesList.size() <= 0 ) {
-                VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
+                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
                 "Case A Should not happen!");
             }
             newLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
@@ -608,7 +609,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         if ( oldLoop.halfEdgesList.size() <= 1 ) {
             oldLoop.boundaryStartHalfEdge.parentEdge = null;
             if ( oldLoop.halfEdgesList.size() <= 0 ) {
-                VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
+                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr",
                 "Case B Should not happen!");
             }
             oldLoop.halfEdgesList.get(0).startingVertex.emanatingHalfEdge = null;
@@ -636,7 +637,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         _PolyhedralBoundedSolidFace face2)
     {
         if ( face2.boundariesList.size() > 1 ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "lkfmrh",
+            Logger.reportMessage(solid, VSDK.WARNING, "lkfmrh",
                 "Internal face to form new loop must have just one boundary!");
             return;
         }
@@ -720,7 +721,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     private static boolean failLringmv(PolyhedralBoundedSolid solid, String message)
     {
         PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-        VSDK.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE, message);
+        Logger.reportMessage(solid, VSDK.WARNING, LRINGMV_MESSAGE, message);
         return false;
     }
 
@@ -882,13 +883,13 @@ public final class PolyhedralBoundedSolidEulerOperators
         //-----------------------------------------------------------------
         if ( he1.parentLoop == he2.parentLoop ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmekr",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmekr",
             "Given half-edges are on the same loop. Operation aborted.");
             return;
         }
         if ( he1.parentLoop.parentFace != he2.parentLoop.parentFace ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "lmekr",
+            Logger.reportMessage(solid, VSDK.WARNING, "lmekr",
             "Given half-edges are not on the same face. Operation aborted.");
             return;
         }
@@ -964,14 +965,14 @@ public final class PolyhedralBoundedSolidEulerOperators
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         he1 = oldFace1.findHalfEdge(v1);
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             EDGE_MESSAGE + v1 + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE + f1 +
                 DOT);
             return false;
@@ -1016,21 +1017,21 @@ public final class PolyhedralBoundedSolidEulerOperators
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         oldFace2 = solid.findFace(f2);
         if ( oldFace2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             FACE_MESSAGE + f2 + NOT_FOUND_MESSAGE);
             return false;
         }
         he1 = oldFace1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             EDGE_MESSAGE + v1 + " - " + v2 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f1 + DOT);
             return false;
@@ -1038,7 +1039,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         he2 = oldFace2.findHalfEdge(v1, v3);
         if ( he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mev",
+            Logger.reportMessage(solid, VSDK.WARNING, "mev",
             EDGE_MESSAGE + v1 + " - " + v3 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f2 + DOT);
             return false;
@@ -1066,14 +1067,14 @@ public final class PolyhedralBoundedSolidEulerOperators
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "smef",
+            Logger.reportMessage(solid, VSDK.WARNING, "smef",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         he1 = oldFace1.findHalfEdge(v1);
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "smef",
+            Logger.reportMessage(solid, VSDK.WARNING, "smef",
             EDGE_MESSAGE + v1 + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE + f1 +
                 DOT);
             return false;
@@ -1081,7 +1082,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         he2 = oldFace1.findHalfEdge(v3);
         if ( he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "smef",
+            Logger.reportMessage(solid, VSDK.WARNING, "smef",
             EDGE_MESSAGE + v3 + EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE + f1 +
                 DOT);
             return false;
@@ -1120,21 +1121,21 @@ public final class PolyhedralBoundedSolidEulerOperators
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mef",
+            Logger.reportMessage(solid, VSDK.WARNING, "mef",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         oldFace2 = solid.findFace(f2);
         if ( oldFace2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mef",
+            Logger.reportMessage(solid, VSDK.WARNING, "mef",
             FACE_MESSAGE + f2 + NOT_FOUND_MESSAGE);
             return false;
         }
         he1 = oldFace1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mef",
+            Logger.reportMessage(solid, VSDK.WARNING, "mef",
             EDGE_MESSAGE + v1 + " - " + v2 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f1 + DOT);
             return false;
@@ -1142,7 +1143,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         he2 = oldFace2.findHalfEdge(v3, v4);
         if ( he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "mef",
+            Logger.reportMessage(solid, VSDK.WARNING, "mef",
             EDGE_MESSAGE + v3 + " - " + v4 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f2 + DOT);
             return false;
@@ -1175,21 +1176,21 @@ public final class PolyhedralBoundedSolidEulerOperators
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "kemr",
+            Logger.reportMessage(solid, VSDK.WARNING, "kemr",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         oldFace2 = solid.findFace(f2);
         if ( oldFace2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "kemr",
+            Logger.reportMessage(solid, VSDK.WARNING, "kemr",
             FACE_MESSAGE + f2 + NOT_FOUND_MESSAGE);
             return false;
         }
         he1 = oldFace1.findHalfEdge(v1, v2);
         if ( he1 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "kemr",
+            Logger.reportMessage(solid, VSDK.WARNING, "kemr",
             EDGE_MESSAGE + v1 + " - " + v2 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f1 + DOT);
             return false;
@@ -1197,7 +1198,7 @@ public final class PolyhedralBoundedSolidEulerOperators
         he2 = oldFace2.findHalfEdge(v3, v4);
         if ( he2 == null ) {
             PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            VSDK.reportMessage(solid, VSDK.WARNING, "kemr",
+            Logger.reportMessage(solid, VSDK.WARNING, "kemr",
             EDGE_MESSAGE + v3 + " - " + v4 + EDGE_NOT_FOUND_IN_FACE_MESSAGE +
                 f2 + DOT);
             return false;
@@ -1230,13 +1231,13 @@ public final class PolyhedralBoundedSolidEulerOperators
 
         oldFace1 = solid.findFace(f1);
         if ( oldFace1 == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "kfmrh",
+            Logger.reportMessage(solid, VSDK.WARNING, "kfmrh",
             FACE_MESSAGE + f1 + NOT_FOUND_MESSAGE);
             return false;
         }
         oldFace2 = solid.findFace(f2);
         if ( oldFace2 == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "kfmrh",
+            Logger.reportMessage(solid, VSDK.WARNING, "kfmrh",
             FACE_MESSAGE + f2 + NOT_FOUND_MESSAGE);
             return false;
         }

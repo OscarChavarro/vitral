@@ -13,6 +13,7 @@ import com.jogamp.opengl.GLException;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
@@ -52,7 +53,7 @@ public class PbufferExample implements GLEventListener {
                 null, pbCaps, null, imageWidth, imageHeight);
         }
         catch ( Exception e ) {
-            VSDK.reportMessageWithException(
+            Logger.reportMessageWithException(
                 this, 
                 VSDK.FATAL_ERROR, 
                 "PbufferExample.createElements", 

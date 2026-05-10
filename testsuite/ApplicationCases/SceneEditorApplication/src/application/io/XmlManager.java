@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
@@ -86,7 +87,7 @@ public class XmlManager {
         catch ( ParserConfigurationException | XmlException | DOMException | 
                 TransformerFactoryConfigurationError | 
                 IllegalArgumentException | TransformerException ex ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "exportXml", "" + ex);
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "exportXml", "" + ex);
         }
     }
 
@@ -132,7 +133,7 @@ public class XmlManager {
         }
         catch ( ParserConfigurationException | SAXException | IOException | 
                 XmlException ex ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "importXml", "" + ex);
+            Logger.reportMessage(null, VSDK.WARNING, "importXml", "" + ex);
         }
         return null;
     }

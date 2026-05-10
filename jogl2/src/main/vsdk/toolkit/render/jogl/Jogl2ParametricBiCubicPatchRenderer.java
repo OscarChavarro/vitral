@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;

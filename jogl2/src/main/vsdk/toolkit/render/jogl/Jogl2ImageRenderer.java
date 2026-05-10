@@ -5,6 +5,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -47,7 +48,7 @@ public class Jogl2ImageRenderer extends Jogl2Renderer
         else {
             String c = img.getClass().getName();
 
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.activate",
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.activate",
             "Image GL activation not implemented for subclass " + c);
         }
         return -1;
@@ -74,7 +75,7 @@ public class Jogl2ImageRenderer extends Jogl2Renderer
         else {
             String c = img.getClass().getName();
 
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.activateAsNormalMap",
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.activateAsNormalMap",
             "Image GL activation not implemented for subclass " + c);
         }
         return -1;
@@ -94,7 +95,7 @@ public class Jogl2ImageRenderer extends Jogl2Renderer
         else {
             String c = img.getClass().getName();
 
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.unload",
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.unload",
             "Image GL unloading not implemented for subclass " + c);
         }
     }
@@ -113,7 +114,7 @@ public class Jogl2ImageRenderer extends Jogl2Renderer
         else {
             String c = img.getClass().getName();
 
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.draw",
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2ImageRenderer.draw",
             "Image GL drawing not implemented for subclass " + c);
         }
     }

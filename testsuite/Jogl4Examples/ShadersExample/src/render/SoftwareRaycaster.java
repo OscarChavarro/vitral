@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import model.ShadersModel;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

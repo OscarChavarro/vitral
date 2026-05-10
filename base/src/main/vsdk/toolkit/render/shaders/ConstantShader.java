@@ -3,8 +3,7 @@ import vsdk.toolkit.render.TraceWorkspace;
 
 import java.util.List;
 
-import vsdk.toolkit.common.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.RayHit;

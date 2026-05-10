@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 // VitralSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Vertex;

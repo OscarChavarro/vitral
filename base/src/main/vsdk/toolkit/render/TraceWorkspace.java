@@ -1,6 +1,6 @@
 package vsdk.toolkit.render;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.RayHit;
 
 public final class TraceWorkspace {

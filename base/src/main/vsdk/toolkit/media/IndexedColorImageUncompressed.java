@@ -2,7 +2,7 @@ package vsdk.toolkit.media;
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 public class IndexedColorImageUncompressed extends Image
 {

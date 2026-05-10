@@ -27,7 +27,8 @@ import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Quaternion;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -1801,7 +1802,7 @@ public class JoglDrawingArea implements
                             //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                         }
                         catch ( Exception ee ) {
-                            VSDK.reportMessage(this, VSDK.WARNING, "keyPressed", "" + ee);
+                            Logger.reportMessage(this, VSDK.WARNING, "keyPressed", "" + ee);
                         }
                         gi.setNormalMap(normalMap);
                     }

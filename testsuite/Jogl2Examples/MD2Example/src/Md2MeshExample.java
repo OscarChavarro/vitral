@@ -27,7 +27,7 @@ import com.jogamp.opengl.awt.GLJPanel;
 
 // VSDK classes
 import vsdk.toolkit.common.RendererConfiguration;    // Model elements
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
@@ -44,6 +44,7 @@ import vsdk.toolkit.animation.AnimationEventGenerator;
 import vsdk.toolkit.render.jogl.Jogl2Md2MeshRenderer;
 import vsdk.toolkit.animation.Md2AnimationListener;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 // Application classes
 //import util.filters.ObjectFilter;
@@ -114,7 +115,7 @@ public class Md2MeshExample
             md2Pers.read(fileName,texture,md2Mesh);
             md2Mesh.setCurrentAnimationInd((short)0);
         } catch ( IOException ex ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, "Md2MeshExample",
+            Logger.reportMessageWithException(this, VSDK.FATAL_ERROR, "Md2MeshExample",
                 "Input/Output error", ex);
             System.exit(0);
         }

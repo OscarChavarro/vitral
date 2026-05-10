@@ -10,6 +10,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -60,7 +61,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
 
         face = solid.findFace(faceId);
         if ( face == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "loopGlue",
+            Logger.reportMessage(solid, VSDK.WARNING, "loopGlue",
                 "Face " + faceId + " not found.");
             return;
         }
@@ -78,12 +79,12 @@ public final class PolyhedralBoundedSolidTopologyEditing
     )
     {
         if ( face == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "loopGlue",
+            Logger.reportMessage(solid, VSDK.WARNING, "loopGlue",
                 "Null face received.");
             return;
         }
         if ( face.boundariesList.size() < 2 ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "loopGlue",
+            Logger.reportMessage(solid, VSDK.WARNING, "loopGlue",
                 "Face " + face.id + " does not contain at least two loops.");
             return;
         }
@@ -109,7 +110,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
         }
 
         if ( gluePair == null ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "loopGlue",
+            Logger.reportMessage(solid, VSDK.WARNING, "loopGlue",
                 "No matching starting vertex found between candidate loops.");
             return;
         }
@@ -1015,7 +1016,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
                     if ( nedges > 2 ) break;
 
                     if ( he == null ) {
-                        VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
+                        Logger.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
                             "Inconsistent model! Null HalfEdge. Check.");
                     }
 
@@ -1027,7 +1028,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
 
                     he = heMirror.next();
                     if ( he == null ) {
-                        VSDK.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
+                        Logger.reportMessage(solid, VSDK.FATAL_ERROR, "maximizeFaces",
                             "Inconsistent model! HalfEdge without next. Check.");
                     }
                     j++;

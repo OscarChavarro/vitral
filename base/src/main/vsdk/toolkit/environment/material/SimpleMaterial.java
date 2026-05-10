@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.material;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 public class SimpleMaterial extends Entity
 {

@@ -13,6 +13,7 @@ import com.jogamp.opengl.util.texture.spi.DDSImage.ImageInfo;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.PersistenceElement;
@@ -66,7 +67,7 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
             }
 
             if ( maxinfo.isCompressed() ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGB",
                 "Compressed image subformats unsupported - file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.init(64, 64);
                 retImage.createTestPattern();
@@ -77,7 +78,7 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
             retImage.init(maxinfo.getWidth(), maxinfo.getHeight());
             int format = dximage.getPixelFormat();
             if ( format == DDSImage.D3DFMT_R8G8B8 ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGB",
                 "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
@@ -108,14 +109,14 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
                 }
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGB",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGB",
                 "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             return retImage;
         }
         catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGB",
+              Logger.reportMessage(null, VSDK.ERROR, "importRGB",
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
             return null;
         }
@@ -220,7 +221,7 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
                 }
             }
             else if ( maxinfo.isCompressed() ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGBA",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGBA",
                 "Compressed image subformats unsupported - file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
                 if ( format == DDSImage.D3DFMT_DXT1 ) {
@@ -247,7 +248,7 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
             else if ( format == DDSImage.D3DFMT_R8G8B8 ) {
                 //System.out.println("[D3DFMT_R8G8B8]");
 
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGBA",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGBA",
                 "Subformat flat not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
@@ -284,14 +285,14 @@ public class ImagePersistenceJogl extends ImagePersistenceHelper
             else {
                 //System.out.println("[**INVALID**]");
 
-                VSDK.reportMessage(null, VSDK.WARNING, "importRGBA",
+                Logger.reportMessage(null, VSDK.WARNING, "importRGBA",
                 "Subformat (?) not supported for file \"" + inImageFd.getAbsolutePath() + "\"");
                 retImage.createTestPattern();
             }
             return retImage;
         }
         catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGBA",
+              Logger.reportMessage(null, VSDK.ERROR, "importRGBA",
                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + 
                  "\"" + e);
               return null;

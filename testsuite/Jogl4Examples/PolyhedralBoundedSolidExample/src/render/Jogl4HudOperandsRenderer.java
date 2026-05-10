@@ -3,7 +3,7 @@ package render;
 import com.jogamp.opengl.GL2;
 
 import models.DebuggerModel;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;

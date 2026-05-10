@@ -11,12 +11,13 @@ import android.opengl.GLES10;
 import android.opengl.GLES11;
 import android.opengl.GLES20;
 import android.util.Log;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 
 // VSDK classes
 import vsdk.toolkit.render.RenderingElement;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
@@ -86,7 +87,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                 Log.e(TAG, op + ": glError " + error + " : " + name
                     + " Thread: " + Thread.currentThread().getName());
                 
-                VSDK.reportMessage(
+                Logger.reportMessage(
                         null, VSDK.WARNING, "checkGLError",
                         "OpenGL ES 1.0 error");
                 /*
@@ -94,7 +95,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                     //throw new RuntimeException(op + ": glError " + error);
                 }
                 catch ( RuntimeException e ) {
-                    VSDK.reportMessageWithException(
+                    Logger.reportMessageWithException(
                         null, VSDK.WARNING, "checkGLError",
                         "OpenGL ES 1.0 error", e);
                 }

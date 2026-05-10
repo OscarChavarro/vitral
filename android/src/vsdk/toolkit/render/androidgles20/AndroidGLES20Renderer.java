@@ -22,10 +22,11 @@ import android.opengl.Matrix;
 //import vitral.application.R;
 
 // VSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.Light;
@@ -353,7 +354,7 @@ public class AndroidGLES20Renderer extends RenderingElement
                     throw new RuntimeException(op + ": glError " + error);
                 }
                 catch ( RuntimeException e ) {
-                    VSDK.reportMessageWithException(
+                    Logger.reportMessageWithException(
                         null, VSDK.WARNING, "checkGLError",
                         "OpenGL ES 2.0 error", e);
                 }
@@ -503,10 +504,10 @@ public class AndroidGLES20Renderer extends RenderingElement
             }
         }
         catch ( Resources.NotFoundException e ) {
-            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
+            Logger.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
         }
         catch ( IOException e ) {
-            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
+            Logger.reportMessageWithException(null, VSDK.FATAL_ERROR, "AndroidGLES20Renderer.createDefaultAutomaticAndroidGLES20Shaders", "Error loading assets", e);
         }
         //- Create parameters ---------------------------------------------
         activateShaders();

@@ -10,9 +10,10 @@ import java.util.StringTokenizer;
 
 // VSDK Classes
 import vsdk.toolkit.common.ArrayListOfInts;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -186,7 +187,7 @@ class _ReaderPlyElement extends PersistenceElement
                     }
                 }
                 else {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
+                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
                     "Wrong element type!");
                     return false;
                 }
@@ -218,7 +219,7 @@ class _ReaderPlyElement extends PersistenceElement
                     }
                 }
                 else {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
+                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
                     "Wrong element type!");
                     return false;
                 }
@@ -245,7 +246,7 @@ class _ReaderPlyElement extends PersistenceElement
                     n = reader.readUnsignedCharacterText();
                 }
                 else {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",
+                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",
                     "Wrong list count element type!");
                     return false;
                 }
@@ -270,7 +271,7 @@ class _ReaderPlyElement extends PersistenceElement
                         }
                     }
                     else {
-                        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",  
+                        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",  
                             "Wrong list element type!");
                         return false;
                     }
@@ -368,7 +369,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     @Override
     public int readSignedCharacterText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
             "Operation not implemented!");
         return 0;
     }
@@ -436,7 +437,7 @@ class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
     @Override
     public float readDoubleText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
         return 0;
     }
@@ -468,7 +469,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     @Override
     public int readSignedShortIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -476,7 +477,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     @Override
     public int readUnsignedShortIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -490,7 +491,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     @Override
     public int readUnsignedIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -504,7 +505,7 @@ class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
     @Override
     public float readDoubleText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
         return 0;
     }
@@ -520,7 +521,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readSignedCharacterText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
             "Operation not implemented!");
         return 0;
     }
@@ -528,7 +529,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readUnsignedCharacterText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedCharacter",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedCharacter",
             "Operation not implemented!");
         return 0;
     }
@@ -536,7 +537,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readSignedShortIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -544,7 +545,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readUnsignedShortIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -552,7 +553,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readSignedIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readSignedInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -560,7 +561,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public int readUnsignedIntegerText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
             "Operation not implemented!");
         return 0;
     }
@@ -574,7 +575,7 @@ class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
     @Override
     public float readDoubleText() throws Exception
     {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
             "Operation not implemented!");
         return 0;
     }
@@ -626,7 +627,7 @@ public class ReaderPly extends PersistenceElement
         line = readAsciiLine(is).toLowerCase();
 
         if ( !line.equals("ply") ) {
-            VSDK.reportMessage(null, VSDK.ERROR,
+            Logger.reportMessage(null, VSDK.ERROR,
                 "ReaderPly.processHeader",
                 "Invalid PLY header: wrong magic line. Should be \"ply\".");
             return false;
@@ -657,7 +658,7 @@ public class ReaderPly extends PersistenceElement
                     elementReader = new _ReaderPlyElementReaderBinaryLittleEndian(is);
                 }
                 else {
-                    VSDK.reportMessage(null, VSDK.ERROR,
+                    Logger.reportMessage(null, VSDK.ERROR,
                         "ReaderPly.processHeader",
                         "Invalid PLY header: unsupported PLY subformat \"" + token + "\".");
                     return false;
@@ -666,7 +667,7 @@ public class ReaderPly extends PersistenceElement
                 double version;
                 version = Double.parseDouble(auxStringTokenizer.nextToken());
                 if ( version > 1.0 + VSDK.EPSILON ) {
-                    VSDK.reportMessage(null, VSDK.WARNING,
+                    Logger.reportMessage(null, VSDK.WARNING,
                         "ReaderPly.processHeader",
                                        "Untested PLY file version " + VSDK.formatDouble(version) + ", reading could fail.");
                 }
@@ -690,7 +691,7 @@ public class ReaderPly extends PersistenceElement
                 }
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING,
+                Logger.reportMessage(null, VSDK.WARNING,
                     "ReaderPly.processHeader",
                     "Unknown header line \"" + token + "\", ignoring.");
             }
@@ -729,7 +730,7 @@ public class ReaderPly extends PersistenceElement
 
         try {
             if ( !processHeader(bis, internalGeometry) ) {
-                VSDK.reportMessage(null, VSDK.ERROR,
+                Logger.reportMessage(null, VSDK.ERROR,
                     "ReaderPly.importEnvironment", "Invalid PLY header!");
             }
             int i;
@@ -740,7 +741,7 @@ public class ReaderPly extends PersistenceElement
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.ERROR,
+            Logger.reportMessage(null, VSDK.ERROR,
                                "ReaderPly.importEnvironment", "Error reading PLY data!" + e);
         }
 

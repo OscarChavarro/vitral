@@ -10,7 +10,7 @@ import android.opengl.GLES20;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.common.RendererConfiguration;

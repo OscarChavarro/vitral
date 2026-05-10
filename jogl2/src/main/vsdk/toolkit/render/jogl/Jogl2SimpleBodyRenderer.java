@@ -12,6 +12,7 @@ import com.jogamp.opengl.GL2ES1;
 // VitralSDK classes
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -174,7 +175,7 @@ public class Jogl2SimpleBodyRenderer extends Jogl2Renderer {
                 Jogl2GeometryRenderer.draw(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
+                    Logger.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
                 }
                 gl.glCallList(id);
             }
@@ -210,7 +211,7 @@ public class Jogl2SimpleBodyRenderer extends Jogl2Renderer {
                 Jogl2GeometryRenderer.drawWithVertexArrays(gl, b.getGeometry(), c, q);
                 gl.glEndList();
                 if ( gl.glGetError() != 0 ) {
-                    VSDK.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
+                    Logger.reportMessage(null, VSDK.WARNING, "Jogl2SimpleBodyRenderer.draw", "Error compiling display list. Rendering could be wrong.");
                 }
                 gl.glCallList(id);
             }

@@ -6,6 +6,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 
@@ -89,7 +90,7 @@ public class AwtRGBImageUncompressedRenderer extends AwtRenderer
             }
         }
         else {
-            VSDK.reportMessage(null, VSDK.WARNING, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
+            Logger.reportMessage(null, VSDK.WARNING, "importFromAwtBufferedImage", "ColorSpace encoding not supported!");
         }
         return true;
     }

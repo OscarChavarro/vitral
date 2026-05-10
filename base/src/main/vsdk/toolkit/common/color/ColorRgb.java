@@ -1,6 +1,8 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.color;
 import java.io.Serial;
 import java.util.Objects;
+import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.VSDK;
 
 /**
 Respect to data representation:
@@ -116,7 +118,7 @@ public final class ColorRgb extends FundamentalEntity
     @Override
     public String toString()
     {
-        return "<" + VSDK.formatDouble(r) + ", " + 
+        return "<" + VSDK.formatDouble(r) + ", " +
                      VSDK.formatDouble(g) + ", " + 
                      VSDK.formatDouble(b) + ">";
     }

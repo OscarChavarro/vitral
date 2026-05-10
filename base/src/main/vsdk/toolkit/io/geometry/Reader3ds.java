@@ -18,7 +18,8 @@ import java.util.ArrayList;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Vertex;
@@ -1070,7 +1071,7 @@ public class Reader3ds extends PersistenceElement
             return true;
         }
 
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.checkChunkHierarchy",
                            "" + _Reader3dsChunk.chunkToString(son.id) + 
                            " chunk is not supposed to be a level under a " +
@@ -1198,12 +1199,12 @@ public class Reader3ds extends PersistenceElement
 
                         // This is checkpoint A
                         if ( newTrianglesList == null ) {
-                            VSDK.reportMessage(null, VSDK.WARNING,
+                            Logger.reportMessage(null, VSDK.WARNING,
                             "Reader3ds.processChunk",
                             "null newTriangleList at checkpoint A.");
                         }
                         if ( currentTrianglesList == null ) {
-                            VSDK.reportMessage(null, VSDK.WARNING,
+                            Logger.reportMessage(null, VSDK.WARNING,
                             "Reader3ds.processChunk",
                             "null currentTrianglesList at checkpoint A.");
                         }
@@ -1211,13 +1212,13 @@ public class Reader3ds extends PersistenceElement
                         for ( j = 0; 
                               j < map_i.associatedTriangles.length; j++ ) {
                             if ( k >= newTrianglesList.length ) {
-                                VSDK.reportMessage(null, VSDK.WARNING,
+                                Logger.reportMessage(null, VSDK.WARNING,
                                 "Reader3ds.processChunk",
                                 "k to large at checkpoint A.");
                             }
                             if ( map_i.associatedTriangles[j] >=
                                  currentTrianglesList.length ) {
-                                VSDK.reportMessage(null, VSDK.WARNING,
+                                Logger.reportMessage(null, VSDK.WARNING,
                                 "Reader3ds.processChunk",
                                 "map to large at checkpoint A.");
                             }
@@ -1543,7 +1544,7 @@ public class Reader3ds extends PersistenceElement
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             if ( !bumpNotImplementedReported ) {
-                VSDK.reportMessage(null, VSDK.WARNING,
+                Logger.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.processChunk",
                            "Chunk ID_MATERIAL_BUMPMAP not implemented! " +
                            "Further error reporting disabled.");
@@ -1555,7 +1556,7 @@ public class Reader3ds extends PersistenceElement
             //-------------------------------------------------------------
             // WARNING: Not implemented feature!
             if ( !t2NotImplementedReported ) {
-                VSDK.reportMessage(null, VSDK.WARNING,
+                Logger.reportMessage(null, VSDK.WARNING,
                            "Reader3ds.processChunk",
                            "Chunk ID_MATERIAL_TEXTURE2 not implemented! " +
                            "Further error reporting disabled.");

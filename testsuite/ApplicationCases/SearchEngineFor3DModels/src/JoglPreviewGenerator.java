@@ -17,7 +17,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -33,7 +33,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.ImageProcessing;
 import vsdk.toolkit.environment.light.LightType;
-import vsdk.toolkit.render.jogl.Jogl2SphereRenderer;
 
 public class JoglPreviewGenerator
 {

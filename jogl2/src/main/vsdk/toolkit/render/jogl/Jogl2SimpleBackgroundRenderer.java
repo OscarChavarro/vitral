@@ -1,6 +1,6 @@
 package vsdk.toolkit.render.jogl;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.background.SimpleBackground;
 

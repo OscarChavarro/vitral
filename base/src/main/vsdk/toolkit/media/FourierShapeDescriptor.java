@@ -8,6 +8,7 @@ package vsdk.toolkit.media;
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 Stores the feature vector for a set of 32 elements
@@ -60,7 +61,7 @@ public class FourierShapeDescriptor extends ShapeDescriptor
     @Override
     public void setFeatureVector(double[] vector) {
         if ( vector.length != numberOfElements*numberOfHarmonics ) {
-            VSDK.reportMessage(this, VSDK.ERROR, "setFeatureVector",
+            Logger.reportMessage(this, VSDK.ERROR, "setFeatureVector",
                 "Trying to set featurevector from incorrectly sized data!");
             return;
         }

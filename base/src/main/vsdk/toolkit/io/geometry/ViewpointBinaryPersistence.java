@@ -6,10 +6,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 // VSDK Classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.QuadMesh;
@@ -57,13 +58,13 @@ public class ViewpointBinaryPersistence extends PersistenceElement {
 
         binVersion = readLongBE(gIs);
         if ( binVersion != 0 ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "importViewpointPolygonBinary", "Wrong file format");
+            Logger.reportMessage(null, VSDK.WARNING, "importViewpointPolygonBinary", "Wrong file format");
             return;
         }
 
         primitiveType = readLongBE(gIs);
         if ( primitiveType != 0x07 ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "importViewpointPolygonBinary", "Primitive type [" + primitiveType + "] not supported.");
+            Logger.reportMessage(null, VSDK.WARNING, "importViewpointPolygonBinary", "Primitive type [" + primitiveType + "] not supported.");
             return;
         }
 

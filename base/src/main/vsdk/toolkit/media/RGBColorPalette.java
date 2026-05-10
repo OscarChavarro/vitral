@@ -3,7 +3,7 @@ import java.io.Serial;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 /**
 This class represents a color palette, as an indexed set of colors.

@@ -28,6 +28,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import javax.swing.JOptionPane;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.camera.Camera;              // Model elements
@@ -168,7 +169,7 @@ public class PercentagesWheelExample extends Applet implements
             result.close();
             sqlstatement.close();
         } catch (SQLException e) {
-            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, 
+            Logger.reportMessageWithException(null, VSDK.FATAL_ERROR, 
                     "fillArrayListSample", "Error connecting with database", e);
 
         }

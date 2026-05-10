@@ -17,6 +17,7 @@ import vsdk.toolkit.common.ArrayListOfDoubles;
 import vsdk.toolkit.common.Triangle;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -1385,7 +1386,7 @@ public class TriangleMesh extends Surface {
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
         if ( ma == null || mb == null /*|| extraVertices == null*/ ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            Logger.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
 	    }
@@ -1432,7 +1433,7 @@ public class TriangleMesh extends Surface {
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
         if ( ma == null /*|| extraVertices == null*/ ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            Logger.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
     	}
@@ -1485,7 +1486,7 @@ public class TriangleMesh extends Surface {
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
         if ( ma == null || mb == null /*|| extraVertices == null*/ ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
+            Logger.reportMessage(this, VSDK.WARNING, "simpleTriangleCut",
             "extraVertices is null!");
             return;
    	    }

@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -82,7 +83,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             fis.close();
           }
           catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGB (C)",
+              Logger.reportMessage(null, VSDK.ERROR, "importRGB (C)",
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
@@ -115,7 +116,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             fis.close();
           }
           catch ( Exception e ) {
-              VSDK.reportMessage(null, VSDK.ERROR, "importRGB (A)",
+              Logger.reportMessage(null, VSDK.ERROR, "importRGB (A)",
                                  "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"");
              throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
         }
@@ -149,7 +150,7 @@ public class ImagePersistenceAwt extends ImagePersistenceHelper
             
           }
           catch ( Exception e ) {
-            VSDK.reportMessageWithException(null, VSDK.ERROR, "ImagePersistenAwt.importRGBA",
+            Logger.reportMessageWithException(null, VSDK.ERROR, "ImagePersistenAwt.importRGBA",
                 "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"",
                 e);
             return null;

@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
 // VitralSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.geometry.surface.TriangleStripMesh;

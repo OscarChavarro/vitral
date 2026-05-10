@@ -1,5 +1,6 @@
 package vsdk.toolkit.common;
 import java.io.Serial;
+import vsdk.toolkit.common.color.ColorRgb;
 
 public class Vertex2D extends FundamentalEntity
 {

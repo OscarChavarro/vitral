@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.util.concurrent.atomic.AtomicLong;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Vector4D;
@@ -1129,7 +1130,7 @@ public class Camera extends Entity
                 }
                 else {
                     // Not possible: non implemented case!
-                        VSDK.reportMessage(this, VSDK.WARNING, 
+                        Logger.reportMessage(this, VSDK.WARNING, 
                             "clipLineCohenSutherlandPlanes", 
                             "Unusal ray case, check code and data");
                 }
@@ -1137,7 +1138,7 @@ public class Camera extends Entity
                 if ( clippingPlane != null ) {
                     Ray hit = clippingPlane.doIntersection(testRay);
                     if ( hit == null ) {
-                        VSDK.reportMessage(this, VSDK.WARNING, 
+                        Logger.reportMessage(this, VSDK.WARNING, 
                             "clipLineCohenSutherlandPlanes", 
                             "Unusal ray assembly, check code and data");
                     }
@@ -1282,7 +1283,7 @@ public class Camera extends Entity
                 }
                 else {
                     // Not possible: non implemented case!
-                        VSDK.reportMessage(this, VSDK.WARNING, 
+                        Logger.reportMessage(this, VSDK.WARNING, 
                             "clipLineCohenSutherlandCanonicVolume", 
                             "Unusal case, check code and data");
                 }

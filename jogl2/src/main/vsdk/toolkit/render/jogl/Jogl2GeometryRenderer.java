@@ -3,10 +3,11 @@ package vsdk.toolkit.render.jogl;
 // JOGL classes
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -203,7 +204,7 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
     public static void draw(GL2 gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                                "Jogl2GeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;
@@ -264,7 +265,7 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
     public static void drawWithVertexArrays(GL2 gl, Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                                "Jogl2GeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;

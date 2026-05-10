@@ -8,6 +8,7 @@ import java.io.File;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.framework.shapeMatching.ShapeDescriptor2DGenerator;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
@@ -47,7 +48,7 @@ public class ShapeDescriptor2DGeneratorFourier extends ShapeDescriptor2DGenerato
 
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "calculateShapeDescriptor", "" + e);
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "calculateShapeDescriptor", "" + e);
             return null;
         }
 

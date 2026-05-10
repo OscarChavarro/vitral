@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.io.InputStream;
 
 // VSDK Classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Complex;
 import vsdk.toolkit.media.FourierShapeDescriptor;
 import vsdk.toolkit.media.Image;

@@ -1,7 +1,7 @@
 package vsdk.toolkit.gui;
 
 import java.util.HashMap;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 
 /**

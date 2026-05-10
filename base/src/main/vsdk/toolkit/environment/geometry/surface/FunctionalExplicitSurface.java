@@ -7,6 +7,7 @@ import vsdk.toolkit.common.AlgebraicExpressionException;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
@@ -41,14 +42,14 @@ public class FunctionalExplicitSurface extends Surface
             xyFunction.setExpression(fxy);
         }
         catch ( AlgebraicExpressionException e ) {
-            VSDK.reportMessage(this, VSDK.WARNING, 
+            Logger.reportMessage(this, VSDK.WARNING, 
                 "constructor",
                 "Cannot create algebraic expression for \"" + fxy + "\":\n" + e);
             try {
                 xyFunction.setExpression("0");
             }
             catch ( AlgebraicExpressionException e2 ) {
-                VSDK.reportMessage(this, VSDK.FATAL_ERROR, 
+                Logger.reportMessage(this, VSDK.FATAL_ERROR, 
                     "constructor",
                     "So bad. Something is wrong with algebraic expressions!:\n" + e2);
             }
@@ -173,7 +174,7 @@ public class FunctionalExplicitSurface extends Surface
             }
         }
         catch ( AlgebraicExpressionException e ) {
-            VSDK.reportMessage(this, VSDK.WARNING, 
+            Logger.reportMessage(this, VSDK.WARNING, 
                 "constructor",
                 "Cannot evaluate algebraic expression!" + e);
             return;

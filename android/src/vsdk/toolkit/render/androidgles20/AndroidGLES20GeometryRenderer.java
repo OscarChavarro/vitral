@@ -10,7 +10,8 @@ import android.opengl.GLES20;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
@@ -272,7 +273,7 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
     public static void draw(Geometry g, Camera c, RendererConfiguration q)
     {
         if ( g == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                                "AndroidGLES20GeometryRenderer.draw",
                                "null Geometry reference recieved");
             return;

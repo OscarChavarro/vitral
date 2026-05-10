@@ -7,6 +7,7 @@ import java.io.BufferedOutputStream;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
@@ -110,7 +111,7 @@ public class WriterVtk extends PersistenceElement {
                 mesh = (TriangleMesh)g;
             }
             else {
-                VSDK.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment", "Current writer implementation only supports writing of triangle meshes. Object skipped.");
+                Logger.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment", "Current writer implementation only supports writing of triangle meshes. Object skipped.");
             }
 
             //-----------------------------------------------------------------
@@ -120,7 +121,7 @@ public class WriterVtk extends PersistenceElement {
                     exported = true;
                 }
                 else {
-                    VSDK.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment", "Current writer implementation only supports writing ONE triangle meshes. Only first mesh exported, remaining meshes skipped.");
+                    Logger.reportMessage(null, VSDK.WARNING, "WriterVtk.exportEnvironment", "Current writer implementation only supports writing ONE triangle meshes. Only first mesh exported, remaining meshes skipped.");
                 }
             }
         }

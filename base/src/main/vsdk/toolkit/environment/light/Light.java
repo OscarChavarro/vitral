@@ -2,7 +2,7 @@ package vsdk.toolkit.environment.light;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 // All the public variables here are ugly, but I
 // wanted Lights and Surfaces to be "friends"

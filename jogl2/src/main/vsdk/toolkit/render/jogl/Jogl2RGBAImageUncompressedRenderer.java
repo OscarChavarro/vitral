@@ -16,6 +16,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.common.RendererConfiguration;
 
@@ -113,7 +114,7 @@ public class Jogl2RGBAImageUncompressedRenderer extends Jogl2Renderer
                 item.renderer = TextureIO.newTexture(textureData);
             }
             catch ( Exception e ) {
-                VSDK.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
+                Logger.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
             }
 
             //----
@@ -180,7 +181,7 @@ public class Jogl2RGBAImageUncompressedRenderer extends Jogl2Renderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBAImageUncompressedRenderer.unload", "Error unloading image.");
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2RGBAImageUncompressedRenderer.unload", "Error unloading image.");
 
         }
     }

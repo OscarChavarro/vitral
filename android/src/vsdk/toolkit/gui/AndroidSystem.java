@@ -9,7 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 
 // VSDK Classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBAPixel;

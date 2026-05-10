@@ -7,6 +7,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 Orchestrates validation passes that preserve the half-edge representation of
@@ -46,7 +47,7 @@ public class PolyhedralBoundedSolidValidationEngine
 
         solid.setValidationState(ok);
         if ( !ok ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "validateIntermediate",
+            Logger.reportMessage(solid, VSDK.WARNING, "validateIntermediate",
                 "Solid validation test failed!:\n" + msg.toString());
         }
         return ok;
@@ -81,7 +82,7 @@ public class PolyhedralBoundedSolidValidationEngine
 
         solid.setValidationState(ok);
         if ( !ok ) {
-            VSDK.reportMessage(solid, VSDK.WARNING, "validateStrict",
+            Logger.reportMessage(solid, VSDK.WARNING, "validateStrict",
                 "Solid validation test failed!:\n" + msg.toString());
         }
         return ok;

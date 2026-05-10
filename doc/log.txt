@@ -977,7 +977,7 @@
   - 2h12min: Updating event management on testuite examples for enabling
     future removal of deprecated methods.
   - 4h: removing warnings on library. Pending to check general error
-    management and the use of java exceptions vs. the VSDK.reportMessage
+    management and the use of java exceptions vs. the Logger.reportMessage
     mechanism.
 
 2013 october 23, Leidy Alexandra Lozano:

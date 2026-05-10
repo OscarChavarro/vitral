@@ -23,7 +23,7 @@ import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.camera.Camera;

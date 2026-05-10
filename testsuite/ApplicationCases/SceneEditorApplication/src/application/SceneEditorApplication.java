@@ -29,6 +29,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK; 
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -258,7 +259,7 @@ public class SceneEditorApplication {
           }
           catch ( ClassNotFoundException | InstantiationException | 
                   IllegalAccessException | UnsupportedLookAndFeelException e ) {
-            VSDK.reportMessage(this, VSDK.WARNING, "createGUIWindowed", 
+            Logger.reportMessage(this, VSDK.WARNING, "createGUIWindowed", 
                 "Warning: Can not set " + lookAndFeel + " look and feel\n" + e);
         }
 

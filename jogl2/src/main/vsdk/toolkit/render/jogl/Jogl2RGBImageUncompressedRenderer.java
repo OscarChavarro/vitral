@@ -16,6 +16,7 @@ import com.jogamp.opengl.util.texture.TextureData;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.common.RendererConfiguration;
 
@@ -80,11 +81,11 @@ public class Jogl2RGBImageUncompressedRenderer extends Jogl2Renderer
         //- 4. Use the image's glList -------------------------------------
         if ( glListIsCompiled == false ) {
             if ( item == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.activate", "null item");
+                Logger.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.activate", "null item");
                 return -1;
             }
             if ( item.renderer == null ) {
-                VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.activate", "null item renderer");
+                Logger.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.activate", "null item renderer");
                 return -1;
             }
             item.renderer.bind(gl);
@@ -166,18 +167,18 @@ public class Jogl2RGBImageUncompressedRenderer extends Jogl2Renderer
                 item.glList = item.renderer.getTextureObject(gl);
             }
             catch ( Exception e ) {
-                VSDK.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
+                Logger.reportMessage(null, VSDK.FATAL_ERROR, "activateBase", "" + e);
             }
         }
 
         //- 4. Use the image's glList -------------------------------------
         if ( item == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                 "Jogl2RGBImageUncompressedRenderer.activate", "null item");
             return -1;
         }
         if ( item.renderer == null ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                 "Jogl2RGBImageUncompressedRenderer.activate", "null item renderer");
             return -1;
         }
@@ -217,7 +218,7 @@ public class Jogl2RGBImageUncompressedRenderer extends Jogl2Renderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.deactivate", "Error unloading image.");
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.deactivate", "Error unloading image.");
 
         }
     }
@@ -240,7 +241,7 @@ public class Jogl2RGBImageUncompressedRenderer extends Jogl2Renderer
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.unload", "Error unloading image.");
+            Logger.reportMessage(null, VSDK.WARNING, "Jogl2RGBImageUncompressedRenderer.unload", "Error unloading image.");
 
         }
     }

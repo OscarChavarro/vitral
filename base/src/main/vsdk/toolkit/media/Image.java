@@ -5,7 +5,7 @@
 package vsdk.toolkit.media;
 import java.io.Serial;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 
 /**

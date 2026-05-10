@@ -17,6 +17,7 @@ import vsdk.toolkit.io.PersistenceElement;
 //#endif
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 Current class is an specific low level implementation of an uncompressed
@@ -403,7 +404,7 @@ public class RGBAImageUncompressed extends Image
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
         if ( !data.hasArray() ) {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
         }
         return data.array();
 //#endif
@@ -434,7 +435,7 @@ public class RGBAImageUncompressed extends Image
 //#endif
 
 //#ifdef WITH_JAVA_DIRECT_BUFFERS
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
 //#endif
 
     }

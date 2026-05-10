@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.PersistenceElement;
@@ -80,7 +81,7 @@ public class ParametricBiCubicPatchPersistence extends PersistenceElement {
 
     }
     catch (TransformerFactoryConfigurationError ex1) {
-      VSDK.reportMessage(null, VSDK.FATAL_ERROR, "toElement", ""  + ex1);
+      Logger.reportMessage(null, VSDK.FATAL_ERROR, "toElement", ""  + ex1);
     }
     return nodeRoot;
 

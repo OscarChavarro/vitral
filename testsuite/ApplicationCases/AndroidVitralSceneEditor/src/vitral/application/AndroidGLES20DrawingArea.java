@@ -20,7 +20,8 @@ import android.view.View;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.RendererConfiguration;
@@ -242,7 +243,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             EnvironmentPersistence.importEnvironment(meshFile, localScene);
           }
           catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+            Logger.reportMessageWithException(this, VSDK.FATAL_ERROR, 
                 "loadExternalSceneFile", "Error loading file " + filename, e);
         }
         return localScene;
@@ -407,7 +408,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             testImage = normalMap.exportToRgbImage();
         }
         catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR,
+            Logger.reportMessageWithException(this, VSDK.FATAL_ERROR,
                     "createModel", "Can not load bumpmap!", e);
         }
         
@@ -481,7 +482,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                 startupTexture = ImagePersistence.importRGB(is);
             }
             catch ( Exception e ) {
-                VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR, 
+                Logger.reportMessageWithException(this, VSDK.FATAL_ERROR, 
                     "createModel", "Can not load texture!", e);
             }
         }

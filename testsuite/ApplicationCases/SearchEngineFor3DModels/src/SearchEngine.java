@@ -28,6 +28,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
@@ -489,7 +490,7 @@ public class SearchEngine
 
         if ( gl == null || offlineRenderer == null ||
              projectedViewRenderer == null ) {
-            VSDK.reportMessage(this, VSDK.WARNING,
+            Logger.reportMessage(this, VSDK.WARNING,
                                "indexFiles",
             "Graphical contexts needed for indexing models not available.\n" +
             "Aborting file indexing.");

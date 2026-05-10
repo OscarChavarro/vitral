@@ -12,8 +12,9 @@ import java.io.FileOutputStream;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.light.Light;
@@ -412,7 +413,7 @@ public class GUIEventExecutor extends CommandListener{
                     parent.mainWindowWidget.repaint();
                 }
                 catch ( Exception ex ) {
-                    VSDK.reportMessage(this, VSDK.WARNING, "executeCommand", "Failed to read file...\n" + ex);
+                    Logger.reportMessage(this, VSDK.WARNING, "executeCommand", "Failed to read file...\n" + ex);
                     return false;
                 }
             }
@@ -468,7 +469,7 @@ public class GUIEventExecutor extends CommandListener{
                     parent.mainWindowWidget.repaint();
                 }
                 catch (Exception ex) {
-                    VSDK.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
+                    Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
                     return false;
                 }
             }
@@ -495,7 +496,7 @@ public class GUIEventExecutor extends CommandListener{
                     parent.mainWindowWidget.repaint();
                 }
                 catch (Exception ex) {
-                    VSDK.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
+                    Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
                     return false;
                 }
             }

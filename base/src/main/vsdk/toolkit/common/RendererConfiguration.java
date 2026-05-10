@@ -2,6 +2,7 @@
 
 package vsdk.toolkit.common;
 import java.io.Serial;
+import vsdk.toolkit.common.color.ColorRgb;
 
 /**
 The RendererConfiguration class is used to indicate some attributes in which a 

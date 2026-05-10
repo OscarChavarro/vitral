@@ -167,7 +167,8 @@ public class Entity implements ModelElement, Serializable
         else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector4D") ) {
             return true;
         }
-        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.ColorRgb") ) {
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.ColorRgb") ||
+                  n.equals("vsdk.toolkit.common.color.ColorRgb") ) {
             return true;
         }
         else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Matrix4x4") ) {

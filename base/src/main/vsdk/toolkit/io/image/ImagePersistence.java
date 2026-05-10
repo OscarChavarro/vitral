@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageCompressed;
@@ -105,7 +106,7 @@ public class ImagePersistence extends PersistenceElement
         data = new RGBAImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test RGBA image"
         );
@@ -118,7 +119,7 @@ public class ImagePersistence extends PersistenceElement
         data = new RGBImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test RGB image"
         );
@@ -131,7 +132,7 @@ public class ImagePersistence extends PersistenceElement
         data = new IndexedColorImageUncompressed();
         data.init(256, 256);
         data.createTestPattern();
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, returning test IndexedColor image"
         );
@@ -261,7 +262,7 @@ public class ImagePersistence extends PersistenceElement
         if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
              type.equals("png") ) {
             nativeWarningGiven = true;
-            VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGBA", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
+            Logger.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGBA", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
         }
 
         //-----------------------------------------------------------------
@@ -326,7 +327,7 @@ public class ImagePersistence extends PersistenceElement
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessageWithException(null, VSDK.FATAL_ERROR, "ImagePersistence.importRGBA", "INPUT ERROR: ", e);
+            Logger.reportMessageWithException(null, VSDK.FATAL_ERROR, "ImagePersistence.importRGBA", "INPUT ERROR: ", e);
         }
         return createNotAvailableImageRGBA();
     }
@@ -372,7 +373,7 @@ public class ImagePersistence extends PersistenceElement
         if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
              type.equals("png") ) {
             nativeWarningGiven = true;
-            VSDK.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGB", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
+            Logger.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGB", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
         }
 
         //-----------------------------------------------------------------
@@ -459,7 +460,7 @@ public class ImagePersistence extends PersistenceElement
                 return (T)retImage;
               }
               catch ( Exception e ) {
-                  VSDK.reportMessage(null, VSDK.ERROR, "importRGB (B)",
+                  Logger.reportMessage(null, VSDK.ERROR, "importRGB (B)",
                                      "Cannot import image file \"" + inImageFd.getAbsolutePath() + "\"" + e);
                  throw new ImageNotRecognizedException("Error reading internal file:\n" + e, inImageFd);
             }
@@ -565,7 +566,7 @@ public class ImagePersistence extends PersistenceElement
             }
         }
 
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving GIF image"
         );
@@ -582,7 +583,7 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving JPG image");
     }
@@ -597,7 +598,7 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving PNG image");
     }
@@ -614,7 +615,7 @@ public class ImagePersistence extends PersistenceElement
             }
         }
         catch ( Exception e ) {
-            VSDK.reportMessage(null, VSDK.WARNING,
+            Logger.reportMessage(null, VSDK.WARNING,
                 "ImagePersistence",
                 "Error saving PNG image");
         }
@@ -629,7 +630,7 @@ public class ImagePersistence extends PersistenceElement
                 return;
             }
         }
-        VSDK.reportMessage(null, VSDK.WARNING,
+        Logger.reportMessage(null, VSDK.WARNING,
             "ImagePersistence",
             "Helper class not available, not saving PNG image");
     }

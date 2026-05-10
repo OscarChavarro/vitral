@@ -8,6 +8,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -446,7 +447,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         }
 
         if ( from == null || to == null ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
                 "Unexpected case: null halfedges!");
         }
 
@@ -454,7 +455,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         s = from.parentLoop.parentFace.parentSolid;
 
         if ( s != to.parentLoop.parentFace.parentSolid ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
                 "Unexpected case: halfedges on different solids!");
         }
 
@@ -526,7 +527,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         } while ( changed );
 
         if ( from.startingVertex != to.startingVertex ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
                 "Unable to recover endpoint pairing after A-E normalization.");
             return;
         }

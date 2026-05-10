@@ -1,7 +1,7 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;

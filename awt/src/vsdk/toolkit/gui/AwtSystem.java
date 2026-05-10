@@ -13,7 +13,7 @@ import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
 
 // VitralSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.awt.AwtRGBAImageUncompressedRenderer;
 

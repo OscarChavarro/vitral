@@ -5,6 +5,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -41,13 +42,13 @@ public class _PolyhedralBoundedSolidTopologicalValidator
             h1 = e.rightHalf;
             h2 = e.leftHalf;
             if ( h1 == null || h2 == null ) {
-                VSDK.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
+                Logger.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
                 "Edge with null halfedge!");
                 return false;
             }
             if ( h1.parentLoop.parentFace.parentSolid !=
                  h2.parentLoop.parentFace.parentSolid ) {
-                VSDK.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
+                Logger.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
                 "Edge belonging to two different solids!");
                 return false;
             }
@@ -68,7 +69,7 @@ public class _PolyhedralBoundedSolidTopologicalValidator
 
                 he = l.boundaryStartHalfEdge;
                 if ( he == null ) {
-                    VSDK.reportMessage(solid, VSDK.WARNING,
+                    Logger.reportMessage(solid, VSDK.WARNING,
                     "validateTopologicalIntegrity",
                     "Loop without starting halfedge\n" +
                     "Offending solid:\n" +
@@ -79,7 +80,7 @@ public class _PolyhedralBoundedSolidTopologicalValidator
                 do {
                     he = he.next();
                     if ( he == null ) {
-                        VSDK.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
+                        Logger.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
                         "Not closed loop!");
                         return false;
                     }
@@ -96,7 +97,7 @@ public class _PolyhedralBoundedSolidTopologicalValidator
 
         for ( i = 0; i < edgeCount.length; i++ ) {
             if ( edgeCount[i] != 2 ) {
-                VSDK.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
+                Logger.reportMessage(solid, VSDK.WARNING, "validateTopologicalIntegrity",
                     "Edges with different halfedges than 2!");
                 return false;
             }

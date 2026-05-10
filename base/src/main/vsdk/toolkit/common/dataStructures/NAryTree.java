@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.util.ArrayList;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 VSDK implementation of a generic N-ary tree type. The following design criteria
@@ -59,7 +60,7 @@ public class NAryTree<T> extends FundamentalEntity {
         final _NAryTreeNode<T> inNode, final T inKey)
     {
         if ( inNode == null ) {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
                 "Null node not expected.");
             return null;
         }
@@ -87,7 +88,7 @@ public class NAryTree<T> extends FundamentalEntity {
             }
         }
         else {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
                 "unexpected node subclass " + inNode.getClass().getName());
         }        
         return null;
@@ -146,7 +147,7 @@ public class NAryTree<T> extends FundamentalEntity {
                 _NAryTreeNode<T> grandpa;
                 grandpa = searchParent(root, parent);
                 if ( grandpa == null ) {
-                    VSDK.reportMessage(this, VSDK.FATAL_ERROR, "addChild", 
+                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "addChild", 
                         "unexpected structure! ");                    
                     return false;
                 }
@@ -159,7 +160,7 @@ public class NAryTree<T> extends FundamentalEntity {
             }
         }
         else {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "addChild", 
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "addChild", 
                 "unexpected node subclass " + parent.getClass().getName());
         }        
         
@@ -176,7 +177,7 @@ public class NAryTree<T> extends FundamentalEntity {
         _NAryTreeNode<T> inKey)
     {
         if ( inNode == null ) {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
                 "Null node not expected.");
             return null;
         }
@@ -204,7 +205,7 @@ public class NAryTree<T> extends FundamentalEntity {
             return null;
         }
         else {
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "searchNodeByContent", 
                 "unexpected node subclass " + inNode.getClass().getName());
         }        
         return null;

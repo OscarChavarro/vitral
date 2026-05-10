@@ -27,6 +27,7 @@ import java.io.ObjectOutputStream;
 // VitralSDK classes
 import vsdk.toolkit.common.Ray;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -1490,7 +1491,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         if ( from == null || to == null ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
                 "Unexpected case: null halfedges!");
         }
 
@@ -1498,7 +1499,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         s = from.parentLoop.parentFace.parentSolid;
 
         if ( s != to.parentLoop.parentFace.parentSolid ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
                 "Unexpected case: halfedges on different solids!");
         }
 
@@ -1570,7 +1571,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         } while ( changed );
 
         if ( from.startingVertex != to.startingVertex ) {
-            VSDK.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
+            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
                 "Unable to recover endpoint pairing after A-E normalization.");
             return;
         }
@@ -2066,7 +2067,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             snapshot = bytes.toByteArray();
         }
         catch ( IOException e ) {
-            VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to clone " + solidLabel +
                 " for subtract connect recovery: " +
@@ -2080,21 +2081,21 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return (PolyhedralBoundedSolid)input.readObject();
         }
         catch ( IOException e ) {
-            VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +
                 e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         catch ( StackOverflowError e ) {
-            VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +
                 e.getClass().getSimpleName());
         }
         catch ( ClassNotFoundException e ) {
-            VSDK.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +

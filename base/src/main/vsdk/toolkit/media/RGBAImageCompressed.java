@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 Compressed RGBA image storage. Pixel-level access is intentionally unsupported
@@ -242,7 +243,7 @@ public class RGBAImageCompressed extends Image
 
     private void reportUnsupportedPixelAccess(String method)
     {
-        VSDK.reportMessage(
+        Logger.reportMessage(
             this,
             VSDK.FATAL_ERROR,
             method,

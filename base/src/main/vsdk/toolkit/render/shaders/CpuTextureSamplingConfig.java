@@ -1,6 +1,6 @@
 package vsdk.toolkit.render.shaders;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;

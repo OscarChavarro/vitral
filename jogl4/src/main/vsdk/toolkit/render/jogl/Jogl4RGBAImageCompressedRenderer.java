@@ -6,6 +6,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBAImageCompressed;
 
 public class Jogl4RGBAImageCompressedRenderer extends Jogl4Renderer {
@@ -72,7 +73,7 @@ public class Jogl4RGBAImageCompressedRenderer extends Jogl4Renderer {
     {
         int internalFormat = toOpenGlInternalFormat(img.getCompressionFormat());
         if ( internalFormat == 0 ) {
-            VSDK.reportMessage(
+            Logger.reportMessage(
                 null,
                 VSDK.ERROR,
                 "Jogl4RGBAImageCompressedRenderer.upload",
@@ -82,7 +83,7 @@ public class Jogl4RGBAImageCompressedRenderer extends Jogl4Renderer {
 
         int imageSize = img.getCompressedDataSize();
         if ( imageSize <= 0 ) {
-            VSDK.reportMessage(
+            Logger.reportMessage(
                 null,
                 VSDK.ERROR,
                 "Jogl4RGBAImageCompressedRenderer.upload",

@@ -3,7 +3,7 @@ package vsdk.toolkit.render.awt;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.RGBColorPalette;
 
 public class AwtRGBColorPaletteRenderer extends AwtRenderer

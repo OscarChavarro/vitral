@@ -1,6 +1,6 @@
 package vsdk.toolkit.processing.polygonClipper;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 
 /**
  * Similar to Vertex2D but is used in polygon clipping.

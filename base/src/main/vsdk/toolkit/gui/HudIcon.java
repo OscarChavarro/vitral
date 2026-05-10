@@ -2,6 +2,7 @@ package vsdk.toolkit.gui;
 
 import java.io.File;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
@@ -189,7 +190,7 @@ public class HudIcon extends PresentationElement {
 
         }
         catch (Exception e) {
-            VSDK.reportMessageWithException(this, VSDK.WARNING, "WebIcon", "Image not found", e);
+            Logger.reportMessageWithException(this, VSDK.WARNING, "WebIcon", "Image not found", e);
         }
     }
 

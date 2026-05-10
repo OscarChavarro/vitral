@@ -9,7 +9,7 @@ import android.opengl.GLES11;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import static vsdk.toolkit.render.androidgles10.AndroidGLES10Renderer.FLOAT_SIZE_IN_BYTES;
 

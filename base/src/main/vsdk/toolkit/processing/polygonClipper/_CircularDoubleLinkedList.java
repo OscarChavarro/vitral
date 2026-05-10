@@ -1,6 +1,7 @@
 package vsdk.toolkit.processing.polygonClipper;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
  * Circular double linked list that exposes its nodes.
@@ -107,7 +108,7 @@ public class _CircularDoubleLinkedList<E> { //Circular.
         if ( ind >= currentSize ) {
             String msg;
             msg = "Circ double linked list error: index out of bounds for remove operation.";
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "remove", msg);
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "remove", msg);
             return;
         }
         if ( currentSize == 1 ) {
@@ -145,7 +146,7 @@ public class _CircularDoubleLinkedList<E> { //Circular.
             String msg;
             msg = "Circ double linked list error: the node not belongs to this"
                 + "linked list, insert before this node will corrupt both linked lists.";
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "insertBefore", msg);
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "insertBefore", msg);
             return null;
         }
         newNode = new _DoubleLinkedListNode<E>();

@@ -6,6 +6,7 @@ import com.jogamp.opengl.GL2;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 
 public class Jogl2SimpleMaterialRenderer extends Jogl2Renderer {
@@ -17,7 +18,7 @@ public class Jogl2SimpleMaterialRenderer extends Jogl2Renderer {
         //-----------------------------------------------------------------
         if ( m == null ) {
             if ( errorReported == false ) {
-                VSDK.reportMessage(null, VSDK.WARNING, 
+                Logger.reportMessage(null, VSDK.WARNING, 
                     "Jogl2SimpleMaterialRenderer.activate", 
                     "Trying to activate null reference to SimpleMaterial." + 
                     " Avoiding further reporting.");

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import android.opengl.GLES20;
 
 // VSDK classes
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBAImageUncompressed;

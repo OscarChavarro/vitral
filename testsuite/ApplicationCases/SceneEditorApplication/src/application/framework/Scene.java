@@ -3,7 +3,7 @@ package application.framework;
 import java.io.File;
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.ColorRgb;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.Ray;
@@ -20,7 +20,6 @@ import vsdk.toolkit.environment.background.SimpleBackground;
 import vsdk.toolkit.environment.background.CubemapBackground;
 import vsdk.toolkit.environment.background.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.geometry.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 public class AnimationEventGenerator implements Runnable {
     private final int fps;
@@ -48,7 +49,7 @@ public class AnimationEventGenerator implements Runnable {
             e.setT(t);
             try { Thread.sleep(1000/fps); }
             catch ( InterruptedException ex ) {
-                VSDK.reportMessageWithException(
+                Logger.reportMessageWithException(
                     this, VSDK.FATAL_ERROR, "run", "Error in sleep", ex);
             }
             dispatch(e);

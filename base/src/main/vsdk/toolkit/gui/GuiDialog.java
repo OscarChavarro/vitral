@@ -3,6 +3,7 @@ package vsdk.toolkit.gui;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 
 /**
 This class plays a role of internal node on an n-ary tree in the composite
@@ -126,7 +127,7 @@ public class GuiDialog extends GuiElement {
      * doesn't exist, an exception is thrown.
      */
     public void associateVariable(String variableName) {
-        VSDK.reportMessage(this, VSDK.FATAL_ERROR, "associateVariable",
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "associateVariable",
                 "Variable " + variableName + " not found!");
     }
 

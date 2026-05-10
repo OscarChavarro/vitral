@@ -11,6 +11,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer;
@@ -42,7 +43,7 @@ implements Runnable {
             parent.setTexture(ImagePersistence.importRGB(is));
         }
         catch ( Exception e ) {
-            VSDK.reportMessageWithException(this, VSDK.FATAL_ERROR,
+            Logger.reportMessageWithException(this, VSDK.FATAL_ERROR,
                     "createModel", "Can not load texture!", e);
         }
 

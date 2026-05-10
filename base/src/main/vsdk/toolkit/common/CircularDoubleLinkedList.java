@@ -1,5 +1,6 @@
 package vsdk.toolkit.common;
 import java.io.Serial;
+import vsdk.toolkit.common.logging.Logger;
 
 class _CircularDoubleLinkedListNode<E> extends FundamentalEntity
 {
@@ -187,7 +188,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             String msg;
             msg = "IndexOutOfBounds Exception! - Trying to `get` with index " + index + " in a list with " + currentSize + " elements.";
 
-            VSDK.reportMessage(this, VSDK.FATAL_ERROR, "get", msg);
+            Logger.reportMessage(this, VSDK.FATAL_ERROR, "get", msg);
             return null;
         }
         int i;
