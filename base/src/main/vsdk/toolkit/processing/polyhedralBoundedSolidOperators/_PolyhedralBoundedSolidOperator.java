@@ -7,7 +7,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 // VitralSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;

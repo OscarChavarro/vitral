@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
 // Vitral classes
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;

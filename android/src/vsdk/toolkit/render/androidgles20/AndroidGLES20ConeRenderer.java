@@ -8,6 +8,7 @@ import android.opengl.GLES20;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Cone;
 
@@ -23,9 +24,9 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
      */
     private static void drawCone(Cone nCone, RendererConfiguration nRendererConfiguration, int slices) {
         //three quad_strips for the body
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 3);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, 3);
         //number of slices covering the cone
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices * 3);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, slices * 3);
 
         //index on the vertex array
         int index;

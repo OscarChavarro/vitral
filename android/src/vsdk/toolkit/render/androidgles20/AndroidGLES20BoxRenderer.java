@@ -8,6 +8,7 @@ import android.opengl.GLES20;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Box;
 
@@ -20,9 +21,9 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
         private static void drawBox(Box nBox, RendererConfiguration nRendererConfiguration)
         {
                 //One Quad_Strip for the body
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
                 //8 Quads covering the body of the box
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD, 8);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, 8);
                 
                 //index on the vertex array
                 int index;
@@ -169,9 +170,9 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 
                 Vector3D color = new Vector3D(1, 0, 0);
                 //One Quad_Strip for the body
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
                 //8 Quads covering the body of the box
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD, 8);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, 8);
                 
 
                 //index on the vertex array
@@ -276,9 +277,9 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
 
         private static void drawPoints(Box nBox, RendererConfiguration nRendererConfiguration) {
                 //One Quad_Strip for the body
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
                 //8 Quads covering the body of the box
-                VSDK.acumulatePrimitiveCount(VSDK.QUAD, 8);
+                RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, 8);
                 
                 //index on the vertex array
                 int index;

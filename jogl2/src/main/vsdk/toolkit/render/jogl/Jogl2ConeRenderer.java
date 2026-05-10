@@ -11,6 +11,7 @@ import com.jogamp.opengl.glu.GLUquadric;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 
@@ -28,7 +29,7 @@ public class Jogl2ConeRenderer extends Jogl2Renderer {
         r2 = cone.getTopRadius();
         h = cone.getHeight();
 
-        VSDK.acumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
 
         glu.gluCylinder(gluQuadric, r1, r2, h, slices, 1);
         gl.glPushMatrix();

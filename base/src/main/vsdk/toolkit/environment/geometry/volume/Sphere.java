@@ -6,7 +6,7 @@ package vsdk.toolkit.environment.geometry.volume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
-import vsdk.toolkit.common.RaytraceStatistics;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.Ray;

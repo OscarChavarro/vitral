@@ -3,6 +3,7 @@ import java.io.Serial;
 import java.util.Objects;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 
 /**
  This class models a mathematical RAY.

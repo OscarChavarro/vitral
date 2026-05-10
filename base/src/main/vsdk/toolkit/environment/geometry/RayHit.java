@@ -4,7 +4,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.RaytraceStatistics;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;

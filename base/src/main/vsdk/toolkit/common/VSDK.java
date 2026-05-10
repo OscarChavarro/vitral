@@ -101,40 +101,6 @@ public class VSDK
     public static final int CONE = 2;
     public static final int INTERSECTION_TYPE_COUNT = 3;
 
-    // Primitive accounting data structures (not thread safe)
-    private static final int primitiveCount[];
-    private static final int intersectionCount[];
-
-    static {
-        primitiveCount = new int[PRIMITIVE_TYPE_COUNT];
-        intersectionCount = new int[INTERSECTION_TYPE_COUNT];
-        resetPrimitiveCounters();
-        resetIntersectionCounters();
-    }
-
-    public static void resetPrimitiveCounters()
-    {
-        int i;
-
-        for ( i = 0; i < PRIMITIVE_TYPE_COUNT; i++ ) {
-            primitiveCount[i] = 0;
-        }
-    }
-
-    public static void resetIntersectionCounters()
-    {
-        int i;
-
-        for ( i = 0; i < INTERSECTION_TYPE_COUNT; i++ ) {
-            intersectionCount[i] = 0;
-        }
-    }
-
-    public static void acumulatePrimitiveCount(int type, int count)
-    {
-        primitiveCount[type] += count;
-    }
-
     public static boolean equals(double a, double b)
     {
         return Math.abs(a - b) < EPSILON;

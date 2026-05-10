@@ -11,7 +11,7 @@ import java.util.Collections;
 
 // VitralSDK classes
 import java.util.List;
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;

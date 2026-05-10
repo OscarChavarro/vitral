@@ -10,8 +10,7 @@ import java.io.Serial;
 /**
 A complex child is one with a real mother and an imaginary father.
 
-Current implementation of complex number based on (borrowed from, jeje)
-sample in [.wPRIN2007].9 course notes.
+Current implementation of complex number based on sample in [.wPRIN2007].9 course notes.
 */
 public class Complex extends FundamentalEntity {
     @Serial private static final long serialVersionUID = 20070712L;

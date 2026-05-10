@@ -15,6 +15,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.gui.TranslateGizmo;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -45,7 +46,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         r2 = cone.getTopRadius();
         h = cone.getHeight();
 
-        VSDK.acumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.TRIANGLE, 4*slices);
 
         glu.gluCylinder(gluQuadric, r1, r2, h, slices, 1);
         gl.glPushMatrix();

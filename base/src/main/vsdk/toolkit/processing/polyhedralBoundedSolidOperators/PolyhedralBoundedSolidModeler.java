@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 // Vitral classes
 import java.util.List;
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;

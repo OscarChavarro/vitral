@@ -12,6 +12,7 @@ import android.opengl.GLES20;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.environment.Camera;
@@ -215,8 +216,8 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     drawSurfacesSmooth(Sphere sphere, int slices, int stacks, 
         RendererConfiguration q)
     {
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
         Vector3D P = new Vector3D(); // Vertex position
@@ -318,8 +319,8 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     private static void
     drawSurfacesFlat(Sphere sphere, int slices, int stacks, RendererConfiguration q)
     {
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
         Vector3D P = new Vector3D(); // Vertex position

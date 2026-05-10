@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.RendererConfiguration;
 import vsdk.toolkit.processing.StopWatch;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.RaytraceStatistics;
+import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;

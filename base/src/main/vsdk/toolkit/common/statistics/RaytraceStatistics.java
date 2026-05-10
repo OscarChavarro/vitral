@@ -1,4 +1,4 @@
-package vsdk.toolkit.common;
+package vsdk.toolkit.common.statistics;
 
 import java.util.concurrent.atomic.LongAdder;
 

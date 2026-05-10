@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL2GL3;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.common.RendererConfiguration;
+import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 
@@ -148,8 +149,8 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     private static void
     drawSphereElements(GL2 gl, double r, int slices, int stacks)
     {
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
-        VSDK.acumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD, slices*stacks);
+        RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
         Vector3D P = new Vector3D(); // Vertex position

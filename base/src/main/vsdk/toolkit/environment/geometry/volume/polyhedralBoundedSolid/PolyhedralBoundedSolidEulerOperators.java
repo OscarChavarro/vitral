@@ -9,7 +9,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.PolyhedralBoundedSolidStatistics;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
