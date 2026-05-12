@@ -1861,14 +1861,201 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return new ConnectResult(sonfa, sonfb);
     }
 
+    /**
+    Partitions a flat list of null-edges into topological rings by tracing
+    vertex-adjacency chains. Two null-edges are adjacent when they share an
+    endpoint vertex. The result preserves the original ordering within each
+    ring for later intra-ring geometric sort.
+
+    This prevents the Connect phase from pairing null-edges that belong to
+    distinct, non-intersecting curves (e.g., the outer and inner boundary
+    circles of a spherical shell intersecting a cylinder).
+    */
+    private static ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>>
+    partitionNullEdgesIntoRings(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone)
+    {
+        HashMap<Integer, ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>>
+            vertexMap = new HashMap<>();
+        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : sone) {
+            int v1 = ne.e.rightHalf.startingVertex.id;
+            int v2 = ne.e.leftHalf.startingVertex.id;
+            vertexMap.computeIfAbsent(v1, k -> new ArrayList<>()).add(ne);
+            if ( v2 != v1 ) {
+                vertexMap.computeIfAbsent(v2, k -> new ArrayList<>()).add(ne);
+            }
+        }
+
+        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> rings =
+            new ArrayList<>();
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> remaining =
+            new ArrayList<>(sone);
+
+        while ( !remaining.isEmpty() ) {
+            ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring =
+                new ArrayList<>();
+            ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> visited =
+                new ArrayList<>();
+            _PolyhedralBoundedSolidSetOperatorNullEdge start = remaining.get(0);
+            _PolyhedralBoundedSolidSetOperatorNullEdge current = start;
+            int nextVertexId = current.e.rightHalf.startingVertex.id;
+
+            while ( true ) {
+                ring.add(current);
+                visited.add(current);
+                ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> neighbors =
+                    vertexMap.get(nextVertexId);
+                _PolyhedralBoundedSolidSetOperatorNullEdge next = null;
+                if ( neighbors != null ) {
+                    for (_PolyhedralBoundedSolidSetOperatorNullEdge nb : neighbors) {
+                        if ( !visited.contains(nb) ) {
+                            next = nb;
+                            break;
+                        }
+                    }
+                }
+                if ( next == null ) {
+                    break;
+                }
+                int v1 = next.e.rightHalf.startingVertex.id;
+                int v2 = next.e.leftHalf.startingVertex.id;
+                nextVertexId = (v1 == nextVertexId) ? v2 : v1;
+                current = next;
+            }
+
+            remaining.removeAll(visited);
+            rings.add(ring);
+        }
+
+        return rings;
+    }
+
+    private static double[] ringCentroidXYZ(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring)
+    {
+        double cx = 0.0;
+        double cy = 0.0;
+        double cz = 0.0;
+        int count = 0;
+
+        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : ring) {
+            cx += ne.e.rightHalf.startingVertex.position.x();
+            cy += ne.e.rightHalf.startingVertex.position.y();
+            cz += ne.e.rightHalf.startingVertex.position.z();
+            cx += ne.e.leftHalf.startingVertex.position.x();
+            cy += ne.e.leftHalf.startingVertex.position.y();
+            cz += ne.e.leftHalf.startingVertex.position.z();
+            count += 2;
+        }
+        if ( count == 0 ) {
+            return new double[]{0.0, 0.0, 0.0};
+        }
+        return new double[]{cx / count, cy / count, cz / count};
+    }
+
+    private static double ringAverageRadius(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring)
+    {
+        double[] c = ringCentroidXYZ(ring);
+        double cx = c[0];
+        double cy = c[1];
+        double cz = c[2];
+        double totalRadius = 0.0;
+        int count = 0;
+
+        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : ring) {
+            double dx = ne.e.rightHalf.startingVertex.position.x() - cx;
+            double dy = ne.e.rightHalf.startingVertex.position.y() - cy;
+            double dz = ne.e.rightHalf.startingVertex.position.z() - cz;
+            totalRadius += Math.sqrt(dx * dx + dy * dy + dz * dz);
+            dx = ne.e.leftHalf.startingVertex.position.x() - cx;
+            dy = ne.e.leftHalf.startingVertex.position.y() - cy;
+            dz = ne.e.leftHalf.startingVertex.position.z() - cz;
+            totalRadius += Math.sqrt(dx * dx + dy * dy + dz * dz);
+            count += 2;
+        }
+        return count > 0 ? totalRadius / count : 0.0;
+    }
+
+    private static void sortRingsBySignature(
+        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> rings)
+    {
+        Collections.sort(rings,
+            (r1, r2) -> {
+                double[] c1 = ringCentroidXYZ(r1);
+                double[] c2 = ringCentroidXYZ(r2);
+                int cmpX = Double.compare(c1[0], c2[0]);
+                if ( cmpX != 0 ) return cmpX;
+                int cmpY = Double.compare(c1[1], c2[1]);
+                if ( cmpY != 0 ) return cmpY;
+                int cmpZ = Double.compare(c1[2], c2[2]);
+                if ( cmpZ != 0 ) return cmpZ;
+                return Double.compare(ringAverageRadius(r1), ringAverageRadius(r2));
+            });
+    }
+
     private static void sortNullEdges()
     {
+        // Always group null-edges by topological ring before any further
+        // processing. Without this, the connect loop pairs null-edges from
+        // different intersection curves (e.g., the outer and inner boundary
+        // circles of a spherical shell), producing non-coplanar faces.
+        // Ring grouping is safe for the single-ring case (it is a no-op).
+        groupNullEdgesByRing();
+
         if ( isKeepInsertionOrderEnabled() ) {
             tracePipelineSummary("connect sort skipped; using insertion order");
             return;
         }
+
+        // Geometric sort within each ring, enabled only when keepInsertionOrder
+        // is explicitly disabled via the system property.
         Collections.sort(sonea);
         Collections.sort(soneb);
+    }
+
+    /**
+    Groups sonea and soneb so that null-edges belonging to the same
+    topological ring are contiguous and ring pairs are aligned between the
+    two lists. This prevents the connect loop from pairing null-edges that
+    belong to distinct intersection curves.
+
+    The insertion order within each ring is preserved so that the connect
+    loop continues to use the compatible angular ordering produced by the
+    Intersect phase. Rings are matched between A and B by their geometric
+    signature (centroid + average radius).
+    */
+    private static void groupNullEdgesByRing()
+    {
+        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> ringsA =
+            partitionNullEdgesIntoRings(sonea);
+        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> ringsB =
+            partitionNullEdgesIntoRings(soneb);
+
+        tracePipelineSummary(
+            "connect ring-group: ringsA=" + ringsA.size() +
+            " ringsB=" + ringsB.size());
+
+        if ( ringsA.size() <= 1 && ringsB.size() <= 1 ) {
+            return;
+        }
+
+        sortRingsBySignature(ringsA);
+        sortRingsBySignature(ringsB);
+
+        sonea.clear();
+        soneb.clear();
+        int n = Math.min(ringsA.size(), ringsB.size());
+        for (int i = 0; i < n; i++) {
+            sonea.addAll(ringsA.get(i));
+            soneb.addAll(ringsB.get(i));
+        }
+        for (int i = n; i < ringsA.size(); i++) {
+            sonea.addAll(ringsA.get(i));
+        }
+        for (int i = n; i < ringsB.size(); i++) {
+            soneb.addAll(ringsB.get(i));
+        }
     }
 
     /**

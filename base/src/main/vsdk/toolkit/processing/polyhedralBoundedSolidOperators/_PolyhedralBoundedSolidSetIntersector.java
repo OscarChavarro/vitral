@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -76,6 +77,16 @@ final class _PolyhedralBoundedSolidSetIntersector
     {
         return PolyhedralBoundedSolidNumericPolicy.compareToZero(value,
             numericContext);
+    }
+
+    private static boolean isZero(double value)
+    {
+        return PolyhedralBoundedSolidNumericPolicy.isZero(value, numericContext);
+    }
+
+    private static boolean isZeroBig(double value)
+    {
+        return PolyhedralBoundedSolidNumericPolicy.isZeroBig(value, numericContext);
     }
 
     private static _PolyhedralBoundedSolidFace.PointInsideResult
@@ -339,6 +350,20 @@ final class _PolyhedralBoundedSolidSetIntersector
         v2 = e.leftHalf.startingVertex;
         d1 = f.getContainingPlane().pointDistance(v1.position);
         d2 = f.getContainingPlane().pointDistance(v2.position);
+
+        // Snap vertices in the (epsilon, bigEpsilon] gap onto the face plane.
+        // Without this, such a vertex triggers the crossing branch and produces
+        // a null-edge whose original endpoint is off-plane; after Connect, that
+        // endpoint ends up in the result face and fails the coplanarity check.
+        if ( isZeroBig(d1) && !isZero(d1) ) {
+            v1.position = f.getContainingPlane().projectPoint(v1.position);
+            d1 = 0.0;
+        }
+        if ( isZeroBig(d2) && !isZero(d2) ) {
+            v2.position = f.getContainingPlane().projectPoint(v2.position);
+            d2 = 0.0;
+        }
+
         s1 = compareToZero(d1);
         s2 = compareToZero(d2);
 
@@ -350,6 +375,31 @@ final class _PolyhedralBoundedSolidSetIntersector
 
             d3 = f.getContainingPlane().pointDistance(p);
             if ( compareToZero(d3) == 0 ) {
+                InfinitePlane facePlane = f.getContainingPlane();
+                p = facePlane.projectPoint(p);
+
+                // Snap p to the intersection line of f's plane and the edge's
+                // face plane. Without this, intrinsically non-planar faces (e.g.
+                // sphere quads) produce a vertex that lies on f's plane but not
+                // on the edge face's plane, causing coplanarity failures after
+                // the boolean operation.
+                _PolyhedralBoundedSolidFace edgeFace =
+                    e.rightHalf.parentLoop.parentFace;
+                if ( edgeFace != null ) {
+                    InfinitePlane edgeFacePlane = edgeFace.getContainingPlane();
+                    double dEdge = edgeFacePlane.pointDistance(p);
+                    if ( !isZero(dEdge) && isZeroBig(dEdge) ) {
+                        Vector3D n1 = edgeFacePlane.getNormal();
+                        Vector3D n2 = facePlane.getNormal();
+                        double n1DotN2 = n1.dotProduct(n2);
+                        double denom = 1.0 - n1DotN2 * n1DotN2;
+                        if ( denom > numericContext.epsilon() ) {
+                            Vector3D n1Perp = n1.subtract(n2.multiply(n1DotN2));
+                            p = p.subtract(n1Perp.multiply(dEdge / denom));
+                        }
+                    }
+                }
+
                 containment = pointInFaceDetailed(f, p);
                 cont = containment.status();
                 nearbyBoundaryHit = null;

@@ -293,6 +293,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
         if ( quality.isSelectionCornersSet() ) {
             Jogl2GeometryRenderer.drawSelectionCorners(gl, solid, quality);
         }
+        Jogl2PolyhedralBoundedSolidFaceRenderer.drawNonPlanarFaceHighlights(gl,
+            solid);
 
         //-----------------------------------------------------------------
     }

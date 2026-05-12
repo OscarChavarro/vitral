@@ -28,7 +28,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
     private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
-    private CsgSampleNames csgSample = CsgSampleNames.STACKED_BLOCKS;
+    private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
     private int kurlanderBowlSingleMotifIndex = 20;
     private int subdivisionCircumference = 16;
     private int subdivisionHeight = 8;

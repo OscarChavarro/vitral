@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3D;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -233,6 +234,166 @@ final class _PolyhedralBoundedSolidSetFinisher
     }
 
     /**
+    Restores the planar-face invariant of [MANT1988].10.2.1 after the answer
+    integration step.  The Connect phase merges adjacent operand faces via
+    `lkef` whenever a null-edge crosses their shared boundary; for tessellated
+    curved surfaces (spheres, cylinders) those neighbours have distinct face
+    normals, so the merged face is non-planar.  Subsequent `lkfmrh` + `loopGlue`
+    in Finish carry that non-planarity into single-loop result faces.
+
+    This routine fans each offending face into triangles using the same
+    `lmef(scan.next, scan.previous, newId)` split used by
+    `PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar`. Each
+    split peels off one triangle (always planar) from the remaining polygon
+    until the polygon itself is a triangle, restoring the planarity invariant
+    expected by `validateIntermediate`.
+    */
+    private static _PolyhedralBoundedSolidHalfEdge findNonDegenerateEar(
+        _PolyhedralBoundedSolidHalfEdge start,
+        int loopSize,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        _PolyhedralBoundedSolidHalfEdge candidate;
+        _PolyhedralBoundedSolidHalfEdge nextHe;
+        _PolyhedralBoundedSolidHalfEdge prevHe;
+        Vector3D p0;
+        Vector3D p1;
+        Vector3D p2;
+        Vector3D a;
+        Vector3D b;
+        double tolerance;
+        int safety;
+
+        if ( start == null || context == null || loopSize <= 0 ) {
+            return null;
+        }
+        tolerance = context.bigEpsilon();
+        candidate = start;
+        safety = 0;
+        do {
+            nextHe = candidate.next();
+            prevHe = candidate.previous();
+            if ( nextHe != null && prevHe != null && nextHe != prevHe &&
+                 candidate.parentLoop != null &&
+                 nextHe.parentLoop == candidate.parentLoop &&
+                 prevHe.parentLoop == candidate.parentLoop &&
+                 candidate.startingVertex != null &&
+                 nextHe.startingVertex != null &&
+                 prevHe.startingVertex != null ) {
+                p0 = prevHe.startingVertex.position;
+                p1 = candidate.startingVertex.position;
+                p2 = nextHe.startingVertex.position;
+                if ( p0 != null && p1 != null && p2 != null ) {
+                    a = p1.subtract(p0);
+                    b = p2.subtract(p0);
+                    if ( a.crossProduct(b).length() > tolerance ) {
+                        return candidate;
+                    }
+                }
+            }
+            candidate = candidate.next();
+            safety++;
+        } while ( candidate != null && candidate != start &&
+                  safety <= loopSize + 1 );
+        return null;
+    }
+
+    private static void extractInnerLoopsOfNonPlanarFace(
+        PolyhedralBoundedSolid solid,
+        _PolyhedralBoundedSolidFace face)
+    {
+        int safety;
+        int maxLoops;
+
+        if ( face == null || face.boundariesList == null ) {
+            return;
+        }
+        maxLoops = face.boundariesList.size();
+        safety = 0;
+        while ( face.boundariesList.size() > 1 && safety <= maxLoops ) {
+            _PolyhedralBoundedSolidLoop innerLoop;
+
+            safety++;
+            innerLoop = face.boundariesList.get(1);
+            if ( innerLoop == null ) {
+                break;
+            }
+            if ( PolyhedralBoundedSolidEulerOperators.lmfkrh(solid,
+                    innerLoop, solid.getMaxFaceId() + 1) == null ) {
+                break;
+            }
+        }
+    }
+
+    static void triangulateNonPlanarFaces(PolyhedralBoundedSolid solid)
+    {
+        int i;
+        int safetyCount;
+        int maxIterations;
+        int initialCount;
+
+        i = 0;
+        safetyCount = 0;
+        initialCount = solid.getPolygonsList().size();
+        maxIterations = 50 * (initialCount + 1);
+        while ( i < solid.getPolygonsList().size() &&
+                safetyCount < maxIterations ) {
+            _PolyhedralBoundedSolidFace face;
+            _PolyhedralBoundedSolidHalfEdge scan;
+            _PolyhedralBoundedSolidHalfEdge ear;
+            _PolyhedralBoundedSolidHalfEdge next;
+            _PolyhedralBoundedSolidHalfEdge prev;
+            PolyhedralBoundedSolidNumericPolicy.ToleranceContext context;
+            int loopSize;
+            int newFaceId;
+
+            safetyCount++;
+            face = solid.getPolygonsList().get(i);
+            if ( PolyhedralBoundedSolidGeometricValidator.
+                    validateFaceIsPlanar(face) ) {
+                i++;
+                continue;
+            }
+            if ( face.boundariesList.size() > 1 ) {
+                extractInnerLoopsOfNonPlanarFace(solid, face);
+                if ( face.boundariesList.size() != 1 ) {
+                    i++;
+                    continue;
+                }
+            }
+            loopSize = face.boundariesList.get(0).halfEdgesList.size();
+            if ( loopSize <= 3 ) {
+                i++;
+                continue;
+            }
+            scan = face.boundariesList.get(0).boundaryStartHalfEdge;
+            if ( scan == null ) {
+                i++;
+                continue;
+            }
+            context = PolyhedralBoundedSolidNumericPolicy.forFace(face);
+            ear = findNonDegenerateEar(scan, loopSize, context);
+            if ( ear == null ) {
+                i++;
+                continue;
+            }
+            next = ear.next();
+            prev = ear.previous();
+            if ( next == null || prev == null || next == prev ||
+                 next.parentLoop != ear.parentLoop ||
+                 prev.parentLoop != ear.parentLoop ) {
+                i++;
+                continue;
+            }
+            newFaceId = solid.getMaxFaceId() + 1;
+            if ( PolyhedralBoundedSolidEulerOperators.lmef(solid, next, prev,
+                    newFaceId) == null ) {
+                i++;
+            }
+        }
+    }
+
+    /**
     Answer integrator for the set-operations pipeline.
     Following program [MANT1988].15.15.
     */
@@ -293,6 +454,7 @@ final class _PolyhedralBoundedSolidSetFinisher
             PolyhedralBoundedSolidTopologyEditing.loopGlue(outRes, sonfa.get(i+inda));
         }
         cleanup(outRes);
+        triangulateNonPlanarFaces(outRes);
         PolyhedralBoundedSolidTopologyEditing.compactIds(outRes);
         tracePipelineSummary(
             "finish end outRes faces=" + outRes.getPolygonsList().size() +

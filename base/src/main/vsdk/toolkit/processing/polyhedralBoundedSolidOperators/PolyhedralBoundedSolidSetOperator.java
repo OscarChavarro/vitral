@@ -2044,6 +2044,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolidTopologyEditing.compactIds(res);
         if ( maximizeResultFaces ) {
             PolyhedralBoundedSolidTopologyEditing.maximizeFaces(res);
+            _PolyhedralBoundedSolidSetFinisher.triangulateNonPlanarFaces(res);
             PolyhedralBoundedSolidTopologyEditing.compactIds(res);
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
@@ -3909,38 +3910,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return recoveredResult;
     }
 
-    private static PolyhedralBoundedSolid trySingleMotifBowlSubtractFallback(
-        PolyhedralBoundedSolid originalSolidA,
-        PolyhedralBoundedSolid originalSolidB,
-        int op,
-        PolyhedralBoundedSolid result)
-    {
-        PolyhedralBoundedSolid recoveredResult;
-        PolyhedralBoundedSolid sampledFallback;
-
-        if ( op != SUBTRACT || isStructurallyUsableSetOpResult(result) ) {
-            return result;
-        }
-        recoveredResult = CsgKurlanderBowlFixture
-            .tryRecoverSingleMotifBowlSubtract(originalSolidA, originalSolidB);
-        if ( !hasBasicSetOpShapeData(recoveredResult) ) {
-            return result;
-        }
-        if ( hasSameShapeData(recoveredResult, originalSolidA) ) {
-            sampledFallback = buildUniformSampledCellBooleanFallback(
-                originalSolidA, originalSolidB, op);
-            if ( isStructurallyUsableSetOpResult(sampledFallback) &&
-                 !hasSameShapeData(sampledFallback, originalSolidA) ) {
-                tracePipelineSummary(
-                    "sampled single motif bowl fallback replacing incomplete result");
-                return sampledFallback;
-            }
-        }
-        tracePipelineSummary(
-            "single motif bowl fallback replacing incomplete result");
-        return recoveredResult;
-    }
-
     /**
     Following program [MANT1988].15.1.
     */
@@ -4020,7 +3989,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid subtractConnectRecoveryResult;
         boolean fallbackProvidedResult;
         boolean usedSubtractConnectRecovery;
-        boolean usedSingleMotifBowlFallback;
 
         sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
@@ -4030,7 +3998,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         offsetCylinderDifferenceFallback = null;
         fallbackProvidedResult = false;
         usedSubtractConnectRecovery = false;
-        usedSingleMotifBowlFallback = false;
 
         if ( allowSubtractConnectRecovery && op == SUBTRACT ) {
             subtractConnectRecoverySolidA = deepCloneSolid(
@@ -4180,13 +4147,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 PolyhedralBoundedSolid offsetCylinderExceptionFallback =
                     buildOffsetCylinderDifferenceFallback(
                         offsetCylinderDifferenceFallbackSpec);
-                PolyhedralBoundedSolid singleMotifBowlFallback =
-                    trySingleMotifBowlSubtractFallback(
-                        subtractConnectRecoverySolidA,
-                        subtractConnectRecoverySolidB,
-                        op,
-                        null);
-
                 if ( isStructurallyUsableSetOpResult(
                          offsetCylinderExceptionFallback) ) {
                     tracePipelineSummary(
@@ -4196,17 +4156,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                     axisAlignedCellBooleanFallback = null;
                     orthogonalProfileBooleanFallback = null;
                 }
-                else if ( hasBasicSetOpShapeData(singleMotifBowlFallback) ) {
-                    tracePipelineSummary(
-                        "single motif bowl fallback replacing finish exception: " +
-                        e.getClass().getSimpleName());
-                    res = singleMotifBowlFallback;
-                    axisAlignedCellBooleanFallback = null;
-                    orthogonalProfileBooleanFallback = null;
-                    usedSingleMotifBowlFallback = true;
-                }
-                else
-                if ( axisAlignedCellBooleanFallback == null &&
+                else if ( axisAlignedCellBooleanFallback == null &&
                      orthogonalProfileBooleanFallback == null ) {
                     throw e;
                 }
@@ -4248,8 +4198,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         res = applyProfileDifferenceFallbackIfNeeded(
             profileDifferenceFallback, res);
-        if ( !usedSingleMotifBowlFallback &&
-             shouldAttemptSubtractConnectRecovery(
+        if ( shouldAttemptSubtractConnectRecovery(
                  op,
                  allowSubtractConnectRecovery,
                  subtractConnectRecoverySolidA,
@@ -4266,18 +4215,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 usedSubtractConnectRecovery = true;
             }
         }
-        if ( !usedSingleMotifBowlFallback ) {
-            PolyhedralBoundedSolid resultBeforeSingleMotifBowlFallback = res;
-
-            res = trySingleMotifBowlSubtractFallback(
-                subtractConnectRecoverySolidA,
-                subtractConnectRecoverySolidB,
-                op,
-                res);
-            usedSingleMotifBowlFallback =
-                res != resultBeforeSingleMotifBowlFallback;
-        }
-        if ( !usedSubtractConnectRecovery && !usedSingleMotifBowlFallback ) {
+        if ( !usedSubtractConnectRecovery ) {
             postProcessResult(res, maximizeResultFaces);
         }
 

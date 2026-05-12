@@ -309,8 +309,13 @@ public class Sphere extends Solid {
         base2 = i+2;
         base1 = 2;
 
-        //- Build side quads for sphere body ------------------------------
+        //- Build triangulated side strips for sphere body ----------------
+        // Each spherical quad is split into two triangles immediately after
+        // creation via smef, adding a diagonal from TL corner to BR corner.
+        // Face IDs are tracked with a running counter to avoid conflicts with
+        // the doubled face count.
         int p;
+        int nextFaceId = nmeridians + 2;
         for ( p = 0; p < nparalels-2; p++ ) {
             phi = ((double)(p+2)) / ((double)nparalels);
             for ( i = 0; i < nmeridians; i++ ) {
@@ -319,23 +324,39 @@ public class Sphere extends Solid {
                 pos = spherePosition(theta, phi, _radius);
                 PolyhedralBoundedSolidEulerOperators.smev(solid, 1, (i)+base1, (i)+base2, pos);
                 if ( i > 0 ) {
-                    // Next face is <(i), (i+base2), (i-1+base2), (i-1)>
+                    int quadFaceId = nextFaceId++;
+                    int diagFaceId = nextFaceId++;
                     PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
                               1,           /* seed face, always face 1 */
-                              (i-1)+base2, /* start of half edge 1 */
-                              (i-1)+base1, /* end of half edge 1 */
-                              (i)+base2,   /* start of half edge 2 */
-                              (i)+base1,   /* end of half edge 2 */
-                              base2+i+1    /* new face id */);
+                              (i-1)+base2, /* start of half edge 1: TL */
+                              (i-1)+base1, /* end of half edge 1: BL */
+                              (i)+base2,   /* start of half edge 2: TR */
+                              (i)+base1,   /* end of half edge 2: BR */
+                              quadFaceId);
+                    // Split quad {TR,TL,BL,BR} into two triangles via TL→BR diagonal
+                    PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
+                              (i-1)+base2, /* TL vertex */
+                              (i)+base1,   /* BR vertex */
+                              diagFaceId);
                 }
             }
-            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
-                      1,           /* seed face, always face 1 */
-                      (i+base2-1), /* start of half edge 1 */
-                      (base1+i-1), /* end of half edge 1 */
-                      (base2),     /* start of half edge 2 */
-                      (base2+1),   /* end of half edge 2 */
-                      base2+i+1    /* new face id */);
+            {
+                int quadFaceId = nextFaceId++;
+                int diagFaceId = nextFaceId++;
+                // Wrap-around quad: closes the ring from the last meridian back to the first
+                PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
+                          1,           /* seed face, always face 1 */
+                          (i+base2-1), /* start of half edge 1: TL-last */
+                          (base1+i-1), /* end of half edge 1: BL-last */
+                          (base2),     /* start of half edge 2 */
+                          (base2+1),   /* end of half edge 2 */
+                          quadFaceId);
+                // Split wrap-around quad via TL-last → BL-0 diagonal
+                PolyhedralBoundedSolidEulerOperators.smef(solid, quadFaceId,
+                          (i-1)+base2, /* TL-last vertex */
+                          base1,       /* BL-0 vertex (first old-parallel vertex) */
+                          diagFaceId);
+            }
             base1 = base2;
             base2 += nmeridians;
         }
@@ -351,7 +372,7 @@ public class Sphere extends Solid {
                       base1+i,     /* end of half edge 1 */
                       base1+i+1,   /* start of half edge 2 */
                       base1+i+2,   /* end of half edge 2 */
-                      base2+i+1    /* new face id */);
+                      nextFaceId++);
         }
 
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
@@ -359,8 +380,8 @@ public class Sphere extends Solid {
                   base2,       /* start of half edge 1 */
                   base1+i,     /* end of half edge 1 */
                   base1+i+1,   /* start of half edge 2 */
-                  base1,   /* end of half edge 2 */
-                  base2+i+1    /* new face id */);
+                  base1,       /* end of half edge 2 */
+                  nextFaceId++);
 
         //-----------------------------------------------------------------
         return solid;

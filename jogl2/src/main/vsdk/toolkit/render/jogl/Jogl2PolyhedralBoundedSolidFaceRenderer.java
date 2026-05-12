@@ -426,6 +426,25 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         }
     }
 
+    /**
+    Unconditional diagnostic pass that draws yellow borders on every face that
+    fails the coplanarity check, regardless of the current rendering quality
+    mode (surfaces, wireframe, points).  This makes non-planar faces visible
+    even when the surface fill pass is disabled.
+    */
+    public static void drawNonPlanarFaceHighlights(GL2 gl,
+        PolyhedralBoundedSolid solid)
+    {
+        int i;
+
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
+            if ( shouldDrawFaceAsBoundaryOnly(face) ) {
+                drawSuspiciousFaceBoundary(gl, face);
+            }
+        }
+    }
+
     public static void
     drawDebugFaceBoundary(GL2 gl, PolyhedralBoundedSolid solid, int faceIndex)
     {
