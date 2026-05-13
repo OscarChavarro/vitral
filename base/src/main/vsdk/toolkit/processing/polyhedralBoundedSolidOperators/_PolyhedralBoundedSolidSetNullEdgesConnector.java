@@ -602,13 +602,23 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         edge = he.parentEdge;
         loop = he.parentLoop;
         if ( edge == null || loop == null ||
-             edge.rightHalf == null || edge.leftHalf == null ) {
+             edge.rightHalf == null || edge.leftHalf == null ||
+             edge.rightHalf.parentLoop == null ||
+             edge.leftHalf.parentLoop == null ) {
             return false;
         }
-        if ( edge.rightHalf.parentLoop != edge.leftHalf.parentLoop ) {
-            return false;
+        // Classic case: both halves in the same loop and loop large enough for
+        // an interior cut.
+        if ( edge.rightHalf.parentLoop == edge.leftHalf.parentLoop ) {
+            return loop.halfEdgesList.size() > 2;
         }
-        return loop.halfEdgesList.size() > 2;
+        // Cross-loop intersection edge whose halves still share the same face
+        // (typical for null-edges produced by the intersect+classify pipeline
+        // on tessellated curved surfaces). Allowing this case prevents
+        // `closeLegacyCoincidentLooseEnds` from rejecting legitimate pairs and
+        // leaving the integration ring incomplete.
+        return edge.rightHalf.parentLoop.parentFace ==
+               edge.leftHalf.parentLoop.parentFace;
     }
 
     private static _PolyhedralBoundedSolidFace registerCoincidentCutFace(

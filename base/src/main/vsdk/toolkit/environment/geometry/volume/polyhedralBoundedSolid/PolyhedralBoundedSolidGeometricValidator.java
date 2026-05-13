@@ -220,6 +220,143 @@ public class PolyhedralBoundedSolidGeometricValidator
         return test;
     }
 
+    /**
+    Convenience overload that derives the tolerance context from the solid.
+    See {@link #validateConsistentFaceOrientations(PolyhedralBoundedSolid,
+    PolyhedralBoundedSolidNumericPolicy.ToleranceContext, StringBuilder)}.
+    */
+    public static boolean validateConsistentFaceOrientations(
+        PolyhedralBoundedSolid solid, StringBuilder msg)
+    {
+        return validateConsistentFaceOrientations(solid,
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid), msg);
+    }
+
+    /**
+    Heuristic check for the consistent face-orientation invariant required by
+    the 2-manifold boundary model of [MANT1988].10.2.1.  Instead of using a
+    global centroid (which produces false positives on hollow shells like
+    the Kurlander bowl), this routine compares each face plane normal
+    against the normals of its topological neighbours through shared edges.
+    An inverted face presents a normal that is strongly anti-parallel to
+    every one of its neighbours (cos > 120 degrees, i.e. dot product
+    smaller than `-INVERTED_FACE_THRESHOLD`).  Smooth curved surfaces
+    (cos < 30 degrees), sharp creases (cos around 0) and even concave
+    edges (cos > -0.5) all stay above the threshold; only a flipped
+    triangle whose normal opposes every neighbour gets flagged.
+
+    Limitation: still a heuristic.  A face that happens to be isolated
+    (no manifold neighbours) is skipped.  False negatives are possible
+    when an invariant inversion affects an entire connected patch
+    consistently; for the Kurlander bowl case the inverted faces are
+    always isolated triangles produced by fan-triangulation, so this is
+    not currently an issue.
+    */
+    public static boolean validateConsistentFaceOrientations(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
+        StringBuilder msg)
+    {
+        int i;
+        boolean test;
+
+        if ( solid == null || solid.getPolygonsList() == null ||
+             solid.getPolygonsList().size() == 0 ) {
+            return true;
+        }
+        if ( numericContext == null ) {
+            numericContext =
+                PolyhedralBoundedSolidNumericPolicy.defaultContext();
+        }
+        test = true;
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            _PolyhedralBoundedSolidFace face =
+                solid.getPolygonsList().get(i);
+            if ( !faceAgreesWithNeighbours(face, msg) ) {
+                test = false;
+            }
+        }
+        return test;
+    }
+
+    private static final double INVERTED_FACE_THRESHOLD = 0.5;
+
+    private static boolean faceAgreesWithNeighbours(
+        _PolyhedralBoundedSolidFace face, StringBuilder msg)
+    {
+        InfinitePlane planeF;
+        Vector3D nF;
+        int i;
+        int j;
+        int neighbourCount;
+        int anomalousCount;
+        double worstDot;
+
+        if ( face == null || face.boundariesList == null ||
+             face.boundariesList.size() == 0 ) {
+            return true;
+        }
+        planeF = face.getContainingPlane();
+        if ( planeF == null ) {
+            return true;
+        }
+        nF = planeF.getNormal();
+        if ( nF == null ) {
+            return true;
+        }
+        neighbourCount = 0;
+        anomalousCount = 0;
+        worstDot = 1.0;
+        for ( i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            if ( loop == null || loop.halfEdgesList == null ) {
+                continue;
+            }
+            for ( j = 0; j < loop.halfEdgesList.size(); j++ ) {
+                _PolyhedralBoundedSolidHalfEdge he =
+                    loop.halfEdgesList.get(j);
+                if ( he == null || he.mirrorHalfEdge() == null ||
+                     he.mirrorHalfEdge().parentLoop == null ) {
+                    continue;
+                }
+                _PolyhedralBoundedSolidFace neighbour =
+                    he.mirrorHalfEdge().parentLoop.parentFace;
+                if ( neighbour == null || neighbour == face ) {
+                    continue;
+                }
+                InfinitePlane planeN = neighbour.getContainingPlane();
+                if ( planeN == null ) {
+                    continue;
+                }
+                Vector3D nN = planeN.getNormal();
+                if ( nN == null ) {
+                    continue;
+                }
+                neighbourCount++;
+                double dot = nF.dotProduct(nN);
+                if ( dot < worstDot ) {
+                    worstDot = dot;
+                }
+                if ( dot < -INVERTED_FACE_THRESHOLD ) {
+                    anomalousCount++;
+                }
+            }
+        }
+        // Flag only when EVERY neighbour disagrees strongly (consistent
+        // inversion sign).  A single sharp dihedral is not enough.
+        if ( neighbourCount >= 2 && anomalousCount == neighbourCount ) {
+            if ( msg != null ) {
+                msg.append("  - Face [").append(face.id)
+                   .append("] is opposed to all ").append(neighbourCount)
+                   .append(" neighbours (worst cos=")
+                   .append(String.format("%.3f", worstDot))
+                   .append(")\n");
+            }
+            return false;
+        }
+        return true;
+    }
+
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
         Vector3D n = face.getContainingPlane().getNormal();

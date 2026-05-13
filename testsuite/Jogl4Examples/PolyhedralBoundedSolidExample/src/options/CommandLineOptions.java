@@ -7,6 +7,7 @@ import models.SolidModelNames;
 public class CommandLineOptions
 {
     private boolean offline;
+    private boolean motifSweep;
     private String outputPath;
     private SolidModelNames solidModelName;
     private CsgSampleNames csgSampleName;
@@ -14,10 +15,12 @@ public class CommandLineOptions
     private Boolean drawWires;
     private Boolean drawSurfaces;
     private ShadingType shadingType;
+    private Integer kurlanderBowlMotifIndex;
 
     public CommandLineOptions()
     {
         offline = false;
+        motifSweep = false;
         outputPath = "output.png";
         solidModelName = null;
         csgSampleName = null;
@@ -25,11 +28,17 @@ public class CommandLineOptions
         drawWires = null;
         drawSurfaces = null;
         shadingType = null;
+        kurlanderBowlMotifIndex = null;
     }
 
     public boolean isOffline()
     {
         return offline;
+    }
+
+    public boolean isMotifSweep()
+    {
+        return motifSweep;
     }
 
     public String getOutputPath()
@@ -67,6 +76,11 @@ public class CommandLineOptions
         return shadingType;
     }
 
+    public Integer getKurlanderBowlMotifIndex()
+    {
+        return kurlanderBowlMotifIndex;
+    }
+
     public static CommandLineOptions parse(String[] args)
     {
         CommandLineOptions options = new CommandLineOptions();
@@ -76,6 +90,10 @@ public class CommandLineOptions
         for ( i = 0; args != null && i < args.length; i++ ) {
             String arg = args[i];
             if ( "--offline".equals(arg) ) {
+                options.offline = true;
+            }
+            else if ( "--motifSweep".equals(arg) ) {
+                options.motifSweep = true;
                 options.offline = true;
             }
             else if ( "--output".equals(arg) ) {
@@ -150,6 +168,17 @@ public class CommandLineOptions
                 options.shadingType = parseShadingType(
                     arg.substring("--shading=".length()));
             }
+            else if ( "--motifIndex".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing value for --motifIndex");
+                }
+                options.kurlanderBowlMotifIndex = parseMotifIndex(args[++i]);
+            }
+            else if ( arg.startsWith("--motifIndex=") ) {
+                options.kurlanderBowlMotifIndex = parseMotifIndex(
+                    arg.substring("--motifIndex=".length()));
+            }
             else {
                 throw new IllegalArgumentException("Unknown option: " + arg);
             }
@@ -203,6 +232,22 @@ public class CommandLineOptions
         String shadingProperty = System.getProperty("poly.shading");
         if ( shadingProperty != null && !shadingProperty.isBlank() ) {
             options.shadingType = parseShadingType(shadingProperty);
+        }
+
+        String motifIndexProperty = System.getProperty("poly.motifIndex");
+        if ( motifIndexProperty != null && !motifIndexProperty.isBlank() ) {
+            options.kurlanderBowlMotifIndex = parseMotifIndex(motifIndexProperty);
+        }
+    }
+
+    private static Integer parseMotifIndex(String rawValue)
+    {
+        try {
+            return Integer.valueOf(rawValue);
+        }
+        catch ( NumberFormatException e ) {
+            throw new IllegalArgumentException(
+                "Invalid --motifIndex value '" + rawValue + "'");
         }
     }
 

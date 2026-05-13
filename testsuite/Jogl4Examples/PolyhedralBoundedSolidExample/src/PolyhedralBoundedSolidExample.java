@@ -1,9 +1,14 @@
 import models.DebuggerModel;
 import models.SolidModelNames;
+import models.CsgSampleNames;
 import options.CommandLineOptions;
 import render.Jogl4HeadlessRenderer;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 
 import java.io.File;
 
@@ -31,10 +36,19 @@ public class PolyhedralBoundedSolidExample
         applyOptionOverrides(model, options);
         buildSolidWithRecovery(model);
 
+        if ( options.isMotifSweep() ) {
+            runMotifSweep(model, options.getOutputPath());
+            return;
+        }
         if ( options.isOffline() ) {
             Jogl4HeadlessRenderer renderer = new Jogl4HeadlessRenderer(
                 model, new File(options.getOutputPath()));
             renderer.render();
+            if ( model.isErrorState() ) {
+                System.err.println("[PolyhedralBoundedSolidExample] BUILD-ERROR: "
+                    + model.getErrorMessage());
+                System.exit(2);
+            }
             return;
         }
 
@@ -90,6 +104,131 @@ public class PolyhedralBoundedSolidExample
         if ( options.getShadingType() != null ) {
             quality.setShadingType(options.getShadingType());
         }
+        if ( options.getKurlanderBowlMotifIndex() != null ) {
+            model.setKurlanderBowlSingleMotifIndex(
+                options.getKurlanderBowlMotifIndex().intValue());
+        }
+    }
+
+    private static void runMotifSweep(DebuggerModel model, String outputPath)
+    {
+        int total = CsgKurlanderBowlFixture.getSingleMotifCount();
+        int stars = CsgKurlanderBowlFixture.getSingleMotifStarCount();
+        String prefix = outputPath;
+        int dotIndex = prefix.lastIndexOf('.');
+        String stem = dotIndex < 0 ? prefix : prefix.substring(0, dotIndex);
+        String ext = dotIndex < 0 ? ".png" : prefix.substring(dotIndex);
+        model.setSolidModelName(SolidModelNames.CSG_DIRECT);
+        model.setCsgSample(CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF);
+        int ok = 0;
+        int empty = 0;
+        int invalid = 0;
+        int blackFaces = 0;
+        int unchanged = 0;
+        int exception = 0;
+        for ( int motif = 0; motif < total; motif++ ) {
+            String kind = motif < stars ? "STAR" : "MOON";
+            int kindIndex = motif < stars ? motif : motif - stars;
+            String tag = kind + "[" + kindIndex + "]";
+            String filename = stem + "_" + String.format("%02d", motif) +
+                "_" + kind + kindIndex + ext;
+            int originalBowlFaces = -1;
+            try {
+                PolyhedralBoundedSolid[] preview =
+                    CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
+                        motif);
+                if ( preview != null && preview[0] != null ) {
+                    originalBowlFaces = preview[0].getPolygonsList().size();
+                }
+            }
+            catch ( Throwable t ) {
+                /* fall through */
+            }
+            model.setKurlanderBowlSingleMotifIndex(motif);
+            buildSolidWithRecovery(model);
+            try {
+                Jogl4HeadlessRenderer renderer = new Jogl4HeadlessRenderer(
+                    model, new File(filename));
+                renderer.render();
+            }
+            catch ( Throwable t ) {
+                model.setErrorState("RenderException: " +
+                    t.getClass().getSimpleName() + " - " + t.getMessage());
+            }
+            String status;
+            String detail;
+            if ( model.isErrorState() ) {
+                status = "EXCEPTION";
+                detail = " err=" + model.getErrorMessage();
+                exception++;
+            }
+            else {
+                PolyhedralBoundedSolid solid = model.getSolid();
+                int faces = solid == null ? 0
+                    : solid.getPolygonsList().size();
+                if ( faces == 0 ) {
+                    status = "EMPTY";
+                    detail = "";
+                    empty++;
+                }
+                else if ( faces == originalBowlFaces ) {
+                    status = "UNCHANGED";
+                    detail = " faces=" + faces;
+                    unchanged++;
+                }
+                else {
+                    boolean valid = false;
+                    try {
+                        valid = PolyhedralBoundedSolidValidationEngine
+                            .validateIntermediate(solid);
+                    }
+                    catch ( Throwable t ) {
+                        /* leave valid=false */
+                    }
+                    if ( !valid ) {
+                        status = "INVALID";
+                        detail = " faces=" + faces;
+                        invalid++;
+                    }
+                    else {
+                        StringBuilder orientationMsg = new StringBuilder();
+                        boolean orientationOK = true;
+                        try {
+                            orientationOK =
+                                PolyhedralBoundedSolidGeometricValidator
+                                    .validateConsistentFaceOrientations(
+                                        solid, orientationMsg);
+                        }
+                        catch ( Throwable t ) {
+                            orientationOK = true;
+                        }
+                        if ( !orientationOK ) {
+                            int firstLine =
+                                orientationMsg.toString().indexOf('\n');
+                            String preview = firstLine > 0
+                                ? orientationMsg.substring(0, firstLine).trim()
+                                : "(orientation flagged)";
+                            status = "BLACK_FACES";
+                            detail = " faces=" + faces +
+                                " " + preview;
+                            blackFaces++;
+                        }
+                        else {
+                            status = "OK";
+                            detail = " faces=" + faces +
+                                " bowlFaces=" + originalBowlFaces;
+                            ok++;
+                        }
+                    }
+                }
+            }
+            System.out.println("[SWEEP-" + status + "] " + tag +
+                " motif=" + motif + detail);
+        }
+        System.out.println("[SWEEP-SUMMARY] ok=" + ok + " empty=" + empty +
+            " invalid=" + invalid + " blackFaces=" + blackFaces +
+            " unchanged=" + unchanged +
+            " exception=" + exception + " total=" + total);
     }
 
     public static void buildSolidWithRecovery(DebuggerModel model)
