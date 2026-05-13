@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+JAVA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$JAVA_DIR" || exit 1
+
+./gradlew clean
+cd ../pkgs/SpharmonicKit27 && make clean && cd "$JAVA_DIR"
+cd ../pkgs/LempelZivWelch && make clean && cd "$JAVA_DIR"
+cd ../pkgs/NativeImageReader && make clean && cd "$JAVA_DIR"
+rm -rf `find . -name "*~"` `find . -name "*.war"` `find . -name "*.class"` `find . -name "output.jpg"` `find . -name "output.ppm"` `find . -name "output.png"` `find . -name "output.bmp"` `find . -name "target"` ./doc/html_doxygen ./doc/html_javadoc ./doc/_doxygen/warnings.log
+rm -rf `find . -type d -name "lib"` `find . -type d -name "classes"` testsuite/ApplicationCases/SearchEngineFor3DModels/tmp ../pkgs/SpharmonicKit27/_ide/VisualStudioDotNet2005/SpharmonicKit/Release ../pkgs/SpharmonicKit27/_ide/VisualStudioDotNet2005/SpharmonicKit/Debug
+if [ -f ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin ]; then
+    rm -i ./testsuite/ApplicationCases/SearchEngineFor3DModels/etc/metadata.bin
+fi
+cd testsuite/Jogl2Examples/PolyhedralBoundedSolidExample
+rm -rf outputA* outputB* outputR*
+cd ../../..
+rm -rf testsuite/Tools/SpriteFontGenerator/output/*
+
+rm -rf .gradle-home/
