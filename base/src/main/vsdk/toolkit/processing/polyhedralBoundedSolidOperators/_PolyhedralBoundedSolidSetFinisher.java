@@ -385,7 +385,9 @@ final class _PolyhedralBoundedSolidSetFinisher
                 i++;
                 continue;
             }
-            newFaceId = solid.getMaxFaceId() + 1;
+            newFaceId = (idNamespace != null)
+                ? idNamespace.nextFaceId(solid)
+                : solid.getMaxFaceId() + 1;
             if ( PolyhedralBoundedSolidEulerOperators.lmef(solid, next, prev,
                     newFaceId) == null ) {
                 i++;

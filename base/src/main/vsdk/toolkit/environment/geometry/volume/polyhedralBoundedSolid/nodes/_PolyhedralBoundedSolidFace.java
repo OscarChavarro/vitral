@@ -218,16 +218,85 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forFace(this);
-
-        // Ignore only numerically degenerate edges. A fixed 0.1 threshold
-        // rejects valid small polygons such as finely tessellated cylinders.
-        return calculatePlaneByCorner(numericContext.bigEpsilon());
+        InfinitePlane plane = calculatePlaneByNewell(numericContext.bigEpsilon());
+        if ( plane == null ) {
+            plane = calculatePlaneByCorner(numericContext.bigEpsilon());
+        }
+        return plane;
     }
 
     /**
+    Computes the face plane using the Newell method: accumulates the sum of
+    (p_i - p_{i+1}) x (p_i + p_{i+1}) / 2 over all loop vertices to obtain a
+    normal proportional to the signed area, then uses the vertex centroid as the
+    reference point.  More robust than picking three vertices for non-convex or
+    nearly-degenerate faces produced by boolean operations.
+    @param tolerance degenerate-face threshold; returns null when the computed
+    normal length is at or below this value.
+    @return a plane containing the face, or null when the face is degenerate.
+    */
+    private InfinitePlane calculatePlaneByNewell(double tolerance)
+    {
+        _PolyhedralBoundedSolidLoop loop;
+        _PolyhedralBoundedSolidHalfEdge he;
+        _PolyhedralBoundedSolidHalfEdge start;
+        Vector3D p;
+        Vector3D q;
+        double nx;
+        double ny;
+        double nz;
+        double cx;
+        double cy;
+        double cz;
+        int count;
+
+        loop = selectLoopForPlaneCalculation();
+        if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+            return null;
+        }
+
+        he = loop.boundaryStartHalfEdge;
+        start = he;
+        nx = 0.0;
+        ny = 0.0;
+        nz = 0.0;
+        cx = 0.0;
+        cy = 0.0;
+        cz = 0.0;
+        count = 0;
+
+        do {
+            p = he.startingVertex.position;
+            q = he.next().startingVertex.position;
+            nx += (p.y() - q.y()) * (p.z() + q.z());
+            ny += (p.z() - q.z()) * (p.x() + q.x());
+            nz += (p.x() - q.x()) * (p.y() + q.y());
+            cx += p.x();
+            cy += p.y();
+            cz += p.z();
+            count++;
+            he = he.next();
+        } while ( he != start );
+
+        if ( count < 3 ) {
+            return null;
+        }
+
+        Vector3D normal = new Vector3D(nx, ny, nz);
+        if ( normal.length() <= tolerance ) {
+            return null;
+        }
+
+        Vector3D centroid = new Vector3D(cx / count, cy / count, cz / count);
+        return new InfinitePlane(normal, centroid);
+    }
+
+    /**
+    @deprecated Kept for git-history reference; replaced by calculatePlaneByNewell.
     Current implementation takes in to account only the first loop.
     @return a plane containing the face, or null when it cannot be calculated.
     */
+    @Deprecated
     private InfinitePlane calculatePlaneByCorner (double tolerance) {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forFace(this);

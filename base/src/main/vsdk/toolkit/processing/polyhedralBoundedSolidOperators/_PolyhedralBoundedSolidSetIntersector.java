@@ -185,6 +185,9 @@ final class _PolyhedralBoundedSolidSetIntersector
     private static int nextVertexId(PolyhedralBoundedSolid current,
                                     PolyhedralBoundedSolid other)
     {
+        if ( idNamespace != null ) {
+            return idNamespace.nextVertexId(current, other);
+        }
         int currentMax;
         int otherMax;
 

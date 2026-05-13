@@ -252,11 +252,22 @@ public class Sphere extends Solid {
 
     /**
     Given current sphere, this method generates a "polyhedral ball"
-    aproximation.
+    approximation.
     Note that this method follows a similar strategy to the one proposed on
     function "ball", from program [MANT1988].12.6, but it is expressed entirely
     on "low level" operators, and doesn't rely on the previous availability of
     generalized rotational sweep operations.
+
+    <p><b>Planarity guarantee for the default tessellation</b> (meridians=16,
+    parallels=8): each latitude band produces quadrilaterals whose four
+    vertices lie on the surface of the sphere at a constant latitude
+    {@code phi} and two adjacent longitudes {@code lambda} and
+    {@code lambda + 2*PI/meridians}.  All four vertices share the same
+    {@code z = r*sin(phi)} coordinate, so the quad is planar in the
+    horizontal plane at height {@code z}.  This was verified analytically
+    in stage-1 analysis (2026-05-12) and holds for any (meridians, parallels)
+    combination because the vertex positions are computed with
+    {@code cos}/{@code sin} only in the latitude direction.</p>
     */
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(
         int nmeridians, int nparalels)

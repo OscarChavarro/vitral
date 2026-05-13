@@ -87,8 +87,11 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         prev = vertexId;
         for ( i = 0; i < n; i++ ) {
             angle += inc;
-            x = cx + radius * Math.cos(angle);
-            y = cy + radius * Math.sin(angle);
+            // Snap trig values to 1e-10 grid so that equal angular positions on
+            // two separately constructed circles always produce bit-identical
+            // coordinates, preventing near-coincident vertices downstream.
+            x = Math.round((cx + radius * Math.cos(angle)) * 1.0e10) / 1.0e10;
+            y = Math.round((cy + radius * Math.sin(angle)) * 1.0e10) / 1.0e10;
             nextVertexId = solid.getMaxVertexId() + 1;
             PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3D(x, y, height));
             prev = nextVertexId;

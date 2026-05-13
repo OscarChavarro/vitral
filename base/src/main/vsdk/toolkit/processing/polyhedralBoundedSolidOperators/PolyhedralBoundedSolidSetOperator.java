@@ -233,6 +233,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static int nextVertexId(PolyhedralBoundedSolid current,
                              PolyhedralBoundedSolid other)
     {
+        if ( idNamespace != null ) {
+            return idNamespace.nextVertexId(current, other);
+        }
         int a;
         int b;
         int m;
@@ -244,7 +247,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             m = b;
         }
 
-        return m+1;
+        return m + 1;
     }
 
     /**
@@ -4019,15 +4022,23 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.maximizeFaces(inSolidB);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidA);
-        PolyhedralBoundedSolidValidationEngine.validateIntermediate(inSolidB);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
+        PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
+        StringBuilder booleanInputMsg = new StringBuilder();
+        if ( !PolyhedralBoundedSolidValidationEngine.validateBooleanInputs(
+                inSolidA, inSolidB, booleanInputMsg) ) {
+            Logger.reportMessage(null, VSDK.WARNING, "setOp",
+                "Boolean input validation failed:\n" + booleanInputMsg);
+        } else if ( booleanInputMsg.length() > 0 ) {
+            Logger.reportMessage(null, VSDK.DEBUG, "setOp",
+                "Boolean input pre-processing:\n" + booleanInputMsg);
+        }
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(inSolidB);
         updmaxnames(inSolidB, inSolidA);
+        setIdNamespace(new _PolyhedralBoundedSolidIdNamespace(inSolidA, inSolidB));
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
         _PolyhedralBoundedSolidSetOperatorNullEdge.setNumericContext(

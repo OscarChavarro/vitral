@@ -1094,4 +1094,56 @@ public final class PolyhedralBoundedSolidTopologyEditing
         // Here should be a code searching for faces inside faces ...
         remakeEmanatingHalfedgesReferences(solid);
     }
+
+    /**
+    Removes edges whose two endpoints are geometrically coincident, merging
+    the two vertices into one via {@code lkev}.  The repair is iterative:
+    each pass restarts from the beginning of the edge list because {@code lkev}
+    modifies the list.  Only edges where BOTH half-edge endpoints are within
+    {@code context.bigEpsilon()} of each other are collapsed; the surviving
+    vertex keeps the position of the half-edge's {@code startingVertex}.
+    <p>
+    This corresponds to the pre-processing step of [MANT1988].15 that ensures
+    no geometrically degenerate edges exist before {@code setOpGenerate}.
+    @param solid target solid instance.
+    @param context tolerance context used to detect coincidence.
+    @return number of edges collapsed.
+    */
+    public static int weldCoincidentVertices(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context)
+    {
+        int weldCount;
+        boolean found;
+        int i;
+        _PolyhedralBoundedSolidEdge edge;
+        _PolyhedralBoundedSolidVertex v1;
+        _PolyhedralBoundedSolidVertex v2;
+
+        weldCount = 0;
+        do {
+            found = false;
+            for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
+                edge = solid.getEdgesList().get(i);
+                if ( edge == null ||
+                     edge.rightHalf == null ||
+                     edge.leftHalf == null ||
+                     edge.rightHalf.startingVertex == null ||
+                     edge.leftHalf.startingVertex == null ) {
+                    continue;
+                }
+                v1 = edge.rightHalf.startingVertex;
+                v2 = edge.leftHalf.startingVertex;
+                if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                         v1.position, v2.position, context) ) {
+                    PolyhedralBoundedSolidEulerOperators.lkev(
+                        solid, edge.rightHalf, edge.leftHalf);
+                    weldCount++;
+                    found = true;
+                    break;
+                }
+            }
+        } while ( found );
+        return weldCount;
+    }
 }

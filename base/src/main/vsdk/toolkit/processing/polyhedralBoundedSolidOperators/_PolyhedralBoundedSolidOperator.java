@@ -46,6 +46,14 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         }
     }
 
+    protected static _PolyhedralBoundedSolidIdNamespace idNamespace = null;
+
+    protected static void setIdNamespace(
+        _PolyhedralBoundedSolidIdNamespace ns)
+    {
+        idNamespace = ns;
+    }
+
     private static boolean searchForEdge(
         CircularDoubleLinkedList<_PolyhedralBoundedSolidEdge> l,
         _PolyhedralBoundedSolidEdge e)
@@ -286,7 +294,10 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         s = oldf.parentSolid;
         if ( h1.parentLoop == h2.parentLoop ) {
             if ( h1.previous().previous() != h2 ) {
-                newf = PolyhedralBoundedSolidEulerOperators.lmef(s, h1, h2.next(), s.getMaxFaceId()+1);
+                int fid1 = (idNamespace != null)
+                    ? idNamespace.nextFaceId(s)
+                    : s.getMaxFaceId() + 1;
+                newf = PolyhedralBoundedSolidEulerOperators.lmef(s, h1, h2.next(), fid1);
                 if ( withDebug ) {
                     //h1.next().parentEdge.debugColor = new ColorRgb(1, 0, 0);
                 }
@@ -300,7 +311,10 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
         }
 
         if ( h1.next().next() != h2 ) {
-            PolyhedralBoundedSolidEulerOperators.lmef(s, h2, h1.next(), s.getMaxFaceId()+1);
+            int fid2 = (idNamespace != null)
+                ? idNamespace.nextFaceId(s)
+                : s.getMaxFaceId() + 1;
+            PolyhedralBoundedSolidEulerOperators.lmef(s, h2, h1.next(), fid2);
             if ( withDebug ) {
                 //h2.next().parentEdge.debugColor = new ColorRgb(0, 0, 1);
             }

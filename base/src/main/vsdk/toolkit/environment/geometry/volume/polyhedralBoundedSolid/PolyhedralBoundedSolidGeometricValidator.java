@@ -790,4 +790,115 @@ public class PolyhedralBoundedSolidGeometricValidator
         }
         return true;
     }
+
+    /**
+    Checks that no two distinct vertices in {@code solid} are geometrically
+    coincident (distance ≤ {@code context.bigEpsilon()}).  Coincident vertices
+    in a boolean operand can cause the null-edge connector of [MANT1988].15.7
+    to produce "loose" half-edges and an empty result.
+    @param solid solid to inspect.
+    @param context tolerance context; use {@code forSolids(a,b)} for boolean
+    operand pairs so both solids share the same scale.
+    @param msg collects one line per coincident pair found.
+    @return true when no coincident vertices are found.
+    */
+    public static boolean validateNoCoincidentVertices(
+        PolyhedralBoundedSolid solid,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext context,
+        StringBuilder msg)
+    {
+        int i;
+        int j;
+        boolean ok;
+        _PolyhedralBoundedSolidVertex vi;
+        _PolyhedralBoundedSolidVertex vj;
+
+        ok = true;
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            vi = solid.getVerticesList().get(i);
+            if ( vi == null || vi.position == null ) {
+                continue;
+            }
+            for ( j = i + 1; j < solid.getVerticesList().size(); j++ ) {
+                vj = solid.getVerticesList().get(j);
+                if ( vj == null || vj.position == null ) {
+                    continue;
+                }
+                if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                         vi.position, vj.position, context) ) {
+                    msg.append("  coincident vertices: v").append(vi.id)
+                       .append(" and v").append(vj.id)
+                       .append(" at ").append(vi.position).append("\n");
+                    ok = false;
+                }
+            }
+        }
+        return ok;
+    }
+
+    /**
+    Checks that {@code solid.getMaxFaceId()} and {@code solid.getMaxVertexId()}
+    are consistent with the IDs actually present in the face and vertex lists.
+    Specifically: no face id exceeds maxFaceId, no vertex id exceeds maxVertexId,
+    and no two faces (or vertices) share the same id.
+    @param solid solid to inspect.
+    @param msg collects one line per violation found.
+    @return true when IDs are unique and the stored maxima cover all elements.
+    */
+    public static boolean validateUniqueFaceAndVertexIds(
+        PolyhedralBoundedSolid solid,
+        StringBuilder msg)
+    {
+        boolean ok;
+        int i;
+        int j;
+        _PolyhedralBoundedSolidFace fi;
+        _PolyhedralBoundedSolidFace fj;
+        _PolyhedralBoundedSolidVertex vi;
+        _PolyhedralBoundedSolidVertex vj;
+
+        ok = true;
+
+        for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            fi = solid.getPolygonsList().get(i);
+            if ( fi == null ) {
+                continue;
+            }
+            if ( fi.id > solid.getMaxFaceId() ) {
+                msg.append("  face id ").append(fi.id)
+                   .append(" exceeds maxFaceId=").append(solid.getMaxFaceId())
+                   .append("\n");
+                ok = false;
+            }
+            for ( j = i + 1; j < solid.getPolygonsList().size(); j++ ) {
+                fj = solid.getPolygonsList().get(j);
+                if ( fj != null && fi.id == fj.id ) {
+                    msg.append("  duplicate face id=").append(fi.id).append("\n");
+                    ok = false;
+                }
+            }
+        }
+
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            vi = solid.getVerticesList().get(i);
+            if ( vi == null ) {
+                continue;
+            }
+            if ( vi.id > solid.getMaxVertexId() ) {
+                msg.append("  vertex id ").append(vi.id)
+                   .append(" exceeds maxVertexId=").append(solid.getMaxVertexId())
+                   .append("\n");
+                ok = false;
+            }
+            for ( j = i + 1; j < solid.getVerticesList().size(); j++ ) {
+                vj = solid.getVerticesList().get(j);
+                if ( vj != null && vi.id == vj.id ) {
+                    msg.append("  duplicate vertex id=").append(vi.id).append("\n");
+                    ok = false;
+                }
+            }
+        }
+
+        return ok;
+    }
 }

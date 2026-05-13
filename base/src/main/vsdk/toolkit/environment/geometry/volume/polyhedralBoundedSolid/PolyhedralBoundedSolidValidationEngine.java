@@ -54,6 +54,89 @@ public class PolyhedralBoundedSolidValidationEngine
     }
 
     /**
+    Validates both operands of a boolean operation before the pipeline starts.
+    Runs validateIntermediate on each solid, checks for coincident vertices and
+    for ID uniqueness.  Attempts to weld any coincident vertices found, then
+    re-validates.  Returns true only when both solids pass all checks.
+    Throws {@link IllegalArgumentException} when a solid remains invalid after
+    the automated repair.
+    */
+    public static boolean validateBooleanInputs(
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB,
+        StringBuilder msg)
+    {
+        boolean ok;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext ctxA;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext ctxB;
+        StringBuilder sub;
+        int welded;
+
+        ok = true;
+        sub = new StringBuilder();
+
+        if ( !validateIntermediate(solidA) ) {
+            msg.append("solidA failed validateIntermediate\n");
+            ok = false;
+        }
+        if ( !validateIntermediate(solidB) ) {
+            msg.append("solidB failed validateIntermediate\n");
+            ok = false;
+        }
+        if ( !ok ) {
+            return false;
+        }
+
+        ctxA = PolyhedralBoundedSolidNumericPolicy.forSolid(solidA);
+        ctxB = PolyhedralBoundedSolidNumericPolicy.forSolid(solidB);
+
+        sub.setLength(0);
+        if ( !PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(
+                solidA, ctxA, sub) ) {
+            welded = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(
+                solidA, ctxA);
+            msg.append("solidA had coincident vertices; welded ").append(welded)
+               .append(" pair(s)\n");
+            if ( !validateIntermediate(solidA) ) {
+                msg.append("solidA failed validateIntermediate after weld\n");
+                throw new IllegalArgumentException(
+                    "solidA is topologically invalid after coincident-vertex weld:\n"
+                    + msg);
+            }
+        }
+
+        sub.setLength(0);
+        if ( !PolyhedralBoundedSolidGeometricValidator.validateNoCoincidentVertices(
+                solidB, ctxB, sub) ) {
+            welded = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(
+                solidB, ctxB);
+            msg.append("solidB had coincident vertices; welded ").append(welded)
+               .append(" pair(s)\n");
+            if ( !validateIntermediate(solidB) ) {
+                msg.append("solidB failed validateIntermediate after weld\n");
+                throw new IllegalArgumentException(
+                    "solidB is topologically invalid after coincident-vertex weld:\n"
+                    + msg);
+            }
+        }
+
+        sub.setLength(0);
+        if ( !PolyhedralBoundedSolidGeometricValidator.validateUniqueFaceAndVertexIds(
+                solidA, sub) ) {
+            msg.append("solidA has ID violations:\n").append(sub);
+            ok = false;
+        }
+        sub.setLength(0);
+        if ( !PolyhedralBoundedSolidGeometricValidator.validateUniqueFaceAndVertexIds(
+                solidB, sub) ) {
+            msg.append("solidB has ID violations:\n").append(sub);
+            ok = false;
+        }
+
+        return ok;
+    }
+
+    /**
     Runs a stricter validation pass that additionally enforces the non-self-
     intersection expectations stated for valid boundary models in
     [MANT1988].15.2.
