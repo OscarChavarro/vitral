@@ -580,11 +580,17 @@ final class _PolyhedralBoundedSolidSetClassifier
     }
 
     /**
-    Following program [MANT1988].15.12.
-    Taking in to account the updated version modifications from
-    [.wMANT2008].
+    Inserts a null-edge strut for the coplanar V/V case (Program [MANT1988].15.12)
+    and, when {@code orient} is {@code false}, swaps rightHalf/leftHalf so the
+    null-edge points toward the open (OUT) side of the boundary per table 15.3.
+    The orientation flip is required when the half-edge approaches the shared
+    edge from the side that would otherwise produce an inward-facing null-edge.
+    @param he half-edge whose starting vertex receives the new strut vertex
+    @param type 0 = emitting to sonea (solidA side), 1 = soneb (solidB side)
+    @param orient true when the null-edge natural direction is already correct
+    @param traceContext caller label for pipeline-summary diagnostics
     */
-    private static void separateInterior(_PolyhedralBoundedSolidHalfEdge he,
+    private static void flipNullEdgeOrientationForOpenSide(_PolyhedralBoundedSolidHalfEdge he,
                                int type,
                                boolean orient,
                                String traceContext,
@@ -642,7 +648,7 @@ final class _PolyhedralBoundedSolidSetClassifier
             sonea.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
-                " separateInterior orient=" + orient +
+                " flipNullEdgeOrientationForOpenSide orient=" + orient +
                 " source=" + summarizeHalfEdge(he) +
                 " inserted=" + summarizeNullEdge(edge) +
                 " soneaSize=" + sonea.size() +
@@ -655,7 +661,7 @@ final class _PolyhedralBoundedSolidSetClassifier
             soneb.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
-                " separateInterior orient=" + orient +
+                " flipNullEdgeOrientationForOpenSide orient=" + orient +
                 " source=" + summarizeHalfEdge(he) +
                 " inserted=" + summarizeNullEdge(edge) +
                 " soneaSize=" + sonea.size() +
@@ -982,7 +988,7 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT A CASE");
                 }
-                separateInterior(ha1, 0, getOrientation(ha1, hb1, hb2),
+                flipNullEdgeOrientationForOpenSide(ha1, 0, getOrientation(ha1, hb1, hb2),
                     traceContext,
                     inSolidA, inSolidB);
                 separateEdgeSequence(hb1, hb2, 1,
@@ -1000,7 +1006,7 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT B CASE");
                 }
-                separateInterior(hb1, 1, getOrientation(hb1, ha2, ha1),
+                flipNullEdgeOrientationForOpenSide(hb1, 1, getOrientation(hb1, ha2, ha1),
                     traceContext,
                     inSolidA, inSolidB);
                 separateEdgeSequence(ha2, ha1, 0,

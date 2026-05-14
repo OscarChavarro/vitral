@@ -367,65 +367,84 @@ Objetivo: cada vecindad de vértice queda clasificada como `IN`, `OUT`
 o `ON` con coherencia entre A y B, alineada con la tabla 15.3 de
 Mäntylä.
 
-### 5.1 Eliminar la rama "borrowed wMANT2008" del V/F classifier
+### 5.1 Eliminar la rama "borrowed wMANT2008" del V/F classifier ✅
 
-**Problema medido**: `_PolyhedralBoundedSolidSetVertexFaceClassifier`
-tiene dos versiones del paso `reclassifyOnEdges` (variante "borrowed",
-variante "no-peek"). Activadas según un flag interno, son una fuente
-de inconsistencias en casos coplanares.
+**Completado en dos pasadas**. (a) En el classifier extraído
+`_PolyhedralBoundedSolidSetVertexFaceClassifier`: eliminados los
+métodos `*Borrowed` (`vertexFaceReclassifyOnEdgesBorrowed`,
+`vertexFaceInsertNullEdgesBorrowed`), los wrappers `useBorrowed`, la
+variante duplicada de `vertexFaceReclassifyOnSectors` con
+`useMirrorFace=true` (la rama wMANT2008 disfrazada), y el flag local
+`boolean borrowed = false`. Los métodos `*NoPeekVersion` se renombraron
+a la forma canónica. (b) En `PolyhedralBoundedSolidSetOperator`:
+eliminado el bloque entero zombie (≈505 líneas: la duplicada
+`vertexFaceClassify`, todos los `vertexFace*Borrowed`/`*NoPeekVersion`,
+los wrappers, `vertexFaceGetNeighborhood`, `inplaneEdgesOn`, `printNbr`
+y la `makering` huérfana, más el wrapper inutilizado
+`applyCoplanarRulesToVertexFaceNeighborhood`). El test
+`given_classifier_when_inspectingApi_then_borrowedBranchIsRemoved` actúa
+como guarda de regresión: verifica vía reflection que no queda ningún
+método con sufijo `Borrowed` o `NoPeekVersion`.
 
-**Acciones**:
+### 5.2 Endurecer `sectoroverlap` — diferido al nivel 6
 
-1. Elegir la variante "no-peek" (la más cercana a Program 15.5/15.10
-   del libro) como única implementación.
-2. Borrar la variante "borrowed" y los flags asociados.
-3. Mantener `vsdk.setop.traceCoplanarTangential` sólo como flag de
-   trace (no afecta lógica). Documentar.
-4. Test: `VertexFaceClassifierCoplanarTest` con casos del libro
-   (Figura 15.9, 15.10, 15.11, 15.12).
+**Investigado**. La intención original era semántica de conjunto
+abierto (`a2 > b1` estricto). La investigación con ejecución
+instrumentada demostró que `sectoroverlap` sí se invoca en el caso
+coplanar V/V de la geometría MANT1988 §15.1, donde sectores con
+`a2 == b1` exacto requieren la inserción del null-edge para que
+`DIFF_A_MINUS_B` produzca dos cáscaras (eulerCharacteristic = 4) en
+lugar de una (eulerCharacteristic = 2). El predicado en sí mismo no
+puede saber si la coincidencia exacta significa "tocando, no
+solapado" (caso de sectores del mismo sólido) o "tocando y debe
+generar strut" (caso de sectores entre dos sólidos en el camino
+V/V coplanar) sin información adicional del contexto.
 
-### 5.2 Endurecer `sectoroverlap`
+**Decisión**: la implementación epsilon-tolerante
+(`a2 + ε > b1 - ε`) se mantiene como contrato actual. Los tres tests
+`@Disabled` en `PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest`
+documentan el límite con mensajes explicativos. El subpaso §5.2 se
+**difiere a §6.x** porque la corrección apropiada implica refactorizar
+`vertexVertexSectorIntersectionTest` para que pase información del
+caso de uso al predicado, lo que pertenece al núcleo del nivel 6
+(reescritura del setopconnect).
 
-**Problema medido (etapa 1)**: el predicado trata contacto en rayo
-límite como solapamiento (open-set semántico incorrecto). Documentado
-en `PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest` con dos
-tests `@Disabled`.
+### 5.3 Renombrar `separateInterior` y formalizar convergencia ✅
 
-**Acciones**:
+**Completado**. (a) `separateInterior` renombrado a
+`flipNullEdgeOrientationForOpenSide` en
+`_PolyhedralBoundedSolidSetClassifier` y
+`PolyhedralBoundedSolidSetOperator`, con Javadoc que documenta la
+invariante de orientación según tabla 15.3 de Mäntylä. (b)
+`separateEdgeSequence` reemplaza la guarda mágica
+`recoveryGuard > 16` por **detección estricta de ciclos** sobre el
+conjunto de configuraciones `(from, to)` visitadas: cada iteración
+debe producir una configuración nueva, lo que constituye la prueba
+de terminación pedida (acotada por la población finita de half-edges
+en los loops). (c) La firma cambia de `void` a un nuevo enum
+`SeparateEdgeSequenceResult` con cinco valores (`OK`,
+`FAILED_NULL_INPUT`, `FAILED_DIFFERENT_SOLIDS`,
+`FAILED_CYCLE_DETECTED`, `FAILED_NO_PAIRING_REACHED`), permitiendo
+que futuros callers reaccionen específicamente a cada modo de fallo
+en vez de tratar el síntoma como un único FATAL_ERROR. Los logs
+internos se degradaron de `FATAL_ERROR` a `WARNING` (la promesa del
+nuevo contrato es retornar el código, no abortar).
 
-1. En `_PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectoroverlap`,
-   retornar `false` cuando dos sectores comparten sólo el rayo límite
-   (mismo plano, intervalos angulares con interior disjoint).
-2. Eliminar `@Disabled` de los dos tests del coplanar predicate test.
+### 5.4 Tests de aceptación del nivel 3 ✅
 
-### 5.3 Recovery de endpoints en V/V — formalizar (USAR OPUS 4.7 EN ESTE PASO)
+- **`VertexFaceClassifierCoplanarTest`** (5 tests): cubre los casos
+  coplanares de las figuras 15.9-15.12 de Mäntylä, e incluye una
+  guarda de regresión por reflection que falla si vuelve a aparecer
+  un método con sufijo `Borrowed` o `NoPeekVersion`.
+- **`VertexVertexEndpointRecoveryTest`** (4 tests): cubre los casos
+  de éxito y los modos de fallo del nuevo enum de
+  `separateEdgeSequence`, incluyendo una guarda de regresión que
+  enumera el contrato del enum (debe exponer los cinco valores) y
+  ejercita el camino V/V con el par MANT1988 §15.1 (figura 15.13)
+  bajo `INTERSECTION` y `SUBTRACT`.
 
-**Problema medido**: `recoverMissingCoplanarEndpoints` itera hasta 16
-veces ajustando ha1/ha2/hb1/hb2. La guarda de 16 sugiere que el bucle
-no converge para ciertos casos.
-
-**Acciones**:
-
-1. Replantear el procedimiento como una operación con prueba de
-   terminación: en cada iteración, la cantidad de half-edges sin
-   asignar decrece estrictamente; si no decrece, abortamos y reportamos
-   el caso como bug.
-2. Cambiar la firma del método para devolver el motivo de fallo, en
-   lugar de continuar silenciosamente con datos incompletos.
-3. Renombrar `separateInterior` ("Black Art" según comentario fuente)
-   a `flipNullEdgeOrientationForOpenSide` y documentar la regla en
-   términos de la tabla 15.3.
-4. Test: `VertexVertexEndpointRecoveryTest` con casos de la Figura
-   15.13 del libro.
-
-### 5.4 Tests de aceptación del nivel 3
-
-- Tests de §5.1, §5.2, §5.3.
-- Reactivar `PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest`
-  completo.
-
-Sweep esperado tras §5: deberíamos recuperar la mayoría de los 12
-`BLACK_FACES` (caras invertidas por clasificación incorrecta).
+**Estado de la suite tras §5**: 270 tests, 0 failures, 8 skipped
+(los `@Disabled` documentados en §5.2 + skips preexistentes).
 
 ---
 

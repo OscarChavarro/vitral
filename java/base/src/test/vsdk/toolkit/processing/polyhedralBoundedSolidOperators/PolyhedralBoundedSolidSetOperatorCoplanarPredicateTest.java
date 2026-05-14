@@ -87,7 +87,9 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     }
 
     @Test
-    @Disabled("Legacy sectoroverlap intentionally treats boundary-ray contact as overlap")
+    @Disabled("Legacy sectoroverlap intentionally treats boundary-ray contact as overlap; "
+        + "fixing requires null-edge strut logic that knows the touching case from"
+        + " the coplanar V/V path — deferred to future rework")
     void given_coplanarNeighborSectors_when_theyOnlyShareBoundaryRay_then_sectoroverlapReturnsFalse()
         throws Exception
     {
@@ -111,7 +113,9 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     }
 
     @Test
-    @Disabled("Legacy sectoroverlap is deliberately permissive; this precise interval predicate belongs to the newer strategy")
+    @Disabled("Legacy sectoroverlap is deliberately permissive (epsilon-tolerant); "
+        + "fixing the B-left-of-A disjoint case without breaking touching-sector "
+        + "classification requires a restructured coplanar V/V path")
     void given_coplanarDisjointSectorsOnSameAngularSide_when_intervalsDoNotIntersect_then_sectoroverlapReturnsFalse()
         throws Exception
     {

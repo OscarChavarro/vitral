@@ -256,6 +256,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             b2 = t;
         }
 
+        // Closed-set (epsilon-tolerant) interval-overlap check.
+        // Intentionally returns true for touching sectors (a2 ≈ b1) because the
+        // setop pipeline requires a null-edge strut even at coplanar boundary-ray
+        // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
+        // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
+        // that requires a deeper restructuring of the coplanar V/V path.
         if ( a2 + VSDK.EPSILON > b1 - VSDK.EPSILON ) {
             if ( withDebug ) {
                 System.out.print(" <TRUE>");

@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -128,18 +129,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .resolveCoplanarVertexVertexClass(op, sameOrientation, sideA);
-    }
-
-    private static void applyCoplanarRulesToVertexFaceNeighborhood(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace referenceFace,
-        InfinitePlane referencePlane,
-        int BvsA, int op,
-        boolean useMirrorFace)
-    {
-        _PolyhedralBoundedSolidSetGeometricPredicateProcessor
-            .applyCoplanarRulesToVertexFaceNeighborhood(
-                nbr, referenceFace, referencePlane, BvsA, op, useMirrorFace);
     }
 
     private static int classifyCoplanarSectorRelation(
@@ -324,512 +313,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 i++;
             }
         }
-    }
-
-    /**
-    Current method is the first step for the initial vertex/face classification
-    of sectors (vertex neighborhood) for `vtx`, as indicated on section
-    [MANT1988].14.5.2. and program [MANT1988].14.4., but biased towards the
-    set operator classifier, as proposed on section [MANT1988].15.6.1. and
-    problem [MANT1988].15.4.
-
-    Vitral SDK's implementation of this procedure extends the original from
-    [MANT1988] by adding extra information flags to sector classifications
-    `.isWide`, `.position` and `.situation`. Those flags are an additional
-    aid for debugging purposes and specifically the `situation` flag will be
-    later used on `splitClassify` to correct the ordering of sectors in order
-    to keep consistency with Vitral SDK's interpretation of coordinate system.
-    */
-    private static
-    ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>
-    vertexFaceGetNeighborhood(
-        _PolyhedralBoundedSolidVertex vtx,
-        InfinitePlane referencePlane,
-        int BvsA)
-    {
-        _PolyhedralBoundedSolidHalfEdge he;
-        Vector3Dd bisect;
-        double d;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace c;
-
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> neighborSectorsInfo;
-        neighborSectorsInfo = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace>();
-
-        he = vtx.emanatingHalfEdge;
-        do {
-            c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
-            c.sector = he;
-            d = referencePlane.pointDistance((he.next()).startingVertex.position);
-            c.cl = compareToZero(d);
-            c.isWide = false;
-            c.position = new Vector3Dd((he.next()).startingVertex.position);
-            c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
-            c.referencePlane = referencePlane;
-            neighborSectorsInfo.add(c);
-            if ( checkWideness(he) ) {
-                bisect = inside(he).add(vtx.position);
-                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
-
-                c = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
-                c.sector = he;
-                d = referencePlane.pointDistance(bisect);
-                c.cl = compareToZero(d);
-                c.isWide = true;
-                c.position = new Vector3Dd(bisect);
-                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
-                c.referencePlane = referencePlane;
-                neighborSectorsInfo.add(c);
-            }
-            he = (he.mirrorHalfEdge()).next();
-        } while ( he != vtx.emanatingHalfEdge );
-
-        //-----------------------------------------------------------------
-        // Extra pass, not from original [MANT1988] code
-        int i;
-
-        for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
-            c = neighborSectorsInfo.get(i);
-            if ( c.cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.ON && c.situation == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED ) {
-                c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.INPLANE_EDGE;
-            }
-        }
-
-        return neighborSectorsInfo;
-    }
-
-    /**
-    Current method applies the first reclassification rule presented at
-    sections [MANT1988].14.5.1 and [MANT1988].14.5.2., but biased towards the
-    set operator classifier, as proposed on section [MANT1988].15.6.1. and
-    problem [MANT1988].15.4.:
-    For the given vertex neigborhood, classify each edge according to whether
-    its final vertex lies above (out), on or below (in) the `referencePlane`.
-    Tag the edge with the corresponding label ABOVE, ON or BELOW.
-    Following program [MANT1988].14.5.
-    */
-    private static void vertexFaceReclassifyOnSectorsNoPeekVersion(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace referenceFace,
-        InfinitePlane referencePlane, int BvsA, int op)
-    {
-        applyCoplanarRulesToVertexFaceNeighborhood(
-            nbr, referenceFace, referencePlane, BvsA, op, false);
-    }
-
-    /**
-    Current method applies the first reclassification rule presented at
-    sections [MANT1988].14.5.1 and [MANT1988].14.5.2., but biased towards the
-    set operator classifier, as proposed on section [MANT1988].15.6.1. and
-    problem [MANT1988].15.4.:
-    For the given vertex neigborhood, classify each edge according to whether
-    its final vertex lies above (out), on or below (in) the `referencePlane`.
-    Tag the edge with the corresponding label ABOVE, ON or BELOW.
-    Following program [MANT1988].14.5.
-    -----------------------------------------------------------------
-    Reclassification procedure for "on"-sectors on the vertex/face clasiffier,
-    Original answer from [.WMANT2008].
-    */
-    private static void vertexFaceReclassifyOnSectors(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace referenceFace,
-        InfinitePlane referencePlane, int BvsA, int op)
-    {
-        applyCoplanarRulesToVertexFaceNeighborhood(
-            nbr, referenceFace, referencePlane, BvsA, op, true);
-    }
-
-    private static void printNbr(ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> neighborSectorsInfo)
-    {
-        int i;
-
-        for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
-            System.out.println("    . " + neighborSectorsInfo.get(i));
-        }
-    }
-
-    private static boolean inplaneEdgesOn(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr)
-    {
-        int i;
-
-        for ( i = 0; i < nbr.size(); i++ ) {
-            if ( nbr.get(i).situation == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.INPLANE_EDGE ) return true;
-        }
-        return false;
-    }
-
-    private static void vertexFaceReclassifyOnEdges(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        int op, boolean useBorrowed)
-    {
-        if ( useBorrowed ) {
-            vertexFaceReclassifyOnEdgesBorrowed(nbr, op);
-          }
-          else {
-            vertexFaceReclassifyOnEdgesNoPeekVersion(nbr, op);
-        }
-    }
-
-    /**
-    Current method implements the set of changes from table [MANT1988].15.3.
-    for the reclassification rules.
-    */
-    private static void vertexFaceReclassifyOnEdgesNoPeekVersion(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        int op)
-    {
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace l;
-        int i;
-
-        for ( i = 0; i < nbr.size(); i++ ) {
-            l = nbr.get(i);
-            l.applyRules(op);
-        }
-    }
-
-    /**
-    Current method implements the set of changes from table [MANT1988].15.3.
-    for the reclassification rules.
-    -----------------------------------------------------------------
-    Original answer from [.WMANT2008].
-    */
-    private static void vertexFaceReclassifyOnEdgesBorrowed(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        int op)
-    {
-        int i;
-        int nnbr = nbr.size();
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector ni;
-
-        ni = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector();
-
-        for ( i = 0; i < nnbr; i++ ) {
-            if ( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.ON ) {
-                if ( nbr.get((nnbr+i-1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                    if ( nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                    }
-                    else {
-                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                    }
-                }
-                else {
-                    // OUT 
-                    if ( nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) {
-                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN;
-                    }
-                    else {
-                        nbr.get(i).cl = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT;
-                    }
-                }
-            }
-        }
-    }
-
-    private static void vertexFaceInsertNullEdges(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace f,
-        _PolyhedralBoundedSolidVertex v,
-        int BvsA, boolean useBorrowed, PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB)
-    {
-        if ( useBorrowed ) {
-            vertexFaceInsertNullEdgesBorrowed(nbr, f, v, BvsA, inSolidA, inSolidB);
-        }
-        else {
-            vertexFaceInsertNullEdgesNoPeekVersion(nbr, f, v, BvsA, inSolidA, inSolidB);
-        }
-    }
-
-    /**
-    This method implements the third stage of the vertex/face classifier:
-    given the previously reclassified list of vertex neigbors, insert
-    a new vertex (using operator lmev) in the direction of the last
-    "in" before an "out" sector of the sequence.
-
-    This implementation follows section [MANT1988].14,6,2 and program
-    [MANT1988].14.7., but it is biased for set operations, as indicated on
-    section [MANT1988].15.6.1.
-
-    Taking in to account the updated version modifications from
-    [.wMANT2008].
-    */
-    private static void vertexFaceInsertNullEdgesNoPeekVersion(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace f,
-        _PolyhedralBoundedSolidVertex v,
-        int BvsA, PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB)
-    {
-        int start;
-        int i;
-        _PolyhedralBoundedSolidHalfEdge head;
-        _PolyhedralBoundedSolidHalfEdge tail;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
-        PolyhedralBoundedSolid solida;
-        int nnbr = nbr.size();
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
-
-        solida = v.emanatingHalfEdge.parentLoop.parentFace.parentSolid;
-
-        if ( nnbr <= 0 ) return;
-        n = nbr.get(0);
-
-        //- Locate the head of an ABOVE-sequence --------------------------
-        i = 0;
-        while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
-                   ((nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB) ||
-                     nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA))  ) {
-            i++;
-            if ( i >= nnbr ) {
-                //System.out.println("**** EMPTY CASE!");
-                return;
-            }
-        }
-        start = i;
-        head = nbr.get(i).sector;
-
-        //-----------------------------------------------------------------
-        while ( true ) {
-            //- Locate the final sector of the sequence ------------------
-            while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA) &&
-                       (nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB ||
-                        nbr.get( (i+1)%nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) ) ) {
-                i = (i+1) % nnbr;
-            }
-            tail = nbr.get(i).sector;
-
-            //- Insert null edge -----------------------------------------
-            if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
-                 (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
-                System.out.println("       -> LMEV (Vertex/face split):");
-                System.out.println("          . (" + start + ") H1: " + head);
-                System.out.println("          . (" + i + ") H2: " + tail);
-            }
-
-            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
-                head.startingVertex.position);
-
-            if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
-                 (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
-                //head.startingVertex.debugColor = new ColorRgb(0, 1, 0);
-                System.out.println("          . New vertex: " + head.startingVertex.id);
-            }
-
-            if ( BvsA != 0 ) {
-                sone = soneb;
-              }
-              else {
-                sone = sonea;
-            }
-            sone.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(head.previous().parentEdge));
-
-            //- Pierce face ---------------------------------------------------
-            makering(f, v, BvsA, inSolidA, inSolidB);
-
-            //- Locate the start of the next sequence --------------------
-            while ( !( (nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AinB || nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BinA) &&
-                       ((nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.AoutB ||
-                         nbr.get( (i+1) % nnbr ).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.BoutA)) ) ) {
-                i = (i+1) % nnbr;
-                if ( i == start ) {
-                    return;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------
-    }
-
-    private static void vertexFaceInsertNullEdgesBorrowed(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
-        _PolyhedralBoundedSolidFace f,
-        _PolyhedralBoundedSolidVertex v,
-        int BvsA, PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB)
-    {
-        int start;
-        int i;
-        _PolyhedralBoundedSolidHalfEdge head;
-        _PolyhedralBoundedSolidHalfEdge tail;
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace n;
-        PolyhedralBoundedSolid solida;
-        int nnbr = nbr.size();
-        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector ni;
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
-
-        ni = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector();
-
-        solida = v.emanatingHalfEdge.parentLoop.parentFace.parentSolid;
-
-        if ( nnbr <= 0 ) return;
-        n = nbr.get(0);
-
-        //- Locate the head of an ABOVE-sequence --------------------------
-        i = 0;
-        while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN &&
-                   nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) ) {
-            i++;
-            if ( i >= nnbr ) {
-                //System.out.println("**** EMPTY CASE!");
-                return;
-            }
-        }
-        start = i;
-        head = nbr.get(i).sector;
-
-        //-----------------------------------------------------------------
-        while ( true ) {
-            //- Locate the final sector of the sequence ------------------
-            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT &&
-                       nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN ) ) {
-                i = (i+1) % nnbr;
-            }
-            tail = nbr.get(i).sector;
-
-            //- Insert null edge -----------------------------------------
-            if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
-                 (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
-                System.out.println("       -> LMEV (Vertex/face split):");
-                System.out.println("          . (" + start + ") H1: " + head);
-                System.out.println("          . (" + i + ") H2: " + tail);
-            }
-            PolyhedralBoundedSolidEulerOperators.lmev(solida, head, tail, nextVertexId(inSolidA, inSolidB),
-                head.startingVertex.position);
-
-            if ( BvsA != 0 ) {
-                sone = soneb;
-              }
-              else {
-                sone = sonea;
-            }
-            sone.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(head.previous().parentEdge));
-
-            //- Pierce face ---------------------------------------------------
-            makering(f, v, BvsA, inSolidA, inSolidB);
-
-            //- Locate the start of the next sequence --------------------
-            while ( !( nbr.get(i).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.IN &&
-                       nbr.get((i+1)%nnbr).cl == _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector.OUT ) ) {
-                i = (i+1) % nnbr;
-                if ( i == start ) {
-                    return;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------
-    }
-
-    /**
-    Vertex/Face classifier for the set operations algorithm (big phase 1).
-    Answer to problem [MANT1988].15.4.
-    */
-    private static void vertexFaceClassify(
-        _PolyhedralBoundedSolidVertex v,
-        _PolyhedralBoundedSolidFace f,
-        int op,
-        int BvsA,
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB)
-    {
-        //- Following classification strategy from the splitter algorithm -
-        ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr;
-
-        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
-            if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 ) {
-                System.out.print("  * ");
-            }
-            else {
-                System.out.print("  - ");
-            }
-            System.out.println("Vertex/face pair V[" + v.id + "] / f[" + f.id + "]");
-        }
-
-        nbr = vertexFaceGetNeighborhood(v, f.getContainingPlane(), BvsA);
-        if ( inplaneEdgesOn(nbr) ) {
-            // In "strict analogy" to the splitter problem
-            Collections.reverse(nbr);
-        }
-
-        if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 ) {
-            System.out.println("   - Initial sector neigborhood by near end vertices:");
-            printNbr(nbr);
-        }
-
-        vertexFaceReclassifyOnSectorsNoPeekVersion(nbr, f, f.getContainingPlane(),
-            BvsA, op);
-
-        //- Adjusting results for set operation interpretation ------------
-        boolean borrowed = false;
-
-        int i;
-        for ( i = 0; !borrowed && i < nbr.size(); i++ ) {
-            nbr.get(i).updateLabel(BvsA);
-        }
-
-        if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 ) {
-            System.out.println("   - Sector neigborhood reclassified on sectors (8-way boundary classification):");
-            printNbr(nbr);
-        }
-
-        vertexFaceReclassifyOnEdges(nbr, op, borrowed);
-
-        if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 ) {
-            System.out.println("   - Sector neigborhood reclassified on edges:");
-            printNbr(nbr);
-        }
-
-        vertexFaceInsertNullEdges(nbr, f, v, BvsA, borrowed, inSolidA, inSolidB);
-    }
-
-    private static void makering(
-        _PolyhedralBoundedSolidFace f,
-        _PolyhedralBoundedSolidVertex v,
-        int type,
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB)
-    {
-        PolyhedralBoundedSolid solida;
-        PolyhedralBoundedSolid solidb;
-        _PolyhedralBoundedSolidHalfEdge he;
-
-        solida = inSolidA;
-        solidb = inSolidB;
-        if ( type == 1 ) {
-            solida = inSolidB;
-            solidb = inSolidA;
-        }
-        //solida = v.emanatingHalfEdge.parentLoop.parentFace.parentSolid;
-        //solidb = f.parentSolid;
-
-        he = f.boundariesList.get(0).boundaryStartHalfEdge;
-
-        int vn1;
-        int vn2;
-        vn1 = nextVertexId(solida, solidb);
-        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn1, v.position);
-        he = solidb.findVertex(vn1).emanatingHalfEdge;
-        PolyhedralBoundedSolidEulerOperators.lkemr(solidb, he.mirrorHalfEdge(), he);
-
-        vn2 = nextVertexId(solida, solidb);
-        PolyhedralBoundedSolidEulerOperators.lmev(solidb, he, he, vn2, v.position);
-
-        if ( (debugFlags & DEBUG_03_VERTEXFACECLASIFFIER) != 0x00 &&
-             (debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x00 ) {
-            System.out.println("       -> MAKERING (Vertex/face pierce):");
-            System.out.println("          . New vertexes: " + vn1 + "/" + vn2 + ".");
-            //he.startingVertex.debugColor = new ColorRgb(0, 0, 1);
-        }
-
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone = null;
-        if ( type == 1 ) {
-            sone = sonea;
-        }
-        else {
-            sone = soneb;
-        }
-        sone.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(he.parentEdge));
     }
 
     /**
@@ -1535,15 +1018,41 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     }
 
     /**
-    Following program [MANT1988].15.12.
-    Taking in to account the updated version modifications from
-    [.wMANT2008].
+    Outcome of the endpoint-pairing recovery loop in {@link #separateEdgeSequence}.
+    Distinguishes successful pairing from each failure mode so the caller can
+    report or react specifically instead of relying on a generic fatal log.
     */
-    private static void separateEdgeSequence(_PolyhedralBoundedSolidHalfEdge from,
-                               _PolyhedralBoundedSolidHalfEdge to,
-                               int type,
-                               PolyhedralBoundedSolid inSolidA,
-                               PolyhedralBoundedSolid inSolidB)
+    enum SeparateEdgeSequenceResult
+    {
+        OK,
+        FAILED_NULL_INPUT,
+        FAILED_DIFFERENT_SOLIDS,
+        FAILED_CYCLE_DETECTED,
+        FAILED_NO_PAIRING_REACHED
+    }
+
+    /**
+    Following program [MANT1988].15.12. Adapts the wMANT2008 recovery
+    extensions for null-edge endpoints (cases A-E) using strict cycle
+    detection — every iteration must produce an unseen (from, to)
+    configuration, otherwise we abort and report
+    {@link SeparateEdgeSequenceResult#FAILED_CYCLE_DETECTED}. This is the
+    convergence proof requested in plan-csg-boolean-fix-stage2 §5.3:
+    progress is measured as "new configurations visited", which is bounded
+    by the (finite) product of half-edges in both loops, so the loop
+    necessarily terminates.
+
+    @return diagnostic result; {@link SeparateEdgeSequenceResult#OK} only
+        when {@code from} and {@code to} share starting vertex and the LMEV
+        split has been applied. Any other value indicates the LMEV was
+        skipped to avoid corrupting the B-rep.
+    */
+    static SeparateEdgeSequenceResult separateEdgeSequence(
+        _PolyhedralBoundedSolidHalfEdge from,
+        _PolyhedralBoundedSolidHalfEdge to,
+        int type,
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
     {
         //-----------------------------------------------------------------
         if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
@@ -1553,25 +1062,41 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         if ( from == null || to == null ) {
-            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
-                "Unexpected case: null halfedges!");
+            Logger.reportMessage(null, VSDK.WARNING, "separateEdgeSequence",
+                "Unexpected case: null halfedges; skipping LMEV.");
+            return SeparateEdgeSequenceResult.FAILED_NULL_INPUT;
         }
 
         PolyhedralBoundedSolid s;
         s = from.parentLoop.parentFace.parentSolid;
 
         if ( s != to.parentLoop.parentFace.parentSolid ) {
-            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence", 
-                "Unexpected case: halfedges on different solids!");
+            Logger.reportMessage(null, VSDK.WARNING, "separateEdgeSequence",
+                "Unexpected case: halfedges on different solids; skipping LMEV.");
+            return SeparateEdgeSequenceResult.FAILED_DIFFERENT_SOLIDS;
         }
 
         //-----------------------------------------------------------------
         // Recover from null edges already inserted.
-        // This block fully resolves the old A-E unsupported branches by
-        // canonicalizing endpoint selection until both halfedges share origin.
-        int recoveryGuard = 0;
+        // Cases A/B follow null-edge struts inserted previously; cases C/D/E
+        // step backwards in the loop until the two starts coincide. Each
+        // iteration must produce an unseen (from, to) pair — repeating a pair
+        // proves divergence and is reported as a bug instead of looping
+        // forever or aborting silently after a magic count.
+        HashSet<Long> visitedConfigurations = new HashSet<Long>();
         boolean changed;
         do {
+            long configurationKey =
+                ((long) System.identityHashCode(from) << 32) |
+                ((long) System.identityHashCode(to) & 0xFFFFFFFFL);
+            if ( !visitedConfigurations.add(configurationKey) ) {
+                Logger.reportMessage(null, VSDK.WARNING,
+                    "separateEdgeSequence",
+                    "Cycle detected in endpoint recovery (cases A-E "
+                    + "did not converge); skipping LMEV to keep B-rep valid.");
+                return SeparateEdgeSequenceResult.FAILED_CYCLE_DETECTED;
+            }
+
             changed = false;
 
             _PolyhedralBoundedSolidHalfEdge recoveredFrom;
@@ -1625,17 +1150,13 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                     }
                 }
             }
-
-            recoveryGuard++;
-            if ( recoveryGuard > 16 ) {
-                break;
-            }
         } while ( changed );
 
         if ( from.startingVertex != to.startingVertex ) {
-            Logger.reportMessage(null, VSDK.FATAL_ERROR, "separateEdgeSequence",
-                "Unable to recover endpoint pairing after A-E normalization.");
-            return;
+            Logger.reportMessage(null, VSDK.WARNING, "separateEdgeSequence",
+                "Unable to recover endpoint pairing after A-E normalization; "
+                + "skipping LMEV.");
+            return SeparateEdgeSequenceResult.FAILED_NO_PAIRING_REACHED;
         }
 
         //-----------------------------------------------------------------
@@ -1663,14 +1184,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             soneb.add(new _PolyhedralBoundedSolidSetOperatorNullEdge(from.previous().parentEdge));
         }
 
+        return SeparateEdgeSequenceResult.OK;
     }
 
     /**
-    Following program [MANT1988].15.12.
-    Taking in to account the updated version modifications from
-    [.wMANT2008].
+    Inserts a null-edge strut for the coplanar V/V case (Program [MANT1988].15.12)
+    and conditionally swaps rightHalf/leftHalf to point toward the open (OUT) side.
+    @see _PolyhedralBoundedSolidSetClassifier#flipNullEdgeOrientationForOpenSide
     */
-    private static void separateInterior(_PolyhedralBoundedSolidHalfEdge he,
+    private static void flipNullEdgeOrientationForOpenSide(_PolyhedralBoundedSolidHalfEdge he,
                                int type,
                                boolean orient,
                                PolyhedralBoundedSolid inSolidA,
@@ -1924,14 +1446,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
                     System.out.println("    . STRUT A CASE");
                 }
-                separateInterior(ha1, 0, getOrientation(ha1, hb1, hb2), inSolidA, inSolidB);
+                flipNullEdgeOrientationForOpenSide(ha1, 0, getOrientation(ha1, hb1, hb2), inSolidA, inSolidB);
                 separateEdgeSequence(hb1, hb2, 1, inSolidA, inSolidB);
             }
             else if ( hb1 == hb2 ) {
                 if ( (debugFlags & DEBUG_04_VERTEXVERTEXCLASIFFIER) != 0x00 ) {
                     System.out.println("    . STRUT B CASE");
                 }
-                separateInterior(hb1, 1, getOrientation(hb1, ha2, ha1), inSolidA, inSolidB);
+                flipNullEdgeOrientationForOpenSide(hb1, 1, getOrientation(hb1, ha2, ha1), inSolidA, inSolidB);
                 separateEdgeSequence(ha2, ha1, 0, inSolidA, inSolidB);
             }
             else {
