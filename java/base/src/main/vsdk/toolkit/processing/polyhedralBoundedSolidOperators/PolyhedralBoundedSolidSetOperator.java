@@ -254,6 +254,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     Initial vertex intersection detector for the set operations algorithm
     (big phase 0).
     Following program [MANT1988].15.2.
+    After generation, coincident intersection vertices are welded in both
+    solids and stale entries are pruned from sonva/sonvb.
     */
     private static void setOpGenerate(PolyhedralBoundedSolid inSolidA,
                                       PolyhedralBoundedSolid inSolidB)
@@ -265,6 +267,63 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         sonvv = generation.sonvv();
         sonva = generation.sonva();
         sonvb = generation.sonvb();
+
+        weldIntersectionVertices(inSolidA, inSolidB);
+    }
+
+    /**
+    Post-Generate weld pass: collapses spatially coincident vertices introduced
+    during setOpGenerate in each solid, then removes from sonva/sonvb any entry
+    whose vertex was merged away by lkev.  This prevents duplicate-position
+    vertices from propagating into the Classify and Connect phases.
+    */
+    private static void weldIntersectionVertices(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        int weldedA;
+        int weldedB;
+
+        weldedA = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(
+            inSolidA, numericContext);
+        weldedB = PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices(
+            inSolidB, numericContext);
+
+        if ( weldedA > 0 ) {
+            Logger.reportMessage(null, VSDK.DEBUG, "weldIntersectionVertices",
+                "setOpGenerate weld: " + weldedA + " vertex pair(s) collapsed in solidA");
+            pruneStaleVertexFaceEntries(sonva, inSolidA);
+        }
+        if ( weldedB > 0 ) {
+            Logger.reportMessage(null, VSDK.DEBUG, "weldIntersectionVertices",
+                "setOpGenerate weld: " + weldedB + " vertex pair(s) collapsed in solidB");
+            pruneStaleVertexFaceEntries(sonvb, inSolidB);
+        }
+    }
+
+    /**
+    Removes entries from {@code list} whose vertex is no longer present in
+    {@code solid}.  After lkev merges two vertices the removed vertex object
+    is detached from the solid's verticesList; any sonva/sonvb entry still
+    pointing to it would reference a dangling node.
+    */
+    private static void pruneStaleVertexFaceEntries(
+        ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> list,
+        PolyhedralBoundedSolid solid)
+    {
+        int i;
+
+        i = 0;
+        while ( i < list.size() ) {
+            _PolyhedralBoundedSolidSetOperatorVertexFace entry;
+            entry = list.get(i);
+            if ( !solid.getVerticesList().locateWindowAtElem(entry.v) ) {
+                list.remove(i);
+            }
+            else {
+                i++;
+            }
+        }
     }
 
     /**

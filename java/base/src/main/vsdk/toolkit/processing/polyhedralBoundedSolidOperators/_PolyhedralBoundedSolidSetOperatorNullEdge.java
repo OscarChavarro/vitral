@@ -39,22 +39,37 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         }
     }
 
+    /**
+    Exact lexicographic comparison of two 3-D points.  Using exact double
+    comparison (no epsilon band) ensures a total order so that
+    {@code Collections.sort} on sonea/soneb is deterministic.  After the
+    post-Generate weld pass vertices that are geometrically coincident share
+    the exact same double values, so the epsilon band is no longer needed for
+    correctness and only introduced non-determinism.
+    */
     private static int comparePoint(Vector3Dd a, Vector3Dd b)
     {
-        int cmpX = PolyhedralBoundedSolidNumericPolicy.compare(
-            a.x(), b.x(), numericContext.bigEpsilon());
+        int cmpX = Double.compare(a.x(), b.x());
         if ( cmpX != 0 ) {
             return cmpX;
         }
 
-        int cmpY = PolyhedralBoundedSolidNumericPolicy.compare(
-            a.y(), b.y(), numericContext.bigEpsilon());
+        int cmpY = Double.compare(a.y(), b.y());
         if ( cmpY != 0 ) {
             return cmpY;
         }
 
-        return PolyhedralBoundedSolidNumericPolicy.compare(
-            a.z(), b.z(), numericContext.bigEpsilon());
+        return Double.compare(a.z(), b.z());
+    }
+
+    private static Vector3Dd midpoint(_PolyhedralBoundedSolidEdge edge)
+    {
+        Vector3Dd r = edge.rightHalf.startingVertex.position;
+        Vector3Dd l = edge.leftHalf.startingVertex.position;
+        return new Vector3Dd(
+            (r.x() + l.x()) * 0.5,
+            (r.y() + l.y()) * 0.5,
+            (r.z() + l.z()) * 0.5);
     }
 
     private static Vector3Dd canonicalFirstEndpoint(
@@ -87,17 +102,21 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
 
     public int compareTo(_PolyhedralBoundedSolidSetOperatorNullEdge other)
     {
-        int firstEndpointComparison;
+        int cmp;
 
-        firstEndpointComparison = comparePoint(
+        cmp = comparePoint(
             canonicalFirstEndpoint(this.e),
             canonicalFirstEndpoint(other.e));
-        if ( firstEndpointComparison != 0 ) {
-            return firstEndpointComparison;
+        if ( cmp != 0 ) {
+            return cmp;
         }
-        return comparePoint(
+        cmp = comparePoint(
             canonicalSecondEndpoint(this.e),
             canonicalSecondEndpoint(other.e));
+        if ( cmp != 0 ) {
+            return cmp;
+        }
+        return comparePoint(midpoint(this.e), midpoint(other.e));
     }
 
     @Override

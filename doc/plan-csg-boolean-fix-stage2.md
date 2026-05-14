@@ -320,73 +320,44 @@ receptora, con orden topológico estable y sin duplicados.
 
 ### 4.1 Proyección al plano receptor
 
-**Problema medido (etapa 1)**: la interpolación lineal
-`p = v1 + (v2 − v1) * t` deja un vértice fuera del plano de la cara
-receptora cuando el plano del operando opuesto está casi perpendicular.
-La triangulación post-finish enmascara la falla, pero la propagación a
-Connect ocasiona "loose" extras.
-
-**Acciones**:
-
-1. En `_PolyhedralBoundedSolidSetIntersector.processEdge()` (~líneas
-   354-401 hoy), tras computar `p`, proyectar:
-   `p = receivingFace.getContainingPlane().projectPoint(p)`.
-2. Eliminar los pares de _snap_ en banda `(epsilon, bigEpsilon]` que
-   hoy existen como compensación; con la proyección directa son
-   superfluos.
-3. Test: `IntersectorVertexProjectionTest` que crea un cubo y un plano
-   inclinado, verifica que cada vértice de intersección satisface
-   `plane.signedDistance(p) < epsilon`.
+✅ **Ya implementada** en `_PolyhedralBoundedSolidSetIntersector` (líneas
+357-404): proyección dual al plano receptor + snap a la línea de
+intersección de los dos planos de cara.
 
 ### 4.2 Weld de vértices coincidentes (post-Intersect)
 
-**Problema medido (MOON 23)**: 12 loose half-edges, 6 pares en mismas
-coordenadas. La causa: la fase Intersect crea un vértice de intersección
-nuevo en cada arista de A que cruza la luna, sin verificar si ya existe
-otro vértice (de otra arista paralela) en la misma posición.
-
-**Acciones**:
-
-1. Después del último `processEdge`, ejecutar un pase
-   `weldCoincidentIntersectionVertices(solidA, solidB, sonva, sonvb,
-   tolerance)` que:
-   - Construye un hash espacial sobre los vértices recién insertados.
-   - Por cada cluster de vértices a distancia < epsilon, mantiene uno
-     y reescribe los half-edges del resto con `lkev` (que ya existe en
-     `EulerOperators`).
-   - Reescribe las listas `sonva` y `sonvb` quitando los duplicados.
-2. Verificar que las listas `sonea`/`soneb` se actualizan (la `Edge`
-   que une dos vértices coincidentes desaparece tras `lkev`).
-3. Test: `IntersectorWeldTest` con dos planos paralelos que producen
-   intersecciones coincidentes; verificar `sonva.size()` post-weld.
+✅ **Implementado** en `PolyhedralBoundedSolidSetOperator.setOpGenerate`:
+- `weldIntersectionVertices(inSolidA, inSolidB)` llama a
+  `PolyhedralBoundedSolidTopologyEditing.weldCoincidentVertices` en
+  ambos sólidos después de que el Intersector devuelve
+  `sonva`/`sonvb`.
+- `pruneStaleVertexFaceEntries` elimina de `sonva`/`sonvb` cualquier
+  entrada cuyo vértice fue eliminado por `lkev`.
+- Logging a nivel `VSDK.DEBUG` cuando ocurren weldings.
 
 ### 4.3 Orden estable de inserción
 
-**Problema medido**: el orden actual depende de la iteración de
-`A->sedges` y `B->sedges`, que en Java no es determinista respecto al
-orden de creación cuando hay borrados intermedios. Esto rompe el
-recorrido de cadenas en Connect.
-
-**Acciones**:
-
-1. Reemplazar el orden por una secuencia explícita: ordenar
-   `sonea`/`soneb` por **parámetro `t` a lo largo de la curva de
-   intersección plano(A) ∩ plano(B)** después de detectarlas todas. Es
-   exactamente la convención que [MANT1988] §15.7 asume.
-2. Eliminar la heurística `keepInsertionOrder` y borrar el system
-   property. La fase Connect leerá el orden ya estable.
+✅ **Implementado** en `_PolyhedralBoundedSolidSetOperatorNullEdge.compareTo`:
+- Reemplazado el comparador basado en banda-epsilon
+  (`PolyhedralBoundedSolidNumericPolicy.compare`) por
+  `Double.compare` exacto, que garantiza orden total para
+  `Collections.sort`.
+- Agregado `midpoint` como tercer criterio de desempate.
+- `setNumericContext` se conserva por compatibilidad de API pero ya
+  no afecta el orden.
 
 ### 4.4 Tests de aceptación del nivel 2
 
-- `IntersectorVertexProjectionTest` (§4.1)
-- `IntersectorWeldTest` (§4.2)
-- `IntersectorParametricOrderingTest` (§4.3): valida que después de
-  permutar el orden de creación de aristas de B, `sonea`/`soneb`
-  retornan en orden idéntico.
+✅ `IntersectorWeldTest` (§4.2):
+- `given_overlappingBoxes_when_union_then_resultHasNoCoincidentVertices`
+- `given_overlappingBoxes_when_subtract_then_resultHasNoCoincidentVertices`
 
-Sweep esperado tras §4: los 2 motifs INVALID deberían pasar, y al menos
-2-3 de los 11 EMPTY deberían recuperarse (los que dependen sólo de
-proyección + weld).
+✅ `IntersectorParametricOrderingTest` (§4.3):
+- `given_overlappingBoxes_when_unionTwice_then_sameStructure`
+- `given_overlappingBoxes_when_subtractTwice_then_sameStructure`
+
+**Cierre del Nivel 2**: `:base:test` 261 tests, 0 fallos, 0 regresiones
+(2026-05-14).
 
 ---
 
