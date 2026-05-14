@@ -16,8 +16,8 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -84,14 +84,14 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         viewportRequestedSizeYInPixels = 0;
 
         //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
         cameraPerspective = new Camera();
 
-        cameraPerspective.setPosition(new Vector3D(-5, -5, 5));
+        cameraPerspective.setPosition(new Vector3Dd(-5, -5, 5));
         R = R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
 
-        //cameraPerspective.setPosition(new Vector3D(0, -4, 0));
+        //cameraPerspective.setPosition(new Vector3Dd(0, -4, 0));
         //R = R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
 
         cameraPerspective.setRotation(R);
@@ -99,7 +99,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
         cameraTop = new Camera();
         cameraTop.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraTop.setPosition(new Vector3D(0, 0, 5));
+        cameraTop.setPosition(new Vector3Dd(0, 0, 5));
         R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         cameraTop.setRotation(R);
         cameraTop.setOrthogonalZoom(0.25);
@@ -107,7 +107,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
         cameraBottom = new Camera();
         cameraBottom.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraBottom.setPosition(new Vector3D(0, 0, -5));
+        cameraBottom.setPosition(new Vector3Dd(0, 0, -5));
         R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
         cameraBottom.setRotation(R);
         cameraBottom.setOrthogonalZoom(0.25);
@@ -115,7 +115,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
         cameraLeft = new Camera();
         cameraLeft.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraLeft.setPosition(new Vector3D(-5, 0, 0));
+        cameraLeft.setPosition(new Vector3Dd(-5, 0, 0));
         R = R.identity();
         cameraLeft.setRotation(R);
         cameraLeft.setOrthogonalZoom(0.25);
@@ -123,7 +123,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
         cameraFront = new Camera();
         cameraFront.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraFront.setPosition(new Vector3D(0, -5, 0));
+        cameraFront.setPosition(new Vector3Dd(0, -5, 0));
         R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         cameraFront.setRotation(R);
         cameraFront.setOrthogonalZoom(0.25);
@@ -444,7 +444,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glDisable(GL2.GL_DEPTH_TEST);
 
         //-----------------------------------------------------------------
-        Matrix4x4 R = camera.getRotation();
+        Matrix4x4d R = camera.getRotation();
 
         gl.glLoadIdentity();
         R = R.invert();
@@ -496,7 +496,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     {
         gl.glPushMatrix();
 
-        Matrix4x4 R;
+        Matrix4x4d R;
         double yaw, pitch;
 
         R = camera.getRotation();
@@ -667,23 +667,23 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     {
         ArrayList<SimpleBody> things = gizmo.getElements();
         int i;
-        Vector3D lv = new Vector3D();
-        Vector3D p;
-        Vector3D tp = new Vector3D();
-        Matrix4x4 R;
+        Vector3Dd lv = new Vector3Dd();
+        Vector3Dd p;
+        Vector3Dd tp = new Vector3Dd();
+        Matrix4x4d R;
         boolean yellow;
         ColorRgb c = new ColorRgb(1, 1, 0);
 
         for ( i = 0; i < things.size() && i < 3; i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
-            Vector3D position;
+            Vector3Dd position;
 
             if ( g != null ) {
                 gl.glPushMatrix();
                 gl.glLoadIdentity();
 
-                lv = new Vector3D(0, 0, lv.z());
+                lv = new Vector3Dd(0, 0, lv.z());
                 if ( g instanceof Arrow ) {
                     Arrow a = ((Arrow)g);
                     lv = lv.withZ((a.getHeadLength() + a.getBaseLength()) * 1.1);
@@ -692,7 +692,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
                     lv = lv.withZ(1);
                 }
 
-                R = new Matrix4x4();
+                R = new Matrix4x4d();
                 R = R.translation(r.getPosition());
                 R = R.multiply(r.getRotation());
                 p = R.multiply(lv);

@@ -8,7 +8,7 @@ import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 
 public class Jogl2LightRenderer extends Jogl2Renderer {
@@ -67,7 +67,7 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
 
     public static void draw(GL2 gl, Light l)
     {
-        Vector3D p = l.getPosition();
+        Vector3Dd p = l.getPosition();
         ColorRgb c = l.getSpecular();
         double delta = 0.1;
 

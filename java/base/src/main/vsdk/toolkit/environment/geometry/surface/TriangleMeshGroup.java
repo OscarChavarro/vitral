@@ -4,8 +4,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -166,8 +166,8 @@ public class TriangleMeshGroup extends Surface {
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
         double[] mm = getMinMax();
-        Vector3D size = new Vector3D(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-        Vector3D center = new Vector3D(
+        Vector3Dd size = new Vector3Dd(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
+        Vector3Dd center = new Vector3Dd(
             (mm[3]+mm[0])/2,
             (mm[4]+mm[1])/2,
             (mm[5]+mm[2])/2
@@ -232,7 +232,7 @@ public class TriangleMeshGroup extends Surface {
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         TriangleMesh mesh;
         int status;
@@ -265,7 +265,7 @@ public class TriangleMeshGroup extends Surface {
     Geometry.doVoxelization.
     */
     @Override
-    public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    public void doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
     {
         int i;
 

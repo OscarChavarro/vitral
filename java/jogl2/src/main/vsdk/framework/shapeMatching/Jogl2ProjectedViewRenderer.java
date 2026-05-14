@@ -12,8 +12,8 @@ import com.jogamp.opengl.GL2;
 
 // VSDK Classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
@@ -72,82 +72,82 @@ public class Jogl2ProjectedViewRenderer extends Component {
     {
         side = cameraConfig;
         bodies = center;
-        Vector3D position = new Vector3D(0, 0, 0);
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd(0, 0, 0);
+        Matrix4x4d R = new Matrix4x4d();
         double cornerAngle;
 
-        Vector3D down = new Vector3D(0, 0, -1);
-        Vector3D cornerReference = new Vector3D(10, 10, -10);
+        Vector3Dd down = new Vector3Dd(0, 0, -1);
+        Vector3Dd cornerReference = new Vector3Dd(10, 10, -10);
         cornerReference = cornerReference.normalized();
         cornerAngle = (Math.PI/2-(Math.acos(down.dotProduct(cornerReference))));
         switch( cameraConfig ) {
           case 1:
-            position = new Vector3D(0, -10, 0);
+            position = new Vector3Dd(0, -10, 0);
             R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
             break;
           case 2:
-            position = new Vector3D(-10, 0, 0);
+            position = new Vector3Dd(-10, 0, 0);
             break;
           case 3:
-            position = new Vector3D(0, 0, -10);
+            position = new Vector3Dd(0, 0, -10);
             R = R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(90), 0);
             break;
           case 4:
-            position = new Vector3D(-10, -10, 10);
+            position = new Vector3Dd(-10, -10, 10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(45), -cornerAngle, 0);
             break;
           case 5:
-            position = new Vector3D(10, -10, 10);
+            position = new Vector3Dd(10, -10, 10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(135), -cornerAngle, 0);
             break;
           case 6:
-            position = new Vector3D(10, 10, 10);
+            position = new Vector3Dd(10, 10, 10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(-135), -cornerAngle, 0);
             break;
           case 7:
-            position = new Vector3D(-10, 10, 10);
+            position = new Vector3Dd(-10, 10, 10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(-45), -cornerAngle, 0);
             break;
           case 8:
-            position = new Vector3D(0, 10, -10);
+            position = new Vector3Dd(0, 10, -10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(-90), Math.toRadians(45), 0);
             break;
           case 9:
-            position = new Vector3D(-10, 0, -10);
+            position = new Vector3Dd(-10, 0, -10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(0), Math.toRadians(45), 0);
             break;
           case 10:
-            position = new Vector3D(0, -10, -10);
+            position = new Vector3Dd(0, -10, -10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(45), 0);
             break;
           case 11:
-            position = new Vector3D(10, 0, -10);
+            position = new Vector3Dd(10, 0, -10);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(180), Math.toRadians(45), 0);
             break;
           case 12:
-            position = new Vector3D(10, -10, 0);
+            position = new Vector3Dd(10, -10, 0);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(135), 0, 0);
             break;
           case 13:
-            position = new Vector3D(10, 10, 0);
+            position = new Vector3Dd(10, 10, 0);
             position = position.normalized();
             position = position.multiply(10);
             R = R.eulerAnglesRotation(Math.toRadians(180+45), 0, 0);
@@ -218,7 +218,7 @@ public class Jogl2ProjectedViewRenderer extends Component {
 
         //- Get contourns from depth buffer's gradient --------------------
         nm = new NormalMap();
-        nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
+        nm.importBumpMap(zbuffer, new Vector3Dd(1, 1, 0.1));
 
         if ( isTransparent ) {
             image = nm.exportToRgbaImageGradient();

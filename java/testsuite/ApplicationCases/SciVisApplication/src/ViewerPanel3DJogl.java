@@ -18,8 +18,8 @@ import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.CameraController;
@@ -82,9 +82,9 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
         camera = new Camera();
         cameraController = new CameraControllerAquynza(camera);
 
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         R = R.eulerAnglesRotation(Math.toRadians(130), Math.toRadians(-30), 0);
-        camera.setPosition(new Vector3D(1.25, -1.25, 1));
+        camera.setPosition(new Vector3Dd(1.25, -1.25, 1));
         camera.setRotation(R);
 
         selectedSlice = -1;
@@ -161,7 +161,7 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
             pixelFactor = 2.0 / ((double) xs);
         }
 
-        Vector3D s = parent.study.getVoxelSizeFactor();
+        Vector3Dd s = parent.study.getVoxelSizeFactor();
         double z = -pixelFactor*((double)timeTake.getNumSlices()/2.0);
 
         //-----------------------------------------------------------------

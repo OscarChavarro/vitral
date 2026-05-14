@@ -25,8 +25,8 @@ import java.util.HashMap;
 // VSDK classes
 import vsdk.toolkit.environment.geometry.elements.Triangle;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
@@ -67,9 +67,9 @@ public class ReaderMitScene extends PersistenceElement
         Background currentBackground;
         int viewportXSize;
         int viewportYSize;
-        Vector3D importedEye;
-        Vector3D importedLookAt;
-        Vector3D importedUp;
+        Vector3Dd importedEye;
+        Vector3Dd importedLookAt;
+        Vector3Dd importedUp;
         double importedHorizontalFov;
 
         ImportContext()
@@ -80,9 +80,9 @@ public class ReaderMitScene extends PersistenceElement
 
             viewportXSize = 320;
             viewportYSize = 240;
-            importedEye = new Vector3D(0, 0, 10);
-            importedLookAt = new Vector3D(0, 0, 0);
-            importedUp = new Vector3D(0, 1, 0);
+            importedEye = new Vector3Dd(0, 0, 10);
+            importedLookAt = new Vector3Dd(0, 0, 0);
+            importedUp = new Vector3Dd(0, 1, 0);
             importedHorizontalFov = 30;
         }
     }
@@ -165,7 +165,7 @@ public class ReaderMitScene extends PersistenceElement
     private NormalMap
     loadNormalMapFromBump(
         String bumpPath,
-        Vector3D bumpScale,
+        Vector3Dd bumpScale,
         HashMap<String, NormalMap> normalMapCache) throws Exception
     {
         String cacheKey =
@@ -183,12 +183,12 @@ public class ReaderMitScene extends PersistenceElement
     private void
     applyBodyTransform(SimpleBody thing,
                        double yaw, double pitch, double roll,
-                       Vector3D position)
+                       Vector3Dd position)
     {
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         R = R.eulerAnglesRotation(yaw, pitch, roll);
         thing.setRotation(R);
-        Matrix4x4 Ri = new Matrix4x4(R);
+        Matrix4x4d Ri = new Matrix4x4d(R);
         Ri = Ri.invert();
         thing.setRotationInverse(Ri);
         thing.setPosition(position);
@@ -213,7 +213,7 @@ public class ReaderMitScene extends PersistenceElement
         SimpleBody thing = new SimpleBody();
         thing.setGeometry(mesh);
         thing.setMaterial(material);
-        applyBodyTransform(thing, yaw, pitch, roll, new Vector3D());
+        applyBodyTransform(thing, yaw, pitch, roll, new Vector3Dd());
         theScene.addBody(thing);
     }
 
@@ -222,13 +222,13 @@ public class ReaderMitScene extends PersistenceElement
                    String objectPath,
                    SimpleMaterial fallbackMaterial,
                    double yaw, double pitch, double roll,
-                   Vector3D translation,
+                   Vector3Dd translation,
                    double uniformScale) throws Exception
     {
         SimpleScene importedScene = new SimpleScene();
         EnvironmentPersistence.importEnvironment(new File(objectPath), importedScene);
 
-        Matrix4x4 sceneRotation = new Matrix4x4().eulerAnglesRotation(yaw, pitch, roll);
+        Matrix4x4d sceneRotation = new Matrix4x4d().eulerAnglesRotation(yaw, pitch, roll);
         for ( SimpleBody importedBody : importedScene.getSimpleBodies() ) {
             SimpleBody thing = new SimpleBody();
             thing.setName(importedBody.getName());
@@ -238,17 +238,17 @@ public class ReaderMitScene extends PersistenceElement
             thing.setTexture(importedBody.getTexture());
             thing.setNormalMap(importedBody.getNormalMap());
 
-            Matrix4x4 composedRotation = sceneRotation.multiply(importedBody.getRotation());
+            Matrix4x4d composedRotation = sceneRotation.multiply(importedBody.getRotation());
             thing.setRotation(composedRotation);
-            thing.setRotationInverse(new Matrix4x4(composedRotation).invert());
+            thing.setRotationInverse(new Matrix4x4d(composedRotation).invert());
 
-            Vector3D sourceScale = importedBody.getScale();
-            thing.setScale(new Vector3D(
+            Vector3Dd sourceScale = importedBody.getScale();
+            thing.setScale(new Vector3Dd(
                 sourceScale.x() * uniformScale,
                 sourceScale.y() * uniformScale,
                 sourceScale.z() * uniformScale));
 
-            Vector3D translatedPosition =
+            Vector3Dd translatedPosition =
                 sceneRotation.multiply(importedBody.getPosition().multiply(uniformScale))
                     .add(translation);
             thing.setPosition(translatedPosition);
@@ -282,7 +282,7 @@ public class ReaderMitScene extends PersistenceElement
         SimpleBody thing = new SimpleBody();
         thing.setGeometry(mesh);
         thing.setMaterial(material);
-        applyBodyTransform(thing, yaw, pitch, roll, new Vector3D());
+        applyBodyTransform(thing, yaw, pitch, roll, new Vector3Dd());
         theScene.addBody(thing);
     }
 
@@ -374,7 +374,7 @@ public class ReaderMitScene extends PersistenceElement
             case StreamTokenizer.TT_WORD:
               if ( readingTriangles ) {
                   if ( st.sval.equals("v") ) {
-                      Vector3D p = new Vector3D(
+                      Vector3Dd p = new Vector3Dd(
                           readNumber(st),
                           readNumber(st),
                           readNumber(st));
@@ -439,7 +439,7 @@ public class ReaderMitScene extends PersistenceElement
               }
               if ( readingQuads ) {
                   if ( st.sval.equals("v") ) {
-                      Vector3D p = new Vector3D(
+                      Vector3Dd p = new Vector3Dd(
                           readNumber(st),
                           readNumber(st),
                           readNumber(st));
@@ -475,7 +475,7 @@ public class ReaderMitScene extends PersistenceElement
               }
 
               if ( st.sval.equals("sphere") ) {
-                  Vector3D c = new Vector3D(readNumber(st), 
+                  Vector3Dd c = new Vector3Dd(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
                   double r = readNumber(st);
@@ -490,7 +490,7 @@ public class ReaderMitScene extends PersistenceElement
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("cube") ) {
-                  Vector3D c = new Vector3D(readNumber(st), 
+                  Vector3Dd c = new Vector3Dd(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
                   double r = readNumber(st);
@@ -505,7 +505,7 @@ public class ReaderMitScene extends PersistenceElement
                   theScene.addBody(thing);
                 } 
                 else if ( st.sval.equals("cylinder") ) {
-                  Vector3D c = new Vector3D(readNumber(st), 
+                  Vector3Dd c = new Vector3Dd(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
                   double r1 = readNumber(st);
@@ -522,7 +522,7 @@ public class ReaderMitScene extends PersistenceElement
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("torus") ) {
-                  Vector3D c = new Vector3D(readNumber(st),
+                  Vector3Dd c = new Vector3Dd(readNumber(st),
                                             readNumber(st),
                                             readNumber(st));
                   double majorRadius = readNumber(st);
@@ -538,7 +538,7 @@ public class ReaderMitScene extends PersistenceElement
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("polybox") ) {
-                  Vector3D c = new Vector3D(readNumber(st),
+                  Vector3Dd c = new Vector3Dd(readNumber(st),
                                             readNumber(st),
                                             readNumber(st));
                   double sx = readNumber(st);
@@ -558,7 +558,7 @@ public class ReaderMitScene extends PersistenceElement
                 }
                 else if ( st.sval.equals("appel") ) {
                   int appelId = (int)readNumber(st);
-                  Vector3D c = new Vector3D(readNumber(st),
+                  Vector3Dd c = new Vector3Dd(readNumber(st),
                                             readNumber(st),
                                             readNumber(st));
                   double uniformScale = 1.0;
@@ -586,20 +586,20 @@ public class ReaderMitScene extends PersistenceElement
                   }
 
                   // APPEL solids are defined in [0,1]^3; recenter for scene placement.
-                  PolyhedralBoundedSolidModeler.applyTransformation(solid, new Matrix4x4().translation(-0.5, -0.5, -0.5));
+                  PolyhedralBoundedSolidModeler.applyTransformation(solid, new Matrix4x4d().translation(-0.5, -0.5, -0.5));
 
                   thing = new SimpleBody();
                   thing.setGeometry(solid);
                   thing.setMaterial(currentMaterial);
                   thing.setTexture(currentTexture);
                   thing.setNormalMap(currentNormalMap);
-                  thing.setScale(new Vector3D(uniformScale, uniformScale, uniformScale));
+                  thing.setScale(new Vector3Dd(uniformScale, uniformScale, uniformScale));
                   applyBodyTransform(thing, yaw_actual, pitch_actual, roll_actual, c);
                   theScene.addBody(thing);
                 }
                 else if ( st.sval.equals("obj") ) {
                   String objectPath = readStringToken(st);
-                  Vector3D c = new Vector3D(readNumber(st),
+                  Vector3Dd c = new Vector3Dd(readNumber(st),
                                             readNumber(st),
                                             readNumber(st));
                   double uniformScale = 1.0;
@@ -639,21 +639,21 @@ public class ReaderMitScene extends PersistenceElement
                 }
                 else if (st.sval.equals("eye")) {
                   showDebugMessage("eye");
-                  context.importedEye = new Vector3D(readNumber(st),
+                  context.importedEye = new Vector3Dd(readNumber(st),
                                                      readNumber(st),
                                                      readNumber(st));
                   configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("lookat")) {
                   showDebugMessage("lookat");
-                  context.importedLookAt = new Vector3D(readNumber(st),
+                  context.importedLookAt = new Vector3Dd(readNumber(st),
                                                         readNumber(st),
                                                         readNumber(st));
                   configureCurrentCameraFromMitView(context);
                 }
                 else if (st.sval.equals("up")) {
                   showDebugMessage("up");
-                  context.importedUp = new Vector3D(readNumber(st),
+                  context.importedUp = new Vector3Dd(readNumber(st),
                                                     readNumber(st),
                                                     readNumber(st));
                   configureCurrentCameraFromMitView(context);
@@ -722,14 +722,14 @@ public class ReaderMitScene extends PersistenceElement
                     }
                     else if ( st.sval.equals("directional") ) {
                       showDebugMessage("directional");
-                      Vector3D v = new Vector3D(readNumber(st), 
+                      Vector3Dd v = new Vector3Dd(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
                       theScene.addLight(new Light(LightType.DIRECTIONAL, v, new ColorRgb(r,g,b)));
                     } 
                     else if ( st.sval.equals("point") ) {
                       showDebugMessage("point");
-                      Vector3D v = new Vector3D(readNumber(st), 
+                      Vector3Dd v = new Vector3Dd(readNumber(st), 
                                             readNumber(st), 
                                             readNumber(st));
                       theScene.addLight(new Light(LightType.POINT, v, new ColorRgb(r, g, b)));
@@ -759,13 +759,13 @@ public class ReaderMitScene extends PersistenceElement
                 }
                 else if ( st.sval.equals("bumpmap") ) {
                   String bumpPath = readStringToken(st);
-                  Vector3D bumpScale = new Vector3D(1, 1, 0.2);
+                  Vector3Dd bumpScale = new Vector3Dd(1, 1, 0.2);
                   int nextToken = st.nextToken();
                   if ( nextToken == StreamTokenizer.TT_NUMBER ) {
                       double sx = st.nval;
                       double sy = readNumber(st);
                       double sz = readNumber(st);
-                      bumpScale = new Vector3D(sx, sy, sz);
+                      bumpScale = new Vector3Dd(sx, sy, sz);
                   }
                   else {
                       st.pushBack();

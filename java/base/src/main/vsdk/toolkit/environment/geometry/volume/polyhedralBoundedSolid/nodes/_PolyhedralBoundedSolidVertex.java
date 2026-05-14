@@ -7,7 +7,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes;
 import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
@@ -23,7 +23,7 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
     public int id;
 
     /// Defined as presented in [MANT1988].10.2.1
-    public Vector3D position;
+    public Vector3Dd position;
 
     /// Defined as presented in [MANT1988].10.2.2
     public _PolyhedralBoundedSolidHalfEdge emanatingHalfEdge;
@@ -32,17 +32,17 @@ public class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
 
     //=================================================================
     public _PolyhedralBoundedSolidVertex(PolyhedralBoundedSolid parentSolid,
-                                         Vector3D position, int id)
+                                         Vector3Dd position, int id)
     {
         init(parentSolid, position, id);
     }
 
     private void
-    init(PolyhedralBoundedSolid parentSolid, Vector3D position, int id)
+    init(PolyhedralBoundedSolid parentSolid, Vector3Dd position, int id)
     {
         this.id = id;
         emanatingHalfEdge = null;
-        this.position = new Vector3D(position);
+        this.position = new Vector3Dd(position);
         parentSolid.getVerticesList().add(this);
         debugColor = new ColorRgb(1, 0, 0);
     }

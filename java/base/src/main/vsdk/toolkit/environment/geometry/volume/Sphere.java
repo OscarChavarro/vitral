@@ -8,7 +8,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -40,7 +40,7 @@ public class Sphere extends Solid {
         double dx = -inout_rayo.origin().x();
         double dy = -inout_rayo.origin().y();
         double dz = -inout_rayo.origin().z();
-        Vector3D direction = inout_rayo.direction();
+        Vector3Dd direction = inout_rayo.direction();
         double v = direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
         // Test if the inout_rayo actually intersects the sphere
@@ -68,7 +68,7 @@ public class Sphere extends Solid {
         double dx = -inRay.origin().x();
         double dy = -inRay.origin().y();
         double dz = -inRay.origin().z();
-        Vector3D direction = inRay.direction();
+        Vector3Dd direction = inRay.direction();
         double projection =
             direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
@@ -118,7 +118,7 @@ public class Sphere extends Solid {
             return;
         }
 
-        Vector3D point = new Vector3D(
+        Vector3Dd point = new Vector3Dd(
             inRay.origin().x() + inT*inRay.direction().x(),
             inRay.origin().y() + inT*inRay.direction().y(),
             inRay.origin().z() + inT*inRay.direction().z());
@@ -126,9 +126,9 @@ public class Sphere extends Solid {
             outData.p = point;
         }
 
-        Vector3D normal = null;
+        Vector3Dd normal = null;
         if ( needsNormalVector ) {
-            normal = new Vector3D(point).normalized();
+            normal = new Vector3Dd(point).normalized();
             if ( outData.needsNormal() ) {
                 outData.n = normal;
             }
@@ -160,7 +160,7 @@ public class Sphere extends Solid {
             outData.v = 1 - (phi / Math.PI);
         }
         if ( outData.needsTangent() ) {
-            outData.t = new Vector3D(
+            outData.t = new Vector3Dd(
                 Math.sin(theta-Math.PI/2),
                 -Math.cos(theta-Math.PI/2),
                 0);
@@ -173,7 +173,7 @@ public class Sphere extends Solid {
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         double l = p.length();
         if ( l < _radius - distanceTolerance ) {
@@ -218,11 +218,11 @@ public class Sphere extends Solid {
         _radius_squared = r*r;
     }
 
-    private static Vector3D
+    private static Vector3Dd
     spherePosition(double theta, double t, double r)
     {
         double phi = (t-0.5)*Math.PI;
-        return new Vector3D(
+        return new Vector3Dd(
             Math.cos(phi) * Math.cos(theta) * r,
             Math.cos(phi) * Math.sin(theta) * r,
             Math.sin(phi) * r);
@@ -277,19 +277,19 @@ public class Sphere extends Solid {
         double dtheta = 2*Math.PI / ((double)nmeridians);
         double dphi = 1.0 / ((double)nparalels);
         int i, base2, base1;
-        Vector3D pos;
+        Vector3Dd pos;
 
         PolyhedralBoundedSolid solid;
 
         //- Build triangles for lower cap ---------------------------------
         solid = new PolyhedralBoundedSolid();
-        pos = new Vector3D(0, 0, -_radius);
+        pos = new Vector3Dd(0, 0, -_radius);
         PolyhedralBoundedSolidEulerOperators.mvfs(solid, pos, 1, 1);
 
-        pos = new Vector3D();
+        pos = new Vector3Dd();
         pos = spherePosition(dtheta, dphi, _radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 3, pos);
-        pos = new Vector3D();
+        pos = new Vector3Dd();
         pos = spherePosition(0, dphi, _radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2, pos);
 
@@ -297,7 +297,7 @@ public class Sphere extends Solid {
 
         for ( i = 2; i < nmeridians; i++ ) {
             theta = dtheta * ((double)i);
-            pos = new Vector3D();
+            pos = new Vector3Dd();
             pos = spherePosition(theta, dphi, _radius);
             PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, (i+1)+1, pos);
             // Next face is <(1), (i+1), (i+0)>
@@ -331,7 +331,7 @@ public class Sphere extends Solid {
             phi = ((double)(p+2)) / ((double)nparalels);
             for ( i = 0; i < nmeridians; i++ ) {
                 theta = dtheta * ((double)i);
-                pos = new Vector3D();
+                pos = new Vector3Dd();
                 pos = spherePosition(theta, phi, _radius);
                 PolyhedralBoundedSolidEulerOperators.smev(solid, 1, (i)+base1, (i)+base2, pos);
                 if ( i > 0 ) {
@@ -373,7 +373,7 @@ public class Sphere extends Solid {
         }
 
         //- Build triangles for upper cap --------------------------------
-        pos = new Vector3D(0, 0, _radius);
+        pos = new Vector3Dd(0, 0, _radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, pos);
 
         for ( i = 0; i < nmeridians-2; i++ ) {
@@ -400,17 +400,17 @@ public class Sphere extends Solid {
 
     /**
     Given a (thetha, phi) spherical coordinate in the surface of current
-    Sphere, this method writes on to `p` Vector3D the (x, y, z) coordinates
+    Sphere, this method writes on to `p` Vector3Dd the (x, y, z) coordinates
     of the corresponding point on Sphere's surface.
     \todo  check this method for efficiency improvement
     @param p
     @param theta
     @param phi
     */
-    public Vector3D
+    public Vector3Dd
     spherePosition(double theta, double phi)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             Math.cos(phi) * Math.cos(theta) * _radius,
             -Math.cos(phi) * Math.sin(theta) * _radius,
             Math.sin(phi) * _radius);
@@ -418,17 +418,17 @@ public class Sphere extends Solid {
 
     /**
     Given a (thetha, phi) spherical coordinate in the surface of current
-    Sphere, this method writes on to `n` Vector3D the (nx, ny, nz) coordinates
+    Sphere, this method writes on to `n` Vector3Dd the (nx, ny, nz) coordinates
     of the surface normal at corresponding point on Sphere's surface.
     \todo  check this method for efficiency improvement
     @param n
     @param theta
     @param phi
     */
-    public Vector3D
+    public Vector3Dd
     sphereNormal(double theta, double phi)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             Math.cos(phi) * Math.cos(theta),
             -Math.cos(phi) * Math.sin(theta),
             Math.sin(phi));
@@ -436,7 +436,7 @@ public class Sphere extends Solid {
 
     /**
     Given a (thetha, phi) spherical coordinate in the surface of current
-    Sphere, this method writes on to `n` Vector3D the (tx, ty, tz) coordinates
+    Sphere, this method writes on to `n` Vector3Dd the (tx, ty, tz) coordinates
     of the surface tangent at corresponding point on Sphere's surface. Tangents
     are aligned with respect to Sphere's equator.
     \todo  check this method for efficiency improvement
@@ -445,10 +445,10 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public Vector3D
+    public Vector3Dd
     sphereTangent(double theta, double phi)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             Math.sin(theta),
             Math.cos(theta),
             0);
@@ -456,7 +456,7 @@ public class Sphere extends Solid {
 
     /**
     Given a (thetha, phi) spherical coordinate in the surface of current
-    Sphere, this method writes on to `n` Vector3D the (bx, by, bz) coordinates
+    Sphere, this method writes on to `n` Vector3Dd the (bx, by, bz) coordinates
     of the surface tangent binormal at corresponding point on Sphere's surface. 
     Tangents binormals are perpendicular to both normal and tangent.
     \todo  check this method for efficiency improvement
@@ -464,10 +464,10 @@ public class Sphere extends Solid {
     @param theta
     @param phi
     */
-    public Vector3D
+    public Vector3Dd
     sphereBinormal(double theta, double phi)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             -Math.sin(phi)*Math.cos(theta),
             Math.sin(phi)*Math.sin(theta),
             Math.cos(phi)*Math.cos(theta)*Math.cos(theta) +

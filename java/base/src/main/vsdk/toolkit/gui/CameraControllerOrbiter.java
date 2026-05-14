@@ -1,7 +1,7 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 
 public class CameraControllerOrbiter extends CameraController {
@@ -10,14 +10,14 @@ public class CameraControllerOrbiter extends CameraController {
     private int oldMouseX;
     private int oldMouseY;
     private double deltaMov;
-    private Vector3D pointOfInterest;
+    private Vector3Dd pointOfInterest;
 
     public CameraControllerOrbiter(Camera camera) {
         this.camera = camera;
         oldMouseX = 0;
         oldMouseY = 0;
         deltaMov = 0.25;
-        pointOfInterest = new Vector3D(0, 0, 0);
+        pointOfInterest = new Vector3Dd(0, 0, 0);
     }
 
     public double getDeltaMovement()
@@ -31,18 +31,18 @@ public class CameraControllerOrbiter extends CameraController {
         deltaMov = val;
     }
 
-    public Vector3D getPointOfInterest()
+    public Vector3Dd getPointOfInterest()
     {
-        return new Vector3D(pointOfInterest);
+        return new Vector3Dd(pointOfInterest);
     }
 
-    public void setPointOfInterest(Vector3D pointOfInterest)
+    public void setPointOfInterest(Vector3Dd pointOfInterest)
     {
         if ( pointOfInterest == null ) {
-            this.pointOfInterest = new Vector3D(0, 0, 0);
+            this.pointOfInterest = new Vector3Dd(0, 0, 0);
             return;
         }
-        this.pointOfInterest = Vector3D.copyOf(pointOfInterest);
+        this.pointOfInterest = Vector3Dd.copyOf(pointOfInterest);
     }
 
     private double augmentLogarithmic(double val, double EPSILON)
@@ -83,35 +83,35 @@ public class CameraControllerOrbiter extends CameraController {
 
     private boolean orbitAroundPointOfInterest(double yawDelta, double pitchDelta)
     {
-        Vector3D eyePosition = camera.getPosition();
-        Vector3D offset = eyePosition.subtract(pointOfInterest);
+        Vector3Dd eyePosition = camera.getPosition();
+        Vector3Dd offset = eyePosition.subtract(pointOfInterest);
 
         if ( offset.length() < 1e-9 ) {
             return false;
         }
 
-        Matrix4x4 R = camera.getRotation();
-        Matrix4x4 DR = new Matrix4x4();
-        Vector3D axisLeft = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
-        Vector3D axisUp = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
+        Matrix4x4d R = camera.getRotation();
+        Matrix4x4d DR = new Matrix4x4d();
+        Vector3Dd axisLeft = new Vector3Dd(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        Vector3Dd axisUp = new Vector3Dd(R.get(0, 2), R.get(1, 2), R.get(2, 2));
         axisLeft = axisLeft.normalized();
         axisUp = axisUp.normalized();
 
         if ( Math.abs(pitchDelta) > 0 ) {
-            DR = new Matrix4x4().axisRotation(pitchDelta,
+            DR = new Matrix4x4d().axisRotation(pitchDelta,
                 axisLeft.x(), axisLeft.y(), axisLeft.z());
             offset = DR.multiply(offset);
         }
         if ( Math.abs(yawDelta) > 0 ) {
-            DR = new Matrix4x4().axisRotation(yawDelta,
+            DR = new Matrix4x4d().axisRotation(yawDelta,
                 axisUp.x(), axisUp.y(), axisUp.z());
             offset = DR.multiply(offset);
         }
 
-        Vector3D newEyePosition = pointOfInterest.add(offset);
-        Vector3D newFrontDirection = pointOfInterest.subtract(newEyePosition);
+        Vector3Dd newEyePosition = pointOfInterest.add(offset);
+        Vector3Dd newFrontDirection = pointOfInterest.subtract(newEyePosition);
         newFrontDirection = newFrontDirection.normalized();
-        Vector3D upHint = camera.getUp();
+        Vector3Dd upHint = camera.getUp();
         if ( Math.abs(newFrontDirection.dotProduct(upHint)) > 0.99999 ) {
             return false;
         }
@@ -124,9 +124,9 @@ public class CameraControllerOrbiter extends CameraController {
     @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
-        Matrix4x4 R; // Camera rotation matrix
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
         int projectionMode;
         double fov;
         double orthogonalZoom;
@@ -345,25 +345,25 @@ public class CameraControllerOrbiter extends CameraController {
         if ( deltaY < -5 ) deltaY = -5;
 
         //------------------------------------------------------------
-        Matrix4x4 R; // Camera rotation matrix
-        Matrix4x4 DR;
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
+        Matrix4x4d DR;
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
         double ax, ay;
 
         // Obtain a copy of the camera's internal parameters
         eyePosition = camera.getPosition();
         focusedPosition = camera.getFocusedPosition();
 
-        Vector3D u, v, w;
+        Vector3Dd u, v, w;
         int modifiers;
 
         modifiers = e.getModifiers();
 
         R = camera.getRotation();
-        u = new Vector3D(R.get(0, 0), R.get(1, 0), R.get(2, 0));
-        v = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
-        w = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
+        u = new Vector3Dd(R.get(0, 0), R.get(1, 0), R.get(2, 0));
+        v = new Vector3Dd(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        w = new Vector3Dd(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
         if ( (modifiers & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             // Orbit around point of interest
@@ -383,7 +383,7 @@ public class CameraControllerOrbiter extends CameraController {
             // Advance
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
-            DR = new Matrix4x4().axisRotation(ax, u.x(), u.y(), u.z());
+            DR = new Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

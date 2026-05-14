@@ -4,18 +4,18 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.gui.RotateGizmo;
 
 public class Jogl2RotateGizmoRenderer extends Jogl2Renderer 
 {
 
-    public static void draw(GL2 gl, RotateGizmo gizmo, Vector3D position)
+    public static void draw(GL2 gl, RotateGizmo gizmo, Vector3Dd position)
     {
-        Matrix4x4 R, giro;
+        Matrix4x4d R, giro;
 
-        R = new Matrix4x4(gizmo.getTransformationMatrix());
+        R = new Matrix4x4d(gizmo.getTransformationMatrix());
         R = R.withTranslation(position);
 
         gl.glLineWidth(3);
@@ -24,11 +24,11 @@ public class Jogl2RotateGizmoRenderer extends Jogl2Renderer
 
         double a;
         double delta = Math.toRadians(15);
-        Vector3D agujax = new Vector3D(0.5, 0, 0);
-        Vector3D agujay = new Vector3D(0, 0.5, 0);
-        Vector3D agujaz = new Vector3D(0, 0, 0.5);
-        Vector3D p;
-        giro = new Matrix4x4();
+        Vector3Dd agujax = new Vector3Dd(0.5, 0, 0);
+        Vector3Dd agujay = new Vector3Dd(0, 0.5, 0);
+        Vector3Dd agujaz = new Vector3Dd(0, 0, 0.5);
+        Vector3Dd p;
+        giro = new Matrix4x4d();
 
         gl.glPushMatrix();
         Jogl2MatrixRenderer.activate(gl, R);

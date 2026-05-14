@@ -7,7 +7,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 
 /**
-Class Vector3D represents a one dimensional array of three values, usually
+Class Vector3Dd represents a one dimensional array of three values, usually
 to be interpreted as:
   - A column vector of 1x3 positions, useful in linear algebra computations.
   - A point in the R3 Euclidean space
@@ -21,7 +21,7 @@ calculations.
 Lack of get/set method enforces a direct attribute access programming style
 which will lend to shorter code.
 */
-public final class Vector3D extends FundamentalEntity
+public final class Vector3Dd extends FundamentalEntity
 {
     // Check the general attribute description in superclass Entity.
     @Serial
@@ -32,9 +32,9 @@ public final class Vector3D extends FundamentalEntity
     private final double z;
 
     /**
-    The default Vector3D value is the zero value
+    The default Vector3Dd value is the zero value
     */
-    public Vector3D() {
+    public Vector3Dd() {
         this(0, 0, 0);
     }
 
@@ -43,47 +43,47 @@ public final class Vector3D extends FundamentalEntity
     @param y Y coordinate
     @param z Z coordinate
     */
-    public Vector3D(double x, double y, double z) {
+    public Vector3Dd(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public Vector3D(Vector3D other) {
-        this(Objects.requireNonNull(other, "Vector3D to copy cannot be null").x,
+    public Vector3Dd(Vector3Dd other) {
+        this(Objects.requireNonNull(other, "Vector3Dd to copy cannot be null").x,
              other.y,
              other.z);
     }
 
-    public static Vector3D copyOf(Vector3D other) {
-        return new Vector3D(Objects.requireNonNull(other, "Vector3D to copy cannot be null"));
+    public static Vector3Dd copyOf(Vector3Dd other) {
+        return new Vector3Dd(Objects.requireNonNull(other, "Vector3Dd to copy cannot be null"));
     }
 
-    public Vector3D multiply(double a) {
-        return new Vector3D(a * x, a * y, a * z);
+    public Vector3Dd multiply(double a) {
+        return new Vector3Dd(a * x, a * y, a * z);
     }
 
     /**
     @param other the second vector in cross product
-    @return Vector3D, the result of the operation
+    @return Vector3Dd, the result of the operation
     */
-    public Vector3D crossProduct(Vector3D other) {
-        return new Vector3D(y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x);
+    public Vector3Dd crossProduct(Vector3Dd other) {
+        return new Vector3Dd(y*other.z - z*other.y, z*other.x - x*other.z, x*other.y - y*other.x);
     }
 
     /**
-    @param other Vector3D
+    @param other Vector3Dd
     @return dot product between two vectors
     */
-    public double dotProduct(Vector3D other) {
+    public double dotProduct(Vector3Dd other) {
         return (x * other.x + y * other.y + z * other.z);
     }
 
-    public Vector3D normalized() {
+    public Vector3Dd normalized() {
         double t = x*x + y*y + z*z;
         if ( Math.abs(t) < VSDK.EPSILON ) return this;
         if (t != 0 && t != 1) t = (1.0 / Math.sqrt(t));
-        return new Vector3D(x * t, y * t, z * t);
+        return new Vector3Dd(x * t, y * t, z * t);
     }
 
     /**
@@ -93,14 +93,14 @@ public final class Vector3D extends FundamentalEntity
         return Math.sqrt(x*x + y*y + z*z);
     }
 
-    public Vector3D add(Vector3D b)
+    public Vector3Dd add(Vector3Dd b)
     {
-        return new Vector3D(x + b.x, y + b.y, z + b.z);
+        return new Vector3Dd(x + b.x, y + b.y, z + b.z);
     }
 
-    public Vector3D subtract(Vector3D b)
+    public Vector3Dd subtract(Vector3Dd b)
     {
-        return new Vector3D(x - b.x, y - b.y, z - b.z);
+        return new Vector3Dd(x - b.x, y - b.y, z - b.z);
     }
 
     public float[] exportToFloatArrayVector()
@@ -170,25 +170,25 @@ public final class Vector3D extends FundamentalEntity
         return Math.acos(z/r);
     }
 
-    public static Vector3D fromSpherical(double r, double theta, double phi)
+    public static Vector3Dd fromSpherical(double r, double theta, double phi)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             r * Math.sin(phi) * Math.cos(theta),
             r * Math.sin(phi) * Math.sin(theta),
             r * Math.cos(phi)
         );
     }
 
-    public Vector3D withX(double nx) {
-        return new Vector3D(nx, y, z);
+    public Vector3Dd withX(double nx) {
+        return new Vector3Dd(nx, y, z);
     }
 
-    public Vector3D withY(double ny) {
-        return new Vector3D(x, ny, z);
+    public Vector3Dd withY(double ny) {
+        return new Vector3Dd(x, ny, z);
     }
 
-    public Vector3D withZ(double nz) {
-        return new Vector3D(x, y, nz);
+    public Vector3Dd withZ(double nz) {
+        return new Vector3Dd(x, y, nz);
     }
 
     public double x() {
@@ -203,12 +203,12 @@ public final class Vector3D extends FundamentalEntity
         return z;
     }
 
-    public boolean epsilonEquals(Vector3D other)
+    public boolean epsilonEquals(Vector3Dd other)
     {
         return epsilonEquals(other, VSDK.EPSILON);
     }
 
-    public boolean epsilonEquals(Vector3D other, double epsilon)
+    public boolean epsilonEquals(Vector3Dd other, double epsilon)
     {
         if ( other == null ) {
             return false;
@@ -226,7 +226,7 @@ public final class Vector3D extends FundamentalEntity
         if ( this == obj ) {
             return true;
         }
-        if ( !(obj instanceof Vector3D other) ) {
+        if ( !(obj instanceof Vector3Dd other) ) {
             return false;
         }
         return Double.compare(x, other.x) == 0 &&

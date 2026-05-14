@@ -9,7 +9,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.AffineTransform;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.io.geometry.FontReader;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -77,7 +77,7 @@ public class AwtFontReader extends FontReader
         ParametricCurve curve;
 
         //-----------------------------------------------------------------
-        Vector3D pointParameters[];
+        Vector3Dd pointParameters[];
 
         curve = new ParametricCurve();
 
@@ -144,21 +144,21 @@ public class AwtFontReader extends FontReader
                   case 0:
                     curve.addPoint(null, ParametricCurve.BREAK);
 
-                    pointParameters = new Vector3D[1];
+                    pointParameters = new Vector3Dd[1];
                     pointParameters[0] = 
-                        new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
+                        new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, ParametricCurve.CORNER);
                     break;
                   case 1:
-                    pointParameters = new Vector3D[1];
-                    pointParameters[0] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
+                    pointParameters = new Vector3Dd[1];
+                    pointParameters[0] = new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, ParametricCurve.CORNER);
                     break;
                   case 2:
-                    pointParameters = new Vector3D[2];
+                    pointParameters = new Vector3Dd[2];
                     // Note the inverse order of awt with respect to VSDK!
-                    pointParameters[0] = new Vector3D(coords[2]/factor, -coords[3]/factor, 0);
-                    pointParameters[1] = new Vector3D(coords[0]/factor, -coords[1]/factor, 0);
+                    pointParameters[0] = new Vector3Dd(coords[2]/factor, -coords[3]/factor, 0);
+                    pointParameters[1] = new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
                     curve.addPoint(pointParameters, ParametricCurve.QUAD);
                     break;
                   case 3:

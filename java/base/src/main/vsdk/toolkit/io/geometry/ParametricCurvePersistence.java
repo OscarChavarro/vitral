@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.io.XmlException;
 import vsdk.toolkit.io.PersistenceElement;
@@ -19,7 +19,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
     public static final String rootName = "ParametricCurve";
     private static final String[] nodesNames = {
         "Point",
-        "Vector3D",
+        "Vector3Dd",
     };
     private static final String curveAttributesNames[] = {
         "approximationSteps"};
@@ -53,7 +53,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
             nodo = nodeList.item(i);
 
             NodeList subNodos = nodo.getChildNodes();
-            Vector3D v3[] = new Vector3D[3];
+            Vector3Dd v3[] = new Vector3Dd[3];
             int pos = 0;
             for (int j = 0; j < subNodos.getLength(); j++) {
                 Node subNodo = subNodos.item(j);
@@ -62,7 +62,7 @@ public class ParametricCurvePersistence extends PersistenceElement {
                     Node subNodo2 = subNodo.getFirstChild();
 
                     String coors[] = subNodo2.getNodeValue().trim().split(" ");
-                    v3[pos] = new Vector3D(Double.parseDouble(coors[0]),
+                    v3[pos] = new Vector3Dd(Double.parseDouble(coors[0]),
                                            Double.parseDouble(coors[1]),
                                            Double.parseDouble(coors[2]));
                     pos++;
@@ -94,10 +94,10 @@ public class ParametricCurvePersistence extends PersistenceElement {
             for (int i = 0; i < curve.getPointSize(); i++) {
                 Element ePoint = document.createElement(nodesNames[0]);
                 ePoint.setAttribute(pointAttributesNames[0], curve.types.get(i) + "");
-                Vector3D v3[] = curve.getPoint(i);
+                Vector3Dd v3[] = curve.getPoint(i);
                 for (int j = 0; j < v3.length; j++) {
                     Element eVector = document.createElement(nodesNames[1]);
-                    Vector3D v = v3[j];
+                    Vector3Dd v = v3[j];
                     eVector.setTextContent(v.x() + " " + v.y() + " " + v.z());
                     ePoint.appendChild(eVector);
                 }

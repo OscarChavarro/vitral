@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -117,7 +117,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     @param vertexId id assigned to the initial vertex.
     @param faceId id assigned to the initial face.
     */
-    public static void mvfs(PolyhedralBoundedSolid solid, Vector3D p, int vertexId, int faceId)
+    public static void mvfs(PolyhedralBoundedSolid solid, Vector3Dd p, int vertexId, int faceId)
     {
         _PolyhedralBoundedSolidFace newFace;
         _PolyhedralBoundedSolidLoop newLoop;
@@ -192,7 +192,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     */
     public static void lmev(PolyhedralBoundedSolid solid, _PolyhedralBoundedSolidHalfEdge he1,
                      _PolyhedralBoundedSolidHalfEdge he2,
-                     int vertexId, Vector3D p)
+                     int vertexId, Vector3Dd p)
     {
         PolyhedralBoundedSolidStatistics.recordLmevCall();
         if ( he1 == null || he2 == null ) {
@@ -218,7 +218,7 @@ public final class PolyhedralBoundedSolidEulerOperators
 
     private static void splitVertexNeighborhood(PolyhedralBoundedSolid solid, _PolyhedralBoundedSolidHalfEdge he1,
                                          _PolyhedralBoundedSolidHalfEdge he2,
-                                         int vertexId, Vector3D p)
+                                         int vertexId, Vector3Dd p)
     {
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidVertex newVertex;
@@ -246,7 +246,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     }
 
     private static void insertLineDrawingEdge(PolyhedralBoundedSolid solid, _PolyhedralBoundedSolidHalfEdge he,
-                                       int vertexId, Vector3D p)
+                                       int vertexId, Vector3Dd p)
     {
         _PolyhedralBoundedSolidVertex oldVertex;
         _PolyhedralBoundedSolidVertex newVertex;
@@ -957,7 +957,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     @param p position for the created vertex.
     @return true if the operation succeeds; false otherwise.
     */
-    public static boolean smev(PolyhedralBoundedSolid solid, int f1, int v1, int v4, Vector3D p)
+    public static boolean smev(PolyhedralBoundedSolid solid, int f1, int v1, int v4, Vector3Dd p)
     {
         _PolyhedralBoundedSolidFace oldFace1;
         _PolyhedralBoundedSolidHalfEdge he1;
@@ -1007,7 +1007,7 @@ public final class PolyhedralBoundedSolidEulerOperators
     @return true if the operation succeeds; false otherwise.
     */
     public static boolean mev(PolyhedralBoundedSolid solid, int f1, int f2,
-                   int v1, int v2, int v3, int v4, Vector3D p)
+                   int v1, int v2, int v3, int v4, Vector3Dd p)
     {
         _PolyhedralBoundedSolidFace oldFace1;
         _PolyhedralBoundedSolidFace oldFace2;

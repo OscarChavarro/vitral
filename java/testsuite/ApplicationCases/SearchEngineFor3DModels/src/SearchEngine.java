@@ -29,7 +29,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -141,7 +141,7 @@ public class SearchEngine
                 //- Calculate transform matrix --------------------------------
                 double minmax[] = referenceGeometry.getMinMax();
                 // Transform from voxelspace to geometry minmax space
-                Matrix4x4 M;
+                Matrix4x4d M;
                 M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
 
                 //- Primitive rasterization ([FUNK2003].4.1.) -----------------

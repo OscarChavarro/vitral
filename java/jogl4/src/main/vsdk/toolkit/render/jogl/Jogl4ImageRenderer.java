@@ -4,7 +4,7 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageCompressed;
@@ -114,7 +114,7 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
     public static void drawTexturedQuad(
         GL4 gl,
         int textureId,
-        Matrix4x4 modelViewProjection,
+        Matrix4x4d modelViewProjection,
         float[] positions,
         float[] uvCoordinates,
         float diffuseR,
@@ -215,7 +215,7 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
         drawTexturedQuad(
             gl,
             textureId,
-            Matrix4x4.identityMatrix(),
+            Matrix4x4d.identityMatrix(),
             positions,
             uvCoordinates,
             1.0f,

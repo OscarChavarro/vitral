@@ -8,8 +8,8 @@ import java.util.Random;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
@@ -47,8 +47,8 @@ public class Scene
         simpleBackground = new SimpleBackground();
         simpleBackground.setColor(0.49, 0.49, 0.49);
 
-        Vector3D p = new Vector3D(0, -5, 5);
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd p = new Vector3Dd(0, -5, 5);
+        Matrix4x4d R = new Matrix4x4d();
 
         R = R.eulerAnglesRotation(Math.toRadians(90.0), Math.toRadians(-45.0), 0);
 
@@ -91,7 +91,7 @@ public class Scene
         camera.updateVectors();
         r = camera.generateRay(x, y);
 
-        Vector3D p;
+        Vector3Dd p;
 
         p = r.origin().add(r.direction().multiply(10.0));
 
@@ -103,11 +103,11 @@ public class Scene
         b.setPosition(p);
     }
 
-    private Vector3D randomPosition()
+    private Vector3Dd randomPosition()
     {
-        Vector3D p;
+        Vector3Dd p;
 
-        p = new Vector3D();
+        p = new Vector3Dd();
 /*
         p.x = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
         p.y = (randomNumberGenerator.nextDouble() * 2.0) - 1.0;
@@ -180,9 +180,9 @@ public class Scene
 
         thing = new SimpleBody();
         thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
+        thing.setPosition(new Vector3Dd());
+        thing.setRotation(new Matrix4x4d());
+        thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
         thing.setName("Geometric object " + acumObject);
         scene.getSimpleBodies().add(thing);

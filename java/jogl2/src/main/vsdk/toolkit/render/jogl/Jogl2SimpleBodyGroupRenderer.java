@@ -8,7 +8,7 @@ import com.jogamp.opengl.GL2;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
@@ -19,8 +19,8 @@ public class Jogl2SimpleBodyGroupRenderer extends Jogl2Renderer {
                             Camera c, RendererConfiguration q)
     {
         Image texture;
-        Vector3D scale;
-        Vector3D p;
+        Vector3Dd scale;
+        Vector3Dd p;
         int i;
         SimpleBody gi;
         RendererConfiguration internalQuality;

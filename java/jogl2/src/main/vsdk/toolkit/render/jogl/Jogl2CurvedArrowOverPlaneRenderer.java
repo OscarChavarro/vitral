@@ -4,7 +4,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
 public class Jogl2CurvedArrowOverPlaneRenderer extends Jogl2Renderer
@@ -31,8 +31,8 @@ public class Jogl2CurvedArrowOverPlaneRenderer extends Jogl2Renderer
     }
 
     public static void draw(GL2 gl,
-        Vector3D startPoint,
-        Vector3D endPoint,
+        Vector3Dd startPoint,
+        Vector3Dd endPoint,
         InfinitePlane plane,
         double invert,
         double sizePercent)
@@ -42,8 +42,8 @@ public class Jogl2CurvedArrowOverPlaneRenderer extends Jogl2Renderer
     }
 
     public static void draw(GL2 gl,
-        Vector3D startPoint,
-        Vector3D endPoint,
+        Vector3Dd startPoint,
+        Vector3Dd endPoint,
         InfinitePlane plane,
         double invert,
         double sizePercent,
@@ -53,18 +53,18 @@ public class Jogl2CurvedArrowOverPlaneRenderer extends Jogl2Renderer
             return;
         }
 
-        Vector3D planeNormal = plane.getNormal();
+        Vector3Dd planeNormal = plane.getNormal();
         if ( planeNormal == null ) {
             return;
         }
 
-        Vector3D u;
-        Vector3D v;
+        Vector3Dd u;
+        Vector3Dd v;
         double fullLength;
         double factor;
         double t;
         int i;
-        Vector3D p;
+        Vector3Dd p;
 
         v = endPoint.subtract(startPoint);
         fullLength = v.length();
@@ -91,21 +91,21 @@ public class Jogl2CurvedArrowOverPlaneRenderer extends Jogl2Renderer
             }
         gl.glEnd();
 
-        Vector3D tip = startPoint.add(v.multiply(factor)).add(u.multiply(invert *
+        Vector3Dd tip = startPoint.add(v.multiply(factor)).add(u.multiply(invert *
             curveFactor(factor, fullLength, curveOffsetPercent)));
-        Vector3D tangent = v.add(u.multiply(invert *
+        Vector3Dd tangent = v.add(u.multiply(invert *
             curveSlope(factor, fullLength, curveOffsetPercent)));
         if ( tangent.length() <= 1e-12 ) {
             tangent = v;
         }
         tangent = tangent.normalized();
-        Vector3D headSide = tangent.crossProduct(planeNormal);
+        Vector3Dd headSide = tangent.crossProduct(planeNormal);
         if ( headSide.length() <= 1e-12 ) {
             headSide = u;
         }
         headSide = headSide.normalized();
         double headLength = factor * 0.1;
-        Vector3D headBase = tip.subtract(tangent.multiply(headLength));
+        Vector3Dd headBase = tip.subtract(tangent.multiply(headLength));
         double headHalfWidth = fullLength * curveOffsetPercent * 0.5;
 
         gl.glBegin(GL.GL_LINES);

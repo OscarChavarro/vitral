@@ -3,7 +3,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 
@@ -63,9 +63,9 @@ class PolyhedralBoundedSolidNumericPolicyTest
     void given_twoPoints_when_forPoints_then_usesBoundingDiagonalAsScale()
     {
         // Arrange
-        ArrayList<Vector3D> points = new ArrayList<Vector3D>();
-        points.add(new Vector3D(0.0, 0.0, 0.0));
-        points.add(new Vector3D(3.0, 4.0, 0.0));
+        ArrayList<Vector3Dd> points = new ArrayList<Vector3Dd>();
+        points.add(new Vector3Dd(0.0, 0.0, 0.0));
+        points.add(new Vector3Dd(3.0, 4.0, 0.0));
 
         // Action
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext context =

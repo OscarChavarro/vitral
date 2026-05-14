@@ -9,8 +9,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -116,8 +116,8 @@ public class Cone extends Solid {
             if ( outInfo != null ) {
                 double px = ox + dx*t0;
                 double py = oy + dy*t0;
-                outInfo.p = new Vector3D(px, py, pz);
-                outInfo.n = new Vector3D(px, py, 0).normalized();
+                outInfo.p = new Vector3Dd(px, py, pz);
+                outInfo.n = new Vector3Dd(px, py, 0).normalized();
             }
             return inOutRay.withT(t0);
         }
@@ -181,9 +181,9 @@ public class Cone extends Solid {
             if ( outInfo != null ) {
                 double px = ox + dx*t0;
                 double py = oy + dy*t0;
-                outInfo.p = new Vector3D(px, py, shiftedPz + inH);
+                outInfo.p = new Vector3Dd(px, py, shiftedPz + inH);
                 outInfo.n =
-                    new Vector3D(px, py, -shiftedPz * ratioSquared).normalized();
+                    new Vector3Dd(px, py, -shiftedPz * ratioSquared).normalized();
             }
             return inOutRay.withT(t0);
         }
@@ -209,8 +209,8 @@ public class Cone extends Solid {
                 double py = oy + dy*t;
                 if ( VSDK.square(px) + VSDK.square(py) < VSDK.square(inR) ) {
                     if ( outInfo != null ) {
-                        outInfo.n = new Vector3D(0, 0, 1);
-                        outInfo.p = new Vector3D(px, py, inH);
+                        outInfo.n = new Vector3Dd(0, 0, 1);
+                        outInfo.p = new Vector3Dd(px, py, inH);
                     }
                     return inOutRay.withT(t);
                 }
@@ -445,9 +445,9 @@ public class Cone extends Solid {
         }
         if ( outHit != null ) {
             outHit.setRay(winner);
-            outHit.p = new Vector3D(winnerInfo.p);
-            outHit.n = new Vector3D(winnerInfo.n).normalized();
-            outHit.t = new Vector3D(winnerInfo.t);
+            outHit.p = new Vector3Dd(winnerInfo.p);
+            outHit.n = new Vector3Dd(winnerInfo.n).normalized();
+            outHit.t = new Vector3Dd(winnerInfo.t);
             outHit.u = winnerInfo.u;
             outHit.v = winnerInfo.v;
             outHit.material = winnerInfo.material;
@@ -554,7 +554,7 @@ public class Cone extends Solid {
 
         int apexVertexId = solid.getMaxVertexId() + 1;
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, ringVertexIds.get(0).intValue(), apexVertexId,
-            new Vector3D(0.0, 0.0, apexZ));
+            new Vector3Dd(0.0, 0.0, apexZ));
 
         int i;
         for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
@@ -578,7 +578,7 @@ public class Cone extends Solid {
         int heightDivisions)
     {
         PolyhedralBoundedSolid solid;
-        Matrix4x4 T, S, M;
+        Matrix4x4d T, S, M;
 
         solid = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, r1, 0.0, nsides
@@ -592,9 +592,9 @@ public class Cone extends Solid {
                 double nextRadius = r1 + (r2 - r1) *
                     (((double)i) / ((double)heightDivisions));
                 double f = nextRadius / prevRadius;
-                T = new Matrix4x4();
+                T = new Matrix4x4d();
                 T = T.translation(0.0, 0.0, zStep);
-                S = new Matrix4x4();
+                S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
@@ -611,9 +611,9 @@ public class Cone extends Solid {
                 double nextRadius = r1 *
                     (1.0 - (((double)i) / ((double)heightDivisions)));
                 double f = nextRadius / prevRadius;
-                T = new Matrix4x4();
+                T = new Matrix4x4d();
                 T = T.translation(0.0, 0.0, zStep);
-                S = new Matrix4x4();
+                S = new Matrix4x4d();
                 S = S.scale(f, f, 1.0);
                 M = T.multiply(S);
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(

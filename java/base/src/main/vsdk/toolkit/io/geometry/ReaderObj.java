@@ -14,10 +14,10 @@ import java.util.StringTokenizer;
 
 // VitralSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Triangle;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
@@ -130,13 +130,13 @@ public class ReaderObj extends PersistenceElement
     private static TriangleMeshGroup read(String fileName) throws IOException
     {
         //- Geometric data and geometric attributes extracted from file ---
-        ArrayList<Vector3D> vertexPositionsArray;
-        ArrayList<Vector3D> vertexNormalsArray;
-        ArrayList<Vector3D> vertexTextureCoordinatesArray;
+        ArrayList<Vector3Dd> vertexPositionsArray;
+        ArrayList<Vector3Dd> vertexNormalsArray;
+        ArrayList<Vector3Dd> vertexTextureCoordinatesArray;
 
-        vertexPositionsArray = new ArrayList<Vector3D>();
-        vertexNormalsArray = new ArrayList<Vector3D>();
-        vertexTextureCoordinatesArray = new ArrayList<Vector3D>();
+        vertexPositionsArray = new ArrayList<Vector3Dd>();
+        vertexNormalsArray = new ArrayList<Vector3Dd>();
+        vertexTextureCoordinatesArray = new ArrayList<Vector3Dd>();
 
         //- Topology data extracted from file -----------------------------
         // _ReaderObjVertex[] will always be of size 3 (3 vertexes groups)
@@ -351,9 +351,9 @@ public class ReaderObj extends PersistenceElement
     addMeshToGroup(
         ArrayList<TriangleMesh> meshGroup,
         String nextGeometricObjectName,
-        ArrayList<Vector3D> vertexPositionsArray,
-        ArrayList<Vector3D> vertexNormalsArray,
-        ArrayList<Vector3D> vertexTextureCoordinatesArray,
+        ArrayList<Vector3Dd> vertexPositionsArray,
+        ArrayList<Vector3Dd> vertexNormalsArray,
+        ArrayList<Vector3Dd> vertexTextureCoordinatesArray,
         ArrayList<_ReaderObjVertex[]> triangleDatasetsArray,
         ArrayList<RGBAImageUncompressed> nextTexturesArray,
         ArrayList<ArrayList<int[]>> texture_span_triangleRange_table,
@@ -412,10 +412,10 @@ public class ReaderObj extends PersistenceElement
         //- Build the mesh vertexes ---------------------------------------
         Vertex newVertexArray[];
         int ti, ni;
-        Vector3D p, n;
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd p, n;
+        Matrix4x4d R = new Matrix4x4d();
 
-        R = R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+        R = R.axisRotation(Math.toRadians(90), new Vector3Dd(1, 0, 0));
         newVertexArray = new Vertex[finalVertexes.size()];
         for ( i = 0; i < finalVertexes.size(); i++ ) {
             // Position
@@ -440,7 +440,7 @@ public class ReaderObj extends PersistenceElement
                 newVertexArray[i].setNormal(n);
             }
             else {
-                newVertexArray[i].setNormal(new Vector3D(0, 0, 0));
+                newVertexArray[i].setNormal(new Vector3Dd(0, 0, 0));
             }
         }
         newTriangleMesh.setVertexes(newVertexArray, true, false, false, true);
@@ -711,12 +711,12 @@ public class ReaderObj extends PersistenceElement
         return ret;
     }
     
-    private static Vector3D readVertex(String lineOfText)
+    private static Vector3Dd readVertex(String lineOfText)
     {
-        Vector3D vert;
+        Vector3Dd vert;
         StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
-        vert = new Vector3D(
+        vert = new Vector3Dd(
             Double.parseDouble(st.nextToken()),
             Double.parseDouble(st.nextToken()),
             Double.parseDouble(st.nextToken()));
@@ -724,8 +724,8 @@ public class ReaderObj extends PersistenceElement
         return vert;
     }
 
-    private static Vector3D readVertexTexture(String lineOfText) {
-        Vector3D vert;
+    private static Vector3Dd readVertexTexture(String lineOfText) {
+        Vector3Dd vert;
         StringTokenizer st = new StringTokenizer(lineOfText);
         st.nextToken();
         double x = Double.parseDouble(st.nextToken());
@@ -735,7 +735,7 @@ public class ReaderObj extends PersistenceElement
             z = Double.parseDouble(st.nextToken());
         }
         catch( Exception e ) {}
-        vert = new Vector3D(x, y, z);
+        vert = new Vector3Dd(x, y, z);
         return vert;
     }
 
@@ -832,9 +832,9 @@ public class ReaderObj extends PersistenceElement
 
         thing = new SimpleBody();
         thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
+        thing.setPosition(new Vector3Dd());
+        thing.setRotation(new Matrix4x4d());
+        thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
         inoutSimpleBodiesArray.add(thing);
     }

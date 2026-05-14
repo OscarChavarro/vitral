@@ -13,7 +13,7 @@ import java.util.List;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -46,7 +46,7 @@ public abstract class LightingShader extends Shader {
         SimpleMaterial material,
         TraceWorkspace workspace)
     {
-        Vector3D surfaceNormal = info.n;
+        Vector3Dd surfaceNormal = info.n;
 
         if ( bumpMapEnabled ) {
             surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
@@ -171,11 +171,11 @@ public abstract class LightingShader extends Shader {
         List<SimpleBody> objects,
         TraceWorkspace workspace)
     {
-        Vector3D shadowOrigin = new Vector3D(
+        Vector3Dd shadowOrigin = new Vector3Dd(
             info.p.x() + VSDK.EPSILON * lightDirX,
             info.p.y() + VSDK.EPSILON * lightDirY,
             info.p.z() + VSDK.EPSILON * lightDirZ);
-        Vector3D shadowDirection = new Vector3D(lightDirX, lightDirY, lightDirZ);
+        Vector3Dd shadowDirection = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
         RayHit shadowCandidateHit = workspace.shadowCandidateHit();
         shadowCandidateHit.setStoreRay(false);
@@ -193,26 +193,26 @@ public abstract class LightingShader extends Shader {
         return false;
     }
 
-    private static Vector3D computeBlinnPerturbedNormal(
+    private static Vector3Dd computeBlinnPerturbedNormal(
         RayHit info,
-        Vector3D surfaceNormal)
+        Vector3Dd surfaceNormal)
     {
         if ( info.normalMap == null ) {
             return surfaceNormal;
         }
-        Vector3D normalVariation =
+        Vector3Dd normalVariation =
             CpuTextureSamplingConfig.sampleNormal(info.normalMap, info.u, 1-info.v);
         if ( normalVariation == null ) {
             return surfaceNormal;
         }
 
-        Vector3D baseNormal = surfaceNormal.normalized();
-        Vector3D surfaceTangentU = info.t.normalized();
-        Vector3D surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
-        Vector3D nCrossPv = baseNormal.crossProduct(surfaceTangentV);
-        Vector3D nCrossPu = baseNormal.crossProduct(surfaceTangentU);
+        Vector3Dd baseNormal = surfaceNormal.normalized();
+        Vector3Dd surfaceTangentU = info.t.normalized();
+        Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
+        Vector3Dd nCrossPv = baseNormal.crossProduct(surfaceTangentV);
+        Vector3Dd nCrossPu = baseNormal.crossProduct(surfaceTangentU);
 
-        Vector3D bumpScale = info.normalMap.getBumpMapScale();
+        Vector3Dd bumpScale = info.normalMap.getBumpMapScale();
         double nz = normalVariation.z();
         if ( Math.abs(nz) <= VSDK.EPSILON ) {
             nz = (nz < 0) ? -VSDK.EPSILON : VSDK.EPSILON;
@@ -222,7 +222,7 @@ public abstract class LightingShader extends Shader {
             -2.0 * (bumpScale.z() / bumpScale.x()) * (normalVariation.x() / nz);
         double derivativeFv =
             -2.0 * (bumpScale.z() / bumpScale.y()) * (normalVariation.y() / nz);
-        Vector3D normalPerturbation =
+        Vector3Dd normalPerturbation =
             nCrossPv.multiply(derivativeFu).subtract(nCrossPu.multiply(derivativeFv));
         return surfaceNormal.add(normalPerturbation).normalized();
     }

@@ -5,7 +5,7 @@ import java.util.Objects;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
 
-public final class Vector4D extends FundamentalEntity
+public final class Vector4Dd extends FundamentalEntity
 {
     @Serial
     private static final long serialVersionUID = 20061103L;
@@ -15,58 +15,58 @@ public final class Vector4D extends FundamentalEntity
     private final double z;
     private final double w;
 
-    public Vector4D(double x, double y, double z, double w) {
+    public Vector4Dd(double x, double y, double z, double w) {
         this.x = x; this.y = y; this.z = z;
         this.w = w;
     }
 
-    public Vector4D(Vector4D other) {
-        this(Objects.requireNonNull(other, "Vector4D to copy cannot be null").x,
+    public Vector4Dd(Vector4Dd other) {
+        this(Objects.requireNonNull(other, "Vector4Dd to copy cannot be null").x,
              other.y,
              other.z,
              other.w);
     }
 
-    public Vector4D(Vector3D other) {
+    public Vector4Dd(Vector3Dd other) {
         this.x = other.x();
         this.y = other.y();
         this.z = other.z();
         w = 1;
     }
 
-    public Vector4D multiply(double a) {
-        return new Vector4D(a * x, a * y, a * z, a * w);
+    public Vector4Dd multiply(double a) {
+        return new Vector4Dd(a * x, a * y, a * z, a * w);
     }
 
-    public Vector4D dividedByW() {
+    public Vector4Dd dividedByW() {
         if ( Math.abs(w) < VSDK.EPSILON ) return this;
-        return new Vector4D(x / w, y / w, z / w, 1);
+        return new Vector4Dd(x / w, y / w, z / w, 1);
     }
 
     public double length() {
         return Math.sqrt(x*x + y*y + z*z + w*w);
     }
 
-    public Vector4D add(Vector4D b)
+    public Vector4Dd add(Vector4Dd b)
     {
-        return new Vector4D(x + b.x, y + b.y, z + b.z, w + b.w);
+        return new Vector4Dd(x + b.x, y + b.y, z + b.z, w + b.w);
     }
 
-    public Vector4D withX(double nx) { return new Vector4D(nx, y, z, w); }
-    public Vector4D withY(double ny) { return new Vector4D(x, ny, z, w); }
-    public Vector4D withZ(double nz) { return new Vector4D(x, y, nz, w); }
-    public Vector4D withW(double nw) { return new Vector4D(x, y, z, nw); }
+    public Vector4Dd withX(double nx) { return new Vector4Dd(nx, y, z, w); }
+    public Vector4Dd withY(double ny) { return new Vector4Dd(x, ny, z, w); }
+    public Vector4Dd withZ(double nz) { return new Vector4Dd(x, y, nz, w); }
+    public Vector4Dd withW(double nw) { return new Vector4Dd(x, y, z, nw); }
     public double x() { return x; }
     public double y() { return y; }
     public double z() { return z; }
     public double w() { return w; }
 
-    public boolean epsilonEquals(Vector4D other)
+    public boolean epsilonEquals(Vector4Dd other)
     {
         return epsilonEquals(other, VSDK.EPSILON);
     }
 
-    public boolean epsilonEquals(Vector4D other, double epsilon)
+    public boolean epsilonEquals(Vector4Dd other, double epsilon)
     {
         if ( other == null ) {
             return false;
@@ -100,7 +100,7 @@ public final class Vector4D extends FundamentalEntity
     @Override
     public boolean equals(Object obj) {
         if ( this == obj ) return true;
-        if ( !(obj instanceof Vector4D other) ) return false;
+        if ( !(obj instanceof Vector4Dd other) ) return false;
         return Double.compare(x, other.x) == 0 &&
                Double.compare(y, other.y) == 0 &&
                Double.compare(z, other.z) == 0 &&

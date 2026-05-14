@@ -7,7 +7,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
@@ -65,8 +65,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     {
         _PolyhedralBoundedSolidHalfEdge ha;
         _PolyhedralBoundedSolidHalfEdge hb;
-        Vector3D n1;
-        Vector3D n2;
+        Vector3Dd n1;
+        Vector3Dd n2;
 
         if ( secta < 0 || sectb < 0 || secta >= nba.size() ||
              sectb >= nbb.size() ) {
@@ -162,14 +162,14 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     {
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nold;
-        Vector3D bisec;
+        Vector3Dd bisec;
         _PolyhedralBoundedSolidHalfEdge he;
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb;
 
         nb = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>();
 
         he = v.emanatingHalfEdge;
-        Vector3D oldref2;
+        Vector3Dd oldref2;
 
         do {
             n = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex();
@@ -234,8 +234,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     test from section [MANT1988].15.6.2, the variables are interpreted as in
     figure [MANT1988].15.8 and equation [MANT1988].15.5.
     */
-    private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
-                                       Vector3D ref2, Vector3D ref12)
+    private static boolean sctrwitthin(Vector3Dd dir, Vector3Dd ref1,
+                                       Vector3Dd ref2, Vector3Dd ref12)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
@@ -273,9 +273,9 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
         h1 = na.he;
         h2 = nb.he;
 
-        Vector3D n1;
-        Vector3D n2;
-        Vector3D intrs;
+        Vector3Dd n1;
+        Vector3Dd n2;
+        Vector3Dd intrs;
 
         n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
         n2 = h2.parentLoop.parentFace.getContainingPlane().getNormal();
@@ -350,8 +350,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
         double d4;
         int j;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s;
-        Vector3D na;
-        Vector3D nb;
+        Vector3Dd na;
+        Vector3Dd nb;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xb;
 
@@ -417,8 +417,8 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
         int prevsectb;
         int nextsectb;
         double d;
-        Vector3D n1;
-        Vector3D n2;
+        Vector3Dd n1;
+        Vector3Dd n2;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sj;
 

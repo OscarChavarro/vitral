@@ -5,7 +5,7 @@ import javax.microedition.lcdui.Graphics;
 
 // VitralSDK Classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class J2meCalligraphic2DBufferRenderer extends J2meRenderer
@@ -14,8 +14,8 @@ public class J2meCalligraphic2DBufferRenderer extends J2meRenderer
                             int xx0, int yy0, int dx, int dy)
     {
         g.setColor(0x000000);
-        Vector3D p0 = new Vector3D();
-        Vector3D p1 = new Vector3D();
+        Vector3Dd p0 = new Vector3Dd();
+        Vector3Dd p1 = new Vector3Dd();
         int x0, y0, x1, y1;
         int i;
         double xt = dx;

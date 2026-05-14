@@ -13,7 +13,7 @@ import com.jogamp.opengl.GL2GL3;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -61,8 +61,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
             gl.glColor3d(c.r(), c.g(), c.b());
 
             if ( start >= 0 && end >= 0 ) {
-                Vector3D startPosition;
-                Vector3D endPosition;
+                Vector3Dd startPosition;
+                Vector3Dd endPosition;
                 startPosition = e.rightHalf.startingVertex.position;
                 endPosition = e.leftHalf.startingVertex.position;
                 if ( startPosition != null && endPosition != null ) {
@@ -119,10 +119,10 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
-                Vector3D startPosition;
-                Vector3D endPosition;
-                Vector3D middle;
-                Vector3D n;
+                Vector3Dd startPosition;
+                Vector3Dd endPosition;
+                Vector3Dd middle;
+                Vector3Dd n;
 
                 startPosition = e.rightHalf.startingVertex.position;
                 endPosition = e.leftHalf.startingVertex.position;
@@ -185,8 +185,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
                         gl.glEnd();
 
                         // Draw som sample points for quantitative invisibility
-                        Vector3D d;
-                        Vector3D p;
+                        Vector3Dd d;
+                        Vector3Dd p;
                         double l;
                         double t;
                         int qi;

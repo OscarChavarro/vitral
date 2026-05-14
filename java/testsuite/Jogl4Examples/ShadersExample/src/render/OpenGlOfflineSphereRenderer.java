@@ -12,7 +12,7 @@ import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 
 import model.ShadersModel;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
 
@@ -20,7 +20,7 @@ public class OpenGlOfflineSphereRenderer
 {
     public RGBImageUncompressed render(
         ShadersModel model,
-        Matrix4x4 modelRotation,
+        Matrix4x4d modelRotation,
         int width,
         int height)
     {
@@ -45,14 +45,14 @@ public class OpenGlOfflineSphereRenderer
     private static final class OfflineRendererListener implements GLEventListener
     {
         private final ShadersModel model;
-        private final Matrix4x4 modelRotation;
+        private final Matrix4x4d modelRotation;
         private final int width;
         private final int height;
         private RGBImageUncompressed capturedImage;
 
         private OfflineRendererListener(
             ShadersModel model,
-            Matrix4x4 modelRotation,
+            Matrix4x4d modelRotation,
             int width,
             int height)
         {

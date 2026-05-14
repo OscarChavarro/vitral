@@ -1,7 +1,7 @@
 package vsdk.toolkit.render.jogl;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.background.SimpleBackground;
 
 // JOGL classes
@@ -13,7 +13,7 @@ public class Jogl2SimpleBackgroundRenderer extends Jogl2Renderer
 {
     public static void draw(GL2 gl, SimpleBackground background)
     {
-        Vector3D d = new Vector3D(1, 0, 0);
+        Vector3Dd d = new Vector3Dd(1, 0, 0);
         ColorRgb color;
 
         color = background.colorInDireccion(d);

@@ -2,7 +2,7 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,8 +26,8 @@ class PolyhedralBoundedSolidQuantitativeInvisibilityTest
 
         // Action
         int qi = solid.computeQuantitativeInvisibility(
-            new Vector3D(-3.0, -2.0, 0.0),
-            new Vector3D(-0.5, -0.75, 0.0));
+            new Vector3Dd(-3.0, -2.0, 0.0),
+            new Vector3Dd(-0.5, -0.75, 0.0));
 
         // Assert
         assertThat(qi).isEqualTo(1);
@@ -43,8 +43,8 @@ class PolyhedralBoundedSolidQuantitativeInvisibilityTest
 
         // Action
         int qi = solid.computeQuantitativeInvisibility(
-            new Vector3D(-3.0, -2.0, -2.0),
-            new Vector3D(-0.5, -0.75, -0.75));
+            new Vector3Dd(-3.0, -2.0, -2.0),
+            new Vector3Dd(-0.5, -0.75, -0.75));
 
         // Assert
         assertThat(qi).isEqualTo(1);
@@ -60,8 +60,8 @@ class PolyhedralBoundedSolidQuantitativeInvisibilityTest
 
         // Action
         int qi = solid.computeQuantitativeInvisibility(
-            new Vector3D(-3.0, -2.0, -1.0),
-            new Vector3D(3.0, 1.0, -1.0));
+            new Vector3Dd(-3.0, -2.0, -1.0),
+            new Vector3Dd(3.0, 1.0, -1.0));
 
         // Assert
         assertThat(qi).isEqualTo(0);

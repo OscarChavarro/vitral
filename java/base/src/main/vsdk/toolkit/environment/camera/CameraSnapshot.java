@@ -1,6 +1,6 @@
 package vsdk.toolkit.environment.camera;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 /**
 Immutable camera state used by the raytracer to guarantee per-frame
@@ -8,60 +8,60 @@ consistency even if the live Camera is edited concurrently.
 */
 public final class CameraSnapshot
 {
-    private final Vector3D eyePosition;
-    private final Vector3D front;
-    private final Vector3D left;
-    private final Vector3D up;
+    private final Vector3Dd eyePosition;
+    private final Vector3Dd front;
+    private final Vector3Dd left;
+    private final Vector3Dd up;
     private final int projectionMode;
     private final double orthogonalZoom;
     private final double viewportXSize;
     private final double viewportYSize;
-    private final Vector3D dir;
-    private final Vector3D upWithScale;
-    private final Vector3D rightWithScale;
+    private final Vector3Dd dir;
+    private final Vector3Dd upWithScale;
+    private final Vector3Dd rightWithScale;
 
     public CameraSnapshot(
-        Vector3D eyePosition,
-        Vector3D front,
-        Vector3D left,
-        Vector3D up,
+        Vector3Dd eyePosition,
+        Vector3Dd front,
+        Vector3Dd left,
+        Vector3Dd up,
         int projectionMode,
         double orthogonalZoom,
         double viewportXSize,
         double viewportYSize,
-        Vector3D dir,
-        Vector3D upWithScale,
-        Vector3D rightWithScale)
+        Vector3Dd dir,
+        Vector3Dd upWithScale,
+        Vector3Dd rightWithScale)
     {
-        this.eyePosition = new Vector3D(eyePosition);
-        this.front = new Vector3D(front);
-        this.left = new Vector3D(left);
-        this.up = new Vector3D(up);
+        this.eyePosition = new Vector3Dd(eyePosition);
+        this.front = new Vector3Dd(front);
+        this.left = new Vector3Dd(left);
+        this.up = new Vector3Dd(up);
         this.projectionMode = projectionMode;
         this.orthogonalZoom = orthogonalZoom;
         this.viewportXSize = viewportXSize;
         this.viewportYSize = viewportYSize;
-        this.dir = new Vector3D(dir);
-        this.upWithScale = new Vector3D(upWithScale);
-        this.rightWithScale = new Vector3D(rightWithScale);
+        this.dir = new Vector3Dd(dir);
+        this.upWithScale = new Vector3Dd(upWithScale);
+        this.rightWithScale = new Vector3Dd(rightWithScale);
     }
 
-    public Vector3D getEyePosition()
+    public Vector3Dd getEyePosition()
     {
         return eyePosition;
     }
 
-    public Vector3D getFront()
+    public Vector3Dd getFront()
     {
         return front;
     }
 
-    public Vector3D getLeft()
+    public Vector3Dd getLeft()
     {
         return left;
     }
 
-    public Vector3D getUp()
+    public Vector3Dd getUp()
     {
         return up;
     }
@@ -86,17 +86,17 @@ public final class CameraSnapshot
         return viewportYSize;
     }
 
-    public Vector3D getDir()
+    public Vector3Dd getDir()
     {
         return dir;
     }
 
-    public Vector3D getUpWithScale()
+    public Vector3Dd getUpWithScale()
     {
         return upWithScale;
     }
 
-    public Vector3D getRightWithScale()
+    public Vector3Dd getRightWithScale()
     {
         return rightWithScale;
     }

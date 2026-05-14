@@ -23,7 +23,7 @@ import android.opengl.Matrix;
 
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
@@ -756,7 +756,7 @@ public class AndroidGLES20Renderer extends RenderingElement
 
             float array[] = new float[3*lights.size()];
             for ( int i = 0; i < lights.size(); i++ ) {
-                Vector3D p = lights.get(i).getPosition();
+                Vector3Dd p = lights.get(i).getPosition();
                 array[3*i + 0] = (float)p.x;
                 array[3*i + 1] = (float)p.y;
                 array[3*i + 2] = (float)p.z;
@@ -780,7 +780,7 @@ public class AndroidGLES20Renderer extends RenderingElement
                     "Could not get uniform location for cameraPositionGlobal for shader " + selectedShaderName);
             }
             if ( currentCamera != null ) {
-                Vector3D p = currentCamera.getPosition();
+                Vector3Dd p = currentCamera.getPosition();
                 GLES20.glUniform3f(cameraPositionGlobalParam,
                        (float)p.x, (float)p.y, (float)p.z);
             }

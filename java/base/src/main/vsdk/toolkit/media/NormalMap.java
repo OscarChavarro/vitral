@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 public class NormalMap extends MediaEntity
 {
@@ -16,26 +16,26 @@ public class NormalMap extends MediaEntity
 
     private int xSize;
     private int ySize;
-    private ArrayList<Vector3D> data;
+    private ArrayList<Vector3Dd> data;
     // Scale used when converting a bump height map into derivative-like normals.
     // Stored to allow later reconstruction of Fu/Fv-style terms from the sampled
     // vector field.
-    private Vector3D bumpMapScale;
+    private Vector3Dd bumpMapScale;
 
     public NormalMap()
     {
         xSize = 0;
         ySize = 0;
         data = null;
-        bumpMapScale = new Vector3D(1, 1, 1);
+        bumpMapScale = new Vector3Dd(1, 1, 1);
     }
 
     public boolean init(int width, int height)
     {
         try {
-            data = new ArrayList<Vector3D>();
+            data = new ArrayList<Vector3Dd>();
             for ( int i = 0; i < width*height; i++ ) {
-                data.add(new Vector3D());
+                data.add(new Vector3Dd());
             }
         }
         catch ( Exception e ) {
@@ -57,29 +57,29 @@ public class NormalMap extends MediaEntity
         return ySize;
     }
 
-    public Vector3D getBumpMapScale()
+    public Vector3Dd getBumpMapScale()
     {
-        return Vector3D.copyOf(bumpMapScale);
+        return Vector3Dd.copyOf(bumpMapScale);
     }
 
-    public void putNormal(int i, int j, Vector3D n)
+    public void putNormal(int i, int j, Vector3Dd n)
     {
         if ( i < 0 || j < 0 || i >= xSize || j >= ySize ) return;
         int index = j * xSize + i;
-        data.set(index, Vector3D.copyOf(n));
+        data.set(index, Vector3Dd.copyOf(n));
     }
 
-    public Vector3D getNormal(int u, int v)
+    public Vector3Dd getNormal(int u, int v)
     {
         if ( u < 0 || v < 0 || u >= xSize || v >= ySize ) return null;
         int index = v * xSize + u;
-        return Vector3D.copyOf(data.get(index));
+        return Vector3Dd.copyOf(data.get(index));
     }
 
     /**
     Provide a bilinear interpolation scheme as proposed in [BLIN1978b].
     */
-    public Vector3D getNormal(double x, double y)
+    public Vector3Dd getNormal(double x, double y)
     {
         //-----------------------------------------------------------------
         double u = x - Math.floor(x);
@@ -96,7 +96,7 @@ public class NormalMap extends MediaEntity
         double dv = V - (double)j0;
 
         //-----------------------------------------------------------------
-        Vector3D F00, F10, F01, F11, FU0, FU1, FVAL;
+        Vector3Dd F00, F10, F01, F11, FU0, FU1, FVAL;
 
         F00 = getNormal(i0, j0);
         F01 = getNormal(i0, j1);
@@ -135,7 +135,7 @@ public class NormalMap extends MediaEntity
         }
 
         int x, y;
-        Vector3D n;
+        Vector3Dd n;
         byte r, g, b;
         int rr, gg, bb;
 
@@ -143,7 +143,7 @@ public class NormalMap extends MediaEntity
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
                 n = n.normalized();
-                Vector3D mapped = new Vector3D((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
+                Vector3Dd mapped = new Vector3Dd((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
 
                 rr = (int)(mapped.x() * 255.0);
                 gg = (int)(mapped.y() * 255.0);
@@ -178,7 +178,7 @@ public class NormalMap extends MediaEntity
         }
 
         int x, y;
-        Vector3D n;
+        Vector3Dd n;
         byte r, g, b, a;
         int rr, gg, bb;
 
@@ -188,7 +188,7 @@ public class NormalMap extends MediaEntity
             for ( x = 0; x < xSize; x++ ) {
                 n = getNormal(x, y);
                 n = n.normalized();
-                Vector3D mapped = new Vector3D((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
+                Vector3Dd mapped = new Vector3Dd((n.x()+1)/2, (n.y()+1)/2, (n.z()+1)/2);
 
                 rr = (int)(mapped.x() * 255.0);
                 gg = (int)(mapped.y() * 255.0);
@@ -219,10 +219,10 @@ public class NormalMap extends MediaEntity
         }
 
         int x, y;
-        Vector3D n;
+        Vector3Dd n;
         int val;
         byte col;
-        Vector3D k = new Vector3D(0, 0, 1);
+        Vector3Dd k = new Vector3Dd(0, 0, 1);
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -250,10 +250,10 @@ public class NormalMap extends MediaEntity
         }
 
         int x, y;
-        Vector3D n;
+        Vector3Dd n;
         int val;
         byte col;
-        Vector3D k = new Vector3D(0, 0, 1);
+        Vector3Dd k = new Vector3Dd(0, 0, 1);
 
         for ( y = 0; y < ySize; y++ ) {
             for ( x = 0; x < xSize; x++ ) {
@@ -276,29 +276,29 @@ public class NormalMap extends MediaEntity
         return output;
     }
 
-    public Vector3D importBumpMap(IndexedColorImageUncompressed inBumpmap, Vector3D inScale)
+    public Vector3Dd importBumpMap(IndexedColorImageUncompressed inBumpmap, Vector3Dd inScale)
     {
         //-------------------------------------------------------------------
         int xxSize = inBumpmap.getXSize();
         int yySize = inBumpmap.getYSize();
-        Vector3D scale = inScale;
+        Vector3Dd scale = inScale;
 
         //- 1. Si el vector de escala dado es erroneo, crear uno base -------
         if( scale.x() < VSDK.EPSILON || scale.y() < VSDK.EPSILON ||
             scale.z() < VSDK.EPSILON ) {
             double val = ((double)xxSize) / ((double)yySize);
             if( val < 1.0 ) {
-                scale = new Vector3D(1.0, 1.0 / val, 1.0);
+                scale = new Vector3Dd(1.0, 1.0 / val, 1.0);
             }
             else {
-                scale = new Vector3D(val, 1.0, 1.0);
+                scale = new Vector3Dd(val, 1.0, 1.0);
             }
         }
-        bumpMapScale = Vector3D.copyOf(scale);
+        bumpMapScale = Vector3Dd.copyOf(scale);
         init(xxSize, yySize);
 
         //- 2. Calculo de las derivadas parciales al interior de la imagen --
-        Vector3D normal;
+        Vector3Dd normal;
         int a, b, c, d;
         int u, v;
 
@@ -309,13 +309,13 @@ public class NormalMap extends MediaEntity
                 c = inBumpmap.getPixel(u, v+1);
                 d = inBumpmap.getPixel(u, v-1);
 
-                Vector3D df_du = new Vector3D(2, 0, ((double)(a - b)) / 255.0);
-                Vector3D df_dv = new Vector3D(0, 2, ((double)(d - c)) / 255.0);
+                Vector3Dd df_du = new Vector3Dd(2, 0, ((double)(a - b)) / 255.0);
+                Vector3Dd df_dv = new Vector3Dd(0, 2, ((double)(d - c)) / 255.0);
 
                 normal = df_du.crossProduct(df_dv);
 
                 // Modular el vector `normal` respecto al vector `inOutScale`
-                normal = new Vector3D(
+                normal = new Vector3Dd(
                     normal.x() * scale.x(),
                     normal.y() * scale.y(),
                     normal.z() * scale.z()

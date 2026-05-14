@@ -7,33 +7,33 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class Box extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
-    private static final Vector3D NORMAL_POS_Z = new Vector3D(0, 0, 1);
-    private static final Vector3D NORMAL_NEG_Z = new Vector3D(0, 0, -1);
-    private static final Vector3D NORMAL_POS_Y = new Vector3D(0, 1, 0);
-    private static final Vector3D NORMAL_NEG_Y = new Vector3D(0, -1, 0);
-    private static final Vector3D NORMAL_POS_X = new Vector3D(1, 0, 0);
-    private static final Vector3D NORMAL_NEG_X = new Vector3D(-1, 0, 0);
-    private static final Vector3D TANGENT_POS_Y = new Vector3D(0, 1, 0);
-    private static final Vector3D TANGENT_NEG_Y = new Vector3D(0, -1, 0);
-    private static final Vector3D TANGENT_NEG_X = new Vector3D(-1, 0, 0);
-    private static final Vector3D TANGENT_POS_X = new Vector3D(1, 0, 0);
-    private static final Vector3D ZERO_VECTOR = new Vector3D();
+    private static final Vector3Dd NORMAL_POS_Z = new Vector3Dd(0, 0, 1);
+    private static final Vector3Dd NORMAL_NEG_Z = new Vector3Dd(0, 0, -1);
+    private static final Vector3Dd NORMAL_POS_Y = new Vector3Dd(0, 1, 0);
+    private static final Vector3Dd NORMAL_NEG_Y = new Vector3Dd(0, -1, 0);
+    private static final Vector3Dd NORMAL_POS_X = new Vector3Dd(1, 0, 0);
+    private static final Vector3Dd NORMAL_NEG_X = new Vector3Dd(-1, 0, 0);
+    private static final Vector3Dd TANGENT_POS_Y = new Vector3Dd(0, 1, 0);
+    private static final Vector3Dd TANGENT_NEG_Y = new Vector3Dd(0, -1, 0);
+    private static final Vector3Dd TANGENT_NEG_X = new Vector3Dd(-1, 0, 0);
+    private static final Vector3Dd TANGENT_POS_X = new Vector3Dd(1, 0, 0);
+    private static final Vector3Dd ZERO_VECTOR = new Vector3Dd();
 
-    private Vector3D size;
+    private Vector3Dd size;
 
     public Box(double dx, double dy, double dz) {
-        size = new Vector3D(dx, dy, dz);
+        size = new Vector3Dd(dx, dy, dz);
     }
 
-    public Box(Vector3D s) {
-        size = new Vector3D(s);
+    public Box(Vector3Dd s) {
+        size = new Vector3Dd(s);
     }
 
     /**
@@ -162,7 +162,7 @@ public class Box extends Solid {
                 double hitZ = oz + dz*minT;
 
                 if ( outHit.needsPoint() ) {
-                    outHit.p = new Vector3D(hitX, hitY, hitZ);
+                    outHit.p = new Vector3Dd(hitX, hitY, hitZ);
                 }
 
                 if ( outHit.needsTextureCoordinates() ) {
@@ -226,7 +226,7 @@ public class Box extends Solid {
         int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
 
         if ( outData.needsPoint() ) {
-            outData.p = new Vector3D(hitX, hitY, hitZ);
+            outData.p = new Vector3Dd(hitX, hitY, hitZ);
         }
         if ( outData.needsNormal() ) {
             outData.n = planeNormal(hitPlane);
@@ -269,7 +269,7 @@ public class Box extends Solid {
         }
     }
 
-    private static Vector3D planeNormal(int hitPlane)
+    private static Vector3Dd planeNormal(int hitPlane)
     {
         switch ( hitPlane ) {
           case 1: return NORMAL_POS_Z;
@@ -282,7 +282,7 @@ public class Box extends Solid {
         }
     }
 
-    private static Vector3D planeTangent(int hitPlane)
+    private static Vector3Dd planeTangent(int hitPlane)
     {
         switch ( hitPlane ) {
           case 1:
@@ -342,17 +342,17 @@ public class Box extends Solid {
         return minmax;
     }
 
-    public Vector3D getSize()
+    public Vector3Dd getSize()
     {
         return size;
     }
 
     public void setSize(double dx, double dy, double dz) {
-        setSize(new Vector3D(dx, dy, dz));
+        setSize(new Vector3Dd(dx, dy, dz));
     }
 
-    public void setSize(Vector3D s) {
-        size = new Vector3D(s);
+    public void setSize(Vector3Dd s) {
+        size = new Vector3Dd(s);
     }
 
     @Override
@@ -373,25 +373,25 @@ public class Box extends Solid {
         PolyhedralBoundedSolid solid;
         solid = new PolyhedralBoundedSolid();
         PolyhedralBoundedSolidEulerOperators.mvfs(solid, 
-            new Vector3D(-size.x()/2, -size.y()/2, -size.z()/2), 1, 1);
+            new Vector3Dd(-size.x()/2, -size.y()/2, -size.z()/2), 1, 1);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 4,
-            new Vector3D(-size.x()/2, size.y()/2, -size.z()/2));
+            new Vector3Dd(-size.x()/2, size.y()/2, -size.z()/2));
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 3,
-            new Vector3D(size.x()/2, size.y()/2, -size.z()/2));
+            new Vector3Dd(size.x()/2, size.y()/2, -size.z()/2));
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2,
-            new Vector3D(size.x()/2, -size.y()/2, -size.z()/2));
+            new Vector3Dd(size.x()/2, -size.y()/2, -size.z()/2));
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 4, 2, 3, 2);
         
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 5,
-            new Vector3D(-size.x()/2, -size.y()/2, size.z()/2));
+            new Vector3Dd(-size.x()/2, -size.y()/2, size.z()/2));
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 6,
-            new Vector3D(size.x()/2, -size.y()/2, size.z()/2));
+            new Vector3Dd(size.x()/2, -size.y()/2, size.z()/2));
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 5, 1, 6, 2, 3);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 7,
-            new Vector3D(size.x()/2, size.y()/2, size.z()/2));
+            new Vector3Dd(size.x()/2, size.y()/2, size.z()/2));
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 6, 2, 7, 3, 4);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 4, 8,
-            new Vector3D(-size.x()/2, size.y()/2, size.z()/2));
+            new Vector3Dd(-size.x()/2, size.y()/2, size.z()/2));
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 7, 3, 8, 4, 5);
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 5, 6, 8, 4, 6);
         return solid;

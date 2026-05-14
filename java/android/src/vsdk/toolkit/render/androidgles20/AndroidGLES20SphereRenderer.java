@@ -11,7 +11,7 @@ import android.opengl.GLES20;
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.geometry.Sphere;
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -32,7 +32,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         float vertexDataArray[] = new float[n*8];
 
         //-----------------------------------------------------------------
-        Vector3D p = new Vector3D();
+        Vector3Dd p = new Vector3Dd();
         ColorRgb c = q.getWireColor();
 
         int index = 0;
@@ -76,7 +76,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         RendererConfiguration q)
     {
         //-----------------------------------------------------------------
-        Vector3D p = new Vector3D();
+        Vector3Dd p = new Vector3Dd();
         ColorRgb c = q.getWireColor();
 
         for( int i = 1; i < stacks - 1; i++ ) {
@@ -165,7 +165,7 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
     */
     private static void
     drawVertex(double theta, double phi, double s, double t,
-               Vector3D P, Vector3D N, Vector3D T, Vector3D B, Sphere sphere,
+               Vector3Dd P, Vector3Dd N, Vector3Dd T, Vector3Dd B, Sphere sphere,
                float vertexDataArray[], int index, RendererConfiguration q)
     {
         //- Execute vertex -----------------------------------------------
@@ -220,10 +220,10 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
-        Vector3D P = new Vector3D(); // Vertex position
-        Vector3D N = new Vector3D(); // Vertex normal
-        Vector3D T = new Vector3D(); // Vertex tangent
-        Vector3D B = new Vector3D(); // Vertex binormal
+        Vector3Dd P = new Vector3Dd(); // Vertex position
+        Vector3Dd N = new Vector3Dd(); // Vertex normal
+        Vector3Dd T = new Vector3Dd(); // Vertex tangent
+        Vector3Dd B = new Vector3Dd(); // Vertex binormal
 
         int i;
         int j;
@@ -323,10 +323,10 @@ public class AndroidGLES20SphereRenderer extends AndroidGLES20Renderer
         RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
-        Vector3D P = new Vector3D(); // Vertex position
-        Vector3D N = new Vector3D(); // Vertex normal
-        Vector3D T = new Vector3D(); // Vertex tangent
-        Vector3D B = new Vector3D(); // Vertex binormal
+        Vector3Dd P = new Vector3Dd(); // Vertex position
+        Vector3Dd N = new Vector3Dd(); // Vertex normal
+        Vector3Dd T = new Vector3Dd(); // Vertex tangent
+        Vector3Dd B = new Vector3Dd(); // Vertex binormal
 
         int i;
         int j;

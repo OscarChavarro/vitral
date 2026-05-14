@@ -2,11 +2,11 @@ package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
 public class Jogl4MatrixRenderer extends Jogl4Renderer {
 
-    public static Matrix4x4 importJOGL(GL4 gl, int matrixId)
+    public static Matrix4x4d importJOGL(GL4 gl, int matrixId)
     {
         double[] Mgl = new double[16];
         double[][] data = new double[4][4];
@@ -21,15 +21,15 @@ public class Jogl4MatrixRenderer extends Jogl4Renderer {
                 data[row][column] = Mgl[pos];
             }
         }
-        return Matrix4x4.copyOf(data);
+        return Matrix4x4d.copyOf(data);
     }
 
-    public static float[] activate(GL4 gl, Matrix4x4 A)
+    public static float[] activate(GL4 gl, Matrix4x4d A)
     {
         return toColumnMajorFloatArray(A);
     }
 
-    public static float[] toColumnMajorFloatArray(Matrix4x4 A)
+    public static float[] toColumnMajorFloatArray(Matrix4x4d A)
     {
         float[] out = new float[16];
         int pos = 0;
@@ -43,12 +43,12 @@ public class Jogl4MatrixRenderer extends Jogl4Renderer {
         return out;
     }
 
-    public static void draw(GL4 gl, Matrix4x4 A)
+    public static void draw(GL4 gl, Matrix4x4d A)
     {
-        draw(gl, Matrix4x4.identityMatrix(), A);
+        draw(gl, Matrix4x4d.identityMatrix(), A);
     }
 
-    public static void draw(GL4 gl, Matrix4x4 modelViewProjection, Matrix4x4 A)
+    public static void draw(GL4 gl, Matrix4x4d modelViewProjection, Matrix4x4d A)
     {
         float ox = (float)A.get(0, 3);
         float oy = (float)A.get(1, 3);

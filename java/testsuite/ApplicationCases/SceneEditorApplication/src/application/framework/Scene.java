@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
@@ -63,11 +63,11 @@ public class Scene
         //-----------------------------------------------------------------
         debugThingGroups = new ArrayList<SimpleBodyGroup>();
 
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         camera = new Camera();
 
         R = R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
-        camera.setPosition(new Vector3D(-5, -5, 5));
+        camera.setPosition(new Vector3Dd(-5, -5, 5));
         camera.setRotation(R);
 
         activeCamera = camera;
@@ -177,9 +177,9 @@ public class Scene
 
         thing = new SimpleBody();
         thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
+        thing.setPosition(new Vector3Dd());
+        thing.setRotation(new Matrix4x4d());
+        thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
         thing.setName("Geometric object " + acumObject);
         scene.getSimpleBodies().add(thing);

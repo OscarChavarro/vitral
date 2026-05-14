@@ -26,7 +26,7 @@ import com.jogamp.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -97,9 +97,9 @@ public class MeshExample
 // Trivial mesh creation (need to change TriangleMeshGroup by TriangleMesh):
 /*
         Vertex v[] = new Vertex[3];
-        v[0] = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 1));
-        v[1] = new Vertex(new Vector3D(1, 0, 0), new Vector3D(0, 0, 1));
-        v[2] = new Vertex(new Vector3D(1, 1, 0), new Vector3D(0, 0, 1));
+        v[0] = new Vertex(new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 1));
+        v[1] = new Vertex(new Vector3Dd(1, 0, 0), new Vector3Dd(0, 0, 1));
+        v[2] = new Vertex(new Vector3Dd(1, 1, 0), new Vector3Dd(0, 0, 1));
 
         Triangle t[] = new Triangle[1];
         t[0] = new Triangle(0, 1, 2);
@@ -138,7 +138,7 @@ public class MeshExample
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
 
-        light = new Light(LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
         light.setId(0);
     }
 

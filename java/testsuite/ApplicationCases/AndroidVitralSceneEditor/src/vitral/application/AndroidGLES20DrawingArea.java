@@ -22,8 +22,8 @@ import android.view.View;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -141,13 +141,13 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     @param g
     @param scale
     */
-    public void addThing(Geometry g, Vector3D scale)
+    public void addThing(Geometry g, Vector3Dd scale)
     {
         SimpleBody b;
         
         b = new SimpleBody();
-        b.setPosition(new Vector3D(0, 0, 0));
-        b.setRotation(new Matrix4x4());
+        b.setPosition(new Vector3Dd(0, 0, 0));
+        b.setRotation(new Matrix4x4d());
         b.setMaterial(material);
         b.setScale(scale);
         b.setGeometry(g);
@@ -173,57 +173,57 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         Cone cone;
         Sphere sphere;
         numberOfAffectedObjectsOnScene = 1;
-        Matrix4x4 R;
+        Matrix4x4d R;
 
         switch ( o ) {
           case 1: default:
             highResSphere = false;
             sphere = new Sphere(1.0);
-            addThing(sphere, new Vector3D(1, 1, 1));
+            addThing(sphere, new Vector3Dd(1, 1, 1));
             break;
           case 2:
             highResSphere = true;
             sphere = new Sphere(1.0);
-            addThing(sphere, new Vector3D(1, 1, 1));
+            addThing(sphere, new Vector3Dd(1, 1, 1));
             break;
           case 3:
             box = new Box(1.0, 1.0, 1.0);
-            addThing(box, new Vector3D(1, 1, 1));
+            addThing(box, new Vector3Dd(1, 1, 1));
             break;
           case 4:
             cone = new Cone(1.0, 1.0, 2.0);
-            addThing(cone, new Vector3D(1, 1, 1));
+            addThing(cone, new Vector3Dd(1, 1, 1));
             break;
           case 5:
             if ( preloadedMug == null ) {
                 preloadedMug = 
                         loadExternalSceneFile("/storage/extSdCard/mug.ply");
             }
-            R = new Matrix4x4();
+            R = new Matrix4x4d();
             R = R.axisRotation(Math.toRadians(90), 1, 0, 0);
-            activateSubScene(preloadedMug, R, new Vector3D(20, 20, 20));
+            activateSubScene(preloadedMug, R, new Vector3Dd(20, 20, 20));
             break;
           case 6:
             if ( preloadedCow == null ) {
                 preloadedCow = 
                         loadExternalSceneFile("/storage/extSdCard/cow.obj");
             }
-            R = new Matrix4x4();
-            activateSubScene(preloadedCow, R, new Vector3D(0.3, 0.3, 0.3));
+            R = new Matrix4x4d();
+            activateSubScene(preloadedCow, R, new Vector3Dd(0.3, 0.3, 0.3));
             break;
         }
 
         resetTimers();
     }
 
-    private void activateSubScene(SimpleScene source, Matrix4x4 R, Vector3D scale) {
+    private void activateSubScene(SimpleScene source, Matrix4x4d R, Vector3Dd scale) {
         int i;
         for ( i = 0; i < source.getSimpleBodies().size();
                 i++ ) {
             SimpleBody b = source.getSimpleBodies().get(i);
             b.setScale(scale);
-            //Matrix4x4 orig = b.getRotation();
-            //Matrix4x4 modified = orig.multiply(R);
+            //Matrix4x4d orig = b.getRotation();
+            //Matrix4x4d modified = orig.multiply(R);
             b.setRotation(R);
             scene.scene.getSimpleBodies().add(b);
         }
@@ -269,7 +269,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         int i;
         for ( i = 0; i < n; i++ ) {
             l = new Light(LightType.POINT, 
-                new Vector3D(p[6*(i%3)+0], p[6*(i%3)+1], p[6*(i%3)+2]), 
+                new Vector3Dd(p[6*(i%3)+0], p[6*(i%3)+1], p[6*(i%3)+2]), 
                 new ColorRgb(p[6*(i%3)+3], p[6*(i%3)+4], p[6*(i%3)+5]));
             list.add(l);
         }
@@ -403,7 +403,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
                     ImagePersistence.importIndexedColor(
                             new File("/storage/extSdCard/earth.bw"));
             normalMap = new NormalMap();
-            normalMap.importBumpMap(bumpmap, new Vector3D(1, 1, 0.2));
+            normalMap.importBumpMap(bumpmap, new Vector3Dd(1, 1, 0.2));
             
             testImage = normalMap.exportToRgbImage();
         }
@@ -549,10 +549,10 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         // Move light around center...
         ArrayList<Light> l = getScene().scene.getLights();
         if ( withLightRotation && l.size() > 0 ) {
-            l.get(0).setPosition(new Vector3D(firstLightRadius, 0, 0));
-            Matrix4x4 RL = new Matrix4x4();
+            l.get(0).setPosition(new Vector3Dd(firstLightRadius, 0, 0));
+            Matrix4x4d RL = new Matrix4x4d();
             RL = RL.axisRotation(Math.toRadians(-50.0*x), 0, 0, 1);
-            Vector3D P, PR;
+            Vector3Dd P, PR;
             P = l.get(0).getPosition();
             PR = RL.multiply(P);
             l.get(0).setPosition(PR);
@@ -572,9 +572,9 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
             for ( i = 0; scene.scene.getSimpleBodies().size() >= 1 &&
                     i < numberOfAffectedObjectsOnScene; i++ ) {
                 SimpleBody b = scene.scene.getSimpleBodies().get(i);
-                Matrix4x4 original = b.getRotation();
-                Matrix4x4 delta = new Matrix4x4();
-                delta = delta.axisRotation(Math.toRadians(1.0), new Vector3D(0, 0, 1));
+                Matrix4x4d original = b.getRotation();
+                Matrix4x4d delta = new Matrix4x4d();
+                delta = delta.axisRotation(Math.toRadians(1.0), new Vector3Dd(0, 0, 1));
                 b.setRotation(delta.multiply(original));
             }
         }

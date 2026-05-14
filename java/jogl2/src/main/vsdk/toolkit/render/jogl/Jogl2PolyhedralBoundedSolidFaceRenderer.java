@@ -14,7 +14,7 @@ import com.jogamp.opengl.glu.GLUtessellator;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
@@ -55,7 +55,7 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         _PolyhedralBoundedSolidFace face)
     {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
-        ArrayList<Vector3D> points;
+        ArrayList<Vector3Dd> points;
 
         numericContext = PolyhedralBoundedSolidNumericPolicy.forFace(face);
         points = PolyhedralBoundedSolidGeometricValidator.extractPointsFromFace(
@@ -82,14 +82,14 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
             _PolyhedralBoundedSolidLoop loop;
             _PolyhedralBoundedSolidHalfEdge he;
             _PolyhedralBoundedSolidHalfEdge heStart;
-            Vector3D vectorArea;
+            Vector3Dd vectorArea;
 
             loop = face.boundariesList.get(i);
             he = loop.boundaryStartHalfEdge;
             if ( he == null ) {
                 continue;
             }
-            vectorArea = new Vector3D();
+            vectorArea = new Vector3Dd();
             heStart = he;
             do {
                 _PolyhedralBoundedSolidHalfEdge next;
@@ -167,12 +167,12 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         return segments;
     }
 
-    private static double segmentDistance(Vector3D p1, Vector3D q1,
-                                          Vector3D p2, Vector3D q2)
+    private static double segmentDistance(Vector3Dd p1, Vector3Dd q1,
+                                          Vector3Dd p2, Vector3Dd q2)
     {
-        Vector3D d1;
-        Vector3D d2;
-        Vector3D r;
+        Vector3Dd d1;
+        Vector3Dd d2;
+        Vector3Dd r;
         double a;
         double e;
         double f;
@@ -301,8 +301,8 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         gl.glEnable(GL.GL_CULL_FACE);
 
         //-----------------------------------------------------------------
-        Vector3D p0;
-        Vector3D n;
+        Vector3Dd p0;
+        Vector3Dd n;
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             // Logic
             _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
@@ -351,7 +351,7 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         int count;
         int j;
         double list[][]; // JOGL GLU Tesselator needs a vertex memory
-        Vector3D p0;
+        Vector3Dd p0;
 
         tesselator = GLU.gluNewTess();
         list = new double[totalNumberOfPoints][3];
@@ -408,10 +408,10 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
 
     private static final class FaceSegment
     {
-        private final Vector3D start;
-        private final Vector3D end;
+        private final Vector3Dd start;
+        private final Vector3Dd end;
 
-        private FaceSegment(Vector3D start, Vector3D end)
+        private FaceSegment(Vector3Dd start, Vector3Dd end)
         {
             this.start = start;
             this.end = end;
@@ -450,14 +450,14 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
     {
         int i;
         int j;
-        Vector3D startP;
-        Vector3D endP;
-        Vector3D p0;
-        Vector3D p1;
-        Vector3D p2;
-        Vector3D a;
-        Vector3D b;
-        Vector3D n;
+        Vector3Dd startP;
+        Vector3Dd endP;
+        Vector3Dd p0;
+        Vector3Dd p1;
+        Vector3Dd p2;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd n;
         InfinitePlane loopPlane;
 
         gl.glDisable(GL.GL_CULL_FACE);
@@ -547,7 +547,7 @@ public class Jogl2PolyhedralBoundedSolidFaceRenderer extends Jogl2Renderer
         //gl.glPolygonOffset(-1.0f, 1.0f);
 
         //-----------------------------------------------------------------
-        Vector3D n;
+        Vector3Dd n;
         for ( i = faceIndex;
               i >= 0 && i == faceIndex && i < solid.getPolygonsList().size();
               i++ ) {

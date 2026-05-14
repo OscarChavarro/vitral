@@ -4,13 +4,13 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
 /**
 This class is meant to support rendering operations in the JOGL API from
 vitral internal representation of a matrix containing an homogeneous
 coordinates geometrical transformation represented in the 
-`vsdk.toolkit.common.Matrix4x4` class.
+`vsdk.toolkit.common.Matrix4x4d` class.
  */
 public class Jogl2MatrixRenderer extends Jogl2Renderer {
 
@@ -18,7 +18,7 @@ public class Jogl2MatrixRenderer extends Jogl2Renderer {
     matrixId must be one of the internal JOGL/OpenGL variable names associated
     with matrices, like GL2.GL_PROJECTION_MATRIX or GL2.GL_MODELVIEW_MATRIX
     */
-    public static Matrix4x4 importJOGL(GL2 gl, int matrixId) {
+    public static Matrix4x4d importJOGL(GL2 gl, int matrixId) {
         double Mgl[] = new double[16];
         double[][] data = new double[4][4];
 
@@ -30,7 +30,7 @@ public class Jogl2MatrixRenderer extends Jogl2Renderer {
                 data[row][column] = Mgl[pos];
             }
         }
-        return Matrix4x4.copyOf(data);
+        return Matrix4x4d.copyOf(data);
     }
 
     /**
@@ -39,7 +39,7 @@ public class Jogl2MatrixRenderer extends Jogl2Renderer {
     @param gl
     @param A
     */
-    public static void activate(GL2 gl, Matrix4x4 A)
+    public static void activate(GL2 gl, Matrix4x4d A)
     {
         double Mgl[] = new double[16];
         int row, column, pos;
@@ -70,7 +70,7 @@ public class Jogl2MatrixRenderer extends Jogl2Renderer {
 
     THIS METHOD WILL BE CHANGED TO ALLOW CUSTOMIZATION
     */
-    public static void draw(GL2 gl, Matrix4x4 A)
+    public static void draw(GL2 gl, Matrix4x4d A)
     {
         gl.glPushMatrix();
         gl.glDisable(GL2.GL_LIGHTING);

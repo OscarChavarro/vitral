@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import com.jogamp.opengl.GL2;
 
 // VSDK Classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.ShapeDescriptor;
 import vsdk.toolkit.media.FourierShapeDescriptor;
@@ -120,7 +120,7 @@ public class ShapeDescriptor3DGenerator extends Component
     */
     private boolean processSphericalHarmonics(VoxelVolume vv,
         int groupIndex, FourierShapeDescriptor fourierShapeDescriptor,
-        Vector3D cm, double averageDistance)
+        Vector3Dd cm, double averageDistance)
     {
         // (r, tetha, phi)
         double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
@@ -130,7 +130,7 @@ public class ShapeDescriptor3DGenerator extends Component
         IndexedColorImageUncompressed texture;
         int s, t;
         int voxelValue;
-        Vector3D p = new Vector3D();
+        Vector3Dd p = new Vector3Dd();
 
         sphere = new Sphere(r);
 
@@ -144,7 +144,7 @@ public class ShapeDescriptor3DGenerator extends Component
              ((double)s) / ((double)texture.getXSize()) * Math.PI * 2;
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
-                p = Vector3D.fromSpherical(r, tetha, phi);
+                p = Vector3Dd.fromSpherical(r, tetha, phi);
                 p = cm.add(p);
                 voxelValue = vv.getVoxelAtPosition(p.x(), p.y(), p.z());
                 if ( voxelValue < 128 ) {
@@ -184,21 +184,21 @@ public class ShapeDescriptor3DGenerator extends Component
         int i;
         double minmax[];
 
-        Vector3D p;
+        Vector3Dd p;
 
         //-----------------------------------------------------------------
         minmax = referenceBodies.getMinMax();
-        Vector3D min, max, s;
-        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-        s = new Vector3D(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
+        Vector3Dd min, max, s;
+        min = new Vector3Dd(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
+        s = new Vector3Dd(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
 
         double maxsize = s.x();
         if ( s.y() > maxsize ) maxsize = s.y();
         if ( s.z() > maxsize ) maxsize = s.z();
         // The 95% scale factor is to allow a full render of the object to
         // fit inside the rendered view
-        s = new Vector3D((2/maxsize) * 0.95, (2/maxsize) * 0.95,
+        s = new Vector3Dd((2/maxsize) * 0.95, (2/maxsize) * 0.95,
                          (2/maxsize) * 0.95);
 
         p = max.add(min);
@@ -269,13 +269,13 @@ public class ShapeDescriptor3DGenerator extends Component
 
         //- Calculate average distance from nonzero voxels to cm ----------
         // This accounts for scale normalization as in [FUNK2003].4.1.
-        Vector3D cm; // Center of mass for vv, in VoxelVolume coordinates
+        Vector3Dd cm; // Center of mass for vv, in VoxelVolume coordinates
         int x, y, z;
 
         cm = vv.doCenterOfMass();
         int numberOfNonZeroVoxels = 0;
         double d; // Distance between a given voxel and center of mass
-        Vector3D p; // Position of voxel
+        Vector3Dd p; // Position of voxel
         double averageDistance = 0;
 
         for ( x = 0; x < vv.getXSize(); x++ ) {

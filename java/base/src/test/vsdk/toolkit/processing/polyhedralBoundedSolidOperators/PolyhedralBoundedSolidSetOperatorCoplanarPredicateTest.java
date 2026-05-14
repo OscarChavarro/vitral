@@ -6,8 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -71,7 +71,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
-            new Vector3D(0.0, 0.0, 1.0)).boundariesList.get(0)
+            new Vector3Dd(0.0, 0.0, 1.0)).boundariesList.get(0)
             .boundaryStartHalfEdge;
 
         setNumericContextMethod.invoke(null,
@@ -95,7 +95,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
-            new Vector3D(0.0, 0.0, 1.0)).boundariesList.get(0)
+            new Vector3Dd(0.0, 0.0, 1.0)).boundariesList.get(0)
             .boundaryStartHalfEdge;
 
         setNumericContextMethod.invoke(null,
@@ -119,7 +119,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidTestFixtures
             .createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
         _PolyhedralBoundedSolidHalfEdge he = findFaceWithNormal(solid,
-            new Vector3D(0.0, 0.0, 1.0)).boundariesList.get(0)
+            new Vector3Dd(0.0, 0.0, 1.0)).boundariesList.get(0)
             .boundaryStartHalfEdge;
 
         setNumericContextMethod.invoke(null,
@@ -144,12 +144,12 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         PolyhedralBoundedSolid solidA = pair[0];
         PolyhedralBoundedSolid solidB = pair[1];
         double interfaceX = solidA.getMinMax()[3];
-        Vector3D interfacePoint = new Vector3D(interfaceX, 0.0, 0.0);
+        Vector3Dd interfacePoint = new Vector3Dd(interfaceX, 0.0, 0.0);
 
         _PolyhedralBoundedSolidFace faceA = findFaceOnPlane(solidA,
-            interfacePoint, new Vector3D(1.0, 0.0, 0.0));
+            interfacePoint, new Vector3Dd(1.0, 0.0, 0.0));
         _PolyhedralBoundedSolidFace faceB = findFaceOnPlane(solidB,
-            interfacePoint, new Vector3D(-1.0, 0.0, 0.0));
+            interfacePoint, new Vector3Dd(-1.0, 0.0, 0.0));
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace sectorInfo =
             new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace();
 
@@ -292,10 +292,10 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         return sector;
     }
 
-    private static Vector3D directionOnXY(double degrees)
+    private static Vector3Dd directionOnXY(double degrees)
     {
         double radians = Math.toRadians(degrees);
-        return new Vector3D(Math.cos(radians), Math.sin(radians), 0.0);
+        return new Vector3Dd(Math.cos(radians), Math.sin(radians), 0.0);
     }
 
     private static PolyhedralBoundedSolid[] createHollowBrickOperands()
@@ -321,9 +321,9 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
         double sx, double sy, double sz,
         double tx, double ty, double tz)
     {
-        Box box = new Box(new Vector3D(sx, sy, sz));
+        Box box = new Box(new Vector3Dd(sx, sy, sz));
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
         translation = translation.translation(tx, ty, tz);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         return solid;
@@ -331,7 +331,7 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
 
     private static _PolyhedralBoundedSolidFace findFaceWithNormal(
         PolyhedralBoundedSolid solid,
-        Vector3D normalHint)
+        Vector3Dd normalHint)
     {
         int i;
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
@@ -347,8 +347,8 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
 
     private static _PolyhedralBoundedSolidFace findFaceOnPlane(
         PolyhedralBoundedSolid solid,
-        Vector3D pointOnPlane,
-        Vector3D normalHint)
+        Vector3Dd pointOnPlane,
+        Vector3Dd normalHint)
     {
         int i;
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {

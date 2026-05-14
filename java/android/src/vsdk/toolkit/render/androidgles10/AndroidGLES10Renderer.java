@@ -18,7 +18,7 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.render.RenderingElement;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.gui.AndroidSystem;
@@ -429,7 +429,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
         final int currentPos[] = new int[2];
         RGBAImageUncompressed glyphMap = null;
 
-        Matrix4x4[] glyphTextureTransform = {new Matrix4x4()};
+        Matrix4x4d[] glyphTextureTransform = {new Matrix4x4d()};
         ColorRgb fg = characterStyle.getForegroundColor();
         ColorRgb bg = characterStyle.getBackgroundColor();
         int fontSize = characterStyle.getFontSize();
@@ -439,8 +439,8 @@ public class AndroidGLES10Renderer extends RenderingElement {
             ';', ':', '_', '{', '}', '[', ']', 'á', 'é', 'í', 'ó', 'ú', 'ñ',
             'ü', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', ' '};
         HashMap<String, RGBAImageUncompressed> characterSpriteCaches;
-        HashMap<String, Matrix4x4> characterTransformCaches;
-        Matrix4x4 M;
+        HashMap<String, Matrix4x4d> characterTransformCaches;
+        Matrix4x4d M;
 
         characterSpriteCaches = characterStyle.getCharacterSprites();
         characterTransformCaches = characterStyle.getCharacterTransforms();
@@ -452,7 +452,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
+                    M = Matrix4x4d.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
@@ -462,7 +462,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
+                    M = Matrix4x4d.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
@@ -472,7 +472,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
+                    M = Matrix4x4d.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
@@ -483,7 +483,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                     glyphMap, currentPos, glyphTextureTransform,
                     "" + c, fg, bg, fontSize);
                 if ( !characterSpriteCaches.containsKey("" + c) ) {
-                    M = Matrix4x4.copyOf(glyphTextureTransform[0]);
+                    M = Matrix4x4d.copyOf(glyphTextureTransform[0]);
                     characterSpriteCaches.put("" + c, glyphMap);
                     characterTransformCaches.put("" + c, M);
                 }
@@ -512,7 +512,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
 
         HashMap<String, RGBAImageUncompressed> characterSpriteCaches;
         characterSpriteCaches = characterStyle.getCharacterSprites();
-        HashMap<String, Matrix4x4> characterTransformCaches;
+        HashMap<String, Matrix4x4d> characterTransformCaches;
         characterTransformCaches = characterStyle.getCharacterTransforms();
         
         for ( i = 0; i < msg.length(); i++ ) {
@@ -525,7 +525,7 @@ public class AndroidGLES10Renderer extends RenderingElement {
                  characterTransformCaches.containsKey(key) ) {
                 float sx;
                 float sy;
-                Matrix4x4 M;
+                Matrix4x4d M;
                 M = characterTransformCaches.get(key);
                 img = characterSpriteCaches.get(key);
                 sx = (float)M.get(0, 0);

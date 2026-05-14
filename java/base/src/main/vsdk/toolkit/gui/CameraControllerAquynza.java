@@ -1,7 +1,7 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 
 public class CameraControllerAquynza extends CameraController {
@@ -68,9 +68,9 @@ public class CameraControllerAquynza extends CameraController {
     @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
-        Matrix4x4 R; // Camera rotation matrix
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
         int projectionMode;
         double fov;
         double orthogonalZoom;
@@ -291,35 +291,35 @@ public class CameraControllerAquynza extends CameraController {
         if ( deltaY < -5 ) deltaY = -5;
 
         //------------------------------------------------------------
-        Matrix4x4 R; // Camera rotation matrix
-        Matrix4x4 DR;
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
+        Matrix4x4d DR;
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
         double ax, ay;
 
         // Obtain a copy of the camera's internal parameters
         eyePosition = camera.getPosition();
         focusedPosition = camera.getFocusedPosition();
 
-        Vector3D u, v, w;
+        Vector3Dd u, v, w;
         int modifiers;
 
         modifiers = e.getModifiers();
 
         R = camera.getRotation();
-        u = new Vector3D(R.get(0, 0), R.get(1, 0), R.get(2, 0));
-        v = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
-        w = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
+        u = new Vector3Dd(R.get(0, 0), R.get(1, 0), R.get(2, 0));
+        v = new Vector3Dd(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        w = new Vector3Dd(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
         if ( (modifiers & MouseEvent.BUTTON1_DOWN_MASK) != 0 ) {
             // Turn
             ax = -Math.min(2, 0.01*deltaX);
             ay = Math.min(2, 0.01*deltaY);
 
-            DR = new Matrix4x4().axisRotation(ay, v.x(), v.y(), v.z());
+            DR = new Matrix4x4d().axisRotation(ay, v.x(), v.y(), v.z());
             R = DR.multiply(R);
 
-            DR = new Matrix4x4().axisRotation(ax, w.x(), w.y(), w.z());
+            DR = new Matrix4x4d().axisRotation(ax, w.x(), w.y(), w.z());
             R = DR.multiply(R);
 
             updated = true;
@@ -336,7 +336,7 @@ public class CameraControllerAquynza extends CameraController {
             // Advance
             eyePosition = eyePosition.subtract(u.multiply(senseFactor*((double)deltaY)));
             ax = Math.min(2, 0.01*deltaX);
-            DR = new Matrix4x4().axisRotation(ax, u.x(), u.y(), u.z());
+            DR = new Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
             R = DR.multiply(R);
             updated = true;
         }

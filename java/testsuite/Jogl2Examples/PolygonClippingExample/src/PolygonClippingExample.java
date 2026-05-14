@@ -21,7 +21,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.render.jogl.Jogl2Renderer;
 import vsdk.toolkit.gui.AwtSystem;
@@ -76,16 +76,16 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     private void focusCameraOnCurrentScene()
     {
-        Vector3D center = PolygonClippingModelingTools.calculateSceneCenter(model);
-        Vector3D eye = model.getCamera().getPosition();
-        Vector3D focus = model.getCamera().getFocusedPosition();
+        Vector3Dd center = PolygonClippingModelingTools.calculateSceneCenter(model);
+        Vector3Dd eye = model.getCamera().getPosition();
+        Vector3Dd focus = model.getCamera().getFocusedPosition();
         double distance = eye.subtract(focus).length();
         if ( distance < VSDK.EPSILON ) {
             distance = 20.0;
         }
-        model.getCamera().setPosition(new Vector3D(center.x(), center.y() - distance, center.z()));
+        model.getCamera().setPosition(new Vector3Dd(center.x(), center.y() - distance, center.z()));
         model.getCamera().setFocusedPositionMaintainingOrthogonality(center);
-        model.getCamera().setUpMaintainingOrthogonality(new Vector3D(0, 0, 1));
+        model.getCamera().setUpMaintainingOrthogonality(new Vector3Dd(0, 0, 1));
         if ( model.getCameraController() instanceof CameraControllerOrbiter orbiter ) {
             orbiter.setPointOfInterest(center);
         }

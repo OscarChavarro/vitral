@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.light;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 
 // All the public variables here are ugly, but I
@@ -9,7 +9,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 public class Light extends Entity
 {
     public int tipo_de_luz;
-    public Vector3D lvec;             // the position of a point light or
+    public Vector3Dd lvec;             // the position of a point light or
                                       // the direction to a directional light
     private ColorRgb ambient;
     private ColorRgb diffuse;
@@ -30,12 +30,12 @@ public class Light extends Entity
         name = n;
     }
 
-    public Light(int type, Vector3D pos, ColorRgb emission) 
+    public Light(int type, Vector3Dd pos, ColorRgb emission) 
     {
         tipo_de_luz = type;
-        lvec = new Vector3D();
+        lvec = new Vector3Dd();
         if ( type != LightType.AMBIENT ) {
-            lvec = Vector3D.copyOf(pos);
+            lvec = Vector3Dd.copyOf(pos);
             if ( type == LightType.DIRECTIONAL )
             {
                 lvec = lvec.normalized();
@@ -72,14 +72,14 @@ public class Light extends Entity
         specular=new ColorRgb(s);
     }
 
-    public Vector3D getPosition()
+    public Vector3Dd getPosition()
     {
         return lvec;
     }
 
-    public void setPosition(Vector3D pos)
+    public void setPosition(Vector3Dd pos)
     {
-        lvec = Vector3D.copyOf(pos);
+        lvec = Vector3Dd.copyOf(pos);
     }
     
     public ColorRgb getAmbient()

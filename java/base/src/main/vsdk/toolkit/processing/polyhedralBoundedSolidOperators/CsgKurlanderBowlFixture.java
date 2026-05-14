@@ -2,8 +2,8 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -57,11 +57,11 @@ public class CsgKurlanderBowlFixture
     }
 
     private static PolyhedralBoundedSolid createSphere(double radius,
-                                                       Vector3D center)
+                                                       Vector3Dd center)
     {
         PolyhedralBoundedSolid solid = new Sphere(radius)
             .exportToPolyhedralBoundedSolid();
-        Matrix4x4 t = new Matrix4x4();
+        Matrix4x4d t = new Matrix4x4d();
         t = t.translation(center);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
         return solid;
@@ -69,16 +69,16 @@ public class CsgKurlanderBowlFixture
 
     private static PolyhedralBoundedSolid createCylinder(double radius,
                                                          double height,
-                                                         Vector3D translation)
+                                                         Vector3Dd translation)
     {
         PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
             .createCircularLamina(0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
-        Matrix4x4 sweep = new Matrix4x4();
+        Matrix4x4d sweep = new Matrix4x4d();
         sweep = sweep.translation(0.0, 0.0, height);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
 
-        Matrix4x4 move = new Matrix4x4();
+        Matrix4x4d move = new Matrix4x4d();
         move = move.translation(translation);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -86,7 +86,7 @@ public class CsgKurlanderBowlFixture
     }
 
     private static PolyhedralBoundedSolid createExtrudedPolygon(
-        Vector3D[] points, double thickness)
+        Vector3Dd[] points, double thickness)
     {
         int i;
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
@@ -97,7 +97,7 @@ public class CsgKurlanderBowlFixture
         }
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
 
-        Matrix4x4 t = new Matrix4x4();
+        Matrix4x4d t = new Matrix4x4d();
         t = t.translation(0.0, 0.0, thickness);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), t);
@@ -111,12 +111,12 @@ public class CsgKurlanderBowlFixture
         double outerR = scale(2.0);
         double innerR = scale(0.77);
         double start = Math.toRadians(-90.0);
-        Vector3D[] points = new Vector3D[n];
+        Vector3Dd[] points = new Vector3Dd[n];
 
         for ( i = 0; i < n; i++ ) {
             double a = start + i * Math.PI / 5.0;
             double r = (i % 2 == 0) ? outerR : innerR;
-            points[i] = new Vector3D(r * Math.cos(a), r * Math.sin(a), 0.0);
+            points[i] = new Vector3Dd(r * Math.cos(a), r * Math.sin(a), 0.0);
         }
 
         return createExtrudedPolygon(points, scale(5.5));
@@ -125,9 +125,9 @@ public class CsgKurlanderBowlFixture
     private static PolyhedralBoundedSolid createMoon()
     {
         PolyhedralBoundedSolid a = createCylinder(
-            scale(1.5), scale(5.0), new Vector3D(0, 0, 0));
+            scale(1.5), scale(5.0), new Vector3Dd(0, 0, 0));
         PolyhedralBoundedSolid b = createCylinder(
-            scale(1.5), scale(5.0), new Vector3D(scale(1.1), 0, scale(0.6)));
+            scale(1.5), scale(5.0), new Vector3Dd(scale(1.1), 0, scale(0.6)));
         return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
     }
 
@@ -137,7 +137,7 @@ public class CsgKurlanderBowlFixture
         return placeMotif(star, z, azimuthDeg, 1.0, STAR_AXIS_ROLL_DEGREES);
     }
 
-    static Matrix4x4 createStarPlacementTransformation(
+    static Matrix4x4d createStarPlacementTransformation(
         double z, double azimuthDeg)
     {
         return createMotifPlacementTransformation(z, azimuthDeg, 1.0,
@@ -151,7 +151,7 @@ public class CsgKurlanderBowlFixture
             1.0 - MOON_BOWL_INSET_FRACTION, MOON_AXIS_ROLL_DEGREES);
     }
 
-    static Matrix4x4 createMoonPlacementTransformation(
+    static Matrix4x4d createMoonPlacementTransformation(
         double z, double azimuthDeg)
     {
         return createMotifPlacementTransformation(z, azimuthDeg,
@@ -162,22 +162,22 @@ public class CsgKurlanderBowlFixture
         PolyhedralBoundedSolid motif, double z, double azimuthDeg,
         double radialDistanceFactor, double axisRollDeg)
     {
-        Matrix4x4 m = createMotifPlacementTransformation(
+        Matrix4x4d m = createMotifPlacementTransformation(
             z, azimuthDeg, radialDistanceFactor, axisRollDeg);
 
         PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
         return motif;
     }
 
-    private static Matrix4x4 createMotifPlacementTransformation(
+    private static Matrix4x4d createMotifPlacementTransformation(
         double z, double azimuthDeg, double radialDistanceFactor,
         double axisRollDeg)
     {
-        Matrix4x4 ry = new Matrix4x4();
-        Matrix4x4 rz = new Matrix4x4();
-        Matrix4x4 roll = new Matrix4x4();
-        Matrix4x4 t = new Matrix4x4();
-        Matrix4x4 m;
+        Matrix4x4d ry = new Matrix4x4d();
+        Matrix4x4d rz = new Matrix4x4d();
+        Matrix4x4d roll = new Matrix4x4d();
+        Matrix4x4d t = new Matrix4x4d();
+        Matrix4x4d m;
         double azimuthRad = Math.toRadians(azimuthDeg);
         double radialDistance = MOTIF_RADIAL_DISTANCE * radialDistanceFactor;
         double x = scale(radialDistance * Math.cos(azimuthRad));
@@ -239,14 +239,14 @@ public class CsgKurlanderBowlFixture
         PolyhedralBoundedSolid[] operands =
             new PolyhedralBoundedSolid[2];
         PolyhedralBoundedSolid outer = createSphere(
-            scale(10.0), new Vector3D(0, 0, scale(10.0)));
+            scale(10.0), new Vector3Dd(0, 0, scale(10.0)));
         PolyhedralBoundedSolid inner = createSphere(
-            scale(9.5), new Vector3D(0, 0, scale(10.0)));
+            scale(9.5), new Vector3Dd(0, 0, scale(10.0)));
         PolyhedralBoundedSolid shell = booleanOp(
             outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
         PolyhedralBoundedSolid bowl = booleanOp(
             shell,
-            createCylinder(scale(10.5), scale(16.5), new Vector3D(0, 0, 0)),
+            createCylinder(scale(10.5), scale(16.5), new Vector3Dd(0, 0, 0)),
             PolyhedralBoundedSolidModeler.INTERSECTION);
 
         operands[0] = bowl;
@@ -313,9 +313,9 @@ public class CsgKurlanderBowlFixture
         PolyhedralBoundedSolid[] operands =
             new PolyhedralBoundedSolid[2];
         PolyhedralBoundedSolid outer = createSphere(
-            scale(10.0), new Vector3D(0, 0, scale(10.0)));
+            scale(10.0), new Vector3Dd(0, 0, scale(10.0)));
         PolyhedralBoundedSolid inner = createSphere(
-            scale(9.5), new Vector3D(0, 0, scale(10.0)));
+            scale(9.5), new Vector3Dd(0, 0, scale(10.0)));
 
         operands[0] = booleanOp(
             outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
@@ -335,9 +335,9 @@ public class CsgKurlanderBowlFixture
         printProgressMessage(
             "Processing Kurlander bowl all motifs: starting base shell");
         PolyhedralBoundedSolid outer = createSphere(
-            scale(10.0), new Vector3D(0, 0, scale(10.0)));
+            scale(10.0), new Vector3Dd(0, 0, scale(10.0)));
         PolyhedralBoundedSolid inner = createSphere(
-            scale(9.5), new Vector3D(0, 0, scale(10.0)));
+            scale(9.5), new Vector3Dd(0, 0, scale(10.0)));
         PolyhedralBoundedSolid shell = booleanOp(
             outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
         printProgressMessage(
@@ -364,7 +364,7 @@ public class CsgKurlanderBowlFixture
         }
 
         PolyhedralBoundedSolid guide = createCylinder(
-            scale(10.5), scale(16.5), new Vector3D(0, 0, 0));
+            scale(10.5), scale(16.5), new Vector3Dd(0, 0, 0));
         printProgressMessage(
             "Processing Kurlander bowl all motifs: clipping final bowl");
         PolyhedralBoundedSolid result = booleanOpWithoutFaceMaximization(

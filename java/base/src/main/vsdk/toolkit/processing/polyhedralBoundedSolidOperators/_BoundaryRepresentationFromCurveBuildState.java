@@ -1,6 +1,6 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 public class _BoundaryRepresentationFromCurveBuildState
@@ -11,8 +11,8 @@ public class _BoundaryRepresentationFromCurveBuildState
     int nextVertexId;
     int lastLoopStartVertexId;
     int nextFaceId;
-    Vector3D firstPointInLoop;
-    Vector3D lastAcceptedPoint;
+    Vector3Dd firstPointInLoop;
+    Vector3Dd lastAcceptedPoint;
 
     public _BoundaryRepresentationFromCurveBuildState()
     {
@@ -22,7 +22,7 @@ public class _BoundaryRepresentationFromCurveBuildState
         nextVertexId = 1;
         lastLoopStartVertexId = 1;
         nextFaceId = 1;
-        firstPointInLoop = new Vector3D();
+        firstPointInLoop = new Vector3Dd();
         lastAcceptedPoint = null;
     }
 }

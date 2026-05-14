@@ -7,8 +7,8 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
@@ -126,7 +126,7 @@ public class PolyhedralBoundedSolidNumericPolicy
         return fromScale(estimateFaceScale(face));
     }
 
-    public static ToleranceContext forPoints(ArrayList<Vector3D> points)
+    public static ToleranceContext forPoints(ArrayList<Vector3Dd> points)
     {
         return fromScale(estimatePointsScale(points));
     }
@@ -182,7 +182,7 @@ public class PolyhedralBoundedSolidNumericPolicy
                 if ( he == null || he.startingVertex == null ) {
                     continue;
                 }
-                Vector3D p = he.startingVertex.position;
+                Vector3Dd p = he.startingVertex.position;
                 if ( p == null ) {
                     continue;
                 }
@@ -202,7 +202,7 @@ public class PolyhedralBoundedSolidNumericPolicy
         return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    private static double estimatePointsScale(ArrayList<Vector3D> points)
+    private static double estimatePointsScale(ArrayList<Vector3Dd> points)
     {
         if ( points == null || points.size() < 2 ) {
             return MIN_SCALE;
@@ -218,7 +218,7 @@ public class PolyhedralBoundedSolidNumericPolicy
 
         int i;
         for ( i = 0; i < points.size(); i++ ) {
-            Vector3D p = points.get(i);
+            Vector3Dd p = points.get(i);
             if ( p == null ) {
                 continue;
             }
@@ -277,32 +277,32 @@ public class PolyhedralBoundedSolidNumericPolicy
         return Math.abs(value) <= context.bigEpsilon();
     }
 
-    public static boolean pointsCoincident(Vector3D a, Vector3D b,
+    public static boolean pointsCoincident(Vector3Dd a, Vector3Dd b,
                                            ToleranceContext context)
     {
         return VSDK.vectorDistance(a, b) <= context.bigEpsilon();
     }
 
-    public static boolean pointsSeparated(Vector3D a, Vector3D b,
+    public static boolean pointsSeparated(Vector3Dd a, Vector3Dd b,
                                           ToleranceContext context)
     {
         return VSDK.vectorDistance(a, b) > context.bigEpsilon();
     }
 
-    public static int testPointInside(_PolyhedralBoundedSolidFace face, Vector3D point,
+    public static int testPointInside(_PolyhedralBoundedSolidFace face, Vector3Dd point,
                                       ToleranceContext context)
     {
         return face.testPointInside(point, context.bigEpsilon());
     }
 
-    public static boolean vectorsColinear(Vector3D a, Vector3D b,
+    public static boolean vectorsColinear(Vector3Dd a, Vector3Dd b,
                                           ToleranceContext context)
     {
         double scale = Math.max(1.0, Math.max(a.length(), b.length()));
         return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
     }
 
-    public static boolean unitVectorsParallel(Vector3D a, Vector3D b,
+    public static boolean unitVectorsParallel(Vector3Dd a, Vector3Dd b,
                                               ToleranceContext context)
     {
         return a.crossProduct(b).length() <= context.unitVectorTolerance();
@@ -322,8 +322,8 @@ public class PolyhedralBoundedSolidNumericPolicy
                t < 1.0 - context.unitIntervalTolerance();
     }
 
-    public static double orientationTolerance2D(Vector2D a, Vector2D b,
-                                                Vector2D c,
+    public static double orientationTolerance2D(Vector2Dd a, Vector2Dd b,
+                                                Vector2Dd c,
                                                 ToleranceContext context)
     {
         double lx = Math.max(Math.max(Math.abs(a.x() - b.x()), Math.abs(a.x() - c.x())),

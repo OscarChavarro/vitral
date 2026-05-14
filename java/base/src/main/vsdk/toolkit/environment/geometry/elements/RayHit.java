@@ -4,7 +4,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -24,11 +24,11 @@ public class RayHit extends FundamentalEntity {
     public static final int DETAIL_ALL =
         DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT;
 
-    private static final Vector3D ZERO_VECTOR = new Vector3D();
+    private static final Vector3Dd ZERO_VECTOR = new Vector3Dd();
 
-    public Vector3D p; // Intersection point coordinates
-    public Vector3D n; // Surface normal at intersection point
-    public Vector3D t; // Surface tangent at intersection point
+    public Vector3Dd p; // Intersection point coordinates
+    public Vector3Dd n; // Surface normal at intersection point
+    public Vector3Dd t; // Surface tangent at intersection point
     // Note that surface binormal at intersection point must be calculated
     // by the application as the cross product (n x t).
 

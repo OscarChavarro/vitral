@@ -17,7 +17,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 
 /**
 @author Andres Felipe Mejia (Paco el Caco)
@@ -26,12 +26,12 @@ public class CohenSutherlandClipping2D implements
         GLEventListener, AdjustmentListener {
 
     private static final double DELTA = 0.0001;
-    private static Vector2D min;
-    private static Vector2D max;
-    private Vector2D clipped0;
-    private Vector2D clipped1;
-    private static Vector2D p0;
-    private static Vector2D p1;
+    private static Vector2Dd min;
+    private static Vector2Dd max;
+    private Vector2Dd clipped0;
+    private Vector2Dd clipped1;
+    private static Vector2Dd p0;
+    private static Vector2Dd p1;
 
     private JFrame frame;
     private JPanel panel;
@@ -62,10 +62,10 @@ public class CohenSutherlandClipping2D implements
 
     public void createGUI()
     {
-        p0 = new Vector2D(0.85, 0.5);
-        p1 = new Vector2D(-0.85, -0.5);
-        min = new Vector2D(-0.8, -0.8);
-        max = new Vector2D(0.8, 0.8);
+        p0 = new Vector2Dd(0.85, 0.5);
+        p1 = new Vector2Dd(-0.85, -0.5);
+        min = new Vector2Dd(-0.8, -0.8);
+        max = new Vector2Dd(0.8, 0.8);
         recalculateClip();
 
         frame = new JFrame("VITRAL concept test - Cohen Sutherland 2D line clipping");

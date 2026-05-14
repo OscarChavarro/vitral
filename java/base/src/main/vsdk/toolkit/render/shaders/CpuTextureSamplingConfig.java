@@ -1,7 +1,7 @@
 package vsdk.toolkit.render.shaders;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.NormalMap;
 
@@ -39,7 +39,7 @@ public final class CpuTextureSamplingConfig {
         return texture.getColorRgbBiLinear(u + du, v + dv);
     }
 
-    static Vector3D sampleNormal(NormalMap normalMap, double u, double v)
+    static Vector3Dd sampleNormal(NormalMap normalMap, double u, double v)
     {
         if ( normalMap == null ) {
             return null;

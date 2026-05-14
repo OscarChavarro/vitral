@@ -12,7 +12,7 @@ import java.util.Collections;
 // VitralSDK classes
 import java.util.List;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
@@ -46,7 +46,7 @@ class _PolyhedralBoundedSolidSplitterSectorClassification extends _PolyhedralBou
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
     public boolean isWide = false;
-    public Vector3D position;
+    public Vector3Dd position;
     public int situation = UNDEFINED;
 
     @Override
@@ -107,8 +107,8 @@ class _PolyhedralBoundedSolidSplitterNullEdge extends _PolyhedralBoundedSolidOpe
     @Override
     public int compareTo(_PolyhedralBoundedSolidSplitterNullEdge other)
     {
-        Vector3D a;
-        Vector3D b;
+        Vector3Dd a;
+        Vector3Dd b;
 
         a = this.e.rightHalf.startingVertex.position;
         b = other.e.rightHalf.startingVertex.position;
@@ -213,7 +213,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidVertex v1;
         _PolyhedralBoundedSolidVertex v2;
-        Vector3D p;
+        Vector3Dd p;
         double d1;
         double d2;
         double t;
@@ -271,7 +271,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
     private static ArrayList<_PolyhedralBoundedSolidSplitterSectorClassification> getNeighborhood(_PolyhedralBoundedSolidVertex vtx, InfinitePlane inSplittingPlane)
     {
         _PolyhedralBoundedSolidHalfEdge he;
-        Vector3D bisect;
+        Vector3Dd bisect;
         double d;
         _PolyhedralBoundedSolidSplitterSectorClassification c;
 
@@ -285,7 +285,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             d = inSplittingPlane.pointDistance((he.next()).startingVertex.position);
             c.cl = compareToZero(d);
             c.isWide = false;
-            c.position = new Vector3D((he.next()).startingVertex.position);
+            c.position = new Vector3Dd((he.next()).startingVertex.position);
             c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED;
             neighborSectorsInfo.add(c);
             if ( checkWideness(he) ) {
@@ -297,7 +297,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
                 d = inSplittingPlane.pointDistance(bisect);
                 c.cl = compareToZero(d);
                 c.isWide = true;
-                c.position = new Vector3D(bisect);
+                c.position = new Vector3Dd(bisect);
                 c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
                 neighborSectorsInfo.add(c);
             }
@@ -342,7 +342,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         InfinitePlane inSplittingPlane)
     {
         _PolyhedralBoundedSolidFace f;
-        Vector3D c;
+        Vector3Dd c;
         double d;
         int i;
         _PolyhedralBoundedSolidSplitterSectorClassification l;

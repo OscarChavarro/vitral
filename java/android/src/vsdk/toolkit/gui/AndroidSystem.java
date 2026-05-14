@@ -10,7 +10,7 @@ import android.graphics.Typeface;
 
 // VSDK Classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.RGBAPixel;
 import vsdk.toolkit.render.android.AndroidRGBAImageUncompressedRenderer;
@@ -57,7 +57,7 @@ public class AndroidSystem extends PresentationElement
     public static RGBAImageUncompressed addGlyphToFontMap(
         RGBAImageUncompressed inOutFontMap,
         int inOutCurrentPosition[],
-        Matrix4x4[] inOutGlyphTextureTransform,
+        Matrix4x4d[] inOutGlyphTextureTransform,
         final String inCharacter,
         final ColorRgb inForegroundColor,
         final ColorRgb inBackgroundColor,
@@ -99,8 +99,8 @@ public class AndroidSystem extends PresentationElement
         }
 
         // Compute transform
-        Matrix4x4 S = new Matrix4x4();
-        Matrix4x4 T = new Matrix4x4();
+        Matrix4x4d S = new Matrix4x4d();
+        Matrix4x4d T = new Matrix4x4d();
         double ux = inOutFontMap.getXSize();
         double uy = inOutFontMap.getYSize();
         double dx = newGlyph.getXSize()+1;
@@ -112,7 +112,7 @@ public class AndroidSystem extends PresentationElement
         T = T.translation((px/ux), (py/ux), 0);
         if ( inOutGlyphTextureTransform != null &&
              inOutGlyphTextureTransform.length > 0 ) {
-            inOutGlyphTextureTransform[0] = Matrix4x4.copyOf(T.multiply(S));
+            inOutGlyphTextureTransform[0] = Matrix4x4d.copyOf(T.multiply(S));
         }
 
         // Next step for incremental algorithm

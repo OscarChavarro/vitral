@@ -28,7 +28,7 @@ import com.jogamp.opengl.awt.GLJPanel;
 // VSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;    // Model elements
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleScene;
@@ -131,11 +131,11 @@ public class Md2MeshExample
         camera = new Camera();
         cameraController = new CameraControllerAquynza(camera);
         cameraController.setDeltaMovement(10);
-        camera.setPosition(new Vector3D(0, -100, 0));
+        camera.setPosition(new Vector3Dd(0, -100, 0));
         camera.setFarPlaneDistance(4000);
         qualitySelection = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection);
-        light = new Light(LightType.POINT, new Vector3D(10, -20, 50), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
         light.setId(0);
     }
 

@@ -5,7 +5,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
@@ -223,11 +223,11 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     This protected method is here for exclusive use of subclasses
     `_PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
     */
-    protected static Vector3D bisector(_PolyhedralBoundedSolidHalfEdge he)
+    protected static Vector3Dd bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle;
-        Vector3D a;
-        Vector3D b;
+        Vector3Dd middle;
+        Vector3Dd a;
+        Vector3Dd b;
 
         a = (he.next()).startingVertex.position.subtract(he.startingVertex.position);
         b = (he.previous()).startingVertex.position.subtract(he.startingVertex.position);
@@ -351,9 +351,9 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
             return true;
         }
 
-        Vector3D ref1;
-        Vector3D ref2;
-        Vector3D ref12;
+        Vector3Dd ref1;
+        Vector3Dd ref2;
+        Vector3Dd ref12;
 
         ref1 = he.previous().startingVertex.position.subtract(
             he.startingVertex.position);

@@ -8,9 +8,9 @@
 package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
@@ -24,10 +24,10 @@ public class ComputationalGeometry extends ProcessingElement
 {
     public static final class TriangleIntersection {
         public final double t;
-        public final Vector3D point;
-        public final Vector3D normal;
+        public final Vector3Dd point;
+        public final Vector3Dd normal;
 
-        public TriangleIntersection(double t, Vector3D point, Vector3D normal) {
+        public TriangleIntersection(double t, Vector3Dd point, Vector3Dd normal) {
             this.t = t;
             this.point = point;
             this.normal = normal;
@@ -70,7 +70,7 @@ public class ComputationalGeometry extends ProcessingElement
     NOTES:
     <UL>
     <LI>The plane normal is determined for each triangle as the cross product
-    of two Triangle edge Vector3D's, algorithm step (1).
+    of two Triangle edge Vector3Dd's, algorithm step (1).
     <LI>The canonic equation for a plane with normal n is
 \f[
         nx*x + ny*y +nz*z + d = 0
@@ -111,12 +111,12 @@ public class ComputationalGeometry extends ProcessingElement
     public static TriangleIntersection
     doIntersectionWithTriangle(
         Ray inOut_Ray,
-        Vector3D v0, 
-        Vector3D v1, 
-        Vector3D v2) 
+        Vector3Dd v0, 
+        Vector3Dd v1, 
+        Vector3Dd v2) 
     {
-        Vector3D p;           // Point of intersection between ray and plane
-        Vector3D u, v, n;     // Edge vectors and normal
+        Vector3Dd p;           // Point of intersection between ray and plane
+        Vector3Dd u, v, n;     // Edge vectors and normal
         double t, a, b, d;    // Coefficients for solving equation (2)
         double s1, s2, s3;    // Side test for each of triangle border
 
@@ -168,12 +168,12 @@ public class ComputationalGeometry extends ProcessingElement
     @return 
     */
     public static double lineToPointDistance(
-        Vector3D p0, 
-        Vector3D p1,
-        Vector3D p)
+        Vector3Dd p0, 
+        Vector3Dd p1,
+        Vector3Dd p)
     {
         //----------------------------------------------------------------------
-        Vector3D lineVector = p1.subtract(p0);
+        Vector3Dd lineVector = p1.subtract(p0);
 
         double denominator = lineVector.length();
         if ( denominator < VSDK.EPSILON ) {
@@ -181,7 +181,7 @@ public class ComputationalGeometry extends ProcessingElement
         }
 
         //----------------------------------------------------------------------
-        Vector3D v, w;
+        Vector3Dd v, w;
 
         v = p1.subtract(p0);
         w = p.subtract(p0);
@@ -201,7 +201,7 @@ public class ComputationalGeometry extends ProcessingElement
         
         double b;
         b = c1 / c2;
-        Vector3D pb;
+        Vector3Dd pb;
         pb = p0.add(v.multiply(b));
            
         return VSDK.vectorDistance(p, pb);    
@@ -217,9 +217,9 @@ public class ComputationalGeometry extends ProcessingElement
     @return 
     */
     public static int lineContainmentTest(
-        Vector3D p0, 
-        Vector3D p1,
-        Vector3D p, 
+        Vector3Dd p0, 
+        Vector3Dd p1,
+        Vector3Dd p, 
         double distanceTolerance) 
     {
         double d;
@@ -245,13 +245,13 @@ public class ComputationalGeometry extends ProcessingElement
     @return 
     */
     public static int lineSegmentContainmentTest(
-        Vector3D p0, 
-        Vector3D p1,
-        Vector3D p, 
+        Vector3Dd p0, 
+        Vector3Dd p1,
+        Vector3Dd p, 
         double distanceTolerance) 
     {
         double d;
-        Vector3D a, b;
+        Vector3Dd a, b;
 
         a = p1.subtract(p0);
         b = p.subtract(p0);
@@ -291,13 +291,13 @@ public class ComputationalGeometry extends ProcessingElement
     @return 
     */
     public static int triangleContainmentTest(
-        Vector3D p0, 
-        Vector3D p1, 
-        Vector3D p2, 
-        Vector3D p,
+        Vector3Dd p0, 
+        Vector3Dd p1, 
+        Vector3Dd p2, 
+        Vector3Dd p,
         double distanceTolerance)
     {
-        Vector3D n, a, b;
+        Vector3Dd n, a, b;
 
         a = p1.subtract(p0);
         b = p2.subtract(p0);
@@ -308,7 +308,7 @@ public class ComputationalGeometry extends ProcessingElement
         if ( workPlane.doContainmentTest(p, distanceTolerance) == 
              Geometry.LIMIT ) {
             // Barycentric coordinates test containment technique (Region 1)
-            Vector3D c = p.subtract(p0);
+            Vector3Dd c = p.subtract(p0);
             double dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
             dot00 = a.dotProduct(a);
             dot01 = a.dotProduct(b);
@@ -360,7 +360,7 @@ public class ComputationalGeometry extends ProcessingElement
     }
 
     public static void triangleMinMax(
-        Vector3D p0, Vector3D p1, Vector3D p2, double minMax[])
+        Vector3Dd p0, Vector3Dd p1, Vector3Dd p2, double minMax[])
     {
         double minX = Double.MAX_VALUE;
         double minY = Double.MAX_VALUE;
@@ -414,30 +414,30 @@ public class ComputationalGeometry extends ProcessingElement
     outside the clipping rectangle.
     */
     public static boolean cohenSutherlandLineClipping2D(
-        Vector2D p0, 
-        Vector2D p1,
-        Vector2D min, 
-        Vector2D max,
+        Vector2Dd p0, 
+        Vector2Dd p1,
+        Vector2Dd min, 
+        Vector2Dd max,
         double tolerance)
     {
         return cohenSutherlandLineClipping2DResult(p0, p1, min, max, tolerance).accepted();
     }
 
     public static ClippedLine2DResult cohenSutherlandLineClipping2DResult(
-        Vector2D p0,
-        Vector2D p1,
-        Vector2D min,
-        Vector2D max,
+        Vector2Dd p0,
+        Vector2Dd p1,
+        Vector2Dd min,
+        Vector2Dd max,
         double tolerance)
     {
-        Vector2D clipped0 = p0;
-        Vector2D clipped1 = p1;
+        Vector2Dd clipped0 = p0;
+        Vector2Dd clipped1 = p1;
         double minX = Math.min(min.x(), max.x());
         double maxX = Math.max(min.x(), max.x());
         double minY = Math.min(min.y(), max.y());
         double maxY = Math.max(min.y(), max.y());
-        Vector2D clipMin = new Vector2D(minX, minY);
-        Vector2D clipMax = new Vector2D(maxX, maxY);
+        Vector2Dd clipMin = new Vector2Dd(minX, minY);
+        Vector2Dd clipMax = new Vector2Dd(maxX, maxY);
         
         if ( maxX - minX < VSDK.EPSILON ||
              maxY - minY < VSDK.EPSILON ) {
@@ -494,11 +494,11 @@ public class ComputationalGeometry extends ProcessingElement
                 }
             }
             if ( outCodeOut == outCode0 ) {
-                clipped0 = new Vector2D(x, y);
+                clipped0 = new Vector2Dd(x, y);
                 outCode0 = computeCohenSutherland2DCode(clipped0, clipMin, clipMax, tolerance);
             }
             else {
-                clipped1 = new Vector2D(x, y);
+                clipped1 = new Vector2Dd(x, y);
                 outCode1 = computeCohenSutherland2DCode(clipped1, clipMin, clipMax, tolerance);
             }            
         }
@@ -508,10 +508,10 @@ public class ComputationalGeometry extends ProcessingElement
     public static final class ClippedLine2DResult
     {
         private final boolean accepted;
-        private final Vector2D clipped0;
-        private final Vector2D clipped1;
+        private final Vector2Dd clipped0;
+        private final Vector2Dd clipped1;
 
-        public ClippedLine2DResult(boolean accepted, Vector2D clipped0, Vector2D clipped1) {
+        public ClippedLine2DResult(boolean accepted, Vector2Dd clipped0, Vector2Dd clipped1) {
             this.accepted = accepted;
             this.clipped0 = clipped0;
             this.clipped1 = clipped1;
@@ -521,11 +521,11 @@ public class ComputationalGeometry extends ProcessingElement
             return accepted;
         }
 
-        public Vector2D clipped0() {
+        public Vector2Dd clipped0() {
             return clipped0;
         }
 
-        public Vector2D clipped1() {
+        public Vector2Dd clipped1() {
             return clipped1;
         }
     }
@@ -539,7 +539,7 @@ public class ComputationalGeometry extends ProcessingElement
     @return the code in four bits representing the location of the point
     */
     private static int computeCohenSutherland2DCode(
-        Vector2D p, Vector2D min, Vector2D max, double tolerance){
+        Vector2Dd p, Vector2Dd min, Vector2Dd max, double tolerance){
         int outCode;
         outCode = COHEN_SUTHERLAND_2D_INSIDE;
         double e = tolerance;

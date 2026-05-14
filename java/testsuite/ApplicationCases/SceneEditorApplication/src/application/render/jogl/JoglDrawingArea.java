@@ -29,9 +29,9 @@ import com.jogamp.opengl.GLEventListener;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Quaternion;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Quaterniond;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.elements.Triangle;
@@ -309,16 +309,16 @@ public class JoglDrawingArea implements
 
         if ( shouldDrawTranslationGizmo() ) {
             if ( firstThingSelected >= 0 ) {
-                Vector3D position;
+                Vector3Dd position;
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-                Matrix4x4 composed;
+                Matrix4x4d composed;
 
                 position = gi.getPosition();
-                //composed = new Matrix4x4(gi.getRotation());
-                composed = new Matrix4x4();
+                //composed = new Matrix4x4d(gi.getRotation());
+                composed = new Matrix4x4d();
                 composed = composed.withVal(0, 3, position.x());
                 composed = composed.withVal(1, 3, position.y());
                 composed = composed.withVal(2, 3, position.z());
@@ -330,7 +330,7 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == ROTATE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-                Vector3D position;
+                Vector3Dd position;
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
@@ -342,7 +342,7 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-                Vector3D position;
+                Vector3Dd position;
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
@@ -362,21 +362,21 @@ public class JoglDrawingArea implements
         SimpleBodyGroup bodySet = new SimpleBodyGroup();
         int i;
 
-        Vector3D p;
+        Vector3Dd p;
         {
             //-----------------------------------------------------------------
             minmax = referenceBodies.getMinMax();
-            Vector3D min, max, s;
-            min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-            max = new Vector3D(minmax[3], minmax[4], minmax[5]);
-            s = new Vector3D(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
+            Vector3Dd min, max, s;
+            min = new Vector3Dd(minmax[0], minmax[1], minmax[2]);
+            max = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
+            s = new Vector3Dd(max.x() - min.x(), max.y() - min.y(), max.z() - min.z());
 
             double maxsize = s.x();
             if ( s.y() > maxsize ) maxsize = s.y();
             if ( s.z() > maxsize ) maxsize = s.z();
             // The 95% scale factor is to allow a full render of the object to
             // fit inside the rendered view
-            s = new Vector3D((2/maxsize) * 0.95, (2/maxsize) * 0.95,
+            s = new Vector3Dd((2/maxsize) * 0.95, (2/maxsize) * 0.95,
                 (2/maxsize) * 0.95);
 
             p = max.add(min);
@@ -399,9 +399,9 @@ public class JoglDrawingArea implements
                 bodySet.getBodies().add(framedBody);
             }
             //-----------------------------------------------------------------
-            Matrix4x4 Mset = bodySet.getTransformationMatrix(), R, Ri, Mbody, S, M;
+            Matrix4x4d Mset = bodySet.getTransformationMatrix(), R, Ri, Mbody, S, M;
             SimpleBody copiedBody;
-            Quaternion q;
+            Quaterniond q;
 
             for ( i = 0; i < referenceBodies.getBodies().size(); i++ ) {
                 referenceBody = referenceBodies.getBodies().get(i);
@@ -414,11 +414,11 @@ public class JoglDrawingArea implements
                     M = M.withVal(1, 3, 0.0);
                     M = M.withVal(2, 3, 0.0);
                     q = M.exportToQuaternion().normalized();
-                    R = new Matrix4x4();
+                    R = new Matrix4x4d();
                     R = R.importFromQuaternion(q);
                     Ri = R.inverse();
                     S = Ri.multiply(M);
-                    s = new Vector3D(M.get(0, 0), M.get(1, 1), M.get(2, 2));
+                    s = new Vector3Dd(M.get(0, 0), M.get(1, 1), M.get(2, 2));
 
                     copiedBody.setPosition(p);
                     copiedBody.setScale(s);
@@ -476,17 +476,17 @@ public class JoglDrawingArea implements
         SimpleBody boxBody;
         Image texture;
         SimpleBodyGroup group;
-        Vector3D position = new Vector3D(0, 0, 0);
-        Vector3D scale = new Vector3D(1, 1, 1);
-        Matrix4x4 R;
-        Matrix4x4 R1 = new Matrix4x4();
-        Matrix4x4 R2 = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd(0, 0, 0);
+        Vector3Dd scale = new Vector3Dd(1, 1, 1);
+        Matrix4x4d R;
+        Matrix4x4d R1 = new Matrix4x4d();
+        Matrix4x4d R2 = new Matrix4x4d();
         int i;
         double delta = 0.01/2.0;
         TriangleMesh mesh;
         Vertex[] vertexArray;
         Triangle[] triangleArray;
-        Vector3D n;
+        Vector3Dd n;
         Image textureArray[];
         SimpleMaterial materialArray[];
         int materialRanges[][];
@@ -494,108 +494,108 @@ public class JoglDrawingArea implements
 
         group = new SimpleBodyGroup();
         for ( i = 1; i <= 13; i++ ) {
-            R = new Matrix4x4();
+            R = new Matrix4x4d();
             switch ( i ) {
               case 1:
-                position = new Vector3D(0, -2, 0);
-                R = R.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
+                position = new Vector3Dd(0, -2, 0);
+                R = R.axisRotation(Math.toRadians(90), new Vector3Dd(1, 0, 0));
                 break;
               case 2:
-                position = new Vector3D(-2, 0, 0);
-                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
-                R2 = R2.axisRotation(Math.toRadians(90), new Vector3D(0, -1, 0));
+                position = new Vector3Dd(-2, 0, 0);
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3Dd(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(90), new Vector3Dd(0, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 3:
-                position = new Vector3D(0, 0, -2);
-                R = R.axisRotation(Math.toRadians(180), new Vector3D(0, 1, 0));
+                position = new Vector3Dd(0, 0, -2);
+                R = R.axisRotation(Math.toRadians(180), new Vector3Dd(0, 1, 0));
                 break;
               case 4:
-                position = new Vector3D(-1, -1, 1);
+                position = new Vector3Dd(-1, -1, 1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, -1));
-                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(1, -1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(45), new Vector3Dd(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3Dd(1, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 5:
-                position = new Vector3D(1, -1, 1);
+                position = new Vector3Dd(1, -1, 1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
-                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(1, 1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(45), new Vector3Dd(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3Dd(1, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 6:
-                position = new Vector3D(1, 1, 1);
+                position = new Vector3Dd(1, 1, 1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
-                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(-1, 1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(135), new Vector3Dd(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3Dd(-1, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 7:
-                position = new Vector3D(-1, 1, 1);
+                position = new Vector3Dd(-1, 1, 1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(135), new Vector3D(0, 0, -1));
-                R2 = R2.axisRotation(Math.toRadians(35), new Vector3D(-1, -1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(135), new Vector3Dd(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(35), new Vector3Dd(-1, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 8:
-                position = new Vector3D(0, 1, -1);
+                position = new Vector3Dd(0, 1, -1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(180), new Vector3D(0, 0, 1));
-                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(-1, 0, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(180), new Vector3Dd(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3Dd(-1, 0, 0));
                 R = R2.multiply(R1);
                 break;
               case 9:
-                position = new Vector3D(-1, 0, -1);
+                position = new Vector3Dd(-1, 0, -1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, -1));
-                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, -1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3Dd(0, 0, -1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3Dd(0, -1, 0));
                 R = R2.multiply(R1);
                 break;
               case 10:
-                position = new Vector3D(0, -1, -1);
+                position = new Vector3Dd(0, -1, -1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R = R.axisRotation(Math.toRadians(135), new Vector3D(1, 0, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R = R.axisRotation(Math.toRadians(135), new Vector3Dd(1, 0, 0));
                 break;
               case 11:
-                position = new Vector3D(1, 0, -1);
+                position = new Vector3Dd(1, 0, -1);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(0, 0, 1));
-                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, 1, 0));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3Dd(0, 0, 1));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3Dd(0, 1, 0));
                 R = R2.multiply(R1);
                 break;
               case 12:
-                position = new Vector3D(1, -1, 0);
+                position = new Vector3Dd(1, -1, 0);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
-                R2 = R2.axisRotation(Math.toRadians(45), new Vector3D(0, 0, 1));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3Dd(1, 0, 0));
+                R2 = R2.axisRotation(Math.toRadians(45), new Vector3Dd(0, 0, 1));
                 R = R2.multiply(R1);
                 break;
               case 13:
-                position = new Vector3D(1, 1, 0);
+                position = new Vector3Dd(1, 1, 0);
                 position = position.normalized();
                 position = position.multiply(1.5);
-                scale = new Vector3D(0.5, 0.5, 0.5);
-                R1 = R1.axisRotation(Math.toRadians(90), new Vector3D(1, 0, 0));
-                R2 = R2.axisRotation(Math.toRadians(135), new Vector3D(0, 0, 1));
+                scale = new Vector3Dd(0.5, 0.5, 0.5);
+                R1 = R1.axisRotation(Math.toRadians(90), new Vector3Dd(1, 0, 0));
+                R2 = R2.axisRotation(Math.toRadians(135), new Vector3Dd(0, 0, 1));
                 R = R2.multiply(R1);
                 break;
             }
@@ -607,12 +607,12 @@ public class JoglDrawingArea implements
             }
 
             //-----------------------------------------------------------------
-            n = new Vector3D(0, 0, 1);
+            n = new Vector3Dd(0, 0, 1);
             vertexArray = new Vertex[4];
-            vertexArray[0] = new Vertex(new Vector3D(-1, -1, 0), n, 0.0, 0.0);
-            vertexArray[1] = new Vertex(new Vector3D(1, -1, 0), n, 1.0, 0.0);
-            vertexArray[2] = new Vertex(new Vector3D(1, 1, 0), n, 1.0, 1.0);
-            vertexArray[3] = new Vertex(new Vector3D(-1, 1, 0), n, 0.0, 1.0);
+            vertexArray[0] = new Vertex(new Vector3Dd(-1, -1, 0), n, 0.0, 0.0);
+            vertexArray[1] = new Vertex(new Vector3Dd(1, -1, 0), n, 1.0, 0.0);
+            vertexArray[2] = new Vertex(new Vector3Dd(1, 1, 0), n, 1.0, 1.0);
+            vertexArray[3] = new Vertex(new Vector3Dd(-1, 1, 0), n, 0.0, 1.0);
             triangleArray = new Triangle[2];
             triangleArray[0] = new Triangle(0, 1, 2);
             triangleArray[1] = new Triangle(2, 3, 0);
@@ -726,7 +726,7 @@ public class JoglDrawingArea implements
                 NormalMap nm;
                 zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
                 nm = new NormalMap();
-                nm.importBumpMap(zbuffer, new Vector3D(1, 1, 0.1));
+                nm.importBumpMap(zbuffer, new Vector3Dd(1, 1, 0.1));
                 parent.zbufferImage = nm.exportToRgbImageGradient();
             }
             else {
@@ -789,7 +789,7 @@ public class JoglDrawingArea implements
 /*
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
         gl.glDisable(gl.GL_DEPTH_TEST);
-        Vector3D projected = new Vector3D();
+        Vector3Dd projected = new Vector3Dd();
         if ( view.getCamera().projectPoint(
              parent.visualDebugRay.origin, projected) ) {
             view.drawTextureString2D(gl,
@@ -911,11 +911,11 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawVisualRayDebugSegment(GL2 gl, Vector3D start, Vector3D end, boolean follow, double w, double tip,
+    private void drawVisualRayDebugSegment(GL2 gl, Vector3Dd start, Vector3Dd end, boolean follow, double w, double tip,
         SimpleMaterial segmentMaterial)
     {
         double l;
-        Vector3D diff = end.subtract(start);
+        Vector3Dd diff = end.subtract(start);
         l = diff.length();
 
         gl.glEnable(GL2.GL_LIGHTING);
@@ -930,7 +930,7 @@ public class JoglDrawingArea implements
         else {
             a = new Cone(w/2, w/2, l);
         }
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         double yaw, pitch;
         yaw = diff.obtainSphericalThetaAngle();
         pitch = diff.obtainSphericalPhiAngle();
@@ -945,7 +945,7 @@ public class JoglDrawingArea implements
         //-----------------------------------------------------------------
         if ( follow ) {
             Sphere s = new Sphere(0.025);
-            Vector3D p;
+            Vector3Dd p;
             double offset = 0.1;
             int i;
             diff = diff.normalized();
@@ -969,8 +969,8 @@ public class JoglDrawingArea implements
         gl.glLoadIdentity();
 
         //-----------------------------------------------------------------
-        Vector3D p;
-        Vector3D d = new Vector3D(ray.direction());
+        Vector3Dd p;
+        Vector3Dd d = new Vector3Dd(ray.direction());
         d = d.normalized();
         RayHit info;
 
@@ -997,9 +997,9 @@ public class JoglDrawingArea implements
                 drawVisualRayDebugSegment(gl, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2, normalMaterial);
             }
             // Reflection ray
-            Vector3D dd = ray.direction().multiply(-1);
+            Vector3Dd dd = ray.direction().multiply(-1);
             dd = dd.normalized();
-            Vector3D h = info.n.multiply(dd.dotProduct(info.n)).subtract(dd);
+            Vector3Dd h = info.n.multiply(dd.dotProduct(info.n)).subtract(dd);
             Ray subray = new Ray(p, dd.add(h.multiply(2)));
             subray = subray.withOrigin(
                 subray.origin().add(subray.direction().multiply(VSDK.EPSILON*10.0)));
@@ -1203,15 +1203,15 @@ public class JoglDrawingArea implements
 
             if ( firstThingSelected >= 0 ) {
                 //------------------------------------------------------------
-                Vector3D position;
+                Vector3Dd position;
                 SimpleBody gi;
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-                Matrix4x4 composed;
+                Matrix4x4d composed;
 
                 position = gi.getPosition();
-                //composed = new Matrix4x4(gi.getRotation());
-                composed = new Matrix4x4();
+                //composed = new Matrix4x4d(gi.getRotation());
+                composed = new Matrix4x4d();
                 composed = composed.withVal(0, 3, position.x());
                 composed = composed.withVal(1, 3, position.y());
                 composed = composed.withVal(2, 3, position.z());
@@ -1254,16 +1254,16 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                   firstThingSelected >= 0 ) {
-            Vector3D position;
+            Vector3Dd position;
             SimpleBody gi;
 
             gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-            Matrix4x4 composed;
+            Matrix4x4d composed;
 
             position = gi.getPosition();
-            //composed = new Matrix4x4(gi.getRotation());
-            composed = new Matrix4x4();
+            //composed = new Matrix4x4d(gi.getRotation());
+            composed = new Matrix4x4d();
             composed = composed.withVal(0, 3, position.x());
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
@@ -1306,16 +1306,16 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                   firstThingSelected >= 0 ) {
-            Vector3D position;
+            Vector3Dd position;
             SimpleBody gi;
 
             gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-            Matrix4x4 composed;
+            Matrix4x4d composed;
 
             position = gi.getPosition();
-            //composed = new Matrix4x4(gi.getRotation());
-            composed = new Matrix4x4();
+            //composed = new Matrix4x4d(gi.getRotation());
+            composed = new Matrix4x4d();
             composed = composed.withVal(0, 3, position.x());
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
@@ -1357,16 +1357,16 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                   firstThingSelected >= 0 ) {
-            Vector3D position;
+            Vector3Dd position;
             SimpleBody gi;
 
             gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-            Matrix4x4 composed;
+            Matrix4x4d composed;
 
             position = gi.getPosition();
-            //composed = new Matrix4x4(gi.getRotation());
-            composed = new Matrix4x4();
+            //composed = new Matrix4x4d(gi.getRotation());
+            composed = new Matrix4x4d();
             composed = composed.withVal(0, 3, position.x());
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
@@ -1404,16 +1404,16 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
                   firstThingSelected >= 0 ) {
-            Vector3D position;
+            Vector3Dd position;
             SimpleBody gi;
 
             gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
-            Matrix4x4 composed;
+            Matrix4x4d composed;
 
             position = gi.getPosition();
-            //composed = new Matrix4x4(gi.getRotation());
-            composed = new Matrix4x4();
+            //composed = new Matrix4x4d(gi.getRotation());
+            composed = new Matrix4x4d();
             composed = composed.withVal(0, 3, position.x());
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
@@ -1494,15 +1494,15 @@ public class JoglDrawingArea implements
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
             if ( firstThingSelected >= 0 ) {
-                Matrix4x4 composed;
-                Vector3D position;
+                Matrix4x4d composed;
+                Vector3Dd position;
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
 
                 position = gi.getPosition();
-                //composed = new Matrix4x4(gi.getRotation());
-                composed = new Matrix4x4();
+                //composed = new Matrix4x4d(gi.getRotation());
+                composed = new Matrix4x4d();
                 composed = composed.withVal(0, 3, position.x());
                 composed = composed.withVal(1, 3, position.y());
                 composed = composed.withVal(2, 3, position.z());
@@ -1525,14 +1525,14 @@ public class JoglDrawingArea implements
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-                Matrix4x4 R = gi.getRotation();
+                Matrix4x4d R = gi.getRotation();
 
                 rotateGizmo.setTransformationMatrix(R);
 
                 if ( rotateGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     R = rotateGizmo.getTransformationMatrix();
                     gi.setRotation(R);
-                    Matrix4x4 Ri = new Matrix4x4(R);
+                    Matrix4x4d Ri = new Matrix4x4d(R);
                     Ri = Ri.invert();
                     gi.setRotationInverse(Ri);
                 }
@@ -1543,8 +1543,8 @@ public class JoglDrawingArea implements
                 SimpleBody gi;
 
                 gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-                Vector3D s = gi.getScale();
-                Matrix4x4 S = new Matrix4x4();
+                Vector3Dd s = gi.getScale();
+                Matrix4x4d S = new Matrix4x4d();
                 S = S.withVal(0, 0, s.x());
                 S = S.withVal(1, 1, s.y());
                 S = S.withVal(2, 2, s.z());
@@ -1553,7 +1553,7 @@ public class JoglDrawingArea implements
 
                 if ( scaleGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
                     S = scaleGizmo.getTransformationMatrix();
-                    s = new Vector3D(S.get(0, 0), S.get(1, 1), S.get(2, 2));
+                    s = new Vector3Dd(S.get(0, 0), S.get(1, 1), S.get(2, 2));
                     gi.setScale(s);
                 }
             }
@@ -1723,7 +1723,7 @@ public class JoglDrawingArea implements
                         parent.visualDebugRay.direction().obtainSphericalPhiAngle();
                     theta -= Math.toRadians(5);
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
-                        Vector3D.fromSpherical(1, theta, phi));
+                        Vector3Dd.fromSpherical(1, theta, phi));
                 }
                 break;
               case '/': // Numpad /
@@ -1734,7 +1734,7 @@ public class JoglDrawingArea implements
                         parent.visualDebugRay.direction().obtainSphericalPhiAngle();
                     theta += Math.toRadians(5);
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
-                        Vector3D.fromSpherical(1, theta, phi));
+                        Vector3Dd.fromSpherical(1, theta, phi));
                 }
                 break;
               case '+': // Numpad +
@@ -1746,7 +1746,7 @@ public class JoglDrawingArea implements
                     phi += Math.toRadians(5);
                     if ( phi > Math.PI ) phi = Math.PI;
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
-                        Vector3D.fromSpherical(1, theta, phi));
+                        Vector3Dd.fromSpherical(1, theta, phi));
                 }
                 break;
               case '-': // Numpad -
@@ -1758,7 +1758,7 @@ public class JoglDrawingArea implements
                     phi -= Math.toRadians(5);
                     if ( phi < 0 ) phi = 0;
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
-                        Vector3D.fromSpherical(1, theta, phi));
+                        Vector3Dd.fromSpherical(1, theta, phi));
                 }
                 break;
                 //------------------------------------------------------------
@@ -1797,7 +1797,7 @@ public class JoglDrawingArea implements
                                 //String imageFilename = "../../../../etc/bumpmaps/blinn2.bw";
                             String imageFilename = "../../../../etc/bumpmaps/earth.bw";
                             source = ImagePersistence.importIndexedColor(new File(imageFilename));
-                            normalMap.importBumpMap(source, new Vector3D(1, 1, 0.2));
+                            normalMap.importBumpMap(source, new Vector3Dd(1, 1, 0.2));
                             //exported = normalMap.exportToRgbImage();
                             //ImagePersistence.exportPPM(new File("./outputmap.ppm"), exported);
                         }
@@ -1892,8 +1892,8 @@ public class JoglDrawingArea implements
         canvas.repaint();
     }
 
-    private void applyTransformToSelectedObjects(Vector3D position,
-                                                 Matrix4x4 rotation)
+    private void applyTransformToSelectedObjects(Vector3Dd position,
+                                                 Matrix4x4d rotation)
     {
         SimpleBody gi;
         int firstThingSelected = theScene.selectedThings.firstSelected();
@@ -1905,13 +1905,13 @@ public class JoglDrawingArea implements
 
             gi.setPosition(position);
             gi.setRotation(rotation);
-            rotation = new Matrix4x4(rotation);
+            rotation = new Matrix4x4d(rotation);
             rotation = rotation.invert();
             gi.setRotationInverse(rotation);
         }
     }
 
-    private void applyTranslationToSelectedObjects(Vector3D position)
+    private void applyTranslationToSelectedObjects(Vector3Dd position)
     {
         SimpleBody gi;
         int firstThingSelected = theScene.selectedThings.firstSelected();

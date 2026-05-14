@@ -23,7 +23,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.KeyEvent;
@@ -108,25 +108,25 @@ public class InteractiveDebugger extends JFrame implements
         }
     }
 
-    private Vector3D calculateSolidCenter()
+    private Vector3Dd calculateSolidCenter()
     {
         if ( model.getSolid() == null ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
 
         double[] minMax = model.getSolid().getMinMax();
         if ( minMax == null || minMax.length < 6 ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
 
-        return new Vector3D(
+        return new Vector3Dd(
             (minMax[0] + minMax[3]) / 2.0,
             (minMax[1] + minMax[4]) / 2.0,
             (minMax[2] + minMax[5]) / 2.0);
     }
 
     private void recenterOrbiterAfterModelChange(SolidModelNames previousModelName,
-                                                 Vector3D previousPointOfInterest)
+                                                 Vector3Dd previousPointOfInterest)
     {
         if ( previousModelName == model.getSolidModelName() ) {
             return;
@@ -141,10 +141,10 @@ public class InteractiveDebugger extends JFrame implements
         CameraControllerOrbiter orbiterController =
             (CameraControllerOrbiter)model.getCameraController();
 
-        Vector3D previousEye = model.getCamera().getPosition();
-        Vector3D relativeVector = previousEye.subtract(previousPointOfInterest);
-        Vector3D newPointOfInterest = calculateSolidCenter();
-        Vector3D newEye = newPointOfInterest.add(relativeVector);
+        Vector3Dd previousEye = model.getCamera().getPosition();
+        Vector3Dd relativeVector = previousEye.subtract(previousPointOfInterest);
+        Vector3Dd newPointOfInterest = calculateSolidCenter();
+        Vector3Dd newEye = newPointOfInterest.add(relativeVector);
 
         orbiterController.setPointOfInterest(newPointOfInterest);
         model.getCamera().setPosition(newEye);
@@ -413,7 +413,7 @@ public class InteractiveDebugger extends JFrame implements
     public void keyPressed(java.awt.event.KeyEvent e) {
         KeyEvent event = AwtSystem.awt2vsdkEvent(e);
         SolidModelNames previousModelName = model.getSolidModelName();
-        Vector3D previousPointOfInterest = new Vector3D(0, 0, 0);
+        Vector3Dd previousPointOfInterest = new Vector3Dd(0, 0, 0);
         if ( model.getCameraController() instanceof CameraControllerOrbiter ) {
             CameraControllerOrbiter orbiterController =
                 (CameraControllerOrbiter)model.getCameraController();

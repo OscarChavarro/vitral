@@ -5,7 +5,7 @@ import java.nio.FloatBuffer;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
 final class Jogl4LineRenderer {
     private static final String VERTEX_SHADER_FILE = "lineVertexShader.glsl";
@@ -24,7 +24,7 @@ final class Jogl4LineRenderer {
 
     static void drawLines(
         GL4 gl,
-        Matrix4x4 modelViewProjection,
+        Matrix4x4d modelViewProjection,
         float[] positions,
         float[] colors,
         float lineWidth)
@@ -34,7 +34,7 @@ final class Jogl4LineRenderer {
 
     static void drawLines(
         GL4 gl,
-        Matrix4x4 modelViewProjection,
+        Matrix4x4d modelViewProjection,
         float[] positions,
         float[] colors,
         float lineWidth,

@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.util.ArrayList;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 /**
 A vertex is a basic data pack for tipically used operations in computer
@@ -28,16 +28,16 @@ public class Vertex extends FundamentalEntity
     @Serial private static final long serialVersionUID = 20060502L;
 
     ///
-    public Vector3D position;
+    public Vector3Dd position;
 
     ///
-    public Vector3D normal;
+    public Vector3Dd normal;
 
     ///
-    public Vector3D binormal;
+    public Vector3Dd binormal;
 
     ///
-    public Vector3D tangent;
+    public Vector3Dd tangent;
 
     /// Texture coordinates
     public double u;
@@ -47,49 +47,49 @@ public class Vertex extends FundamentalEntity
     public ArrayList<Triangle> incidentTriangles;
 
     public Vertex(double x, double y, double z) {
-        position = new Vector3D(x, y, z);
-        normal = new Vector3D(1, 0, 0);
-        binormal = new Vector3D(0, 1, 0);
-        tangent = new Vector3D(0, 0, 1);
+        position = new Vector3Dd(x, y, z);
+        normal = new Vector3Dd(1, 0, 0);
+        binormal = new Vector3Dd(0, 1, 0);
+        tangent = new Vector3Dd(0, 0, 1);
         incidentTriangles = null;
         u = 0.0;
         v = 0.0;
     }
 
-    public Vertex(Vector3D position) {
+    public Vertex(Vector3Dd position) {
         this.position = position;
-        normal = new Vector3D(1, 0, 0);
-        binormal = new Vector3D(0, 1, 0);
-        tangent = new Vector3D(0, 0, 1);
+        normal = new Vector3Dd(1, 0, 0);
+        binormal = new Vector3Dd(0, 1, 0);
+        tangent = new Vector3Dd(0, 0, 1);
         incidentTriangles = null;
         u = 0.0;
         v = 0.0;
     }
 
-    public Vertex(Vector3D position, Vector3D normal) {
-        this.position = new Vector3D(position);
-        this.normal = new Vector3D(normal).normalized();
+    public Vertex(Vector3Dd position, Vector3Dd normal) {
+        this.position = new Vector3Dd(position);
+        this.normal = new Vector3Dd(normal).normalized();
 
-        binormal = new Vector3D(0, 1, 0);
-        tangent = new Vector3D(0, 0, 1);
+        binormal = new Vector3Dd(0, 1, 0);
+        tangent = new Vector3Dd(0, 0, 1);
         incidentTriangles = null;
         u = 0.0;
         v = 0.0;
     }
 
-    public Vertex(Vector3D position, Vector3D normal, double u, double v) {
-        this.position = new Vector3D(position);
-        this.normal = new Vector3D(normal).normalized();
+    public Vertex(Vector3Dd position, Vector3Dd normal, double u, double v) {
+        this.position = new Vector3Dd(position);
+        this.normal = new Vector3Dd(normal).normalized();
 
-        binormal = new Vector3D(0, 1, 0);
-        tangent = new Vector3D(0, 0, 1);
+        binormal = new Vector3Dd(0, 1, 0);
+        tangent = new Vector3Dd(0, 0, 1);
         incidentTriangles = null;
         this.u = u;
         this.v = v;
     }
 
-    public Vertex(Vector3D position, Vector3D normal, Vector3D binormal,
-                  Vector3D tangent) {
+    public Vertex(Vector3Dd position, Vector3Dd normal, Vector3Dd binormal,
+                  Vector3Dd tangent) {
         this.position = position;
         this.normal = normal;
         this.binormal = binormal;
@@ -109,19 +109,19 @@ public class Vertex extends FundamentalEntity
         v = vertex.v;
     }
 
-    public Vector3D getPosition() {
+    public Vector3Dd getPosition() {
         return this.position;
     }
 
-    public Vector3D getNormal() {
+    public Vector3Dd getNormal() {
         return normal;
     }
 
-    public Vector3D getBinormal() {
+    public Vector3Dd getBinormal() {
         return this.binormal;
     }
 
-    public Vector3D getTangent() {
+    public Vector3Dd getTangent() {
         return this.tangent;
     }
 
@@ -137,19 +137,19 @@ public class Vertex extends FundamentalEntity
         return this.incidentTriangles;
     }
 
-    public void setPosition(Vector3D position) {
-        this.position = new Vector3D(position);
+    public void setPosition(Vector3Dd position) {
+        this.position = new Vector3Dd(position);
     }
 
-    public void setNormal(Vector3D normal) {
-        this.normal = new Vector3D(normal).normalized();
+    public void setNormal(Vector3Dd normal) {
+        this.normal = new Vector3Dd(normal).normalized();
     }
 
-    public void setBinormal(Vector3D binormal) {
+    public void setBinormal(Vector3Dd binormal) {
         this.binormal = binormal;
     }
 
-    public void setTangent(Vector3D tangent) {
+    public void setTangent(Vector3Dd tangent) {
         this.tangent = tangent;
     }
 

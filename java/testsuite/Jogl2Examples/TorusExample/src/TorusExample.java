@@ -35,7 +35,7 @@ import com.jogamp.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;              // Model elements
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -188,7 +188,7 @@ public class TorusExample implements
         
         light = 
             new Light(
-                LightType.POINT, new Vector3D(3, 3, 5), new ColorRgb(1, 1, 1));
+                LightType.POINT, new Vector3Dd(3, 3, 5), new ColorRgb(1, 1, 1));
         light.setId(0);
         material = new SimpleMaterial();
         material = material.withAmbient(new ColorRgb(0.2, 0.2, 0.2));

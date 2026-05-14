@@ -17,7 +17,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -293,7 +293,7 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         gl.glLineWidth(1.0f);
 
         gl.glBegin(GL.GL_LINES);
-        Vertex vertex = new Vertex(new Vector3D(), new Vector3D());
+        Vertex vertex = new Vertex(new Vector3Dd(), new Vector3Dd());
         int i;
         for ( i = 0; i < mesh.getNumVertices(); i++ ) {
             mesh.getVertexAt(i, vertex);
@@ -523,9 +523,9 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int t[];
 
         gl.glBegin(GL.GL_TRIANGLES);
-        v0 = new Vertex(new Vector3D(), new Vector3D());
-        v1 = new Vertex(new Vector3D(), new Vector3D());
-        v2 = new Vertex(new Vector3D(), new Vector3D());
+        v0 = new Vertex(new Vector3Dd(), new Vector3Dd());
+        v1 = new Vertex(new Vector3Dd(), new Vector3Dd());
+        v2 = new Vertex(new Vector3Dd(), new Vector3Dd());
         t = mesh.getTriangleIndexes();
         for ( int i = start; i < end; i++ ) {
             mesh.getVertexAt(t[3*i], v0);
@@ -570,9 +570,9 @@ public class Jogl2TriangleMeshRenderer extends Jogl2Renderer {
         int t[];
 
         gl.glBegin(GL.GL_TRIANGLES);
-        v0 = new Vertex(new Vector3D(), new Vector3D());
-        v1 = new Vertex(new Vector3D(), new Vector3D());
-        v2 = new Vertex(new Vector3D(), new Vector3D());
+        v0 = new Vertex(new Vector3Dd(), new Vector3Dd());
+        v1 = new Vertex(new Vector3Dd(), new Vector3Dd());
+        v2 = new Vertex(new Vector3Dd(), new Vector3Dd());
         t = mesh.getTriangleIndexes();
         for ( int i = start; i < end; i++ ) {
             if ( i >= t.length/3 ) {

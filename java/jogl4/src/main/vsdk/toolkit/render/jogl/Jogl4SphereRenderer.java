@@ -7,8 +7,8 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -28,7 +28,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static final float NORMAL_START_EPSILON = 0.002f;
     private static final float NORMAL_LINE_DEPTH_BIAS_NDC = -1.0e-4f;
     // [BLIN1978b] bump scales used by both shader and raytracer examples.
-    private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
+    private static final Vector3Dd DEFAULT_BUMP_SCALE = new Vector3Dd(1.0, 1.0, 1.0);
     private static final float[] VERTEX_NORMAL_COLOR = new float[] { 1.0f, 1.0f, 0.0f };
     private static final float[] TRIANGLE_NORMAL_COLOR = new float[] { 0.0f, 1.0f, 1.0f };
 
@@ -95,7 +95,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             quality,
             textureMap,
             normalMap,
-            Matrix4x4.identityMatrix(),
+            Matrix4x4d.identityMatrix(),
             slices,
             stacks);
     }
@@ -109,7 +109,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         RendererConfiguration quality,
         RGBImageUncompressed textureMap,
         RGBImageUncompressed normalMap,
-        Matrix4x4 modelViewLocal,
+        Matrix4x4d modelViewLocal,
         int slices,
         int stacks)
     {
@@ -124,11 +124,11 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         int textureId = hasTexture ? Jogl4ImageRenderer.activate(gl, textureMap) : 0;
         int normalMapId = (hasNormalMap && quality.isBumpMapSet()) ? Jogl4ImageRenderer.activate(gl, normalMap) : 0;
 
-        Matrix4x4 localTransform = (modelViewLocal != null)
+        Matrix4x4d localTransform = (modelViewLocal != null)
             ? modelViewLocal
-            : Matrix4x4.identityMatrix();
-        Matrix4x4 modelViewProjection = camera.calculateProjectionMatrix().multiply(localTransform);
-        Matrix4x4 modelViewITLocal = localTransform.invert().transpose();
+            : Matrix4x4d.identityMatrix();
+        Matrix4x4d modelViewProjection = camera.calculateProjectionMatrix().multiply(localTransform);
+        Matrix4x4d modelViewITLocal = localTransform.invert().transpose();
 
         if ( quality.isSurfacesSet() ) {
             int programId = Jogl4RendererConfigurationShaderSelector.selectSurfaceShaderProgram(
@@ -321,9 +321,9 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static void configureProgram(
         GL4 gl,
         int programId,
-        Matrix4x4 modelViewProjection,
-        Matrix4x4 modelViewLocal,
-        Matrix4x4 modelViewITLocal,
+        Matrix4x4d modelViewProjection,
+        Matrix4x4d modelViewLocal,
+        Matrix4x4d modelViewITLocal,
         Camera camera,
         Light light,
         SimpleMaterial material,
@@ -376,7 +376,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         }
     }
 
-    private static void setMatrix(GL4 gl, int programId, String name, Matrix4x4 matrix)
+    private static void setMatrix(GL4 gl, int programId, String name, Matrix4x4d matrix)
     {
         int loc = gl.glGetUniformLocation(programId, name);
         if ( loc >= 0 ) {
@@ -384,7 +384,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         }
     }
 
-    private static void setVector3(GL4 gl, int programId, String name, Vector3D value)
+    private static void setVector3(GL4 gl, int programId, String name, Vector3Dd value)
     {
         int loc = gl.glGetUniformLocation(programId, name);
         if ( loc >= 0 ) {
@@ -559,10 +559,10 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         float[] binormals,
         int index)
     {
-        Vector3D p = sphere.spherePosition(theta, phi);
-        Vector3D n = sphere.sphereNormal(theta, phi);
-        Vector3D tangent = sphere.sphereTangent(theta, phi);
-        Vector3D binormal = sphere.sphereBinormal(theta, phi);
+        Vector3Dd p = sphere.spherePosition(theta, phi);
+        Vector3Dd n = sphere.sphereNormal(theta, phi);
+        Vector3Dd tangent = sphere.sphereTangent(theta, phi);
+        Vector3Dd binormal = sphere.sphereBinormal(theta, phi);
 
         positions[index] = (float)p.x();
         normals[index] = (float)n.x();
@@ -651,7 +651,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static void drawNormalOverlays(
         GL4 gl,
         RendererConfiguration quality,
-        Matrix4x4 modelViewProjection)
+        Matrix4x4d modelViewProjection)
     {
         if ( meshPositionsHost == null || meshNormalsHost == null ) {
             return;

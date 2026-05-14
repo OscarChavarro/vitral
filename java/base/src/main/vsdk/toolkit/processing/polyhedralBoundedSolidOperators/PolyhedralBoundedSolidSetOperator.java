@@ -28,8 +28,8 @@ import java.io.ObjectOutputStream;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -117,7 +117,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             .compareToZero(value);
     }
 
-    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
+    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3Dd point)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
@@ -289,7 +289,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int BvsA)
     {
         _PolyhedralBoundedSolidHalfEdge he;
-        Vector3D bisect;
+        Vector3Dd bisect;
         double d;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace c;
 
@@ -303,7 +303,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             d = referencePlane.pointDistance((he.next()).startingVertex.position);
             c.cl = compareToZero(d);
             c.isWide = false;
-            c.position = new Vector3D((he.next()).startingVertex.position);
+            c.position = new Vector3Dd((he.next()).startingVertex.position);
             c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
             c.referencePlane = referencePlane;
             neighborSectorsInfo.add(c);
@@ -316,7 +316,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 d = referencePlane.pointDistance(bisect);
                 c.cl = compareToZero(d);
                 c.isWide = true;
-                c.position = new Vector3D(bisect);
+                c.position = new Vector3Dd(bisect);
                 c.situation = _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
                 c.referencePlane = referencePlane;
                 neighborSectorsInfo.add(c);
@@ -777,12 +777,12 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     Constructs a vector along the bisector of the sector defined by `he`.
     that points inward the he's containing face.
     */
-    protected static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
+    protected static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle = null;
-        Vector3D a;
-        Vector3D b;
-        Vector3D n;
+        Vector3Dd middle = null;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd n;
 
         a = (he.next()).startingVertex.position.subtract(he.startingVertex.position);
         b = (he.previous()).startingVertex.position.subtract(he.startingVertex.position);
@@ -807,14 +807,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex n;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nold;
-        Vector3D bisec;
+        Vector3Dd bisec;
         _PolyhedralBoundedSolidHalfEdge he;
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nb;
 
         nb = new ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>();
 
         he = v.emanatingHalfEdge;
-        Vector3D oldref2;
+        Vector3Dd oldref2;
 
         do {
             n = new _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex();
@@ -898,15 +898,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
       - c2 is the cross product of dir and ref2, or `test2` in figure
         [MANT1988].15.8. and equation [MANT1988].15.5.
     */
-    private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
-                            Vector3D ref2, Vector3D ref12)
+    private static boolean sctrwitthin(Vector3Dd dir, Vector3Dd ref1,
+                            Vector3Dd ref2, Vector3Dd ref12)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
     }
 
-    private static boolean sctrwitthinProper(Vector3D dir, Vector3D ref1,
-                                             Vector3D ref2, Vector3D ref12)
+    private static boolean sctrwitthinProper(Vector3Dd dir, Vector3Dd ref1,
+                                             Vector3Dd ref2, Vector3Dd ref12)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthinProper(dir, ref1, ref2, ref12);
@@ -935,9 +935,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         //-----------------------------------------------------------------
         // Here, n1 and n2 are the plane normals for containing faces of
         // sectors i and j, as in figure [MANT1988].15.7.
-        Vector3D n1;
-        Vector3D n2;
-        Vector3D intrs;
+        Vector3Dd n1;
+        Vector3Dd n2;
+        Vector3Dd intrs;
 
         n1 = h1.parentLoop.parentFace.getContainingPlane().getNormal();
         n2 = h2.parentLoop.parentFace.getContainingPlane().getNormal();
@@ -1020,8 +1020,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         double d4;
         int j;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector s;
-        Vector3D na;
-        Vector3D nb;
+        Vector3Dd na;
+        Vector3Dd nb;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xa;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex xb;
 
@@ -1093,8 +1093,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int prevsectb;
         int nextsectb;
         double d;
-        Vector3D n1;
-        Vector3D n2;
+        Vector3Dd n1;
+        Vector3Dd n2;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector si;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector sj;
 
@@ -1178,7 +1178,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
     }
 
-    private static boolean colinearVectors(Vector3D a, Vector3D b)
+    private static boolean colinearVectors(Vector3Dd a, Vector3Dd b)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectors(a, b);
@@ -1189,8 +1189,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         _PolyhedralBoundedSolidHalfEdge ha;
         _PolyhedralBoundedSolidHalfEdge hb;
-        Vector3D n1;
-        Vector3D n2;
+        Vector3Dd n1;
+        Vector3Dd n2;
 
         if ( secta < 0 || sectb < 0 || secta >= nba.size() ||
              sectb >= nbb.size() ) {
@@ -1217,7 +1217,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return n1.dotProduct(n2) >= 0.0;
     }
 
-    public static boolean colinearVectorsWithDirection(Vector3D a, Vector3D b)
+    public static boolean colinearVectorsWithDirection(Vector3Dd a, Vector3Dd b)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .colinearVectorsWithDirection(a, b);
@@ -1698,8 +1698,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static boolean convexedg(_PolyhedralBoundedSolidHalfEdge he)
     {
         _PolyhedralBoundedSolidHalfEdge h2;
-        Vector3D dir;
-        Vector3D cr;
+        Vector3Dd dir;
+        Vector3Dd cr;
 
         h2 = he.next();
         if ( nulledge(he) ) {
@@ -2120,7 +2120,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
     }
 
-    private static double coordinate(Vector3D p, int axis)
+    private static double coordinate(Vector3Dd p, int axis)
     {
         if ( axis == 0 ) {
             return p.x();
@@ -2180,15 +2180,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return values;
     }
 
-    private static double signedAreaOnYZ(ArrayList<Vector3D> profile)
+    private static double signedAreaOnYZ(ArrayList<Vector3Dd> profile)
     {
         double area;
         int i;
 
         area = 0.0;
         for ( i = 0; i < profile.size(); i++ ) {
-            Vector3D a;
-            Vector3D b;
+            Vector3Dd a;
+            Vector3Dd b;
 
             a = profile.get(i);
             b = profile.get((i + 1) % profile.size());
@@ -2197,11 +2197,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return area * 0.5;
     }
 
-    private static ArrayList<Vector3D> extractProfileAtX(
+    private static ArrayList<Vector3Dd> extractProfileAtX(
         PolyhedralBoundedSolid solid,
         double x)
     {
-        ArrayList<Vector3D> best;
+        ArrayList<Vector3Dd> best;
         double bestArea;
         int i;
 
@@ -2214,7 +2214,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             face = solid.getPolygonsList().get(i);
             for ( j = 0; j < face.boundariesList.size(); j++ ) {
                 _PolyhedralBoundedSolidLoop loop;
-                ArrayList<Vector3D> profile;
+                ArrayList<Vector3Dd> profile;
                 double area;
                 int k;
                 boolean onPlane;
@@ -2223,17 +2223,17 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 if ( loop.halfEdgesList.size() < 3 ) {
                     continue;
                 }
-                profile = new ArrayList<Vector3D>();
+                profile = new ArrayList<Vector3Dd>();
                 onPlane = true;
                 for ( k = 0; k < loop.halfEdgesList.size(); k++ ) {
-                    Vector3D p;
+                    Vector3Dd p;
 
                     p = loop.halfEdgesList.get(k).startingVertex.position;
                     if ( !sameCoordinate(p.x(), x) ) {
                         onPlane = false;
                         break;
                     }
-                    profile.add(new Vector3D(p));
+                    profile.add(new Vector3Dd(p));
                 }
                 if ( !onPlane ) {
                     continue;
@@ -2248,15 +2248,15 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         return best;
     }
 
-    private static boolean sameProfilePoint(Vector3D a, Vector3D b)
+    private static boolean sameProfilePoint(Vector3Dd a, Vector3Dd b)
     {
         return sameCoordinate(a.x(), b.x()) &&
                sameCoordinate(a.y(), b.y()) &&
                sameCoordinate(a.z(), b.z());
     }
 
-    private static void appendProfilePoint(ArrayList<Vector3D> profile,
-                                           Vector3D point)
+    private static void appendProfilePoint(ArrayList<Vector3Dd> profile,
+                                           Vector3Dd point)
     {
         if ( !profile.isEmpty() &&
              sameProfilePoint(profile.get(profile.size() - 1), point) ) {
@@ -2265,7 +2265,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         profile.add(point);
     }
 
-    private static Vector3D projectProfilePoint(Vector3D point,
+    private static Vector3Dd projectProfilePoint(Vector3Dd point,
                                                 double x,
                                                 double zCut)
     {
@@ -2275,11 +2275,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         if ( sameCoordinate(z, zCut) ) {
             z = zCut;
         }
-        return new Vector3D(x, point.y(), z);
+        return new Vector3Dd(x, point.y(), z);
     }
 
-    private static Vector3D intersectProfileSegmentAtZ(Vector3D a,
-                                                       Vector3D b,
+    private static Vector3Dd intersectProfileSegmentAtZ(Vector3Dd a,
+                                                       Vector3Dd b,
                                                        double x,
                                                        double zCut)
     {
@@ -2287,24 +2287,24 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         double y;
 
         if ( sameCoordinate(a.z(), b.z()) ) {
-            return new Vector3D(x, a.y(), zCut);
+            return new Vector3Dd(x, a.y(), zCut);
         }
         t = (zCut - a.z()) / (b.z() - a.z());
         y = a.y() + (b.y() - a.y()) * t;
-        return new Vector3D(x, y, zCut);
+        return new Vector3Dd(x, y, zCut);
     }
 
-    private static ArrayList<Vector3D> clipProfileAboveZ(
-        ArrayList<Vector3D> profile,
+    private static ArrayList<Vector3Dd> clipProfileAboveZ(
+        ArrayList<Vector3Dd> profile,
         double x,
         double zCut)
     {
-        ArrayList<Vector3D> clipped;
-        Vector3D previous;
+        ArrayList<Vector3Dd> clipped;
+        Vector3Dd previous;
         boolean previousInside;
         int i;
 
-        clipped = new ArrayList<Vector3D>();
+        clipped = new ArrayList<Vector3Dd>();
         if ( profile == null || profile.size() < 3 ) {
             return clipped;
         }
@@ -2312,7 +2312,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         previous = profile.get(profile.size() - 1);
         previousInside = previous.z() + numericContext.bigEpsilon() >= zCut;
         for ( i = 0; i < profile.size(); i++ ) {
-            Vector3D current;
+            Vector3Dd current;
             boolean currentInside;
 
             current = profile.get(i);
@@ -2360,8 +2360,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         ArrayList<Double> minuendX;
         ArrayList<Double> subtrahendX;
         ArrayList<Double> subtrahendZ;
-        ArrayList<Vector3D> profile;
-        ArrayList<Vector3D> clippedProfile;
+        ArrayList<Vector3Dd> profile;
+        ArrayList<Vector3Dd> clippedProfile;
         double xCut;
         double zCut;
 
@@ -2410,7 +2410,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         _PolyhedralBoundedSolidProfileDifferenceFallbackSpec spec)
     {
         PolyhedralBoundedSolid solid;
-        Matrix4x4 translation;
+        Matrix4x4d translation;
         int i;
 
         if ( spec == null ||
@@ -2428,7 +2428,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, spec.clippedProfileAtCut.size(),
             spec.clippedProfileAtCut.size() - 1, 1, 2, 2);
 
-        translation = new Matrix4x4();
+        translation = new Matrix4x4d();
         translation = translation.translation(spec.xMax - spec.xCut, 0, 0);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), translation);
@@ -2498,7 +2498,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             }
 
             vertex = new _PolyhedralBoundedSolidVertex(solid,
-                new Vector3D(xs.get(ix), ys.get(iy), zs.get(iz)),
+                new Vector3Dd(xs.get(ix), ys.get(iy), zs.get(iz)),
                 nextVertexId);
             solid.setMaxVertexId(nextVertexId);
             nextVertexId++;
@@ -2580,8 +2580,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
     private static boolean isAxisAlignedEdge(_PolyhedralBoundedSolidEdge edge)
     {
-        Vector3D a;
-        Vector3D b;
+        Vector3Dd a;
+        Vector3Dd b;
         int changingAxes;
 
         if ( edge == null || edge.rightHalf == null || edge.leftHalf == null ) {
@@ -2619,7 +2619,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
     private static int classifyPointForAxisAlignedFallback(
         PolyhedralBoundedSolid solid,
-        Vector3D point)
+        Vector3Dd point)
     {
         Ray ray;
         ArrayList<Double> distances;
@@ -2632,14 +2632,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         eps = numericContext.bigEpsilon();
-        ray = new Ray(point, new Vector3D(1.0, 0.371, 0.137));
+        ray = new Ray(point, new Vector3Dd(1.0, 0.371, 0.137));
         distances = new ArrayList<Double>();
         hits = 0;
 
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidFace face;
             Ray hit;
-            Vector3D p;
+            Vector3Dd p;
             int status;
             int j;
             boolean duplicate;
@@ -2756,7 +2756,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         ys = uniqueVertexCoordinates(inSolidA, 1);
         zs = uniqueVertexCoordinates(inSolidA, 2);
         for ( ix = 0; ix < inSolidB.getVerticesList().size(); ix++ ) {
-            Vector3D p = inSolidB.getVerticesList().get(ix).position;
+            Vector3Dd p = inSolidB.getVerticesList().get(ix).position;
             addUniqueCoordinate(xs, p.x());
             addUniqueCoordinate(ys, p.y());
             addUniqueCoordinate(zs, p.z());
@@ -2771,11 +2771,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         for ( ix = 0; ix < xs.size() - 1; ix++ ) {
             for ( iy = 0; iy < ys.size() - 1; iy++ ) {
                 for ( iz = 0; iz < zs.size() - 1; iz++ ) {
-                    Vector3D sample;
+                    Vector3Dd sample;
                     boolean insideA;
                     boolean insideB;
 
-                    sample = new Vector3D(
+                    sample = new Vector3Dd(
                         (xs.get(ix) + xs.get(ix + 1)) * 0.5,
                         (ys.get(iy) + ys.get(iy + 1)) * 0.5,
                         (zs.get(iz) + zs.get(iz + 1)) * 0.5);
@@ -2890,11 +2890,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         for ( ix = 0; ix < divisions; ix++ ) {
             for ( iy = 0; iy < divisions; iy++ ) {
                 for ( iz = 0; iz < divisions; iz++ ) {
-                    Vector3D sample;
+                    Vector3Dd sample;
                     boolean insideA;
                     boolean insideB;
 
-                    sample = new Vector3D(
+                    sample = new Vector3Dd(
                         (xs.get(ix) + xs.get(ix + 1)) * 0.5,
                         (ys.get(iy) + ys.get(iy + 1)) * 0.5,
                         (zs.get(iz) + zs.get(iz + 1)) * 0.5);
@@ -2960,13 +2960,13 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     {
         private final int type;
         private final double[] bounds;
-        private final ArrayList<Vector3D> yzProfile;
+        private final ArrayList<Vector3Dd> yzProfile;
         private final ArrayList<Double> rightBoundaryZ;
         private final ArrayList<Double> rightBoundaryX;
 
         private OrthogonalProfileOperandSpec(int type,
                                              double[] bounds,
-                                             ArrayList<Vector3D> yzProfile,
+                                             ArrayList<Vector3Dd> yzProfile,
                                              ArrayList<Double> rightBoundaryZ,
                                              ArrayList<Double> rightBoundaryX)
         {
@@ -3065,12 +3065,12 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return xMax;
         }
 
-        private Vector3D point(int boundary, int iy, int iz)
+        private Vector3Dd point(int boundary, int iy, int iz)
         {
             double z;
 
             z = zs.get(iz);
-            return new Vector3D(xAtBoundary(boundary, z), ys.get(iy), z);
+            return new Vector3Dd(xAtBoundary(boundary, z), ys.get(iy), z);
         }
     }
 
@@ -3096,14 +3096,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return Math.round(value * 1000000000000.0);
         }
 
-        private String vertexKey(Vector3D point)
+        private String vertexKey(Vector3Dd point)
         {
             return coordinateKey(point.x()) + ":" +
                    coordinateKey(point.y()) + ":" +
                    coordinateKey(point.z());
         }
 
-        private _PolyhedralBoundedSolidVertex vertexAt(Vector3D point)
+        private _PolyhedralBoundedSolidVertex vertexAt(Vector3Dd point)
         {
             String key;
             _PolyhedralBoundedSolidVertex vertex;
@@ -3154,7 +3154,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             he.parentEdge = edge;
         }
 
-        private boolean degenerateQuad(Vector3D[] corners)
+        private boolean degenerateQuad(Vector3Dd[] corners)
         {
             int i;
 
@@ -3167,7 +3167,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return false;
         }
 
-        private void addQuad(Vector3D[] corners)
+        private void addQuad(Vector3Dd[] corners)
         {
             _PolyhedralBoundedSolidFace face;
             _PolyhedralBoundedSolidLoop loop;
@@ -3211,7 +3211,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
     }
 
-    private static boolean pointInsideYZProfile(ArrayList<Vector3D> profile,
+    private static boolean pointInsideYZProfile(ArrayList<Vector3Dd> profile,
                                                 double y,
                                                 double z)
     {
@@ -3250,7 +3250,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         ArrayList<Double> ys,
         ArrayList<Double> zs)
     {
-        ArrayList<Vector3D> profile;
+        ArrayList<Vector3Dd> profile;
         double[] bounds;
 
         if ( xs.size() != 2 || ys.size() != 4 || zs.size() != 3 ||
@@ -3296,7 +3296,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             z = zs.get(i);
             maxX = -Double.MAX_VALUE;
             for ( j = 0; j < solid.getVerticesList().size(); j++ ) {
-                Vector3D p;
+                Vector3Dd p;
 
                 p = solid.getVerticesList().get(j).position;
                 if ( sameCoordinate(p.z(), z) && p.x() > maxX ) {
@@ -3367,7 +3367,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         ys = uniqueVertexCoordinates(inSolidA, 1);
         zs = uniqueVertexCoordinates(inSolidA, 2);
         for ( i = 0; i < inSolidB.getVerticesList().size(); i++ ) {
-            Vector3D p;
+            Vector3Dd p;
 
             p = inSolidB.getVerticesList().get(i).position;
             addUniqueCoordinate(ys, p.y());
@@ -3425,28 +3425,28 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         left = zone;
         right = zone + 1;
         if ( side == 0 ) {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(left, iy, iz), spec.point(left, iy, iz + 1),
                 spec.point(left, iy + 1, iz + 1),
                 spec.point(left, iy + 1, iz)
             });
         }
         else if ( side == 1 ) {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(right, iy, iz), spec.point(right, iy + 1, iz),
                 spec.point(right, iy + 1, iz + 1),
                 spec.point(right, iy, iz + 1)
             });
         }
         else if ( side == 2 ) {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(left, iy, iz), spec.point(right, iy, iz),
                 spec.point(right, iy, iz + 1),
                 spec.point(left, iy, iz + 1)
             });
         }
         else if ( side == 3 ) {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(left, iy + 1, iz),
                 spec.point(left, iy + 1, iz + 1),
                 spec.point(right, iy + 1, iz + 1),
@@ -3454,14 +3454,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             });
         }
         else if ( side == 4 ) {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(left, iy, iz), spec.point(left, iy + 1, iz),
                 spec.point(right, iy + 1, iz),
                 spec.point(right, iy, iz)
             });
         }
         else {
-            builder.addQuad(new Vector3D[] {
+            builder.addQuad(new Vector3Dd[] {
                 spec.point(left, iy, iz + 1),
                 spec.point(right, iy, iz + 1),
                 spec.point(right, iy + 1, iz + 1),
@@ -3575,13 +3575,13 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
     }
 
-    private static void addUniqueXy(ArrayList<Vector3D> values,
-                                    Vector3D point)
+    private static void addUniqueXy(ArrayList<Vector3Dd> values,
+                                    Vector3Dd point)
     {
         int i;
 
         for ( i = 0; i < values.size(); i++ ) {
-            Vector3D current = values.get(i);
+            Vector3Dd current = values.get(i);
             if ( sameCoordinate(current.x(), point.x()) &&
                  sameCoordinate(current.y(), point.y()) ) {
                 return;
@@ -3598,7 +3598,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         double centerY;
         double radius;
         ArrayList<Double> zs;
-        ArrayList<Vector3D> xy;
+        ArrayList<Vector3Dd> xy;
         int i;
 
         if ( solid == null || solid.getVerticesList().size() < 6 ) {
@@ -3615,9 +3615,9 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         centerY = (bounds[1] + bounds[4]) * 0.5;
         radius = 0.0;
         zs = new ArrayList<Double>();
-        xy = new ArrayList<Vector3D>();
+        xy = new ArrayList<Vector3Dd>();
         for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            Vector3D p = solid.getVerticesList().get(i).position;
+            Vector3Dd p = solid.getVerticesList().get(i).position;
             double radialDistance;
 
             addUniqueCoordinate(zs, p.z());
@@ -3636,7 +3636,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
-            Vector3D p = solid.getVerticesList().get(i).position;
+            Vector3Dd p = solid.getVerticesList().get(i).position;
             double radialDistance = Math.sqrt(
                 (p.x() - centerX) * (p.x() - centerX) +
                 (p.y() - centerY) * (p.y() - centerY));
@@ -3707,11 +3707,11 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int heightDivisions)
     {
         PolyhedralBoundedSolid cylinder;
-        Matrix4x4 translation;
+        Matrix4x4d translation;
 
         cylinder = new Cone(spec.radius, spec.radius, spec.height)
             .exportToPolyhedralBoundedSolid(radialDivisions, heightDivisions);
-        translation = new Matrix4x4();
+        translation = new Matrix4x4d();
         translation = translation.translation(
             spec.centerX, spec.centerY, spec.zMin);
         PolyhedralBoundedSolidModeler.applyTransformation(

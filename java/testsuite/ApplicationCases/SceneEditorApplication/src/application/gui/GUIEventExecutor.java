@@ -15,8 +15,8 @@ import javax.swing.JPanel;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -82,7 +82,7 @@ public class GUIEventExecutor extends CommandListener{
         }
         else if ( label.equals("IDC_CREATE_PLANE") ) {
             InfinitePlane plane;
-            plane = new InfinitePlane(new Vector3D(-0.2, 0, 1), new Vector3D(0, 0, -1));
+            plane = new InfinitePlane(new Vector3Dd(-0.2, 0, 1), new Vector3Dd(0, 0, -1));
             System.out.println(plane);
             parent.theScene.addThing(plane);
 
@@ -113,13 +113,13 @@ public class GUIEventExecutor extends CommandListener{
             else {
                 //- Calculate the VoxelVolume's center of mass ---------------
                 VoxelVolume vv = (VoxelVolume)referenceGeometry;
-                Vector3D cm = vv.doCenterOfMass();
+                Vector3Dd cm = vv.doCenterOfMass();
 
                 //- Calculate average distance from nonzero voxels to cm -----
                 // This accounts for scale normalization as in [FUNK2003].4.1.
                 int numberOfNonZeroVoxels = 0;
                 double d; // Distance between a given voxel and center of mass
-                Vector3D p; // Position of voxel
+                Vector3Dd p; // Position of voxel
                 double averageDistance = 0;
                 int x, y, z;
 
@@ -169,7 +169,7 @@ public class GUIEventExecutor extends CommandListener{
 
             //- Calculate transform matrix ------------------------------------
             double minmax[] = referenceGeometry.getMinMax();
-            Matrix4x4 M; // Transform from voxelspace to geometry minmax space
+            Matrix4x4d M; // Transform from voxelspace to geometry minmax space
 
             M = VoxelVolume.getTransformFromVoxelFrameToMinMax(minmax);
 
@@ -185,38 +185,38 @@ public class GUIEventExecutor extends CommandListener{
 
             //- Append newly created volume to scene, matching reference form -
             SimpleBody newThing = parent.theScene.addThing(vv);
-            Vector3D pos = M.extractTranslation();
+            Vector3Dd pos = M.extractTranslation();
             if ( thing != null ) {
                 pos = pos.add(thing.getPosition());
                 newThing.setRotation(thing.getRotation());
                 newThing.setScale(thing.getScale());
             }
             newThing.setPosition(pos);
-            Vector3D size = new Vector3D(M.get(0, 0), M.get(1, 1), M.get(2, 2));
+            Vector3Dd size = new Vector3Dd(M.get(0, 0), M.get(1, 1), M.get(2, 2));
             newThing.setScale(size);
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
             PolyhedralBoundedSolid brep;
 
             brep = (new Box(0.9, 0.9, 0.9)).exportToPolyhedralBoundedSolid();
-            Matrix4x4 R = new Matrix4x4();
+            Matrix4x4d R = new Matrix4x4d();
             R = R.translation(0.55, 0.55, 0.55);
             PolyhedralBoundedSolidModeler.applyTransformation(brep, R);
             //- Cube modification to holed box ----------------------------
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 5, 9, new Vector3D(0.3, 0.3, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 5, 9, new Vector3Dd(0.3, 0.3, 1));
             PolyhedralBoundedSolidEulerOperators.kemr(brep, 6, 6, 5, 9, 9, 5);
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 9, 10, new Vector3D(0.8, 0.3, 1));
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 10, 11, new Vector3D(0.8, 0.8, 1));
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 11, 12, new Vector3D(0.3, 0.8, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 9, 10, new Vector3Dd(0.8, 0.3, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 10, 11, new Vector3Dd(0.8, 0.8, 1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 6, 11, 12, new Vector3Dd(0.3, 0.8, 1));
             PolyhedralBoundedSolidEulerOperators.mef(brep, 6, 6, 9, 10, 12, 11, 7);
 
             //- Box extrusion ---------------------------------------------
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 9, 13, new Vector3D(0.3, 0.3, 0.1));
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 10, 14, new Vector3D(0.8, 0.3, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 9, 13, new Vector3Dd(0.3, 0.3, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 10, 14, new Vector3Dd(0.8, 0.3, 0.1));
             PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 13, 9, 14, 10, 8);
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 11, 15, new Vector3D(0.8, 0.8, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 11, 15, new Vector3Dd(0.8, 0.8, 0.1));
             PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 14, 10, 15, 11, 9);
-            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 12, 16, new Vector3D(0.3, 0.8, 0.1));
+            PolyhedralBoundedSolidEulerOperators.smev(brep, 7, 12, 16, new Vector3Dd(0.3, 0.8, 0.1));
             PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 15, 11, 16, 12, 10);
             PolyhedralBoundedSolidEulerOperators.mef(brep, 7, 7, 13, 14, 16, 12, 11);
 
@@ -237,28 +237,28 @@ public class GUIEventExecutor extends CommandListener{
             ParametricCurve curve;
 
             // Case 1: curve hard-coded in source
-            Vector3D pointParameters[];
+            Vector3Dd pointParameters[];
 
             curve = new ParametricCurve();
             // Note that an HERMITE curve uses tangent vectors, BEZIER curves
             // uses control points (tangent vectors are control point minus
             // knot position)
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 0, 0); // Position 0
-            pointParameters[1] = new Vector3D(0, 0, 0); // Not used
-            pointParameters[2] = new Vector3D(0, 1, 0); // Salient tangent end
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(0, 0, 0); // Position 0
+            pointParameters[1] = new Vector3Dd(0, 0, 0); // Not used
+            pointParameters[2] = new Vector3Dd(0, 1, 0); // Salient tangent end
             curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 1, 0); // Position 1
-            pointParameters[1] = new Vector3D(0, 1, 0); // Entry tangent end
-            pointParameters[2] = new Vector3D(2, 1, 0); // Salient tangent end
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(1, 1, 0); // Position 1
+            pointParameters[1] = new Vector3Dd(0, 1, 0); // Entry tangent end
+            pointParameters[2] = new Vector3Dd(2, 1, 0); // Salient tangent end
             curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(2, 0, 1); // Position 2
-            pointParameters[1] = new Vector3D(2, 0, 0); // Entry tangent end
-            pointParameters[2] = new Vector3D(0, 0, 0); // Not used
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(2, 0, 1); // Position 2
+            pointParameters[1] = new Vector3Dd(2, 0, 0); // Entry tangent end
+            pointParameters[2] = new Vector3Dd(0, 0, 0); // Not used
             curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
             parent.theScene.addThing(curve);
@@ -295,34 +295,34 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
             //- Create a Ferguson patch ---------------------------------------
             ParametricCurve contourHermiteLine;
-            Vector3D pointParameters[];
+            Vector3Dd pointParameters[];
 
             contourHermiteLine = new ParametricCurve();
             // Note that an HERMITE curve uses tangent vectors, BEZIER curves
             // uses control points (tangent vectors are control point minus
             // knot position)
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 0, 0);  // Position 0
-            pointParameters[1] = new Vector3D(0, -1, 0); // Entry tangent
-            pointParameters[2] = new Vector3D(1, 0, 0);  // Salient tangent
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(0, 0, 0);  // Position 0
+            pointParameters[1] = new Vector3Dd(0, -1, 0); // Entry tangent
+            pointParameters[2] = new Vector3Dd(1, 0, 0);  // Salient tangent
             contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 0, 0);  // Position 1
-            pointParameters[1] = new Vector3D(1, 0, 0);  // Entry tangent
-            pointParameters[2] = new Vector3D(0, 1, 0);  // Salient tangent
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(1, 0, 0);  // Position 1
+            pointParameters[1] = new Vector3Dd(1, 0, 0);  // Entry tangent
+            pointParameters[2] = new Vector3Dd(0, 1, 0);  // Salient tangent
             contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(1, 1, 0.4);  // Position 2
-            pointParameters[1] = new Vector3D(0, 1, 0);  // Entry tangent
-            pointParameters[2] = new Vector3D(-1, 0, 0);  // Salient tangent
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(1, 1, 0.4);  // Position 2
+            pointParameters[1] = new Vector3Dd(0, 1, 0);  // Entry tangent
+            pointParameters[2] = new Vector3Dd(-1, 0, 0);  // Salient tangent
             contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
-            pointParameters = new Vector3D[3];
-            pointParameters[0] = new Vector3D(0, 1, 0);  // Position 3
-            pointParameters[1] = new Vector3D(-1, 0, 0);  // Entry tangent
-            pointParameters[2] = new Vector3D(0, -1, 0);  // Salient tangent
+            pointParameters = new Vector3Dd[3];
+            pointParameters[0] = new Vector3Dd(0, 1, 0);  // Position 3
+            pointParameters[1] = new Vector3Dd(-1, 0, 0);  // Entry tangent
+            pointParameters[2] = new Vector3Dd(0, -1, 0);  // Salient tangent
             contourHermiteLine.addPoint(pointParameters, ParametricCurve.HERMITE);
 
             contourHermiteLine.addPoint(contourHermiteLine.getPoint(0), ParametricCurve.HERMITE);
@@ -340,10 +340,10 @@ public class GUIEventExecutor extends CommandListener{
 /*
             //- Create a Bezier patch -----------------------------------------
             // Create control points 4x4 matrix
-            Vector3D cp[][] = new Vector3D[4][4];
+            Vector3Dd cp[][] = new Vector3Dd[4][4];
             for ( int j = 0; j < 4; j++ ) {
                 for ( int i = 0; i < 4; i++ ) {
-                    cp[i][j] = new Vector3D();
+                    cp[i][j] = new Vector3Dd();
                     cp[i][j].x = ((double)i)/3-0.5;
                     cp[i][j].y = ((double)j)/3-0.5;
                     if ( i > 0 && i < 3 && j > 0 && j < 3 ) {
@@ -502,8 +502,8 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = new Light(LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(1, 1, 1));
-            //light = new Light(vsdk.toolkit.environment.light.LightType.POINT, new Vector3D(0, -4, 0), new ColorRgb(1, 1, 1));
+            light = new Light(LightType.POINT, new Vector3Dd(-10, -9, 8), new ColorRgb(1, 1, 1));
+            //light = new Light(vsdk.toolkit.environment.light.LightType.POINT, new Vector3Dd(0, -4, 0), new ColorRgb(1, 1, 1));
             parent.theScene.scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------
@@ -648,7 +648,7 @@ public class GUIEventExecutor extends CommandListener{
     }
     
     private SimpleBody addDebugSphere(SimpleBody voxelBody, int groupIndex,
-                                      Vector3D cm, double averageDistance)
+                                      Vector3Dd cm, double averageDistance)
     {
         double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
         VoxelVolume vv = (VoxelVolume)voxelBody.getGeometry();
@@ -658,10 +658,10 @@ public class GUIEventExecutor extends CommandListener{
         double tetha, phi;
         int s, t;
         int voxelValue;
-        Vector3D p = new Vector3D();
-        Vector3D pos;
-        Vector3D scale, cm2;
-        Matrix4x4 S = new Matrix4x4();
+        Vector3Dd p = new Vector3Dd();
+        Vector3Dd pos;
+        Vector3Dd scale, cm2;
+        Matrix4x4d S = new Matrix4x4d();
 
         sphere = new Sphere(r);
         body = new SimpleBody();
@@ -675,8 +675,8 @@ public class GUIEventExecutor extends CommandListener{
         cm2 = S.multiply(cm);
         pos = voxelBody.getPosition().add(cm2);
         body.setPosition(pos);
-        body.setRotation(new Matrix4x4());
-        body.setRotationInverse(new Matrix4x4());
+        body.setRotation(new Matrix4x4d());
+        body.setRotationInverse(new Matrix4x4d());
         body.setName("Debug sphere for harmonics " + groupIndex);
 
         texture = new RGBAImageUncompressed();
@@ -689,7 +689,7 @@ public class GUIEventExecutor extends CommandListener{
              ((double)s) / ((double)texture.getXSize()) * Math.PI * 2;
                 phi =
              ((double)t) / ((double)texture.getYSize()) * Math.PI;
-                p = Vector3D.fromSpherical(r, tetha, phi);
+                p = Vector3Dd.fromSpherical(r, tetha, phi);
                 p = cm.add(p);
                 voxelValue = vv.getVoxelAtPosition(p.x(), p.y(), p.z());
                 if ( voxelValue < 128 ) {

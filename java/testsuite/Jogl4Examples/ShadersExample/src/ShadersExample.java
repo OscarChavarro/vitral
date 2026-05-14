@@ -30,8 +30,8 @@ import model.ShadersModel;
 import options.CommandLineOptions;
 import render.JogHudRenderer;
 import render.SoftwareRaycaster;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
@@ -173,7 +173,7 @@ public class ShadersExample extends JFrame implements
         gl.glClearColor(0, 0, 0, 1);
         gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
-        Matrix4x4 modelRotation = new Matrix4x4().axisRotation(
+        Matrix4x4d modelRotation = new Matrix4x4d().axisRotation(
             model.getSphereRotationAngleRadians(),
             0.0,
             0.0,
@@ -404,7 +404,7 @@ public class ShadersExample extends JFrame implements
 
     private void renderSoftwareFrame()
     {
-        Matrix4x4 modelRotation = new Matrix4x4().axisRotation(
+        Matrix4x4d modelRotation = new Matrix4x4d().axisRotation(
             model.getSphereRotationAngleRadians(),
             0.0,
             0.0,
@@ -436,12 +436,12 @@ public class ShadersExample extends JFrame implements
 
         lightAnimationAngleRadians +=
             LIGHT_ANGULAR_SPEED_RAD_PER_SECOND * elapsedSeconds;
-        Matrix4x4 rotation = new Matrix4x4().axisRotation(
+        Matrix4x4d rotation = new Matrix4x4d().axisRotation(
             lightAnimationAngleRadians,
             0.0,
             -1.0,
             0.0);
-        Vector3D baseLightPosition = new Vector3D(1.0, -3.0, 1.0);
+        Vector3Dd baseLightPosition = new Vector3Dd(1.0, -3.0, 1.0);
         model.getLight().setPosition(rotation.multiply(baseLightPosition));
     }
 }

@@ -3,7 +3,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
 public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
     private static int constantProgramId;
@@ -67,7 +67,7 @@ public class Jogl4RendererConfigurationShaderSelector extends Jogl4Renderer {
     public static void activateShader(
         GL4 gl,
         int programId,
-        Matrix4x4 modelViewProjection,
+        Matrix4x4d modelViewProjection,
         RendererConfiguration quality,
         float diffuseR,
         float diffuseG,

@@ -6,8 +6,8 @@ package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -31,7 +31,7 @@ public class PolyhedralBoundedSolidGeometricValidator
     required by [MANT1988].10.2.1 and by the face-equation procedure of
     [MANT1988].13.1.
     */
-    public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points)
+    public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3Dd> points)
     {
         return validateFacePointsAreCoplanar(points,
             PolyhedralBoundedSolidNumericPolicy.forPoints(points));
@@ -42,7 +42,7 @@ public class PolyhedralBoundedSolidGeometricValidator
     equation ideas of [MANT1988].13.1 to a polyhedral face from
     [MANT1988].10.2.1.
     */
-    public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3D> points,
+    public static boolean validateFacePointsAreCoplanar(ArrayList<Vector3Dd> points,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         if ( points == null || points.size() < 3 ) {
@@ -52,9 +52,9 @@ public class PolyhedralBoundedSolidGeometricValidator
             numericContext = PolyhedralBoundedSolidNumericPolicy.defaultContext();
         }
 
-        Vector3D p0;
-        Vector3D p1;
-        Vector3D p2;
+        Vector3Dd p0;
+        Vector3Dd p1;
+        Vector3Dd p2;
         p0 = points.get(0);
         boolean foundSeparatedPair = false;
 
@@ -71,9 +71,9 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D a;
-        Vector3D b;
-        Vector3D n;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd n;
         double aDotB;
         InfinitePlane facePlane = null;
         int j;
@@ -123,11 +123,11 @@ public class PolyhedralBoundedSolidGeometricValidator
         return true;
     }
 
-    public static ArrayList<Vector3D> extractPointsFromFace(_PolyhedralBoundedSolidFace face)
+    public static ArrayList<Vector3Dd> extractPointsFromFace(_PolyhedralBoundedSolidFace face)
     {
         boolean test = true;
-        ArrayList<Vector3D> points;
-        points = new ArrayList<Vector3D>();
+        ArrayList<Vector3Dd> points;
+        points = new ArrayList<Vector3Dd>();
         int j;
 
         for ( j = 0; j < face.boundariesList.size(); j++ ) {
@@ -175,7 +175,7 @@ public class PolyhedralBoundedSolidGeometricValidator
     public static boolean validateFaceIsPlanar(_PolyhedralBoundedSolidFace face,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
-        ArrayList<Vector3D> points = extractPointsFromFace(face);
+        ArrayList<Vector3Dd> points = extractPointsFromFace(face);
         return (points != null) &&
             validateFacePointsAreCoplanar(points, numericContext);
     }
@@ -285,7 +285,7 @@ public class PolyhedralBoundedSolidGeometricValidator
         _PolyhedralBoundedSolidFace face, StringBuilder msg)
     {
         InfinitePlane planeF;
-        Vector3D nF;
+        Vector3Dd nF;
         int i;
         int j;
         int neighbourCount;
@@ -328,7 +328,7 @@ public class PolyhedralBoundedSolidGeometricValidator
                 if ( planeN == null ) {
                     continue;
                 }
-                Vector3D nN = planeN.getNormal();
+                Vector3Dd nN = planeN.getNormal();
                 if ( nN == null ) {
                     continue;
                 }
@@ -359,7 +359,7 @@ public class PolyhedralBoundedSolidGeometricValidator
 
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
-        Vector3D n = face.getContainingPlane().getNormal();
+        Vector3Dd n = face.getContainingPlane().getNormal();
         if ( Math.abs(n.x()) >= Math.abs(n.y()) && Math.abs(n.x()) >= Math.abs(n.z()) ) {
             return 1;
         }
@@ -369,23 +369,23 @@ public class PolyhedralBoundedSolidGeometricValidator
         return 3;
     }
 
-    private static Vector2D projectPointTo2D(Vector3D in, int dominantCoordinate)
+    private static Vector2Dd projectPointTo2D(Vector3Dd in, int dominantCoordinate)
     {
         if ( dominantCoordinate == 1 ) {
-            return new Vector2D(in.y(), in.z());
+            return new Vector2Dd(in.y(), in.z());
         }
         if ( dominantCoordinate == 2 ) {
-            return new Vector2D(in.x(), in.z());
+            return new Vector2Dd(in.x(), in.z());
         }
-        return new Vector2D(in.x(), in.y());
+        return new Vector2Dd(in.x(), in.y());
     }
 
-    private static double orientation2D(Vector2D a, Vector2D b, Vector2D c)
+    private static double orientation2D(Vector2Dd a, Vector2Dd b, Vector2Dd c)
     {
         return (b.x()-a.x())*(c.y()-a.y()) - (b.y()-a.y())*(c.x()-a.x());
     }
 
-    private static boolean pointOnSegment2D(Vector2D p, Vector2D a, Vector2D b,
+    private static boolean pointOnSegment2D(Vector2Dd p, Vector2Dd a, Vector2Dd b,
                                             double orientationTolerance,
                                             double linearTolerance)
     {
@@ -399,8 +399,8 @@ public class PolyhedralBoundedSolidGeometricValidator
         return p.x() >= minX && p.x() <= maxX && p.y() >= minY && p.y() <= maxY;
     }
 
-    private static boolean segmentsIntersect2D(Vector2D a1, Vector2D a2,
-                                               Vector2D b1, Vector2D b2,
+    private static boolean segmentsIntersect2D(Vector2Dd a1, Vector2Dd a2,
+                                               Vector2Dd b1, Vector2Dd b2,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
     {
         double o1 = orientation2D(a1, a2, b1);
@@ -459,8 +459,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                    .append("] has a non-closed loop during strict validation.\n");
                 return true;
             }
-            Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
-            Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+            Vector2Dd a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+            Vector2Dd a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
 
             for ( j = i+1; j < n; j++ ) {
                 if ( j == (i+1)%n || i == (j+1)%n ) {
@@ -473,8 +473,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                        .append("] has a non-closed loop during strict validation.\n");
                     return true;
                 }
-                Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
-                Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+                Vector2Dd b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                Vector2Dd b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
 
                 if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                     msg.append("  - Face [").append(face.id)
@@ -503,8 +503,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                    .append("] has a non-closed loop during strict validation.\n");
                 return true;
             }
-            Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
-            Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+            Vector2Dd a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+            Vector2Dd a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
 
             for ( j = 0; j < loopB.halfEdgesList.size(); j++ ) {
                 _PolyhedralBoundedSolidHalfEdge heB = loopB.halfEdgesList.get(j);
@@ -514,8 +514,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                        .append("] has a non-closed loop during strict validation.\n");
                     return true;
                 }
-                Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
-                Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+                Vector2Dd b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                Vector2Dd b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
                 if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) ) {
                     msg.append("  - Face [").append(face.id)
                        .append("] has intersecting loops.\n");
@@ -584,8 +584,8 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D nA = faceA.getContainingPlane().getNormal().multiply(1.0);
-        Vector3D nB = faceB.getContainingPlane().getNormal().multiply(1.0);
+        Vector3Dd nA = faceA.getContainingPlane().getNormal().multiply(1.0);
+        Vector3Dd nB = faceB.getContainingPlane().getNormal().multiply(1.0);
         nA = nA.normalized();
         nB = nB.normalized();
         if ( Math.abs(Math.abs(nA.dotProduct(nB)) - 1.0) >
@@ -596,7 +596,7 @@ public class PolyhedralBoundedSolidGeometricValidator
         for ( int i = 0; i < faceA.boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidLoop loop = faceA.boundariesList.get(i);
             if ( loop.halfEdgesList.size() > 0 ) {
-                Vector3D p = loop.halfEdgesList.get(0).startingVertex.position;
+                Vector3Dd p = loop.halfEdgesList.get(0).startingVertex.position;
                 return Math.abs(faceB.getContainingPlane().pointDistance(p)) <=
                     numericContext.bigEpsilon();
             }
@@ -640,8 +640,8 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D p0 = he.startingVertex.position;
-        Vector3D p1 = next.startingVertex.position;
+        Vector3Dd p0 = he.startingVertex.position;
+        Vector3Dd p1 = next.startingVertex.position;
         double d0 = face.getContainingPlane().pointDistance(p0);
         double d1 = face.getContainingPlane().pointDistance(p1);
 
@@ -663,7 +663,7 @@ public class PolyhedralBoundedSolidGeometricValidator
             return false;
         }
 
-        Vector3D p = p0.add(p1.subtract(p0).multiply(t));
+        Vector3Dd p = p0.add(p1.subtract(p0).multiply(t));
         return PolyhedralBoundedSolidNumericPolicy
             .testPointInside(face, p, numericContext) == Geometry.INSIDE;
     }
@@ -724,8 +724,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                     if ( heANext == null ) {
                         continue;
                     }
-                    Vector2D a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
-                    Vector2D a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
+                    Vector2Dd a1 = projectPointTo2D(heA.startingVertex.position, dominantCoordinate);
+                    Vector2Dd a2 = projectPointTo2D(heANext.startingVertex.position, dominantCoordinate);
 
                     for ( k = 0; k < faceB.boundariesList.size(); k++ ) {
                         _PolyhedralBoundedSolidLoop loopB = faceB.boundariesList.get(k);
@@ -738,8 +738,8 @@ public class PolyhedralBoundedSolidGeometricValidator
                             if ( heA.parentEdge == heB.parentEdge ) {
                                 continue;
                             }
-                            Vector2D b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
-                            Vector2D b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
+                            Vector2Dd b1 = projectPointTo2D(heB.startingVertex.position, dominantCoordinate);
+                            Vector2Dd b2 = projectPointTo2D(heBNext.startingVertex.position, dominantCoordinate);
                             if ( segmentsIntersect2D(a1, a2, b1, b2, numericContext) &&
                                  !segmentSharesEndpoint(heA, heB) ) {
                                 msg.append("  - Faces [").append(faceA.id).append("] and [")

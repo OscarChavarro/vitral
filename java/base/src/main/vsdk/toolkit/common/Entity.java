@@ -158,20 +158,20 @@ public class Entity implements ModelElement, Serializable
         else if ( n.equals("java.lang.String") ) {
             return true;
         }
-        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector2D") ) {
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector2Dd") ) {
             return true;
         }
-        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector3D") ) {
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector3Dd") ) {
             return true;
         }
-        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector4D") ) {
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Vector4Dd") ) {
             return true;
         }
         else if ( n.equals("vsdk.toolkit.common.linealAlgebra.ColorRgb") ||
                   n.equals("vsdk.toolkit.common.color.ColorRgb") ) {
             return true;
         }
-        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Matrix4x4") ) {
+        else if ( n.equals("vsdk.toolkit.common.linealAlgebra.Matrix4x4d") ) {
             return true;
         }
         return false;

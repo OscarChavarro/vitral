@@ -22,10 +22,10 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.gui.CameraController;
@@ -58,8 +58,8 @@ public class GlyphExample extends JFrame implements
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         camera = new Camera();
-        camera.setPosition(new Vector3D(0, 0, 5));
-        Matrix4x4 R = new Matrix4x4();
+        camera.setPosition(new Vector3Dd(0, 0, 5));
+        Matrix4x4d R = new Matrix4x4d();
         R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera.setRotation(R);
         camera.setFov(20);

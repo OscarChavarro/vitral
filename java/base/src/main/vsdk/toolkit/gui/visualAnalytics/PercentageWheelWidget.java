@@ -2,7 +2,7 @@ package vsdk.toolkit.gui.visualAnalytics;
 
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.PresentationElement;
 
 public class PercentageWheelWidget extends PresentationElement {
@@ -21,7 +21,7 @@ public class PercentageWheelWidget extends PresentationElement {
     private double aproximationSteps;
     
     /// Geometric configuration
-    private Vector3D position;
+    private Vector3Dd position;
     private double scale;
     
     /// Interaction control. -1 means "no selection"
@@ -60,7 +60,7 @@ public class PercentageWheelWidget extends PresentationElement {
         borderSelectedColor = new ColorRgb(1, 1, 1);
         borderHighlightedColor  = new ColorRgb(146.0/256.0, 146.0/256.0, 146.0/256.0);
 
-        position = new Vector3D(0, 0, 0);
+        position = new Vector3Dd(0, 0, 0);
     
         scale = 1.0;
         
@@ -213,14 +213,14 @@ public class PercentageWheelWidget extends PresentationElement {
     /**
     @return the position
     */
-    public Vector3D getPosition() {
+    public Vector3Dd getPosition() {
         return position;
     }
 
     /**
     @param position the position to set
     */
-    public void setPosition(Vector3D position) {
+    public void setPosition(Vector3Dd position) {
         this.position = position;
     }
 

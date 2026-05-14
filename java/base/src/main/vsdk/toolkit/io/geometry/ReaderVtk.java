@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
@@ -24,8 +24,8 @@ import vsdk.toolkit.io.PersistenceElement;
 
 public class ReaderVtk extends PersistenceElement
 {
-    private static Vector3D points[] = null;
-    private static Vector3D normals[] = null;
+    private static Vector3Dd points[] = null;
+    private static Vector3Dd normals[] = null;
     private static long stripData[] = null;
     private static long polygonData[] = null;
     private static int numPolygons;
@@ -50,9 +50,9 @@ public class ReaderVtk extends PersistenceElement
             numElements = Integer.parseInt(auxStringTokenizer.nextToken());
             elementType = auxStringTokenizer.nextToken();
             if ( elementType.startsWith("float") ) {
-                points = new Vector3D[numElements];
+                points = new Vector3Dd[numElements];
                 for ( i = 0; i < numElements; i++ ) {
-                    points[i] = new Vector3D(
+                    points[i] = new Vector3Dd(
                         readFloatBE(fis) / 1000.0,
                         readFloatBE(fis) / 1000.0,
                         readFloatBE(fis) / 1000.0);
@@ -110,9 +110,9 @@ public class ReaderVtk extends PersistenceElement
                 elementType = auxStringTokenizer.nextToken();
                 if ( elementType.startsWith("float") ) {
                     //System.out.print("Reading normals... ");
-                    normals = new Vector3D[numElements];
+                    normals = new Vector3Dd[numElements];
                     for ( i = 0; i < numElements; i++ ) {
-                        normals[i] = new Vector3D(
+                        normals[i] = new Vector3Dd(
                             readFloatBE(fis),
                             readFloatBE(fis),
                             readFloatBE(fis));
@@ -219,13 +219,13 @@ public class ReaderVtk extends PersistenceElement
         long deltaTam;
 
         Vertex[] vertexes = new Vertex[points.length];
-        Vector3D n;
+        Vector3Dd n;
         for ( i = 0; i < points.length; i++ ) {
             if ( i < normals.length ) {
-                n = new Vector3D(normals[i]);
+                n = new Vector3Dd(normals[i]);
             }
             else {
-                n = new Vector3D(0, 0, 1);
+                n = new Vector3Dd(0, 0, 1);
             }
             vertexes[i] = new Vertex(points[i], n);
         }

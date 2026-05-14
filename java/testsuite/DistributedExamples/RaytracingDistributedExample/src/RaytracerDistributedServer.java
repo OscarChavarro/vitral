@@ -76,8 +76,8 @@ class VitralVisualizationServerProtocol implements Runnable
     the data itself.  The current supported packets are:
       - 1 - empty answer
       - 2 - double answer followed by 4 bytes of big endian double number
-      - 3 - Vector3D answer followed by 12 bytes of big endian vector data
-      - 4 - Quaternion answer followed by 16 bytes of big endian quaternion data
+      - 3 - Vector3Dd answer followed by 12 bytes of big endian vector data
+      - 4 - Quaterniond answer followed by 16 bytes of big endian quaternion data
       - 5 - String answer followed by zero terminated string
       - 6 - Image answer... (?)
     */

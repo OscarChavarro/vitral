@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.environment.geometry.elements.Triangle;
 import vsdk.toolkit.environment.background.Background;
@@ -727,7 +727,7 @@ to something as "Persistence3ds". Some chunks are not being processed.
 public class Reader3ds extends PersistenceElement
 {
     // Accumulated object parts
-    private static ArrayList<Vector3D> currentVertexPositionArray = null;
+    private static ArrayList<Vector3Dd> currentVertexPositionArray = null;
     private static ArrayList<_Reader3dsMaterialMapping> currentMaterialMappingArray = null;
     private static TriangleMesh currentTriangleMesh = null;
     private static Triangle currentTrianglesList[] = null;
@@ -820,9 +820,9 @@ public class Reader3ds extends PersistenceElement
 
         thing = new SimpleBody();
         thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
+        thing.setPosition(new Vector3Dd());
+        thing.setRotation(new Matrix4x4d());
+        thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
         inoutSimpleBodiesArray.add(thing);
     }
@@ -1148,7 +1148,7 @@ public class Reader3ds extends PersistenceElement
                 // Vertex processing
                 Vertex v[] = new Vertex[currentVertexPositionArray.size()];
                 for ( i = 0; i < v.length; i++ ) {
-                    v[i] = new Vertex(new Vector3D(currentVertexPositionArray.get(i)));
+                    v[i] = new Vertex(new Vector3Dd(currentVertexPositionArray.get(i)));
                 }
                 for ( i = 0;
                       i < v.length && currentUTextureMapping != null &&
@@ -1256,10 +1256,10 @@ public class Reader3ds extends PersistenceElement
             //System.out.println(indent(level+1) + "  . Reading " + numVertexes +
             //                 " vertexes");
 
-            currentVertexPositionArray = new ArrayList<Vector3D>();
-            Vector3D p;
+            currentVertexPositionArray = new ArrayList<Vector3Dd>();
+            Vector3Dd p;
             for ( i = 0; i < numVertexes; i++ ) {
-                p = new Vector3D(readFloatLE(is), readFloatLE(is), readFloatLE(is));
+                p = new Vector3Dd(readFloatLE(is), readFloatLE(is), readFloatLE(is));
                 currentVertexPositionArray.add(p);
             }
             if ( currentChunk.length-8-numVertexes*12 > 0 ) {

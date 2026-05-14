@@ -10,8 +10,8 @@ import java.util.ArrayList;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -447,8 +447,8 @@ public class ReaderBinNeedForSpeed extends PersistenceElement
 
         //-----------------------------------------------------------------
         SimpleBody thing;
-        Vector3D position = new Vector3D();
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd();
+        Matrix4x4d R = new Matrix4x4d();
         SimpleMaterial material = defaultMaterial();
 
         thing = new SimpleBody();

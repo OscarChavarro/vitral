@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.io.OutputStream;
 
 // VSDK Classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
@@ -26,15 +26,15 @@ public class WriterObj extends PersistenceElement {
         double vn[] = mesh.getVertexNormals();
         double vuv[] = mesh.getVertexUvs();
         int i;
-        Vector3D p, n, vpi, vni;
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd p, n, vpi, vni;
+        Matrix4x4d R = new Matrix4x4d();
 
-        R = R.axisRotation(Math.toRadians(-90), new Vector3D(1, 0, 0));
+        R = R.axisRotation(Math.toRadians(-90), new Vector3Dd(1, 0, 0));
 
         //-----------------------------------------------------------------
         writeAsciiLine(inOutputStream, "# " + nv + " vertex positions");
         for ( i = 0; i < nv; i++ ) {
-            vpi = new Vector3D(vp[3*i], vp[3*i+1], vp[3*i+2]);
+            vpi = new Vector3Dd(vp[3*i], vp[3*i+1], vp[3*i+2]);
             p = R.multiply(vpi);
             writeAsciiLine(inOutputStream, "v " + p.x() + " " + p.y() + " " + p.z());
         }
@@ -48,7 +48,7 @@ public class WriterObj extends PersistenceElement {
         //-----------------------------------------------------------------
         writeAsciiLine(inOutputStream, "# " + nv + " vertex normals");
         for ( i = 0; i < nv && vn != null; i++ ) {
-            vni = new Vector3D(vn[3*i], vn[3*i+1], vn[3*i+2]);
+            vni = new Vector3Dd(vn[3*i], vn[3*i+1], vn[3*i+2]);
             n = R.multiply(vni);
             writeAsciiLine(inOutputStream, "vn " + n.x() + " " + n.y() + " " + n.z());
         }

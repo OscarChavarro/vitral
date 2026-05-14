@@ -18,7 +18,7 @@ import com.jogamp.opengl.GL2;
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.visualAnalytics.PercentageWheelWidget;
@@ -55,7 +55,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
     }
     
     private static void
-    drawCharJOGL(GL2 gl, String key, TextRenderer r, ColorRgb c, Vector3D pos, double scale)
+    drawCharJOGL(GL2 gl, String key, TextRenderer r, ColorRgb c, Vector3Dd pos, double scale)
     {
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
@@ -145,7 +145,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         // OpenGL state setup
         gl.glPushMatrix();
 
-        Vector3D pos = widget.getPosition();
+        Vector3Dd pos = widget.getPosition();
         double s = widget.getScale();
         
         gl.glPushAttrib(GL2.GL_DEPTH_BITS | GL2.GL_TEXTURE_2D );
@@ -164,7 +164,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
     }
 
     private static void drawInternal(GL2 gl, PercentageWheelWidget widget) {
-        Vector3D pos = widget.getPosition();
+        Vector3Dd pos = widget.getPosition();
         double s = widget.getScale();
                 
         gl.glDisable(GL2.GL_TEXTURE_2D);
@@ -403,7 +403,7 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         double outerRadius,
         double borderWidth,
         double deltaZ,
-        Vector3D pos,
+        Vector3Dd pos,
         double ss) {
         
         String key;

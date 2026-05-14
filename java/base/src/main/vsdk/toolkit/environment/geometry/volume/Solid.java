@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 
 public abstract class Solid extends Geometry {
@@ -15,10 +15,10 @@ public abstract class Solid extends Geometry {
 
     This method should be overwritten and defined for every solid
 
-    @return a new Vector3D containing the coordinate of current solid
+    @return a new Vector3Dd containing the coordinate of current solid
     center of mass.
     */
-    public Vector3D doCenterOfMass() {
-        return new Vector3D(0, 0, 0);
+    public Vector3Dd doCenterOfMass() {
+        return new Vector3Dd(0, 0, 0);
     }
 }

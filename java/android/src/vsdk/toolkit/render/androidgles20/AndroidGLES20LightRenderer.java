@@ -11,7 +11,7 @@ import android.opengl.GLES20;
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.Light;
 
 public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
@@ -48,7 +48,7 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
 
         float vertexDataArray[] = new float[numVertex*8];
 
-        Vector3D p = l.getPosition();
+        Vector3Dd p = l.getPosition();
 
         index = 0;
         vertexDataArray[index] = (float)p.x - delta;    index++;

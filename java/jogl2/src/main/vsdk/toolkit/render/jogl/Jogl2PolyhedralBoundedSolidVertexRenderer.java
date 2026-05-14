@@ -12,7 +12,7 @@ import com.jogamp.opengl.GL2;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -37,7 +37,7 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
         int i;
         for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solid.getVerticesList().get(i);
-            Vector3D p = v.position;
+            Vector3Dd p = v.position;
 
             c = v.debugColor;
             if ( c.r() >= 1 - VSDK.EPSILON &&
@@ -77,7 +77,7 @@ public class Jogl2PolyhedralBoundedSolidVertexRenderer extends Jogl2Renderer
         int j;
 
         //-----------------------------------------------------------------
-        Vector3D p0 = null;
+        Vector3Dd p0 = null;
         Vertex vertex = new Vertex(p0);
 
         gl.glBegin(GL.GL_LINES);

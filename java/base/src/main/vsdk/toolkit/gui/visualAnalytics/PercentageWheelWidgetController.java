@@ -2,7 +2,7 @@ package vsdk.toolkit.gui.visualAnalytics;
 
 // VSDK classes
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.gui.Controller;
@@ -59,18 +59,18 @@ public class PercentageWheelWidgetController extends Controller {
 
     private int selectSector(int x, int y, Camera c) {
         int i;
-        Vector3D p = controlledWidget.getPosition();
+        Vector3Dd p = controlledWidget.getPosition();
         Ray ray;
         c.updateVectors();
         ray = c.generateRay(x, y);
         InfinitePlane plane;
-        plane = new InfinitePlane(new Vector3D(0, 0, 1), p);
+        plane = new InfinitePlane(new Vector3Dd(0, 0, 1), p);
         Ray hit = plane.doIntersection(ray);
         if ( hit == null ) {
             return -1;
         }
 
-        Vector3D inPlane;
+        Vector3Dd inPlane;
         double r;
         double angle;
         

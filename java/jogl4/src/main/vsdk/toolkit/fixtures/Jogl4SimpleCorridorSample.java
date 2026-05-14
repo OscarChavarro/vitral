@@ -7,7 +7,7 @@ import java.util.List;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ShaderProgramUtil;
 
@@ -43,7 +43,7 @@ public class Jogl4SimpleCorridorSample
         interSpace = 0.05;
     }
 
-    public void drawGL(GL4 gl, Matrix4x4 modelViewProjection)
+    public void drawGL(GL4 gl, Matrix4x4d modelViewProjection)
     {
         if ( !initialized ) {
             initialize(gl);

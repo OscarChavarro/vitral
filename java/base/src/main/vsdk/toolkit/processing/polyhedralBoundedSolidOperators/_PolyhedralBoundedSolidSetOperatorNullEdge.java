@@ -4,7 +4,7 @@
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 
@@ -39,7 +39,7 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         }
     }
 
-    private static int comparePoint(Vector3D a, Vector3D b)
+    private static int comparePoint(Vector3Dd a, Vector3Dd b)
     {
         int cmpX = PolyhedralBoundedSolidNumericPolicy.compare(
             a.x(), b.x(), numericContext.bigEpsilon());
@@ -57,11 +57,11 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
             a.z(), b.z(), numericContext.bigEpsilon());
     }
 
-    private static Vector3D canonicalFirstEndpoint(
+    private static Vector3Dd canonicalFirstEndpoint(
         _PolyhedralBoundedSolidEdge edge)
     {
-        Vector3D right;
-        Vector3D left;
+        Vector3Dd right;
+        Vector3Dd left;
 
         right = edge.rightHalf.startingVertex.position;
         left = edge.leftHalf.startingVertex.position;
@@ -71,11 +71,11 @@ public class _PolyhedralBoundedSolidSetOperatorNullEdge
         return left;
     }
 
-    private static Vector3D canonicalSecondEndpoint(
+    private static Vector3Dd canonicalSecondEndpoint(
         _PolyhedralBoundedSolidEdge edge)
     {
-        Vector3D right;
-        Vector3D left;
+        Vector3Dd right;
+        Vector3Dd left;
 
         right = edge.rightHalf.startingVertex.position;
         left = edge.leftHalf.startingVertex.position;

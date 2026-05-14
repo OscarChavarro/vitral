@@ -13,7 +13,7 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.Material;
 import vsdk.toolkit.environment.geometry.TriangleMesh;
@@ -128,7 +128,7 @@ public class AndroidGLES20TriangleMeshRenderer extends AndroidGLES20Renderer {
         
         Vertex v;
         
-        v = new Vertex(new Vector3D(0, 0, 0), new Vector3D(0, 0, 0), 0, 0);
+        v = new Vertex(new Vector3Dd(0, 0, 0), new Vector3Dd(0, 0, 0), 0, 0);
         
         int p;
         int i;

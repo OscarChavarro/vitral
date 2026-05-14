@@ -6,7 +6,7 @@ import java.awt.Graphics;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class AwtCalligraphic2DBufferRenderer extends AwtRenderer
@@ -20,15 +20,15 @@ public class AwtCalligraphic2DBufferRenderer extends AwtRenderer
                        VSDK.signedByte2unsignedInteger((byte)0) )
         );
 
-        Vector3D p0;
-        Vector3D p1;
+        Vector3Dd p0;
+        Vector3Dd p1;
         int x0, y0, x1, y1;
         int i;
         double xt = dx;
         double yt = dy;
 
         for ( i = 0; i < lineSet.getNumLines(); i++ ) {
-            Vector3D[] segment = lineSet.get2DLine(i);
+            Vector3Dd[] segment = lineSet.get2DLine(i);
             p0 = segment[0];
             p1 = segment[1];
             x0 = (int)((xt-1)*((p0.x()+1)/2));

@@ -13,8 +13,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -54,18 +54,18 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         return m;
     }
 
-    private static Vector3D solidCenter(PolyhedralBoundedSolid solid)
+    private static Vector3Dd solidCenter(PolyhedralBoundedSolid solid)
     {
         double[] minMax;
 
         if ( solid == null ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
         minMax = solid.getMinMax();
         if ( minMax == null || minMax.length < 6 ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
-        return new Vector3D(
+        return new Vector3Dd(
             (minMax[0] + minMax[3]) / 2.0,
             (minMax[1] + minMax[4]) / 2.0,
             (minMax[2] + minMax[5]) / 2.0);
@@ -91,15 +91,15 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         return Math.max(ex, Math.max(ey, ez));
     }
 
-    private static Vector3D cameraRelativeAnchor(Camera camera,
+    private static Vector3Dd cameraRelativeAnchor(Camera camera,
         double ndcX,
         double ndcY,
         double depth)
     {
-        Vector3D eye = camera.getPosition();
-        Vector3D front = camera.getFront().normalized();
-        Vector3D up = camera.getUp().normalized();
-        Vector3D right = camera.getLeft().multiply(-1).normalized();
+        Vector3Dd eye = camera.getPosition();
+        Vector3Dd front = camera.getFront().normalized();
+        Vector3Dd up = camera.getUp().normalized();
+        Vector3Dd right = camera.getLeft().multiply(-1).normalized();
         double viewportY = Math.max(camera.getViewportYSize(), 1e-9);
         double aspect = camera.getViewportXSize() / viewportY;
         double offsetX;
@@ -127,10 +127,10 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     private void drawInsetSolid(GL2 gl,
         PolyhedralBoundedSolid solid,
         SimpleMaterial material,
-        Vector3D anchorPoint,
+        Vector3Dd anchorPoint,
         double mainSolidExtent)
     {
-        Vector3D center;
+        Vector3Dd center;
         double extent;
         double scale;
 
@@ -164,8 +164,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         PolyhedralBoundedSolid mainSolid = model.getSolid();
         Camera camera = model.getCamera();
         double mainExtent;
-        Vector3D leftAnchor;
-        Vector3D rightAnchor;
+        Vector3Dd leftAnchor;
+        Vector3Dd rightAnchor;
 
         if ( operandA == null || operandB == null || mainSolid == null ) {
             return;
@@ -216,12 +216,12 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     }
 
     private void
-    renderLinesResult(GL2 gl, List <Vector3D> contourLines,
-                      List <Vector3D> visibleLines,
-                      List <Vector3D> hiddenLines)
+    renderLinesResult(GL2 gl, List <Vector3Dd> contourLines,
+                      List <Vector3Dd> visibleLines,
+                      List <Vector3Dd> hiddenLines)
     {
         int i;
-        Vector3D p;
+        Vector3Dd p;
 
         gl.glPushAttrib(GL.GL_DEPTH_TEST);
         gl.glDisable(GL.GL_DEPTH_TEST);
@@ -319,9 +319,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
 
         // Points pass: nearest depth bias.
-        List<Vector3D> contourLines;
-        List <Vector3D> visibleLines;
-        List <Vector3D> hiddenLines;
+        List<Vector3Dd> contourLines;
+        List <Vector3Dd> visibleLines;
+        List <Vector3Dd> hiddenLines;
         List <SimpleBody> bodyArray;
         SimpleBody body;
 
@@ -332,16 +332,16 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             gl.glDisable(GL2.GL_POLYGON_OFFSET_POINT);
         }
         else if ( model.getEdgeIndex() == -3 ) {
-            contourLines = new ArrayList <Vector3D>();
-            visibleLines = new ArrayList <Vector3D>();
-            hiddenLines = new ArrayList <Vector3D>();
+            contourLines = new ArrayList <Vector3Dd>();
+            visibleLines = new ArrayList <Vector3Dd>();
+            hiddenLines = new ArrayList <Vector3Dd>();
             bodyArray = new ArrayList <SimpleBody>();
 
             body = new SimpleBody();
             body.setGeometry(model.getSolid());
-            body.setPosition(new Vector3D());
-            body.setRotation(new Matrix4x4());
-            body.setRotationInverse(new Matrix4x4());
+            body.setPosition(new Vector3Dd());
+            body.setRotation(new Matrix4x4d());
+            body.setRotationInverse(new Matrix4x4d());
             bodyArray.add(body);
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);

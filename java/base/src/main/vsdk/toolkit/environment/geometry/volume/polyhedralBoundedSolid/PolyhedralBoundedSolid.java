@@ -15,7 +15,7 @@ import java.util.List;
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.elements.Vertex2D;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -254,7 +254,7 @@ public class PolyhedralBoundedSolid extends Solid {
         // Initialization values for search algorithm
         minT = Double.MAX_VALUE;
         RayHit bestInfo = null;
-        Vector3D p;
+        Vector3Dd p;
         int pos;
 
         for ( i = 0; i < polygonsList.size(); i++ ) {
@@ -290,18 +290,18 @@ public class PolyhedralBoundedSolid extends Solid {
         return true;
     }
 
-    private static Vector3D dropCoordinate(Vector3D in, int coordinate)
+    private static Vector3Dd dropCoordinate(Vector3Dd in, int coordinate)
     {
         return switch (coordinate) {
-            case 1 -> new Vector3D(in.y(), in.z(), 0);
-            case 2 -> new Vector3D(in.x(), in.z(), 0);
-            default -> new Vector3D(in.x(), in.y(), 0);
+            case 1 -> new Vector3Dd(in.y(), in.z(), 0);
+            case 2 -> new Vector3Dd(in.x(), in.z(), 0);
+            default -> new Vector3Dd(in.x(), in.y(), 0);
         };
     }
 
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
-        Vector3D n = face.getContainingPlane().getNormal();
+        Vector3Dd n = face.getContainingPlane().getNormal();
 
         if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
              Math.abs(n.x()) >= Math.abs(n.z()) ) {
@@ -316,13 +316,13 @@ public class PolyhedralBoundedSolid extends Solid {
 
     private static int testPointInsideForRayIntersection(
         _PolyhedralBoundedSolidFace face,
-        Vector3D point,
+        Vector3Dd point,
         double tolerance)
     {
         int dominantCoordinate;
         int insideLoopCount;
         int i;
-        Vector3D projectedPoint;
+        Vector3Dd projectedPoint;
         Vertex2D projectedPoint2D;
 
         if ( face == null || face.getContainingPlane() == null ) {
@@ -524,15 +524,15 @@ public class PolyhedralBoundedSolid extends Solid {
     respect to `origin`) between the `origin` point and the `p` point
     */
     @Override
-    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
         int qi = 0;
         int i;
         int j;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-        Vector3D d = p.subtract(origin);
-        Vector3D pi;
+        Vector3Dd d = p.subtract(origin);
+        Vector3Dd pi;
         double t0 = d.length();
         d = d.normalized();
         int pos;
@@ -580,11 +580,11 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     private boolean boundaryHitProducesInteriorPenetration(
-        Vector3D hitPoint,
-        Vector3D direction,
+        Vector3Dd hitPoint,
+        Vector3Dd direction,
         double tolerance)
     {
-        Vector3D afterHit = hitPoint.add(direction.multiply(4.0 * tolerance));
+        Vector3Dd afterHit = hitPoint.add(direction.multiply(4.0 * tolerance));
         boolean touchesBoundary = false;
 
         for ( int i = 0; i < polygonsList.size(); i++ ) {
@@ -602,7 +602,7 @@ public class PolyhedralBoundedSolid extends Solid {
     }
 
     private boolean isFaceBoundaryTouchAtHit(_PolyhedralBoundedSolidFace face,
-                                             Vector3D hitPoint,
+                                             Vector3Dd hitPoint,
                                              double tolerance)
     {
         if ( Math.abs(face.getContainingPlane().pointDistance(hitPoint)) >
@@ -614,7 +614,7 @@ public class PolyhedralBoundedSolid extends Solid {
 
     private boolean isForwardProbeInsideFaceHalfSpace(
         _PolyhedralBoundedSolidFace face,
-        Vector3D probePoint,
+        Vector3Dd probePoint,
         double tolerance)
     {
         int halfSpaceStatus = face.getContainingPlane()

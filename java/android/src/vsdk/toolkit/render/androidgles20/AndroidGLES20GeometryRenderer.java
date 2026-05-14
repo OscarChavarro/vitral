@@ -14,7 +14,7 @@ import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.Vertex;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Arrow;
 import vsdk.toolkit.environment.geometry.Box;
@@ -117,9 +117,9 @@ public class AndroidGLES20GeometryRenderer extends AndroidGLES20Renderer
         double borderPercent = 0.01;
         double linePercent = 0.25;
 
-        Vector3D min, max, delta;
-        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        Vector3Dd min, max, delta;
+        min = new Vector3Dd(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
         delta = max.substract(min);
         min = min.substract(delta.multiply(borderPercent));
         max = max.add(delta.multiply(borderPercent));

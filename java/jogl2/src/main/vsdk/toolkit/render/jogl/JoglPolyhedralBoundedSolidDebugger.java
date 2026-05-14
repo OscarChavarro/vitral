@@ -15,8 +15,8 @@ import com.jogamp.opengl.GLDrawableFactory;
 // VSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -72,8 +72,8 @@ implements GLEventListener
 
         //-----------------------------------------------------------------
         camera = new Camera();
-        camera.setPosition(new Vector3D(2, -1, 2));
-        Matrix4x4 R = new Matrix4x4();
+        camera.setPosition(new Vector3Dd(2, -1, 2));
+        Matrix4x4d R = new Matrix4x4d();
         R = R.eulerAnglesRotation(Math.toRadians(135), Math.toRadians(-35), 0);
         camera.setRotation(R);
         camera.setFov(45.0);
@@ -84,8 +84,8 @@ implements GLEventListener
         quality.setWires(true);
 
         material = defaultMaterial();
-        light1 = new Light(LightType.POINT, new Vector3D(3, -3, 2), new ColorRgb(1, 1, 1));
-        light2 = new Light(LightType.POINT, new Vector3D(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
+        light1 = new Light(LightType.POINT, new Vector3Dd(3, -3, 2), new ColorRgb(1, 1, 1));
+        light2 = new Light(LightType.POINT, new Vector3Dd(-2, 5, -2), new ColorRgb(0.9, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
     }

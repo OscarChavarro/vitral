@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -43,15 +43,15 @@ class HiddenLineRendererTest
         }
         double tolerance = PolyhedralBoundedSolidNumericPolicy.forSolid(solid)
             .bigEpsilon();
-        ArrayList<Vector3D> contourLines = new ArrayList<Vector3D>();
-        ArrayList<Vector3D> visibleLines = new ArrayList<Vector3D>();
-        ArrayList<Vector3D> hiddenLines = new ArrayList<Vector3D>();
+        ArrayList<Vector3Dd> contourLines = new ArrayList<Vector3Dd>();
+        ArrayList<Vector3Dd> visibleLines = new ArrayList<Vector3Dd>();
+        ArrayList<Vector3Dd> hiddenLines = new ArrayList<Vector3Dd>();
 
         // Action
         HiddenLineRenderer.executeAppelAlgorithm(createSingleBodyScene(solid),
             createFeaturedCamera(), contourLines, visibleLines, hiddenLines);
 
-        ArrayList<Vector3D> allPoints = new ArrayList<Vector3D>();
+        ArrayList<Vector3Dd> allPoints = new ArrayList<Vector3Dd>();
         allPoints.addAll(contourLines);
         allPoints.addAll(visibleLines);
         allPoints.addAll(hiddenLines);
@@ -72,9 +72,9 @@ class HiddenLineRendererTest
     {
         SimpleBody body = new SimpleBody();
         body.setGeometry(solid);
-        body.setPosition(new Vector3D());
-        body.setRotation(new Matrix4x4());
-        body.setRotationInverse(new Matrix4x4());
+        body.setPosition(new Vector3Dd());
+        body.setRotation(new Matrix4x4d());
+        body.setRotationInverse(new Matrix4x4d());
 
         ArrayList<SimpleBody> bodies = new ArrayList<SimpleBody>();
         bodies.add(body);
@@ -84,8 +84,8 @@ class HiddenLineRendererTest
     private static Camera createFeaturedCamera()
     {
         Camera camera = new Camera();
-        camera.setPosition(new Vector3D(2.0, -1.0, 2.0));
-        Matrix4x4 rotation = new Matrix4x4();
+        camera.setPosition(new Vector3Dd(2.0, -1.0, 2.0));
+        Matrix4x4d rotation = new Matrix4x4d();
         rotation = rotation.eulerAnglesRotation(Math.toRadians(135.0),
             Math.toRadians(-35.0), 0.0);
         camera.setRotation(rotation);
@@ -94,7 +94,7 @@ class HiddenLineRendererTest
     }
 
     private static boolean liesOnAnyEdge(PolyhedralBoundedSolid solid,
-                                         Vector3D point,
+                                         Vector3Dd point,
                                          double tolerance)
     {
         for ( int i = 0; i < solid.getEdgesList().size(); i++ ) {
@@ -102,8 +102,8 @@ class HiddenLineRendererTest
             if ( edge.leftHalf == null || edge.rightHalf == null ) {
                 continue;
             }
-            Vector3D start = edge.leftHalf.startingVertex.position;
-            Vector3D end = edge.rightHalf.startingVertex.position;
+            Vector3Dd start = edge.leftHalf.startingVertex.position;
+            Vector3Dd end = edge.rightHalf.startingVertex.position;
             if ( ComputationalGeometry.lineSegmentContainmentTest(start, end,
                      point, tolerance) == Geometry.LIMIT ) {
                 return true;

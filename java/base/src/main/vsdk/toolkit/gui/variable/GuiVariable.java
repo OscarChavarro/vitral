@@ -64,7 +64,7 @@ public abstract class GuiVariable extends GuiElement {
 
     /**
     Each variable has a type. Examples: "Integer", "Double", "String",
-    "Vector3D".
+    "Vector3Dd".
     @return 
     */
     public abstract String getType();

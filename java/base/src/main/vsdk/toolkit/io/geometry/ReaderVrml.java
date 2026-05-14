@@ -14,8 +14,8 @@ import java.util.zip.GZIPInputStream;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -370,7 +370,7 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Light> lightsArray,
         ArrayList<Background> backgroundsArray,
         ArrayList<Camera> camerasArray,
-        Matrix4x4 M)
+        Matrix4x4d M)
     {
         int tokenType;
         int level = 0;
@@ -411,9 +411,9 @@ public class ReaderVrml extends PersistenceElement
         } while ( tokenType != StreamTokenizer.TT_EOF );
     }
 
-    private static Matrix4x4 processRotation(StreamTokenizer parser)
+    private static Matrix4x4d processRotation(StreamTokenizer parser)
     {
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         int i = 0;
         double vals[];
         vals = new double[4];
@@ -456,7 +456,7 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Light> lightsArray,
         ArrayList<Background> backgroundsArray,
         ArrayList<Camera> camerasArray,
-        Matrix4x4 M)
+        Matrix4x4d M)
     {
         int tokenType;
         int level = 0;
@@ -473,7 +473,7 @@ public class ReaderVrml extends PersistenceElement
               case StreamTokenizer.TT_EOF: break;
               case StreamTokenizer.TT_WORD:
                 if ( parser.sval.equals("rotation") ) {
-                    Matrix4x4 R;
+                    Matrix4x4d R;
                     R = processRotation(parser);
                     if ( R == null ) {
                         return;
@@ -622,7 +622,7 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Light> lightsArray,
         ArrayList<Background> backgroundsArray,
         ArrayList<Camera> camerasArray,
-        Matrix4x4 M)
+        Matrix4x4d M)
     {
         int tokenType;
         int level = 0;
@@ -678,13 +678,13 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Light> lightsArray,
         ArrayList<Background> backgroundsArray,
         ArrayList<Camera> camerasArray,
-        Matrix4x4 M)
+        Matrix4x4d M)
     {
         int tokenType;
         int level = 0;
         SimpleBody thing;
-        Matrix4x4 R = new Matrix4x4(M);
-        Vector3D position = M.extractTranslation();
+        Matrix4x4d R = new Matrix4x4d(M);
+        Vector3Dd position = M.extractTranslation();
         Geometry g = null;
 
         R = R.withoutTranslation();
@@ -748,7 +748,7 @@ public class ReaderVrml extends PersistenceElement
         ArrayList<Light> lightsArray,
         ArrayList<Background> backgroundsArray,
         ArrayList<Camera> camerasArray,
-        Matrix4x4 M)
+        Matrix4x4d M)
     {
         if ( parser.sval.equals("WorldInfo") ) {
             skipGroup(parser);
@@ -851,9 +851,9 @@ public class ReaderVrml extends PersistenceElement
               case StreamTokenizer.TT_EOL: break;
               case StreamTokenizer.TT_EOF: break;
               case StreamTokenizer.TT_WORD:
-                Matrix4x4 M;
+                Matrix4x4d M;
 
-                M = new Matrix4x4();
+                M = new Matrix4x4d();
                 processGroup(parser, simpleBodiesArray, lightsArray, backgroundsArray, camerasArray, M);
                 break;
               default:

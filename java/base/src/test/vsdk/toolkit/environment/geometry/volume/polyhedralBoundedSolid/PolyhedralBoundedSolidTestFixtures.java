@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -26,9 +26,9 @@ public class PolyhedralBoundedSolidTestFixtures
                                                         double sz, double tx,
                                                         double ty, double tz)
     {
-        Box box = new Box(new Vector3D(sx, sy, sz));
+        Box box = new Box(new Vector3Dd(sx, sy, sz));
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
         translation = translation.translation(tx, ty, tz);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);

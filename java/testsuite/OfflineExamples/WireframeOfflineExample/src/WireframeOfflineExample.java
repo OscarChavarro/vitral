@@ -2,8 +2,8 @@
 import java.io.File;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;     // Model elements
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;     // Model elements
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -47,9 +47,9 @@ public class WireframeOfflineExample {
     {
         //-----------------------------------------------------------------
         camera = new Camera();
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
-        camera.setPosition(new Vector3D(7, -4, 4));
+        camera.setPosition(new Vector3Dd(7, -4, 4));
         R = R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
         camera.setNearPlaneDistance(0.001);
         camera.setFarPlaneDistance(100);
@@ -74,7 +74,7 @@ public class WireframeOfflineExample {
         b = new SimpleBody();
         box = new Box(1, 1, 1);
         b.setGeometry(box);
-        b.setPosition(new Vector3D(1, 2, 3));
+        b.setPosition(new Vector3Dd(1, 2, 3));
         scene.addBody(b);
     }
 

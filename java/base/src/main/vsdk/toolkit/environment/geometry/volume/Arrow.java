@@ -4,8 +4,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.io.Serial;
 
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
@@ -86,7 +86,7 @@ public class Arrow extends Solid {
     */
     public Ray
     doIntersection(Ray inOutRay) {
-        Vector3D tr = new Vector3D(0, 0, -baseLength);
+        Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
 
         Ray headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
         Ray baseRay = new Ray(inOutRay);
@@ -110,7 +110,7 @@ public class Arrow extends Solid {
 
     private boolean doIntersectionDistanceOnly(Ray inRay, RayHit outHit)
     {
-        Vector3D shiftedHeadOrigin = new Vector3D(
+        Vector3Dd shiftedHeadOrigin = new Vector3Dd(
             inRay.origin().x(),
             inRay.origin().y(),
             inRay.origin().z() - baseLength);
@@ -164,7 +164,7 @@ public class Arrow extends Solid {
             return doIntersectionDistanceOnly(inRay, outHit);
         }
 
-        Vector3D tr = new Vector3D(0, 0, -baseLength);
+        Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
         Ray shiftedHeadRay = new Ray(inRay.origin().add(tr), inRay.direction(), inRay.t());
 
         RayHit baseHit = new RayHit(outHit.requiredDetailMask());
@@ -191,7 +191,7 @@ public class Arrow extends Solid {
             outHit.clone(headHit);
             outHit.setRay(inRay.withT(headT));
             if ( outHit.p != null ) {
-                outHit.p = new Vector3D(outHit.p.x(), outHit.p.y(), outHit.p.z() + baseLength);
+                outHit.p = new Vector3Dd(outHit.p.x(), outHit.p.y(), outHit.p.z() + baseLength);
             }
         }
         return true;
@@ -248,7 +248,7 @@ public class Arrow extends Solid {
     private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
     {
         PolyhedralBoundedSolid solid;
-        Matrix4x4 T, S, M;
+        Matrix4x4d T, S, M;
         int nsides = 36/4;
 
         solid = PolyhedralBoundedSolidModeler.createCircularLamina(
@@ -256,27 +256,27 @@ public class Arrow extends Solid {
         );
 
         // Cylinder case
-        T = new Matrix4x4();
+        T = new Matrix4x4d();
         T = T.translation(0.0, 0.0, baseLength);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), T);
 
-        T = new Matrix4x4();
+        T = new Matrix4x4d();
         T = T.translation(0.0, 0.0, 0);
         double f = headRadius / baseRadius;
-        S = new Matrix4x4();
+        S = new Matrix4x4d();
         S = S.scale(f, f, 1);
         M = T.multiply(S);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), M);
 
         // Cone case
-        Vector3D apex;
+        Vector3Dd apex;
         int i;
         int base1 = 2*nsides+1;
         int base2 = 3*nsides+1;
 
-        apex = new Vector3D(0, 0, baseLength + headLength);
+        apex = new Vector3Dd(0, 0, baseLength + headLength);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, apex);
 
         for ( i = 0; i < nsides-2; i++ ) {

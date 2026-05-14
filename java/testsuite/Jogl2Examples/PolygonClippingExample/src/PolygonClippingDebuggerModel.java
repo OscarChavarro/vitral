@@ -3,7 +3,7 @@ import javax.swing.JFrame;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
@@ -49,8 +49,8 @@ public class PolygonClippingDebuggerModel
     public PolygonClippingDebuggerModel()
     {
         camera = new Camera();
-        camera.setPosition(new Vector3D(14, -18, 12));
-        camera.setFocusedPositionMaintainingOrthogonality(new Vector3D(6, 0, 4));
+        camera.setPosition(new Vector3Dd(14, -18, 12));
+        camera.setFocusedPositionMaintainingOrthogonality(new Vector3Dd(6, 0, 4));
         camera.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera.setOrthogonalZoom(camera.getOrthogonalZoom() / 16.0);
 
@@ -59,7 +59,7 @@ public class PolygonClippingDebuggerModel
         qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerOrbiter(camera);
 
-        light = new Light(LightType.POINT, new Vector3D(10, -20, 50),
+        light = new Light(LightType.POINT, new Vector3Dd(10, -20, 50),
             new ColorRgb(1, 1, 1));
 
         clipPolygon = null;

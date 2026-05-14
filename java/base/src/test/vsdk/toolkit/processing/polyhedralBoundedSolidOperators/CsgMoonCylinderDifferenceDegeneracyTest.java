@@ -12,8 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -31,8 +31,8 @@ class CsgMoonCylinderDifferenceDegeneracyTest
     private static final double RADIUS = 0.15;
     private static final double HEIGHT = 0.5;
     private static final double TOLERANCE = 1.0e-9;
-    private static final Vector3D MOON_OFFSET =
-        new Vector3D(0.11, 0.0, 0.06);
+    private static final Vector3Dd MOON_OFFSET =
+        new Vector3Dd(0.11, 0.0, 0.06);
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("moonCylinderResolutionVariants")
@@ -121,7 +121,7 @@ class CsgMoonCylinderDifferenceDegeneracyTest
             aHeightDivisions);
         PolyhedralBoundedSolid b = createCylinder(bRadialDivisions,
             bHeightDivisions);
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
 
         translation = translation.translation(MOON_OFFSET);
         PolyhedralBoundedSolidModeler.applyTransformation(b, translation);
@@ -630,7 +630,7 @@ class CsgMoonCylinderDifferenceDegeneracyTest
 
     private static double loopAreaMagnitude(_PolyhedralBoundedSolidLoop loop)
     {
-        Vector3D normalAccumulator = new Vector3D();
+        Vector3Dd normalAccumulator = new Vector3Dd();
         int i;
 
         if ( loop == null || loop.halfEdgesList == null ||
@@ -650,10 +650,10 @@ class CsgMoonCylinderDifferenceDegeneracyTest
                 return 0.0;
             }
 
-            Vector3D p = halfEdge.startingVertex.position;
-            Vector3D q = next.startingVertex.position;
+            Vector3Dd p = halfEdge.startingVertex.position;
+            Vector3Dd q = next.startingVertex.position;
 
-            normalAccumulator = normalAccumulator.add(new Vector3D(
+            normalAccumulator = normalAccumulator.add(new Vector3Dd(
                 (p.y() - q.y()) * (p.z() + q.z()),
                 (p.z() - q.z()) * (p.x() + q.x()),
                 (p.x() - q.x()) * (p.y() + q.y())));
@@ -661,7 +661,7 @@ class CsgMoonCylinderDifferenceDegeneracyTest
         return normalAccumulator.length();
     }
 
-    private static boolean samePosition(Vector3D first, Vector3D second)
+    private static boolean samePosition(Vector3Dd first, Vector3Dd second)
     {
         if ( first == null || second == null ) {
             return false;

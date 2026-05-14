@@ -16,8 +16,8 @@ import java.util.Iterator;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -851,8 +851,8 @@ public class ReaderAse extends PersistenceElement
         int tokenType;
         int level = 0;
         SimpleBody thing;
-        Vector3D position = new Vector3D();
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd();
+        Matrix4x4d R = new Matrix4x4d();
         Geometry g = null;
         SimpleMaterial material = defaultMaterial();
 
@@ -947,8 +947,8 @@ public class ReaderAse extends PersistenceElement
         int tokenType;
         int level = 0;
         SimpleBody thing;
-        Vector3D position = new Vector3D();
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd();
+        Matrix4x4d R = new Matrix4x4d();
         Geometry g = null;
         SimpleMaterial material = defaultMaterial();
 

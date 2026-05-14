@@ -12,7 +12,7 @@ import com.jogamp.opengl.glu.GLUquadric;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
@@ -82,7 +82,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         for ( i = 0; i < things.size(); i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
-            Vector3D position;
+            Vector3Dd position;
 
             if ( g != null && (i < 9 || i > 11) ) {
                 gl.glPushMatrix();
@@ -110,7 +110,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         for ( i = 9; i < things.size() && i < 12; i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
-            Vector3D position;
+            Vector3Dd position;
 
             if ( g != null ) {
                 gl.glPushMatrix();
@@ -147,7 +147,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         for ( i = 0; i < things.size(); i++ ) {
             SimpleBody r = things.get(i);
             Geometry g = r.getGeometry();
-            Vector3D position;
+            Vector3Dd position;
 
             if ( g != null ) {
                 gl.glPushMatrix();
@@ -168,14 +168,14 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
 /*
         Jogl2LightRenderer.turnOffAllLights(gl);
 
-        Vector3D lp1;
-        Vector3D lp2;
+        Vector3Dd lp1;
+        Vector3Dd lp2;
 
-        lp1 = new Vector3D(gizmo.getPosition());
+        lp1 = new Vector3Dd(gizmo.getPosition());
         lp1 = lp1.withX(lp1.x() + 20);
         lp1 = lp1.withY(lp1.y() + 20);
         lp1 = lp1.withZ(lp1.z() + 20);
-        lp2 = new Vector3D(gizmo.getPosition());
+        lp2 = new Vector3Dd(gizmo.getPosition());
         lp2 = lp2.withX(lp2.x() - 20);
         lp2 = lp2.withY(lp2.y() - 20);
         if ( light1 == null ) {

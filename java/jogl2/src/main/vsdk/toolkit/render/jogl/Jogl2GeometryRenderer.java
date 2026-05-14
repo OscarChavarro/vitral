@@ -10,7 +10,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -31,8 +31,8 @@ import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 
 public class Jogl2GeometryRenderer extends Jogl2Renderer 
 {
-    private static Vector3D p = new Vector3D();
-    private static Vector3D n = new Vector3D();
+    private static Vector3Dd p = new Vector3Dd();
+    private static Vector3Dd n = new Vector3Dd();
 
     public static void prepareSurfaceQuality(GL2 gl, RendererConfiguration quality)
     {
@@ -114,9 +114,9 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
         double borderPercent = 0.01;
         double linePercent = 0.25;
 
-        Vector3D min, max, delta;
-        min = new Vector3D(minmax[0], minmax[1], minmax[2]);
-        max = new Vector3D(minmax[3], minmax[4], minmax[5]);
+        Vector3Dd min, max, delta;
+        min = new Vector3Dd(minmax[0], minmax[1], minmax[2]);
+        max = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
         delta = max.subtract(min);
         min = min.subtract(delta.multiply(borderPercent));
         max = max.add(delta.multiply(borderPercent));

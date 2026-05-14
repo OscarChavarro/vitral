@@ -9,8 +9,8 @@ import java.util.List;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;
@@ -29,7 +29,7 @@ public class ShadersModel
 {
     private static final int MIN_SPHERE_MERIDIANS = 12;
     private static final int MIN_SPHERE_PARALLELS = 8;
-    private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
+    private static final Vector3Dd DEFAULT_BUMP_SCALE = new Vector3Dd(1.0, 1.0, 1.0);
     private static final String MICROFACET_CSV_FILE =
         "../../../../etc/materials/microFacetMAterials.csv";
     private static final String COOK_TORRANCE_MATERIAL_NAME = "Copper";
@@ -65,8 +65,8 @@ public class ShadersModel
     private void initializeDefaults()
     {
         camera = new Camera();
-        camera.setPosition(new Vector3D(0, -4, 0));
-        Matrix4x4 rotation = new Matrix4x4().eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
+        camera.setPosition(new Vector3Dd(0, -4, 0));
+        Matrix4x4d rotation = new Matrix4x4d().eulerAnglesRotation(Math.toRadians(90.0), 0, 0);
         camera.setRotation(rotation);
         camera.setFov(30.0);
 
@@ -80,7 +80,7 @@ public class ShadersModel
 
         sphere = new Sphere(1.0);
 
-        light = new Light(LightType.POINT, new Vector3D(1, -3, 1), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3Dd(1, -3, 1), new ColorRgb(1, 1, 1));
         light.setId(0);
 
         material = new SimpleMaterial();

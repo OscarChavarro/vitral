@@ -1,7 +1,7 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 
 public class CameraControllerBlender extends CameraController {
@@ -53,9 +53,9 @@ public class CameraControllerBlender extends CameraController {
     @Override
     public boolean processKeyPressedEvent(KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
-        Matrix4x4 R; // Camera rotation matrix
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
         int projectionMode;
         double fov;
         double orthogonalZoom;
@@ -72,10 +72,10 @@ public class CameraControllerBlender extends CameraController {
         int mask;
         int SHIFT_MASK = 1;//java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
         int CTRL_MASK = 2;//java.awt.event.KeyEvent.CTRL_DOWN_MASK;
-        Vector3D u, v, w;
-        Matrix4x4 DR, T1, T2, COMPUESTA;
+        Vector3Dd u, v, w;
+        Matrix4x4d DR, T1, T2, COMPUESTA;
         //LRR16ene2015.
-        Matrix4x4 tranMat = new Matrix4x4();
+        Matrix4x4d tranMat = new Matrix4x4d();
         double angRot;
 
         angRot = Math.toRadians(5);
@@ -93,9 +93,9 @@ public class CameraControllerBlender extends CameraController {
         keycode = keyEvent.keycode;
         mask = keyEvent.modifierMask;
 
-        u = new Vector3D(R.get(0, 0), R.get(1, 0), R.get(2, 0));
-        v = new Vector3D(R.get(0, 1), R.get(1, 1), R.get(2, 1));
-        w = new Vector3D(R.get(0, 2), R.get(1, 2), R.get(2, 2));
+        u = new Vector3Dd(R.get(0, 0), R.get(1, 0), R.get(2, 0));
+        v = new Vector3Dd(R.get(0, 1), R.get(1, 1), R.get(2, 1));
+        w = new Vector3Dd(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
         if ( fov > 90 ) angleInc = Math.toRadians(10);
         else if ( fov > 45 ) angleInc = Math.toRadians(5);
@@ -135,9 +135,9 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM4:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-//                    T1 = new Matrix4x4();
-//                    DR = new Matrix4x4();
-//                    T2 = new Matrix4x4();
+//                    T1 = new Matrix4x4d();
+//                    DR = new Matrix4x4d();
+//                    T2 = new Matrix4x4d();
 //                    T1 = T1.translation(focusedPosition.multiply(-1));
 //                    DR = R = R.axisRotation(-Math.toRadians(15), 0, 0, 1);
 //                    T2 = T2.translation(focusedPosition);
@@ -163,9 +163,9 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM6:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-//                    T1 = new Matrix4x4();
-//                    DR = new Matrix4x4();
-//                    T2 = new Matrix4x4();
+//                    T1 = new Matrix4x4d();
+//                    DR = new Matrix4x4d();
+//                    T2 = new Matrix4x4d();
 //                    T1 = T1.translation(focusedPosition.multiply(-1));
 //                    DR = R = R.axisRotation(Math.toRadians(15), 0, 0, 1);
 //                    T2 = T2.translation(focusedPosition);
@@ -191,9 +191,9 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM2:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-//                    T1 = new Matrix4x4();
-//                    DR = new Matrix4x4();
-//                    T2 = new Matrix4x4();
+//                    T1 = new Matrix4x4d();
+//                    DR = new Matrix4x4d();
+//                    T2 = new Matrix4x4d();
 //                    T1 = T1.translation(focusedPosition.multiply(-1));
 //                    DR = R = R.axisRotation(-Math.toRadians(15), v.x, v.y, v.z);
 //                    T2 = T2.translation(focusedPosition);
@@ -218,9 +218,9 @@ public class CameraControllerBlender extends CameraController {
               case KeyEvent.KEY_NUM8:
                 if ( (mask & CTRL_MASK) == 0 ) {
                     // Rotation
-//                    T1 = new Matrix4x4();
-//                    DR = new Matrix4x4();
-//                    T2 = new Matrix4x4();
+//                    T1 = new Matrix4x4d();
+//                    DR = new Matrix4x4d();
+//                    T2 = new Matrix4x4d();
 //                    T1 = T1.translation(focusedPosition.multiply(-1));
 //                    DR = R = R.axisRotation(Math.toRadians(15), v.x, v.y, v.z);
 //                    T2 = T2.translation(focusedPosition);

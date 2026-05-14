@@ -4,7 +4,7 @@ package scivis;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Image;
 
 
@@ -40,7 +40,7 @@ public class Study
     current volume measures can be derived, given a voxel count for each
     dimension.
     */
-    private Vector3D voxelSizeFactor;
+    private Vector3Dd voxelSizeFactor;
 
     /**
     The `unitsInMetersExponent` determines the interpretation of units
@@ -92,7 +92,7 @@ public class Study
         }
 
         cacheManager = new CacheManager(Runtime.getRuntime().freeMemory());
-        setVoxelSizeFactor(new Vector3D(1.0, 1.0, 1.0));
+        setVoxelSizeFactor(new Vector3Dd(1.0, 1.0, 1.0));
         setUnitsInMeters10Exponent(1);
         timeTakesArray = new ArrayList<TimeTake>();
 
@@ -111,14 +111,14 @@ public class Study
         cacheManager.addChunk(c);
     }
 
-    public void setVoxelSizeFactor(Vector3D newFactor)
+    public void setVoxelSizeFactor(Vector3Dd newFactor)
     {
-        voxelSizeFactor = new Vector3D(newFactor);
+        voxelSizeFactor = new Vector3Dd(newFactor);
     }
 
-    public Vector3D getVoxelSizeFactor()
+    public Vector3Dd getVoxelSizeFactor()
     {
-        return new Vector3D(voxelSizeFactor);
+        return new Vector3Dd(voxelSizeFactor);
     }
 
     public int getUnitsInMeters10Exponent()

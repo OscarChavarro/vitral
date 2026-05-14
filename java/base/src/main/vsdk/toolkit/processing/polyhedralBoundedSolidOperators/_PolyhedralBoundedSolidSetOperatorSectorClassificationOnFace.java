@@ -4,7 +4,7 @@
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
@@ -48,7 +48,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace
     // Following attributes are not taken from [MANT1988], and all operations
     // on them are fine tunning options aditional to original algorithm.
     public boolean isWide = false;
-    public Vector3D position;
+    public Vector3Dd position;
     public int situation = UNDEFINED;
     public boolean reverse = false;
     public int coplanarRelation = COPLANAR_UNKNOWN;

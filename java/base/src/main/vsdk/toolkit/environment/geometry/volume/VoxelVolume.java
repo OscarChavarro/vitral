@@ -10,8 +10,8 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 
@@ -105,12 +105,12 @@ public class VoxelVolume extends Solid {
     @param x
     @param y
     @param z
-    @return a new Vector3D with point position corresponding to given indexes
+    @return a new Vector3Dd with point position corresponding to given indexes
     inside the matrix of voxels
     */
-    public Vector3D getVoxelPosition(int x, int y, int z)
+    public Vector3Dd getVoxelPosition(int x, int y, int z)
     {
-        Vector3D p = new Vector3D();
+        Vector3Dd p = new Vector3Dd();
         p = p.withX(((double)x+0.5) / ((double)getXSize())*2 - 1);
         p = p.withY(((double)y+0.5) / ((double)getYSize())*2 - 1);
         p = p.withZ(((double)z+0.5) / ((double)getZSize())*2 - 1);
@@ -180,7 +180,7 @@ public class VoxelVolume extends Solid {
     @param p
     @return voxel value for given point in space
     */
-    public int getVoxelAtPosition(Vector3D p)
+    public int getVoxelAtPosition(Vector3Dd p)
     {
         if ( p.x() < -1 || p.x() > 1 || p.y() < -1 || p.y() > 1 || p.z() < -1 || p.z() > 1 ) return 0;
         int i, j, k;
@@ -222,7 +222,7 @@ public class VoxelVolume extends Solid {
     @param p
     @param val
     */
-    public void putVoxelAtPosition(Vector3D p, byte val)
+    public void putVoxelAtPosition(Vector3Dd p, byte val)
     {
         if ( p.x() < -1 || p.x() > 1 || p.y() < -1 || p.y() > 1 || p.z() < -1 || p.z() > 1 ) return;
         int i, j, k;
@@ -304,14 +304,14 @@ public class VoxelVolume extends Solid {
     coordinate change from voxel volume cube <-1, -1, -1>-<1, 1, 1> to
     the bounding box recieved in `minmax`.
     @param minmax
-    @return a new Matrix4x4 for coordinate mapping between volume and
+    @return a new Matrix4x4d for coordinate mapping between volume and
     world coordinates
     */
-    public static Matrix4x4
+    public static Matrix4x4d
     getTransformFromVoxelFrameToMinMax(double minmax[])
     {
-        Matrix4x4 M;
-        Matrix4x4 S, T1, T2;
+        Matrix4x4d M;
+        Matrix4x4d S, T1, T2;
         double greaterScale, sx, sy, sz;
 
         sx = minmax[3]-minmax[0];
@@ -325,12 +325,12 @@ public class VoxelVolume extends Solid {
             greaterScale = sz;
         }
 
-        S = new Matrix4x4();
+        S = new Matrix4x4d();
         S = S.scale(greaterScale/2, greaterScale/2, greaterScale/2);
 
-        T1 = new Matrix4x4();
+        T1 = new Matrix4x4d();
         T1 = T1.translation(1, 1, 1);
-        T2 = new Matrix4x4();
+        T2 = new Matrix4x4d();
         T2 = T2.translation(minmax[0]-(greaterScale-sx)/2,
                        minmax[1]-(greaterScale-sy)/2,
                        minmax[2]-(greaterScale-sz)/2);
@@ -342,11 +342,11 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Solid.doCenterOfMass
-    @return new Vector3D containing volume center of mass
+    @return new Vector3Dd containing volume center of mass
     */
     @Override
-    public Vector3D doCenterOfMass() {
-        Vector3D p;
+    public Vector3Dd doCenterOfMass() {
+        Vector3Dd p;
         double cmx = 0;
         double cmy = 0;
         double cmz = 0;
@@ -369,10 +369,10 @@ public class VoxelVolume extends Solid {
         }
 
         if ( Math.abs(M) < VSDK.EPSILON ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
 
-        return new Vector3D(cmx / M, cmy / M, cmz / M);
+        return new Vector3Dd(cmx / M, cmy / M, cmz / M);
     }
 
 }

@@ -4,7 +4,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
@@ -24,9 +24,9 @@ class CurveModelerRotationalSweepTest
     {
         // Arrange
         PolyhedralBoundedSolid wire = createWireProfile(
-            new Vector3D(0.0, 0.0, 0.0),
-            new Vector3D(0.8, 0.35, 0.0),
-            new Vector3D(1.2, 0.5, 0.0));
+            new Vector3Dd(0.0, 0.0, 0.0),
+            new Vector3Dd(0.8, 0.35, 0.0),
+            new Vector3Dd(1.2, 0.5, 0.0));
 
         // Action
         PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 16);
@@ -42,9 +42,9 @@ class CurveModelerRotationalSweepTest
     {
         // Arrange
         PolyhedralBoundedSolid wire = createWireProfile(
-            new Vector3D(0.0, 0.0, 0.0),
-            new Vector3D(0.6, 0.4, 0.0),
-            new Vector3D(1.1, 0.0, 0.0));
+            new Vector3Dd(0.0, 0.0, 0.0),
+            new Vector3Dd(0.6, 0.4, 0.0),
+            new Vector3Dd(1.1, 0.0, 0.0));
 
         // Action
         PolyhedralBoundedSolidModeler.rotationalSweepExtrudeWireAroundXAxis(wire, 18);
@@ -55,9 +55,9 @@ class CurveModelerRotationalSweepTest
         assertThat(wire.getVerticesList().size()).isGreaterThan(3);
     }
 
-    private static PolyhedralBoundedSolid createWireProfile(Vector3D p0,
-                                                            Vector3D p1,
-                                                            Vector3D p2)
+    private static PolyhedralBoundedSolid createWireProfile(Vector3Dd p0,
+                                                            Vector3Dd p1,
+                                                            Vector3Dd p2)
     {
         PolyhedralBoundedSolid wire = new PolyhedralBoundedSolid();
         PolyhedralBoundedSolidEulerOperators.mvfs(wire, p0, 1, 1);

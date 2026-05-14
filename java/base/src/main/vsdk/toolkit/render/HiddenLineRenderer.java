@@ -15,7 +15,7 @@ import java.util.Collections;
 // VitralSDK classes
 import java.util.List;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -53,22 +53,22 @@ class _AppelEdgeCache extends RenderingElement
     /// quantitative invisibility can be acumulated in the edge sequence,
     /// otherwise must be calculated.
     boolean onSequence;
-    public Vector3D start;
-    public Vector3D end;
+    public Vector3Dd start;
+    public Vector3Dd end;
     /// d = start - end
-    public Vector3D d;
+    public Vector3Dd d;
     /// `visibleEdgeForContourLine` contains an explicit reference to the
     /// planar surface marked as "S" on figure [APPE1967].5.
     public _PolyhedralBoundedSolidFace visibleEdgeForContourLine;
 
-    public void setStart(Vector3D s)
+    public void setStart(Vector3Dd s)
     {
-        start = new Vector3D(s);
+        start = new Vector3Dd(s);
     }
 
-    public void setEnd(Vector3D e)
+    public void setEnd(Vector3Dd e)
     {
-        end = new Vector3D(e);
+        end = new Vector3Dd(e);
     }
 }
 
@@ -133,7 +133,7 @@ public class HiddenLineRenderer extends RenderingElement
         _PolyhedralBoundedSolidFace face2;
         boolean f1, f2;
         _AppelEdgeCache materialLine;
-        Vector3D prevEnd = new Vector3D();
+        Vector3Dd prevEnd = new Vector3Dd();
 
         for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = solid.getEdgesList().get(i);
@@ -142,8 +142,8 @@ public class HiddenLineRenderer extends RenderingElement
             start = e.getStartingVertexId();
             end = e.getEndingVertexId();
             if ( start >= 0 && end >= 0 ) {
-                Vector3D startPosition;
-                Vector3D endPosition;
+                Vector3Dd startPosition;
+                Vector3Dd endPosition;
 
                 startPosition = e.leftHalf.startingVertex.position;
                 endPosition = e.rightHalf.startingVertex.position;
@@ -188,7 +188,7 @@ public class HiddenLineRenderer extends RenderingElement
                     }
                     cache.add(materialLine);
                     //--------------------------------------------------------
-                    prevEnd = Vector3D.copyOf(endPosition);
+                    prevEnd = Vector3Dd.copyOf(endPosition);
                     l++;
                 }
             }
@@ -210,14 +210,14 @@ public class HiddenLineRenderer extends RenderingElement
         List <SimpleBody> solids,
         _AppelEdgeCache inEdge,
         Camera inCamera,
-        List <Vector3D> outVisibleContourLineEndPoints,
-        List <Vector3D> outVisibleNonContourLineEndPoints,
-        List <Vector3D> outHiddenLineEndPoints,
+        List <Vector3Dd> outVisibleContourLineEndPoints,
+        List <Vector3Dd> outVisibleNonContourLineEndPoints,
+        List <Vector3Dd> outHiddenLineEndPoints,
         List <_AppelEdgeCache> contourCache)
     {
         //- 1. Compute the sweep plane triangle ---------------------------
         // Defines plane "SP1" on figure [APPE1967].5.
-        Vector3D sp1a, sp1b, sp1c;
+        Vector3Dd sp1a, sp1b, sp1c;
 
         sp1a = inEdge.start;
         sp1b = inEdge.end;
@@ -225,16 +225,16 @@ public class HiddenLineRenderer extends RenderingElement
 
         //- 2. Break current edge into segments ---------------------------
         // Defines plane "SP2" on figure [APPE1967].5.
-        Vector3D sp2a, sp2b, sp2c;
-        Vector3D K; // Preceding point "K" on figure [APPE1967].5.
-        Vector3D J; // "K" projected on "SP2"
-        Ray ray = new Ray(new Vector3D(), new Vector3D());
+        Vector3Dd sp2a, sp2b, sp2c;
+        Vector3Dd K; // Preceding point "K" on figure [APPE1967].5.
+        Vector3Dd J; // "K" projected on "SP2"
+        Ray ray = new Ray(new Vector3Dd(), new Vector3Dd());
         double t0;
         int i;
         int pos;
         _AppelEdgeCache cl;          // Line "CL" on figure 5 of [APPE1967]
-        Vector3D p = new Vector3D(); // Point "PP1" on figure 5 of [APPE1967]
-        Vector3D n = new Vector3D();
+        Vector3Dd p = new Vector3Dd(); // Point "PP1" on figure 5 of [APPE1967]
+        Vector3Dd n = new Vector3Dd();
         ArrayList<_AppelEdgeSegment> segments;
         _AppelEdgeSegment segment;
         InfinitePlane plane;
@@ -317,7 +317,7 @@ public class HiddenLineRenderer extends RenderingElement
         }
 
         //- 4. Determine visibility for each segment based on Q.I. --------
-        Vector3D pos1, pos2;
+        Vector3Dd pos1, pos2;
         int qi;
 
         qi = computeQuantitativeInvisibility(solids, inCamera, inEdge);
@@ -336,7 +336,7 @@ public class HiddenLineRenderer extends RenderingElement
             double val2 = segment.t;
 
             // This disables propagation of Q.I., making all slower!
-            Vector3D posx = inEdge.start.add(inEdge.d.multiply((val2+val1)/2));
+            Vector3Dd posx = inEdge.start.add(inEdge.d.multiply((val2+val1)/2));
             qi = 0;
             for ( int solidIndex = 0; solidIndex < solids.size(); solidIndex++ ) {
                 qi += solids.get(solidIndex).computeQuantitativeInvisibility(
@@ -346,17 +346,17 @@ public class HiddenLineRenderer extends RenderingElement
 
             if ( qi == 0 ) {
                 if ( inEdge.edgeType == _AppelEdgeCache.CONTOUR_LINE ) {
-                    outVisibleContourLineEndPoints.add(new Vector3D(pos1));
-                    outVisibleContourLineEndPoints.add(new Vector3D(pos2));
+                    outVisibleContourLineEndPoints.add(new Vector3Dd(pos1));
+                    outVisibleContourLineEndPoints.add(new Vector3Dd(pos2));
                 }
                 else {
-                    outVisibleNonContourLineEndPoints.add(new Vector3D(pos1));
-                    outVisibleNonContourLineEndPoints.add(new Vector3D(pos2));
+                    outVisibleNonContourLineEndPoints.add(new Vector3Dd(pos1));
+                    outVisibleNonContourLineEndPoints.add(new Vector3Dd(pos2));
                 }
             }
             else {
-                outHiddenLineEndPoints.add(new Vector3D(pos1));
-                outHiddenLineEndPoints.add(new Vector3D(pos2));
+                outHiddenLineEndPoints.add(new Vector3Dd(pos1));
+                outHiddenLineEndPoints.add(new Vector3Dd(pos2));
             }
         }
 
@@ -374,9 +374,9 @@ public class HiddenLineRenderer extends RenderingElement
     public static void executeAppelAlgorithm(
         List<SimpleBody> inSimpleBodyArray,
         Camera inCamera,
-        List <Vector3D> outVisibleContourLineEndPoints,
-        List <Vector3D> outVisibleNonContourLineEndPoints,
-        List <Vector3D> outHiddenLineEndPoints)
+        List <Vector3Dd> outVisibleContourLineEndPoints,
+        List <Vector3Dd> outVisibleNonContourLineEndPoints,
+        List <Vector3Dd> outHiddenLineEndPoints)
     {
         //-----------------------------------------------------------------
         ArrayList <_AppelEdgeCache> cache;
@@ -404,8 +404,8 @@ public class HiddenLineRenderer extends RenderingElement
             // not marked as a hidden line.
             switch ( edge.edgeType ) {
               case _AppelEdgeCache.HIDDEN_LINE:
-                outHiddenLineEndPoints.add(new Vector3D(edge.start));
-                outHiddenLineEndPoints.add(new Vector3D(edge.end));
+                outHiddenLineEndPoints.add(new Vector3Dd(edge.start));
+                outHiddenLineEndPoints.add(new Vector3Dd(edge.end));
                 break;
               case _AppelEdgeCache.CONTOUR_LINE:
               case _AppelEdgeCache.VISIBLE_LINE:

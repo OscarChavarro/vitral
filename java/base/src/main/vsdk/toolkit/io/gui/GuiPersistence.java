@@ -835,7 +835,7 @@ public class GuiPersistence extends PersistenceElement {
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
-                            } else if (typeName != null && typeName.equalsIgnoreCase("Vector3D")) {
+                            } else if (typeName != null && typeName.equalsIgnoreCase("Vector3Dd")) {
                                 variable = new GuiVector3DVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);

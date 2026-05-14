@@ -7,7 +7,7 @@ import java.io.Serial;
 
 // VSDK classes
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
@@ -66,10 +66,10 @@ public class Torus extends Solid
 
     public Ray doIntersection(Ray inOut_ray) 
     {
-        Vector3D p = inOut_ray.origin();
+        Vector3Dd p = inOut_ray.origin();
 
         inOut_ray = inOut_ray.withDirection(inOut_ray.direction().normalized());
-        Vector3D d = inOut_ray.direction();
+        Vector3Dd d = inOut_ray.direction();
 
         double alpha, beta, gama;
 
@@ -1275,7 +1275,7 @@ public class Torus extends Solid
         if ( outData == null ) {
             return;
         }
-        Vector3D hitPoint = new Vector3D(
+        Vector3Dd hitPoint = new Vector3Dd(
             inRay.origin().x() + intT*inRay.direction().x(),
             inRay.origin().y() + intT*inRay.direction().y(),
             inRay.origin().z() + intT*inRay.direction().z());
@@ -1287,7 +1287,7 @@ public class Torus extends Solid
             hitPoint.y()*hitPoint.y() +
             hitPoint.z()*hitPoint.z();
      
-        outData.n = new Vector3D(
+        outData.n = new Vector3Dd(
             4 * hitPoint.x() * (hitNormSquared - r2 - R2),
             4 * hitPoint.y() * (hitNormSquared - r2 - R2),
             4 * hitPoint.z() * (hitNormSquared - r2 - R2) + 8 * R2 * hitPoint.z()

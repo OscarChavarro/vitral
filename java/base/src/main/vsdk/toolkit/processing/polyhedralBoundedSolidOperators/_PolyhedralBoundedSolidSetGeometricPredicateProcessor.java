@@ -7,7 +7,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -29,9 +29,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
 
     private static final class CoplanarAngleBasis
     {
-        private Vector3D normal;
-        private Vector3D u;
-        private Vector3D v;
+        private Vector3Dd normal;
+        private Vector3Dd u;
+        private Vector3Dd v;
     }
 
     private static final class CoplanarAngularInterval
@@ -142,24 +142,24 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             numericContext);
     }
 
-    static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
+    static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3Dd point)
     {
         return face.testPointInside(point, numericContext.bigEpsilon());
     }
 
     static _PolyhedralBoundedSolidFace.PointInsideResult
-    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3D point)
+    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3Dd point)
     {
         return face.testPointInsideDetailed(point, numericContext.bigEpsilon());
     }
 
-    static boolean colinearVectors(Vector3D a, Vector3D b)
+    static boolean colinearVectors(Vector3Dd a, Vector3Dd b)
     {
         return PolyhedralBoundedSolidNumericPolicy
             .vectorsColinear(a, b, numericContext);
     }
 
-    static boolean colinearVectorsWithDirection(Vector3D a, Vector3D b)
+    static boolean colinearVectorsWithDirection(Vector3Dd a, Vector3Dd b)
     {
         if ( PolyhedralBoundedSolidNumericPolicy
             .vectorsColinear(a, b, numericContext) ) {
@@ -173,11 +173,11 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     test from section [MANT1988].15.6.2, the variables are interpreted as in
     figure [MANT1988].15.8 and equation [MANT1988].15.5.
     */
-    static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
-                               Vector3D ref2, Vector3D ref12)
+    static boolean sctrwitthin(Vector3Dd dir, Vector3Dd ref1,
+                               Vector3Dd ref2, Vector3Dd ref12)
     {
-        Vector3D c1;
-        Vector3D c2;
+        Vector3Dd c1;
+        Vector3Dd c2;
         int t1;
         int t2;
 
@@ -201,8 +201,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     that excludes the boundary-line cases implicit in figure [MANT1988].15.8
     and equation [MANT1988].15.5.
     */
-    static boolean sctrwitthinProper(Vector3D dir, Vector3D ref1,
-                                     Vector3D ref2, Vector3D ref12)
+    static boolean sctrwitthinProper(Vector3Dd dir, Vector3Dd ref1,
+                                     Vector3Dd ref2, Vector3Dd ref12)
     {
         if ( colinearVectors(dir, ref1) || colinearVectors(dir, ref2) ) {
             return false;
@@ -225,20 +225,20 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         double a2;
         double b1;
         double b2;
-        Vector3D u;
-        Vector3D v;
-        Vector3D a;
-        Vector3D b;
-        Vector3D c;
-        Vector3D n;
+        Vector3Dd u;
+        Vector3Dd v;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd c;
+        Vector3Dd n;
 
         n = na.he.parentLoop.parentFace.getContainingPlane().getNormal();
-        u = new Vector3D(na.ref1).normalized();
+        u = new Vector3Dd(na.ref1).normalized();
         v = n.crossProduct(u).normalized();
 
-        a = new Vector3D(na.ref2).normalized();
-        b = new Vector3D(nb.ref1).normalized();
-        c = new Vector3D(nb.ref2).normalized();
+        a = new Vector3Dd(na.ref2).normalized();
+        b = new Vector3Dd(nb.ref1).normalized();
+        c = new Vector3Dd(nb.ref2).normalized();
 
         a1 = angleFromVectors(u, v, u);
         a2 = angleFromVectors(u, v, a);
@@ -270,7 +270,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return false;
     }
 
-    private static double angleFromVectors(Vector3D u, Vector3D v, Vector3D a)
+    private static double angleFromVectors(Vector3Dd u, Vector3Dd v, Vector3Dd a)
     {
         double x;
         double y;
@@ -322,7 +322,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace current;
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidFace localFace;
-        Vector3D c;
+        Vector3Dd c;
         double d;
         int i;
         int nnbr = nbr.size();
@@ -389,15 +389,15 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         }
     }
 
-    private static Vector3D normalizedDirection(Vector3D direction)
+    private static Vector3Dd normalizedDirection(Vector3Dd direction)
     {
-        Vector3D out;
+        Vector3Dd out;
 
         if ( direction == null ) {
             return null;
         }
 
-        out = new Vector3D(direction);
+        out = new Vector3Dd(direction);
         if ( out.length() <= numericContext.unitVectorTolerance() ) {
             return null;
         }
@@ -406,14 +406,14 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     }
 
     private static CoplanarAngleBasis buildCoplanarAngleBasis(
-        Vector3D planeNormal,
-        Vector3D preferredDirection,
-        Vector3D fallbackDirection)
+        Vector3Dd planeNormal,
+        Vector3Dd preferredDirection,
+        Vector3Dd fallbackDirection)
     {
         CoplanarAngleBasis basis;
-        Vector3D normal;
-        Vector3D u;
-        Vector3D v;
+        Vector3Dd normal;
+        Vector3Dd u;
+        Vector3Dd v;
 
         normal = normalizedDirection(planeNormal);
         if ( normal == null ) {
@@ -428,11 +428,11 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         if ( u == null || normal.crossProduct(u).length() <=
              numericContext.unitVectorTolerance() ) {
             if ( Math.abs(normal.x()) < 0.9 ) {
-                u = normalizedDirection(new Vector3D(1.0, 0.0, 0.0)
+                u = normalizedDirection(new Vector3Dd(1.0, 0.0, 0.0)
                     .subtract(normal.multiply(normal.x())));
             }
             else {
-                u = normalizedDirection(new Vector3D(0.0, 1.0, 0.0)
+                u = normalizedDirection(new Vector3Dd(0.0, 1.0, 0.0)
                     .subtract(normal.multiply(normal.y())));
             }
         }
@@ -454,9 +454,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     }
 
     private static double angleOnBasis(CoplanarAngleBasis basis,
-                                       Vector3D direction)
+                                       Vector3Dd direction)
     {
-        Vector3D d;
+        Vector3Dd d;
 
         d = normalizedDirection(direction);
         if ( basis == null || d == null ) {
@@ -477,10 +477,10 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     }
 
     private static boolean sectorContainsDirectionInclusive(
-        Vector3D dir,
-        Vector3D ref1,
-        Vector3D ref2,
-        Vector3D ref12)
+        Vector3Dd dir,
+        Vector3Dd ref1,
+        Vector3Dd ref2,
+        Vector3Dd ref12)
     {
         if ( colinearVectorsWithDirection(dir, ref1) ||
              colinearVectorsWithDirection(dir, ref2) ) {
@@ -489,13 +489,13 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return sctrwitthin(dir, ref1, ref2, ref12);
     }
 
-    private static Vector3D acceptSectorInteriorProbe(
-        Vector3D candidate,
-        Vector3D ref1,
-        Vector3D ref2,
-        Vector3D ref12)
+    private static Vector3Dd acceptSectorInteriorProbe(
+        Vector3Dd candidate,
+        Vector3Dd ref1,
+        Vector3Dd ref2,
+        Vector3Dd ref12)
     {
-        Vector3D normalized;
+        Vector3Dd normalized;
 
         normalized = normalizedDirection(candidate);
         if ( normalized == null ) {
@@ -512,14 +512,14 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         return null;
     }
 
-    private static Vector3D selectSectorInteriorProbe(
-        Vector3D ref1,
-        Vector3D ref2,
-        Vector3D ref12,
-        Vector3D fallbackProbe)
+    private static Vector3Dd selectSectorInteriorProbe(
+        Vector3Dd ref1,
+        Vector3Dd ref2,
+        Vector3Dd ref12,
+        Vector3Dd fallbackProbe)
     {
-        Vector3D probe;
-        Vector3D bisector;
+        Vector3Dd probe;
+        Vector3Dd bisector;
 
         bisector = ref1.add(ref2);
         probe = acceptSectorInteriorProbe(bisector, ref1, ref2, ref12);
@@ -550,12 +550,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
 
     private static CoplanarAngularInterval buildCoplanarAngularInterval(
         CoplanarAngleBasis basis,
-        Vector3D boundary1,
-        Vector3D boundary2,
-        Vector3D interiorProbe)
+        Vector3Dd boundary1,
+        Vector3Dd boundary2,
+        Vector3Dd interiorProbe)
     {
         CoplanarAngularInterval interval;
-        Vector3D probe;
+        Vector3Dd probe;
         double t;
 
         if ( basis == null || normalizedDirection(boundary1) == null ||
@@ -637,9 +637,9 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         CoplanarAngleBasis basis,
         _PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D ref1;
-        Vector3D ref2;
-        Vector3D probe;
+        Vector3Dd ref1;
+        Vector3Dd ref2;
+        Vector3Dd probe;
 
         if ( he == null || he.startingVertex == null || he.previous() == null ||
              he.next() == null || he.previous().startingVertex == null ||
@@ -664,8 +664,8 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         CoplanarAngleBasis basis,
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex sector)
     {
-        Vector3D fallbackProbe;
-        Vector3D probe;
+        Vector3Dd fallbackProbe;
+        Vector3Dd probe;
 
         if ( sector == null ) {
             return null;
@@ -684,10 +684,10 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     private static CoplanarAngularInterval buildIntervalForCoplanarEdge(
         CoplanarAngleBasis basis,
         _PolyhedralBoundedSolidHalfEdge edge,
-        Vector3D faceNormal)
+        Vector3Dd faceNormal)
     {
-        Vector3D edgeDirection;
-        Vector3D inward;
+        Vector3Dd edgeDirection;
+        Vector3Dd inward;
 
         if ( edge == null || edge.startingVertex == null || edge.next() == null ||
              edge.next().startingVertex == null ) {
@@ -793,7 +793,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         _PolyhedralBoundedSolidFace referenceFace)
     {
         _PolyhedralBoundedSolidHalfEdge he;
-        Vector3D start;
+        Vector3Dd start;
         CoplanarAngleBasis basis;
         CoplanarAngularInterval currentInterval;
         int status;

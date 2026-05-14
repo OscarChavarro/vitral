@@ -2,7 +2,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -84,14 +84,14 @@ class PolyhedralBoundedSolidPreflightTest
             .createCircularLamina(0.0, 0.0, 0.15, 0.0, 30);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             cylA, cylA.findFace(1),
-            new vsdk.toolkit.common.linealAlgebra.Matrix4x4()
+            new vsdk.toolkit.common.linealAlgebra.Matrix4x4d()
                 .translation(0.0, 0.0, 0.5));
 
         PolyhedralBoundedSolid cylB = PolyhedralBoundedSolidModeler
             .createCircularLamina(0.11, 0.0, 0.15, 0.06, 30);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             cylB, cylB.findFace(1),
-            new vsdk.toolkit.common.linealAlgebra.Matrix4x4()
+            new vsdk.toolkit.common.linealAlgebra.Matrix4x4d()
                 .translation(0.0, 0.0, 0.5));
 
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext ctxA =

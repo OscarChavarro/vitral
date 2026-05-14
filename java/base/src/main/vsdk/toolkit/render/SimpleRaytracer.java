@@ -18,7 +18,7 @@ import java.util.List;
 
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -219,25 +219,25 @@ public class SimpleRaytracer extends RenderingElement {
             ((viewportYSize - pixelCenterY) - viewportYSize/2.0) / viewportYSize;
 
         if ( cameraSnapshot.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            Vector3D left = cameraSnapshot.getLeft();
-            Vector3D up = cameraSnapshot.getUp();
-            Vector3D front = cameraSnapshot.getFront();
-            Vector3D eyePosition = cameraSnapshot.getEyePosition();
+            Vector3Dd left = cameraSnapshot.getLeft();
+            Vector3Dd up = cameraSnapshot.getUp();
+            Vector3Dd front = cameraSnapshot.getFront();
+            Vector3Dd eyePosition = cameraSnapshot.getEyePosition();
             double fovFactor = viewportXSize/viewportYSize;
             double duScale =
                 (-fovFactor) * (2*u/cameraSnapshot.getOrthogonalZoom());
             double dvScale = 2*v/cameraSnapshot.getOrthogonalZoom();
-            Vector3D origin = new Vector3D(
+            Vector3Dd origin = new Vector3Dd(
                 eyePosition.x() + left.x()*duScale + up.x()*dvScale,
                 eyePosition.y() + left.y()*duScale + up.y()*dvScale,
                 eyePosition.z() + left.z()*duScale + up.z()*dvScale);
             return new Ray(origin, front);
         }
 
-        Vector3D rightWithScale = cameraSnapshot.getRightWithScale();
-        Vector3D upWithScale = cameraSnapshot.getUpWithScale();
-        Vector3D dir = cameraSnapshot.getDir();
-        Vector3D direction = new Vector3D(
+        Vector3Dd rightWithScale = cameraSnapshot.getRightWithScale();
+        Vector3Dd upWithScale = cameraSnapshot.getUpWithScale();
+        Vector3Dd dir = cameraSnapshot.getDir();
+        Vector3Dd direction = new Vector3Dd(
             rightWithScale.x()*u + upWithScale.x()*v + dir.x(),
             rightWithScale.y()*u + upWithScale.y()*v + dir.y(),
             rightWithScale.z()*u + upWithScale.z()*v + dir.z());
@@ -327,7 +327,7 @@ public class SimpleRaytracer extends RenderingElement {
             objects,
             material,
             workspace);
-        Vector3D surfaceNormal = localShading.normal();
+        Vector3Dd surfaceNormal = localShading.normal();
         ColorRgb localColor = localShading.color();
         double outR = localColor.r();
         double outG = localColor.g();
@@ -348,8 +348,8 @@ public class SimpleRaytracer extends RenderingElement {
                 double reflectX = twoT*surfaceNormalX - viewX;
                 double reflectY = twoT*surfaceNormalY - viewY;
                 double reflectZ = twoT*surfaceNormalZ - viewZ;
-                Vector3D reflect = new Vector3D(reflectX, reflectY, reflectZ);
-                Vector3D poffset = new Vector3D(
+                Vector3Dd reflect = new Vector3Dd(reflectX, reflectY, reflectZ);
+                Vector3Dd poffset = new Vector3Dd(
                     info.p.x() + VSDK.EPSILON*reflectX,
                     info.p.y() + VSDK.EPSILON*reflectY,
                     info.p.z() + VSDK.EPSILON*reflectZ);

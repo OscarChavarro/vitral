@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -760,9 +760,9 @@ public final class PolyhedralBoundedSolidTopologyEditing
         _PolyhedralBoundedSolidHalfEdge he;
         InfinitePlane a;
         InfinitePlane b;
-        Vector3D p0;
-        Vector3D p1;
-        Vector3D p2;
+        Vector3Dd p0;
+        Vector3Dd p1;
+        Vector3Dd p2;
         _PolyhedralBoundedSolidHalfEdge heStart;
         boolean restart;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
@@ -902,11 +902,11 @@ public final class PolyhedralBoundedSolidTopologyEditing
 
                     // Estimate the size of semiloop starting at e.leftHalf
                     double minmax[] = solid.getMinMax();
-                    Vector3D min =
-                        new Vector3D(minmax[3], minmax[4], minmax[5]);
-                    Vector3D max =
-                        new Vector3D(minmax[0], minmax[1], minmax[2]);
-                    Vector3D p;
+                    Vector3Dd min =
+                        new Vector3Dd(minmax[3], minmax[4], minmax[5]);
+                    Vector3Dd max =
+                        new Vector3Dd(minmax[0], minmax[1], minmax[2]);
+                    Vector3Dd p;
                     heStart = e.leftHalf;
                     he = heStart;
                     do {
@@ -926,8 +926,8 @@ public final class PolyhedralBoundedSolidTopologyEditing
                     double leftDistance = VSDK.vectorDistance(min, max);
 
                     // Estimate the size of semiloop starting at e.rightHalf
-                    min = new Vector3D(minmax[3], minmax[4], minmax[5]);
-                    max = new Vector3D(minmax[0], minmax[1], minmax[2]);
+                    min = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
+                    max = new Vector3Dd(minmax[0], minmax[1], minmax[2]);
                     heStart = e.rightHalf;
                     he = heStart;
                     do {

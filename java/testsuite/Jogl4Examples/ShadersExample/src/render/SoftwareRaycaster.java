@@ -13,8 +13,8 @@ import java.util.concurrent.Future;
 import model.ShadersModel;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.light.Light;
@@ -36,7 +36,7 @@ import vsdk.toolkit.render.TileGenerator;
 
 public class SoftwareRaycaster
 {
-    private static final Vector3D DEFAULT_BUMP_SCALE = new Vector3D(1.0, 1.0, 1.0);
+    private static final Vector3Dd DEFAULT_BUMP_SCALE = new Vector3Dd(1.0, 1.0, 1.0);
 
     private final int numberOfThreads;
     private final NormalMap bumpNormalMap;
@@ -57,7 +57,7 @@ public class SoftwareRaycaster
     public void render(
         ShadersModel model,
         Camera activeCamera,
-        Matrix4x4 modelRotation)
+        Matrix4x4d modelRotation)
     {
         RGBImageUncompressed outputImage = model.getSoftwareFrameImage();
         if ( outputImage == null ) {
@@ -107,7 +107,7 @@ public class SoftwareRaycaster
     private SimpleSceneSnapshot buildSceneSnapshot(
         ShadersModel model,
         Camera activeCamera,
-        Matrix4x4 modelRotation,
+        Matrix4x4d modelRotation,
         RGBImageUncompressed outputImage)
     {
         int viewportWidth = outputImage.getXSize();
@@ -135,7 +135,7 @@ public class SoftwareRaycaster
         ArrayList<Light> lights = new ArrayList<Light>(2);
         Light ambientLight = new Light(
             LightType.AMBIENT,
-            new Vector3D(0, 0, 0),
+            new Vector3Dd(0, 0, 0),
             new ColorRgb(1, 1, 1));
         ambientLight.setId(0);
         lights.add(ambientLight);

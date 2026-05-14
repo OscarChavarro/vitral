@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Vector4D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
@@ -35,10 +35,10 @@ public class Camera extends Entity
     public static final int PROJECTION_MODE_PERSPECTIVE = 5;
 
     // Basic Camera Model
-    private Vector3D up;
-    private Vector3D front;
-    private Vector3D left;
-    private Vector3D eyePosition;
+    private Vector3Dd up;
+    private Vector3Dd front;
+    private Vector3Dd left;
+    private Vector3Dd eyePosition;
     private double focalDistance;
     private int projectionMode;
     
@@ -70,17 +70,17 @@ public class Camera extends Entity
     private double viewportYSize;
 
     // Private values which are preprocessed to speed up calculations
-    private Vector3D dx, dy, _dir, upWithScale, rightWithScale;
-    private Matrix4x4 normalizingTransformation;
+    private Vector3Dd dx, dy, _dir, upWithScale, rightWithScale;
+    private Matrix4x4d normalizingTransformation;
     private final AtomicLong modificationVersion = new AtomicLong();
     
     public Camera() 
     {
-        eyePosition = new Vector3D(0,-5,1);
+        eyePosition = new Vector3Dd(0,-5,1);
         
-        up = new Vector3D(0,0,1);
-        front=new Vector3D(0,1,0);
-        left=new Vector3D(-1,0,0);
+        up = new Vector3Dd(0,0,1);
+        front=new Vector3Dd(0,1,0);
+        left=new Vector3Dd(-1,0,0);
         
         fov = 60;
         viewportXSize = 320;
@@ -97,11 +97,11 @@ public class Camera extends Entity
 
     public Camera(Camera b)
     {
-        eyePosition = new Vector3D(b.eyePosition);
+        eyePosition = new Vector3Dd(b.eyePosition);
         
-        up = new Vector3D(b.up);
-        front=new Vector3D(b.front);
-        left=new Vector3D(b.left);
+        up = new Vector3Dd(b.up);
+        front=new Vector3Dd(b.front);
+        left=new Vector3Dd(b.left);
         
         fov = b.fov;
         viewportXSize = b.viewportXSize;
@@ -117,7 +117,7 @@ public class Camera extends Entity
         updateVectors();
     }
 
-    public Matrix4x4 getNormalizingTransformation()
+    public Matrix4x4d getNormalizingTransformation()
     {
         return normalizingTransformation;
     }
@@ -153,21 +153,21 @@ public class Camera extends Entity
         return viewportYSize;
     }
 
-    public Vector3D getPosition()
+    public Vector3Dd getPosition()
     {
         return eyePosition;
     }
 
-    public void setPosition(Vector3D eyePosition)
+    public void setPosition(Vector3Dd eyePosition)
     {
-        this.eyePosition = new Vector3D(eyePosition);
+        this.eyePosition = new Vector3Dd(eyePosition);
         markModified();
     }
     
-    public Vector3D getFocusedPosition()
+    public Vector3Dd getFocusedPosition()
     {
-        Vector3D partial;
-        Vector3D result;
+        Vector3Dd partial;
+        Vector3Dd result;
         partial = front.multiply(focalDistance);
         result = eyePosition.add(partial);
         return result;
@@ -181,12 +181,12 @@ public class Camera extends Entity
     access basic camera parameters.
     @param focusedPosition
     */
-    public void setFocusedPositionDirect(Vector3D focusedPosition)
+    public void setFocusedPositionDirect(Vector3Dd focusedPosition)
     {
-        Vector3D partial;
+        Vector3Dd partial;
 
         partial = focusedPosition.subtract(eyePosition);
-        front = new Vector3D(partial);
+        front = new Vector3Dd(partial);
         focalDistance = front.length();
         front = front.normalized();
         markModified();
@@ -210,7 +210,7 @@ public class Camera extends Entity
     `front` direction. Validation and exception handling are needed.
     @param focusedPosition
     */
-    public void setFocusedPositionMaintainingOrthogonality(Vector3D focusedPosition)
+    public void setFocusedPositionMaintainingOrthogonality(Vector3Dd focusedPosition)
     {
         front = focusedPosition.subtract(eyePosition);
         focalDistance = front.length();
@@ -224,27 +224,27 @@ public class Camera extends Entity
         markModified();
     }
 
-    public Vector3D getUp()
+    public Vector3Dd getUp()
     {
         return up;
     }
 
-    public Vector3D getUpWithScale()
+    public Vector3Dd getUpWithScale()
     {
         return upWithScale;
     }
 
-    public Vector3D getRightWithScale()
+    public Vector3Dd getRightWithScale()
     {
         return rightWithScale;
     }
 
-    public Vector3D getFront()
+    public Vector3Dd getFront()
     {
         return front;
     }
 
-    public Vector3D getLeft()
+    public Vector3Dd getLeft()
     {
         return left;
     }
@@ -258,9 +258,9 @@ public class Camera extends Entity
     `setUpMaintainingOrthogonality` method instead of this one.
     @param up
     */
-    public void setUpDirect(Vector3D up)
+    public void setUpDirect(Vector3Dd up)
     {
-        this.up = new Vector3D(up);
+        this.up = new Vector3Dd(up);
         markModified();
     }
 
@@ -273,9 +273,9 @@ public class Camera extends Entity
     `setLeftMaintainingOrthogonality` method instead of this one.
     @param left
     */
-    public void setLeftDirect(Vector3D left)
+    public void setLeftDirect(Vector3Dd left)
     {
-        this.left = new Vector3D(left);
+        this.left = new Vector3Dd(left);
         markModified();
     }
 
@@ -284,7 +284,7 @@ public class Camera extends Entity
     para el mismo lado.
     @param up
      */
-    public void setUpMaintainingOrthogonality(Vector3D up)
+    public void setUpMaintainingOrthogonality(Vector3Dd up)
     {
         up = up.normalized();
 
@@ -375,10 +375,10 @@ public class Camera extends Entity
         and it is calculated following the mechanism described on sections
         [FOLE1992].6.5.1 and [FOLE1992].6.5.2.
         */
-        normalizingTransformation = new Matrix4x4();
+        normalizingTransformation = new Matrix4x4d();
         // 1. Translate the "VRP" point to the origin
-        Vector3D VRP;
-        Matrix4x4 T1 = new Matrix4x4();
+        Vector3Dd VRP;
+        Matrix4x4d T1 = new Matrix4x4d();
 
         // Warning: near plane clipping
         VRP = eyePosition.add(front.multiply(nearPlaneDistance));
@@ -386,23 +386,23 @@ public class Camera extends Entity
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
         //    become the -z axis
-        Matrix4x4 R1;
+        Matrix4x4d R1;
         R1 = getRotation();
         R1 = R1.invert();
         
-        Matrix4x4 R2 = new Matrix4x4();
+        Matrix4x4d R2 = new Matrix4x4d();
         R2 = R2.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
-        Matrix4x4 RTOTAL = R2.multiply(R1);
+        Matrix4x4d RTOTAL = R2.multiply(R1);
 
         //System.out.println("----------------------");
         //System.out.println("R1: " + R1);
-        //Vector3D myVPN = front.multiply(-1);
+        //Vector3Dd myVPN = front.multiply(-1);
         //System.out.println("MyVPN: " + myVPN);
-        //Vector3D normalizedVPN = RTOTAL.multiply(myVPN);
+        //Vector3Dd normalizedVPN = RTOTAL.multiply(myVPN);
         //System.out.println("NormalizedVPN: " + normalizedVPN);
         
         // 3. Translate such that the center of projection is at the origin
-        Matrix4x4 T2 = new Matrix4x4();
+        Matrix4x4d T2 = new Matrix4x4d();
         T2 = T2.translation(0, 0, -nearPlaneDistance);
 
         // 4. Shear such that the center line of the view volume becomes the
@@ -411,8 +411,8 @@ public class Camera extends Entity
 
         // 5. Scale such that the view volume becomes the canonical perspective
         //    view volume
-        Matrix4x4 S1 = new Matrix4x4();
-        Matrix4x4 S2 = new Matrix4x4();
+        Matrix4x4d S1 = new Matrix4x4d();
+        Matrix4x4d S2 = new Matrix4x4d();
         double ddx, ddy, ddz;
 
         // 5.1. Non proportional scaling to adjust the slopes of the piramid
@@ -429,7 +429,7 @@ public class Camera extends Entity
         //S2 = S2.invert();
 
         // Compose final transformation
-        Matrix4x4 T3 = new Matrix4x4();
+        Matrix4x4d T3 = new Matrix4x4d();
         //T3 = T3.translation(0, 0, nearPlaneDistance);
         
         normalizingTransformation = 
@@ -496,7 +496,7 @@ public class Camera extends Entity
             double fovFactor = viewportXSize/viewportYSize;
             double duScale = (-fovFactor) * (2*u/orthogonalZoom);
             double dvScale = 2*v/orthogonalZoom;
-            Vector3D origin = new Vector3D(
+            Vector3Dd origin = new Vector3Dd(
                 eyePosition.x() + left.x()*duScale + up.x()*dvScale,
                 eyePosition.y() + left.y()*duScale + up.y()*dvScale,
                 eyePosition.z() + left.z()*duScale + up.z()*dvScale);
@@ -504,7 +504,7 @@ public class Camera extends Entity
         }
 
         // 2. Default behavior is to assume planar perspective projection
-        Vector3D direction = new Vector3D(
+        Vector3Dd direction = new Vector3Dd(
             rightWithScale.x()*u + upWithScale.x()*v + _dir.x(),
             rightWithScale.y()*u + upWithScale.y()*v + _dir.y(),
             rightWithScale.z()*u + upWithScale.z()*v + _dir.z());
@@ -524,7 +524,7 @@ public class Camera extends Entity
         markModified();
     }
 
-    public void setRotation(Matrix4x4 R)
+    public void setRotation(Matrix4x4d R)
     {
         up = up.withX(R.get(0, 2));
         up = up.withY(R.get(1, 2));
@@ -543,10 +543,10 @@ public class Camera extends Entity
         markModified();
     }
 
-    public Matrix4x4 getRotation()
+    public Matrix4x4d getRotation()
     {
         //------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4()
+        Matrix4x4d R = new Matrix4x4d()
             .withVal(0, 0, front.x()).withVal(0, 1, left.x()).withVal(0, 2, up.x())
             .withVal(1, 0, front.y()).withVal(1, 1, left.y()).withVal(1, 2, up.y())
             .withVal(2, 0, front.z()).withVal(2, 1, left.z()).withVal(2, 2, up.z());
@@ -558,11 +558,11 @@ public class Camera extends Entity
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix
     @return projection matrix representing view volume component
     */
-    public Matrix4x4 calculateViewVolumeMatrix()
+    public Matrix4x4d calculateViewVolumeMatrix()
     {
         //- Calculate the base projection matrix ----------------------------
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
-        Matrix4x4 P = new Matrix4x4();
+        Matrix4x4d P = new Matrix4x4d();
 
         aspect = viewportXSize / viewportYSize; 
         switch ( projectionMode ) {
@@ -589,15 +589,15 @@ public class Camera extends Entity
     Note that projectionMatrix = transformationMatrix*viewVolumeMatrix.
     @return transformation component for projection matrix for current camera
     */
-    public Matrix4x4 calculateTransformationMatrix()
+    public Matrix4x4d calculateTransformationMatrix()
     {
         //- Take into account the camera position and orientation ----------
-        Matrix4x4 R;
-        Matrix4x4 R1;
-        Matrix4x4 T1 = new Matrix4x4();
-        Matrix4x4 R_adic2 = new Matrix4x4();
-        Matrix4x4 R_adic1 = new Matrix4x4();
-        Matrix4x4 R2 = new Matrix4x4();
+        Matrix4x4d R;
+        Matrix4x4d R1;
+        Matrix4x4d T1 = new Matrix4x4d();
+        Matrix4x4d R_adic2 = new Matrix4x4d();
+        Matrix4x4d R_adic1 = new Matrix4x4d();
+        Matrix4x4d R2 = new Matrix4x4d();
 
         R1 = getRotation();
         R1 = R1.invert();
@@ -616,10 +616,10 @@ public class Camera extends Entity
     @return projection matrix for current camera, including transformation
     and view volume components
     */
-    public Matrix4x4 calculateProjectionMatrix()
+    public Matrix4x4d calculateProjectionMatrix()
     {
-        Matrix4x4 P = calculateViewVolumeMatrix();
-        Matrix4x4 R = calculateTransformationMatrix();
+        Matrix4x4d P = calculateViewVolumeMatrix();
+        Matrix4x4d R = calculateTransformationMatrix();
         return P.multiply(R);
     }
 
@@ -652,7 +652,7 @@ public class Camera extends Entity
         msg = msg + "  - focusedPointPosition(x, y, z) = " + eyePosition.add(front.multiply(focalDistance)) + "\n";
 
         //------------------------------------------------------------
-        Matrix4x4 R, TP;
+        Matrix4x4d R, TP;
         double yaw, pitch, roll;
 
         TP = calculateProjectionMatrix();
@@ -688,10 +688,10 @@ public class Camera extends Entity
         msg = msg + "  - Transformation * projection matrix:" + TP;
 
         //------------------------------------------------------------
-        Matrix4x4 P;
+        Matrix4x4d P;
         double leftDistance, rightDistance, upDistance, downDistance, aspect;
 
-        P = new Matrix4x4();
+        P = new Matrix4x4d();
         aspect = viewportXSize / viewportYSize; 
         if ( projectionMode == PROJECTION_MODE_PERSPECTIVE ) {
             upDistance = nearPlaneDistance * Math.tan(Math.toRadians(fov/2));
@@ -752,7 +752,7 @@ public class Camera extends Entity
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
             u /= orthogonalZoom;
             u *= 2*(viewportXSize/viewportYSize);
-            Vector3D right = left.multiply(-1);
+            Vector3Dd right = left.multiply(-1);
             right = right.normalized();
             if ( u > 0 ) {
                 return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
@@ -762,9 +762,9 @@ public class Camera extends Entity
             }
         }
 
-        Vector3D du = rightWithScale.multiply(u);
-        Vector3D f = new Vector3D(front);
-        Vector3D dir = du.add(_dir);
+        Vector3Dd du = rightWithScale.multiply(u);
+        Vector3Dd f = new Vector3Dd(front);
+        Vector3Dd dir = du.add(_dir);
 
         f = f.normalized();
 
@@ -776,8 +776,8 @@ public class Camera extends Entity
         if ( u > 0 ) alpha *= -1;
 
         // 2. Calculate the plane normal
-        Matrix4x4 R = new Matrix4x4();
-        Vector3D n;
+        Matrix4x4d R = new Matrix4x4d();
+        Vector3Dd n;
 
         R = R.axisRotation(alpha, up);
         n = R.multiply(du);
@@ -822,20 +822,20 @@ public class Camera extends Entity
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
             v /= orthogonalZoom;
             v *= 2;
-            Vector3D up2 = new Vector3D(up);
+            Vector3Dd up2 = new Vector3Dd(up);
             up = up.normalized();
             if ( v > 0 ) {
                 return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
             }
             else {
-                Vector3D down = up.multiply(-1);
+                Vector3Dd down = up.multiply(-1);
                 return new InfinitePlane(down, eyePosition.add(up.multiply(v)));
             }
         }
 
-        Vector3D dv = upWithScale.multiply(v);
-        Vector3D f = new Vector3D(front);
-        Vector3D dir = dv.add(_dir);
+        Vector3Dd dv = upWithScale.multiply(v);
+        Vector3Dd f = new Vector3Dd(front);
+        Vector3Dd dir = dv.add(_dir);
 
         f = f.normalized();
 
@@ -847,8 +847,8 @@ public class Camera extends Entity
         if ( v > 0 ) alpha *= -1;
 
         // 2. Calculate the plane normal
-        Matrix4x4 R = new Matrix4x4();
-        Vector3D n;
+        Matrix4x4d R = new Matrix4x4d();
+        Vector3Dd n;
 
         R = R.axisRotation(alpha, left);
         n = R.multiply(dv);
@@ -875,11 +875,11 @@ public class Camera extends Entity
     {
         InfinitePlane plane;
 
-        Vector3D f = new Vector3D(front);
+        Vector3Dd f = new Vector3Dd(front);
         f = f.normalized();
-        Vector3D back = f.multiply(-1);
+        Vector3Dd back = f.multiply(-1);
         f = f.multiply(nearPlaneDistance);
-        Vector3D c = eyePosition.add(f);
+        Vector3Dd c = eyePosition.add(f);
 
         plane = new InfinitePlane(back, c);
 
@@ -899,10 +899,10 @@ public class Camera extends Entity
     {
         InfinitePlane plane;
 
-        Vector3D f = new Vector3D(front);
+        Vector3Dd f = new Vector3Dd(front);
         f = f.normalized();
         f = f.multiply(farPlaneDistance);
-        Vector3D c = eyePosition.add(f);
+        Vector3Dd c = eyePosition.add(f);
         plane = new InfinitePlane(front, c);
 
         return plane;
@@ -927,7 +927,7 @@ public class Camera extends Entity
     classified.
     \todo : check this method... currently disabled due to non working cases!
     */
-    private int calculateOutcodeBits(Vector4D p)
+    private int calculateOutcodeBits(Vector4Dd p)
     {
         int bits = 0x00;
 
@@ -965,7 +965,7 @@ public class Camera extends Entity
 
     WARNING: Currently is only implementing the perspective case!
     */
-    private int calculateOutcodeBits(Vector3D p)
+    private int calculateOutcodeBits(Vector3Dd p)
     {
         int bits = 0x00;
 
@@ -986,7 +986,7 @@ public class Camera extends Entity
     line clipping algorithm. The camera view volume should be represented
     by its six bounding planes.
     */
-    private int calculateOutcodeBits(Vector3D p,
+    private int calculateOutcodeBits(Vector3Dd p,
                                      InfinitePlane right, InfinitePlane left,
                                      InfinitePlane up, InfinitePlane down,
                                      InfinitePlane far, InfinitePlane near)
@@ -1038,16 +1038,16 @@ public class Camera extends Entity
     view volume, false if line is to be totally removed on an clipping operation
     */
     public boolean clipLineCohenSutherlandPlanes(
-                             Vector3D point0, Vector3D point1,
-                             Vector3D clippedPoint0, Vector3D clippedPoint1)
+                             Vector3Dd point0, Vector3Dd point1,
+                             Vector3Dd clippedPoint0, Vector3Dd clippedPoint1)
     {
         //- Local variables definition ------------------------------------
         int outcode0;                // 6bit containment code for point0
         int outcode1;                // 6bit containment code for point1
         int outcodeout;              // Selected endpoint code for iteration
-        Vector3D clippingMidPoint;   // Selected endpoint clipped for iteration
+        Vector3Dd clippingMidPoint;   // Selected endpoint clipped for iteration
         Ray testRay;                 // Ray use for general line/plane clipping
-        Vector3D dirFromP0ToP1;      // Temporary for testRay construction
+        Vector3Dd dirFromP0ToP1;      // Temporary for testRay construction
         InfinitePlane rightPlane;    // 6 planes defining current camera
         InfinitePlane leftPlane;     //   view volume. Note that intersection
         InfinitePlane upPlane;       //   tests are done against these planes
@@ -1064,7 +1064,7 @@ public class Camera extends Entity
         clippedPoint1 = clippedPoint1.withY(point1.y());
         clippedPoint1 = clippedPoint1.withZ(point1.z());
         updateVectors();
-        clippingMidPoint = new Vector3D();
+        clippingMidPoint = new Vector3Dd();
         rightPlane = calculateUPlane(0.5);
         leftPlane = calculateUPlane(-0.5);
         upPlane = calculateVPlane(0.5);
@@ -1192,22 +1192,22 @@ public class Camera extends Entity
     current camera
     */
     public boolean clipLineCohenSutherlandCanonicVolume(
-                             Vector3D point0, Vector3D point1,
-                             Vector3D clippedPoint0, Vector3D clippedPoint1)
+                             Vector3Dd point0, Vector3Dd point1,
+                             Vector3Dd clippedPoint0, Vector3Dd clippedPoint1)
     {
         //- Local variables definition ------------------------------------
         int outcode0;                // 6bit containment code for point0
         int outcode1;                // 6bit containment code for point1
         int outcodeout;              // Selected endpoint code for iteration
-        Vector3D clippingMidPoint;   // Selected endpoint clipped for iteration
+        Vector3Dd clippingMidPoint;   // Selected endpoint clipped for iteration
         Ray testRay;                 // Ray use for general line/plane clipping
-        Vector3D dirFromP0ToP1;      // Temporary for testRay construction
+        Vector3Dd dirFromP0ToP1;      // Temporary for testRay construction
         double l;                    // Length of dirFromP0ToP1
         int planeId;                 // A number from 1 to 6 identifying which
                                      // plane intersection is being tested
 
         //- Algorithm initial state ---------------------------------------
-        Vector3D pp0, pp1;
+        Vector3Dd pp0, pp1;
 
         pp0 = normalizingTransformation.multiply(point0);
         pp1 = normalizingTransformation.multiply(point1);
@@ -1219,7 +1219,7 @@ public class Camera extends Entity
         clippedPoint1 = clippedPoint1.withY(pp1.y());
         clippedPoint1 = clippedPoint1.withZ(pp1.z());
         updateVectors();
-        clippingMidPoint = new Vector3D();
+        clippingMidPoint = new Vector3Dd();
         outcode0 = calculateOutcodeBits(pp0);
         outcode1 = calculateOutcodeBits(pp1);
 
@@ -1246,7 +1246,7 @@ public class Camera extends Entity
                     // continue;
                     return false;
                 }
-                dirFromP0ToP1 = new Vector3D(
+                dirFromP0ToP1 = new Vector3Dd(
                     dirFromP0ToP1.x() / l,
                     dirFromP0ToP1.y() / l,
                     dirFromP0ToP1.z() / l
@@ -1366,10 +1366,10 @@ public class Camera extends Entity
     @param projectedPosition
     @return 
     */
-    public boolean projectPoint(Vector3D worldPosition, Vector3D projectedPosition) {
-        Matrix4x4 NT = getNormalizingTransformation();
-        Vector3D p = NT.multiply(worldPosition);
-        p = new Vector3D(
+    public boolean projectPoint(Vector3Dd worldPosition, Vector3Dd projectedPosition) {
+        Matrix4x4d NT = getNormalizingTransformation();
+        Vector3Dd p = NT.multiply(worldPosition);
+        p = new Vector3Dd(
             p.x() / (-p.z()),
             p.y() / (-p.z()),
             p.z() / p.z()
@@ -1414,11 +1414,11 @@ public class Camera extends Entity
     @param outProjected
     @return true if the pixel lies inside the viewport, false otherwise.
     */
-    public boolean projectPointUsingRayMethod(Vector3D inPoint, Vector3D outProjected)
+    public boolean projectPointUsingRayMethod(Vector3Dd inPoint, Vector3Dd outProjected)
     {
         // 1. Calculate vectors
-        Vector3D upCopy = null;
-        Vector3D rightCopy = null;
+        Vector3Dd upCopy = null;
+        Vector3Dd rightCopy = null;
         double fovFactor;
         double scaleFactor;
 
@@ -1426,11 +1426,11 @@ public class Camera extends Entity
         updateVectors(); // Should be made a prerequisite for efficiency!
 
         // 2. Calculate projection plane
-        Vector3D p;
-        Vector3D center;
+        Vector3Dd p;
+        Vector3Dd center;
         InfinitePlane viewPlane;
 
-        center = new Vector3D(front);
+        center = new Vector3Dd(front);
         p = getPosition();
         center = center.normalized();
         center.multiply(nearPlaneDistance);
@@ -1438,15 +1438,15 @@ public class Camera extends Entity
         viewPlane = new InfinitePlane(front.multiply(-1), center);
 
         // 3. Calculate projected global coordinates XYZ
-        Vector3D projected;
+        Vector3Dd projected;
 
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
             projected = (viewPlane.projectPoint(inPoint).subtract(center)).multiply(orthogonalZoom);
         }
         else {
             // 3.1. Vector calculation for perspective case
-            upCopy = new Vector3D(up);
-            rightCopy = new Vector3D(left.multiply(-1));
+            upCopy = new Vector3Dd(up);
+            rightCopy = new Vector3Dd(left.multiply(-1));
             scaleFactor = 1.0/Math.tan(Math.toRadians(fov/2));
             upCopy = upCopy.normalized();
             upCopy = upCopy.multiply(scaleFactor);
@@ -1518,13 +1518,13 @@ public class Camera extends Entity
     current camera
     */
     public boolean
-    boundingConvexPolyhedraIsVisible(Vector3D[] cornerCoordinates)
+    boundingConvexPolyhedraIsVisible(Vector3Dd[] cornerCoordinates)
     {
         InfinitePlane[] viewVolumePlanes = getBoundingPlanes();
 
         int i, j;
         boolean isOutside;
-        Vector3D p;
+        Vector3Dd p;
 
         for ( i = 0; i < 6; i++ ) {
             isOutside = true;
@@ -1578,8 +1578,8 @@ public class Camera extends Entity
     @param inOutUnitSquarePoint 
     */
     public void convertViewportPointToUnitSquare(
-        final Vector3D inViewportPoint,
-        Vector3D inOutUnitSquarePoint)
+        final Vector3Dd inViewportPoint,
+        Vector3Dd inOutUnitSquarePoint)
     {
         double a = 1.0 / (viewportXSize);
         double f = -1.0 / (viewportYSize);
@@ -1595,11 +1595,11 @@ public class Camera extends Entity
     (from <-0.5, -0.5, 0> to <0.5, 0.5, 0>) viewport coordinates.
     @return 
     */
-    public Matrix4x4
+    public Matrix4x4d
     viewport2UnitSquareTransform()
     {
-        Matrix4x4 T;
-        T = new Matrix4x4();
+        Matrix4x4d T;
+        T = new Matrix4x4d();
         
         double a = 1.0 / (viewportXSize);
         double f = -1.0 / (viewportYSize);

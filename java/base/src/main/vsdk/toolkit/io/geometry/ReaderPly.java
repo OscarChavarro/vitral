@@ -11,10 +11,10 @@ import java.util.StringTokenizer;
 // VSDK Classes
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -610,9 +610,9 @@ public class ReaderPly extends PersistenceElement
 
         thing = new SimpleBody();
         thing.setGeometry(g);
-        thing.setPosition(new Vector3D());
-        thing.setRotation(new Matrix4x4());
-        thing.setRotationInverse(new Matrix4x4());
+        thing.setPosition(new Vector3Dd());
+        thing.setRotation(new Matrix4x4d());
+        thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
         inoutSimpleBodiesArray.add(thing);
         return thing;

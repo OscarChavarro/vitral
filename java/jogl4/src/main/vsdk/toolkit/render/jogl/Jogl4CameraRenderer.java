@@ -5,23 +5,23 @@ import java.util.List;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl4CameraRenderer extends Jogl4Renderer {
     private static final float[] CAMERA_ORIGIN_COLOR = { 1.0f, 0.5f, 0.5f };
     private static final float[] FRUSTUM_COLOR = { 0.0f, 1.0f, 1.0f };
 
-    public static Matrix4x4 activate(GL4 gl, Camera cam)
+    public static Matrix4x4d activate(GL4 gl, Camera cam)
     {
         return cam.calculateProjectionMatrix();
     }
 
-    public static Matrix4x4 activateCenter(GL4 gl, Camera cam)
+    public static Matrix4x4d activateCenter(GL4 gl, Camera cam)
     {
         Camera camera2 = new Camera(cam);
-        camera2.setPosition(new Vector3D(0, 0, 0));
+        camera2.setPosition(new Vector3Dd(0, 0, 0));
         camera2.setNearPlaneDistance(0.1);
         camera2.setFarPlaneDistance(10.0);
         return camera2.calculateProjectionMatrix();
@@ -29,18 +29,18 @@ public class Jogl4CameraRenderer extends Jogl4Renderer {
 
     public static void draw(GL4 gl, Camera cam)
     {
-        Matrix4x4 projection = cam.calculateProjectionMatrix();
+        Matrix4x4d projection = cam.calculateProjectionMatrix();
         draw(gl, cam, projection);
     }
 
-    public static void draw(GL4 gl, Camera cam, Matrix4x4 projection)
+    public static void draw(GL4 gl, Camera cam, Matrix4x4d projection)
     {
-        Matrix4x4 model = cam.getRotation().withTranslation(cam.getPosition());
-        Matrix4x4 modelViewProjection = projection.multiply(model);
+        Matrix4x4d model = cam.getRotation().withTranslation(cam.getPosition());
+        Matrix4x4d modelViewProjection = projection.multiply(model);
         drawVolume(gl, cam, modelViewProjection);
     }
 
-    public static void drawVolume(GL4 gl, Camera cam, Matrix4x4 mvp)
+    public static void drawVolume(GL4 gl, Camera cam, Matrix4x4d mvp)
     {
         double npd = cam.getNearPlaneDistance();
         double fpd = cam.getFarPlaneDistance();

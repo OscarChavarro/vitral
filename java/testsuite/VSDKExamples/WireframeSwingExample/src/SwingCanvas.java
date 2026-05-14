@@ -11,9 +11,9 @@ import javax.swing.JPanel;
 //import java.awt.event.KeyEvent;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;    // Model elements
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;    // Model elements
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
@@ -69,10 +69,10 @@ public class SwingCanvas extends JPanel implements
     private void createModel()
     {
         //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
         camera = new Camera();
-        camera.setPosition(new Vector3D(7, -4, 4));
+        camera.setPosition(new Vector3Dd(7, -4, 4));
         R = R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
         camera.setNearPlaneDistance(1);
         camera.setFarPlaneDistance(100);
@@ -85,7 +85,7 @@ public class SwingCanvas extends JPanel implements
         background = new SimpleBackground();
         background.setColor(0.5, 0.5, 0.9);
 
-        light = new Light(LightType.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3Dd(5, -5, 5), new ColorRgb(1, 1, 1));
 
         scene = new SimpleScene();
         scene.addBackground(background);
@@ -99,13 +99,13 @@ public class SwingCanvas extends JPanel implements
         b = new SimpleBody();
         box = new Box(4, 4, 4);
         b.setGeometry(box);
-        b.setPosition(new Vector3D(0, 0, 0));
+        b.setPosition(new Vector3Dd(0, 0, 0));
         scene.addBody(b);
 
         b = new SimpleBody();
         sphere = new Sphere(2);
         b.setGeometry(sphere);
-        b.setPosition(new Vector3D(0, 0, 0));
+        b.setPosition(new Vector3Dd(0, 0, 0));
         scene.addBody(b);
 
         //-----------------------------------------------------------------
@@ -165,7 +165,7 @@ public class SwingCanvas extends JPanel implements
 
     public void keyPressed(java.awt.event.KeyEvent e) {
         KeyEvent vsdke = AwtSystem.awt2vsdkEvent(e);
-        Vector3D p;
+        Vector3Dd p;
 
         if ( vsdke.keycode == KeyEvent.KEY_ESC ) {
             if ( !appletMode ) {

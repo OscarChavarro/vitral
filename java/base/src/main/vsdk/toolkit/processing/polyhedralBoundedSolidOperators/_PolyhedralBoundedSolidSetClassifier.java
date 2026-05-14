@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -325,7 +325,7 @@ final class _PolyhedralBoundedSolidSetClassifier
         }
     }
 
-    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3D point)
+    private static int pointInFace(_PolyhedralBoundedSolidFace face, Vector3Dd point)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
@@ -361,12 +361,12 @@ final class _PolyhedralBoundedSolidSetClassifier
     bisector idea from problem [MANT1988].14.1 to the set-operations
     classifiers of chapter [MANT1988].15.
     */
-    protected static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
+    protected static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle = null;
-        Vector3D a;
-        Vector3D b;
-        Vector3D n;
+        Vector3Dd middle = null;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd n;
 
         a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
@@ -383,8 +383,8 @@ final class _PolyhedralBoundedSolidSetClassifier
         return middle;
     }
 
-    private static boolean sctrwitthin(Vector3D dir, Vector3D ref1,
-                            Vector3D ref2, Vector3D ref12)
+    private static boolean sctrwitthin(Vector3Dd dir, Vector3Dd ref1,
+                            Vector3Dd ref2, Vector3Dd ref12)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .sctrwitthin(dir, ref1, ref2, ref12);
@@ -692,8 +692,8 @@ final class _PolyhedralBoundedSolidSetClassifier
     private static boolean convexedg(_PolyhedralBoundedSolidHalfEdge he)
     {
         _PolyhedralBoundedSolidHalfEdge h2;
-        Vector3D dir;
-        Vector3D cr;
+        Vector3Dd dir;
+        Vector3Dd cr;
 
         h2 = he.next();
         if ( nulledge(he) ) {

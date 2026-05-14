@@ -23,7 +23,7 @@ import com.jogamp.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
         import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
@@ -52,10 +52,10 @@ public class IlluminationTest
     private RendererConfiguration qualitySelection2;
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;
-    private Vector3D lightPosition;
+    private Vector3Dd lightPosition;
     private boolean showVectors;
-    private Vector3D N;
-    private Vector3D H;
+    private Vector3Dd N;
+    private Vector3Dd H;
     private double phongExp;
 
     private TriangleMesh baseMesh;
@@ -68,7 +68,7 @@ public class IlluminationTest
 
     private void updateH()
     {
-        Vector3D L = lightPosition.normalized();
+        Vector3Dd L = lightPosition.normalized();
 
         double mag = N.dotProduct(L) * 2;
 
@@ -155,7 +155,7 @@ public class IlluminationTest
         TriangleMesh m = new TriangleMesh();
 
         //- Prepare illumination model vectors ----------------------------
-        Vector3D L = lightPosition.normalized();
+        Vector3Dd L = lightPosition.normalized();
 
         //-----------------------------------------------------------------
         m.initVertexPositionsArray((nx+1)*(ny+1));
@@ -180,7 +180,7 @@ public class IlluminationTest
                 y1 = Math.sin(Math.toRadians(tetha)) *
                         Math.cos(Math.toRadians(phi));
                 z1 = Math.cos(Math.toRadians(90-phi));
-                // Avoid per-vertex Vector3D allocations in this hot loop.
+                // Avoid per-vertex Vector3Dd allocations in this hot loop.
                 double hDotE = (H.x() * x1) + (H.y() * y1) + (H.z() * z1);
                 s = Math.pow(hDotE, phongExp);
 
@@ -257,7 +257,7 @@ public class IlluminationTest
         qualitySelection2 = new RendererConfiguration();
         qualityController = new RendererConfigurationController(qualitySelection1);
 
-        lightPosition = new Vector3D(0, 0, 3);
+        lightPosition = new Vector3Dd(0, 0, 3);
         light1 = new Light(LightType.POINT, lightPosition, 
                 new ColorRgb(1, 1, 1));
         light1.setPosition(lightPosition);
@@ -265,16 +265,16 @@ public class IlluminationTest
 
 
 
-        light2 = new Light(LightType.POINT, new Vector3D(30, -70, 50), 
+        light2 = new Light(LightType.POINT, new Vector3Dd(30, -70, 50), 
                 new ColorRgb(1, 1, 1));
-        light3 = new Light(LightType.POINT, new Vector3D(-40, 60, 30), 
+        light3 = new Light(LightType.POINT, new Vector3Dd(-40, 60, 30), 
                 new ColorRgb(1, 1, 1));
         light1.setId(0);
         light2.setId(1);
         light3.setId(2);
 
         //-----------------------------------------------------------------
-        N = new Vector3D(0, 0, 1); // For the floor!
+        N = new Vector3Dd(0, 0, 1); // For the floor!
         updateH();
 
         phongExp = 60.0;

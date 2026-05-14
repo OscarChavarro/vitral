@@ -2,7 +2,7 @@ package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 
@@ -11,10 +11,10 @@ public class Jogl4MinMaxRenderer extends Jogl4Renderer {
 
     public static void draw(GL4 gl, Geometry geometry, Camera camera)
     {
-        draw(gl, geometry, camera, Matrix4x4.identityMatrix());
+        draw(gl, geometry, camera, Matrix4x4d.identityMatrix());
     }
 
-    public static void draw(GL4 gl, Geometry geometry, Camera camera, Matrix4x4 modelViewLocal)
+    public static void draw(GL4 gl, Geometry geometry, Camera camera, Matrix4x4d modelViewLocal)
     {
         if ( geometry == null ) {
             return;
@@ -24,10 +24,10 @@ public class Jogl4MinMaxRenderer extends Jogl4Renderer {
 
     public static void draw(GL4 gl, double[] minmax, Camera camera)
     {
-        draw(gl, minmax, camera, Matrix4x4.identityMatrix());
+        draw(gl, minmax, camera, Matrix4x4d.identityMatrix());
     }
 
-    public static void draw(GL4 gl, double[] minmax, Camera camera, Matrix4x4 modelViewLocal)
+    public static void draw(GL4 gl, double[] minmax, Camera camera, Matrix4x4d modelViewLocal)
     {
         if ( gl == null || minmax == null || minmax.length < 6 || camera == null ) {
             return;
@@ -36,10 +36,10 @@ public class Jogl4MinMaxRenderer extends Jogl4Renderer {
         float[] positions = buildMinMaxLinePositions(minmax);
         float[] colors = buildUniformColors(positions.length / 3, YELLOW_RGB);
 
-        Matrix4x4 local = (modelViewLocal != null)
+        Matrix4x4d local = (modelViewLocal != null)
             ? modelViewLocal
-            : Matrix4x4.identityMatrix();
-        Matrix4x4 mvp = camera.calculateProjectionMatrix().multiply(local);
+            : Matrix4x4d.identityMatrix();
+        Matrix4x4d mvp = camera.calculateProjectionMatrix().multiply(local);
 
         Jogl4LineRenderer.drawLines(gl, mvp, positions, colors, 1.0f);
     }

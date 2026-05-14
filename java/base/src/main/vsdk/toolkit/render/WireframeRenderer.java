@@ -9,9 +9,9 @@ package vsdk.toolkit.render;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Vector4D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.Surface;
 import vsdk.toolkit.environment.geometry.volume.Solid;
@@ -33,23 +33,23 @@ public class WireframeRenderer extends RenderingElement
     `lineSet`.
     */
     private static void addLine(Calligraphic2DBuffer lineSet,
-                                Vector3D cp0, Vector3D cp1, Matrix4x4 Proj,
+                                Vector3Dd cp0, Vector3Dd cp1, Matrix4x4d Proj,
                                 Camera c) {
         //-----------------------------------------------------------------
-        Vector4D hp0, hp1; // Clipped points in homogeneous space
-        Vector4D pp0, pp1; // Projected points
+        Vector4Dd hp0, hp1; // Clipped points in homogeneous space
+        Vector4Dd pp0, pp1; // Projected points
 
         double f;
         f = 1;// f = (c.getFarPlaneDistance() - c.getNearPlaneDistance())/20;
 
-        hp0 = new Vector4D(cp0);
-        hp1 = new Vector4D(cp1);
+        hp0 = new Vector4Dd(cp0);
+        hp1 = new Vector4Dd(cp1);
         pp0 = Proj.multiply(hp0).dividedByW();
         pp1 = Proj.multiply(hp1).dividedByW();
         lineSet.add2DLine(pp0.x()*f, pp0.y()*f, pp1.x()*f, pp1.y()*f);
     }
 
-    private static void processBrep(SimpleBody body, Matrix4x4 P,
+    private static void processBrep(SimpleBody body, Matrix4x4d P,
                         Calligraphic2DBuffer outLineSet,
                         Camera inCamera)
     {
@@ -61,13 +61,13 @@ public class WireframeRenderer extends RenderingElement
 
         //-----------------------------------------------------------------
         int i;
-        Vector3D mp0, mp1;         // Edge points
-        Vector3D cp0, cp1;         // Clipped points
-        Matrix4x4 M;
+        Vector3Dd mp0, mp1;         // Edge points
+        Vector3Dd cp0, cp1;         // Clipped points
+        Matrix4x4d M;
 
         M = body.getTransformationMatrix();
-        cp0 = new Vector3D();
-        cp1 = new Vector3D();
+        cp0 = new Vector3Dd();
+        cp1 = new Vector3Dd();
 
         for ( i = 0; i < brep.getEdgesList().size(); i++ ) {
             _PolyhedralBoundedSolidEdge e = brep.getEdgesList().get(i);
@@ -89,7 +89,7 @@ public class WireframeRenderer extends RenderingElement
         }
     }
 
-    private static void processMesh(SimpleBody body, Matrix4x4 P,
+    private static void processMesh(SimpleBody body, Matrix4x4d P,
                         Calligraphic2DBuffer outLineSet,
                         Camera inCamera)
     {
@@ -101,18 +101,18 @@ public class WireframeRenderer extends RenderingElement
         int nt;
         double v[];
         int tr[];
-        Matrix4x4 M;               // Modelview matrix
+        Matrix4x4d M;               // Modelview matrix
         int p0, p1, p2;
-        Vector3D mp0, mp1;         // Mesh points
-        Vector3D cp0, cp1;         // Clipped points
+        Vector3Dd mp0, mp1;         // Mesh points
+        Vector3Dd cp0, cp1;         // Clipped points
 
         mg = body.getGeometry().exportToTriangleMeshGroup();
         if ( mg == null ) return;
 
-        mp0 = new Vector3D();
-        mp1 = new Vector3D();
-        cp0 = new Vector3D();
-        cp1 = new Vector3D();
+        mp0 = new Vector3Dd();
+        mp1 = new Vector3Dd();
+        cp0 = new Vector3Dd();
+        cp1 = new Vector3Dd();
 
         M = body.getTransformationMatrix();
         for ( j = 0; j < mg.getMeshes().size(); j++ ) {
@@ -126,24 +126,24 @@ public class WireframeRenderer extends RenderingElement
                 p1 = tr[3*t+1];
                 p2 = tr[3*t+2];
 
-                mp0 = new Vector3D(v[3*p0], v[3*p0+1], v[3*p0+2]);
-                mp1 = new Vector3D(v[3*p1], v[3*p1+1], v[3*p1+2]);
+                mp0 = new Vector3Dd(v[3*p0], v[3*p0+1], v[3*p0+2]);
+                mp1 = new Vector3Dd(v[3*p1], v[3*p1+1], v[3*p1+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0 = new Vector3D(v[3*p1], v[3*p1+1], v[3*p1+2]);
-                mp1 = new Vector3D(v[3*p2], v[3*p2+1], v[3*p2+2]);
+                mp0 = new Vector3Dd(v[3*p1], v[3*p1+1], v[3*p1+2]);
+                mp1 = new Vector3Dd(v[3*p2], v[3*p2+1], v[3*p2+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
                     addLine(outLineSet, cp0, cp1, P, inCamera);
                 }
 
-                mp0 = new Vector3D(v[3*p2], v[3*p2+1], v[3*p2+2]);
-                mp1 = new Vector3D(v[3*p0], v[3*p0+1], v[3*p0+2]);
+                mp0 = new Vector3Dd(v[3*p2], v[3*p2+1], v[3*p2+2]);
+                mp1 = new Vector3Dd(v[3*p0], v[3*p0+1], v[3*p0+2]);
                 mp0 = M.multiply(mp0);
                 mp1 = M.multiply(mp1);
                 if ( inCamera.clipLineCohenSutherlandCanonicVolume(mp0, mp1, cp0, cp1) ) {
@@ -159,10 +159,10 @@ public class WireframeRenderer extends RenderingElement
     {
         //- Calligraphic rendering of lines in to 2D line buffer ----------
         int i;                     // Index inside objects list
-        Matrix4x4 P;               // Projection matrix
+        Matrix4x4d P;               // Projection matrix
         Geometry g;
 
-        P = new Matrix4x4();
+        P = new Matrix4x4d();
         P = P.canonicalPerspectiveProjection();
 
         for ( i = 0; i < inSimpleBodyArray.size(); i++ ) {

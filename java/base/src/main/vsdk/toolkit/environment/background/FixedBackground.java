@@ -2,7 +2,7 @@ package vsdk.toolkit.environment.background;
 import java.io.Serial;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 
@@ -35,7 +35,7 @@ public class FixedBackground extends Background {
     @return color as viewed in given direction
     */
     @Override
-    public ColorRgb colorInDireccion(Vector3D d)
+    public ColorRgb colorInDireccion(Vector3Dd d)
     {
         return null;
 /*
@@ -43,12 +43,12 @@ public class FixedBackground extends Background {
         Ray r = new Ray(camera.getPosition(), d);
         ColorRgb color = new ColorRgb();
         double u, v;
-        Vector3D p;
-        Vector3D left = camera.getLeft();
-        Vector3D up = camera.getUp();
-        Vector3D rel;
+        Vector3Dd p;
+        Vector3Dd left = camera.getLeft();
+        Vector3Dd up = camera.getUp();
+        Vector3Dd rel;
         double near = camera.getNearPlaneDistance();
-        Vector3D front = camera.getFront();
+        Vector3Dd front = camera.getFront();
 
         if ( plane.doIntersectionWithNegative(r) ) {
             p = r.origin.add(d.multiply(r.t));

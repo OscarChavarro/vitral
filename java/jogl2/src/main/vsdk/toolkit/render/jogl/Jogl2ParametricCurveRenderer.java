@@ -9,7 +9,7 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.glu.GLUtessellator;
 
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
@@ -44,12 +44,12 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
             }
 
             // Build a polyline for approximating the [i] curve segment
-            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
+            ArrayList<Vector3Dd> polyline = curve.calculatePoints(i, false);
 
             // Draw the polyline
             gl.glBegin(GL.GL_LINE_STRIP);
             for ( j = 0; j < polyline.size(); j++ ) {
-                Vector3D vec = polyline.get(j);
+                Vector3Dd vec = polyline.get(j);
 
                 gl.glVertex3d(vec.x(), vec.y(), vec.z());
             }
@@ -122,13 +122,13 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
 
     }
 
-    static public void drawPoints(GL2 gl, ArrayList<Vector3D[]> pts) {
+    static public void drawPoints(GL2 gl, ArrayList<Vector3Dd[]> pts) {
         gl.glColor3d(1, 0, 0);
         gl.glLineWidth(1);
         for (int i = 0; i < pts.size(); i++) {
             gl.glColor3d(1, 0, 0);
-            Vector3D vecarray[] = pts.get(i);
-            Vector3D vec = vecarray[0];
+            Vector3Dd vecarray[] = pts.get(i);
+            Vector3Dd vec = vecarray[0];
             gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
             gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
@@ -140,7 +140,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glLineWidth(1);
     }
 
-    static public void drawOneControlPoints(GL2 gl, Vector3D vec, ColorRgb color) {
+    static public void drawOneControlPoints(GL2 gl, Vector3Dd vec, ColorRgb color) {
         gl.glColor3d(color.r(), color.g(), color.b());
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
@@ -150,7 +150,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glEnd();
     }
 
-    static public void drawFirstControlPoint(GL2 gl, Vector3D vec, ColorRgb color) {
+    static public void drawFirstControlPoint(GL2 gl, Vector3Dd vec, ColorRgb color) {
         gl.glColor3d(color.r(), color.g(), color.b());
         gl.glBegin(GL.GL_LINE_STRIP);
         gl.glVertex3d(vec.x() - 0.02, vec.y() - 0.02, vec.z());
@@ -161,14 +161,14 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glEnd();
     }
 
-    static public void drawTwoControlPoints(GL2 gl, Vector3D[] ptsB,
+    static public void drawTwoControlPoints(GL2 gl, Vector3Dd[] ptsB,
                                             int tangPoint, ColorRgb colorLine,
                                             ColorRgb colorCenterPoint,
                                             ColorRgb colorTangPoint) {
 
         //p1
         gl.glColor3d(colorCenterPoint.r(), colorCenterPoint.g(), colorCenterPoint.b());
-        Vector3D vec = ptsB[0];
+        Vector3Dd vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
         gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
@@ -178,7 +178,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
 
         //p2
         gl.glColor3d(colorTangPoint.r(), colorTangPoint.g(), colorTangPoint.b());
-        Vector3D vec2 = ptsB[tangPoint];
+        Vector3Dd vec2 = ptsB[tangPoint];
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
         gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
@@ -193,14 +193,14 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         gl.glEnd();
     }
 
-    static public void drawThreeControlPoints(GL2 gl, Vector3D[] ptsB,
+    static public void drawThreeControlPoints(GL2 gl, Vector3Dd[] ptsB,
                                               ColorRgb colorLine,
                                               ColorRgb colorCenterPoint,
                                               ColorRgb colorTangPoint) {
 
         gl.glColor3d(colorCenterPoint.r(), colorCenterPoint.g(), colorCenterPoint.b());
         // p1
-        Vector3D vec = ptsB[0];
+        Vector3Dd vec = ptsB[0];
         gl.glBegin(GL.GL_LINES);
         gl.glVertex3d(vec.x() + 0.02, vec.y() - 0.02, vec.z());
         gl.glVertex3d(vec.x() - 0.02, vec.y() + 0.02, vec.z());
@@ -210,7 +210,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
 
         // p2
         gl.glColor3d(colorTangPoint.r(), colorTangPoint.g(), colorTangPoint.b());
-        Vector3D vec2 = ptsB[1];
+        Vector3Dd vec2 = ptsB[1];
         gl.glBegin(GL.GL_LINES);
 
         gl.glVertex3d(vec2.x() + 0.02, vec2.y() - 0.02, vec2.z());
@@ -254,7 +254,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         int i, j;
         int totalNumberOfPoints;
         double list[][];
-        Vector3D first;
+        Vector3Dd first;
         boolean beginning;
         int count;
 
@@ -278,7 +278,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
                 i++;
                 continue;
             }
-            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
+            ArrayList<Vector3Dd> polyline = curve.calculatePoints(i, false);
             totalNumberOfPoints += polyline.size();
         }
 
@@ -290,7 +290,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
         GLU.gluTessBeginContour(tesselator);
         //gl.glBegin(GL.GL_LINE_LOOP);
 
-        first = new Vector3D();
+        first = new Vector3Dd();
         beginning = true;
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( curve.types.get(i).intValue() == ParametricCurve.BREAK ) {
@@ -304,13 +304,13 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
             }
 
             // Build a polyline for approximating the [i] curve segment
-            ArrayList<Vector3D> polyline = curve.calculatePoints(i, false);
+            ArrayList<Vector3Dd> polyline = curve.calculatePoints(i, false);
 
             // Insert into current contour the polyline
             for ( j = 0; j < polyline.size(); j++ ) {
-                Vector3D vec = polyline.get(j);
+                Vector3Dd vec = polyline.get(j);
                 if ( !beginning ) {
-                    Vector3D prev = new Vector3D(list[count-1][0], 
+                    Vector3Dd prev = new Vector3Dd(list[count-1][0], 
                                                  list[count-1][1],
                                                  list[count-1][2]);
                     if ( VSDK.vectorDistance(vec,  prev) > VSDK.EPSILON &&
@@ -330,7 +330,7 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
                     list[count][2] = vec.z();
                     GLU.gluTessVertex(tesselator, list[count], 0, list[count]);
                     //gl.glVertex3d(vec.x(), vec.y(), vec.z());
-                    first = new Vector3D(vec.x(), vec.y(), vec.z());
+                    first = new Vector3Dd(vec.x(), vec.y(), vec.z());
                     count++;
                 }
             }

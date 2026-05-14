@@ -14,8 +14,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -355,10 +355,10 @@ class BooleansFromReferenceObjectPairsTest
 
         vsdk.toolkit.environment.geometry.volume.Box clipCubeGeometry =
             new vsdk.toolkit.environment.geometry.volume.Box(
-                new Vector3D(1.4, 1.4, 1.05));
+                new Vector3Dd(1.4, 1.4, 1.05));
         PolyhedralBoundedSolid clipCube = clipCubeGeometry
             .exportToPolyhedralBoundedSolid();
-        Matrix4x4 cubeMove = new Matrix4x4();
+        Matrix4x4d cubeMove = new Matrix4x4d();
         cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
         PolyhedralBoundedSolidModeler.applyTransformation(clipCube, cubeMove);
 
@@ -371,7 +371,7 @@ class BooleansFromReferenceObjectPairsTest
                                                        int subdivisionsC,
                                                        int subdivisionsH)
     {
-        Matrix4x4 move = new Matrix4x4();
+        Matrix4x4d move = new Matrix4x4d();
         move = move.translation(0.55, 0.55, 0.55);
         Sphere sphere = new Sphere(radius);
         PolyhedralBoundedSolid solid = sphere.exportToPolyhedralBoundedSolid(
@@ -798,11 +798,11 @@ class BooleansFromReferenceObjectPairsTest
         }
 
         private static PolyhedralBoundedSolid createSphere(double radius,
-                                                           Vector3D center)
+                                                           Vector3Dd center)
         {
             PolyhedralBoundedSolid solid = new Sphere(radius)
                 .exportToPolyhedralBoundedSolid();
-            Matrix4x4 t = new Matrix4x4();
+            Matrix4x4d t = new Matrix4x4d();
             t = t.translation(center);
             PolyhedralBoundedSolidModeler.applyTransformation(solid, t);
             return solid;
@@ -810,23 +810,23 @@ class BooleansFromReferenceObjectPairsTest
 
         private static PolyhedralBoundedSolid createCylinder(double radius,
                                                              double height,
-                                                             Vector3D translation)
+                                                             Vector3Dd translation)
         {
             PolyhedralBoundedSolid solid = PolyhedralBoundedSolidModeler
                 .createCircularLamina(0.0, 0.0, radius, 0.0, CYLINDER_SIDES);
-            Matrix4x4 sweep = new Matrix4x4();
+            Matrix4x4d sweep = new Matrix4x4d();
             sweep = sweep.translation(0.0, 0.0, height);
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 solid, solid.findFace(1), sweep);
 
-            Matrix4x4 move = new Matrix4x4();
+            Matrix4x4d move = new Matrix4x4d();
             move = move.translation(translation);
             PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
             return solid;
         }
 
         private static PolyhedralBoundedSolid createExtrudedPolygon(
-            Vector3D[] points, double thickness)
+            Vector3Dd[] points, double thickness)
         {
             PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
             int i;
@@ -836,7 +836,7 @@ class BooleansFromReferenceObjectPairsTest
             }
             PolyhedralBoundedSolidEulerOperators.smef(solid, 1, points.length, 1, 2);
 
-            Matrix4x4 t = new Matrix4x4();
+            Matrix4x4d t = new Matrix4x4d();
             t = t.translation(0.0, 0.0, thickness);
             PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
                 solid, solid.findFace(1), t);
@@ -849,13 +849,13 @@ class BooleansFromReferenceObjectPairsTest
             double outerR = s(2.0);
             double innerR = s(0.77);
             double start = Math.toRadians(-90.0);
-            Vector3D[] points = new Vector3D[n];
+            Vector3Dd[] points = new Vector3Dd[n];
             int i;
 
             for ( i = 0; i < n; i++ ) {
                 double a = start + i * Math.PI / 5.0;
                 double r = (i % 2 == 0) ? outerR : innerR;
-                points[i] = new Vector3D(r * Math.cos(a), r * Math.sin(a), 0.0);
+                points[i] = new Vector3Dd(r * Math.cos(a), r * Math.sin(a), 0.0);
             }
 
             return createExtrudedPolygon(points, s(5.5));
@@ -864,19 +864,19 @@ class BooleansFromReferenceObjectPairsTest
         private static PolyhedralBoundedSolid createMoon()
         {
             PolyhedralBoundedSolid a = createCylinder(
-                s(1.5), s(5.0), new Vector3D(0, 0, 0));
+                s(1.5), s(5.0), new Vector3Dd(0, 0, 0));
             PolyhedralBoundedSolid b = createCylinder(
-                s(1.5), s(5.0), new Vector3D(s(1.1), 0, s(0.6)));
+                s(1.5), s(5.0), new Vector3Dd(s(1.1), 0, s(0.6)));
             return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
         }
 
         private static PolyhedralBoundedSolid placeMotif(
             PolyhedralBoundedSolid motif, double z, double azimuthDeg)
         {
-            Matrix4x4 t = new Matrix4x4();
-            Matrix4x4 ry = new Matrix4x4();
-            Matrix4x4 rz = new Matrix4x4();
-            Matrix4x4 m;
+            Matrix4x4d t = new Matrix4x4d();
+            Matrix4x4d ry = new Matrix4x4d();
+            Matrix4x4d rz = new Matrix4x4d();
+            Matrix4x4d m;
 
             t = t.translation(s(6.0), 0.0, s(z));
             ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
@@ -889,9 +889,9 @@ class BooleansFromReferenceObjectPairsTest
         private static PolyhedralBoundedSolid create()
         {
             PolyhedralBoundedSolid outer = createSphere(
-                s(10.0), new Vector3D(0, 0, s(10.0)));
+                s(10.0), new Vector3Dd(0, 0, s(10.0)));
             PolyhedralBoundedSolid inner = createSphere(
-                s(9.5), new Vector3D(0, 0, s(10.0)));
+                s(9.5), new Vector3Dd(0, 0, s(10.0)));
             PolyhedralBoundedSolid shell = booleanOp(
                 outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
 
@@ -935,7 +935,7 @@ class BooleansFromReferenceObjectPairsTest
             }
 
             PolyhedralBoundedSolid guide = createCylinder(
-                s(10.5), s(16.5), new Vector3D(0, 0, 0));
+                s(10.5), s(16.5), new Vector3Dd(0, 0, 0));
             return booleanOp(shell, guide,
                 PolyhedralBoundedSolidModeler.INTERSECTION);
         }

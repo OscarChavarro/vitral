@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -1008,7 +1008,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidHalfEdge currentTarget)
     {
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
-        Vector3D point;
+        Vector3Dd point;
 
         if ( targetFace == null ||
              !isLiveHalfEdge(currentTarget) ||
@@ -1439,7 +1439,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidHalfEdge first,
         _PolyhedralBoundedSolidHalfEdge second)
     {
-        Vector3D delta;
+        Vector3Dd delta;
 
         if ( first == null || second == null ||
              first.startingVertex == null ||

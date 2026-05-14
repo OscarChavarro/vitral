@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.geometry.surface;
 import java.io.Serial;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
@@ -27,7 +27,7 @@ public class InfinitePlane extends HalfSpace {
         this.d = d;
     }
 
-    public InfinitePlane(Vector3D normal, Vector3D pointInPlane) {
+    public InfinitePlane(Vector3Dd normal, Vector3Dd pointInPlane) {
         normal = normal.normalized();
         a = normal.x();
         b = normal.y();
@@ -35,10 +35,10 @@ public class InfinitePlane extends HalfSpace {
         d = -normal.dotProduct(pointInPlane);
     }
 
-    public InfinitePlane(Vector3D p0, Vector3D p1, Vector3D p2) {
-        Vector3D aa;
-        Vector3D bb;
-        Vector3D normal;
+    public InfinitePlane(Vector3Dd p0, Vector3Dd p1, Vector3Dd p2) {
+        Vector3Dd aa;
+        Vector3Dd bb;
+        Vector3Dd normal;
         aa = p1.subtract(p0);
         aa = aa.normalized();
         bb = p2.subtract(p0);
@@ -112,7 +112,7 @@ public class InfinitePlane extends HalfSpace {
     Note that current interpretation of the plane is done as a semispace,
     where "outside" means the direction pointed by plane's normal.
     */
-    public int doContainmentTestHalfSpace(Vector3D p,
+    public int doContainmentTestHalfSpace(Vector3Dd p,
                                           double distanceTolerance) {
         double num = a*p.x() + b*p.y() + c*p.z() + d;
         int op = LIMIT;
@@ -132,7 +132,7 @@ public class InfinitePlane extends HalfSpace {
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         double num = a*p.x() + b*p.y() + c*p.z() + d;
         int op = LIMIT;
@@ -154,7 +154,7 @@ public class InfinitePlane extends HalfSpace {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
-        outData.p = new Vector3D(
+        outData.p = new Vector3Dd(
             inRay.origin().x() + inT*inRay.direction().x(),
             inRay.origin().y() + inT*inRay.direction().y(),
             inRay.origin().z() + inT*inRay.direction().z()
@@ -180,9 +180,9 @@ public class InfinitePlane extends HalfSpace {
         return minmax;
     }
 
-    public Vector3D getNormal()
+    public Vector3Dd getNormal()
     {
-        Vector3D n = new Vector3D(a, b, c);
+        Vector3Dd n = new Vector3Dd(a, b, c);
         return n.normalized();
     }
 
@@ -191,7 +191,7 @@ public class InfinitePlane extends HalfSpace {
         return d;
     }
 
-    public void setNormal(Vector3D n)
+    public void setNormal(Vector3Dd n)
     {
         n = n.normalized();
         a = n.x();
@@ -210,7 +210,7 @@ public class InfinitePlane extends HalfSpace {
     @param p
     @param n
     */
-    public void setFromPointNormal(Vector3D p, Vector3D n)
+    public void setFromPointNormal(Vector3Dd p, Vector3Dd n)
     {
         setNormal(n);
         setD(-(n.x()*p.x() + n.y()*p.y() + n.z()*p.z()));
@@ -222,7 +222,7 @@ public class InfinitePlane extends HalfSpace {
     @param p
     @return a number indicating minimum signed distances to current plane
     */
-    public double pointDistance(Vector3D p)
+    public double pointDistance(Vector3Dd p)
     {
         return a*p.x() + b*p.y() + c*p.z() + d;
     }
@@ -233,12 +233,12 @@ public class InfinitePlane extends HalfSpace {
     projection to the plane" such as the projector is at 90 deg. angle with
     respect to the plane.
     @param p
-    @return a new Vector3D containing point projection over current plane
+    @return a new Vector3Dd containing point projection over current plane
     */
-    public Vector3D projectPoint(Vector3D p)
+    public Vector3Dd projectPoint(Vector3Dd p)
     {
         double distance = pointDistance(p);
-        Vector3D n = new Vector3D(a, b, c);
+        Vector3Dd n = new Vector3Dd(a, b, c);
         n = n.normalized();
         n = n.multiply(distance);
         return p.subtract(n);
@@ -249,13 +249,13 @@ public class InfinitePlane extends HalfSpace {
     respect to this plane. Note that the intersection between this plane and
     the line from `p` to its mirror is the projection of p over the plane.
     @param p
-    @return a new Vector3D with a point mirrored with respect to input point
+    @return a new Vector3Dd with a point mirrored with respect to input point
     around current plane
     */
-    public Vector3D mirrorPoint(Vector3D p)
+    public Vector3Dd mirrorPoint(Vector3Dd p)
     {
         double distance = pointDistance(p);
-        Vector3D n = new Vector3D(a, b, c);
+        Vector3Dd n = new Vector3Dd(a, b, c);
         n = n.normalized();
         n = n.multiply(2*distance);
         return p.subtract(n);
@@ -274,8 +274,8 @@ public class InfinitePlane extends HalfSpace {
         double a1, b1, c1, d1;
         double a2, b2, c2, d2;
         double l1, l2;
-        Vector3D n1;
-        Vector3D n2;
+        Vector3Dd n1;
+        Vector3Dd n2;
 
         a1 = this.a;
         b1 = this.b;
@@ -285,8 +285,8 @@ public class InfinitePlane extends HalfSpace {
         b2 = other.b;
         c2 = other.c;
         d2 = other.d;
-        n1 = new Vector3D(a1, b1, c1);
-        n2 = new Vector3D(a2, b2, c2);
+        n1 = new Vector3Dd(a1, b1, c1);
+        n2 = new Vector3Dd(a2, b2, c2);
         l1 = n1.length();
         l2 = n2.length();
         a1 /= l1;

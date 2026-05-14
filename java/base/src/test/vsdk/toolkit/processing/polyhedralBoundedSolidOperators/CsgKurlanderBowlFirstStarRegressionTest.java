@@ -3,7 +3,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
@@ -125,7 +125,7 @@ class CsgKurlanderBowlFirstStarRegressionTest
     private static PolyhedralBoundedSolid createClosedDoubleWalkStarLamina()
     {
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-        Vector3D[] starPoints = createStarPoints();
+        Vector3Dd[] starPoints = createStarPoints();
         int vertexId = 1;
         int i;
 
@@ -144,9 +144,9 @@ class CsgKurlanderBowlFirstStarRegressionTest
         return solid;
     }
 
-    private static Vector3D[] createStarPoints()
+    private static Vector3Dd[] createStarPoints()
     {
-        Vector3D[] points = new Vector3D[STAR_VERTEX_COUNT];
+        Vector3Dd[] points = new Vector3Dd[STAR_VERTEX_COUNT];
         double outerRadius = 2.0;
         double innerRadius = 0.77;
         double start = Math.toRadians(-90.0);
@@ -155,7 +155,7 @@ class CsgKurlanderBowlFirstStarRegressionTest
         for ( i = 0; i < points.length; i++ ) {
             double angle = start + i * Math.PI / 5.0;
             double radius = (i % 2 == 0) ? outerRadius : innerRadius;
-            points[i] = new Vector3D(
+            points[i] = new Vector3Dd(
                 radius * Math.cos(angle),
                 radius * Math.sin(angle),
                 0.0);
@@ -286,13 +286,13 @@ class CsgKurlanderBowlFirstStarRegressionTest
     {
         _PolyhedralBoundedSolidHalfEdge he = loop.boundaryStartHalfEdge;
         _PolyhedralBoundedSolidHalfEdge start = he;
-        Vector3D normalAccumulator = new Vector3D();
+        Vector3Dd normalAccumulator = new Vector3Dd();
 
         do {
-            Vector3D p = he.startingVertex.position;
-            Vector3D q = he.next().startingVertex.position;
+            Vector3Dd p = he.startingVertex.position;
+            Vector3Dd q = he.next().startingVertex.position;
 
-            normalAccumulator = normalAccumulator.add(new Vector3D(
+            normalAccumulator = normalAccumulator.add(new Vector3Dd(
                 (p.y() - q.y()) * (p.z() + q.z()),
                 (p.z() - q.z()) * (p.x() + q.x()),
                 (p.x() - q.x()) * (p.y() + q.y())));

@@ -2,8 +2,8 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.render.jogl.Jogl2StereoStrategyRenderer;
 import vsdk.toolkit.render.jogl.Jogl2StereoStrategyCyclopeanZBufferRenderer;
@@ -45,22 +45,22 @@ public class JoglDrawingArea implements GLEventListener
         //-----------------------------------------------------------------
         parent.scene.camera.updateVectors();
 
-        Vector3D l = new Vector3D(parent.scene.camera.getLeft()).normalized();
+        Vector3Dd l = new Vector3Dd(parent.scene.camera.getLeft()).normalized();
         l = l.multiply(parent.scene.eyeDistance/2.0);
-        Vector3D p = new Vector3D(parent.scene.camera.getPosition());
+        Vector3Dd p = new Vector3Dd(parent.scene.camera.getPosition());
 
         parent.scene.activeCamera = new Camera(parent.scene.camera);
         parent.scene.activeCamera.setPosition(p.add(l));
         
         //-----------------------------------------------------------------
-        Matrix4x4 R1;
-        Matrix4x4 R2;
-        Vector3D u;
+        Matrix4x4d R1;
+        Matrix4x4d R2;
+        Vector3Dd u;
 
-        u = new Vector3D(parent.scene.camera.getUp());
+        u = new Vector3Dd(parent.scene.camera.getUp());
 
         R1 = parent.scene.camera.getRotation();
-        R2 = new Matrix4x4();
+        R2 = new Matrix4x4d();
         R2 = R2.axisRotation(-Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));
@@ -77,22 +77,22 @@ public class JoglDrawingArea implements GLEventListener
         //-----------------------------------------------------------------
         parent.scene.camera.updateVectors();
 
-        Vector3D l = new Vector3D(parent.scene.camera.getLeft()).normalized();
+        Vector3Dd l = new Vector3Dd(parent.scene.camera.getLeft()).normalized();
         l = l.multiply(parent.scene.eyeDistance/2.0);
-        Vector3D p = new Vector3D(parent.scene.camera.getPosition());
+        Vector3Dd p = new Vector3Dd(parent.scene.camera.getPosition());
 
         parent.scene.activeCamera = new Camera(parent.scene.camera);
         parent.scene.activeCamera.setPosition(p.subtract(l));
         
         //-----------------------------------------------------------------
-        Matrix4x4 R1;
-        Matrix4x4 R2;
-        Vector3D u;
+        Matrix4x4d R1;
+        Matrix4x4d R2;
+        Vector3Dd u;
 
-        u = new Vector3D(parent.scene.camera.getUp());
+        u = new Vector3Dd(parent.scene.camera.getUp());
 
         R1 = parent.scene.camera.getRotation();
-        R2 = new Matrix4x4();
+        R2 = new Matrix4x4d();
         R2 = R2.axisRotation(Math.toRadians(parent.scene.eyeTorsionAngle), u);
 
         parent.scene.activeCamera.setRotation(R2.multiply(R1));

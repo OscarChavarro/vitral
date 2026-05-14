@@ -13,7 +13,7 @@ import com.jogamp.opengl.GL2ES1;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -99,8 +99,8 @@ public class Jogl2SimpleBodyRenderer extends Jogl2Renderer {
                             Camera c, RendererConfiguration q)
     {
         //-----------------------------------------------------------------
-        Vector3D scale;
-        Vector3D p;
+        Vector3Dd scale;
+        Vector3Dd p;
 
         p = b.getPosition();
         scale = b.getScale();

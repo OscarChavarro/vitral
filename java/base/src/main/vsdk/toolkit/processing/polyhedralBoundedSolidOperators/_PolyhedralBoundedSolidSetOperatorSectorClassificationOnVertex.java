@@ -4,7 +4,7 @@
 
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 /**
@@ -17,12 +17,12 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
     implements Comparable<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex>
 {
     public _PolyhedralBoundedSolidHalfEdge he;
-    public Vector3D ref1;
-    public Vector3D ref2;
-    public Vector3D ref12;
-    public Vector3D referenceLine;
-    public Vector3D referenceU;
-    public Vector3D referenceV;
+    public Vector3Dd ref1;
+    public Vector3Dd ref2;
+    public Vector3Dd ref12;
+    public Vector3Dd referenceLine;
+    public Vector3Dd referenceU;
+    public Vector3Dd referenceV;
     public boolean wide;
 
     public _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex()
@@ -41,18 +41,18 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
         double x;
         double y;
         double an;
-        Vector3D a = ref1;
+        Vector3Dd a = ref1;
 
         if ( PolyhedralBoundedSolidSetOperator.colinearVectorsWithDirection(ref1, referenceLine) ) {
             a = ref2;
         }
 
-        Vector3D u;
-        Vector3D v;
+        Vector3Dd u;
+        Vector3Dd v;
 
-        u = new Vector3D(referenceU);
+        u = new Vector3Dd(referenceU);
         u = u.normalized();
-        v = new Vector3D(referenceV);
+        v = new Vector3Dd(referenceV);
         v = v.normalized();
         a = a.normalized();
 

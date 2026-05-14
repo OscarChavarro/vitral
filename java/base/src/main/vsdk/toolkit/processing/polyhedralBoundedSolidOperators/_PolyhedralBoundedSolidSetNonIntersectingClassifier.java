@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -128,7 +128,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid outRes,
         int op)
     {
-        ArrayList<ArrayList<Vector3D>> contactPolygons;
+        ArrayList<ArrayList<Vector3Dd>> contactPolygons;
         int i;
 
         if ( op == UNION ) {
@@ -173,14 +173,14 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static int pointInFace(_PolyhedralBoundedSolidFace face,
-        Vector3D point)
+        Vector3Dd point)
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .pointInFace(face, point);
     }
 
     private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
-        Vector3D point)
+        Vector3Dd point)
     {
         int i;
         int j;
@@ -205,10 +205,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             }
         }
 
-        Vector3D[] dirs = {
-            new Vector3D(1.0, 0.371, 0.137),
-            new Vector3D(0.193, 1.0, 0.417),
-            new Vector3D(0.217, 0.173, 1.0)
+        Vector3Dd[] dirs = {
+            new Vector3Dd(1.0, 0.371, 0.137),
+            new Vector3Dd(0.193, 1.0, 0.417),
+            new Vector3Dd(0.217, 0.173, 1.0)
         };
 
         for ( j = 0; j < dirs.length; j++ ) {
@@ -232,7 +232,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     continue;
                 }
 
-                Vector3D pi = hit.origin().add(
+                Vector3Dd pi = hit.origin().add(
                     hit.direction().multiply(hit.t()));
                 int status = face.testPointInside(pi, eps);
                 if ( status == Geometry.LIMIT ) {
@@ -440,7 +440,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         for ( i = 0; i < xs.length; i++ ) {
             for ( j = 0; j < ys.length; j++ ) {
                 for ( k = 0; k < zs.length; k++ ) {
-                    Vector3D sample = new Vector3D(xs[i], ys[j], zs[k]);
+                    Vector3Dd sample = new Vector3Dd(xs[i], ys[j], zs[k]);
                     if ( classifyPointAgainstSolid(solidA, sample) ==
                          Geometry.INSIDE &&
                          classifyPointAgainstSolid(solidB, sample) ==
@@ -519,7 +519,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         double t;
         int s1;
         int s2;
-        Vector3D p;
+        Vector3Dd p;
 
         if ( current == null || other == null ) {
             return false;
@@ -593,15 +593,15 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return false;
     }
 
-    private static ArrayList<ArrayList<Vector3D>>
+    private static ArrayList<ArrayList<Vector3Dd>>
     partialCoplanarFaceAreaOverlapPolygons(PolyhedralBoundedSolid solidA,
                                            PolyhedralBoundedSolid solidB)
     {
-        ArrayList<ArrayList<Vector3D>> polygons;
+        ArrayList<ArrayList<Vector3Dd>> polygons;
         int i;
         int j;
 
-        polygons = new ArrayList<ArrayList<Vector3D>>();
+        polygons = new ArrayList<ArrayList<Vector3Dd>>();
         if ( solidA == null || solidB == null ) {
             return polygons;
         }
@@ -612,7 +612,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 _PolyhedralBoundedSolidFace faceB = solidB.getPolygonsList().get(j);
                 if ( coplanarFaces(faceA, faceB) &&
                      partialCoplanarFaceAreaOverlap(faceA, faceB) ) {
-                    ArrayList<Vector3D> polygon =
+                    ArrayList<Vector3Dd> polygon =
                         coplanarFaceIntersectionPolygon(faceA, faceB);
                     if ( polygon.size() >= 3 ) {
                         polygons.add(polygon);
@@ -659,13 +659,13 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return faceBoundariesCrossProperly(faceA, faceB);
     }
 
-    private static ArrayList<Vector3D> coplanarFaceIntersectionPolygon(
+    private static ArrayList<Vector3Dd> coplanarFaceIntersectionPolygon(
         _PolyhedralBoundedSolidFace faceA,
         _PolyhedralBoundedSolidFace faceB)
     {
-        ArrayList<Vector3D> points;
+        ArrayList<Vector3Dd> points;
 
-        points = new ArrayList<Vector3D>();
+        points = new ArrayList<Vector3Dd>();
         appendFaceVerticesInsideOther(points, faceA, faceB);
         appendFaceVerticesInsideOther(points, faceB, faceA);
         appendBoundaryIntersections(points, faceA, faceB);
@@ -681,7 +681,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static void appendFaceVerticesInsideOther(
-        ArrayList<Vector3D> points,
+        ArrayList<Vector3Dd> points,
         _PolyhedralBoundedSolidFace source,
         _PolyhedralBoundedSolidFace target)
     {
@@ -708,7 +708,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static void appendBoundaryIntersections(
-        ArrayList<Vector3D> points,
+        ArrayList<Vector3Dd> points,
         _PolyhedralBoundedSolidFace faceA,
         _PolyhedralBoundedSolidFace faceB)
     {
@@ -732,7 +732,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static void appendLoopIntersections(
-        ArrayList<Vector3D> points,
+        ArrayList<Vector3Dd> points,
         _PolyhedralBoundedSolidLoop loopA,
         _PolyhedralBoundedSolidLoop loopB,
         int dominantCoordinate)
@@ -758,32 +758,32 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static void appendSegmentIntersection(
-        ArrayList<Vector3D> points,
+        ArrayList<Vector3Dd> points,
         _PolyhedralBoundedSolidHalfEdge heA,
         _PolyhedralBoundedSolidHalfEdge heB,
         int dominantCoordinate)
     {
-        Vector2D a1 = projectPointTo2D(heA.startingVertex.position,
+        Vector2Dd a1 = projectPointTo2D(heA.startingVertex.position,
             dominantCoordinate);
-        Vector2D a2 = projectPointTo2D(heA.next().startingVertex.position,
+        Vector2Dd a2 = projectPointTo2D(heA.next().startingVertex.position,
             dominantCoordinate);
-        Vector2D b1 = projectPointTo2D(heB.startingVertex.position,
+        Vector2Dd b1 = projectPointTo2D(heB.startingVertex.position,
             dominantCoordinate);
-        Vector2D b2 = projectPointTo2D(heB.next().startingVertex.position,
+        Vector2Dd b2 = projectPointTo2D(heB.next().startingVertex.position,
             dominantCoordinate);
         double den;
         double t;
-        Vector2D da;
-        Vector2D db;
-        Vector2D ba;
+        Vector2Dd da;
+        Vector2Dd db;
+        Vector2Dd ba;
 
         if ( !segmentsCrossProperly2D(a1, a2, b1, b2) ) {
             return;
         }
 
-        da = new Vector2D(a2.x() - a1.x(), a2.y() - a1.y());
-        db = new Vector2D(b2.x() - b1.x(), b2.y() - b1.y());
-        ba = new Vector2D(b1.x() - a1.x(), b1.y() - a1.y());
+        da = new Vector2Dd(a2.x() - a1.x(), a2.y() - a1.y());
+        db = new Vector2Dd(b2.x() - b1.x(), b2.y() - b1.y());
+        ba = new Vector2Dd(b1.x() - a1.x(), b1.y() - a1.y());
         den = cross2D(da, db);
         if ( Math.abs(den) <= numericContext.bigEpsilon() ) {
             return;
@@ -795,13 +795,13 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 .subtract(heA.startingVertex.position).multiply(t)));
     }
 
-    private static double cross2D(Vector2D a, Vector2D b)
+    private static double cross2D(Vector2Dd a, Vector2Dd b)
     {
         return a.x()*b.y() - a.y()*b.x();
     }
 
-    private static void appendUniquePoint(ArrayList<Vector3D> points,
-                                          Vector3D point)
+    private static void appendUniquePoint(ArrayList<Vector3Dd> points,
+                                          Vector3Dd point)
     {
         int i;
 
@@ -811,29 +811,29 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 return;
             }
         }
-        points.add(new Vector3D(point));
+        points.add(new Vector3Dd(point));
     }
 
-    private static void sortCoplanarPolygon(ArrayList<Vector3D> points,
-                                            Vector3D normal)
+    private static void sortCoplanarPolygon(ArrayList<Vector3Dd> points,
+                                            Vector3Dd normal)
     {
-        Vector3D center;
-        Vector3D u;
-        Vector3D v;
-        Vector3D n;
+        Vector3Dd center;
+        Vector3Dd u;
+        Vector3Dd v;
+        Vector3Dd n;
         int i;
 
         if ( points.size() < 3 ) {
             return;
         }
 
-        center = new Vector3D();
+        center = new Vector3Dd();
         for ( i = 0; i < points.size(); i++ ) {
             center = center.add(points.get(i));
         }
         center = center.multiply(1.0 / points.size());
 
-        n = new Vector3D(normal).normalized();
+        n = new Vector3Dd(normal).normalized();
         u = points.get(0).subtract(center);
         if ( u.length() <= numericContext.bigEpsilon() ) {
             return;
@@ -841,12 +841,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         u = u.normalized();
         v = n.crossProduct(u).normalized();
 
-        final Vector3D sortCenter = center;
-        final Vector3D sortU = u;
-        final Vector3D sortV = v;
+        final Vector3Dd sortCenter = center;
+        final Vector3Dd sortU = u;
+        final Vector3Dd sortV = v;
         Collections.sort(points, (p1, p2) -> {
-            Vector3D d1 = p1.subtract(sortCenter);
-            Vector3D d2 = p2.subtract(sortCenter);
+            Vector3Dd d1 = p1.subtract(sortCenter);
+            Vector3Dd d2 = p2.subtract(sortCenter);
             double a1 = Math.atan2(d1.dotProduct(sortV),
                 d1.dotProduct(sortU));
             double a2 = Math.atan2(d2.dotProduct(sortV),
@@ -856,20 +856,20 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static double coplanarPolygonAreaMagnitude(
-        ArrayList<Vector3D> points,
-        Vector3D normal)
+        ArrayList<Vector3Dd> points,
+        Vector3Dd normal)
     {
-        Vector3D accumulator;
+        Vector3Dd accumulator;
         int i;
 
         if ( points.size() < 3 ) {
             return 0.0;
         }
 
-        accumulator = new Vector3D();
+        accumulator = new Vector3Dd();
         for ( i = 0; i < points.size(); i++ ) {
-            Vector3D p = points.get(i);
-            Vector3D q = points.get((i+1)%points.size());
+            Vector3Dd p = points.get(i);
+            Vector3Dd q = points.get((i+1)%points.size());
             accumulator = accumulator.add(p.crossProduct(q));
         }
 
@@ -877,7 +877,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     private static PolyhedralBoundedSolid createLaminaFromPolygon(
-        ArrayList<Vector3D> points)
+        ArrayList<Vector3Dd> points)
     {
         PolyhedralBoundedSolid solid;
         int i;
@@ -917,7 +917,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     return true;
                 }
                 if ( he.next() != null ) {
-                    Vector3D midpoint = he.startingVertex.position.add(
+                    Vector3Dd midpoint = he.startingVertex.position.add(
                         he.next().startingVertex.position
                             .subtract(he.startingVertex.position)
                             .multiply(0.5));
@@ -971,9 +971,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             if ( heA == null || heA.next() == null ) {
                 continue;
             }
-            Vector2D a1 = projectPointTo2D(heA.startingVertex.position,
+            Vector2Dd a1 = projectPointTo2D(heA.startingVertex.position,
                 dominantCoordinate);
-            Vector2D a2 = projectPointTo2D(heA.next().startingVertex.position,
+            Vector2Dd a2 = projectPointTo2D(heA.next().startingVertex.position,
                 dominantCoordinate);
 
             for ( j = 0; j < loopB.halfEdgesList.size(); j++ ) {
@@ -982,9 +982,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 if ( heB == null || heB.next() == null ) {
                     continue;
                 }
-                Vector2D b1 = projectPointTo2D(heB.startingVertex.position,
+                Vector2Dd b1 = projectPointTo2D(heB.startingVertex.position,
                     dominantCoordinate);
-                Vector2D b2 = projectPointTo2D(
+                Vector2Dd b2 = projectPointTo2D(
                     heB.next().startingVertex.position, dominantCoordinate);
                 if ( segmentsCrossProperly2D(a1, a2, b1, b2) ) {
                     return true;
@@ -997,7 +997,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
     private static int dominantCoordinateForFace(_PolyhedralBoundedSolidFace face)
     {
-        Vector3D n = face.getContainingPlane().getNormal();
+        Vector3Dd n = face.getContainingPlane().getNormal();
 
         if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
              Math.abs(n.x()) >= Math.abs(n.z()) ) {
@@ -1010,26 +1010,26 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return 3;
     }
 
-    private static Vector2D projectPointTo2D(Vector3D in,
+    private static Vector2Dd projectPointTo2D(Vector3Dd in,
                                              int dominantCoordinate)
     {
         if ( dominantCoordinate == 1 ) {
-            return new Vector2D(in.y(), in.z());
+            return new Vector2Dd(in.y(), in.z());
         }
         if ( dominantCoordinate == 2 ) {
-            return new Vector2D(in.x(), in.z());
+            return new Vector2Dd(in.x(), in.z());
         }
-        return new Vector2D(in.x(), in.y());
+        return new Vector2Dd(in.x(), in.y());
     }
 
-    private static double orientation2D(Vector2D a, Vector2D b, Vector2D c)
+    private static double orientation2D(Vector2Dd a, Vector2Dd b, Vector2Dd c)
     {
         return (b.x()-a.x())*(c.y()-a.y()) -
             (b.y()-a.y())*(c.x()-a.x());
     }
 
-    private static boolean segmentsCrossProperly2D(Vector2D a1, Vector2D a2,
-                                                   Vector2D b1, Vector2D b2)
+    private static boolean segmentsCrossProperly2D(Vector2Dd a1, Vector2Dd a2,
+                                                   Vector2Dd b1, Vector2Dd b2)
     {
         double o1 = orientation2D(a1, a2, b1);
         double o2 = orientation2D(a1, a2, b2);

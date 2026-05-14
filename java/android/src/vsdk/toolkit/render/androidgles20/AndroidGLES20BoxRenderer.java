@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 import android.opengl.GLES20;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Box;
@@ -46,7 +46,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                 //reserving the space on the vertexArray: 10 vertex to create the envelopping surface
                 vertexDataArray = new float[10*vertexFloatElements];
                 index = 0;
-                Vector3D color = new Vector3D(1, 1, 1);
+                Vector3Dd color = new Vector3Dd(1, 1, 1);
                 //WARNING: UV Mapping coordinates are hard coded!!
                 
                 //Face 1
@@ -122,7 +122,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
         /**
          * Draw a vertex given the primitives
          */
-        private static void drawVertex(double x, double y, double z, double u, double v, Vector3D color, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration) {
+        private static void drawVertex(double x, double y, double z, double u, double v, Vector3Dd color, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration) {
                 
                 //Vertex coordinates
                 vertexDataArray[index] = (float)x; index++;
@@ -130,7 +130,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                 vertexDataArray[index] = (float)z; index++;
                 
                 //Vertex normals                
-                Vector3D normal = new Vector3D(x, y, z);
+                Vector3Dd normal = new Vector3Dd(x, y, z);
                 normal.normalize();
                 
                 //VertexColor
@@ -149,7 +149,7 @@ public class AndroidGLES20BoxRenderer extends AndroidGLES20Renderer {
                                 
         }
         
-private static void drawSimpleVertex(double x, double y, double z, Vector3D color, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration) {
+private static void drawSimpleVertex(double x, double y, double z, Vector3Dd color, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration) {
                 
                 //Vertex coordinates
                 vertexDataArray[index] = (float)x; index++;
@@ -168,7 +168,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
         private static void drawWires(Box nBox,
                         RendererConfiguration nRendererConfiguration) {
                 
-                Vector3D color = new Vector3D(1, 0, 0);
+                Vector3Dd color = new Vector3Dd(1, 0, 0);
                 //One Quad_Strip for the body
                 RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, 1);
                 //8 Quads covering the body of the box
@@ -288,7 +288,7 @@ private static void drawSimpleVertex(double x, double y, double z, Vector3D colo
                 //THe size of a vertex with all its information
                 int vertexFloatElements = 6;
                 
-                Vector3D color = new Vector3D(1, 0, 0);
+                Vector3Dd color = new Vector3Dd(1, 0, 0);
                 
                 //Size of the vertex in byte
                 int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES*vertexFloatElements;

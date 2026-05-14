@@ -3,7 +3,7 @@ package vsdk.toolkit.gui.variable;
 public class GuiVector3DVariable extends GuiVariable {
     @Override
     public String getType() {
-        return "Vector3D";
+        return "Vector3Dd";
     }
     
     public GuiVector3DVariable() {

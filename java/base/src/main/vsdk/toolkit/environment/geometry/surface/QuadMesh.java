@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.Triangle;
 import vsdk.toolkit.environment.geometry.elements.Vertex;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 
 /**
@@ -306,14 +306,14 @@ public class QuadMesh extends Surface {
         double mm[];
 
         mm = getMinMax();
-        Vector3D p;
+        Vector3Dd p;
 
         msg = "- QuadMesh ------------------------------------------------------------\n";
         msg += "  - Number of quads:" + getNumQuads() + "\n";
         msg += "  - Number of vertexes:" + getNumVertices() + "\n";
-        p = new Vector3D(mm[0], mm[1], mm[2]);
+        p = new Vector3Dd(mm[0], mm[1], mm[2]);
         msg += "  - MINMAX: " + p;
-        p = new Vector3D(mm[3], mm[4], mm[5]);
+        p = new Vector3Dd(mm[3], mm[4], mm[5]);
         msg += " - " + p + "\n";
         msg += "---------------------------------------------------------------------------\n";
         return msg;
@@ -358,7 +358,7 @@ public class QuadMesh extends Surface {
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
     @Override
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         return exportToTriangleMeshGroup().doContainmentTest(p, distanceTolerance);
     }
@@ -388,12 +388,12 @@ public class QuadMesh extends Surface {
 
         Vertex[] vertices = new Vertex[nVertices];
         for ( int i = 0; i < nVertices; i++ ) {
-            Vector3D p = new Vector3D(
+            Vector3Dd p = new Vector3Dd(
                 vertexPositions[3*i],
                 vertexPositions[3*i+1],
                 vertexPositions[3*i+2]);
             if ( vertexNormals != null ) {
-                Vector3D n = new Vector3D(
+                Vector3Dd n = new Vector3Dd(
                     vertexNormals[3*i],
                     vertexNormals[3*i+1],
                     vertexNormals[3*i+2]);

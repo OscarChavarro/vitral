@@ -1,7 +1,7 @@
 package vsdk.toolkit.environment.geometry.elements;
 import java.io.Serial;
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 public class Triangle extends FundamentalEntity
 {
@@ -11,10 +11,10 @@ public class Triangle extends FundamentalEntity
     public int p1;
     public int p2;
 
-    public Vector3D normal;
+    public Vector3Dd normal;
 
     public Triangle() {
-        normal = new Vector3D(0, 0, 0);
+        normal = new Vector3Dd(0, 0, 0);
     }
 
     /**
@@ -26,7 +26,7 @@ public class Triangle extends FundamentalEntity
         this.p0 = p0;
         this.p1 = p1;
         this.p2 = p2;
-        normal = new Vector3D(0, 0, 0);
+        normal = new Vector3Dd(0, 0, 0);
     }
 
     /**

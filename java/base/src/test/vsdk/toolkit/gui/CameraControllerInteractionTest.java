@@ -2,8 +2,8 @@ package vsdk.toolkit.gui;
 
 import org.junit.jupiter.api.Test;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,9 +19,9 @@ class CameraControllerInteractionTest
         // Arrange
         Camera camera = new Camera();
         CameraControllerOrbiter controller = new CameraControllerOrbiter(camera);
-        Matrix4x4 originalRotation = camera.getRotation();
-        Vector3D frontAxis = extractColumn(originalRotation, 0);
-        Matrix4x4 expectedRotation = new Matrix4x4()
+        Matrix4x4d originalRotation = camera.getRotation();
+        Vector3Dd frontAxis = extractColumn(originalRotation, 0);
+        Matrix4x4d expectedRotation = new Matrix4x4d()
             .axisRotation(0.05, frontAxis.x(), frontAxis.y(), frontAxis.z())
             .multiply(originalRotation);
 
@@ -41,13 +41,13 @@ class CameraControllerInteractionTest
         // Arrange
         Camera camera = new Camera();
         CameraControllerAquynza controller = new CameraControllerAquynza(camera);
-        Matrix4x4 originalRotation = camera.getRotation();
-        Vector3D leftAxis = extractColumn(originalRotation, 1);
-        Vector3D upAxis = extractColumn(originalRotation, 2);
-        Matrix4x4 expectedRotation = new Matrix4x4()
+        Matrix4x4d originalRotation = camera.getRotation();
+        Vector3Dd leftAxis = extractColumn(originalRotation, 1);
+        Vector3Dd upAxis = extractColumn(originalRotation, 2);
+        Matrix4x4d expectedRotation = new Matrix4x4d()
             .axisRotation(-0.05, upAxis.x(), upAxis.y(), upAxis.z())
             .multiply(
-                new Matrix4x4()
+                new Matrix4x4d()
                     .axisRotation(0.03, leftAxis.x(), leftAxis.y(), leftAxis.z())
                     .multiply(originalRotation));
 
@@ -67,9 +67,9 @@ class CameraControllerInteractionTest
         // Arrange
         Camera camera = new Camera();
         CameraControllerAquynza controller = new CameraControllerAquynza(camera);
-        Vector3D originalPosition = camera.getPosition();
-        Vector3D frontAxis = extractColumn(camera.getRotation(), 0);
-        Vector3D expectedPosition = originalPosition.subtract(
+        Vector3Dd originalPosition = camera.getPosition();
+        Vector3Dd frontAxis = extractColumn(camera.getRotation(), 0);
+        Vector3Dd expectedPosition = originalPosition.subtract(
             frontAxis.multiply(0.05));
 
         // Action
@@ -91,13 +91,13 @@ class CameraControllerInteractionTest
         return event;
     }
 
-    private static Vector3D extractColumn(Matrix4x4 matrix, int column)
+    private static Vector3Dd extractColumn(Matrix4x4d matrix, int column)
     {
-        return new Vector3D(matrix.get(0, column), matrix.get(1, column),
+        return new Vector3Dd(matrix.get(0, column), matrix.get(1, column),
             matrix.get(2, column));
     }
 
-    private static void assertMatrixEquals(Matrix4x4 actual, Matrix4x4 expected)
+    private static void assertMatrixEquals(Matrix4x4d actual, Matrix4x4d expected)
     {
         for ( int row = 0; row < 3; row++ ) {
             for ( int column = 0; column < 3; column++ ) {
@@ -107,7 +107,7 @@ class CameraControllerInteractionTest
         }
     }
 
-    private static void assertVectorEquals(Vector3D actual, Vector3D expected)
+    private static void assertVectorEquals(Vector3Dd actual, Vector3Dd expected)
     {
         assertThat(actual.x()).isCloseTo(expected.x(), within(EPSILON));
         assertThat(actual.y()).isCloseTo(expected.y(), within(EPSILON));

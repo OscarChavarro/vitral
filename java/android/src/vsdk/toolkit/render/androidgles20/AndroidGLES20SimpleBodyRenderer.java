@@ -8,8 +8,8 @@ import android.opengl.GLES20;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Image;
@@ -21,15 +21,15 @@ public class AndroidGLES20SimpleBodyRenderer extends AndroidGLES20Renderer
     {
         //-----------------------------------------------------------------
         // Activate current body transformation matrix
-        Matrix4x4 R = b.getRotation();
-        Matrix4x4 S = new Matrix4x4();
-        Matrix4x4 T = new Matrix4x4();
-        Vector3D p = b.getPosition();
-        Vector3D s = b.getScale();
+        Matrix4x4d R = b.getRotation();
+        Matrix4x4d S = new Matrix4x4d();
+        Matrix4x4d T = new Matrix4x4d();
+        Vector3Dd p = b.getPosition();
+        Vector3Dd s = b.getScale();
 
         S = S.scale(s);
         T = T.translation(p);
-        Matrix4x4 M;
+        Matrix4x4d M;
 
         M = T.multiply(R.multiply(S));
         glLoadIdentity();

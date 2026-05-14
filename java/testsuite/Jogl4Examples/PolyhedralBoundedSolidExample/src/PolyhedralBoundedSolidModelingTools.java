@@ -3,7 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import models.DebuggerModel;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import models.CsgSampleNames;
@@ -17,7 +17,7 @@ public class PolyhedralBoundedSolidModelingTools
         return GeneralModelsBuilder.buildSolid(model);
     }
 
-    public static PolyhedralBoundedSolid createBox(Vector3D boxSize)
+    public static PolyhedralBoundedSolid createBox(Vector3Dd boxSize)
     {
         return GeneralModelsBuilder.createBox(boxSize);
     }

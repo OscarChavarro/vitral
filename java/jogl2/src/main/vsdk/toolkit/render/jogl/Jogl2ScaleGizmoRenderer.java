@@ -4,18 +4,18 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.gui.ScaleGizmo;
 
 public class Jogl2ScaleGizmoRenderer extends Jogl2Renderer 
 {
 
-    public static void draw(GL2 gl, ScaleGizmo gizmo, Vector3D position)
+    public static void draw(GL2 gl, ScaleGizmo gizmo, Vector3Dd position)
     {
-        Matrix4x4 R;
+        Matrix4x4d R;
 
-        R = new Matrix4x4(gizmo.getTransformationMatrix());
+        R = new Matrix4x4d(gizmo.getTransformationMatrix());
         R = R.withTranslation(position);
 
         gl.glLineWidth(3);

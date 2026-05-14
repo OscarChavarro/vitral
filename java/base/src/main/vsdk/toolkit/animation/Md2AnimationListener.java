@@ -13,7 +13,7 @@ public class Md2AnimationListener  extends AnimationListener {
 
     @Override
     public void tick(AnimationEvent e) {
-        // Vector3D p = new Vector3D(e.getT()*10.0, 0.0, 1.0);
+        // Vector3Dd p = new Vector3Dd(e.getT()*10.0, 0.0, 1.0);
         
         if ( md2Mesh != null ) {
             //model.setAnimationTestCursorPosition(p);

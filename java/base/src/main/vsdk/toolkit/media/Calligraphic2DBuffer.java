@@ -2,7 +2,7 @@ package vsdk.toolkit.media;
 import java.io.Serial;
 
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.render.Rasterizer2D;
 
 /**
@@ -44,7 +44,7 @@ public class Calligraphic2DBuffer extends MediaEntity {
     Adds a 2D line to the calligraphic buffer. Note that z components in
     Vector coordinates are discarged.
     */
-    public void add2DLine(Vector3D p0, Vector3D p1) {
+    public void add2DLine(Vector3Dd p0, Vector3Dd p1) {
         add2DLine(p0.x(), p0.y(), p1.x(), p1.y());
     }
 
@@ -62,11 +62,11 @@ public class Calligraphic2DBuffer extends MediaEntity {
         lineData.add(1.0); // Width
     }
 
-    public Vector3D[] get2DLine(int i)
+    public Vector3Dd[] get2DLine(int i)
     {
-        Vector3D outP0 = new Vector3D(lineData.get(8*i), lineData.get(8*i+1), 0.0);
-        Vector3D outP1 = new Vector3D(lineData.get(8*i+2), lineData.get(8*i+3), 0.0);
-        return new Vector3D[] { outP0, outP1 };
+        Vector3Dd outP0 = new Vector3Dd(lineData.get(8*i), lineData.get(8*i+1), 0.0);
+        Vector3Dd outP1 = new Vector3Dd(lineData.get(8*i+2), lineData.get(8*i+3), 0.0);
+        return new Vector3Dd[] { outP0, outP1 };
     }
 
     public int getNumLines()
@@ -79,8 +79,8 @@ public class Calligraphic2DBuffer extends MediaEntity {
         double xt = inOutRasterViewport.getXSize();
         double yt = inOutRasterViewport.getYSize();
 
-        Vector3D e0;
-        Vector3D e1;
+        Vector3Dd e0;
+        Vector3Dd e1;
         int x0, y0, x1, y1;
         RGBPixel pixel = new RGBPixel();
 
@@ -89,7 +89,7 @@ public class Calligraphic2DBuffer extends MediaEntity {
         pixel.b = (byte)255;
 
         for ( int j = 0; j < getNumLines(); j++ ) {
-            Vector3D[] segment = get2DLine(j);
+            Vector3Dd[] segment = get2DLine(j);
             e0 = segment[0];
             e1 = segment[1];
             x0 = (int)((xt-1)*((e0.x()+1)/2));

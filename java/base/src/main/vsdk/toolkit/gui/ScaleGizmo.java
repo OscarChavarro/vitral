@@ -1,18 +1,18 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 public class ScaleGizmo extends Gizmo {
 
-  private Matrix4x4 T;
+  private Matrix4x4d T;
 
-  public void setTransformationMatrix(Matrix4x4 T)
+  public void setTransformationMatrix(Matrix4x4d T)
   {
       this.T = T;
   }
 
-  public Matrix4x4 getTransformationMatrix()
+  public Matrix4x4d getTransformationMatrix()
   {
       return T;
   }
@@ -32,7 +32,7 @@ public class ScaleGizmo extends Gizmo {
       unicode_id = keyEvent.unicode_id;
       keycode = keyEvent.keycode;
 
-      Vector3D s = new Vector3D(T.get(0, 0), T.get(1, 1), T.get(2, 2));
+      Vector3Dd s = new Vector3Dd(T.get(0, 0), T.get(1, 1), T.get(2, 2));
 
       if ( unicode_id != KeyEvent.KEY_NONE ) {
             switch ( unicode_id ) {
@@ -67,13 +67,13 @@ public class ScaleGizmo extends Gizmo {
             switch ( keycode ) {
               case KeyEvent.KEY_UP:
               case KeyEvent.KEY_RIGHT:
-                s = new Vector3D(s.x() * deltaMov, s.y() * deltaMov, s.z() * deltaMov);
+                s = new Vector3Dd(s.x() * deltaMov, s.y() * deltaMov, s.z() * deltaMov);
                 updateNeeded = true;
                 break;
 
               case KeyEvent.KEY_LEFT:
               case KeyEvent.KEY_DOWN:
-                s = new Vector3D(s.x() / deltaMov, s.y() / deltaMov, s.z() / deltaMov);
+                s = new Vector3Dd(s.x() / deltaMov, s.y() / deltaMov, s.z() / deltaMov);
                 updateNeeded = true;
                 break;
             }

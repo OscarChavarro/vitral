@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 
 // VSDK Classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Torus;
 
@@ -124,7 +124,7 @@ public class Jogl2TorusRenderer extends Jogl2Renderer {
         double v=0.0f;
         double w;
         
-        Vector3D normal = new Vector3D();
+        Vector3Dd normal = new Vector3Dd();
 
         //--------------------------------------------------------------------
         for ( w = 0.0; w<2*Math.PI+dw; w+=dw ) {
@@ -247,8 +247,8 @@ public class Jogl2TorusRenderer extends Jogl2Renderer {
         double v=0.0f;
         double w;
                 
-        Vector3D normal = new Vector3D();
-        Vector3D p = new Vector3D();
+        Vector3Dd normal = new Vector3Dd();
+        Vector3Dd p = new Vector3Dd();
 
         double f=10;
         

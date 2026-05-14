@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 import android.opengl.GLES20;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.Camera;
 import vsdk.toolkit.environment.geometry.Cone;
@@ -165,13 +165,13 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         vertexDataArray[index] = (float) (height);
         index++;
 
-        Vector3D normal;
+        Vector3Dd normal;
         if (element == BODY) {
             normal = calculateVectorBodyNormal(nCone, cosTheta, sinTheta);
         } else if (element == TOP_CAP) {
-            normal = new Vector3D(0.0f, 0.0f, 1.0f);
+            normal = new Vector3Dd(0.0f, 0.0f, 1.0f);
         } else {
-            normal = new Vector3D(0.0f, 0.0f, -1.0f);
+            normal = new Vector3Dd(0.0f, 0.0f, -1.0f);
         }
 
                 //Putting the colors
@@ -198,7 +198,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
     }
 
-    private static void drawSimpleVertex(Cone nCone, Vector3D color, double radius, double height, double theta, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration, int element) {
+    private static void drawSimpleVertex(Cone nCone, Vector3Dd color, double radius, double height, double theta, float[] vertexDataArray, int index, RendererConfiguration nRendererConfiguration, int element) {
 
         double cosTheta = Math.cos(theta);
         double sinTheta = Math.sin(theta);
@@ -211,13 +211,13 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         vertexDataArray[index] = (float) (height);
         index++;
 
-        Vector3D normal;
+        Vector3Dd normal;
         if (element == BODY) {
             normal = calculateVectorBodyNormal(nCone, cosTheta, sinTheta);
         } else if (element == TOP_CAP) {
-            normal = new Vector3D(0.0f, 0.0f, 1.0f);
+            normal = new Vector3Dd(0.0f, 0.0f, 1.0f);
         } else {
-            normal = new Vector3D(0.0f, 0.0f, -1.0f);
+            normal = new Vector3Dd(0.0f, 0.0f, -1.0f);
         }
 
                 //Putting the colors
@@ -242,7 +242,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         //THe size of a vertex with all its information
         int vertexFloatElements = 6;
 
-        Vector3D color = new Vector3D(1, 0, 0);
+        Vector3Dd color = new Vector3Dd(1, 0, 0);
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
@@ -365,7 +365,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         //THe size of a vertex with all its information
         int vertexFloatElements = 6;
 
-        Vector3D color = new Vector3D(1, 0, 0);
+        Vector3Dd color = new Vector3Dd(1, 0, 0);
 
         //Size of the vertex in byte
         int vertexSizeInBytes = FLOAT_SIZE_IN_BYTES * vertexFloatElements;
@@ -525,7 +525,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         double cosTheta = Math.cos(theta);
         double sinTheta = Math.sin(theta);
 
-        Vector3D normal = calculateVectorBodyNormal(nCone, cosTheta, sinTheta);
+        Vector3Dd normal = calculateVectorBodyNormal(nCone, cosTheta, sinTheta);
 
         //Putting the coordinates
         vertexDataArray[index] = (float) (radius * cosTheta);
@@ -611,26 +611,26 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
     /**
      * Method that calculates the vector for a normal on the body
      */
-    private static Vector3D calculateVectorBodyNormal(Cone nCone, double cosTheta, double sinTheta) {
+    private static Vector3Dd calculateVectorBodyNormal(Cone nCone, double cosTheta, double sinTheta) {
 
-        Vector3D r1 = new Vector3D((nCone.getBaseRadius() * cosTheta), (nCone.getBaseRadius() * sinTheta), 0);
-        Vector3D r2 = new Vector3D((nCone.getTopRadius() * cosTheta), (nCone.getTopRadius() * sinTheta), nCone.getHeight());
-        Vector3D tangent = r2.substract(r1);
+        Vector3Dd r1 = new Vector3Dd((nCone.getBaseRadius() * cosTheta), (nCone.getBaseRadius() * sinTheta), 0);
+        Vector3Dd r2 = new Vector3Dd((nCone.getTopRadius() * cosTheta), (nCone.getTopRadius() * sinTheta), nCone.getHeight());
+        Vector3Dd tangent = r2.substract(r1);
 
         tangent.normalize();
         r1.normalize();
 
-        Vector3D binormal;
+        Vector3Dd binormal;
         //Avoid cross products with the zero vector.
         if (nCone.getBaseRadius() > 0) {
             binormal = tangent.crossProduct(r1);
         } else {
             //An auxiliary vector to make the crossProducts
-            Vector3D rAux = new Vector3D((nCone.getTopRadius() * cosTheta), (nCone.getTopRadius() * sinTheta), 0);
+            Vector3Dd rAux = new Vector3Dd((nCone.getTopRadius() * cosTheta), (nCone.getTopRadius() * sinTheta), 0);
             rAux.normalize();
             binormal = tangent.crossProduct(rAux);
         }
-        Vector3D normal = binormal.crossProduct(tangent);
+        Vector3Dd normal = binormal.crossProduct(tangent);
 
         return normal;
     }

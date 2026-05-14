@@ -8,7 +8,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.ArrayList;
 import java.util.Collections;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -83,7 +83,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace current;
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidFace localFace;
-        Vector3D c;
+        Vector3Dd c;
         double d;
         int i;
         int nnbr;
@@ -217,12 +217,12 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     This is the inward-oriented variant of the bisector from problem
     [MANT1988].14.1 used by the vertex/face classifier.
     */
-    private static Vector3D inside(_PolyhedralBoundedSolidHalfEdge he)
+    private static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge he)
     {
-        Vector3D middle;
-        Vector3D a;
-        Vector3D b;
-        Vector3D n;
+        Vector3Dd middle;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd n;
 
         a = (he.next()).startingVertex.position.subtract(
             he.startingVertex.position);
@@ -254,7 +254,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         int BvsA)
     {
         _PolyhedralBoundedSolidHalfEdge he;
-        Vector3D bisect;
+        Vector3Dd bisect;
         double d;
         _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace c;
 
@@ -269,7 +269,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
             d = referencePlane.pointDistance((he.next()).startingVertex.position);
             c.cl = compareToZero(d);
             c.isWide = false;
-            c.position = new Vector3D((he.next()).startingVertex.position);
+            c.position = new Vector3Dd((he.next()).startingVertex.position);
             c.situation =
                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.UNDEFINED;
             c.referencePlane = referencePlane;
@@ -284,7 +284,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
                 d = referencePlane.pointDistance(bisect);
                 c.cl = compareToZero(d);
                 c.isWide = true;
-                c.position = new Vector3D(bisect);
+                c.position = new Vector3Dd(bisect);
                 c.situation =
                     _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.CROSSING_EDGE;
                 c.referencePlane = referencePlane;

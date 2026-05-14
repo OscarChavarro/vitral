@@ -6,8 +6,8 @@ import vsdk.toolkit.render.jogl.Jogl2StereoStrategyRenderer;
 import vsdk.toolkit.render.jogl.Jogl2StereoStrategyCyclopeanZBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2StereoStrategyAutostereogramRenderer;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
@@ -39,9 +39,9 @@ public class JoglDrawingArea implements GLEventListener
         Camera c = new Camera();
         c.setNearPlaneDistance(1);
         c.setFarPlaneDistance(6.0);
-        Vector3D v = new Vector3D(0, 0, 4);
-        Matrix4x4 R1 = new Matrix4x4();
-        Matrix4x4 R2 = new Matrix4x4();
+        Vector3Dd v = new Vector3Dd(0, 0, 4);
+        Matrix4x4d R1 = new Matrix4x4d();
+        Matrix4x4d R2 = new Matrix4x4d();
         R1 = R1.axisRotation(Math.PI/2, 0, 1, 0);
         R2 = R2.axisRotation(Math.PI/2, 0, 0, 1);
         c.setPosition(v);

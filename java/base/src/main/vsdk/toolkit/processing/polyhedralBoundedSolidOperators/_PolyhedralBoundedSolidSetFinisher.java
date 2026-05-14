@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -47,7 +47,7 @@ final class _PolyhedralBoundedSolidSetFinisher
         _PolyhedralBoundedSolidLoop ring;
         _PolyhedralBoundedSolidHalfEdge start;
         _PolyhedralBoundedSolidHalfEdge current;
-        Vector3D reference;
+        Vector3Dd reference;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext context;
         int guard;
 
@@ -256,11 +256,11 @@ final class _PolyhedralBoundedSolidSetFinisher
         _PolyhedralBoundedSolidHalfEdge candidate;
         _PolyhedralBoundedSolidHalfEdge nextHe;
         _PolyhedralBoundedSolidHalfEdge prevHe;
-        Vector3D p0;
-        Vector3D p1;
-        Vector3D p2;
-        Vector3D a;
-        Vector3D b;
+        Vector3Dd p0;
+        Vector3Dd p1;
+        Vector3Dd p2;
+        Vector3Dd a;
+        Vector3Dd b;
         double tolerance;
         int safety;
 

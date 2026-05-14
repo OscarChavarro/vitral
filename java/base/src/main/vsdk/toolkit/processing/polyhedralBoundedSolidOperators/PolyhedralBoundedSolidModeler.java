@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -43,7 +43,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     */
     public static void applyTransformation(
         PolyhedralBoundedSolid solid,
-        Matrix4x4 transformation
+        Matrix4x4d transformation
     )
     {
         int i;
@@ -93,7 +93,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             x = Math.round((cx + radius * Math.cos(angle)) * 1.0e10) / 1.0e10;
             y = Math.round((cy + radius * Math.sin(angle)) * 1.0e10) / 1.0e10;
             nextVertexId = solid.getMaxVertexId() + 1;
-            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3D(x, y, height));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3Dd(x, y, height));
             prev = nextVertexId;
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
@@ -113,7 +113,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         PolyhedralBoundedSolid solid;
 
         solid = new PolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(cx + rad, cy, h), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3Dd(cx + rad, cy, h), 1, 1);
         addArcToExistingFace(solid, 1, 1, cx, cy, rad, h, 0,
             (n - 1) * 360.0 / n, n-1);
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, n, 1, 2);
@@ -132,13 +132,13 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void translationalSweepExtrudeFace(
         PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace face,
-        Matrix4x4 transformationMatrix)
+        Matrix4x4d transformationMatrix)
     {
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge first;
         _PolyhedralBoundedSolidHalfEdge scan;
         _PolyhedralBoundedSolidVertex v;
-        Vector3D newPos;
+        Vector3Dd newPos;
         int i;
 
         for ( i = 0; i < face.boundariesList.size(); i++ ) {
@@ -172,13 +172,13 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static void translationalSweepExtrudeFacePlanar(
         PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace face,
-        Matrix4x4 transformationMatrix)
+        Matrix4x4d transformationMatrix)
     {
         _PolyhedralBoundedSolidLoop l;
         _PolyhedralBoundedSolidHalfEdge first;
         _PolyhedralBoundedSolidHalfEdge scan;
         _PolyhedralBoundedSolidVertex v;
-        Vector3D newPos;
+        Vector3Dd newPos;
         ArrayList<Integer> newFaces = new ArrayList<>();
         int i;
         int newFaceId;
@@ -241,7 +241,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         return new _PolyhedralBoundedSolidHalfEdge[] { first, last  };
     }
 
-    private static boolean isOnXAxis(Vector3D p, double tolerance)
+    private static boolean isOnXAxis(Vector3Dd p, double tolerance)
     {
         return Math.abs(p.y()) <= tolerance && Math.abs(p.z()) <= tolerance;
     }
@@ -262,7 +262,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
                 continue;
             }
             do {
-                he.startingVertex.position = new Vector3D(x, 0.0, 0.0);
+                he.startingVertex.position = new Vector3Dd(x, 0.0, 0.0);
                 he = he.next();
             } while ( he != null && he != start );
         }
@@ -290,9 +290,9 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         _PolyhedralBoundedSolidFace headf = solid.getPolygonsList().get(0);
 
         double axisTolerance = VSDK.EPSILON * 100.0;
-        Vector3D firstEndpointPosition = new Vector3D(
+        Vector3Dd firstEndpointPosition = new Vector3Dd(
             first.next().startingVertex.position);
-        Vector3D lastEndpointPosition = new Vector3D(
+        Vector3Dd lastEndpointPosition = new Vector3Dd(
             last.startingVertex.position);
         boolean firstEndpointOnAxis = isOnXAxis(firstEndpointPosition,
             axisTolerance);
@@ -302,11 +302,11 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         _PolyhedralBoundedSolidHalfEdge cfirst;
         _PolyhedralBoundedSolidHalfEdge scan = null;
         _PolyhedralBoundedSolidFace tailf;
-        Vector3D v;
-        Matrix4x4 rotation;
+        Vector3Dd v;
+        Matrix4x4d rotation;
 
         cfirst = first;
-        rotation = new Matrix4x4();
+        rotation = new Matrix4x4d();
         rotation = rotation.axisRotation((2*Math.PI) / numberOfFaces, 1, 0, 0);
 
         int i;
@@ -357,7 +357,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         return curve.types.get(segmentIndex) == ParametricCurve.BREAK;
     }
 
-    private static List<Vector3D> sampleCurveSegment(ParametricCurve curve,
+    private static List<Vector3Dd> sampleCurveSegment(ParametricCurve curve,
                                                      int segmentIndex)
     {
         // Approximate one parametric segment as a polyLine.
@@ -365,12 +365,12 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     }
 
     private static void startLoopWithSeedPoint(_BoundaryRepresentationFromCurveBuildState state,
-                                               Vector3D point)
+                                               Vector3Dd point)
     {
         state.beginningOfLoop = false;
         if ( state.firstLoop ) {
             // [MANT1988] 12.2: first contour starts with MVFS.
-            PolyhedralBoundedSolidEulerOperators.mvfs(state.solid, new Vector3D(point), state.nextVertexId,
+            PolyhedralBoundedSolidEulerOperators.mvfs(state.solid, new Vector3Dd(point), state.nextVertexId,
                 state.nextFaceId);
             state.nextVertexId++;
             state.nextFaceId++;
@@ -378,19 +378,19 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         else {
             // Additional contours are connected and converted into rings.
             PolyhedralBoundedSolidEulerOperators.smev(state.solid, 1, state.nextVertexId-1, state.nextVertexId,
-                new Vector3D(point));
+                new Vector3Dd(point));
             state.nextVertexId++;
             PolyhedralBoundedSolidEulerOperators.kemr(state.solid, 1, 1, state.nextVertexId-2, state.nextVertexId-1,
                 state.nextVertexId-1, state.nextVertexId-2);
             state.lastLoopStartVertexId = state.nextVertexId-1;
         }
 
-        state.firstPointInLoop = new Vector3D(point);
-        state.lastAcceptedPoint = new Vector3D(point);
+        state.firstPointInLoop = new Vector3Dd(point);
+        state.lastAcceptedPoint = new Vector3Dd(point);
     }
 
     private static boolean shouldAcceptPolyLinePoint(_BoundaryRepresentationFromCurveBuildState state,
-                                                     Vector3D point)
+                                                     Vector3Dd point)
     {
         return VSDK.vectorDistance(point, state.lastAcceptedPoint) >
             VSDK.EPSILON &&
@@ -398,20 +398,20 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     }
 
     private static void appendPointToCurrentLoop(_BoundaryRepresentationFromCurveBuildState state,
-                                                 Vector3D point)
+                                                 Vector3Dd point)
     {
         PolyhedralBoundedSolidEulerOperators.smev(state.solid, 1, state.nextVertexId-1, state.nextVertexId,
-            new Vector3D(point));
+            new Vector3Dd(point));
         state.nextVertexId++;
-        state.lastAcceptedPoint = new Vector3D(point);
+        state.lastAcceptedPoint = new Vector3Dd(point);
     }
 
     private static void processSampledSegment(_BoundaryRepresentationFromCurveBuildState state,
-                                              List<Vector3D> polyline)
+                                              List<Vector3Dd> polyline)
     {
         int j;
         for ( j = 0; j < polyline.size(); j++ ) {
-            Vector3D point = polyline.get(j);
+            Vector3Dd point = polyline.get(j);
             if ( state.beginningOfLoop ) {
                 startLoopWithSeedPoint(state, point);
             }

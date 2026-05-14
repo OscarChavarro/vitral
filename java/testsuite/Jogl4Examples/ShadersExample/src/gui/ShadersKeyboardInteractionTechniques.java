@@ -2,7 +2,7 @@ package gui;
 
 import model.ShadersModel;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.gui.KeyEvent;
 
@@ -37,7 +37,7 @@ public class ShadersKeyboardInteractionTechniques
             repaint = true;
         }
 
-        Vector3D lp = light.getPosition();
+        Vector3Dd lp = light.getPosition();
         switch ( event.keycode ) {
             case KeyEvent.KEY_h:
             case KeyEvent.KEY_H:

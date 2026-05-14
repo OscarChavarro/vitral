@@ -5,7 +5,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
@@ -26,7 +26,7 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
         //-----------------------------------------------------------------
         int i; // Integer index in the U direction
         int j; // Integer index in the V direction
-        Vector3D pos = new Vector3D();
+        Vector3Dd pos = new Vector3Dd();
         int n = p.getApproximationSteps()+1;
         double s, t;
         double ds, dt;
@@ -81,8 +81,8 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
                 t = ((double)j)*dt;
                 sizeDivTu = (textureUSizeFactor / (n-1));
 
-                Vector3D p1 = new Vector3D();
-                Vector3D normal;
+                Vector3Dd p1 = new Vector3Dd();
+                Vector3Dd normal;
 
                 p.evaluate(p1, s, t);
 
@@ -164,14 +164,14 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
                 t = ((double)j)*dt;
                 sizeDivTu = (textureUSizeFactor / (n-1));
                 // Now we draw some lines
-                Vector3D p1 = new Vector3D();
-                Vector3D p2 = new Vector3D();
+                Vector3Dd p1 = new Vector3Dd();
+                Vector3Dd p2 = new Vector3Dd();
 
                 p.evaluate(p1, s, t);
                 p.evaluate(p2, s+ds, t);
 
-                Vector3D n1 = p.evaluateNormal(s, t);
-                Vector3D n2 = p.evaluateNormal(s+ds, t);
+                Vector3Dd n1 = p.evaluateNormal(s, t);
+                Vector3Dd n2 = p.evaluateNormal(s+ds, t);
 
                 //- Generate GL primitives ------------------------------------
                 // First vertex
@@ -230,16 +230,16 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
             Jogl2ParametricCurveRenderer.drawControlPointsCurve(gl, c1);
 
             c1 = new ParametricCurve();
-            Vector3D[] v3 = new Vector3D[] {
+            Vector3Dd[] v3 = new Vector3Dd[] {
                 patch.contourCurve.getPoint(4)[0], patch.contourCurve.getPoint(4)[2],
                 patch.contourCurve.getPoint(4)[1]};
             c1.addPoint(v3, ParametricCurve.HERMITE);
 
-            v3 = new Vector3D[] {
+            v3 = new Vector3Dd[] {
                 patch.contourCurve.getPoint(2)[0], patch.contourCurve.getPoint(2)[2],
                 patch.contourCurve.getPoint(2)[1]};
             c1.addPoint(v3, ParametricCurve.HERMITE);
-            v3 = new Vector3D[] {
+            v3 = new Vector3Dd[] {
                 patch.contourCurve.getPoint(3)[0], patch.contourCurve.getPoint(3)[2],
                 patch.contourCurve.getPoint(3)[1]};
             c1.addPoint(v3, ParametricCurve.HERMITE);

@@ -17,7 +17,7 @@ import vsdk.toolkit.common.VSDK;
 /**
 This class is a data structure that represents a 4x4 matrix.
 */
-public final class Matrix4x4 extends FundamentalEntity
+public final class Matrix4x4d extends FundamentalEntity
 {
     @Serial
     private static final long serialVersionUID = 20260419L;
@@ -26,44 +26,44 @@ public final class Matrix4x4 extends FundamentalEntity
 
     private final double[][] m;
 
-    public Matrix4x4()
+    public Matrix4x4d()
     {
         this(buildIdentityValues(), false);
     }
 
-    public Matrix4x4(Matrix4x4 other)
+    public Matrix4x4d(Matrix4x4d other)
     {
         this(Objects.requireNonNull(other, "Matrix to copy cannot be null").m,
              true);
     }
 
-    public Matrix4x4(double[][] values)
+    public Matrix4x4d(double[][] values)
     {
         this(values, true);
     }
 
-    private Matrix4x4(double[][] values, boolean deepCopy)
+    private Matrix4x4d(double[][] values, boolean deepCopy)
     {
         validate4x4(values);
         this.m = deepCopy ? deepCopy(values) : values;
     }
 
-    public static Matrix4x4 copyOf(Matrix4x4 other)
+    public static Matrix4x4d copyOf(Matrix4x4d other)
     {
-        return new Matrix4x4(other);
+        return new Matrix4x4d(other);
     }
 
-    public static Matrix4x4 copyOf(double[][] values)
+    public static Matrix4x4d copyOf(double[][] values)
     {
-        return new Matrix4x4(values);
+        return new Matrix4x4d(values);
     }
 
-    public static Matrix4x4 identityMatrix()
+    public static Matrix4x4d identityMatrix()
     {
-        return new Matrix4x4();
+        return new Matrix4x4d();
     }
 
-    public Matrix4x4 identity()
+    public Matrix4x4d identity()
     {
         return identityMatrix();
     }
@@ -74,12 +74,12 @@ public final class Matrix4x4 extends FundamentalEntity
         return m[row][column];
     }
 
-    public Matrix4x4 withVal(int row, int column, double val)
+    public Matrix4x4d withVal(int row, int column, double val)
     {
         validatePosition(row, column);
         double[][] r = deepCopy(m);
         r[row][column] = val;
-        return new Matrix4x4(r, false);
+        return new Matrix4x4d(r, false);
     }
 
     public double[][] toArrayCopy()
@@ -87,7 +87,7 @@ public final class Matrix4x4 extends FundamentalEntity
         return deepCopy(m);
     }
 
-    public Matrix4x4 withoutTranslation()
+    public Matrix4x4d withoutTranslation()
     {
         return this
             .withVal(0, 3, 0.0)
@@ -99,12 +99,12 @@ public final class Matrix4x4 extends FundamentalEntity
             .withVal(3, 3, 1.0);
     }
 
-    public Vector3D extractTranslation()
+    public Vector3Dd extractTranslation()
     {
-        return new Vector3D(get(0, 3), get(1, 3), get(2, 3));
+        return new Vector3Dd(get(0, 3), get(1, 3), get(2, 3));
     }
 
-    public Matrix4x4 withTranslation(Vector3D t)
+    public Matrix4x4d withTranslation(Vector3Dd t)
     {
         Objects.requireNonNull(t, "Translation vector cannot be null");
         return this
@@ -113,7 +113,7 @@ public final class Matrix4x4 extends FundamentalEntity
             .withVal(2, 3, t.z());
     }
 
-    public Matrix4x4 orthogonalProjection(
+    public Matrix4x4d orthogonalProjection(
         double leftPlaneDistance,
         double rightPlaneDistance,
         double downPlaneDistance,
@@ -128,7 +128,7 @@ public final class Matrix4x4 extends FundamentalEntity
         double tz = -((farPlaneDistance + nearPlaneDistance) /
                      (farPlaneDistance - nearPlaneDistance));
 
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { 2 / (rightPlaneDistance - leftPlaneDistance), 0, 0, tx },
             { 0, 2 / (upPlaneDistance - downPlaneDistance), 0, ty },
             { 0, 0, -2 / (farPlaneDistance - nearPlaneDistance), tz },
@@ -136,9 +136,9 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 canonicalPerspectiveProjection()
+    public Matrix4x4d canonicalPerspectiveProjection()
     {
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { 1, 0, 0, 0 },
             { 0, 1, 0, 0 },
             { 0, 0, 0, 0 },
@@ -146,7 +146,7 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 frustumProjection(
+    public Matrix4x4d frustumProjection(
         double leftDistance,
         double rightDistance,
         double downDistance,
@@ -163,7 +163,7 @@ public final class Matrix4x4 extends FundamentalEntity
         double d = -((2 * farPlaneDistance * nearPlaneDistance) /
                     (farPlaneDistance - nearPlaneDistance));
 
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { 2 * nearPlaneDistance / (rightDistance - leftDistance), 0, a, 0 },
             { 0, 2 * nearPlaneDistance / (upDistance - downDistance), b, 0 },
             { 0, 0, c, d },
@@ -171,9 +171,9 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 translation(double transx, double transy, double transz)
+    public Matrix4x4d translation(double transx, double transy, double transz)
     {
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { 1.0, 0.0, 0.0, transx },
             { 0.0, 1.0, 0.0, transy },
             { 0.0, 0.0, 1.0, transz },
@@ -181,9 +181,9 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 scale(double sx, double sy, double sz)
+    public Matrix4x4d scale(double sx, double sy, double sz)
     {
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { sx, 0.0, 0.0, 0.0 },
             { 0.0, sy, 0.0, 0.0 },
             { 0.0, 0.0, sz, 0.0 },
@@ -191,30 +191,30 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 scale(Vector3D s)
+    public Matrix4x4d scale(Vector3Dd s)
     {
         return scale(s.x(), s.y(), s.z());
     }
 
-    public Matrix4x4 translation(Vector3D t)
+    public Matrix4x4d translation(Vector3Dd t)
     {
         return translation(t.x(), t.y(), t.z());
     }
 
-    public Matrix4x4 eulerAnglesRotation(double yaw, double pitch, double roll)
+    public Matrix4x4d eulerAnglesRotation(double yaw, double pitch, double roll)
     {
-        Matrix4x4 r1 = new Matrix4x4().axisRotation(roll, 1, 0, 0);
-        Matrix4x4 r2 = new Matrix4x4().axisRotation(pitch, 0, -1, 0);
-        Matrix4x4 r3 = new Matrix4x4().axisRotation(yaw, 0, 0, 1);
+        Matrix4x4d r1 = new Matrix4x4d().axisRotation(roll, 1, 0, 0);
+        Matrix4x4d r2 = new Matrix4x4d().axisRotation(pitch, 0, -1, 0);
+        Matrix4x4d r3 = new Matrix4x4d().axisRotation(yaw, 0, 0, 1);
         return r3.multiply(r2.multiply(r1));
     }
 
-    public Matrix4x4 axisRotation(double angle, Vector3D axis)
+    public Matrix4x4d axisRotation(double angle, Vector3Dd axis)
     {
         return axisRotation(angle, axis.x(), axis.y(), axis.z());
     }
 
-    public Matrix4x4 axisRotation(double angle, double x, double y, double z)
+    public Matrix4x4d axisRotation(double angle, double x, double y, double z)
     {
         double s = Math.sin(angle);
         double c = Math.cos(angle);
@@ -239,7 +239,7 @@ public final class Matrix4x4 extends FundamentalEntity
         double zs = z * s;
         double oneC = 1 - c;
 
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { (oneC * xx) + c,      (oneC * xy) - zs,    (oneC * zx) + ys,    0 },
             { (oneC * xy) + zs,     (oneC * yy) + c,     (oneC * yz) - xs,    0 },
             { (oneC * zx) - ys,     (oneC * yz) + xs,    (oneC * zz) + c,     0 },
@@ -247,19 +247,19 @@ public final class Matrix4x4 extends FundamentalEntity
         }, false);
     }
 
-    public Matrix4x4 inverse()
+    public Matrix4x4d inverse()
     {
         return invert();
     }
 
-    public Matrix4x4 invert()
+    public Matrix4x4d invert()
     {
         double a = 1.0 / determinant();
-        Matrix4x4 n = cofactors().transpose();
+        Matrix4x4d n = cofactors().transpose();
         return n.multiply(a);
     }
 
-    public Matrix4x4 cofactors()
+    public Matrix4x4d cofactors()
     {
         double[][] r = new double[SIZE][SIZE];
         double[] minor3x3 = new double[9];
@@ -271,10 +271,10 @@ public final class Matrix4x4 extends FundamentalEntity
                 r[row][column] = sign * determinant3x3(minor3x3);
             }
         }
-        return new Matrix4x4(r, false);
+        return new Matrix4x4d(r, false);
     }
 
-    public Matrix4x4 transpose()
+    public Matrix4x4d transpose()
     {
         double[][] r = new double[SIZE][SIZE];
         for ( int row = 0; row < SIZE; row++ ) {
@@ -282,10 +282,10 @@ public final class Matrix4x4 extends FundamentalEntity
                 r[row][column] = m[column][row];
             }
         }
-        return new Matrix4x4(r, false);
+        return new Matrix4x4d(r, false);
     }
 
-    public Matrix4x4 multiply(double a)
+    public Matrix4x4d multiply(double a)
     {
         double[][] r = new double[SIZE][SIZE];
         for ( int row = 0; row < SIZE; row++ ) {
@@ -293,21 +293,21 @@ public final class Matrix4x4 extends FundamentalEntity
                 r[row][column] = a * m[row][column];
             }
         }
-        return new Matrix4x4(r, false);
+        return new Matrix4x4d(r, false);
     }
 
-    public Vector3D multiply(Vector3D e)
+    public Vector3Dd multiply(Vector3Dd e)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             m[0][0] * e.x() + m[0][1] * e.y() + m[0][2] * e.z() + m[0][3],
             m[1][0] * e.x() + m[1][1] * e.y() + m[1][2] * e.z() + m[1][3],
             m[2][0] * e.x() + m[2][1] * e.y() + m[2][2] * e.z() + m[2][3]
         );
     }
 
-    public Vector4D multiply(Vector4D e)
+    public Vector4Dd multiply(Vector4Dd e)
     {
-        return new Vector4D(
+        return new Vector4Dd(
             m[0][0] * e.x() + m[0][1] * e.y() + m[0][2] * e.z() + m[0][3] * e.w(),
             m[1][0] * e.x() + m[1][1] * e.y() + m[1][2] * e.z() + m[1][3] * e.w(),
             m[2][0] * e.x() + m[2][1] * e.y() + m[2][2] * e.z() + m[2][3] * e.w(),
@@ -315,7 +315,7 @@ public final class Matrix4x4 extends FundamentalEntity
         );
     }
 
-    public Matrix4x4 multiply(Matrix4x4 second)
+    public Matrix4x4d multiply(Matrix4x4d second)
     {
         double[][] r = new double[SIZE][SIZE];
         for ( int rowA = 0; rowA < SIZE; rowA++ ) {
@@ -327,7 +327,7 @@ public final class Matrix4x4 extends FundamentalEntity
                 r[rowA][columnB] = accum;
             }
         }
-        return new Matrix4x4(r, false);
+        return new Matrix4x4d(r, false);
     }
 
     public double determinant()
@@ -401,7 +401,7 @@ public final class Matrix4x4 extends FundamentalEntity
         return array;
     }
 
-    public Quaternion exportToQuaternion()
+    public Quaterniond exportToQuaternion()
     {
         double tr = m[0][0] + m[1][1] + m[2][2];
         double[] q = new double[4];
@@ -440,10 +440,10 @@ public final class Matrix4x4 extends FundamentalEntity
             qw = q[3];
         }
 
-        return new Quaternion(new Vector3D(qx, qy, qz), qw);
+        return new Quaterniond(new Vector3Dd(qx, qy, qz), qw);
     }
 
-    public Matrix4x4 importFromQuaternion(Quaternion a)
+    public Matrix4x4d importFromQuaternion(Quaterniond a)
     {
         double x2 = a.direction().x() + a.direction().x();
         double y2 = a.direction().y() + a.direction().y();
@@ -458,7 +458,7 @@ public final class Matrix4x4 extends FundamentalEntity
         double sy = a.magnitude() * y2;
         double sz = a.magnitude() * z2;
 
-        return new Matrix4x4(new double[][] {
+        return new Matrix4x4d(new double[][] {
             { 1 - (yy + zz),   xy - sz,        xz + sy,        0 },
             { xy + sz,         1 - (xx + zz),  yz - sx,        0 },
             { xz - sy,         yz + sx,        1 - (xx + yy),  0 },
@@ -468,7 +468,7 @@ public final class Matrix4x4 extends FundamentalEntity
 
     public double obtainEulerYawAngle()
     {
-        Vector3D dir = new Vector3D(1, 0, 0);
+        Vector3Dd dir = new Vector3Dd(1, 0, 0);
         double yaw;
         double pitch = obtainEulerPitchAngle();
         double epsilon = 0.0004;
@@ -476,10 +476,10 @@ public final class Matrix4x4 extends FundamentalEntity
         dir = multiply(dir).withZ(0);
 
         if ( Math.abs(Math.toRadians(90) - pitch) < epsilon ) {
-            dir = multiply(new Vector3D(0, 0, -1));
+            dir = multiply(new Vector3Dd(0, 0, -1));
         }
         if ( Math.abs(Math.toRadians(-90) - pitch) < epsilon ) {
-            dir = multiply(new Vector3D(0, 0, 1));
+            dir = multiply(new Vector3Dd(0, 0, 1));
         }
 
         dir = dir.normalized();
@@ -491,7 +491,7 @@ public final class Matrix4x4 extends FundamentalEntity
 
     public double obtainEulerPitchAngle()
     {
-        Vector3D dir = multiply(new Vector3D(1, 0, 0)).normalized();
+        Vector3Dd dir = multiply(new Vector3Dd(1, 0, 0)).normalized();
         return Math.toRadians(90) - Math.acos(dir.z());
     }
 
@@ -500,12 +500,12 @@ public final class Matrix4x4 extends FundamentalEntity
         double pitch = obtainEulerPitchAngle();
         double yaw = obtainEulerYawAngle();
 
-        Matrix4x4 r3 = new Matrix4x4().axisRotation(yaw, 0, 0, 1).invert();
-        Matrix4x4 r2 = new Matrix4x4().axisRotation(pitch, 0, -1, 0).invert();
+        Matrix4x4d r3 = new Matrix4x4d().axisRotation(yaw, 0, 0, 1).invert();
+        Matrix4x4d r2 = new Matrix4x4d().axisRotation(pitch, 0, -1, 0).invert();
 
-        Matrix4x4 r1 = r2.multiply(r3.multiply(this));
+        Matrix4x4d r1 = r2.multiply(r3.multiply(this));
 
-        Quaternion q = r1.exportToQuaternion().normalized();
+        Quaterniond q = r1.exportToQuaternion().normalized();
         r1 = r1.importFromQuaternion(q);
 
         if ( r1.get(2, 1) >= 0 ) {
@@ -518,7 +518,7 @@ public final class Matrix4x4 extends FundamentalEntity
     public boolean equals(Object obj)
     {
         if ( this == obj ) return true;
-        if ( !(obj instanceof Matrix4x4 other) ) return false;
+        if ( !(obj instanceof Matrix4x4d other) ) return false;
         for ( int i = 0; i < SIZE; i++ ) {
             if ( !Arrays.equals(m[i], other.m[i]) ) return false;
         }
@@ -535,12 +535,12 @@ public final class Matrix4x4 extends FundamentalEntity
         return result;
     }
 
-    public boolean epsilonEquals(Matrix4x4 other)
+    public boolean epsilonEquals(Matrix4x4d other)
     {
         return epsilonEquals(other, VSDK.EPSILON);
     }
 
-    public boolean epsilonEquals(Matrix4x4 other, double epsilon)
+    public boolean epsilonEquals(Matrix4x4d other, double epsilon)
     {
         if ( other == null ) {
             return false;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -107,7 +107,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     {
         _PolyhedralBoundedSolidHalfEdge start;
         _PolyhedralBoundedSolidHalfEdge he;
-        Vector3D normalAccumulator;
+        Vector3Dd normalAccumulator;
 
         if ( loop == null || loop.boundaryStartHalfEdge == null ) {
             return 0.0;
@@ -115,12 +115,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
         start = loop.boundaryStartHalfEdge;
         he = start;
-        normalAccumulator = new Vector3D();
+        normalAccumulator = new Vector3Dd();
         do {
-            Vector3D p = he.startingVertex.position;
-            Vector3D q = he.next().startingVertex.position;
+            Vector3Dd p = he.startingVertex.position;
+            Vector3Dd q = he.next().startingVertex.position;
 
-            normalAccumulator = normalAccumulator.add(new Vector3D(
+            normalAccumulator = normalAccumulator.add(new Vector3Dd(
                 (p.y() - q.y()) * (p.z() + q.z()),
                 (p.z() - q.z()) * (p.x() + q.x()),
                 (p.x() - q.x()) * (p.y() + q.y())));
@@ -240,8 +240,8 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         _PolyhedralBoundedSolidLoop loop;
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidHalfEdge start;
-        Vector3D p;
-        Vector3D q;
+        Vector3Dd p;
+        Vector3Dd q;
         double nx;
         double ny;
         double nz;
@@ -282,12 +282,12 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             return null;
         }
 
-        Vector3D normal = new Vector3D(nx, ny, nz);
+        Vector3Dd normal = new Vector3Dd(nx, ny, nz);
         if ( normal.length() <= tolerance ) {
             return null;
         }
 
-        Vector3D centroid = new Vector3D(cx / count, cy / count, cz / count);
+        Vector3Dd centroid = new Vector3Dd(cx / count, cy / count, cz / count);
         return new InfinitePlane(normal, centroid);
     }
 
@@ -305,19 +305,19 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         _PolyhedralBoundedSolidHalfEdge he;
         _PolyhedralBoundedSolidHalfEdge heStart;
         _PolyhedralBoundedSolidHalfEdge heInferior;
-        Vector3D p0 = new Vector3D ();
-        Vector3D p1;
-        Vector3D a = new Vector3D ();
-        Vector3D b = new Vector3D ();
-        Vector3D n1;
-        Vector3D temp = new Vector3D ();
+        Vector3Dd p0 = new Vector3Dd ();
+        Vector3Dd p1;
+        Vector3Dd a = new Vector3Dd ();
+        Vector3Dd b = new Vector3Dd ();
+        Vector3Dd n1;
+        Vector3Dd temp = new Vector3Dd ();
         boolean readyVecA;
         boolean readyVecB;
         double dotP;
         //domPlane: 1=xy, 2=xz, 3=yz
         byte domPlane;
-        Vector3D vPrev = new Vector3D ();
-        Vector3D vNext = new Vector3D ();
+        Vector3Dd vPrev = new Vector3Dd ();
+        Vector3Dd vNext = new Vector3Dd ();
 
         if ( boundariesList.size () < 1 ) {
             return null;
@@ -346,7 +346,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             temp = p1.subtract(p0);
             if ( !readyVecA ) {
                 if ( temp.length () > tolerance ) {
-                    a = new Vector3D(temp);
+                    a = new Vector3Dd(temp);
                     a = a.normalized();
                     readyVecA = true;
                 }
@@ -355,7 +355,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                     temp = temp.normalized();
                     dotP = Math.abs (temp.dotProduct (a));
                     if ( dotP < 1 - nonColinearDotTolerance ) {
-                        b = new Vector3D(temp);
+                        b = new Vector3Dd(temp);
                         readyVecB = true;
                     }
                 }
@@ -444,18 +444,18 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     /**
     @coord: 1 means drop x, 2 means drop y and 3 means drop z
     */
-    private Vector3D dropCoordinate(Vector3D in, int coord)
+    private Vector3Dd dropCoordinate(Vector3Dd in, int coord)
     {
         switch ( coord ) {
           case 1:
             // Drop X
-            return new Vector3D(in.y(), in.z(), 0);
+            return new Vector3Dd(in.y(), in.z(), 0);
           case 2:
             // Drop Y
-            return new Vector3D(in.x(), in.z(), 0);
+            return new Vector3Dd(in.x(), in.z(), 0);
           case 3: default:
             // Drop Z
-            return new Vector3D(in.x(), in.y(), 0);
+            return new Vector3Dd(in.x(), in.y(), 0);
         }
     }
 
@@ -476,13 +476,13 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     problem [MANT1988].13.3.
     */
     public int
-    testPointInside(Vector3D p, double tolerance)
+    testPointInside(Vector3Dd p, double tolerance)
     {
         return testPointInsideDetailed(p, tolerance).status();
     }
 
     public PointInsideResult
-    testPointInsideDetailed(Vector3D p, double tolerance)
+    testPointInsideDetailed(Vector3Dd p, double tolerance)
     {
         int nc; // Number of crossings
         int sh; // Sign holder for vertex crossings
@@ -497,10 +497,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         ArrayList<_PolyhedralBoundedSolidVertex> polygon2Dvv;
         double u;
         double v;
-        Vector3D projectedPoint = new Vector3D();
+        Vector3Dd projectedPoint = new Vector3Dd();
         int dominantCoordinate;
         int i;
-        Vector3D n;
+        Vector3Dd n;
 
         polygon2Dh = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
         polygon2Dvv = new ArrayList<_PolyhedralBoundedSolidVertex>();
@@ -656,16 +656,16 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
     */
     public int isVisibleFrom(Camera c)
     {
-        Vector3D iv = new Vector3D(1, 0, 0);
-        Vector3D viewingVector;
+        Vector3Dd iv = new Vector3Dd(1, 0, 0);
+        Vector3Dd viewingVector;
         viewingVector = c.getRotation().multiply(iv);
-        Vector3D n = getContainingPlane().getNormal();
-        Vector3D cp;
-        Vector3D t;
+        Vector3Dd n = getContainingPlane().getNormal();
+        Vector3Dd cp;
+        Vector3Dd t;
         n = n.normalized();
         double dot;
         int i;
-        Vector3D p;
+        Vector3Dd p;
 
         if ( c.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
             viewingVector = viewingVector.normalized();

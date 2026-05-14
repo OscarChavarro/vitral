@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL2GL3;
 
 // VitralSDK classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
 import vsdk.toolkit.environment.camera.Camera;
@@ -21,7 +21,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     \todo  check this method for efficiency improvement
     */
     private static void
-    spherePosition(Vector3D p, double theta, double phi, double r)
+    spherePosition(Vector3Dd p, double theta, double phi, double r)
     {
         p = p.withX(Math.cos(phi) * Math.cos(theta) * r);
         p = p.withY(-Math.cos(phi) * Math.sin(theta) * r);
@@ -32,7 +32,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     \todo  check this method for efficiency improvement
     */
     private static void
-    sphereNormal(Vector3D n, double theta, double phi)
+    sphereNormal(Vector3Dd n, double theta, double phi)
     {
         n = n.withX(Math.cos(phi) * Math.cos(theta));
         n = n.withY(-Math.cos(phi) * Math.sin(theta));
@@ -43,7 +43,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     \todo  check this method for efficiency improvement
     */
     private static void
-    sphereTangent(Vector3D t, double theta, double phi)
+    sphereTangent(Vector3Dd t, double theta, double phi)
     {
         t = t.withX(Math.sin(theta));
         t = t.withY(Math.cos(theta));
@@ -54,7 +54,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     \todo  check this method for efficiency improvement
     */
     private static void
-    sphereBinormal(Vector3D b, double theta, double phi)
+    sphereBinormal(Vector3Dd b, double theta, double phi)
     {
         b = b.withX(-Math.sin(phi)*Math.cos(theta));
         b = b.withY(Math.sin(phi)*Math.sin(theta));
@@ -71,10 +71,10 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         gl.glLineWidth(1.0f);
 
 
-        Vector3D n = new Vector3D();
-        Vector3D p = new Vector3D();
-        Vector3D T = new Vector3D();
-        Vector3D b = new Vector3D();
+        Vector3Dd n = new Vector3Dd();
+        Vector3Dd p = new Vector3Dd();
+        Vector3Dd T = new Vector3Dd();
+        Vector3Dd b = new Vector3Dd();
 
         gl.glBegin(GL.GL_LINES);
         for( int i = 0; i < stacks; i++ ) {
@@ -112,7 +112,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(6.0f);
 
-        Vector3D p = new Vector3D();
+        Vector3Dd p = new Vector3Dd();
 
         gl.glBegin(GL.GL_POINTS);
         for( int i = 0; i < stacks; i++ ) {
@@ -134,7 +134,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     */
     private static void
     drawVertex(GL2 gl, double theta, double phi, double s, double t,
-               Vector3D P, Vector3D N, Vector3D T, Vector3D B, double r)
+               Vector3Dd P, Vector3Dd N, Vector3Dd T, Vector3Dd B, double r)
     {
         //- Pass standard vertex parameters to OpenGL ---------------------
         sphereNormal(N, theta, phi);
@@ -153,10 +153,10 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
-        Vector3D P = new Vector3D(); // Vertex position
-        Vector3D N = new Vector3D(); // Vertex normal
-        Vector3D T = new Vector3D(); // Vertex tangent
-        Vector3D B = new Vector3D(); // Vertex binormal
+        Vector3Dd P = new Vector3Dd(); // Vertex position
+        Vector3Dd N = new Vector3Dd(); // Vertex normal
+        Vector3Dd T = new Vector3Dd(); // Vertex tangent
+        Vector3Dd B = new Vector3Dd(); // Vertex binormal
 
         int i;
         int j;

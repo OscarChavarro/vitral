@@ -31,7 +31,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import vsdk.toolkit.common.VSDK; 
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
@@ -143,7 +143,7 @@ public class SceneEditorApplication {
             System.exit(0);
         }
 
-        visualDebugRay = new Ray(new Vector3D(0, -3, 0), new Vector3D(0, 1, 0));
+        visualDebugRay = new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0));
         visualDebugRayLevels = 2;
         withVisualDebugRay = false;
 

@@ -4,7 +4,7 @@ import com.jogamp.opengl.GL2;
 
 import models.DebuggerModel;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -37,18 +37,18 @@ public class Jogl4HudOperandsRenderer
         return m;
     }
 
-    private static Vector3D solidCenter(PolyhedralBoundedSolid solid)
+    private static Vector3Dd solidCenter(PolyhedralBoundedSolid solid)
     {
         double[] minMax;
 
         if ( solid == null ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
         minMax = solid.getMinMax();
         if ( minMax == null || minMax.length < 6 ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
-        return new Vector3D(
+        return new Vector3Dd(
             (minMax[0] + minMax[3]) / 2.0,
             (minMax[1] + minMax[4]) / 2.0,
             (minMax[2] + minMax[5]) / 2.0);
@@ -74,15 +74,15 @@ public class Jogl4HudOperandsRenderer
         return Math.max(ex, Math.max(ey, ez));
     }
 
-    private static Vector3D cameraRelativeAnchor(Camera camera,
+    private static Vector3Dd cameraRelativeAnchor(Camera camera,
         double ndcX,
         double ndcY,
         double depth)
     {
-        Vector3D eye = camera.getPosition();
-        Vector3D front = camera.getFront().normalized();
-        Vector3D up = camera.getUp().normalized();
-        Vector3D right = camera.getLeft().multiply(-1).normalized();
+        Vector3Dd eye = camera.getPosition();
+        Vector3Dd front = camera.getFront().normalized();
+        Vector3Dd up = camera.getUp().normalized();
+        Vector3Dd right = camera.getLeft().multiply(-1).normalized();
         double viewportY = Math.max(camera.getViewportYSize(), 1e-9);
         double aspect = camera.getViewportXSize() / viewportY;
         double offsetX;
@@ -110,10 +110,10 @@ public class Jogl4HudOperandsRenderer
     private void drawInsetSolid(GL2 gl,
         PolyhedralBoundedSolid solid,
         SimpleMaterial material,
-        Vector3D anchorPoint,
+        Vector3Dd anchorPoint,
         double mainSolidExtent)
     {
-        Vector3D center;
+        Vector3Dd center;
         double extent;
         double scale;
 
@@ -147,8 +147,8 @@ public class Jogl4HudOperandsRenderer
         PolyhedralBoundedSolid mainSolid = model.getSolid();
         Camera camera = model.getCamera();
         double mainExtent;
-        Vector3D leftAnchor;
-        Vector3D rightAnchor;
+        Vector3Dd leftAnchor;
+        Vector3Dd rightAnchor;
 
         if ( operandA == null || operandB == null || mainSolid == null ) {
             return;

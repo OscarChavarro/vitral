@@ -16,7 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 // VSDK Classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
@@ -94,7 +94,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
         PolyhedralBoundedSolid solid;
 
         solid = new PolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(cx + rad, cy, h), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3Dd(cx + rad, cy, h), 1, 1);
         addArc(solid, 1, 1, cx, cy, rad, h, 0, 
             ((double)(n-1))*360.0/((double)n), n-1);
         PolyhedralBoundedSolidEulerOperators.smef(solid, 1, n, 1, 2);
@@ -118,7 +118,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             x = cx + rad * Math.cos(angle);
             y = cy + rad * Math.sin(angle);
             nextVertexId = solid.getMaxVertexId() + 1;
-            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3D(x, y, h));
+            PolyhedralBoundedSolidEulerOperators.smev(solid, faceId, prev, nextVertexId, new Vector3Dd(x, y, h));
             prev = nextVertexId;
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);

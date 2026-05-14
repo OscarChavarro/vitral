@@ -22,7 +22,7 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.fixtures.Jogl4SimpleCorridorSample;
 import vsdk.toolkit.gui.AwtSystem;
@@ -115,9 +115,9 @@ public class CameraExample extends Applet implements
     {
         gl.glEnable(GL4.GL_DEPTH_TEST);
 
-        Matrix4x4 projection = Jogl4CameraRenderer.activate(gl, camera);
+        Matrix4x4d projection = Jogl4CameraRenderer.activate(gl, camera);
         corridor.drawGL(gl, projection);
-        Jogl4MatrixRenderer.draw(gl, projection, Matrix4x4.identityMatrix());
+        Jogl4MatrixRenderer.draw(gl, projection, Matrix4x4d.identityMatrix());
     }
 
     @Override

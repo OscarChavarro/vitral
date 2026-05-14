@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.util.gl2.GLUT;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -98,7 +98,7 @@ public class Jogl2BoxRenderer extends Jogl2Renderer {
             glut = new GLUT();
         }
 
-        Vector3D size = box.getSize();
+        Vector3Dd size = box.getSize();
 
         gl.glPushMatrix();
         gl.glEnable(GL2.GL_NORMALIZE);

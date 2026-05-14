@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Quaternion;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Quaterniond;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.io.PersistenceElement;
 
@@ -41,16 +41,16 @@ class VitralEditorServerProtocol implements Runnable
     the data itself.  The current supported packets are:
       - 1 - empty answer
       - 2 - double answer followed by 4 bytes of big endian double number
-      - 3 - Vector3D answer followed by 12 bytes of big endian vector data
-      - 4 - Quaternion answer followed by 16 bytes of big endian quaternion data
+      - 3 - Vector3Dd answer followed by 12 bytes of big endian vector data
+      - 4 - Quaterniond answer followed by 16 bytes of big endian quaternion data
     */
     private byte[] servePetition(String in)
     {
         //-----------------------------------------------------------------
         byte[] out;
-        Vector3D pos;
-        Quaternion q;
-        Matrix4x4 R;
+        Vector3Dd pos;
+        Quaterniond q;
+        Matrix4x4d R;
         Camera camera;
         int firstThingSelected = parent.theScene.selectedThings.firstSelected();
 

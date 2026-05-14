@@ -11,34 +11,34 @@ Represents a quaternion in vector-scalar form.
 
 <p>For rotation use cases the quaternion is expected to have unit length.
 */
-public final class Quaternion extends FundamentalEntity
+public final class Quaterniond extends FundamentalEntity
 {
     @Serial
     private static final long serialVersionUID = 20260419L;
 
-    private final Vector3D direction;
+    private final Vector3Dd direction;
     private final double magnitude;
 
-    public Quaternion()
+    public Quaterniond()
     {
-        this(new Vector3D(0, 0, 0), 0);
+        this(new Vector3Dd(0, 0, 0), 0);
     }
 
-    public Quaternion(Vector3D direction, double magnitude)
+    public Quaterniond(Vector3Dd direction, double magnitude)
     {
-        this.direction = Vector3D.copyOf(Objects.requireNonNull(direction, "Quaternion direction cannot be null"));
+        this.direction = Vector3Dd.copyOf(Objects.requireNonNull(direction, "Quaterniond direction cannot be null"));
         this.magnitude = magnitude;
     }
 
-    public Quaternion(Quaternion other)
+    public Quaterniond(Quaterniond other)
     {
-        this(Objects.requireNonNull(other, "Quaternion to copy cannot be null").direction,
+        this(Objects.requireNonNull(other, "Quaterniond to copy cannot be null").direction,
              other.magnitude);
     }
 
-    public static Quaternion copyOf(Quaternion other)
+    public static Quaterniond copyOf(Quaterniond other)
     {
-        return new Quaternion(Objects.requireNonNull(other, "Quaternion to copy cannot be null"));
+        return new Quaterniond(Objects.requireNonNull(other, "Quaterniond to copy cannot be null"));
     }
 
     /**
@@ -60,21 +60,21 @@ public final class Quaternion extends FundamentalEntity
     /**
     @return a normalized quaternion, or this quaternion if its norm is near zero
     */
-    public Quaternion normalized()
+    public Quaterniond normalized()
     {
         double l = length();
         if ( Math.abs(l) < VSDK.EPSILON ) {
             return this;
         }
-        return new Quaternion(direction.multiply(1/l), magnitude * (1/l));
+        return new Quaterniond(direction.multiply(1/l), magnitude * (1/l));
     }
 
     /**
     @return the quaternion conjugate
     */
-    public Quaternion conjugated()
+    public Quaterniond conjugated()
     {
-        return new Quaternion(direction.multiply(-1), magnitude);
+        return new Quaterniond(direction.multiply(-1), magnitude);
     }
 
     /**
@@ -86,27 +86,27 @@ public final class Quaternion extends FundamentalEntity
     @param vector vector to rotate
     @return rotated vector
     */
-    public Vector3D rotate(Vector3D vector)
+    public Vector3Dd rotate(Vector3Dd vector)
     {
-        Vector3D normalizedAxis = direction;
-        Vector3D uv = normalizedAxis.crossProduct(
+        Vector3Dd normalizedAxis = direction;
+        Vector3Dd uv = normalizedAxis.crossProduct(
             Objects.requireNonNull(vector, "Vector to rotate cannot be null"));
-        Vector3D uuv = normalizedAxis.crossProduct(uv);
+        Vector3Dd uuv = normalizedAxis.crossProduct(uv);
 
         return vector.add(uv.multiply(2 * magnitude)).add(uuv.multiply(2));
     }
 
-    public Quaternion withDirection(Vector3D newDirection)
+    public Quaterniond withDirection(Vector3Dd newDirection)
     {
-        return new Quaternion(newDirection, magnitude);
+        return new Quaterniond(newDirection, magnitude);
     }
 
-    public Quaternion withMagnitude(double newMagnitude)
+    public Quaterniond withMagnitude(double newMagnitude)
     {
-        return new Quaternion(direction, newMagnitude);
+        return new Quaterniond(direction, newMagnitude);
     }
 
-    public Vector3D direction()
+    public Vector3Dd direction()
     {
         return direction;
     }
@@ -116,12 +116,12 @@ public final class Quaternion extends FundamentalEntity
         return magnitude;
     }
 
-    public boolean epsilonEquals(Quaternion other)
+    public boolean epsilonEquals(Quaterniond other)
     {
         return epsilonEquals(other, VSDK.EPSILON);
     }
 
-    public boolean epsilonEquals(Quaternion other, double epsilon)
+    public boolean epsilonEquals(Quaterniond other, double epsilon)
     {
         if ( other == null ) {
             return false;

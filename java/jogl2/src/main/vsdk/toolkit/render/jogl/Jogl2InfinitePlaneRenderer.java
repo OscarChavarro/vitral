@@ -6,8 +6,8 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 
 // VitralSDK classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
@@ -32,9 +32,9 @@ public class Jogl2InfinitePlaneRenderer extends Jogl2Renderer {
         dx = 20.0/((double)nx);
         dy = 20.0/((double)ny);
 
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
-        Vector3D n = s.getNormal();
+        Vector3Dd n = s.getNormal();
         double yaw = n.obtainSphericalThetaAngle();
         double pitch = Math.PI/2 - n.obtainSphericalPhiAngle();
 

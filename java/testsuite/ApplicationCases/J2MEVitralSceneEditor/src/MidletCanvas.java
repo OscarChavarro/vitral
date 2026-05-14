@@ -15,9 +15,9 @@ import javax.bluetooth.ServiceRecord;
 import de.enough.polish.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.common.Matrix4x4;                   // Model linealAlgebra.elements
+import vsdk.toolkit.common.Matrix4x4d;                   // Model linealAlgebra.elements
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
@@ -86,10 +86,10 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
     private void createModel()
     {
         //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
         camera = new Camera();
-        camera.setPosition(new Vector3D(7, -4, 4));
+        camera.setPosition(new Vector3Dd(7, -4, 4));
         R = R.eulerAnglesRotation(Math.toRadians(140), Math.toRadians(-30), 0);
         camera.setNearPlaneDistance(0.001);
         camera.setFarPlaneDistance(100);
@@ -102,7 +102,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         background = new SimpleBackground();
         background.setColor(0.5, 0.5, 0.9);
 
-        light = new Light(LightType.POINT, new Vector3D(5, -5, 5), new ColorRgb(1, 1, 1));
+        light = new Light(LightType.POINT, new Vector3Dd(5, -5, 5), new ColorRgb(1, 1, 1));
 
         scene = new SimpleScene();
         scene.addBackground(background);
@@ -116,13 +116,13 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         b = new SimpleBody();
         box = new Box(4, 4, 4);
         b.setGeometry(box);
-        b.setPosition(new Vector3D(0, 0, 0));
+        b.setPosition(new Vector3Dd(0, 0, 0));
         scene.addBody(b);
 
         b = new SimpleBody();
         sphere = new Sphere(2);
         b.setGeometry(sphere);
-        b.setPosition(new Vector3D(0, 0, 0));
+        b.setPosition(new Vector3Dd(0, 0, 0));
         scene.addBody(b);
 
         //-----------------------------------------------------------------
@@ -226,7 +226,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
 
     protected void keyPressed(int keycode) {
         KeyEvent vsdke = J2meSystem.j2me2vsdkEvent(this, keycode);
-        Vector3D p;
+        Vector3Dd p;
 
         if ( cameraController.processKeyPressedEvent(vsdke) ) {
             repaint();

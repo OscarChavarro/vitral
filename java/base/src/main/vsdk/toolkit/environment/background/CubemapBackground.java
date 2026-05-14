@@ -2,7 +2,7 @@ package vsdk.toolkit.environment.background;
 import java.io.Serial;
 
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
@@ -41,14 +41,14 @@ public class CubemapBackground extends Background {
     @return color as viewed in given direction
     */
     @Override
-    public ColorRgb colorInDireccion(Vector3D d)
+    public ColorRgb colorInDireccion(Vector3Dd d)
     {
         double u;
         double v;
         RGBAImageUncompressed img;
 
         d = d.normalized();
-        Ray r = new Ray(new Vector3D(0, 0, 0), d);
+        Ray r = new Ray(new Vector3Dd(0, 0, 0), d);
         RayHit hit = new RayHit();
         if ( !boundingCube.doIntersection(r, hit) ) {
             return new ColorRgb();
@@ -85,7 +85,7 @@ public class CubemapBackground extends Background {
         return img.getColorRgbBiLinear(u, v);
     }
 
-    private int classifyPlane(Vector3D normal)
+    private int classifyPlane(Vector3Dd normal)
     {
         double ax = Math.abs(normal.x());
         double ay = Math.abs(normal.y());

@@ -4,8 +4,8 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 
@@ -17,12 +17,12 @@ public class SimpleBodyGroup extends Entity {
     private ArrayList <SimpleBody> bodies;
 
     //- Model (2/6): body geometric transformations -------------------
-    private Vector3D position;
-    private Vector3D scale;
+    private Vector3Dd position;
+    private Vector3Dd scale;
     /// Warning: The translation value in this matrix must be <0, 0, 0>
-    private Matrix4x4 rotation;
+    private Matrix4x4d rotation;
     /// Warning: The translation value in this matrix must be <0, 0, 0>
-    private Matrix4x4 rotation_i;
+    private Matrix4x4d rotation_i;
 
     //- Model (3/6): body visual data ---------------------------------
 
@@ -39,10 +39,10 @@ public class SimpleBodyGroup extends Entity {
     public SimpleBodyGroup()
     {
         bodies = new ArrayList<SimpleBody>();
-        rotation = new Matrix4x4();
-        rotation_i = new Matrix4x4();
-        position = new Vector3D(0, 0, 0);
-        scale = new Vector3D(1, 1, 1);
+        rotation = new Matrix4x4d();
+        rotation_i = new Matrix4x4d();
+        position = new Vector3Dd(0, 0, 0);
+        scale = new Vector3Dd(1, 1, 1);
     }
 
     @Override
@@ -84,50 +84,50 @@ public class SimpleBodyGroup extends Entity {
         name = n;
     }
 
-    public Matrix4x4 getRotation()
+    public Matrix4x4d getRotation()
     {
         return rotation;
     }
 
-    public void setRotation(Matrix4x4 rotation)
+    public void setRotation(Matrix4x4d rotation)
     {
         // This is an homogeneous matrix, but it should contain only rotation.
         this.rotation = rotation.withoutTranslation();
     }
 
-    public Matrix4x4 getRotationInverse()
+    public Matrix4x4d getRotationInverse()
     {
         return rotation_i;
     }
 
-    public void setRotationInverse(Matrix4x4 rotationi)
+    public void setRotationInverse(Matrix4x4d rotationi)
     {
         this.rotation_i = rotationi;
     }
 
-    public Vector3D getPosition()
+    public Vector3Dd getPosition()
     {
         return position;
     }
 
-    public void setPosition(Vector3D p)
+    public void setPosition(Vector3Dd p)
     {
         position = p;
     }
 
-    public Vector3D getScale()
+    public Vector3Dd getScale()
     {
         return scale;
     }
 
-    public void setScale(Vector3D s)
+    public void setScale(Vector3Dd s)
     {
         scale = s;
     }
 
-    public Matrix4x4 getTransformationMatrix()
+    public Matrix4x4d getTransformationMatrix()
     {
-        Matrix4x4 S = new Matrix4x4(), T = new Matrix4x4(), M;
+        Matrix4x4d S = new Matrix4x4d(), T = new Matrix4x4d(), M;
         S = S.scale(scale);
         T = T.translation(position);
         M = T.multiply(rotation.multiply(S));
@@ -179,9 +179,9 @@ public class SimpleBodyGroup extends Entity {
         //-----------------------------------------------------------------
         int i;
         SimpleBody bi;
-        Matrix4x4 T = new Matrix4x4(), R, S = new Matrix4x4(), M;
-        Vector3D p2;
-        ArrayList<Vector3D> points = new ArrayList<Vector3D>();
+        Matrix4x4d T = new Matrix4x4d(), R, S = new Matrix4x4d(), M;
+        Vector3Dd p2;
+        ArrayList<Vector3Dd> points = new ArrayList<Vector3Dd>();
         double[] minmaxSub;
 
         for ( i = 0; i < bodies.size(); i++ ) {
@@ -192,28 +192,28 @@ public class SimpleBodyGroup extends Entity {
             S = S.scale(bi.getScale()); 
             M = T.multiply(R).multiply(S);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[1], minmaxSub[2]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[2]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[1], minmaxSub[2]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[2]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[4], minmaxSub[2]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[2]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[4], minmaxSub[2]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[2]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[1], minmaxSub[5]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[5]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[1], minmaxSub[5]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[5]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[0], minmaxSub[4], minmaxSub[5]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[5]));
             points.add(p2);
 
-            p2 = M.multiply(new Vector3D(minmaxSub[3], minmaxSub[4], minmaxSub[5]));
+            p2 = M.multiply(new Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[5]));
             points.add(p2);
         }
 
@@ -225,7 +225,7 @@ public class SimpleBodyGroup extends Entity {
             maxZ = -Double.MAX_VALUE;
 
         for ( i = 0; i < points.size(); i++ ) {
-            Vector3D p = points.get(i);
+            Vector3Dd p = points.get(i);
             if ( p.x() < minX ) minX = p.x();
             if ( p.y() < minY ) minY = p.y();
             if ( p.z() < minZ ) minZ = p.z();

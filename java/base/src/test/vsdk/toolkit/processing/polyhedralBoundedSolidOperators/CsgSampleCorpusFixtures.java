@@ -1,7 +1,7 @@
 package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -52,7 +52,7 @@ final class CsgSampleCorpusFixtures
         PolyhedralBoundedSolid[] operands = new PolyhedralBoundedSolid[2];
         PolyhedralBoundedSolid cylinderA = createTranslatedCylinder(0.5, 1.0);
         PolyhedralBoundedSolid cylinderB = createTranslatedCylinder(0.5, 2.0);
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
 
         translation = translation.translation(0.275, 0.0, -0.5);
         PolyhedralBoundedSolidModeler.applyTransformation(cylinderB, translation);
@@ -69,7 +69,7 @@ final class CsgSampleCorpusFixtures
     {
         PolyhedralBoundedSolid solid = new Cone(radius, radius, height)
             .exportToPolyhedralBoundedSolid();
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
 
         translation = translation.translation(0.55, 0.55, 0.05);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);
@@ -125,9 +125,9 @@ final class CsgSampleCorpusFixtures
         double sx, double sy, double sz,
         double tx, double ty, double tz)
     {
-        Box box = new Box(new Vector3D(sx, sy, sz));
+        Box box = new Box(new Vector3Dd(sx, sy, sz));
         PolyhedralBoundedSolid solid = box.exportToPolyhedralBoundedSolid();
-        Matrix4x4 translation = new Matrix4x4();
+        Matrix4x4d translation = new Matrix4x4d();
 
         translation = translation.translation(tx, ty, tz);
         PolyhedralBoundedSolidModeler.applyTransformation(solid, translation);

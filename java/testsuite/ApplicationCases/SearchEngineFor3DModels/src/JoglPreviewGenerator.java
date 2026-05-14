@@ -18,8 +18,8 @@ import com.jogamp.opengl.awt.GLCanvas;
 // VSDK Classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.environment.camera.Camera;
@@ -111,8 +111,8 @@ public class JoglPreviewGenerator
     */
     private void configureView(int i, Camera cam, RendererConfiguration quality)
     {
-        Vector3D position = new Vector3D();
-        Matrix4x4 R = new Matrix4x4();
+        Vector3Dd position = new Vector3Dd();
+        Matrix4x4d R = new Matrix4x4d();
         double yaw = 0, pitch = 0;
         double fov = 60.0;
 
@@ -174,7 +174,7 @@ public class JoglPreviewGenerator
         }
 
         R = R.eulerAnglesRotation(Math.toRadians(yaw), Math.toRadians(pitch), 0);
-        position = new Vector3D(-1, 0, 0);
+        position = new Vector3Dd(-1, 0, 0);
         position = R.multiply(position);
         position = position.normalized();
         position = position.multiply(2);
@@ -206,10 +206,10 @@ public class JoglPreviewGenerator
         RendererConfiguration quality = new RendererConfiguration();
         Light light1;
         Light light2;
-        Vector3D p;
+        Vector3Dd p;
 
-        light1 = new Light(LightType.POINT, new Vector3D(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
-        light2 = new Light(LightType.POINT, new Vector3D(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
+        light1 = new Light(LightType.POINT, new Vector3Dd(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
+        light2 = new Light(LightType.POINT, new Vector3Dd(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
         Jogl2LightRenderer.activate(gl, light1);

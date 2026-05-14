@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 // Vitral
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Quaternion;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Quaterniond;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -33,13 +33,13 @@ public class SimpleBody extends Entity {
     private Geometry geometry;
 
     //- Model (2/6): body geometric transformations -------------------
-    private Vector3D position;
-    private Vector3D scale;
-    private Matrix4x4 rotation;
-    private Matrix4x4 rotationInverse;
-    private Quaternion rotationQuaternion;
-    private Quaternion rotationInverseQuaternion;
-    private Vector3D inverseScale;
+    private Vector3Dd position;
+    private Vector3Dd scale;
+    private Matrix4x4d rotation;
+    private Matrix4x4d rotationInverse;
+    private Quaterniond rotationQuaternion;
+    private Quaterniond rotationInverseQuaternion;
+    private Vector3Dd inverseScale;
     private boolean hasInvertibleScale;
     private boolean hasIdentityRotation;
     private boolean hasUnitScale;
@@ -64,9 +64,9 @@ public class SimpleBody extends Entity {
     public SimpleBody()
     {
         geometry = null;
-        setPosition(new Vector3D(0, 0, 0));
-        setRotation(new Matrix4x4());
-        setScale(new Vector3D(1, 1, 1));
+        setPosition(new Vector3Dd(0, 0, 0));
+        setRotation(new Matrix4x4d());
+        setScale(new Vector3Dd(1, 1, 1));
         globalMaterial = new SimpleMaterial();
         globalTextureMap = null;
         globalNormalMap = null;
@@ -119,7 +119,7 @@ public class SimpleBody extends Entity {
     /**
     @return the cached object-to-world rotation matrix
     */
-    public Matrix4x4 getRotation()
+    public Matrix4x4d getRotation()
     {
         return rotation;
     }
@@ -130,16 +130,16 @@ public class SimpleBody extends Entity {
 
     @param rotation rigid-body rotation matrix without translation
     */
-    public void setRotation(Matrix4x4 rotation)
+    public void setRotation(Matrix4x4d rotation)
     {
-        Matrix4x4 sanitizedRotation = sanitizeRotationMatrix(rotation);
-        Quaternion cachedRotationQuaternion =
+        Matrix4x4d sanitizedRotation = sanitizeRotationMatrix(rotation);
+        Quaterniond cachedRotationQuaternion =
             sanitizedRotation.exportToQuaternion().normalized();
 
         this.rotation = sanitizedRotation;
         this.rotationQuaternion = cachedRotationQuaternion;
         this.rotationInverseQuaternion = cachedRotationQuaternion.conjugated();
-        this.rotationInverse = new Matrix4x4()
+        this.rotationInverse = new Matrix4x4d()
             .importFromQuaternion(rotationInverseQuaternion);
         updateTransformFlags();
         markModified();
@@ -148,7 +148,7 @@ public class SimpleBody extends Entity {
     /**
     @return the cached world-to-object rotation matrix
     */
-    public Matrix4x4 getRotationInverse()
+    public Matrix4x4d getRotationInverse()
     {
         return rotationInverse;
     }
@@ -159,17 +159,17 @@ public class SimpleBody extends Entity {
 
     @param rotationInverse rigid-body inverse rotation matrix without translation
     */
-    public void setRotationInverse(Matrix4x4 rotationInverse)
+    public void setRotationInverse(Matrix4x4d rotationInverse)
     {
-        Matrix4x4 sanitizedInverseRotation =
+        Matrix4x4d sanitizedInverseRotation =
             sanitizeRotationMatrix(rotationInverse);
-        Quaternion cachedInverseRotationQuaternion =
+        Quaterniond cachedInverseRotationQuaternion =
             sanitizedInverseRotation.exportToQuaternion().normalized();
 
         this.rotationInverse = sanitizedInverseRotation;
         this.rotationInverseQuaternion = cachedInverseRotationQuaternion;
         this.rotationQuaternion = cachedInverseRotationQuaternion.conjugated();
-        this.rotation = new Matrix4x4().importFromQuaternion(rotationQuaternion);
+        this.rotation = new Matrix4x4d().importFromQuaternion(rotationQuaternion);
         updateTransformFlags();
         markModified();
     }
@@ -239,7 +239,7 @@ public class SimpleBody extends Entity {
     /**
     @return body position in world space
     */
-    public Vector3D getPosition()
+    public Vector3Dd getPosition()
     {
         return position;
     }
@@ -247,7 +247,7 @@ public class SimpleBody extends Entity {
     /**
     @param p body position in world space
     */
-    public void setPosition(Vector3D p)
+    public void setPosition(Vector3Dd p)
     {
         position = p;
         updateTransformFlags();
@@ -257,7 +257,7 @@ public class SimpleBody extends Entity {
     /**
     @return body scale relative to object space axes
     */
-    public Vector3D getScale()
+    public Vector3Dd getScale()
     {
         return scale;
     }
@@ -265,11 +265,11 @@ public class SimpleBody extends Entity {
     /**
     @return object-to-world matrix with scale, rotation and translation
     */
-    public Matrix4x4 getTransformationMatrix()
+    public Matrix4x4d getTransformationMatrix()
     {
-        Matrix4x4 scaleMatrix = new Matrix4x4();
-        Matrix4x4 translateMatrix = new Matrix4x4();
-        Matrix4x4 multipliedMatrix;
+        Matrix4x4d scaleMatrix = new Matrix4x4d();
+        Matrix4x4d translateMatrix = new Matrix4x4d();
+        Matrix4x4d multipliedMatrix;
         scaleMatrix = scaleMatrix.scale(scale);
         translateMatrix = translateMatrix.translation(position);
         multipliedMatrix = translateMatrix.multiply(rotation.multiply(scaleMatrix));
@@ -287,7 +287,7 @@ public class SimpleBody extends Entity {
 
     @param s body scale relative to object space axes
     */
-    public void setScale(Vector3D s)
+    public void setScale(Vector3Dd s)
     {
         scale = s;
         hasInvertibleScale =
@@ -296,13 +296,13 @@ public class SimpleBody extends Entity {
             Math.abs(scale.z()) > VSDK.EPSILON;
 
         if ( hasInvertibleScale ) {
-            inverseScale = new Vector3D(
+            inverseScale = new Vector3Dd(
                 1.0 / scale.x(),
                 1.0 / scale.y(),
                 1.0 / scale.z());
         }
         else {
-            inverseScale = new Vector3D();
+            inverseScale = new Vector3Dd();
         }
         updateTransformFlags();
         markModified();
@@ -363,8 +363,8 @@ public class SimpleBody extends Entity {
                 requiredDetailMask);
         }
 
-        Vector3D localOrigin = worldPointToObjectSpace(inOutRay.origin());
-        Vector3D localDirection = worldDirectionToObjectSpace(inOutRay.direction());
+        Vector3Dd localOrigin = worldPointToObjectSpace(inOutRay.origin());
+        Vector3Dd localDirection = worldDirectionToObjectSpace(inOutRay.direction());
         double localDirectionLength = localDirection.length();
         if ( localDirectionLength <= VSDK.EPSILON ) {
             return false;
@@ -438,14 +438,14 @@ public class SimpleBody extends Entity {
     @param p world-space point being tested
     @return quantitative invisibility value reported by the underlying geometry
     */
-    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
         if ( geometry == null || !hasInvertibleScale ) {
             return 0;
         }
 
-        Vector3D myOrigin = worldPointToObjectSpace(origin);
-        Vector3D myP = worldPointToObjectSpace(p);
+        Vector3Dd myOrigin = worldPointToObjectSpace(origin);
+        Vector3Dd myP = worldPointToObjectSpace(p);
 
         return geometry.computeQuantitativeInvisibility(myOrigin, myP);
     }
@@ -482,8 +482,8 @@ public class SimpleBody extends Entity {
             return;
         }
 
-        Vector3D localOrigin = worldPointToObjectSpace(inRay.origin());
-        Vector3D localDirection = worldDirectionToObjectSpace(inRay.direction());
+        Vector3Dd localOrigin = worldPointToObjectSpace(inRay.origin());
+        Vector3Dd localDirection = worldDirectionToObjectSpace(inRay.direction());
         double localDirectionLength = localDirection.length();
         if ( localDirectionLength <= VSDK.EPSILON ) {
             return;
@@ -509,7 +509,7 @@ public class SimpleBody extends Entity {
         }
     }
 
-    private static Matrix4x4 sanitizeRotationMatrix(Matrix4x4 rotationMatrix)
+    private static Matrix4x4d sanitizeRotationMatrix(Matrix4x4d rotationMatrix)
     {
         return rotationMatrix.withoutTranslation();
     }
@@ -532,7 +532,7 @@ public class SimpleBody extends Entity {
         hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
     }
 
-    private static boolean isIdentityRotation(Matrix4x4 matrix)
+    private static boolean isIdentityRotation(Matrix4x4d matrix)
     {
         return
             Math.abs(matrix.get(0, 0) - 1.0) <= VSDK.EPSILON &&
@@ -614,7 +614,7 @@ public class SimpleBody extends Entity {
         double dx = position.x() - inOutRay.origin().x();
         double dy = position.y() - inOutRay.origin().y();
         double dz = position.z() - inOutRay.origin().z();
-        Vector3D direction = inOutRay.direction();
+        Vector3Dd direction = inOutRay.direction();
         double projection =
             direction.x()*dx + direction.y()*dy + direction.z()*dz;
         double discriminant =
@@ -641,15 +641,15 @@ public class SimpleBody extends Entity {
         return true;
     }
 
-    private static Vector3D scaleComponents(Vector3D value, Vector3D factors)
+    private static Vector3Dd scaleComponents(Vector3Dd value, Vector3Dd factors)
     {
-        return new Vector3D(
+        return new Vector3Dd(
             value.x() * factors.x(),
             value.y() * factors.y(),
             value.z() * factors.z());
     }
 
-    private static Vector3D normalizeIfPossible(Vector3D vector)
+    private static Vector3Dd normalizeIfPossible(Vector3Dd vector)
     {
         if ( vector.length() <= VSDK.EPSILON ) {
             return vector;
@@ -666,34 +666,34 @@ public class SimpleBody extends Entity {
         return worldSpaceRayParameter * localDirectionLength;
     }
 
-    private Vector3D worldPointToObjectSpace(Vector3D point)
+    private Vector3Dd worldPointToObjectSpace(Vector3Dd point)
     {
-        Vector3D translatedPoint = point.subtract(position);
-        Vector3D rotatedPoint = rotationInverseQuaternion.rotate(translatedPoint);
+        Vector3Dd translatedPoint = point.subtract(position);
+        Vector3Dd rotatedPoint = rotationInverseQuaternion.rotate(translatedPoint);
         return scaleComponents(rotatedPoint, inverseScale);
     }
 
-    private Vector3D worldDirectionToObjectSpace(Vector3D direction)
+    private Vector3Dd worldDirectionToObjectSpace(Vector3Dd direction)
     {
-        Vector3D rotatedDirection = rotationInverseQuaternion.rotate(direction);
+        Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(direction);
         return scaleComponents(rotatedDirection, inverseScale);
     }
 
-    private Vector3D objectPointToWorldSpace(Vector3D point)
+    private Vector3Dd objectPointToWorldSpace(Vector3Dd point)
     {
-        Vector3D scaledPoint = scaleComponents(point, scale);
+        Vector3Dd scaledPoint = scaleComponents(point, scale);
         return rotationQuaternion.rotate(scaledPoint).add(position);
     }
 
-    private Vector3D objectNormalToWorldSpace(Vector3D normal)
+    private Vector3Dd objectNormalToWorldSpace(Vector3Dd normal)
     {
-        Vector3D scaledNormal = scaleComponents(normal, inverseScale);
+        Vector3Dd scaledNormal = scaleComponents(normal, inverseScale);
         return normalizeIfPossible(rotationQuaternion.rotate(scaledNormal));
     }
 
-    private Vector3D objectTangentToWorldSpace(Vector3D tangent)
+    private Vector3Dd objectTangentToWorldSpace(Vector3Dd tangent)
     {
-        Vector3D scaledTangent = scaleComponents(tangent, scale);
+        Vector3Dd scaledTangent = scaleComponents(tangent, scale);
         return normalizeIfPossible(rotationQuaternion.rotate(scaledTangent));
     }
 }

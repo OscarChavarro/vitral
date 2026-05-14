@@ -3,7 +3,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 public abstract class Background extends Entity
 {
@@ -13,5 +13,5 @@ public abstract class Background extends Entity
     public Background() {
 
     }
-    public abstract ColorRgb colorInDireccion(Vector3D d);
+    public abstract ColorRgb colorInDireccion(Vector3Dd d);
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -34,7 +34,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
 
         // Action
-        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(1.0, 2.0, 3.0), 7, 11);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3Dd(1.0, 2.0, 3.0), 7, 11);
 
         // Assert
         assertThat(solid.getPolygonsList().size()).isEqualTo(1);
@@ -66,7 +66,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
         // Action
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3Dd(1.0, 0.0, 0.0));
 
         // Assert
         assertThat(solid.getPolygonsList().size()).isEqualTo(1);
@@ -92,7 +92,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolid solid = createSkeletalSolid();
         _PolyhedralBoundedSolidHalfEdge seed =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3Dd(1.0, 0.0, 0.0));
         _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(0);
 
         // Action
@@ -290,7 +290,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolid solid = createSkeletalSolid();
 
         // Action
-        boolean result = PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3D(1.0, 0.0, 0.0));
+        boolean result = PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3Dd(1.0, 0.0, 0.0));
 
         // Assert
         assertThat(result).isTrue();
@@ -503,10 +503,10 @@ class PolyhedralBoundedSolidEulerOperatorsTest
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
         // Action
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, seed, seed, 2, new Vector3Dd(1.0, 0.0, 0.0));
         PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(2).emanatingHalfEdge,
             solid.findVertex(2).emanatingHalfEdge, 3,
-            new Vector3D(0.0, 1.0, 0.0));
+            new Vector3Dd(0.0, 1.0, 0.0));
         PolyhedralBoundedSolidEulerOperators.lmef(solid, solid.findFace(1).findHalfEdge(3),
             solid.findFace(1).findHalfEdge(1), 2);
 
@@ -523,7 +523,7 @@ class PolyhedralBoundedSolidEulerOperatorsTest
     private static PolyhedralBoundedSolid createSkeletalSolid()
     {
         PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
-        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3D(0.0, 0.0, 0.0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3Dd(0.0, 0.0, 0.0), 1, 1);
         return solid;
     }
 
@@ -533,11 +533,11 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         _PolyhedralBoundedSolidHalfEdge he =
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge;
 
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 2, new Vector3D(1.0, 0.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 2, new Vector3Dd(1.0, 0.0, 0.0));
         he = solid.findVertex(2).emanatingHalfEdge;
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 3, new Vector3D(1.0, 1.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 3, new Vector3Dd(1.0, 1.0, 0.0));
         he = solid.findVertex(3).emanatingHalfEdge;
-        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 4, new Vector3D(0.0, 1.0, 0.0));
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he, he, 4, new Vector3Dd(0.0, 1.0, 0.0));
         return solid;
     }
 
@@ -546,18 +546,18 @@ class PolyhedralBoundedSolidEulerOperatorsTest
         PolyhedralBoundedSolid solid = createSkeletalSolid();
         PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge,
             solid.findFace(1).boundariesList.get(0).boundaryStartHalfEdge,
-            2, new Vector3D(1.0, 0.0, 0.0));
+            2, new Vector3Dd(1.0, 0.0, 0.0));
         PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(2).emanatingHalfEdge,
             solid.findVertex(2).emanatingHalfEdge, 3,
-            new Vector3D(1.0, 1.0, 0.0));
+            new Vector3Dd(1.0, 1.0, 0.0));
         PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findVertex(3).emanatingHalfEdge,
             solid.findVertex(3).emanatingHalfEdge, 4,
-            new Vector3D(0.0, 1.0, 0.0));
+            new Vector3Dd(0.0, 1.0, 0.0));
         PolyhedralBoundedSolidEulerOperators.lmef(solid, solid.findFace(1).findHalfEdge(4),
             solid.findFace(1).findHalfEdge(1), 2);
         PolyhedralBoundedSolidEulerOperators.lmev(solid, solid.findFace(1).findHalfEdge(1),
             solid.findFace(1).findHalfEdge(1), 5,
-            new Vector3D(0.25, 0.25, 0.0));
+            new Vector3Dd(0.25, 0.25, 0.0));
         return solid;
     }
 

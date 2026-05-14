@@ -1,18 +1,18 @@
 package vsdk.toolkit.gui;
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 public class RotateGizmo extends Gizmo {
 
-  private Matrix4x4 T;
+  private Matrix4x4d T;
 
-  public void setTransformationMatrix(Matrix4x4 T)
+  public void setTransformationMatrix(Matrix4x4d T)
   {
       this.T = T;
   }
 
-  public Matrix4x4 getTransformationMatrix()
+  public Matrix4x4d getTransformationMatrix()
   {
       return T;
   }
@@ -32,20 +32,20 @@ public class RotateGizmo extends Gizmo {
       unicode_id = keyEvent.unicode_id;
       keycode = keyEvent.keycode;
 
-      Matrix4x4 delta;
-      Vector3D up, front, left;
+      Matrix4x4d delta;
+      Vector3Dd up, front, left;
 
-      delta = new Matrix4x4();
-      //up = new Vector3D(T.M[0][2], T.M[1][2], T.M[2][2]);
-      up = new Vector3D(0, 0, 1);
+      delta = new Matrix4x4d();
+      //up = new Vector3Dd(T.M[0][2], T.M[1][2], T.M[2][2]);
+      up = new Vector3Dd(0, 0, 1);
       up = up.normalized();
 
-      //front = new Vector3D(T.M[0][0], T.M[1][0], T.M[2][0]);
-      front = new Vector3D(0, 1, 0);
+      //front = new Vector3Dd(T.M[0][0], T.M[1][0], T.M[2][0]);
+      front = new Vector3Dd(0, 1, 0);
       front = front.normalized();
 
-      //left = new Vector3D(T.M[0][1], T.M[1][1], T.M[2][1]);
-      left = new Vector3D(1, 0, 0);
+      //left = new Vector3Dd(T.M[0][1], T.M[1][1], T.M[2][1]);
+      left = new Vector3Dd(1, 0, 0);
       left = left.normalized();
 
       if ( unicode_id != KeyEvent.KEY_NONE ) {

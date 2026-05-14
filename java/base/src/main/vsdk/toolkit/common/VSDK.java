@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector2D;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 /**
 \mainpage Vitral SDK Toolkit documentation.
@@ -106,14 +106,14 @@ public class VSDK
         return Math.abs(a - b) < EPSILON;
     }
 
-    public static double vectorDistance(Vector3D a, Vector3D b)
+    public static double vectorDistance(Vector3Dd a, Vector3Dd b)
     {
         return Math.sqrt((a.x()-b.x())*(a.x()-b.x()) +
                          (a.y()-b.y())*(a.y()-b.y()) +
                          (a.z()-b.z())*(a.z()-b.z()));
     }
 
-    public static double vectorDistance(Vector2D a, Vector2D b)
+    public static double vectorDistance(Vector2Dd a, Vector2Dd b)
     {
         return Math.sqrt((a.x()-b.x())*(a.x()-b.x()) +
                          (a.y()-b.y())*(a.y()-b.y()));

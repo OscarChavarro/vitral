@@ -2,17 +2,17 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
 final class _PolyhedralBoundedSolidProfileDifferenceFallbackSpec
 {
-    final ArrayList<Vector3D> clippedProfileAtCut;
+    final ArrayList<Vector3Dd> clippedProfileAtCut;
     final double xCut;
     final double xMax;
     final double[] minuendBounds;
 
     _PolyhedralBoundedSolidProfileDifferenceFallbackSpec(
-        ArrayList<Vector3D> clippedProfileAtCut,
+        ArrayList<Vector3Dd> clippedProfileAtCut,
         double xCut,
         double xMax,
         double[] minuendBounds)

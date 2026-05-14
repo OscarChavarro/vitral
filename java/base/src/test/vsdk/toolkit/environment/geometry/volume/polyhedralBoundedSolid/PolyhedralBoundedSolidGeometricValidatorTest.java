@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -26,7 +26,7 @@ class PolyhedralBoundedSolidGeometricValidatorTest
     @ParameterizedTest
     @MethodSource("coplanaritySamples")
     void given_pointsSet_when_validateFacePointsAreCoplanar_then_matchesExpected(
-        ArrayList<Vector3D> points, boolean expected)
+        ArrayList<Vector3Dd> points, boolean expected)
     {
         // Arrange
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
@@ -59,23 +59,23 @@ class PolyhedralBoundedSolidGeometricValidatorTest
 
     private static Stream<Arguments> coplanaritySamples()
     {
-        ArrayList<Vector3D> coplanarSquare = new ArrayList<Vector3D>();
-        coplanarSquare.add(new Vector3D(0.0, 0.0, 0.0));
-        coplanarSquare.add(new Vector3D(1.0, 0.0, 0.0));
-        coplanarSquare.add(new Vector3D(1.0, 1.0, 0.0));
-        coplanarSquare.add(new Vector3D(0.0, 1.0, 0.0));
+        ArrayList<Vector3Dd> coplanarSquare = new ArrayList<Vector3Dd>();
+        coplanarSquare.add(new Vector3Dd(0.0, 0.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(1.0, 0.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(1.0, 1.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(0.0, 1.0, 0.0));
 
-        ArrayList<Vector3D> nonCoplanar = new ArrayList<Vector3D>();
-        nonCoplanar.add(new Vector3D(0.0, 0.0, 0.0));
-        nonCoplanar.add(new Vector3D(1.0, 0.0, 0.0));
-        nonCoplanar.add(new Vector3D(0.0, 1.0, 0.0));
-        nonCoplanar.add(new Vector3D(0.0, 0.0, 1.0));
+        ArrayList<Vector3Dd> nonCoplanar = new ArrayList<Vector3Dd>();
+        nonCoplanar.add(new Vector3Dd(0.0, 0.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(1.0, 0.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(0.0, 1.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(0.0, 0.0, 1.0));
 
-        ArrayList<Vector3D> almostCoplanar = new ArrayList<Vector3D>();
-        almostCoplanar.add(new Vector3D(0.0, 0.0, 0.0));
-        almostCoplanar.add(new Vector3D(2.0, 0.0, 0.0));
-        almostCoplanar.add(new Vector3D(2.0, 2.0, 1.0e-12));
-        almostCoplanar.add(new Vector3D(0.0, 2.0, 0.0));
+        ArrayList<Vector3Dd> almostCoplanar = new ArrayList<Vector3Dd>();
+        almostCoplanar.add(new Vector3Dd(0.0, 0.0, 0.0));
+        almostCoplanar.add(new Vector3Dd(2.0, 0.0, 0.0));
+        almostCoplanar.add(new Vector3Dd(2.0, 2.0, 1.0e-12));
+        almostCoplanar.add(new Vector3Dd(0.0, 2.0, 0.0));
 
         return Stream.of(
             Arguments.of(coplanarSquare, true),

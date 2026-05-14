@@ -1,8 +1,8 @@
 package vsdk.toolkit.gui;
 
 import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
@@ -97,7 +97,7 @@ public class CameraControllerGoogleEarth extends CameraController {
 
         //----------------------------------------------------------------------
         //3. Intercepción con plano infinito
-        InfinitePlane infinitePlane = new InfinitePlane(new Vector3D(0, 0, 1), new Vector3D(0, 0, 0));
+        InfinitePlane infinitePlane = new InfinitePlane(new Vector3Dd(0, 0, 1), new Vector3Dd(0, 0, 0));
         Ray hitA = infinitePlane.doIntersection(RayA);
         Ray hitB = infinitePlane.doIntersection(RayB);
         if ( hitA == null || hitB == null ) {
@@ -106,8 +106,8 @@ public class CameraControllerGoogleEarth extends CameraController {
 
         //----------------------------------------------------------------------
         //4. Distancia entre RayA y RayB
-        Vector3D pA = new Vector3D();
-        Vector3D pB = new Vector3D();
+        Vector3Dd pA = new Vector3Dd();
+        Vector3Dd pB = new Vector3Dd();
 
         pA = pA.withX(hitA.origin().x() + (hitA.direction().x() * hitA.t()));
         pA = pA.withY(hitA.origin().y() + (hitA.direction().y() * hitA.t()));
@@ -117,12 +117,12 @@ public class CameraControllerGoogleEarth extends CameraController {
         pB = pB.withY(hitB.origin().y() + (hitB.direction().y() * hitB.t()));
         pB = pB.withZ(hitB.origin().z() + (hitB.direction().z() * hitB.t()));
 
-        Vector3D d = pB.subtract(pA);
+        Vector3Dd d = pB.subtract(pA);
 
         //----------------------------------------------------------------------
         //5. Mover la cámara
-        Vector3D currentPosition = camera.getPosition();
-        camera.setPosition(new Vector3D(
+        Vector3Dd currentPosition = camera.getPosition();
+        camera.setPosition(new Vector3Dd(
             currentPosition.x() - d.x(),
             currentPosition.y() - d.y(),
             currentPosition.z()));
@@ -140,9 +140,9 @@ public class CameraControllerGoogleEarth extends CameraController {
     @Override
     public boolean processMouseWheelEvent(MouseEvent e) {
         // Local copy of the Camera's internal parameters
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
-        Matrix4x4 R; // Camera rotation matrix
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
         int projectionMode;
         double fov;
         double orthogonalZoom;
@@ -237,9 +237,9 @@ public class CameraControllerGoogleEarth extends CameraController {
     @Override
     public boolean processKeyPressedEvent(vsdk.toolkit.gui.KeyEvent keyEvent) {
         // Local copy of the Camera's internal parameters
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
-        Matrix4x4 R; // Camera rotation matrix
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
+        Matrix4x4d R; // Camera rotation matrix
         int projectionMode;
         double fov;
         double orthogonalZoom;
@@ -520,8 +520,8 @@ public class CameraControllerGoogleEarth extends CameraController {
     @param jumpValue
     */
     public void zoomOut(double jumpValue) {
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
 
         double nearPlaneDistance;
         double farPlaneDistance;
@@ -549,8 +549,8 @@ public class CameraControllerGoogleEarth extends CameraController {
     */
     public void zoomIn(double jumpValue) {
 
-        Vector3D eyePosition;
-        Vector3D focusedPosition;
+        Vector3Dd eyePosition;
+        Vector3Dd focusedPosition;
 
         double nearPlaneDistance;
         double farPlaneDistance;

@@ -5,15 +5,15 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 // VSDK classes
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 
 public class Jogl2CameraRenderer extends Jogl2Renderer
 {
     public static void activate(GL2 gl, Camera cam)
     {
-        Matrix4x4 R;
+        Matrix4x4d R;
 
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glLoadIdentity();
@@ -24,11 +24,11 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
 
     public static void activateCenter(GL2 gl, Camera cam)
     {
-        Matrix4x4 R;
+        Matrix4x4d R;
         Camera camera2 = new Camera(cam);
-        Vector3D neweye;
+        Vector3Dd neweye;
 
-        neweye = new Vector3D(0, 0, 0);
+        neweye = new Vector3Dd(0, 0, 0);
         camera2.setPosition(neweye);
         camera2.setNearPlaneDistance(0.1);
         camera2.setFarPlaneDistance(10.0);
@@ -166,8 +166,8 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPushMatrix();
 
-        Matrix4x4 R = cam.getRotation();
-        Vector3D p = cam.getPosition();
+        Matrix4x4d R = cam.getRotation();
+        Vector3Dd p = cam.getPosition();
         R = R.withTranslation(p);
 
         Jogl2MatrixRenderer.activate(gl, R);

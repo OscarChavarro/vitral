@@ -10,8 +10,8 @@ package vsdk.toolkit.environment.geometry.surface;
 import java.io.Serial;
 
 
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
@@ -20,26 +20,26 @@ import vsdk.toolkit.environment.geometry.elements.RayHit;
 public class ParametricBiCubicPatch extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    public Matrix4x4 Gx_MATRIX = new Matrix4x4();
-    public Matrix4x4 Gy_MATRIX = new Matrix4x4();
-    public Matrix4x4 Gz_MATRIX = new Matrix4x4();
+    public Matrix4x4d Gx_MATRIX = new Matrix4x4d();
+    public Matrix4x4d Gy_MATRIX = new Matrix4x4d();
+    public Matrix4x4d Gz_MATRIX = new Matrix4x4d();
 
-    private Matrix4x4 S_MATRIX;
-    private Matrix4x4 Tt_MATRIX;
-    private Matrix4x4 S_MATRIX_DS;
-    private Matrix4x4 Tt_MATRIX_DT;
-    private Matrix4x4 M_MATRIX;
-    private Matrix4x4 Mt_MATRIX;
-    private Matrix4x4 M_Gx_Mt_MATRIX;
-    private Matrix4x4 M_Gy_Mt_MATRIX;
-    private Matrix4x4 M_Gz_Mt_MATRIX;
+    private Matrix4x4d S_MATRIX;
+    private Matrix4x4d Tt_MATRIX;
+    private Matrix4x4d S_MATRIX_DS;
+    private Matrix4x4d Tt_MATRIX_DT;
+    private Matrix4x4d M_MATRIX;
+    private Matrix4x4d Mt_MATRIX;
+    private Matrix4x4d M_Gx_Mt_MATRIX;
+    private Matrix4x4d M_Gy_Mt_MATRIX;
+    private Matrix4x4d M_Gz_Mt_MATRIX;
 
     public static final int FERGUSON = 7;
 
     /// Note that the contourCurve must have 4 points with its respective
     /// control parameters.
     public ParametricCurve contourCurve;
-    private Vector3D controlMeshPoints[][];
+    private Vector3Dd controlMeshPoints[][];
     public int type;
 
     // Number of steps for curve approximation
@@ -79,7 +79,7 @@ public class ParametricBiCubicPatch extends Surface {
         calculateMatrices();
     }
 
-    public void buildBezierPatch(Vector3D controlMeshPoints[][])
+    public void buildBezierPatch(Vector3Dd controlMeshPoints[][])
     {
         this.controlMeshPoints = controlMeshPoints;
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
@@ -106,15 +106,15 @@ public class ParametricBiCubicPatch extends Surface {
             buildGeometryMatricesXYZ_Ferguson();
             M_MATRIX = ParametricCurve.HERMITE_MATRIX;
         }
-        Mt_MATRIX = new Matrix4x4(M_MATRIX);
+        Mt_MATRIX = new Matrix4x4d(M_MATRIX);
         Mt_MATRIX = Mt_MATRIX.transpose();
         M_Gx_Mt_MATRIX = M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
         M_Gy_Mt_MATRIX = M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
         M_Gz_Mt_MATRIX = M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
-        S_MATRIX = new Matrix4x4();
-        Tt_MATRIX = new Matrix4x4();
-        S_MATRIX_DS = new Matrix4x4();
-        Tt_MATRIX_DT = new Matrix4x4();
+        S_MATRIX = new Matrix4x4d();
+        Tt_MATRIX = new Matrix4x4d();
+        S_MATRIX_DS = new Matrix4x4d();
+        Tt_MATRIX_DT = new Matrix4x4d();
     }
 
     public int getApproximationSteps() {
@@ -142,15 +142,15 @@ public class ParametricBiCubicPatch extends Surface {
 
         for ( i = 0; i < 4; i++ ) {
             for ( j = 0; j < 4; j++ ) {
-                Vector3D vp = controlMeshPoints[i][j];
+                Vector3Dd vp = controlMeshPoints[i][j];
                 mx[i][j] = vp.x();
                 my[i][j] = vp.y();
                 mz[i][j] = vp.z();
             }
         }
-        Gx_MATRIX = Matrix4x4.copyOf(mx);
-        Gy_MATRIX = Matrix4x4.copyOf(my);
-        Gz_MATRIX = Matrix4x4.copyOf(mz);
+        Gx_MATRIX = Matrix4x4d.copyOf(mx);
+        Gy_MATRIX = Matrix4x4d.copyOf(my);
+        Gz_MATRIX = Matrix4x4d.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -167,7 +167,7 @@ public class ParametricBiCubicPatch extends Surface {
         int p = 0;
         int i = 0;
         for (int j = 0; j < 2; j++) {
-            Vector3D[] vp = contourCurve.getPoint(p);
+            Vector3Dd[] vp = contourCurve.getPoint(p);
 
             mx[i][j] = vp[0].x();
             my[i][j] = vp[0].y();
@@ -181,7 +181,7 @@ public class ParametricBiCubicPatch extends Surface {
             my[i + 2][j] = vp[1 + j].y();
             mz[i + 2][j] = vp[1 + j].z();
 
-            Vector3D vn = new Vector3D(0, 0, 0);
+            Vector3Dd vn = new Vector3Dd(0, 0, 0);
 
             mx[i + 2][j + 2] = vn.x();
             my[i + 2][j + 2] = vn.y();
@@ -191,7 +191,7 @@ public class ParametricBiCubicPatch extends Surface {
         p = 2;
         i = 1;
         for (int j = 0; j < 2; j++) {
-            Vector3D[] vp = contourCurve.getPoint(p);
+            Vector3Dd[] vp = contourCurve.getPoint(p);
 
             mx[i][j] = vp[0].x();
             my[i][j] = vp[0].y();
@@ -205,7 +205,7 @@ public class ParametricBiCubicPatch extends Surface {
             my[i + 2][j] = vp[2 - j].y();
             mz[i + 2][j] = vp[2 - j].z();
 
-            Vector3D vn = new Vector3D(0, 0, 0);
+            Vector3Dd vn = new Vector3Dd(0, 0, 0);
 
             mx[i + 2][j + 2] = vn.x();
             my[i + 2][j + 2] = vn.y();
@@ -214,9 +214,9 @@ public class ParametricBiCubicPatch extends Surface {
 
         }
 
-        Gx_MATRIX = Matrix4x4.copyOf(mx);
-        Gy_MATRIX = Matrix4x4.copyOf(my);
-        Gz_MATRIX = Matrix4x4.copyOf(mz);
+        Gx_MATRIX = Matrix4x4d.copyOf(mx);
+        Gy_MATRIX = Matrix4x4d.copyOf(my);
+        Gz_MATRIX = Matrix4x4d.copyOf(mz);
     }
 
     public void printGeometryMatrices()
@@ -295,10 +295,10 @@ public class ParametricBiCubicPatch extends Surface {
         double[][] mx = new double[4][4];
         double[][] my = new double[4][4];
         double[][] mz = new double[4][4];
-        Vector3D[] vp00 = contourCurve.getPoint(0);
-        Vector3D[] vp10 = contourCurve.getPoint(1);
-        Vector3D[] vp11 = contourCurve.getPoint(2);
-        Vector3D[] vp01 = contourCurve.getPoint(3);
+        Vector3Dd[] vp00 = contourCurve.getPoint(0);
+        Vector3Dd[] vp10 = contourCurve.getPoint(1);
+        Vector3Dd[] vp11 = contourCurve.getPoint(2);
+        Vector3Dd[] vp01 = contourCurve.getPoint(3);
 
         // Positions with respect to contour curve
         mx[0][0] = vp00[0].x();
@@ -360,9 +360,9 @@ public class ParametricBiCubicPatch extends Surface {
         mz[3][3] = 0;
 
         // Final result
-        Gx_MATRIX = Matrix4x4.copyOf(mx);
-        Gy_MATRIX = Matrix4x4.copyOf(my);
-        Gz_MATRIX = Matrix4x4.copyOf(mz);
+        Gx_MATRIX = Matrix4x4d.copyOf(mx);
+        Gy_MATRIX = Matrix4x4d.copyOf(my);
+        Gz_MATRIX = Matrix4x4d.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -387,7 +387,7 @@ public class ParametricBiCubicPatch extends Surface {
     @param s
     @param t
     */
-    public void evaluate(Vector3D p, double s, double t)
+    public void evaluate(Vector3Dd p, double s, double t)
     {
         S_MATRIX = S_MATRIX
             .withVal(0, 0, s * s * s)
@@ -401,18 +401,18 @@ public class ParametricBiCubicPatch extends Surface {
             .withVal(2, 0, t)
             .withVal(3, 0, 1);
 
-        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
         // The result is a 1x1 matrix.
-        p = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
+        p = new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
     }
 
-    public Vector3D evaluateTangent(double s, double t)
+    public Vector3Dd evaluateTangent(double s, double t)
     {
         S_MATRIX_DS = S_MATRIX_DS
             .withVal(0, 0, 3 * s * s)
@@ -425,23 +425,23 @@ public class ParametricBiCubicPatch extends Surface {
             .withVal(2, 0, t)
             .withVal(3, 0, 1);
 
-        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
         // The result is a 1x1 matrix.
-        Vector3D result = new Vector3D();
+        Vector3Dd result = new Vector3Dd();
 
-        result = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
+        result = new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
         result = result.normalized();
 
         return result;
     }
 
-    public Vector3D evaluateBinormal(double s, double t)
+    public Vector3Dd evaluateBinormal(double s, double t)
     {
         S_MATRIX = S_MATRIX
             .withVal(0, 0, s * s * s)
@@ -455,16 +455,16 @@ public class ParametricBiCubicPatch extends Surface {
             .withVal(2, 0, 1)
             .withVal(3, 0, 0);
 
-        Matrix4x4 S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4 S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4 S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4 Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX_DT);
-        Matrix4x4 Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX_DT);
-        Matrix4x4 Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX_DT);
 
         // The results are 1x1 matrices.
-        Vector3D result = new Vector3D();
-        result = new Vector3D(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
+        Vector3Dd result = new Vector3Dd();
+        result = new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
         result = result.normalized();
 
         return result;
@@ -492,15 +492,15 @@ public class ParametricBiCubicPatch extends Surface {
     @param s
     @param t
     */
-    public Vector3D evaluateNormal(double s, double t)
+    public Vector3Dd evaluateNormal(double s, double t)
     {
-        Vector3D dQds;
-        Vector3D dQdt;
+        Vector3Dd dQds;
+        Vector3Dd dQdt;
 
         dQds = evaluateTangent(s, t);
         dQdt = evaluateBinormal(s, t);
 
-        Vector3D nn = dQds.crossProduct(dQdt);
+        Vector3Dd nn = dQds.crossProduct(dQdt);
         nn = nn.normalized();
 
         return nn;
@@ -571,7 +571,7 @@ public class ParametricBiCubicPatch extends Surface {
 
             for ( i = 0; i < 4; i++ ) {
                 for ( j = 0; j < 4; j++ ) {
-                    Vector3D p = controlMeshPoints[i][j];
+                    Vector3Dd p = controlMeshPoints[i][j];
 
                     if ( p.x() < minX ) minX = p.x();
                     if ( p.y() < minY ) minY = p.y();

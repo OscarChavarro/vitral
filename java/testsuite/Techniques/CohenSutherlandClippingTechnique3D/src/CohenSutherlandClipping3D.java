@@ -33,8 +33,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // Vitral classes
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraController;
@@ -49,9 +49,9 @@ KeyListener
     public Camera camera1;
     public Camera camera2;
     public Camera lastPerspectiveCamera;
-    public Vector3D point0;
-    public Vector3D point1;
-    public Vector3D testVector;
+    public Vector3Dd point0;
+    public Vector3Dd point1;
+    public Vector3Dd testVector;
 
     // Application GUI artifacts
     private ControlPanel controls;
@@ -66,18 +66,18 @@ KeyListener
     public static final int PERSPECTIVEVIEW = 4;
 
     public CohenSutherlandClipping3D() {
-        testVector = new Vector3D();
+        testVector = new Vector3Dd();
         //-----------------------------------------------------------------
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
 
         R = R.eulerAnglesRotation(Math.toRadians(110), Math.toRadians(-25), 0);
         camera1 = new Camera();
-        camera1.setPosition(new Vector3D(1.5, -5, 2.5));
+        camera1.setPosition(new Vector3Dd(1.5, -5, 2.5));
         camera1.setRotation(R);
         camera1.setFarPlaneDistance(300);
 
         camera2 = new Camera();
-        camera2.setPosition(new Vector3D(0, 0, 1));
+        camera2.setPosition(new Vector3Dd(0, 0, 1));
         camera2.setNearPlaneDistance(1);
         camera2.setFarPlaneDistance(3);
         camera2.setFov(90);
@@ -88,10 +88,10 @@ KeyListener
 
         cameraController = new CameraControllerAquynza(camera1);
 
-        point0 = new Vector3D(0, 0, 0.6);
-        point1 = new Vector3D(0, 0, -10);
-        //point0 = new Vector3D(-3, 0, -2.5);
-        //point1 = new Vector3D(0, 0, 0.5);
+        point0 = new Vector3Dd(0, 0, 0.6);
+        point1 = new Vector3Dd(0, 0, -10);
+        //point0 = new Vector3Dd(-3, 0, -2.5);
+        //point1 = new Vector3Dd(0, 0, 0.5);
     }
 
     public void createGUI()
@@ -133,12 +133,12 @@ KeyListener
 
     public void setTopView()
     {
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         if ( cameraMode == PERSPECTIVEVIEW ) {
             lastPerspectiveCamera = new Camera(camera1);
         }
         cameraMode = TOPVIEW;
-        camera1.setPosition(new Vector3D(0, 0, 5));
+        camera1.setPosition(new Vector3Dd(0, 0, 5));
         R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
         camera1.setRotation(R);
         camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
@@ -147,12 +147,12 @@ KeyListener
 
     public void setFrontView()
     {
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         if ( cameraMode == PERSPECTIVEVIEW ) {
             lastPerspectiveCamera = new Camera(camera1);
         }
         cameraMode = TOPVIEW;
-        camera1.setPosition(new Vector3D(0, -10, 0));
+        camera1.setPosition(new Vector3Dd(0, -10, 0));
         R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
         camera1.setRotation(R);
         camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
@@ -161,12 +161,12 @@ KeyListener
 
     public void setLeftView()
     {
-        Matrix4x4 R = new Matrix4x4();
+        Matrix4x4d R = new Matrix4x4d();
         if ( cameraMode == PERSPECTIVEVIEW ) {
             lastPerspectiveCamera = new Camera(camera1);
         }
         cameraMode = TOPVIEW;
-        camera1.setPosition(new Vector3D(-10, 0, 0));
+        camera1.setPosition(new Vector3Dd(-10, 0, 0));
         camera1.setRotation(R);
         camera1.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
         camera1.setOrthogonalZoom(0.25);
@@ -214,8 +214,8 @@ KeyListener
 
         boolean linePasses;
 
-        Vector3D clippedPoint0 = new Vector3D();
-        Vector3D clippedPoint1 = new Vector3D();
+        Vector3Dd clippedPoint0 = new Vector3Dd();
+        Vector3Dd clippedPoint1 = new Vector3Dd();
 
         camera2.updateVectors();
 
@@ -225,7 +225,7 @@ KeyListener
         linePasses = camera2.clipLineCohenSutherlandCanonicVolume(
             point0, point1, clippedPoint0, clippedPoint1);
 
-        Matrix4x4 NT = camera2.getNormalizingTransformation().inverse();
+        Matrix4x4d NT = camera2.getNormalizingTransformation().inverse();
 
         clippedPoint0 = NT.multiply(clippedPoint0);
         clippedPoint1 = NT.multiply(clippedPoint1);

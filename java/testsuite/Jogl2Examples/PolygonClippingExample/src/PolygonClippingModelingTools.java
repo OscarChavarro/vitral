@@ -1,4 +1,4 @@
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.processing.polygonClipper.WeilerAthertonPolygonClipper;
@@ -28,7 +28,7 @@ public class PolygonClippingModelingTools
         model.setSubjectPolygonWA(clipper.getSubjectPolyWA());
     }
 
-    public static Vector3D calculateSceneCenter(PolygonClippingDebuggerModel model)
+    public static Vector3Dd calculateSceneCenter(PolygonClippingDebuggerModel model)
     {
         Bounds2D bounds = new Bounds2D();
 
@@ -38,7 +38,7 @@ public class PolygonClippingModelingTools
         expandBounds(bounds, model.getOuterPolygon());
 
         if ( !bounds.initialized ) {
-            return new Vector3D(0, 0, 0);
+            return new Vector3Dd(0, 0, 0);
         }
 
         double panelWidth = Math.max(1.0, bounds.maxX - bounds.minX);
@@ -51,7 +51,7 @@ public class PolygonClippingModelingTools
         centerX += panelWidth * 0.4;
         centerZ -= panelDepth * 0.2;
 
-        return new Vector3D(centerX, 0, centerZ);
+        return new Vector3Dd(centerX, 0, centerZ);
     }
 
     public static int countPairedVertices(_Polygon2DWA polygon)

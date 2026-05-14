@@ -7,8 +7,8 @@ A `FundamentalEntity` in VitralSDK is a basic software construction
 brick, use in the support and definition of common data structures. Classes
 derived from this abstract class belong two one of the following groups:
   - Extended common data structures: similar to other, but not found in basic
-    java implementations. For example, Vector3D, Matrix4x4, ColorRgb and
-    Quaternion classes, are 3D counterparts of 2D versions available in
+    java implementations. For example, Vector3Dd, Matrix4x4d, ColorRgb and
+    Quaterniond classes, are 3D counterparts of 2D versions available in
     java language or java extensions like Java2D or Swing. These classes are
     provided as they replace others with no 3D support, and as they are
     needed in all VitralSDK implementations. Note that they replace the use

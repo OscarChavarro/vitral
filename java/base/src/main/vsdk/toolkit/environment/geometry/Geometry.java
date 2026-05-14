@@ -7,8 +7,8 @@ package vsdk.toolkit.environment.geometry;
 import java.io.Serial;
 
 import vsdk.toolkit.common.Entity;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
@@ -79,7 +79,7 @@ public abstract class Geometry extends Entity {
     and the Ray is modified to have the distance between the Ray origin and
     the red Sphere surface in its Ray.t() attribute. From this operation,
     the Geometry.doExtraInformation method could be used to recall the
-    normal Vector3D of the red Sphere, which is shown in yellow. Applying a
+    normal Vector3Dd of the red Sphere, which is shown in yellow. Applying a
     reflection rule (equal incident and reflection angles respective to
     the normal) a second ray can be generated and the process repeated.<P>
         <IMG SRC="../images/Geometry.doIntersection_1.jpg"></IMG><P>
@@ -87,7 +87,7 @@ public abstract class Geometry extends Entity {
 
     @param inOut_ray It is used both ways: as an input value and as an output
     returned value. As input parameter, it must specify the ray origin and
-    ray direction in the two internal Vector3D fields, it's scalar
+    ray direction in the two internal Vector3Dd fields, it's scalar
     distance value Ray.t() is not relevant.  As output value, the origin and 
     direction of the Ray are not altered, but the scalar distance value Ray.t() 
     could change if the input Ray intersects current geometry.
@@ -127,7 +127,7 @@ public abstract class Geometry extends Entity {
     that is "phamtom" or "transparent" geometry with respect to visibility.
     This method should be overloaded for each Geometry's subclass.
     */
-    public int computeQuantitativeInvisibility(Vector3D origin, Vector3D p)
+    public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
         return 0;
     }
@@ -181,7 +181,7 @@ public abstract class Geometry extends Entity {
     @param distanceTolerance
     @return INSIDE, OUTSIDE or LIMIT constant value
     */
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         return OUTSIDE;
     }
@@ -197,7 +197,7 @@ public abstract class Geometry extends Entity {
     @param M
     @param reporter
     */
-    public void doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    public void doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
     {
         int nx = vv.getXSize();
         int ny = vv.getYSize();
@@ -222,8 +222,8 @@ public abstract class Geometry extends Entity {
         if ( nz > nmax ) nmax = nz;
         int containmentStatus;
         int x, y, z;
-        Vector3D p;
-        Vector3D transformedP;
+        Vector3Dd p;
+        Vector3Dd transformedP;
 
         if ( reporter != null ) {
             reporter.begin();

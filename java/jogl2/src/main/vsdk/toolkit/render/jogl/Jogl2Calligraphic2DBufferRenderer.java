@@ -4,7 +4,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class Jogl2Calligraphic2DBufferRenderer extends Jogl2Renderer
@@ -12,12 +12,12 @@ public class Jogl2Calligraphic2DBufferRenderer extends Jogl2Renderer
     public static void draw(GL2 gl, Calligraphic2DBuffer vectors)
     {
         int i;
-        Vector3D p0;
-        Vector3D p1;
+        Vector3Dd p0;
+        Vector3Dd p1;
 
         gl.glBegin(GL.GL_LINES);
         for ( i = 0; i < vectors.getNumLines(); i++ ) {
-            Vector3D[] segment = vectors.get2DLine(i);
+            Vector3Dd[] segment = vectors.get2DLine(i);
             p0 = segment[0];
             p1 = segment[1];
             gl.glVertex3d(p0.x(), p0.y(), p0.z());

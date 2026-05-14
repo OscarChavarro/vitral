@@ -5,8 +5,8 @@ import model.ShadersModel;
 import options.CommandLineOptions;
 import render.OpenGlOfflineSphereRenderer;
 import render.SoftwareRaycaster;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
@@ -35,7 +35,7 @@ public final class OfflineControl
                 Math.toRadians(options.getLightRotationDegrees().doubleValue()));
         }
 
-        Matrix4x4 modelRotation = new Matrix4x4().axisRotation(
+        Matrix4x4d modelRotation = new Matrix4x4d().axisRotation(
             model.getSphereRotationAngleRadians(),
             0.0,
             0.0,
@@ -69,12 +69,12 @@ public final class OfflineControl
         ShadersModel model,
         double lightRotationRadians)
     {
-        Matrix4x4 rotation = new Matrix4x4().axisRotation(
+        Matrix4x4d rotation = new Matrix4x4d().axisRotation(
             lightRotationRadians,
             0.0,
             -1.0,
             0.0);
-        Vector3D baseLightPosition = new Vector3D(1.0, -3.0, 1.0);
+        Vector3Dd baseLightPosition = new Vector3Dd(1.0, -3.0, 1.0);
         model.getLight().setPosition(rotation.multiply(baseLightPosition));
     }
 

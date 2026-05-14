@@ -17,7 +17,7 @@ import models.SolidModelNames;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -220,7 +220,7 @@ public class Jogl4DebuggerHudRenderer
 
         for ( int i = 0; i < vertexGroups.size(); i++ ) {
             VertexLabelGroup group = vertexGroups.get(i);
-            Vector3D projectedPosition = group.projectedPosition;
+            Vector3Dd projectedPosition = group.projectedPosition;
             ArrayList<_PolyhedralBoundedSolidVertex> visibleVertices =
                 filterVisibleVertices(group.vertices, solid, model.getCamera());
 
@@ -260,7 +260,7 @@ public class Jogl4DebuggerHudRenderer
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext;
         Ray visibilityRay;
         double vertexRayT;
-        Vector3D closestPointOnRay;
+        Vector3Dd closestPointOnRay;
         Ray hit;
 
         if ( vertex == null || vertex.position == null || camera == null ) {
@@ -305,7 +305,7 @@ public class Jogl4DebuggerHudRenderer
 
         for ( int i = 0; i < solid.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);
-            Vector3D projectedPosition = projectVertexToViewport(
+            Vector3Dd projectedPosition = projectVertexToViewport(
                 vertex.position, modelview, projection, viewport);
             VertexLabelGroup group;
 
@@ -328,7 +328,7 @@ public class Jogl4DebuggerHudRenderer
     private static VertexLabelGroup findVertexGroup(
         ArrayList<VertexLabelGroup> vertexGroups,
         _PolyhedralBoundedSolidVertex vertex,
-        Vector3D projectedPosition,
+        Vector3Dd projectedPosition,
         double spatialTolerance)
     {
         for ( int i = 0; i < vertexGroups.size(); i++ ) {
@@ -341,7 +341,7 @@ public class Jogl4DebuggerHudRenderer
         return null;
     }
 
-    private static double distanceSquared3D(Vector3D a, Vector3D b)
+    private static double distanceSquared3D(Vector3Dd a, Vector3Dd b)
     {
         double dx = a.x() - b.x();
         double dy = a.y() - b.y();
@@ -350,7 +350,7 @@ public class Jogl4DebuggerHudRenderer
         return dx * dx + dy * dy + dz * dz;
     }
 
-    private static double distanceSquared2D(Vector3D a, Vector3D b)
+    private static double distanceSquared2D(Vector3Dd a, Vector3Dd b)
     {
         double dx = a.x() - b.x();
         double dy = a.y() - b.y();
@@ -375,20 +375,20 @@ public class Jogl4DebuggerHudRenderer
     private static final class VertexLabelGroup
     {
         private final ArrayList<_PolyhedralBoundedSolidVertex> vertices;
-        private final ArrayList<Vector3D> projectedPositions;
-        private final Vector3D projectedPosition;
+        private final ArrayList<Vector3Dd> projectedPositions;
+        private final Vector3Dd projectedPosition;
 
         private VertexLabelGroup(_PolyhedralBoundedSolidVertex vertex,
-                                 Vector3D projectedPosition)
+                                 Vector3Dd projectedPosition)
         {
             this.vertices = new ArrayList<_PolyhedralBoundedSolidVertex>();
-            this.projectedPositions = new ArrayList<Vector3D>();
+            this.projectedPositions = new ArrayList<Vector3Dd>();
             this.projectedPosition = projectedPosition;
             add(vertex, projectedPosition);
         }
 
         private void add(_PolyhedralBoundedSolidVertex vertex,
-                         Vector3D projectedPosition)
+                         Vector3Dd projectedPosition)
         {
             vertices.add(vertex);
             projectedPositions.add(projectedPosition);
@@ -396,7 +396,7 @@ public class Jogl4DebuggerHudRenderer
 
         private boolean containsCloseVertex(
             _PolyhedralBoundedSolidVertex vertex,
-            Vector3D projectedPosition,
+            Vector3Dd projectedPosition,
             double spatialTolerance)
         {
             double spatialToleranceSquared = spatialTolerance *
@@ -418,8 +418,8 @@ public class Jogl4DebuggerHudRenderer
         }
     }
 
-    private static Vector3D projectVertexToViewport(
-        Vector3D worldPosition,
+    private static Vector3Dd projectVertexToViewport(
+        Vector3Dd worldPosition,
         double[] modelview,
         double[] projection,
         int[] viewport)
@@ -433,6 +433,6 @@ public class Jogl4DebuggerHudRenderer
         if ( projected[2] < 0.0 || projected[2] > 1.0 ) {
             return null;
         }
-        return new Vector3D(projected[0], projected[1], projected[2]);
+        return new Vector3Dd(projected[0], projected[1], projected[2]);
     }
 }

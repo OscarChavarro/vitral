@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import java.util.ArrayList;
 
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -29,11 +29,11 @@ final class _PolyhedralBoundedSolidSetIntersector
     {
         private final _PolyhedralBoundedSolidHalfEdge halfEdge;
         private final _PolyhedralBoundedSolidVertex vertex;
-        private final Vector3D point;
+        private final Vector3Dd point;
 
         private BoundaryHit(_PolyhedralBoundedSolidHalfEdge halfEdge,
                             _PolyhedralBoundedSolidVertex vertex,
-                            Vector3D point)
+                            Vector3Dd point)
         {
             this.halfEdge = halfEdge;
             this.vertex = vertex;
@@ -90,14 +90,14 @@ final class _PolyhedralBoundedSolidSetIntersector
     }
 
     private static _PolyhedralBoundedSolidFace.PointInsideResult
-    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3D point)
+    pointInFaceDetailed(_PolyhedralBoundedSolidFace face, Vector3Dd point)
     {
         return face.testPointInsideDetailed(point, numericContext.bigEpsilon());
     }
 
     private static BoundaryHit findNearbyBoundaryHit(
         _PolyhedralBoundedSolidFace face,
-        Vector3D point)
+        Vector3Dd point)
     {
         double tolerance;
         int i;
@@ -137,13 +137,13 @@ final class _PolyhedralBoundedSolidSetIntersector
 
     private static BoundaryHit findNearbyBoundaryHit(
         _PolyhedralBoundedSolidHalfEdge halfEdge,
-        Vector3D point,
+        Vector3Dd point,
         double tolerance)
     {
-        Vector3D a;
-        Vector3D b;
-        Vector3D ab;
-        Vector3D closest;
+        Vector3Dd a;
+        Vector3Dd b;
+        Vector3Dd ab;
+        Vector3Dd closest;
         double lengthSquared;
         double t;
 
@@ -340,7 +340,7 @@ final class _PolyhedralBoundedSolidSetIntersector
         double d2;
         double d3;
         double t;
-        Vector3D p;
+        Vector3Dd p;
         int s1;
         int s2;
         int cont;
@@ -392,12 +392,12 @@ final class _PolyhedralBoundedSolidSetIntersector
                     InfinitePlane edgeFacePlane = edgeFace.getContainingPlane();
                     double dEdge = edgeFacePlane.pointDistance(p);
                     if ( !isZero(dEdge) && isZeroBig(dEdge) ) {
-                        Vector3D n1 = edgeFacePlane.getNormal();
-                        Vector3D n2 = facePlane.getNormal();
+                        Vector3Dd n1 = edgeFacePlane.getNormal();
+                        Vector3Dd n2 = facePlane.getNormal();
                         double n1DotN2 = n1.dotProduct(n2);
                         double denom = 1.0 - n1DotN2 * n1DotN2;
                         if ( denom > numericContext.epsilon() ) {
-                            Vector3D n1Perp = n1.subtract(n2.multiply(n1DotN2));
+                            Vector3Dd n1Perp = n1.subtract(n2.multiply(n1DotN2));
                             p = p.subtract(n1Perp.multiply(dEdge / denom));
                         }
                     }

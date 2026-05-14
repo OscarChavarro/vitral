@@ -3,8 +3,8 @@ import java.io.File;
 
 import vsdk.toolkit.common.color.ColorRgb;                     // Model elements
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
@@ -29,9 +29,9 @@ public class Scene
         camera = new Camera();
         camera.setNearPlaneDistance(1);
         camera.setFarPlaneDistance(60.0);
-        Vector3D v = new Vector3D(0, -6, 0);
-        Matrix4x4 R1 = new Matrix4x4();
-        Matrix4x4 R2 = new Matrix4x4();
+        Vector3Dd v = new Vector3Dd(0, -6, 0);
+        Matrix4x4d R1 = new Matrix4x4d();
+        Matrix4x4d R2 = new Matrix4x4d();
         R1 = R1.axisRotation(Math.PI/2, 0, 1, 0);
         R2 = R2.axisRotation(Math.PI/2, 0, 0, 1);
         camera.setPosition(v);
@@ -53,7 +53,7 @@ public class Scene
             for ( i = 0; i < scene.getSimpleBodies().size(); i++ ) {
                 b = scene.getSimpleBodies().get(i);
                 b.setMaterial(b.getMaterial().withDoubleSided(false));
-                b.setScale(new Vector3D(0.5, 0.5, 0.5));
+                b.setScale(new Vector3Dd(0.5, 0.5, 0.5));
                 bodies.add(b);
             }
         }
@@ -67,7 +67,7 @@ public class Scene
         lights = new ArrayList<Light>();
         Light l;
         l = new Light(LightType.POINT, 
-                      new Vector3D(5, -5, 10), 
+                      new Vector3Dd(5, -5, 10), 
                       new ColorRgb(1, 1, 1));
         lights.add(l);
 

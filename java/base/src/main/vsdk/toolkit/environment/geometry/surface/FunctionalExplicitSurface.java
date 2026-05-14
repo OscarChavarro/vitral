@@ -4,11 +4,11 @@ import java.io.Serial;
 // VitralSDK classes
 import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpression;
 import vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
@@ -268,7 +268,7 @@ public class FunctionalExplicitSurface extends Surface
     @return INSIDE, OUTSIDE or LIMIT constant value 
     */
     @Override
-    public int doContainmentTest(Vector3D p, double distanceTolerance)
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         return internalGeometry.doContainmentTest(p, distanceTolerance);
     }
@@ -282,7 +282,7 @@ public class FunctionalExplicitSurface extends Surface
     */
     @Override
     public void
-    doVoxelization(VoxelVolume vv, Matrix4x4 M, ProgressMonitor reporter)
+    doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
     {
         internalGeometry.doVoxelization(vv, M, reporter);
     }

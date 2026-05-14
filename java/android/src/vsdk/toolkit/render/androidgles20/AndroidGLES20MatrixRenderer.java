@@ -2,7 +2,7 @@ package vsdk.toolkit.render.androidgles20;
 
 // VSDK classes
 import android.opengl.Matrix;
-import vsdk.toolkit.common.linealAlgebra.Matrix4x4;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.GL_MODELVIEW;
 import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.GL_PROJECTION;
 import static vsdk.toolkit.render.androidgles20.AndroidGLES20Renderer.copyMatrix;
@@ -18,7 +18,7 @@ public class AndroidGLES20MatrixRenderer extends AndroidGLES20Renderer {
     Multiply current OpenGL matrix with matrix R.
     @param R
     */
-    public static void activate(Matrix4x4 R)
+    public static void activate(Matrix4x4d R)
     {
         int i, j, index;
         

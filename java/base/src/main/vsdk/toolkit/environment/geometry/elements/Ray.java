@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.linealAlgebra.Vector3D;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.statistics.RaytraceStatistics;
 
 /**
@@ -16,21 +16,21 @@ public final class Ray extends FundamentalEntity
     private static final long serialVersionUID = 20060502L;
     private static final double UNIT_DIRECTION_TOLERANCE = 1e-12;
 
-    private final Vector3D origin;
-    private final Vector3D direction;
+    private final Vector3Dd origin;
+    private final Vector3Dd direction;
     private final double t;
 
     public Ray()
     {
-        this(new Vector3D(0, 0, 0), new Vector3D(1, 0, 0), 0.0);
+        this(new Vector3Dd(0, 0, 0), new Vector3Dd(1, 0, 0), 0.0);
     }
 
-    public Ray(Vector3D origin, Vector3D direction)
+    public Ray(Vector3Dd origin, Vector3Dd direction)
     {
         this(origin, direction, 0.0);
     }
 
-    public Ray(Vector3D origin, Vector3D direction, double t)
+    public Ray(Vector3Dd origin, Vector3Dd direction, double t)
     {
         this(origin, direction, t, false);
     }
@@ -48,12 +48,12 @@ public final class Ray extends FundamentalEntity
         return Objects.requireNonNull(other, "Ray to copy cannot be null");
     }
 
-    public Ray withOrigin(Vector3D newOrigin)
+    public Ray withOrigin(Vector3Dd newOrigin)
     {
         return new Ray(newOrigin, direction, t, true);
     }
 
-    public Ray withDirection(Vector3D newDirection)
+    public Ray withDirection(Vector3Dd newDirection)
     {
         return new Ray(origin, newDirection, t, false);
     }
@@ -67,12 +67,12 @@ public final class Ray extends FundamentalEntity
         return new Ray(origin, direction, newT, true);
     }
 
-    public Vector3D origin()
+    public Vector3Dd origin()
     {
         return origin;
     }
 
-    public Vector3D direction()
+    public Vector3Dd direction()
     {
         return direction;
     }
@@ -83,8 +83,8 @@ public final class Ray extends FundamentalEntity
     }
 
     private Ray(
-        Vector3D origin,
-        Vector3D direction,
+        Vector3Dd origin,
+        Vector3Dd direction,
         double t,
         boolean directionAlreadyNormalized)
     {
@@ -95,9 +95,9 @@ public final class Ray extends FundamentalEntity
         this.t = t;
     }
 
-    private static Vector3D normalizeDirection(Vector3D direction)
+    private static Vector3Dd normalizeDirection(Vector3Dd direction)
     {
-        Vector3D candidate =
+        Vector3Dd candidate =
             Objects.requireNonNull(direction, "Ray direction cannot be null");
         double lengthSquared = candidate.dotProduct(candidate);
         if ( lengthSquared <= VSDK.EPSILON ) {
