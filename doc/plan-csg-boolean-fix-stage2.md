@@ -491,19 +491,43 @@ curva).
 
 ### 6.2 Eliminar `forceARingMove` y el retry de subtract
 
-**Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` líneas
-3879-3911 hacen retry con `forceARingMove=true` para sustracciones que
-fallan. Eso enmascara el bug y duplica el tiempo de ejecución.
+**Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` hacía
+retry con `forceARingMove=true` para sustracciones que fallaban. Eso
+enmascaraba el bug y duplicaba el tiempo de ejecución.
 
 **Acciones**:
 
-1. Borrar el bloque `recoveredResult = setOp(...)` y la mutación de
-   system property.
-2. Borrar las flags `forceARingMove` y `flexibleDisableBRingMoveForSubtract`.
-3. Para la operación de subtracción, aplicar `revert(B)` antes de
-   Connect (no después) — es lo que el libro pide en Equation 15.1:
-   `A \ B = AoutB ⊕ (BinA)^-1`. La complementación es semántica fija,
-   no negociable.
+1. ✅ Borrar el bloque `recoveredResult = setOp(...)` y la mutación de
+   system property. **Hecho**: `trySubtractConnectRecovery` y
+   `shouldAttemptSubtractConnectRecovery` eliminados; el parámetro
+   `allowSubtractConnectRecovery` se quitó de la firma interna de
+   `setOp`; las variables `subtractConnectRecoverySolidA/B`,
+   `subtractConnectRecoveryResult`, `usedSubtractConnectRecovery` y el
+   bloque de inicialización/clonado correspondiente desaparecen; los
+   helpers huérfanos `restoreSystemProperty` y la constante
+   `CONNECT_FORCE_A_RING_MOVE_PROPERTY` también se eliminaron.
+2. ✅ Borrar las flags `forceARingMove` y
+   `flexibleDisableBRingMoveForSubtract`. **Hecho**: en
+   `_PolyhedralBoundedSolidSetNullEdgesConnector` se eliminaron las
+   constantes `FORCE_A_RING_MOVE_PROPERTY` y
+   `FLEXIBLE_DISABLE_B_RING_MOVE_FOR_SUBTRACT_PROPERTY` junto con sus
+   getters `isForceARingMoveEnabled` /
+   `isFlexibleDisableBRingMoveForSubtractEnabled`. Los dos sitios que
+   las leían se simplificaron a sus valores constantes:
+   `allowRingMoveOnAJoin = (operation == INTERSECTION)` y
+   `allowRingMoveOnBJoin = true`.
+3. ⏸ **Bloqueado por §6.1** — para la operación de sustracción,
+   aplicar `revert(B)` antes de Connect en lugar de dentro de Finish.
+   **Resultado del experimento**: mover el `inSolidB.revert()` desde
+   `_PolyhedralBoundedSolidSetFinisher` (línea 443) hasta antes de
+   `setOpConnect(op)` rompe 28 tests inmediatamente. El conector
+   actual asume que B mantiene su orientación original durante Connect
+   (los half-edges de los null-edges se emparejan con esa convención).
+   La Equation 15.1 sigue siendo el contrato fijo del resultado, pero
+   moverla al lugar correcto del pipeline requiere primero la
+   reescritura de Connect según Programs 15.13/15.14 (§6.1) — el
+   nuevo `scanjoin` debe operar sobre B ya complementado. Se difiere
+   §6.2.3 a la implementación de §6.1.
 
 ### 6.3 Borrar `groupNullEdgesByRing` heurístico
 
@@ -526,15 +550,43 @@ inserción.
 ### 6.4 Tests de aceptación del nivel 4
 
 - `SetOpConnectScanJoinTest` — Programs 15.13-15.14 con datos
-  sintéticos (dos cubos solapados).
+  sintéticos (dos cubos solapados). **Pendiente**.
 - `SetOpConnectNoLooseInvariantTest` — invariante: después de Connect,
-  `looseA == 0 && looseB == 0` siempre.
+  `looseA == 0 && looseB == 0` siempre. **Implementado parcialmente
+  (avance §6.4-A)**: 4 casos baseline pasan (regression guard),
+  2 casos pendientes están `@Disabled` con counts documentados (ambos
+  MANT1988_15_1 + INTERSECTION/SUBTRACT, looseA=4 — comparten causa
+  raíz con §5.2 sectoroverlap diferido).
 - `CsgKurlanderBowlFirstStarRegressionTest.given_..._then_connectStageClosesAllStarEdges`
-  reactivado y pasando.
+  reactivado y pasando. **Pendiente**.
 
 Sweep esperado tras §6: `ok ≥ 35/40`. Los 11 EMPTY desaparecen porque
 ahora Connect produce el ring completo (40 vértices), y Finish recibe
 datos consistentes.
+
+### Avance §6.4-A — primer hito del nivel 6 (✅ formal, autocontenido)
+
+Avance mínimo y verificable seleccionado por independencia y por estar
+en línea con Programs 15.13/15.14: **establecer el contrato externo
+del Connect como test ejecutable**, sin reescribir aún el conector.
+
+`SetOpConnectNoLooseInvariantTest` audita
+`_PolyhedralBoundedSolidSetNullEdgesConnector` contra el invariante
+de Program 15.14 vía los accessors `getLastLooseACount()` /
+`getLastLooseBCount()`. La matriz se separa en dos bloques:
+
+- **baseline** (4 tests, deben mantenerse en verde):
+  `MANT1988_15_1 + UNION`,
+  `STACKED_BLOCKS + {UNION, INTERSECTION, SUBTRACT}`. El conector ya
+  cumple Program 15.14 para estos casos; el test los lockea como
+  guarda de regresión.
+- **pending §6.1** (2 tests, `@Disabled`):
+  `MANT1988_15_1 + {INTERSECTION, SUBTRACT}`, ambos con `looseA = 4`
+  documentado. El `@Disabled` referencia §6.1 + §5.2 explícitamente
+  para que, cuando esos cierren, baste con quitar la anotación.
+
+Esto da una métrica continua del progreso del nivel 6 sin acoplar el
+avance a la reescritura completa del conector.
 
 ---
 

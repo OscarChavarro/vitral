@@ -66,8 +66,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         "vsdk.setop.traceCoplanarTangential";
     private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
         "vsdk.setop.tracePipelineSummary";
-    private static final String CONNECT_FORCE_A_RING_MOVE_PROPERTY =
-        "vsdk.setop.connect.forceARingMove";
 
     /**
     Debug flags.
@@ -1688,17 +1686,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         return null;
-    }
-
-    private static void restoreSystemProperty(String propertyName,
-                                              String previousValue)
-    {
-        if ( previousValue == null ) {
-            System.clearProperty(propertyName);
-        }
-        else {
-            System.setProperty(propertyName, previousValue);
-        }
     }
 
     private static double coordinate(Vector3Dd p, int axis)
@@ -3323,7 +3310,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             heightDivisions);
 
         try {
-            result = setOp(fallbackA, fallbackB, SUBTRACT, false, true, false);
+            result = setOp(fallbackA, fallbackB, SUBTRACT, false, true);
         }
         catch ( RuntimeException e ) {
             tracePipelineSummary(
@@ -3420,80 +3407,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             boundsMatch(first.getMinMax(), second.getMinMax());
     }
 
-    private static boolean shouldAttemptSubtractConnectRecovery(
-        int op,
-        boolean allowSubtractConnectRecovery,
-        PolyhedralBoundedSolid recoverySolidA,
-        PolyhedralBoundedSolid recoverySolidB,
-        PolyhedralBoundedSolid result)
-    {
-        if ( !allowSubtractConnectRecovery ||
-             op != SUBTRACT ||
-             recoverySolidA == null ||
-             recoverySolidB == null ||
-             !hasIncompleteConnectState() ) {
-            return false;
-        }
-
-        return !isStructurallyUsableSetOpResult(result);
-    }
-
-    private static PolyhedralBoundedSolid trySubtractConnectRecovery(
-        PolyhedralBoundedSolid recoverySolidA,
-        PolyhedralBoundedSolid recoverySolidB,
-        boolean withDebug)
-    {
-        String previousForceARingMoveValue;
-        PolyhedralBoundedSolid retrySolidA;
-        PolyhedralBoundedSolid retrySolidB;
-        PolyhedralBoundedSolid recoveredResult;
-
-        if ( recoverySolidA == null || recoverySolidB == null ) {
-            return null;
-        }
-
-        retrySolidA = deepCloneSolid(recoverySolidA,
-            "subtract recovery retry solid A");
-        retrySolidB = deepCloneSolid(recoverySolidB,
-            "subtract recovery retry solid B");
-        if ( retrySolidA == null || retrySolidB == null ) {
-            return null;
-        }
-
-        previousForceARingMoveValue = System.getProperty(
-            CONNECT_FORCE_A_RING_MOVE_PROPERTY);
-        try {
-            System.setProperty(CONNECT_FORCE_A_RING_MOVE_PROPERTY, "true");
-            tracePipelineSummary(
-                "subtract connect recovery retrying with forceARingMove");
-            recoveredResult = setOp(retrySolidA, retrySolidB, SUBTRACT,
-                withDebug, false, false);
-        }
-        catch ( RuntimeException e ) {
-            tracePipelineSummary(
-                "subtract connect recovery failed: " +
-                e.getClass().getSimpleName());
-            return null;
-        }
-        finally {
-            restoreSystemProperty(CONNECT_FORCE_A_RING_MOVE_PROPERTY,
-                previousForceARingMoveValue);
-        }
-
-        if ( !isStructurallyUsableSetOpResult(recoveredResult) ) {
-            tracePipelineSummary(
-                "subtract connect recovery rejected");
-            return null;
-        }
-
-        tracePipelineSummary(
-            "subtract connect recovery accepted faces=" +
-            recoveredResult.getPolygonsList().size() +
-            " edges=" + recoveredResult.getEdgesList().size() +
-            " vertices=" + recoveredResult.getVerticesList().size());
-        return recoveredResult;
-    }
-
     /**
     Following program [MANT1988].15.1.
     */
@@ -3514,18 +3427,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         int op,
         boolean withDebug,
         boolean maximizeResultFaces)
-    {
-        return setOp(inSolidA, inSolidB, op, withDebug,
-            maximizeResultFaces, true);
-    }
-
-    private static PolyhedralBoundedSolid setOp(
-        PolyhedralBoundedSolid inSolidA,
-        PolyhedralBoundedSolid inSolidB,
-        int op,
-        boolean withDebug,
-        boolean maximizeResultFaces,
-        boolean allowSubtractConnectRecovery)
     {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
@@ -3568,32 +3469,12 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         PolyhedralBoundedSolid offsetCylinderDifferenceFallback;
         PolyhedralBoundedSolid axisAlignedCellBooleanFallback;
         PolyhedralBoundedSolid orthogonalProfileBooleanFallback;
-        PolyhedralBoundedSolid subtractConnectRecoverySolidA;
-        PolyhedralBoundedSolid subtractConnectRecoverySolidB;
-        PolyhedralBoundedSolid subtractConnectRecoveryResult;
         boolean fallbackProvidedResult;
-        boolean usedSubtractConnectRecovery;
 
         sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-        subtractConnectRecoverySolidA = null;
-        subtractConnectRecoverySolidB = null;
-        subtractConnectRecoveryResult = null;
         offsetCylinderDifferenceFallback = null;
         fallbackProvidedResult = false;
-        usedSubtractConnectRecovery = false;
-
-        if ( allowSubtractConnectRecovery && op == SUBTRACT ) {
-            subtractConnectRecoverySolidA = deepCloneSolid(
-                inSolidA, "subtract recovery solid A");
-            subtractConnectRecoverySolidB = deepCloneSolid(
-                inSolidB, "subtract recovery solid B");
-            if ( subtractConnectRecoverySolidA == null ||
-                 subtractConnectRecoverySolidB == null ) {
-                subtractConnectRecoverySolidA = null;
-                subtractConnectRecoverySolidB = null;
-            }
-        }
 
         //-----------------------------------------------------------------
         if ( withDebug ) {
@@ -3790,26 +3671,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         res = applyProfileDifferenceFallbackIfNeeded(
             profileDifferenceFallback, res);
-        if ( shouldAttemptSubtractConnectRecovery(
-                 op,
-                 allowSubtractConnectRecovery,
-                 subtractConnectRecoverySolidA,
-                 subtractConnectRecoverySolidB,
-                 res) ) {
-            subtractConnectRecoveryResult = trySubtractConnectRecovery(
-                subtractConnectRecoverySolidA,
-                subtractConnectRecoverySolidB,
-                withDebug);
-            if ( subtractConnectRecoveryResult != null ) {
-                tracePipelineSummary(
-                    "subtract connect recovery replacing incomplete result");
-                res = subtractConnectRecoveryResult;
-                usedSubtractConnectRecovery = true;
-            }
-        }
-        if ( !usedSubtractConnectRecovery ) {
-            postProcessResult(res, maximizeResultFaces);
-        }
+        postProcessResult(res, maximizeResultFaces);
 
         if ( withDebug ) {
             debugSolid(res, "outputR_stage07");

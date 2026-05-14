@@ -30,8 +30,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 {
     private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
         "vsdk.setop.tracePipelineSummary";
-    private static final String FORCE_A_RING_MOVE_PROPERTY =
-        "vsdk.setop.connect.forceARingMove";
     private static final String ALLOW_CROSS_LOOSE_MATCH_PROPERTY =
         "vsdk.setop.connect.allowCrossLooseMatch";
     private static final String KEEP_INSERTION_ORDER_PROPERTY =
@@ -49,9 +47,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static final String
         FLEXIBLE_KEEP_ONLY_PAIRED_CUT_FACES_PROPERTY =
         "vsdk.setop.connect.flexibleKeepOnlyPairedCutFaces";
-    private static final String
-        FLEXIBLE_DISABLE_B_RING_MOVE_FOR_SUBTRACT_PROPERTY =
-        "vsdk.setop.connect.flexibleDisableBRingMoveForSubtract";
     private static final String
         FLEXIBLE_ALLOW_CROSS_CHAIN_MERGE_PROPERTY =
         "vsdk.setop.connect.flexibleAllowCrossChainMerge";
@@ -175,11 +170,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
     }
 
-    private static boolean isForceARingMoveEnabled()
-    {
-        return Boolean.getBoolean(FORCE_A_RING_MOVE_PROPERTY);
-    }
-
     private static boolean isCrossLooseMatchEnabled()
     {
         return Boolean.getBoolean(ALLOW_CROSS_LOOSE_MATCH_PROPERTY);
@@ -222,12 +212,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     {
         return Boolean.getBoolean(
             FLEXIBLE_KEEP_ONLY_PAIRED_CUT_FACES_PROPERTY);
-    }
-
-    private static boolean isFlexibleDisableBRingMoveForSubtractEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_DISABLE_B_RING_MOVE_FOR_SUBTRACT_PROPERTY);
     }
 
     private static boolean isFlexibleAllowCrossChainMergeEnabled()
@@ -2452,10 +2436,12 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidHalfEdge h1b = null;
         _PolyhedralBoundedSolidHalfEdge h2b = null;
         PointJoinResult pointResult;
-        boolean allowRingMoveOnAJoin = (operation == INTERSECTION) ||
-            isForceARingMoveEnabled();
-        boolean allowRingMoveOnBJoin = (operation != SUBTRACT) ||
-            !isFlexibleDisableBRingMoveForSubtractEnabled();
+        // Ring-move policy after §6.2 cleanup: derived purely from the
+        // operation. The forceARingMove and flexibleDisableBRingMoveForSubtract
+        // flags were removed because they only ever flipped behaviour from
+        // the recovery retry path that §6.2.1 deleted.
+        boolean allowRingMoveOnAJoin = (operation == INTERSECTION);
+        boolean allowRingMoveOnBJoin = true;
         boolean withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                             ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
@@ -2607,8 +2593,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         _PolyhedralBoundedSolidHalfEdge h1b = null;
         _PolyhedralBoundedSolidHalfEdge h2b = null;
         _PolyhedralBoundedSolidHalfEdge r[];
-        boolean allowRingMoveOnAJoin = (operation == INTERSECTION) ||
-            isForceARingMoveEnabled();
+        boolean allowRingMoveOnAJoin = (operation == INTERSECTION);
         boolean withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
                             ((debugFlags & DEBUG_05_CONNECT) != 0x00);
 
