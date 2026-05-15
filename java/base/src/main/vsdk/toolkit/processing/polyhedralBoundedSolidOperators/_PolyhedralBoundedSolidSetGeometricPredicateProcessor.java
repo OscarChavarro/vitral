@@ -27,6 +27,86 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
     private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
         "vsdk.setop.traceCoplanarTangential";
 
+    /**
+    Structured trace of a single {@code sectoroverlap} invocation captured
+    when the static collector is active (see §7.3.1 of
+    plan-csg-boolean-fix-stage2). Mutable POJO by design so the test can
+    introspect every field without reflection.
+    */
+    static final class SectoroverlapTraceEntry
+    {
+        int callIndex;
+        int faceA, faceB;
+        int vertexAFrom, vertexATo;
+        int vertexBFrom, vertexBTo;
+        double a1, a2, b1, b2;
+        double diffA2B1;
+        double diffB2A1;
+        boolean boundaryRayContact;
+        boolean decision;
+    }
+
+    private static ArrayList<SectoroverlapTraceEntry> sectoroverlapTrace = null;
+    private static int sectoroverlapCallCounter = 0;
+
+    static void enableSectoroverlapTrace()
+    {
+        sectoroverlapTrace = new ArrayList<SectoroverlapTraceEntry>();
+        sectoroverlapCallCounter = 0;
+    }
+
+    static void disableSectoroverlapTrace()
+    {
+        sectoroverlapTrace = null;
+    }
+
+    static ArrayList<SectoroverlapTraceEntry> getSectoroverlapTrace()
+    {
+        return sectoroverlapTrace;
+    }
+
+    private static void recordSectoroverlapCall(
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex na,
+        _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex nb,
+        double a1, double a2, double b1, double b2, boolean decision)
+    {
+        if ( sectoroverlapTrace == null ) {
+            return;
+        }
+        SectoroverlapTraceEntry entry = new SectoroverlapTraceEntry();
+        entry.callIndex = sectoroverlapCallCounter++;
+        entry.faceA = (na != null && na.he != null && na.he.parentLoop != null
+                       && na.he.parentLoop.parentFace != null)
+            ? na.he.parentLoop.parentFace.id : -1;
+        entry.faceB = (nb != null && nb.he != null && nb.he.parentLoop != null
+                       && nb.he.parentLoop.parentFace != null)
+            ? nb.he.parentLoop.parentFace.id : -1;
+        entry.vertexAFrom = (na != null && na.he != null
+                             && na.he.startingVertex != null)
+            ? na.he.startingVertex.id : -1;
+        entry.vertexATo = -1;
+        if ( na != null && na.he != null && na.he.next() != null
+             && na.he.next().startingVertex != null ) {
+            entry.vertexATo = na.he.next().startingVertex.id;
+        }
+        entry.vertexBFrom = (nb != null && nb.he != null
+                             && nb.he.startingVertex != null)
+            ? nb.he.startingVertex.id : -1;
+        entry.vertexBTo = -1;
+        if ( nb != null && nb.he != null && nb.he.next() != null
+             && nb.he.next().startingVertex != null ) {
+            entry.vertexBTo = nb.he.next().startingVertex.id;
+        }
+        entry.a1 = a1; entry.a2 = a2;
+        entry.b1 = b1; entry.b2 = b2;
+        entry.diffA2B1 = a2 - b1;
+        entry.diffB2A1 = b2 - a1;
+        entry.boundaryRayContact = Math.abs(entry.diffA2B1) < 1.0e-12
+            || Math.abs(entry.diffB2A1) < 1.0e-12;
+        entry.decision = decision;
+        sectoroverlapTrace.add(entry);
+    }
+
     private static final class CoplanarAngleBasis
     {
         private Vector3Dd normal;
@@ -262,18 +342,12 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
         // contact — a strict open-set check breaks MANT1988 §15.1 reference geometry.
         // The symmetric disjoint case (B entirely left of A) is not yet fixed here;
         // that requires a deeper restructuring of the coplanar V/V path.
-        if ( a2 + VSDK.EPSILON > b1 - VSDK.EPSILON ) {
-            if ( withDebug ) {
-                System.out.print(" <TRUE>");
-            }
-            return true;
-        }
-
+        boolean decision = (a2 + VSDK.EPSILON > b1 - VSDK.EPSILON);
+        recordSectoroverlapCall(na, nb, a1, a2, b1, b2, decision);
         if ( withDebug ) {
-            System.out.print(" <FALSE>");
+            System.out.print(decision ? " <TRUE>" : " <FALSE>");
         }
-
-        return false;
+        return decision;
     }
 
     private static double angleFromVectors(Vector3Dd u, Vector3Dd v, Vector3Dd a)

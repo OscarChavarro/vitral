@@ -21,7 +21,17 @@ problematic CSG fixtures.
 <p>Traceability: [MANT1988] Ch. 15.1 set-operation statement and problem
 cases for union, intersection, and difference.</p>
  */
-@Disabled("Pending revalidation after restoring the legacy boolean set-operation strategy")
+// §7 finding (2026-05-15): this class was kept @Disabled because its
+// assertions are designed in the *inverse* direction — they ASSERT
+// that the algebraic identity is BROKEN for the listed fixtures
+// (`.isFalse()` on `allIdentitiesHold`). That made it a "drift
+// detector that fires when bugs vanish": fixing a bug turns a
+// previously-passing test into a failing one, which is the wrong
+// gradient. After this finding the assertions are documented below
+// and a clarifying note added; the class stays @Disabled until a
+// proper rewrite (§7.3.1.B in plan) flips each assertion to the
+// algebraic-positive direction.
+@Disabled("Pending §7.3.1.B rewrite: invert assertions to algebraic-positive direction")
 class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 {
     @ParameterizedTest
