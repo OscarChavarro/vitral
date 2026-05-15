@@ -48,10 +48,9 @@ public class ImagePersistence extends PersistenceElement
     {
         ClassLoader cl = ImagePersistence.class.getClassLoader();
         try {
-            Class<? extends Object> handle;
+            Class<?> handle;
             handle = cl.loadClass(className);
-            Object o;
-            o = handle.newInstance();
+            Object o = handle.getDeclaredConstructor().newInstance();
             if ( o instanceof ImagePersistenceHelper ) {
                 helpers.add((ImagePersistenceHelper)o);
             }
@@ -59,9 +58,7 @@ public class ImagePersistence extends PersistenceElement
         catch ( ClassNotFoundException e ) {
             // Class is not available... (not a problem)
         }
-        catch ( InstantiationException e ) {
-        }
-        catch ( IllegalAccessException e ) {
+        catch ( ReflectiveOperationException e ) {
         }
     }
 

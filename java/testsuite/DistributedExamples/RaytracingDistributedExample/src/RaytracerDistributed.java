@@ -87,7 +87,7 @@ public class RaytracerDistributed {
         }
         //- 5. Destruir las estructuras de datos --------------------------
         // 5.1. Free image reference
-        theResultingImage.finalize();
+        theResultingImage.dettach();
         theResultingImage = null;
 
         // 5.2. Free scene references

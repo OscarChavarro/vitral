@@ -100,13 +100,4 @@ public class Calligraphic2DBuffer extends MediaEntity {
         }
     }
 
-    @Override
-    public void finalize()
-    {
-        init();
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-        }
-    }
 }

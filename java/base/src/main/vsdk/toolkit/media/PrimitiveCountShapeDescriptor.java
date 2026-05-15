@@ -64,14 +64,4 @@ public class PrimitiveCountShapeDescriptor extends ShapeDescriptor
         }
     }
 
-    @Override
-    public void finalize()
-    {
-        label = null;
-        featureVector = null;
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-        }
-    }
 }

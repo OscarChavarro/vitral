@@ -45,30 +45,6 @@ public class SimpleBodyGroup extends Entity {
         scale = new Vector3Dd(1, 1, 1);
     }
 
-    @Override
-    public void finalize()
-    {
-        int i;
-
-        for ( i = 0; i < bodies.size(); i++ ) {
-            bodies.set(i, null);
-        }
-        while ( bodies.size() > 0 ) {
-            bodies.remove(0);
-        }
-        bodies = null;
-        position = null;
-        scale = null;
-        rotation = null;
-        rotation_i = null;
-        name = null;
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-            
-        }
-    }
-
     public ArrayList <SimpleBody> getBodies()
     {
         return bodies;

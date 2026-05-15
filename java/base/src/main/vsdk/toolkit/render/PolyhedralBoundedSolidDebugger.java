@@ -24,10 +24,9 @@ public abstract class PolyhedralBoundedSolidDebugger extends RenderingElement
     {
         ClassLoader cl = PolyhedralBoundedSolidDebugger.class.getClassLoader();
         try {
-            Class<? extends Object> handle;
+            Class<?> handle;
             handle = cl.loadClass(className);
-            Object o;
-            o = handle.newInstance();
+            Object o = handle.getDeclaredConstructor().newInstance();
             if ( o instanceof PolyhedralBoundedSolidDebugger ) {
                 return (PolyhedralBoundedSolidDebugger)o;
             }

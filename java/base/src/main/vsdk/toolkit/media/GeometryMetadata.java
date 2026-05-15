@@ -152,22 +152,4 @@ public class GeometryMetadata extends MediaEntity
         return msg;
     }
 
-    @Override
-    public void finalize()
-    {
-        int i;
-        for ( i = 0; i < descriptorsList.size(); i++ ) {
-            descriptorsList.set(i, null);
-        }
-        for ( i = 0; descriptorsList.size() > 0; i++ ) {
-            descriptorsList.remove(0);
-        }
-        objectFilename = null;
-        descriptorsList = null;
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-           
-        }
-    }
 }

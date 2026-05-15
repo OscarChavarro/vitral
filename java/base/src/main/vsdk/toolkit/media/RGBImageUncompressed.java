@@ -71,23 +71,6 @@ public class RGBImageUncompressed extends Image
     }
 
     /**
-    This is the class destructor.
-    */
-    @Override
-    public void finalize()
-    {
-        if ( data != null ) {
-            xSize = 0;
-            ySize = 0;
-            data = null;
-        }
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-        }
-    }
-
-    /**
     Experimental method. Used for rendering-only applications that has
     transfered image contents to a JOGL context (GPU's Video memory) */
     public void dettach() {

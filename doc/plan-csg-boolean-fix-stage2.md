@@ -14,7 +14,7 @@ heurísticas acumuladas y verificando invariantes en cada borde.
 (293 tests, 0 failures, 6 skipped). Los 6 skipped tienen razón
 documentada: 3 son invariantes teóricos/non-goals de §7.5, 2 son
 tests Kurlander pendientes de §8, 1 es helper de mantenimiento.
-El siguiente bloque activo es §8 (Nivel 6).
+El siguiente bloque activo es §9 (Nivel 7 — setopfinish).
 
 ---
 
@@ -80,13 +80,13 @@ Clases de test relevantes (todas verdes):
 - ✅ `sectoroverlap` confirmado no-causa-raíz (§7.1, traza idéntica).
 - ✅ `AlgebraicPropertiesTest` eliminado (drift detector inverso).
 
-**Pendiente (bloque §8 — ahora desbloqueado):**
+**Pendiente (bloques §9 y §10):**
 
 - **2 tests Kurlander `@Disabled`**:
   `CsgKurlanderBowlFirstStarRegressionTest.given_kurlanderBowlAndFifthStar_...`
-  y `BooleansFromReferenceObjectPairsTest.given_csgKurlanderBowl_...` → §8.3.
-- **Sweep visual Kurlander**: 11 EMPTY + 12 blackFaces remanentes
-  desde etapa 1 → §10.
+  (faces no coplanares en Finisher → §9) y
+  `BooleansFromReferenceObjectPairsTest.given_csgKurlanderBowl_...` → §9.
+- **Sweep visual Kurlander**: 11 EMPTY + 12 blackFaces remanentes → §10.
 
 ---
 
@@ -120,8 +120,8 @@ Reglas de oro:
 | 3 | `setopclassify` estructural | V/F y V/V classifiers, `separateEdgeSequence` | §5 | ✅ Cerrado salvo §5.2 (movido a §7) |
 | 4 | `setopconnect` estructural | `_PolyhedralBoundedSolidSetNullEdgesConnector` | §6 | ✅ Cerrado salvo §6.3 (movido a §8) |
 | 5 | Núcleo algorítmico — bugs algebraicos + diagnóstico sectoroverlap | predicate processor + algebraic identity preflight | §7 | ✅ Cerrado |
-| **6** | **Cleanup post-núcleo** (revert(B), groupNullEdgesByRing, Kurlander) | SetOperator + connector | **§8** | 🟡 **En curso** |
-| 7 | `setopfinish` | `_PolyhedralBoundedSolidSetFinisher` | §9 | ⏸ Pendiente |
+| 6 | Cleanup post-núcleo (experimentos revert/ring/Kurlander) | SetOperator + connector | §8 | ✅ Cerrado (todos keep) |
+| **7** | **`setopfinish`** | `_PolyhedralBoundedSolidSetFinisher` | **§9** | 🟡 **En curso** |
 | 8 | Validación visual y regresión | `--motifSweep` + tests slow | §10 | ⏸ Pendiente |
 
 Métrica final esperada: sweep `ok=40, empty=0, invalid=0, blackFaces=0`.
@@ -570,35 +570,61 @@ elevar el rigor teórico, pero la etapa 2 prioriza outcomes.
 
 ---
 
-## 8. Nivel 6 — Cleanup post-núcleo ⏸
+## 8. Nivel 6 — Cleanup post-núcleo ✅ CERRADO (experimentos completados)
 
-Trabajo posible **únicamente** una vez §7 cerrado, porque depende del
-nuevo invariante "looseA == looseB == 0 siempre".
+Los tres sub-pasos de §8 fueron experimentos deliberados. Ninguno produjo
+una limpieza efectiva; todos resultaron en "mantener el estado actual con
+decisión documentada".
 
-### 8.1 §6.2.3 `revert(B)` antes de Connect (Equation 15.1)
+### 8.1 §6.2.3 `revert(B)` antes de Connect ✅ DECIDIDO: mantener en Finisher
 
-Mover `inSolidB.revert()` desde `_PolyhedralBoundedSolidSetFinisher`
-hasta antes de `setOpConnect(op)`. **Resultado del experimento
-previo**: rompía 28 tests con el conector con muletas. Con el
-conector limpio de §6 + §7, el experimento debe repetirse: si pasa,
-la complementación queda donde Mäntylä la quiere; si no, hay un
-detalle adicional que documentar.
+**Experimento (2026-05-15)**: Se movió `inSolidB.revert()` de
+`_PolyhedralBoundedSolidSetFinisher:443` a antes de `setOpConnect(op)` en
+`PolyhedralBoundedSolidSetOperator`. Resultado: **29 fallos** (mismo que
+con el conector anterior). El conector limpio de §6/§7 no cambia la
+dependencia.
 
-### 8.2 §6.3 Eliminar `groupNullEdgesByRing` heurístico
+**Causa raíz**: La secuencia `lmfkrh(inSolidB, ...) → revert(B) →
+movefac → loopGlue` del Finisher require que B esté sin revertir durante
+los `lmfkrh` (que crean las nuevas caras espejo con la orientación
+original) y revertido durante `movefac/loopGlue` (para que las caras de B
+queden con normales complementadas en el resultado SUBTRACT). Mover
+`revert` antes de Connect pasa B ya revertido al `lmfkrh`, invirtiendo
+las orientaciones que luego usa `loopGlue`.
 
-Con §4.3 (orden paramétrico estable) y §7 (sectoroverlap correcto), el
-agrupamiento por anillos debería emerger naturalmente del orden de
-inserción. **Acción**: ejecutar el sweep `--motifSweep` y la suite
-`:base:test` con y sin `groupNullEdgesByRing`. Si los resultados son
-equivalentes, eliminar el método. Si no, formalizar como
-`partitionNullEdgesIntoRings` determinista con tests aislados.
+**Decisión**: `revert(B)` permanece en su posición actual, entre `lmfkrh`
+y `movefac`, dentro del Finisher. Esta posición, aunque diferente al
+Program 15.1 de Mäntylä, es correcta para la implementación actual.
 
-### 8.3 `CsgKurlanderBowlFirstStarRegressionTest` reactivado
+### 8.2 §6.3 `groupNullEdgesByRing` ✅ DECIDIDO: mantener
 
-Eliminar `@Disabled` del test `given_..._then_connectStageClosesAllStarEdges`.
-Si pasa: documentar como avance del sweep. Si no: investigar como
-nueva instancia del problema (probablemente diagnosticable con la
-infraestructura de §7.3.1).
+**Experimento (2026-05-15)**: Se deshabilitó `groupNullEdgesByRing()` en
+`sortNullEdges()`. Resultado: **3 fallos** en
+`CsgKurlanderBowlAllMotifsRegressionTest` — precisamente los motifs con
+múltiples curvas de intersección (e.g., bowl con inner + outer boundary).
+
+**Conclusión**: El método es necesario para multi-ring cases. La
+implementación actual ya usa `partitionNullEdgesIntoRings` (determinista)
++ `sortRingsBySignature` para alineación, lo que satisface el objetivo
+del plan de "formalizar como `partitionNullEdgesIntoRings` determinista".
+No hay nada adicional que eliminar.
+
+### 8.3 `CsgKurlanderBowlFirstStarRegressionTest` quinto star ✅ DIAGNOSTICADO
+
+**Hallazgo (2026-05-15)**: El test `given_..._then_connectStageClosesAllStarEdges`
+(primer star) ya estaba activo y en verde **antes de §8** — no había
+`@Disabled` sobre él.
+
+El `@Disabled` existente era sobre `given_kurlanderBowlAndFifthStar_when_...`.
+Se eliminó el `@Disabled` y se probó: el quinto star (índice 4) produce
+**Face [232] y Face [144] no coplanares** y retorna 0 contornos en lugar
+de 2. Causa: el pipeline Finisher produce caras no coplanares para la
+geometría del quinto star — un issue de §9 (setopfinish).
+
+**Acción**: `@Disabled` restituido con mensaje diagnóstico completo.
+Reactivar tras §9.
+
+**Métricas post-§8**: 293 tests, 0 failures, 6 skipped (sin cambio).
 
 ---
 
@@ -702,8 +728,8 @@ revierte.
 | 3 | §5 Nivel 3 — classify estructural | ✅ Cerrado | — |
 | 4 | §6 Nivel 4 — connect estructural | ✅ Cerrado | — |
 | 5 | §7 Nivel 5 — bugs algebraicos + diagnóstico sectoroverlap | ✅ Cerrado | — |
-| **6** | **§8 Nivel 6 — cleanup post-núcleo** | 🟡 **En curso** | **Medio** |
-| 7 | §9 Nivel 7 — setopfinish | ⏸ Bloqueado por 6 | Medio |
+| 6 | §8 Nivel 6 — cleanup post-núcleo | ✅ Cerrado | — |
+| **7** | **§9 Nivel 7 — setopfinish** | 🟡 **En curso** | **Medio** |
 | 8 | §10 Nivel 8 — validación visual | ⏸ Bloqueado por 7 | Bajo |
 
 Riesgo principal está en el paso 5 (§7). Mitigación: trabajar en sub-pasos
@@ -785,3 +811,12 @@ Por si el ejecutor de la siguiente sesión quiere ir directo:
     actualizado para reflejar eliminación (no "arqueología").
   - §7 (Nivel 5) marcado ✅ CERRADO. Métricas reales: 293/0/6.
   - §8 (Nivel 6) desbloqueado → siguiente bloque activo.
+- **2026-05-15 (sesión §8)**:
+  - §8.1: experimento revert(B) antes de setOpConnect → 29 fallos, revertido.
+    Causa documentada: lmfkrh necesita B sin revertir antes de movefac.
+  - §8.2: experimento sin groupNullEdgesByRing → 3 fallos Kurlander multi-ring,
+    revertido. El método ya es determinista (usa partitionNullEdgesIntoRings).
+  - §8.3: quinto star @Disabled retirado, falla con faces no coplanares [232,144]
+    → issue de §9 Finisher; @Disabled restituido con mensaje diagnóstico.
+  - §8 (Nivel 6) marcado ✅ CERRADO. Métricas: 293/0/6 (sin cambio).
+  - §9 (Nivel 7 — setopfinish) → siguiente bloque activo.

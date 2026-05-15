@@ -90,7 +90,10 @@ class CsgKurlanderBowlFirstStarRegressionTest
     }
 
     @Test
-    @Disabled
+    @Disabled("§8.3 probe (2026-05-15): fifth star (index 4) produces non-coplanar faces "
+        + "[232] and [144] in the CSG result — a Finisher-level issue (§9). "
+        + "countClosedDoubleBoundaryContours returns 0 instead of expected 2. "
+        + "Re-enable after §9 (setopfinish) is hardened.")
     void given_kurlanderBowlAndFifthStar_when_inspectingPartialOperandB_then_twoDoubleBoundaryContoursAreClosed()
     {
         PolyhedralBoundedSolid[] operands =

@@ -47,23 +47,6 @@ public class IndexedColorImageUncompressed extends Image
         this.colorTable = new RGBColorPalette();
     }
 
-    /**
-    This is the class destructor.
-    */
-    @Override
-    public void finalize()
-    {
-        if ( data != null ) {
-            xSize = 0;
-            ySize = 0;
-            data = null;
-        }
-        try {
-            super.finalize();
-        } catch (Throwable ex) {
-        }
-    }
-
     @Override
     public boolean init(int width, int height)
     {

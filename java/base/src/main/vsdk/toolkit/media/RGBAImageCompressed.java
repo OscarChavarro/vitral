@@ -37,24 +37,6 @@ public class RGBAImageCompressed extends Image
         compressedDataSize = 0;
     }
 
-    @Override
-    public void finalize()
-    {
-        if ( data != null ) {
-            data = null;
-            directData = null;
-            xSize = 0;
-            ySize = 0;
-            compressionFormat = COMPRESSION_UNKNOWN;
-            compressedDataSize = 0;
-        }
-        try {
-            super.finalize();
-        }
-        catch (Throwable ex) {
-        }
-    }
-
     public void dettach()
     {
         data = null;
