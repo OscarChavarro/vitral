@@ -34,25 +34,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         "vsdk.setop.connect.allowCrossLooseMatch";
     private static final String KEEP_INSERTION_ORDER_PROPERTY =
         "vsdk.setop.connect.keepInsertionOrder";
-    private static final String FLEXIBLE_ENDPOINT_CHAINS_PROPERTY =
-        "vsdk.setop.connect.flexibleEndpointChains";
-    private static final String FLEXIBLE_SKIP_CUTS_PROPERTY =
-        "vsdk.setop.connect.flexibleSkipCuts";
-    private static final String
-        FLEXIBLE_ALLOW_SAME_POINT_SELF_CLOSURE_PROPERTY =
-        "vsdk.setop.connect.flexibleAllowSamePointSelfClosure";
-    private static final String
-        FLEXIBLE_SKIP_LEGACY_PAIR_FINAL_CUTS_PROPERTY =
-        "vsdk.setop.connect.flexibleSkipLegacyPairFinalCuts";
-    private static final String
-        FLEXIBLE_KEEP_ONLY_PAIRED_CUT_FACES_PROPERTY =
-        "vsdk.setop.connect.flexibleKeepOnlyPairedCutFaces";
-    private static final String
-        FLEXIBLE_ALLOW_CROSS_CHAIN_MERGE_PROPERTY =
-        "vsdk.setop.connect.flexibleAllowCrossChainMerge";
-    private static final String
-        FLEXIBLE_REJECT_ONE_SIDED_MATCHES_PROPERTY =
-        "vsdk.setop.connect.flexibleRejectOneSidedMatches";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_05_CONNECT = 0x10;
     private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
@@ -82,55 +63,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
     }
 
-    private static final class ChainEndpoint
-    {
-        private _PolyhedralBoundedSolidHalfEdge halfEdge;
-        private final int solid;
-
-        private ChainEndpoint(_PolyhedralBoundedSolidHalfEdge halfEdge, int solid)
-        {
-            this.halfEdge = halfEdge;
-            this.solid = solid;
-        }
-    }
-
-    private static final class OpenChain
-    {
-        private ChainEndpoint first;
-        private ChainEndpoint second;
-
-        private OpenChain(ChainEndpoint first, ChainEndpoint second)
-        {
-            this.first = first;
-            this.second = second;
-        }
-    }
-
-    private static final class EndpointMatch
-    {
-        private final int chainIndex;
-        private final boolean firstEndpoint;
-        private final ChainEndpoint endpoint;
-        private final ChainEndpoint otherEndpoint;
-
-        private EndpointMatch(int chainIndex,
-                              boolean firstEndpoint,
-                              ChainEndpoint endpoint,
-                              ChainEndpoint otherEndpoint)
-        {
-            this.chainIndex = chainIndex;
-            this.firstEndpoint = firstEndpoint;
-            this.endpoint = endpoint;
-            this.otherEndpoint = otherEndpoint;
-        }
-    }
-
-    private static final class PointJoinResult
-    {
-        private _PolyhedralBoundedSolidHalfEdge matchedA;
-        private _PolyhedralBoundedSolidHalfEdge matchedB;
-    }
-
     private static final class DeferredCut
     {
         private final _PolyhedralBoundedSolidHalfEdge halfEdge;
@@ -154,7 +86,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static ArrayList<DeferredCut> deferredCutsB;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
     private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
-    private static ArrayList<OpenChain> openChains;
     private static Map<Integer, Integer> sonfaPairIndexByFaceId;
     private static Map<Integer, Integer> sonfbPairIndexByFaceId;
     private static int lastLooseACount;
@@ -184,46 +115,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             return true;
         }
         return Boolean.parseBoolean(propertyValue);
-    }
-
-    private static boolean isFlexibleEndpointChainsEnabled()
-    {
-        return Boolean.getBoolean(FLEXIBLE_ENDPOINT_CHAINS_PROPERTY);
-    }
-
-    private static boolean isFlexibleSkipCutsEnabled()
-    {
-        return Boolean.getBoolean(FLEXIBLE_SKIP_CUTS_PROPERTY);
-    }
-
-    private static boolean isFlexibleSamePointSelfClosureEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_ALLOW_SAME_POINT_SELF_CLOSURE_PROPERTY);
-    }
-
-    private static boolean isFlexibleSkipLegacyPairFinalCutsEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_SKIP_LEGACY_PAIR_FINAL_CUTS_PROPERTY);
-    }
-
-    private static boolean isFlexibleKeepOnlyPairedCutFacesEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_KEEP_ONLY_PAIRED_CUT_FACES_PROPERTY);
-    }
-
-    private static boolean isFlexibleAllowCrossChainMergeEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_ALLOW_CROSS_CHAIN_MERGE_PROPERTY);
-    }
-
-    private static boolean isFlexibleRejectOneSidedMatchesEnabled()
-    {
-        return Boolean.getBoolean(
-            FLEXIBLE_REJECT_ONE_SIDED_MATCHES_PROPERTY);
     }
 
     private static void tracePipelineSummary(String message)
@@ -340,175 +231,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return out.toString();
     }
 
-    private static String summarizeChainEndpoint(ChainEndpoint endpoint)
-    {
-        if ( endpoint == null ) {
-            return "null";
-        }
-        return (endpoint.solid == ENDPOINT_SOLID_A ? "A=" : "B=") +
-            summarizeHalfEdge(endpoint.halfEdge);
-    }
-
-    private static String summarizeOpenChains()
-    {
-        StringBuilder out = new StringBuilder();
-        int i;
-
-        if ( openChains == null ) {
-            return "chains=0 []";
-        }
-        out.append("chains=").append(openChains.size()).append(" [");
-        for ( i = 0; i < openChains.size(); i++ ) {
-            if ( i > 0 ) {
-                out.append(" | ");
-            }
-            out.append(i)
-               .append(":")
-               .append(summarizeChainEndpoint(openChains.get(i).first))
-               .append(",")
-               .append(summarizeChainEndpoint(openChains.get(i).second));
-        }
-        out.append("]");
-        return out.toString();
-    }
-
-    private static ChainEndpoint endpointForSolid(OpenChain chain, int solid)
-    {
-        if ( chain == null ) {
-            return null;
-        }
-        if ( chain.first != null && chain.first.solid == solid ) {
-            return chain.first;
-        }
-        if ( chain.second != null && chain.second.solid == solid ) {
-            return chain.second;
-        }
-        return null;
-    }
-
-    private static int countOpenEndpoints(int solid)
-    {
-        int count = 0;
-        int i;
-
-        if ( openChains == null ) {
-            return 0;
-        }
-        for ( i = 0; i < openChains.size(); i++ ) {
-            if ( openChains.get(i).first.solid == solid ) {
-                count++;
-            }
-            if ( openChains.get(i).second.solid == solid ) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private static void updateLastSnapshotFromOpenChains()
-    {
-        lastLooseACount = countOpenEndpoints(ENDPOINT_SOLID_A);
-        lastLooseBCount = countOpenEndpoints(ENDPOINT_SOLID_B);
-        lastSonfaCount = (sonfa != null) ? sonfa.size() : 0;
-        lastSonfbCount = (sonfb != null) ? sonfb.size() : 0;
-    }
-
-    private static EndpointMatch findEndpointMatch(
-        _PolyhedralBoundedSolidHalfEdge current,
-        int solid)
-    {
-        int i;
-        EndpointMatch found = null;
-        ChainEndpoint endpoint;
-        ChainEndpoint other;
-
-        if ( openChains == null ) {
-            return null;
-        }
-        for ( i = 0; i < openChains.size(); i++ ) {
-            endpoint = openChains.get(i).first;
-            other = openChains.get(i).second;
-            if ( endpoint.solid == solid &&
-                 neighbor(current, endpoint.halfEdge) &&
-                 (isFlexibleSamePointSelfClosureEnabled() ||
-                  !isSamePoint(current, endpoint.halfEdge)) ) {
-                if ( found == null ) {
-                    found = new EndpointMatch(i, true, endpoint, other);
-                }
-                else {
-                }
-            }
-            endpoint = openChains.get(i).second;
-            other = openChains.get(i).first;
-            if ( endpoint.solid == solid &&
-                 neighbor(current, endpoint.halfEdge) &&
-                 (isFlexibleSamePointSelfClosureEnabled() ||
-                  !isSamePoint(current, endpoint.halfEdge)) ) {
-                if ( found == null ) {
-                    found = new EndpointMatch(i, false, endpoint, other);
-                }
-                else {
-                }
-            }
-        }
-        return found;
-    }
-
-    private static void replaceMatchedEndpoint(EndpointMatch match,
-                                               ChainEndpoint replacement)
-    {
-        if ( match.firstEndpoint ) {
-            openChains.get(match.chainIndex).first = replacement;
-        }
-        else {
-            openChains.get(match.chainIndex).second = replacement;
-        }
-    }
-
-    private static void removeOpenChain(int chainIndex)
-    {
-        openChains.remove(chainIndex);
-    }
-
-    private static boolean isFlexibleLooseA(_PolyhedralBoundedSolidHalfEdge he)
-    {
-        int i;
-
-        if ( he == null || openChains == null ) {
-            return false;
-        }
-        for ( i = 0; i < openChains.size(); i++ ) {
-            if ( openChains.get(i).first.solid == ENDPOINT_SOLID_A &&
-                 openChains.get(i).first.halfEdge == he ) {
-                return true;
-            }
-            if ( openChains.get(i).second.solid == ENDPOINT_SOLID_A &&
-                 openChains.get(i).second.halfEdge == he ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isFlexibleLooseB(_PolyhedralBoundedSolidHalfEdge he)
-    {
-        int i;
-
-        if ( he == null || openChains == null ) {
-            return false;
-        }
-        for ( i = 0; i < openChains.size(); i++ ) {
-            if ( openChains.get(i).first.solid == ENDPOINT_SOLID_B &&
-                 openChains.get(i).first.halfEdge == he ) {
-                return true;
-            }
-            if ( openChains.get(i).second.solid == ENDPOINT_SOLID_B &&
-                 openChains.get(i).second.halfEdge == he ) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private static boolean isSamePoint(_PolyhedralBoundedSolidHalfEdge first,
                                        _PolyhedralBoundedSolidHalfEdge second)
@@ -521,14 +243,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             first.startingVertex.position,
             second.startingVertex.position,
             numericContext);
-    }
-
-    private static boolean isSamePoint(ChainEndpoint first, ChainEndpoint second)
-    {
-        if ( first == null || second == null ) {
-            return false;
-        }
-        return isSamePoint(first.halfEdge, second.halfEdge);
     }
 
     private static boolean canCutCoincidentHalfEdge(
@@ -552,14 +266,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             return true;
         }
         return loop.halfEdgesList.size() > 2;
-    }
-
-    private static boolean canCutCoincidentEndpoint(ChainEndpoint endpoint)
-    {
-        if ( endpoint == null ) {
-            return false;
-        }
-        return canCutCoincidentHalfEdge(endpoint.halfEdge);
     }
 
     private static boolean hasReusableCoincidentCutFace(
@@ -623,34 +329,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return face;
     }
 
-    private static _PolyhedralBoundedSolidFace registerCoincidentCutFace(
-        ChainEndpoint endpoint,
-        ArrayList<_PolyhedralBoundedSolidFace> target,
-        String label)
-    {
-        if ( endpoint == null ) {
-            return null;
-        }
-        return registerCoincidentCutFace(endpoint.halfEdge, target, label);
-    }
 
-    private static _PolyhedralBoundedSolidFace
-    finalizeCoincidentChainEndpointA(ChainEndpoint endpoint)
-    {
-        if ( canCutCoincidentEndpoint(endpoint) ) {
-            return cutA(endpoint.halfEdge);
-        }
-        return registerCoincidentCutFace(endpoint, sonfa, "reuse-sonfa");
-    }
-
-    private static _PolyhedralBoundedSolidFace
-    finalizeCoincidentChainEndpointB(ChainEndpoint endpoint)
-    {
-        if ( canCutCoincidentEndpoint(endpoint) ) {
-            return cutB(endpoint.halfEdge);
-        }
-        return registerCoincidentCutFace(endpoint, sonfb, "reuse-sonfb");
-    }
 
     private static boolean canFinalizeCoincidentLooseA(
         _PolyhedralBoundedSolidHalfEdge he)
@@ -758,63 +437,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 finalizeCoincidentLooseB(endsb.get(i));
                 removeLoosePair(j);
                 removeLoosePair(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean closeFlexibleChainsByCoincidentEndpoints()
-    {
-        int i;
-        int j;
-
-        if ( openChains == null ) {
-            return false;
-        }
-
-        for ( i = 0; i < openChains.size(); i++ ) {
-            ChainEndpoint a0 = endpointForSolid(openChains.get(i),
-                ENDPOINT_SOLID_A);
-            ChainEndpoint b0 = endpointForSolid(openChains.get(i),
-                ENDPOINT_SOLID_B);
-            if ( a0 == null || b0 == null ) {
-                continue;
-            }
-
-            for ( j = i + 1; j < openChains.size(); j++ ) {
-                ChainEndpoint a1 = endpointForSolid(openChains.get(j),
-                    ENDPOINT_SOLID_A);
-                ChainEndpoint b1 = endpointForSolid(openChains.get(j),
-                    ENDPOINT_SOLID_B);
-                _PolyhedralBoundedSolidFace addedA;
-                _PolyhedralBoundedSolidFace addedB;
-
-                if ( a1 == null || b1 == null ) {
-                    continue;
-                }
-                if ( !isSamePoint(a0, a1) || !isSamePoint(b0, b1) ) {
-                    continue;
-                }
-
-                tracePipelineSummary(
-                    "connect coincident-chain closure i=" + i + " j=" + j +
-                    " A0=" + summarizeChainEndpoint(a0) +
-                    " A1=" + summarizeChainEndpoint(a1) +
-                    " B0=" + summarizeChainEndpoint(b0) +
-                    " B1=" + summarizeChainEndpoint(b1));
-
-                setCurrentConnectContext(allocateSyntheticPairIndex());
-                addedA = finalizeCoincidentChainEndpointA(a0);
-                addedB = finalizeCoincidentChainEndpointB(b0);
-                if ( addedA == null || addedB == null ) {
-                    keepOnlyPairedFlexibleCutFaces(addedA, addedB,
-                        "coincident-chain");
-                    continue;
-                }
-
-                openChains.remove(j);
-                openChains.remove(i);
                 return true;
             }
         }
@@ -1155,30 +777,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return cutB(he);
     }
 
-    private static _PolyhedralBoundedSolidFace cutOrDeferFlexibleA(
-        _PolyhedralBoundedSolidHalfEdge he)
-    {
-        if ( shouldDeferFlexibleCutA(he) ) {
-            rememberDeferredCut(deferredCutsA, he);
-            tracePipelineSummary(
-                "connect defer cutA " + summarizeHalfEdge(he));
-            return null;
-        }
-        return cutA(he);
-    }
-
-    private static _PolyhedralBoundedSolidFace cutOrDeferFlexibleB(
-        _PolyhedralBoundedSolidHalfEdge he)
-    {
-        if ( shouldDeferFlexibleCutB(he) ) {
-            rememberDeferredCut(deferredCutsB, he);
-            tracePipelineSummary(
-                "connect defer cutB " + summarizeHalfEdge(he));
-            return null;
-        }
-        return cutB(he);
-    }
-
     private static boolean flushDeferredCuts(
         ArrayList<DeferredCut> deferredCuts,
         boolean onSolidA,
@@ -1238,18 +836,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             progress = false;
             progress |= flushDeferredCuts(deferredCutsA, true, false);
             progress |= flushDeferredCuts(deferredCutsB, false, false);
-        } while ( progress );
-    }
-
-    private static void flushDeferredFlexibleCuts()
-    {
-        boolean progress;
-
-        setCurrentConnectContext(-1);
-        do {
-            progress = false;
-            progress |= flushDeferredCuts(deferredCutsA, true, true);
-            progress |= flushDeferredCuts(deferredCutsB, false, true);
         } while ( progress );
     }
 
@@ -1842,16 +1428,14 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         lastLooseBCount = 0;
         lastSonfaCount = 0;
         lastSonfbCount = 0;
-        openChains = null;
         nextSyntheticPairIndex = lastPairCount;
         deferredCutsA = new ArrayList<DeferredCut>();
         deferredCutsB = new ArrayList<DeferredCut>();
-        if ( isFlexibleEndpointChainsEnabled() ) {
-            setOpConnectWithFlexibleChains();
-        }
-        else {
-            setOpConnect();
-        }
+        // [MANT1988] §15.7 Program 15.14: single Connect implementation.
+        // The "flexibleEndpointChains" alternative path was removed in §6.1
+        // of plan-csg-boolean-fix-stage2 because it duplicated setOpConnect
+        // with extra heuristics that the book does not require.
+        setOpConnect();
         return new ConnectResult(sonfa, sonfb);
     }
 
@@ -2258,23 +1842,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
     }
 
-    private static void keepOnlyPairedFlexibleCutFaces(
-        _PolyhedralBoundedSolidFace addedA,
-        _PolyhedralBoundedSolidFace addedB,
-        String context)
-    {
-        if ( !isFlexibleKeepOnlyPairedCutFacesEnabled() ||
-             ((addedA == null) == (addedB == null)) ) {
-            return;
-        }
-
-        if ( addedA != null ) {
-            removeLastCutFaceIfSame(sonfa, addedA);
-        }
-        if ( addedB != null ) {
-            removeLastCutFaceIfSame(sonfb, addedB);
-        }
-    }
 
     private static void removeLooseEndsA(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -2308,258 +1875,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             }
             he = he.next();
         } while ( he != heStart );
-    }
-
-    private static PointJoinResult processPointWithFlexibleChains(
-        _PolyhedralBoundedSolidHalfEdge currentA,
-        _PolyhedralBoundedSolidHalfEdge currentB,
-        boolean withDebug,
-        boolean allowRingMoveOnAJoin,
-        boolean allowRingMoveOnBJoin)
-    {
-        EndpointMatch matchA;
-        EndpointMatch matchB;
-        PointJoinResult result;
-        int firstRemove;
-        int secondRemove;
-
-        result = new PointJoinResult();
-        matchA = findEndpointMatch(currentA, ENDPOINT_SOLID_A);
-        matchB = findEndpointMatch(currentB, ENDPOINT_SOLID_B);
-        if ( matchA != null && matchB == null &&
-             isSamePoint(currentA, matchA.endpoint.halfEdge) ) {
-            matchA = null;
-        }
-        if ( matchB != null && matchA == null &&
-             isSamePoint(currentB, matchB.endpoint.halfEdge) ) {
-            matchB = null;
-        }
-        if ( matchA != null && matchB != null &&
-             matchA.chainIndex != matchB.chainIndex &&
-             !isFlexibleAllowCrossChainMergeEnabled() ) {
-            matchA = null;
-            matchB = null;
-        }
-        if ( (matchA == null) != (matchB == null) &&
-             isFlexibleRejectOneSidedMatchesEnabled() ) {
-            matchA = null;
-            matchB = null;
-        }
-
-        if ( matchA != null ) {
-            result.matchedA = matchA.endpoint.halfEdge;
-            join(matchA.endpoint.halfEdge, currentA, withDebug,
-                allowRingMoveOnAJoin);
-        }
-        if ( matchB != null ) {
-            result.matchedB = matchB.endpoint.halfEdge;
-            join(matchB.endpoint.halfEdge, currentB, withDebug,
-                allowRingMoveOnBJoin);
-        }
-
-        if ( matchA == null && matchB == null ) {
-            openChains.add(new OpenChain(
-                new ChainEndpoint(currentA, ENDPOINT_SOLID_A),
-                new ChainEndpoint(currentB, ENDPOINT_SOLID_B)));
-        }
-        else if ( matchA != null && matchB == null ) {
-            replaceMatchedEndpoint(matchA,
-                new ChainEndpoint(currentB, ENDPOINT_SOLID_B));
-        }
-        else if ( matchA == null ) {
-            replaceMatchedEndpoint(matchB,
-                new ChainEndpoint(currentA, ENDPOINT_SOLID_A));
-        }
-        else if ( matchA.chainIndex == matchB.chainIndex ) {
-            removeOpenChain(matchA.chainIndex);
-        }
-        else {
-            ChainEndpoint remainingA;
-            ChainEndpoint remainingB;
-
-            remainingA = matchA.otherEndpoint;
-            remainingB = matchB.otherEndpoint;
-            firstRemove = Math.max(matchA.chainIndex, matchB.chainIndex);
-            secondRemove = Math.min(matchA.chainIndex, matchB.chainIndex);
-            removeOpenChain(firstRemove);
-            removeOpenChain(secondRemove);
-            openChains.add(new OpenChain(remainingA, remainingB));
-        }
-
-        if ( matchA != null &&
-             !isFlexibleSkipCutsEnabled() &&
-             !isFlexibleLooseA(matchA.endpoint.halfEdge.mirrorHalfEdge()) ) {
-            _PolyhedralBoundedSolidFace addedA = null;
-            _PolyhedralBoundedSolidFace addedB = null;
-            addedA = cutOrDeferFlexibleA(matchA.endpoint.halfEdge);
-            if ( matchB != null &&
-                 !isFlexibleLooseB(matchB.endpoint.halfEdge.mirrorHalfEdge()) ) {
-                addedB = cutOrDeferFlexibleB(matchB.endpoint.halfEdge);
-            }
-            keepOnlyPairedFlexibleCutFaces(addedA, addedB, "point");
-        }
-        else if ( matchB != null &&
-             !isFlexibleSkipCutsEnabled() &&
-             !isFlexibleLooseB(matchB.endpoint.halfEdge.mirrorHalfEdge()) ) {
-            _PolyhedralBoundedSolidFace addedB;
-            addedB = cutOrDeferFlexibleB(matchB.endpoint.halfEdge);
-            keepOnlyPairedFlexibleCutFaces(null, addedB, "point");
-        }
-        if ( isFlexibleSkipCutsEnabled() && (matchA != null || matchB != null) ) {
-        }
-        return result;
-    }
-
-    private static void setOpConnectWithFlexibleChains()
-    {
-        if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
-            System.out.println("- 3. ------------------------------------------------------------------------------------------------------------------------------------------------------");
-        }
-
-        sortNullEdges();
-
-        int i;
-
-        if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
-            System.out.println("SORTED SET OF " + sonea.size() + " NULL EDGES PAIRS TO BE CONNECTED");
-        }
-        tracePipelineSummary(
-            "connect start pairsA=" + sonea.size() +
-            " pairsB=" + soneb.size() + " mode=flexibleEndpointChains");
-        for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
-        }
-
-        _PolyhedralBoundedSolidEdge nextedgea;
-        _PolyhedralBoundedSolidEdge nextedgeb;
-        _PolyhedralBoundedSolidHalfEdge h1a = null;
-        _PolyhedralBoundedSolidHalfEdge h2a = null;
-        _PolyhedralBoundedSolidHalfEdge h1b = null;
-        _PolyhedralBoundedSolidHalfEdge h2b = null;
-        PointJoinResult pointResult;
-        // Ring-move policy after §6.2 cleanup: derived purely from the
-        // operation. The forceARingMove and flexibleDisableBRingMoveForSubtract
-        // flags were removed because they only ever flipped behaviour from
-        // the recovery retry path that §6.2.1 deleted.
-        boolean allowRingMoveOnAJoin = (operation == INTERSECTION);
-        boolean allowRingMoveOnBJoin = true;
-        boolean withDebug = ((debugFlags & DEBUG_99_SHOWOPERATIONS) != 0x0) &&
-                            ((debugFlags & DEBUG_05_CONNECT) != 0x00);
-
-        endsa = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
-        endsb = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
-        openChains = new ArrayList<OpenChain>();
-
-        sonfa = new ArrayList<_PolyhedralBoundedSolidFace>();
-        sonfb = new ArrayList<_PolyhedralBoundedSolidFace>();
-        sonfaPairIndexByFaceId = new HashMap<Integer, Integer>();
-        sonfbPairIndexByFaceId = new HashMap<Integer, Integer>();
-        setCurrentConnectContext(-1);
-
-        if ( sonea.size() != soneb.size() ) {
-            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-            System.out.println("**** Not paired null edges!");
-        }
-
-        for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
-            _PolyhedralBoundedSolidHalfEdge ha;
-            _PolyhedralBoundedSolidHalfEdge ham;
-            _PolyhedralBoundedSolidHalfEdge hb;
-            _PolyhedralBoundedSolidHalfEdge hbm;
-            _PolyhedralBoundedSolidHalfEdge tmp;
-
-            ha = sonea.get(i).e.rightHalf;
-            ham = sonea.get(i).e.leftHalf;
-            hb = soneb.get(i).e.rightHalf;
-            hbm = soneb.get(i).e.leftHalf;
-            setCurrentConnectContext(i);
-            tracePipelineSummary(
-                "connect pair[" + i + "] A{" + summarizeNullEdge(sonea.get(i)) +
-                "} B{" + summarizeNullEdge(soneb.get(i)) + "}");
-
-            nextedgea = sonea.get(i).e;
-            nextedgeb = soneb.get(i).e;
-            h1a = null;
-            h2a = null;
-            h1b = null;
-            h2b = null;
-            if ( ha.startingVertex.id > ham.startingVertex.id ) {
-                tmp = nextedgea.rightHalf;
-                nextedgea.rightHalf = nextedgea.leftHalf;
-                nextedgea.leftHalf = tmp;
-            }
-            if ( hb.startingVertex.id > hbm.startingVertex.id ) {
-                tmp = nextedgeb.rightHalf;
-                nextedgeb.rightHalf = nextedgeb.leftHalf;
-                nextedgeb.leftHalf = tmp;
-            }
-
-            pointResult = processPointWithFlexibleChains(
-                nextedgea.rightHalf, nextedgeb.leftHalf, withDebug,
-                allowRingMoveOnAJoin, allowRingMoveOnBJoin);
-            h1a = pointResult.matchedA;
-            h2b = pointResult.matchedB;
-
-            pointResult = processPointWithFlexibleChains(
-                nextedgea.leftHalf, nextedgeb.rightHalf, withDebug,
-                allowRingMoveOnAJoin, allowRingMoveOnBJoin);
-            h2a = pointResult.matchedA;
-            h1b = pointResult.matchedB;
-
-            if ( h1a != null && h1b != null && h2a != null && h2b != null ) {
-                if ( isFlexibleSkipLegacyPairFinalCutsEnabled() ) {
-                }
-                else {
-                    _PolyhedralBoundedSolidFace addedA;
-                    _PolyhedralBoundedSolidFace addedB;
-                    addedA = cutOrDeferFlexibleA(nextedgea.rightHalf);
-                    addedB = cutOrDeferFlexibleB(nextedgeb.rightHalf);
-                    keepOnlyPairedFlexibleCutFaces(addedA, addedB,
-                        "pair[" + i + "]");
-                }
-                tracePipelineSummary(
-                    "connect pair[" + i + "] produced cuts h1a=" +
-                    summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +
-                    " h1b=" + summarizeHalfEdge(h1b) + " h2b=" +
-                    summarizeHalfEdge(h2b));
-            }
-            else {
-                PolyhedralBoundedSolidStatistics.recordJoinIncompleteCase();
-                PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
-                tracePipelineSummary(
-                    "connect pair[" + i + "] incomplete h1a=" +
-                    summarizeHalfEdge(h1a) + " h2a=" + summarizeHalfEdge(h2a) +
-                    " h1b=" + summarizeHalfEdge(h1b) + " h2b=" +
-                    summarizeHalfEdge(h2b) + " looseA=" +
-                    countOpenEndpoints(ENDPOINT_SOLID_A) + " looseB=" +
-                    countOpenEndpoints(ENDPOINT_SOLID_B));
-            }
-        }
-
-        tracePipelineSummary(
-            "connect end sonfa=" + sonfa.size() +
-            " sonfb=" + sonfb.size() +
-            " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
-            " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
-        while ( closeFlexibleChainsByCoincidentEndpoints() ) {
-            tracePipelineSummary(
-                "connect coincident-chain pass sonfa=" + sonfa.size() +
-                " sonfb=" + sonfb.size() +
-                " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
-                " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
-        }
-        flushDeferredFlexibleCuts();
-        tracePipelineSummary(
-            "connect post-pass sonfa=" + sonfa.size() +
-            " sonfb=" + sonfb.size() +
-            " looseA=" + countOpenEndpoints(ENDPOINT_SOLID_A) +
-            " looseB=" + countOpenEndpoints(ENDPOINT_SOLID_B));
-        updateLastSnapshotFromOpenChains();
-
-        for ( i = 0; i < openChains.size(); i++ ) {
-            tracePipelineSummary("connect chain[" + i + "] " +
-                summarizeChainEndpoint(openChains.get(i).first) + " " +
-                summarizeChainEndpoint(openChains.get(i).second));
-        }
     }
 
     /**

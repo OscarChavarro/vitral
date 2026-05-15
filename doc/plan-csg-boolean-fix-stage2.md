@@ -489,6 +489,64 @@ curva).
    quedan loose, es bug que se reporta como `IllegalStateException`,
    no se intenta cerrar con heurística.
 
+#### Avance §6.1-A — eliminación del camino dual `flexibleEndpointChains` ✅
+
+**Hito completado**: el conector tenía **dos implementaciones**
+paralelas de Connect — la "clásica" (`setOpConnect`, alineada
+estructuralmente con Program 15.14) y `setOpConnectWithFlexibleChains`
+(una variante con heurísticas de open-chain matching). La selección
+se hacía por system property `vsdk.setop.connect.flexibleEndpointChains`,
+que en la suite real solo se activaba en un único test (no afectaba el
+resultado, era equivalente a la clásica para el caso medido).
+
+**Acción**: se eliminó por completo el camino flexible y todo su
+ecosistema dependiente:
+
+- Switch en `connect()` simplificado a llamar directamente
+  `setOpConnect()`.
+- Función `setOpConnectWithFlexibleChains` borrada (~150 LOC).
+- 8 funciones helper borradas exclusivas del camino flexible:
+  `processPointWithFlexibleChains`, `closeFlexibleChainsByCoincidentEndpoints`,
+  `cutOrDeferFlexibleA/B`, `flushDeferredFlexibleCuts`,
+  `keepOnlyPairedFlexibleCutFaces`, `findEndpointMatch`,
+  `replaceMatchedEndpoint`, `removeOpenChain`,
+  `isFlexibleLooseA/B`, `endpointForSolid`,
+  `summarizeChainEndpoint`, `summarizeOpenChains`,
+  `countOpenEndpoints`, `updateLastSnapshotFromOpenChains`,
+  `finalizeCoincidentChainEndpointA/B`,
+  `canCutCoincidentEndpoint`, `isSamePoint(ChainEndpoint,…)`,
+  `registerCoincidentCutFace(ChainEndpoint,…)`.
+- 7 system properties `flexible*` eliminadas con sus getters:
+  `flexibleEndpointChains`, `flexibleSkipCuts`,
+  `flexibleAllowSamePointSelfClosure`,
+  `flexibleSkipLegacyPairFinalCuts`,
+  `flexibleKeepOnlyPairedCutFaces`,
+  `flexibleAllowCrossChainMerge`,
+  `flexibleRejectOneSidedMatches`.
+- 4 inner classes borradas: `ChainEndpoint`, `OpenChain`,
+  `EndpointMatch`, `PointJoinResult`.
+- Variable estática `openChains` y todo el bookkeeping asociado
+  borrado.
+- Test `given_..._when_flexibleBilateralConnectRuns_then_...`
+  renombrado a `..._when_classicConnectRuns_then_...` y
+  simplificado quitando los toggles de system properties.
+
+**Métrica**: ~700 LOC netas eliminadas en
+`_PolyhedralBoundedSolidSetNullEdgesConnector.java` (de 2790 a 2090).
+Suite verde sin regresión: **275 tests, 0 failures, 9 skipped** —
+incluido el invariante `SetOpConnectNoLooseInvariantTest` baseline.
+
+**Significado para §6.1**: queda el camino clásico `setOpConnect()`
+como única implementación, la cual ya tiene la **estructura externa**
+de Program 15.14 (bucle por pares de null-edges con scanjoin/join/cut).
+Las acciones (1)-(3) restantes — sustituir `canJoin` por `scanjoin`
+estricto, eliminar `closeLegacyCoincidentLooseEnds` y los
+post-procesamientos (`resolveClassicAlternatingLooseCycle`,
+`resolveClassicLooseNetwork`, `flushDeferredClassicCuts`) — se
+abordarán en sub-hitos siguientes (§6.1-B, §6.1-C, …) usando los
+2 casos pending del invariante test (MANT1988_15_1 + INTERSECTION/SUBTRACT)
+como métrica de progreso.
+
 ### 6.2 Eliminar `forceARingMove` y el retry de subtract
 
 **Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` hacía

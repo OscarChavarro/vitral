@@ -285,54 +285,30 @@ class PolyhedralBoundedSolidSetOperatorTest
     }
 
     @org.junit.jupiter.api.Test
-    void given_mant1988Section15_1DifferenceBA_when_flexibleBilateralConnectRuns_then_resultClosesDoubleLoop()
+    void given_mant1988Section15_1DifferenceBA_when_classicConnectRuns_then_resultClosesDoubleLoop()
     {
-        // Arrange
-        String[] properties = new String[] {
-            "vsdk.setop.connect.keepInsertionOrder",
-            "vsdk.setop.connect.flexibleEndpointChains",
-            "vsdk.setop.connect.flexibleAllowSamePointSelfClosure",
-            "vsdk.setop.connect.flexibleKeepOnlyPairedCutFaces",
-            "vsdk.setop.connect.flexibleRejectOneSidedMatches"
-        };
-        String[] previousValues = new String[properties.length];
-        int i;
+        // Originally this test toggled the "flexibleEndpointChains" path
+        // (and four sibling flags). After §6.1-A of plan-csg-boolean-fix-stage2
+        // the flexible path was removed: the classic Connect (the only one
+        // left) must still produce the same B-A subtract result topology
+        // documented by Mantyla §15.1 figure.
+        PolyhedralBoundedSolid[] operands =
+            PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
 
-        for ( i = 0; i < properties.length; i++ ) {
-            previousValues[i] = System.getProperty(properties[i]);
-            System.setProperty(properties[i], "true");
-        }
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
 
-        // Action
-        try {
-            PolyhedralBoundedSolid[] operands =
-                PolyhedralBoundedSolidTestFixtures.createMant1988_15_1Pair();
-            PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
-                operands[1], operands[0], PolyhedralBoundedSolidModeler.SUBTRACT,
-                false);
-
-            // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.getPolygonsList().size()).isEqualTo(8);
-            assertThat(result.getEdgesList().size()).isEqualTo(18);
-            assertThat(result.getVerticesList().size()).isEqualTo(12);
-            assertThat(PolyhedralBoundedSolidValidationEngine
-                .validateIntermediate(result)).isTrue();
-            assertThat(PolyhedralBoundedSolidValidationEngine
-                .validateStrict(result)).isTrue();
-            assertThat(result.getMinMax()).containsExactly(
-                1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
-        }
-        finally {
-            for ( i = 0; i < properties.length; i++ ) {
-                if ( previousValues[i] == null ) {
-                    System.clearProperty(properties[i]);
-                }
-                else {
-                    System.setProperty(properties[i], previousValues[i]);
-                }
-            }
-        }
+        assertThat(result).isNotNull();
+        assertThat(result.getPolygonsList().size()).isEqualTo(8);
+        assertThat(result.getEdgesList().size()).isEqualTo(18);
+        assertThat(result.getVerticesList().size()).isEqualTo(12);
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(result)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateStrict(result)).isTrue();
+        assertThat(result.getMinMax()).containsExactly(
+            1.0 / 3.0, 0.0, 0.25, 1.0, 1.0, 1.0);
     }
 
     @org.junit.jupiter.api.Test
