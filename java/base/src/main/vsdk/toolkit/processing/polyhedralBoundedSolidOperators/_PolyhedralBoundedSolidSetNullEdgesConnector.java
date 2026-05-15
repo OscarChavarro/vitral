@@ -1039,6 +1039,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
 
+
     /**
     Neighbor null edges connector for the set operations algorithm
     (big phase 3).
@@ -1231,9 +1232,13 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             " looseB=" + endsb.size());
         // §6.1-B: post-loop safety nets removed.
         // Per [MANT1988] Program 15.14, the main loop must leave
-        // looseA == looseB == 0 by itself, and cuts must happen
-        // immediately (no deferrals); any survivor is a bug in
-        // scanjoin/join, not something to patch here.
+        // looseA == looseB == 0 by itself. Any survivor for
+        // MANT1988_15_1 INTERSECTION/SUBTRACT (looseA=4) is the
+        // visible symptom of the §5.2 deferred sectoroverlap fix
+        // upstream — see plan §6.1-C analysis. A post-pass closure
+        // (pairLatentLooseEnds) was attempted but turned out to fuse
+        // legitimately-separate shells in cases like HOLLOW_BRICK, so
+        // it was retired. The right fix is upstream, not here.
         tracePipelineSummary(
             "connect post-pass sonfa=" + sonfa.size() +
             " sonfb=" + sonfb.size() +

@@ -70,11 +70,12 @@ class SetOpConnectNoLooseInvariantTest
             .isZero();
     }
 
-    @Disabled("Pending §6.1.3+: §6.1-A/B/1/2 already shaped the connector "
-        + "structurally to Program 15.14, but scanjoin's neighbor-based matching "
-        + "still leaves looseA=4 for these MANT1988_15_1 cases. The remaining "
-        + "gap is in the scanjoin neighbor predicate, intertwined with the §5.2 "
-        + "deferred sectoroverlap fix. Re-enable when both close.")
+    @Disabled("Pending §6.1-C/§5.2 unified: scanjoin's main loop misses "
+        + "latent loose-pair closures for MANT1988_15_1 INTERSECTION/SUBTRACT "
+        + "(looseA=4). Diagnosis: the loose halves satisfy neighbor() between "
+        + "themselves but scanjoin only compares new-vs-loose. A post-pass "
+        + "closure was attempted in §6.1-C-attempt-1 but fused legitimately-"
+        + "separate shells (HOLLOW_BRICK case) — needs upstream §5.2 fix.")
     @ParameterizedTest(name = "{0} + {1}")
     @MethodSource("pendingCases")
     void given_pendingPair_when_setopRuns_then_connectShouldLeaveNoLooseEndpoints(

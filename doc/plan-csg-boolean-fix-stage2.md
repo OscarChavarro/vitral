@@ -673,6 +673,70 @@ sectoroverlap**. Atacarlos requerirá modificar la lógica del matching
 (el cuerpo del {@code if (condition1 && condition2)}) en combinación
 con sectoroverlap. Es el sub-hito §6.1-C / §5.2 unificado.
 
+#### Avance §6.1-C — diagnóstico y rechazo de post-pass heurístico ⚠
+
+**Estado**: análisis profundo completado; **un intento de fix
+descartado** por causar regresiones. Lección documentada para el
+próximo intento.
+
+**Diagnóstico completo** (vía harness temporal de inspección de
+{@code endsa}/{@code endsb} tras el bucle principal):
+
+Para los 2 casos MANT1988_15_1 + INTERSECTION/SUBTRACT, los 4 survivors
+en {@code endsa} (idem en {@code endsb}) son **2 null-edges con sus
+dos halves acumulados sin parear**. Por ejemplo, en SUBTRACT:
+
+| Slot | Face | Vert | Side |
+|---|---|---|---|
+| endsa[0] | 5  | 10→42 | R |
+| endsa[1] | 39 | 42→10 | L |
+| endsa[2] | 39 | 4→39  | R |
+| endsa[3] | 5  | 39→4  | L |
+
+Los pares {endsa[0], endsa[3]} (misma face=5, sides R+L) y
+{endsa[1], endsa[2]} (misma face=39, sides L+R) **satisfacen el
+predicado {@code neighbor()}** entre sí pero {@code scanjoin} no los
+detectó porque solo compara *nuevo* vs *acumulado*, nunca
+*acumulado* vs *acumulado*.
+
+Lo mismo en B, pero con índices descorrelacionados de A:
+{endsb[0], endsb[1]} y {endsb[2], endsb[3]} — las parejas A y B
+**no están alineadas por índice**.
+
+**Intento de fix descartado**: implementé un post-pass
+{@code pairLatentLooseEnds} (con guard {@code canCloseAllLatents} y
+{@code sameLoopNeighbor}) que cerraba los latentes vía
+{@code join}/{@code cut}. Cerró exitosamente los 2 casos pending
+(invariante 6/6) pero **rompió HOLLOW_BRICK** (INTERSECTION,
+DIFFERENCE_A/B). Causa: en HOLLOW_BRICK los loose latentes también
+satisfacen {@code sameLoopNeighbor} entre sí — pero pertenecen a
+**cáscaras topológicamente independientes** que el post-pass fusiona
+en una sola, contradiciendo la expectativa de 2 shells (Euler=4).
+
+No fue posible encontrar un predicado discriminador entre "loose que
+DEBE cerrarse" (MANT1988_15_1) y "loose legítimo de cáscaras
+separadas" (HOLLOW_BRICK) **mirando sólo la estructura local del
+loop/face**. El post-pass fue retirado y los 2 casos pending volvieron
+a {@code @Disabled} con mensaje detallado.
+
+**Conclusión arquitectónica**: la **causa raíz auténtica de los 2
+loose=4 está upstream** — en cómo Generate / Classify producen
+{@code sonea}/{@code soneb}. Para MANT1988_15_1, el orden parametrico
+no coloca los 4 loose como parejas alcanzables por
+{@code scanjoin}; eso implica que sectoroverlap (§5.2) o el classifier
+los generó en orden imperfecto para esa geometría específica.
+
+**Próximo intento §6.1-C**: en lugar de un post-pass, atacar el
+problema en {@code _PolyhedralBoundedSolidSetGeometricPredicateProcessor.sectoroverlap}
+y/o en {@code _PolyhedralBoundedSolidSetIntersector} para que los
+4 null-edges loose o (a) no se generen, o (b) se generen en el orden
+correcto que {@code scanjoin} sí cierra. Esto **es §5.2 propiamente
+dicho**: cerrar §5.2 cierra §6.1-C.
+
+**Suite**: 282/0/9 (sin cambio respecto a antes del intento — el
+trabajo dejó código intacto y un test {@code @Disabled} con mensaje
+mejorado).
+
 ### 6.2 Eliminar `forceARingMove` y el retry de subtract
 
 **Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` hacía
