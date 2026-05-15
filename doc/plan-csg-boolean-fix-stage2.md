@@ -547,6 +547,59 @@ abordarán en sub-hitos siguientes (§6.1-B, §6.1-C, …) usando los
 2 casos pending del invariante test (MANT1988_15_1 + INTERSECTION/SUBTRACT)
 como métrica de progreso.
 
+#### Avance §6.1-B — purga de la red de seguridad post-bucle ✅
+
+**Hito completado**: el bucle principal de `setOpConnect` estaba
+rodeado de **5 mecanismos correctivos** que Mäntylä no menciona en
+Program 15.14. Cada uno se ejecutaba *después* del bucle (o durante,
+en el caso de los deferrals) para "salvar" casos donde el matching
+había dejado loose ends, o intentaba retrasar cortes esperando a un
+estado mejor. Todos fueron **muletas**: la suite y el invariante del
+Program 15.14 (`SetOpConnectNoLooseInvariantTest`) siguen pasando sin
+ellos, lo que demuestra que el bucle principal ya resolvía los casos
+cubiertos por la suite *sin* ayuda externa.
+
+Eliminado en §6.1-B (5 sub-hitos, todos con verificación en verde):
+
+1. **§6.1-B.1**: `closeLegacyCoincidentLooseEnds` (47 LOC) +
+   bucle `while (closeLegacyCoincidentLooseEnds()) { … }`.
+2. **§6.1-B.2**: `resolveClassicAlternatingLooseCycle` (41 LOC).
+3. **§6.1-B.3**: `resolveClassicLooseNetwork` (48 LOC) + un cluster
+   completo de helpers de matching/cycle-finding
+   (`findTwoDisjointNeighborPairs`, `hasCoincidentLooseEndpoint`,
+   `findMinimumLooseMatching` (2 sobrecargas), `findLooseNetworkCycles`,
+   `joinLoosePairA/B` (2 sobrecargas cada una), `joinLoosePairsA/B`,
+   `joinLoosePairsInCycleA/B`, `cutLiveLoosePairs`,
+   `cutMatchedLoosePairsA/B`, `cutLooseCycle`, `loosePairWeight`,
+   `pointDistance`, `buildLoosePairMates`, `toIntArray`,
+   `cycleContains`, `sameUnorderedPair`, `samePairing`, `sameMatching`,
+   `summarizeMatching`, `cutLiveA/B`) — ~470 LOC entre todos.
+4. **§6.1-B.4**: deferrals `cutOrDeferClassicA/B` reemplazados por
+   `cutA`/`cutB` directos como pide [MANT1988]. Eliminados también:
+   `shouldDeferClassicCutA/B`, `shouldDeferFlexibleCutA/B`,
+   `rememberDeferredCut`, `flushDeferredCuts`,
+   `flushDeferredClassicCuts`, `hasPendingNullEdgeOnSameFace`,
+   y la inner class `DeferredCut` con sus variables `deferredCutsA/B`.
+5. **§6.1-B.5**: `removeLooseEndsA/B` extra. El libro confía en que
+   `join`/`cut` mantienen las listas `endsa`/`endsb` consistentes; el
+   barrido extra que iteraba todo el loop y removía coincidencias era
+   muleta. Las 4 invocaciones del bucle principal se eliminaron sin
+   reemplazo.
+
+**Métrica final del archivo**: 2790 → 1248 LOC en
+`_PolyhedralBoundedSolidSetNullEdgesConnector.java` — **55 % menos
+código** que al iniciar el nivel 6, sin perder cobertura
+funcional. Suite verde estable: **275 tests, 0 failures, 9 skipped**.
+Métrica del Invariante Program 15.14: 4/6 conformantes (sin cambio
+respecto al baseline pre-§6.1, pero ahora **sin las muletas que
+podían enmascarar bugs futuros**).
+
+**Significado para §6.1**: el conector queda con la **forma más
+parecida posible a Program 15.14 sin tocar todavía el núcleo
+algorítmico** (`canJoin` → `scanjoin` real, e iterador
+`sgetnextnulledge`). Los próximos sub-hitos (§6.1-C, …) atacarán esos
+dos puntos directamente, ahora con un campo de trabajo limpio.
+
 ### 6.2 Eliminar `forceARingMove` y el retry de subtract
 
 **Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` hacía
