@@ -3539,6 +3539,31 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return res;
         }
 
+        // §7.3.1.A — Degenerate identity preflight (algebraic identity
+        // detector): when A ≡ B geometrically (e.g. tests of idempotence
+        // A∪A = A on cloned operands), the classifier marks every face of
+        // both as "inside the other" and the regular pipeline collapses
+        // to ∅, breaking A∪A and A∩A. Detect and dispatch directly per
+        // set-theoretic identity.
+        if ( PolyhedralBoundedSolidValidationEngine
+                .areGeometricallyIdentical(
+                    inSolidA, inSolidB, numericContext.bigEpsilon()) ) {
+            tracePipelineSummary(
+                "setOp identity-preflight A≡B op=" + op);
+            if ( op == UNION || op == INTERSECTION ) {
+                res = deepCloneSolid(inSolidA, "identity-preflight clone");
+                if ( res == null ) {
+                    res = new PolyhedralBoundedSolid();
+                }
+            }
+            // SUBTRACT case: A − A = ∅; res remains the empty PolyhedralBoundedSolid
+            // already initialised at function entry.
+            if ( res.getPolygonsList().size() > 0 ) {
+                postProcessResult(res, maximizeResultFaces);
+            }
+            return res;
+        }
+
         setOpGenerate(inSolidA, inSolidB);
 
         if ( withDebug ) {

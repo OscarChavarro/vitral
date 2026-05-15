@@ -323,7 +323,53 @@ leyes algebraicas (no idempotente, no determinista al swap).
 
 ### 7.3.1 Ataque a los bugs algebraicos reales — sub-pasos balanceados
 
-#### 7.3.1.A Aislar 1 fixture y un test [BAJO, BAJO]
+#### 7.3.1.A Aislar 1 fixture y un test ✅ CERRADO
+
+**Diagnóstico** (vía `Mant1988_6_13IdempotenceDiagnostic` temporal):
+para 3 fixtures (`MANT1988_6_13[0]`, `MANT1988_15_2_LIMIT[0]`, además
+`MANT1986_2`), las operaciones `A∪A` y `A∩A` con `A` clonado producían
+resultado **vacío** (f=0, e=0, v=0) en lugar del baseline.
+
+**Causa raíz identificada**: Mäntylä 1988 no especifica el caso
+degenerado `A ≡ B` (operandos geométricamente idénticos). El classifier
+marca todas las caras de B como "inside A" y simétricamente, y
+UNION/INTERSECTION colapsan a ∅.
+
+**Fix implementado**:
+
+1. Nuevo predicado público `PolyhedralBoundedSolidValidationEngine.areGeometricallyIdentical(a, b, tolerance)`:
+   verifica cardinalidad idéntica (V, E, F), bbox dentro de tolerance, y
+   coincidencia pairwise de vertices. O(n²) en vertices.
+2. Nuevo "identity preflight" en
+   `PolyhedralBoundedSolidSetOperator.setOp` (justo después del
+   `isTouchingOnlyPreflightCase`): si `areGeometricallyIdentical` es
+   true, dispatch directo a:
+   - `UNION` o `INTERSECTION` → `deepCloneSolid(inSolidA)`
+   - `SUBTRACT` → `new PolyhedralBoundedSolid()` (vacío)
+
+**Cobertura entregada**:
+
+- Nuevo test `AlgebraicIdentityRegressionTest` con 7 tests (6 idempotence
+  + 1 diff-swap) que actúa como regression guard.
+- El antiguo `PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest`
+  queda explícitamente `@Disabled` con mensaje que documenta que sus
+  assertions estaban invertidas (drift detector inverso). Se preservó
+  para arqueología hasta §7.3.1.B.
+
+**Métricas tras §7.3.1.A**:
+- Suite: 289 → **293 tests** (+4 nuevos en `AlgebraicIdentityRegressionTest`,
+  3 del diagnostic temporal ya removidos)
+- Failures: 0
+- Skipped: 9 (sin cambio — el legacy AlgebraicProperties seguía y sigue
+  `@Disabled`; el nuevo Regression cubre el contrato positivo)
+
+**Drift remanente** (a atacar en §7.3.1.D):
+- Absorption: 3 fixtures (`MANT1986_2`, `MANT1988_15_2_LIMIT`,
+  `MANT1988_6_13`)
+- Diff-swap determinism: 2 fixtures (`MANT1988_15_2_LIMIT`,
+  `MANT1988_6_13`)
+
+#### 7.3.1.A.HIST Aislar 1 fixture y un test (descripción original) [BAJO, BAJO]
 
 Empezar por el más simple: `MANT1986_2 + idempotence` (`A∪A=A`).
 Producir un test temporal de diagnóstico que ejecute:

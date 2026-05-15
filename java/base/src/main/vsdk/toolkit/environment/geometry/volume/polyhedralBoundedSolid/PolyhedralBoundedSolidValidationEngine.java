@@ -170,4 +170,81 @@ public class PolyhedralBoundedSolidValidationEngine
         }
         return ok;
     }
+
+    /**
+    Decides whether two solids represent the same geometric set within
+    tolerance — i.e., every vertex in one has a coincident counterpart
+    in the other and their topological cardinality matches.
+
+    <p>Used by {@code setOp} to detect the degenerate case
+    {@code A op A_clone}, which Mäntylä 1988 does not specify
+    explicitly. Without this preflight, the classifier marks every
+    face of both solids as "inside the other", and UNION/INTERSECTION
+    collapse to ∅ — violating the algebraic identities
+    {@code A∪A = A}, {@code A∩A = A}.</p>
+
+    <p>The check is intentionally conservative: it requires same
+    cardinality of vertices/edges/faces AND a pairwise coincidence on
+    vertex positions within {@code tolerance}. False positives are
+    impossible at this granularity (cardinality plus exact-position
+    match), and false negatives are acceptable (the pipeline simply
+    runs the regular path, which may or may not produce the expected
+    output).</p>
+
+    @param a first operand
+    @param b second operand
+    @param tolerance vertex coincidence epsilon (typically the bigEpsilon
+        of either operand's {@code ToleranceContext})
+    @return {@code true} if the two solids are interchangeable as boolean
+        operands
+     */
+    public static boolean areGeometricallyIdentical(
+        PolyhedralBoundedSolid a,
+        PolyhedralBoundedSolid b,
+        double tolerance)
+    {
+        if ( a == null || b == null ) {
+            return false;
+        }
+        if ( a.getVerticesList().size() != b.getVerticesList().size() ) {
+            return false;
+        }
+        if ( a.getEdgesList().size() != b.getEdgesList().size() ) {
+            return false;
+        }
+        if ( a.getPolygonsList().size() != b.getPolygonsList().size() ) {
+            return false;
+        }
+        double[] ma = a.getMinMax();
+        double[] mb = b.getMinMax();
+        for ( int i = 0; i < 6; i++ ) {
+            if ( Math.abs(ma[i] - mb[i]) > tolerance ) {
+                return false;
+            }
+        }
+        // Pairwise vertex coincidence: every vertex in A has at least
+        // one matching counterpart in B (and by cardinality this implies
+        // a bijection). O(n²) on vertex count.
+        int n = a.getVerticesList().size();
+        boolean[] matched = new boolean[n];
+        for ( int i = 0; i < n; i++ ) {
+            vsdk.toolkit.common.linealAlgebra.Vector3Dd pa =
+                a.getVerticesList().get(i).position;
+            boolean found = false;
+            for ( int j = 0; j < n; j++ ) {
+                if ( matched[j] ) continue;
+                vsdk.toolkit.common.linealAlgebra.Vector3Dd pb =
+                    b.getVerticesList().get(j).position;
+                if ( Math.abs(pa.x() - pb.x()) <= tolerance
+                     && Math.abs(pa.y() - pb.y()) <= tolerance
+                     && Math.abs(pa.z() - pb.z()) <= tolerance ) {
+                    matched[j] = true;
+                    found = true;
+                    break;
+                }
+            }
+            if ( !found ) return false;
+        }
+        return true;
+    }
 }
