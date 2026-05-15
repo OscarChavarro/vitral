@@ -30,8 +30,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 {
     private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
         "vsdk.setop.tracePipelineSummary";
-    private static final String ALLOW_CROSS_LOOSE_MATCH_PROPERTY =
-        "vsdk.setop.connect.allowCrossLooseMatch";
     private static final String KEEP_INSERTION_ORDER_PROPERTY =
         "vsdk.setop.connect.keepInsertionOrder";
     private static final int DEBUG_01_STRUCTURE = 0x01;
@@ -63,8 +61,21 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
     }
 
+    /**
+    Mutable carrier for the (nea, neb) pair returned by
+    {@link #sgetnextnulledge(NullEdgePair)}, mirroring the out-param
+    style used by [MANT1988] Program 15.14 in C.
+    */
+    private static final class NullEdgePair
+    {
+        _PolyhedralBoundedSolidSetOperatorNullEdge nea;
+        _PolyhedralBoundedSolidSetOperatorNullEdge neb;
+        int pairIndex;
+    }
+
     private static int debugFlags;
     private static int operation;
+    private static int nextNullEdgeIndex;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
     private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
@@ -84,11 +95,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static boolean isPipelineSummaryTraceEnabled()
     {
         return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
-    }
-
-    private static boolean isCrossLooseMatchEnabled()
-    {
-        return Boolean.getBoolean(ALLOW_CROSS_LOOSE_MATCH_PROPERTY);
     }
 
     private static boolean isKeepInsertionOrderEnabled()
@@ -838,98 +844,87 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
     /**
-    Following section [MANT1988].15.7. and program [MANT1988].15.13.
+    Implements sgetnextnulledge per [MANT1988] §15.7, Program 15.14.
+
+    <p>Advances the internal cursor over {@code sonea}/{@code soneb} and
+    fills {@code out} with the next (nea, neb) pair, mirroring the
+    out-param style of the C original. Returns {@code true} while pairs
+    remain; {@code false} signals the {@code while} loop body to exit.</p>
+
+    <p>The cursor is reset to {@code 0} in {@link #setOpConnect()} before
+    the loop starts. Order is the parametric ordering produced by
+    {@link #sortNullEdges()} (§4.3 of plan-csg-boolean-fix-stage2).</p>
+    */
+    private static boolean sgetnextnulledge(NullEdgePair out)
+    {
+        if ( nextNullEdgeIndex >= sonea.size() ||
+             nextNullEdgeIndex >= soneb.size() ) {
+            return false;
+        }
+        out.nea = sonea.get(nextNullEdgeIndex);
+        out.neb = soneb.get(nextNullEdgeIndex);
+        out.pairIndex = nextNullEdgeIndex;
+        nextNullEdgeIndex++;
+        return true;
+    }
+
+    /**
+    Implements scanjoin per [MANT1988] §15.7, Program 15.13.
+
+    <p>Returns {@code {ha, hb}} (matched halves from {@code endsa[i]}/{@code endsb[i]})
+    only when there is a single index {@code i} such that <b>both</b>
+    {@code hea} is a neighbor of {@code endsa.get(i)} AND {@code heb} is a
+    neighbor of {@code endsb.get(i)} — i.e., both null-edges can close to
+    the <em>same</em> previously-loose pair. The matched pair is removed
+    from {@code endsa}/{@code endsb} and returned.</p>
+
+    <p>If no such index exists, {@code hea} and {@code heb} are appended to
+    the loose lists (becoming candidates for future pairings) and
+    {@code null} is returned, signalling that the caller must not perform
+    {@code join}/{@code cut} for this pair.</p>
     */
     private static _PolyhedralBoundedSolidHalfEdge[]
-    canJoin(_PolyhedralBoundedSolidHalfEdge hea,
+    scanjoin(_PolyhedralBoundedSolidHalfEdge hea,
              _PolyhedralBoundedSolidHalfEdge heb)
     {
         int i;
-        _PolyhedralBoundedSolidHalfEdge ret[];
         boolean condition1;
         boolean condition2;
-        int matchAIndex = -1;
-        int matchBIndex = -1;
-        _PolyhedralBoundedSolidHalfEdge matchA = null;
-        _PolyhedralBoundedSolidHalfEdge matchB = null;
-
-        ret = new _PolyhedralBoundedSolidHalfEdge[2];
 
         for ( i = 0; i < endsa.size(); i++ ) {
-
             condition1 = neighbor(hea, endsa.get(i));
             condition2 = neighbor(heb, endsb.get(i));
-            if ( condition1 && matchA == null ) {
-                matchAIndex = i;
-                matchA = endsa.get(i);
-            }
-            if ( condition2 && matchB == null ) {
-                matchBIndex = i;
-                matchB = endsb.get(i);
-            }
 
             if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
                 System.out.println("    . Testing for neighborhood A[" +
-                   hea.startingVertex.id +
-                   "/" +
-                   hea.next().startingVertex.id +
-                   "] vs. A[" +
-                   endsa.get(i).startingVertex.id +
-                   "/" +
-                   endsa.get(i).next().startingVertex.id +
-                   "]: " +
+                   hea.startingVertex.id + "/" +
+                   hea.next().startingVertex.id + "] vs. A[" +
+                   endsa.get(i).startingVertex.id + "/" +
+                   endsa.get(i).next().startingVertex.id + "]: " +
                    (condition1?"true":"false") +
                    " ParentFaces: " +
-                   hea.parentLoop.parentFace.id +
-                   " / " +
+                   hea.parentLoop.parentFace.id + " / " +
                    endsa.get(i).parentLoop.parentFace.id);
-
                 System.out.println("    . Testing for neighborhood B[" +
-                   heb.startingVertex.id +
-                   "/" +
-                   heb.next().startingVertex.id +
-                   "] vs. B[" +
-                   endsb.get(i).startingVertex.id +
-                   "/" +
-                   endsb.get(i).next().startingVertex.id +
-                   "]: " +
+                   heb.startingVertex.id + "/" +
+                   heb.next().startingVertex.id + "] vs. B[" +
+                   endsb.get(i).startingVertex.id + "/" +
+                   endsb.get(i).next().startingVertex.id + "]: " +
                    (condition2?"true":"false") +
                    " ParentFaces: " +
-                   heb.parentLoop.parentFace.id +
-                   " / " +
+                   heb.parentLoop.parentFace.id + " / " +
                    endsb.get(i).parentLoop.parentFace.id);
             }
 
             if ( condition1 && condition2 ) {
+                _PolyhedralBoundedSolidHalfEdge[] ret =
+                    new _PolyhedralBoundedSolidHalfEdge[2];
                 ret[0] = endsa.get(i);
                 ret[1] = endsb.get(i);
                 endsa.remove(i);
                 endsb.remove(i);
                 return ret;
             }
-        }
-        if ( isCrossLooseMatchEnabled() &&
-             matchAIndex >= 0 &&
-             matchBIndex >= 0 &&
-             matchAIndex != matchBIndex ) {
-            int minIndex;
-            int maxIndex;
-            _PolyhedralBoundedSolidHalfEdge residualA;
-            _PolyhedralBoundedSolidHalfEdge residualB;
-
-            ret[0] = matchA;
-            ret[1] = matchB;
-            residualA = endsa.get(matchBIndex);
-            residualB = endsb.get(matchAIndex);
-            minIndex = Math.min(matchAIndex, matchBIndex);
-            maxIndex = Math.max(matchAIndex, matchBIndex);
-            endsa.remove(maxIndex);
-            endsb.remove(maxIndex);
-            endsa.remove(minIndex);
-            endsb.remove(minIndex);
-            endsa.add(residualA);
-            endsb.add(residualB);
-            return ret;
         }
         endsa.add(hea);
         endsb.add(heb);
@@ -1065,8 +1060,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         tracePipelineSummary(
             "connect start pairsA=" + sonea.size() +
             " pairsB=" + soneb.size());
-        for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
-        }
 
         _PolyhedralBoundedSolidEdge nextedgea;
         _PolyhedralBoundedSolidEdge nextedgeb;
@@ -1094,20 +1087,29 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             System.out.println("**** Not paired null edges!");
         }
 
-        for ( i = 0; i < sonea.size() && i < soneb.size(); i++ ) {
+        // [MANT1988] Program 15.14:
+        //   while (sgetnextnulledge(&nea, &neb)) { ... }
+        // The cursor is set to 0 here so each call to setOpConnect()
+        // restarts iteration from the first pair of the sorted set.
+        nextNullEdgeIndex = 0;
+        NullEdgePair pair = new NullEdgePair();
+        while ( sgetnextnulledge(pair) ) {
+            _PolyhedralBoundedSolidSetOperatorNullEdge nea = pair.nea;
+            _PolyhedralBoundedSolidSetOperatorNullEdge neb = pair.neb;
+            i = pair.pairIndex;
             _PolyhedralBoundedSolidHalfEdge ha;
             _PolyhedralBoundedSolidHalfEdge ham;
             _PolyhedralBoundedSolidHalfEdge hb;
             _PolyhedralBoundedSolidHalfEdge hbm;
             _PolyhedralBoundedSolidHalfEdge tmp;
 
-            ha = sonea.get(i).e.rightHalf;
-            ham = sonea.get(i).e.leftHalf;
-            hb = soneb.get(i).e.rightHalf;
-            hbm = soneb.get(i).e.leftHalf;
+            ha = nea.e.rightHalf;
+            ham = nea.e.leftHalf;
+            hb = neb.e.rightHalf;
+            hbm = neb.e.leftHalf;
             tracePipelineSummary(
-                "connect pair[" + i + "] A{" + summarizeNullEdge(sonea.get(i)) +
-                "} B{" + summarizeNullEdge(soneb.get(i)) + "}");
+                "connect pair[" + i + "] A{" + summarizeNullEdge(nea) +
+                "} B{" + summarizeNullEdge(neb) + "}");
 
             if ( (debugFlags & DEBUG_05_CONNECT) != 0x00 ) {
                 System.out.println("  - " + (endsa.size()+endsb.size()) +
@@ -1137,8 +1139,8 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     " He(B2): " + hbm.startingVertex.id + "/" + hbm.next().startingVertex.id);
             }
 
-            nextedgea = sonea.get(i).e;
-            nextedgeb = soneb.get(i).e;
+            nextedgea = nea.e;
+            nextedgeb = neb.e;
             h1a = null;
             h2a = null;
             h1b = null;
@@ -1161,7 +1163,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                 nextedgeb.rightHalf);
 
             setCurrentConnectContext(i);
-            r = canJoin(nextedgea.rightHalf, nextedgeb.leftHalf);
+            r = scanjoin(nextedgea.rightHalf, nextedgeb.leftHalf);
             if ( r != null ) {
                 h1a = r[0];
                 h2b = r[1];
@@ -1177,7 +1179,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             }
 
             setCurrentConnectContext(i);
-            r = canJoin(nextedgea.leftHalf, nextedgeb.rightHalf);
+            r = scanjoin(nextedgea.leftHalf, nextedgeb.rightHalf);
             if ( r != null ) {
                 h2a = r[0];
                 h1b = r[1];

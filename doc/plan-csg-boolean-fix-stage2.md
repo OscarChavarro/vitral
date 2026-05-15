@@ -600,6 +600,79 @@ algorítmico** (`canJoin` → `scanjoin` real, e iterador
 `sgetnextnulledge`). Los próximos sub-hitos (§6.1-C, …) atacarán esos
 dos puntos directamente, ahora con un campo de trabajo limpio.
 
+#### Avance §6.1.2 — scanjoin alineado con Program 15.13 ✅
+
+**Hito completado**: el predicado de emparejamiento ahora se llama
+{@code scanjoin} y sigue literalmente Program 15.13. Cambios:
+
+- Renombre {@code canJoin} → {@code scanjoin} (con Javadoc explícito
+  citando §15.7 y Program 15.13).
+- Eliminada la rama {@code isCrossLooseMatchEnabled()} que aceptaba
+  matches cruzados de índices distintos cuando ambos {@code hea} y
+  {@code heb} encontraban un neighbor por separado. Esa heurística
+  no está en el libro y estaba gated por una system property que
+  ningún test activaba — código muerto en la práctica.
+- Eliminada la constante {@code ALLOW_CROSS_LOOSE_MATCH_PROPERTY} y el
+  getter {@code isCrossLooseMatchEnabled()}.
+
+**Contrato resultante**: {@code scanjoin(hea, heb)} retorna un match
+únicamente cuando existe un índice {@code i} tal que
+{@code hea es neighbor de endsa.get(i)} **y**
+{@code heb es neighbor de endsb.get(i)} simultáneamente — el "ambas
+pueden cerrar a un loose existente" que pide el plan. En caso
+contrario añade {@code (hea, heb)} a las listas de loose y retorna
+{@code null}, justo como el original C.
+
+Suite: 275/0/9 en verde.
+
+#### Avance §6.1.1 — iterador sgetnextnulledge ✅
+
+**Hito completado**: el bucle principal pasa de
+{@code for ( i = 0; i < sonea.size() && i < soneb.size(); i++ )} a la
+forma del libro:
+
+```c
+while (sgetnextnulledge(&nea, &neb)) { ... }
+```
+
+Implementación:
+
+- Nueva inner class {@code NullEdgePair} con campos mutables
+  {@code nea, neb, pairIndex} (mimetiza out-params de C).
+- Nuevo método estático {@code sgetnextnulledge(NullEdgePair out)}
+  que avanza un cursor {@code nextNullEdgeIndex} sobre
+  {@code sonea}/{@code soneb} y retorna {@code true} mientras quedan
+  pares. El orden recorrido es el que produjo §4.3
+  ({@code sortNullEdges}), garantizando determinismo.
+- El cuerpo del bucle ahora recibe {@code nea, neb} (objetos) en
+  lugar de hacer {@code sonea.get(i)}/{@code soneb.get(i)} repetidos.
+  El índice {@code i} se preserva sólo para logs/trace de
+  compatibilidad.
+
+Eliminado también el {@code for ( i = ...; i++ ) {}} vacío que era
+un placeholder huérfano antes del bucle real.
+
+Suite: 275/0/9 en verde.
+
+#### Medición del invariante después de §6.1.1 + §6.1.2
+
+Experimento controlado: re-habilité temporalmente los 2 casos
+{@code pendingCases} del invariante test para medir el efecto neto
+de las acciones estructurales (§6.1-A, §6.1-B, §6.1.1, §6.1.2):
+
+| Caso | Antes | Después |
+|---|---|---|
+| MANT1988_15_1 + INTERSECTION | looseA=4 | **looseA=4** (sin cambio) |
+| MANT1988_15_1 + SUBTRACT | looseA=4 | **looseA=4** (sin cambio) |
+
+**Lección**: la métrica del invariante no se mueve con la limpieza
+estructural. Los 2 casos no conformantes restantes tienen su origen
+en el **predicado {@code neighbor}** que {@code scanjoin} usa para
+detectar si dos null-edges pueden cerrar, **intertwined con §5.2
+sectoroverlap**. Atacarlos requerirá modificar la lógica del matching
+(el cuerpo del {@code if (condition1 && condition2)}) en combinación
+con sectoroverlap. Es el sub-hito §6.1-C / §5.2 unificado.
+
 ### 6.2 Eliminar `forceARingMove` y el retry de subtract
 
 **Problema medido**: `PolyhedralBoundedSolidSetOperator.setOp` hacía

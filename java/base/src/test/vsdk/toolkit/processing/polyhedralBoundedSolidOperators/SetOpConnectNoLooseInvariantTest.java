@@ -70,9 +70,11 @@ class SetOpConnectNoLooseInvariantTest
             .isZero();
     }
 
-    @Disabled("Pending §6.1: connector currently leaves looseA=4 for these "
-        + "MANT1988_15_1 cases — same root as §5.2 deferred sectoroverlap. "
-        + "Re-enable and verify when Connect is rewritten per Program 15.14.")
+    @Disabled("Pending §6.1.3+: §6.1-A/B/1/2 already shaped the connector "
+        + "structurally to Program 15.14, but scanjoin's neighbor-based matching "
+        + "still leaves looseA=4 for these MANT1988_15_1 cases. The remaining "
+        + "gap is in the scanjoin neighbor predicate, intertwined with the §5.2 "
+        + "deferred sectoroverlap fix. Re-enable when both close.")
     @ParameterizedTest(name = "{0} + {1}")
     @MethodSource("pendingCases")
     void given_pendingPair_when_setopRuns_then_connectShouldLeaveNoLooseEndpoints(
