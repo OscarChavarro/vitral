@@ -31,10 +31,11 @@ cases for union, intersection, and difference.</p>
 // and a clarifying note added; the class stays @Disabled until a
 // proper rewrite (§7.3.1.B in plan) flips each assertion to the
 // algebraic-positive direction.
-@Disabled("Pending §7.3.1.B rewrite: assertions are inverted "
-    + "(`.isFalse()` on allHold). After §7.3.1.A fix, the 6 idempotence "
-    + "fixtures are clean and would fail this inverted form. Replacement: "
-    + "AlgebraicIdentityRegressionTest holds the positive-assertion guard.")
+@Disabled("Legacy drift-detector with inverted assertions. After §7.3.1.A "
+    + "fix: 10/12 cases clean (6 idempotence + 1 absorption MANT1986_2 + 3 "
+    + "diff-swap). Replaced by AlgebraicIdentityRegressionTest; this class "
+    + "preserved for archaeology pending §7.3.1.D fix of the 2 absorption "
+    + "drift cases (MANT1988_15_2_LIMIT, MANT1988_6_13).")
 class PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest
 {
     @ParameterizedTest

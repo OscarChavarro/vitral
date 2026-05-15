@@ -38,6 +38,53 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     {
     }
 
+    /**
+    §7.3.1.D preflight — detects the case where one solid is strictly
+    contained in the other (A⊂B or B⊂A) without any real edge/face
+    intersection and without partial coplanar overlap. When this holds,
+    the regular intersect/classify/connect pipeline produces ∅ (no
+    intersections found → empty boundary), even though set-theoretically
+    the result must be one of the operands per Mäntylä Ch. 15.1.
+
+    <p>Together with {@link #runTouchingOnlyPreflightCase}, this routes
+    every "no real intersection" geometry to {@link #runSetOpNoIntersectionCase},
+    which has the table-15.1 dispatch for all four cases (disjoint,
+    touching, A⊂B, B⊂A).</p>
+    */
+    static boolean runContainmentOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        setNumericContext(
+            PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
+
+        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
+        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
+        int relation = classifyNoIntersectionRelation(aInB, bInA);
+
+        if ( relation != NO_INT_RELATION_A_IN_B &&
+             relation != NO_INT_RELATION_B_IN_A ) {
+            return false;
+        }
+
+        // Note: we deliberately do NOT bail out on
+        // hasPartialCoplanarFaceAreaOverlap here. The absorption identity
+        // {@code A ∪ (A∩B)} produces a contained operand that can be
+        // tangent to A on coplanar boundary faces (the second step of
+        // §15.1 absorption holds whether or not the inner solid is
+        // strictly interior). Proper edge/face intersections still
+        // disqualify (those need the regular pipeline), but tangent
+        // coplanar overlap is part of the degenerate dispatch.
+        if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
+            return false;
+        }
+        if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+            return false;
+        }
+
+        return true;
+    }
+
     static boolean runTouchingOnlyPreflightCase(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)

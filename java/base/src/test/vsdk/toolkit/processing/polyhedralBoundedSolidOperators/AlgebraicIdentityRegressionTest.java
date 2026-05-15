@@ -135,9 +135,62 @@ class AlgebraicIdentityRegressionTest
 
     private static Stream<Arguments> cleanDifferenceSwapFixtures()
     {
-        // Diff-swap determinism: only MANT1986_2 is clean. The other two
-        // (MANT1988_15_2_LIMIT, MANT1988_6_13) have remaining drift per
-        // plan §7.3.1.D — TODO.
+        // Post-§7.3.1.A re-mapping (§7.3.1.B): all 3 fixtures pass the
+        // diff-swap determinism (same f/e/v across runs AND validate).
+        return Stream.of(
+            Arguments.of("MANT1986_2"),
+            Arguments.of("MANT1988_15_2_LIMIT"),
+            Arguments.of("MANT1988_6_13"));
+    }
+
+    @ParameterizedTest(name = "absorption: {0}")
+    @MethodSource("cleanAbsorptionFixtures")
+    void given_cleanFixturePair_when_absorptionIdentities_then_identitiesHold(
+        String corpusKey)
+    {
+        // A ∪ (A ∩ B) = A   and   A ∩ (A ∪ B) = A
+        PolyhedralBoundedSolid baselineLeft = createPair(corpusKey)[0];
+        double[] baselineMinMax = baselineLeft.getMinMax();
+
+        PolyhedralBoundedSolid[] pairForIntersection = createPair(corpusKey);
+        PolyhedralBoundedSolid[] pairForUnion = createPair(corpusKey);
+        PolyhedralBoundedSolid[] pairForFinalUnion = createPair(corpusKey);
+        PolyhedralBoundedSolid[] pairForFinalIntersection = createPair(corpusKey);
+
+        PolyhedralBoundedSolid aIntersectionB =
+            PolyhedralBoundedSolidModeler.setOp(
+                pairForIntersection[0], pairForIntersection[1],
+                PolyhedralBoundedSolidModeler.INTERSECTION, false);
+        PolyhedralBoundedSolid firstAbsorption =
+            PolyhedralBoundedSolidModeler.setOp(
+                pairForFinalUnion[0], aIntersectionB,
+                PolyhedralBoundedSolidModeler.UNION, false);
+
+        PolyhedralBoundedSolid aUnionB = PolyhedralBoundedSolidModeler.setOp(
+            pairForUnion[0], pairForUnion[1],
+            PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolid secondAbsorption =
+            PolyhedralBoundedSolidModeler.setOp(
+                pairForFinalIntersection[0], aUnionB,
+                PolyhedralBoundedSolidModeler.INTERSECTION, false);
+
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(firstAbsorption)).isTrue();
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(secondAbsorption)).isTrue();
+        assertThat(boundingBoxMatches(firstAbsorption, baselineMinMax))
+            .as("A ∪ (A ∩ B) bbox must match A")
+            .isTrue();
+        assertThat(boundingBoxMatches(secondAbsorption, baselineMinMax))
+            .as("A ∩ (A ∪ B) bbox must match A")
+            .isTrue();
+    }
+
+    private static Stream<Arguments> cleanAbsorptionFixtures()
+    {
+        // Post-§7.3.1.A: only MANT1986_2 is clean. The two remaining
+        // drift fixtures (MANT1988_15_2_LIMIT, MANT1988_6_13) are the
+        // §7.3.1.D target.
         return Stream.of(
             Arguments.of("MANT1986_2"));
     }

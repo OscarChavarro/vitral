@@ -369,6 +369,63 @@ UNION/INTERSECTION colapsan a ∅.
 - Diff-swap determinism: 2 fixtures (`MANT1988_15_2_LIMIT`,
   `MANT1988_6_13`)
 
+#### 7.3.1.B Re-mapping post-§7.3.1.A ✅
+
+Tras el fix de identity preflight, mapping de drift actualizado vía
+diagnostic temporal (idempotence + absorption + diff-swap):
+
+| Test method | Clean | Drift remanente |
+|---|---|---|
+| Idempotence (6 cases) | 6 | 0 |
+| Absorption (3 cases) | 1 (`MANT1986_2`) | 2 (`MANT1988_15_2_LIMIT`, `MANT1988_6_13`) |
+| Diff-swap determinism (3 cases) | 3 | 0 |
+| **Total** | **10** | **2** |
+
+El nuevo `AlgebraicIdentityRegressionTest` cubre los 10 clean cases
+como regression guard positivo (§7.3.1.A entregó 7, §7.3.1.B amplió a
+10 con absorption + diff-swap clean).
+
+#### 7.3.1.D Containment-only preflight (parcial) ✅ + ⚠
+
+**Hipótesis correcta**: las 2 absorptions restantes fallan porque
+operaciones como `A ∪ (A∩B)` cuando `A∩B ⊂ A` colapsan a ∅. Mäntylä
+solo dispatcha a `runSetOpNoIntersectionCase` cuando los sólidos se
+TOCAN pero no contienen.
+
+**Solución implementada**:
+- Nuevo `_PolyhedralBoundedSolidSetNonIntersectingClassifier.runContainmentOnlyPreflightCase`
+  que detecta `A⊂B` / `B⊂A` sin proper edge/face intersections.
+- Nuevo `isContainmentOnlyPreflightCase` en `PolyhedralBoundedSolidSetOperator`
+  invocado justo después del touching preflight.
+
+**Resultado parcial**:
+- Suite: 0 regresiones (302 → 296 tests, ya quitando diagnósticos
+  temporales).
+- Los 2 absorption casos problemáticos **NO se activan** por este
+  preflight: tienen geometría con intersecciones marginales / caras
+  tangentes parciales que dispara `hasProperEdgeFaceIntersection`
+  como `true`. El classifier de containment es demasiado estricto
+  para esos casos compuestos.
+
+**Por qué se difiere parcialmente**:
+La causa raíz real para `MANT1988_15_2_LIMIT` y `MANT1988_6_13`
+absorption es que `A ∩ B` no produce un sólido estrictamente
+contenido — produce uno con cardinalidad mayor (extra cuts por
+intersection edges). Ese sólido luego, al unirlo con A, dispara el
+mismo bug original ("dos sólidos casi superpuestos" con tangencia
+parcial → pipeline colapsa a ∅). Esto requiere un fix más profundo
+en el classifier que distinga "containment con tangencia" de
+"intersección verdadera" — trabajo de mayor calado que el alcance
+de este turno.
+
+**TODO §7.3.1.D-cont** (para próximo turno):
+- Trace de `classifySolidAgainstSolid` para esos 2 cases (cuántos
+  vertices "in", cuántos "limit", cuántos "out"?)
+- Posible fix: amplificar `classifyNoIntersectionRelation` para que
+  reconozca "tangent containment" como relation válida cuando
+  `hasProperEdgeFaceIntersection` retorna false pero hay
+  `hasPartialCoplanarFaceAreaOverlap`.
+
 #### 7.3.1.A.HIST Aislar 1 fixture y un test (descripción original) [BAJO, BAJO]
 
 Empezar por el más simple: `MANT1986_2 + idempotence` (`A∪A=A`).

@@ -1573,6 +1573,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             .runTouchingOnlyPreflightCase(inSolidA, inSolidB);
     }
 
+    private static boolean isContainmentOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            .runContainmentOnlyPreflightCase(inSolidA, inSolidB);
+    }
+
     /**
     Handles no-intersection cases (book problem [MANT1988].15.1).
     */
@@ -3532,6 +3540,19 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
         }
 
         if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+            if ( res.getPolygonsList().size() > 0 ) {
+                postProcessResult(res, maximizeResultFaces);
+            }
+            return res;
+        }
+
+        // §7.3.1.D — Containment-only preflight: when one solid is
+        // strictly contained inside the other without real edge/face
+        // intersections (e.g., the second step of absorption identities
+        // A ∪ (A ∩ B) where A ∩ B ⊂ A), the regular pipeline produces ∅.
+        // Dispatch to the same Mäntylä Ch.15.1 table that touching uses.
+        if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
