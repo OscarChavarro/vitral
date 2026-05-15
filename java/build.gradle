@@ -186,6 +186,10 @@ tasks.register('publishToMavenLocal') {
     }
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xlint:deprecation']
+}
+
 project(':testsuite:ApplicationCases:CommandServer') {
     dependencies {
         implementation project(':base')

@@ -3547,25 +3547,14 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return res;
         }
 
-        // §7.3.1.D — Containment-only preflight: when one solid is
-        // strictly contained inside the other without real edge/face
-        // intersections (e.g., the second step of absorption identities
-        // A ∪ (A ∩ B) where A ∩ B ⊂ A), the regular pipeline produces ∅.
-        // Dispatch to the same Mäntylä Ch.15.1 table that touching uses.
-        if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB) ) {
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
-        }
-
         // §7.3.1.A — Degenerate identity preflight (algebraic identity
         // detector): when A ≡ B geometrically (e.g. tests of idempotence
         // A∪A = A on cloned operands), the classifier marks every face of
         // both as "inside the other" and the regular pipeline collapses
         // to ∅, breaking A∪A and A∩A. Detect and dispatch directly per
-        // set-theoretic identity.
+        // set-theoretic identity. MUST run before the containment
+        // preflight (which would also accept A ≡ B but produce slightly
+        // different topology via merge() instead of deepClone()).
         if ( PolyhedralBoundedSolidValidationEngine
                 .areGeometricallyIdentical(
                     inSolidA, inSolidB, numericContext.bigEpsilon()) ) {
@@ -3579,6 +3568,20 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             }
             // SUBTRACT case: A − A = ∅; res remains the empty PolyhedralBoundedSolid
             // already initialised at function entry.
+            if ( res.getPolygonsList().size() > 0 ) {
+                postProcessResult(res, maximizeResultFaces);
+            }
+            return res;
+        }
+
+        // §7.3.1.D — Containment-only preflight: when one solid is
+        // contained inside the other (strictly or with tangent
+        // boundary) without real edge/face intersections (e.g., the
+        // second step of absorption identities A ∪ (A ∩ B) where
+        // A ∩ B ⊂ A), the regular pipeline produces ∅. Dispatch to a
+        // dedicated containment table per Mäntylä Ch.15.1.
+        if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB) ) {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
             if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }

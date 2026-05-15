@@ -62,19 +62,20 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
         int relation = classifyNoIntersectionRelation(aInB, bInA);
 
+        // Restricted to strict containment only. An earlier attempt to
+        // extend this preflight to "tangent containment" (one solid
+        // sitting inside the other with all its boundary vertices on
+        // the other's surface) regressed legitimate cases — those need
+        // the regular pipeline because their result expects the inner
+        // surface preserved as a hole/cut, not a plain merge. The two
+        // absorption-step-2 fixtures (MANT1988_15_2_LIMIT,
+        // MANT1988_6_13) that motivate this preflight are tracked in
+        // plan §7.3.1.D-cont as remaining drift.
         if ( relation != NO_INT_RELATION_A_IN_B &&
              relation != NO_INT_RELATION_B_IN_A ) {
             return false;
         }
 
-        // Note: we deliberately do NOT bail out on
-        // hasPartialCoplanarFaceAreaOverlap here. The absorption identity
-        // {@code A ∪ (A∩B)} produces a contained operand that can be
-        // tangent to A on coplanar boundary faces (the second step of
-        // §15.1 absorption holds whether or not the inner solid is
-        // strictly interior). Proper edge/face intersections still
-        // disqualify (those need the regular pipeline), but tangent
-        // coplanar overlap is part of the degenerate dispatch.
         if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
             return false;
         }

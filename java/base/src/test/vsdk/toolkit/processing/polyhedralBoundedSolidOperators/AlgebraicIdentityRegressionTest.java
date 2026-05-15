@@ -21,10 +21,10 @@ Regression guard for the algebraic identities of set-operations
     twice on equivalent inputs returns equivalent topologies.</li>
 </ul>
 
-<p>This class is the <b>algebraic-positive</b> counterpart of
-{@code PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest}, which
-was kept for archaeology with its inverted assertions. The corpus is
-split into:</p>
+<p>This class replaces the eliminated
+{@code PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest}, whose
+assertions were inverted drift detectors (§7.3.1.E in the stage-2 plan).
+The corpus is split into:</p>
 
 <ul>
 <li><b>cleanIdempotenceFixtures</b> — the 3 fixtures × 2 indices where
