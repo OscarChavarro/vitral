@@ -7,6 +7,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import java.util.ArrayList;
 
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
@@ -27,6 +29,21 @@ final class _PolyhedralBoundedSolidSetFinisher
         "vsdk.setop.tracePipelineSummary";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_06_FINISH = 0x20;
+
+    /** §9.1 instrumentation: times the legacy-ordering fallback was taken. */
+    private static int lastLegacyFallbackCount = 0;
+    /** §9.2 instrumentation: faces triangulated in the most recent finish(). */
+    private static int lastTriangulatedFaceCount = 0;
+
+    static int getLastLegacyFallbackCount()
+    {
+        return lastLegacyFallbackCount;
+    }
+
+    static int getLastTriangulatedFaceCount()
+    {
+        return lastTriangulatedFaceCount;
+    }
 
     private static boolean isPipelineSummaryTraceEnabled()
     {
@@ -162,6 +179,8 @@ final class _PolyhedralBoundedSolidSetFinisher
         int i;
         int j;
 
+        lastLegacyFallbackCount = 0;
+
         if ( sonfa == null || sonfb == null ) {
             return 0;
         }
@@ -219,6 +238,14 @@ final class _PolyhedralBoundedSolidSetFinisher
 
         if ( matchedA.isEmpty() && !sonfa.isEmpty() &&
              sonfa.size() == sonfb.size() ) {
+            // §9.1 instrumentation: legacy ordering fallback — no pairIndex
+            // matches found. Per plan §9.1 this should not fire once Connect
+            // emits correct pairIndices. Count it so tests can assert it stays 0.
+            lastLegacyFallbackCount++;
+            Logger.reportMessage(null, VSDK.WARNING, "sanitizePairedFaces",
+                "Legacy ordering fallback taken (pairIndex matching found no "
+                + "pairs for sonfa=" + sonfa.size() + " sonfb=" + sonfb.size()
+                + "). This indicates Connect did not tag faces with pairIndex.");
             tracePipelineSummary(
                 "finish sanitize kept legacy ordering");
             return sonfa.size();
@@ -256,18 +283,20 @@ final class _PolyhedralBoundedSolidSetFinisher
         _PolyhedralBoundedSolidHalfEdge candidate;
         _PolyhedralBoundedSolidHalfEdge nextHe;
         _PolyhedralBoundedSolidHalfEdge prevHe;
+        _PolyhedralBoundedSolidHalfEdge bestCandidate;
         Vector3Dd p0;
         Vector3Dd p1;
         Vector3Dd p2;
         Vector3Dd a;
         Vector3Dd b;
-        double tolerance;
+        double bestSinTheta;
         int safety;
 
         if ( start == null || context == null || loopSize <= 0 ) {
             return null;
         }
-        tolerance = context.bigEpsilon();
+        bestCandidate = null;
+        bestSinTheta = 0.0;
         candidate = start;
         safety = 0;
         do {
@@ -286,8 +315,22 @@ final class _PolyhedralBoundedSolidSetFinisher
                 if ( p0 != null && p1 != null && p2 != null ) {
                     a = p1.subtract(p0);
                     b = p2.subtract(p0);
-                    if ( a.crossProduct(b).length() > tolerance ) {
-                        return candidate;
+                    // Use the same normalized-vector collinearity test as
+                    // validateFacePointsAreCoplanar to guarantee the ear
+                    // triangle will pass planarity after the split.
+                    if ( a.length() > context.epsilon() &&
+                         b.length() > context.epsilon() ) {
+                        Vector3Dd an = a.normalized();
+                        Vector3Dd bn = b.normalized();
+                        double aDotB = Math.abs(an.dotProduct(bn));
+                        double sinTheta = an.crossProduct(bn).length();
+                        if ( aDotB < 1.0 - context.unitVectorTolerance() ) {
+                            return candidate;
+                        }
+                        if ( sinTheta > bestSinTheta ) {
+                            bestSinTheta = sinTheta;
+                            bestCandidate = candidate;
+                        }
                     }
                 }
             }
@@ -295,6 +338,12 @@ final class _PolyhedralBoundedSolidSetFinisher
             safety++;
         } while ( candidate != null && candidate != start &&
                   safety <= loopSize + 1 );
+        // No ear with sufficient angle found — fall back to the widest ear
+        // above epsilon for cases where the polygon is nearly degenerate.
+        if ( bestCandidate != null &&
+             bestSinTheta > context.unitVectorTolerance() / 10.0 ) {
+            return bestCandidate;
+        }
         return null;
     }
 
@@ -332,6 +381,7 @@ final class _PolyhedralBoundedSolidSetFinisher
         int maxIterations;
         int initialCount;
 
+        lastTriangulatedFaceCount = 0;
         i = 0;
         safetyCount = 0;
         initialCount = solid.getPolygonsList().size();
@@ -363,7 +413,60 @@ final class _PolyhedralBoundedSolidSetFinisher
             }
             loopSize = face.boundariesList.get(0).halfEdgesList.size();
             if ( loopSize <= 3 ) {
-                i++;
+                // Degenerate or collinear small face.
+                _PolyhedralBoundedSolidLoop loop0 =
+                    face.boundariesList.get(0);
+                // §9.5-degenerate: size-1 self-referential face with orphaned
+                // mirror cannot be killed via lkef. Prune it directly — the
+                // edge is dangling (mirror has no parentLoop) so removing the
+                // face and edge is safe and leaves the solid consistent.
+                if ( loopSize == 1 &&
+                     loop0.halfEdgesList.get(0) != null &&
+                     loop0.halfEdgesList.get(0).next() ==
+                         loop0.halfEdgesList.get(0) ) {
+                    _PolyhedralBoundedSolidHalfEdge h0 =
+                        loop0.halfEdgesList.get(0);
+                    if ( h0.mirrorHalfEdge() == null ||
+                         h0.mirrorHalfEdge().parentLoop == null ) {
+                        solid.getPolygonsList().remove(i);
+                        if ( h0.parentEdge != null ) {
+                            int edgeIdx;
+                            for ( edgeIdx = 0;
+                                  edgeIdx < solid.getEdgesList().size();
+                                  edgeIdx++ ) {
+                                if ( solid.getEdgesList().get(edgeIdx) ==
+                                     h0.parentEdge ) {
+                                    solid.getEdgesList().remove(edgeIdx);
+                                    break;
+                                }
+                            }
+                        }
+                        continue; // don't increment i: next face slides to i
+                    }
+                }
+                // Try to absorb into adjacent face via lkef. When lkef
+                // succeeds, the absorbed vertices may make the adjacent face
+                // non-planar; restart the scan from index 0 so it is re-checked.
+                boolean killed = false;
+                int k;
+                for ( k = 0; k < loop0.halfEdgesList.size(); k++ ) {
+                    _PolyhedralBoundedSolidHalfEdge h =
+                        loop0.halfEdgesList.get(k);
+                    if ( h != null &&
+                         h.mirrorHalfEdge() != null &&
+                         h.mirrorHalfEdge().parentLoop != null &&
+                         h.mirrorHalfEdge().parentLoop.parentFace != face ) {
+                        PolyhedralBoundedSolidEulerOperators.lkef(
+                            solid, h.mirrorHalfEdge(), h);
+                        killed = true;
+                        break;
+                    }
+                }
+                if ( killed ) {
+                    i = 0; // restart to re-check faces that absorbed the triangle
+                } else {
+                    i++;
+                }
                 continue;
             }
             scan = face.boundariesList.get(0).boundaryStartHalfEdge;
@@ -391,6 +494,8 @@ final class _PolyhedralBoundedSolidSetFinisher
             if ( PolyhedralBoundedSolidEulerOperators.lmef(solid, next, prev,
                     newFaceId) == null ) {
                 i++;
+            } else {
+                lastTriangulatedFaceCount++;
             }
         }
     }

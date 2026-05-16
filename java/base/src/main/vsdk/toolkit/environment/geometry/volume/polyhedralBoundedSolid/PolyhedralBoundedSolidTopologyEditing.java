@@ -124,6 +124,19 @@ public final class PolyhedralBoundedSolidTopologyEditing
             remakeLoopBoundaryStartHalfEdgesReferences(solid);
             return;
         }
+        // §9.5: A degenerate ring (size < 3) cannot be bridged by lmekr
+        // without creating a self-loop edge. The gluePair search may return
+        // either loop as h1 or h2 — check both to cover the swapped case.
+        if ( isDegenerateLoop(solid, h2.parentLoop) ) {
+            removeLoop(face, h2.parentLoop);
+            remakeLoopBoundaryStartHalfEdgesReferences(solid);
+            return;
+        }
+        if ( isDegenerateLoop(solid, h1.parentLoop) ) {
+            removeLoop(face, h1.parentLoop);
+            remakeLoopBoundaryStartHalfEdgesReferences(solid);
+            return;
+        }
 
         PolyhedralBoundedSolidEulerOperators.lmekr(solid, h1, h2);
         PolyhedralBoundedSolidEulerOperators.lkev(
@@ -752,6 +765,47 @@ public final class PolyhedralBoundedSolidTopologyEditing
     [MANT1988].15.15.
     @param solid target solid instance.
     */
+    /**
+    §9.3 planarity guard: collects vertices from both loops of an edge's two
+    adjacent faces and checks that all combined points are coplanar. Prevents
+    {@code maximizeFaces} from merging two faces whose union would be
+    non-planar even though their individual planes nominally overlap.
+    */
+    private static boolean wouldMergedFaceBeCoplanar(
+        _PolyhedralBoundedSolidHalfEdge rightHalf,
+        _PolyhedralBoundedSolidHalfEdge leftHalf,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
+    {
+        ArrayList<Vector3Dd> points = new ArrayList<>();
+        _PolyhedralBoundedSolidHalfEdge start;
+        _PolyhedralBoundedSolidHalfEdge cur;
+
+        start = rightHalf.parentLoop.boundaryStartHalfEdge;
+        cur = start;
+        if ( cur != null ) {
+            do {
+                if ( cur.startingVertex != null &&
+                     cur.startingVertex.position != null ) {
+                    points.add(cur.startingVertex.position);
+                }
+                cur = cur.next();
+            } while ( cur != null && cur != start );
+        }
+        start = leftHalf.parentLoop.boundaryStartHalfEdge;
+        cur = start;
+        if ( cur != null ) {
+            do {
+                if ( cur.startingVertex != null &&
+                     cur.startingVertex.position != null ) {
+                    points.add(cur.startingVertex.position);
+                }
+                cur = cur.next();
+            } while ( cur != null && cur != start );
+        }
+        return PolyhedralBoundedSolidGeometricValidator
+            .validateFacePointsAreCoplanar(points, numericContext);
+    }
+
     public static void maximizeFaces(PolyhedralBoundedSolid solid)
     {
         int i;
@@ -857,6 +911,14 @@ public final class PolyhedralBoundedSolidTopologyEditing
                              e.rightHalf.parentLoop.parentFace,
                              e.leftHalf.parentLoop.parentFace,
                              numericContext) ) {
+                        continue;
+                    }
+                    // §9.3 guard: even though both face planes overlap, the
+                    // merged polygon may be non-planar due to floating-point
+                    // drift (e.g. triangulated curved surfaces). Skip if the
+                    // combined vertex set is not coplanar.
+                    if ( !wouldMergedFaceBeCoplanar(
+                             e.rightHalf, e.leftHalf, numericContext) ) {
                         continue;
                     }
                     PolyhedralBoundedSolidEulerOperators.lkef(

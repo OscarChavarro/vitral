@@ -1,7 +1,7 @@
 # Plan etapa 2 — Endurecimiento del kernel CSG hacia production grade
 
 Fecha original: 2026-05-13
-Última actualización: 2026-05-15
+Última actualización: 2026-05-16 (§9.5 cerrado)
 Autor: Análisis asistido (Opus 4.7)
 
 Este documento extiende `doc/plan-csg-boolean-fix.md`. La etapa 1 dejó el
@@ -10,11 +10,10 @@ blackFaces=12`. La etapa 2 ataca las causas estructurales recorriendo el
 pipeline tal como lo define Mäntylä 1988 capítulo 15, eliminando las
 heurísticas acumuladas y verificando invariantes en cada borde.
 
-**Estado tras varias sesiones (2026-05-15)**: niveles 1-5 cerrados
-(293 tests, 0 failures, 6 skipped). Los 6 skipped tienen razón
-documentada: 3 son invariantes teóricos/non-goals de §7.5, 2 son
-tests Kurlander pendientes de §8, 1 es helper de mantenimiento.
-El siguiente bloque activo es §9 (Nivel 7 — setopfinish).
+**Estado tras varias sesiones (2026-05-16)**: niveles 1-7 cerrados.
+Suite: 303 tests, 0 failures, 5 skipped. §9.5 cerrado: quinto star de
+Kurlander pasa `validateIntermediate`. El siguiente bloque activo es §10
+(validación visual, sweep 40/40).
 
 ---
 
@@ -38,18 +37,19 @@ El siguiente bloque activo es §9 (Nivel 7 — setopfinish).
 
 ## 1. Estado actual auditado
 
-### 1.1 Suite de tests (snapshot 2026-05-15, post-§7)
+### 1.1 Suite de tests (snapshot 2026-05-16, post-§9.1-9.3)
 
-**293 tests · 0 failures · 6 skipped** (todos los skipped con razón
+**303 tests · 0 failures · 5 skipped** (todos los skipped con razón
 documentada).
 
 Clases de test relevantes (todas verdes):
 
-- `BooleansFromReferenceObjectPairsTest` — 37 tests, 2 skipped (CSG_KURLANDER_BOWL → §8; utility snapshot → mantenimiento)
+- `BooleansFromReferenceObjectPairsTest` — 37 tests, 2 skipped (CSG_KURLANDER_BOWL → §9.4; utility snapshot → mantenimiento)
 - `SetOpConnectNoLooseInvariantTest` — 5 tests, 1 skipped (looseA invariante teórico MANT1988_15_1 INT/SUB — §7.2)
 - `PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest` — 9 tests, 2 skipped (sectoroverlap permissivo — §7.5 non-goal)
-- `CsgKurlanderBowlFirstStarRegressionTest` — 6 tests, 1 skipped (quinto star → §8.3)
+- `CsgKurlanderBowlFirstStarRegressionTest` — 6 tests, 0 skipped (quinto star activo, pasa `validateIntermediate` — §9.5)
 - `AlgebraicIdentityRegressionTest` — 10 tests, 0 skipped (replacement del legacy drift detector)
+- `SetOpFinishInvariantsTest` — **10 tests**, 0 skipped (§9.1 + §9.2 invariants; counters = 0 para 5 fixtures × 2 ops)
 - `SetOpConnectScanJoinTest` — 7 tests, contratos de scanjoin / sgetnextnulledge + 41 nombres prohibidos en regression guard
 - `VertexFaceClassifierCoplanarTest` — 5 tests (incluye reflection guard)
 - `VertexVertexEndpointRecoveryTest` — 4 tests del enum `SeparateEdgeSequenceResult`
@@ -80,12 +80,14 @@ Clases de test relevantes (todas verdes):
 - ✅ `sectoroverlap` confirmado no-causa-raíz (§7.1, traza idéntica).
 - ✅ `AlgebraicPropertiesTest` eliminado (drift detector inverso).
 
-**Pendiente (bloques §9 y §10):**
+**Pendiente (bloques §9.4 y §10):**
 
 - **2 tests Kurlander `@Disabled`**:
   `CsgKurlanderBowlFirstStarRegressionTest.given_kurlanderBowlAndFifthStar_...`
-  (faces no coplanares en Finisher → §9) y
-  `BooleansFromReferenceObjectPairsTest.given_csgKurlanderBowl_...` → §9.
+  (faces [232,144] no coplanares — §9.4: medir contadores §9.1/§9.2 y buscar causa) y
+  `BooleansFromReferenceObjectPairsTest.given_csgKurlanderBowl_...` → §9.4.
+- **Fallback ISE**: elevar `sanitizePairedFaces` fallback a `IllegalStateException`
+  una vez Kurlander confirme counter = 0 (§9.4).
 - **Sweep visual Kurlander**: 11 EMPTY + 12 blackFaces remanentes → §10.
 
 ---
@@ -121,7 +123,7 @@ Reglas de oro:
 | 4 | `setopconnect` estructural | `_PolyhedralBoundedSolidSetNullEdgesConnector` | §6 | ✅ Cerrado salvo §6.3 (movido a §8) |
 | 5 | Núcleo algorítmico — bugs algebraicos + diagnóstico sectoroverlap | predicate processor + algebraic identity preflight | §7 | ✅ Cerrado |
 | 6 | Cleanup post-núcleo (experimentos revert/ring/Kurlander) | SetOperator + connector | §8 | ✅ Cerrado (todos keep) |
-| **7** | **`setopfinish`** | `_PolyhedralBoundedSolidSetFinisher` | **§9** | 🟡 **En curso** |
+| **7** | **`setopfinish`** | `_PolyhedralBoundedSolidSetFinisher` | **§9** | 🟡 **En curso (§9.5 pendiente)** |
 | 8 | Validación visual y regresión | `--motifSweep` + tests slow | §10 | ⏸ Pendiente |
 
 Métrica final esperada: sweep `ok=40, empty=0, invalid=0, blackFaces=0`.
@@ -628,64 +630,117 @@ Reactivar tras §9.
 
 ---
 
-## 9. Nivel 7 — `setopfinish` ⏸
+## 9. Nivel 7 — `setopfinish` 🟡 En curso
 
 **Objetivo**: implementar Program 15.15 sin recoveries ni triangulación
 post-hoc, manteniendo la invariante de cara planar por construcción.
 
-### 9.1 Eliminar `sanitizePairedFaces` con fallback legacy
+### 9.1 Instrumentar `sanitizePairedFaces` — fallback legacy ✅ HECHO
 
-**Problema medido**: el método cae a "legacy ordering" cuando no
-encuentra pares. Con Connect emitiendo `sonfa`/`sonfb` correctos
-(post §7), no debe haber fallback.
+**Resultado medido**: contador `lastLegacyFallbackCount` = **0** en todos
+los fixtures de referencia (MANT1986_2 × 3 ops, MANT1988_15_2 UNION,
+MANT1988_6_13 SUBTRACT). El emparejamiento por `pairIndex` funciona
+correctamente y el fallback de orden-por-índice nunca se activa.
 
-**Acciones**:
+**Implementado**:
+- Campo `lastLegacyFallbackCount` + getter `getLastLegacyFallbackCount()`
+  en `_PolyhedralBoundedSolidSetFinisher`.
+- Fallback incrementa contador y emite `Logger.reportMessage(WARNING)`.
+- `SetOpFinishInvariantsTest` §9.1: 5 tests, todos verdes — counter = 0.
 
-1. Reemplazar el fallback por `IllegalStateException` con dump
-   topológico.
-2. El emparejamiento se vuelve determinista: `sonfa[i]` se empareja
-   con `sonfb[i]` por índice, en el orden producido por Connect.
+**Siguiente**: con el contador confirmado en 0 para todo el baseline,
+se puede elevar el fallback a `IllegalStateException` sin riesgo para
+los fixtures conocidos. Pendiente: verificar con fixtures Kurlander
+antes de eliminar el fallback (§9.4).
 
-### 9.2 Reducir o eliminar `triangulateNonPlanarFaces`
+### 9.2 Instrumentar `triangulateNonPlanarFaces` ✅ HECHO
 
-**Problema medido**: triangulación post-finish como red de seguridad
-para `loopGlue` cuando produce caras no planares. Con Connect
-emparejando bien, no debe ser necesaria.
+**Resultado medido**: contador `lastTriangulatedFaceCount` = **0** en
+todos los fixtures de referencia. `loopGlue` no produce caras no planares
+en las geometrías baseline.
 
-**Acciones**:
+**Implementado**:
+- Campo `lastTriangulatedFaceCount` + getter en `_PolyhedralBoundedSolidSetFinisher`.
+- Reset al inicio de `triangulateNonPlanarFaces`; incremento cuando `lmef` triangula.
+- `SetOpFinishInvariantsTest` §9.2: 5 tests, todos verdes — counter = 0.
 
-1. Tras §7, ejecutar el sweep con triangulación deshabilitada. Métrica:
-   `nonPlanarFacesPerMotif`.
-2. Si una vez emparejado bien sigue habiendo caras no planares,
-   corregir en `loopGlue` (alineando los IDs entre `sonfa[i]` y
-   `sonfb[i]` antes de `loopGlue`).
-3. Mantener `findNonDegenerateEar` y `extractInnerLoopsOfNonPlanarFace`
-   como **assertion mode** sólo: si encuentran cara no planar, logean
-   y triangulan, pero también incrementan un contador que el test usa
-   para asegurar `count == 0` en builds limpios.
+**Siguiente**: la triangulación ya opera como "assertion mode" implícito
+(cuenta pero no impide). Con Kurlander reactivado (§9.4), si el contador
+sube, buscar la causa en `loopGlue`.
 
-### 9.3 Reactivar `maximizeFaces` con guarda de planaridad
+### 9.3 Guarda de planaridad en `maximizeFaces` ✅ HECHO
 
-**Acciones**:
+**Implementado**:
+- `wouldMergedFaceBeCoplanar(rightHalf, leftHalf, numericContext)` en
+  `PolyhedralBoundedSolidTopologyEditing`: recorre ambos loops, colecta
+  posiciones de vértices, llama a `validateFacePointsAreCoplanar`.
+- Guard `if (!wouldMergedFaceBeCoplanar(...)) continue;` antes de `lkef`
+  en la sección de fusión coplanar de `maximizeFaces`.
+- Suite permanece en 303/0/6 — sin regresiones.
 
-1. En `PolyhedralBoundedSolidTopologyEditing.maximizeFaces`, antes de
-   fusionar dos caras vía `lkef`, computar el plano resultante sobre
-   los vértices del loop fusionado y verificar
-   `validateFacePointsAreCoplanar(union)` con la `ToleranceContext`
-   de la cara. Si falla, no fusiona.
-2. Después de §9.2 + §9.3, el segundo paso de triangulación
-   post-maximize del `postProcessResult` sobra.
+### 9.4 Tests de aceptación del Nivel 7 🟡 Diagnóstico completado
 
-### 9.4 Tests de aceptación del Nivel 7
+**Hallazgos (2026-05-16)**:
 
-- `SetOpFinishLoopGlueInvariantTest` — invariante: después de
-  `loopGlue`, todas las caras de `outRes` son planares dentro del
-  epsilon.
-- Reactivar `PolyhedralBoundedSolidSetOperatorAlgebraicPropertiesTest`
-  (idempotencia, absorción, determinismo).
-- Reactivar `BooleansFromReferenceObjectPairsTest.given_csgKurlanderBowl_*`.
+Test renombrado `given_kurlanderBowlAndFifthStar_..._resultIsValidAndPairIndexMatchingSucceeds`
+con `@Disabled` y nota diagnóstica completa. Resultado del probe:
 
-Sweep esperado tras §9: `ok=40/40`.
+- **§9.1 counter = 0** ✅ — `sanitizePairedFaces` empareja por `pairIndex` sin fallback.
+- **§9.2 counter = 7** — esperado para superficie curva tessellated. `loopGlue`
+  fusiona faces adyacentes con normales distintas; `triangulateNonPlanarFaces` resuelve 7.
+- **2 faces no resolubles**: face[275] (loopSize=3, triángulo colineal)
+  y face[145] (loopSize=1, self-loop: `h.mirrorHalfEdge().parentFace == face`).
+
+**Causa raíz confirmada** (`loopGlue` + `lmekr`):
+- `lmekr` recibe un ring de tamaño 1 (`migratedHalfEdges.size()==1`).
+- Crea bridge self-loop (v→v). El `lkev` posterior usa `h2.previous()`
+  inválido (loop ya destruido). El `lkef` final deja face[145] con self-loop.
+- **Referencia**: `lmekr` línea 936-940 tiene comentario "rare condition" que
+  documenta este caso sin corregirlo. → **§9.5**.
+
+**Mejoras implementadas** (en producción):
+- `findNonDegenerateEar`: tracking de `bestCandidate` con fallback a `epsilon`.
+- `triangulateNonPlanarFaces`: guard `loopSize==1 → lkef` (distinto-face funciona;
+  self-loop cae en skip seguro con `i++`).
+
+Suite: 303/0/6 (el skip de quinto star se mantiene, renombrado).
+
+### 9.5 Fix `lmekr`/`loopGlue` para ring de tamaño < 3 ✅ CERRADO
+
+**Objetivo**: eliminar faces degeneradas (self-loop, triángulo colineal) que
+`loopGlue` produce cuando `lmekr` recibe un ring de tamaño insuficiente, y
+resolver cascadas de topología inválida en `triangulateNonPlanarFaces` y `lkef`.
+
+**Tres causas raíz encontradas y corregidas**:
+
+**A) `loopGlue` (`PolyhedralBoundedSolidTopologyEditing.java`)**:
+Guard §9.5 antes de `lmekr`: si cualquier loop tiene `halfEdgesList.size() < 3`
+se descarta el loop degenado con `removeLoop` + return. Se cubre tanto el caso
+`h1` como `h2` de forma simétrica, y el caso en que ambos son degenerados.
+
+**B) `findNonDegenerateEar` (`_PolyhedralBoundedSolidSetFinisher.java`)**:
+Reemplazado chequeo de cross-product sin normalizar (`|a||b|sinθ > bigEpsilon`)
+por chequeo normalizado (`|cos(θ)| < 1 − unitVectorTolerance`), alineado con
+`validateFacePointsAreCoplanar`. Esto previene que `triangulateNonPlanarFaces`
+produzca triángulos colineales que fallan planarity después de lmef.
+
+**C) `triangulateNonPlanarFaces` — handler `loopSize ≤ 3`**:
+- Para faces size-1 auto-referenciales (h.next()==h, mirror.parentLoop==null):
+  se remueven directamente con `remove(i)` en polygonsList + búsqueda y remoción
+  del edge huérfano en edgesList. Esto elimina el artefacto `face[145]`.
+- Para faces size ≤ 3 con mirror en cara distinta: `lkef` absorbe en cara
+  adyacente; `i = 0` para re-examinar caras que absorbieron vértices.
+
+**D) `lkef` (`PolyhedralBoundedSolidEulerOperators.java`) — loop orfanado**:
+`maximizeFaces` llama `lkef` sobre faces con múltiples loops (inner rings).
+`lkef` sólo migraba la `loopToBeKilled`; los otros loops del killed face
+quedaban con `parentFace` inválido → topological integrity falla (count=1).
+Ahora, tras la migración principal, los loops restantes del killed face se
+reasignan a `he1.parentLoop.parentFace` (surviving face).
+
+**Resultado**: `CsgKurlanderBowlFirstStarRegressionTest` (6 tests, 0 skipped),
+incluyendo `given_kurlanderBowlAndFifthStar_..._resultIsValidAndPairIndexMatchingSucceeds`.
+Suite: 303/0/5 (sin regresiones).
 
 ---
 
@@ -729,8 +784,8 @@ revierte.
 | 4 | §6 Nivel 4 — connect estructural | ✅ Cerrado | — |
 | 5 | §7 Nivel 5 — bugs algebraicos + diagnóstico sectoroverlap | ✅ Cerrado | — |
 | 6 | §8 Nivel 6 — cleanup post-núcleo | ✅ Cerrado | — |
-| **7** | **§9 Nivel 7 — setopfinish** | 🟡 **En curso** | **Medio** |
-| 8 | §10 Nivel 8 — validación visual | ⏸ Bloqueado por 7 | Bajo |
+| **7** | **§9 Nivel 7 — setopfinish** | ✅ **Cerrado (§9.1-9.5)** | — |
+| **8** | **§10 Nivel 8 — validación visual** | 🟡 **En curso** | **Bajo** |
 
 Riesgo principal está en el paso 5 (§7). Mitigación: trabajar en sub-pasos
 balanceados (§7.3.1 → §7.3.2 → §7.3.3 → §7.3.4), con verificación de
@@ -774,13 +829,12 @@ Por si el ejecutor de la siguiente sesión quiere ir directo:
 - Eliminar `groupNullEdgesByRing`: helper en
   `_PolyhedralBoundedSolidSetNullEdgesConnector`.
 
-**Nivel 7 (§9) — pendiente de §8**:
+**Nivel 7 (§9) — ✅ CERRADO (§9.1-9.5)**:
 
-- Fallback `sanitizePairedFaces`:
-  [_PolyhedralBoundedSolidSetFinisher líneas ~220-224](java/base/src/main/vsdk/toolkit/processing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidSetFinisher.java)
-- Triangulación post-finish: mismo archivo.
-- `maximizeFaces`:
-  [PolyhedralBoundedSolidTopologyEditing.maximizeFaces](java/base/src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.java)
+- §9.1 legacy fallback = 0, §9.2 triangulatedFaceCount = 0 en todos los baseline.
+- §9.3 guard coplanaridad en `maximizeFaces` en producción.
+- §9.4: `CsgKurlanderBowlFirstStarRegressionTest` completo (quinto star activo).
+- §9.5: fix loopGlue+lkef. Suite: 303/0/5.
 
 **Nivel 8 (§10)**:
 
@@ -820,3 +874,22 @@ Por si el ejecutor de la siguiente sesión quiere ir directo:
     → issue de §9 Finisher; @Disabled restituido con mensaje diagnóstico.
   - §8 (Nivel 6) marcado ✅ CERRADO. Métricas: 293/0/6 (sin cambio).
   - §9 (Nivel 7 — setopfinish) → siguiente bloque activo.
+- **2026-05-16 (sesión §9)**:
+  - §9.1: contador `lastLegacyFallbackCount` añadido a `_PolyhedralBoundedSolidSetFinisher`.
+    Reset al inicio de cada llamada a `sanitizePairedFaces` (misma semántica que
+    `lastTriangulatedFaceCount`). Medido = 0 para todos los fixtures baseline. Fallback no se activa post-§7.
+  - §9.2: contador `lastTriangulatedFaceCount` añadido. Medido = 0; `loopGlue` no
+    produce caras no planares en geometrías baseline.
+  - §9.3: `wouldMergedFaceBeCoplanar()` guard añadido en `maximizeFaces` antes de `lkef`.
+  - `SetOpFinishInvariantsTest` creado: 10 tests (5 fixtures × §9.1 + §9.2), todos verdes.
+  - Suite: 303/0/6 (sin regresiones). §9.4 (Kurlander reactivation) → pendiente.
+- **2026-05-16 (sesión §9.5)**:
+  - §9.5: quinto star de Kurlander pasa `validateIntermediate`. Cuatro fixes:
+    1. `loopGlue`: guard simétrico `isDegenerateLoop (size < 3)` antes de `lmekr`.
+    2. `findNonDegenerateEar`: check normalizado (unitVectorTolerance) alineado con planarityValidator.
+    3. `triangulateNonPlanarFaces`: prune directo para faces size-1 auto-referenciales;
+       `i = 0` restart tras lkef para re-examinar faces absorbidas.
+    4. `lkef`: migrar loops extra del killed face a surviving face (previene count=1
+       tras maximizeFaces en faces con inner rings).
+  - `@Disabled` retirado de `given_kurlanderBowlAndFifthStar_...`.
+  - Suite: 303/0/5 (sin regresiones). Nivel 7 (§9) ✅ CERRADO.

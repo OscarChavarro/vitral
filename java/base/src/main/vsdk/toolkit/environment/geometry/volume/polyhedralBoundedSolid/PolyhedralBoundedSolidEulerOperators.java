@@ -427,6 +427,16 @@ public final class PolyhedralBoundedSolidEulerOperators
             he1.parentLoop.halfEdgesList.insertBefore(he, halfEdgePivot);
             halfEdgePivot = he;
         }
+
+        // If the killed face had additional loops (inner rings), transfer them
+        // to the surviving face so their half-edges remain reachable.
+        while ( faceToBeKilled.boundariesList.size() > 0 ) {
+            _PolyhedralBoundedSolidLoop orphanedLoop;
+            orphanedLoop = faceToBeKilled.boundariesList.get(0);
+            orphanedLoop.parentFace = he1.parentLoop.parentFace;
+            faceToBeKilled.boundariesList.remove(0);
+            he1.parentLoop.parentFace.boundariesList.add(orphanedLoop);
+        }
     }
 
     /**
