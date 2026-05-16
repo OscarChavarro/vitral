@@ -3,6 +3,8 @@ package render;
 // Java Awt classes
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import models.DebuggerModel;
 import java.awt.geom.Rectangle2D;
 
@@ -21,6 +23,9 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import com.jogamp.opengl.glu.GLU;
 
@@ -112,6 +117,7 @@ public class Jogl4DebuggerHudRenderer
         }
         drawCsgStatisticsSummary(height);
         hudTextRenderer.endRendering();
+        drawSelectedFaceLabel(drawable, width, height);
         drawDebugVertexLabels(drawable, width, height);
     }
 
@@ -232,6 +238,108 @@ public class Jogl4DebuggerHudRenderer
             }
         }
         vertexLabelRenderer.endRendering();
+    }
+
+    private void drawSelectedFaceLabel(GLAutoDrawable drawable, int width, int height)
+    {
+        PolyhedralBoundedSolid solid = model.getSolid();
+        int faceIndex = model.getFaceIndex();
+        GL2 gl;
+        double[] modelview;
+        double[] projection;
+        int[] viewport;
+        _PolyhedralBoundedSolidFace face;
+        ArrayList<Vector3Dd> projectedVertices;
+        Vector3Dd projectedMidpoint;
+        String label;
+
+        if ( solid == null || solid.getPolygonsList() == null || faceIndex < 0 ) {
+            return;
+        }
+        if ( faceIndex >= solid.getPolygonsList().size() ) {
+            return;
+        }
+
+        face = solid.getPolygonsList().get(faceIndex);
+        gl = drawable.getGL().getGL2();
+        modelview = new double[16];
+        projection = new double[16];
+        viewport = new int[4];
+
+        gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, modelview, 0);
+        gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
+        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+
+        projectedVertices = collectProjectedFaceVertices(face, modelview,
+            projection, viewport);
+        if ( projectedVertices.isEmpty() ) {
+            return;
+        }
+
+        projectedMidpoint = averageProjectedPosition(projectedVertices);
+        label = Integer.toString(face.id);
+
+        vertexLabelRenderer.beginRendering(width, height);
+        vertexLabelRenderer.setColor(0.0f, 1.0f, 1.0f, 1.0f);
+        vertexLabelRenderer.draw(label,
+            (int)Math.round(projectedMidpoint.x()),
+            (int)Math.round(projectedMidpoint.y()));
+        vertexLabelRenderer.endRendering();
+    }
+
+    private static ArrayList<Vector3Dd> collectProjectedFaceVertices(
+        _PolyhedralBoundedSolidFace face,
+        double[] modelview,
+        double[] projection,
+        int[] viewport)
+    {
+        ArrayList<Vector3Dd> projected = new ArrayList<Vector3Dd>();
+        Set<Integer> visitedVertexIds = new LinkedHashSet<Integer>();
+
+        for ( int i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge start;
+            _PolyhedralBoundedSolidHalfEdge he;
+
+            if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+                continue;
+            }
+
+            start = loop.boundaryStartHalfEdge;
+            he = start;
+            do {
+                _PolyhedralBoundedSolidVertex vertex = he.startingVertex;
+                if ( vertex != null &&
+                     visitedVertexIds.add(vertex.id) &&
+                     vertex.position != null ) {
+                    Vector3Dd projectedVertex = projectVertexToViewport(
+                        vertex.position, modelview, projection, viewport);
+                    if ( projectedVertex != null ) {
+                        projected.add(projectedVertex);
+                    }
+                }
+                he = he.next();
+            } while ( he != start );
+        }
+        return projected;
+    }
+
+    private static Vector3Dd averageProjectedPosition(
+        ArrayList<Vector3Dd> projectedVertices)
+    {
+        double sx = 0.0;
+        double sy = 0.0;
+        double sz = 0.0;
+
+        for ( int i = 0; i < projectedVertices.size(); i++ ) {
+            Vector3Dd p = projectedVertices.get(i);
+            sx += p.x();
+            sy += p.y();
+            sz += p.z();
+        }
+
+        double n = projectedVertices.size();
+        return new Vector3Dd(sx / n, sy / n, sz / n);
     }
 
     private static ArrayList<_PolyhedralBoundedSolidVertex> filterVisibleVertices(

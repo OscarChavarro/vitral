@@ -893,3 +893,51 @@ Por si el ejecutor de la siguiente sesión quiere ir directo:
        tras maximizeFaces en faces con inner rings).
   - `@Disabled` retirado de `given_kurlanderBowlAndFifthStar_...`.
   - Suite: 303/0/5 (sin regresiones). Nivel 7 (§9) ✅ CERRADO.
+
+## 15. Estado de las pruebas
+
+Para los motifs seleccionados individualmente dentro del Bowl Kurlander:
+
+| Índice motif | Estado |
+|------|---------|
+| 0 | ✅ |
+| 1 | ✅ |
+| 2 | ❌ Fallo en contorno interno |
+| 3 | ✅ |
+| 4 | ❌ Fallo en ambos contornos |
+| 5 | ❌ Fallo en ambos contornos |
+| 6 | ❌ Fallo en contorno interno |
+| 7 | ⚠️ B-A pierde un shell |
+| 8 | ❌ Fallo en contorno externo |
+| 9 | ❌ Objeto A eliminado |
+| 10 | ✅ |
+| 11 | ❌ Fallo en contorno externo |
+| 12 | ✅ |
+| 13 | ❌ Fallo en contorno externo |
+| 14 | ✅ |
+| 15 | ✅ |
+| 16 | ❌ Fallo en contorno externo |
+| 17 | ❌ Fallo en contorno externo |
+| 18 | ❌ Fallo en contorno externo |
+| 19 | ❌ Objeto A eliminado |
+| 20 | ❌ Fallo en contorno externo |
+| 21 | ✅ |
+| 22 | ❌ Cara resultante no planar |
+| 23 | ❌ Cara resultante no planar y cara vecina eliminada |
+| 24 | ❌ Objeto A eliminado |
+| 25 | ❌ Objeto A eliminado |
+| 26 | ❌ Fallo en ambos contornos |
+| 27 | ❌ Objeto A eliminado |
+| 28 | ❌ Objeto A eliminado |
+| 29 | ❌ Objeto A eliminado |
+| 30 | ❌ Objeto A eliminado |
+| 31 | ❌ Objeto A eliminado |
+| 32 | ❌ Objeto A eliminado |
+| 33 | ❌ Objeto A eliminado |
+| 34 | ❌ Objeto A eliminado |
+| 35 | ❌ Objeto A eliminado |
+| 36 | ❌ Objeto A eliminado |
+| 37 | ❌ Fallo en contorno externo |
+| 38 | ❌ Objeto A eliminado |
+| 39 | ❌ Objeto A eliminado |
+

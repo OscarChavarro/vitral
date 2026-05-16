@@ -243,9 +243,6 @@ public final class GeneralModelsBuilder
         CsgSampleNames sample,
         int part)
     {
-        if ( sample != CsgSampleNames.KURLANDER_BOWL_ALL_MOTIFS ) {
-            return;
-        }
         if ( part != 1 ) {
             printProgressMessage(
                 "KURLANDER_BOWL_ALL_MOTIFS selected as operand preview; " +
@@ -1193,12 +1190,6 @@ public final class GeneralModelsBuilder
             "operation %s, and sample pair %s\n", part,
             op.getLabel(), sample.getLabel());
 
-        if ( sample == CsgSampleNames.KURLANDER_BOWL_ALL_MOTIFS &&
-             part == 1 ) {
-            PolyhedralBoundedSolidStatistics.reset();
-            return CsgKurlanderBowlFixture.create();
-        }
-
         operands = createCsgOperands(sample, kurlanderSingleMotifIndex);
         PolyhedralBoundedSolidStatistics.reset();
 
@@ -1288,14 +1279,10 @@ public final class GeneralModelsBuilder
                     SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
                 break;
             case KURLANDER_BOWL_SINGLE_MOTIF:
+            default:
                 operands =
                     CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
                         kurlanderSingleMotifIndex);
-                break;
-            case KURLANDER_BOWL_ALL_MOTIFS:
-            default:
-                operands =
-                    CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
                 break;
         }
 
@@ -1337,8 +1324,6 @@ public final class GeneralModelsBuilder
             case KURLANDER_BOWL_SINGLE_MOTIF:
                 return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(
                     kurlanderSingleMotifIndex);
-            case KURLANDER_BOWL_ALL_MOTIFS:
-                return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands();
             default:
                 return createCsgOperands(sample, kurlanderSingleMotifIndex);
         }

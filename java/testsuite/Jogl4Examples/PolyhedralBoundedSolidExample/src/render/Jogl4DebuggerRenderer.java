@@ -2,6 +2,8 @@ package render;
 
 // Java basic classes
 import com.jogamp.opengl.GL;
+import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import models.DebuggerModel;
@@ -25,6 +27,8 @@ import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class Jogl4DebuggerRenderer implements GLEventListener
 {
@@ -34,6 +38,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     private final Jogl4DebuggerHudRenderer hudRenderer;
     private final SimpleMaterial csgOperandMaterialA;
     private final SimpleMaterial csgOperandMaterialB;
+    private File pendingScreenshotFile;
 
     public Jogl4DebuggerRenderer(DebuggerModel model)
     {
@@ -41,6 +46,12 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         this.hudRenderer = new Jogl4DebuggerHudRenderer(model);
         this.csgOperandMaterialA = createInsetMaterial(1.0, 0.502, 0.502);
         this.csgOperandMaterialB = createInsetMaterial(0.502, 1.0, 0.502);
+        this.pendingScreenshotFile = null;
+    }
+
+    public void requestScreenshot(File outputFile)
+    {
+        pendingScreenshotFile = outputFile;
     }
 
     private static SimpleMaterial createInsetMaterial(double r, double g, double b)
@@ -376,6 +387,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         drawCsgOperandInsets(gl, drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());
         hudRenderer.draw(drawable);
+        exportPendingScreenshot(gl, drawable.getSurfaceWidth(),
+            drawable.getSurfaceHeight());
     }
    
     /** Not used method, but needed to instanciate GLEventListener
@@ -412,5 +425,48 @@ public class Jogl4DebuggerRenderer implements GLEventListener
 
         model.getCamera().updateViewportResize(width, height);
         hudRenderer.updateViewportSize(width, height);
+    }
+
+    private void exportPendingScreenshot(GL2 gl, int width, int height)
+    {
+        File outputFile = pendingScreenshotFile;
+        if ( outputFile == null || width <= 0 || height <= 0 ) {
+            return;
+        }
+
+        pendingScreenshotFile = null;
+        gl.glFinish();
+        RGBImageUncompressed image = captureRgbImage(gl, width, height);
+        ensureParentFolder(outputFile);
+        ImagePersistence.exportPNG(outputFile, image);
+        System.out.println("[PolyhedralBoundedSolidExample] Exported " +
+            outputFile.getPath());
+    }
+
+    private static RGBImageUncompressed captureRgbImage(GL2 gl, int width, int height)
+    {
+        ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
+        gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+        gl.glReadPixels(0, 0, width, height, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, bb);
+
+        RGBImageUncompressed image = new RGBImageUncompressed();
+        image.init(width, height);
+
+        int pos = 0;
+        for ( int y = image.getYSize() - 1; y >= 0; y-- ) {
+            for ( int x = 0; x < image.getXSize(); x++ ) {
+                image.putPixel(x, y, bb.get(pos), bb.get(pos + 1), bb.get(pos + 2));
+                pos += 3;
+            }
+        }
+        return image;
+    }
+
+    private static void ensureParentFolder(File outputFile)
+    {
+        File parent = outputFile.getParentFile();
+        if ( parent != null && !parent.exists() ) {
+            parent.mkdirs();
+        }
     }
 }

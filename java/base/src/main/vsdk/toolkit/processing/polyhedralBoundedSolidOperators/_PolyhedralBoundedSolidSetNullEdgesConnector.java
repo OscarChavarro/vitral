@@ -1061,6 +1061,33 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         tracePipelineSummary(
             "connect start pairsA=" + sonea.size() +
             " pairsB=" + soneb.size());
+        if ( isPipelineSummaryTraceEnabled() ) {
+            int sameLoopA = 0;
+            int diffLoopA = 0;
+            for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : sonea) {
+                if ( ne.e.rightHalf != null && ne.e.leftHalf != null &&
+                     ne.e.rightHalf.parentLoop == ne.e.leftHalf.parentLoop ) {
+                    sameLoopA++;
+                } else {
+                    diffLoopA++;
+                }
+            }
+            int sameLoopB = 0;
+            int diffLoopB = 0;
+            for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : soneb) {
+                if ( ne.e.rightHalf != null && ne.e.leftHalf != null &&
+                     ne.e.rightHalf.parentLoop == ne.e.leftHalf.parentLoop ) {
+                    sameLoopB++;
+                } else {
+                    diffLoopB++;
+                }
+            }
+            tracePipelineSummary(
+                "connect null-edge-loops A:sameLoop=" + sameLoopA +
+                " diffLoop=" + diffLoopA +
+                " B:sameLoop=" + sameLoopB +
+                " diffLoop=" + diffLoopB);
+        }
 
         _PolyhedralBoundedSolidEdge nextedgea;
         _PolyhedralBoundedSolidEdge nextedgeb;

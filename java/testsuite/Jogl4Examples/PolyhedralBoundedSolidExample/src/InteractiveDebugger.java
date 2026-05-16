@@ -15,6 +15,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
+import java.io.File;
 
 // JOGL classes
 import com.jogamp.opengl.GLCapabilities;
@@ -435,6 +436,13 @@ public class InteractiveDebugger extends JFrame implements
                      @Override
                      public void toggleFullscreen() {
                          InteractiveDebugger.this.toggleFullscreenMode();
+                     }
+
+                     @Override
+                     public void requestScreenshot() {
+                         InteractiveDebugger.this.joglDebuggerRenderer
+                             .requestScreenshot(new File("screenshot.png"));
+                         InteractiveDebugger.this.repaintCanvas();
                      }
                  }) ) {
             recenterOrbiterAfterModelChange(

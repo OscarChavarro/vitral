@@ -1,12 +1,14 @@
 import models.DebuggerModel;
 import models.SolidModelNames;
 import models.CsgSampleNames;
+import gui.CameraFaceFocusInteraction;
 import options.CommandLineOptions;
 import render.Jogl4HeadlessRenderer;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 
@@ -24,7 +26,8 @@ public class PolyhedralBoundedSolidExample
         }
         catch ( IllegalArgumentException e ) {
             System.err.println("[PolyhedralBoundedSolidExample] " + e.getMessage());
-            System.err.println("Usage: [--offline] [--output <file.png>]");
+            System.err.println(
+                "Usage: [--offline] [--screenshot <file.png>] [--faceId <id>]");
             return;
         }
 
@@ -41,6 +44,14 @@ public class PolyhedralBoundedSolidExample
             return;
         }
         if ( options.isOffline() ) {
+            try {
+                applyOfflineFaceSelection(model, options);
+            }
+            catch ( RuntimeException e ) {
+                System.err.println("[PolyhedralBoundedSolidExample] " + e.getMessage());
+                System.exit(2);
+                return;
+            }
             Jogl4HeadlessRenderer renderer = new Jogl4HeadlessRenderer(
                 model, new File(options.getOutputPath()));
             renderer.render();
@@ -53,6 +64,49 @@ public class PolyhedralBoundedSolidExample
         }
 
         InteractiveDebugger.launch(model);
+    }
+
+    private static void applyOfflineFaceSelection(
+        DebuggerModel model,
+        CommandLineOptions options)
+    {
+        Integer requestedFaceId = options.getFaceId();
+        int faceIndex;
+        _PolyhedralBoundedSolidFace face;
+
+        if ( requestedFaceId == null ) {
+            return;
+        }
+
+        faceIndex = findFaceIndexById(model.getSolid(), requestedFaceId.intValue());
+        if ( faceIndex < 0 ) {
+            throw new IllegalArgumentException(
+                "Face id " + requestedFaceId + " not found in current solid");
+        }
+        model.setFaceIndex(faceIndex);
+        model.clampFaceIndex();
+
+        if ( !(new CameraFaceFocusInteraction()).focusSelectedFace(model) ) {
+            throw new IllegalStateException(
+                "Cannot focus camera on selected face id " + requestedFaceId);
+        }
+
+        face = model.getSolid().getPolygonsList().get(faceIndex);
+        System.out.println("[PolyhedralBoundedSolidExample] Selected face id=" +
+            face.id + " index=" + faceIndex + " loops=" + face.boundariesList.size());
+    }
+
+    private static int findFaceIndexById(PolyhedralBoundedSolid solid, int faceId)
+    {
+        if ( solid == null || solid.getPolygonsList() == null ) {
+            return -1;
+        }
+        for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            if ( solid.getPolygonsList().get(i).id == faceId ) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static void configureInitialModelFromSystemProperty(DebuggerModel model)

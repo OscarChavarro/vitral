@@ -16,6 +16,7 @@ public class CommandLineOptions
     private Boolean drawSurfaces;
     private ShadingType shadingType;
     private Integer kurlanderBowlMotifIndex;
+    private Integer faceId;
 
     public CommandLineOptions()
     {
@@ -29,6 +30,7 @@ public class CommandLineOptions
         drawSurfaces = null;
         shadingType = null;
         kurlanderBowlMotifIndex = null;
+        faceId = null;
     }
 
     public boolean isOffline()
@@ -81,6 +83,11 @@ public class CommandLineOptions
         return kurlanderBowlMotifIndex;
     }
 
+    public Integer getFaceId()
+    {
+        return faceId;
+    }
+
     public static CommandLineOptions parse(String[] args)
     {
         CommandLineOptions options = new CommandLineOptions();
@@ -96,15 +103,15 @@ public class CommandLineOptions
                 options.motifSweep = true;
                 options.offline = true;
             }
-            else if ( "--output".equals(arg) ) {
+            else if ( "--screenshot".equals(arg) ) {
                 if ( i + 1 >= args.length ) {
                     throw new IllegalArgumentException(
-                        "Missing value for --output");
+                        "Missing value for --screenshot");
                 }
                 options.outputPath = args[++i];
             }
-            else if ( arg.startsWith("--output=") ) {
-                options.outputPath = arg.substring("--output=".length());
+            else if ( arg.startsWith("--screenshot=") ) {
+                options.outputPath = arg.substring("--screenshot=".length());
             }
             else if ( "--solidModel".equals(arg) ) {
                 if ( i + 1 >= args.length ) {
@@ -179,6 +186,17 @@ public class CommandLineOptions
                 options.kurlanderBowlMotifIndex = parseMotifIndex(
                     arg.substring("--motifIndex=".length()));
             }
+            else if ( "--faceId".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing value for --faceId");
+                }
+                options.faceId = parseFaceId(args[++i]);
+            }
+            else if ( arg.startsWith("--faceId=") ) {
+                options.faceId = parseFaceId(
+                    arg.substring("--faceId=".length()));
+            }
             else {
                 throw new IllegalArgumentException("Unknown option: " + arg);
             }
@@ -238,6 +256,11 @@ public class CommandLineOptions
         if ( motifIndexProperty != null && !motifIndexProperty.isBlank() ) {
             options.kurlanderBowlMotifIndex = parseMotifIndex(motifIndexProperty);
         }
+
+        String faceIdProperty = System.getProperty("poly.faceId");
+        if ( faceIdProperty != null && !faceIdProperty.isBlank() ) {
+            options.faceId = parseFaceId(faceIdProperty);
+        }
     }
 
     private static Integer parseMotifIndex(String rawValue)
@@ -248,6 +271,17 @@ public class CommandLineOptions
         catch ( NumberFormatException e ) {
             throw new IllegalArgumentException(
                 "Invalid --motifIndex value '" + rawValue + "'");
+        }
+    }
+
+    private static Integer parseFaceId(String rawValue)
+    {
+        try {
+            return Integer.valueOf(rawValue);
+        }
+        catch ( NumberFormatException e ) {
+            throw new IllegalArgumentException(
+                "Invalid --faceId value '" + rawValue + "'");
         }
     }
 
