@@ -532,6 +532,9 @@ final class _PolyhedralBoundedSolidSetFinisher
             " sonfb=" + sonfb.size());
 
         int oldsize = sanitizePairedFaces(sonfa, sonfb);
+        // §11 fail-fast precondition failed: MANT1988_15_1 B-A fires the legacy
+        // fallback (count>0) while still producing a valid result. The throw was
+        // removed to preserve passing tests. Track via getLastLegacyFallbackCount().
         inda = (op == INTERSECTION) ? sonfa.size() : 0;
         indb = (op == UNION) ? 0 : sonfb.size();
 

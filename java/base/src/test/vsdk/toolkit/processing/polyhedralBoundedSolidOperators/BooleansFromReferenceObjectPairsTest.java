@@ -400,10 +400,10 @@ class BooleansFromReferenceObjectPairsTest
         }
     }
 
-    private static final class TopologicalSummary
+    static final class TopologicalSummary
     {
         private final String placeholderLabel;
-        private final int shellCount;
+        final int shellCount;
         private final int faceCount;
         private final int edgeCount;
         private final int vertexCount;
