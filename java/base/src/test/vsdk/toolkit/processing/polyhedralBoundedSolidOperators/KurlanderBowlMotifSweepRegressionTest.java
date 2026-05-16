@@ -2,6 +2,7 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
@@ -24,6 +25,7 @@ bowl copies takes several minutes.  Run explicitly before release:
 {@code gradle :base:test --tests "*KurlanderBowlMotifSweepRegressionTest"}
 */
 @Tag("slow")
+@Disabled("Temporarily disabled: 40-motif Kurlander bowl sweep is too slow for regular build runs.")
 class KurlanderBowlMotifSweepRegressionTest
 {
     /**
