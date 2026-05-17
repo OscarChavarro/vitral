@@ -18,13 +18,3 @@ while IFS= read -r dir; do
   rm -rf "$dir"
   COUNT=$((COUNT + 1))
 done < "$tmp_list"
-
-if [ "$COUNT" -eq 0 ]; then
-  echo "No build directories found under $ROOT_DIR"
-else
-  if [ "$COUNT" -eq 1 ]; then
-    echo "Done. Removed 1 build directory."
-  else
-    echo "Done. Removed $COUNT build directories."
-  fi
-fi

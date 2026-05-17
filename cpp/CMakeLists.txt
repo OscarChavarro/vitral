@@ -6,3 +6,4 @@ enable_testing()
 
 # Root controller for all C++ subprojects under cpp/
 add_subdirectory(base)
+add_subdirectory(testsuite)
