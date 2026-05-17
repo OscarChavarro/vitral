@@ -1,6 +1,7 @@
 #include "OpenGL4ImageRenderer.h"
 #include "OpenGL4RGBImageUncompressedRenderer.h"
 #include "OpenGL4RGBAImageUncompressedRenderer.h"
+#include "OpenGL4RGBAImageCompressedRenderer.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
@@ -28,6 +29,11 @@ int OpenGL4ImageRenderer::activate(Image* img) {
         return OpenGL4RGBAImageUncompressedRenderer::activate(rgbaUncomp);
     }
 
+    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    if (rgbaComp != nullptr) {
+        return OpenGL4RGBAImageCompressedRenderer::activate(rgbaComp);
+    }
+
     RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
     if (rgbUncomp != nullptr) {
         return OpenGL4RGBImageUncompressedRenderer::activate(rgbUncomp);
@@ -44,6 +50,12 @@ void OpenGL4ImageRenderer::deactivate(Image* img) {
     RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
     if (rgbaUncomp != nullptr) {
         OpenGL4RGBAImageUncompressedRenderer::deactivate(rgbaUncomp);
+        return;
+    }
+
+    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    if (rgbaComp != nullptr) {
+        OpenGL4RGBAImageCompressedRenderer::deactivate(rgbaComp);
         return;
     }
 
@@ -64,6 +76,12 @@ void OpenGL4ImageRenderer::unload(Image* img) {
         return;
     }
 
+    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    if (rgbaComp != nullptr) {
+        OpenGL4RGBAImageCompressedRenderer::unload(rgbaComp);
+        return;
+    }
+
     RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
     if (rgbUncomp != nullptr) {
         OpenGL4RGBImageUncompressedRenderer::unload(rgbUncomp);
@@ -78,6 +96,12 @@ void OpenGL4ImageRenderer::draw(Image* img) {
     RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
     if (rgbaUncomp != nullptr) {
         OpenGL4RGBAImageUncompressedRenderer::draw(rgbaUncomp);
+        return;
+    }
+
+    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    if (rgbaComp != nullptr) {
+        OpenGL4RGBAImageCompressedRenderer::draw(rgbaComp);
         return;
     }
 
@@ -261,6 +285,7 @@ void OpenGL4ImageRenderer::ensureBuffers() {
 void OpenGL4ImageRenderer::dispose() {
     OpenGL4RGBImageUncompressedRenderer::disposeAll();
     OpenGL4RGBAImageUncompressedRenderer::disposeAll();
+    OpenGL4RGBAImageCompressedRenderer::disposeAll();
 
     if (quadVaoId != 0) {
         glDeleteVertexArrays(1, &quadVaoId);

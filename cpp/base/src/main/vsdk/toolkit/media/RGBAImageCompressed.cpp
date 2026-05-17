@@ -127,6 +127,10 @@ char* RGBAImageCompressed::getRawImage() const {
     return copy;
 }
 
+const char* RGBAImageCompressed::getRawImageDirectBuffer() const {
+    return data;
+}
+
 void RGBAImageCompressed::reportUnsupportedPixelAccess(const char* method) const {
     fprintf(stderr, "FATAL_ERROR in %s: Pixel access is not implemented for RGBAImageCompressed.\n", method);
 }

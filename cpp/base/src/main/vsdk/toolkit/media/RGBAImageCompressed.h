@@ -55,6 +55,7 @@ public:
     int getCompressedDataSize() const;
 
     char* getRawImage() const;
+    const char* getRawImageDirectBuffer() const;
 
     virtual void putPixelRgb(int x, int y, RGBPixel* p) override;
 

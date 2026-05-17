@@ -2,6 +2,7 @@
 #include "vsdk/toolkit/io/PersistenceElement.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -14,6 +15,104 @@
 #include <cstring>
 #include <cstdio>
 #include <cctype>
+#include <vector>
+
+namespace {
+
+int readIntLE(const unsigned char* data, int offset) {
+    return (data[offset] & 0xFF) |
+           ((data[offset + 1] & 0xFF) << 8) |
+           ((data[offset + 2] & 0xFF) << 16) |
+           ((data[offset + 3] & 0xFF) << 24);
+}
+
+int ddsFourCCToCompressionFormat(const char fourCC[5]) {
+    if (std::strncmp(fourCC, "DXT1", 4) == 0) {
+        return RGBAImageCompressed::COMPRESSION_DXT1;
+    }
+    if (std::strncmp(fourCC, "DXT3", 4) == 0) {
+        return RGBAImageCompressed::COMPRESSION_DXT3;
+    }
+    if (std::strncmp(fourCC, "DXT5", 4) == 0) {
+        return RGBAImageCompressed::COMPRESSION_DXT5;
+    }
+    return RGBAImageCompressed::COMPRESSION_UNKNOWN;
+}
+
+RGBAImageCompressed* importDDSCompressed(const java::File& inImageFd) {
+    java::String filePath = inImageFd.getPath();
+    FILE* f = std::fopen(filePath.toCString(), "rb");
+    if (f == nullptr) {
+        std::fprintf(stderr, "Error: could not open DDS file \"%s\"\\n", filePath.toCString());
+        return nullptr;
+    }
+
+    std::fseek(f, 0, SEEK_END);
+    long fileSize = std::ftell(f);
+    std::fseek(f, 0, SEEK_SET);
+    if (fileSize < 128) {
+        std::fclose(f);
+        std::fprintf(stderr, "Error: DDS file too short\\n");
+        return nullptr;
+    }
+
+    std::vector<unsigned char> fileData(static_cast<size_t>(fileSize));
+    size_t readCount = std::fread(fileData.data(), 1, fileData.size(), f);
+    std::fclose(f);
+    if (readCount != fileData.size()) {
+        std::fprintf(stderr, "Error: could not read complete DDS file\\n");
+        return nullptr;
+    }
+
+    if (fileData[0] != 'D' || fileData[1] != 'D' ||
+        fileData[2] != 'S' || fileData[3] != ' ') {
+        std::fprintf(stderr, "Error: DDS signature not recognized\\n");
+        return nullptr;
+    }
+
+    int headerSize = readIntLE(fileData.data(), 4);
+    if (headerSize != 124) {
+        std::fprintf(stderr, "Error: DDS header size not recognized\\n");
+        return nullptr;
+    }
+
+    int height = readIntLE(fileData.data(), 12);
+    int width = readIntLE(fileData.data(), 16);
+    int pixelFormatFlags = readIntLE(fileData.data(), 80);
+    char fourCC[5] = {0, 0, 0, 0, 0};
+    std::memcpy(fourCC, fileData.data() + 84, 4);
+
+    if ((pixelFormatFlags & 0x04) == 0) {
+        std::fprintf(stderr, "Error: DDS file does not use a FourCC compressed format\\n");
+        return nullptr;
+    }
+
+    int compressionFormat = ddsFourCCToCompressionFormat(fourCC);
+    if (compressionFormat == RGBAImageCompressed::COMPRESSION_UNKNOWN) {
+        std::fprintf(stderr, "Error: DDS compressed format not supported: %.4s\\n", fourCC);
+        return nullptr;
+    }
+
+    int dataOffset = 128;
+    int dataSize = static_cast<int>(fileData.size()) - dataOffset;
+    if (dataSize <= 0) {
+        std::fprintf(stderr, "Error: DDS has no payload data\\n");
+        return nullptr;
+    }
+
+    RGBAImageCompressed* image = new RGBAImageCompressed();
+    if (!image->initCompressed(width, height, compressionFormat,
+                               reinterpret_cast<char*>(fileData.data() + dataOffset),
+                               dataSize)) {
+        delete image;
+        std::fprintf(stderr, "Error: could not initialize compressed DDS image\\n");
+        return nullptr;
+    }
+
+    return image;
+}
+
+}
 
 #ifdef VITRAL_WITH_JPEG
 #include <jpeglib.h>
@@ -233,6 +332,18 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const java::File& inImageFd)
     retImage->init(256, 256);
     retImage->createTestPattern();
     return retImage;
+}
+
+Image* ImagePersistence::importImage(const java::File& inImageFd) {
+    java::String* type = extractExtensionFromFile(inImageFd);
+    if (type->equals("dds")) {
+        RGBAImageCompressed* ddsImage = importDDSCompressed(inImageFd);
+        delete type;
+        return ddsImage;
+    }
+
+    delete type;
+    return importRGB(inImageFd);
 }
 
 bool ImagePersistence::exportPPM(const java::File& fd, Image* img) {

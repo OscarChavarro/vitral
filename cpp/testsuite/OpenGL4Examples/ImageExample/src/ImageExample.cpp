@@ -15,6 +15,8 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include <string>
+#include <vector>
 
 using namespace vsdk::toolkit::environment::camera;
 using namespace vsdk::toolkit::gui;
@@ -107,21 +109,23 @@ public:
         cameraController = new CameraControllerAquynza(camera);
         corridor = new OpenGL4SimpleCorridorSample();
 
-        renderImage = loadImage("../etc/images/render.jpg");
+        renderImage = loadImage("etc/images/render.jpg");
         if (renderImage == nullptr || renderImage->getXSize() <= 0) {
-            fprintf(stderr, "Warning: Could not load render.jpg, using test pattern\n");
-            if (renderImage != nullptr) delete renderImage;
-            RGBImageUncompressed* fallback = new RGBImageUncompressed();
-            fallback->init(256, 256);
-            fallback->createTestPattern();
-            renderImage = fallback;
+            fprintf(stderr, "Warning: Could not load render.jpg\n");
+            if (renderImage != nullptr) {
+                delete renderImage;
+                renderImage = nullptr;
+            }
         }
 
-        // earth.dds is not yet supported — use test pattern
-        RGBImageUncompressed* earthFallback = new RGBImageUncompressed();
-        earthFallback->init(128, 128);
-        earthFallback->createTestPattern();
-        earthImage = earthFallback;
+        earthImage = loadImage("etc/textures/earth.dds");
+        if (earthImage == nullptr || earthImage->getXSize() <= 0) {
+            fprintf(stderr, "Warning: Could not load earth.dds\n");
+            if (earthImage != nullptr) {
+                delete earthImage;
+                earthImage = nullptr;
+            }
+        }
 
         return true;
     }
@@ -175,12 +179,39 @@ public:
     }
 
     Image* loadImage(const char* filename) {
-        java::File file(filename);
-        Image* result = ImagePersistence::importRGB(file);
-        if (result == nullptr) {
-            fprintf(stderr, "Error: Could not read image file \"%s\"\n", filename);
+        std::vector<std::string> candidates = {
+            std::string(filename),
+            std::string("../") + filename,
+            std::string("../../") + filename,
+            std::string("../../../") + filename,
+            std::string("../../../../") + filename
+        };
+
+        for (const std::string& candidate : candidates) {
+            java::File file(candidate.c_str());
+            if (!file.exists() || !file.canRead()) {
+                continue;
+            }
+
+            Image* result = nullptr;
+            const std::string& path = candidate;
+            if (path.size() >= 4 && path.substr(path.size() - 4) == ".dds") {
+                result = ImagePersistence::importImage(file);
+            }
+            else {
+                result = ImagePersistence::importRGB(file);
+            }
+
+            if (result != nullptr && result->getXSize() > 0 && result->getYSize() > 0) {
+                return result;
+            }
+            if (result != nullptr) {
+                delete result;
+            }
         }
-        return result;
+
+        fprintf(stderr, "Error: Could not read image file \"%s\"\n", filename);
+        return nullptr;
     }
 
     void drawTexturedPolygon(Image* image, const float* mvp, float x0, float y0, float width, float height) {

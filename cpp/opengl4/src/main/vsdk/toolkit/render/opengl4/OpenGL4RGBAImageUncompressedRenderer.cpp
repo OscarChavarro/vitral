@@ -1,6 +1,7 @@
 #include "OpenGL4RGBAImageUncompressedRenderer.h"
 #include "OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include <cstdio>
 
 std::map<RGBAImageUncompressed*, GLuint> OpenGL4RGBAImageUncompressedRenderer::compiledImages;
 
@@ -12,6 +13,9 @@ int OpenGL4RGBAImageUncompressedRenderer::activate(RGBAImageUncompressed* img) {
     auto it = compiledImages.find(img);
     if (it == compiledImages.end()) {
         GLuint textureId = upload(img);
+        if (textureId == 0) {
+            return -1;
+        }
         compiledImages[img] = textureId;
     }
 
@@ -63,6 +67,16 @@ void OpenGL4RGBAImageUncompressedRenderer::draw(RGBAImageUncompressed* img) {
 
 GLuint OpenGL4RGBAImageUncompressedRenderer::upload(RGBAImageUncompressed* img) {
     if (img == nullptr) {
+        return 0;
+    }
+
+    if (img->getRawImage() == nullptr) {
+        fprintf(stderr, "Error: RGBAImageUncompressed has no raw image data\n");
+        return 0;
+    }
+    if (img->getXSize() <= 0 || img->getYSize() <= 0) {
+        fprintf(stderr, "Error: RGBAImageUncompressed has invalid dimensions: %d x %d\n",
+                img->getXSize(), img->getYSize());
         return 0;
     }
 

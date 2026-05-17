@@ -9,6 +9,7 @@ namespace java {
 class Image;
 class RGBImageUncompressed;
 class RGBAImageUncompressed;
+class RGBAImageCompressed;
 
 /**
 This class is a front end through which images of various formats can be
@@ -38,6 +39,12 @@ public:
     @return An RGBAImageUncompressed entity that contains the image loaded in memory.
     */
     static RGBAImageUncompressed* importRGBA(const java::File& inImageFd);
+
+    /**
+    Generic image import that may return compressed or uncompressed images
+    depending on format support.
+    */
+    static Image* importImage(const java::File& inImageFd);
 
     /**
     This method writes the contents of the specified image to a file in
