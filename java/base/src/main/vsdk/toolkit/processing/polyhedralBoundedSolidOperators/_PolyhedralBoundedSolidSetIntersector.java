@@ -25,6 +25,10 @@ program [MANT1988].15.2.
 final class _PolyhedralBoundedSolidSetIntersector
     extends _PolyhedralBoundedSolidOperator
 {
+    /** Diagnostic trace: one entry per vertex created during intersection. Cleared at the start
+    of each {@link #setOpGenerate} call. Accessible from tests in the same package. */
+    static final ArrayList<String> intersectionTrace = new ArrayList<>();
+
     private static final class BoundaryHit
     {
         private final _PolyhedralBoundedSolidHalfEdge halfEdge;
@@ -305,10 +309,18 @@ final class _PolyhedralBoundedSolidSetIntersector
             }
             else if ( cont == Geometry.LIMIT &&
                       intersectedHalfedge != null ) {
-                PolyhedralBoundedSolidEulerOperators.lmev(faceSolid, 
+                int newVIdVof = nextVertexId(edgeSolid, faceSolid);
+                String eLabelVof = (BvsA == 0) ? "A" : "B";
+                String fLabelVof = (BvsA == 0) ? "B" : "A";
+                int bv1Vof = intersectedHalfedge.startingVertex.id;
+                int bv2Vof = intersectedHalfedge.next().startingVertex.id;
+                intersectionTrace.add(String.format(
+                    "Vertex %s:%d created splitting %s:<%d, %d> boundary edge (at coincidence with %s vertex %d).",
+                    fLabelVof, newVIdVof, fLabelVof, bv1Vof, bv2Vof, eLabelVof, v.id));
+                PolyhedralBoundedSolidEulerOperators.lmev(faceSolid,
                     intersectedHalfedge,
                     intersectedHalfedge.mirrorHalfEdge().next(),
-                    nextVertexId(edgeSolid, faceSolid), v.position);
+                    newVIdVof, v.position);
                 addsovv(v, intersectedHalfedge.startingVertex, BvsA,
                     sonvv);
             }
@@ -415,9 +427,14 @@ final class _PolyhedralBoundedSolidSetIntersector
                 }
 
                 if ( cont != Geometry.OUTSIDE ) {
+                    String eLabel = (BvsA == 0) ? "A" : "B";
+                    String fLabel = (BvsA == 0) ? "B" : "A";
+                    int newVId = nextVertexId(edgeSolid, faceSolid);
+                    intersectionTrace.add(String.format(
+                        "Vertex %s:%d created after intersection between %s:%d face and %s:<%d, %d> edge.",
+                        eLabel, newVId, fLabel, f.id, eLabel, v1.id, v2.id));
                     PolyhedralBoundedSolidEulerOperators.lmev(edgeSolid,
-                        e.rightHalf, e.leftHalf.next(),
-                        nextVertexId(edgeSolid, faceSolid), p);
+                        e.rightHalf, e.leftHalf.next(), newVId, p);
 
                     if ( cont == Geometry.INSIDE ) {
                         addsovf(e.rightHalf, f, BvsA, sonva, sonvb);
@@ -430,9 +447,14 @@ final class _PolyhedralBoundedSolidSetIntersector
                             nearbyBoundaryHit.halfEdge != null ?
                             nearbyBoundaryHit.halfEdge :
                             containment.intersectedHalfedge();
+                        int newVIdBoundary = nextVertexId(edgeSolid, faceSolid);
+                        int bv1 = intersectedHalfedge.startingVertex.id;
+                        int bv2 = intersectedHalfedge.next().startingVertex.id;
+                        intersectionTrace.add(String.format(
+                            "Vertex %s:%d created splitting %s:<%d, %d> boundary edge (intersection on %s:%d face boundary).",
+                            fLabel, newVIdBoundary, fLabel, bv1, bv2, fLabel, f.id));
                         PolyhedralBoundedSolidEulerOperators.lmev(faceSolid, intersectedHalfedge,
-                            intersectedHalfedge.mirrorHalfEdge().next(),
-                                     nextVertexId(edgeSolid, faceSolid), p);
+                            intersectedHalfedge.mirrorHalfEdge().next(), newVIdBoundary, p);
                         addsovv(e.rightHalf.startingVertex,
                             intersectedHalfedge.startingVertex, BvsA,
                             sonvv);
@@ -503,6 +525,7 @@ final class _PolyhedralBoundedSolidSetIntersector
         ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
         int i;
 
+        intersectionTrace.clear();
         sonvv = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex>();
         sonva = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();
         sonvb = new ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>();

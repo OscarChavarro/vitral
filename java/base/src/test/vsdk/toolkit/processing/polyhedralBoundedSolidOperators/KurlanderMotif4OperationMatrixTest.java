@@ -3,12 +3,17 @@ package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
 Diagnóstico 40×4 del sweep Kurlander: para los 40 motifs × 4 operaciones
@@ -30,6 +35,26 @@ class KurlanderMotif4OperationMatrixTest
     private enum OpStatus { OK, EMPTY, INVALID, BLACK_FACES, EXCEPTION }
 
     private static final String[] OP_NAMES = { "A-B", "B-A", "AiB", "A+B" };
+
+    /**
+    Control de ejecución del test paramétrico: un booleano por motif (índice 0–39).
+    {@code true} = el motif es conocido como 4-OK y se ejecuta el assert.
+    {@code false} = el motif aún falla en alguna operación; se omite con assumeTrue.
+
+    Motifs 4-OK actuales (plan-csg-boolean-fix-stage3 §14.2):
+      ✅ shellCount=2: 0, 2, 10, 15, 21
+      ⚠️ shellCount=1: 1, 5, 7, 12, 14, 23
+    */
+    static final boolean[] ENABLED = {
+    //   0      1      2      3      4      5      6      7      8      9
+        true,  true,  true,  false, false, true,  false, true,  false, false,
+    //  10     11     12     13     14     15     16     17     18     19
+        true,  false, true,  false, true,  true,  false, false, false, false,
+    //  20     21     22     23     24     25     26     27     28     29
+        false, true,  false, true,  false, false, false, false, false, false,
+    //  30     31     32     33     34     35     36     37     38     39
+        false, false, false, false, false, false, false, false, false, false
+    };
 
     // -----------------------------------------------------------------------
     // Paso 1.1 — Test diagnóstico lento 40×4 (plan-csg-boolean-fix-stage3 §6.1)
@@ -107,6 +132,52 @@ class KurlanderMotif4OperationMatrixTest
                 System.out.printf(" %-12d", statusCounts[opIdx][sIdx]);
             }
             System.out.println();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Test paramétrico controlado por ENABLED[40]
+    // -----------------------------------------------------------------------
+
+    static IntStream allMotifIndices()
+    {
+        return IntStream.range(0, CsgKurlanderBowlFixture.getSingleMotifCount());
+    }
+
+    /**
+    Para cada motif habilitado en {@link #ENABLED}, ejecuta las 4 operaciones booleanas
+    y verifica que todas producen {@link OpStatus#OK}.
+    Para cada operación imprime el trace de vértices creados durante la intersección.
+    Los motifs con {@code ENABLED[motif] == false} se omiten con {@code assumeTrue}.
+    */
+    @ParameterizedTest(name = "motif[{0}]")
+    @MethodSource("allMotifIndices")
+    void given_kurlanderBowlAndMotifN_when_allFourOps_then_allClassifyOK(int motif)
+    {
+        assumeTrue(ENABLED[motif],
+            "motif " + motif + " deshabilitado en ENABLED — aún no es 4-OK");
+
+        String motifDesc = CsgKurlanderBowlFixture.describeSingleMotif(motif);
+        System.out.printf("%n[PARAM] motif=%2d %s%n", motif, motifDesc);
+
+        for ( int opIdx = 0; opIdx < OP_NAMES.length; opIdx++ ) {
+            PolyhedralBoundedSolid[] ops =
+                CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(motif);
+            PolyhedralBoundedSolid result = executeOp(ops[0], ops[1], opIdx);
+
+            System.out.printf("[PARAM]   op=%s — intersection vertices:%n",
+                OP_NAMES[opIdx]);
+            for ( String event : _PolyhedralBoundedSolidSetIntersector.intersectionTrace ) {
+                System.out.println("[PARAM]     " + event);
+            }
+            if ( _PolyhedralBoundedSolidSetIntersector.intersectionTrace.isEmpty() ) {
+                System.out.println("[PARAM]     (none)");
+            }
+
+            OpStatus status = classify(result);
+            assertThat(status)
+                .as("motif %d op %s", motif, OP_NAMES[opIdx])
+                .isEqualTo(OpStatus.OK);
         }
     }
 
