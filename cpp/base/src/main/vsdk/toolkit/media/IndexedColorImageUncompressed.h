@@ -18,7 +18,7 @@ private:
     int xSize;
     int ySize;
     RGBColorPalette* colorTable;
-    ColorRgb* staticColor;
+    mutable ColorRgb* staticColor;
 
     int pixelBaseIndex(int x, int y) const;
 

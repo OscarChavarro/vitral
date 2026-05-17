@@ -1,5 +1,5 @@
 #include "NormalMap.h"
-#include "../common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include <cmath>
 
 static int positiveMod(int value, int modulus) {

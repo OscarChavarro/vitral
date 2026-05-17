@@ -1,5 +1,5 @@
 #include "ShapeDescriptor.h"
-#include "../java/String.h"
+#include "vsdk/toolkit/java/lang/String.h"
 
 ShapeDescriptor::ShapeDescriptor(const java::String* label_) {
     if (label_ != nullptr) {

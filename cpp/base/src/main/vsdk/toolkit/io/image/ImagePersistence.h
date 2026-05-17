@@ -49,6 +49,27 @@ public:
     */
     static bool exportPPM(const java::File& fd, Image* img);
 
+    /**
+    This method writes the contents of the specified image to a file in
+    JPEG format. Returns true if everything works fine, false if something fails.
+    JPEG support must be compiled with -DWITH_JPEG=ON.
+    @param fd
+    @param img
+    @param quality JPEG quality (0-100)
+    @return true if export was successful, false otherwise
+    */
+    static bool exportJPEG(const java::File& fd, Image* img, int quality = 85);
+
+    /**
+    This method writes the contents of the specified image to a file in
+    PNG format. Returns true if everything works fine, false if something fails.
+    PNG support must be compiled with -DWITH_PNG=ON.
+    @param fd
+    @param img
+    @return true if export was successful, false otherwise
+    */
+    static bool exportPNG(const java::File& fd, Image* img);
+
 private:
     static bool isTextComment(const java::String& line);
     static java::String* extractExtensionFromFile(const java::File& fd);

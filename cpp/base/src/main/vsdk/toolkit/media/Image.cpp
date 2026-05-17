@@ -1,6 +1,6 @@
 #include "Image.h"
 #include "RGBPixel.h"
-#include "../common/color/ColorRgb.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 
 int Image::positiveMod(int value, int modulus) {

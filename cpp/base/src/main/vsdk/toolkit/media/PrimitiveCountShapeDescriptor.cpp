@@ -1,6 +1,6 @@
 #include "PrimitiveCountShapeDescriptor.h"
-#include "../java/String.h"
-#include "../common/VSDK.h"
+#include "vsdk/toolkit/java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
 #include <cstdio>
 
 PrimitiveCountShapeDescriptor::PrimitiveCountShapeDescriptor(const java::String* label) :
@@ -47,16 +47,16 @@ void PrimitiveCountShapeDescriptor::setFeatureVector(double* vector) {
 
 java::String* PrimitiveCountShapeDescriptor::toString() const {
     char buffer[2048];
-    snprintf(buffer, sizeof(buffer), "Primitive counts for %d types:\n", numberOfElements);
-
-    java::String* result = new java::String(buffer);
+    char fullBuffer[4096];
+    int offset = 0;
+    offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "Primitive counts for %d types:\n", numberOfElements);
 
     for (int i = 0; i < numberOfElements; i++) {
         char line[256];
         std::string formatted = VSDK::formatDouble(featureVector[i]);
-        snprintf(line, sizeof(line), "  - %s\n", formatted.c_str());
-        *result = *result + java::String(line);
+        offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "  - %s\n", formatted.c_str());
     }
 
+    java::String* result = new java::String(fullBuffer);
     return result;
 }

@@ -14,7 +14,7 @@ public:
     GrayScalePalette();
     virtual ~GrayScalePalette() = default;
 
-    int selectNearestIndexToRgb(const ColorRgb& c) const override;
+    int selectNearestIndexToRgb(const ColorRgb& c) const;
 };
 
 #endif // __VSDK_TOOLKIT_MEDIA_GRAYSCALEPALETTE_H__

@@ -4,6 +4,7 @@
 #include "Image.h"
 
 class RGBPixel;
+class RGBAImageUncompressed;
 
 /**
 Current class is a specific low level implementation of an uncompressed
@@ -60,7 +61,5 @@ public:
 
     void dispose();
 };
-
-class RGBAImageUncompressed;
 
 #endif // __VSDK_TOOLKIT_MEDIA_RGBIMAGEUNCOMPRESSED_H__

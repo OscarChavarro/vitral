@@ -1,6 +1,6 @@
 #include "FourierShapeDescriptor.h"
-#include "../java/String.h"
-#include "../common/VSDK.h"
+#include "vsdk/toolkit/java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
 #include <cmath>
 #include <cstdio>
 
@@ -48,18 +48,17 @@ void FourierShapeDescriptor::setFeatureVector(double* vector) {
 }
 
 java::String* FourierShapeDescriptor::toString() const {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer), "SphericalHarmonics amplitudes for %d spheres and %d harmonics:\n",
+    char fullBuffer[8192];
+    int offset = 0;
+    offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "SphericalHarmonics amplitudes for %d spheres and %d harmonics:\n",
         numberOfElements, numberOfHarmonics);
-
-    java::String* result = new java::String(buffer);
 
     for (int i = 0; i < numberOfElements * numberOfHarmonics; i++) {
         char line[256];
         std::string formatted = VSDK::formatDouble(featureVector[i]);
-        snprintf(line, sizeof(line), "  - %s\n", formatted.c_str());
-        *result = *result + java::String(line);
+        offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "  - %s\n", formatted.c_str());
     }
 
+    java::String* result = new java::String(fullBuffer);
     return result;
 }

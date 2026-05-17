@@ -8,23 +8,105 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
-add_library(vitral_base SHARED
+# Optional image format support
+option(WITH_JPEG "Enable JPEG image format support" OFF)
+option(WITH_PNG "Enable PNG image format support" OFF)
+
+# Try to find JPEG library if requested
+if(WITH_JPEG)
+    find_package(JPEG)
+    if(NOT JPEG_FOUND)
+        message(WARNING "JPEG library not found. JPEG support will be disabled.")
+        set(WITH_JPEG OFF)
+    endif()
+endif()
+
+# Try to find PNG library if requested
+if(WITH_PNG)
+    find_package(PNG)
+    if(NOT PNG_FOUND)
+        message(WARNING "PNG library not found. PNG support will be disabled.")
+        set(WITH_PNG OFF)
+    endif()
+endif()
+
+# Print configuration summary
+message(STATUS "Vitral C++ Base Configuration:")
+message(STATUS "  JPEG Support: ${WITH_JPEG}")
+message(STATUS "  PNG Support:  ${WITH_PNG}")
+
+# Source files for the base library
+set(VITRAL_BASE_SOURCES
     src/VSDK.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
+    src/main/vsdk/toolkit/common/color/ColorRgb.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp
     src/main/vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.cpp
+    src/main/vsdk/toolkit/java/lang/Object.cpp
     src/main/vsdk/toolkit/java/lang/String.cpp
+    src/main/vsdk/toolkit/java/lang/System.cpp
+    src/main/vsdk/toolkit/java/lang/Character.cpp
+    src/main/vsdk/toolkit/java/lang/Float.cpp
+    src/main/vsdk/toolkit/java/lang/StringBuilder.cpp
+    src/main/vsdk/toolkit/java/lang/ProcessBuilder.cpp
+    src/main/vsdk/toolkit/java/io/InputStream.cpp
+    src/main/vsdk/toolkit/java/io/OutputStream.cpp
+    src/main/vsdk/toolkit/java/io/File.cpp
+    src/main/vsdk/toolkit/java/io/FileInputStream.cpp
+    src/main/vsdk/toolkit/java/io/FileOutputStream.cpp
+    src/main/vsdk/toolkit/java/io/BufferedInputStream.cpp
+    src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
+    src/main/vsdk/toolkit/java/io/PrintStream.cpp
     src/main/vsdk/toolkit/java/util/Formatter.cpp
+    src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
     src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
+    src/main/vsdk/toolkit/io/PersistenceElement.cpp
+    src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
+    src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
+    src/main/vsdk/toolkit/media/MediaEntity.h
+    src/main/vsdk/toolkit/media/RGBPixel.cpp
+    src/main/vsdk/toolkit/media/RGBAPixel.cpp
+    src/main/vsdk/toolkit/media/ShapeDescriptor.cpp
+    src/main/vsdk/toolkit/media/RGBColorPalette.cpp
+    src/main/vsdk/toolkit/media/RGBProceduralColorPalette.cpp
+    src/main/vsdk/toolkit/media/GrayScalePalette.cpp
+    src/main/vsdk/toolkit/media/Image.cpp
+    src/main/vsdk/toolkit/media/RGBImageUncompressed.cpp
+    src/main/vsdk/toolkit/media/RGBAImageUncompressed.cpp
+    src/main/vsdk/toolkit/media/IndexedColorImageUncompressed.cpp
+    src/main/vsdk/toolkit/media/RGBAImageCompressed.cpp
+    src/main/vsdk/toolkit/media/ZBuffer.cpp
+    src/main/vsdk/toolkit/media/NormalMap.cpp
+    src/main/vsdk/toolkit/media/Calligraphic2DBuffer.cpp
+    src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.cpp
+    src/main/vsdk/toolkit/media/FourierShapeDescriptor.cpp
+    src/main/vsdk/toolkit/media/GeometryMetadata.cpp
 )
 
+add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})
+
 target_include_directories(vitral_base PUBLIC src src/main)
+
+# Link optional libraries and set compile definitions
+if(WITH_JPEG)
+    target_include_directories(vitral_base PRIVATE ${JPEG_INCLUDE_DIR})
+    target_link_libraries(vitral_base PRIVATE ${JPEG_LIBRARIES})
+    target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_JPEG)
+    message(STATUS "JPEG support enabled: ${JPEG_LIBRARIES}")
+endif()
+
+if(WITH_PNG)
+    target_include_directories(vitral_base PRIVATE ${PNG_INCLUDE_DIR})
+    target_link_libraries(vitral_base PRIVATE ${PNG_LIBRARIES})
+    target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_PNG)
+    message(STATUS "PNG support enabled: ${PNG_LIBRARIES}")
+endif()
 
 option(VITRAL_BUILD_TESTS "Build tests" ON)
 if(VITRAL_BUILD_TESTS)

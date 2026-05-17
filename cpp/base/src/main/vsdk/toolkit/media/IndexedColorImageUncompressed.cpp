@@ -2,7 +2,7 @@
 #include "RGBColorPalette.h"
 #include "RGBPixel.h"
 #include "RGBAImageUncompressed.h"
-#include "../common/color/ColorRgb.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 
 IndexedColorImageUncompressed::IndexedColorImageUncompressed(RGBColorPalette* colorTable_) :
     data(nullptr), xSize(0), ySize(0), staticColor(nullptr) {

@@ -1,5 +1,5 @@
 #include "RGBColorPalette.h"
-#include "../common/color/ColorRgb.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 
 RGBColorPalette::RGBColorPalette() {

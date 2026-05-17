@@ -1,6 +1,6 @@
 #include "GeometryMetadata.h"
 #include "ShapeDescriptor.h"
-#include "../java/String.h"
+#include "vsdk/toolkit/java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 #include <limits>
@@ -42,7 +42,7 @@ double GeometryMetadata::doMinskowskiDistance(
         ShapeDescriptor* aa = descriptorsList[i];
         if (aa != nullptr) {
             java::String* label = aa->getLabel();
-            if (label != nullptr && *label == *subGroup) {
+            if (label != nullptr && label->equals(*subGroup)) {
                 a = aa;
             }
             delete label;
@@ -56,7 +56,7 @@ double GeometryMetadata::doMinskowskiDistance(
         ShapeDescriptor* bb = other->descriptorsList[i];
         if (bb != nullptr) {
             java::String* label = bb->getLabel();
-            if (label != nullptr && *label == *subGroup) {
+            if (label != nullptr && label->equals(*subGroup)) {
                 b = bb;
             }
             delete label;
@@ -158,7 +158,7 @@ ShapeDescriptor* GeometryMetadata::getDescriptorByName(const java::String* name)
         ShapeDescriptor* s = descriptorsList[i];
         if (s != nullptr) {
             java::String* label = s->getLabel();
-            if (label != nullptr && *label == *name) {
+            if (label != nullptr && label->equals(*name)) {
                 delete label;
                 return s;
             }
@@ -175,20 +175,19 @@ void GeometryMetadata::addDescriptor(ShapeDescriptor* descriptor) {
 }
 
 java::String* GeometryMetadata::toString() const {
-    char buffer[512];
-    const char* filename_str = objectFilename != nullptr ? objectFilename->c_str() : "nullptr";
+    char fullBuffer[4096];
+    int offset = 0;
+    const char* filename_str = objectFilename != nullptr ? objectFilename->toCString() : "nullptr";
 
-    snprintf(buffer, sizeof(buffer),
+    offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset,
         "%s\n    . %zu shape descriptors\n",
         filename_str, descriptorsList.size());
 
-    java::String* msg = new java::String(buffer);
-
     for (size_t i = 0; i < descriptorsList.size(); i++) {
         char line[256];
-        snprintf(line, sizeof(line), "        . descriptor_%zu\n", i);
-        *msg = *msg + java::String(line);
+        offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "        . descriptor_%zu\n", i);
     }
 
+    java::String* msg = new java::String(fullBuffer);
     return msg;
 }

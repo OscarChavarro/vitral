@@ -1,7 +1,7 @@
 #include "Calligraphic2DBuffer.h"
 #include "RGBImageUncompressed.h"
 #include "RGBPixel.h"
-#include "../common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 Calligraphic2DBuffer::Calligraphic2DBuffer() {
     lineData.reserve(80000);

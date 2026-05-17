@@ -12,12 +12,24 @@ Vitral provides a compact but broad graphics toolkit with:
 - IO and persistence layers for geometry, images, XML, and scene resources
 - A testsuite with offline examples, interactive apps, techniques demos, and benchmarks
 
-This repository currently contains the Java implementation organized as:
+This repository contains multiple implementations:
+
+### Java Implementation
 
 - `java/base`: dependency-light core toolkit
 - `java/awt`: AWT/Swing integration layer
 - `java/jogl2` and `java/jogl4`: JOGL rendering backends
 - `java/testsuite`: runnable examples, API tests, and application cases
+
+### C++ Port
+
+- `cpp/base`: C++ core toolkit (see [C++ README](cpp/README.md) for details)
+- `cpp/opengl4`: OpenGL 4.1 rendering backend via GLFW
+- `cpp/glfw`: GLFW window management
+- `cpp/glut`: GLUT/FreeGLUT backend
+- `cpp/testsuite`: C++ examples and benchmarks
+
+For building the C++ port and installing optional image format dependencies (JPEG, PNG), see the [C++ port documentation](cpp/README.md#requirements).
 
 ## Architecture and learning focus
 

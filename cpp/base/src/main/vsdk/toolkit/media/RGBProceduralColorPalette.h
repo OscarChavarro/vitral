@@ -30,13 +30,13 @@ public:
     RGBProceduralColorPalette();
     virtual ~RGBProceduralColorPalette();
 
-    int selectNearestIndexToRgb(const ColorRgb& c) const override;
+    int selectNearestIndexToRgb(const ColorRgb& c) const;
 
-    void setColorAt(int i, ColorRgb* c) override;
-    void setColorAt(int i, double r, double g, double b) override;
+    virtual void setColorAt(int i, ColorRgb* c) override;
+    virtual void setColorAt(int i, double r, double g, double b) override;
 
-    void addColor(ColorRgb* c) override;
-    void addColor(double r, double g, double b) override;
+    virtual void addColor(ColorRgb* c) override;
+    virtual void addColor(double r, double g, double b) override;
 
     bool isPure() const { return pure; }
 };

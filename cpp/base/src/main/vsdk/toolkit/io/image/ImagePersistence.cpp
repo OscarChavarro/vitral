@@ -1,46 +1,57 @@
 #include "ImagePersistence.h"
-#include "../PersistenceElement.h"
-#include "../../media/RGBImageUncompressed.h"
-#include "../../media/RGBAImageUncompressed.h"
-#include "../../media/RGBPixel.h"
-#include "../../common/logging/Logger.h"
-#include "../../common/VSDK.h"
-#include "../../java/File.h"
-#include "../../java/String.h"
-#include "../../java/io/FileInputStream.h"
-#include "../../java/io/FileOutputStream.h"
-#include "../../java/io/BufferedInputStream.h"
-#include "../../java/io/BufferedOutputStream.h"
+#include "vsdk/toolkit/io/PersistenceElement.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/java/io/File.h"
+#include "vsdk/toolkit/java/lang/String.h"
+#include "vsdk/toolkit/java/io/FileInputStream.h"
+#include "vsdk/toolkit/java/io/FileOutputStream.h"
+#include "vsdk/toolkit/java/io/BufferedInputStream.h"
+#include "vsdk/toolkit/java/io/BufferedOutputStream.h"
 #include <cstring>
 #include <cstdio>
 #include <cctype>
 
+#ifdef VITRAL_WITH_JPEG
+#include <jpeglib.h>
+#endif
+
+#ifdef VITRAL_WITH_PNG
+#include <png.h>
+#endif
+
 bool ImagePersistence::isTextComment(const java::String& line) {
-    const char* str = line.c_str();
-    if (str == nullptr || strlen(str) == 0) {
+    if (line.isEmpty()) {
         return false;
     }
 
     int i = 0;
-    while (i < (int)strlen(str) &&
-           (str[i] != ' ' && str[i] != '\t')) {
+    while (i < line.length() &&
+           (line.charAt(i) != ' ' && line.charAt(i) != '\t')) {
         i++;
     }
 
-    return i < (int)strlen(str) && str[i] == '#';
+    return i < line.length() && line.charAt(i) == '#';
 }
 
 java::String* ImagePersistence::extractExtensionFromFile(const java::File& fd) {
     java::String path = fd.getName();
-    const char* pathStr = path.c_str();
+    const char* pathStr = path.toCString();
 
     const char* lastDot = strrchr(pathStr, '.');
     if (lastDot != nullptr && lastDot != pathStr) {
         java::String* ext = new java::String(lastDot + 1);
-        for (int i = 0; i < (int)ext->length(); i++) {
-            (*ext)[i] = tolower((*ext)[i]);
+        char extBuffer[256];
+        strcpy(extBuffer, ext->toCString());
+        for (int i = 0; i < (int)strlen(extBuffer); i++) {
+            extBuffer[i] = tolower(extBuffer[i]);
         }
-        return ext;
+        delete ext;
+        java::String* result = new java::String(extBuffer);
+        return result;
     }
     return new java::String("");
 }
@@ -50,104 +61,109 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
     RGBImageUncompressed* retImage = nullptr;
 
     if (type->equals("ppm")) {
-        try {
-            java::FileInputStream fis(inImageFd);
-            java::BufferedInputStream bis(fis);
+        java::FileInputStream fis(inImageFd.getName().toCString());
+        java::BufferedInputStream bis(&fis);
 
-            bool exit = false;
-            java::String* line = nullptr;
-            int stage = 1;
-            int xSize = 0, ySize = 0;
-            int i = 0;
+        bool exit = false;
+        char* lineStr = nullptr;
+        int stage = 1;
+        int xSize = 0, ySize = 0;
+        int i = 0;
 
-            do {
-                if (line != nullptr) {
-                    delete line;
-                }
-                line = vsdk::PersistenceElement::readAsciiLine(bis);
+        do {
+            if (lineStr != nullptr) {
+                delete[] lineStr;
+            }
+            lineStr = vsdk::PersistenceElement::readAsciiLine(bis);
 
-                if (line == nullptr) {
+            if (lineStr == nullptr) {
+                break;
+            }
+
+            if (strcmp(lineStr, "255") == 0) {
+                exit = true;
+            }
+
+            if (isTextComment(java::String(lineStr))) {
+                continue;
+            }
+
+            switch (stage) {
+                case 1:
+                    if (strncmp(lineStr, "P6", 2) != 0) {
+                        delete type;
+                        delete[] lineStr;
+                        fprintf(stderr, "Error reading internal PPM file subformat\n");
+                        return new RGBImageUncompressed();
+                    }
+                    stage++;
                     break;
-                }
 
-                if (line->equals("255")) {
-                    exit = true;
-                }
+                case 2:
+                    if (lineStr[0] == '#') {
+                    } else {
+                        char lineCopy[256];
+                        strcpy(lineCopy, lineStr);
 
-                if (isTextComment(*line)) {
-                    continue;
-                }
-
-                switch (stage) {
-                    case 1:
-                        if (!line->startsWith("P6")) {
-                            delete type;
-                            delete line;
-                            fprintf(stderr, "Error reading internal PPM file subformat\n");
-                            return new RGBImageUncompressed();
+                        char* token = strtok(lineCopy, " \t");
+                        if (token != nullptr) {
+                            xSize = atoi(token);
+                            token = strtok(nullptr, " \t");
+                            if (token != nullptr) {
+                                ySize = atoi(token);
+                            }
                         }
                         stage++;
-                        break;
-
-                    case 2:
-                        if (line->startsWith("#")) {
-                        } else {
-                            char lineCopy[256];
-                            strcpy(lineCopy, line->c_str());
-
-                            char* token = strtok(lineCopy, " \t");
-                            if (token != nullptr) {
-                                xSize = atoi(token);
-                                token = strtok(nullptr, " \t");
-                                if (token != nullptr) {
-                                    ySize = atoi(token);
-                                }
-                            }
-                            stage++;
-                        }
-                        break;
-                }
-            } while (!exit);
-
-            if (line != nullptr) {
-                delete line;
+                    }
+                    break;
             }
+        } while (!exit);
 
-            retImage = new RGBImageUncompressed();
-            retImage->initNoFill(xSize, ySize);
+        if (lineStr != nullptr) {
+            delete[] lineStr;
+        }
 
-            char* barr = new char[xSize * 3];
-            for (i = 0; i < ySize; i++) {
-                unsigned char* ubarr = (unsigned char*)barr;
-                vsdk::PersistenceElement::readBytes(bis, ubarr, xSize * 3);
-                for (int x = 0; x < xSize; x++) {
-                    retImage->putPixel(x, i, barr[x*3], barr[x*3+1], barr[x*3+2]);
-                }
-            }
-
-            delete[] barr;
-
-            // Invert image (flip vertically)
-            RGBPixel pa;
-            RGBPixel pb;
-            for (int y = 0; y < ySize / 2; y++) {
-                for (int x = 0; x < xSize; x++) {
-                    RGBPixel* ppa = retImage->getPixelRgb(x, y);
-                    RGBPixel* ppb = retImage->getPixelRgb(x, ySize - y - 1);
-                    retImage->putPixelRgb(x, y, ppb);
-                    retImage->putPixelRgb(x, ySize - y - 1, ppa);
-                    delete ppa;
-                    delete ppb;
-                }
-            }
-
-            delete type;
-            return retImage;
-        } catch (...) {
-            fprintf(stderr, "Cannot import PPM image file\n");
+        if (xSize <= 0 || ySize <= 0) {
+            fprintf(stderr, "Invalid image dimensions\n");
             delete type;
             return new RGBImageUncompressed();
         }
+
+        retImage = new RGBImageUncompressed();
+        if (!retImage->initNoFill(xSize, ySize)) {
+            fprintf(stderr, "Failed to allocate image memory\n");
+            delete retImage;
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        char* barr = new char[xSize * 3];
+        for (i = 0; i < ySize; i++) {
+            unsigned char* ubarr = (unsigned char*)barr;
+            vsdk::PersistenceElement::readBytes(bis, ubarr, xSize * 3);
+            for (int x = 0; x < xSize; x++) {
+                retImage->putPixel(x, i, barr[x*3], barr[x*3+1], barr[x*3+2]);
+            }
+        }
+
+        delete[] barr;
+
+        // Invert image (flip vertically)
+        for (int y = 0; y < ySize / 2; y++) {
+            for (int x = 0; x < xSize; x++) {
+                RGBPixel* ppa = retImage->getPixelRgb(x, y);
+                RGBPixel* ppb = retImage->getPixelRgb(x, ySize - y - 1);
+                if (ppa != nullptr && ppb != nullptr) {
+                    retImage->putPixelRgb(x, y, ppb);
+                    retImage->putPixelRgb(x, ySize - y - 1, ppa);
+                }
+                delete ppa;
+                delete ppb;
+            }
+        }
+
+        delete type;
+        return retImage;
     }
 
     delete type;
@@ -166,38 +182,207 @@ bool ImagePersistence::exportPPM(const java::File& fd, Image* img) {
         return false;
     }
 
-    try {
-        java::FileOutputStream fos(fd);
-        java::BufferedOutputStream writer(fos);
+    java::FileOutputStream fos(fd.getName().toCString());
+    java::BufferedOutputStream writer(&fos);
 
-        java::String line1("P6\n");
-        java::String line2("# Image generated by VitralSDK (http://vitral.sf.net)\n");
+    java::String line1("P6\n");
+    java::String line2("# Image generated by VitralSDK (http://vitral.sf.net)\n");
 
-        char sizeStr[256];
-        snprintf(sizeStr, sizeof(sizeStr), "%d %d\n", img->getXSize(), img->getYSize());
-        java::String line3(sizeStr);
+    char sizeStr[256];
+    snprintf(sizeStr, sizeof(sizeStr), "%d %d\n", img->getXSize(), img->getYSize());
+    java::String line3(sizeStr);
 
-        java::String line4("255\n");
+    java::String line4("255\n");
 
-        vsdk::PersistenceElement::writeAsciiString(writer, line1.c_str());
-        vsdk::PersistenceElement::writeAsciiString(writer, line2.c_str());
-        vsdk::PersistenceElement::writeAsciiString(writer, line3.c_str());
-        vsdk::PersistenceElement::writeAsciiString(writer, line4.c_str());
+    vsdk::PersistenceElement::writeAsciiString(writer, line1.toCString());
+    vsdk::PersistenceElement::writeAsciiString(writer, line2.toCString());
+    vsdk::PersistenceElement::writeAsciiString(writer, line3.toCString());
+    vsdk::PersistenceElement::writeAsciiString(writer, line4.toCString());
 
-        int x;
-        int y;
-        for (y = 0; y < img->getYSize(); y++) {
-            for (x = 0; x < img->getXSize(); x++) {
-                RGBPixel* p = img->getPixelRgb(x, y);
-                vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->r);
-                vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->g);
-                vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->b);
-                delete p;
+    int x;
+    int y;
+    for (y = 0; y < img->getYSize(); y++) {
+        for (x = 0; x < img->getXSize(); x++) {
+            RGBPixel* p = img->getPixelRgb(x, y);
+            if (p == nullptr) {
+                fprintf(stderr, "Failed to get pixel at (%d, %d)\n", x, y);
+                return false;
             }
+            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->r);
+            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->g);
+            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->b);
+            delete p;
         }
+    }
 
-        return true;
-    } catch (...) {
+    return true;
+}
+
+bool ImagePersistence::exportJPEG(const java::File& fd, Image* img, int quality) {
+#ifndef VITRAL_WITH_JPEG
+    fprintf(stderr, "ERROR: ImagePersistence: JPEG support not compiled in.\n");
+    fprintf(stderr, "       Recompile with -DWITH_JPEG=ON to enable JPEG support.\n");
+    return false;
+#else
+    if (img == nullptr) {
         return false;
     }
+
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    FILE* outfile = nullptr;
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+
+    const char* filename = fd.getName().toCString();
+    if ((outfile = fopen(filename, "wb")) == nullptr) {
+        fprintf(stderr, "Cannot open file %s for writing\n", filename);
+        return false;
+    }
+
+    jpeg_stdio_dest(&cinfo, outfile);
+
+    cinfo.image_width = img->getXSize();
+    cinfo.image_height = img->getYSize();
+    cinfo.input_components = 3;
+    cinfo.in_color_space = JCS_RGB;
+
+    jpeg_set_defaults(&cinfo);
+    if (quality < 0) quality = 0;
+    if (quality > 100) quality = 100;
+    jpeg_set_quality(&cinfo, quality, TRUE);
+
+    jpeg_start_compress(&cinfo, TRUE);
+
+    JSAMPROW row_pointer;
+    unsigned char* row_buffer = new unsigned char[img->getXSize() * 3];
+    if (row_buffer == nullptr) {
+        fprintf(stderr, "Failed to allocate row buffer\n");
+        fclose(outfile);
+        jpeg_destroy_compress(&cinfo);
+        return false;
+    }
+
+    for (int y = 0; y < img->getYSize(); y++) {
+        for (int x = 0; x < img->getXSize(); x++) {
+            RGBPixel* p = img->getPixelRgb(x, y);
+            if (p == nullptr) {
+                fprintf(stderr, "Failed to get pixel at (%d, %d)\n", x, y);
+                delete[] row_buffer;
+                fclose(outfile);
+                jpeg_destroy_compress(&cinfo);
+                return false;
+            }
+            row_buffer[x * 3 + 0] = (unsigned char)p->r;
+            row_buffer[x * 3 + 1] = (unsigned char)p->g;
+            row_buffer[x * 3 + 2] = (unsigned char)p->b;
+            delete p;
+        }
+        row_pointer = row_buffer;
+        jpeg_write_scanlines(&cinfo, &row_pointer, 1);
+    }
+
+    delete[] row_buffer;
+
+    jpeg_finish_compress(&cinfo);
+    fclose(outfile);
+    jpeg_destroy_compress(&cinfo);
+
+    return true;
+#endif
+}
+
+bool ImagePersistence::exportPNG(const java::File& fd, Image* img) {
+#ifndef VITRAL_WITH_PNG
+    fprintf(stderr, "ERROR: ImagePersistence: PNG support not compiled in.\n");
+    fprintf(stderr, "       Recompile with -DWITH_PNG=ON to enable PNG support.\n");
+    return false;
+#else
+    if (img == nullptr) {
+        return false;
+    }
+
+    FILE* fp = nullptr;
+    png_structp png_ptr = nullptr;
+    png_infop info_ptr = nullptr;
+
+    const char* filename = fd.getName().toCString();
+    fp = fopen(filename, "wb");
+    if (!fp) {
+        fprintf(stderr, "Cannot open file %s for writing\n", filename);
+        return false;
+    }
+
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    if (!png_ptr) {
+        fclose(fp);
+        return false;
+    }
+
+    info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        png_destroy_write_struct(&png_ptr, nullptr);
+        fclose(fp);
+        return false;
+    }
+
+    png_init_io(png_ptr, fp);
+
+    png_set_IHDR(png_ptr, info_ptr,
+                 img->getXSize(), img->getYSize(),
+                 8, PNG_COLOR_TYPE_RGB,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
+
+    png_write_info(png_ptr, info_ptr);
+
+    png_bytep* row_pointers = new png_bytep[img->getYSize()];
+    if (row_pointers == nullptr) {
+        fprintf(stderr, "Failed to allocate row pointers\n");
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        fclose(fp);
+        return false;
+    }
+
+    unsigned char* image_data = new unsigned char[img->getXSize() * img->getYSize() * 3];
+    if (image_data == nullptr) {
+        fprintf(stderr, "Failed to allocate image data\n");
+        delete[] row_pointers;
+        png_destroy_write_struct(&png_ptr, &info_ptr);
+        fclose(fp);
+        return false;
+    }
+
+    for (int y = 0; y < img->getYSize(); y++) {
+        row_pointers[y] = image_data + y * img->getXSize() * 3;
+        for (int x = 0; x < img->getXSize(); x++) {
+            RGBPixel* p = img->getPixelRgb(x, y);
+            if (p == nullptr) {
+                fprintf(stderr, "Failed to get pixel at (%d, %d)\n", x, y);
+                delete[] image_data;
+                delete[] row_pointers;
+                png_destroy_write_struct(&png_ptr, &info_ptr);
+                fclose(fp);
+                return false;
+            }
+            row_pointers[y][x * 3 + 0] = (unsigned char)p->r;
+            row_pointers[y][x * 3 + 1] = (unsigned char)p->g;
+            row_pointers[y][x * 3 + 2] = (unsigned char)p->b;
+            delete p;
+        }
+    }
+
+    png_write_image(png_ptr, row_pointers);
+    png_write_end(png_ptr, nullptr);
+
+    delete[] image_data;
+    delete[] row_pointers;
+
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    fclose(fp);
+
+    return true;
+#endif
 }

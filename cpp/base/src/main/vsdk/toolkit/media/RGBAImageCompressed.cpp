@@ -1,7 +1,7 @@
 #include "RGBAImageCompressed.h"
 #include "RGBPixel.h"
-#include "../common/VSDK.h"
-#include "../common/logging/Logger.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include <cstring>
 #include <algorithm>
 

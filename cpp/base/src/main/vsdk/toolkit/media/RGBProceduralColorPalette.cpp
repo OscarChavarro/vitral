@@ -1,5 +1,5 @@
 #include "RGBProceduralColorPalette.h"
-#include "../common/color/ColorRgb.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 
 RGBProceduralColorPalette::RGBProceduralColorPalette() : RGBColorPalette() {
     pure = true;
