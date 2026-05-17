@@ -5,6 +5,8 @@
 #include <vector>
 
 class Vector3Dd;
+class IndexedColorImageUncompressed;
+class RGBImageUncompressed;
 
 /**
 This class represents a normal map, containing normal vectors for each
@@ -21,6 +23,7 @@ private:
 
 public:
     NormalMap();
+    NormalMap(const NormalMap& other);
     virtual ~NormalMap();
 
     bool init(int width, int height);
@@ -44,6 +47,10 @@ public:
     @return interpolated normal
     */
     Vector3Dd* getNormalBiLinear(double u, double v) const;
+
+    RGBImageUncompressed* exportToRgbImage() const;
+    Vector3Dd importBumpMap(IndexedColorImageUncompressed* inBumpmap, const Vector3Dd& inScale);
+    NormalMap* clone() const;
 };
 
 #endif // __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__

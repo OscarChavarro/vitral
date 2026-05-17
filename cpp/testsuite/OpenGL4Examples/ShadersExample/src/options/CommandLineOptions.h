@@ -1,0 +1,45 @@
+#ifndef SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
+#define SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
+
+#include <string>
+#include "../model/ShaderOperationMode.h"
+
+class CommandLineOptions {
+public:
+    enum class TextureFilterOption {
+        LINEAR,
+        NEAREST
+    };
+
+    bool offline;
+    std::string offlineOutputPath;
+    ShaderOperationMode method;
+    bool hasRotation;
+    double rotationDegrees;
+    bool hasLightRotation;
+    double lightRotationDegrees;
+    bool hasWithTexture;
+    bool withTexture;
+    bool hasWithBumpMap;
+    bool withBumpMap;
+    bool hasShadingType;
+    int shadingType;
+    bool hasTextureFilter;
+    TextureFilterOption textureFilter;
+    bool hasMeridians;
+    int meridians;
+    bool hasParallels;
+    int parallels;
+    bool hasCpuTextureOffsetU;
+    double cpuTextureOffsetUTexels;
+    bool hasCpuTextureOffsetV;
+    double cpuTextureOffsetVTexels;
+    bool showHud;
+    int width;
+    int height;
+
+    CommandLineOptions();
+    static CommandLineOptions parse(int argc, char** argv);
+};
+
+#endif

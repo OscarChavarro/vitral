@@ -1,2 +1,3 @@
 add_subdirectory(CameraExample)
 add_subdirectory(ImageExample)
+add_subdirectory(ShadersExample)

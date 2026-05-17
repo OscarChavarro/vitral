@@ -1,5 +1,8 @@
 #include "NormalMap.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include <cmath>
 
 static int positiveMod(int value, int modulus) {
@@ -12,6 +15,24 @@ static int positiveMod(int value, int modulus) {
 
 NormalMap::NormalMap() : xSize(0), ySize(0), bumpMapScale(nullptr) {
     bumpMapScale = new Vector3Dd(1.0, 1.0, 1.0);
+}
+
+NormalMap::NormalMap(const NormalMap& other) : xSize(0), ySize(0), bumpMapScale(nullptr)
+{
+    bumpMapScale = new Vector3Dd(1.0, 1.0, 1.0);
+    if (other.bumpMapScale != nullptr) {
+        setBumpMapScale(*other.bumpMapScale);
+    }
+    init(other.xSize, other.ySize);
+    for (int y = 0; y < ySize; y++) {
+        for (int x = 0; x < xSize; x++) {
+            Vector3Dd* n = other.getNormal(x, y);
+            if (n != nullptr) {
+                putNormal(x, y, *n);
+                delete n;
+            }
+        }
+    }
 }
 
 NormalMap::~NormalMap() {
@@ -124,4 +145,105 @@ Vector3Dd* NormalMap::getNormalBiLinear(double x, double y) const {
     delete FU1;
 
     return FVAL;
+}
+
+RGBImageUncompressed* NormalMap::exportToRgbImage() const
+{
+    RGBImageUncompressed* output = new RGBImageUncompressed();
+    if (!output->init(xSize, ySize)) {
+        delete output;
+        return nullptr;
+    }
+
+    for (int y = 0; y < ySize; y++) {
+        for (int x = 0; x < xSize; x++) {
+            Vector3Dd* n = getNormal(x, y);
+            if (n == nullptr) {
+                output->putPixel(x, y, (char)127, (char)127, (char)255);
+                continue;
+            }
+            Vector3Dd nn = n->normalized();
+            delete n;
+            Vector3Dd mapped((nn.x() + 1.0) * 0.5, (nn.y() + 1.0) * 0.5, (nn.z() + 1.0) * 0.5);
+            int rr = (int)(mapped.x() * 255.0);
+            int gg = (int)(mapped.y() * 255.0);
+            int bb = (int)(mapped.z() * 255.0);
+            if (rr < 0) rr += 256;
+            if (gg < 0) gg += 256;
+            if (bb < 0) bb += 256;
+            output->putPixel(
+                x,
+                y,
+                (char)(unsigned char)rr,
+                (char)(unsigned char)gg,
+                (char)(unsigned char)bb);
+        }
+    }
+    return output;
+}
+
+Vector3Dd NormalMap::importBumpMap(IndexedColorImageUncompressed* inBumpmap, const Vector3Dd& inScale)
+{
+    if (inBumpmap == nullptr) {
+        return Vector3Dd(1.0, 1.0, 1.0);
+    }
+
+    int xxSize = inBumpmap->getXSize();
+    int yySize = inBumpmap->getYSize();
+    Vector3Dd scale = inScale;
+
+    if (scale.x() < VSDK::EPSILON || scale.y() < VSDK::EPSILON || scale.z() < VSDK::EPSILON) {
+        double val = ((double)xxSize) / ((double)yySize);
+        if (val < 1.0) {
+            scale = Vector3Dd(1.0, 1.0 / val, 1.0);
+        }
+        else {
+            scale = Vector3Dd(val, 1.0, 1.0);
+        }
+    }
+    setBumpMapScale(scale);
+    init(xxSize, yySize);
+
+    for (int u = 1; u < xxSize - 1; u++) {
+        for (int v = 1; v < yySize - 1; v++) {
+            int a = (unsigned char)inBumpmap->getPixel(u + 1, v);
+            int b = (unsigned char)inBumpmap->getPixel(u - 1, v);
+            int c = (unsigned char)inBumpmap->getPixel(u, v + 1);
+            int d = (unsigned char)inBumpmap->getPixel(u, v - 1);
+
+            Vector3Dd df_du(2, 0, ((double)(a - b)) / 255.0);
+            Vector3Dd df_dv(0, 2, ((double)(d - c)) / 255.0);
+
+            Vector3Dd normal = df_du.crossProduct(df_dv);
+            normal = Vector3Dd(
+                normal.x() * scale.x(),
+                normal.y() * scale.y(),
+                normal.z() * scale.z()).normalized();
+            putNormal(u, v, normal);
+        }
+    }
+
+    for (int u = 0; u < xxSize; u++) {
+        Vector3Dd* n1 = getNormal(u, 1);
+        if (n1) { putNormal(u, 0, *n1); delete n1; }
+        Vector3Dd* n2 = getNormal(u, yySize - 3);
+        if (n2) { putNormal(u, yySize - 2, *n2); delete n2; }
+        Vector3Dd* n3 = getNormal(u, yySize - 2);
+        if (n3) { putNormal(u, yySize - 1, *n3); delete n3; }
+    }
+    for (int v = 0; v < yySize; v++) {
+        Vector3Dd* n1 = getNormal(2, v);
+        if (n1) { putNormal(1, v, *n1); delete n1; }
+        Vector3Dd* n2 = getNormal(1, v);
+        if (n2) { putNormal(0, v, *n2); delete n2; }
+        Vector3Dd* n3 = getNormal(xxSize - 2, v);
+        if (n3) { putNormal(xxSize - 1, v, *n3); delete n3; }
+    }
+
+    return scale;
+}
+
+NormalMap* NormalMap::clone() const
+{
+    return new NormalMap(*this);
 }

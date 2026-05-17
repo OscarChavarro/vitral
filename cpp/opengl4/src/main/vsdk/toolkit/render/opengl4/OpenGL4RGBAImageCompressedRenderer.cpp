@@ -72,6 +72,29 @@ void OpenGL4RGBAImageCompressedRenderer::draw(RGBAImageCompressed* img) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    float positions[] = {
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f
+    };
+    float uvCoordinates[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f
+    };
+
+    OpenGL4ImageRenderer::drawTexturedQuad(
+        (GLuint)textureId,
+        positions, 6,
+        uvCoordinates, 6,
+        1.0f, 1.0f, 1.0f);
+
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }

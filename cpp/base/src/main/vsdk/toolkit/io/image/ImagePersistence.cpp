@@ -4,6 +4,8 @@
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/GrayScalePalette.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/java/io/File.h"
@@ -37,6 +39,104 @@ int ddsFourCCToCompressionFormat(const char fourCC[5]) {
         return RGBAImageCompressed::COMPRESSION_DXT5;
     }
     return RGBAImageCompressed::COMPRESSION_UNKNOWN;
+}
+
+unsigned short readU16BE(const unsigned char* p) {
+    return (unsigned short)((p[0] << 8) | p[1]);
+}
+
+unsigned int readU32BE(const unsigned char* p) {
+    return ((unsigned int)p[0] << 24) |
+           ((unsigned int)p[1] << 16) |
+           ((unsigned int)p[2] << 8) |
+           ((unsigned int)p[3]);
+}
+
+IndexedColorImageUncompressed* importSgiIndexed(const java::File& inImageFd)
+{
+    java::String filePath = inImageFd.getPath();
+    FILE* f = std::fopen(filePath.toCString(), "rb");
+    if (f == nullptr) return nullptr;
+
+    unsigned char header[512];
+    if (std::fread(header, 1, sizeof(header), f) != sizeof(header)) {
+        std::fclose(f);
+        return nullptr;
+    }
+
+    const unsigned short magic = readU16BE(&header[0]);
+    const unsigned char storageFormat = header[2];
+    const unsigned char bytesPerChannel = header[3];
+    const unsigned short dimensions = readU16BE(&header[4]);
+    const unsigned short xSize = readU16BE(&header[6]);
+    const unsigned short ySize = readU16BE(&header[8]);
+    const unsigned short channels = readU16BE(&header[10]);
+    const unsigned int colormapId = readU32BE(&header[104]);
+
+    if (magic != 474 || storageFormat != 0x01 || bytesPerChannel != 1 ||
+        dimensions < 2 || channels != 1 || colormapId != 0 || xSize == 0 || ySize == 0) {
+        std::fclose(f);
+        return nullptr;
+    }
+
+    const int tables = (int)ySize * (int)channels;
+    std::vector<unsigned int> starts((size_t)tables, 0);
+    std::vector<unsigned int> lengths((size_t)tables, 0);
+    std::vector<unsigned char> tmp((size_t)tables * 4u, 0u);
+    if (std::fread(tmp.data(), 1, tmp.size(), f) != tmp.size()) {
+        std::fclose(f);
+        return nullptr;
+    }
+    for (int i = 0; i < tables; i++) starts[(size_t)i] = readU32BE(&tmp[(size_t)i * 4u]);
+    if (std::fread(tmp.data(), 1, tmp.size(), f) != tmp.size()) {
+        std::fclose(f);
+        return nullptr;
+    }
+    for (int i = 0; i < tables; i++) lengths[(size_t)i] = readU32BE(&tmp[(size_t)i * 4u]);
+
+    IndexedColorImageUncompressed* img = new IndexedColorImageUncompressed(new GrayScalePalette());
+    if (!img->init((int)xSize, (int)ySize)) {
+        delete img;
+        std::fclose(f);
+        return nullptr;
+    }
+
+    for (int y = 0; y < (int)ySize; y++) {
+        const unsigned int start = starts[(size_t)y];
+        const unsigned int length = lengths[(size_t)y];
+        if (length == 0) continue;
+        if (std::fseek(f, (long)start, SEEK_SET) != 0) continue;
+        std::vector<unsigned char> line(length, 0u);
+        if (std::fread(line.data(), 1, length, f) != length) continue;
+
+        int x = 0;
+        for (unsigned int pos = 0; pos < length && x < (int)xSize; pos++) {
+            bool literal = (line[pos] & 0x80) != 0;
+            int count = (line[pos] & 0x7F);
+            if (count == 0) break;
+
+            if (literal) {
+                for (int i = 0; i < count && x < (int)xSize; i++) {
+                    pos++;
+                    if (pos >= length) break;
+                    img->putPixel(x, (int)ySize - y - 1, (char)line[pos]);
+                    x++;
+                }
+            }
+            else {
+                pos++;
+                if (pos >= length) break;
+                char v = (char)line[pos];
+                for (int i = 0; i < count && x < (int)xSize; i++) {
+                    img->putPixel(x, (int)ySize - y - 1, v);
+                    x++;
+                }
+            }
+        }
+    }
+
+    std::fclose(f);
+    return img;
 }
 
 RGBAImageCompressed* importDDSCompressed(const java::File& inImageFd) {
@@ -216,6 +316,87 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
     }
 #endif
 
+#ifdef VITRAL_WITH_PNG
+    if (type->equals("png")) {
+        java::String pngNameStr = inImageFd.getPath();
+        const char* filename = pngNameStr.toCString();
+        FILE* fp = std::fopen(filename, "rb");
+        if (fp == nullptr) {
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+        if (!png_ptr) {
+            std::fclose(fp);
+            delete type;
+            return new RGBImageUncompressed();
+        }
+        png_infop info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr) {
+            png_destroy_read_struct(&png_ptr, nullptr, nullptr);
+            std::fclose(fp);
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        if (setjmp(png_jmpbuf(png_ptr))) {
+            png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+            std::fclose(fp);
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        png_init_io(png_ptr, fp);
+        png_read_info(png_ptr, info_ptr);
+
+        int width = (int)png_get_image_width(png_ptr, info_ptr);
+        int height = (int)png_get_image_height(png_ptr, info_ptr);
+        int color_type = png_get_color_type(png_ptr, info_ptr);
+        int bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+
+        if (bit_depth == 16) png_set_strip_16(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr);
+        if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_RGB_ALPHA || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_strip_alpha(png_ptr);
+
+        png_read_update_info(png_ptr, info_ptr);
+
+        std::vector<unsigned char> pixels((size_t)width * (size_t)height * 3u, 0u);
+        std::vector<png_bytep> row_ptrs((size_t)height);
+        for (int y = 0; y < height; y++) {
+            row_ptrs[(size_t)y] = reinterpret_cast<png_bytep>(&pixels[(size_t)y * (size_t)width * 3u]);
+        }
+        png_read_image(png_ptr, row_ptrs.data());
+
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        std::fclose(fp);
+
+        retImage = new RGBImageUncompressed();
+        if (!retImage->initNoFill(width, height)) {
+            delete retImage;
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        size_t pos = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                retImage->putPixel(x, y,
+                    (char)pixels[pos + 0],
+                    (char)pixels[pos + 1],
+                    (char)pixels[pos + 2]);
+                pos += 3;
+            }
+        }
+
+        delete type;
+        return retImage;
+    }
+#endif
+
     if (type->equals("ppm")) {
         java::String ppmNameStr = inImageFd.getPath();
         java::FileInputStream fis(ppmNameStr.toCString());
@@ -325,6 +506,45 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
 
     delete type;
     return new RGBImageUncompressed();
+}
+
+IndexedColorImageUncompressed* ImagePersistence::importIndexedColor(const java::File& inImageFd)
+{
+    java::String* type = extractExtensionFromFile(inImageFd);
+    if (type->equals("bw") || type->equals("sgi")) {
+        IndexedColorImageUncompressed* sgi = importSgiIndexed(inImageFd);
+        delete type;
+        if (sgi != nullptr) {
+            return sgi;
+        }
+        return new IndexedColorImageUncompressed(new GrayScalePalette());
+    }
+    delete type;
+
+    RGBImageUncompressed* rgb = importRGB(inImageFd);
+    IndexedColorImageUncompressed* indexed = new IndexedColorImageUncompressed();
+    if (rgb == nullptr || rgb->getXSize() <= 0 || rgb->getYSize() <= 0) {
+        if (rgb != nullptr) delete rgb;
+        return indexed;
+    }
+
+    indexed->init(rgb->getXSize(), rgb->getYSize());
+    for (int y = 0; y < rgb->getYSize(); y++) {
+        for (int x = 0; x < rgb->getXSize(); x++) {
+            RGBPixel* p = rgb->getPixelRgb(x, y);
+            if (p != nullptr) {
+                int r = (unsigned char)p->r;
+                int g = (unsigned char)p->g;
+                int b = (unsigned char)p->b;
+                int luma = (299 * r + 587 * g + 114 * b) / 1000;
+                indexed->putPixel(x, y, (char)luma);
+                delete p;
+            }
+        }
+    }
+
+    delete rgb;
+    return indexed;
 }
 
 RGBAImageUncompressed* ImagePersistence::importRGBA(const java::File& inImageFd) {

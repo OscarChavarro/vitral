@@ -55,6 +55,29 @@ void OpenGL4RGBImageUncompressedRenderer::draw(RGBImageUncompressed* img) {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
+    float positions[] = {
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f
+    };
+    float uvCoordinates[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f
+    };
+
+    OpenGL4ImageRenderer::drawTexturedQuad(
+        (GLuint)textureId,
+        positions, 6,
+        uvCoordinates, 6,
+        1.0f, 1.0f, 1.0f);
+
     glEnable(GL_DEPTH_TEST);
 }
 

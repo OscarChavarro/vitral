@@ -10,6 +10,7 @@ class Image;
 class RGBImageUncompressed;
 class RGBAImageUncompressed;
 class RGBAImageCompressed;
+class IndexedColorImageUncompressed;
 
 /**
 This class is a front end through which images of various formats can be
@@ -29,6 +30,8 @@ public:
     @return An RGBImageUncompressed entity that contains the image loaded in memory.
     */
     static RGBImageUncompressed* importRGB(const java::File& inImageFd);
+
+    static IndexedColorImageUncompressed* importIndexedColor(const java::File& inImageFd);
 
     /**
     Given the filename of an input data file which contains an image, this
