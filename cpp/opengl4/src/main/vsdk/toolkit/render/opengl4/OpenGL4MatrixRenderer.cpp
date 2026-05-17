@@ -22,13 +22,25 @@ bool OpenGL4MatrixRenderer::initialized = false;
 
 std::string OpenGL4MatrixRenderer::readShaderFile(const std::string& filename) {
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        fprintf(stderr, "Error: Could not open shader file: %s\n", filename.c_str());
-        return "";
+    if (file.is_open()) {
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        return buffer.str();
     }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
+
+    const char* prefixes[] = { "../", "../../", "../../../", "../../../../", nullptr };
+    for (int i = 0; prefixes[i] != nullptr; i++) {
+        std::string altPath = std::string(prefixes[i]) + filename;
+        file.open(altPath);
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            return buffer.str();
+        }
+    }
+
+    fprintf(stderr, "Error: Could not open shader file: %s\n", filename.c_str());
+    return "";
 }
 
 unsigned int OpenGL4MatrixRenderer::compileShader(const std::string& source, int type) {
@@ -50,8 +62,8 @@ unsigned int OpenGL4MatrixRenderer::compileShader(const std::string& source, int
 }
 
 unsigned int OpenGL4MatrixRenderer::compileShaders() {
-    std::string vertexSource = readShaderFile("../../../../etc/glslShaders/lineVertexShader.glsl");
-    std::string fragmentSource = readShaderFile("../../../../etc/glslShaders/linePixelShader.glsl");
+    std::string vertexSource = readShaderFile("../etc/glslShaders/lineVertexShader.glsl");
+    std::string fragmentSource = readShaderFile("../etc/glslShaders/linePixelShader.glsl");
 
     if (vertexSource.empty() || fragmentSource.empty()) {
         fprintf(stderr, "Error: Shader files not found\n");

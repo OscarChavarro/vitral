@@ -28,6 +28,9 @@ class File {
     dispose();
 
     java::String
+    getPath() const;
+
+    java::String
     getName() const;
 
     bool

@@ -60,8 +60,66 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
     java::String* type = extractExtensionFromFile(inImageFd);
     RGBImageUncompressed* retImage = nullptr;
 
+#ifdef VITRAL_WITH_JPEG
+    if (type->equals("jpg") || type->equals("jpeg")) {
+        java::String nameStr = inImageFd.getPath();
+        const char* filename = nameStr.toCString();
+        FILE* infile = fopen(filename, "rb");
+        if (infile == nullptr) {
+            fprintf(stderr, "Cannot open JPEG file: %s\n", filename);
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        struct jpeg_decompress_struct cinfo;
+        struct jpeg_error_mgr jerr;
+        cinfo.err = jpeg_std_error(&jerr);
+        jpeg_create_decompress(&cinfo);
+        jpeg_stdio_src(&cinfo, infile);
+        jpeg_read_header(&cinfo, TRUE);
+
+        cinfo.out_color_space = JCS_RGB;
+        jpeg_start_decompress(&cinfo);
+
+        int xSize = (int)cinfo.output_width;
+        int ySize = (int)cinfo.output_height;
+        int channels = (int)cinfo.output_components;
+
+        retImage = new RGBImageUncompressed();
+        if (!retImage->initNoFill(xSize, ySize)) {
+            fprintf(stderr, "Failed to allocate image memory for JPEG\n");
+            jpeg_destroy_decompress(&cinfo);
+            fclose(infile);
+            delete retImage;
+            delete type;
+            return new RGBImageUncompressed();
+        }
+
+        unsigned char* rowBuffer = new unsigned char[xSize * channels];
+        for (int y = 0; y < ySize; y++) {
+            JSAMPROW rowPtr = rowBuffer;
+            jpeg_read_scanlines(&cinfo, &rowPtr, 1);
+            for (int x = 0; x < xSize; x++) {
+                unsigned char r = rowBuffer[x * channels + 0];
+                unsigned char g = (channels >= 3) ? rowBuffer[x * channels + 1] : r;
+                unsigned char b = (channels >= 3) ? rowBuffer[x * channels + 2] : r;
+                retImage->putPixel(x, y, (char)r, (char)g, (char)b);
+            }
+        }
+        delete[] rowBuffer;
+
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
+        fclose(infile);
+
+        delete type;
+        return retImage;
+    }
+#endif
+
     if (type->equals("ppm")) {
-        java::FileInputStream fis(inImageFd.getName().toCString());
+        java::String ppmNameStr = inImageFd.getPath();
+        java::FileInputStream fis(ppmNameStr.toCString());
         java::BufferedInputStream bis(&fis);
 
         bool exit = false;
@@ -182,7 +240,8 @@ bool ImagePersistence::exportPPM(const java::File& fd, Image* img) {
         return false;
     }
 
-    java::FileOutputStream fos(fd.getName().toCString());
+    java::String ppmExportName = fd.getPath();
+    java::FileOutputStream fos(ppmExportName.toCString());
     java::BufferedOutputStream writer(&fos);
 
     java::String line1("P6\n");
@@ -235,7 +294,8 @@ bool ImagePersistence::exportJPEG(const java::File& fd, Image* img, int quality)
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    const char* filename = fd.getName().toCString();
+    java::String jpegExportName = fd.getPath();
+    const char* filename = jpegExportName.toCString();
     if ((outfile = fopen(filename, "wb")) == nullptr) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);
         return false;
@@ -307,7 +367,8 @@ bool ImagePersistence::exportPNG(const java::File& fd, Image* img) {
     png_structp png_ptr = nullptr;
     png_infop info_ptr = nullptr;
 
-    const char* filename = fd.getName().toCString();
+    java::String pngExportName = fd.getPath();
+    const char* filename = pngExportName.toCString();
     fp = fopen(filename, "wb");
     if (!fp) {
         fprintf(stderr, "Cannot open file %s for writing\n", filename);

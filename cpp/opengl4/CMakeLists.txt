@@ -11,6 +11,9 @@ find_package(GLEW REQUIRED)
 
 add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.cpp
 )
 

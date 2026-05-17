@@ -89,6 +89,11 @@ File::dispose() {
 }
 
 java::String
+File::getPath() const {
+    return path;
+}
+
+java::String
 File::getName() const {
     const int separator = path.indexOf('/');
     if ( separator < 0 ) {
