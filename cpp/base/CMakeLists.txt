@@ -183,8 +183,8 @@ if(WITH_PNG)
 endif()
 
 if(WITH_POSIX_THREADS)
-    target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_POSIX_THREADS)
-    target_link_libraries(vitral_base PRIVATE pthread)
+    target_compile_definitions(vitral_base PUBLIC VITRAL_WITH_POSIX_THREADS)
+    target_link_libraries(vitral_base PUBLIC pthread)
 endif()
 
 option(VITRAL_BUILD_TESTS "Build tests" ON)
