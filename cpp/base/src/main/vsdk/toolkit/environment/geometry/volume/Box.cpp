@@ -2,6 +2,8 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include <cmath>
 
 static const Vector3Dd NORMAL_POS_Z(0, 0, 1);
@@ -128,3 +130,41 @@ double* Box::getMinMax() { double* m=new double[6]; m[0]=-size.x()/2; m[1]=-size
 Vector3Dd Box::getSize() const { return size; }
 void Box::setSize(double dx,double dy,double dz){ setSize(Vector3Dd(dx,dy,dz)); }
 void Box::setSize(const Vector3Dd& s){ size=s; }
+
+PolyhedralBoundedSolid* Box::exportToPolyhedralBoundedSolid()
+{
+    return buildPolyhedralBoundedSolid();
+}
+
+PolyhedralBoundedSolid* Box::buildPolyhedralBoundedSolid()
+{
+    PolyhedralBoundedSolid* solid = new PolyhedralBoundedSolid();
+    PolyhedralBoundedSolidEulerOperators::mvfs(
+        solid, Vector3Dd(-size.x()/2, -size.y()/2, -size.z()/2), 1, 1);
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 1, 4, Vector3Dd(-size.x()/2, size.y()/2, -size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 4, 3, Vector3Dd(size.x()/2, size.y()/2, -size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 3, 2, Vector3Dd(size.x()/2, -size.y()/2, -size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::mef(
+        solid, 1, 1, 1, 4, 2, 3, 2);
+
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 1, 5, Vector3Dd(-size.x()/2, -size.y()/2, size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 2, 6, Vector3Dd(size.x()/2, -size.y()/2, size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::mef(
+        solid, 1, 1, 5, 1, 6, 2, 3);
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 3, 7, Vector3Dd(size.x()/2, size.y()/2, size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::mef(
+        solid, 1, 1, 6, 2, 7, 3, 4);
+    PolyhedralBoundedSolidEulerOperators::smev(
+        solid, 1, 4, 8, Vector3Dd(-size.x()/2, size.y()/2, size.z()/2));
+    PolyhedralBoundedSolidEulerOperators::mef(
+        solid, 1, 1, 7, 3, 8, 4, 5);
+    PolyhedralBoundedSolidEulerOperators::mef(
+        solid, 1, 1, 5, 6, 8, 4, 6);
+    return solid;
+}

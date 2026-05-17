@@ -1,0 +1,27 @@
+#ifndef __VSDK_PBS_NODE_LOOP_H__
+#define __VSDK_PBS_NODE_LOOP_H__
+
+#include <vector>
+
+class _PolyhedralBoundedSolidFace;
+class _PolyhedralBoundedSolidHalfEdge;
+
+class _PolyhedralBoundedSolidLoop {
+public:
+    _PolyhedralBoundedSolidFace* parentFace;
+    _PolyhedralBoundedSolidHalfEdge* boundaryStartHalfEdge;
+    std::vector<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
+
+    explicit _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent);
+
+    void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    _PolyhedralBoundedSolidHalfEdge* halfEdgeVertices(int a, int b);
+    _PolyhedralBoundedSolidHalfEdge* firstHalfEdgeAtVertex(int a);
+    void delhe(_PolyhedralBoundedSolidHalfEdge* he);
+    void revert();
+
+    _PolyhedralBoundedSolidHalfEdge* previousOf(_PolyhedralBoundedSolidHalfEdge* he) const;
+    _PolyhedralBoundedSolidHalfEdge* nextOf(_PolyhedralBoundedSolidHalfEdge* he) const;
+};
+
+#endif

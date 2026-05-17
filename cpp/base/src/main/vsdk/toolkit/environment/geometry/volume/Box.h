@@ -23,10 +23,14 @@ public:
     virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual double* getMinMax();
+    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
 
     Vector3Dd getSize() const;
     void setSize(double dx, double dy, double dz);
     void setSize(const Vector3Dd& s);
+
+private:
+    PolyhedralBoundedSolid* buildPolyhedralBoundedSolid();
 };
 
 #endif
