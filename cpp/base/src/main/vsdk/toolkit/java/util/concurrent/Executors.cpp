@@ -1,0 +1,136 @@
+#include "Executors.h"
+
+#include <deque>
+#include <vector>
+#include <pthread.h>
+
+namespace java {
+namespace concurrent {
+
+class FixedThreadPoolExecutor : public ExecutorService {
+private:
+    struct WorkerContext {
+        FixedThreadPoolExecutor* owner;
+    };
+
+    std::deque<TaskBase*> queue_;
+    pthread_mutex_t mutex_;
+    pthread_cond_t hasWorkCond_;
+    bool shutdown_;
+
+#ifdef VITRAL_WITH_POSIX_THREADS
+    std::vector<pthread_t> workers_;
+#endif
+
+    static void* workerMain(void* arg)
+    {
+        WorkerContext* ctx = reinterpret_cast<WorkerContext*>(arg);
+        FixedThreadPoolExecutor* self = ctx->owner;
+        delete ctx;
+
+        while ( true ) {
+            TaskBase* task = 0;
+            pthread_mutex_lock(&self->mutex_);
+            while ( self->queue_.empty() && !self->shutdown_ ) {
+                pthread_cond_wait(&self->hasWorkCond_, &self->mutex_);
+            }
+
+            if ( self->shutdown_ && self->queue_.empty() ) {
+                pthread_mutex_unlock(&self->mutex_);
+                break;
+            }
+
+            task = self->queue_.front();
+            self->queue_.pop_front();
+            pthread_mutex_unlock(&self->mutex_);
+
+            if ( task != 0 ) {
+                task->run();
+                delete task;
+            }
+        }
+        return 0;
+    }
+
+public:
+    explicit FixedThreadPoolExecutor(int numberOfThreads)
+        : queue_(), shutdown_(false)
+    {
+        pthread_mutex_init(&mutex_, 0);
+        pthread_cond_init(&hasWorkCond_, 0);
+
+#ifdef VITRAL_WITH_POSIX_THREADS
+        if ( numberOfThreads < 1 ) {
+            numberOfThreads = 1;
+        }
+        workers_.resize(static_cast<size_t>(numberOfThreads));
+        for (int i = 0; i < numberOfThreads; ++i) {
+            WorkerContext* ctx = new WorkerContext();
+            ctx->owner = this;
+            pthread_create(&workers_[static_cast<size_t>(i)], 0, &FixedThreadPoolExecutor::workerMain, ctx);
+        }
+#endif
+    }
+
+    virtual ~FixedThreadPoolExecutor()
+    {
+        shutdownNow();
+        pthread_cond_destroy(&hasWorkCond_);
+        pthread_mutex_destroy(&mutex_);
+    }
+
+    virtual void shutdownNow()
+    {
+        pthread_mutex_lock(&mutex_);
+        if ( shutdown_ ) {
+            pthread_mutex_unlock(&mutex_);
+            return;
+        }
+        shutdown_ = true;
+        pthread_cond_broadcast(&hasWorkCond_);
+        pthread_mutex_unlock(&mutex_);
+
+#ifdef VITRAL_WITH_POSIX_THREADS
+        for (size_t i = 0; i < workers_.size(); ++i) {
+            pthread_join(workers_[i], 0);
+        }
+        workers_.clear();
+#endif
+
+        pthread_mutex_lock(&mutex_);
+        while ( !queue_.empty() ) {
+            TaskBase* task = queue_.front();
+            queue_.pop_front();
+            delete task;
+        }
+        pthread_mutex_unlock(&mutex_);
+    }
+
+protected:
+    virtual bool enqueue(TaskBase* task)
+    {
+        pthread_mutex_lock(&mutex_);
+        if ( shutdown_ ) {
+            pthread_mutex_unlock(&mutex_);
+            return false;
+        }
+#ifdef VITRAL_WITH_POSIX_THREADS
+        queue_.push_back(task);
+        pthread_cond_signal(&hasWorkCond_);
+        pthread_mutex_unlock(&mutex_);
+#else
+        pthread_mutex_unlock(&mutex_);
+        task->run();
+        delete task;
+#endif
+        return true;
+    }
+};
+
+ExecutorService* Executors::newFixedThreadPool(int numberOfThreads)
+{
+    return new FixedThreadPoolExecutor(numberOfThreads);
+}
+
+}
+}

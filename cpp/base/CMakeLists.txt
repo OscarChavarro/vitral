@@ -11,6 +11,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 # Optional image format support
 option(WITH_JPEG "Enable JPEG image format support" OFF)
 option(WITH_PNG "Enable PNG image format support" OFF)
+option(WITH_POSIX_THREADS "Enable POSIX thread based java.util.concurrent emulation" ON)
 
 # Try to find JPEG library if requested
 if(WITH_JPEG)
@@ -34,6 +35,7 @@ endif()
 message(STATUS "Vitral C++ Base Configuration:")
 message(STATUS "  JPEG Support: ${WITH_JPEG}")
 message(STATUS "  PNG Support:  ${WITH_PNG}")
+message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 
 # Source files for the base library
 set(VITRAL_BASE_SOURCES
@@ -64,6 +66,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/java/io/PrintStream.cpp
     src/main/vsdk/toolkit/java/util/Formatter.cpp
     src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
+    src/main/vsdk/toolkit/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
@@ -139,6 +142,11 @@ if(WITH_PNG)
     target_link_libraries(vitral_base PRIVATE ${PNG_LIBRARIES})
     target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_PNG)
     message(STATUS "PNG support enabled: ${PNG_LIBRARIES}")
+endif()
+
+if(WITH_POSIX_THREADS)
+    target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_POSIX_THREADS)
+    target_link_libraries(vitral_base PRIVATE pthread)
 endif()
 
 option(VITRAL_BUILD_TESTS "Build tests" ON)
