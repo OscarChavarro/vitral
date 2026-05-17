@@ -1,0 +1,72 @@
+#include "Calligraphic2DBuffer.h"
+#include "RGBImageUncompressed.h"
+#include "RGBPixel.h"
+#include "../common/linealAlgebra/Vector3Dd.h"
+
+Calligraphic2DBuffer::Calligraphic2DBuffer() {
+    lineData.reserve(80000);
+}
+
+void Calligraphic2DBuffer::init() {
+    lineData.clear();
+}
+
+void Calligraphic2DBuffer::add2DLine(const Vector3Dd& p0, const Vector3Dd& p1) {
+    add2DLine(p0.x(), p0.y(), p1.x(), p1.y());
+}
+
+void Calligraphic2DBuffer::add2DLine(double x0, double y0, double x1, double y1) {
+    lineData.push_back(x0);
+    lineData.push_back(y0);
+    lineData.push_back(x1);
+    lineData.push_back(y1);
+    lineData.push_back(0.0);     // R
+    lineData.push_back(0.0);     // G
+    lineData.push_back(0.0);     // B
+    lineData.push_back(1.0);     // Width
+}
+
+Vector3Dd* Calligraphic2DBuffer::get2DLinePoint0(int i) const {
+    if (i < 0 || i >= getNumLines()) {
+        return nullptr;
+    }
+    return new Vector3Dd(lineData[8*i], lineData[8*i+1], 0.0);
+}
+
+Vector3Dd* Calligraphic2DBuffer::get2DLinePoint1(int i) const {
+    if (i < 0 || i >= getNumLines()) {
+        return nullptr;
+    }
+    return new Vector3Dd(lineData[8*i+2], lineData[8*i+3], 0.0);
+}
+
+int Calligraphic2DBuffer::getNumLines() const {
+    return (int)lineData.size() / 8;
+}
+
+void Calligraphic2DBuffer::exportRgbImage(RGBImageUncompressed* inOutRasterViewport) {
+    double xt = inOutRasterViewport->getXSize();
+    double yt = inOutRasterViewport->getYSize();
+
+    Vector3Dd* e0;
+    Vector3Dd* e1;
+    int x0, y0, x1, y1;
+    RGBPixel pixel;
+
+    pixel.r = (char)255;
+    pixel.g = (char)255;
+    pixel.b = (char)255;
+
+    for (int j = 0; j < getNumLines(); j++) {
+        e0 = get2DLinePoint0(j);
+        e1 = get2DLinePoint1(j);
+
+        x0 = (int)((xt - 1) * ((e0->x() + 1.0) / 2.0));
+        y0 = (int)((yt - 1) * (1.0 - ((e0->y() + 1.0) / 2.0)));
+        x1 = (int)((xt - 1) * ((e1->x() + 1.0) / 2.0));
+        y1 = (int)((yt - 1) * (1.0 - ((e1->y() + 1.0) / 2.0)));
+
+        delete e0;
+        delete e1;
+    }
+}
