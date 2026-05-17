@@ -65,6 +65,22 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
+    src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
+    src/main/vsdk/toolkit/environment/geometry/elements/Ray.cpp
+    src/main/vsdk/toolkit/environment/geometry/elements/RayHit.cpp
+    src/main/vsdk/toolkit/environment/geometry/elements/Triangle.cpp
+    src/main/vsdk/toolkit/environment/geometry/elements/Vertex.cpp
+    src/main/vsdk/toolkit/environment/geometry/elements/Vertex2D.cpp
+    src/main/vsdk/toolkit/environment/geometry/Geometry.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Solid.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Sphere.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Box.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Cone.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Arrow.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Torus.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.cpp
     src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp

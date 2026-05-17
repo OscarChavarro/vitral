@@ -1,0 +1,41 @@
+#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAY_H__
+#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAY_H__
+
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include <string>
+
+/**
+ This class models a mathematical RAY.
+ */
+class Ray {
+private:
+    static const double UNIT_DIRECTION_TOLERANCE;
+
+    Vector3Dd origin_;
+    Vector3Dd direction_;
+    double t_;
+
+    static Vector3Dd normalizeDirection(const Vector3Dd& direction);
+
+public:
+    Ray();
+    Ray(const Vector3Dd& origin, const Vector3Dd& direction);
+    Ray(const Vector3Dd& origin, const Vector3Dd& direction, double t);
+    Ray(const Ray& b);
+
+    static Ray copyOf(const Ray& other);
+
+    Ray withOrigin(const Vector3Dd& newOrigin) const;
+    Ray withDirection(const Vector3Dd& newDirection) const;
+    Ray withT(double newT) const;
+
+    const Vector3Dd& origin() const;
+    const Vector3Dd& direction() const;
+    double t() const;
+
+    bool equals(const Ray& other) const;
+    int hashCode() const;
+    std::string toString() const;
+};
+
+#endif
