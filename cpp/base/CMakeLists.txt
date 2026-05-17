@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(vitral_base_cpp LANGUAGES CXX)
-cmake_policy(SET CMP0135 NEW)
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 # Optional image format support
 option(WITH_JPEG "Enable JPEG image format support" OFF)
-option(WITH_PNG "Enable PNG image format support" OFF)
+option(WITH_PNG "Enable PNG image format support" ON)
 option(WITH_POSIX_THREADS "Enable POSIX thread based java.util.concurrent emulation" ON)
 
 # Try to find JPEG library if requested
@@ -193,11 +195,19 @@ if(VITRAL_BUILD_TESTS)
   enable_testing()
 
   include(FetchContent)
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  )
+  set(_gtest_url "https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+    FetchContent_Declare(
+      googletest
+      URL "${_gtest_url}"
+      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+  else()
+    FetchContent_Declare(
+      googletest
+      URL "${_gtest_url}"
+    )
+  endif()
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
 

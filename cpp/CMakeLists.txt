@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(vitral_cpp LANGUAGES CXX)
 
+if(POLICY CMP0072)
+  cmake_policy(SET CMP0072 NEW)
+endif()
+
+if(UNIX AND NOT APPLE)
+  set(OpenGL_GL_PREFERENCE GLVND)
+endif()
+
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()

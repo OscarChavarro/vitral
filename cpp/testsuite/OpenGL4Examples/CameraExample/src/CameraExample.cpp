@@ -3,15 +3,12 @@
 
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
-#endif
-#include <GLFW/glfw3.h>
-
-#ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
+#define GLFW_INCLUDE_NONE
 #include <GL/glew.h>
-#include <GL/gl.h>
 #endif
+#include <GLFW/glfw3.h>
 
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
@@ -123,6 +120,17 @@ int main(int argc, char** argv) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
+    GLenum glewErr = glewInit();
+    if (glewErr != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW: %s\n", glewGetErrorString(glewErr));
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        return -1;
+    }
+#endif
 
     camera = new Camera();
     camera->updateViewportResize(640, 480);
