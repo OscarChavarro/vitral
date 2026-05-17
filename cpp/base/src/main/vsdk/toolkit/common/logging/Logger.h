@@ -1,0 +1,27 @@
+#ifndef __VSDK_TOOLKIT_COMMON_LOGGING_LOGGER_H__
+#define __VSDK_TOOLKIT_COMMON_LOGGING_LOGGER_H__
+
+
+#include <exception>
+#include <string>
+
+class Logger {
+public:
+    static const int WARNING = 1;
+    static const int ERROR = 2;
+    static const int FATAL_ERROR = 3;
+
+    static void setWithSystemExit(bool flag);
+    static void setWithFatalExceptions(bool flag);
+
+    static void reportMessage(const std::string& className, int level, const std::string& method, const std::string& message);
+    static void reportMessageWithException(const std::string& className, int level, const std::string& method, const std::string& message, const std::exception* cause);
+
+private:
+    static bool withSystemExit_;
+    static bool withFatalExceptions_;
+    static void processFatalError(const std::string& method, const std::string& message, const std::exception* cause);
+};
+
+
+#endif // __VSDK_TOOLKIT_COMMON_LOGGING_LOGGER_H__
