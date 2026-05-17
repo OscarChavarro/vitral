@@ -7,4 +7,6 @@ enable_testing()
 # Root controller for all C++ subprojects under cpp/
 add_subdirectory(base)
 add_subdirectory(glut)
+add_subdirectory(glfw)
+add_subdirectory(opengl4)
 add_subdirectory(testsuite)

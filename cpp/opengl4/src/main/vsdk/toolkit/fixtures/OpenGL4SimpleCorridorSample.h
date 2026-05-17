@@ -1,0 +1,94 @@
+#ifndef OPENGL4SIMPLECORRIDORSAMPLE_H
+#define OPENGL4SIMPLECORRIDORSAMPLE_H
+
+#include <vector>
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+
+namespace vsdk { namespace toolkit { namespace fixtures {
+
+class OpenGL4SimpleCorridorSample {
+public:
+    OpenGL4SimpleCorridorSample();
+    ~OpenGL4SimpleCorridorSample();
+
+    void drawGL(const float* mvpColumnMajor16, const Matrix4x4d& modelViewProjection);
+    void dispose();
+
+private:
+    double a;
+    int na;
+    double b;
+    int nb;
+    double c;
+    int nc;
+    double interSpace;
+
+    bool initialized;
+    unsigned int shaderProgramId;
+    unsigned int vertexArrayId;
+    unsigned int positionBufferId;
+    unsigned int colorBufferId;
+    int modelViewProjectionLocalLoc;
+    int withTextureLoc;
+    int withVertexColorsLoc;
+    int diffuseColorLoc;
+    int vertexCount;
+
+    void initialize();
+    void buildGeometry(std::vector<float>& positions, std::vector<float>& colors);
+
+    void appendTilesCenter(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double rotZDeg, bool flipYZ, double translateZ);
+
+    void appendTilesLong(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double rotZDeg, bool flipYZ, double translateZ);
+
+    void appendTilesWallA(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double rotZDeg);
+
+    void appendTilesWallB(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double rotZDeg);
+
+    void appendTilesWallC(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double rotZDeg);
+
+    void addQuad(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        float r, float g, float bColor,
+        double x1, double y1, double z1,
+        double x2, double y2, double z2,
+        double x3, double y3, double z3,
+        double x4, double y4, double z4,
+        double rotZDeg, bool flipYZ, double translateZ);
+
+    void addVertex(
+        std::vector<float>& positions,
+        std::vector<float>& colors,
+        double x, double y, double z,
+        float r, float g, float bColor,
+        double rotZDeg, bool flipYZ, double translateZ);
+
+    unsigned int compileShaders();
+    std::string readShaderFile(const std::string& filename);
+    unsigned int compileShader(const std::string& source, int type);
+};
+
+}}}
+
+#endif // OPENGL4SIMPLECORRIDORSAMPLE_H

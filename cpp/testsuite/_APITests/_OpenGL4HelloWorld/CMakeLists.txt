@@ -19,3 +19,7 @@ target_link_libraries(_OpenGL4HelloWorld
     GLEW::GLEW
     glfw
 )
+
+if(APPLE)
+    target_compile_definitions(_OpenGL4HelloWorld PRIVATE GL_SILENCE_DEPRECATION)
+endif()

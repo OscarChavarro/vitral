@@ -1,0 +1,24 @@
+#ifndef GLFWSYSTEM_H
+#define GLFWSYSTEM_H
+
+#include "vsdk/toolkit/gui/KeyEvent.h"
+#include "vsdk/toolkit/gui/MouseEvent.h"
+
+namespace vsdk { namespace toolkit { namespace gui {
+
+class GlfwSystem {
+public:
+    static KeyEvent glfw2vsdkKeyEvent(int glfwKey, int glfwMods);
+    static KeyEvent glfw2vsdkSpecialKeyEvent(int glfwKey, int glfwMods);
+    static MouseEvent glfw2vsdkMouseEvent(int glfwButton, int glfwAction, double x, double y);
+    static MouseEvent glfw2vsdkMotionEvent(double x, double y);
+    static MouseEvent glfw2vsdkWheelEvent(double xoffset, double yoffset);
+
+private:
+    GlfwSystem();
+    ~GlfwSystem();
+};
+
+}}}
+
+#endif // GLFWSYSTEM_H

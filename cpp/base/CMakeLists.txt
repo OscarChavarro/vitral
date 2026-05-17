@@ -20,6 +20,8 @@ add_library(vitral_base SHARED
     src/main/vsdk/toolkit/java/lang/String.cpp
     src/main/vsdk/toolkit/java/util/Formatter.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
+    src/main/vsdk/toolkit/environment/camera/Camera.cpp
+    src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
 )
 
 target_include_directories(vitral_base PUBLIC src src/main)
