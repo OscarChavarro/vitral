@@ -39,7 +39,7 @@ private:
 
 public:
     SimpleBody();
-    virtual ~SimpleBody() {}
+    virtual ~SimpleBody();
 
     const std::string& getName() const;
     long long getModificationVersion() const;

@@ -35,4 +35,18 @@ target_link_libraries(RaytracingOfflineExample PRIVATE vitral_base)
 
 if(APPLE)
   target_compile_definitions(RaytracingOfflineExample PRIVATE GL_SILENCE_DEPRECATION)
+
+  # Sign the executable on macOS so profiling/instrumentation tools can run it.
+  # Use an explicit identity if provided; otherwise use ad-hoc signing.
+  set(VITRAL_CODESIGN_IDENTITY "$ENV{VITRAL_CODESIGN_IDENTITY}")
+  if(VITRAL_CODESIGN_IDENTITY STREQUAL "")
+    set(VITRAL_CODESIGN_IDENTITY "-")
+  endif()
+
+  add_custom_command(
+    TARGET RaytracingOfflineExample
+    POST_BUILD
+    COMMAND /usr/bin/codesign --force --sign "${VITRAL_CODESIGN_IDENTITY}" --timestamp=none $<TARGET_FILE:RaytracingOfflineExample>
+    VERBATIM
+    COMMENT "Code-signing RaytracingOfflineExample (${VITRAL_CODESIGN_IDENTITY})")
 endif()

@@ -1,5 +1,6 @@
 #include "SimpleScene.h"
 
+#include "SimpleBody.h"
 #include "SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/environment/background/Background.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -9,6 +10,35 @@
 SimpleScene::SimpleScene()
     : activeCameraIndex(0), activeBackgroundIndex(0)
 {
+}
+
+SimpleScene::~SimpleScene()
+{
+    clearOwnedElements();
+}
+
+void SimpleScene::clearOwnedElements()
+{
+    for (size_t i = 0; i < simpleBodiesArray.size(); ++i) {
+        delete simpleBodiesArray[i];
+    }
+    for (size_t i = 0; i < lightsArray.size(); ++i) {
+        delete lightsArray[i];
+    }
+    for (size_t i = 0; i < backgroundsArray.size(); ++i) {
+        delete backgroundsArray[i];
+    }
+    for (size_t i = 0; i < camerasArray.size(); ++i) {
+        delete camerasArray[i];
+    }
+
+    simpleBodiesArray.clear();
+    lightsArray.clear();
+    backgroundsArray.clear();
+    camerasArray.clear();
+
+    activeCameraIndex = 0;
+    activeBackgroundIndex = 0;
 }
 
 int SimpleScene::getActiveCameraIndex() const { return activeCameraIndex; }
@@ -26,16 +56,37 @@ std::vector<Light*>& SimpleScene::getLights() { return lightsArray; }
 std::vector<Background*>& SimpleScene::getBackgrounds() { return backgroundsArray; }
 std::vector<vsdk::toolkit::environment::camera::Camera*>& SimpleScene::getCameras() { return camerasArray; }
 
-void SimpleScene::setSimpleBodies(const std::vector<SimpleBody*>& simpleBodies) { simpleBodiesArray = simpleBodies; }
+void SimpleScene::setSimpleBodies(const std::vector<SimpleBody*>& simpleBodies)
+{
+    for (size_t i = 0; i < simpleBodiesArray.size(); ++i) {
+        delete simpleBodiesArray[i];
+    }
+    simpleBodiesArray = simpleBodies;
+}
 void SimpleScene::setLights(const std::vector<Light*>& lights)
 {
+    for (size_t i = 0; i < lightsArray.size(); ++i) {
+        delete lightsArray[i];
+    }
     lightsArray = lights;
     for (size_t i = 0; i < lightsArray.size(); ++i) {
         lightsArray[i]->setId(static_cast<int>(i));
     }
 }
-void SimpleScene::setBackgrounds(const std::vector<Background*>& backgrounds) { backgroundsArray = backgrounds; }
-void SimpleScene::setCameras(const std::vector<vsdk::toolkit::environment::camera::Camera*>& cameras) { camerasArray = cameras; }
+void SimpleScene::setBackgrounds(const std::vector<Background*>& backgrounds)
+{
+    for (size_t i = 0; i < backgroundsArray.size(); ++i) {
+        delete backgroundsArray[i];
+    }
+    backgroundsArray = backgrounds;
+}
+void SimpleScene::setCameras(const std::vector<vsdk::toolkit::environment::camera::Camera*>& cameras)
+{
+    for (size_t i = 0; i < camerasArray.size(); ++i) {
+        delete camerasArray[i];
+    }
+    camerasArray = cameras;
+}
 
 Background* SimpleScene::getActiveBackground() const { return backgroundsArray[static_cast<size_t>(activeBackgroundIndex)]; }
 vsdk::toolkit::environment::camera::Camera* SimpleScene::getActiveCamera() const { return camerasArray[static_cast<size_t>(activeCameraIndex)]; }

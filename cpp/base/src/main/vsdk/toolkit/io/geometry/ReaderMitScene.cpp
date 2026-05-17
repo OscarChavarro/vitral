@@ -34,10 +34,7 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         throw std::runtime_error("ReaderMitScene::importEnvironment: outScene is null");
     }
 
-    outScene->getSimpleBodies().clear();
-    outScene->getLights().clear();
-    outScene->getBackgrounds().clear();
-    outScene->getCameras().clear();
+    outScene->clearOwnedElements();
 
     vsdk::toolkit::environment::camera::Camera* camera =
         new vsdk::toolkit::environment::camera::Camera();

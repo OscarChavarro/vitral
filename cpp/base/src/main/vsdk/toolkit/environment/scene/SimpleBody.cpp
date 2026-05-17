@@ -4,6 +4,8 @@
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
@@ -16,13 +18,40 @@ SimpleBody::SimpleBody()
 {
 }
 
+SimpleBody::~SimpleBody()
+{
+    if ( geometry != 0 ) {
+        delete geometry;
+        geometry = 0;
+    }
+    if ( globalMaterial != 0 ) {
+        delete globalMaterial;
+        globalMaterial = 0;
+    }
+    if ( globalTextureMap != 0 ) {
+        delete globalTextureMap;
+        globalTextureMap = 0;
+    }
+    if ( globalNormalMap != 0 ) {
+        delete globalNormalMap;
+        globalNormalMap = 0;
+    }
+}
+
 void SimpleBody::markModified() { modificationVersion++; }
 const std::string& SimpleBody::getName() const { return name; }
 long long SimpleBody::getModificationVersion() const { return modificationVersion; }
 void SimpleBody::setName(const std::string& n) { name = n; markModified(); }
 
 Geometry* SimpleBody::getGeometry() const { return geometry; }
-void SimpleBody::setGeometry(Geometry* g) { geometry = g; markModified(); }
+void SimpleBody::setGeometry(Geometry* g)
+{
+    if ( geometry != g && geometry != 0 ) {
+        delete geometry;
+    }
+    geometry = g;
+    markModified();
+}
 
 Matrix4x4d SimpleBody::getRotation() const { return rotation; }
 void SimpleBody::setRotation(const Matrix4x4d& r)
@@ -47,14 +76,31 @@ void SimpleBody::setRotationInverse(const Matrix4x4d& ri)
 }
 
 SimpleMaterial* SimpleBody::getMaterial() const { return globalMaterial; }
-void SimpleBody::setMaterial(SimpleMaterial* m) { globalMaterial = m; markModified(); }
+void SimpleBody::setMaterial(SimpleMaterial* m)
+{
+    if ( globalMaterial != m && globalMaterial != 0 ) {
+        delete globalMaterial;
+    }
+    globalMaterial = m;
+    markModified();
+}
 Image* SimpleBody::getTexture() const { return globalTextureMap; }
-void SimpleBody::setTexture(Image* in) { globalTextureMap = in; markModified(); }
+void SimpleBody::setTexture(Image* in)
+{
+    if ( globalTextureMap != in && globalTextureMap != 0 ) {
+        delete globalTextureMap;
+    }
+    globalTextureMap = in;
+    markModified();
+}
 NormalMap* SimpleBody::getNormalMap() const { return globalNormalMap; }
 RGBImageUncompressed* SimpleBody::getNormalMapRgb() const { return globalNormalMapRgb; }
 
 void SimpleBody::setNormalMap(NormalMap* in)
 {
+    if ( globalNormalMap != in && globalNormalMap != 0 ) {
+        delete globalNormalMap;
+    }
     globalNormalMap = in;
     globalNormalMapRgb = 0;
     markModified();

@@ -29,6 +29,7 @@ pkgs/SpharmonicKit27/tmp/
 # testsuite generated assets
 testsuite/**/output/
 testsuite/**/*.ppm
+cpp/testsuite/**/*.ppm
 testsuite/**/*.jpg
 testsuite/**/*.bmp
 testsuite/**/PolyhedralBoundedSolidExample/*.png

@@ -21,7 +21,9 @@ private:
 
 public:
     SimpleScene();
-    virtual ~SimpleScene() {}
+    virtual ~SimpleScene();
+
+    void clearOwnedElements();
 
     int getActiveCameraIndex() const;
     int getActiveBackgroundIndex() const;
