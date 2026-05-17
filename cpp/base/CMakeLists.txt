@@ -68,6 +68,11 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
     src/main/vsdk/toolkit/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
+    src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.cpp
+    src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.cpp
+    src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.cpp
+    src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.cpp
+    src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
