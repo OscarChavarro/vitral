@@ -1,5 +1,4 @@
 #include "RayHit.h"
-#include "Ray.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 
 static const Vector3Dd ZERO_VECTOR;
@@ -12,7 +11,8 @@ RayHit::RayHit(int requiredDetailMask, bool storeRay)
     : p(ZERO_VECTOR), n(ZERO_VECTOR), t(ZERO_VECTOR),
       u(0), v(0),
       material(nullptr), texture(nullptr), normalMap(nullptr),
-      ray_(nullptr),
+      rayValue_(),
+      hasRay_(false),
       requiredDetailMask_(requiredDetailMask),
       storeRay_(storeRay),
       hitDistance_(0),
@@ -26,7 +26,8 @@ RayHit::RayHit(const RayHit& other)
     : p(ZERO_VECTOR), n(ZERO_VECTOR), t(ZERO_VECTOR),
       u(0), v(0),
       material(nullptr), texture(nullptr), normalMap(nullptr),
-      ray_(nullptr),
+      rayValue_(),
+      hasRay_(false),
       requiredDetailMask_(other.requiredDetailMask_),
       storeRay_(other.storeRay_),
       hitDistance_(0),
@@ -37,10 +38,6 @@ RayHit::RayHit(const RayHit& other)
 
 RayHit::~RayHit()
 {
-    if ( ray_ != nullptr ) {
-        delete ray_;
-        ray_ = nullptr;
-    }
 }
 
 void RayHit::clear()
@@ -53,10 +50,7 @@ void RayHit::clear()
     material = nullptr;
     texture = nullptr;
     normalMap = nullptr;
-    if ( ray_ != nullptr ) {
-        delete ray_;
-        ray_ = nullptr;
-    }
+    hasRay_ = false;
     hitDistance_ = 0;
     hasHitDistance_ = false;
 }
@@ -70,10 +64,7 @@ void RayHit::reset(int newRequiredDetailMask)
 void RayHit::resetForDistanceOnly()
 {
     requiredDetailMask_ = DETAIL_NONE;
-    if ( ray_ != nullptr ) {
-        delete ray_;
-        ray_ = nullptr;
-    }
+    hasRay_ = false;
     hitDistance_ = 0;
     hasHitDistance_ = false;
 }
@@ -94,12 +85,9 @@ void RayHit::clone(const RayHit& other)
     texture = other.texture;
     normalMap = other.normalMap;
 
-    if ( ray_ != nullptr ) {
-        delete ray_;
-        ray_ = nullptr;
-    }
-    if ( other.ray_ != nullptr ) {
-        ray_ = new Ray(*other.ray_);
+    hasRay_ = other.hasRay_;
+    if ( hasRay_ ) {
+        rayValue_ = other.rayValue_;
     }
 }
 
@@ -150,15 +138,13 @@ bool RayHit::needsAnySurfaceData() const
 
 const Ray* RayHit::ray() const
 {
-    return ray_;
+    return hasRay_ ? &rayValue_ : nullptr;
 }
 
 void RayHit::setRay(const Ray& ray)
 {
-    if ( ray_ != nullptr ) {
-        delete ray_;
-    }
-    ray_ = new Ray(ray);
+    rayValue_ = ray;
+    hasRay_ = true;
     hitDistance_ = ray.t();
     hasHitDistance_ = true;
 }
@@ -173,8 +159,8 @@ double RayHit::hitDistance() const
     if ( hasHitDistance_ ) {
         return hitDistance_;
     }
-    if ( ray_ != nullptr ) {
-        return ray_->t();
+    if ( hasRay_ ) {
+        return rayValue_.t();
     }
     return 0;
 }

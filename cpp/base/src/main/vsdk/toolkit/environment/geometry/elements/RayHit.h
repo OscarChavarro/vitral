@@ -1,9 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
 
+#include "Ray.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
-class Ray;
 class SimpleMaterial;
 class Image;
 class NormalMap;
@@ -39,8 +39,8 @@ public:
     NormalMap* normalMap; // Internal geometry selected normal map
 
 private:
-    // This can be null for miss results.
-    Ray* ray_; // Intersected ray with valid t at hit point
+    Ray rayValue_;
+    bool hasRay_;
 
     int requiredDetailMask_;
     bool storeRay_;

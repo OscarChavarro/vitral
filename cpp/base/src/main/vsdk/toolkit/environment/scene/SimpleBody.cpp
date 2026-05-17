@@ -160,19 +160,34 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     localDirection = rotationInverse.multiply(localDirection).normalized();
 
     Ray localRay(localOrigin, localDirection, inOutRay.t());
-    RayHit localHit = outHit != 0 ? RayHit(*outHit) : RayHit();
+    const int requestedDetailMask = outHit != 0 ? outHit->requiredDetailMask() : RayHit::DETAIL_NONE;
+    const bool requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : false;
 
-    if ( !geometry->doIntersection(localRay, &localHit) ) {
-        return false;
+    if ( outHit != 0 ) {
+        outHit->setStoreRay(false);
+        outHit->resetForDistanceOnly();
+        if ( !geometry->doIntersection(localRay, outHit) ) {
+            outHit->setStoreRay(requestedStoreRay);
+            outHit->setRequiredDetailMask(requestedDetailMask);
+            return false;
+        }
+    }
+    else {
+        RayHit localHitStorage;
+        localHitStorage.setStoreRay(false);
+        localHitStorage.resetForDistanceOnly();
+        if ( !geometry->doIntersection(localRay, &localHitStorage) ) {
+            return false;
+        }
     }
 
     if ( outHit != 0 ) {
         double localHitT;
-        if ( localHit.ray() != 0 ) {
-            localHitT = localHit.ray()->t();
+        if ( outHit->ray() != 0 ) {
+            localHitT = outHit->ray()->t();
         }
-        else if ( localHit.hasHitDistance() ) {
-            localHitT = localHit.hitDistance();
+        else if ( outHit->hasHitDistance() ) {
+            localHitT = outHit->hitDistance();
         }
         else {
             return false;
@@ -185,10 +200,12 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
             localHitPoint.z() * scale.z())).add(position);
         double worldT = worldHitPoint.subtract(inOutRay.origin()).length();
 
-        if ( outHit->shouldStoreRay() || outHit->needsAnySurfaceData() ) {
+        outHit->setStoreRay(requestedStoreRay);
+        outHit->setRequiredDetailMask(requestedDetailMask);
+        if ( requestedStoreRay || requestedDetailMask != RayHit::DETAIL_NONE ) {
             Ray worldRay(inOutRay.origin(), inOutRay.direction(), worldT);
             outHit->setRay(worldRay);
-            if ( outHit->needsAnySurfaceData() ) {
+            if ( requestedDetailMask != RayHit::DETAIL_NONE ) {
                 doExtraInformation(worldRay, worldT, outHit);
             }
         }
@@ -196,7 +213,6 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
             outHit->setHitDistance(worldT);
         }
     }
-
     return true;
 }
 

@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 project(vitral_cpp LANGUAGES CXX)
 
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  add_compile_options(
+    "$<$<CONFIG:Release>:-O3>"
+    "$<$<CONFIG:RelWithDebInfo>:-O3>"
+    "$<$<CONFIG:MinSizeRel>:-O2>")
+endif()
+
 if(APPLE)
   # Sanitize stale CLT SDK paths that may leak from environment/toolchain cache.
   set(_STALE_FRAMEWORK_DIR "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/System/Library/Frameworks")

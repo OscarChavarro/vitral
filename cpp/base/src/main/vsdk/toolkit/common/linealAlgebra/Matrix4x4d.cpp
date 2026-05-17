@@ -181,19 +181,34 @@ Matrix4x4d Matrix4x4d::multiply(double a) const
 
 Vector4Dd Matrix4x4d::multiply(const Vector4Dd& e) const
 {
+    const double ex = e.x();
+    const double ey = e.y();
+    const double ez = e.z();
+    const double ew = e.w();
     return Vector4Dd(
-        m_[0][0] * e.x() + m_[0][1] * e.y() + m_[0][2] * e.z() + m_[0][3] * e.w(),
-        m_[1][0] * e.x() + m_[1][1] * e.y() + m_[1][2] * e.z() + m_[1][3] * e.w(),
-        m_[2][0] * e.x() + m_[2][1] * e.y() + m_[2][2] * e.z() + m_[2][3] * e.w(),
-        m_[3][0] * e.x() + m_[3][1] * e.y() + m_[3][2] * e.z() + m_[3][3] * e.w()
+        m_[0][0] * ex + m_[0][1] * ey + m_[0][2] * ez + m_[0][3] * ew,
+        m_[1][0] * ex + m_[1][1] * ey + m_[1][2] * ez + m_[1][3] * ew,
+        m_[2][0] * ex + m_[2][1] * ey + m_[2][2] * ez + m_[2][3] * ew,
+        m_[3][0] * ex + m_[3][1] * ey + m_[3][2] * ez + m_[3][3] * ew
     );
 }
 
 Vector3Dd Matrix4x4d::multiply(const Vector3Dd& e) const
 {
-    Vector4Dd r = multiply(Vector4Dd(e));
-    Vector4Dd d = r.dividedByW();
-    return Vector3Dd(d.x(), d.y(), d.z());
+    const double ex = e.x();
+    const double ey = e.y();
+    const double ez = e.z();
+
+    const double rx = m_[0][0] * ex + m_[0][1] * ey + m_[0][2] * ez + m_[0][3];
+    const double ry = m_[1][0] * ex + m_[1][1] * ey + m_[1][2] * ez + m_[1][3];
+    const double rz = m_[2][0] * ex + m_[2][1] * ey + m_[2][2] * ez + m_[2][3];
+    const double rw = m_[3][0] * ex + m_[3][1] * ey + m_[3][2] * ez + m_[3][3];
+
+    if ( std::abs(rw) < VSDK::EPSILON ) {
+        return Vector3Dd(rx, ry, rz);
+    }
+    const double invW = 1.0 / rw;
+    return Vector3Dd(rx * invW, ry * invW, rz * invW);
 }
 
 Matrix4x4d Matrix4x4d::multiply(const Matrix4x4d& second) const
