@@ -18,6 +18,7 @@ class SimpleMaterial;
 class SimpleBody {
 private:
     Geometry* geometry;
+    bool geometryIsSphere;
     Vector3Dd position;
     Vector3Dd scale;
     Matrix4x4d rotation;
@@ -26,6 +27,11 @@ private:
     Quaterniond rotationInverseQuaternion;
     Vector3Dd inverseScale;
     bool hasInvertibleScale;
+    bool hasIdentityRotation;
+    bool hasUnitScale;
+    bool hasZeroTranslation;
+    bool hasTranslationOnlyTransform;
+    bool hasIdentityTransform;
 
     SimpleMaterial* globalMaterial;
     Image* globalTextureMap;
@@ -36,6 +42,9 @@ private:
     long long modificationVersion;
 
     void markModified();
+    void updateTransformFlags();
+    static bool isIdentityRotation(const Matrix4x4d& matrix);
+    bool doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
 
 public:
     SimpleBody();

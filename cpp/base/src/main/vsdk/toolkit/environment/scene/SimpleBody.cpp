@@ -4,15 +4,20 @@
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
+#include <cmath>
+
 SimpleBody::SimpleBody()
-    : geometry(0), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
+    : geometry(0), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
       rotationQuaternion(rotation.exportToQuaternion()), rotationInverseQuaternion(rotationInverse.exportToQuaternion()),
       inverseScale(1, 1, 1), hasInvertibleScale(true),
+      hasIdentityRotation(true), hasUnitScale(true), hasZeroTranslation(true),
+      hasTranslationOnlyTransform(true), hasIdentityTransform(true),
       globalMaterial(0), globalTextureMap(0), globalNormalMap(0), globalNormalMapRgb(0),
       name(""), modificationVersion(0)
 {
@@ -39,6 +44,36 @@ SimpleBody::~SimpleBody()
 }
 
 void SimpleBody::markModified() { modificationVersion++; }
+
+bool SimpleBody::isIdentityRotation(const Matrix4x4d& matrix)
+{
+    return
+        std::abs(matrix.get(0, 0) - 1.0) <= VSDK::EPSILON &&
+        std::abs(matrix.get(0, 1)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(0, 2)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(1, 0)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(1, 1) - 1.0) <= VSDK::EPSILON &&
+        std::abs(matrix.get(1, 2)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(2, 0)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(2, 1)) <= VSDK::EPSILON &&
+        std::abs(matrix.get(2, 2) - 1.0) <= VSDK::EPSILON;
+}
+
+void SimpleBody::updateTransformFlags()
+{
+    hasIdentityRotation = isIdentityRotation(rotation);
+    hasUnitScale =
+        std::abs(scale.x() - 1.0) <= VSDK::EPSILON &&
+        std::abs(scale.y() - 1.0) <= VSDK::EPSILON &&
+        std::abs(scale.z() - 1.0) <= VSDK::EPSILON;
+    hasZeroTranslation =
+        std::abs(position.x()) <= VSDK::EPSILON &&
+        std::abs(position.y()) <= VSDK::EPSILON &&
+        std::abs(position.z()) <= VSDK::EPSILON;
+    hasTranslationOnlyTransform = hasIdentityRotation && hasUnitScale;
+    hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
+}
+
 const std::string& SimpleBody::getName() const { return name; }
 long long SimpleBody::getModificationVersion() const { return modificationVersion; }
 void SimpleBody::setName(const std::string& n) { name = n; markModified(); }
@@ -50,6 +85,7 @@ void SimpleBody::setGeometry(Geometry* g)
         delete geometry;
     }
     geometry = g;
+    geometryIsSphere = dynamic_cast<Sphere*>(geometry) != 0;
     markModified();
 }
 
@@ -61,6 +97,7 @@ void SimpleBody::setRotation(const Matrix4x4d& r)
     rotation = sanitized;
     rotationInverseQuaternion = rotationQuaternion.conjugated();
     rotationInverse = Matrix4x4d().importFromQuaternion(rotationInverseQuaternion);
+    updateTransformFlags();
     markModified();
 }
 
@@ -72,6 +109,7 @@ void SimpleBody::setRotationInverse(const Matrix4x4d& ri)
     rotationInverse = sanitized;
     rotationQuaternion = rotationInverseQuaternion.conjugated();
     rotation = Matrix4x4d().importFromQuaternion(rotationQuaternion);
+    updateTransformFlags();
     markModified();
 }
 
@@ -107,7 +145,7 @@ void SimpleBody::setNormalMap(NormalMap* in)
 }
 
 Vector3Dd SimpleBody::getPosition() const { return position; }
-void SimpleBody::setPosition(const Vector3Dd& p) { position = p; markModified(); }
+void SimpleBody::setPosition(const Vector3Dd& p) { position = p; updateTransformFlags(); markModified(); }
 Vector3Dd SimpleBody::getScale() const { return scale; }
 
 Matrix4x4d SimpleBody::getTransformationMatrix() const
@@ -131,6 +169,7 @@ void SimpleBody::setScale(const Vector3Dd& s)
     else {
         inverseScale = Vector3Dd();
     }
+    updateTransformFlags();
     markModified();
 }
 
@@ -143,10 +182,52 @@ Ray* SimpleBody::doIntersection(const Ray& inRay) const
     return new Ray(*hit.ray());
 }
 
+bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const
+{
+    const Sphere* sphere = static_cast<const Sphere*>(geometry);
+    const Vector3Dd& origin = inOutRay.origin();
+    const Vector3Dd& direction = inOutRay.direction();
+    const double dx = position.x() - origin.x();
+    const double dy = position.y() - origin.y();
+    const double dz = position.z() - origin.z();
+    const double projection = direction.x() * dx + direction.y() * dy + direction.z() * dz;
+    const double discriminant =
+        sphere->getRadiusSquared() + projection * projection - dx * dx - dy * dy - dz * dz;
+
+    if ( discriminant < 0 ) {
+        return false;
+    }
+
+    const double t = projection - std::sqrt(discriminant);
+    if ( t < 0 ) {
+        return false;
+    }
+
+    if ( outHit != 0 ) {
+        if ( outHit->shouldStoreRay() ) {
+            outHit->setRay(inOutRay.withT(t));
+        }
+        else {
+            outHit->setHitDistance(t);
+        }
+    }
+    return true;
+}
+
 bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
 {
     if ( geometry == 0 || !hasInvertibleScale ) {
         return false;
+    }
+
+    const int requestedDetailMask = outHit != 0 ? outHit->requiredDetailMask() : RayHit::DETAIL_NONE;
+
+    if ( hasTranslationOnlyTransform && requestedDetailMask == RayHit::DETAIL_NONE && geometryIsSphere ) {
+        return doIntersectionWithTranslationOnlySphereFastPath(inOutRay, outHit);
+    }
+
+    if ( hasIdentityTransform ) {
+        return geometry->doIntersection(inOutRay, outHit);
     }
 
     Vector3Dd localOrigin = inOutRay.origin().subtract(position);
@@ -160,7 +241,6 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     localDirection = rotationInverse.multiply(localDirection).normalized();
 
     Ray localRay(localOrigin, localDirection, inOutRay.t());
-    const int requestedDetailMask = outHit != 0 ? outHit->requiredDetailMask() : RayHit::DETAIL_NONE;
     const bool requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : false;
 
     if ( outHit != 0 ) {
