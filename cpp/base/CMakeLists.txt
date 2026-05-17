@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(vitral_base_cpp
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
+
+add_library(vitral_base SHARED
     src/VSDK.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
@@ -17,9 +19,10 @@ add_library(vitral_base_cpp
     src/main/vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.cpp
     src/main/vsdk/toolkit/java/lang/String.cpp
     src/main/vsdk/toolkit/java/util/Formatter.cpp
+    src/main/vsdk/toolkit/gui/KeyEvent.cpp
 )
 
-target_include_directories(vitral_base_cpp PUBLIC src src/main)
+target_include_directories(vitral_base PUBLIC src src/main)
 
 option(VITRAL_BUILD_TESTS "Build tests" ON)
 if(VITRAL_BUILD_TESTS)
@@ -41,7 +44,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/matrix_nxm_tests.cpp
     src/test/matrix4x4_tests.cpp
   )
-  target_link_libraries(vitral_base_tests PRIVATE vitral_base_cpp GTest::gtest_main)
+  target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)
   gtest_discover_tests(vitral_base_tests)
 endif()
