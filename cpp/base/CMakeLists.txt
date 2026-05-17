@@ -74,6 +74,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/elements/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Vertex2D.cpp
+    src/main/vsdk/toolkit/environment/geometry/curve/Curve.cpp
     src/main/vsdk/toolkit/environment/geometry/curve/ParametricCurve.cpp
     src/main/vsdk/toolkit/environment/geometry/Geometry.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/Surface.cpp

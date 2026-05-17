@@ -1,0 +1,27 @@
+#include "Curve.h"
+
+#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+
+Ray* Curve::doIntersection(const Ray&)
+{
+    return nullptr;
+}
+
+bool Curve::doIntersection(const Ray& inRay, RayHit* outHit)
+{
+    Ray* hit = doIntersection(inRay);
+    if ( hit == nullptr ) {
+        return false;
+    }
+
+    if ( outHit != nullptr ) {
+        outHit->setRay(*hit);
+        doExtraInformation(*hit, hit->t(), outHit);
+    }
+    return true;
+}
+
+void Curve::doExtraInformation(const Ray&, double, RayHit*)
+{
+}
