@@ -37,7 +37,7 @@ message(STATUS "  PNG Support:  ${WITH_PNG}")
 
 # Source files for the base library
 set(VITRAL_BASE_SOURCES
-    src/VSDK.cpp
+    src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
