@@ -46,6 +46,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp
     src/main/vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.cpp
+    src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp
     src/main/vsdk/toolkit/java/lang/Object.cpp
     src/main/vsdk/toolkit/java/lang/String.cpp
     src/main/vsdk/toolkit/java/lang/System.cpp
@@ -65,13 +66,28 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
+    src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
+    src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Ray.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/RayHit.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Vertex2D.cpp
+    src/main/vsdk/toolkit/environment/geometry/curve/ParametricCurve.cpp
     src/main/vsdk/toolkit/environment/geometry/Geometry.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/Surface.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/HalfSpace.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/InfinitePlane.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/Md2Mesh.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Solid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Sphere.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Box.cpp
