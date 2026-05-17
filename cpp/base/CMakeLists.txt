@@ -74,6 +74,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.cpp
     src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
+    src/main/vsdk/toolkit/environment/light/Light.cpp
+    src/main/vsdk/toolkit/environment/scene/SimpleScene.cpp
+    src/main/vsdk/toolkit/environment/scene/SimpleSceneSnapshot.cpp
+    src/main/vsdk/toolkit/environment/scene/SimpleBodyGroup.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
@@ -128,6 +132,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/PrimitiveCountShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/FourierShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/GeometryMetadata.cpp
+    src/main/vsdk/toolkit/environment/material/SimpleMaterial.cpp
+    src/main/vsdk/toolkit/environment/material/ShadingType.cpp
+    src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp
 )
 
 add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})

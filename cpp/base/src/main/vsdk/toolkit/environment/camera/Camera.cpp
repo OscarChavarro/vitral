@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "CameraSnapshot.h"
 #include <cmath>
 #include <cstdio>
 #include "vsdk/toolkit/common/VSDK.h"
@@ -355,6 +356,31 @@ std::string Camera::toString() const {
         + std::to_string(viewportYSize) + ")\n";
 
     return msg;
+}
+
+CameraSnapshot* Camera::exportToCameraSnapshot() const
+{
+    return exportToCameraSnapshot(static_cast<int>(viewportXSize), static_cast<int>(viewportYSize));
+}
+
+CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewportYSizeIn) const
+{
+    Camera tmp(*this);
+    tmp.viewportXSize = viewportXSizeIn;
+    tmp.viewportYSize = viewportYSizeIn;
+    tmp.updateVectors();
+    return new CameraSnapshot(
+        tmp.eyePosition,
+        tmp.front,
+        tmp.left,
+        tmp.up,
+        tmp.projectionMode,
+        tmp.orthogonalZoom,
+        tmp.viewportXSize,
+        tmp.viewportYSize,
+        tmp._dir,
+        tmp.upWithScale,
+        tmp.rightWithScale);
 }
 
 }}}}

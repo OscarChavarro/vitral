@@ -7,6 +7,8 @@
 
 namespace vsdk { namespace toolkit { namespace environment { namespace camera {
 
+class CameraSnapshot;
+
 class Camera {
 public:
     static const int OPCODE_FAR = (0x01 << 1);
@@ -76,6 +78,8 @@ public:
     float* toColumnMajorFloatArray() const;
 
     std::string toString() const;
+    CameraSnapshot* exportToCameraSnapshot() const;
+    CameraSnapshot* exportToCameraSnapshot(int viewportXSize, int viewportYSize) const;
 
 private:
     Vector3Dd up;
