@@ -1,10 +1,14 @@
 #include "LightingShader.h"
 #include "CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/render/TraceWorkspace.h"
 #include <cmath>
 
 LightingShader::LightingShader(bool specularEnabledIn, bool textureEnabledIn, bool bumpMapEnabledIn)
@@ -14,8 +18,8 @@ LightingShader::LightingShader(bool specularEnabledIn, bool textureEnabledIn, bo
 
 Shader::LocalShadingResult LightingShader::shadeLocal(
     RayHit* info, double viewX, double viewY, double viewZ,
-    const std::vector<Light*>& lights, const std::vector<SimpleBody*>&,
-    SimpleMaterial* material, TraceWorkspace*)
+    const std::vector<Light*>& lights, const std::vector<SimpleBody*>& objects,
+    SimpleMaterial* material, TraceWorkspace* workspace)
 {
     Vector3Dd surfaceNormal = info->n;
     if ( bumpMapEnabled && info->normalMap != 0 ) {
@@ -51,6 +55,44 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
             double d = std::sqrt(lx*lx + ly*ly + lz*lz);
             if ( d <= VSDK::EPSILON ) continue;
             lx /= d; ly /= d; lz /= d;
+        }
+
+        if ( workspace != 0 ) {
+            Vector3Dd shadowOrigin(
+                info->p.x() + VSDK::EPSILON * lx,
+                info->p.y() + VSDK::EPSILON * ly,
+                info->p.z() + VSDK::EPSILON * lz);
+            Ray shadowRay(shadowOrigin, Vector3Dd(lx, ly, lz));
+            RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
+            shadowCandidateHit->setStoreRay(false);
+
+            double maxShadowDistance = 1e308;
+            if ( light->tipo_de_luz == LightType::POINT ) {
+                double dx = light->lvec.x() - info->p.x();
+                double dy = light->lvec.y() - info->p.y();
+                double dz = light->lvec.z() - info->p.z();
+                maxShadowDistance = std::sqrt(dx*dx + dy*dy + dz*dz) - VSDK::EPSILON;
+                if ( maxShadowDistance <= VSDK::EPSILON ) {
+                    continue;
+                }
+            }
+
+            bool shadowed = false;
+            for ( size_t oi = 0; oi < objects.size(); oi++ ) {
+                SimpleBody* candidateObject = objects[oi];
+                shadowCandidateHit->resetForDistanceOnly();
+                RaytraceStatistics::recordShadowRay();
+                if ( candidateObject != 0 && candidateObject->doIntersection(shadowRay, shadowCandidateHit) ) {
+                    double hitDistance = shadowCandidateHit->hitDistance();
+                    if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
+                        shadowed = true;
+                        break;
+                    }
+                }
+            }
+            if ( shadowed ) {
+                continue;
+            }
         }
 
         double lambert = nx*lx + ny*ly + nz*lz;

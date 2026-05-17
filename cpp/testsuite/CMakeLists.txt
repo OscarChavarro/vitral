@@ -1,2 +1,3 @@
 add_subdirectory(_APITests)
 add_subdirectory(OpenGL4Examples)
+add_subdirectory(OfflineExamples)

@@ -1,0 +1,159 @@
+#include "RaytracerParallelExecutor.h"
+
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
+#include "vsdk/toolkit/java/util/concurrent/Callable.h"
+#include "vsdk/toolkit/java/util/concurrent/ConcurrentLinkedQueue.h"
+#include "vsdk/toolkit/java/util/concurrent/ExecutorService.h"
+#include "vsdk/toolkit/java/util/concurrent/Executors.h"
+#include "vsdk/toolkit/java/util/concurrent/Future.h"
+#include "vsdk/toolkit/java/util/concurrent/Void.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/render/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/Tile.h"
+#include "vsdk/toolkit/render/TileGenerationStrategy.h"
+#include "vsdk/toolkit/render/TileGenerator.h"
+
+#include <pthread.h>
+#include <unistd.h>
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+
+namespace {
+
+struct ConsumerThreadData {
+    ParallelProgressMonitorConsumer* consumer;
+};
+
+void* progressConsumerMain(void* arg)
+{
+    ConsumerThreadData* data = reinterpret_cast<ConsumerThreadData*>(arg);
+    data->consumer->run();
+    return 0;
+}
+
+class TileWorker : public java::concurrent::Callable<java::concurrent::Void> {
+private:
+    java::concurrent::ConcurrentLinkedQueue<Tile>* pendingTiles;
+    RGBImageUncompressed* resultingImage;
+    const RendererConfiguration* rendererConfiguration;
+    SimpleSceneSnapshot* sceneSnapshot;
+    ProgressMonitor* progressReporter;
+
+public:
+    TileWorker(java::concurrent::ConcurrentLinkedQueue<Tile>* pendingTiles,
+               RGBImageUncompressed* resultingImage,
+               const RendererConfiguration* rendererConfiguration,
+               SimpleSceneSnapshot* sceneSnapshot,
+               ProgressMonitor* progressReporter)
+        : pendingTiles(pendingTiles),
+          resultingImage(resultingImage),
+          rendererConfiguration(rendererConfiguration),
+          sceneSnapshot(sceneSnapshot),
+          progressReporter(progressReporter)
+    {
+    }
+
+    virtual java::concurrent::Void call() override
+    {
+        Tile tile(resultingImage, 0, 0, resultingImage->getXSize(), resultingImage->getYSize());
+        SimpleRaytracer raytracer;
+
+        while ( pendingTiles->poll(&tile) ) {
+            raytracer.execute(resultingImage,
+                             rendererConfiguration,
+                             sceneSnapshot,
+                             progressReporter,
+                             0,
+                             tile.getX0(),
+                             tile.getY0(),
+                             tile.getX1(),
+                             tile.getY1());
+        }
+        return java::concurrent::Void();
+    }
+};
+
+long long calculateTotalProgressElements(const std::vector<Tile>& generatedTiles)
+{
+    long long total = 0;
+    for (size_t i = 0; i < generatedTiles.size(); i++) {
+        total += generatedTiles[i].getDy();
+    }
+    return total;
+}
+
+}
+
+void RaytracerParallelExecutor::run(SimpleRaytracer*,
+                                    RGBImageUncompressed* resultingImage,
+                                    const RendererConfiguration* rendererConfiguration,
+                                    SimpleSceneSnapshot* sceneSnapshot,
+                                    ProgressMonitor*)
+{
+#ifdef VITRAL_WITH_POSIX_THREADS
+    long cpuCount = sysconf(_SC_NPROCESSORS_ONLN);
+    int numberOfThreads = cpuCount > 0 ? (int)cpuCount : 1;
+#else
+    int numberOfThreads = 1;
+#endif
+
+    TileGenerator tileGenerator(TileGenerationStrategy::LINEAR,
+                                resultingImage,
+                                resultingImage->getXSize(),
+                                resultingImage->getYSize(),
+                                numberOfThreads);
+    std::cout << "Starting parallel raytracing with " << numberOfThreads << " threads." << std::endl;
+
+    std::vector<Tile> generatedTiles = tileGenerator.getTiles();
+    java::concurrent::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);
+    java::concurrent::ExecutorService* executorService =
+        java::concurrent::Executors::newFixedThreadPool(numberOfThreads);
+
+    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents;
+    ParallelProgressMonitorProducer producer(&progressEvents);
+    ParallelProgressMonitorConsumer consumer(&progressEvents);
+
+    producer.init(calculateTotalProgressElements(generatedTiles));
+
+#ifdef VITRAL_WITH_POSIX_THREADS
+    pthread_t consumerThread;
+    ConsumerThreadData consumerData;
+    consumerData.consumer = &consumer;
+    pthread_create(&consumerThread, 0, &progressConsumerMain, &consumerData);
+#else
+    consumer.run();
+#endif
+
+    std::vector<java::concurrent::Future<java::concurrent::Void> > futures;
+    futures.reserve((size_t)numberOfThreads);
+    for (int i = 0; i < numberOfThreads; i++) {
+        futures.push_back(executorService->submit(new TileWorker(
+            &pendingTiles,
+            resultingImage,
+            rendererConfiguration,
+            sceneSnapshot,
+            &producer)));
+    }
+
+    for (size_t i = 0; i < futures.size(); i++) {
+        futures[i].get();
+    }
+
+    producer.finish();
+    executorService->shutdownNow();
+    delete executorService;
+
+#ifdef VITRAL_WITH_POSIX_THREADS
+    pthread_join(consumerThread, 0);
+#endif
+
+    if ( !pendingTiles.isEmpty() ) {
+        throw std::runtime_error("Parallel raytracing finished with pending tiles");
+    }
+}

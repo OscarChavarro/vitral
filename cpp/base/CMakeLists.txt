@@ -74,12 +74,14 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.cpp
     src/main/vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.cpp
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
+    src/main/vsdk/toolkit/environment/background/SimpleBackground.cpp
     src/main/vsdk/toolkit/environment/light/Light.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleScene.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleSceneSnapshot.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBodyGroup.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
+    src/main/vsdk/toolkit/processing/StopWatch.cpp
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/Ray.cpp
     src/main/vsdk/toolkit/environment/geometry/elements/RayHit.cpp
@@ -135,6 +137,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/shaders/CookTorranceShader.cpp
     src/main/vsdk/toolkit/render/shaders/ShaderSelector.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
     src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
     src/main/vsdk/toolkit/media/MediaEntity.h

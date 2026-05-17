@@ -14,6 +14,7 @@ public:
     static void recordRayHitInstance();
     static void recordHitInfoClone();
     static void recordGeometryDetailComputation();
+    static void printSummary();
 };
 
 #endif

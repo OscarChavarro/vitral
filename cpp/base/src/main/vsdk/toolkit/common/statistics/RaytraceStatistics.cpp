@@ -10,3 +10,4 @@ void RaytraceStatistics::recordRayWithT() {}
 void RaytraceStatistics::recordRayHitInstance() {}
 void RaytraceStatistics::recordHitInfoClone() {}
 void RaytraceStatistics::recordGeometryDetailComputation() {}
+void RaytraceStatistics::printSummary() {}
