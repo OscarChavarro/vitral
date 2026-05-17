@@ -119,6 +119,21 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.cpp
     src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
+    src/main/vsdk/toolkit/render/TraceWorkspace.cpp
+    src/main/vsdk/toolkit/render/Tile.cpp
+    src/main/vsdk/toolkit/render/TileGenerator.cpp
+    src/main/vsdk/toolkit/render/SimpleRaytracer.cpp
+    src/main/vsdk/toolkit/render/AutoStereogramGenerator.cpp
+    src/main/vsdk/toolkit/render/HiddenLineRenderer.cpp
+    src/main/vsdk/toolkit/render/Rasterizer2D.cpp
+    src/main/vsdk/toolkit/render/WireframeRenderer.cpp
+    src/main/vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.cpp
+    src/main/vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.cpp
+    src/main/vsdk/toolkit/render/shaders/LightingShader.cpp
+    src/main/vsdk/toolkit/render/shaders/ConstantShader.cpp
+    src/main/vsdk/toolkit/render/shaders/ConstantTextureShader.cpp
+    src/main/vsdk/toolkit/render/shaders/CookTorranceShader.cpp
+    src/main/vsdk/toolkit/render/shaders/ShaderSelector.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
     src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
@@ -191,5 +206,5 @@ if(VITRAL_BUILD_TESTS)
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)
-  gtest_discover_tests(vitral_base_tests)
+  gtest_discover_tests(vitral_base_tests DISCOVERY_TIMEOUT 60)
 endif()

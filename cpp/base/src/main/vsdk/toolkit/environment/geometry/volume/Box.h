@@ -20,9 +20,9 @@ public:
     virtual ~Box() {}
 
     Ray* doIntersection(const Ray& inOutRay);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
-    virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
-    virtual double* getMinMax();
+    virtual bool doIntersection(const Ray& inRay, RayHit* outHit) override;
+    virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
+    virtual double* getMinMax() override;
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
 
     Vector3Dd getSize() const;
