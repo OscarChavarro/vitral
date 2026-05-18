@@ -24,6 +24,7 @@ public class DebuggerModel {
     public Vertex2D p0;
     public Vertex2D p1;
     public Vertex2D p2;
+    public int selectedObject;
 
     public DebuggerModel() {
         scene = new SimpleScene();
@@ -35,16 +36,18 @@ public class DebuggerModel {
 
         lights = new ArrayList<Light>();
 
-        Light frontLeft = new Light(LightType.POINT, new Vector3Dd(-35, -20, 50), new ColorRgb(1, 1, 1));
-        frontLeft.setId(0);
-        lights.add(frontLeft);
+        Light lightOne = new Light(LightType.POINT, new Vector3Dd(65, 20, 20), new ColorRgb(1, 1, 1));
+        lightOne.setId(0);
+        lights.add(lightOne);
 
-        Light frontRight = new Light(LightType.POINT, new Vector3Dd(35, -20, 50), new ColorRgb(1, 1, 1));
-        frontRight.setId(1);
-        lights.add(frontRight);
+        Light lightTwo = new Light(LightType.POINT, new Vector3Dd(20, 20, 10), new ColorRgb(1, 1, 1));
+        lightTwo.setId(1);
+        lights.add(lightTwo);
 
-        Light back = new Light(LightType.POINT, new Vector3Dd(0, 20, 50), new ColorRgb(1, 1, 1));
-        back.setId(2);
-        lights.add(back);
+        Light lightThree = new Light(LightType.POINT, new Vector3Dd(0, -20, 20), new ColorRgb(1, 1, 1));
+        lightThree.setId(2);
+        lights.add(lightThree);
+
+        selectedObject = -1;
     }
 }

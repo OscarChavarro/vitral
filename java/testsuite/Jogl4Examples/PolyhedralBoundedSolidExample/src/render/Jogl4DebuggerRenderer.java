@@ -298,9 +298,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         gl.glPolygonOffset(4.0f, 4.0f);
         Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
         Jogl4LightRenderer.activate(gl, model.getLight1());
-        Jogl4LightRenderer.draw(gl, model.getLight1());
+        Jogl4LightRenderer.draw(gl, model.getLight1(), model.getCamera());
         Jogl4LightRenderer.activate(gl, model.getLight2());
-        Jogl4LightRenderer.draw(gl, model.getLight2());
+        Jogl4LightRenderer.draw(gl, model.getLight2(), model.getCamera());
         gl.glEnable(GL2.GL_LIGHTING);
         Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
         gl.glDisable(GL2.GL_POLYGON_OFFSET_FILL);

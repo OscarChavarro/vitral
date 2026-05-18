@@ -239,7 +239,9 @@ public class Md2MeshExample
         if ( keyboardInteractionTechniques.processKeyPressedEvent(keyEvent) ) {
             canvas.repaint();
         }
-        if ( cameraController.processKeyPressedEvent(keyEvent) ) {
+        boolean redirectToCamera = !(KeyboardInteractionTechniques.isMovementKey(keyEvent) &&
+            model.selectedObject >= 0);
+        if ( redirectToCamera && cameraController.processKeyPressedEvent(keyEvent) ) {
             canvas.repaint();
         }
         if ( qualityController.processKeyPressedEvent(keyEvent) ) {

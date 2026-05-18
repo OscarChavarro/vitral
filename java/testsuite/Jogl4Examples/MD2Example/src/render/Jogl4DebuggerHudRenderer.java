@@ -61,6 +61,8 @@ public class Jogl4DebuggerHudRenderer {
         String animationName = model.md2Mesh.getAnimationName(model.md2Mesh.getCurrentAnimationInd());
         String msg = "Selected animation [1, 2]: " + selectedAnimation + "/" + totalAnimations
             + " " + animationName.toUpperCase();
+        String selectedObjectMsg = "Selected object to move with XYZ [3, 4]: "
+            + getSelectedObjectName();
 
         Graphics2D g = bufferedHud.createGraphics();
         g.setRenderingHint(
@@ -71,6 +73,9 @@ public class Jogl4DebuggerHudRenderer {
         g.setColor(Color.WHITE);
         g.setFont(hudFont);
         g.drawString(msg, HUD_LEFT, HUD_BASELINE);
+        int rightX = Math.max(HUD_LEFT, hudWidth - HUD_LEFT -
+            g.getFontMetrics().stringWidth(selectedObjectMsg));
+        g.drawString(selectedObjectMsg, rightX, HUD_BASELINE);
         g.dispose();
 
         for ( int y = 0; y < hudHeight; y++ ) {
@@ -118,5 +123,13 @@ public class Jogl4DebuggerHudRenderer {
             hudWidth,
             hudHeight,
             BufferedImage.TYPE_INT_RGB);
+    }
+
+    private String getSelectedObjectName()
+    {
+        if ( model.selectedObject < 0 ) {
+            return "Camera";
+        }
+        return "Light " + (model.selectedObject + 1);
     }
 }
