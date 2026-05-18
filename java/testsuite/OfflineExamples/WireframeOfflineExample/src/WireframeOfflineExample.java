@@ -78,6 +78,7 @@ public class WireframeOfflineExample {
         scene.addBody(b);
     }
 
+
     public void rasterOutput(Calligraphic2DBuffer lineSet) {
         RGBImageUncompressed outputImageRasterViewport;
 
@@ -93,8 +94,31 @@ public class WireframeOfflineExample {
         lineSet.init(); // leaves buffer ready for next frame
 
         //- (2/2) Image result transfer to output file --------------------
-        ImagePersistence.exportJPG(
-            new File("output.jpg"), outputImageRasterViewport);
+        ImagePersistence.exportPNG(
+            new File("output.png"), outputImageRasterViewport);
+    }
+
+    private static void reportLineSetStats(Calligraphic2DBuffer lineSet) {
+        int inside = 0;
+        double minx = Double.POSITIVE_INFINITY;
+        double miny = Double.POSITIVE_INFINITY;
+        double maxx = Double.NEGATIVE_INFINITY;
+        double maxy = Double.NEGATIVE_INFINITY;
+        for ( int i = 0; i < lineSet.getNumLines(); i++ ) {
+            Vector3Dd[] seg = lineSet.get2DLine(i);
+            Vector3Dd p0 = seg[0];
+            Vector3Dd p1 = seg[1];
+            minx = Math.min(minx, Math.min(p0.x(), p1.x()));
+            miny = Math.min(miny, Math.min(p0.y(), p1.y()));
+            maxx = Math.max(maxx, Math.max(p0.x(), p1.x()));
+            maxy = Math.max(maxy, Math.max(p0.y(), p1.y()));
+            if ( p0.x() >= -1 && p0.x() <= 1 && p0.y() >= -1 && p0.y() <= 1 &&
+                 p1.x() >= -1 && p1.x() <= 1 && p1.y() >= -1 && p1.y() <= 1 ) {
+                inside++;
+            }
+        }
+        System.out.println("[WireframeOfflineExample] minx=" + minx + " maxx=" + maxx +
+            " miny=" + miny + " maxy=" + maxy + " insideSegments=" + inside);
     }
 
     public static void main (String[] args) {
@@ -104,6 +128,7 @@ public class WireframeOfflineExample {
         lineSet = new Calligraphic2DBuffer();
         WireframeRenderer.execute(
             lineSet, instance.scene.getSimpleBodies(), instance.camera);
+        reportLineSetStats(lineSet);
         instance.rasterOutput(lineSet);
     }
 
