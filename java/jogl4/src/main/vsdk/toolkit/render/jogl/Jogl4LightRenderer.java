@@ -8,6 +8,9 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.gui.LightGizmoOmniBillboard;
+import vsdk.toolkit.gui.LightGizmoStyle;
+import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class Jogl4LightRenderer extends Jogl4Renderer
 {
@@ -20,26 +23,57 @@ public class Jogl4LightRenderer extends Jogl4Renderer
 
     public static void draw(GL2 gl, Light light)
     {
-        draw(gl, light, null);
+        draw(gl, light, null, LightGizmoStyle.CROSS);
     }
 
     public static void draw(GL2 gl, Light light, Camera camera)
     {
+        draw(gl, light, camera, LightGizmoStyle.CROSS);
+    }
+
+    public static void draw(GL2 gl, Light light, Camera camera,
+                            LightGizmoStyle lightGizmoStyle)
+    {
         if ( gl == null ) {
             return;
         }
-        draw(gl.getGL4(), light, camera);
+        draw(gl.getGL4(), light, camera, lightGizmoStyle);
     }
 
     public static void draw(GL4 gl, Light light, Camera camera)
+    {
+        draw(gl, light, camera, LightGizmoStyle.CROSS);
+    }
+
+    public static void draw(GL4 gl, Light light, Camera camera,
+                            LightGizmoStyle lightGizmoStyle)
     {
         if ( gl == null || light == null ) {
             return;
         }
 
-        GL4 gl4 = gl;
+        if ( lightGizmoStyle == LightGizmoStyle.OMNI_BILLBOARD ) {
+            drawOmniBillboard(gl, light, camera);
+            return;
+        }
+
+        drawCross(gl, light, camera);
+    }
+
+    public static double getScale()
+    {
+        return scale;
+    }
+
+    public static void setScale(double newScale)
+    {
+        scale = newScale;
+    }
+
+    private static void drawCross(GL4 gl, Light light, Camera camera)
+    {
         int[] viewport = new int[4];
-        gl4.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
+        gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
 
         int viewportWidth = Math.max(viewport[2], 1);
         int viewportHeight = Math.max(viewport[3], 1);
@@ -72,30 +106,94 @@ public class Jogl4LightRenderer extends Jogl4Renderer
             px, py, pz + d
         };
 
-        float cr = (float)c.r();
-        float cg = (float)c.g();
-        float cb = (float)c.b();
-        float[] colors = new float[] {
-            cr, cg, cb,
-            cr, cg, cb,
-            cr, cg, cb,
-            cr, cg, cb,
-            cr, cg, cb,
-            cr, cg, cb
-        };
+        float[] colors = buildUniformColorArray(c, positions.length / 3);
 
-        Jogl4LineRenderer.drawLines(gl4, modelViewProjection, positions, colors,
+        Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors,
             2.0f);
     }
 
-    public static double getScale()
+    private static void drawOmniBillboard(GL4 gl, Light light, Camera camera)
     {
-        return scale;
+        int[] viewport = new int[4];
+        gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
+
+        int viewportWidth = Math.max(viewport[2], 1);
+        int viewportHeight = Math.max(viewport[3], 1);
+
+        if ( camera == null ) {
+            drawCross(gl, light, null);
+            return;
+        }
+
+        camera.updateViewportResize(viewportWidth, viewportHeight);
+        Matrix4x4d modelViewProjection = camera.calculateProjectionMatrix();
+
+        double worldHalfSize = calculateHalfAxisLength(light, camera,
+            viewportWidth, viewportHeight) * scale;
+        double worldFullSize = 2.0 * worldHalfSize;
+
+        Vector3Dd lightPosition = light.getPosition();
+        Vector3Dd right = camera.getLeft().multiply(-1.0).normalized();
+        Vector3Dd up = camera.getUp().normalized();
+
+        Calligraphic2DBuffer pattern = LightGizmoOmniBillboard.createLinePattern();
+
+        int lineCount = pattern.getNumLines();
+        if ( lineCount <= 0 ) {
+            return;
+        }
+
+        float[] positions = new float[lineCount * 2 * 3];
+        int write = 0;
+        for ( int i = 0; i < lineCount; i++ ) {
+            Vector3Dd[] line = pattern.get2DLine(i);
+
+            Vector3Dd p0 = mapPatternPointToWorld(line[0], lightPosition, right, up,
+                worldFullSize);
+            Vector3Dd p1 = mapPatternPointToWorld(line[1], lightPosition, right, up,
+                worldFullSize);
+
+            positions[write++] = (float)p0.x();
+            positions[write++] = (float)p0.y();
+            positions[write++] = (float)p0.z();
+            positions[write++] = (float)p1.x();
+            positions[write++] = (float)p1.y();
+            positions[write++] = (float)p1.z();
+        }
+
+        float[] colors = buildUniformColorArray(light.getSpecular(), positions.length / 3);
+        Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors, 2.0f);
     }
 
-    public static void setScale(double newScale)
+    private static Vector3Dd mapPatternPointToWorld(Vector3Dd point,
+                                                     Vector3Dd center,
+                                                     Vector3Dd right,
+                                                     Vector3Dd up,
+                                                     double worldSize)
     {
-        scale = newScale;
+        double localX = (point.x() - 0.5) * worldSize;
+        double localY = (point.y() - 0.5) * worldSize;
+
+        Vector3Dd rightContribution = right.multiply(localX);
+        Vector3Dd upContribution = up.multiply(localY);
+
+        return center.add(rightContribution).add(upContribution);
+    }
+
+    private static float[] buildUniformColorArray(ColorRgb c, int vertexCount)
+    {
+        float cr = (float)c.r();
+        float cg = (float)c.g();
+        float cb = (float)c.b();
+
+        float[] colors = new float[vertexCount * 3];
+        for ( int i = 0; i < vertexCount; i++ ) {
+            int base = i * 3;
+            colors[base] = cr;
+            colors[base + 1] = cg;
+            colors[base + 2] = cb;
+        }
+        return colors;
     }
 
     private static double calculateHalfAxisLength(Light light, Camera camera,
