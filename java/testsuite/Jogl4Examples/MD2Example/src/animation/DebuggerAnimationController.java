@@ -1,22 +1,28 @@
 package animation;
 
-import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLCanvas;
 
+import vsdk.toolkit.animation.AnimationEvent;
 import vsdk.toolkit.animation.AnimationEventGenerator;
+import vsdk.toolkit.animation.AnimationListener;
 import vsdk.toolkit.animation.Md2AnimationListener;
 import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
-import vsdk.toolkit.render.jogl.animation.JoglRepainterAnimationListener;
 
 public class DebuggerAnimationController {
     private AnimationEventGenerator animator;
 
-    public void start(Md2Mesh md2Mesh, GLJPanel panel) {
+    public void start(Md2Mesh md2Mesh, GLCanvas panel) {
         animator = new AnimationEventGenerator();
         Md2AnimationListener md2AniListener = new Md2AnimationListener(md2Mesh);
         animator.addAnimationListener(md2AniListener);
 
-        JoglRepainterAnimationListener repainterListener;
-        repainterListener = new JoglRepainterAnimationListener(panel);
+        AnimationListener repainterListener = new AnimationListener() {
+            @Override
+            public void tick(AnimationEvent e)
+            {
+                panel.repaint();
+            }
+        };
         animator.addAnimationListener(repainterListener);
 
         Thread t = new Thread(animator);

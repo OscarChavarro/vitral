@@ -1,0 +1,7 @@
+// Gradle module descriptor migrated from Maven.
+
+tasks.named('runMain', JavaExec) {
+    jvmArgs(
+        '--add-exports=java.desktop/sun.awt=ALL-UNNAMED',
+        '--add-opens=java.desktop/sun.awt=ALL-UNNAMED')
+}

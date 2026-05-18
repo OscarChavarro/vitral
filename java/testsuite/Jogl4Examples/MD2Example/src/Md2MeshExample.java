@@ -14,13 +14,13 @@ import java.io.IOException;
 import javax.swing.JFrame;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLCanvas;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -34,7 +34,7 @@ import vsdk.toolkit.gui.AwtSystem;
 import model.DebuggerModel;
 import gui.KeyboardInteractionTechniques;
 import gui.MouseInteractionTechniques;
-import render.Jogl2DebuggerRenderer;
+import render.Jogl4DebuggerRenderer;
 import animation.DebuggerAnimationController;
 import io.DebuggerReader;
 
@@ -47,8 +47,8 @@ public class Md2MeshExample
     private RendererConfigurationController qualityController;
     private KeyboardInteractionTechniques keyboardInteractionTechniques;
     private MouseInteractionTechniques mouseInteractionTechniques;
-    private Jogl2DebuggerRenderer renderer;
-    public GLJPanel canvas;
+    private Jogl4DebuggerRenderer renderer;
+    public GLCanvas canvas;
 
     private final DebuggerModel model;
     private DebuggerReader reader;
@@ -80,17 +80,17 @@ public class Md2MeshExample
         qualityController = new RendererConfigurationController(model.qualitySelection);
         keyboardInteractionTechniques = new KeyboardInteractionTechniques(model);
         mouseInteractionTechniques = new MouseInteractionTechniques(model);
-        renderer = new Jogl2DebuggerRenderer(model);
+        renderer = new Jogl4DebuggerRenderer(model);
         animationController = new DebuggerAnimationController();
 
         initGui();
     }
 
     private void initGui() {
-        GLCapabilities glCaps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+        GLCapabilities glCaps = new GLCapabilities(GLProfile.get(GLProfile.GL4));
         glCaps.setDepthBits(64);
 
-        canvas = new GLJPanel(glCaps);
+        canvas = new GLCanvas(glCaps);
         canvas.addGLEventListener(this);
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
@@ -125,6 +125,22 @@ public class Md2MeshExample
 
     @Override
     public void init(GLAutoDrawable drawable) {
+        GL4 gl = drawable.getGL().getGL4();
+        if ( gl.isGL4() ) {
+            String version = gl.glGetString(GL4.GL_VERSION);
+            String[] parts = version.split("[ .]", 3);
+            try {
+                int major = Integer.parseInt(parts[0]);
+                int minor = Integer.parseInt(parts[1]);
+                if ( major < 4 || (major == 4 && minor < 1) ) {
+                    throw new IllegalStateException(
+                        "Md2MeshExample requires OpenGL 4.1+. Current context is " + version);
+                }
+            } catch ( RuntimeException ex ) {
+                throw new IllegalStateException(
+                    "Unable to parse OpenGL version string: " + version, ex);
+            }
+        }
         renderer.init(drawable);
         animationController.start(model.md2Mesh, canvas);
     }
