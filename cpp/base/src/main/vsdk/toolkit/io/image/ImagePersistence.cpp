@@ -19,8 +19,6 @@
 #include <cctype>
 #include <vector>
 
-namespace {
-
 int readIntLE(const unsigned char* data, int offset) {
     return (data[offset] & 0xFF) |
            ((data[offset + 1] & 0xFF) << 8) |
@@ -210,8 +208,6 @@ RGBAImageCompressed* importDDSCompressed(const java::File& inImageFd) {
     }
 
     return image;
-}
-
 }
 
 #ifdef VITRAL_WITH_JPEG
@@ -412,7 +408,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
             if (lineStr != nullptr) {
                 delete[] lineStr;
             }
-            lineStr = vsdk::PersistenceElement::readAsciiLine(bis);
+            lineStr = PersistenceElement::readAsciiLine(bis);
 
             if (lineStr == nullptr) {
                 break;
@@ -478,7 +474,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
         char* barr = new char[xSize * 3];
         for (i = 0; i < ySize; i++) {
             unsigned char* ubarr = (unsigned char*)barr;
-            vsdk::PersistenceElement::readBytes(bis, ubarr, xSize * 3);
+            PersistenceElement::readBytes(bis, ubarr, xSize * 3);
             for (int x = 0; x < xSize; x++) {
                 retImage->putPixel(x, i, barr[x*3], barr[x*3+1], barr[x*3+2]);
             }
@@ -585,19 +581,19 @@ bool ImagePersistence::exportPPM(const java::File& fd, Image* img) {
     java::String line4("255\n");
 
     // Use raw ASCII writes (without trailing NUL bytes) for valid PPM header text lines.
-    vsdk::PersistenceElement::writeBytes(
+    PersistenceElement::writeBytes(
         writer,
         reinterpret_cast<const unsigned char*>(line1.toCString()),
         static_cast<int>(std::strlen(line1.toCString())));
-    vsdk::PersistenceElement::writeBytes(
+    PersistenceElement::writeBytes(
         writer,
         reinterpret_cast<const unsigned char*>(line2.toCString()),
         static_cast<int>(std::strlen(line2.toCString())));
-    vsdk::PersistenceElement::writeBytes(
+    PersistenceElement::writeBytes(
         writer,
         reinterpret_cast<const unsigned char*>(line3.toCString()),
         static_cast<int>(std::strlen(line3.toCString())));
-    vsdk::PersistenceElement::writeBytes(
+    PersistenceElement::writeBytes(
         writer,
         reinterpret_cast<const unsigned char*>(line4.toCString()),
         static_cast<int>(std::strlen(line4.toCString())));
@@ -611,9 +607,9 @@ bool ImagePersistence::exportPPM(const java::File& fd, Image* img) {
                 fprintf(stderr, "Failed to get pixel at (%d, %d)\n", x, y);
                 return false;
             }
-            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->r);
-            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->g);
-            vsdk::PersistenceElement::writeByte(writer, (unsigned char)p->b);
+            PersistenceElement::writeByte(writer, (unsigned char)p->r);
+            PersistenceElement::writeByte(writer, (unsigned char)p->g);
+            PersistenceElement::writeByte(writer, (unsigned char)p->b);
             delete p;
         }
     }

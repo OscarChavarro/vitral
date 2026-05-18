@@ -1,7 +1,7 @@
 #include "ParallelProgressMonitorProducer.h"
 
 ParallelProgressMonitorProducer::ParallelProgressMonitorProducer(
-    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
+    java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
     : sharedEventQueue(queue), processedElements(0), totalElements(0)
 {
 }

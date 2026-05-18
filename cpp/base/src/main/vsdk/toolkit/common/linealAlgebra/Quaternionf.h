@@ -3,7 +3,7 @@
 
 
 #include <stdexcept>
-namespace java { class String; }
+#include "vsdk/toolkit/java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"

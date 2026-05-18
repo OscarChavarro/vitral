@@ -74,7 +74,7 @@ static void offlineExecution(const std::string& fileName,
     std::cout << "Scene loaded OK!\n";
 
     RGBImageUncompressed resultingImage;
-    vsdk::toolkit::environment::camera::Camera* activeCamera = scene.getActiveCamera();
+    Camera* activeCamera = scene.getActiveCamera();
     if ( !resultingImage.initNoFill((int)activeCamera->getViewportXSize(),
                                     (int)activeCamera->getViewportYSize()) ) {
         std::cerr << "Error creating image!\n";
@@ -86,7 +86,7 @@ static void offlineExecution(const std::string& fileName,
     optimizeRendererConfigurationForScene(&scene, &rendererConfiguration);
 
     SimpleRaytracer visualizationEngine;
-    vsdk::toolkit::environment::camera::CameraSnapshot* cameraSnapshot =
+    CameraSnapshot* cameraSnapshot =
         activeCamera->exportToCameraSnapshot(resultingImage.getXSize(), resultingImage.getYSize());
     SimpleSceneSnapshot* sceneSnapshot =
         scene.exportToSimpleSceneSnapshot(cameraSnapshot, scene.getActiveBackground());

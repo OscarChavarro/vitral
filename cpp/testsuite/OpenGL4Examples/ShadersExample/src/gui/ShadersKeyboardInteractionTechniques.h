@@ -19,12 +19,12 @@ public:
         virtual void animationStateChanged() = 0;
     };
 
-    bool processPressed(const vsdk::toolkit::gui::KeyEvent& event, ShadersModel* model, Actions* actions);
-    bool processReleased(const vsdk::toolkit::gui::KeyEvent& event, ShadersModel* model);
+    bool processPressed(const KeyEvent& event, ShadersModel* model, Actions* actions);
+    bool processReleased(const KeyEvent& event, ShadersModel* model);
     bool processPressedForApp(
-        const vsdk::toolkit::gui::KeyEvent& event,
-        vsdk::toolkit::gui::CameraControllerAquynza* cameraController,
-        vsdk::toolkit::gui::RendererConfigurationController* qualityController,
+        const KeyEvent& event,
+        CameraControllerAquynza* cameraController,
+        RendererConfigurationController* qualityController,
         Light* light,
         RendererConfiguration* quality,
         int* meridians,
@@ -35,8 +35,8 @@ public:
         ShaderOperationMode* renderingMode,
         Actions* actions);
     bool processReleasedForApp(
-        const vsdk::toolkit::gui::KeyEvent& event,
-        vsdk::toolkit::gui::CameraControllerAquynza* cameraController);
+        const KeyEvent& event,
+        CameraControllerAquynza* cameraController);
 };
 
 #endif

@@ -211,7 +211,7 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
 
 void OpenGL4SphereRenderer::draw(
     const Sphere* sphere,
-    const vsdk::toolkit::environment::camera::Camera* camera,
+    const Camera* camera,
     const Light* light,
     const SimpleMaterial* material,
     const RendererConfiguration* quality,

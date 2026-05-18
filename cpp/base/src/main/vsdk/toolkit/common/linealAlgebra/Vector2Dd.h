@@ -5,7 +5,7 @@
 #include <cmath>
 #include <functional>
 #include <stdexcept>
-namespace java { class String; }
+#include "vsdk/toolkit/java/lang/String.h"
 
 class Vector2Dd {
     double x_;

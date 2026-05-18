@@ -6,7 +6,6 @@
 #include <pthread.h>
 
 namespace java {
-namespace concurrent {
 
 template<typename T>
 class ConcurrentLinkedQueue {
@@ -57,7 +56,6 @@ public:
     }
 };
 
-}
 }
 
 #endif

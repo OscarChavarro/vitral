@@ -15,10 +15,6 @@ static inline double radiansToDegrees(double radians) {
     return radians * 180.0 / PI;
 }
 
-namespace vsdk { namespace toolkit { namespace gui {
-
-using namespace vsdk::toolkit::environment::camera;
-
 CameraControllerAquynza::CameraControllerAquynza(Camera* cam)
     : camera(cam), oldMouseX(0), oldMouseY(0), deltaMov(0.25) {
 }
@@ -342,5 +338,3 @@ Camera* CameraControllerAquynza::getCamera() {
 void CameraControllerAquynza::setCamera(Camera* cam) {
     camera = cam;
 }
-
-}}}

@@ -3,8 +3,6 @@
 
 #include "PresentationElement.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 class MouseEvent : public PresentationElement {
 public:
     static const int BUTTON1 = 1;
@@ -39,6 +37,5 @@ private:
     int clicks;
 };
 
-}}}
 
 #endif // MOUSEEVENT_H

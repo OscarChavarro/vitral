@@ -2,7 +2,6 @@
 #define JAVA_UTIL_CONCURRENT_CALLABLE_H
 
 namespace java {
-namespace concurrent {
 
 template<typename T>
 class Callable {
@@ -11,7 +10,6 @@ public:
     virtual T call() = 0;
 };
 
-}
 }
 
 #endif

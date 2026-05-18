@@ -2,10 +2,10 @@
 #define __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
 
 #include "MediaEntity.h"
+#include "vsdk/toolkit/java/lang/String.h"
 #include <vector>
 
 class ShapeDescriptor;
-namespace java { class String; }
 
 /**
 This class is a container for a set of different ShapeDescriptor's for an

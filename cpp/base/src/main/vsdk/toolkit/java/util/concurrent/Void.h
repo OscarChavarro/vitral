@@ -2,11 +2,9 @@
 #define JAVA_UTIL_CONCURRENT_VOID_H
 
 namespace java {
-namespace concurrent {
 
 struct Void {};
 
-}
 }
 
 #endif

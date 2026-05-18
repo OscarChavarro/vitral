@@ -11,7 +11,7 @@ public:
     void invalidateSnapshot();
     void render(
         ShadersModel* model,
-        vsdk::toolkit::environment::camera::Camera* activeCamera,
+        Camera* activeCamera,
         const Matrix4x4d& modelRotation);
 };
 

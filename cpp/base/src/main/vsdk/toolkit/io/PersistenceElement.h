@@ -5,7 +5,6 @@
 #include "vsdk/toolkit/java/io/InputStream.h"
 #include "vsdk/toolkit/java/io/OutputStream.h"
 
-namespace vsdk {
 
 /**
 A `PersistenceElement` in VitralSDK is a software element with
@@ -143,6 +142,5 @@ class PersistenceElement {
     static bool containsExistingLibrary(const char *pathList, char pathSeparator, const char *nativeLibname);
 };
 
-}
 
 #endif

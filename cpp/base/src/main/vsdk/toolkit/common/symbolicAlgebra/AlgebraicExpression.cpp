@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace {
 class Parser {
 private:
     const std::string& s;
@@ -58,7 +57,6 @@ public:
     Parser(const std::string& s, const std::map<std::string, double>& vars) : s(s), vars(vars), p(0) {}
     double eval() const { double v = expr(); skip(); if (p != s.size()) throw AlgebraicExpressionException("Trailing input"); return v; }
 };
-}
 
 void AlgebraicExpression::setExpression(const std::string& expr) { expression = expr; }
 void AlgebraicExpression::defineValue(const std::string& name, double value) { vars[name] = value; }

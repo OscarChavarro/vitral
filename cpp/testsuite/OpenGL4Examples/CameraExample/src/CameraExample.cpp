@@ -16,15 +16,10 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 
-using namespace vsdk::toolkit::environment::camera;
-using namespace vsdk::toolkit::gui;
-using namespace vsdk::toolkit::render::opengl4;
-using namespace vsdk::toolkit::fixtures;
-
 GLFWwindow* window = nullptr;
 Camera* camera = nullptr;
 CameraControllerAquynza* controller = nullptr;
-OpenGL4SimpleCorridorSample* corridor = nullptr;
+vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample* corridor = nullptr;
 int lastFramebufferWidth = 640;
 int lastFramebufferHeight = 480;
 
@@ -37,7 +32,7 @@ void framebufferSizeCallback(GLFWwindow* win, int width, int height) {
 
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         if (controller) {
             controller->processKeyPressedEvent(event);
         }
@@ -45,7 +40,7 @@ void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods) {
             glfwSetWindowShouldClose(win, GLFW_TRUE);
         }
     } else if (action == GLFW_RELEASE) {
-        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         if (controller) {
             controller->processKeyReleasedEvent(event);
         }
@@ -55,7 +50,7 @@ void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods) {
 void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods) {
     double xpos, ypos;
     glfwGetCursorPos(win, &xpos, &ypos);
-    MouseEvent event = GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
+    MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
 
     if (controller) {
         if (action == GLFW_PRESS) {
@@ -68,7 +63,7 @@ void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods) {
 
 void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
     if (controller) {
-        MouseEvent event = GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
+        MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
         int leftButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT);
         int middleButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE);
         int rightButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT);
@@ -95,7 +90,7 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
 
 void scrollCallback(GLFWwindow* win, double xoffset, double yoffset) {
     if (controller) {
-        MouseEvent event = GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
+        MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
         controller->processMouseWheelEvent(event);
     }
 }
@@ -136,7 +131,7 @@ int main(int argc, char** argv) {
     camera->updateViewportResize(640, 480);
 
     controller = new CameraControllerAquynza(camera);
-    corridor = new OpenGL4SimpleCorridorSample();
+    corridor = new vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample();
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetKeyCallback(window, keyCallback);
@@ -167,14 +162,14 @@ int main(int argc, char** argv) {
         Matrix4x4d identity = Matrix4x4d::identityMatrix();
 
         corridor->drawGL(mvp, identity);
-        OpenGL4MatrixRenderer::draw(mvp, identity);
+        vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::draw(mvp, identity);
 
         delete[] mvp;
 
         glfwSwapBuffers(window);
     }
 
-    OpenGL4MatrixRenderer::release();
+    vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::release();
 
     if (corridor) {
         corridor->dispose();

@@ -3,8 +3,6 @@
 
 #include "PresentationElement.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 class KeyEvent : public PresentationElement {
 public:
     static const int MASK_CTRL = 0x0001;
@@ -150,6 +148,5 @@ public:
     static const char* getKeyName(int key);
 };
 
-}}}
 
 #endif // KEYEVENT_H

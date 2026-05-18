@@ -4,7 +4,6 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include <cmath>
 
-namespace {
 static Vector3Dd closestPointOnTriangle(const Vector3Dd& p, const Vector3Dd& a, const Vector3Dd& b, const Vector3Dd& c)
 {
     Vector3Dd ab = b.subtract(a), ac = c.subtract(a), ap = p.subtract(a);
@@ -25,7 +24,6 @@ static Vector3Dd closestPointOnTriangle(const Vector3Dd& p, const Vector3Dd& a, 
     double denom = 1.0/(va+vb+vc);
     double v = vb*denom, w = vc*denom;
     return a.add(ab.multiply(v)).add(ac.multiply(w));
-}
 }
 
 ComputationalGeometry::TriangleIntersection* ComputationalGeometry::doIntersectionWithTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2)

@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_RGBPIXEL_H__
 
 #include "MediaEntity.h"
-namespace java { class String; }
+#include "vsdk/toolkit/java/lang/String.h"
 
 /**
 Respect to data representation:

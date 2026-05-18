@@ -8,13 +8,13 @@
 
 class ParallelProgressMonitorProducer : public ProgressMonitor {
 private:
-    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue;
-    java::concurrent::atomic::AtomicLong processedElements;
+    java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue;
+    java::AtomicLong processedElements;
     volatile long long totalElements;
 
 public:
     explicit ParallelProgressMonitorProducer(
-        java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue);
+        java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue);
     virtual ~ParallelProgressMonitorProducer() override {}
 
     void init(long long totalElementsToProcess);

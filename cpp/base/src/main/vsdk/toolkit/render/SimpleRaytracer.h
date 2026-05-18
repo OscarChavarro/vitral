@@ -23,7 +23,7 @@ class SimpleMaterial;
 class Shader;
 class Image;
 class NormalMap;
-namespace vsdk { namespace toolkit { namespace environment { namespace camera { class CameraSnapshot; }}}}
+class CameraSnapshot;
 
 class SimpleRaytracer : public RenderingElement {
 private:
@@ -51,14 +51,14 @@ private:
     static int buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext);
     static std::vector<long long> captureBodyVersions(const std::vector<SimpleBody*>& bodies);
     static void assertSceneUnmodifiedDuringRender(const std::vector<long long>& expectedBodyVersions,const std::vector<SimpleBody*>& bodies);
-    static Ray generateRay(const vsdk::toolkit::environment::camera::CameraSnapshot* cameraSnapshot, int x, int y);
+    static Ray generateRay(const CameraSnapshot* cameraSnapshot, int x, int y);
 
     void prepareSurfaceHit(SimpleBody* nearestObject, const SceneObjectRenderData& objectData, const Ray& hitRay, RayHit* outHit);
     static SimpleMaterial* resolveMaterial(RayHit* hit, const SceneObjectRenderData& objectData);
     ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
     int selectNearestThingInRayDirection(const Ray& inRay,const std::vector<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
     ColorRgb followRayPath(const Ray& inRay,const std::vector<SimpleBody*>& inSimpleBodiesArray,const std::vector<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
-    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,const std::vector<SimpleBody*>& inSimpleBodiesArray,const std::vector<Light*>& inLightsArray,Background* inBackground,const vsdk::toolkit::environment::camera::CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
+    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,const std::vector<SimpleBody*>& inSimpleBodiesArray,const std::vector<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
 
 public:
     SimpleRaytracer();

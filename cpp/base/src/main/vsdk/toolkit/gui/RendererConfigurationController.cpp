@@ -3,8 +3,6 @@
 #include "KeyEvent.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 RendererConfigurationController::RendererConfigurationController()
     : qualitySelection(0)
 {
@@ -99,4 +97,3 @@ bool RendererConfigurationController::processKeyReleasedEvent(const KeyEvent&)
     return false;
 }
 
-}}}

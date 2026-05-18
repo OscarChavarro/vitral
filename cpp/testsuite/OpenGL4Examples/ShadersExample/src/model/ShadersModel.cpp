@@ -14,7 +14,7 @@
 ShadersModel ShadersModel::createDefault() { return ShadersModel(); }
 
 ShadersModel::ShadersModel()
-    : camera(new vsdk::toolkit::environment::camera::Camera()),
+    : camera(new Camera()),
       cameraController(0),
       qualityController(0),
       sphere(new Sphere(1.0)),
@@ -28,11 +28,11 @@ ShadersModel::ShadersModel()
     camera->setRotation(Matrix4x4d().eulerAnglesRotation(M_PI / 2.0, 0.0, 0.0));
     camera->setFov(30.0);
 
-    cameraController = new vsdk::toolkit::gui::CameraControllerAquynza(camera);
+    cameraController = new CameraControllerAquynza(camera);
     quality.setTexture(true);
     quality.setBumpMap(true);
     quality.setShadingType(RendererConfiguration::SHADING_TYPE_PHONG);
-    qualityController = new vsdk::toolkit::gui::RendererConfigurationController(&quality);
+    qualityController = new RendererConfigurationController(&quality);
 
     light->setId(0);
     material = material.withAmbient(ColorRgb(0.1, 0.1, 0.1));

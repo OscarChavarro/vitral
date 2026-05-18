@@ -6,8 +6,6 @@
 
 class RendererConfiguration;
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 class RendererConfigurationController : public Controller {
 private:
     RendererConfiguration* qualitySelection;
@@ -23,6 +21,5 @@ public:
     bool processKeyReleasedEvent(const KeyEvent& keyEvent);
 };
 
-}}}
 
 #endif

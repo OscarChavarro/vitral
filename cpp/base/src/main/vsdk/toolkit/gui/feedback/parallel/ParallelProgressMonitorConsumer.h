@@ -8,14 +8,14 @@
 class ParallelProgressMonitorConsumer {
 private:
     ProgressMonitorConsoleLongFormat concreteProgressMonitor;
-    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue;
+    java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue;
     bool stillProcessingEvents;
     long long totalElementsToProcess;
     long long currentProcessedElements;
 
 public:
     explicit ParallelProgressMonitorConsumer(
-        java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue);
+        java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue);
     virtual ~ParallelProgressMonitorConsumer() {}
 
     void run();

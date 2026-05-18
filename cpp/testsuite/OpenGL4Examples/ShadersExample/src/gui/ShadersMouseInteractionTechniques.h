@@ -8,17 +8,17 @@ class ShadersModel;
 
 class ShadersMouseInteractionTechniques {
 public:
-    bool processMousePressed(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseReleased(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseClicked(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseMoved(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseDragged(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseWheelMoved(ShadersModel* model, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMousePressedForApp(vsdk::toolkit::gui::CameraControllerAquynza* cameraController, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseReleasedForApp(vsdk::toolkit::gui::CameraControllerAquynza* cameraController, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseMovedForApp(vsdk::toolkit::gui::CameraControllerAquynza* cameraController, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseDraggedForApp(vsdk::toolkit::gui::CameraControllerAquynza* cameraController, const vsdk::toolkit::gui::MouseEvent& e);
-    bool processMouseWheelMovedForApp(vsdk::toolkit::gui::CameraControllerAquynza* cameraController, const vsdk::toolkit::gui::MouseEvent& e);
+    bool processMousePressed(ShadersModel* model, const MouseEvent& e);
+    bool processMouseReleased(ShadersModel* model, const MouseEvent& e);
+    bool processMouseClicked(ShadersModel* model, const MouseEvent& e);
+    bool processMouseMoved(ShadersModel* model, const MouseEvent& e);
+    bool processMouseDragged(ShadersModel* model, const MouseEvent& e);
+    bool processMouseWheelMoved(ShadersModel* model, const MouseEvent& e);
+    bool processMousePressedForApp(CameraControllerAquynza* cameraController, const MouseEvent& e);
+    bool processMouseReleasedForApp(CameraControllerAquynza* cameraController, const MouseEvent& e);
+    bool processMouseMovedForApp(CameraControllerAquynza* cameraController, const MouseEvent& e);
+    bool processMouseDraggedForApp(CameraControllerAquynza* cameraController, const MouseEvent& e);
+    bool processMouseWheelMovedForApp(CameraControllerAquynza* cameraController, const MouseEvent& e);
 };
 
 #endif

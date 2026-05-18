@@ -5,7 +5,6 @@
 #include <pthread.h>
 
 namespace java {
-namespace concurrent {
 
 class FixedThreadPoolExecutor : public ExecutorService {
 private:
@@ -132,5 +131,4 @@ ExecutorService* Executors::newFixedThreadPool(int numberOfThreads)
     return new FixedThreadPoolExecutor(numberOfThreads);
 }
 
-}
 }

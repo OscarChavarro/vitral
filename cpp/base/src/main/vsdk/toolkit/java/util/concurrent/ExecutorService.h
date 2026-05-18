@@ -9,7 +9,6 @@
 #include <exception>
 
 namespace java {
-namespace concurrent {
 
 class ExecutorService {
 protected:
@@ -83,7 +82,6 @@ public:
     }
 };
 
-}
 }
 
 #endif

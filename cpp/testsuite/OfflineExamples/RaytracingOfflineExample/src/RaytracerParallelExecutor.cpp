@@ -37,16 +37,16 @@ void* progressConsumerMain(void* arg)
     return 0;
 }
 
-class TileWorker : public java::concurrent::Callable<java::concurrent::Void> {
+class TileWorker : public java::Callable<java::Void> {
 private:
-    java::concurrent::ConcurrentLinkedQueue<Tile>* pendingTiles;
+    java::ConcurrentLinkedQueue<Tile>* pendingTiles;
     RGBImageUncompressed* resultingImage;
     const RendererConfiguration* rendererConfiguration;
     SimpleSceneSnapshot* sceneSnapshot;
     ProgressMonitor* progressReporter;
 
 public:
-    TileWorker(java::concurrent::ConcurrentLinkedQueue<Tile>* pendingTiles,
+    TileWorker(java::ConcurrentLinkedQueue<Tile>* pendingTiles,
                RGBImageUncompressed* resultingImage,
                const RendererConfiguration* rendererConfiguration,
                SimpleSceneSnapshot* sceneSnapshot,
@@ -59,7 +59,7 @@ public:
     {
     }
 
-    virtual java::concurrent::Void call() override
+    virtual java::Void call() override
     {
         Tile tile(resultingImage, 0, 0, resultingImage->getXSize(), resultingImage->getYSize());
         SimpleRaytracer raytracer;
@@ -75,7 +75,7 @@ public:
                              tile.getX1(),
                              tile.getY1());
         }
-        return java::concurrent::Void();
+        return java::Void();
     }
 };
 
@@ -111,11 +111,11 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
     std::cout << "Starting parallel raytracing with " << numberOfThreads << " threads." << std::endl;
 
     std::vector<Tile> generatedTiles = tileGenerator.getTiles();
-    java::concurrent::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);
-    java::concurrent::ExecutorService* executorService =
-        java::concurrent::Executors::newFixedThreadPool(numberOfThreads);
+    java::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);
+    java::ExecutorService* executorService =
+        java::Executors::newFixedThreadPool(numberOfThreads);
 
-    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents;
+    java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents;
     ParallelProgressMonitorProducer producer(&progressEvents);
     ParallelProgressMonitorConsumer consumer(&progressEvents);
 
@@ -130,7 +130,7 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
     consumer.run();
 #endif
 
-    std::vector<java::concurrent::Future<java::concurrent::Void> > futures;
+    std::vector<java::Future<java::Void> > futures;
     futures.reserve((size_t)numberOfThreads);
     for (int i = 0; i < numberOfThreads; i++) {
         futures.push_back(executorService->submit(new TileWorker(

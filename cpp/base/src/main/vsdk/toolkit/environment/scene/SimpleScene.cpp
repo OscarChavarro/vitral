@@ -47,14 +47,14 @@ void SimpleScene::setActiveCameraIndex(int i) { activeCameraIndex = i; }
 void SimpleScene::setActiveBackgroundIndex(int i) { activeBackgroundIndex = i; }
 
 void SimpleScene::addBody(SimpleBody* b) { simpleBodiesArray.push_back(b); }
-void SimpleScene::addCamera(vsdk::toolkit::environment::camera::Camera* c) { camerasArray.push_back(c); }
+void SimpleScene::addCamera(Camera* c) { camerasArray.push_back(c); }
 void SimpleScene::addBackground(Background* b) { backgroundsArray.push_back(b); }
 void SimpleScene::addLight(Light* l) { l->setId(static_cast<int>(lightsArray.size())); lightsArray.push_back(l); }
 
 std::vector<SimpleBody*>& SimpleScene::getSimpleBodies() { return simpleBodiesArray; }
 std::vector<Light*>& SimpleScene::getLights() { return lightsArray; }
 std::vector<Background*>& SimpleScene::getBackgrounds() { return backgroundsArray; }
-std::vector<vsdk::toolkit::environment::camera::Camera*>& SimpleScene::getCameras() { return camerasArray; }
+std::vector<Camera*>& SimpleScene::getCameras() { return camerasArray; }
 
 void SimpleScene::setSimpleBodies(const std::vector<SimpleBody*>& simpleBodies)
 {
@@ -80,7 +80,7 @@ void SimpleScene::setBackgrounds(const std::vector<Background*>& backgrounds)
     }
     backgroundsArray = backgrounds;
 }
-void SimpleScene::setCameras(const std::vector<vsdk::toolkit::environment::camera::Camera*>& cameras)
+void SimpleScene::setCameras(const std::vector<Camera*>& cameras)
 {
     for (size_t i = 0; i < camerasArray.size(); ++i) {
         delete camerasArray[i];
@@ -89,7 +89,7 @@ void SimpleScene::setCameras(const std::vector<vsdk::toolkit::environment::camer
 }
 
 Background* SimpleScene::getActiveBackground() const { return backgroundsArray[static_cast<size_t>(activeBackgroundIndex)]; }
-vsdk::toolkit::environment::camera::Camera* SimpleScene::getActiveCamera() const { return camerasArray[static_cast<size_t>(activeCameraIndex)]; }
+Camera* SimpleScene::getActiveCamera() const { return camerasArray[static_cast<size_t>(activeCameraIndex)]; }
 
 SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot()
 {
@@ -101,7 +101,7 @@ SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(int viewportXSize,
     return exportToSimpleSceneSnapshot(getActiveCamera()->exportToCameraSnapshot(viewportXSize, viewportYSize), getActiveBackground());
 }
 
-SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(vsdk::toolkit::environment::camera::CameraSnapshot* cameraSnapshot, Background* background)
+SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(CameraSnapshot* cameraSnapshot, Background* background)
 {
     return new SimpleSceneSnapshot(simpleBodiesArray, lightsArray, background, cameraSnapshot);
 }

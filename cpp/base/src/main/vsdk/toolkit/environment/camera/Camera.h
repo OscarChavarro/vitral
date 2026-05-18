@@ -5,8 +5,6 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
-namespace vsdk { namespace toolkit { namespace environment { namespace camera {
-
 class CameraSnapshot;
 
 class Camera {
@@ -106,6 +104,5 @@ private:
     void markModified();
 };
 
-}}}}
 
 #endif // CAMERA_H

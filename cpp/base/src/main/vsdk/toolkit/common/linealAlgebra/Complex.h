@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
 #define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
 
-namespace java { class String; }
+#include "vsdk/toolkit/java/lang/String.h"
 
 class Complex {
 public:

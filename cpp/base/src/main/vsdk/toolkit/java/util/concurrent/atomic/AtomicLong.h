@@ -4,8 +4,6 @@
 #include <atomic>
 
 namespace java {
-namespace concurrent {
-namespace atomic {
 
 class AtomicLong {
 private:
@@ -20,8 +18,6 @@ public:
     long long incrementAndGet() { return value_.fetch_add(1) + 1; }
 };
 
-}
-}
 }
 
 #endif

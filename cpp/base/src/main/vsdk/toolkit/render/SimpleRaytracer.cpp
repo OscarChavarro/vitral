@@ -73,7 +73,7 @@ void SimpleRaytracer::assertSceneUnmodifiedDuringRender(const std::vector<long l
     }
 }
 
-Ray SimpleRaytracer::generateRay(const vsdk::toolkit::environment::camera::CameraSnapshot* c, int x, int y)
+Ray SimpleRaytracer::generateRay(const CameraSnapshot* c, int x, int y)
 {
     double viewportXSize = c->getViewportXSize();
     double viewportYSize = c->getViewportYSize();
@@ -82,7 +82,7 @@ Ray SimpleRaytracer::generateRay(const vsdk::toolkit::environment::camera::Camer
     double u = (pixelCenterX - viewportXSize/2.0) / viewportXSize;
     double v = ((viewportYSize - pixelCenterY) - viewportYSize/2.0) / viewportYSize;
 
-    if ( c->getProjectionMode() == vsdk::toolkit::environment::camera::Camera::PROJECTION_MODE_ORTHOGONAL ) {
+    if ( c->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL ) {
         Vector3Dd left = c->getLeft(); Vector3Dd up = c->getUp(); Vector3Dd front = c->getFront(); Vector3Dd eye = c->getEyePosition();
         double fovFactor = viewportXSize/viewportYSize;
         double duScale = (-fovFactor) * (2*u/c->getOrthogonalZoom());
@@ -194,7 +194,7 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
 { execute(inoutViewport, q, sceneSnapshot->getSimpleBodies(), sceneSnapshot->getLights(), sceneSnapshot->getBackground(), sceneSnapshot->getCameraSnapshot(), liveReport, outDepthmap, limx1, limy1, limx2, limy2); }
 
-void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,const std::vector<SimpleBody*>& bodies,const std::vector<Light*>& lights,Background* bg,const vsdk::toolkit::environment::camera::CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
+void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,const std::vector<SimpleBody*>& bodies,const std::vector<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
 {
     RenderContext renderContext = buildRenderContext(q, lights);
     SceneRenderCache cache;

@@ -3,15 +3,11 @@
 
 #include "vsdk/toolkit/gui/CameraController.h"
 
-namespace vsdk { namespace toolkit { namespace environment { namespace camera {
 class Camera;
-}}}}
-
-namespace vsdk { namespace toolkit { namespace gui {
 
 class CameraControllerAquynza : public CameraController {
 public:
-    explicit CameraControllerAquynza(vsdk::toolkit::environment::camera::Camera* camera);
+    explicit CameraControllerAquynza(Camera* camera);
     virtual ~CameraControllerAquynza() {}
 
     double getDeltaMovement() const;
@@ -26,12 +22,12 @@ public:
     bool processMouseDraggedEvent(const MouseEvent& e) override;
     bool processMouseWheelEvent(const MouseEvent& e) override;
 
-    vsdk::toolkit::environment::camera::Camera* getCamera() override;
-    void setCamera(vsdk::toolkit::environment::camera::Camera* camera) override;
+    Camera* getCamera() override;
+    void setCamera(Camera* camera) override;
     void tick(double inCurrentTime) override {}
 
 private:
-    vsdk::toolkit::environment::camera::Camera* camera;
+    Camera* camera;
     int oldMouseX;
     int oldMouseY;
     double deltaMov;
@@ -40,6 +36,5 @@ private:
     double diminishLogarithmic(double val, double EPSILON);
 };
 
-}}}
 
 #endif // CAMERACONTROLLERAQUYNZA_H

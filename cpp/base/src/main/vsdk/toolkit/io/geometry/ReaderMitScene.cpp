@@ -36,8 +36,8 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
 
     outScene->clearOwnedElements();
 
-    vsdk::toolkit::environment::camera::Camera* camera =
-        new vsdk::toolkit::environment::camera::Camera();
+    Camera* camera =
+        new Camera();
     SimpleBackground* background = new SimpleBackground();
     outScene->addCamera(camera);
     outScene->addBackground(background);

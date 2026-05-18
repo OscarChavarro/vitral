@@ -6,8 +6,6 @@
 
 static const double PI = 3.14159265358979323846;
 
-namespace vsdk { namespace toolkit { namespace environment { namespace camera {
-
 static inline double degreesToRadians(double degrees) {
     return degrees * PI / 180.0;
 }
@@ -383,4 +381,3 @@ CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewport
         tmp.rightWithScale);
 }
 
-}}}}

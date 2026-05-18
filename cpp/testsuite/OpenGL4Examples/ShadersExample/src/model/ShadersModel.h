@@ -18,10 +18,10 @@ class ShadersModel {
 public:
     static ShadersModel createDefault();
 
-    vsdk::toolkit::environment::camera::Camera* camera;
-    vsdk::toolkit::gui::CameraControllerAquynza* cameraController;
+    Camera* camera;
+    CameraControllerAquynza* cameraController;
     RendererConfiguration quality;
-    vsdk::toolkit::gui::RendererConfigurationController* qualityController;
+    RendererConfigurationController* qualityController;
     Sphere* sphere;
     Light* light;
     SimpleMaterial material;

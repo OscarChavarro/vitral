@@ -1,7 +1,5 @@
 #include "KeyEvent.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 const char* KeyEvent::getKeyName(int key)
 {
     switch (key) {
@@ -127,4 +125,3 @@ const char* KeyEvent::getKeyName(int key)
     }
 }
 
-}}}

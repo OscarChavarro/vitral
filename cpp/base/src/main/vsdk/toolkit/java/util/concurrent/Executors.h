@@ -4,14 +4,12 @@
 #include "ExecutorService.h"
 
 namespace java {
-namespace concurrent {
 
 class Executors {
 public:
     static ExecutorService* newFixedThreadPool(int numberOfThreads);
 };
 
-}
 }
 
 #endif

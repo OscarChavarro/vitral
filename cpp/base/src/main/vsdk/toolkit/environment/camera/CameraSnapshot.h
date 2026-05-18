@@ -3,8 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
-namespace vsdk { namespace toolkit { namespace environment { namespace camera {
-
 class CameraSnapshot {
 private:
     Vector3Dd eyePosition;
@@ -51,6 +49,5 @@ public:
     const Vector3Dd& getRightWithScale() const { return rightWithScale; }
 };
 
-}}}}
 
 #endif

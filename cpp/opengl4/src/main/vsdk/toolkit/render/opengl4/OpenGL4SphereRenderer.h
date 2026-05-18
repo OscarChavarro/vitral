@@ -8,9 +8,7 @@ class Light;
 class SimpleMaterial;
 class RendererConfiguration;
 class RGBImageUncompressed;
-namespace vsdk { namespace toolkit { namespace environment { namespace camera {
 class Camera;
-}}}}
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -18,7 +16,7 @@ class OpenGL4SphereRenderer {
 public:
     static void draw(
         const Sphere* sphere,
-        const vsdk::toolkit::environment::camera::Camera* camera,
+        const Camera* camera,
         const Light* light,
         const SimpleMaterial* material,
         const RendererConfiguration* quality,

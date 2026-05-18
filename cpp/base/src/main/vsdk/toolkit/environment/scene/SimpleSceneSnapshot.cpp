@@ -5,7 +5,7 @@ SimpleSceneSnapshot::SimpleSceneSnapshot(
     const std::vector<SimpleBody*>& inSimpleBodies,
     const std::vector<Light*>& inLights,
     Background* inBackground,
-    vsdk::toolkit::environment::camera::CameraSnapshot* inCameraSnapshot)
+    CameraSnapshot* inCameraSnapshot)
     : simpleBodies(inSimpleBodies), lights(inLights), background(inBackground), cameraSnapshot(inCameraSnapshot)
 {
 }
@@ -21,4 +21,4 @@ SimpleSceneSnapshot::~SimpleSceneSnapshot()
 const std::vector<SimpleBody*>& SimpleSceneSnapshot::getSimpleBodies() const { return simpleBodies; }
 const std::vector<Light*>& SimpleSceneSnapshot::getLights() const { return lights; }
 Background* SimpleSceneSnapshot::getBackground() const { return background; }
-vsdk::toolkit::environment::camera::CameraSnapshot* SimpleSceneSnapshot::getCameraSnapshot() const { return cameraSnapshot; }
+CameraSnapshot* SimpleSceneSnapshot::getCameraSnapshot() const { return cameraSnapshot; }

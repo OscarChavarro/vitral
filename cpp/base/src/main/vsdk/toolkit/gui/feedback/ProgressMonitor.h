@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
 
-class ProgressMonitor : public vsdk::toolkit::gui::PresentationElement {
+class ProgressMonitor : public PresentationElement {
 public:
     virtual ~ProgressMonitor() {}
     virtual void begin() = 0;

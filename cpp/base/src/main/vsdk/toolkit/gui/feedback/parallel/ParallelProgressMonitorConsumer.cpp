@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 ParallelProgressMonitorConsumer::ParallelProgressMonitorConsumer(
-    java::concurrent::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
+    java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
     : concreteProgressMonitor(),
       sharedEventQueue(queue),
       stillProcessingEvents(true),

@@ -5,8 +5,8 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Df.h"
+#include "vsdk/toolkit/java/lang/String.h"
 #include <functional>
-namespace java { class String; }
 
 class Matrix4x4f {
     Matrix4x4d d_;
