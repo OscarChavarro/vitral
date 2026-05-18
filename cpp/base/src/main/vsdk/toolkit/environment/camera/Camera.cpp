@@ -307,6 +307,30 @@ Matrix4x4d Camera::calculateProjectionMatrix() const {
     return P.multiply(R);
 }
 
+Ray Camera::generateRay(int x, int y) const
+{
+    double u = ((double)x - viewportXSize/2.0) / viewportXSize;
+    double v = ((viewportYSize - (double)y - 1) - viewportYSize/2.0) / viewportYSize;
+
+    if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+        double fovFactor = viewportXSize / viewportYSize;
+        double duScale = (-fovFactor) * (2 * u / orthogonalZoom);
+        double dvScale = 2 * v / orthogonalZoom;
+        Vector3Dd origin(
+            eyePosition.x() + left.x()*duScale + up.x()*dvScale,
+            eyePosition.y() + left.y()*duScale + up.y()*dvScale,
+            eyePosition.z() + left.z()*duScale + up.z()*dvScale);
+        return Ray(origin, front);
+    }
+
+    Vector3Dd direction(
+        rightWithScale.x()*u + upWithScale.x()*v + _dir.x(),
+        rightWithScale.y()*u + upWithScale.y()*v + _dir.y(),
+        rightWithScale.z()*u + upWithScale.z()*v + _dir.z());
+
+    return Ray(eyePosition, direction);
+}
+
 float* Camera::toColumnMajorFloatArray() const {
     return calculateProjectionMatrix().exportToFloatArrayColumnOrder();
 }
@@ -380,4 +404,3 @@ CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewport
         tmp.upWithScale,
         tmp.rightWithScale);
 }
-

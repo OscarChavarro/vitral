@@ -124,6 +124,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.cpp
     src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
+    src/main/vsdk/toolkit/gui/CameraControllerOrbiter.cpp
+    src/main/vsdk/toolkit/gui/CameraControllerBlender.cpp
+    src/main/vsdk/toolkit/gui/CameraControllerGoogleEarth.cpp
     src/main/vsdk/toolkit/render/TraceWorkspace.cpp
     src/main/vsdk/toolkit/render/Tile.cpp
     src/main/vsdk/toolkit/render/TileGenerator.cpp

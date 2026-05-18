@@ -4,6 +4,7 @@
 #include <string>
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 
 class CameraSnapshot;
 
@@ -72,6 +73,7 @@ public:
     Matrix4x4d calculateViewVolumeMatrix() const;
     Matrix4x4d calculateTransformationMatrix() const;
     Matrix4x4d calculateProjectionMatrix() const;
+    Ray generateRay(int x, int y) const;
 
     float* toColumnMajorFloatArray() const;
 
