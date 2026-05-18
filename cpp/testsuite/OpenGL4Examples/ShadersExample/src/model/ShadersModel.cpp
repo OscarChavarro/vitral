@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <vector>
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -19,6 +22,8 @@ ShadersModel::ShadersModel()
       qualityController(0),
       sphere(new Sphere(1.0)),
       light(new Light(LightType::POINT, Vector3Dd(1, -3, 1), ColorRgb(1, 1, 1))),
+      cookTorranceMaterial(0),
+      cookTorranceMaterialIndex(0),
       textureMap(0), bumpMapHeightRgb(0), bumpNormalMap(0), softwareFrameImage(0),
       renderingMode(ShaderOperationMode::OPENGL_4_1), showHud(true),
       animationEnabled(false), lightAnimationEnabled(false), sphereRotationAngleRadians(0.0),
@@ -39,6 +44,30 @@ ShadersModel::ShadersModel()
     material = material.withDiffuse(ColorRgb(1, 1, 1));
     material = material.withSpecular(ColorRgb(1, 1, 1));
     material = material.withPhongExponent(40);
+    cookTorranceMaterial = new MicroFacetedMaterial(
+        "../../../../etc/materials/microFacetMAterials.csv",
+        "Copper");
+
+    std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
+    if ( csv.good() ) {
+        std::string line;
+        if ( std::getline(csv, line) ) {
+            while ( std::getline(csv, line) ) {
+                if ( line.empty() ) continue;
+                std::stringstream ss(line);
+                std::string token;
+                std::vector<std::string> cols;
+                while ( std::getline(ss, token, ',') ) cols.push_back(token);
+                if ( cols.size() < 16 ) continue;
+                const std::string& name = cols[0];
+                if ( name.empty() ) continue;
+                cookTorranceMaterialNames.push_back(name);
+                if ( name == "Copper" ) {
+                    cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
+                }
+            }
+        }
+    }
 
     try {
         java::File textureFile("../../../../etc/textures/miniearth.png");
@@ -65,6 +94,7 @@ ShadersModel::~ShadersModel()
     delete textureMap;
     delete bumpMapHeightRgb;
     delete bumpNormalMap;
+    delete cookTorranceMaterial;
     delete softwareFrameImage;
     delete camera;
 }
@@ -85,6 +115,23 @@ static double normalizeAngle(double a) {
 
 void ShadersModel::setSphereRotationAngleRadians(double angle) { sphereRotationAngleRadians = normalizeAngle(angle); }
 void ShadersModel::advanceSphereRotationRadians(double delta) { setSphereRotationAngleRadians(sphereRotationAngleRadians + delta); }
+const SimpleMaterial& ShadersModel::getActiveMaterialForCurrentShading() const
+{
+    if ( quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
+         cookTorranceMaterial != 0 ) {
+        return *cookTorranceMaterial;
+    }
+    return material;
+}
+
+SimpleMaterial* ShadersModel::createActiveMaterialCopy() const
+{
+    if ( quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
+         cookTorranceMaterial != 0 ) {
+        return new MicroFacetedMaterial(*cookTorranceMaterial);
+    }
+    return new SimpleMaterial(material);
+}
 
 void ShadersModel::updateSoftwareViewportAndCamera(int width, int height)
 {
@@ -97,5 +144,19 @@ void ShadersModel::updateSoftwareViewportAndCamera(int width, int height)
     softwareFrameImage->init(w, h);
 }
 
-std::string ShadersModel::getCookTorranceMaterialLabel() const { return "Copper"; }
-void ShadersModel::cycleCookTorranceMaterial() {}
+std::string ShadersModel::getCookTorranceMaterialLabel() const
+{
+    if ( cookTorranceMaterial == 0 || cookTorranceMaterial->getName().empty() ) return "Copper";
+    return cookTorranceMaterial->getName();
+}
+
+void ShadersModel::cycleCookTorranceMaterial()
+{
+    if ( cookTorranceMaterialNames.empty() ) return;
+    cookTorranceMaterialIndex = (cookTorranceMaterialIndex + 1) % (int)cookTorranceMaterialNames.size();
+    const std::string& name = cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex];
+    delete cookTorranceMaterial;
+    cookTorranceMaterial = new MicroFacetedMaterial(
+        "../../../../etc/materials/microFacetMAterials.csv",
+        name);
+}

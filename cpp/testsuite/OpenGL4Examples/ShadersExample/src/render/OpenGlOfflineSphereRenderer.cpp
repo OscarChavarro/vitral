@@ -46,7 +46,7 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
         model->sphere,
         model->camera,
         model->light,
-        &model->material,
+        &model->getActiveMaterialForCurrentShading(),
         &model->quality,
         model->textureMap,
         model->bumpMapHeightRgb,

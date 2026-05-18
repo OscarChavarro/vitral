@@ -52,27 +52,20 @@ bool RendererConfigurationController::processKeyPressedEvent(const KeyEvent& key
             break;
         case KeyEvent::KEY_F7:
             st = qualitySelection->getShadingType();
-            if (st == RendererConfiguration::SHADING_TYPE_FLAT) {
+            if (st == RendererConfiguration::SHADING_TYPE_NOLIGHT) {
+                st = RendererConfiguration::SHADING_TYPE_FLAT;
+            }
+            else if (st == RendererConfiguration::SHADING_TYPE_FLAT) {
                 st = RendererConfiguration::SHADING_TYPE_GOURAUD;
-                qualitySelection->setBumpMap(false);
             }
             else if (st == RendererConfiguration::SHADING_TYPE_GOURAUD) {
                 st = RendererConfiguration::SHADING_TYPE_PHONG;
-                qualitySelection->setBumpMap(false);
             }
             else if (st == RendererConfiguration::SHADING_TYPE_PHONG) {
-                if (qualitySelection->isBumpMapSet()) {
-                    st = RendererConfiguration::SHADING_TYPE_COOK_TERRANCE;
-                    qualitySelection->setBumpMap(false);
-                }
-                else {
-                    st = RendererConfiguration::SHADING_TYPE_PHONG;
-                    qualitySelection->setBumpMap(true);
-                }
+                st = RendererConfiguration::SHADING_TYPE_COOK_TERRANCE;
             }
             else {
-                st = RendererConfiguration::SHADING_TYPE_FLAT;
-                qualitySelection->setBumpMap(false);
+                st = RendererConfiguration::SHADING_TYPE_NOLIGHT;
             }
             qualitySelection->setShadingType(st);
             updated = true;
@@ -96,4 +89,3 @@ bool RendererConfigurationController::processKeyReleasedEvent(const KeyEvent&)
 {
     return false;
 }
-

@@ -163,6 +163,11 @@ void JogHudRenderer::draw(
 
     std::string line2 = gpuMode ? "MODE [.]: GPU" : "MODE [.]: CPU";
     std::string line2Right = "SHOW HUD [H]";
+    std::string lineCookMaterial;
+    if ( quality &&
+         quality->getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE ) {
+        lineCookMaterial = "SIMPLEMATERIAL [M]: " + cookMaterialLabel;
+    }
 
     drawText(HUD_LEFT, HUD_BASELINE_1, line1);
     drawText(HUD_LEFT, HUD_BASELINE_2, line2);
@@ -170,6 +175,11 @@ void JogHudRenderer::draw(
     int rightWidth = (int)line2Right.size() * CHAR_W;
     int rightX = std::max(HUD_LEFT, hudWidth - rightWidth - HUD_LEFT);
     drawText(rightX, HUD_BASELINE_1, line2Right);
+    if (!lineCookMaterial.empty()) {
+        int materialWidth = (int)lineCookMaterial.size() * CHAR_W;
+        int materialX = std::max(HUD_LEFT, hudWidth - materialWidth - HUD_LEFT);
+        drawText(materialX, HUD_BASELINE_2, lineCookMaterial);
+    }
 
     OpenGL4ImageRenderer::unload(hudImage);
 

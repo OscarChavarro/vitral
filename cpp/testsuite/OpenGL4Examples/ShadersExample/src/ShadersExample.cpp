@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <fstream>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -20,6 +22,7 @@
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
@@ -108,6 +111,9 @@ public:
     Light* light;
     RendererConfiguration quality;
     SimpleMaterial material;
+    MicroFacetedMaterial* cookTorranceMaterial;
+    std::vector<std::string> cookTorranceMaterialNames;
+    int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMap;
     NormalMap* bumpNormalMap;
@@ -127,6 +133,7 @@ public:
 
     App()
         : window(0), camera(0), controller(0), qualityController(0), sphere(0), light(0),
+          cookTorranceMaterial(0), cookTorranceMaterialIndex(0),
           textureMap(0), bumpMap(0), bumpNormalMap(0), meridians(100), parallels(50), angle(0.0),
           animationEnabled(false), lightAnimationEnabled(false), showHud(true),
           renderingMode(ShaderOperationMode::OPENGL_4_1),
@@ -186,7 +193,7 @@ public:
 
             SimpleBody* sphereBody = new SimpleBody();
             sphereBody->setGeometry(new Sphere(sphere->getRadius()));
-            sphereBody->setMaterial(new SimpleMaterial(material));
+            sphereBody->setMaterial(createActiveMaterialCopy());
             if (textureMap != 0 && quality.isTextureSet()) {
                 sphereBody->setTexture(textureMap->clone());
             }
@@ -238,6 +245,31 @@ public:
         return glfwGetTime();
     }
 
+    void cycleCookTorranceMaterial()
+    {
+        if (cookTorranceMaterialNames.empty()) return;
+        cookTorranceMaterialIndex = (cookTorranceMaterialIndex + 1) % (int)cookTorranceMaterialNames.size();
+        delete cookTorranceMaterial;
+        cookTorranceMaterial = new MicroFacetedMaterial(
+            "../../../../etc/materials/microFacetMAterials.csv",
+            cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex]);
+    }
+
+    std::string getCookTorranceMaterialLabel() const
+    {
+        if (!cookTorranceMaterial || cookTorranceMaterial->getName().empty()) return "Copper";
+        return cookTorranceMaterial->getName();
+    }
+
+    SimpleMaterial* createActiveMaterialCopy() const
+    {
+        if (quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
+            cookTorranceMaterial != 0) {
+            return new MicroFacetedMaterial(*cookTorranceMaterial);
+        }
+        return new SimpleMaterial(material);
+    }
+
     ~App() {
         const bool sharedBumpTexture = (bumpMap != 0 && bumpMap == textureMap);
         if (textureMap) {
@@ -254,6 +286,8 @@ public:
             delete bumpNormalMap;
             bumpNormalMap = 0;
         }
+        delete cookTorranceMaterial;
+        cookTorranceMaterial = 0;
         if (softwareFrameImage) {
             OpenGL4ImageRenderer::unload(softwareFrameImage);
             delete softwareFrameImage;
@@ -319,6 +353,25 @@ public:
         material = material.withDiffuse(ColorRgb(1.0, 1.0, 1.0));
         material = material.withSpecular(ColorRgb(1.0, 1.0, 1.0));
         material = material.withPhongExponent(40.0);
+        cookTorranceMaterial = new MicroFacetedMaterial(
+            "../../../../etc/materials/microFacetMAterials.csv",
+            "Copper");
+        std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
+        if (csv.good()) {
+            std::string line;
+            if (std::getline(csv, line)) {
+                while (std::getline(csv, line)) {
+                    if (line.empty()) continue;
+                    std::stringstream ss(line);
+                    std::string token;
+                    std::vector<std::string> cols;
+                    while (std::getline(ss, token, ',')) cols.push_back(token);
+                    if (cols.empty() || cols[0].empty()) continue;
+                    cookTorranceMaterialNames.push_back(cols[0]);
+                    if (cols[0] == "Copper") cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
+                }
+            }
+        }
 
         textureMap = loadRgbByCandidates({
             "../../../../etc/textures/miniearth.png",
@@ -375,6 +428,9 @@ public:
                     &app->lightAnimationEnabled,
                     &app->renderingMode,
                     &actions);
+                if (ev.keycode == KeyEvent::KEY_m || ev.keycode == KeyEvent::KEY_M) {
+                    app->cycleCookTorranceMaterial();
+                }
             } else if (action == GLFW_RELEASE) {
                 KeyEvent ev = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
                 app->keyboardInteractionTechniques.processReleasedForApp(
@@ -441,11 +497,16 @@ public:
                 renderSoftwareFrame(worldTransform);
             }
             else {
+                const SimpleMaterial* activeMaterial =
+                    (quality.getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE &&
+                     cookTorranceMaterial != 0)
+                    ? static_cast<const SimpleMaterial*>(cookTorranceMaterial)
+                    : static_cast<const SimpleMaterial*>(&material);
                 vsdk::toolkit::render::opengl4::OpenGL4SphereRenderer::draw(
                     sphere,
                     camera,
                     light,
-                    &material,
+                    activeMaterial,
                     &quality,
                     textureMap,
                     bumpMap,
@@ -476,7 +537,7 @@ public:
                         meridians,
                         parallels,
                         &quality,
-                        std::string());
+                        getCookTorranceMaterialLabel());
                 }
             }
 

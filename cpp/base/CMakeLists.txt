@@ -162,6 +162,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/FourierShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/GeometryMetadata.cpp
     src/main/vsdk/toolkit/environment/material/SimpleMaterial.cpp
+    src/main/vsdk/toolkit/environment/material/MicroFacetedMaterial.cpp
     src/main/vsdk/toolkit/environment/material/ShadingType.cpp
     src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp
 )

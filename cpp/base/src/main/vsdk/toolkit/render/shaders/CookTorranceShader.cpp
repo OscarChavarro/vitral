@@ -1,5 +1,160 @@
 #include "CookTorranceShader.h"
-#include "LightingShader.h"
+#include "CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/render/TraceWorkspace.h"
+
+#include <algorithm>
+#include <cmath>
+
+namespace {
+const double DEFAULT_ROUGHNESS = 0.35;
+const double MIN_ROUGHNESS = 0.02;
+const double EPS = 1e-8;
+
+struct LightDirection {
+    double x, y, z;
+    double maxShadowDistance;
+};
+
+struct MicrofacetParams {
+    double roughness;
+    double alpha;
+    ColorRgb fresnelF0;
+    double kd;
+    double ks;
+};
+
+static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd& surfaceNormal)
+{
+    if ( info == 0 || info->normalMap == 0 ) return surfaceNormal;
+    Vector3Dd normalVariation = CpuTextureSamplingConfig::sampleNormal(info->normalMap, info->u, 1.0 - info->v);
+    if ( normalVariation.length() <= VSDK::EPSILON ) return surfaceNormal;
+
+    Vector3Dd baseNormal = surfaceNormal.normalized();
+    Vector3Dd surfaceTangentU = info->t.normalized();
+    if ( surfaceTangentU.length() <= VSDK::EPSILON ) return surfaceNormal;
+
+    Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
+    Vector3Dd nCrossPv = baseNormal.crossProduct(surfaceTangentV);
+    Vector3Dd nCrossPu = baseNormal.crossProduct(surfaceTangentU);
+
+    Vector3Dd* bumpScalePtr = info->normalMap->getBumpMapScale();
+    if ( bumpScalePtr == 0 ) return surfaceNormal;
+    Vector3Dd bumpScale = *bumpScalePtr;
+    delete bumpScalePtr;
+
+    double nz = normalVariation.z();
+    if ( std::abs(nz) <= VSDK::EPSILON ) nz = (nz < 0.0) ? -VSDK::EPSILON : VSDK::EPSILON;
+    double derivativeFu = -2.0 * (bumpScale.z() / bumpScale.x()) * (normalVariation.x() / nz);
+    double derivativeFv = -2.0 * (bumpScale.z() / bumpScale.y()) * (normalVariation.y() / nz);
+    Vector3Dd normalPerturbation = nCrossPv.multiply(derivativeFu).subtract(nCrossPu.multiply(derivativeFv));
+    return surfaceNormal.add(normalPerturbation).normalized();
+}
+
+static double beckmannDistribution(double ndotH, double roughness)
+{
+    if ( ndotH <= 0.0 ) return 0.0;
+    double ndotHSquared = ndotH * ndotH;
+    double tanSquaredTheta = (1.0 - ndotHSquared) / std::max(EPS, ndotHSquared);
+    double mSquared = roughness * roughness;
+    double exponent = -tanSquaredTheta / std::max(EPS, mSquared);
+    return std::exp(exponent) / (M_PI * std::max(EPS, mSquared) * ndotHSquared * ndotHSquared);
+}
+
+static double smithSchlickGeometry(double ndotV, double ndotL, double alpha)
+{
+    double k = alpha * 0.5;
+    double gV = ndotV / (ndotV * (1.0 - k) + k);
+    double gL = ndotL / (ndotL * (1.0 - k) + k);
+    return gV * gL;
+}
+
+static LightDirection resolveLightDirection(const Light* light, const RayHit* info, bool* ok)
+{
+    *ok = false;
+    LightDirection ld = {0, 0, 0, 0};
+    if ( light == 0 || info == 0 ) return ld;
+    if ( light->tipo_de_luz == LightType::POINT ) {
+        double lx = light->lvec.x() - info->p.x();
+        double ly = light->lvec.y() - info->p.y();
+        double lz = light->lvec.z() - info->p.z();
+        double len2 = lx * lx + ly * ly + lz * lz;
+        if ( len2 <= VSDK::EPSILON ) return ld;
+        double len = std::sqrt(len2);
+        double inv = 1.0 / len;
+        ld.x = lx * inv; ld.y = ly * inv; ld.z = lz * inv;
+        ld.maxShadowDistance = len - VSDK::EPSILON;
+        *ok = true;
+        return ld;
+    }
+    double lx = -light->lvec.x();
+    double ly = -light->lvec.y();
+    double lz = -light->lvec.z();
+    double len2 = lx * lx + ly * ly + lz * lz;
+    if ( len2 <= EPS ) return ld;
+    double inv = 1.0 / std::sqrt(len2);
+    ld.x = lx * inv; ld.y = ly * inv; ld.z = lz * inv;
+    ld.maxShadowDistance = 1e308;
+    *ok = true;
+    return ld;
+}
+
+static bool isShadowed(
+    const RayHit* info,
+    double lightDirX, double lightDirY, double lightDirZ,
+    double maxShadowDistance,
+    const std::vector<SimpleBody*>& objects,
+    TraceWorkspace* workspace)
+{
+    if ( maxShadowDistance <= VSDK::EPSILON ) return true;
+    if ( workspace == 0 ) return false;
+    Vector3Dd shadowOrigin(
+        info->p.x() + VSDK::EPSILON * lightDirX,
+        info->p.y() + VSDK::EPSILON * lightDirY,
+        info->p.z() + VSDK::EPSILON * lightDirZ);
+    Ray shadowRay(shadowOrigin, Vector3Dd(lightDirX, lightDirY, lightDirZ));
+    RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
+    shadowCandidateHit->setStoreRay(false);
+    for ( size_t i = 0; i < objects.size(); i++ ) {
+        SimpleBody* candidateObject = objects[i];
+        shadowCandidateHit->resetForDistanceOnly();
+        if ( candidateObject && candidateObject->doIntersection(shadowRay, shadowCandidateHit) ) {
+            double hitDistance = shadowCandidateHit->hitDistance();
+            if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
+{
+    MicrofacetParams p;
+    p.roughness = DEFAULT_ROUGHNESS;
+    p.alpha = p.roughness * p.roughness;
+    p.fresnelF0 = material->getSpecularReference();
+    p.kd = 1.0;
+    p.ks = 1.0;
+    MicroFacetedMaterial* mf = dynamic_cast<MicroFacetedMaterial*>(material);
+    if ( mf != 0 ) {
+        p.roughness = mf->getRoughness();
+        p.alpha = mf->getAlpha();
+        p.fresnelF0 = mf->getFresnelF0();
+        p.kd = mf->getKd();
+        p.ks = mf->getKs();
+    }
+    return p;
+}
+}
 
 CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnabledIn)
     : textureEnabled(textureEnabledIn), bumpMapEnabled(bumpMapEnabledIn)
@@ -8,6 +163,90 @@ CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnable
 
 Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace)
 {
-    LightingShader fallback(true, textureEnabled, bumpMapEnabled);
-    return fallback.shadeLocal(info, viewX, viewY, viewZ, lights, objects, material, workspace);
+    Vector3Dd surfaceNormal = info->n;
+    if ( bumpMapEnabled ) {
+        surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
+    }
+
+    Vector3Dd normal = surfaceNormal.normalized();
+    double normalX = normal.x();
+    double normalY = normal.y();
+    double normalZ = normal.z();
+
+    double viewLength = std::sqrt(viewX * viewX + viewY * viewY + viewZ * viewZ);
+    if ( viewLength <= EPS ) return LocalShadingResult(surfaceNormal, ColorRgb(0.0, 0.0, 0.0));
+    double invViewLength = 1.0 / viewLength;
+    double viewDirX = viewX * invViewLength;
+    double viewDirY = viewY * invViewLength;
+    double viewDirZ = viewZ * invViewLength;
+
+    const ColorRgb& ambient = material->getAmbientReference();
+    double outR = 0.0;
+    double outG = 0.0;
+    double outB = 0.0;
+
+    for ( size_t i = 0; i < lights.size(); i++ ) {
+        Light* light = lights[i];
+        if ( light == 0 ) continue;
+        const ColorRgb& lightEmission = light->getSpecularReference();
+        if ( light->tipo_de_luz == LightType::AMBIENT ) {
+            outR += ambient.r() * lightEmission.r();
+            outG += ambient.g() * lightEmission.g();
+            outB += ambient.b() * lightEmission.b();
+            continue;
+        }
+
+        bool ok = false;
+        LightDirection ld = resolveLightDirection(light, info, &ok);
+        if ( !ok ) continue;
+        if ( isShadowed(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace) ) continue;
+
+        double ndotL = std::max(0.0, normalX * ld.x + normalY * ld.y + normalZ * ld.z);
+        if ( ndotL <= 0.0 ) continue;
+        double ndotV = std::max(0.0, normalX * viewDirX + normalY * viewDirY + normalZ * viewDirZ);
+        if ( ndotV <= 0.0 ) continue;
+
+        double halfX = ld.x + viewDirX;
+        double halfY = ld.y + viewDirY;
+        double halfZ = ld.z + viewDirZ;
+        double halfLength = std::sqrt(halfX * halfX + halfY * halfY + halfZ * halfZ);
+        if ( halfLength <= EPS ) continue;
+        double invHalf = 1.0 / halfLength;
+        halfX *= invHalf; halfY *= invHalf; halfZ *= invHalf;
+        double ndotH = std::max(0.0, normalX * halfX + normalY * halfY + normalZ * halfZ);
+        double vdotH = std::max(0.0, viewDirX * halfX + viewDirY * halfY + viewDirZ * halfZ);
+
+        MicrofacetParams p = resolveMicrofacetParams(material);
+        double roughness = std::max(MIN_ROUGHNESS, p.roughness);
+        double alpha = std::max(MIN_ROUGHNESS * MIN_ROUGHNESS, p.alpha);
+
+        const ColorRgb& baseDiffuse = material->getDiffuseReference();
+        double diffuseR = baseDiffuse.r();
+        double diffuseG = baseDiffuse.g();
+        double diffuseB = baseDiffuse.b();
+        if ( textureEnabled && info->texture != 0 ) {
+            ColorRgb tc = CpuTextureSamplingConfig::sample(info->texture, info->u, 1.0 - info->v);
+            diffuseR *= tc.r();
+            diffuseG *= tc.g();
+            diffuseB *= tc.b();
+        }
+
+        double distribution = beckmannDistribution(ndotH, roughness);
+        double geometry = smithSchlickGeometry(ndotV, ndotL, alpha);
+        double fresnelPower = std::pow(std::max(0.0, 1.0 - vdotH), 5.0);
+        double fresnelR = p.fresnelF0.r() + (1.0 - p.fresnelF0.r()) * fresnelPower;
+        double fresnelG = p.fresnelF0.g() + (1.0 - p.fresnelF0.g()) * fresnelPower;
+        double fresnelB = p.fresnelF0.b() + (1.0 - p.fresnelF0.b()) * fresnelPower;
+        double denominator = std::max(EPS, 4.0 * ndotL * ndotV);
+
+        double specR = p.ks * distribution * geometry * fresnelR / denominator;
+        double specG = p.ks * distribution * geometry * fresnelG / denominator;
+        double specB = p.ks * distribution * geometry * fresnelB / denominator;
+
+        outR += lightEmission.r() * (p.kd * diffuseR * ndotL + specR);
+        outG += lightEmission.g() * (p.kd * diffuseG * ndotL + specG);
+        outB += lightEmission.b() * (p.kd * diffuseB * ndotL + specB);
+    }
+
+    return LocalShadingResult(surfaceNormal, ColorRgb(outR, outG, outB));
 }

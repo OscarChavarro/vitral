@@ -2,12 +2,14 @@
 #define SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
 
 #include <string>
+#include <vector>
 #include "ShaderOperationMode.h"
 
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
@@ -25,6 +27,9 @@ public:
     Sphere* sphere;
     Light* light;
     SimpleMaterial material;
+    MicroFacetedMaterial* cookTorranceMaterial;
+    std::vector<std::string> cookTorranceMaterialNames;
+    int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMapHeightRgb;
     NormalMap* bumpNormalMap;
@@ -49,6 +54,8 @@ public:
     void changeSphereParallels(int delta);
     void setSphereRotationAngleRadians(double angle);
     void advanceSphereRotationRadians(double delta);
+    const SimpleMaterial& getActiveMaterialForCurrentShading() const;
+    SimpleMaterial* createActiveMaterialCopy() const;
     std::string getCookTorranceMaterialLabel() const;
     void cycleCookTorranceMaterial();
 };

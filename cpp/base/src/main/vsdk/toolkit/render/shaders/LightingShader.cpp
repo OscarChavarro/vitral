@@ -8,8 +8,57 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include <cmath>
+
+static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd& surfaceNormal)
+{
+    if ( info == 0 || info->normalMap == 0 ) {
+        return surfaceNormal;
+    }
+
+    Vector3Dd normalVariation =
+        CpuTextureSamplingConfig::sampleNormal(info->normalMap, info->u, 1.0 - info->v);
+    if ( normalVariation.length() <= VSDK::EPSILON ) {
+        return surfaceNormal;
+    }
+
+    Vector3Dd baseNormal = surfaceNormal.normalized();
+    Vector3Dd surfaceTangentU = info->t.normalized();
+    if ( surfaceTangentU.length() <= VSDK::EPSILON ) {
+        return surfaceNormal;
+    }
+
+    Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
+    Vector3Dd nCrossPv = baseNormal.crossProduct(surfaceTangentV);
+    Vector3Dd nCrossPu = baseNormal.crossProduct(surfaceTangentU);
+
+    Vector3Dd* bumpScalePtr = info->normalMap->getBumpMapScale();
+    if ( bumpScalePtr == 0 ) {
+        return surfaceNormal;
+    }
+    Vector3Dd bumpScale = *bumpScalePtr;
+    delete bumpScalePtr;
+
+    if ( std::abs(bumpScale.x()) <= VSDK::EPSILON || std::abs(bumpScale.y()) <= VSDK::EPSILON ) {
+        return surfaceNormal;
+    }
+
+    double nz = normalVariation.z();
+    if ( std::abs(nz) <= VSDK::EPSILON ) {
+        nz = (nz < 0.0) ? -VSDK::EPSILON : VSDK::EPSILON;
+    }
+
+    double derivativeFu =
+        -2.0 * (bumpScale.z() / bumpScale.x()) * (normalVariation.x() / nz);
+    double derivativeFv =
+        -2.0 * (bumpScale.z() / bumpScale.y()) * (normalVariation.y() / nz);
+    Vector3Dd normalPerturbation =
+        nCrossPv.multiply(derivativeFu).subtract(nCrossPu.multiply(derivativeFv));
+
+    return surfaceNormal.add(normalPerturbation).normalized();
+}
 
 LightingShader::LightingShader(bool specularEnabledIn, bool textureEnabledIn, bool bumpMapEnabledIn)
     : specularEnabled(specularEnabledIn), textureEnabled(textureEnabledIn), bumpMapEnabled(bumpMapEnabledIn)
@@ -22,9 +71,8 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
     SimpleMaterial* material, TraceWorkspace* workspace)
 {
     Vector3Dd surfaceNormal = info->n;
-    if ( bumpMapEnabled && info->normalMap != 0 ) {
-        surfaceNormal = CpuTextureSamplingConfig::sampleNormal(info->normalMap, info->u, 1.0 - info->v);
-        if ( surfaceNormal.length() <= VSDK::EPSILON ) surfaceNormal = info->n;
+    if ( bumpMapEnabled ) {
+        surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
     }
 
     double nx = surfaceNormal.x();

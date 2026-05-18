@@ -42,8 +42,9 @@ bool SimpleRaytracer::isReflective(SimpleMaterial* material)
 RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* qualitySelection,const std::vector<Light*>& lights)
 {
     Shader* localShader = ShaderSelector::select(qualitySelection);
-    (void)lights;
-    bool localLightingEnabled = qualitySelection->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT;
+    bool localLightingEnabled =
+        qualitySelection->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT &&
+        hasNonAmbientLights(lights);
     return RenderContext(localLightingEnabled, qualitySelection->isTextureSet(), qualitySelection->isBumpMapSet(), localShader);
 }
 

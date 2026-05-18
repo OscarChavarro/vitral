@@ -11,6 +11,8 @@ master.iml
 .gradle-home/
 build/
 **/build/
+build-*/
+**/build-*/
 
 classes/*
 lib/*

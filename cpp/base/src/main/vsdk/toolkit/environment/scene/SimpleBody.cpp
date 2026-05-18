@@ -230,15 +230,19 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         return geometry->doIntersection(inOutRay, outHit);
     }
 
-    Vector3Dd localOrigin = inOutRay.origin().subtract(position);
-    localOrigin = Vector3Dd(localOrigin.x() * inverseScale.x(), localOrigin.y() * inverseScale.y(), localOrigin.z() * inverseScale.z());
-    localOrigin = rotationInverse.multiply(localOrigin);
+    Vector3Dd translatedOrigin = inOutRay.origin().subtract(position);
+    Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+    Vector3Dd localOrigin(
+        rotatedOrigin.x() * inverseScale.x(),
+        rotatedOrigin.y() * inverseScale.y(),
+        rotatedOrigin.z() * inverseScale.z());
 
-    Vector3Dd localDirection = Vector3Dd(
-        inOutRay.direction().x() * inverseScale.x(),
-        inOutRay.direction().y() * inverseScale.y(),
-        inOutRay.direction().z() * inverseScale.z());
-    localDirection = rotationInverse.multiply(localDirection).normalized();
+    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(inOutRay.direction());
+    Vector3Dd localDirection(
+        rotatedDirection.x() * inverseScale.x(),
+        rotatedDirection.y() * inverseScale.y(),
+        rotatedDirection.z() * inverseScale.z());
+    localDirection = localDirection.normalized();
 
     Ray localRay(localOrigin, localDirection, inOutRay.t());
     const bool requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : false;
@@ -316,17 +320,18 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
     const Ray worldRay = *worldRayPtr;
     const double worldT = worldRay.t();
 
-    Vector3Dd localOrigin = worldRay.origin().subtract(position);
-    localOrigin = Vector3Dd(
-        localOrigin.x() * inverseScale.x(),
-        localOrigin.y() * inverseScale.y(),
-        localOrigin.z() * inverseScale.z());
-    localOrigin = rotationInverse.multiply(localOrigin);
+    Vector3Dd translatedOrigin = worldRay.origin().subtract(position);
+    Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+    Vector3Dd localOrigin(
+        rotatedOrigin.x() * inverseScale.x(),
+        rotatedOrigin.y() * inverseScale.y(),
+        rotatedOrigin.z() * inverseScale.z());
 
-    Vector3Dd localDirection = Vector3Dd(
-        worldRay.direction().x() * inverseScale.x(),
-        worldRay.direction().y() * inverseScale.y(),
-        worldRay.direction().z() * inverseScale.z());
+    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(worldRay.direction());
+    Vector3Dd localDirection(
+        rotatedDirection.x() * inverseScale.x(),
+        rotatedDirection.y() * inverseScale.y(),
+        rotatedDirection.z() * inverseScale.z());
     double localDirLength = localDirection.length();
     if ( localDirLength <= VSDK::EPSILON ) {
         outData->material = globalMaterial;

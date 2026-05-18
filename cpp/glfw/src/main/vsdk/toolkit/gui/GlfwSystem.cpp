@@ -187,6 +187,10 @@ KeyEvent GlfwSystem::glfw2vsdkKeyEvent(int glfwKey, int glfwMods) {
             event.keycode = KeyEvent::KEY_9;
             event.unicode_id = '9';
             break;
+        case GLFW_KEY_PERIOD:
+            event.keycode = KeyEvent::KEY_PERIOD;
+            event.unicode_id = '.';
+            break;
 
         case GLFW_KEY_F1:
             event.keycode = KeyEvent::KEY_F1;
