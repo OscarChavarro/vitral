@@ -4,6 +4,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 
 /**
@@ -42,6 +43,27 @@ public abstract class ImageProcessing extends ProcessingElement {
                 val = img.getPixel(x, y);
                 val = gammaCorrection8bits(val, gamma);
                 img.putPixel(x, y, VSDK.unsigned8BitInteger2signedByte(val));
+            }
+        }
+    }
+
+    public static void
+    gammaCorrection(RGBImageUncompressed img, double gamma)
+    {
+        int x, y;
+        RGBPixel p = new RGBPixel();
+        int r, g, b;
+
+        for ( x = 0; x < img.getXSize(); x++ ) {
+            for ( y = 0; y < img.getYSize(); y++ ) {
+                img.getPixelRgb(x, y, p);
+                r = gammaCorrection8bits(VSDK.signedByte2unsignedInteger(p.r), gamma);
+                g = gammaCorrection8bits(VSDK.signedByte2unsignedInteger(p.g), gamma);
+                b = gammaCorrection8bits(VSDK.signedByte2unsignedInteger(p.b), gamma);
+                p.r = VSDK.unsigned8BitInteger2signedByte(r);
+                p.g = VSDK.unsigned8BitInteger2signedByte(g);
+                p.b = VSDK.unsigned8BitInteger2signedByte(b);
+                img.putPixelRgb(x, y, p);
             }
         }
     }

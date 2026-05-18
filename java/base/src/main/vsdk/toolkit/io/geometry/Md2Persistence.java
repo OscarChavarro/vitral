@@ -17,6 +17,7 @@ import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.processing.ImageProcessing;
 
 
 /**
@@ -181,6 +182,22 @@ public class Md2Persistence extends PersistenceElement {
             outMd2Mesh.skins = new Image[outMd2Mesh.numSkins];
         // For now, only one image.
         outMd2Mesh.skins[0] = loadImagefile(inTexture);
+        return true;
+    }
+
+    public final boolean read(String inFileName, String inTexture,
+        Md2Mesh outMd2Mesh, double gammaCorrection) throws IOException
+    {
+        boolean ok = read(inFileName, inTexture, outMd2Mesh);
+        if ( !ok ) {
+            return false;
+        }
+        if ( outMd2Mesh.skins != null &&
+             outMd2Mesh.skins.length > 0 &&
+             outMd2Mesh.skins[0] instanceof RGBImageUncompressed ) {
+            ImageProcessing.gammaCorrection(
+                (RGBImageUncompressed)outMd2Mesh.skins[0], gammaCorrection);
+        }
         return true;
     }
     

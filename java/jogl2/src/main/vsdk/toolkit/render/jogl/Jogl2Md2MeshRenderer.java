@@ -1,16 +1,22 @@
 package vsdk.toolkit.render.jogl;
 
 // Java basic classes
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 
 // VitralSDK classes
 import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 
 /**
  *
  * @author 
  */
 public class Jogl2Md2MeshRenderer extends Jogl2Renderer {
+    private static final double LINES_DEPTH_RANGE_FAR = 0.99995;
+    private static final double POINTS_DEPTH_RANGE_FAR = 0.99990;
+
     //static int numFrame;
     //static float t=0; // Fraction of a frame.
     
@@ -23,7 +29,7 @@ public class Jogl2Md2MeshRenderer extends Jogl2Renderer {
 //        Jogl2ImageRenderer.activate(gl, md2Mesh.skins[0]);
     }
     
-    public static void draw(GL2 gl, Md2Mesh md2Mesh){
+    public static void draw(GL2 gl, Md2Mesh md2Mesh, RendererConfiguration quality){
         int numFrame;
         int i,j, numFrameNext;
         float[] frameVerts,frameVertsNext;
@@ -67,11 +73,81 @@ public class Jogl2Md2MeshRenderer extends Jogl2Renderer {
         frameNormalInds     = md2Mesh.frameNormalIndices.get(numFrame);
         frameVertsNext      = md2Mesh.frameVertices.get(numFrameNext);
         frameNormalIndsNext = md2Mesh.frameNormalIndices.get(numFrameNext);
-        Jogl2ImageRenderer.activate(gl, md2Mesh.skins[0]);
-        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glEnable(GL2.GL_NORMALIZE);
+        boolean withTexture = md2Mesh.skins != null &&
+            md2Mesh.skins.length > 0 &&
+            md2Mesh.skins[0] != null;
+
+        if ( quality.isSurfacesSet() ) {
+            Jogl2GeometryRenderer.prepareSurfaceQuality(gl, quality);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            if ( quality.isTextureSet() && withTexture ) {
+                Jogl2ImageRenderer.activate(gl, md2Mesh.skins[0]);
+                gl.glEnable(GL2.GL_TEXTURE_2D);
+            }
+            else {
+                gl.glDisable(GL2.GL_TEXTURE_2D);
+            }
+            gl.glColor3d(0.8, 0.8, 0.8);
+            drawGeometry(gl, md2Mesh, frameVerts, frameVertsNext, frameNormalInds,
+                frameNormalIndsNext, normals, t);
+        }
+
+        if ( quality.isWiresSet() ) {
+            gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_ENABLE_BIT |
+                GL2.GL_POLYGON_BIT | GL2.GL_CURRENT_BIT | GL2.GL_LIGHTING_BIT |
+                GL2.GL_LINE_BIT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL2.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glColor3d(1.0, 1.0, 1.0);
+            gl.glLineWidth(1.0f);
+            gl.glEnable(GL.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDepthMask(false);
+            gl.glDepthRange(0.0, LINES_DEPTH_RANGE_FAR);
+            drawGeometry(gl, md2Mesh, frameVerts, frameVertsNext, frameNormalInds,
+                frameNormalIndsNext, normals, t);
+            gl.glDepthRange(0.0, 1.0);
+            gl.glDepthMask(true);
+            gl.glPopAttrib();
+        }
+
+        if ( quality.isPointsSet() ) {
+            gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_ENABLE_BIT |
+                GL2.GL_POLYGON_BIT | GL2.GL_CURRENT_BIT | GL2.GL_LIGHTING_BIT |
+                GL2.GL_POINT_BIT);
+            gl.glDisable(GL2.GL_LIGHTING);
+            gl.glDisable(GL2.GL_TEXTURE_2D);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glShadeModel(GL2.GL_FLAT);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_POINT);
+            gl.glColor3d(1.0, 0.0, 0.0);
+            gl.glPointSize(4.0f);
+            gl.glEnable(GL.GL_DEPTH_TEST);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDepthMask(false);
+            gl.glDepthRange(0.0, POINTS_DEPTH_RANGE_FAR);
+            drawGeometry(gl, md2Mesh, frameVerts, frameVertsNext, frameNormalInds,
+                frameNormalIndsNext, normals, t);
+            gl.glDepthRange(0.0, 1.0);
+            gl.glDepthMask(true);
+            gl.glPopAttrib();
+        }
+    }
+
+    private static void drawGeometry(GL2 gl, Md2Mesh md2Mesh, float[] frameVerts,
+        float[] frameVertsNext, short[] frameNormalInds, short[] frameNormalIndsNext,
+        float[][] normals, float t)
+    {
+        int i, j, vertInd;
+        float[] glCmdTexCoords;
+        float[] normal;
+        float[] normalN;
+
         if(!md2Mesh.glCmdVertIndexStrip.isEmpty() || !md2Mesh.glCmdVertIndexFan.isEmpty()) {
-//        if(false) {
-    //        for(int[] vertIndexStrip : md2Mesh.glCmdVertIndexStrip) {
             for(i=0; i < md2Mesh.glCmdVertIndexStrip.size(); ++i) {
                 int[] vertIndexStrip = md2Mesh.glCmdVertIndexStrip.get(i);
                 glCmdTexCoords = md2Mesh.glCmdTexCoordsStrip.get(i);
@@ -79,19 +155,17 @@ public class Jogl2Md2MeshRenderer extends Jogl2Renderer {
                     for(j=0;j<vertIndexStrip.length;++j) {
                         normal = normals[frameNormalInds[vertIndexStrip[j]]];
                         normalN = normals[frameNormalIndsNext[vertIndexStrip[j]]];
-                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
-                                     ,normal[1] + t*(normalN[1]-normal[1])
-                                     ,normal[2] + t*(normalN[2]-normal[2]));
-                        //Apparently the image has the origin in the top left, not on the bottom left as in OpenGL.
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0]),
+                            normal[1] + t*(normalN[1]-normal[1]),
+                            normal[2] + t*(normalN[2]-normal[2]));
                         gl.glTexCoord2d(glCmdTexCoords[j*2], 1-glCmdTexCoords[j*2+1]);
-                        vertInd = vertIndexStrip[j]*3;//In frameVerts, a one-dimensional array, are the 3 vertex coords.
-                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
-                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
-                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                        vertInd = vertIndexStrip[j]*3;
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd]),
+                            frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1]),
+                            frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
                     }
                 gl.glEnd();
             }
-    //        for(int[] vertIndexFan : md2Mesh.glCmdVertIndexFan) {
             for(i=0; i < md2Mesh.glCmdVertIndexFan.size(); ++i) {
                 int[] vertIndexFan = md2Mesh.glCmdVertIndexFan.get(i);
                 glCmdTexCoords = md2Mesh.glCmdTexCoordsFan.get(i);
@@ -99,33 +173,33 @@ public class Jogl2Md2MeshRenderer extends Jogl2Renderer {
                     for(j=0;j<vertIndexFan.length;++j) {
                         normal = normals[frameNormalInds[vertIndexFan[j]]];
                         normalN = normals[frameNormalIndsNext[vertIndexFan[j]]];
-                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
-                                     ,normal[1] + t*(normalN[1]-normal[1])
-                                     ,normal[2] + t*(normalN[2]-normal[2]));
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0]),
+                            normal[1] + t*(normalN[1]-normal[1]),
+                            normal[2] + t*(normalN[2]-normal[2]));
                         gl.glTexCoord2d(glCmdTexCoords[j*2], 1-glCmdTexCoords[j*2+1]);
                         vertInd = vertIndexFan[j]*3;
-                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
-                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
-                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd]),
+                            frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1]),
+                            frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
                     }
                 gl.glEnd();
             }
-        } else {
-            // Each triangle has three vertex indices and three tex. coord. indices.
+        }
+        else {
             gl.glBegin(GL2.GL_TRIANGLES);
                 for(i=0;i<md2Mesh.numTriangles;++i){
                     for(j=0;j<3;++j){
                         normal = normals[frameNormalInds[md2Mesh.triangles[i*2][j]]];
                         normalN = normals[frameNormalIndsNext[md2Mesh.triangles[i*2][j]]];
-                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0])
-                                     ,normal[1] + t*(normalN[1]-normal[1])
-                                     ,normal[2] + t*(normalN[2]-normal[2]));
-                        gl.glTexCoord2d(md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2]
-                                      , 1 - md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2 + 1]);
-                        vertInd = md2Mesh.triangles[i*2][j]*3;//In frameVerts, a one-dimensional array, are the 3 vertex coords.
-                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd])
-                                     ,frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1])
-                                     ,frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
+                        gl.glNormal3d(normal[0] + t*(normalN[0]-normal[0]),
+                            normal[1] + t*(normalN[1]-normal[1]),
+                            normal[2] + t*(normalN[2]-normal[2]));
+                        gl.glTexCoord2d(md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2],
+                            1 - md2Mesh.texCoords[md2Mesh.triangles[i*2+1][j]*2 + 1]);
+                        vertInd = md2Mesh.triangles[i*2][j]*3;
+                        gl.glVertex3d(frameVerts[vertInd] + t*(frameVertsNext[vertInd]-frameVerts[vertInd]),
+                            frameVerts[vertInd+1] + t*(frameVertsNext[vertInd+1]-frameVerts[vertInd+1]),
+                            frameVerts[vertInd+2] + t*(frameVertsNext[vertInd+2]-frameVerts[vertInd+2]));
                     }
                 }
             gl.glEnd();

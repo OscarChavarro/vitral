@@ -129,6 +129,27 @@ public class Md2Mesh {
             outStartEnd[1] = 0;            
         }
     }
+
+    public String getAnimationName(short index) {
+        if ( frameNames.isEmpty() ) {
+            return "";
+        }
+        if ( aniInfos.isEmpty() ) {
+            fillAniInfo();
+        }
+        if ( aniInfos.isEmpty() ) {
+            return "";
+        }
+
+        int safeIndex = index;
+        if ( safeIndex < 0 ) {
+            safeIndex = 0;
+        }
+        if ( safeIndex >= aniInfos.size() ) {
+            safeIndex = aniInfos.size() - 1;
+        }
+        return aniInfos.get(safeIndex).name;
+    }
     
     private _AnimationInfo getAniInfo(String nameAnim) {
         for(_AnimationInfo ai : aniInfos) {
