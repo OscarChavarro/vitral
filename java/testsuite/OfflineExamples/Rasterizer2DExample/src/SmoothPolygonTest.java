@@ -16,6 +16,9 @@ import vsdk.toolkit.io.image.ImagePersistence;
 public class SmoothPolygonTest
 {
     public static void main (String[] args) {
+        String outputFileName = (args != null && args.length > 0 && args[0] != null && !args[0].isBlank())
+            ? args[0]
+            : "output3.png";
         //-----------------------------------------------------------------
         RGBImageUncompressed img = null;
         RGBPixel fillcolor = new RGBPixel();
@@ -54,7 +57,8 @@ public class SmoothPolygonTest
         Rasterizer2D.fillSmoothPolygon(img, pol);
         Rasterizer2D.drawPolygon(img, pol, bordercolor);
 
-        ImagePersistence.exportBMP(new File("output.bmp"), img);
-        System.out.println("Resulting image has been written to \"output.bmp\"");    }
+        ImagePersistence.exportPNG(new File(outputFileName), img);
+        System.out.println("Resulting image has been written to \"" + outputFileName + "\"");
+    }
 
 }

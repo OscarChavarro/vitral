@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-gradle run -PrunMainClass=PolygonTest
-display output.bmp
+gradle -q run -PrunMainClass=PolygonTest --args="output2.png"

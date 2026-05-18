@@ -43,8 +43,8 @@ public class ImageOfflineExample
         }
 
         performImageOperation1(img);
-        ImagePersistence.exportBMP(new File("output.bmp"), img);
-        System.out.println("Resulting image has been written to \"output.bmp\"");
+        ImagePersistence.exportPNG(new File("output.png"), img);
+        System.out.println("Resulting image has been written to \"output.png\"");
     }
 
 }
