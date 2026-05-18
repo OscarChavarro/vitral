@@ -33,8 +33,18 @@ private:
     static unsigned int vboPositions_;
     static unsigned int vboNormals_;
     static unsigned int vboUvs_;
+    static unsigned int vboTangents_;
+    static unsigned int vboBinormals_;
     static unsigned int ebo_;
-    static unsigned int program_;
+    static unsigned int constantProgram_;
+    static unsigned int texturedProgram_;
+    static unsigned int flatProgram_;
+    static unsigned int flatTexturedProgram_;
+    static unsigned int gouraudProgram_;
+    static unsigned int phongProgram_;
+    static unsigned int phongBumpProgram_;
+    static unsigned int cookProgram_;
+    static unsigned int cookBumpProgram_;
 
     static int cachedMeridians_;
     static int cachedParallels_;
@@ -42,6 +52,7 @@ private:
 
     static bool initProgramIfNeeded();
     static bool buildSphereMeshIfNeeded(int meridians, int parallels);
+    static unsigned int selectProgram(const RendererConfiguration* quality, bool hasTexture, bool hasNormalMap);
     static unsigned int compileShader(unsigned int type, const char* source);
 };
 

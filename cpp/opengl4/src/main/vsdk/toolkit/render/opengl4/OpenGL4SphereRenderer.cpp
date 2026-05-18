@@ -3,17 +3,22 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "OpenGL4ImageRenderer.h"
 
-#include <vector>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <fstream>
+#include <string>
+#include <vector>
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -21,67 +26,53 @@ unsigned int OpenGL4SphereRenderer::vao_ = 0;
 unsigned int OpenGL4SphereRenderer::vboPositions_ = 0;
 unsigned int OpenGL4SphereRenderer::vboNormals_ = 0;
 unsigned int OpenGL4SphereRenderer::vboUvs_ = 0;
+unsigned int OpenGL4SphereRenderer::vboTangents_ = 0;
+unsigned int OpenGL4SphereRenderer::vboBinormals_ = 0;
 unsigned int OpenGL4SphereRenderer::ebo_ = 0;
-unsigned int OpenGL4SphereRenderer::program_ = 0;
+unsigned int OpenGL4SphereRenderer::constantProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::texturedProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::flatProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::flatTexturedProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::gouraudProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::phongProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::phongBumpProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::cookProgram_ = 0;
+unsigned int OpenGL4SphereRenderer::cookBumpProgram_ = 0;
+
 int OpenGL4SphereRenderer::cachedMeridians_ = -1;
 int OpenGL4SphereRenderer::cachedParallels_ = -1;
 unsigned int OpenGL4SphereRenderer::indexCount_ = 0;
 
-static const char* VERTEX_SHADER =
-    "#version 410 core\n"
-    "layout(location=0) in vec3 aPos;\n"
-    "layout(location=1) in vec3 aNormal;\n"
-    "layout(location=2) in vec2 aUv;\n"
-    "uniform mat4 uMVP;\n"
-    "uniform mat4 uModel;\n"
-    "out vec3 vPos;\n"
-    "out vec3 vNormal;\n"
-    "out vec2 vUv;\n"
-    "void main(){\n"
-    "  vec4 wp = uModel * vec4(aPos, 1.0);\n"
-    "  vPos = wp.xyz;\n"
-    "  vNormal = normalize(mat3(uModel) * aNormal);\n"
-    "  vUv = aUv;\n"
-    "  gl_Position = uMVP * vec4(aPos, 1.0);\n"
-    "}\n";
+static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
-static const char* FRAGMENT_SHADER =
-    "#version 410 core\n"
-    "in vec3 vPos;\n"
-    "in vec3 vNormal;\n"
-    "in vec2 vUv;\n"
-    "uniform vec3 uLightPos;\n"
-    "uniform vec3 uLightColor;\n"
-    "uniform vec3 uViewPos;\n"
-    "uniform vec3 uAmbient;\n"
-    "uniform vec3 uDiffuse;\n"
-    "uniform vec3 uSpecular;\n"
-    "uniform float uShininess;\n"
-    "uniform bool uUseTexture;\n"
-    "uniform bool uUseBump;\n"
-    "uniform sampler2D uTexture;\n"
-    "uniform sampler2D uBump;\n"
-    "uniform int uShadingType;\n"
-    "out vec4 FragColor;\n"
-    "void main(){\n"
-    "  vec3 n = normalize(vNormal);\n"
-    "  if (uUseBump) {\n"
-    "    vec3 bn = texture(uBump, vUv).rgb * 2.0 - 1.0;\n"
-    "    n = normalize(mix(n, bn, 0.4));\n"
-    "  }\n"
-    "  vec3 baseColor = uDiffuse;\n"
-    "  if (uUseTexture) baseColor *= texture(uTexture, vUv).rgb;\n"
-    "  vec3 ambient = uAmbient * baseColor;\n"
-    "  if (uShadingType == 0) { FragColor = vec4(ambient, 1.0); return; }\n"
-    "  vec3 l = normalize(uLightPos - vPos);\n"
-    "  float diff = max(dot(n, l), 0.0);\n"
-    "  vec3 diffuse = diff * baseColor * uLightColor;\n"
-    "  vec3 v = normalize(uViewPos - vPos);\n"
-    "  vec3 r = reflect(-l, n);\n"
-    "  float specF = pow(max(dot(v, r), 0.0), uShininess);\n"
-    "  vec3 spec = specF * uSpecular * uLightColor;\n"
-    "  FragColor = vec4(ambient + diffuse + spec, 1.0);\n"
-    "}\n";
+static std::string readTextFile(const std::string& path)
+{
+    std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
+    if (!f.good()) return std::string();
+    std::string s;
+    f.seekg(0, std::ios::end);
+    s.resize((size_t)f.tellg());
+    f.seekg(0, std::ios::beg);
+    if (!s.empty()) f.read(&s[0], (std::streamsize)s.size());
+    return s;
+}
+
+static std::string findShaderSource(const std::string& shaderFileName)
+{
+    const char* candidates[] = {
+        "../../../../etc/glslShaders/", // from testsuite/OpenGL4Examples/ShadersExample/build
+        "../../../etc/glslShaders/",
+        "../../etc/glslShaders/",
+        "../etc/glslShaders/",
+        "etc/glslShaders/"
+    };
+    for (size_t i = 0; i < sizeof(candidates)/sizeof(candidates[0]); i++) {
+        std::string path = std::string(candidates[i]) + shaderFileName;
+        std::string src = readTextFile(path);
+        if (!src.empty()) return src;
+    }
+    return std::string();
+}
 
 unsigned int OpenGL4SphereRenderer::compileShader(unsigned int type, const char* source)
 {
@@ -91,37 +82,83 @@ unsigned int OpenGL4SphereRenderer::compileShader(unsigned int type, const char*
     int ok = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
     if (!ok) {
-        char log[2048];
+        char log[4096];
         glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
-        fprintf(stderr, "OpenGL4SphereRenderer shader compile error: %s\n", log);
+        std::fprintf(stderr, "OpenGL4SphereRenderer shader compile error: %s\n", log);
         glDeleteShader(shader);
         return 0;
     }
     return shader;
 }
 
-bool OpenGL4SphereRenderer::initProgramIfNeeded()
+static unsigned int buildProgram(const char* vsFile, const char* fsFile)
 {
-    if (program_ != 0) return true;
-    unsigned int vs = compileShader(GL_VERTEX_SHADER, VERTEX_SHADER);
-    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
-    if (vs == 0 || fs == 0) return false;
+    std::string vsSource = findShaderSource(vsFile);
+    std::string fsSource = findShaderSource(fsFile);
+    if (vsSource.empty() || fsSource.empty()) {
+        std::fprintf(stderr, "OpenGL4SphereRenderer shader not found: %s / %s\n", vsFile, fsFile);
+        return 0;
+    }
 
-    program_ = glCreateProgram();
-    glAttachShader(program_, vs);
-    glAttachShader(program_, fs);
-    glLinkProgram(program_);
+    auto compileLocal = [](unsigned int type, const char* source) -> unsigned int {
+        unsigned int shader = glCreateShader(type);
+        glShaderSource(shader, 1, &source, nullptr);
+        glCompileShader(shader);
+        int ok = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+        if (!ok) {
+            char log[4096];
+            glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+            std::fprintf(stderr, "OpenGL4SphereRenderer shader compile error: %s\n", log);
+            glDeleteShader(shader);
+            return 0;
+        }
+        return shader;
+    };
+
+    unsigned int vs = compileLocal(GL_VERTEX_SHADER, vsSource.c_str());
+    unsigned int fs = compileLocal(GL_FRAGMENT_SHADER, fsSource.c_str());
+    if (vs == 0 || fs == 0) {
+        if (vs) glDeleteShader(vs);
+        if (fs) glDeleteShader(fs);
+        return 0;
+    }
+
+    unsigned int program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
     glDeleteShader(vs);
     glDeleteShader(fs);
 
     int ok = 0;
-    glGetProgramiv(program_, GL_LINK_STATUS, &ok);
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
     if (!ok) {
-        char log[2048];
-        glGetProgramInfoLog(program_, sizeof(log), nullptr, log);
-        fprintf(stderr, "OpenGL4SphereRenderer link error: %s\n", log);
-        glDeleteProgram(program_);
-        program_ = 0;
+        char log[4096];
+        glGetProgramInfoLog(program, sizeof(log), nullptr, log);
+        std::fprintf(stderr, "OpenGL4SphereRenderer link error: %s\n", log);
+        glDeleteProgram(program);
+        return 0;
+    }
+    return program;
+}
+
+bool OpenGL4SphereRenderer::initProgramIfNeeded()
+{
+    if (constantProgram_ != 0) return true;
+
+    constantProgram_ = buildProgram("constantVertexShader.glsl", "constantPixelShader.glsl");
+    texturedProgram_ = buildProgram("constantTextureVertexShader.glsl", "constantTexturePixelShader.glsl");
+    flatProgram_ = buildProgram("flatVertexShader.glsl", "flatPixelShader.glsl");
+    flatTexturedProgram_ = buildProgram("flatTexturedVertexShader.glsl", "flatTexturedPixelShader.glsl");
+    gouraudProgram_ = buildProgram("gouraudTextureVertexShader.glsl", "gouraudTexturePixelShader.glsl");
+    phongProgram_ = buildProgram("phongTextureVertexShader.glsl", "phongTexturePixelShader.glsl");
+    phongBumpProgram_ = buildProgram("phongTextureBumpVertexShader.glsl", "phongTextureBumpPixelShader.glsl");
+    cookProgram_ = buildProgram("phongTextureVertexShader.glsl", "cookTexturePixelShader.glsl");
+    cookBumpProgram_ = buildProgram("phongTextureBumpVertexShader.glsl", "cookTextureBumpPixelShader.glsl");
+
+    if (!constantProgram_ || !texturedProgram_ || !flatProgram_ || !flatTexturedProgram_ ||
+        !gouraudProgram_ || !phongProgram_ || !phongBumpProgram_ || !cookProgram_ || !cookBumpProgram_) {
         return false;
     }
 
@@ -129,21 +166,52 @@ bool OpenGL4SphereRenderer::initProgramIfNeeded()
     glGenBuffers(1, &vboPositions_);
     glGenBuffers(1, &vboNormals_);
     glGenBuffers(1, &vboUvs_);
+    glGenBuffers(1, &vboTangents_);
+    glGenBuffers(1, &vboBinormals_);
     glGenBuffers(1, &ebo_);
     return true;
 }
 
+unsigned int OpenGL4SphereRenderer::selectProgram(const RendererConfiguration* quality, bool hasTexture, bool hasNormalMap)
+{
+    if (quality == nullptr) {
+        return hasTexture ? OpenGL4SphereRenderer::texturedProgram_ : OpenGL4SphereRenderer::constantProgram_;
+    }
+
+    int shadingType = quality->getShadingType();
+    if (shadingType == RendererConfiguration::SHADING_TYPE_NOLIGHT) {
+        return (quality->isTextureSet() && hasTexture)
+            ? OpenGL4SphereRenderer::texturedProgram_ : OpenGL4SphereRenderer::constantProgram_;
+    }
+    if (shadingType == RendererConfiguration::SHADING_TYPE_FLAT) {
+        return (quality->isTextureSet() && hasTexture)
+            ? OpenGL4SphereRenderer::flatTexturedProgram_ : OpenGL4SphereRenderer::flatProgram_;
+    }
+    if (shadingType == RendererConfiguration::SHADING_TYPE_PHONG) {
+        if (quality->isBumpMapSet() && hasNormalMap) return OpenGL4SphereRenderer::phongBumpProgram_;
+        return OpenGL4SphereRenderer::phongProgram_;
+    }
+    if (shadingType == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE) {
+        if (quality->isBumpMapSet() && hasNormalMap) return OpenGL4SphereRenderer::cookBumpProgram_;
+        return OpenGL4SphereRenderer::cookProgram_;
+    }
+    return OpenGL4SphereRenderer::gouraudProgram_;
+}
+
 bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels)
 {
-    meridians = (meridians < 3) ? 3 : meridians;
-    parallels = (parallels < 2) ? 2 : parallels;
+    meridians = std::max(12, meridians);
+    parallels = std::max(8, parallels);
     if (cachedMeridians_ == meridians && cachedParallels_ == parallels && indexCount_ > 0) {
         return true;
     }
 
+    Sphere unitSphere(1.0);
     std::vector<float> positions;
     std::vector<float> normals;
     std::vector<float> uvs;
+    std::vector<float> tangents;
+    std::vector<float> binormals;
     std::vector<unsigned int> indices;
 
     for (int p = 0; p <= parallels; ++p) {
@@ -152,20 +220,26 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
         for (int m = 0; m <= meridians; ++m) {
             double s = static_cast<double>(m) / static_cast<double>(meridians);
             double theta = 2.0 * M_PI * s;
-            double cosPhi = std::cos(phi);
-            double sinPhi = std::sin(phi);
-            double cosTheta = std::cos(theta);
-            double sinTheta = std::sin(theta);
-            Vector3Dd pos(cosPhi * cosTheta, cosPhi * sinTheta, sinPhi);
-            Vector3Dd nrm = pos.normalized();
-            positions.push_back(static_cast<float>(pos.x()));
-            positions.push_back(static_cast<float>(pos.y()));
-            positions.push_back(static_cast<float>(pos.z()));
-            normals.push_back(static_cast<float>(nrm.x()));
-            normals.push_back(static_cast<float>(nrm.y()));
-            normals.push_back(static_cast<float>(nrm.z()));
-            uvs.push_back(static_cast<float>(s));
-            uvs.push_back(static_cast<float>(t));
+
+            Vector3Dd pos = unitSphere.spherePosition(theta, phi);
+            Vector3Dd nrm = unitSphere.sphereNormal(theta, phi);
+            Vector3Dd tan = unitSphere.sphereTangent(theta, phi);
+            Vector3Dd bin = unitSphere.sphereBinormal(theta, phi);
+
+            positions.push_back((float)pos.x());
+            positions.push_back((float)pos.y());
+            positions.push_back((float)pos.z());
+            normals.push_back((float)nrm.x());
+            normals.push_back((float)nrm.y());
+            normals.push_back((float)nrm.z());
+            tangents.push_back((float)tan.x());
+            tangents.push_back((float)tan.y());
+            tangents.push_back((float)tan.z());
+            binormals.push_back((float)bin.x());
+            binormals.push_back((float)bin.y());
+            binormals.push_back((float)bin.z());
+            uvs.push_back((float)(1.0 - s)); // Java parity
+            uvs.push_back((float)t);
         }
     }
 
@@ -198,6 +272,16 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(2);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vboTangents_);
+    glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(float), tangents.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboBinormals_);
+    glBufferData(GL_ARRAY_BUFFER, binormals.size() * sizeof(float), binormals.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(4);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
@@ -205,8 +289,71 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
 
     cachedMeridians_ = meridians;
     cachedParallels_ = parallels;
-    indexCount_ = static_cast<unsigned int>(indices.size());
+    indexCount_ = (unsigned int)indices.size();
     return true;
+}
+
+static void setUniform3f(unsigned int program, const char* name, const Vector3Dd& v)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc >= 0) glUniform3f(loc, (float)v.x(), (float)v.y(), (float)v.z());
+}
+
+static void setUniform3f(unsigned int program, const char* name, const ColorRgb& c)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc >= 0) glUniform3f(loc, (float)c.r(), (float)c.g(), (float)c.b());
+}
+
+static void setUniform1i(unsigned int program, const char* name, int v)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc >= 0) glUniform1i(loc, v);
+}
+
+static void setUniform1f(unsigned int program, const char* name, float v)
+{
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc >= 0) glUniform1f(loc, v);
+}
+
+static void configureMicrofacetUniforms(unsigned int programId, const SimpleMaterial* material)
+{
+    float roughness = 0.35f;
+    float alpha = roughness * roughness;
+    ColorRgb fresnelF0 = material->getSpecular();
+    float kd = 1.0f;
+    float ks = 1.0f;
+    int fresnelModel = MicroFacetedMaterial::FRESNEL_MODEL_SCHLICK;
+    int ndfModel = MicroFacetedMaterial::NDF_MODEL_BECKMANN;
+    int geometryModel = MicroFacetedMaterial::GEOMETRY_MODEL_SMITH;
+    ColorRgb eta(1.5, 1.5, 1.5);
+    ColorRgb kappa(0.0, 0.0, 0.0);
+
+    const MicroFacetedMaterial* mf = dynamic_cast<const MicroFacetedMaterial*>(material);
+    if (mf) {
+        roughness = (float)mf->getRoughness();
+        alpha = (float)mf->getAlpha();
+        fresnelF0 = mf->getFresnelF0();
+        kd = (float)mf->getKd();
+        ks = (float)mf->getKs();
+        fresnelModel = mf->getFresnelModel();
+        ndfModel = mf->getNdfModel();
+        geometryModel = mf->getGeometryModel();
+        eta = mf->getEta();
+        kappa = mf->getKappa();
+    }
+
+    setUniform1f(programId, "cookRoughness", roughness);
+    setUniform1f(programId, "cookAlpha", alpha);
+    setUniform1f(programId, "cookKd", kd);
+    setUniform1f(programId, "cookKs", ks);
+    setUniform3f(programId, "cookF0", fresnelF0);
+    setUniform3f(programId, "cookEta", eta);
+    setUniform3f(programId, "cookKappa", kappa);
+    setUniform1i(programId, "cookFresnelModel", fresnelModel);
+    setUniform1i(programId, "cookNdfModel", ndfModel);
+    setUniform1i(programId, "cookGeometryModel", geometryModel);
 }
 
 void OpenGL4SphereRenderer::draw(
@@ -228,139 +375,147 @@ void OpenGL4SphereRenderer::draw(
         return;
     }
 
-    Matrix4x4d model = Matrix4x4d::identityMatrix().multiply(modelRotation).multiply(
+    bool hasTexture = (textureMap != nullptr);
+    bool hasNormalMap = (bumpMapHeightRgb != nullptr);
+    int textureId = hasTexture ? OpenGL4ImageRenderer::activate(textureMap) : 0;
+    int normalMapId = (hasNormalMap && quality->isBumpMapSet()) ? OpenGL4ImageRenderer::activate(bumpMapHeightRgb) : 0;
+
+    unsigned int programId = OpenGL4SphereRenderer::selectProgram(quality, hasTexture, normalMapId > 0);
+    if (programId == 0) return;
+
+    Matrix4x4d localTransform = modelRotation.multiply(
         Matrix4x4d().scale(sphere->getRadius(), sphere->getRadius(), sphere->getRadius()));
-    Matrix4x4d mvp = camera->calculateProjectionMatrix().multiply(model);
+    Matrix4x4d modelViewProjection = camera->calculateProjectionMatrix().multiply(localTransform);
+    Matrix4x4d modelViewITLocal = localTransform.invert().transpose();
 
-    float* mvpFloat = mvp.exportToFloatArrayColumnOrder();
-    float* modelFloat = model.exportToFloatArrayColumnOrder();
+    float* mvpFloat = modelViewProjection.exportToFloatArrayColumnOrder();
+    float* modelFloat = localTransform.exportToFloatArrayColumnOrder();
+    float* modelItFloat = modelViewITLocal.exportToFloatArrayColumnOrder();
 
-    glUseProgram(program_);
-    glUniformMatrix4fv(glGetUniformLocation(program_, "uMVP"), 1, GL_FALSE, mvpFloat);
-    glUniformMatrix4fv(glGetUniformLocation(program_, "uModel"), 1, GL_FALSE, modelFloat);
+    glUseProgram(programId);
 
-    Vector3Dd lp = light->getPosition();
-    Vector3Dd cp = camera->getPosition();
-    ColorRgb lc = light->getSpecular();
-    ColorRgb amb = material->getAmbient();
-    ColorRgb dif = material->getDiffuse();
-    ColorRgb spe = material->getSpecular();
+    GLint mvpLoc = glGetUniformLocation(programId, "modelViewProjectionLocal");
+    if (mvpLoc >= 0) glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, mvpFloat);
+    GLint modelLoc = glGetUniformLocation(programId, "modelViewLocal");
+    if (modelLoc >= 0) glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelFloat);
+    GLint modelItLoc = glGetUniformLocation(programId, "modelViewITLocal");
+    if (modelItLoc >= 0) glUniformMatrix4fv(modelItLoc, 1, GL_FALSE, modelItFloat);
 
-    glUniform3f(glGetUniformLocation(program_, "uLightPos"), (float)lp.x(), (float)lp.y(), (float)lp.z());
-    glUniform3f(glGetUniformLocation(program_, "uLightColor"), (float)lc.r(), (float)lc.g(), (float)lc.b());
-    glUniform3f(glGetUniformLocation(program_, "uViewPos"), (float)cp.x(), (float)cp.y(), (float)cp.z());
-    glUniform3f(glGetUniformLocation(program_, "uAmbient"), (float)amb.r(), (float)amb.g(), (float)amb.b());
-    glUniform3f(glGetUniformLocation(program_, "uDiffuse"), (float)dif.r(), (float)dif.g(), (float)dif.b());
-    glUniform3f(glGetUniformLocation(program_, "uSpecular"), (float)spe.r(), (float)spe.g(), (float)spe.b());
-    glUniform1f(glGetUniformLocation(program_, "uShininess"), (float)material->getPhongExponent());
-    glUniform1i(glGetUniformLocation(program_, "uShadingType"), quality->getShadingType());
+    setUniform3f(programId, "cameraPositionGlobal", camera->getPosition());
+    setUniform3f(programId, "lightPositionsGlobal[0]", light->getPosition());
+    setUniform3f(programId, "lightColorsGlobal[0]", light->getSpecular());
+    setUniform1i(programId, "numberOfLights", 1);
 
-    int texId = -1;
-    int bumpId = -1;
-    bool useTexture = quality->isTextureSet() && textureMap != nullptr;
-    bool useBump = quality->isBumpMapSet() && bumpMapHeightRgb != nullptr;
+    setUniform3f(programId, "ambientColor", material->getAmbient());
+    setUniform3f(programId, "diffuseColor", material->getDiffuse());
+    setUniform3f(programId, "specularColor", material->getSpecular());
+    setUniform3f(programId, "bumpScale", DEFAULT_BUMP_SCALE);
+    setUniform1f(programId, "phongExponent", (float)material->getPhongExponent());
+    configureMicrofacetUniforms(programId, material);
 
-    if (useTexture) {
-        texId = OpenGL4ImageRenderer::activate(textureMap);
-        if (texId > 0) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, (unsigned int)texId);
-            glUniform1i(glGetUniformLocation(program_, "uTexture"), 0);
-        }
+    setUniform1i(programId, "withTexture", (quality->isTextureSet() && textureId > 0) ? 1 : 0);
+    setUniform1i(programId, "withBumpMap", (quality->isBumpMapSet() && normalMapId > 0) ? 1 : 0);
+    setUniform1i(programId, "withVertexColors", 0);
+    setUniform1i(programId, "sTexture", 0);
+    setUniform1i(programId, "sNormalMap", 1);
+
+    if (textureId > 0) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, (unsigned int)textureId);
     }
-    if (useBump) {
-        bumpId = OpenGL4ImageRenderer::activate(bumpMapHeightRgb);
-        if (bumpId > 0) {
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, (unsigned int)bumpId);
-            glUniform1i(glGetUniformLocation(program_, "uBump"), 1);
-        }
+    if (normalMapId > 0) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, (unsigned int)normalMapId);
+        glActiveTexture(GL_TEXTURE0);
     }
 
     glBindVertexArray(vao_);
 
-    const GLint locUseTexture = glGetUniformLocation(program_, "uUseTexture");
-    const GLint locUseBump = glGetUniformLocation(program_, "uUseBump");
-    const GLint locAmbient = glGetUniformLocation(program_, "uAmbient");
-    const GLint locDiffuse = glGetUniformLocation(program_, "uDiffuse");
-    const GLint locShadingType = glGetUniformLocation(program_, "uShadingType");
-
     if (quality->isSurfacesSet()) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.0f, 1.0f);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glUniform1i(locShadingType, quality->getShadingType());
-        glUniform1i(locUseTexture, useTexture ? 1 : 0);
-        glUniform1i(locUseBump, useBump ? 1 : 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)indexCount_, GL_UNSIGNED_INT, nullptr);
+        glDisable(GL_POLYGON_OFFSET_FILL);
     }
 
     if (quality->isWiresSet()) {
-        ColorRgb wire(1.0, 1.0, 1.0);
+        unsigned int wireProgram = OpenGL4SphereRenderer::selectProgram(nullptr, false, false);
+        glUseProgram(wireProgram);
+        GLint wireMvp = glGetUniformLocation(wireProgram, "modelViewProjectionLocal");
+        if (wireMvp >= 0) glUniformMatrix4fv(wireMvp, 1, GL_FALSE, mvpFloat);
+        GLint wireDiffuse = glGetUniformLocation(wireProgram, "diffuseColor");
+        if (wireDiffuse >= 0) glUniform3f(wireDiffuse, 1.0f, 1.0f, 1.0f);
+        setUniform1i(wireProgram, "withTexture", 0);
+        setUniform1i(wireProgram, "withVertexColors", 0);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
         glEnable(GL_POLYGON_OFFSET_LINE);
         glPolygonOffset(-1.0f, -1.0f);
+        glDisable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glUniform1i(locShadingType, RendererConfiguration::SHADING_TYPE_NOLIGHT);
-        glUniform3f(locAmbient, (float)wire.r(), (float)wire.g(), (float)wire.b());
-        glUniform3f(locDiffuse, (float)wire.r(), (float)wire.g(), (float)wire.b());
-        glUniform1i(locUseTexture, 0);
-        glUniform1i(locUseBump, 0);
+        glLineWidth(1.0f);
         glDrawElements(GL_TRIANGLES, (GLsizei)indexCount_, GL_UNSIGNED_INT, nullptr);
         glDisable(GL_POLYGON_OFFSET_LINE);
-        glUniform3f(locAmbient, (float)amb.r(), (float)amb.g(), (float)amb.b());
-        glUniform3f(locDiffuse, (float)dif.r(), (float)dif.g(), (float)dif.b());
-        glUniform1i(locShadingType, quality->getShadingType());
     }
 
     if (quality->isPointsSet()) {
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glPointSize(3.0f);
+        unsigned int pointsProgram = OpenGL4SphereRenderer::selectProgram(nullptr, false, false);
+        glUseProgram(pointsProgram);
+        GLint pointsMvp = glGetUniformLocation(pointsProgram, "modelViewProjectionLocal");
+        if (pointsMvp >= 0) glUniformMatrix4fv(pointsMvp, 1, GL_FALSE, mvpFloat);
+        GLint pointsDiffuse = glGetUniformLocation(pointsProgram, "diffuseColor");
+        if (pointsDiffuse >= 0) glUniform3f(pointsDiffuse, 1.0f, 0.0f, 0.0f);
+        setUniform1i(pointsProgram, "withTexture", 0);
+        setUniform1i(pointsProgram, "withVertexColors", 0);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glDisable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-        glUniform1i(locShadingType, RendererConfiguration::SHADING_TYPE_NOLIGHT);
-        glUniform3f(locAmbient, 1.0f, 0.0f, 0.0f);
-        glUniform3f(locDiffuse, 1.0f, 0.0f, 0.0f);
-        glUniform1i(locUseTexture, 0);
-        glUniform1i(locUseBump, 0);
+        glPointSize(4.0f);
         glDrawElements(GL_TRIANGLES, (GLsizei)indexCount_, GL_UNSIGNED_INT, nullptr);
-        glUniform3f(locAmbient, (float)amb.r(), (float)amb.g(), (float)amb.b());
-        glUniform3f(locDiffuse, (float)dif.r(), (float)dif.g(), (float)dif.b());
-        glUniform1i(locShadingType, quality->getShadingType());
     }
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBindVertexArray(0);
-
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
 
     delete[] mvpFloat;
     delete[] modelFloat;
+    delete[] modelItFloat;
 }
 
 void OpenGL4SphereRenderer::dispose()
 {
-    if (vao_ != 0) {
-        glDeleteVertexArrays(1, &vao_);
-        vao_ = 0;
+    if (vao_ != 0) { glDeleteVertexArrays(1, &vao_); vao_ = 0; }
+    if (vboPositions_ != 0) { glDeleteBuffers(1, &vboPositions_); vboPositions_ = 0; }
+    if (vboNormals_ != 0) { glDeleteBuffers(1, &vboNormals_); vboNormals_ = 0; }
+    if (vboUvs_ != 0) { glDeleteBuffers(1, &vboUvs_); vboUvs_ = 0; }
+    if (vboTangents_ != 0) { glDeleteBuffers(1, &vboTangents_); vboTangents_ = 0; }
+    if (vboBinormals_ != 0) { glDeleteBuffers(1, &vboBinormals_); vboBinormals_ = 0; }
+    if (ebo_ != 0) { glDeleteBuffers(1, &ebo_); ebo_ = 0; }
+
+    unsigned int programs[] = {
+        constantProgram_, texturedProgram_, flatProgram_, flatTexturedProgram_, gouraudProgram_,
+        phongProgram_, phongBumpProgram_, cookProgram_, cookBumpProgram_ };
+    for (size_t i = 0; i < sizeof(programs)/sizeof(programs[0]); i++) {
+        if (programs[i] != 0) glDeleteProgram(programs[i]);
     }
-    if (vboPositions_ != 0) {
-        glDeleteBuffers(1, &vboPositions_);
-        vboPositions_ = 0;
-    }
-    if (vboNormals_ != 0) {
-        glDeleteBuffers(1, &vboNormals_);
-        vboNormals_ = 0;
-    }
-    if (vboUvs_ != 0) {
-        glDeleteBuffers(1, &vboUvs_);
-        vboUvs_ = 0;
-    }
-    if (ebo_ != 0) {
-        glDeleteBuffers(1, &ebo_);
-        ebo_ = 0;
-    }
-    if (program_ != 0) {
-        glDeleteProgram(program_);
-        program_ = 0;
-    }
+    constantProgram_ = texturedProgram_ = flatProgram_ = flatTexturedProgram_ = gouraudProgram_ = 0;
+    phongProgram_ = phongBumpProgram_ = cookProgram_ = cookBumpProgram_ = 0;
+
     cachedMeridians_ = -1;
     cachedParallels_ = -1;
     indexCount_ = 0;

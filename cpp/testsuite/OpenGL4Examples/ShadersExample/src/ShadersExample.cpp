@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <thread>
+#include <atomic>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -35,6 +37,8 @@
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/Tile.h"
+#include "vsdk/toolkit/render/TileGenerator.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
@@ -49,6 +53,13 @@
 static const int WINDOW_WIDTH = 1100;
 static const int WINDOW_HEIGHT = 900;
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
+
+static int detectCpuCount()
+{
+    const unsigned int hc = std::thread::hardware_concurrency();
+    if ( hc > 0 ) return (int)hc;
+    return 1;
+}
 
 static RGBImageUncompressed* loadRgbByCandidates(const std::vector<std::string>& candidates)
 {
@@ -127,6 +138,8 @@ public:
     double lastHudTitleTickSeconds;
     RGBImageUncompressed* softwareFrameImage;
     JogHudRenderer* hudRenderer;
+    int softwareThreadCount;
+    bool softwareThreadInfoPrinted;
     Animation animation;
     ShadersKeyboardInteractionTechniques keyboardInteractionTechniques;
     ShadersMouseInteractionTechniques mouseInteractionTechniques;
@@ -137,7 +150,9 @@ public:
           textureMap(0), bumpMap(0), bumpNormalMap(0), meridians(100), parallels(50), angle(0.0),
           animationEnabled(false), lightAnimationEnabled(false), showHud(true),
           renderingMode(ShaderOperationMode::OPENGL_4_1),
-          lastHudTitleTickSeconds(-1.0), softwareFrameImage(0), hudRenderer(0) {}
+          lastHudTitleTickSeconds(-1.0), softwareFrameImage(0), hudRenderer(0),
+          softwareThreadCount(std::max(1, detectCpuCount())),
+          softwareThreadInfoPrinted(false) {}
 
     void updateHudTitle()
     {
@@ -220,8 +235,53 @@ public:
                 background,
                 camera->exportToCameraSnapshot(softwareFrameImage->getXSize(), softwareFrameImage->getYSize()));
 
-            SimpleRaytracer raytracer;
-            raytracer.execute(softwareFrameImage, &quality, snapshot, 0);
+            if (!softwareThreadInfoPrinted) {
+                std::fprintf(stderr, "ShadersExample CPU parallel threads: %d\n", softwareThreadCount);
+                softwareThreadInfoPrinted = true;
+            }
+
+            TileGenerator tileGenerator(
+                TileGenerationStrategy::LINEAR,
+                softwareFrameImage,
+                softwareFrameImage->getXSize(),
+                softwareFrameImage->getYSize(),
+                softwareThreadCount);
+            const std::vector<Tile>& tiles = tileGenerator.getTiles();
+            std::atomic<size_t> nextTileIndex(0);
+            std::vector<std::thread> workers;
+            workers.reserve((size_t)softwareThreadCount);
+            std::atomic<bool> failed(false);
+            std::exception_ptr firstError;
+
+            for (int w = 0; w < softwareThreadCount; w++) {
+                workers.push_back(std::thread([&]() {
+                    SimpleRaytracer raytracer;
+                    try {
+                        while (true) {
+                            size_t tileIndex = nextTileIndex.fetch_add(1);
+                            if (tileIndex >= tiles.size()) break;
+                            const Tile& tile = tiles[tileIndex];
+                            raytracer.execute(
+                                softwareFrameImage,
+                                &quality,
+                                snapshot,
+                                0,
+                                0,
+                                tile.getX0(),
+                                tile.getY0(),
+                                tile.getX1(),
+                                tile.getY1());
+                        }
+                    }
+                    catch (...) {
+                        if (!failed.exchange(true)) {
+                            firstError = std::current_exception();
+                        }
+                    }
+                }));
+            }
+            for (size_t i = 0; i < workers.size(); i++) workers[i].join();
+            if (firstError) std::rethrow_exception(firstError);
         }
         catch (...) {
             if (snapshot != 0) delete snapshot;
