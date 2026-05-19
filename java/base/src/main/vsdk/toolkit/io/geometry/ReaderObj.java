@@ -285,6 +285,7 @@ public class ReaderObj extends PersistenceElement
             // Object building
             if ( lineOfText.startsWith("o ") || lineOfText.startsWith("g ") ) {
                 if ( vertexPositionsArray.size() > 0 ) {
+                    ensureMaterialSelection(nextMaterialsArray, materialsHashMap, material_triangleRange_table);
                     addMeshToGroup(meshGroup,
                                    nextGeometricObjectName,
                                    vertexPositionsArray,
@@ -323,6 +324,7 @@ public class ReaderObj extends PersistenceElement
 
         // Build the last mesh from remaining vertexes, if any
         if ( vertexPositionsArray.size() > 0 ) {
+            ensureMaterialSelection(nextMaterialsArray, materialsHashMap, material_triangleRange_table);
             addMeshToGroup(meshGroup,
                            nextGeometricObjectName,
                            vertexPositionsArray,
@@ -345,6 +347,22 @@ public class ReaderObj extends PersistenceElement
             }
         }
         return finalTriangleMeshGroup;
+    }
+
+    private static void ensureMaterialSelection(
+        ArrayList<SimpleMaterial> nextMaterialsArray,
+        HashMap<String, SimpleMaterial> materialsHashMap,
+        ArrayList<int[]> material_triangleRange_table)
+    {
+        if ( !nextMaterialsArray.isEmpty() || materialsHashMap.isEmpty() ) {
+            return;
+        }
+        SimpleMaterial fallbackMaterial = materialsHashMap.values().iterator().next();
+        nextMaterialsArray.add(fallbackMaterial);
+        int[] auxMaterialRange = new int[2];
+        auxMaterialRange[0] = 0;
+        auxMaterialRange[1] = 0;
+        material_triangleRange_table.add(auxMaterialRange);
     }
 
     private static void
@@ -419,13 +437,19 @@ public class ReaderObj extends PersistenceElement
         newVertexArray = new Vertex[finalVertexes.size()];
         for ( i = 0; i < finalVertexes.size(); i++ ) {
             // Position
-            p = vertexPositionsArray.get(
-                finalVertexes.get(i).vertexPositionIndex-1);
+            int srcPos = resolveObjIndex(
+                finalVertexes.get(i).vertexPositionIndex, vertexPositionsArray.size());
+            if ( srcPos < 0 || srcPos >= vertexPositionsArray.size() ) {
+                srcPos = 0;
+            }
+            p = vertexPositionsArray.get(srcPos);
             p = R.multiply(p);
             newVertexArray[i] = new Vertex(p);
             // Texture coordinates
-            ti = finalVertexes.get(i).vertexTextureCoordinateIndex - 1;
-            if ( ti >= 0 ) {
+            ti = resolveObjIndex(
+                finalVertexes.get(i).vertexTextureCoordinateIndex,
+                vertexTextureCoordinatesArray.size());
+            if ( ti >= 0 && ti < vertexTextureCoordinatesArray.size() ) {
                 newVertexArray[i].u = vertexTextureCoordinatesArray.get(ti).x();
                 newVertexArray[i].v = vertexTextureCoordinatesArray.get(ti).y();
             }
@@ -433,7 +457,8 @@ public class ReaderObj extends PersistenceElement
                 newVertexArray[i].u = newVertexArray[i].v = 0.0;
             }
             // Normals
-            ni = finalVertexes.get(i).vertexNormalIndex - 1;
+            ni = resolveObjIndex(
+                finalVertexes.get(i).vertexNormalIndex, vertexNormalsArray.size());
             if ( ni >= 0 && ni < vertexNormalsArray.size() ) {
                 n = vertexNormalsArray.get(ni);
                 n = R.multiply(n);
@@ -524,14 +549,15 @@ public class ReaderObj extends PersistenceElement
                 i++;
             }
         }
-        quickSortTriangleRange(textureRanges, 0, textureRanges.length-1);
+        if ( textureRanges.length > 0 ) {
+            quickSortTriangleRange(textureRanges, 0, textureRanges.length-1);
+        }
         newTriangleMesh.setTextureRanges(textureRanges);
 
         //- Finalize mesh and add to group --------------------------------
         if ( vertexNormalsArray.size() < 0 ) {
             newTriangleMesh.calculateNormals();
         }
-        newTriangleMesh.reorientateNormals();
         newTriangleMesh.setName(nextGeometricObjectName);
         meshGroup.add(newTriangleMesh);
     }
@@ -630,15 +656,22 @@ public class ReaderObj extends PersistenceElement
     }
 
     /**
-    In some obj files (particulary those exported from 3DSMax) some array
-    indexes contains negative numbers. This method is supposed to parse integer
-    numbers from a string token, and returning the absolute value of it.
+    Parses integer index values preserving sign (OBJ supports negative indices).
     */
     private static int readIndexInteger(String inToken)
     {
-        int val = Integer.parseInt(inToken);
-        if ( val < 0 ) val *= -1;
-        return val;
+        return Integer.parseInt(inToken);
+    }
+
+    private static int resolveObjIndex(int rawIndex, int count)
+    {
+        if ( rawIndex > 0 ) {
+            return rawIndex - 1;
+        }
+        if ( rawIndex < 0 ) {
+            return count + rawIndex;
+        }
+        return -1;
     }
 
     /**
@@ -764,6 +797,18 @@ public class ReaderObj extends PersistenceElement
                     activeMaterial = activeMaterial.withPhongExponent(
                         Float.parseFloat(stMat.nextToken()));
                 }
+                if ( lineOfText.startsWith("d ") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // d
+                    activeMaterial = activeMaterial.withOpacity(
+                        Float.parseFloat(stMat.nextToken()));
+                }
+                if ( lineOfText.startsWith("Tr ") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Tr
+                    activeMaterial = activeMaterial.withOpacity(
+                        1.0 - Float.parseFloat(stMat.nextToken()));
+                }
                 if ( lineOfText.startsWith("Kd") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
                     stMat.nextToken(); // Kd
@@ -791,10 +836,32 @@ public class ReaderObj extends PersistenceElement
                         Float.parseFloat(stMat.nextToken()));
                     activeMaterial = activeMaterial.withSpecular(color);
                 }
-                if ( lineOfText.startsWith("d") ) {
+                if ( lineOfText.startsWith("Ke") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
-                    stMat.nextToken(); // d
-                    //activeMaterial.setAlpha(Float.parseFloat(stMat.nextToken()));
+                    stMat.nextToken(); // Ke
+                    ColorRgb color = new ColorRgb(
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()));
+                    activeMaterial = activeMaterial.withEmission(color);
+                }
+                if ( lineOfText.startsWith("Kt") || lineOfText.startsWith("Tf") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Kt/Tf
+                    ColorRgb color = new ColorRgb(
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()),
+                        Float.parseFloat(stMat.nextToken()));
+                    activeMaterial = activeMaterial.withTransmittance(color);
+                }
+                if ( lineOfText.startsWith("Ni") ) {
+                    StringTokenizer stMat=new StringTokenizer(lineOfText, " ");
+                    stMat.nextToken(); // Ni
+                    activeMaterial = activeMaterial.withIndexOfRefraction(
+                        Float.parseFloat(stMat.nextToken()));
+                }
+                if ( lineOfText.startsWith("illum") ) {
+                    // Ignored by Vitral material model.
                 }
                 if ( lineOfText.startsWith("newmtl") ) {
                     StringTokenizer stMat=new StringTokenizer(lineOfText, " ");

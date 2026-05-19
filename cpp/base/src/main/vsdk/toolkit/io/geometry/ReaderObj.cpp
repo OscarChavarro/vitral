@@ -54,9 +54,18 @@ static std::string joinPath(const std::string& a, const std::string& b)
 
 static int readIndexInteger(const std::string& token)
 {
-    int val = std::atoi(token.c_str());
-    if ( val < 0 ) val *= -1;
-    return val;
+    return std::atoi(token.c_str());
+}
+
+static int resolveObjIndex(int rawIndex, int count)
+{
+    if (rawIndex > 0) {
+        return rawIndex - 1;
+    }
+    if (rawIndex < 0) {
+        return count + rawIndex;
+    }
+    return -1;
 }
 
 static ReaderObjVertex readFaceVertex(const std::string& text)
@@ -150,6 +159,12 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
         if (cmd == "Ns") {
             double v; if (ls >> v) active = active.withPhongExponent(v);
         }
+        else if (cmd == "d") {
+            double v; if (ls >> v) active = active.withOpacity(v);
+        }
+        else if (cmd == "Tr") {
+            double tr; if (ls >> tr) active = active.withOpacity(1.0 - tr);
+        }
         else if (cmd == "Kd") {
             double r,g,b; if (ls >> r >> g >> b) active = active.withDiffuse(ColorRgb(r,g,b));
         }
@@ -158,6 +173,18 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
         }
         else if (cmd == "Ks") {
             double r,g,b; if (ls >> r >> g >> b) active = active.withSpecular(ColorRgb(r,g,b));
+        }
+        else if (cmd == "Ke") {
+            double r,g,b; if (ls >> r >> g >> b) active = active.withEmission(ColorRgb(r,g,b));
+        }
+        else if (cmd == "Kt" || cmd == "Tf") {
+            double r,g,b; if (ls >> r >> g >> b) active = active.withTransmittance(ColorRgb(r,g,b));
+        }
+        else if (cmd == "Ni") {
+            double ior; if (ls >> ior) active = active.withIndexOfRefraction(ior);
+        }
+        else if (cmd == "illum") {
+            // Ignored by Vitral material model.
         }
         else if (cmd == "newmtl") {
             std::string name; ls >> name;
@@ -210,17 +237,20 @@ static void addMeshToGroup(
     R = R.axisRotation(90.0 * pi / 180.0, Vector3Dd(1, 0, 0));
 
     for (size_t i = 0; i < finalVertexes.size(); i++) {
-        int srcPos = finalVertexes[i].vertexPositionIndex - 1;
+        int srcPos = resolveObjIndex(
+            finalVertexes[i].vertexPositionIndex, (int)vertexPositionsArray.size());
         if (srcPos < 0 || srcPos >= (int)vertexPositionsArray.size()) srcPos = 0;
         Vertex vtx(R.multiply(vertexPositionsArray[(size_t)srcPos]));
 
-        int ti = finalVertexes[i].vertexTextureCoordinateIndex - 1;
+        int ti = resolveObjIndex(finalVertexes[i].vertexTextureCoordinateIndex,
+            (int)vertexTextureCoordinatesArray.size());
         if (ti >= 0 && ti < (int)vertexTextureCoordinatesArray.size()) {
             vtx.u = vertexTextureCoordinatesArray[(size_t)ti].x();
             vtx.v = vertexTextureCoordinatesArray[(size_t)ti].y();
         }
 
-        int ni = finalVertexes[i].vertexNormalIndex - 1;
+        int ni =
+            resolveObjIndex(finalVertexes[i].vertexNormalIndex, (int)vertexNormalsArray.size());
         if (ni >= 0 && ni < (int)vertexNormalsArray.size()) {
             vtx.normal = R.multiply(vertexNormalsArray[(size_t)ni]);
         }
@@ -277,7 +307,6 @@ static void addMeshToGroup(
     std::sort(textureRanges.begin(), textureRanges.end(), [](const std::vector<int>& a, const std::vector<int>& b){ return a[0] < b[0]; });
     mesh.setTextureRanges(textureRanges);
 
-    mesh.reorientateNormals();
     mesh.setName(nextGeometricObjectName);
     meshGroup.push_back(mesh);
 }
@@ -305,6 +334,19 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     std::map<std::string, Image*> texturesHashMap;
     std::map<std::string, SimpleMaterial> materialsHashMap;
     int textureIndex = 0;
+    auto ensureMaterialSelection = [&]() {
+        if (!nextMaterialsArray.empty() || materialsHashMap.empty()) {
+            return;
+        }
+        // Fallback for OBJ files that declare mtllib but omit explicit usemtl:
+        // use the first material from the MTL table for the whole mesh.
+        auto it = materialsHashMap.begin();
+        nextMaterialsArray.push_back(it->second);
+        std::vector<int> r(2, 0);
+        r[0] = 0;
+        r[1] = 0;
+        materialTriangleRangeTable.push_back(r);
+    };
 
     std::string line;
     while (std::getline(in, line)) {
@@ -377,6 +419,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
         }
         if (line.rfind("o ", 0) == 0 || line.rfind("g ", 0) == 0) {
             if (!vertexPositionsArray.empty()) {
+                ensureMaterialSelection();
                 addMeshToGroup(meshGroup, nextGeometricObjectName,
                                vertexPositionsArray, vertexNormalsArray, vertexTextureCoordinatesArray,
                                triangleDatasetsArray, nextTexturesArray, textureSpanTriangleRangeTable,
@@ -400,6 +443,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     }
 
     if (!vertexPositionsArray.empty()) {
+        ensureMaterialSelection();
         addMeshToGroup(meshGroup, nextGeometricObjectName,
                        vertexPositionsArray, vertexNormalsArray, vertexTextureCoordinatesArray,
                        triangleDatasetsArray, nextTexturesArray, textureSpanTriangleRangeTable,
