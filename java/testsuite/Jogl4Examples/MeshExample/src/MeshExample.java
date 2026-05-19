@@ -16,6 +16,8 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JFrame;
 
 // JOGL classes
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
 // VSDK classes
@@ -72,7 +74,9 @@ public class MeshExample
         }
 
         //-----------------------------------------------------------------
-        canvas = new GLCanvas();
+        GLCapabilities glCaps = new GLCapabilities(GLProfile.get(GLProfile.GL4));
+        glCaps.setDepthBits(64);
+        canvas = new GLCanvas(glCaps);
 
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);

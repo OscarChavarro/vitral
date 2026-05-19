@@ -1,5 +1,8 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
@@ -11,7 +14,7 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 
 public class MeshModel {
     private final Camera camera;
-    private final Light light;
+    private final List<Light> lights;
     private final SimpleScene scene;
     private final RendererConfiguration qualitySelection;
 
@@ -19,16 +22,21 @@ public class MeshModel {
         scene = new SimpleScene();
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
-        light = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
-        light.setId(0);
+        lights = new ArrayList<>();
+        Light light0 = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
+        light0.setId(0);
+        Light light1 = new Light(LightType.POINT, new Vector3Dd(-10, 20, 50), new ColorRgb(1, 1, 1));
+        light1.setId(1);
+        lights.add(light0);
+        lights.add(light1);
     }
 
     public Camera getCamera() {
         return camera;
     }
 
-    public Light getLight() {
-        return light;
+    public List<Light> getLights() {
+        return lights;
     }
 
     public SimpleScene getScene() {
@@ -78,7 +86,16 @@ public class MeshModel {
         camera.updateVectors();
 
         Vector3Dd lightDirection = new Vector3Dd(1, -1, 1).normalized();
-        Vector3Dd lightPos = center.add(lightDirection.multiply(radius * 3.0));
-        light.setPosition(lightPos);
+        Vector3Dd lightPos0 = center.add(lightDirection.multiply(radius * 3.0));
+        Vector3Dd lightPos1 = center.add(new Vector3Dd(-lightDirection.x(), -lightDirection.y(), lightDirection.z())
+            .normalized()
+            .multiply(radius * 3.0));
+
+        if ( lights.size() > 0 ) {
+            lights.get(0).setPosition(lightPos0);
+        }
+        if ( lights.size() > 1 ) {
+            lights.get(1).setPosition(lightPos1);
+        }
     }
 }
