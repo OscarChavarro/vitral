@@ -4,7 +4,7 @@
 
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/render/Rasterizer2D.h"

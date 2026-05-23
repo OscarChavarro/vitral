@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
 
 #include "ShapeDescriptor.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 /**
 Stores the feature vector for a set of 32 elements

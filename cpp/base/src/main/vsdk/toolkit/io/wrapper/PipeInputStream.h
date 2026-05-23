@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-#include "vsdk/toolkit/java/io/InputStream.h"
+#include "java/io/InputStream.h"
 
 class PipeInputStream : public java::InputStream {
   private:

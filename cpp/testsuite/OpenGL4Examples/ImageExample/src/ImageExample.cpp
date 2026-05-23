@@ -7,7 +7,7 @@
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"

@@ -1,7 +1,7 @@
 #ifndef MATRIX_2X2_PRINTER__
 #define MATRIX_2X2_PRINTER__
 
-#include "vsdk/toolkit/java/io/PrintStream.h"
+#include "java/io/PrintStream.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix2x2.h"
 
 class Matrix2x2Printer {

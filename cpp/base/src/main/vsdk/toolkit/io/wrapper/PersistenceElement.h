@@ -1,9 +1,9 @@
 #ifndef PERSISTENCE_ELEMENT__
 #define PERSISTENCE_ELEMENT__
 
-#include "vsdk/toolkit/java/io/File.h"
-#include "vsdk/toolkit/java/io/InputStream.h"
-#include "vsdk/toolkit/java/io/OutputStream.h"
+#include "java/io/File.h"
+#include "java/io/InputStream.h"
+#include "java/io/OutputStream.h"
 
 
 /**

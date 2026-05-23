@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 
 ShadersModel ShadersModel::createDefault() { return ShadersModel(); }

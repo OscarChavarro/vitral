@@ -1,7 +1,7 @@
 #include "ImageExporter.h"
 
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
 #include <algorithm>

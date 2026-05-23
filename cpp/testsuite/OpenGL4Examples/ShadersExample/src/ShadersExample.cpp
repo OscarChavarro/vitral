@@ -32,7 +32,7 @@
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"

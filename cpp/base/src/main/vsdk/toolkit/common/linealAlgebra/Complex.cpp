@@ -1,6 +1,6 @@
 #include "vsdk/toolkit/common/linealAlgebra/Complex.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 

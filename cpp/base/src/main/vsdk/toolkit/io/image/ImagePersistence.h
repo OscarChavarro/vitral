@@ -1,8 +1,8 @@
 #ifndef __VSDK_TOOLKIT_IO_IMAGE_IMAGEPERSISTENCE_H__
 #define __VSDK_TOOLKIT_IO_IMAGE_IMAGEPERSISTENCE_H__
 
-#include "vsdk/toolkit/java/io/File.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/io/File.h"
+#include "java/lang/String.h"
 
 class Image;
 class RGBImageUncompressed;

@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "vsdk/toolkit/java/lang/System.h"
-#include "vsdk/toolkit/java/util/ArrayList.txx"
+#include "java/lang/System.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/io/wrapper/PersistenceElement.h"
 

@@ -1,6 +1,6 @@
 #ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
 #define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 class MatrixNxM {
 private:

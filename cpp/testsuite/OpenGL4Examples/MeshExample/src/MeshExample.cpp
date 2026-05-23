@@ -29,7 +29,7 @@
 #include "vsdk/toolkit/gui/LightGizmoStyle.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"

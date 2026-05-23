@@ -6,7 +6,7 @@
 #include <functional>
 
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 Matrix4x4d::Matrix4x4d()
 {

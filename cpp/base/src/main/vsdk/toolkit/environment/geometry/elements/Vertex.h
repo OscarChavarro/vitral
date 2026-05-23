@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/java/util/ArrayList.h"
+#include "java/util/ArrayList.h"
 #include <string>
 class Triangle;
 

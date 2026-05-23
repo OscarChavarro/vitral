@@ -1,8 +1,8 @@
 #include <cstring>
 
-#include "vsdk/toolkit/java/io/FileInputStream.h"
-#include "vsdk/toolkit/java/io/FileOutputStream.h"
-#include "vsdk/toolkit/java/util/Formatter.h"
+#include "java/io/FileInputStream.h"
+#include "java/io/FileOutputStream.h"
+#include "java/util/Formatter.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/io/wrapper/FileUncompressWrapper.h"
 #include "vsdk/toolkit/io/wrapper/PipeInputStream.h"

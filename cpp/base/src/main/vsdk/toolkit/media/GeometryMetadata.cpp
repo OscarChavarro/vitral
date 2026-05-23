@@ -1,6 +1,6 @@
 #include "GeometryMetadata.h"
 #include "ShapeDescriptor.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 #include <limits>

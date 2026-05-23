@@ -3,7 +3,7 @@
 
 #include "ParallelProgressMonitorEvent.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
-#include "vsdk/toolkit/java/util/concurrent/ConcurrentLinkedQueue.h"
+#include "java/util/concurrent/ConcurrentLinkedQueue.h"
 
 class ParallelProgressMonitorConsumer {
 private:

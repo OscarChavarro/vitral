@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "vsdk/toolkit/java/lang/ProcessBuilder.h"
+#include "java/lang/ProcessBuilder.h"
 #include "vsdk/toolkit/io/wrapper/PipeInputStream.h"
 
 FILE *

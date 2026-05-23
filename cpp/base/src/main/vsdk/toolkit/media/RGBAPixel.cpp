@@ -1,5 +1,5 @@
 #include "RGBAPixel.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 #include <cstdio>
 
 java::String* RGBAPixel::toString() const {

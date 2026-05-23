@@ -51,24 +51,24 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp
     src/main/vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.cpp
     src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp
-    src/main/vsdk/toolkit/java/lang/Object.cpp
-    src/main/vsdk/toolkit/java/lang/String.cpp
-    src/main/vsdk/toolkit/java/lang/System.cpp
-    src/main/vsdk/toolkit/java/lang/Character.cpp
-    src/main/vsdk/toolkit/java/lang/Float.cpp
-    src/main/vsdk/toolkit/java/lang/StringBuilder.cpp
-    src/main/vsdk/toolkit/java/lang/ProcessBuilder.cpp
-    src/main/vsdk/toolkit/java/io/InputStream.cpp
-    src/main/vsdk/toolkit/java/io/OutputStream.cpp
-    src/main/vsdk/toolkit/java/io/File.cpp
-    src/main/vsdk/toolkit/java/io/FileInputStream.cpp
-    src/main/vsdk/toolkit/java/io/FileOutputStream.cpp
-    src/main/vsdk/toolkit/java/io/BufferedInputStream.cpp
-    src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
-    src/main/vsdk/toolkit/java/io/PrintStream.cpp
-    src/main/vsdk/toolkit/java/util/Formatter.cpp
-    src/main/vsdk/toolkit/java/util/StringTokenizer.cpp
-    src/main/vsdk/toolkit/java/util/concurrent/Executors.cpp
+    src/main/java/lang/Object.cpp
+    src/main/java/lang/String.cpp
+    src/main/java/lang/System.cpp
+    src/main/java/lang/Character.cpp
+    src/main/java/lang/Float.cpp
+    src/main/java/lang/StringBuilder.cpp
+    src/main/java/lang/ProcessBuilder.cpp
+    src/main/java/io/InputStream.cpp
+    src/main/java/io/OutputStream.cpp
+    src/main/java/io/File.cpp
+    src/main/java/io/FileInputStream.cpp
+    src/main/java/io/FileOutputStream.cpp
+    src/main/java/io/BufferedInputStream.cpp
+    src/main/java/io/BufferedOutputStream.cpp
+    src/main/java/io/PrintStream.cpp
+    src/main/java/util/Formatter.cpp
+    src/main/java/util/StringTokenizer.cpp
+    src/main/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/gui/LightGizmoOmniBillboard.cpp
     src/main/vsdk/toolkit/gui/RendererConfigurationController.cpp
@@ -148,7 +148,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/io/geometry/ReaderObj.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
-    src/main/vsdk/toolkit/java/io/BufferedOutputStream.cpp
+    src/main/java/io/BufferedOutputStream.cpp
     src/main/vsdk/toolkit/media/MediaEntity.h
     src/main/vsdk/toolkit/media/RGBPixel.cpp
     src/main/vsdk/toolkit/media/RGBAPixel.cpp

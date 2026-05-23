@@ -1,8 +1,8 @@
 #include "Vertex.h"
 #include "Triangle.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/java/util/ArrayList.h"
-#include "vsdk/toolkit/java/util/ArrayList.txx"
+#include "java/util/ArrayList.h"
+#include "java/util/ArrayList.txx"
 
 Vertex::Vertex(double x, double y, double z)
     : position(x, y, z), normal(1, 0, 0), binormal(0, 1, 0), tangent(0, 0, 1),

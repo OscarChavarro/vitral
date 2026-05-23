@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-#include "vsdk/toolkit/java/io/OutputStream.h"
+#include "java/io/OutputStream.h"
 
 class PipeOutputStream : public java::OutputStream {
   private:

@@ -1,5 +1,5 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4f.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 Matrix4x4f::Matrix4x4f(const float values[4][4])
 {

@@ -3,8 +3,8 @@
 
 #include "ParallelProgressMonitorEvent.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
-#include "vsdk/toolkit/java/util/concurrent/ConcurrentLinkedQueue.h"
-#include "vsdk/toolkit/java/util/concurrent/atomic/AtomicLong.h"
+#include "java/util/concurrent/ConcurrentLinkedQueue.h"
+#include "java/util/concurrent/atomic/AtomicLong.h"
 
 class ParallelProgressMonitorProducer : public ProgressMonitor {
 private:

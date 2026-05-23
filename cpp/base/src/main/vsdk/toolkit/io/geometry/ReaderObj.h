@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_IO_GEOMETRY_READEROBJ_H__
 
 #include "vsdk/toolkit/io/PersistenceElement.h"
-#include "vsdk/toolkit/java/io/File.h"
+#include "java/io/File.h"
 
 class SimpleScene;
 

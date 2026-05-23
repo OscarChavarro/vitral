@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_SHAPEDESCRIPTOR_H__
 
 #include "MediaEntity.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 class ShapeDescriptor : public MediaEntity {
 

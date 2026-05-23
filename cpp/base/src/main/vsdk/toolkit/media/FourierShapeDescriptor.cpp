@@ -1,5 +1,5 @@
 #include "FourierShapeDescriptor.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include <cmath>
 #include <cstdio>

@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
 
 #include "ShapeDescriptor.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 
 /**
 Stores primitive counts as a feature vector. Based on the primitive types

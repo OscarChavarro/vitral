@@ -1,6 +1,6 @@
 #include "RGBPixel.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "vsdk/toolkit/java/lang/String.h"
+#include "java/lang/String.h"
 #include <cstdio>
 
 void RGBPixel::importFromColorRgb(const ColorRgb& c) {
