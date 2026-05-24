@@ -1,2 +1,3 @@
 add_subdirectory(_OpenGL4HelloWorld)
 add_subdirectory(_OpenGL4PbufferExample)
+add_subdirectory(_occtPolyhedralBoundedSolidBooleansTool)

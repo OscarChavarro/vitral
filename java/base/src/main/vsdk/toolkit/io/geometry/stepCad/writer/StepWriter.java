@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.io.PersistenceElement;
+import vsdk.toolkit.io.geometry.stepCad.StepLengthUnit;
 
 /**
 Exports a `PolyhedralBoundedSolid` to an ISO 10303-21 ASCII STEP file
@@ -32,9 +33,10 @@ to internal collaborators in this package:
   - `_StepProductStructureEmitter`  - AP242 product structure chain.
   - `_StepHeaderWriter`             - ISO 10303-21 file wrapper.
 
-The unit of length is metre, with no SI prefix. The geometric tolerance
-declared in the representation context is `BIG_EPSILON` of the active
-numeric policy.
+Coordinates are written in the unit specified by the caller
+({@link StepLengthUnit}); the default overload uses {@link StepLengthUnit#METERS}.
+The geometric tolerance declared in the representation context is
+`BIG_EPSILON` of the active numeric policy, scaled to the requested unit.
 */
 public class StepWriter extends PersistenceElement {
 
@@ -43,8 +45,7 @@ public class StepWriter extends PersistenceElement {
     }
 
     /**
-    Exports the given solid as an AP242 ASCII STEP file written to the
-    provided output stream.
+    Exports the given solid as an AP242 ASCII STEP file in metres.
 
     @param solid solid to export; must satisfy `validateIntermediate`
         and have non-zero volume.
@@ -58,11 +59,35 @@ public class StepWriter extends PersistenceElement {
                                    String productName)
         throws Exception
     {
+        exportSolid(solid, outputStream, productName, StepLengthUnit.METERS);
+    }
+
+    /**
+    Exports the given solid as an AP242 ASCII STEP file in the requested
+    length unit.
+
+    @param solid solid to export; must satisfy `validateIntermediate`
+        and have non-zero volume.
+    @param outputStream destination stream; not closed by this method.
+    @param productName product name to encode in the FILE_NAME and
+        PRODUCT entities (use a stable identifier, not a file path).
+    @param lengthUnit the unit in which coordinates are written.
+    @throws Exception when validation fails or write fails.
+    */
+    public static void exportSolid(PolyhedralBoundedSolid solid,
+                                   OutputStream outputStream,
+                                   String productName,
+                                   StepLengthUnit lengthUnit)
+        throws Exception
+    {
         if ( solid == null ) {
             throw new IllegalArgumentException("solid is null");
         }
         if ( outputStream == null ) {
             throw new IllegalArgumentException("outputStream is null");
+        }
+        if ( lengthUnit == null ) {
+            throw new IllegalArgumentException("lengthUnit is null");
         }
         String safeName = (productName == null || productName.isBlank())
             ? "VitralSolid" : productName;
@@ -71,17 +96,17 @@ public class StepWriter extends PersistenceElement {
 
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
-        double tolerance = numericContext.bigEpsilon();
+        double toleranceMeters = numericContext.bigEpsilon();
 
         _StepEntityBuffer buffer = new _StepEntityBuffer();
         _StepGeometryEmitter geometry = new _StepGeometryEmitter(buffer);
 
         //- 1. Units, tolerance and geometric representation context -----
         _StepUnitContextEmitter unitContext =
-            new _StepUnitContextEmitter(buffer);
-        int contextId = unitContext.emit(tolerance);
+            new _StepUnitContextEmitter(buffer, lengthUnit);
+        int contextId = unitContext.emit(toleranceMeters);
 
-        //- 2. Global axis placement -------------------------------------
+        //- 2. Global axis placement (origin is unit-independent: 0,0,0) -
         int axisOriginCpId = geometry.emitCartesianPoint(0.0, 0.0, 0.0);
         int axisZDirId = geometry.emitDirection(0.0, 0.0, 1.0);
         int axisXDirId = geometry.emitDirection(1.0, 0.0, 0.0);
@@ -90,7 +115,7 @@ public class StepWriter extends PersistenceElement {
 
         //- 3. Mantyla B-Rep -> STEP topology + geometry -----------------
         _StepTopologyEmitter topology =
-            new _StepTopologyEmitter(buffer, geometry);
+            new _StepTopologyEmitter(buffer, geometry, lengthUnit);
         int manifoldSolidId = topology.emit(solid, safeName);
 
         //- 4. Shape representation linking topology to context ----------

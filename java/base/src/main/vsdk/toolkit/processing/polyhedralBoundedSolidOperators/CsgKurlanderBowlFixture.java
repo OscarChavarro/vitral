@@ -228,6 +228,63 @@ public class CsgKurlanderBowlFixture
             " index " + normalizedIndex + "/" + lastIndex;
     }
 
+    /**
+    Returns the bowl base: outer sphere minus inner sphere, clipped by the
+    guide cylinder.  This is operand A for all boolean subtraction tests.
+    */
+    public static PolyhedralBoundedSolid createBowl()
+    {
+        PolyhedralBoundedSolid outer = createSphere(
+            scale(10.0), new Vector3Dd(0, 0, scale(10.0)));
+        PolyhedralBoundedSolid inner = createSphere(
+            scale(9.5), new Vector3Dd(0, 0, scale(10.0)));
+        PolyhedralBoundedSolid shell = booleanOp(
+            outer, inner, PolyhedralBoundedSolidModeler.SUBTRACT);
+        return booleanOp(
+            shell,
+            createCylinder(scale(10.5), scale(16.5), new Vector3Dd(0, 0, 0)),
+            PolyhedralBoundedSolidModeler.INTERSECTION);
+    }
+
+    /**
+    Returns the union of all 40 motifs (20 moons + 20 stars) as a single
+    multi-shell solid.  The motifs are spatially disjoint so the union
+    produces one shell per motif.
+    */
+    public static PolyhedralBoundedSolid createAllMotifsUnion()
+    {
+        int i;
+        int moonCount = getSingleMotifMoonCount();
+        int starCount = getSingleMotifStarCount();
+        int motifCount = moonCount + starCount;
+
+        printProgressMessage(
+            "createAllMotifsUnion: building " + motifCount + " motifs");
+
+        PolyhedralBoundedSolid result =
+            placeMoon(createMoon(), getMoonZ(0), getMoonAzimuthDeg(0));
+        printMotifProgress("moon", 1, moonCount, 1, motifCount);
+
+        for ( i = 1; i < moonCount; i++ ) {
+            printMotifProgress("moon", i + 1, moonCount, i + 1, motifCount);
+            result = booleanOpWithoutFaceMaximization(result,
+                placeMoon(createMoon(), getMoonZ(i), getMoonAzimuthDeg(i)),
+                PolyhedralBoundedSolidModeler.UNION);
+        }
+
+        for ( i = 0; i < starCount; i++ ) {
+            printMotifProgress("star", i + 1, starCount,
+                moonCount + i + 1, motifCount);
+            result = booleanOpWithoutFaceMaximization(result,
+                placeStar(createStar(), getStarZ(i), getStarAzimuthDeg(i)),
+                PolyhedralBoundedSolidModeler.UNION);
+        }
+
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
+        printProgressMessage("createAllMotifsUnion: finished");
+        return result;
+    }
+
     public static PolyhedralBoundedSolid[] createBowlAndFirstStarOperands()
     {
         return createBowlAndFirstStarOperands(0);

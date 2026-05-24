@@ -16,6 +16,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
+import vsdk.toolkit.io.geometry.stepCad.StepLengthUnit;
 
 /**
 Maps the Mantyla half-edge data structure of [MANT1988].10.2.1 onto the
@@ -45,16 +46,19 @@ public class _StepTopologyEmitter {
 
     private final _StepEntityBuffer buffer;
     private final _StepGeometryEmitter geometry;
+    private final double scale;
 
     private final Map<Integer, Integer> vertexPointByVertexId;
     private final Map<Integer, Integer> cartesianPointByVertexId;
     private final Map<Integer, Integer> edgeCurveByEdgeId;
 
     public _StepTopologyEmitter(_StepEntityBuffer buffer,
-                                _StepGeometryEmitter geometry)
+                                _StepGeometryEmitter geometry,
+                                StepLengthUnit lengthUnit)
     {
         this.buffer = buffer;
         this.geometry = geometry;
+        this.scale = lengthUnit.metreScale;
         this.vertexPointByVertexId = new HashMap<>();
         this.cartesianPointByVertexId = new HashMap<>();
         this.edgeCurveByEdgeId = new HashMap<>();
@@ -81,7 +85,9 @@ public class _StepTopologyEmitter {
         for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solid.getVerticesList().get(i);
             int cpId = geometry.emitCartesianPoint(
-                v.position.x(), v.position.y(), v.position.z());
+                v.position.x() * scale,
+                v.position.y() * scale,
+                v.position.z() * scale);
             int vpId = geometry.emitVertexPoint(cpId);
             cartesianPointByVertexId.put(v.id, cpId);
             vertexPointByVertexId.put(v.id, vpId);
@@ -122,7 +128,7 @@ public class _StepTopologyEmitter {
 
         int directionId = geometry.emitDirection(
             direction.x(), direction.y(), direction.z());
-        int vectorId = geometry.emitVector(directionId, length);
+        int vectorId = geometry.emitVector(directionId, length * scale);
         int lineId = geometry.emitLine(
             cartesianPointByVertexId.get(startVertex.id), vectorId);
 
@@ -160,7 +166,7 @@ public class _StepTopologyEmitter {
         Vector3Dd refX = chooseReferenceX(normal);
 
         int originCpId = geometry.emitCartesianPoint(
-            origin.x(), origin.y(), origin.z());
+            origin.x() * scale, origin.y() * scale, origin.z() * scale);
         int normalDirId = geometry.emitDirection(
             normal.x(), normal.y(), normal.z());
         int refXDirId = geometry.emitDirection(

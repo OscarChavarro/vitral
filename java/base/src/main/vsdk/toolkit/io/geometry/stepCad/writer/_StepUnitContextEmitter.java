@@ -2,17 +2,20 @@ package vsdk.toolkit.io.geometry.stepCad.writer;
 
 import static vsdk.toolkit.io.geometry.stepCad.writer._StepEntityBuffer.fmt;
 
+import vsdk.toolkit.io.geometry.stepCad.StepLengthUnit;
+
 /**
 Emits the AP242 unit + tolerance + geometric representation context
-cluster: SI_UNIT for metre/radian/steradian, the
-UNCERTAINTY_MEASURE_WITH_UNIT carrying the kernel's BIG_EPSILON, and the
-composite GEOMETRIC_REPRESENTATION_CONTEXT.
+cluster: SI_UNIT for the requested length unit, radian/steradian, the
+UNCERTAINTY_MEASURE_WITH_UNIT carrying the kernel's BIG_EPSILON (scaled to
+the requested unit), and the composite GEOMETRIC_REPRESENTATION_CONTEXT.
 
 This is an internal collaborator of `StepWriter`.
 */
 public class _StepUnitContextEmitter {
 
     private final _StepEntityBuffer buffer;
+    private final StepLengthUnit lengthUnit;
 
     private int lengthUnitId;
     private int planeAngleUnitId;
@@ -20,9 +23,11 @@ public class _StepUnitContextEmitter {
     private int uncertaintyId;
     private int contextId;
 
-    public _StepUnitContextEmitter(_StepEntityBuffer buffer)
+    public _StepUnitContextEmitter(_StepEntityBuffer buffer,
+                                   StepLengthUnit lengthUnit)
     {
         this.buffer = buffer;
+        this.lengthUnit = lengthUnit;
     }
 
     /**
@@ -30,6 +35,7 @@ public class _StepUnitContextEmitter {
     GEOMETRIC_REPRESENTATION_CONTEXT entity, which other entities
     reference.
     @param toleranceMeters the distance tolerance (BIG_EPSILON), in metres.
+        The value is automatically scaled to the configured length unit.
     @return the geometric representation context entity id.
     */
     public int emit(double toleranceMeters)
@@ -37,7 +43,7 @@ public class _StepUnitContextEmitter {
         lengthUnitId = emitLengthUnit();
         planeAngleUnitId = emitPlaneAngleUnit();
         solidAngleUnitId = emitSolidAngleUnit();
-        uncertaintyId = emitUncertainty(toleranceMeters);
+        uncertaintyId = emitUncertainty(toleranceMeters * lengthUnit.metreScale);
         contextId = emitGeometricRepresentationContext();
         return contextId;
     }
@@ -53,7 +59,8 @@ public class _StepUnitContextEmitter {
     {
         int id = buffer.nextId();
         buffer.appendEntity(id,
-            "( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT($,.METRE.) )");
+            "( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT("
+            + lengthUnit.siPrefix + ",.METRE.) )");
         return id;
     }
 

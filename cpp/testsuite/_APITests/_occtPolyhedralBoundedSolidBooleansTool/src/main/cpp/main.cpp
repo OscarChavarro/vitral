@@ -1,0 +1,252 @@
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Cut.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepLib.hxx>
+#include <BRep_Builder.hxx>
+#include <BRep_Tool.hxx>
+#include <GeomConvert_CurveToAnaCurve.hxx>
+#include <Geom_Curve.hxx>
+#include <Geom_Line.hxx>
+#include <IFSelect_ReturnStatus.hxx>
+#include <NCollection_IndexedMap.hxx>
+#include <Precision.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <STEPControl_Reader.hxx>
+#include <STEPControl_Writer.hxx>
+#include <Standard_Failure.hxx>
+#include <TopAbs_ShapeEnum.hxx>
+#include <TopExp.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Edge.hxx>
+#include <TopoDS_Shape.hxx>
+
+#include <algorithm>
+#include <cctype>
+#include <iostream>
+#include <string>
+
+namespace {
+
+enum class OpCode {
+  Union,
+  AMinusB,
+  BMinusA,
+  Intersection
+};
+
+std::string ToUpper(std::string value) {
+  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+    return static_cast<char>(std::toupper(c));
+  });
+  return value;
+}
+
+bool ParseOpCode(const std::string& opcodeRaw, OpCode& out) {
+  const std::string opcode = ToUpper(opcodeRaw);
+  if (opcode == "UNION") {
+    out = OpCode::Union;
+    return true;
+  }
+  if (opcode == "A_MINUS_B") {
+    out = OpCode::AMinusB;
+    return true;
+  }
+  if (opcode == "B_MINUS_A") {
+    out = OpCode::BMinusA;
+    return true;
+  }
+  if (opcode == "INTERSECTION") {
+    out = OpCode::Intersection;
+    return true;
+  }
+  return false;
+}
+
+TopoDS_Shape ReadStepShape(const std::string& path) {
+  STEPControl_Reader reader;
+  const IFSelect_ReturnStatus readStatus = reader.ReadFile(path.c_str());
+  if (readStatus != IFSelect_RetDone) {
+    throw Standard_Failure(("Failed to read STEP file: " + path).c_str());
+  }
+
+  const int transferCount = reader.TransferRoots();
+  if (transferCount <= 0) {
+    throw Standard_Failure(("Failed to transfer STEP entities: " + path).c_str());
+  }
+
+  TopoDS_Shape shape = reader.OneShape();
+  if (shape.IsNull()) {
+    throw Standard_Failure(("Imported geometry is null: " + path).c_str());
+  }
+  return shape;
+}
+
+TopoDS_Shape ExecuteBoolean(const TopoDS_Shape& shapeA, const TopoDS_Shape& shapeB, OpCode opcode) {
+  switch (opcode) {
+    case OpCode::Union: {
+      BRepAlgoAPI_Fuse op(shapeA, shapeB);
+      op.Build();
+      if (!op.IsDone()) {
+        throw Standard_Failure("UNION operation failed");
+      }
+      op.SimplifyResult(true, true, Precision::Angular());
+      return op.Shape();
+    }
+    case OpCode::AMinusB: {
+      BRepAlgoAPI_Cut op(shapeA, shapeB);
+      op.Build();
+      if (!op.IsDone()) {
+        throw Standard_Failure("A_MINUS_B operation failed");
+      }
+      op.SimplifyResult(true, true, Precision::Angular());
+      return op.Shape();
+    }
+    case OpCode::BMinusA: {
+      BRepAlgoAPI_Cut op(shapeB, shapeA);
+      op.Build();
+      if (!op.IsDone()) {
+        throw Standard_Failure("B_MINUS_A operation failed");
+      }
+      op.SimplifyResult(true, true, Precision::Angular());
+      return op.Shape();
+    }
+    case OpCode::Intersection: {
+      BRepAlgoAPI_Common op(shapeA, shapeB);
+      op.Build();
+      if (!op.IsDone()) {
+        throw Standard_Failure("INTERSECTION operation failed");
+      }
+      op.SimplifyResult(true, true, Precision::Angular());
+      return op.Shape();
+    }
+  }
+
+  throw Standard_Failure("Unsupported opcode");
+}
+
+TopoDS_Shape PlanarizeForStep(const TopoDS_Shape& input) {
+  if (input.IsNull()) {
+    throw Standard_Failure("Cannot planarize null shape");
+  }
+
+  // Force same-domain unification as a mandatory STEP post-process.
+  ShapeUpgrade_UnifySameDomain unifier(input, true, true, false);
+  unifier.SetSafeInputMode(true);
+  unifier.SetLinearTolerance(Precision::Confusion());
+  unifier.SetAngularTolerance(Precision::Angular());
+  unifier.Build();
+
+  const TopoDS_Shape& planarized = unifier.Shape();
+  if (planarized.IsNull()) {
+    throw Standard_Failure("Planarization/unification failed");
+  }
+
+  BRep_Builder builder;
+  NCollection_IndexedMap<TopoDS_Shape, TopTools_ShapeMapHasher> edges;
+  TopExp::MapShapes(planarized, TopAbs_EDGE, edges);
+
+  int convertedEdges = 0;
+  int nonLinearEdges = 0;
+
+  for (int i = 1; i <= edges.Extent(); ++i) {
+    const TopoDS_Edge edge = TopoDS::Edge(edges(i));
+    if (edge.IsNull()) {
+      continue;
+    }
+
+    double first = 0.0;
+    double last = 0.0;
+    Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, first, last);
+    if (curve.IsNull()) {
+      continue;
+    }
+
+    if (!curve->IsKind(STANDARD_TYPE(Geom_Line))) {
+      const double tol = std::max(BRep_Tool::Tolerance(edge), Precision::Confusion());
+      double cf = first;
+      double cl = last;
+      double deviation = 0.0;
+      Handle(Geom_Line) line = GeomConvert_CurveToAnaCurve::ComputeLine(curve, tol, first, last, cf, cl, deviation);
+      if (line.IsNull()) {
+        ++nonLinearEdges;
+        continue;
+      }
+
+      builder.UpdateEdge(edge, line, tol);
+      builder.Range(edge, cf, cl, true);
+      builder.SameRange(edge, true);
+      builder.SameParameter(edge, false);
+      ++convertedEdges;
+    }
+  }
+
+  if (nonLinearEdges > 0) {
+    throw Standard_Failure("Found non-linear edges that cannot be converted to LINE");
+  }
+
+  // Rebuild p-curves to keep consistency after replacing 3D edge curves.
+  BRepLib::SameParameter(planarized, Precision::Confusion(), true);
+  return planarized;
+}
+
+void WriteStepShape(const TopoDS_Shape& shape, const std::string& path) {
+  if (shape.IsNull()) {
+    throw Standard_Failure("Boolean operation result is null");
+  }
+
+  STEPControl_Writer writer;
+  const IFSelect_ReturnStatus transferStatus = writer.Transfer(shape, STEPControl_AsIs);
+  if (transferStatus != IFSelect_RetDone) {
+    throw Standard_Failure(("Failed to transfer shape to STEP: " + path).c_str());
+  }
+
+  const IFSelect_ReturnStatus writeStatus = writer.Write(path.c_str());
+  if (writeStatus != IFSelect_RetDone) {
+    throw Standard_Failure(("Failed to write STEP file: " + path).c_str());
+  }
+}
+
+void PrintUsage(const char* argv0) {
+  std::cerr << "Usage: " << argv0
+            << " inputA.step inputB.step <opcode> output.step\n"
+            << "Opcodes: UNION | A_MINUS_B | B_MINUS_A | INTERSECTION\n";
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  if (argc != 5) {
+    PrintUsage(argv[0]);
+    return 1;
+  }
+
+  const std::string inputA = argv[1];
+  const std::string inputB = argv[2];
+  const std::string opcodeArg = argv[3];
+  const std::string output = argv[4];
+
+  OpCode opcode;
+  if (!ParseOpCode(opcodeArg, opcode)) {
+    std::cerr << "Invalid opcode: " << opcodeArg << "\n";
+    PrintUsage(argv[0]);
+    return 2;
+  }
+
+  try {
+    const TopoDS_Shape shapeA = ReadStepShape(inputA);
+    const TopoDS_Shape shapeB = ReadStepShape(inputB);
+    const TopoDS_Shape result = ExecuteBoolean(shapeA, shapeB, opcode);
+    const TopoDS_Shape planarized = PlanarizeForStep(result);
+    WriteStepShape(planarized, output);
+
+    std::cout << "Result written to: " << output << "\n";
+    return 0;
+  } catch (const Standard_Failure& e) {
+    std::cerr << "OCCT error: " << e.what() << "\n";
+    return 3;
+  } catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << "\n";
+    return 4;
+  }
+}
