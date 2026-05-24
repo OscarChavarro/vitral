@@ -37,6 +37,9 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         if ( gl == null ) {
             return;
         }
+        if ( !gl.isGL4() ) {
+            return;
+        }
         draw(gl.getGL4(), light, camera, lightGizmoStyle);
     }
 

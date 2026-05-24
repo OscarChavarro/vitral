@@ -29,6 +29,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.render.awt.AwtFontReader;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
+import vsdk.toolkit.io.geometry.stepCad.reader.StepReader;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
@@ -227,6 +228,9 @@ public final class GeneralModelsBuilder
                 mySolid = featuredObject();
             }
             break;
+          case STEP_IMPORT:
+            mySolid = importFromStepFile("../../../../etc/solids/moonMotif.step");
+            break;
           case HOLLOW_BOX:
             mySolid = createHollowBox();
             break;
@@ -289,6 +293,31 @@ public final class GeneralModelsBuilder
         }
 
         return mysolid;
+    }
+
+    private static PolyhedralBoundedSolid importFromStepFile(String filename)
+    {
+        try {
+            PolyhedralBoundedSolid solid = StepReader.readSolid(new File(filename));
+            if ( solid == null ) {
+                Logger.reportMessage(
+                    GeneralModelsBuilder.class,
+                    VSDK.WARNING,
+                    "importFromStepFile",
+                    "StepReader returned null for " + filename);
+                return createHoledBox();
+            }
+            return solid;
+        }
+        catch ( Exception e ) {
+            Logger.reportMessageWithException(
+                GeneralModelsBuilder.class,
+                VSDK.WARNING,
+                "importFromStepFile",
+                "Could not read STEP file " + filename
+                + " — falling back to holed box.", e);
+            return createHoledBox();
+        }
     }
 
     public static PolyhedralBoundedSolid createBox(Vector3Dd boxSize)

@@ -18,5 +18,6 @@ cd testsuite/Jogl4Examples/PolyhedralBoundedSolidExample
 rm -rf outputA* outputB* outputR*
 cd ../../..
 rm -rf testsuite/Tools/SpriteFontGenerator/output/*
+rm -rf testsuite/OfflineExamples/PolyhedralBoundedSolidExpotImportExample/output/
 
 rm -rf .gradle-home/

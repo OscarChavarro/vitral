@@ -29,7 +29,8 @@ public enum SolidModelNames
     CSG_OPERAND1_PARTIAL(24),
     CSG_OPERAND2_PARTIAL(25),
     FEATURED_OBJECT(26),
-    IMPORT_OR_FEATURED_OBJECT(27);
+    IMPORT_OR_FEATURED_OBJECT(27),
+    STEP_IMPORT(28);
 
     private static final SolidModelNames[] MAIN_SEQUENCE = {
         MVFS_SMEV_SAMPLE,
@@ -58,7 +59,8 @@ public enum SolidModelNames
         CSG_OPERAND1_PARTIAL,
         CSG_OPERAND2_PARTIAL,
         FEATURED_OBJECT,
-        IMPORT_OR_FEATURED_OBJECT
+        IMPORT_OR_FEATURED_OBJECT,
+        STEP_IMPORT
     };
 
     private final int id;
