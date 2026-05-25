@@ -1,4 +1,4 @@
-#include "RaytraceStatistics.h"
+#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 
 bool RaytraceStatistics::isEnabled() { return false; }
 void RaytraceStatistics::recordPrimaryRay() {}

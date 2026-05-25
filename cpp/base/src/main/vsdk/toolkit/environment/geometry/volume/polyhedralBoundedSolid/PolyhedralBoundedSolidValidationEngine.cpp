@@ -1,7 +1,7 @@
-#include "PolyhedralBoundedSolidValidationEngine.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.h"
 
-#include "PolyhedralBoundedSolid.h"
-#include "PolyhedralBoundedSolidGeometricValidator.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
 #include <cmath>
 
 bool PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoundedSolid* solid)

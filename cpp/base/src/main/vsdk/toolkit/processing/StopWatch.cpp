@@ -1,4 +1,4 @@
-#include "StopWatch.h"
+#include "vsdk/toolkit/processing/StopWatch.h"
 
 StopWatch::StopWatch() : running_(false), elapsedSeconds_(0.0)
 {

@@ -1,4 +1,4 @@
-#include "SimpleMaterial.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 
 #include <sstream>
 

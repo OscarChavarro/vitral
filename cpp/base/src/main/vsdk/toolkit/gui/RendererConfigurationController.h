@@ -1,8 +1,8 @@
 #ifndef __VSDK_TOOLKIT_GUI_RENDERERCONFIGURATIONCONTROLLER_H__
 #define __VSDK_TOOLKIT_GUI_RENDERERCONFIGURATIONCONTROLLER_H__
 
-#include "Controller.h"
-#include "KeyEvent.h"
+#include "vsdk/toolkit/gui/Controller.h"
+#include "vsdk/toolkit/gui/KeyEvent.h"
 
 class RendererConfiguration;
 

@@ -1,6 +1,6 @@
-#include "_PolyhedralBoundedSolidEdge.h"
-#include "_PolyhedralBoundedSolidHalfEdge.h"
-#include "_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
 static int pbs_edge_current_id = 1;
 

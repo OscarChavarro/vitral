@@ -1,4 +1,4 @@
-#include "RGBColorPalette.h"
+#include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 

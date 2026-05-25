@@ -1,4 +1,4 @@
-#include "NormalMap.h"
+#include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"

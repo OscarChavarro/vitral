@@ -1,6 +1,6 @@
-#include "EnvironmentPersistence.h"
+#include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 
-#include "ReaderObj.h"
+#include "vsdk/toolkit/io/geometry/ReaderObj.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include <cctype>
 

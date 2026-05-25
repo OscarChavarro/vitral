@@ -1,4 +1,4 @@
-#include "ParametricCurve.h"
+#include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 
 #include <cmath>
 #include <limits>

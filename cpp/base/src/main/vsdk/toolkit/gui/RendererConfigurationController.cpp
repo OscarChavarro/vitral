@@ -1,6 +1,6 @@
-#include "RendererConfigurationController.h"
+#include "vsdk/toolkit/gui/RendererConfigurationController.h"
 
-#include "KeyEvent.h"
+#include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 
 RendererConfigurationController::RendererConfigurationController()

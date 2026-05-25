@@ -59,7 +59,6 @@ set(VITRAL_BASE_SOURCES
     src/main/java/lang/StringBuilder.cpp
     src/main/java/lang/ProcessBuilder.cpp
     src/main/java/io/InputStream.cpp
-    src/main/java/io/OutputStream.cpp
     src/main/java/io/File.cpp
     src/main/java/io/FileInputStream.cpp
     src/main/java/io/FileOutputStream.cpp

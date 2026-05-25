@@ -1,4 +1,4 @@
-#include "ProgressMonitorConsoleLongFormat.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 

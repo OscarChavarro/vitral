@@ -1,4 +1,4 @@
-#include "WireframeRenderer.h"
+#include "vsdk/toolkit/render/WireframeRenderer.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

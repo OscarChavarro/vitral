@@ -1,5 +1,5 @@
-#include "CookTorranceShader.h"
-#include "CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

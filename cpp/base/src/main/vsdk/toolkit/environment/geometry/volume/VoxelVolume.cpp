@@ -1,4 +1,4 @@
-#include "VoxelVolume.h"
+#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

@@ -1,4 +1,4 @@
-#include "CameraControllerOrbiter.h"
+#include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 
 #include <algorithm>
 #include <cstdio>

@@ -1,4 +1,4 @@
-#include "Curve.h"
+#include "vsdk/toolkit/environment/geometry/curve/Curve.h"
 
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

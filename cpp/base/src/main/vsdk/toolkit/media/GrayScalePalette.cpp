@@ -1,4 +1,4 @@
-#include "GrayScalePalette.h"
+#include "vsdk/toolkit/media/GrayScalePalette.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 
 GrayScalePalette::GrayScalePalette() : RGBProceduralColorPalette() {

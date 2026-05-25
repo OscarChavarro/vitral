@@ -1,5 +1,5 @@
-#include "Camera.h"
-#include "CameraSnapshot.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include <cmath>
 #include <cstdio>
 #include "vsdk/toolkit/common/VSDK.h"

@@ -1,4 +1,4 @@
-#include "CameraControllerAquynza.h"
+#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

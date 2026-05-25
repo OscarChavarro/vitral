@@ -1,4 +1,4 @@
-#include "TriangleStripMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

@@ -1,6 +1,6 @@
-#include "RGBImageUncompressed.h"
-#include "RGBPixel.h"
-#include "RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 
 RGBImageUncompressed::RGBImageUncompressed() :
     data(nullptr), xSize(0), ySize(0), rowStride(0) {

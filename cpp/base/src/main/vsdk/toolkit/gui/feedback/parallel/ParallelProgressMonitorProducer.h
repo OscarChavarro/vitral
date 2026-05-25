@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PARALLEL_PARALLELPROGRESSMONITORPRODUCER_H__
 #define __VSDK_TOOLKIT_GUI_FEEDBACK_PARALLEL_PARALLELPROGRESSMONITORPRODUCER_H__
 
-#include "ParallelProgressMonitorEvent.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
 #include "java/util/concurrent/atomic/AtomicLong.h"

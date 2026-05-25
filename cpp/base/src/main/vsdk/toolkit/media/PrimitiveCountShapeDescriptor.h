@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
 #define __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
 
-#include "ShapeDescriptor.h"
+#include "vsdk/toolkit/media/ShapeDescriptor.h"
 #include "java/lang/String.h"
 
 /**

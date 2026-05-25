@@ -1,6 +1,6 @@
-#include "Calligraphic2DBuffer.h"
-#include "RGBImageUncompressed.h"
-#include "RGBPixel.h"
+#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 Calligraphic2DBuffer::Calligraphic2DBuffer() {

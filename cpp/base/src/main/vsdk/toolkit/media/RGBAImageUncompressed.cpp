@@ -1,6 +1,6 @@
-#include "RGBAImageUncompressed.h"
-#include "RGBPixel.h"
-#include "RGBAPixel.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/media/RGBAPixel.h"
 
 RGBAImageUncompressed::RGBAImageUncompressed() :
     data(nullptr), xSize(0), ySize(0) {

@@ -1,4 +1,4 @@
-#include "LightGizmoOmniBillboard.h"
+#include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
 
 #include <cmath>
 

@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_RGBPIXEL_H__
 #define __VSDK_TOOLKIT_MEDIA_RGBPIXEL_H__
 
-#include "MediaEntity.h"
+#include "vsdk/toolkit/media/MediaEntity.h"
 #include "java/lang/String.h"
 
 /**

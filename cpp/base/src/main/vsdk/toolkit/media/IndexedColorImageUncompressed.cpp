@@ -1,7 +1,7 @@
-#include "IndexedColorImageUncompressed.h"
-#include "RGBColorPalette.h"
-#include "RGBPixel.h"
-#include "RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBColorPalette.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 
 IndexedColorImageUncompressed::IndexedColorImageUncompressed(RGBColorPalette* colorTable_) :

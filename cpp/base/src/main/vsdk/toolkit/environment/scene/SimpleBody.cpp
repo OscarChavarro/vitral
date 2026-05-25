@@ -1,4 +1,4 @@
-#include "SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"

@@ -1,4 +1,4 @@
-#include "RGBAPixel.h"
+#include "vsdk/toolkit/media/RGBAPixel.h"
 #include "java/lang/String.h"
 #include <cstdio>
 

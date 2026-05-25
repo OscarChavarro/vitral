@@ -1,4 +1,4 @@
-#include "ShapeDescriptor.h"
+#include "vsdk/toolkit/media/ShapeDescriptor.h"
 #include "java/lang/String.h"
 
 ShapeDescriptor::ShapeDescriptor(const java::String* label_) {

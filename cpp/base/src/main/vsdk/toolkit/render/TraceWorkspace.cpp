@@ -1,4 +1,4 @@
-#include "TraceWorkspace.h"
+#include "vsdk/toolkit/render/TraceWorkspace.h"
 
 TraceWorkspace::TraceWorkspace() : TraceWorkspace(DEFAULT_MAX_RECURSION_LEVEL)
 {

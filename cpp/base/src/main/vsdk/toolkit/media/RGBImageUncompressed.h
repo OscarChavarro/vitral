@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_RGBIMAGEUNCOMPRESSED_H__
 #define __VSDK_TOOLKIT_MEDIA_RGBIMAGEUNCOMPRESSED_H__
 
-#include "Image.h"
+#include "vsdk/toolkit/media/Image.h"
 
 class RGBPixel;
 class RGBAImageUncompressed;

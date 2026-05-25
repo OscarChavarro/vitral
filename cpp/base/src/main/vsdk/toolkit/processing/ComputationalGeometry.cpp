@@ -1,4 +1,4 @@
-#include "ComputationalGeometry.h"
+#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/common/VSDK.h"

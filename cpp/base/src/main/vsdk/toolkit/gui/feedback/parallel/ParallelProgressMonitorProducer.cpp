@@ -1,4 +1,4 @@
-#include "ParallelProgressMonitorProducer.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
 
 ParallelProgressMonitorProducer::ParallelProgressMonitorProducer(
     java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)

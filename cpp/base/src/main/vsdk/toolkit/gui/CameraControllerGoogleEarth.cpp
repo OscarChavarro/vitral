@@ -1,4 +1,4 @@
-#include "CameraControllerGoogleEarth.h"
+#include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
 
 #include <cmath>
 #include <cstdio>

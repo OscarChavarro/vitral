@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_INFINITEPLANE_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_INFINITEPLANE_H__
 
-#include "HalfSpace.h"
+#include "vsdk/toolkit/environment/geometry/surface/HalfSpace.h"
 #include <string>
 
 class Ray;

@@ -1,4 +1,4 @@
-#include "ReaderObj.h"
+#include "vsdk/toolkit/io/geometry/ReaderObj.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

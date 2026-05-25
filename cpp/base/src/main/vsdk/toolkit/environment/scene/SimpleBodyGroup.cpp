@@ -1,6 +1,6 @@
-#include "SimpleBodyGroup.h"
+#include "vsdk/toolkit/environment/scene/SimpleBodyGroup.h"
 
-#include "SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

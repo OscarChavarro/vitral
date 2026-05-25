@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
 #define __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
 
-#include "MediaEntity.h"
+#include "vsdk/toolkit/media/MediaEntity.h"
 #include <vector>
 
 class Vector3Dd;

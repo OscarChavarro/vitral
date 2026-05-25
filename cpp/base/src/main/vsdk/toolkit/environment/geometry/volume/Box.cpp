@@ -1,4 +1,4 @@
-#include "Box.h"
+#include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

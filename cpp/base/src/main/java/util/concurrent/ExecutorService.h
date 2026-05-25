@@ -1,8 +1,8 @@
 #ifndef JAVA_UTIL_CONCURRENT_EXECUTORSERVICE_H
 #define JAVA_UTIL_CONCURRENT_EXECUTORSERVICE_H
 
-#include "Callable.h"
-#include "Future.h"
+#include "java/util/concurrent/Callable.h"
+#include "java/util/concurrent/Future.h"
 
 #include <memory>
 #include <string>

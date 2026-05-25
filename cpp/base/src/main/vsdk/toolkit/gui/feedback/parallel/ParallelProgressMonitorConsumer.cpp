@@ -1,4 +1,4 @@
-#include "ParallelProgressMonitorConsumer.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
 
 #include <unistd.h>
 

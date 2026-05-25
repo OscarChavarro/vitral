@@ -1,5 +1,5 @@
-#include "LightingShader.h"
-#include "CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/render/shaders/LightingShader.h"
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/light/Light.h"

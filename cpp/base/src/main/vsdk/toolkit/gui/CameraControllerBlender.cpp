@@ -1,4 +1,4 @@
-#include "CameraControllerBlender.h"
+#include "vsdk/toolkit/gui/CameraControllerBlender.h"
 
 #include <cmath>
 #include <cstdio>

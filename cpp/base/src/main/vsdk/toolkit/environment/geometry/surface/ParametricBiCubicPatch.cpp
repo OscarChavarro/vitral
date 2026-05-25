@@ -6,7 +6,7 @@
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
-#include "ParametricBiCubicPatch.h"
+#include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

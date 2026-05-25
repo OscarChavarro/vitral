@@ -1,4 +1,4 @@
-#include "ZBuffer.h"
+#include "vsdk/toolkit/media/ZBuffer.h"
 
 ZBuffer::ZBuffer(int width, int height) : xSize(width), ySize(height) {
     depth = new float[xSize * ySize];

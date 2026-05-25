@@ -1,5 +1,5 @@
-#include "TriangleMeshGroup.h"
-#include "TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"

@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_RENDERERCONFIGURATION_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "ShadingType.h"
+#include "vsdk/toolkit/environment/material/ShadingType.h"
 
 #include <string>
 

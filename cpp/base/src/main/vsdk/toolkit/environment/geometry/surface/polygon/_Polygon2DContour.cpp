@@ -1,4 +1,4 @@
-#include "_Polygon2DContour.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
 
 _Polygon2DContour::_Polygon2DContour() : exteriorContour(nullptr), fleetingFlag(false) {}

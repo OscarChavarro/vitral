@@ -1,5 +1,5 @@
-#include "Image.h"
-#include "RGBPixel.h"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 

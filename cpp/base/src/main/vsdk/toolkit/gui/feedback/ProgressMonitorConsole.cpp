@@ -1,4 +1,4 @@
-#include "ProgressMonitorConsole.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 

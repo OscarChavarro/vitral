@@ -1,5 +1,5 @@
-#include "AlgebraicExpression.h"
-#include "AlgebraicExpressionException.h"
+#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
+#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
 #include <cctype>
 #include <cmath>
 #include <cstdlib>

@@ -1,4 +1,4 @@
-#include "SimpleSceneSnapshot.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 
 SimpleSceneSnapshot::SimpleSceneSnapshot(

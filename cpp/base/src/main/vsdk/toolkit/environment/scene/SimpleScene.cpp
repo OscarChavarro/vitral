@@ -1,7 +1,7 @@
-#include "SimpleScene.h"
+#include "vsdk/toolkit/environment/scene/SimpleScene.h"
 
-#include "SimpleBody.h"
-#include "SimpleSceneSnapshot.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/environment/background/Background.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"

@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_ZBUFFER_H__
 #define __VSDK_TOOLKIT_MEDIA_ZBUFFER_H__
 
-#include "MediaEntity.h"
+#include "vsdk/toolkit/media/MediaEntity.h"
 
 /**
 This class represents a depth map. A depth map can be used to:

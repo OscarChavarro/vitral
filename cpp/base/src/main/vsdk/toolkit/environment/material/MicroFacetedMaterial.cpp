@@ -1,4 +1,4 @@
-#include "MicroFacetedMaterial.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 
 #include <algorithm>
 #include <cctype>

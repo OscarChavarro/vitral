@@ -1,7 +1,7 @@
 #ifndef KEYEVENT_H
 #define KEYEVENT_H
 
-#include "PresentationElement.h"
+#include "vsdk/toolkit/gui/PresentationElement.h"
 
 class KeyEvent : public PresentationElement {
 public:

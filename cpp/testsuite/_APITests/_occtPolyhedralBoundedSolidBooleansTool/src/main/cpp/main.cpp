@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <exception>
 #include <iostream>
 #include <string>
 
@@ -243,7 +244,7 @@ int main(int argc, char** argv) {
     std::cout << "Result written to: " << output << "\n";
     return 0;
   } catch (const Standard_Failure& e) {
-    std::cerr << "OCCT error: " << e.what() << "\n";
+    std::cerr << "OCCT error: " << e.GetMessageString() << "\n";
     return 3;
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << "\n";

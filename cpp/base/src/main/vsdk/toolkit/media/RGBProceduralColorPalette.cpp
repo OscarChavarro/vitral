@@ -1,4 +1,4 @@
-#include "RGBProceduralColorPalette.h"
+#include "vsdk/toolkit/media/RGBProceduralColorPalette.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 
 RGBProceduralColorPalette::RGBProceduralColorPalette() : RGBColorPalette() {

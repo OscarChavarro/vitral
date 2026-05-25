@@ -1,5 +1,5 @@
-#include "GeometryMetadata.h"
-#include "ShapeDescriptor.h"
+#include "vsdk/toolkit/media/GeometryMetadata.h"
+#include "vsdk/toolkit/media/ShapeDescriptor.h"
 #include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>

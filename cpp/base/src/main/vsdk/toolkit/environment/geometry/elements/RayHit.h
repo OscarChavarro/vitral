@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
 
-#include "Ray.h"
+#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class SimpleMaterial;

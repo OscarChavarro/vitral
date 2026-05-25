@@ -1,4 +1,4 @@
-#include "RGBPixel.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "java/lang/String.h"
 #include <cstdio>

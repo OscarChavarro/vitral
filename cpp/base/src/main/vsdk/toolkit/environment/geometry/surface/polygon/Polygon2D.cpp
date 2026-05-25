@@ -1,5 +1,5 @@
-#include "Polygon2D.h"
-#include "_Polygon2DContour.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"

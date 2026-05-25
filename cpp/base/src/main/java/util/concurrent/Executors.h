@@ -1,7 +1,7 @@
 #ifndef JAVA_UTIL_CONCURRENT_EXECUTORS_H
 #define JAVA_UTIL_CONCURRENT_EXECUTORS_H
 
-#include "ExecutorService.h"
+#include "java/util/concurrent/ExecutorService.h"
 
 namespace java {
 

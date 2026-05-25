@@ -1,4 +1,4 @@
-#include "RendererConfiguration.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),

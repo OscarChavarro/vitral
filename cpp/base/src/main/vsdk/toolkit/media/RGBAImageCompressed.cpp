@@ -1,5 +1,5 @@
-#include "RGBAImageCompressed.h"
-#include "RGBPixel.h"
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include <cstring>

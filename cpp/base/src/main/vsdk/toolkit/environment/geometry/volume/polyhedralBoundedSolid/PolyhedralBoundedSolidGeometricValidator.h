@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "PolyhedralBoundedSolidNumericPolicy.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;

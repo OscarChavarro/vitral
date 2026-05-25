@@ -1,7 +1,7 @@
 #ifndef MOUSEEVENT_H
 #define MOUSEEVENT_H
 
-#include "PresentationElement.h"
+#include "vsdk/toolkit/gui/PresentationElement.h"
 
 class MouseEvent : public PresentationElement {
 public:

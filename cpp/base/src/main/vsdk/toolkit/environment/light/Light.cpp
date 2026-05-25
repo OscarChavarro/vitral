@@ -1,5 +1,5 @@
-#include "Light.h"
-#include "LightType.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/LightType.h"
 
 Light::Light(int type, const Vector3Dd& pos, const ColorRgb& emission)
     : tipo_de_luz(type), lvec(0, 0, 0), ambient(0, 0, 0), diffuse(1, 1, 1), specular(emission), id(0), name("")

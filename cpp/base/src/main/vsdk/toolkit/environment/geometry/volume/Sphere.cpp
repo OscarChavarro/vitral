@@ -1,4 +1,4 @@
-#include "Sphere.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"

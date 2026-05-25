@@ -1,4 +1,4 @@
-#include "ShadingType.h"
+#include "vsdk/toolkit/environment/material/ShadingType.h"
 
 ShadingType ShadingTypeUtil::fromCode(int code)
 {

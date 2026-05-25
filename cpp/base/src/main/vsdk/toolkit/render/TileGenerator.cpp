@@ -1,5 +1,5 @@
-#include "TileGenerator.h"
-#include "Tile.h"
+#include "vsdk/toolkit/render/TileGenerator.h"
+#include "vsdk/toolkit/render/Tile.h"
 #include "vsdk/toolkit/media/Image.h"
 #include <stdexcept>
 

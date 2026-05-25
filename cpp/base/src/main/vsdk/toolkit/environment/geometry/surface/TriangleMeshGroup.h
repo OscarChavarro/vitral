@@ -1,8 +1,8 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESHGROUP_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESHGROUP_H__
 
-#include "Surface.h"
-#include "TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include <string>
 #include <vector>
 

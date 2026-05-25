@@ -1,5 +1,5 @@
-#include "ConstantTextureShader.h"
-#include "CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/render/shaders/ConstantTextureShader.h"
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 Shader::LocalShadingResult ConstantTextureShader::shadeLocal(RayHit* info,double,double,double,const std::vector<Light*>&,const std::vector<SimpleBody*>&,SimpleMaterial* material,TraceWorkspace*)

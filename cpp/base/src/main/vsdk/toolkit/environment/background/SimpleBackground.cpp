@@ -1,4 +1,4 @@
-#include "SimpleBackground.h"
+#include "vsdk/toolkit/environment/background/SimpleBackground.h"
 
 SimpleBackground::SimpleBackground() : color_(0, 0, 0)
 {

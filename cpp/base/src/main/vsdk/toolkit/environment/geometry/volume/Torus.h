@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_TORUS_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_TORUS_H__
 
-#include "Solid.h"
+#include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 
 class Ray;
 class RayHit;

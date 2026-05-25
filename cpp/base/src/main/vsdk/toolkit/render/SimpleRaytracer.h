@@ -1,10 +1,10 @@
 #ifndef __VSDK_TOOLKIT_RENDER_SIMPLERAYTRACER_H__
 #define __VSDK_TOOLKIT_RENDER_SIMPLERAYTRACER_H__
 
-#include "RenderingElement.h"
-#include "TraceWorkspace.h"
-#include "RenderContext.h"
-#include "TileGenerationStrategy.h"
+#include "vsdk/toolkit/render/RenderingElement.h"
+#include "vsdk/toolkit/render/TraceWorkspace.h"
+#include "vsdk/toolkit/render/RenderContext.h"
+#include "vsdk/toolkit/render/TileGenerationStrategy.h"
 #include <vector>
 
 class Ray;

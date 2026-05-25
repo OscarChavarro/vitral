@@ -1,4 +1,4 @@
-#include "PrimitiveCountShapeDescriptor.h"
+#include "vsdk/toolkit/media/PrimitiveCountShapeDescriptor.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include <cstdio>

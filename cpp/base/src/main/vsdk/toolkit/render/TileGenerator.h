@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_RENDER_TILEGENERATOR_H__
 
 #include <vector>
-#include "TileGenerationStrategy.h"
+#include "vsdk/toolkit/render/TileGenerationStrategy.h"
 
 class Image;
 class Tile;

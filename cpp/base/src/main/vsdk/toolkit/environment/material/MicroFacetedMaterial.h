@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
 
-#include "SimpleMaterial.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 
 class MicroFacetedMaterial : public SimpleMaterial {
 public:

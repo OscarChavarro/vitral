@@ -1,4 +1,4 @@
-#include "Triangle.h"
+#include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
 
 Triangle::Triangle() : p0(0), p1(0), p2(0), normal(0, 0, 0) {}
 Triangle::Triangle(int inP0, int inP1, int inP2)

@@ -1,4 +1,4 @@
-#include "ProgressMonitorInRam.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorInRam.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 

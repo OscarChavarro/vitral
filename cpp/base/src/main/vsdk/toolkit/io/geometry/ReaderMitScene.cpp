@@ -1,4 +1,4 @@
-#include "ReaderMitScene.h"
+#include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

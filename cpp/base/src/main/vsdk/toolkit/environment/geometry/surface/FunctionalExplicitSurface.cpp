@@ -1,5 +1,5 @@
-#include "FunctionalExplicitSurface.h"
-#include "TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/common/logging/Logger.h"

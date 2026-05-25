@@ -1,4 +1,4 @@
-#include "SimpleRaytracer.h"
+#include "vsdk/toolkit/render/SimpleRaytracer.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"

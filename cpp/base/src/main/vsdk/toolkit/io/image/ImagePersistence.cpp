@@ -1,4 +1,4 @@
-#include "ImagePersistence.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/io/PersistenceElement.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
