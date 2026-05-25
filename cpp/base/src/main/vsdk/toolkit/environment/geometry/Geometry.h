@@ -2,6 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRY_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/processing/Containment.h"
 
 class Ray;
 class RayHit;
@@ -9,9 +10,9 @@ class PolyhedralBoundedSolid;
 
 class Geometry {
 public:
-    static const int INSIDE = 1;
-    static const int LIMIT = 0;
-    static const int OUTSIDE = -1;
+    static constexpr int INSIDE = static_cast<int>(Containment::INSIDE);
+    static constexpr int LIMIT = static_cast<int>(Containment::LIMIT);
+    static constexpr int OUTSIDE = static_cast<int>(Containment::OUTSIDE);
 
     virtual ~Geometry() {}
 

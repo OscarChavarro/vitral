@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.elements.Triangle;
+import vsdk.toolkit.environment.geometry.elements.Intersection;
 import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
@@ -28,7 +29,6 @@ import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
-import vsdk.toolkit.processing.ComputationalGeometry;
 
 /**
 This class represents a "basic" triangle mesh. Its model is based in a set
@@ -873,7 +873,7 @@ public class TriangleMesh extends Surface {
         Ray ray = new Ray(inRay);
         int bestTriangle = -1;
         double minT = Double.MAX_VALUE;
-        ComputationalGeometry.TriangleIntersection bestHit = null;
+        Intersection bestHit = null;
 
         int nt = getNumTriangles();
         for ( int i = 0; i < nt; i++ ) {
@@ -893,8 +893,8 @@ public class TriangleMesh extends Surface {
                 vertexPositions[3*triangleIndices[3*i+2]+2]
             );
 
-            ComputationalGeometry.TriangleIntersection hit =
-                ComputationalGeometry.doIntersectionWithTriangle(ray, v0, v1, v2);
+            Intersection hit =
+                Triangle.doIntersectionWithTriangle(ray, v0, v1, v2);
             if ( hit != null && hit.t < minT ) {
                 minT = hit.t;
                 bestTriangle = i;
@@ -1061,7 +1061,7 @@ public class TriangleMesh extends Surface {
             p0 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
             p1 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
             p2 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
-            status = ComputationalGeometry.triangleContainmentTest(
+            status = Triangle.containmentTest(
                 p0, p1, p2, p, distanceTolerance);
             if ( status != OUTSIDE ) {
                 return LIMIT;
@@ -1127,8 +1127,7 @@ public class TriangleMesh extends Surface {
             p1Volume = Minv.multiply(p1Geom);
             p2Volume = Minv.multiply(p2Geom);
             // Obtain triangle minmax
-            ComputationalGeometry.triangleMinMax(p0Volume, p1Volume, p2Volume,
-                                                 triangleMinmax);
+            Triangle.minMax(p0Volume, p1Volume, p2Volume, triangleMinmax);
             minpVolume = new Vector3Dd(triangleMinmax[0], triangleMinmax[1], triangleMinmax[2]);
             maxpVolume = new Vector3Dd(triangleMinmax[3], triangleMinmax[4], triangleMinmax[5]);
             minI = vv.getNearestIFromX(minpVolume.x());
@@ -1144,7 +1143,7 @@ public class TriangleMesh extends Surface {
                 for ( j = minJ; j <= maxJ; j++ ) {
                     for ( k = minK; k <= maxK; k++ ) {
                         pVolume = vv.getVoxelPosition(i, j, k);
-                        status = ComputationalGeometry.triangleContainmentTest(
+                        status = Triangle.containmentTest(
                             p0Volume, p1Volume, p2Volume,
                             pVolume, distanceTolerance);
                         if ( status != OUTSIDE ) {

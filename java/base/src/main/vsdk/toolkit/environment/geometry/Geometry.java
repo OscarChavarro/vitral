@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.processing.Containment;
 
 /**
 Every geometric entity (prefer not to call it "Object", for not confusing
@@ -31,9 +32,9 @@ geometric algorithm, including but not limited to rendering operations.<P>
 public abstract class Geometry extends Entity {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20150218L;
-    public static final int INSIDE = 1;
-    public static final int LIMIT = 0;
-    public static final int OUTSIDE = -1;
+    public static final int INSIDE = Containment.INSIDE.value();
+    public static final int LIMIT = Containment.LIMIT.value();
+    public static final int OUTSIDE = Containment.OUTSIDE.value();
 
     /**
     Takes in a Ray and checks wheter or not that Ray intersects the current 

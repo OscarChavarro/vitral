@@ -1,7 +1,4 @@
 //= References:                                                             =
-//= [BAER2002] Baeentzen, Jakob Andreas. Aanaes, Henrik. "Generating Signed =
-//=     Distance Fields From Triangle Meshes",  Technical report            =
-//=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
@@ -9,10 +6,7 @@ package vsdk.toolkit.processing;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.elements.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 
 /**
 This class contains common computational geometry operations (mostly
@@ -22,140 +16,12 @@ over gemetries.
 */
 public class ComputationalGeometry extends ProcessingElement
 {
-    public static final class TriangleIntersection {
-        public final double t;
-        public final Vector3Dd point;
-        public final Vector3Dd normal;
-
-        public TriangleIntersection(double t, Vector3Dd point, Vector3Dd normal) {
-            this.t = t;
-            this.point = point;
-            this.normal = normal;
-        }
-    }
-
-    private static final InfinitePlane workPlane;
-        
-        // For 2D line clipping an 4 bit outcode is used
+    // For 2D line clipping an 4 bit outcode is used
     private static final int COHEN_SUTHERLAND_2D_INSIDE = 0; // 0000
     private static final int COHEN_SUTHERLAND_2D_LEFT = 1;  // 0001
     private static final int COHEN_SUTHERLAND_2D_RIGHT = 2; // 0010
     private static final int COHEN_SUTHERLAND_2D_BOTTOM = 4;// 0100
     private static final int COHEN_SUTHERLAND_2D_TOP = 8;   // 1000
-
-    static {
-        workPlane = new InfinitePlane(1, 1, 1, 0);
-    }
-
-    /**
-    Check the related interface contract for method
-    Geometry.doIntersection.
-
-    SPECIFIC IMPLEMENTATION: this method solve the intersection problem
-    for one triangle in two stages:
-    <UL>
-    <LI>Calculates the plane containing the Triangle and checks if the Ray
-    intersects with that plane.
-    <LI>If the Ray intersects the plane, a check is done to determine
-    if the intersection is inside the Triangle.
-    </UL>
-    That logic y repeated for all the Triangles in the TriangleMesh, and
-    the shortest length intersected Triangle is reported.<P>
-
-    Precondition:
-\f[
-    \mathbf{Q} := inOut\_Ray.direction().length() = 1 \;
-\f]
-
-    NOTES:
-    <UL>
-    <LI>The plane normal is determined for each triangle as the cross product
-    of two Triangle edge Vector3Dd's, algorithm step (1).
-    <LI>The canonic equation for a plane with normal n is
-\f[
-        nx*x + ny*y +nz*z + d = 0
-\f]
-    <LI>The parametric equation for the ray inOut_Ray (call it r) is
-\f[
-        \vec p = \vec{r.o} + t * \vec{r.d}
-\f]
-    <LI>Combining those two equations and solving for parameter t, algorithm
-    step (2), gives
-\f[
-        t = \frac{ -(nx*ox+ny*oy+nz*oz+d) }{ nx*dx+ny*dy+nz*dz }
-\f]
-    and observing that the appearing vector components can be expressed as
-    dot product, this equation can be rewritten in the condensed vectorial
-    form
-\f[
-        t = \frac{ -(\vec n \cdot \vec{r.o} +d) }
-                               { \vec n \cdot \vec{r.d} }
-\f]
-    <LI>Scalar value d in that equation can be solve replacing the coordinates
-    of any of the Triangle points into the plane equation.
-    <LI>To check if an intersected point lies inside the triangle, a left/right
-    test is done with each one of the three directed edge vectors. If all three
-    tests pass, then the point is inside the triangle.
-    <LI>If the normal and the direction of the ray are in the same direction
-    (more than 90 degrees of vector angle) then the normal is inverted to manage
-     meshes with reversed triangles.
-    </UL>
-    @param inOut_Ray
-    @param v0
-    @param v1
-    @param v2
-    @param outPoint
-    @param outNormal
-    @return 
-    */
-    public static TriangleIntersection
-    doIntersectionWithTriangle(
-        Ray inOut_Ray,
-        Vector3Dd v0, 
-        Vector3Dd v1, 
-        Vector3Dd v2) 
-    {
-        Vector3Dd p;           // Point of intersection between ray and plane
-        Vector3Dd u, v, n;     // Edge vectors and normal
-        double t, a, b, d;    // Coefficients for solving equation (2)
-        double s1, s2, s3;    // Side test for each of triangle border
-
-        // The vectors u & v are two triangle edges, and define the 
-        // normal (1)
-        u = v1.subtract(v0);
-        v = v2.subtract(v1);
-        n = v.crossProduct(u).normalized();
-
-        // This is the result of replacing point v0 on plane equation, 
-        // solving for d
-        d = -n.dotProduct(v0);
-
-        // Calculate numerator and denominator for equation (2)
-        a = n.dotProduct(inOut_Ray.origin()) + d;
-        b = n.dotProduct(inOut_Ray.direction());
-
-        // The denominator is big when the ray is not parallel to the plane
-        if ( Math.abs(b) > VSDK.EPSILON ) {
-            // Solution for equation (2), only if non-zero denominator
-            t = (-a) / b;
-
-            if ( t < 0.0 ) return null;
-
-            // Calculate the intersection point between ray and plane
-            p = inOut_Ray.origin().add(inOut_Ray.direction().multiply(t));
-
-            // Check if the point is inside the triangle
-            s1 = u.crossProduct(p.subtract(v0)).dotProduct(n);
-            s2 = (v2.subtract(v1)).crossProduct(p.subtract(v1)).dotProduct(n);
-            s3 = (v0.subtract(v2)).crossProduct(p.subtract(v2)).dotProduct(n);
-
-            if ( (s1 >= 0 && s2 >= 0 && s3 >= 0) || 
-                (s1 <= 0 && s2 <= 0 && s3 <= 0) ) {
-                return new TriangleIntersection(t, p, n);
-            }
-        }
-        return null;
-    }
 
     /**
     Given a line from p0 to p1 and a point p, this method gives the minimum
@@ -227,9 +93,9 @@ public class ComputationalGeometry extends ProcessingElement
         d = lineToPointDistance(p0, p1, p);
         
         if ( d <= distanceTolerance ) {
-            return Geometry.LIMIT;
+            return Containment.LIMIT.value();
         }
-        return Geometry.OUTSIDE;
+        return Containment.OUTSIDE.value();
     }
 
     /**
@@ -257,146 +123,20 @@ public class ComputationalGeometry extends ProcessingElement
         b = p.subtract(p0);
 
         double denominator = a.length();
-        if ( denominator < VSDK.EPSILON ) return Geometry.OUTSIDE;
+        if ( denominator < VSDK.EPSILON ) return Containment.OUTSIDE.value();
 
         double numerator = a.crossProduct(b).length();
         d = numerator / denominator;
 
         if ( d <= distanceTolerance ) {
             double t = a.dotProduct(b) / a.dotProduct(a);
-            if ( t < -VSDK.EPSILON || t > 1+VSDK.EPSILON ) return Geometry.OUTSIDE;
+            if ( t < -VSDK.EPSILON || t > 1+VSDK.EPSILON ) return Containment.OUTSIDE.value();
 
-            return Geometry.LIMIT;
+            return Containment.LIMIT.value();
         }
-        return Geometry.OUTSIDE;
+        return Containment.OUTSIDE.value();
     }
 
-    /**
-    This method calculates containment test for triangle defined by its
-    3 vertex positions.  It implements a region classification based
-    strategy proposed in [BAER2002].  For a given triangle and with respect
-    to triangle's containing plane, a poing lies in one of 7 regions:
-       - R1: inside triangle
-       - R2: outside triangle, near edge 1
-       - R3: outside triangle, near edge 2
-       - R4: outside triangle, near edge 3
-       - R5: outside triangle, near vertex 1
-       - R6: outside triangle, near vertex 2
-       - R7: outside triangle, near vertex 3
-    @param p0
-    @param p1
-    @param p2
-    @param p
-    @param distanceTolerance
-    @return 
-    */
-    public static int triangleContainmentTest(
-        Vector3Dd p0, 
-        Vector3Dd p1, 
-        Vector3Dd p2, 
-        Vector3Dd p,
-        double distanceTolerance)
-    {
-        Vector3Dd n, a, b;
-
-        a = p1.subtract(p0);
-        b = p2.subtract(p0);
-        n = a.crossProduct(b).normalized();
-
-        workPlane.setFromPointNormal(p0, n);
-
-        if ( workPlane.doContainmentTest(p, distanceTolerance) == 
-             Geometry.LIMIT ) {
-            // Barycentric coordinates test containment technique (Region 1)
-            Vector3Dd c = p.subtract(p0);
-            double dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
-            dot00 = a.dotProduct(a);
-            dot01 = a.dotProduct(b);
-            dot02 = a.dotProduct(c);
-            dot11 = b.dotProduct(b);
-            dot12 = b.dotProduct(c);
-            invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-            u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-            if ( (u >= 0) && (v >= 0) && (u + v <= 1) ) {
-                // R1
-                return Geometry.LIMIT;
-            }
-            else if ( (u <= 0) && (v >= 0) && (u + v <= 1) ) {
-                // R2
-                return
-                    lineSegmentContainmentTest(p0, p2, p, distanceTolerance);
-            }
-            else if ( (u >= 0) && (v <= 0) && (u + v <= 1) ) {
-                // R3
-                return
-                    lineSegmentContainmentTest(p0, p1, p, distanceTolerance);
-            }
-            else if ( (u >= 0) && (v >= 0) && (u + v >= 1) ) {
-                // R4
-                return
-                    lineSegmentContainmentTest(p1, p2, p, distanceTolerance);
-            }
-            else if ( (u <= 0) && (v <= 0) ) {
-                // R5
-                if ( VSDK.vectorDistance(p, p0) < distanceTolerance ) {
-                    return Geometry.LIMIT;
-                }
-            }
-            else if ( (u <= 0) && (v >= 1) ) {
-                // R6
-                if ( VSDK.vectorDistance(p, p2) < distanceTolerance ) {
-                    return Geometry.LIMIT;
-                }
-            }
-            else {
-                // R7
-                if ( VSDK.vectorDistance(p, p1) < distanceTolerance ) {
-                    return Geometry.LIMIT;
-                }
-            }
-        }
-        return Geometry.OUTSIDE;
-    }
-
-    public static void triangleMinMax(
-        Vector3Dd p0, Vector3Dd p1, Vector3Dd p2, double minMax[])
-    {
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double minZ = Double.MAX_VALUE;
-        double maxX = -Double.MAX_VALUE;
-        double maxY = -Double.MAX_VALUE;
-        double maxZ = -Double.MAX_VALUE;
-
-        if ( p0.x() < minX ) minX = p0.x();
-        if ( p0.y() < minY ) minY = p0.y();
-        if ( p0.z() < minZ ) minZ = p0.z();
-        if ( p0.x() > maxX ) maxX = p0.x();
-        if ( p0.y() > maxY ) maxY = p0.y();
-        if ( p0.z() > maxZ ) maxZ = p0.z();
-
-        if ( p1.x() < minX ) minX = p1.x();
-        if ( p1.y() < minY ) minY = p1.y();
-        if ( p1.z() < minZ ) minZ = p1.z();
-        if ( p1.x() > maxX ) maxX = p1.x();
-        if ( p1.y() > maxY ) maxY = p1.y();
-        if ( p1.z() > maxZ ) maxZ = p1.z();
-
-        if ( p2.x() < minX ) minX = p2.x();
-        if ( p2.y() < minY ) minY = p2.y();
-        if ( p2.z() < minZ ) minZ = p2.z();
-        if ( p2.x() > maxX ) maxX = p2.x();
-        if ( p2.y() > maxY ) maxY = p2.y();
-        if ( p2.z() > maxZ ) maxZ = p2.z();
-
-        minMax[0] = minX;
-        minMax[1] = minY;
-        minMax[2] = minZ;
-        minMax[3] = maxX;
-        minMax[4] = maxY;
-        minMax[5] = maxZ;
-    }
 
     /**
     Implementation of the Cohen-Sutherland line clipping algorithm on two

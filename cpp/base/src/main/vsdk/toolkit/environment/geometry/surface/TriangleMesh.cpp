@@ -11,7 +11,6 @@
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include <cmath>
 #include <algorithm>
 
@@ -389,7 +388,7 @@ int TriangleMesh::doContainmentTest(const Vector3Dd& p, double distanceTolerance
         Vector3Dd p0(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
         Vector3Dd p1(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
         Vector3Dd p2(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
-        int status = ComputationalGeometry::triangleContainmentTest(p0, p1, p2, p, distanceTolerance);
+        int status = Triangle::containmentTest(p0, p1, p2, p, distanceTolerance);
         if (status != OUTSIDE) return LIMIT;
     }
     return OUTSIDE;
@@ -410,7 +409,7 @@ void TriangleMesh::doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, Progress
         Vector3Dd p0Volume = Minv.multiply(p0Geom);
         Vector3Dd p1Volume = Minv.multiply(p1Geom);
         Vector3Dd p2Volume = Minv.multiply(p2Geom);
-        ComputationalGeometry::triangleMinMax(p0Volume, p1Volume, p2Volume, triangleMinmax);
+        Triangle::minMax(p0Volume, p1Volume, p2Volume, triangleMinmax);
 
         int minI = vv.getNearestIFromX(triangleMinmax[0]);
         int minJ = vv.getNearestJFromY(triangleMinmax[1]);
@@ -424,7 +423,7 @@ void TriangleMesh::doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, Progress
             for (int j = minJ; j <= maxJ; j++) {
                 for (int k = minK; k <= maxK; k++) {
                     Vector3Dd pVolume = vv.getVoxelPosition(i, j, k);
-                    int status = ComputationalGeometry::triangleContainmentTest(p0Volume, p1Volume, p2Volume, pVolume, distanceTolerance);
+                    int status = Triangle::containmentTest(p0Volume, p1Volume, p2Volume, pVolume, distanceTolerance);
                     if (status != OUTSIDE) vv.putVoxel(i, j, k, (char)255);
                 }
             }

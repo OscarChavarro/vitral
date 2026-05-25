@@ -17,6 +17,8 @@ import java.util.List;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.elements.Intersection;
+import vsdk.toolkit.environment.geometry.elements.Triangle;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -24,7 +26,6 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
-import vsdk.toolkit.processing.ComputationalGeometry;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
@@ -256,8 +257,8 @@ public class HiddenLineRenderer extends RenderingElement
             ray = ray.withDirection(cl.d);
             t0 = ray.direction().length() - 6*VSDK.EPSILON;
             ray = ray.withDirection(ray.direction().normalized());
-            ComputationalGeometry.TriangleIntersection hit =
-                ComputationalGeometry.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
+            Intersection hit =
+                Triangle.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
             if (
              hit != null &&
              hit.t < t0

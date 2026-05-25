@@ -2,7 +2,10 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_TRIANGLE_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/geometry/elements/Intersection.h"
 #include <string>
+
+class Ray;
 
 class Triangle
 {
@@ -23,6 +26,23 @@ public:
     void setPoint0(int p0);
     void setPoint1(int p1);
     void setPoint2(int p2);
+
+    static Intersection* doIntersectionWithTriangle(
+        const Ray& ray,
+        const Vector3Dd& v0,
+        const Vector3Dd& v1,
+        const Vector3Dd& v2);
+    static int containmentTest(
+        const Vector3Dd& p0,
+        const Vector3Dd& p1,
+        const Vector3Dd& p2,
+        const Vector3Dd& p,
+        double distanceTolerance);
+    static void minMax(
+        const Vector3Dd& p0,
+        const Vector3Dd& p1,
+        const Vector3Dd& p2,
+        double mm[6]);
 
     /**
     Provides an object to text report convertion, optimized for human
