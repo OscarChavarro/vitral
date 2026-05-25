@@ -1,4 +1,4 @@
-#include "OpenGL4LightRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>

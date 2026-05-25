@@ -1,4 +1,4 @@
-#include "OpenGL4SimpleCorridorSample.h"
+#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #include <cmath>
 #include <cstdio>
 #include <fstream>

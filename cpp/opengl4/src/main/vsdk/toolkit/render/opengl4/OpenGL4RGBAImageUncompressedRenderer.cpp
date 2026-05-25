@@ -1,5 +1,5 @@
-#include "OpenGL4RGBAImageUncompressedRenderer.h"
-#include "OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include <cstdio>
 

@@ -3,7 +3,6 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
 
 TriangleMeshGroup::TriangleMeshGroup()
     : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
@@ -135,17 +134,14 @@ bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
     Vector3Dd center((mm[3]+mm[0])/2, (mm[4]+mm[1])/2, (mm[5]+mm[2])/2);
     delete [] mm;
 
-    SimpleBody boundingVolume;
-    boundingVolume.setPosition(center);
     Box bbox(size);
-    boundingVolume.setGeometry(&bbox);
-    Ray* coarseHit = boundingVolume.doIntersection(inRay);
-    if (coarseHit == 0) {
+    Ray localRay(inRay.origin().subtract(center), inRay.direction(), inRay.t());
+    RayHit coarseHit(RayHit::DETAIL_NONE, false);
+    if (!bbox.doIntersection(localRay, &coarseHit)) {
         intersectionMeshIndex = -1;
         intersectionTriangleIndex = -1;
         return false;
     }
-    delete coarseHit;
 
     double minT = 1e308;
     RayHit bestHit;

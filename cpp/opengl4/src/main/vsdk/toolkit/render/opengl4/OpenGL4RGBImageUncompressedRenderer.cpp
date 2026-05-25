@@ -1,5 +1,5 @@
-#include "OpenGL4RGBImageUncompressedRenderer.h"
-#include "OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
 std::map<RGBImageUncompressed*, GLuint> OpenGL4RGBImageUncompressedRenderer::compiledImages;

@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.h"
+#include "vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.h"
 
 #include <cmath>
 

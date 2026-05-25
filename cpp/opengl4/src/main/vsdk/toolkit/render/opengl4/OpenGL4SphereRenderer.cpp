@@ -1,4 +1,4 @@
-#include "OpenGL4SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 
 #include <algorithm>
 #include <cmath>

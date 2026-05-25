@@ -49,7 +49,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp
-    src/main/vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.cpp
+    src/main/vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.cpp
     src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp
     src/main/java/lang/Object.cpp
     src/main/java/lang/String.cpp

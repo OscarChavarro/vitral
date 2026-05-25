@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_LINEARALGEBRAENGINE_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
-#include "vsdk/toolkit/processing/linealAlgebra/Strategies.h"
+#include "vsdk/toolkit/linealAlgebra/processing/Strategies.h"
 
 class LinearAlgebraEngine {
 private:

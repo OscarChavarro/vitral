@@ -1,4 +1,4 @@
-#include "OpenGL4MatrixRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>

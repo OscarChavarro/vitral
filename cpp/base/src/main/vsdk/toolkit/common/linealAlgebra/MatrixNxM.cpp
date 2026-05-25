@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <cstdio>
 
-#include "vsdk/toolkit/processing/linealAlgebra/LinearAlgebraEngine.h"
+#include "vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
