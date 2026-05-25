@@ -57,12 +57,12 @@ public class ComputationalGeometry extends ProcessingElement
 
         c1 = w.dotProduct(v);
         if ( c1 <= 0.0 ) {
-            return VSDK.vectorDistance(p, p0);
+            return Vector3Dd.distance(p, p0);
         }
         
         c2 = v.dotProduct(v);
         if ( c2 <= c1 ) {
-            return VSDK.vectorDistance(p, p1);
+            return Vector3Dd.distance(p, p1);
         }
         
         double b;
@@ -70,7 +70,7 @@ public class ComputationalGeometry extends ProcessingElement
         Vector3Dd pb;
         pb = p0.add(v.multiply(b));
            
-        return VSDK.vectorDistance(p, pb);    
+        return Vector3Dd.distance(p, pb);    
     }
     
     /**

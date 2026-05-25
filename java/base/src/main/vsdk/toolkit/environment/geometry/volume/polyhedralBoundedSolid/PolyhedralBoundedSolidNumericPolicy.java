@@ -280,13 +280,13 @@ public class PolyhedralBoundedSolidNumericPolicy
     public static boolean pointsCoincident(Vector3Dd a, Vector3Dd b,
                                            ToleranceContext context)
     {
-        return VSDK.vectorDistance(a, b) <= context.bigEpsilon();
+        return Vector3Dd.distance(a, b) <= context.bigEpsilon();
     }
 
     public static boolean pointsSeparated(Vector3Dd a, Vector3Dd b,
                                           ToleranceContext context)
     {
-        return VSDK.vectorDistance(a, b) > context.bigEpsilon();
+        return Vector3Dd.distance(a, b) > context.bigEpsilon();
     }
 
     public static int testPointInside(_PolyhedralBoundedSolidFace face, Vector3Dd point,

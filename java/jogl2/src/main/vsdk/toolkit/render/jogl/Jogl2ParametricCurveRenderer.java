@@ -313,8 +313,8 @@ public class Jogl2ParametricCurveRenderer extends Jogl2Renderer {
                     Vector3Dd prev = new Vector3Dd(list[count-1][0], 
                                                  list[count-1][1],
                                                  list[count-1][2]);
-                    if ( VSDK.vectorDistance(vec,  prev) > VSDK.EPSILON &&
-                         VSDK.vectorDistance(vec, first) > VSDK.EPSILON ) {
+                    if ( Vector3Dd.distance(vec,  prev) > VSDK.EPSILON &&
+                         Vector3Dd.distance(vec, first) > VSDK.EPSILON ) {
                         list[count][0] = vec.x();
                         list[count][1] = vec.y();
                         list[count][2] = vec.z();

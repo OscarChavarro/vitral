@@ -26,6 +26,8 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
@@ -78,6 +80,51 @@ This class implements the Appel's algorithm for hidden line rendering. :)
 */
 public class HiddenLineRenderer extends RenderingElement
 {
+    public static int isFaceVisibleFromCamera(
+        _PolyhedralBoundedSolidFace face,
+        Camera camera)
+    {
+        Vector3Dd iv = new Vector3Dd(1, 0, 0);
+        Vector3Dd viewingVector = camera.getRotation().multiply(iv);
+        Vector3Dd n = face.getContainingPlane().getNormal().normalized();
+        double dot;
+
+        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
+            viewingVector = viewingVector.normalized();
+            dot = n.dotProduct(viewingVector);
+            if ( dot > VSDK.EPSILON ) {
+                return -1;
+            }
+            else if ( dot > VSDK.EPSILON ) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        Vector3Dd cameraPosition = camera.getPosition();
+        for ( int i = 0; i < face.boundariesList.size(); i++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
+            _PolyhedralBoundedSolidHalfEdge he = loop.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge heStart = he;
+
+            do {
+                he = he.next();
+                if ( he == null ) {
+                    // Loop is not closed.
+                    break;
+                }
+                Vector3Dd p = he.startingVertex.position;
+                Vector3Dd t = p.subtract(cameraPosition).multiply(-1).normalized();
+                if ( t.dotProduct(n) > 0.0 ) {
+                    return 1;
+                }
+            } while ( he != heStart );
+        }
+        return -1;
+    }
+
     private static int
     computeQuantitativeInvisibility(List <SimpleBody> solids,
         Camera camera, _AppelEdgeCache edge)
@@ -152,8 +199,8 @@ public class HiddenLineRenderer extends RenderingElement
                     //--------------------------------------------------------
                     face1 = e.leftHalf.parentLoop.parentFace;
                     face2 = e.rightHalf.parentLoop.parentFace;
-                    f1 = face1.isVisibleFrom(camera) >= 0;
-                    f2 = face2.isVisibleFrom(camera) >= 0;
+                    f1 = isFaceVisibleFromCamera(face1, camera) >= 0;
+                    f2 = isFaceVisibleFromCamera(face2, camera) >= 0;
 
                     //--------------------------------------------------------
                     materialLine = new _AppelEdgeCache();
@@ -161,7 +208,7 @@ public class HiddenLineRenderer extends RenderingElement
                     materialLine.setEnd(endPosition);
                     materialLine.d = endPosition.subtract(startPosition);
                     if ( l > 0 &&
-                         VSDK.vectorDistance(prevEnd, startPosition) < 
+                         Vector3Dd.distance(prevEnd, startPosition) < 
                              VSDK.EPSILON ) {
                         materialLine.onSequence = true;
                     }

@@ -315,7 +315,7 @@ public class TranslateGizmo extends Gizmo {
             right = right.normalized();
             camera.projectPointUsingRayMethod(p, a);
             camera.projectPointUsingRayMethod(p.add(right), b);
-            double factor = VSDK.vectorDistance(a, b);
+            double factor = Vector3Dd.distance(a, b);
             currentScale = ((double)initialdu)/factor;
         }
         double scale = currentScale;

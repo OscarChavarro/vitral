@@ -616,7 +616,7 @@ public class ParametricCurve extends Curve {
             // Solve problem for the polyline
             for ( j = 0; j < polyline.size(); j++ ) {
                 vec = polyline.get(j);
-                if ( VSDK.vectorDistance(vec, p) < distanceTolerance ) {
+                if ( Vector3Dd.distance(vec, p) < distanceTolerance ) {
                     return LIMIT;
                 }
             }

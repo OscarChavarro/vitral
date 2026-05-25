@@ -441,7 +441,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
                 hb = nbb.get(sectb).he;
                 n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
                 n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
-                d = VSDK.vectorDistance(n1, n2);
+                d = Vector3Dd.distance(n1, n2);
                 nonopposite = ( d < VSDK.EPSILON );
                 if ( nonopposite ) {
                     newsa = (op == _PolyhedralBoundedSolidSetClassifier.UNION) ?

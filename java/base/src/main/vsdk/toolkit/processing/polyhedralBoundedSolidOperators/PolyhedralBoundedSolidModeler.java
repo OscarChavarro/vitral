@@ -392,9 +392,9 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     private static boolean shouldAcceptPolyLinePoint(_BoundaryRepresentationFromCurveBuildState state,
                                                      Vector3Dd point)
     {
-        return VSDK.vectorDistance(point, state.lastAcceptedPoint) >
+        return Vector3Dd.distance(point, state.lastAcceptedPoint) >
             VSDK.EPSILON &&
-            VSDK.vectorDistance(point, state.firstPointInLoop) > VSDK.EPSILON;
+            Vector3Dd.distance(point, state.firstPointInLoop) > VSDK.EPSILON;
     }
 
     private static void appendPointToCurrentLoop(_BoundaryRepresentationFromCurveBuildState state,

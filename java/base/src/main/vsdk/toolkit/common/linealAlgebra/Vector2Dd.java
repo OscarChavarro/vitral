@@ -64,6 +64,11 @@ public final class Vector2Dd extends FundamentalEntity {
         return Math.sqrt(x*x + y*y);
     }
 
+    public static double distance(Vector2Dd a, Vector2Dd b) {
+        return Math.sqrt((a.x - b.x)*(a.x - b.x) +
+                         (a.y - b.y)*(a.y - b.y));
+    }
+
     public final Vector2Dd add(Vector2Dd b)
     {
         return new Vector2Dd(x + b.x, y + b.y);

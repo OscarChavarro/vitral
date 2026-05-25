@@ -18,6 +18,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.render.HiddenLineRenderer;
 
 public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 {
@@ -130,8 +131,8 @@ public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
                     //- Prepare data for visible line determination ----------
                     face1 = e.leftHalf.parentLoop.parentFace;
                     face2 = e.rightHalf.parentLoop.parentFace;
-                    f1 = face1.isVisibleFrom(c) >= 0;
-                    f2 = face2.isVisibleFrom(c) >= 0;
+                    f1 = HiddenLineRenderer.isFaceVisibleFromCamera(face1, c) >= 0;
+                    f2 = HiddenLineRenderer.isFaceVisibleFromCamera(face2, c) >= 0;
 
                     //- Determine if line is hidden, visible or contour ------
                     boolean isVisible = false;

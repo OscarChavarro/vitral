@@ -93,6 +93,12 @@ public final class Vector3Dd extends FundamentalEntity
         return Math.sqrt(x*x + y*y + z*z);
     }
 
+    public static double distance(Vector3Dd a, Vector3Dd b) {
+        return Math.sqrt((a.x - b.x)*(a.x - b.x) +
+                         (a.y - b.y)*(a.y - b.y) +
+                         (a.z - b.z)*(a.z - b.z));
+    }
+
     public Vector3Dd add(Vector3Dd b)
     {
         return new Vector3Dd(x + b.x, y + b.y, z + b.z);

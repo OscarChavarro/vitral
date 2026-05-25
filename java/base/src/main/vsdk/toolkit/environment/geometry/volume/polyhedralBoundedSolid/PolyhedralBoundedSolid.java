@@ -348,7 +348,7 @@ public class PolyhedralBoundedSolid extends Solid {
             projectedLoopVertices = new ArrayList<>();
 
             do {
-                if ( VSDK.vectorDistance(point, he.startingVertex.position)
+                if ( Vector3Dd.distance(point, he.startingVertex.position)
                      < 2 * tolerance ) {
                     return Geometry.LIMIT;
                 }

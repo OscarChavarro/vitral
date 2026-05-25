@@ -18,7 +18,6 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
-import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.processing.ComputationalGeometry;
 
 /**
@@ -533,7 +532,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
             }
             heStart = he;
             do {
-                if ( VSDK.vectorDistance(p, he.startingVertex.position) 
+                if ( Vector3Dd.distance(p, he.startingVertex.position) 
                      < 2*tolerance ) {
                     return new PointInsideResult(Geometry.LIMIT, null,
                         he.startingVertex);
@@ -557,7 +556,7 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
                 polygon2Dv.add(projectedPoint.y());
                 polygon2Dvv.add(he.startingVertex);
 
-                if ( VSDK.vectorDistance(p, he.startingVertex.position) 
+                if ( Vector3Dd.distance(p, he.startingVertex.position) 
                      < 2*tolerance ) {
                     return new PointInsideResult(Geometry.LIMIT, null,
                         he.startingVertex);
@@ -644,75 +643,6 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         }
 
         return new PointInsideResult(Geometry.OUTSIDE, null, null);
-    }
-
-    /**
-    Current implementation only takes into account the containing plane.
-    @param c
-    @return 1 if this face is visible from camera c, -1 if is not visible and
-    0 if is tangent to it.
-    \todo : generalize to plane. This is returning "1" in cases where should
-    return "-1".
-    */
-    public int isVisibleFrom(Camera c)
-    {
-        Vector3Dd iv = new Vector3Dd(1, 0, 0);
-        Vector3Dd viewingVector;
-        viewingVector = c.getRotation().multiply(iv);
-        Vector3Dd n = getContainingPlane().getNormal();
-        Vector3Dd cp;
-        Vector3Dd t;
-        n = n.normalized();
-        double dot;
-        int i;
-        Vector3Dd p;
-
-        if ( c.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            viewingVector = viewingVector.normalized();
-            dot = n.dotProduct(viewingVector);
-            if ( dot > VSDK.EPSILON ) {
-                return -1;
-            }
-            else if ( dot > VSDK.EPSILON ) {
-                return 1;
-            }
-            else return 0;
-        }
-        else {
-            cp = c.getPosition();
-            _PolyhedralBoundedSolidLoop l;
-            for ( i = 0; i < boundariesList.size(); i++ ) {
-                //System.out.println("  - Testing boundary " + i + " of " + boundariesList.size());
-                l = boundariesList.get(i);
-                _PolyhedralBoundedSolidHalfEdge he;
-                _PolyhedralBoundedSolidHalfEdge heStart;
-
-                he = l.boundaryStartHalfEdge;
-                heStart = he;
-                do {
-                    // Logic
-                    he = he.next();
-                    if ( he == null ) {
-                        // Loop is not closed!
-                        break;
-                    }
-
-                    // Calculate containing plane equation for current edge
-                    p = he.startingVertex.position;
-                    //System.out.println("    . Testing point " + p);
-                    t = p.subtract(cp);
-                    t = t.multiply(-1);
-                    t = t.normalized();
-                    //System.out.println("     -> Viewing point " + t);
-                    if ( t.dotProduct(n) > 0.0 ) {
-                        return 1;
-                        //System.out.println("  * Face in");
-                    }
-                } while( he != heStart );
-            }
-            //System.out.println("  * Face out");
-            return -1;
-        }
     }
 
     public void revert()

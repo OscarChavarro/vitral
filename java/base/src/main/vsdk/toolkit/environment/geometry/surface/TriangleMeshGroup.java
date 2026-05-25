@@ -9,7 +9,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.elements.RayHit;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
-import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class TriangleMeshGroup extends Surface {
@@ -172,10 +171,13 @@ public class TriangleMeshGroup extends Surface {
             (mm[4]+mm[1])/2,
             (mm[5]+mm[2])/2
         );
-        SimpleBody boundingVolume = new SimpleBody();
-        boundingVolume.setPosition(center);
-        boundingVolume.setGeometry(new Box(size));
-        if ( boundingVolume.doIntersection(inRay) == null ) {
+        Box boundingVolume = new Box(size);
+        Ray localRay = new Ray(
+            inRay.origin().subtract(center),
+            inRay.direction(),
+            inRay.t()
+        );
+        if ( !boundingVolume.doIntersection(localRay, null) ) {
             int[] info = intersectionInformation.get();
             info[0] = -1;
             info[1] = -1;

@@ -7,6 +7,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.FundamentalEntity;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 
 /**
@@ -121,7 +122,7 @@ public class _PolyhedralBoundedSolidHalfEdge extends FundamentalEntity {
     public boolean
     vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge other, double tolerance)
     {
-        return VSDK.vectorDistance(
+        return Vector3Dd.distance(
             this.startingVertex.position,
             other.startingVertex.position
         ) <= tolerance;

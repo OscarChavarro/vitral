@@ -27,7 +27,6 @@ import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 /**
@@ -859,10 +858,13 @@ public class TriangleMesh extends Surface {
             (mm[4]+mm[1])/2,
             (mm[5]+mm[2])/2
         );
-        SimpleBody boundingVolume = new SimpleBody();
-        boundingVolume.setPosition(center);
-        boundingVolume.setGeometry(new Box(size));
-        if ( boundingVolume.doIntersection(inRay) == null ) {
+        Box boundingVolume = new Box(size);
+        Ray localRay = new Ray(
+            inRay.origin().subtract(center),
+            inRay.direction(),
+            inRay.t()
+        );
+        if ( !boundingVolume.doIntersection(localRay, null) ) {
             intersectionTriangleIndex.set(-1);
             if ( outTriangleIndex != null && outTriangleIndex.length > 0 ) {
                 outTriangleIndex[0] = -1;

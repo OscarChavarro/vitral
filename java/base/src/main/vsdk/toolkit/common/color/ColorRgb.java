@@ -135,6 +135,12 @@ public final class ColorRgb extends FundamentalEntity
                          (this.b - other.b)*(this.b - other.b));
     }
 
+    public static double distance(ColorRgb a, ColorRgb b) {
+        return Math.sqrt((a.r - b.r)*(a.r - b.r) +
+                         (a.g - b.g)*(a.g - b.g) +
+                         (a.b - b.b)*(a.b - b.b));
+    }
+
     public ColorRgb add(ColorRgb other)
     {
         return new ColorRgb(this.r + other.r, this.g + other.g, this.b + other.b);

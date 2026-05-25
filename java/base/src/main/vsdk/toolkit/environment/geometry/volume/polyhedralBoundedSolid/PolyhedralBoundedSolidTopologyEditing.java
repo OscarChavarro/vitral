@@ -985,7 +985,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
                         if ( p.y() < min.y() ) min = min.withY(p.y());
                         if ( p.z() < min.z() ) min = min.withZ(p.z());
                     } while( he != heStart && he != e.rightHalf);
-                    double leftDistance = VSDK.vectorDistance(min, max);
+                    double leftDistance = Vector3Dd.distance(min, max);
 
                     // Estimate the size of semiloop starting at e.rightHalf
                     min = new Vector3Dd(minmax[3], minmax[4], minmax[5]);
@@ -1006,7 +1006,7 @@ public final class PolyhedralBoundedSolidTopologyEditing
                         if ( p.y() < min.y() ) min = min.withY(p.y());
                         if ( p.z() < min.z() ) min = min.withZ(p.z());
                     } while( he != heStart && he != e.leftHalf);
-                    double rightDistance = VSDK.vectorDistance(min, max);
+                    double rightDistance = Vector3Dd.distance(min, max);
 
                     // Determine outer loop acording to major extent
                     _PolyhedralBoundedSolidHalfEdge heOuter;

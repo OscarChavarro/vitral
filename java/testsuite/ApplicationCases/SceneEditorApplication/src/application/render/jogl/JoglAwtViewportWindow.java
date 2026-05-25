@@ -700,7 +700,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
                 //---------------------------------------------
                 yellow = false;
-                if ( VSDK.colorDistance(c, r.getMaterial().getDiffuse()) <
+                if ( ColorRgb.distance(c, r.getMaterial().getDiffuse()) <
                      VSDK.EPSILON ) {
                 yellow = true;
                 }

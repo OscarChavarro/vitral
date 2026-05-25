@@ -42,7 +42,6 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
-import vsdk.toolkit.render.PolyhedralBoundedSolidDebugger;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
@@ -79,10 +78,20 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
     private static final int DEBUG_99_SHOWOPERATIONS = 0x40;
     private static int debugFlags = 0;
 
+    @FunctionalInterface
+    public interface DebugSolidExporter {
+        void export(PolyhedralBoundedSolid solid, String pattern) throws Exception;
+    }
+
     /**
-    Used for exporting internal state in graphical form.
+    Optional callback used to export internal state in graphical form.
     */
-    private static PolyhedralBoundedSolidDebugger offlineRenderer = null;
+    private static DebugSolidExporter debugSolidExporter = null;
+
+    public static void setDebugSolidExporter(DebugSolidExporter exporter)
+    {
+        debugSolidExporter = exporter;
+    }
 
     private static boolean isCoplanarTangentialTraceEnabled()
     {
@@ -656,7 +665,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
                 hb = nbb.get(sectb).he;
                 n1 = ha.parentLoop.parentFace.getContainingPlane().getNormal();
                 n2 = hb.parentLoop.parentFace.getContainingPlane().getNormal();
-                d = VSDK.vectorDistance(n1, n2);
+                d = Vector3Dd.distance(n1, n2);
                 sameOrientation = ( d < numericContext.unitVectorTolerance() );
                 traceCoplanarTangential(
                     "vertexVertexReclassifyOnSectors op=" + op +
@@ -1611,8 +1620,8 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             FileOutputStream fos = new FileOutputStream(fd);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
 
-            if ( offlineRenderer != null ) {
-                offlineRenderer.execute(solid, pattern + ".png");
+            if ( debugSolidExporter != null ) {
+                debugSolidExporter.export(solid, pattern);
             }
 
             PersistenceElement.writeAsciiLine(bos, solid.toString());
@@ -3451,7 +3460,6 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
               | DEBUG_06_FINISH
               | DEBUG_99_SHOWOPERATIONS
               ;
-            offlineRenderer = PolyhedralBoundedSolidDebugger.createOfflineRenderer();
         }
         else {
             debugFlags = 0;

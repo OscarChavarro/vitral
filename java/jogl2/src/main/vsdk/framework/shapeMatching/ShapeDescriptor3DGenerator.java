@@ -283,7 +283,7 @@ public class ShapeDescriptor3DGenerator extends Component
                 for ( z = 0; z < vv.getZSize(); z++ ) {
                     if ( vv.getVoxel(x, y, z) != 0 ) {
                         p = vv.getVoxelPosition(x, y, z);
-                        averageDistance += VSDK.vectorDistance(cm, p);
+                        averageDistance += Vector3Dd.distance(cm, p);
                         numberOfNonZeroVoxels++;
                     }
                 }
