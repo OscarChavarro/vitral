@@ -23,8 +23,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <exception>
-#include <iostream>
 #include <string>
 
 namespace {
@@ -209,9 +209,10 @@ void WriteStepShape(const TopoDS_Shape& shape, const std::string& path) {
 }
 
 void PrintUsage(const char* argv0) {
-  std::cerr << "Usage: " << argv0
-            << " inputA.step inputB.step <opcode> output.step\n"
-            << "Opcodes: UNION | A_MINUS_B | B_MINUS_A | INTERSECTION\n";
+  std::fprintf(stderr,
+               "Usage: %s inputA.step inputB.step <opcode> output.step\n"
+               "Opcodes: UNION | A_MINUS_B | B_MINUS_A | INTERSECTION\n",
+               argv0);
 }
 
 }  // namespace
@@ -229,7 +230,7 @@ int main(int argc, char** argv) {
 
   OpCode opcode;
   if (!ParseOpCode(opcodeArg, opcode)) {
-    std::cerr << "Invalid opcode: " << opcodeArg << "\n";
+    std::fprintf(stderr, "Invalid opcode: %s\n", opcodeArg.c_str());
     PrintUsage(argv[0]);
     return 2;
   }
@@ -241,13 +242,13 @@ int main(int argc, char** argv) {
     const TopoDS_Shape planarized = PlanarizeForStep(result);
     WriteStepShape(planarized, output);
 
-    std::cout << "Result written to: " << output << "\n";
+    std::printf("Result written to: %s\n", output.c_str());
     return 0;
   } catch (const Standard_Failure& e) {
-    std::cerr << "OCCT error: " << e.GetMessageString() << "\n";
+    std::fprintf(stderr, "OCCT error: %s\n", e.what());
     return 3;
   } catch (const std::exception& e) {
-    std::cerr << "Error: " << e.what() << "\n";
+    std::fprintf(stderr, "Error: %s\n", e.what());
     return 4;
   }
 }

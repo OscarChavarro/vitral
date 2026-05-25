@@ -94,6 +94,7 @@ class PersistenceElement {
     static void writeUtf8String(java::OutputStream &writer, const char *cad);
     static void writeAsciiLine(java::OutputStream &writer, const char *cad);
     static void writeUtf8Line(java::OutputStream &writer, const char *cad);
+    static bool verifyLibrary(const char *libname);
     static bool checkDirectory(const char *dirName);
 
   protected:

@@ -1,10 +1,12 @@
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
+#include <sys/stat.h>
 
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/io/wrapper/PersistenceElement.h"
+#include "vsdk/toolkit/io/PersistenceElement.h"
 
 
 const bool PersistenceElement::bigEndianArchitecture = false;
@@ -967,6 +969,67 @@ PersistenceElement::containsExistingLibrary(const char *pathList, char pathSepar
 }
 
 bool
+PersistenceElement::verifyLibrary(const char *libname) {
+    if ( libname == nullptr || libname[0] == '\0' ) {
+        return false;
+    }
+
+    const char *prefix = "";
+    const char *suffix = "";
+    char separator = ':';
+#if defined(_WIN32)
+    suffix = ".dll";
+    separator = ';';
+#elif defined(__APPLE__)
+    prefix = "lib";
+    suffix = ".dylib";
+#else
+    prefix = "lib";
+    suffix = ".so";
+#endif
+
+    char *nativeLibname = joinCString3(prefix, libname, suffix);
+    if ( nativeLibname == nullptr ) {
+        return false;
+    }
+
+    const char *paths = std::getenv("JAVA_LIBRARY_PATH");
+    if ( paths == nullptr || paths[0] == '\0' ) {
+        paths = std::getenv("LD_LIBRARY_PATH");
+    }
+
+    bool exists = false;
+    if ( paths != nullptr && paths[0] != '\0' ) {
+        exists = containsExistingLibrary(paths, separator, nativeLibname);
+    }
+
+#if !defined(_WIN32)
+    if ( !exists ) {
+        const char *fallbackUnixPaths[] = {
+            "/lib", "/usr/lib", "/usr/local/lib", "/usr/X11R6/lib",
+            "/usr/X11R6/lib64", "/usr/openwin/lib", "/usr/dt/lib",
+            "/lib64", "/usr/lib64", "/usr/local/lib64"
+        };
+        for ( size_t i = 0; i < sizeof(fallbackUnixPaths) / sizeof(fallbackUnixPaths[0]); i++ ) {
+            char *candidate = joinCString3(fallbackUnixPaths[i], "/", nativeLibname);
+            if ( candidate != nullptr ) {
+                java::File file(candidate);
+                if ( file.exists() && file.canRead() && file.isFile() ) {
+                    exists = true;
+                    std::free(candidate);
+                    break;
+                }
+                std::free(candidate);
+            }
+        }
+    }
+#endif
+
+    std::free(nativeLibname);
+    return exists;
+}
+
+bool
 PersistenceElement::checkDirectory(const char *dirName) {
     if ( dirName == nullptr || dirName[0] == '\0' ) {
         java::System::err.print("Directory name is empty.\n");
@@ -974,9 +1037,30 @@ PersistenceElement::checkDirectory(const char *dirName) {
     }
 
     java::File directory(dirName);
-    if ( !directory.exists() || !directory.isDirectory() || !directory.canRead() || !directory.canWrite() ) {
+    if ( directory.exists() && !directory.isDirectory() ) {
         java::System::err.printf(
-            "Directory %s is not accessible and automatic creation is disabled.\n",
+            "Directory %s can not be created, because a file with that name already exists (not overwriten).\n",
+            dirName);
+        return false;
+    }
+
+    if ( !directory.exists() ) {
+        errno = 0;
+        if ( mkdir(dirName, 0775) != 0 ) {
+            java::System::err.printf(
+                "Directory %s can not be created, check permisions and available free disk space.\n",
+                dirName);
+            return false;
+        }
+        java::File recreated(dirName);
+        if ( !recreated.exists() || !recreated.isDirectory() ) {
+            return false;
+        }
+    }
+
+    if ( !directory.canRead() || !directory.canWrite() ) {
+        java::System::err.printf(
+            "Directory %s is not accessible for read/write operations.\n",
             dirName);
         return false;
     }
@@ -1015,4 +1099,3 @@ PersistenceElement::extractExtensionFromFile(const java::File &fd) {
     javaFilename.dispose();
     return output;
 }
-
