@@ -166,9 +166,14 @@ static SimpleMaterial defaultMaterial()
     return m;
 }
 
-static void readMaterials(const java::String& mtllibLine, const java::String& objFile, java::HashMap<java::String, SimpleMaterial>& ret)
+static void readMaterials(
+    const java::String& mtllibLine,
+    const java::String& objFile,
+    java::ArrayList<java::String>& materialNames,
+    java::ArrayList<SimpleMaterial>& materialValues)
 {
-    ret.clear();
+    materialNames.clear();
+    materialValues.clear();
     char tagStr[256] = {0}, mtlFileStr[256] = {0};
     sscanf(mtllibLine.toCString(), "%255s %255s", tagStr, mtlFileStr);
     java::String mtlFile(mtlFileStr);
@@ -180,6 +185,7 @@ static void readMaterials(const java::String& mtllibLine, const java::String& ob
 
     SimpleMaterial active;
     active = active.withDoubleSided(false).withName("default");
+    bool hasRealMaterial = false;
 
     char line[1024];
     while (fgets(line, sizeof(line), in)) {
@@ -229,12 +235,19 @@ static void readMaterials(const java::String& mtllibLine, const java::String& ob
             char nameStr[256] = {0};
             sscanf(line, "%*s %255s", nameStr);
             java::String name(nameStr);
-            ret.put(active.getName(), active);
+            if (hasRealMaterial) {
+                materialNames.add(active.getName());
+                materialValues.add(active);
+            }
             active = SimpleMaterial().withDoubleSided(false).withName(name);
+            hasRealMaterial = true;
         }
     }
     fclose(in);
-    ret.put(active.getName(), active);
+    if (hasRealMaterial) {
+        materialNames.add(active.getName());
+        materialValues.add(active);
+    }
 }
 
 static void addMeshToGroup(
@@ -257,17 +270,22 @@ static void addMeshToGroup(
         nextMaterialsArray.add(new SimpleMaterial(defaultMat));
     }
 
-    java::HashMap<ReaderObjVertex, int> usedCombinedVertexes;
     java::ArrayList<ReaderObjVertex> finalVertexes;
 
     for (size_t i = 0; i < triangleDatasetsArray.size(); i++) {
         for (int k = 0; k < 3; k++) {
             ReaderObjVertex p = triangleDatasetsArray[i][k];
-            if (!usedCombinedVertexes.containsKey(p)) {
-                usedCombinedVertexes.put(p, (int)finalVertexes.size());
+            int vertexIdx = -1;
+            for (long int vi = 0; vi < finalVertexes.size(); vi++) {
+                if (finalVertexes[vi] == p) {
+                    vertexIdx = (int)vi;
+                    break;
+                }
+            }
+            if (vertexIdx < 0) {
+                vertexIdx = (int)finalVertexes.size();
                 finalVertexes.add(p);
             }
-            int vertexIdx = usedCombinedVertexes.getOrDefault(p, -1);
             triangleDatasetsArray[i][k].vertexPositionIndex = vertexIdx;
         }
     }
@@ -315,7 +333,6 @@ static void addMeshToGroup(
     mesh.setTriangles(newTriangleArray);
 
     mesh.setMaterials(nextMaterialsArray);
-    mesh.setOwnsMaterials(true);
 
     java::ArrayList<int> auxMaterialRange;
     auxMaterialRange.add((int)triangleDatasetsArray.size());
@@ -398,15 +415,16 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     java::ArrayList< java::ArrayList<int> > materialTriangleRangeTable;
 
     java::HashMap<java::String, Image*> texturesHashMap;
-    java::HashMap<java::String, SimpleMaterial> materialsHashMap;
+    java::ArrayList<java::String> materialNames;
+    java::ArrayList<SimpleMaterial> materialValues;
     int textureIndex = 0;
     auto ensureMaterialSelection = [&]() {
-        if (nextMaterialsArray.size() > 0 || materialsHashMap.isEmpty()) {
+        if (nextMaterialsArray.size() > 0 || materialValues.size() == 0) {
             return;
         }
         // Fallback for OBJ files that declare mtllib but omit explicit usemtl:
-        // use the default material for the whole mesh
-        nextMaterialsArray.add(new SimpleMaterial());
+        // use the first material from the MTL table for the whole mesh.
+        nextMaterialsArray.add(new SimpleMaterial(materialValues[0]));
         java::ArrayList<int> r;
         r.add(0);
         r.add(0);
@@ -417,18 +435,21 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     while (fgets(lineBuf, sizeof(lineBuf), in)) {
         java::String javaLine(lineBuf);
         if (javaLine.rfind("mtllib ", 0) == 0) {
-            readMaterials(javaLine, fileName, materialsHashMap);
+            readMaterials(javaLine, fileName, materialNames, materialValues);
         }
         if (javaLine.rfind("usemtl ", 0) == 0) {
             char tStr[256] = {0}, matNameStr[256] = {0};
             sscanf(lineBuf, "%255s %255s", tStr, matNameStr);
             java::String matName(matNameStr);
-            SimpleMaterial matValue;
-            if (materialsHashMap.tryGet(matName, &matValue)) {
-                nextMaterialsArray.add(new SimpleMaterial(matValue));
-            } else {
-                nextMaterialsArray.add(new SimpleMaterial());
+            bool found = false;
+            for (long int mi = 0; mi < materialNames.size(); mi++) {
+                if (materialNames[mi] == matName) {
+                    nextMaterialsArray.add(new SimpleMaterial(materialValues[mi]));
+                    found = true;
+                    break;
+                }
             }
+            if (!found) nextMaterialsArray.add(new SimpleMaterial());
             java::ArrayList<int> r;
             r.add((int)triangleDatasetsArray.size());
             r.add((int)nextMaterialsArray.size() - 1);
