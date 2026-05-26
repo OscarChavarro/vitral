@@ -23,6 +23,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
@@ -169,7 +170,13 @@ public class HiddenLineRenderer extends RenderingElement
             return;
         }
 
-        g = g.exportToPolyhedralBoundedSolid();
+        if ( !(g instanceof Volume) ) {
+            return;
+        }
+        g = ((Volume)g).exportToPolyhedralBoundedSolid();
+        if ( g == null ) {
+            return;
+        }
 
         solids.add(body);
         PolyhedralBoundedSolid solid = (PolyhedralBoundedSolid)g;

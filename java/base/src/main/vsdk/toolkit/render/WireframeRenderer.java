@@ -17,6 +17,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.Surface;
 import vsdk.toolkit.environment.geometry.volume.Solid;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
@@ -144,7 +145,10 @@ public class WireframeRenderer extends RenderingElement
         //-----------------------------------------------------------------
         PolyhedralBoundedSolid brep;
 
-        brep = body.getGeometry().exportToPolyhedralBoundedSolid();
+        if ( !(body.getGeometry() instanceof Volume) ) {
+            return;
+        }
+        brep = ((Volume)body.getGeometry()).exportToPolyhedralBoundedSolid();
         if ( brep == null ) return;
 
         //-----------------------------------------------------------------

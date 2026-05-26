@@ -107,6 +107,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/Volume.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Solid.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Sphere.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Box.cpp

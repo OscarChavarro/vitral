@@ -13,6 +13,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
+#include "vsdk/toolkit/environment/geometry/volume/Volume.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
@@ -147,7 +148,10 @@ static void processTriangleMeshGroup(TriangleMeshGroup* mg,
 static void processBrep(SimpleBody* body, const Matrix4x4d& proj,
                         Calligraphic2DBuffer* lineSet, const Camera* camera)
 {
-    PolyhedralBoundedSolid* brep = body->getGeometry()->exportToPolyhedralBoundedSolid();
+    Volume* volume = dynamic_cast<Volume*>(body->getGeometry());
+    if ( volume == 0 ) return;
+
+    PolyhedralBoundedSolid* brep = volume->exportToPolyhedralBoundedSolid();
     if ( brep == 0 ) return;
 
     Matrix4x4d M = body->getTransformationMatrix();

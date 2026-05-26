@@ -6,7 +6,6 @@
 
 class Ray;
 class RayHit;
-class PolyhedralBoundedSolid;
 
 class Geometry {
 public:
@@ -20,7 +19,6 @@ public:
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outHit);
     virtual int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p);
     virtual double* getMinMax() = 0;
-    virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 };
 

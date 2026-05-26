@@ -14,7 +14,6 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.processing.Containment;
 
 /**
@@ -157,16 +156,6 @@ public abstract class Geometry extends Entity {
     when possible, null if not possible
     */
     public TriangleMeshGroup exportToTriangleMeshGroup()
-    {
-        return null;
-    }
-
-    /**
-    The design of this method could change in future.
-    @return a new PolyhedralBoundedSolid representing the surface of current 
-    Geometry when possible, null if not possible
-    */
-    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
         return null;
     }

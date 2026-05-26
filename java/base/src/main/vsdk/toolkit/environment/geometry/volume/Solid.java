@@ -2,9 +2,8 @@ package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.Geometry;
 
-public abstract class Solid extends Geometry {
+public abstract class Solid extends Volume {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20150218L;
     
