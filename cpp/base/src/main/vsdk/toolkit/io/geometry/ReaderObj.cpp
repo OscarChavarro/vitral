@@ -246,15 +246,15 @@ static void addMeshToGroup(
     java::ArrayList< java::ArrayList<ReaderObjVertex> >& triangleDatasetsArray,
     const java::ArrayList<Image*>& nextTexturesArray,
     java::ArrayList< java::ArrayList< java::ArrayList<int> > >& textureSpanTriangleRangeTable,
-    java::ArrayList<SimpleMaterial>& nextMaterialsArray,
+    java::ArrayList<SimpleMaterial*>& nextMaterialsArray,
     java::ArrayList< java::ArrayList<int> >& materialTriangleRangeTable)
 {
     TriangleMesh mesh;
 
     if (nextMaterialsArray.size() == 0) {
-        SimpleMaterial m;
-        m = m.withName("default obj material").withDoubleSided(false);
-        nextMaterialsArray.add(m);
+        SimpleMaterial defaultMat;
+        defaultMat = defaultMat.withName("default obj material").withDoubleSided(false);
+        nextMaterialsArray.add(new SimpleMaterial(defaultMat));
     }
 
     java::HashMap<ReaderObjVertex, int> usedCombinedVertexes;
@@ -314,11 +314,8 @@ static void addMeshToGroup(
     mesh.setVertexes(newVertexArray, true, false, false, true);
     mesh.setTriangles(newTriangleArray);
 
-    java::ArrayList<SimpleMaterial*> materials;
-    for (size_t i = 0; i < nextMaterialsArray.size(); i++) {
-        materials.add(new SimpleMaterial(nextMaterialsArray[i]));
-    }
-    mesh.setMaterials(materials);
+    mesh.setMaterials(nextMaterialsArray);
+    mesh.setOwnsMaterials(true);
 
     java::ArrayList<int> auxMaterialRange;
     auxMaterialRange.add((int)triangleDatasetsArray.size());
@@ -388,7 +385,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
 
     java::String nextGeometricObjectName = "OBJ_default_material";
     java::ArrayList<Image*> nextTexturesArray;
-    java::ArrayList<SimpleMaterial> nextMaterialsArray;
+    java::ArrayList<SimpleMaterial*> nextMaterialsArray;
 
     java::ArrayList<TriangleMesh> meshGroup;
     java::ArrayList< java::ArrayList< java::ArrayList<int> > > textureSpanTriangleRangeTable;
@@ -409,7 +406,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
         }
         // Fallback for OBJ files that declare mtllib but omit explicit usemtl:
         // use the default material for the whole mesh
-        nextMaterialsArray.add(SimpleMaterial());
+        nextMaterialsArray.add(new SimpleMaterial());
         java::ArrayList<int> r;
         r.add(0);
         r.add(0);
@@ -427,8 +424,11 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
             sscanf(lineBuf, "%255s %255s", tStr, matNameStr);
             java::String matName(matNameStr);
             SimpleMaterial matValue;
-            if (materialsHashMap.tryGet(matName, &matValue)) nextMaterialsArray.add(matValue);
-            else nextMaterialsArray.add(SimpleMaterial());
+            if (materialsHashMap.tryGet(matName, &matValue)) {
+                nextMaterialsArray.add(new SimpleMaterial(matValue));
+            } else {
+                nextMaterialsArray.add(new SimpleMaterial());
+            }
             java::ArrayList<int> r;
             r.add((int)triangleDatasetsArray.size());
             r.add((int)nextMaterialsArray.size() - 1);
@@ -533,6 +533,8 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     for (long int i = 0; i < meshGroup.size(); i++) {
         if (meshGroup[i].getNumVertices() > 0) finalGroup->addMesh(meshGroup[i]);
     }
+
+    nextMaterialsArray.clear();
     return finalGroup;
 }
 

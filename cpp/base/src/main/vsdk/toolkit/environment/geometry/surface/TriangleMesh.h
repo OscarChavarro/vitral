@@ -44,6 +44,7 @@ private:
     java::ArrayList< java::ArrayList<int> > materialRanges;
 
     int intersectionTriangleIndex;
+    bool ownsMaterials;
 
     static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t, double& u, double& v);
     void interpolateTriangleData(int triangleIndex, double u, double v, RayHit* outHit, const Vector3Dd& rayDirection);
@@ -68,6 +69,7 @@ private:
 public:
     TriangleMesh();
     TriangleMesh(const TriangleMesh& other);
+    ~TriangleMesh();
 
     TriangleMesh* clone() const;
 
@@ -95,6 +97,7 @@ public:
 
     void setTextures(const java::ArrayList<Image*>& textures);
     void setMaterials(const java::ArrayList<SimpleMaterial*>& materials);
+    void setOwnsMaterials(bool owns);
 
     void setVertexAt(int i, const Vertex& vertex);
     void setTriangleAt(int i, const Triangle& triangle);

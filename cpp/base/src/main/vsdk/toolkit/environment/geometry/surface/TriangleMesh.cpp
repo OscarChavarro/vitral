@@ -50,8 +50,31 @@ This class does not ensure nor impose data integrity, and this will be the
 sole responsability of the cooperating utilities and applications.
 */
 
-TriangleMesh::TriangleMesh() : name("default"), intersectionTriangleIndex(-1) {}
-TriangleMesh::TriangleMesh(const TriangleMesh& o) = default;
+TriangleMesh::TriangleMesh() : name("default"), intersectionTriangleIndex(-1), ownsMaterials(false) {}
+
+TriangleMesh::TriangleMesh(const TriangleMesh& o)
+    : name(o.name), vertexPositions(o.vertexPositions), vertexNormals(o.vertexNormals),
+      vertexBinormals(o.vertexBinormals), vertexTangents(o.vertexTangents),
+      vertexColors(o.vertexColors), vertexSelections(o.vertexSelections),
+      vertexUvs(o.vertexUvs), incidentTrianglesPerVertexArray(o.incidentTrianglesPerVertexArray),
+      triangleIndices(o.triangleIndices), triangleNormals(o.triangleNormals),
+      materials(o.materials), textureRanges(o.textureRanges), materialRanges(o.materialRanges),
+      textures(o.textures), intersectionTriangleIndex(o.intersectionTriangleIndex),
+      ownsMaterials(false)
+{
+}
+
+TriangleMesh::~TriangleMesh()
+{
+    if (ownsMaterials) {
+        for (long int i = 0; i < materials.size(); i++) {
+            if (materials[i] != 0) {
+                delete materials[i];
+            }
+        }
+    }
+}
+
 TriangleMesh* TriangleMesh::clone() const { return new TriangleMesh(*this); }
 
 java::String TriangleMesh::getName() const { return name; }
@@ -156,6 +179,7 @@ void TriangleMesh::setTriangles(const java::ArrayList<Triangle>& triangles)
 
 void TriangleMesh::setTextures(const java::ArrayList<Image*>& t) { textures = t; }
 void TriangleMesh::setMaterials(const java::ArrayList<SimpleMaterial*>& m) { materials = m; }
+void TriangleMesh::setOwnsMaterials(bool owns) { ownsMaterials = owns; }
 
 /*
 Given a vertex structure and an `i` position, this method copies
