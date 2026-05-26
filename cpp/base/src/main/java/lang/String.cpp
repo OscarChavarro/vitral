@@ -1,5 +1,6 @@
 #include <cstdarg>
 #include <cstring>
+#include <cstdio>
 
 #include "java/lang/String.h"
 #include "java/util/Formatter.h"
@@ -36,6 +37,12 @@ String::String(const char *text):
     assignText(text);
 }
 
+String::String(const std::string &text):
+    value(nullptr)
+{
+    assignText(text.c_str());
+}
+
 String::~String() {
     dispose();
 }
@@ -56,9 +63,40 @@ String::operator=(const String &other) {
     return *this;
 }
 
+String &
+String::operator=(const char *other) {
+    assignText(other);
+    return *this;
+}
+
+String &
+String::operator=(const std::string &other) {
+    assignText(other.c_str());
+    return *this;
+}
+
 const char *
 String::toCString() const {
     return value == nullptr ? "" : value;
+}
+
+const char *
+String::c_str() const {
+    return toCString();
+}
+
+const char *
+String::data() const {
+    return toCString();
+}
+
+std::string
+String::toStdString() const {
+    return std::string(toCString());
+}
+
+String::operator std::string() const {
+    return toStdString();
 }
 
 int
@@ -66,9 +104,19 @@ String::length() const {
     return static_cast<int>(std::strlen(toCString()));
 }
 
+int
+String::size() const {
+    return length();
+}
+
 bool
 String::isEmpty() const {
     return toCString()[0] == '\0';
+}
+
+bool
+String::empty() const {
+    return isEmpty();
 }
 
 char
@@ -125,6 +173,19 @@ String::substring(int beginIndex, int endIndex) const {
     return result;
 }
 
+String
+String::substr(int beginIndex) const {
+    return substring(beginIndex);
+}
+
+String
+String::substr(int beginIndex, int count) const {
+    if ( count <= 0 ) {
+        return String();
+    }
+    return substring(beginIndex, beginIndex + count);
+}
+
 int
 String::indexOf(char token, int fromIndex) const {
     if ( fromIndex < 0 ) {
@@ -154,6 +215,158 @@ String::startsWith(const char *prefix) const {
         return false;
     }
     return std::strncmp(toCString(), prefix, prefixLength) == 0;
+}
+
+int
+String::rfind(char token) const {
+    const char *source = toCString();
+    for ( int i = length() - 1; i >= 0; i-- ) {
+        if ( source[i] == token ) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int
+String::rfind(const char *token) const {
+    if ( token == nullptr || token[0] == '\0' ) {
+        return length();
+    }
+    const int tokenLength = static_cast<int>(std::strlen(token));
+    const int sourceLength = length();
+    if ( tokenLength > sourceLength ) {
+        return -1;
+    }
+    const char *source = toCString();
+    for ( int i = sourceLength - tokenLength; i >= 0; i-- ) {
+        if ( std::strncmp(source + i, token, static_cast<std::size_t>(tokenLength)) == 0 ) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int
+String::rfind(const char *token, int fromIndex) const {
+    if ( token == nullptr || token[0] == '\0' ) {
+        return length();
+    }
+    const int tokenLength = static_cast<int>(std::strlen(token));
+    const int sourceLength = length();
+    if ( tokenLength > sourceLength ) {
+        return -1;
+    }
+    int start = sourceLength - tokenLength;
+    if ( fromIndex >= 0 && fromIndex < start ) {
+        start = fromIndex;
+    }
+    const char *source = toCString();
+    for ( int i = start; i >= 0; i-- ) {
+        if ( std::strncmp(source + i, token, static_cast<std::size_t>(tokenLength)) == 0 ) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int
+String::rfind(const String &token) const {
+    return rfind(token.toCString());
+}
+
+String
+String::concat(const String &other) const {
+    return concat(other.toCString());
+}
+
+String
+String::concat(const char *other) const {
+    const char *left = toCString();
+    const char *right = other == nullptr ? "null" : other;
+
+    const std::size_t leftLength = std::strlen(left);
+    const std::size_t rightLength = std::strlen(right);
+    char *joined = new char[leftLength + rightLength + 1];
+    std::memcpy(joined, left, leftLength);
+    std::memcpy(joined + leftLength, right, rightLength);
+    joined[leftLength + rightLength] = '\0';
+
+    String result(joined);
+    delete[] joined;
+    return result;
+}
+
+String
+String::operator+(const String &other) const {
+    return concat(other);
+}
+
+String
+String::operator+(const char *other) const {
+    return concat(other);
+}
+
+bool
+String::operator==(const String &other) const {
+    return equals(other);
+}
+
+bool
+String::operator==(const char *other) const {
+    return equals(other);
+}
+
+bool
+String::operator!=(const String &other) const {
+    return !equals(other);
+}
+
+bool
+String::operator!=(const char *other) const {
+    return !equals(other);
+}
+
+String
+String::valueOf(long long value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%lld", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(unsigned long long value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%llu", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(long value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%ld", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(unsigned long value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%lu", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(int value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%d", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(unsigned int value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%u", value);
+    return String(buffer);
 }
 
 String
@@ -187,6 +400,11 @@ String::formatCStringToJavaString(const char *format, va_list arguments) {
     String result(dynamicBuffer);
     delete[] dynamicBuffer;
     return result;
+}
+
+String
+operator+(const char *left, const String &right) {
+    return String(left).concat(right);
 }
 
 }

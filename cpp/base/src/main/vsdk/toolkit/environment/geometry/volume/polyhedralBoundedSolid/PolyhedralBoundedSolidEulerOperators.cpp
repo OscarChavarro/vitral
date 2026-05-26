@@ -7,7 +7,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
-#include <algorithm>
+#include "java/util/ArrayList.txx"
 
 void PolyhedralBoundedSolidEulerOperators::mvfs(PolyhedralBoundedSolid* solid, const Vector3Dd& pos, int vertexId, int faceId)
 {
@@ -16,11 +16,11 @@ void PolyhedralBoundedSolidEulerOperators::mvfs(PolyhedralBoundedSolid* solid, c
     _PolyhedralBoundedSolidLoop* newLoop = new _PolyhedralBoundedSolidLoop(newFace);
     _PolyhedralBoundedSolidVertex* newVertex = new _PolyhedralBoundedSolidVertex(pos, vertexId);
     _PolyhedralBoundedSolidHalfEdge* newHalfEdge = new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop);
-    newLoop->halfEdgesList.push_back(newHalfEdge);
+    newLoop->halfEdgesList.add(newHalfEdge);
     newLoop->boundaryStartHalfEdge = newHalfEdge;
 
-    solid->getPolygonsList().push_back(newFace);
-    solid->getVerticesList().push_back(newVertex);
+    solid->getPolygonsList().add(newFace);
+    solid->getVerticesList().add(newVertex);
     if ( vertexId > solid->getMaxVertexId() ) solid->setMaxVertexId(vertexId);
     if ( faceId > solid->getMaxFaceId() ) solid->setMaxFaceId(faceId);
 }
@@ -36,7 +36,7 @@ void PolyhedralBoundedSolidEulerOperators::kvfs(PolyhedralBoundedSolid* solid)
 void PolyhedralBoundedSolidEulerOperators::lmev(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge*, _PolyhedralBoundedSolidHalfEdge*, int vertexId, const Vector3Dd& p)
 {
     if ( solid == 0 ) return;
-    solid->getVerticesList().push_back(new _PolyhedralBoundedSolidVertex(p, vertexId));
+    solid->getVerticesList().add(new _PolyhedralBoundedSolidVertex(p, vertexId));
     if ( vertexId > solid->getMaxVertexId() ) solid->setMaxVertexId(vertexId);
 }
 void PolyhedralBoundedSolidEulerOperators::lkev(PolyhedralBoundedSolid*, _PolyhedralBoundedSolidHalfEdge*, _PolyhedralBoundedSolidHalfEdge*) {}
@@ -46,7 +46,7 @@ _PolyhedralBoundedSolidFace* PolyhedralBoundedSolidEulerOperators::lmef(Polyhedr
 {
     if ( solid == 0 ) return 0;
     _PolyhedralBoundedSolidFace* f = new _PolyhedralBoundedSolidFace(solid, newFaceId);
-    solid->getPolygonsList().push_back(f);
+    solid->getPolygonsList().add(f);
     if ( newFaceId > solid->getMaxFaceId() ) solid->setMaxFaceId(newFaceId);
     return f;
 }
@@ -55,12 +55,12 @@ bool PolyhedralBoundedSolidEulerOperators::lringmv(PolyhedralBoundedSolid*, _Pol
 {
     if ( l == 0 || toFace == 0 ) return false;
     if ( l->parentFace != 0 ) {
-        std::vector<_PolyhedralBoundedSolidLoop*>& src = l->parentFace->boundariesList;
-        src.erase(std::remove(src.begin(), src.end(), l), src.end());
+        java::ArrayList<_PolyhedralBoundedSolidLoop*>& src = l->parentFace->boundariesList;
+        src.remove(l);
     }
     l->parentFace = toFace;
-    if ( setAsOuterLoop ) toFace->boundariesList.insert(toFace->boundariesList.begin(), l);
-    else toFace->boundariesList.push_back(l);
+    if ( setAsOuterLoop ) toFace->boundariesList.add(0L, l);
+    else toFace->boundariesList.add(l);
     return true;
 }
 
@@ -74,7 +74,7 @@ void PolyhedralBoundedSolidEulerOperators::smev(PolyhedralBoundedSolid* solid, i
 {
     (void)seedSolidId; (void)fromVertexId;
     if ( solid == 0 ) return;
-    solid->getVerticesList().push_back(new _PolyhedralBoundedSolidVertex(pos, toVertexId));
+    solid->getVerticesList().add(new _PolyhedralBoundedSolidVertex(pos, toVertexId));
     if ( toVertexId > solid->getMaxVertexId() ) solid->setMaxVertexId(toVertexId);
 }
 

@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 
 RGBColorPalette::RGBColorPalette() {
@@ -7,7 +8,7 @@ RGBColorPalette::RGBColorPalette() {
 }
 
 RGBColorPalette::~RGBColorPalette() {
-    for (size_t i = 0; i < colors.size(); i++) {
+    for (long int i = 0; i < colors.size(); i++) {
         if (colors[i] != nullptr) {
             delete colors[i];
             colors[i] = nullptr;
@@ -17,7 +18,7 @@ RGBColorPalette::~RGBColorPalette() {
 }
 
 void RGBColorPalette::init(int size) {
-    for (size_t i = 0; i < colors.size(); i++) {
+    for (long int i = 0; i < colors.size(); i++) {
         if (colors[i] != nullptr) {
             delete colors[i];
             colors[i] = nullptr;
@@ -26,7 +27,7 @@ void RGBColorPalette::init(int size) {
     colors.clear();
 
     for (int i = 0; i < size; i++) {
-        colors.push_back(new ColorRgb(0, 0, 0));
+        colors.add(new ColorRgb(0, 0, 0));
     }
     buildGrayLevelsTable();
 }
@@ -37,7 +38,7 @@ int RGBColorPalette::size() const {
 
 void RGBColorPalette::buildGrayLevelsTable() {
     double val = 0.0;
-    for (size_t i = 0; i < colors.size(); i++) {
+    for (long int i = 0; i < colors.size(); i++) {
         if (colors[i] != nullptr) {
             delete colors[i];
         }
@@ -50,8 +51,8 @@ ColorRgb* RGBColorPalette::getColorAt(int i) const {
     if (i < 0 || i >= (int)colors.size()) {
         return nullptr;
     }
-    if (colors[i] != nullptr) {
-        return new ColorRgb(*colors[i]);
+    if (colors.get(i) != nullptr) {
+        return new ColorRgb(*colors.get(i));
     }
     return nullptr;
 }
@@ -82,14 +83,14 @@ void RGBColorPalette::setColorAt(int i, double r, double g, double b) {
 
 void RGBColorPalette::addColor(ColorRgb* c) {
     if (c != nullptr) {
-        colors.push_back(new ColorRgb(*c));
+        colors.add(new ColorRgb(*c));
     } else {
-        colors.push_back(new ColorRgb(0, 0, 0));
+        colors.add(new ColorRgb(0, 0, 0));
     }
 }
 
 void RGBColorPalette::addColor(double r, double g, double b) {
-    colors.push_back(new ColorRgb(r, g, b));
+    colors.add(new ColorRgb(r, g, b));
 }
 
 ColorRgb* RGBColorPalette::evalNearest(double t) const {
@@ -102,8 +103,8 @@ ColorRgb* RGBColorPalette::evalNearest(double t) const {
     if (i < 0) i = 0;
     if (i >= N) i = N - 1;
 
-    if (colors[i] != nullptr) {
-        return new ColorRgb(*colors[i]);
+    if (colors.get(i) != nullptr) {
+        return new ColorRgb(*colors.get(i));
     }
     return new ColorRgb(0, 0, 0);
 }
@@ -125,8 +126,8 @@ ColorRgb* RGBColorPalette::evalLinear(double t) const {
     if (sup < 0) sup = 0;
     if (sup > N) sup = N;
 
-    ColorRgb* a = colors[inf];
-    ColorRgb* b = colors[sup];
+    ColorRgb* a = colors.get(inf);
+    ColorRgb* b = colors.get(sup);
 
     double cr = a->r() + (b->r() - a->r()) * p;
     double cg = a->g() + (b->g() - a->g()) * p;
@@ -139,9 +140,9 @@ int RGBColorPalette::selectNearestIndexToRgb(const ColorRgb& c) const {
     double minDistance = 1e308;
     int index = 0;
 
-    for (size_t i = 0; i < colors.size(); i++) {
-        if (colors[i] != nullptr) {
-            double currentDistance = colors[i]->distance(c);
+    for (long int i = 0; i < colors.size(); i++) {
+        if (colors.get(i) != nullptr) {
+            double currentDistance = colors.get(i)->distance(c);
             if (currentDistance < minDistance) {
                 minDistance = currentDistance;
                 index = (int)i;

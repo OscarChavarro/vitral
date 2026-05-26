@@ -26,6 +26,8 @@
 #include "vsdk/toolkit/render/shaders/Shader.h"
 #include "vsdk/toolkit/render/shaders/ShaderSelector.h"
 
+#include "java/util/ArrayList.txx"
+
 #include <cmath>
 #include <stdexcept>
 
@@ -33,13 +35,13 @@ SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
 {
 }
 
-bool SimpleRaytracer::hasNonAmbientLights(const std::vector<Light*>& lights)
-{ for (size_t i=0;i<lights.size();i++) if (lights[i] && lights[i]->tipo_de_luz != LightType::AMBIENT) return true; return false; }
+bool SimpleRaytracer::hasNonAmbientLights(java::ArrayList<Light*>& lights)
+{ for (long int i=0;i<lights.size();i++) if (lights.get(i) && lights.get(i)->tipo_de_luz != LightType::AMBIENT) return true; return false; }
 
 bool SimpleRaytracer::isReflective(SimpleMaterial* material)
 { return material != 0 && material->getReflectionCoefficient() > 0; }
 
-RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* qualitySelection,const std::vector<Light*>& lights)
+RenderContext SimpleRaytracer::buildRenderContext(const RendererConfiguration* qualitySelection,java::ArrayList<Light*>& lights)
 {
     Shader* localShader = ShaderSelector::select(qualitySelection);
     bool localLightingEnabled =
@@ -63,14 +65,14 @@ int SimpleRaytracer::buildSurfaceDetailMask(SimpleMaterial* material, Image* tex
     return detailMask;
 }
 
-std::vector<long long> SimpleRaytracer::captureBodyVersions(const std::vector<SimpleBody*>& bodies)
-{ std::vector<long long> v(bodies.size()); for(size_t i=0;i<bodies.size();i++) v[i]=bodies[i]->getModificationVersion(); return v; }
+void SimpleRaytracer::captureBodyVersions(java::ArrayList<SimpleBody*>& bodies, java::ArrayList<long long>& out)
+{ for (long int i=0;i<bodies.size();i++) out.add(bodies.get(i)->getModificationVersion()); }
 
-void SimpleRaytracer::assertSceneUnmodifiedDuringRender(const std::vector<long long>& expected,const std::vector<SimpleBody*>& bodies)
+void SimpleRaytracer::assertSceneUnmodifiedDuringRender(java::ArrayList<long long>& expected,java::ArrayList<SimpleBody*>& bodies)
 {
     if ( expected.size() != bodies.size() ) throw std::runtime_error("Scene bodies list changed while raytracing");
-    for ( size_t i = 0; i < bodies.size(); i++ ) {
-        if ( bodies[i]->getModificationVersion() != expected[i] ) throw std::runtime_error("SimpleBody modified while raytracing");
+    for ( long int i = 0; i < bodies.size(); i++ ) {
+        if ( bodies.get(i)->getModificationVersion() != expected.get(i) ) throw std::runtime_error("SimpleBody modified while raytracing");
     }
 }
 
@@ -116,7 +118,7 @@ void SimpleRaytracer::prepareSurfaceHit(SimpleBody* nearestObject, const SceneOb
 SimpleMaterial* SimpleRaytracer::resolveMaterial(RayHit* hit, const SceneObjectRenderData& objectData)
 { return hit->material != 0 ? hit->material : objectData.material; }
 
-ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,const SceneRenderCache& cache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel)
+ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& cache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel)
 {
     Shader::LocalShadingResult localShading = renderContext.localShader->shadeLocal(info, viewX, viewY, viewZ, lights, objects, material, &workspace);
     Vector3Dd surfaceNormal = localShading.normal;
@@ -136,8 +138,8 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
             RayHit* reflectedHit = &workspace.reflectionHits[recursionLevel];
             int nearestObjectIndex = selectNearestThingInRayDirection(reflectedRay, objects, reflectedHit, &workspace.traversalCandidateHit);
             if ( nearestObjectIndex >= 0 ) {
-                SimpleBody* nearestObject = objects[nearestObjectIndex];
-                const SceneObjectRenderData& objectData = cache.objects[nearestObjectIndex];
+                SimpleBody* nearestObject = objects.get(nearestObjectIndex);
+                const SceneObjectRenderData& objectData = cache.objects.get(nearestObjectIndex);
                 RayHit* subInfo = &workspace.shadingHits[recursionLevel + 1];
                 Ray reflectedHitRay = reflectedRay.withT(reflectedHit->hitDistance());
                 prepareSurfaceHit(nearestObject, objectData, reflectedHitRay, subInfo);
@@ -154,15 +156,15 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
     return ColorRgb(outR > 1 ? 1 : outR, outG > 1 ? 1 : outG, outB > 1 ? 1 : outB);
 }
 
-int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,const std::vector<SimpleBody*>& bodies,RayHit* outHit,RayHit* candidateHit)
+int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,java::ArrayList<SimpleBody*>& bodies,RayHit* outHit,RayHit* candidateHit)
 {
     double nearestDistance = 1e308; int nearestIndex = -1;
     candidateHit->setStoreRay(false);
     RaytraceStatistics::recordSceneTraversal();
-    for ( size_t i=0; i<bodies.size(); i++ ) {
+    for ( long int i=0; i<bodies.size(); i++ ) {
         candidateHit->resetForDistanceOnly();
         RaytraceStatistics::recordObjectIntersectionTest();
-        if ( bodies[i]->doIntersection(inRay, candidateHit) ) {
+        if ( bodies.get(i)->doIntersection(inRay, candidateHit) ) {
             double d = candidateHit->hitDistance();
             if ( d < nearestDistance && d > VSDK::EPSILON ) { nearestDistance = d; nearestIndex = (int)i; }
         }
@@ -171,13 +173,13 @@ int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,const std
     return nearestIndex;
 }
 
-ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,const std::vector<SimpleBody*>& bodies,const std::vector<Light*>& lights,Background* background,RenderContext& renderContext,const SceneRenderCache& cache)
+ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,java::ArrayList<SimpleBody*>& bodies,java::ArrayList<Light*>& lights,Background* background,RenderContext& renderContext,const SceneRenderCache& cache)
 {
     RayHit* hitInfo = &workspace.nearestHit;
     int nearestIndex = selectNearestThingInRayDirection(inRay, bodies, hitInfo, &workspace.traversalCandidateHit);
     if ( nearestIndex >= 0 ) {
-        SimpleBody* nearestObject = bodies[nearestIndex];
-        const SceneObjectRenderData& objectData = cache.objects[nearestIndex];
+        SimpleBody* nearestObject = bodies.get(nearestIndex);
+        const SceneObjectRenderData& objectData = cache.objects.get(nearestIndex);
         Ray primaryHitRay = inRay.withT(hitInfo->hitDistance());
         RayHit* shadingInfo = &workspace.shadingHits[0];
         prepareSurfaceHit(nearestObject, objectData, primaryHitRay, shadingInfo);
@@ -195,20 +197,23 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
 { execute(inoutViewport, q, sceneSnapshot->getSimpleBodies(), sceneSnapshot->getLights(), sceneSnapshot->getBackground(), sceneSnapshot->getCameraSnapshot(), liveReport, outDepthmap, limx1, limy1, limx2, limy2); }
 
-void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,const std::vector<SimpleBody*>& bodies,const std::vector<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
+void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,java::ArrayList<SimpleBody*>& bodies,java::ArrayList<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
 {
     RenderContext renderContext = buildRenderContext(q, lights);
     SceneRenderCache cache;
-    cache.objects.resize(bodies.size());
-    for ( size_t i=0; i<bodies.size(); i++ ) {
-        cache.objects[i].material = bodies[i]->getMaterial();
-        cache.objects[i].texture = renderContext.textureEnabled ? bodies[i]->getTexture() : 0;
-        cache.objects[i].normalMap = renderContext.bumpMappingEnabled ? bodies[i]->getNormalMap() : 0;
-        cache.objects[i].detailMask = buildSurfaceDetailMask(cache.objects[i].material, cache.objects[i].texture, cache.objects[i].normalMap, renderContext);
+    for ( long int i=0; i<bodies.size(); i++ ) {
+        SceneObjectRenderData d;
+        d.material = bodies.get(i)->getMaterial();
+        d.texture = renderContext.textureEnabled ? bodies.get(i)->getTexture() : 0;
+        d.normalMap = renderContext.bumpMappingEnabled ? bodies.get(i)->getNormalMap() : 0;
+        d.detailMask = buildSurfaceDetailMask(d.material, d.texture, d.normalMap, renderContext);
+        cache.objects.add(d);
     }
 
-    std::vector<long long> versions = captureBodyVersions(bodies);
+    java::ArrayList<long long> versions;
+    captureBodyVersions(bodies, versions);
     TileGenerator tileGenerator(TILE_STRATEGY, inoutViewport, limx1, limy1, limx2 - limx1, limy2 - limy1, TILE_WORKERS_HINT);
+    // TileGenerator still uses std::vector<Tile> internally; getTiles() returns const std::vector<Tile>&
     const std::vector<Tile>& tiles = tileGenerator.getTiles();
     RGBPixel outputPixel;
 

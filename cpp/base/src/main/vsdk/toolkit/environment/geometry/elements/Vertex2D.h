@@ -11,6 +11,7 @@ public:
     double y;
     ColorRgb color;
 
+    Vertex2D() : x(0), y(0) {}
     Vertex2D(double x, double y);
     Vertex2D(double x, double y, double r, double g, double b);
 

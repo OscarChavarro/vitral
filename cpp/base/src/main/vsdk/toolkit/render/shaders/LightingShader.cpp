@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include <cmath>
+#include "java/util/ArrayList.txx"
 
 static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd& surfaceNormal)
 {
@@ -67,7 +68,7 @@ LightingShader::LightingShader(bool specularEnabledIn, bool textureEnabledIn, bo
 
 Shader::LocalShadingResult LightingShader::shadeLocal(
     RayHit* info, double viewX, double viewY, double viewZ,
-    const std::vector<Light*>& lights, const std::vector<SimpleBody*>& objects,
+    java::ArrayList<Light*>& lights, java::ArrayList<SimpleBody*>& objects,
     SimpleMaterial* material, TraceWorkspace* workspace)
 {
     Vector3Dd surfaceNormal = info->n;
@@ -80,8 +81,8 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
     double nz = surfaceNormal.z();
     double outR = 0.0, outG = 0.0, outB = 0.0;
 
-    for ( size_t i = 0; i < lights.size(); i++ ) {
-        Light* light = lights[i];
+    for ( long int i = 0; i < lights.size(); i++ ) {
+        Light* light = lights.get(i);
         if ( light == 0 ) continue;
         const ColorRgb& lightEmission = light->getSpecularReference();
 
@@ -126,8 +127,8 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
             }
 
             bool shadowed = false;
-            for ( size_t oi = 0; oi < objects.size(); oi++ ) {
-                SimpleBody* candidateObject = objects[oi];
+            for ( long int oi = 0; oi < objects.size(); oi++ ) {
+                SimpleBody* candidateObject = objects.get(oi);
                 shadowCandidateHit->resetForDistanceOnly();
                 RaytraceStatistics::recordShadowRay();
                 if ( candidateObject != 0 && candidateObject->doIntersection(shadowRay, shadowCandidateHit) ) {

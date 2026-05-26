@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/media/MediaEntity.h"
 #include "java/lang/String.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class ShapeDescriptor;
 
@@ -20,7 +20,7 @@ private:
 
     long id;
     java::String* objectFilename;
-    std::vector<ShapeDescriptor*> descriptorsList;
+    java::ArrayList<ShapeDescriptor*> descriptorsList;
 
 public:
     GeometryMetadata();
@@ -49,8 +49,8 @@ public:
     void setFilename(const java::String* filename);
     java::String* getFilename() const;
 
-    std::vector<ShapeDescriptor*>& getDescriptors();
-    const std::vector<ShapeDescriptor*>& getDescriptors() const;
+    java::ArrayList<ShapeDescriptor*>& getDescriptors();
+    const java::ArrayList<ShapeDescriptor*>& getDescriptors() const;
 
     ShapeDescriptor* getDescriptorByName(const java::String* name) const;
 

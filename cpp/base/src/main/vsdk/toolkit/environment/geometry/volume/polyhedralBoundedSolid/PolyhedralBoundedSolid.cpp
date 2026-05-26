@@ -6,6 +6,8 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 
+#include "java/util/ArrayList.txx"
+
 #include <cfloat>
 #include <cmath>
 
@@ -16,20 +18,29 @@ PolyhedralBoundedSolid::PolyhedralBoundedSolid()
 
 PolyhedralBoundedSolid::~PolyhedralBoundedSolid()
 {
-    for (size_t i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
-    for (size_t i = 0; i < edgesList.size(); ++i) delete edgesList[i];
-    for (size_t i = 0; i < verticesList.size(); ++i) delete verticesList[i];
+    for (long int i = 0; i < polygonsList.size(); ++i) delete polygonsList[i];
+    for (long int i = 0; i < edgesList.size(); ++i) delete edgesList[i];
+    for (long int i = 0; i < verticesList.size(); ++i) delete verticesList[i];
 }
 
-_PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id) { for (size_t i=0;i<polygonsList.size();++i) if (polygonsList[i]->id==id) return polygonsList[i]; return 0; }
-_PolyhedralBoundedSolidVertex* PolyhedralBoundedSolid::findVertex(int id) { for (size_t i=0;i<verticesList.size();++i) if (verticesList[i]->id==id) return verticesList[i]; return 0; }
+_PolyhedralBoundedSolidFace* PolyhedralBoundedSolid::findFace(int id) { for (long int i=0;i<polygonsList.size();++i) if (polygonsList[i]->id==id) return polygonsList[i]; return 0; }
+_PolyhedralBoundedSolidVertex* PolyhedralBoundedSolid::findVertex(int id) { for (long int i=0;i<verticesList.size();++i) if (verticesList[i]->id==id) return verticesList[i]; return 0; }
 
-std::vector<_PolyhedralBoundedSolidFace*>& PolyhedralBoundedSolid::getPolygonsList() { return polygonsList; }
-void PolyhedralBoundedSolid::setPolygonsList(const std::vector<_PolyhedralBoundedSolidFace*>& v) { polygonsList = v; }
-std::vector<_PolyhedralBoundedSolidEdge*>& PolyhedralBoundedSolid::getEdgesList() { return edgesList; }
-void PolyhedralBoundedSolid::setEdgesList(const std::vector<_PolyhedralBoundedSolidEdge*>& v) { edgesList = v; }
-std::vector<_PolyhedralBoundedSolidVertex*>& PolyhedralBoundedSolid::getVerticesList() { return verticesList; }
-void PolyhedralBoundedSolid::setVerticesList(const std::vector<_PolyhedralBoundedSolidVertex*>& v) { verticesList = v; }
+java::ArrayList<_PolyhedralBoundedSolidFace*>& PolyhedralBoundedSolid::getPolygonsList() { return polygonsList; }
+void PolyhedralBoundedSolid::setPolygonsList(java::ArrayList<_PolyhedralBoundedSolidFace*>& v) {
+    polygonsList.clear();
+    for (long int i = 0; i < v.size(); i++) polygonsList.add(v.get(i));
+}
+java::ArrayList<_PolyhedralBoundedSolidEdge*>& PolyhedralBoundedSolid::getEdgesList() { return edgesList; }
+void PolyhedralBoundedSolid::setEdgesList(java::ArrayList<_PolyhedralBoundedSolidEdge*>& v) {
+    edgesList.clear();
+    for (long int i = 0; i < v.size(); i++) edgesList.add(v.get(i));
+}
+java::ArrayList<_PolyhedralBoundedSolidVertex*>& PolyhedralBoundedSolid::getVerticesList() { return verticesList; }
+void PolyhedralBoundedSolid::setVerticesList(java::ArrayList<_PolyhedralBoundedSolidVertex*>& v) {
+    verticesList.clear();
+    for (long int i = 0; i < v.size(); i++) verticesList.add(v.get(i));
+}
 
 int PolyhedralBoundedSolid::getMaxVertexId() const { return maxVertexId; }
 void PolyhedralBoundedSolid::setMaxVertexId(int v) { maxVertexId = v; }
@@ -51,12 +62,12 @@ double* PolyhedralBoundedSolid::getMinMax()
     double* minMax = new double[6];
     double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
     double maxX = -DBL_MAX, maxY = -DBL_MAX, maxZ = -DBL_MAX;
-    for (size_t i = 0; i < verticesList.size(); ++i) {
+    for (long int i = 0; i < verticesList.size(); ++i) {
         const Vector3Dd& p = verticesList[i]->position;
         if ( p.x() < minX ) minX = p.x(); if ( p.y() < minY ) minY = p.y(); if ( p.z() < minZ ) minZ = p.z();
         if ( p.x() > maxX ) maxX = p.x(); if ( p.y() > maxY ) maxY = p.y(); if ( p.z() > maxZ ) maxZ = p.z();
     }
-    if ( verticesList.empty() ) { minX=minY=minZ=maxX=maxY=maxZ=0; }
+    if ( verticesList.size() == 0 ) { minX=minY=minZ=maxX=maxY=maxZ=0; }
     minMax[0]=minX; minMax[1]=minY; minMax[2]=minZ; minMax[3]=maxX; minMax[4]=maxY; minMax[5]=maxZ;
     return minMax;
 }
@@ -70,23 +81,23 @@ void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
     int offsetFacesId = getMaxFaceId();
     int offsetVertexId = getMaxVertexId();
 
-    while ( !other->getPolygonsList().empty() ) {
-        _PolyhedralBoundedSolidFace* f = other->getPolygonsList().front();
+    while ( other->getPolygonsList().size() != 0 ) {
+        _PolyhedralBoundedSolidFace* f = other->getPolygonsList()[0];
         f->id += offsetFacesId;
         if ( f->id > maxFaceId ) maxFaceId = f->id;
-        polygonsList.push_back(f);
-        other->getPolygonsList().erase(other->getPolygonsList().begin());
+        polygonsList.add(f);
+        other->getPolygonsList().remove(0L);
     }
-    while ( !other->getEdgesList().empty() ) {
-        edgesList.push_back(other->getEdgesList().front());
-        other->getEdgesList().erase(other->getEdgesList().begin());
+    while ( other->getEdgesList().size() != 0 ) {
+        edgesList.add(other->getEdgesList()[0]);
+        other->getEdgesList().remove(0L);
     }
-    while ( !other->getVerticesList().empty() ) {
-        _PolyhedralBoundedSolidVertex* v = other->getVerticesList().front();
+    while ( other->getVerticesList().size() != 0 ) {
+        _PolyhedralBoundedSolidVertex* v = other->getVerticesList()[0];
         v->id += offsetVertexId;
         if ( v->id > maxVertexId ) maxVertexId = v->id;
-        verticesList.push_back(v);
-        other->getVerticesList().erase(other->getVerticesList().begin());
+        verticesList.add(v);
+        other->getVerticesList().remove(0L);
     }
 }
 
@@ -100,7 +111,7 @@ int PolyhedralBoundedSolid::compareValue(double a, double b, double tolerance)
 
 void PolyhedralBoundedSolid::revert()
 {
-    for (size_t i = 0; i < polygonsList.size(); ++i) {
+    for (long int i = 0; i < polygonsList.size(); ++i) {
         polygonsList[i]->revert();
     }
 }

@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include "java/util/ArrayList.txx"
 
 namespace {
 const double DEFAULT_ROUGHNESS = 0.35;
@@ -111,7 +112,7 @@ static bool isShadowed(
     const RayHit* info,
     double lightDirX, double lightDirY, double lightDirZ,
     double maxShadowDistance,
-    const std::vector<SimpleBody*>& objects,
+    java::ArrayList<SimpleBody*>& objects,
     TraceWorkspace* workspace)
 {
     if ( maxShadowDistance <= VSDK::EPSILON ) return true;
@@ -123,8 +124,8 @@ static bool isShadowed(
     Ray shadowRay(shadowOrigin, Vector3Dd(lightDirX, lightDirY, lightDirZ));
     RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
     shadowCandidateHit->setStoreRay(false);
-    for ( size_t i = 0; i < objects.size(); i++ ) {
-        SimpleBody* candidateObject = objects[i];
+    for ( long int i = 0; i < objects.size(); i++ ) {
+        SimpleBody* candidateObject = objects.get(i);
         shadowCandidateHit->resetForDistanceOnly();
         if ( candidateObject && candidateObject->doIntersection(shadowRay, shadowCandidateHit) ) {
             double hitDistance = shadowCandidateHit->hitDistance();
@@ -161,7 +162,7 @@ CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnable
 {
 }
 
-Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace)
+Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace)
 {
     Vector3Dd surfaceNormal = info->n;
     if ( bumpMapEnabled ) {
@@ -185,8 +186,8 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
     double outG = 0.0;
     double outB = 0.0;
 
-    for ( size_t i = 0; i < lights.size(); i++ ) {
-        Light* light = lights[i];
+    for ( long int i = 0; i < lights.size(); i++ ) {
+        Light* light = lights.get(i);
         if ( light == 0 ) continue;
         const ColorRgb& lightEmission = light->getSpecularReference();
         if ( light->tipo_de_luz == LightType::AMBIENT ) {

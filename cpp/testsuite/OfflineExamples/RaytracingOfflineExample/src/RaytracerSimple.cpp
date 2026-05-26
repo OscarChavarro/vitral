@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include "java/util/ArrayList.txx"
 
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;
@@ -33,9 +34,9 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
 {
     bool hasTextures = false;
     bool hasNormalMaps = false;
-    std::vector<SimpleBody*>& bodies = scene->getSimpleBodies();
+    java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
 
-    for (size_t i = 0; i < bodies.size(); i++) {
+    for (long int i = 0; i < bodies.size(); i++) {
         SimpleBody* body = bodies[i];
         if ( body->getTexture() != 0 ) hasTextures = true;
         if ( body->getNormalMap() != 0 ) hasNormalMaps = true;

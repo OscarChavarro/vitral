@@ -5,14 +5,14 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 #include <string>
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class SimpleBody;
 class Ray;
 
 class SimpleBodyGroup {
 private:
-    std::vector<SimpleBody*> bodies;
+    java::ArrayList<SimpleBody*> bodies;
     Vector3Dd position;
     Vector3Dd scale;
     Matrix4x4d rotation;
@@ -23,7 +23,7 @@ public:
     SimpleBodyGroup();
     virtual ~SimpleBodyGroup() {}
 
-    std::vector<SimpleBody*>& getBodies();
+    java::ArrayList<SimpleBody*>& getBodies();
 
     const std::string& getName() const;
     void setName(const std::string& n);

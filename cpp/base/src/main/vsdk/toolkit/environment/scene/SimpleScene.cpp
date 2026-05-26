@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "java/util/ArrayList.txx"
 
 SimpleScene::SimpleScene()
     : activeCameraIndex(0), activeBackgroundIndex(0)
@@ -19,16 +20,16 @@ SimpleScene::~SimpleScene()
 
 void SimpleScene::clearOwnedElements()
 {
-    for (size_t i = 0; i < simpleBodiesArray.size(); ++i) {
+    for (long int i = 0; i < simpleBodiesArray.size(); ++i) {
         delete simpleBodiesArray[i];
     }
-    for (size_t i = 0; i < lightsArray.size(); ++i) {
+    for (long int i = 0; i < lightsArray.size(); ++i) {
         delete lightsArray[i];
     }
-    for (size_t i = 0; i < backgroundsArray.size(); ++i) {
+    for (long int i = 0; i < backgroundsArray.size(); ++i) {
         delete backgroundsArray[i];
     }
-    for (size_t i = 0; i < camerasArray.size(); ++i) {
+    for (long int i = 0; i < camerasArray.size(); ++i) {
         delete camerasArray[i];
     }
 
@@ -46,50 +47,54 @@ int SimpleScene::getActiveBackgroundIndex() const { return activeBackgroundIndex
 void SimpleScene::setActiveCameraIndex(int i) { activeCameraIndex = i; }
 void SimpleScene::setActiveBackgroundIndex(int i) { activeBackgroundIndex = i; }
 
-void SimpleScene::addBody(SimpleBody* b) { simpleBodiesArray.push_back(b); }
-void SimpleScene::addCamera(Camera* c) { camerasArray.push_back(c); }
-void SimpleScene::addBackground(Background* b) { backgroundsArray.push_back(b); }
-void SimpleScene::addLight(Light* l) { l->setId(static_cast<int>(lightsArray.size())); lightsArray.push_back(l); }
+void SimpleScene::addBody(SimpleBody* b) { simpleBodiesArray.add(b); }
+void SimpleScene::addCamera(Camera* c) { camerasArray.add(c); }
+void SimpleScene::addBackground(Background* b) { backgroundsArray.add(b); }
+void SimpleScene::addLight(Light* l) { l->setId(static_cast<int>(lightsArray.size())); lightsArray.add(l); }
 
-std::vector<SimpleBody*>& SimpleScene::getSimpleBodies() { return simpleBodiesArray; }
-std::vector<Light*>& SimpleScene::getLights() { return lightsArray; }
-std::vector<Background*>& SimpleScene::getBackgrounds() { return backgroundsArray; }
-std::vector<Camera*>& SimpleScene::getCameras() { return camerasArray; }
+java::ArrayList<SimpleBody*>& SimpleScene::getSimpleBodies() { return simpleBodiesArray; }
+java::ArrayList<Light*>& SimpleScene::getLights() { return lightsArray; }
+java::ArrayList<Background*>& SimpleScene::getBackgrounds() { return backgroundsArray; }
+java::ArrayList<Camera*>& SimpleScene::getCameras() { return camerasArray; }
 
-void SimpleScene::setSimpleBodies(const std::vector<SimpleBody*>& simpleBodies)
+void SimpleScene::setSimpleBodies(java::ArrayList<SimpleBody*>& simpleBodies)
 {
-    for (size_t i = 0; i < simpleBodiesArray.size(); ++i) {
+    for (long int i = 0; i < simpleBodiesArray.size(); ++i) {
         delete simpleBodiesArray[i];
     }
-    simpleBodiesArray = simpleBodies;
+    simpleBodiesArray.clear();
+    for (long int i = 0; i < simpleBodies.size(); i++) simpleBodiesArray.add(simpleBodies.get(i));
 }
-void SimpleScene::setLights(const std::vector<Light*>& lights)
+void SimpleScene::setLights(java::ArrayList<Light*>& lights)
 {
-    for (size_t i = 0; i < lightsArray.size(); ++i) {
+    for (long int i = 0; i < lightsArray.size(); ++i) {
         delete lightsArray[i];
     }
-    lightsArray = lights;
-    for (size_t i = 0; i < lightsArray.size(); ++i) {
+    lightsArray.clear();
+    for (long int i = 0; i < lights.size(); i++) lightsArray.add(lights.get(i));
+    for (long int i = 0; i < lightsArray.size(); ++i) {
         lightsArray[i]->setId(static_cast<int>(i));
     }
 }
-void SimpleScene::setBackgrounds(const std::vector<Background*>& backgrounds)
+void SimpleScene::setBackgrounds(java::ArrayList<Background*>& backgrounds)
 {
-    for (size_t i = 0; i < backgroundsArray.size(); ++i) {
+    for (long int i = 0; i < backgroundsArray.size(); ++i) {
         delete backgroundsArray[i];
     }
-    backgroundsArray = backgrounds;
+    backgroundsArray.clear();
+    for (long int i = 0; i < backgrounds.size(); i++) backgroundsArray.add(backgrounds.get(i));
 }
-void SimpleScene::setCameras(const std::vector<Camera*>& cameras)
+void SimpleScene::setCameras(java::ArrayList<Camera*>& cameras)
 {
-    for (size_t i = 0; i < camerasArray.size(); ++i) {
+    for (long int i = 0; i < camerasArray.size(); ++i) {
         delete camerasArray[i];
     }
-    camerasArray = cameras;
+    camerasArray.clear();
+    for (long int i = 0; i < cameras.size(); i++) camerasArray.add(cameras.get(i));
 }
 
-Background* SimpleScene::getActiveBackground() const { return backgroundsArray[static_cast<size_t>(activeBackgroundIndex)]; }
-Camera* SimpleScene::getActiveCamera() const { return camerasArray[static_cast<size_t>(activeCameraIndex)]; }
+Background* SimpleScene::getActiveBackground() const { return backgroundsArray.get(activeBackgroundIndex); }
+Camera* SimpleScene::getActiveCamera() const { return camerasArray.get(activeCameraIndex); }
 
 SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot()
 {

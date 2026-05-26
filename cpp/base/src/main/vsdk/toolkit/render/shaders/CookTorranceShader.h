@@ -9,7 +9,7 @@ private:
     bool bumpMapEnabled;
 public:
     CookTorranceShader(bool textureEnabled, bool bumpMapEnabled);
-    virtual LocalShadingResult shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace) override;
+    virtual LocalShadingResult shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace) override;
 };
 
 #endif

@@ -1,8 +1,7 @@
 #ifndef __VSDK_PBS_NODE_FACE_H__
 #define __VSDK_PBS_NODE_FACE_H__
 
-#include <vector>
-
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class PolyhedralBoundedSolid;
@@ -14,7 +13,7 @@ class _PolyhedralBoundedSolidFace {
 public:
     int id;
     PolyhedralBoundedSolid* parentSolid;
-    std::vector<_PolyhedralBoundedSolidLoop*> boundariesList;
+    java::ArrayList<_PolyhedralBoundedSolidLoop*> boundariesList;
 
     _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int id);
 

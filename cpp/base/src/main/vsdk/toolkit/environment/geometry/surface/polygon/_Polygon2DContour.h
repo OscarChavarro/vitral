@@ -1,13 +1,13 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON__POLYGON2DCONTOUR_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON__POLYGON2DCONTOUR_H__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
 
 class _Polygon2DContour
 {
 public:
-    std::vector<Vertex2D> vertices;
+    java::ArrayList<Vertex2D> vertices;
     // If this contour is a hole, exteriorContour is the contour that contains it.
 private:
     _Polygon2DContour* exteriorContour;

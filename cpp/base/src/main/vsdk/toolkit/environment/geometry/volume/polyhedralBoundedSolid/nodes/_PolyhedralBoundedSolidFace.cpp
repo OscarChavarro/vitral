@@ -6,6 +6,8 @@
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 
+#include "java/util/ArrayList.txx"
+
 _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int inId)
     : id(inId), parentSolid(parent)
 {
@@ -13,7 +15,7 @@ _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid*
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int vn1, int vn2)
 {
-    for (size_t i = 0; i < boundariesList.size(); ++i) {
+    for (long int i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* he = boundariesList[i]->halfEdgeVertices(vn1, vn2);
         if ( he != 0 ) return he;
     }
@@ -22,7 +24,7 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int v
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int vn1)
 {
-    for (size_t i = 0; i < boundariesList.size(); ++i) {
+    for (long int i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* he = boundariesList[i]->firstHalfEdgeAtVertex(vn1);
         if ( he != 0 ) return he;
     }
@@ -36,7 +38,7 @@ bool _PolyhedralBoundedSolidFace::calculatePlane()
 
 InfinitePlane* _PolyhedralBoundedSolidFace::getContainingPlane()
 {
-    if ( boundariesList.empty() ) return 0;
+    if ( boundariesList.size() == 0 ) return 0;
     _PolyhedralBoundedSolidLoop* loop = boundariesList[0];
     if ( loop == 0 || loop->halfEdgesList.size() < 3 ) return 0;
 
@@ -55,7 +57,7 @@ int _PolyhedralBoundedSolidFace::testPointInside(const Vector3Dd&, double)
 
 void _PolyhedralBoundedSolidFace::revert()
 {
-    for (size_t i = 0; i < boundariesList.size(); ++i) {
+    for (long int i = 0; i < boundariesList.size(); ++i) {
         if ( boundariesList[i] != 0 ) boundariesList[i]->revert();
     }
 }

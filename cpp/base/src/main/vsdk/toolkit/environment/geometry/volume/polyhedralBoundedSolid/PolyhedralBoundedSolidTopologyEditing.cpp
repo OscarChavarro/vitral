@@ -4,16 +4,18 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
+#include "java/util/ArrayList.txx"
+
 void PolyhedralBoundedSolidTopologyEditing::loopGlue(PolyhedralBoundedSolid*, int) {}
 
 void PolyhedralBoundedSolidTopologyEditing::compactIds(PolyhedralBoundedSolid* solid)
 {
     if ( solid == 0 ) return;
-    int i;
-    std::vector<_PolyhedralBoundedSolidVertex*>& verts = solid->getVerticesList();
-    for (i = 0; i < static_cast<int>(verts.size()); ++i) verts[i]->id = i + 1;
-    std::vector<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
-    for (i = 0; i < static_cast<int>(faces.size()); ++i) faces[i]->id = i + 1;
+    long int i;
+    java::ArrayList<_PolyhedralBoundedSolidVertex*>& verts = solid->getVerticesList();
+    for (i = 0; i < verts.size(); ++i) verts[i]->id = static_cast<int>(i + 1);
+    java::ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
+    for (i = 0; i < faces.size(); ++i) faces[i]->id = static_cast<int>(i + 1);
     solid->setMaxVertexId(static_cast<int>(verts.size()));
     solid->setMaxFaceId(static_cast<int>(faces.size()));
 }

@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#include "java/util/ArrayList.txx"
 #if defined(_SC_NPROCESSORS_ONLN)
 #include <unistd.h>
 #endif
@@ -93,19 +94,19 @@ SimpleSceneSnapshot* SoftwareRaycaster::buildSceneSnapshot(
     sphereBody->setNormalMap(bumpNormalMap ? bumpNormalMap->clone() : 0);
     sphereBody->setRotation(modelRotation);
 
-    std::vector<SimpleBody*> bodies;
-    bodies.push_back(sphereBody);
+    java::ArrayList<SimpleBody*> bodies;
+    bodies.add(sphereBody);
 
-    std::vector<Light*> lights;
+    java::ArrayList<Light*> lights;
     Light* ambientLight = new Light(LightType::AMBIENT, Vector3Dd(0, 0, 0), ColorRgb(1, 1, 1));
     ambientLight->setId(0);
-    lights.push_back(ambientLight);
+    lights.add(ambientLight);
     Light* pointLight = new Light(
         model->light->getLightType(),
         model->light->getPosition(),
         model->light->getSpecular());
     pointLight->setId(1);
-    lights.push_back(pointLight);
+    lights.add(pointLight);
 
     SimpleBackground* background = new SimpleBackground();
     background->setColor(0, 0, 0);

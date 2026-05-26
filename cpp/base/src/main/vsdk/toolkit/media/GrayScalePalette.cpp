@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/media/GrayScalePalette.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/util/ArrayList.txx"
 
 GrayScalePalette::GrayScalePalette() : RGBProceduralColorPalette() {
 }

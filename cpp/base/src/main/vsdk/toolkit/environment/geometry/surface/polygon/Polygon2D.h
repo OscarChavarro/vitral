@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON_POLYGON2D_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class _Polygon2DContour;
 class Vertex2D;
@@ -13,7 +13,7 @@ template <class T> class BinaryTreeNode;
 class Polygon2D : public Surface
 {
 public:
-    std::vector<_Polygon2DContour*> loops;
+    java::ArrayList<_Polygon2DContour*> loops;
 
 private:
     _Polygon2DContour* currentLoop;

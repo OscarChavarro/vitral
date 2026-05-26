@@ -1,7 +1,7 @@
 #ifndef __VSDK_PBS_NODE_LOOP_H__
 #define __VSDK_PBS_NODE_LOOP_H__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -10,7 +10,7 @@ class _PolyhedralBoundedSolidLoop {
 public:
     _PolyhedralBoundedSolidFace* parentFace;
     _PolyhedralBoundedSolidHalfEdge* boundaryStartHalfEdge;
-    std::vector<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
+    java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
 
     explicit _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent);
 

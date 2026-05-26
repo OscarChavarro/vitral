@@ -4,26 +4,26 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
-#include <algorithm>
+#include "java/util/ArrayList.txx"
 
 _PolyhedralBoundedSolidLoop::_PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent)
     : parentFace(parent), boundaryStartHalfEdge(0)
 {
     if ( parentFace != 0 ) {
-        parentFace->boundariesList.push_back(this);
+        parentFace->boundariesList.add(this);
     }
 }
 
 void _PolyhedralBoundedSolidLoop::unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    halfEdgesList.erase(std::remove(halfEdgesList.begin(), halfEdgesList.end(), he), halfEdgesList.end());
-    boundaryStartHalfEdge = halfEdgesList.empty() ? 0 : halfEdgesList[0];
+    halfEdgesList.remove(he);
+    boundaryStartHalfEdge = halfEdgesList.size() == 0 ? 0 : halfEdgesList[0];
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::halfEdgeVertices(int a, int b)
 {
-    if ( halfEdgesList.empty() ) return 0;
-    for (size_t i = 0; i < halfEdgesList.size(); ++i) {
+    if ( halfEdgesList.size() == 0 ) return 0;
+    for (long int i = 0; i < halfEdgesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* oldhe = halfEdgesList[i];
         _PolyhedralBoundedSolidHalfEdge* he = oldhe->next();
         if ( he != 0 && oldhe->startingVertex != 0 && he->startingVertex != 0 &&
@@ -36,7 +36,7 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::halfEdgeVertices(i
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::firstHalfEdgeAtVertex(int a)
 {
-    for (size_t i = 0; i < halfEdgesList.size(); ++i) {
+    for (long int i = 0; i < halfEdgesList.size(); ++i) {
         _PolyhedralBoundedSolidHalfEdge* oldhe = halfEdgesList[i];
         if ( oldhe->startingVertex != 0 && oldhe->startingVertex->id == a ) {
             return oldhe;
@@ -52,17 +52,23 @@ void _PolyhedralBoundedSolidLoop::delhe(_PolyhedralBoundedSolidHalfEdge* he)
 
 void _PolyhedralBoundedSolidLoop::revert()
 {
-    std::reverse(halfEdgesList.begin(), halfEdgesList.end());
-    boundaryStartHalfEdge = halfEdgesList.empty() ? 0 : halfEdgesList[0];
+    long int n = halfEdgesList.size();
+    for (long int i = 0; i < n / 2; i++) {
+        _PolyhedralBoundedSolidHalfEdge* tmp = halfEdgesList[i];
+        halfEdgesList[i] = halfEdgesList[n - 1 - i];
+        halfEdgesList[n - 1 - i] = tmp;
+    }
+    boundaryStartHalfEdge = n == 0 ? 0 : halfEdgesList[0];
 }
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::previousOf(_PolyhedralBoundedSolidHalfEdge* he) const
 {
-    if ( he == 0 || halfEdgesList.empty() ) return 0;
-    for (size_t i = 0; i < halfEdgesList.size(); ++i) {
-        if ( halfEdgesList[i] == he ) {
-            size_t j = (i == 0) ? halfEdgesList.size() - 1 : i - 1;
-            return halfEdgesList[j];
+    long int n = halfEdgesList.size();
+    if ( he == 0 || n == 0 ) return 0;
+    for (long int i = 0; i < n; ++i) {
+        if ( halfEdgesList.get(i) == he ) {
+            long int j = (i == 0) ? n - 1 : i - 1;
+            return halfEdgesList.get(j);
         }
     }
     return 0;
@@ -70,10 +76,11 @@ _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::previousOf(_Polyhe
 
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidLoop::nextOf(_PolyhedralBoundedSolidHalfEdge* he) const
 {
-    if ( he == 0 || halfEdgesList.empty() ) return 0;
-    for (size_t i = 0; i < halfEdgesList.size(); ++i) {
-        if ( halfEdgesList[i] == he ) {
-            return halfEdgesList[(i + 1) % halfEdgesList.size()];
+    long int n = halfEdgesList.size();
+    if ( he == 0 || n == 0 ) return 0;
+    for (long int i = 0; i < n; ++i) {
+        if ( halfEdgesList.get(i) == he ) {
+            return halfEdgesList.get((i + 1) % n);
         }
     }
     return 0;

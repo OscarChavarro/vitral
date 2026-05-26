@@ -18,8 +18,8 @@ public:
         double viewX,
         double viewY,
         double viewZ,
-        const std::vector<Light*>& lights,
-        const std::vector<SimpleBody*>& objects,
+        java::ArrayList<Light*>& lights,
+        java::ArrayList<SimpleBody*>& objects,
         SimpleMaterial* material,
         TraceWorkspace* workspace) override;
 };

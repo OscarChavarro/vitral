@@ -2,8 +2,8 @@
 #define __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
 
 #include <string>
-#include <vector>
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
 class PolyhedralBoundedSolid;
@@ -12,9 +12,9 @@ class Vector3Dd;
 
 class PolyhedralBoundedSolidGeometricValidator {
 public:
-    static bool validateFacePointsAreCoplanar(const std::vector<Vector3Dd>& points);
-    static bool validateFacePointsAreCoplanar(const std::vector<Vector3Dd>& points, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
-    static std::vector<Vector3Dd> extractPointsFromFace(_PolyhedralBoundedSolidFace* face);
+    static bool validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>& points);
+    static bool validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>& points, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
+    static void extractPointsFromFace(_PolyhedralBoundedSolidFace* face, java::ArrayList<Vector3Dd>& outPoints);
     static bool validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face);
     static bool validateFaceIsPlanar(_PolyhedralBoundedSolidFace* face, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext);
     static bool validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid* solid, std::string* msg);

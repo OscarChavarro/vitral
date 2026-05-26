@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class RayHit;
 class Light;
@@ -25,8 +25,8 @@ public:
         double viewX,
         double viewY,
         double viewZ,
-        const std::vector<Light*>& lights,
-        const std::vector<SimpleBody*>& objects,
+        java::ArrayList<Light*>& lights,
+        java::ArrayList<SimpleBody*>& objects,
         SimpleMaterial* material,
         TraceWorkspace* workspace) = 0;
 };

@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "java/io/File.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
@@ -68,7 +69,7 @@ int main(int argc, char** argv)
 
     SimpleScene scene;
     EnvironmentPersistence::importEnvironment(java::File(sceneFile.c_str()), &scene);
-    if (scene.getSimpleBodies().empty()) {
+    if (scene.getSimpleBodies().size() == 0) {
         std::fprintf(stderr, "Failed to load scene file: %s\n", sceneFile.c_str());
         return 1;
     }

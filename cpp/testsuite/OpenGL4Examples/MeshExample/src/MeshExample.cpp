@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include "java/util/ArrayList.txx"
 #include <fstream>
 #include <sstream>
 
@@ -541,13 +542,13 @@ public:
 
     void configureInitialViewAndLightToScene()
     {
-        std::vector<SimpleBody*>& bodies = scene.getSimpleBodies();
-        if (bodies.empty()) return;
+        java::ArrayList<SimpleBody*>& bodies = scene.getSimpleBodies();
+        if (bodies.size() == 0) return;
 
         SimpleBodyGroup group;
-        std::vector<SimpleBody*>& groupBodies = group.getBodies();
-        for (size_t i = 0; i < bodies.size(); i++) {
-            groupBodies.push_back(bodies[i]);
+        java::ArrayList<SimpleBody*>& groupBodies = group.getBodies();
+        for (long int i = 0; i < bodies.size(); i++) {
+            groupBodies.add(bodies[i]);
         }
 
         double* minmax = group.getMinMax();

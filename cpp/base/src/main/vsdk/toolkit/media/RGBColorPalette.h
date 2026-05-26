@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_RGBCOLORPALETTE_H__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class ColorRgb;
 
@@ -12,7 +12,7 @@ This class represents a color palette, as an indexed set of colors.
 class RGBColorPalette : public MediaEntity {
 
 protected:
-    std::vector<ColorRgb*> colors;
+    java::ArrayList<ColorRgb*> colors;
 
 public:
     RGBColorPalette();

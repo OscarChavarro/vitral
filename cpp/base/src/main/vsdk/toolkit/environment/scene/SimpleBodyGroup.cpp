@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/util/ArrayList.txx"
 
 #include <cfloat>
 
@@ -12,7 +13,7 @@ SimpleBodyGroup::SimpleBodyGroup()
 {
 }
 
-std::vector<SimpleBody*>& SimpleBodyGroup::getBodies() { return bodies; }
+java::ArrayList<SimpleBody*>& SimpleBodyGroup::getBodies() { return bodies; }
 const std::string& SimpleBodyGroup::getName() const { return name; }
 void SimpleBodyGroup::setName(const std::string& n) { name = n; }
 
@@ -44,7 +45,7 @@ Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
 
     Ray* nearestHit = 0;
 
-    for (size_t i = 0; i < bodies.size(); i++) {
+    for (long int i = 0; i < bodies.size(); i++) {
         if ( bodies[i] == 0 || bodies[i]->getGeometry() == 0 ) continue;
         RayHit hit;
         if ( bodies[i]->getGeometry()->doIntersection(myRay, &hit) && hit.ray() != 0 ) {
@@ -61,9 +62,9 @@ Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
 
 double* SimpleBodyGroup::getMinMax()
 {
-    std::vector<Vector3Dd> points;
+    java::ArrayList<Vector3Dd> points;
 
-    for (size_t i = 0; i < bodies.size(); i++) {
+    for (long int i = 0; i < bodies.size(); i++) {
         SimpleBody* bi = bodies[i];
         if ( bi == 0 || bi->getGeometry() == 0 ) continue;
         double* minmaxSub = bi->getGeometry()->getMinMax();
@@ -72,14 +73,14 @@ double* SimpleBodyGroup::getMinMax()
         Matrix4x4d S = Matrix4x4d().scale(bi->getScale());
         Matrix4x4d M = T.multiply(R).multiply(S);
 
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[2])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[2])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[2])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[2])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[5])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[5])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[5])));
-        points.push_back(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[5])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[2])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[2])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[2])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[2])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[1], minmaxSub[5])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[1], minmaxSub[5])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[0], minmaxSub[4], minmaxSub[5])));
+        points.add(M.multiply(Vector3Dd(minmaxSub[3], minmaxSub[4], minmaxSub[5])));
 
         delete[] minmaxSub;
     }
@@ -88,7 +89,7 @@ double* SimpleBodyGroup::getMinMax()
     double minX = DBL_MAX, minY = DBL_MAX, minZ = DBL_MAX;
     double maxX = -DBL_MAX, maxY = -DBL_MAX, maxZ = -DBL_MAX;
 
-    for (size_t i = 0; i < points.size(); i++) {
+    for (long int i = 0; i < points.size(); i++) {
         const Vector3Dd& p = points[i];
         if ( p.x() < minX ) minX = p.x();
         if ( p.y() < minY ) minY = p.y();

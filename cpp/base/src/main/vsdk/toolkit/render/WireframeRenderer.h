@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/render/RenderingElement.h"
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Calligraphic2DBuffer;
 class SimpleBody;
@@ -14,7 +14,7 @@ class Vector3Dd;
 class WireframeRenderer : public RenderingElement {
 public:
     static void execute(Calligraphic2DBuffer* outLineSet,
-                        const std::vector<SimpleBody*>& simpleBodies,
+                        java::ArrayList<SimpleBody*>& simpleBodies,
                         const Camera* camera);
 };
 

@@ -5,7 +5,7 @@
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/RenderContext.h"
 #include "vsdk/toolkit/render/TileGenerationStrategy.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Ray;
 class RayHit;
@@ -40,25 +40,25 @@ private:
     };
 
     struct SceneRenderCache {
-        std::vector<SceneObjectRenderData> objects;
+        java::ArrayList<SceneObjectRenderData> objects;
     };
 
     TraceWorkspace workspace;
 
-    static bool hasNonAmbientLights(const std::vector<Light*>& lights);
+    static bool hasNonAmbientLights(java::ArrayList<Light*>& lights);
     static bool isReflective(SimpleMaterial* material);
-    static RenderContext buildRenderContext(const RendererConfiguration* qualitySelection,const std::vector<Light*>& lights);
+    static RenderContext buildRenderContext(const RendererConfiguration* qualitySelection,java::ArrayList<Light*>& lights);
     static int buildSurfaceDetailMask(SimpleMaterial* material, Image* texture, NormalMap* normalMap, const RenderContext& renderContext);
-    static std::vector<long long> captureBodyVersions(const std::vector<SimpleBody*>& bodies);
-    static void assertSceneUnmodifiedDuringRender(const std::vector<long long>& expectedBodyVersions,const std::vector<SimpleBody*>& bodies);
+    static void captureBodyVersions(java::ArrayList<SimpleBody*>& bodies, java::ArrayList<long long>& out);
+    static void assertSceneUnmodifiedDuringRender(java::ArrayList<long long>& expectedBodyVersions,java::ArrayList<SimpleBody*>& bodies);
     static Ray generateRay(const CameraSnapshot* cameraSnapshot, int x, int y);
 
     void prepareSurfaceHit(SimpleBody* nearestObject, const SceneObjectRenderData& objectData, const Ray& hitRay, RayHit* outHit);
     static SimpleMaterial* resolveMaterial(RayHit* hit, const SceneObjectRenderData& objectData);
-    ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,const std::vector<Light*>& lights,const std::vector<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
-    int selectNearestThingInRayDirection(const Ray& inRay,const std::vector<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
-    ColorRgb followRayPath(const Ray& inRay,const std::vector<SimpleBody*>& inSimpleBodiesArray,const std::vector<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
-    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,const std::vector<SimpleBody*>& inSimpleBodiesArray,const std::vector<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
+    ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
+    int selectNearestThingInRayDirection(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
+    ColorRgb followRayPath(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
+    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
 
 public:
     SimpleRaytracer();

@@ -1,7 +1,7 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLESCENE_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLESCENE_H__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class SimpleBody;
 class Light;
@@ -12,10 +12,10 @@ class SimpleSceneSnapshot;
 
 class SimpleScene {
 private:
-    std::vector<SimpleBody*> simpleBodiesArray;
-    std::vector<Light*> lightsArray;
-    std::vector<Background*> backgroundsArray;
-    std::vector<Camera*> camerasArray;
+    java::ArrayList<SimpleBody*> simpleBodiesArray;
+    java::ArrayList<Light*> lightsArray;
+    java::ArrayList<Background*> backgroundsArray;
+    java::ArrayList<Camera*> camerasArray;
     int activeCameraIndex;
     int activeBackgroundIndex;
 
@@ -35,15 +35,15 @@ public:
     void addBackground(Background* b);
     void addLight(Light* l);
 
-    std::vector<SimpleBody*>& getSimpleBodies();
-    std::vector<Light*>& getLights();
-    std::vector<Background*>& getBackgrounds();
-    std::vector<Camera*>& getCameras();
+    java::ArrayList<SimpleBody*>& getSimpleBodies();
+    java::ArrayList<Light*>& getLights();
+    java::ArrayList<Background*>& getBackgrounds();
+    java::ArrayList<Camera*>& getCameras();
 
-    void setSimpleBodies(const std::vector<SimpleBody*>& simpleBodies);
-    void setLights(const std::vector<Light*>& lights);
-    void setBackgrounds(const std::vector<Background*>& backgrounds);
-    void setCameras(const std::vector<Camera*>& cameras);
+    void setSimpleBodies(java::ArrayList<SimpleBody*>& simpleBodies);
+    void setLights(java::ArrayList<Light*>& lights);
+    void setBackgrounds(java::ArrayList<Background*>& backgrounds);
+    void setCameras(java::ArrayList<Camera*>& cameras);
 
     Background* getActiveBackground() const;
     Camera* getActiveCamera() const;

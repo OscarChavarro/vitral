@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Ray;
 class RayHit;
@@ -18,9 +18,9 @@ public:
     static const int MINUS = 0;
 
 private:
-    std::vector<_PolyhedralBoundedSolidFace*> polygonsList;
-    std::vector<_PolyhedralBoundedSolidEdge*> edgesList;
-    std::vector<_PolyhedralBoundedSolidVertex*> verticesList;
+    java::ArrayList<_PolyhedralBoundedSolidFace*> polygonsList;
+    java::ArrayList<_PolyhedralBoundedSolidEdge*> edgesList;
+    java::ArrayList<_PolyhedralBoundedSolidVertex*> verticesList;
     int maxVertexId;
     int maxFaceId;
     bool modelIsValid;
@@ -32,12 +32,12 @@ public:
     _PolyhedralBoundedSolidFace* findFace(int id);
     _PolyhedralBoundedSolidVertex* findVertex(int id);
 
-    std::vector<_PolyhedralBoundedSolidFace*>& getPolygonsList();
-    void setPolygonsList(const std::vector<_PolyhedralBoundedSolidFace*>& polygonsList);
-    std::vector<_PolyhedralBoundedSolidEdge*>& getEdgesList();
-    void setEdgesList(const std::vector<_PolyhedralBoundedSolidEdge*>& edgesList);
-    std::vector<_PolyhedralBoundedSolidVertex*>& getVerticesList();
-    void setVerticesList(const std::vector<_PolyhedralBoundedSolidVertex*>& verticesList);
+    java::ArrayList<_PolyhedralBoundedSolidFace*>& getPolygonsList();
+    void setPolygonsList(java::ArrayList<_PolyhedralBoundedSolidFace*>& polygonsList);
+    java::ArrayList<_PolyhedralBoundedSolidEdge*>& getEdgesList();
+    void setEdgesList(java::ArrayList<_PolyhedralBoundedSolidEdge*>& edgesList);
+    java::ArrayList<_PolyhedralBoundedSolidVertex*>& getVerticesList();
+    void setVerticesList(java::ArrayList<_PolyhedralBoundedSolidVertex*>& verticesList);
 
     int getMaxVertexId() const;
     void setMaxVertexId(int maxVertexId);

@@ -1,13 +1,16 @@
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
+#include "java/util/ArrayList.txx"
 
 SimpleSceneSnapshot::SimpleSceneSnapshot(
-    const std::vector<SimpleBody*>& inSimpleBodies,
-    const std::vector<Light*>& inLights,
+    java::ArrayList<SimpleBody*>& inSimpleBodies,
+    java::ArrayList<Light*>& inLights,
     Background* inBackground,
     CameraSnapshot* inCameraSnapshot)
-    : simpleBodies(inSimpleBodies), lights(inLights), background(inBackground), cameraSnapshot(inCameraSnapshot)
+    : background(inBackground), cameraSnapshot(inCameraSnapshot)
 {
+    for (long int i = 0; i < inSimpleBodies.size(); i++) simpleBodies.add(inSimpleBodies.get(i));
+    for (long int i = 0; i < inLights.size(); i++) lights.add(inLights.get(i));
 }
 
 SimpleSceneSnapshot::~SimpleSceneSnapshot()
@@ -18,7 +21,7 @@ SimpleSceneSnapshot::~SimpleSceneSnapshot()
     }
 }
 
-const std::vector<SimpleBody*>& SimpleSceneSnapshot::getSimpleBodies() const { return simpleBodies; }
-const std::vector<Light*>& SimpleSceneSnapshot::getLights() const { return lights; }
+java::ArrayList<SimpleBody*>& SimpleSceneSnapshot::getSimpleBodies() { return simpleBodies; }
+java::ArrayList<Light*>& SimpleSceneSnapshot::getLights() { return lights; }
 Background* SimpleSceneSnapshot::getBackground() const { return background; }
 CameraSnapshot* SimpleSceneSnapshot::getCameraSnapshot() const { return cameraSnapshot; }

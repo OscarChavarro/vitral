@@ -1,5 +1,7 @@
 #include "vsdk/toolkit/render/WireframeRenderer.h"
 
+#include "java/util/ArrayList.txx"
+
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -197,7 +199,7 @@ static void processBox(SimpleBody* body, const Matrix4x4d& proj,
 }
 
 void WireframeRenderer::execute(Calligraphic2DBuffer* outLineSet,
-                                const std::vector<SimpleBody*>& simpleBodies,
+                                java::ArrayList<SimpleBody*>& simpleBodies,
                                 const Camera* camera)
 {
     if ( outLineSet == 0 || camera == 0 ) return;
@@ -205,7 +207,7 @@ void WireframeRenderer::execute(Calligraphic2DBuffer* outLineSet,
     Matrix4x4d proj;
     proj = proj.canonicalPerspectiveProjection();
 
-    for (size_t i = 0; i < simpleBodies.size(); i++) {
+    for (long int i = 0; i < simpleBodies.size(); i++) {
         SimpleBody* body = simpleBodies[i];
         if ( body == 0 || body->getGeometry() == 0 ) continue;
         Geometry* g = body->getGeometry();

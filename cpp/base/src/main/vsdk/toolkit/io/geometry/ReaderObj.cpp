@@ -14,6 +14,8 @@
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 
+#include "java/util/ArrayList.txx"
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -457,7 +459,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     return finalGroup;
 }
 
-static void addThing(TriangleMeshGroup* g, std::vector<SimpleBody*>& bodies)
+static void addThing(TriangleMeshGroup* g, java::ArrayList<SimpleBody*>& bodies)
 {
     if (g == 0) return;
     SimpleBody* thing = new SimpleBody();
@@ -466,7 +468,7 @@ static void addThing(TriangleMeshGroup* g, std::vector<SimpleBody*>& bodies)
     thing->setRotation(Matrix4x4d());
     thing->setRotationInverse(Matrix4x4d());
     thing->setMaterial(new SimpleMaterial(defaultMaterial()));
-    bodies.push_back(thing);
+    bodies.add(thing);
 }
 
 void ReaderObj::importEnvironment(const java::File& sceneFile, SimpleScene* scene)

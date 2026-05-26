@@ -1,11 +1,12 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
+#include "java/util/ArrayList.txx"
 
 _Polygon2DContour::_Polygon2DContour() : exteriorContour(nullptr), fleetingFlag(false) {}
 
-void _Polygon2DContour::addVertex(double x, double y, double r, double g, double b) { vertices.push_back(Vertex2D(x, y, r, g, b)); }
-void _Polygon2DContour::addVertex(double x, double y) { vertices.push_back(Vertex2D(x, y)); }
-void _Polygon2DContour::pushVertex(double x, double y) { vertices.insert(vertices.begin(), Vertex2D(x, y)); }
+void _Polygon2DContour::addVertex(double x, double y, double r, double g, double b) { vertices.add(Vertex2D(x, y, r, g, b)); }
+void _Polygon2DContour::addVertex(double x, double y) { vertices.add(Vertex2D(x, y)); }
+void _Polygon2DContour::pushVertex(double x, double y) { vertices.add(0L, Vertex2D(x, y)); }
 
 double* _Polygon2DContour::getMinMax()
 {

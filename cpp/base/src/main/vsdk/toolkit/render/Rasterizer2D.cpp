@@ -5,10 +5,24 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "java/util/ArrayList.txx"
 
 #include <algorithm>
 #include <cmath>
-#include <vector>
+
+static void sortDoubles(java::ArrayList<double>& arr)
+{
+    long int n = arr.size();
+    for (long int i = 1; i < n; i++) {
+        double key = arr[i];
+        long int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
 
 void Rasterizer2D::drawLine(Image* img, int x0, int y0, int x1, int y1, const RGBPixel& p)
 {
@@ -64,13 +78,13 @@ void Rasterizer2D::drawLine(Image* img, int x0, int y0, int x1, int y1, const RG
     }
 }
 
-void Rasterizer2D::drawPolygon(Image* img, const Polygon2D& p, const RGBPixel& color)
+void Rasterizer2D::drawPolygon(Image* img, Polygon2D& p, const RGBPixel& color)
 {
     if (img == 0) return;
-    for (size_t i = 0; i < p.loops.size(); i++) {
-        if (p.loops[i]->vertices.empty()) continue;
+    for (long int i = 0; i < p.loops.size(); i++) {
+        if (p.loops[i]->vertices.size() == 0) continue;
         Vertex2D va(0, 0), vb(0, 0);
-        for (size_t j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
+        for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
             va = p.loops[i]->vertices[j];
             vb = p.loops[i]->vertices[j + 1];
             drawLine(img, (int)va.x, (int)va.y, (int)vb.x, (int)vb.y, color);
@@ -85,7 +99,7 @@ void Rasterizer2D::fillPolygonProcessLine(
     const Vertex2D& va,
     const Vertex2D& vb,
     double h,
-    std::vector<double>& spanBuffer)
+    java::ArrayList<double>& spanBuffer)
 {
     double dx = vb.x - va.x;
     double dy = vb.y - va.y;
@@ -96,14 +110,14 @@ void Rasterizer2D::fillPolygonProcessLine(
         b = va.y - dydx * va.x;
         if (std::abs(dydx) < VSDK::EPSILON) {
             if (std::abs(va.y - h) <= 0.5) {
-                spanBuffer.push_back(va.x);
-                spanBuffer.push_back(vb.x);
+                spanBuffer.add(va.x);
+                spanBuffer.add(vb.x);
             }
         }
         else {
             x = (h - b) / dydx;
             if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.push_back(x);
+                spanBuffer.add(x);
             }
         }
     }
@@ -113,19 +127,19 @@ void Rasterizer2D::fillPolygonProcessLine(
         b = va.x - dxdy * va.y;
         if (std::abs(dxdy) < VSDK::EPSILON) {
             if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.push_back(va.x);
+                spanBuffer.add(va.x);
             }
         }
         else {
             x = dxdy * h + b;
             if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.push_back(x);
+                spanBuffer.add(x);
             }
         }
     }
 }
 
-void Rasterizer2D::fillPolygon(Image* img, const Polygon2D& p, const RGBPixel& color)
+void Rasterizer2D::fillPolygon(Image* img, Polygon2D& p, const RGBPixel& color)
 {
     if (img == 0) return;
     int minx = img->getXSize();
@@ -133,8 +147,8 @@ void Rasterizer2D::fillPolygon(Image* img, const Polygon2D& p, const RGBPixel& c
     int maxx = 0;
     int maxy = 0;
 
-    for (size_t i = 0; i < p.loops.size(); i++) {
-        for (size_t j = 0; j < p.loops[i]->vertices.size(); j++) {
+    for (long int i = 0; i < p.loops.size(); i++) {
+        for (long int j = 0; j < p.loops[i]->vertices.size(); j++) {
             const Vertex2D& va = p.loops[i]->vertices[j];
             if (va.x < minx && va.x >= 0) minx = (int)va.x;
             if (va.x > maxx && va.x < img->getXSize()) maxx = (int)va.x;
@@ -144,13 +158,12 @@ void Rasterizer2D::fillPolygon(Image* img, const Polygon2D& p, const RGBPixel& c
     }
 
     for (int y = miny; y <= maxy; y++) {
-        std::vector<double> spanBuffer;
-        spanBuffer.reserve(p.loops.size() * 4);
+        java::ArrayList<double> spanBuffer;
         double h = y;
 
-        for (size_t i = 0; i < p.loops.size(); i++) {
-            if (p.loops[i]->vertices.empty()) continue;
-            for (size_t j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
+        for (long int i = 0; i < p.loops.size(); i++) {
+            if (p.loops[i]->vertices.size() == 0) continue;
+            for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
                 fillPolygonProcessLine(p.loops[i]->vertices[j], p.loops[i]->vertices[j + 1], h, spanBuffer);
             }
             fillPolygonProcessLine(
@@ -158,9 +171,9 @@ void Rasterizer2D::fillPolygon(Image* img, const Polygon2D& p, const RGBPixel& c
                 p.loops[i]->vertices[0], h, spanBuffer);
         }
 
-        std::sort(spanBuffer.begin(), spanBuffer.end());
+        sortDoubles(spanBuffer);
         bool state = false;
-        for (size_t s = 0; s + 1 < spanBuffer.size(); s++) {
+        for (long int s = 0; s + 1 < spanBuffer.size(); s++) {
             double xs1 = spanBuffer[s];
             double xs2 = spanBuffer[s + 1];
             state = !state;
@@ -176,13 +189,13 @@ void Rasterizer2D::fillPolygon(Image* img, const Polygon2D& p, const RGBPixel& c
 }
 
 void Rasterizer2D::fillSmoothPolygonCalculateColor(
-    const Polygon2D& p, double x, double y, RGBPixel& outPixel)
+    Polygon2D& p, double x, double y, RGBPixel& outPixel)
 {
     double outR = 0.0, outG = 0.0, outB = 0.0;
     double totaldistance = 0.0;
 
-    for (size_t i = 0; i < p.loops.size(); i++) {
-        for (size_t j = 0; j < p.loops[i]->vertices.size(); j++) {
+    for (long int i = 0; i < p.loops.size(); i++) {
+        for (long int j = 0; j < p.loops[i]->vertices.size(); j++) {
             const Vertex2D& va = p.loops[i]->vertices[j];
             double distance = 1.0 / (1.0 + std::sqrt((va.x - x) * (va.x - x) + (va.y - y) * (va.y - y)));
             totaldistance += distance;
@@ -209,7 +222,7 @@ void Rasterizer2D::fillSmoothPolygonCalculateColor(
     outPixel.b = (char)(bb & 0xFF);
 }
 
-void Rasterizer2D::fillSmoothPolygon(Image* img, const Polygon2D& p)
+void Rasterizer2D::fillSmoothPolygon(Image* img, Polygon2D& p)
 {
     if (img == 0) return;
     int minx = img->getXSize();
@@ -217,8 +230,8 @@ void Rasterizer2D::fillSmoothPolygon(Image* img, const Polygon2D& p)
     int maxx = 0;
     int maxy = 0;
 
-    for (size_t i = 0; i < p.loops.size(); i++) {
-        for (size_t j = 0; j < p.loops[i]->vertices.size(); j++) {
+    for (long int i = 0; i < p.loops.size(); i++) {
+        for (long int j = 0; j < p.loops[i]->vertices.size(); j++) {
             const Vertex2D& va = p.loops[i]->vertices[j];
             if (va.x < minx && va.x >= 0) minx = (int)va.x;
             if (va.x > maxx && va.x < img->getXSize()) maxx = (int)va.x;
@@ -228,13 +241,12 @@ void Rasterizer2D::fillSmoothPolygon(Image* img, const Polygon2D& p)
     }
 
     for (int y = miny; y <= maxy; y++) {
-        std::vector<double> spanBuffer;
-        spanBuffer.reserve(p.loops.size() * 4);
+        java::ArrayList<double> spanBuffer;
         double h = y;
 
-        for (size_t i = 0; i < p.loops.size(); i++) {
-            if (p.loops[i]->vertices.empty()) continue;
-            for (size_t j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
+        for (long int i = 0; i < p.loops.size(); i++) {
+            if (p.loops[i]->vertices.size() == 0) continue;
+            for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
                 fillPolygonProcessLine(p.loops[i]->vertices[j], p.loops[i]->vertices[j + 1], h, spanBuffer);
             }
             fillPolygonProcessLine(
@@ -242,10 +254,10 @@ void Rasterizer2D::fillSmoothPolygon(Image* img, const Polygon2D& p)
                 p.loops[i]->vertices[0], h, spanBuffer);
         }
 
-        std::sort(spanBuffer.begin(), spanBuffer.end());
+        sortDoubles(spanBuffer);
         bool state = false;
         RGBPixel color;
-        for (size_t s = 0; s + 1 < spanBuffer.size(); s++) {
+        for (long int s = 0; s + 1 < spanBuffer.size(); s++) {
             double xs1 = spanBuffer[s];
             double xs2 = spanBuffer[s + 1];
             state = !state;

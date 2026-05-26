@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include "java/util/ArrayList.txx"
 #include <algorithm>
 #include <stdexcept>
 #include <fstream>
@@ -198,8 +199,8 @@ public:
     {
         if (!ensureSoftwareFrameImageForViewport()) return;
 
-        std::vector<SimpleBody*> bodies;
-        std::vector<Light*> lights;
+        java::ArrayList<SimpleBody*> bodies;
+        java::ArrayList<Light*> lights;
         SimpleBackground* background = 0;
         SimpleSceneSnapshot* snapshot = 0;
 
@@ -216,15 +217,15 @@ public:
                 sphereBody->setNormalMap(bumpNormalMap->clone());
             }
             sphereBody->setRotation(modelRotation);
-            bodies.push_back(sphereBody);
+            bodies.add(sphereBody);
 
             Light* ambientLight = new Light(LightType::AMBIENT, Vector3Dd(0, 0, 0), ColorRgb(1, 1, 1));
             ambientLight->setId(0);
-            lights.push_back(ambientLight);
+            lights.add(ambientLight);
 
             Light* pointLight = new Light(light->getLightType(), light->getPosition(), light->getSpecular());
             pointLight->setId(1);
-            lights.push_back(pointLight);
+            lights.add(pointLight);
 
             background = new SimpleBackground();
             background->setColor(0, 0, 0);
@@ -286,15 +287,15 @@ public:
         catch (...) {
             if (snapshot != 0) delete snapshot;
             if (background != 0) delete background;
-            for (size_t i = 0; i < lights.size(); i++) delete lights[i];
-            for (size_t i = 0; i < bodies.size(); i++) delete bodies[i];
+            for (long int i = 0; i < lights.size(); i++) delete lights[i];
+            for (long int i = 0; i < bodies.size(); i++) delete bodies[i];
             throw;
         }
 
         delete snapshot;
         delete background;
-        for (size_t i = 0; i < lights.size(); i++) delete lights[i];
-        for (size_t i = 0; i < bodies.size(); i++) delete bodies[i];
+        for (long int i = 0; i < lights.size(); i++) delete lights[i];
+        for (long int i = 0; i < bodies.size(); i++) delete bodies[i];
 
         OpenGL4ImageRenderer::unload(softwareFrameImage);
         OpenGL4ImageRenderer::draw(softwareFrameImage);

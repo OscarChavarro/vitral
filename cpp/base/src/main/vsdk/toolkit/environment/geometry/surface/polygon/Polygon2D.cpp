@@ -5,13 +5,13 @@
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include <algorithm>
+#include "java/util/ArrayList.txx"
 
 Polygon2D::Polygon2D() : currentLoop(nullptr), headNode(nullptr) { nextLoop(); }
 
 Polygon2D::~Polygon2D()
 {
-    for (size_t i = 0; i < loops.size(); i++) delete loops[i];
+    for (long int i = 0; i < loops.size(); i++) delete loops[i];
 }
 
 void Polygon2D::addVertex(double x, double y, double r, double g, double b) { currentLoop->addVertex(x,y,r,g,b); }
@@ -21,31 +21,35 @@ void Polygon2D::pushVertex(double x, double y) { currentLoop->pushVertex(x,y); }
 void Polygon2D::nextLoop()
 {
     currentLoop = new _Polygon2DContour();
-    loops.push_back(currentLoop);
+    loops.add(currentLoop);
 }
 
 void Polygon2D::eraseLastLoop()
 {
     if (loops.size() <= 1) return;
-    _Polygon2DContour* last = loops.back();
-    for (size_t i = 0; i < loops.size(); ) {
+    _Polygon2DContour* last = loops[loops.size() - 1];
+    for (long int i = 0; i < loops.size(); ) {
         if (loops[i]->getExteriorContour() == last) {
             delete loops[i];
-            loops.erase(loops.begin() + i);
+            loops.remove(i);
         }
         else i++;
     }
     if (loops.size() > 1) {
-        delete loops.back();
-        loops.pop_back();
-        currentLoop = loops.back();
+        delete loops[loops.size() - 1];
+        loops.remove(loops.size() - 1);
+        currentLoop = loops[loops.size() - 1];
     }
 }
 
 void Polygon2D::invert()
 {
-    for (size_t i = 0; i < loops.size(); i++) {
-        std::reverse(loops[i]->vertices.begin(), loops[i]->vertices.end());
+    for (long int i = 0; i < loops.size(); i++) {
+        java::ArrayList<Vertex2D>& verts = loops[i]->vertices;
+        long int _n = verts.size();
+        for (long int _i = 0; _i < _n / 2; _i++) {
+            auto _tmp = verts[_i]; verts[_i] = verts[_n - 1 - _i]; verts[_n - 1 - _i] = _tmp;
+        }
     }
 }
 
@@ -55,8 +59,8 @@ double* Polygon2D::getMinMax()
     double minX = 1e308, minY = 1e308;
     double maxX = -1e308, maxY = -1e308;
 
-    for (size_t i = 0; i < loops.size(); i++) {
-        for (size_t j = 0; j + 1 < loops[i]->vertices.size(); j++) {
+    for (long int i = 0; i < loops.size(); i++) {
+        for (long int j = 0; j + 1 < loops[i]->vertices.size(); j++) {
             const Vertex2D& v = loops[i]->vertices[j];
             if (v.x > maxX) maxX = v.x;
             if (v.x < minX) minX = v.x;
@@ -73,10 +77,10 @@ double* Polygon2D::getMinMax()
 static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
 {
     bool inside = false;
-    const std::vector<Vertex2D>& v = loop->vertices;
-    size_t n = v.size();
+    java::ArrayList<Vertex2D>& v = const_cast<_Polygon2DContour*>(loop)->vertices;
+    long int n = v.size();
     if (n < 3) return false;
-    for (size_t i = 0, j = n - 1; i < n; j = i++) {
+    for (long int i = 0, j = n - 1; i < n; j = i++) {
         bool inter = ((v[i].y > y) != (v[j].y > y)) &&
                      (x < (v[j].x - v[i].x) * (y - v[i].y) / ((v[j].y - v[i].y) + 1e-30) + v[i].x);
         if (inter) inside = !inside;
@@ -101,7 +105,7 @@ bool Polygon2D::doIntersection(const Ray& inRay, RayHit* outHit)
 
     Vector3Dd p = inRay.origin().add(inRay.direction().multiply(t));
     bool inside = false;
-    for (size_t i = 0; i < loops.size(); i++) {
+    for (long int i = 0; i < loops.size(); i++) {
         if (pointInLoop(loops[i], p.x(), p.y())) {
             if (loops[i]->getExteriorContour() == nullptr) inside = true;
             else inside = false;
