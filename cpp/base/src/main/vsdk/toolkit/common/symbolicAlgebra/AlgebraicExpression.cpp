@@ -1,18 +1,13 @@
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
-#include "java/lang/String.h"
 #include <cctype>
-#include "java/lang/String.h"
 #include <cmath>
-#include "java/lang/String.h"
 #include <cstdlib>
-#include "java/lang/String.h"
 
 class Parser {
 private:
     const java::String& s;
-    const std::map<java::String, double>& vars;
+    const java::HashMap<java::String, double>& vars;
     mutable size_t p;
 
     void skip() const { while (p < s.size() && std::isspace((unsigned char)s[p])) p++; }
@@ -48,10 +43,10 @@ private:
         if (name.empty()) throw AlgebraicExpressionException("Unexpected token");
         if (name == "pi") return 3.14159265358979323846;
         if (name == "e") return 2.71828182845904523536;
-        std::map<java::String, double>::const_iterator it = vars.find(name);
-        if (it != vars.end()) return it->second;
+        double varValue = 0.0;
+        if (vars.tryGet(name, &varValue)) return varValue;
         if (consume('(')) { double a = expr(); if (!consume(')')) throw AlgebraicExpressionException("Missing ')' in function"); return fn(name, a); }
-        throw AlgebraicExpressionException("Unknown variable: " + name);
+        throw AlgebraicExpressionException(java::String("Unknown variable: ").concat(name).toCString());
     }
     double unary() const { if (consume('+')) return unary(); if (consume('-')) return -unary(); return primary(); }
     double power() const { double a = unary(); if (consume('^')) return std::pow(a, power()); return a; }
@@ -59,10 +54,10 @@ private:
     double expr() const { double a = term(); while (true) { if (consume('+')) a += term(); else if (consume('-')) a -= term(); else break; } return a; }
 
 public:
-    Parser(const java::String& s, const std::map<java::String, double>& vars) : s(s), vars(vars), p(0) {}
+    Parser(const java::String& s, const java::HashMap<java::String, double>& vars) : s(s), vars(vars), p(0) {}
     double eval() const { double v = expr(); skip(); if (p != s.size()) throw AlgebraicExpressionException("Trailing input"); return v; }
 };
 
 void AlgebraicExpression::setExpression(const java::String& expr) { expression = expr; }
-void AlgebraicExpression::defineValue(const java::String& name, double value) { vars[name] = value; }
+void AlgebraicExpression::defineValue(const java::String& name, double value) { vars.put(name, value); }
 double AlgebraicExpression::eval() const { return Parser(expression, vars).eval(); }

@@ -51,4 +51,6 @@ class HashMap final: public Object {
 };
 }
 
+#include "java/util/HashMap.txx"
+
 #endif
