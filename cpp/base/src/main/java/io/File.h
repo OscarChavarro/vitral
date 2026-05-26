@@ -47,6 +47,9 @@ class File {
 
     bool
     canWrite() const;
+
+    bool
+    mkdirs() const;
 };
 
 }

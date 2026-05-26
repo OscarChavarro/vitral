@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
-#include <sys/stat.h>
 
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
@@ -1045,15 +1044,10 @@ PersistenceElement::checkDirectory(const char *dirName) {
     }
 
     if ( !directory.exists() ) {
-        errno = 0;
-        if ( mkdir(dirName, 0775) != 0 ) {
+        if ( !directory.mkdirs() ) {
             java::System::err.printf(
                 "Directory %s can not be created, check permisions and available free disk space.\n",
                 dirName);
-            return false;
-        }
-        java::File recreated(dirName);
-        if ( !recreated.exists() || !recreated.isDirectory() ) {
             return false;
         }
     }

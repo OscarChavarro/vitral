@@ -1,6 +1,7 @@
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
 
-#include <unistd.h>
+#include <thread>
+#include <chrono>
 
 ParallelProgressMonitorConsumer::ParallelProgressMonitorConsumer(
     java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
@@ -20,7 +21,7 @@ void ParallelProgressMonitorConsumer::run()
         bool hasEvent = sharedEventQueue->poll(&nextEvent);
 
         if ( !hasEvent ) {
-            usleep(50 * 1000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             continue;
         }
 

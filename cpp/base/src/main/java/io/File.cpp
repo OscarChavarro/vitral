@@ -1,6 +1,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <sys/stat.h>
 
 #include "java/io/File.h"
 
@@ -164,6 +165,36 @@ File::canWrite() const {
     }
 
     return canOpenWithMode(rawPath, "ab");
+}
+
+bool
+File::mkdirs() const {
+    const char *rawPath = path.toCString();
+    if ( !isValidPath(rawPath) ) {
+        return false;
+    }
+
+    if ( isDirectoryByReadProbe(rawPath) ) {
+        return true;
+    }
+
+    const std::size_t len = std::strlen(rawPath);
+    char *tmp = new char[len + 1];
+    std::memcpy(tmp, rawPath, len + 1);
+
+    for ( std::size_t i = 1; i < len; i++ ) {
+        if ( tmp[i] == '/' ) {
+            tmp[i] = '\0';
+            mkdir(tmp, 0775);
+            tmp[i] = '/';
+        }
+    }
+
+    errno = 0;
+    const bool created = (mkdir(tmp, 0775) == 0);
+    delete[] tmp;
+
+    return created || isDirectoryByReadProbe(rawPath);
 }
 
 }
