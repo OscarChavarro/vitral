@@ -19,7 +19,6 @@
 #include "vsdk/toolkit/render/SimpleRaytracer.h"
 
 #include <cstdio>
-#include <memory>
 #include "java/util/ArrayList.txx"
 
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
@@ -85,8 +84,8 @@ static void offlineExecution(const java::String& fileName,
         scene.exportToSimpleSceneSnapshot(cameraSnapshot, scene.getActiveBackground());
 
     StopWatch clock;
-    std::unique_ptr<RaytracerExecutor> raytracerExecutor(
-        parallel ? (RaytracerExecutor*)new RaytracerParallelExecutor() : (RaytracerExecutor*)new RaytracerSerialExecutor());
+    RaytracerExecutor* raytracerExecutor =
+        parallel ? (RaytracerExecutor*)new RaytracerParallelExecutor() : (RaytracerExecutor*)new RaytracerSerialExecutor();
 
     clock.start();
     raytracerExecutor->run(&visualizationEngine,
@@ -108,6 +107,7 @@ static void offlineExecution(const java::String& fileName,
         }
     }
 
+    delete raytracerExecutor;
     delete sceneSnapshot;
 }
 
