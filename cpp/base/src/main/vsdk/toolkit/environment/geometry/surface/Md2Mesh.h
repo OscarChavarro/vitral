@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_MD2MESH_H__
 
 #include <string>
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Image;
 
@@ -36,20 +36,20 @@ public:
     int offsetGlCommands;
     int offsetEnd;
 
-    std::vector<std::string> skinNames;
-    std::vector<Image*> skins;
-    std::vector<std::string> frameNames;
-    std::vector< std::vector<float> > frameVertices;
-    std::vector< std::vector<short> > frameNormalIndices;
-    std::vector< std::vector<float> > glCmdTexCoordsStrip;
-    std::vector< std::vector<int> > glCmdVertIndexStrip;
-    std::vector< std::vector<float> > glCmdTexCoordsFan;
-    std::vector< std::vector<int> > glCmdVertIndexFan;
-    std::vector<float> texCoords;
-    std::vector< std::vector<int> > triangles;
+    java::ArrayList<std::string> skinNames;
+    java::ArrayList<Image*> skins;
+    java::ArrayList<std::string> frameNames;
+    java::ArrayList< java::ArrayList<float> > frameVertices;
+    java::ArrayList< java::ArrayList<short> > frameNormalIndices;
+    java::ArrayList< java::ArrayList<float> > glCmdTexCoordsStrip;
+    java::ArrayList< java::ArrayList<int> > glCmdVertIndexStrip;
+    java::ArrayList< java::ArrayList<float> > glCmdTexCoordsFan;
+    java::ArrayList< java::ArrayList<int> > glCmdVertIndexFan;
+    java::ArrayList<float> texCoords;
+    java::ArrayList< java::ArrayList<int> > triangles;
 
 private:
-    std::vector<_AnimationInfo> aniInfos;
+    java::ArrayList<_AnimationInfo> aniInfos;
     float frameTimeSeg;
     float elapsedTimeSeg;
     short currentAnimationInd;
@@ -103,7 +103,7 @@ public:
     float scale[3];
     float translate[3];
     unsigned char name[16];
-    std::vector<_md2Vertex> verts;
+    java::ArrayList<_md2Vertex> verts;
 };
 
 #endif

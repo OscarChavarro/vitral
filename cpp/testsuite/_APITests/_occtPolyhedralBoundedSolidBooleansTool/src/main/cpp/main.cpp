@@ -244,8 +244,8 @@ int main(int argc, char** argv) {
 
     std::printf("Result written to: %s\n", output.c_str());
     return 0;
-  } catch (const Standard_Failure& e) {
-    std::fprintf(stderr, "OCCT error: %s\n", e.what());
+  } catch (const Standard_Failure&) {
+    std::fprintf(stderr, "Operation failed with Standard_Failure\n");
     return 3;
   } catch (const std::exception& e) {
     std::fprintf(stderr, "Error: %s\n", e.what());

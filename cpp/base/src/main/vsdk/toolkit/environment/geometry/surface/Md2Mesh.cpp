@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
+#include "java/util/ArrayList.txx"
 #include <cctype>
 
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}
@@ -28,12 +29,12 @@ void Md2Mesh::setElapsedTimeSeg(float e) { elapsedTimeSeg = e; }
 
 void Md2Mesh::returnStartEndAnim(short inIndex, short outStartEnd[2])
 {
-    if (frameNames.empty()) {
+    if (frameNames.size() == 0) {
         outStartEnd[0] = 0;
         outStartEnd[1] = 0;
         return;
     }
-    if (aniInfos.empty()) {
+    if (aniInfos.size() == 0) {
         fillAniInfo();
     }
     if (inIndex < 0 || inIndex >= (short)aniInfos.size()) {
@@ -47,12 +48,12 @@ void Md2Mesh::returnStartEndAnim(short inIndex, short outStartEnd[2])
 
 void Md2Mesh::returnStartEndAnim(const std::string& inNameAnim, short outStartEnd[2])
 {
-    if (frameNames.empty()) {
+    if (frameNames.size() == 0) {
         outStartEnd[0] = 0;
         outStartEnd[1] = 0;
         return;
     }
-    if (aniInfos.empty()) {
+    if (aniInfos.size() == 0) {
         fillAniInfo();
     }
     _AnimationInfo* ai = getAniInfo(inNameAnim);
@@ -108,7 +109,7 @@ void Md2Mesh::fillAniInfo()
         if (fName != aniInfoT.name) {
             if (i != 0) {
                 aniInfoT.end = (short)(i - 1);
-                aniInfos.push_back(aniInfoT);
+                aniInfos.add(aniInfoT);
             }
             aniInfoT = _AnimationInfo();
             aniInfoT.name = fName;
@@ -116,11 +117,11 @@ void Md2Mesh::fillAniInfo()
         }
     }
 
-    if (!frameNames.empty()) {
+    if (frameNames.size() > 0) {
         aniInfoT.end = (short)(i - 1);
-        aniInfos.push_back(aniInfoT);
+        aniInfos.add(aniInfoT);
     }
-    maxAnimationInd = (short)(aniInfos.empty() ? 0 : (aniInfos.size() - 1));
+    maxAnimationInd = (short)(aniInfos.size() == 0 ? 0 : (aniInfos.size() - 1));
 }
 
 const float Md2Mesh::anorms[162][3] =

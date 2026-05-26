@@ -23,7 +23,6 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <vector>
 
 struct ReaderObjVertex {
     int vertexPositionIndex;
@@ -73,10 +72,10 @@ static int resolveObjIndex(int rawIndex, int count)
 static ReaderObjVertex readFaceVertex(const std::string& text)
 {
     ReaderObjVertex r;
-    std::vector<std::string> parts;
+    java::ArrayList<std::string> parts;
     std::stringstream ss(text);
     std::string item;
-    while (std::getline(ss, item, '/')) parts.push_back(item);
+    while (std::getline(ss, item, '/')) parts.add(item);
 
     if (parts.size() >= 1 && !parts[0].empty()) r.vertexPositionIndex = readIndexInteger(parts[0]);
     if (parts.size() >= 2 && !parts[1].empty()) r.vertexTextureCoordinateIndex = readIndexInteger(parts[1]);
@@ -88,24 +87,24 @@ static ReaderObjVertex readFaceVertex(const std::string& text)
     return r;
 }
 
-static std::vector< std::vector<ReaderObjVertex> > readPolygonAsTriangleFan(const std::string& line)
+static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangleFan(const std::string& line)
 {
-    std::vector< std::vector<ReaderObjVertex> > ret;
+    java::ArrayList< java::ArrayList<ReaderObjVertex> > ret;
     std::istringstream ss(line);
     std::string tag;
     ss >> tag;
 
-    std::vector<ReaderObjVertex> poly;
+    java::ArrayList<ReaderObjVertex> poly;
     std::string tok;
-    while (ss >> tok) poly.push_back(readFaceVertex(tok));
+    while (ss >> tok) poly.add(readFaceVertex(tok));
     if (poly.size() < 3) return ret;
 
     for (size_t i = 2; i < poly.size(); i++) {
-        std::vector<ReaderObjVertex> tri(3);
-        tri[0] = poly[0];
-        tri[1] = poly[i - 1];
-        tri[2] = poly[i];
-        ret.push_back(tri);
+        java::ArrayList<ReaderObjVertex> tri;
+        tri.add(poly[0]);
+        tri.add(poly[(long int)i - 1]);
+        tri.add(poly[(long int)i]);
+        ret.add(tri);
     }
     return ret;
 }
@@ -201,32 +200,32 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
 static void addMeshToGroup(
     java::ArrayList<TriangleMesh>& meshGroup,
     const std::string& nextGeometricObjectName,
-    const std::vector<Vector3Dd>& vertexPositionsArray,
-    const std::vector<Vector3Dd>& vertexNormalsArray,
-    const std::vector<Vector3Dd>& vertexTextureCoordinatesArray,
-    std::vector< std::vector<ReaderObjVertex> >& triangleDatasetsArray,
+    const java::ArrayList<Vector3Dd>& vertexPositionsArray,
+    const java::ArrayList<Vector3Dd>& vertexNormalsArray,
+    const java::ArrayList<Vector3Dd>& vertexTextureCoordinatesArray,
+    java::ArrayList< java::ArrayList<ReaderObjVertex> >& triangleDatasetsArray,
     const java::ArrayList<Image*>& nextTexturesArray,
-    std::vector< std::vector< std::vector<int> > >& textureSpanTriangleRangeTable,
-    std::vector<SimpleMaterial>& nextMaterialsArray,
-    std::vector< std::vector<int> >& materialTriangleRangeTable)
+    java::ArrayList< java::ArrayList< java::ArrayList<int> > >& textureSpanTriangleRangeTable,
+    java::ArrayList<SimpleMaterial>& nextMaterialsArray,
+    java::ArrayList< java::ArrayList<int> >& materialTriangleRangeTable)
 {
     TriangleMesh mesh;
 
-    if (nextMaterialsArray.empty()) {
+    if (nextMaterialsArray.size() == 0) {
         SimpleMaterial m;
         m = m.withName("default obj material").withDoubleSided(false);
-        nextMaterialsArray.push_back(m);
+        nextMaterialsArray.add(m);
     }
 
     std::map<ReaderObjVertex, int> usedCombinedVertexes;
-    std::vector<ReaderObjVertex> finalVertexes;
+    java::ArrayList<ReaderObjVertex> finalVertexes;
 
     for (size_t i = 0; i < triangleDatasetsArray.size(); i++) {
         for (int k = 0; k < 3; k++) {
             ReaderObjVertex p = triangleDatasetsArray[i][k];
             if (usedCombinedVertexes.find(p) == usedCombinedVertexes.end()) {
                 usedCombinedVertexes[p] = (int)finalVertexes.size();
-                finalVertexes.push_back(p);
+                finalVertexes.add(p);
             }
             triangleDatasetsArray[i][k].vertexPositionIndex = usedCombinedVertexes[p];
         }
@@ -242,19 +241,19 @@ static void addMeshToGroup(
         int srcPos = resolveObjIndex(
             finalVertexes[i].vertexPositionIndex, (int)vertexPositionsArray.size());
         if (srcPos < 0 || srcPos >= (int)vertexPositionsArray.size()) srcPos = 0;
-        Vertex vtx(R.multiply(vertexPositionsArray[(size_t)srcPos]));
+        Vertex vtx(R.multiply(vertexPositionsArray.get((long int)srcPos)));
 
         int ti = resolveObjIndex(finalVertexes[i].vertexTextureCoordinateIndex,
             (int)vertexTextureCoordinatesArray.size());
         if (ti >= 0 && ti < (int)vertexTextureCoordinatesArray.size()) {
-            vtx.u = vertexTextureCoordinatesArray[(size_t)ti].x();
-            vtx.v = vertexTextureCoordinatesArray[(size_t)ti].y();
+            vtx.u = vertexTextureCoordinatesArray.get((long int)ti).x();
+            vtx.v = vertexTextureCoordinatesArray.get((long int)ti).y();
         }
 
         int ni =
             resolveObjIndex(finalVertexes[i].vertexNormalIndex, (int)vertexNormalsArray.size());
         if (ni >= 0 && ni < (int)vertexNormalsArray.size()) {
-            vtx.normal = R.multiply(vertexNormalsArray[(size_t)ni]);
+            vtx.normal = R.multiply(vertexNormalsArray.get((long int)ni));
         }
         else {
             vtx.normal = Vector3Dd(0, 0, 0);
@@ -280,10 +279,10 @@ static void addMeshToGroup(
     }
     mesh.setMaterials(materials);
 
-    std::vector<int> auxMaterialRange(2, 0);
-    auxMaterialRange[0] = (int)triangleDatasetsArray.size();
-    auxMaterialRange[1] = (int)nextMaterialsArray.size() - 1;
-    materialTriangleRangeTable.push_back(auxMaterialRange);
+    java::ArrayList<int> auxMaterialRange;
+    auxMaterialRange.add((int)triangleDatasetsArray.size());
+    auxMaterialRange.add((int)nextMaterialsArray.size() - 1);
+    materialTriangleRangeTable.add(auxMaterialRange);
 
     java::ArrayList< java::ArrayList<int> > materialRanges;
     for (size_t i = 0; i < materialTriangleRangeTable.size(); i++) {
@@ -304,16 +303,24 @@ static void addMeshToGroup(
         numTextureSpans += (int)textureSpanTriangleRangeTable[textureIndex].size();
     }
 
-    std::vector< std::vector<int> > textureRangesTmp((size_t)std::max(numTextureSpans, 0), std::vector<int>(2, 0));
-    int ri = 0;
+    java::ArrayList< java::ArrayList<int> > textureRangesTmp;
     for (size_t textureIndex = 0; textureIndex < textureSpanTriangleRangeTable.size(); textureIndex++) {
         for (size_t j = 0; j < textureSpanTriangleRangeTable[textureIndex].size(); j++) {
-            textureRangesTmp[(size_t)ri][0] = textureSpanTriangleRangeTable[textureIndex][j][1];
-            textureRangesTmp[(size_t)ri][1] = (int)textureIndex;
-            ri++;
+            java::ArrayList<int> row;
+            row.add(textureSpanTriangleRangeTable[textureIndex][j][1]);
+            row.add((int)textureIndex);
+            textureRangesTmp.add(row);
         }
     }
-    std::sort(textureRangesTmp.begin(), textureRangesTmp.end(), [](const std::vector<int>& a, const std::vector<int>& b){ return a[0] < b[0]; });
+    for (long int i = 1; i < textureRangesTmp.size(); i++) {
+        java::ArrayList<int> key = textureRangesTmp[i];
+        long int j = i - 1;
+        while (j >= 0 && textureRangesTmp[j][0] > key[0]) {
+            textureRangesTmp[j + 1] = textureRangesTmp[j];
+            j--;
+        }
+        textureRangesTmp[j + 1] = key;
+    }
     java::ArrayList< java::ArrayList<int> > textureRanges;
     for (size_t i = 0; i < textureRangesTmp.size(); i++) {
         java::ArrayList<int> row;
@@ -333,35 +340,40 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     std::ifstream in(fileName.c_str());
     if (!in.is_open()) return new TriangleMeshGroup();
 
-    std::vector<Vector3Dd> vertexPositionsArray;
-    std::vector<Vector3Dd> vertexNormalsArray;
-    std::vector<Vector3Dd> vertexTextureCoordinatesArray;
-    std::vector< std::vector<ReaderObjVertex> > triangleDatasetsArray;
+    java::ArrayList<Vector3Dd> vertexPositionsArray;
+    java::ArrayList<Vector3Dd> vertexNormalsArray;
+    java::ArrayList<Vector3Dd> vertexTextureCoordinatesArray;
+    java::ArrayList< java::ArrayList<ReaderObjVertex> > triangleDatasetsArray;
 
     std::string nextGeometricObjectName = "OBJ_default_material";
     java::ArrayList<Image*> nextTexturesArray;
-    std::vector<SimpleMaterial> nextMaterialsArray;
+    java::ArrayList<SimpleMaterial> nextMaterialsArray;
 
     java::ArrayList<TriangleMesh> meshGroup;
-    std::vector< std::vector< std::vector<int> > > textureSpanTriangleRangeTable;
-    textureSpanTriangleRangeTable.push_back(std::vector< std::vector<int> >(1, std::vector<int>(2, 0)));
-    std::vector< std::vector<int> > materialTriangleRangeTable;
+    java::ArrayList< java::ArrayList< java::ArrayList<int> > > textureSpanTriangleRangeTable;
+    java::ArrayList< java::ArrayList<int> > initialTextureSpans;
+    java::ArrayList<int> initialTextureRange;
+    initialTextureRange.add(0);
+    initialTextureRange.add(0);
+    initialTextureSpans.add(initialTextureRange);
+    textureSpanTriangleRangeTable.add(initialTextureSpans);
+    java::ArrayList< java::ArrayList<int> > materialTriangleRangeTable;
 
     std::map<std::string, Image*> texturesHashMap;
     std::map<std::string, SimpleMaterial> materialsHashMap;
     int textureIndex = 0;
     auto ensureMaterialSelection = [&]() {
-        if (!nextMaterialsArray.empty() || materialsHashMap.empty()) {
+        if (nextMaterialsArray.size() > 0 || materialsHashMap.empty()) {
             return;
         }
         // Fallback for OBJ files that declare mtllib but omit explicit usemtl:
         // use the first material from the MTL table for the whole mesh.
         auto it = materialsHashMap.begin();
-        nextMaterialsArray.push_back(it->second);
-        std::vector<int> r(2, 0);
-        r[0] = 0;
-        r[1] = 0;
-        materialTriangleRangeTable.push_back(r);
+        nextMaterialsArray.add(it->second);
+        java::ArrayList<int> r;
+        r.add(0);
+        r.add(0);
+        materialTriangleRangeTable.add(r);
     };
 
     std::string line;
@@ -373,19 +385,19 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
             std::istringstream ss(line);
             std::string t, matName;
             ss >> t >> matName;
-            if (materialsHashMap.find(matName) != materialsHashMap.end()) nextMaterialsArray.push_back(materialsHashMap[matName]);
-            else nextMaterialsArray.push_back(SimpleMaterial());
-            std::vector<int> r(2, 0);
-            r[0] = (int)triangleDatasetsArray.size();
-            r[1] = (int)nextMaterialsArray.size() - 1;
-            materialTriangleRangeTable.push_back(r);
+            if (materialsHashMap.find(matName) != materialsHashMap.end()) nextMaterialsArray.add(materialsHashMap[matName]);
+            else nextMaterialsArray.add(SimpleMaterial());
+            java::ArrayList<int> r;
+            r.add((int)triangleDatasetsArray.size());
+            r.add((int)nextMaterialsArray.size() - 1);
+            materialTriangleRangeTable.add(r);
         }
-        if (line.rfind("v ", 0) == 0) vertexPositionsArray.push_back(readVertex(line));
-        if (line.rfind("vn ", 0) == 0) vertexNormalsArray.push_back(readVertex(line));
-        if (line.rfind("vt ", 0) == 0) vertexTextureCoordinatesArray.push_back(readVertexTexture(line));
+        if (line.rfind("v ", 0) == 0) vertexPositionsArray.add(readVertex(line));
+        if (line.rfind("vn ", 0) == 0) vertexNormalsArray.add(readVertex(line));
+        if (line.rfind("vt ", 0) == 0) vertexTextureCoordinatesArray.add(readVertexTexture(line));
         if (line.rfind("f ", 0) == 0) {
-            std::vector< std::vector<ReaderObjVertex> > fan = readPolygonAsTriangleFan(line);
-            for (size_t i = 0; i < fan.size(); i++) triangleDatasetsArray.push_back(fan[i]);
+            java::ArrayList< java::ArrayList<ReaderObjVertex> > fan = readPolygonAsTriangleFan(line);
+            for (size_t i = 0; i < fan.size(); i++) triangleDatasetsArray.add(fan[i]);
         }
         if (line.rfind("usemap ", 0) == 0) {
             std::istringstream ss(line);
@@ -401,7 +413,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
                 texturesHashMap[texName] = tex;
                 if (tex != 0) {
                     nextTexturesArray.add(tex);
-                    textureSpanTriangleRangeTable.push_back(std::vector< std::vector<int> >());
+                    textureSpanTriangleRangeTable.add(java::ArrayList< java::ArrayList<int> >());
                     textureIndex = (int)nextTexturesArray.size();
                 }
                 else {
@@ -420,21 +432,22 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
                     }
                     if (textureIndex == 0) {
                         nextTexturesArray.add(tex);
-                        textureSpanTriangleRangeTable.push_back(std::vector< std::vector<int> >());
+                        textureSpanTriangleRangeTable.add(java::ArrayList< java::ArrayList<int> >());
                         textureIndex = (int)nextTexturesArray.size();
                     }
                 }
             }
 
-            if ((size_t)textureIndex >= textureSpanTriangleRangeTable.size()) {
-                textureSpanTriangleRangeTable.resize((size_t)textureIndex + 1);
+            while ((size_t)textureIndex >= textureSpanTriangleRangeTable.size()) {
+                textureSpanTriangleRangeTable.add(java::ArrayList< java::ArrayList<int> >());
             }
-            std::vector<int> newRange(2, 0);
-            newRange[0] = (int)triangleDatasetsArray.size();
-            textureSpanTriangleRangeTable[(size_t)textureIndex].push_back(newRange);
+            java::ArrayList<int> newRange;
+            newRange.add((int)triangleDatasetsArray.size());
+            newRange.add(0);
+            textureSpanTriangleRangeTable[(size_t)textureIndex].add(newRange);
         }
         if (line.rfind("o ", 0) == 0 || line.rfind("g ", 0) == 0) {
-            if (!vertexPositionsArray.empty()) {
+            if (vertexPositionsArray.size() > 0) {
                 ensureMaterialSelection();
                 addMeshToGroup(meshGroup, nextGeometricObjectName,
                                vertexPositionsArray, vertexNormalsArray, vertexTextureCoordinatesArray,
@@ -446,19 +459,24 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
             std::string t;
             ss >> t >> nextGeometricObjectName;
 
-            if (!vertexPositionsArray.empty()) {
+            if (vertexPositionsArray.size() > 0) {
                 nextTexturesArray.clear();
                 nextMaterialsArray.clear();
                 triangleDatasetsArray.clear();
                 materialTriangleRangeTable.clear();
                 textureSpanTriangleRangeTable.clear();
-                textureSpanTriangleRangeTable.push_back(std::vector< std::vector<int> >(1, std::vector<int>(2, 0)));
+                java::ArrayList< java::ArrayList<int> > defaultTextureSpans;
+                java::ArrayList<int> defaultTextureRange;
+                defaultTextureRange.add(0);
+                defaultTextureRange.add(0);
+                defaultTextureSpans.add(defaultTextureRange);
+                textureSpanTriangleRangeTable.add(defaultTextureSpans);
                 textureIndex = 0;
             }
         }
     }
 
-    if (!vertexPositionsArray.empty()) {
+    if (vertexPositionsArray.size() > 0) {
         ensureMaterialSelection();
         addMeshToGroup(meshGroup, nextGeometricObjectName,
                        vertexPositionsArray, vertexNormalsArray, vertexTextureCoordinatesArray,
