@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
 
@@ -48,7 +49,7 @@ public:
     static GLint minFilterParam();
     static GLint magFilterParam();
 
-    static void setShaderBasePath(const std::string& basePath);
+    static void setShaderBasePath(const java::String& basePath);
 
     static void dispose();
 
@@ -59,12 +60,12 @@ private:
     static GLuint quadUvVboId;
     static GLuint shaderProgramId;
     static GLint mvpUniformLocation;
-    static std::string shaderBasePath;
+    static java::String shaderBasePath;
 
     static void ensureBuffers();
     static void initializeShaderProgram();
-    static std::string readShaderFile(const std::string& filename);
-    static GLuint compileShader(const std::string& source, int type);
+    static java::String readShaderFile(const java::String& filename);
+    static GLuint compileShader(const java::String& source, int type);
 };
 
 #endif // __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__

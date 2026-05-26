@@ -47,9 +47,9 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
     rendererConfiguration->setBumpMap(hasNormalMaps);
 }
 
-static void offlineExecution(const std::string& fileName,
+static void offlineExecution(const java::String& fileName,
                              bool save,
-                             const std::string& outputFileName,
+                             const java::String& outputFileName,
                              bool parallel)
 {
     SimpleScene scene;
@@ -122,7 +122,7 @@ static void offlineExecution(const std::string& fileName,
 
 int main(int argc, char** argv)
 {
-    std::vector<std::string> args;
+    std::vector<java::String> args;
     for (int i = 1; i < argc; i++) {
         args.push_back(argv[i]);
     }

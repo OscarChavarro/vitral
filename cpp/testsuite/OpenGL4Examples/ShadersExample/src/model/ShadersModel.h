@@ -28,7 +28,7 @@ public:
     Light* light;
     SimpleMaterial material;
     MicroFacetedMaterial* cookTorranceMaterial;
-    std::vector<std::string> cookTorranceMaterialNames;
+    std::vector<java::String> cookTorranceMaterialNames;
     int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMapHeightRgb;
@@ -56,7 +56,7 @@ public:
     void advanceSphereRotationRadians(double delta);
     const SimpleMaterial& getActiveMaterialForCurrentShading() const;
     SimpleMaterial* createActiveMaterialCopy() const;
-    std::string getCookTorranceMaterialLabel() const;
+    java::String getCookTorranceMaterialLabel() const;
     void cycleCookTorranceMaterial();
 };
 

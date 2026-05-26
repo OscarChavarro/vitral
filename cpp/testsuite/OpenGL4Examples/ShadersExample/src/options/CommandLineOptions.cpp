@@ -22,29 +22,29 @@ CommandLineOptions::CommandLineOptions()
       hasCpuTextureOffsetV(false), cpuTextureOffsetVTexels(-0.5),
       showHud(false), width(1100), height(900) {}
 
-static std::string lower(const std::string& s)
+static java::String lower(const java::String& s)
 {
-    std::string out = s;
+    java::String out = s;
     std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c){ return (char)std::tolower(c); });
     return out;
 }
 
-static bool startsWith(const std::string& s, const std::string& p)
+static bool startsWith(const java::String& s, const java::String& p)
 {
-    return s.size() >= p.size() && s.compare(0, p.size(), p) == 0;
+    return s.size() >= p.size() && s.substr(0, p.size()) == p;
 }
 
-static ShaderOperationMode parseMethod(const std::string& raw)
+static ShaderOperationMode parseMethod(const java::String& raw)
 {
-    const std::string v = lower(raw);
+    const java::String v = lower(raw);
     if (v == "opengl" || v == "opengl_4_1") return ShaderOperationMode::OPENGL_4_1;
     if (v == "software") return ShaderOperationMode::SOFTWARE;
     throw std::invalid_argument("Unknown --method value: " + raw + ". Use opengl or software.");
 }
 
-static int parseShading(const std::string& raw)
+static int parseShading(const java::String& raw)
 {
-    const std::string v = lower(raw);
+    const java::String v = lower(raw);
     if (v == "constant" || v == "nolight") return RendererConfiguration::SHADING_TYPE_NOLIGHT;
     if (v == "flat") return RendererConfiguration::SHADING_TYPE_FLAT;
     if (v == "gouraud") return RendererConfiguration::SHADING_TYPE_GOURAUD;
@@ -55,22 +55,29 @@ static int parseShading(const std::string& raw)
     throw std::invalid_argument("Unknown --shading value: " + raw);
 }
 
-static CommandLineOptions::TextureFilterOption parseTextureFilter(const std::string& raw)
+static CommandLineOptions::TextureFilterOption parseTextureFilter(const java::String& raw)
 {
-    const std::string v = lower(raw);
+    const java::String v = lower(raw);
     if (v == "linear") return CommandLineOptions::TextureFilterOption::LINEAR;
     if (v == "nearest") return CommandLineOptions::TextureFilterOption::NEAREST;
     throw std::invalid_argument("Unknown --texture-filter value: " + raw);
 }
 
-static void applyFeatureSwitches(CommandLineOptions& o, const std::string& csv, bool enabled)
+static void applyFeatureSwitches(CommandLineOptions& o, const java::String& csv, bool enabled)
 {
     size_t b = 0;
     while (b < csv.size()) {
         size_t e = csv.find(',', b);
-        if (e == std::string::npos) e = csv.size();
-        std::string t = lower(csv.substr(b, e - b));
-        t.erase(std::remove_if(t.begin(), t.end(), [](unsigned char c){ return std::isspace(c); }), t.end());
+        if (e == java::String::npos) e = csv.size();
+        const java::String t0 = lower(csv.substr(b, e - b));
+        java::String t;
+        for (size_t i = 0; i < t0.size(); ++i) {
+            const unsigned char c = (unsigned char)t0[i];
+            if (!std::isspace(c)) {
+                char oneChar[2] = { t0[i], '\0' };
+                t += oneChar;
+            }
+        }
         if (t == "texture" || t == "textures") {
             o.hasWithTexture = true;
             o.withTexture = enabled;
@@ -90,10 +97,10 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
 {
     CommandLineOptions o;
     for (int i = 1; i < argc; i++) {
-        std::string arg(argv[i]);
-        auto readValue = [&](const std::string& name)->std::string {
+        java::String arg(argv[i]);
+        auto readValue = [&](const java::String& name)->java::String {
             if (i + 1 >= argc) throw std::invalid_argument(name + " requires a value");
-            return std::string(argv[++i]);
+            return java::String(argv[++i]);
         };
 
         if (arg == "--offline") { o.offline = true; o.offlineOutputPath = readValue("--offline"); continue; }

@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <string>
 #include <vector>
 #include "java/util/ArrayList.txx"
 #include <fstream>
@@ -42,19 +41,20 @@ static const float SURFACE_POLYGON_OFFSET_UNITS = 1.0f;
 static const float LINE_POLYGON_OFFSET_FACTOR = -1.0f;
 static const float LINE_POLYGON_OFFSET_UNITS = -1.0f;
 
-static std::string readTextFile(const std::string& path)
+static java::String readTextFile(const java::String& path)
 {
     std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
-    if (!f.good()) return std::string();
-    std::string s;
+    if (!f.good()) return java::String();
     f.seekg(0, std::ios::end);
-    s.resize((size_t)f.tellg());
+    const std::streamsize fileSize = f.tellg();
+    if (fileSize <= 0) return java::String();
     f.seekg(0, std::ios::beg);
-    if (!s.empty()) f.read(&s[0], (std::streamsize)s.size());
-    return s;
+    std::vector<char> buffer((size_t)fileSize + 1, '\0');
+    f.read(&buffer[0], fileSize);
+    return java::String(&buffer[0]);
 }
 
-static std::string findShaderSource(const std::string& shaderFileName)
+static java::String findShaderSource(const java::String& shaderFileName)
 {
     const char* candidates[] = {
         "../../../../etc/glslShaders/",
@@ -64,11 +64,11 @@ static std::string findShaderSource(const std::string& shaderFileName)
         "etc/glslShaders/"
     };
     for (size_t i = 0; i < sizeof(candidates)/sizeof(candidates[0]); i++) {
-        std::string path = std::string(candidates[i]) + shaderFileName;
-        std::string src = readTextFile(path);
+        java::String path = java::String(candidates[i]) + shaderFileName;
+        java::String src = readTextFile(path);
         if (!src.empty()) return src;
     }
-    return std::string();
+    return java::String();
 }
 
 static unsigned int compileShader(unsigned int type, const char* source)
@@ -90,8 +90,8 @@ static unsigned int compileShader(unsigned int type, const char* source)
 
 static unsigned int buildProgram(const char* vsFile, const char* fsFile)
 {
-    std::string vsSource = findShaderSource(vsFile);
-    std::string fsSource = findShaderSource(fsFile);
+    java::String vsSource = findShaderSource(vsFile);
+    java::String fsSource = findShaderSource(fsFile);
     if (vsSource.empty() || fsSource.empty()) {
         std::fprintf(stderr, "MeshExample shader not found: %s / %s\n", vsFile, fsFile);
         return 0;

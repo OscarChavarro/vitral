@@ -9,13 +9,13 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/render/Rasterizer2D.h"
 
-static std::string argOrDefault(int argc, char** argv, int idx, const std::string& fallback)
+static java::String argOrDefault(int argc, char** argv, int idx, const java::String& fallback)
 {
-    if (argc > idx && argv[idx] != 0 && std::string(argv[idx]).size() > 0) return std::string(argv[idx]);
+    if (argc > idx && argv[idx] != 0 && java::String(argv[idx]).size() > 0) return java::String(argv[idx]);
     return fallback;
 }
 
-static int runLineTest(const std::string& outputFileName)
+static int runLineTest(const java::String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -33,7 +33,7 @@ static int runLineTest(const std::string& outputFileName)
     return ok ? 0 : 1;
 }
 
-static int runPolygonTest(const std::string& outputFileName)
+static int runPolygonTest(const java::String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -59,7 +59,7 @@ static int runPolygonTest(const std::string& outputFileName)
     return ok ? 0 : 1;
 }
 
-static int runSmoothPolygonTest(const std::string& outputFileName)
+static int runSmoothPolygonTest(const java::String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -86,8 +86,8 @@ static int runSmoothPolygonTest(const std::string& outputFileName)
 
 int main(int argc, char** argv)
 {
-    std::string mode = argOrDefault(argc, argv, 1, "line");
-    std::string outputFileName = argOrDefault(argc, argv, 2, "output1.png");
+    java::String mode = argOrDefault(argc, argv, 1, "line");
+    java::String outputFileName = argOrDefault(argc, argv, 2, "output1.png");
 
     if (mode == "line") return runLineTest(outputFileName);
     if (mode == "polygon") return runPolygonTest(outputFileName);

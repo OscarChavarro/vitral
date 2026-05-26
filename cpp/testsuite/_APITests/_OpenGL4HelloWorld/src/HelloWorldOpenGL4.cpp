@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -188,8 +189,8 @@ private:
 
     GLuint createShaderProgram()
     {
-        std::string vertexSource = readShaderSource("constantVertexShader.glsl");
-        std::string fragmentSource = readShaderSource("constantPixelShader.glsl");
+        java::String vertexSource = readShaderSource("constantVertexShader.glsl");
+        java::String fragmentSource = readShaderSource("constantPixelShader.glsl");
 
         GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSource);
         GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
@@ -207,7 +208,7 @@ private:
         GLint linkStatus;
         glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
         if (linkStatus == GL_FALSE) {
-            std::string log = getProgramInfoLog(program);
+            java::String log = getProgramInfoLog(program);
             fprintf(stderr, "Program link error: %s\n", log.c_str());
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
@@ -223,7 +224,7 @@ private:
         return program;
     }
 
-    GLuint compileShader(GLenum shaderType, const std::string& source)
+    GLuint compileShader(GLenum shaderType, const java::String& source)
     {
         GLuint shader = glCreateShader(shaderType);
         const char* src = source.c_str();
@@ -235,7 +236,7 @@ private:
         GLint compileStatus;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
         if (compileStatus == GL_FALSE) {
-            std::string log = getShaderInfoLog(shader);
+            java::String log = getShaderInfoLog(shader);
             fprintf(stderr, "Shader compile error: %s\n", log.c_str());
             glDeleteShader(shader);
             return 0;
@@ -272,9 +273,9 @@ private:
         }
     }
 
-    std::string readShaderSource(const std::string& shaderFileName)
+    java::String readShaderSource(const java::String& shaderFileName)
     {
-        std::string path = "../../../../etc/glslShaders/" + shaderFileName;
+        java::String path = "../../../../etc/glslShaders/" + shaderFileName;
         FILE* file = fopen(path.c_str(), "r");
         if (!file) {
             fprintf(stderr, "Shader not found: %s\n", shaderFileName.c_str());
@@ -291,12 +292,12 @@ private:
         fclose(file);
 
         printf("Loaded shader from: %s\n", path.c_str());
-        std::string result(buffer);
+        java::String result(buffer);
         delete[] buffer;
         return result;
     }
 
-    std::string getShaderInfoLog(GLuint shader)
+    java::String getShaderInfoLog(GLuint shader)
     {
         GLint length;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
@@ -306,10 +307,10 @@ private:
 
         std::vector<char> log(length);
         glGetShaderInfoLog(shader, length, &length, log.data());
-        return std::string(log.data(), std::max(0, length - 1));
+        return java::String(log.data());
     }
 
-    std::string getProgramInfoLog(GLuint program)
+    java::String getProgramInfoLog(GLuint program)
     {
         GLint length;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
@@ -319,7 +320,7 @@ private:
 
         std::vector<char> log(length);
         glGetProgramInfoLog(program, length, &length, log.data());
-        return std::string(log.data(), std::max(0, length - 1));
+        return java::String(log.data());
     }
 
     void cleanup()

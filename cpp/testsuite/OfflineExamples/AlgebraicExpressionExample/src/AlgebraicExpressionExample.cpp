@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 {
     AlgebraicExpression regexp;
     try {
-        std::string expression;
+        java::String expression;
         if (argc <= 1) {
             expression = "666.0";
         }

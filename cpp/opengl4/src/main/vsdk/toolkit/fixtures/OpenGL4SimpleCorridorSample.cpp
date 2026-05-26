@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #include "java/util/ArrayList.txx"
 #include <cmath>
@@ -28,20 +29,20 @@ OpenGL4SimpleCorridorSample::~OpenGL4SimpleCorridorSample() {
     }
 }
 
-std::string OpenGL4SimpleCorridorSample::readShaderFile(const std::string& filename) {
+java::String OpenGL4SimpleCorridorSample::readShaderFile(const java::String& filename) {
     std::ifstream file(filename);
     if (file.is_open()) {
-        std::stringstream buffer;
+        std::basic_stringstream<char> buffer;
         buffer << file.rdbuf();
         return buffer.str();
     }
 
     const char* prefixes[] = { "../", "../../", "../../../", "../../../../", nullptr };
     for (int i = 0; prefixes[i] != nullptr; i++) {
-        std::string altPath = std::string(prefixes[i]) + filename;
+        java::String altPath = java::String(prefixes[i]) + filename;
         file.open(altPath);
         if (file.is_open()) {
-            std::stringstream buffer;
+            std::basic_stringstream<char> buffer;
             buffer << file.rdbuf();
             return buffer.str();
         }
@@ -51,7 +52,7 @@ std::string OpenGL4SimpleCorridorSample::readShaderFile(const std::string& filen
     return "";
 }
 
-unsigned int OpenGL4SimpleCorridorSample::compileShader(const std::string& source, int type) {
+unsigned int OpenGL4SimpleCorridorSample::compileShader(const java::String& source, int type) {
     unsigned int shader = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
@@ -70,8 +71,8 @@ unsigned int OpenGL4SimpleCorridorSample::compileShader(const std::string& sourc
 }
 
 unsigned int OpenGL4SimpleCorridorSample::compileShaders() {
-    std::string vertexSource = readShaderFile("../etc/glslShaders/constantVertexShader.glsl");
-    std::string fragmentSource = readShaderFile("../etc/glslShaders/constantPixelShader.glsl");
+    java::String vertexSource = readShaderFile("../etc/glslShaders/constantVertexShader.glsl");
+    java::String fragmentSource = readShaderFile("../etc/glslShaders/constantPixelShader.glsl");
 
     if (vertexSource.empty() || fragmentSource.empty()) {
         fprintf(stderr, "Error: Shader files not found\n");

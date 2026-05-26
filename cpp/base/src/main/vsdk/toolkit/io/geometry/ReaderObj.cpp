@@ -95,7 +95,7 @@ static ReaderObjVertex readFaceVertex(const java::String& text)
 {
     ReaderObjVertex r;
     java::ArrayList<java::String> parts;
-    std::stringstream ss(text);
+    std::basic_stringstream<char> ss(text);
     java::String item;
     while (std::getline(ss, item, '/')) parts.add(item);
 

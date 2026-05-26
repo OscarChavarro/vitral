@@ -23,9 +23,9 @@ static void performImageOperation1(RGBImageUncompressed* img)
 
 int main(int argc, char** argv)
 {
-    std::string imageFilename = "../../../../etc/images/render.jpg";
-    std::string outputFilename = "output.png";
-    if (argc > 1 && argv[1] != 0 && std::string(argv[1]).size() > 0) {
+    java::String imageFilename = "../../../../etc/images/render.jpg";
+    java::String outputFilename = "output.png";
+    if (argc > 1 && argv[1] != 0 && java::String(argv[1]).size() > 0) {
         outputFilename = argv[1];
     }
 

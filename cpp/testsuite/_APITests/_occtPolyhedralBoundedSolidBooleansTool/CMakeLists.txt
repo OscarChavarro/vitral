@@ -88,7 +88,7 @@ add_executable(booleanSetOperator
 )
 
 target_include_directories(booleanSetOperator PRIVATE ${OpenCASCADE_INCLUDE_DIR})
-target_link_libraries(booleanSetOperator PRIVATE ${OpenCASCADE_LIBRARIES})
+target_link_libraries(booleanSetOperator PRIVATE ${OpenCASCADE_LIBRARIES} vitral_base)
 
 # Place the binary in the top-level build directory so it is easy to find
 # and cleaned automatically by clean.sh.

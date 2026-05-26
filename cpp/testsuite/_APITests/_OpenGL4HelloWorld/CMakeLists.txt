@@ -19,6 +19,7 @@ target_link_libraries(_OpenGL4HelloWorld
     OpenGL::GL
     ${VITRAL_GLEW_LIB}
     glfw
+    vitral_base
 )
 target_include_directories(_OpenGL4HelloWorld SYSTEM PRIVATE ${GLEW_INCLUDE_DIRS})
 

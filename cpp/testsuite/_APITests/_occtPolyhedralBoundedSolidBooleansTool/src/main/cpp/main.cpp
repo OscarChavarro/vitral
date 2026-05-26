@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -36,15 +37,15 @@ enum class OpCode {
   Intersection
 };
 
-std::string ToUpper(std::string value) {
+java::String ToUpper(java::String value) {
   std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
     return static_cast<char>(std::toupper(c));
   });
   return value;
 }
 
-bool ParseOpCode(const std::string& opcodeRaw, OpCode& out) {
-  const std::string opcode = ToUpper(opcodeRaw);
+bool ParseOpCode(const java::String& opcodeRaw, OpCode& out) {
+  const java::String opcode = ToUpper(opcodeRaw);
   if (opcode == "UNION") {
     out = OpCode::Union;
     return true;
@@ -64,7 +65,7 @@ bool ParseOpCode(const std::string& opcodeRaw, OpCode& out) {
   return false;
 }
 
-TopoDS_Shape ReadStepShape(const std::string& path) {
+TopoDS_Shape ReadStepShape(const java::String& path) {
   STEPControl_Reader reader;
   const IFSelect_ReturnStatus readStatus = reader.ReadFile(path.c_str());
   if (readStatus != IFSelect_RetDone) {
@@ -191,7 +192,7 @@ TopoDS_Shape PlanarizeForStep(const TopoDS_Shape& input) {
   return planarized;
 }
 
-void WriteStepShape(const TopoDS_Shape& shape, const std::string& path) {
+void WriteStepShape(const TopoDS_Shape& shape, const java::String& path) {
   if (shape.IsNull()) {
     throw Standard_Failure("Boolean operation result is null");
   }
@@ -223,10 +224,10 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  const std::string inputA = argv[1];
-  const std::string inputB = argv[2];
-  const std::string opcodeArg = argv[3];
-  const std::string output = argv[4];
+  const java::String inputA = argv[1];
+  const java::String inputB = argv[2];
+  const java::String opcodeArg = argv[3];
+  const java::String output = argv[4];
 
   OpCode opcode;
   if (!ParseOpCode(opcodeArg, opcode)) {

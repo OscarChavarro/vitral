@@ -1,7 +1,7 @@
 #ifndef SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
 #define SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
 
-#include <string>
+#include "java/lang/String.h"
 #include "../model/ShaderOperationMode.h"
 
 class CommandLineOptions {
@@ -12,7 +12,7 @@ public:
     };
 
     bool offline;
-    std::string offlineOutputPath;
+    java::String offlineOutputPath;
     ShaderOperationMode method;
     bool hasRotation;
     double rotationDegrees;

@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 
 #ifdef __APPLE__
@@ -20,20 +21,20 @@ unsigned int OpenGL4MatrixRenderer::VBO_colors = 0;
 unsigned int OpenGL4MatrixRenderer::shaderProgram = 0;
 bool OpenGL4MatrixRenderer::initialized = false;
 
-std::string OpenGL4MatrixRenderer::readShaderFile(const std::string& filename) {
+java::String OpenGL4MatrixRenderer::readShaderFile(const java::String& filename) {
     std::ifstream file(filename);
     if (file.is_open()) {
-        std::stringstream buffer;
+        std::basic_stringstream<char> buffer;
         buffer << file.rdbuf();
         return buffer.str();
     }
 
     const char* prefixes[] = { "../", "../../", "../../../", "../../../../", nullptr };
     for (int i = 0; prefixes[i] != nullptr; i++) {
-        std::string altPath = std::string(prefixes[i]) + filename;
+        java::String altPath = java::String(prefixes[i]) + filename;
         file.open(altPath);
         if (file.is_open()) {
-            std::stringstream buffer;
+            std::basic_stringstream<char> buffer;
             buffer << file.rdbuf();
             return buffer.str();
         }
@@ -43,7 +44,7 @@ std::string OpenGL4MatrixRenderer::readShaderFile(const std::string& filename) {
     return "";
 }
 
-unsigned int OpenGL4MatrixRenderer::compileShader(const std::string& source, int type) {
+unsigned int OpenGL4MatrixRenderer::compileShader(const java::String& source, int type) {
     unsigned int shader = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
@@ -62,8 +63,8 @@ unsigned int OpenGL4MatrixRenderer::compileShader(const std::string& source, int
 }
 
 unsigned int OpenGL4MatrixRenderer::compileShaders() {
-    std::string vertexSource = readShaderFile("../etc/glslShaders/lineVertexShader.glsl");
-    std::string fragmentSource = readShaderFile("../etc/glslShaders/linePixelShader.glsl");
+    java::String vertexSource = readShaderFile("../etc/glslShaders/lineVertexShader.glsl");
+    java::String fragmentSource = readShaderFile("../etc/glslShaders/linePixelShader.glsl");
 
     if (vertexSource.empty() || fragmentSource.empty()) {
         fprintf(stderr, "Error: Shader files not found\n");

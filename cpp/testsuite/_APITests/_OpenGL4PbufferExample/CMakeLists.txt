@@ -19,6 +19,7 @@ target_link_libraries(_OpenGL4PbufferExample
     OpenGL::GL
     ${VITRAL_GLEW_LIB}
     glfw
+    vitral_base
 )
 target_include_directories(_OpenGL4PbufferExample SYSTEM PRIVATE ${GLEW_INCLUDE_DIRS})
 

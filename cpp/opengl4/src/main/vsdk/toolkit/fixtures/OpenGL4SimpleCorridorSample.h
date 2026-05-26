@@ -85,8 +85,8 @@ private:
         double rotZDeg, bool flipYZ, double translateZ);
 
     unsigned int compileShaders();
-    std::string readShaderFile(const std::string& filename);
-    unsigned int compileShader(const std::string& source, int type);
+    java::String readShaderFile(const java::String& filename);
+    unsigned int compileShader(const java::String& source, int type);
 };
 
 }}}

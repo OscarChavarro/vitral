@@ -11,13 +11,13 @@ CommandOptionsProcessor::CommandOptionsProcessor()
 {
 }
 
-CommandOptionsProcessor CommandOptionsProcessor::process(const std::vector<std::string>& args)
+CommandOptionsProcessor CommandOptionsProcessor::process(const std::vector<java::String>& args)
 {
     CommandOptionsProcessor options;
     int positionalCount = 0;
 
     for (size_t i = 0; i < args.size(); i++) {
-        const std::string& arg = args[i];
+        const java::String& arg = args[i];
         if ( arg == "nosave" || arg == "--nosave" || arg == "-n" ) {
             options.save = false;
             continue;
@@ -80,8 +80,8 @@ void CommandOptionsProcessor::printUsage()
     std::cout << "  - `nosave` (without dashes) is still accepted.\n";
 }
 
-const std::string& CommandOptionsProcessor::getSceneFile() const { return sceneFile; }
-const std::string& CommandOptionsProcessor::getOutputFile() const { return outputFile; }
+const java::String& CommandOptionsProcessor::getSceneFile() const { return sceneFile; }
+const java::String& CommandOptionsProcessor::getOutputFile() const { return outputFile; }
 bool CommandOptionsProcessor::shouldSave() const { return save; }
 bool CommandOptionsProcessor::shouldUseParallelExecutor() const { return parallel; }
 bool CommandOptionsProcessor::shouldShowHelp() const { return showHelp; }

@@ -50,16 +50,16 @@ ShadersModel::ShadersModel()
 
     std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
     if ( csv.good() ) {
-        std::string line;
+        java::String line;
         if ( std::getline(csv, line) ) {
             while ( std::getline(csv, line) ) {
                 if ( line.empty() ) continue;
-                std::stringstream ss(line);
-                std::string token;
-                std::vector<std::string> cols;
+                std::basic_stringstream<char> ss(line);
+                java::String token;
+                std::vector<java::String> cols;
                 while ( std::getline(ss, token, ',') ) cols.push_back(token);
                 if ( cols.size() < 16 ) continue;
-                const std::string& name = cols[0];
+                const java::String& name = cols[0];
                 if ( name.empty() ) continue;
                 cookTorranceMaterialNames.push_back(name);
                 if ( name == "Copper" ) {
@@ -144,7 +144,7 @@ void ShadersModel::updateSoftwareViewportAndCamera(int width, int height)
     softwareFrameImage->init(w, h);
 }
 
-std::string ShadersModel::getCookTorranceMaterialLabel() const
+java::String ShadersModel::getCookTorranceMaterialLabel() const
 {
     if ( cookTorranceMaterial == 0 || cookTorranceMaterial->getName().empty() ) return "Copper";
     return cookTorranceMaterial->getName();
@@ -154,7 +154,7 @@ void ShadersModel::cycleCookTorranceMaterial()
 {
     if ( cookTorranceMaterialNames.empty() ) return;
     cookTorranceMaterialIndex = (cookTorranceMaterialIndex + 1) % (int)cookTorranceMaterialNames.size();
-    const std::string& name = cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex];
+    const java::String& name = cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex];
     delete cookTorranceMaterial;
     cookTorranceMaterial = new MicroFacetedMaterial(
         "../../../../etc/materials/microFacetMAterials.csv",

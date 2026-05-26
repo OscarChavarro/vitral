@@ -120,7 +120,7 @@ void JogHudRenderer::drawChar5x7(int x, int y, char c)
     }
 }
 
-void JogHudRenderer::drawText(int x, int y, const std::string& text)
+void JogHudRenderer::drawText(int x, int y, const java::String& text)
 {
     int cx = x;
     for (size_t i = 0; i < text.size(); i++) {
@@ -139,7 +139,7 @@ void JogHudRenderer::draw(
     int meridians,
     int parallels,
     const RendererConfiguration* quality,
-    const std::string& cookMaterialLabel)
+    const java::String& cookMaterialLabel)
 {
     if (!showHud || viewportWidth < 1 || viewportHeight < 1) return;
     (void)quality;
@@ -150,7 +150,7 @@ void JogHudRenderer::draw(
     ensureHudBuffers(targetHudWidth, targetHudHeight);
     clearBlack();
 
-    std::string line1;
+    java::String line1;
     if (gpuMode) {
         int triangles = std::max(0, (parallels - 1) * meridians * 2);
         line1 = "MERIDIANS: " + std::to_string(meridians)
@@ -161,9 +161,9 @@ void JogHudRenderer::draw(
         line1 = "RAYTRACING";
     }
 
-    std::string line2 = gpuMode ? "MODE [.]: GPU" : "MODE [.]: CPU";
-    std::string line2Right = "SHOW HUD [H]";
-    std::string lineCookMaterial;
+    java::String line2 = gpuMode ? "MODE [.]: GPU" : "MODE [.]: CPU";
+    java::String line2Right = "SHOW HUD [H]";
+    java::String lineCookMaterial;
     if ( quality &&
          quality->getShadingType() == RendererConfiguration::SHADING_TYPE_COOK_TERRANCE ) {
         lineCookMaterial = "SIMPLEMATERIAL [M]: " + cookMaterialLabel;

@@ -62,7 +62,7 @@ static int detectCpuCount()
     return 1;
 }
 
-static RGBImageUncompressed* loadRgbByCandidates(const std::vector<std::string>& candidates)
+static RGBImageUncompressed* loadRgbByCandidates(const std::vector<java::String>& candidates)
 {
     for (size_t i = 0; i < candidates.size(); i++) {
         java::File f(candidates[i].c_str());
@@ -74,7 +74,7 @@ static RGBImageUncompressed* loadRgbByCandidates(const std::vector<std::string>&
     return 0;
 }
 
-static NormalMap* loadBumpNormalMapByCandidates(const std::vector<std::string>& candidates)
+static NormalMap* loadBumpNormalMapByCandidates(const std::vector<java::String>& candidates)
 {
     for (size_t i = 0; i < candidates.size(); i++) {
         java::File f(candidates[i].c_str());
@@ -124,7 +124,7 @@ public:
     RendererConfiguration quality;
     SimpleMaterial material;
     MicroFacetedMaterial* cookTorranceMaterial;
-    std::vector<std::string> cookTorranceMaterialNames;
+    std::vector<java::String> cookTorranceMaterialNames;
     int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMap;
@@ -316,7 +316,7 @@ public:
             cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex]);
     }
 
-    std::string getCookTorranceMaterialLabel() const
+    java::String getCookTorranceMaterialLabel() const
     {
         if (!cookTorranceMaterial || cookTorranceMaterial->getName().empty()) return "Copper";
         return cookTorranceMaterial->getName();
@@ -419,13 +419,13 @@ public:
             "Copper");
         std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
         if (csv.good()) {
-            std::string line;
+            java::String line;
             if (std::getline(csv, line)) {
                 while (std::getline(csv, line)) {
                     if (line.empty()) continue;
-                    std::stringstream ss(line);
-                    std::string token;
-                    std::vector<std::string> cols;
+                    std::basic_stringstream<char> ss(line);
+                    java::String token;
+                    std::vector<java::String> cols;
                     while (std::getline(ss, token, ',')) cols.push_back(token);
                     if (cols.empty() || cols[0].empty()) continue;
                     cookTorranceMaterialNames.push_back(cols[0]);

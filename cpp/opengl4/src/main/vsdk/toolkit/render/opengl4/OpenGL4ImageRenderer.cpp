@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.h"
@@ -17,7 +18,7 @@ GLuint OpenGL4ImageRenderer::quadPositionVboId = 0;
 GLuint OpenGL4ImageRenderer::quadUvVboId = 0;
 GLuint OpenGL4ImageRenderer::shaderProgramId = 0;
 GLint OpenGL4ImageRenderer::mvpUniformLocation = -1;
-std::string OpenGL4ImageRenderer::shaderBasePath = "../etc/glslShaders";
+java::String OpenGL4ImageRenderer::shaderBasePath = "../etc/glslShaders";
 
 int OpenGL4ImageRenderer::activate(Image* img) {
     if (img == nullptr) {
@@ -266,7 +267,7 @@ GLint OpenGL4ImageRenderer::magFilterParam() {
     return GL_LINEAR;
 }
 
-void OpenGL4ImageRenderer::setShaderBasePath(const std::string& basePath) {
+void OpenGL4ImageRenderer::setShaderBasePath(const java::String& basePath) {
     shaderBasePath = basePath;
 }
 
@@ -311,11 +312,11 @@ void OpenGL4ImageRenderer::initializeShaderProgram() {
         return;
     }
 
-    std::string vertexPath = shaderBasePath + "/constantTextureVertexShader.glsl";
-    std::string fragmentPath = shaderBasePath + "/constantTexturePixelShader.glsl";
+    java::String vertexPath = shaderBasePath + "/constantTextureVertexShader.glsl";
+    java::String fragmentPath = shaderBasePath + "/constantTexturePixelShader.glsl";
 
-    std::string vertexSource = readShaderFile(vertexPath);
-    std::string fragmentSource = readShaderFile(fragmentPath);
+    java::String vertexSource = readShaderFile(vertexPath);
+    java::String fragmentSource = readShaderFile(fragmentPath);
 
     if (vertexSource.empty() || fragmentSource.empty()) {
         fprintf(stderr, "Error: Failed to read shader files\n");
@@ -355,17 +356,17 @@ void OpenGL4ImageRenderer::initializeShaderProgram() {
     glDeleteShader(fragmentShader);
 }
 
-std::string OpenGL4ImageRenderer::readShaderFile(const std::string& filename) {
+java::String OpenGL4ImageRenderer::readShaderFile(const java::String& filename) {
     // Try primary path first
     std::ifstream file(filename);
     if (file.is_open()) {
-        std::stringstream buffer;
+        std::basic_stringstream<char> buffer;
         buffer << file.rdbuf();
         return buffer.str();
     }
 
     // Try alternative paths (for when running from different directories)
-    java::ArrayList<std::string> alternatePaths;
+    java::ArrayList<java::String> alternatePaths;
     alternatePaths.reserve(4);
     alternatePaths.add("../" + filename);
     alternatePaths.add("../../" + filename);
@@ -373,10 +374,10 @@ std::string OpenGL4ImageRenderer::readShaderFile(const std::string& filename) {
     alternatePaths.add("../../../../" + filename);
 
     for (long int ii = 0; ii < alternatePaths.size(); ii++) {
-        std::string altPath = alternatePaths.get(ii);
+        java::String altPath = alternatePaths.get(ii);
         file.open(altPath);
         if (file.is_open()) {
-            std::stringstream buffer;
+            std::basic_stringstream<char> buffer;
             buffer << file.rdbuf();
             return buffer.str();
         }
@@ -386,7 +387,7 @@ std::string OpenGL4ImageRenderer::readShaderFile(const std::string& filename) {
     return "";
 }
 
-GLuint OpenGL4ImageRenderer::compileShader(const std::string& source, int type) {
+GLuint OpenGL4ImageRenderer::compileShader(const java::String& source, int type) {
     GLuint shader = glCreateShader(type);
     const char* sourcePtr = source.c_str();
     glShaderSource(shader, 1, &sourcePtr, nullptr);

@@ -37,7 +37,7 @@ String::String(const char *text):
     assignText(text);
 }
 
-String::String(const std::string &text):
+String::String(const std::__cxx11::basic_string<char> &text):
     value(nullptr)
 {
     assignText(text.c_str());
@@ -70,7 +70,7 @@ String::operator=(const char *other) {
 }
 
 String &
-String::operator=(const std::string &other) {
+String::operator=(const std::__cxx11::basic_string<char> &other) {
     assignText(other.c_str());
     return *this;
 }
@@ -90,12 +90,12 @@ String::data() const {
     return toCString();
 }
 
-std::string
+std::__cxx11::basic_string<char>
 String::toStdString() const {
-    return std::string(toCString());
+    return std::__cxx11::basic_string<char>(toCString());
 }
 
-String::operator std::string() const {
+String::operator std::__cxx11::basic_string<char>() const {
     return toStdString();
 }
 
@@ -397,7 +397,7 @@ String::operator+=(const char *other) {
 }
 
 String &
-String::operator+=(const std::string &other) {
+String::operator+=(const std::__cxx11::basic_string<char> &other) {
     *this = concat(other.c_str());
     return *this;
 }
@@ -530,7 +530,7 @@ operator<<(std::ostream &os, const String &value) {
 
 std::istream &
 operator>>(std::istream &is, String &value) {
-    std::string token;
+    std::__cxx11::basic_string<char> token;
     is >> token;
     value = token;
     return is;
@@ -542,7 +542,7 @@ namespace std {
 
 std::istream &
 getline(std::istream &is, java::String &value, char delim) {
-    std::string tmp;
+    std::__cxx11::basic_string<char> tmp;
     std::getline(is, tmp, delim);
     value = tmp;
     return is;
@@ -550,7 +550,7 @@ getline(std::istream &is, java::String &value, char delim) {
 
 std::istream &
 getline(std::istream &is, java::String &value) {
-    std::string tmp;
+    std::__cxx11::basic_string<char> tmp;
     std::getline(is, tmp);
     value = tmp;
     return is;

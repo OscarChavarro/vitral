@@ -175,22 +175,22 @@ public:
     }
 
     Image* loadImage(const char* filename) {
-        std::vector<std::string> candidates = {
-            std::string(filename),
-            std::string("../") + filename,
-            std::string("../../") + filename,
-            std::string("../../../") + filename,
-            std::string("../../../../") + filename
+        std::vector<java::String> candidates = {
+            java::String(filename),
+            java::String("../") + filename,
+            java::String("../../") + filename,
+            java::String("../../../") + filename,
+            java::String("../../../../") + filename
         };
 
-        for (const std::string& candidate : candidates) {
+        for (const java::String& candidate : candidates) {
             java::File file(candidate.c_str());
             if (!file.exists() || !file.canRead()) {
                 continue;
             }
 
             Image* result = nullptr;
-            const std::string& path = candidate;
+            const java::String& path = candidate;
             if (path.size() >= 4 && path.substr(path.size() - 4) == ".dds") {
                 result = ImagePersistence::importImage(file);
             }

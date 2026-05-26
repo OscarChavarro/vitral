@@ -8,12 +8,12 @@
 #include <cctype>
 #include <iostream>
 
-bool ImageExporter::exportImage(const std::string& outputFileName, RGBImageUncompressed* image)
+bool ImageExporter::exportImage(const java::String& outputFileName, RGBImageUncompressed* image)
 {
     java::File outFile(outputFileName.c_str());
     std::cout << "Exporting result image to file \"" << outputFileName << "\": ";
 
-    std::string lower = outputFileName;
+    java::String lower = outputFileName;
     std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c){ return (char)std::tolower(c); });
 
     bool ok = false;

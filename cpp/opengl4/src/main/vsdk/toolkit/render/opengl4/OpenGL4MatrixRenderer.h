@@ -19,8 +19,8 @@ private:
 
     static void initializeIfNeeded();
     static unsigned int compileShaders();
-    static std::string readShaderFile(const std::string& filename);
-    static unsigned int compileShader(const std::string& source, int type);
+    static java::String readShaderFile(const java::String& filename);
+    static unsigned int compileShader(const java::String& source, int type);
     static void linkProgram(unsigned int vertexShader, unsigned int fragmentShader);
 
     OpenGL4MatrixRenderer();

@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 
 #include <GL/glew.h>
@@ -19,6 +20,7 @@
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -45,19 +47,20 @@ unsigned int OpenGL4SphereRenderer::indexCount_ = 0;
 
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
-static std::string readTextFile(const std::string& path)
+static java::String readTextFile(const java::String& path)
 {
     std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
-    if (!f.good()) return std::string();
-    std::string s;
+    if (!f.good()) return java::String();
     f.seekg(0, std::ios::end);
-    s.resize((size_t)f.tellg());
+    const std::streamsize size = f.tellg();
     f.seekg(0, std::ios::beg);
-    if (!s.empty()) f.read(&s[0], (std::streamsize)s.size());
-    return s;
+    if (size <= 0) return java::String();
+    std::vector<char> buffer(static_cast<size_t>(size) + 1u, '\0');
+    f.read(buffer.data(), size);
+    return java::String(buffer.data());
 }
 
-static std::string findShaderSource(const std::string& shaderFileName)
+static java::String findShaderSource(const java::String& shaderFileName)
 {
     const char* candidates[] = {
         "../../../../etc/glslShaders/", // from testsuite/OpenGL4Examples/ShadersExample/build
@@ -67,11 +70,11 @@ static std::string findShaderSource(const std::string& shaderFileName)
         "etc/glslShaders/"
     };
     for (size_t i = 0; i < sizeof(candidates)/sizeof(candidates[0]); i++) {
-        std::string path = std::string(candidates[i]) + shaderFileName;
-        std::string src = readTextFile(path);
+        java::String path = java::String(candidates[i]) + shaderFileName;
+        java::String src = readTextFile(path);
         if (!src.empty()) return src;
     }
-    return std::string();
+    return java::String();
 }
 
 unsigned int OpenGL4SphereRenderer::compileShader(unsigned int type, const char* source)
@@ -93,8 +96,8 @@ unsigned int OpenGL4SphereRenderer::compileShader(unsigned int type, const char*
 
 static unsigned int buildProgram(const char* vsFile, const char* fsFile)
 {
-    std::string vsSource = findShaderSource(vsFile);
-    std::string fsSource = findShaderSource(fsFile);
+    java::String vsSource = findShaderSource(vsFile);
+    java::String fsSource = findShaderSource(fsFile);
     if (vsSource.empty() || fsSource.empty()) {
         std::fprintf(stderr, "OpenGL4SphereRenderer shader not found: %s / %s\n", vsFile, fsFile);
         return 0;

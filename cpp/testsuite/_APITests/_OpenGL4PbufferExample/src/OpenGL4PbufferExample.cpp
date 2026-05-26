@@ -1,3 +1,4 @@
+#include "java/lang/String.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -8,9 +9,9 @@
 #include <string>
 #include <vector>
 
-static std::string readShaderSource(const std::string& shaderFileName)
+static java::String readShaderSource(const java::String& shaderFileName)
 {
-    std::string path = "../../../../etc/glslShaders/" + shaderFileName;
+    java::String path = "../../../../etc/glslShaders/" + shaderFileName;
     FILE* file = std::fopen(path.c_str(), "r");
     if (!file) {
         throw std::runtime_error("Shader not found: " + path);
@@ -24,30 +25,30 @@ static std::string readShaderSource(const std::string& shaderFileName)
     size_t readSize = std::fread(buffer.data(), 1, (size_t)size, file);
     buffer[readSize] = '\0';
     std::fclose(file);
-    return std::string(buffer.data());
+    return java::String(buffer.data());
 }
 
-static std::string getShaderInfoLog(GLuint shader)
+static java::String getShaderInfoLog(GLuint shader)
 {
     GLint length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
     if (length <= 1) return "(no log)";
     std::vector<char> log((size_t)length, 0);
     glGetShaderInfoLog(shader, length, &length, log.data());
-    return std::string(log.data());
+    return java::String(log.data());
 }
 
-static std::string getProgramInfoLog(GLuint program)
+static java::String getProgramInfoLog(GLuint program)
 {
     GLint length = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
     if (length <= 1) return "(no log)";
     std::vector<char> log((size_t)length, 0);
     glGetProgramInfoLog(program, length, &length, log.data());
-    return std::string(log.data());
+    return java::String(log.data());
 }
 
-static GLuint compileShader(GLenum shaderType, const std::string& source)
+static GLuint compileShader(GLenum shaderType, const java::String& source)
 {
     GLuint shader = glCreateShader(shaderType);
     const char* src = source.c_str();
@@ -58,7 +59,7 @@ static GLuint compileShader(GLenum shaderType, const std::string& source)
     GLint status = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
-        std::string log = getShaderInfoLog(shader);
+        java::String log = getShaderInfoLog(shader);
         glDeleteShader(shader);
         throw std::runtime_error("Shader compile error: " + log);
     }
@@ -67,8 +68,8 @@ static GLuint compileShader(GLenum shaderType, const std::string& source)
 
 static GLuint createShaderProgram()
 {
-    std::string vertexSource = readShaderSource("constantVertexShader.glsl");
-    std::string fragmentSource = readShaderSource("constantPixelShader.glsl");
+    java::String vertexSource = readShaderSource("constantVertexShader.glsl");
+    java::String fragmentSource = readShaderSource("constantPixelShader.glsl");
 
     GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSource);
     GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
@@ -82,7 +83,7 @@ static GLuint createShaderProgram()
     GLint status = GL_FALSE;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if (status == GL_FALSE) {
-        std::string log = getProgramInfoLog(program);
+        java::String log = getProgramInfoLog(program);
         glDeleteShader(vs);
         glDeleteShader(fs);
         glDeleteProgram(program);

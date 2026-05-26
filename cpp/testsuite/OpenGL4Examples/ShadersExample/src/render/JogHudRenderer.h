@@ -1,7 +1,7 @@
 #ifndef SHADERSEXAMPLE_JOGHUDRENDERER_H
 #define SHADERSEXAMPLE_JOGHUDRENDERER_H
 
-#include <string>
+#include "java/lang/String.h"
 
 class RGBImageUncompressed;
 class RendererConfiguration;
@@ -21,7 +21,7 @@ public:
         int meridians,
         int parallels,
         const RendererConfiguration* quality,
-        const std::string& cookMaterialLabel);
+        const java::String& cookMaterialLabel);
 
     void dispose();
 
@@ -34,7 +34,7 @@ private:
     void clearBlack();
     void putPixelSafe(int x, int y, unsigned char r, unsigned char g, unsigned char b);
     void drawChar5x7(int x, int y, char c);
-    void drawText(int x, int y, const std::string& text);
+    void drawText(int x, int y, const java::String& text);
 };
 
 #endif

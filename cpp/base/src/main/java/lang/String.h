@@ -21,7 +21,7 @@ class String {
     String();
     String(const String &other);
     String(const char *text);
-    String(const std::string &text);
+    String(const std::__cxx11::basic_string<char> &text);
     ~String();
 
     void
@@ -34,7 +34,7 @@ class String {
     operator=(const char *other);
 
     String &
-    operator=(const std::string &other);
+    operator=(const std::__cxx11::basic_string<char> &other);
 
     const char *
     toCString() const;
@@ -45,10 +45,10 @@ class String {
     const char *
     data() const;
 
-    std::string
+    std::__cxx11::basic_string<char>
     toStdString() const;
 
-    operator std::string() const;
+    operator std::__cxx11::basic_string<char>() const;
 
     int
     length() const;
@@ -147,7 +147,7 @@ class String {
     operator+=(const char *other);
 
     String &
-    operator+=(const std::string &other);
+    operator+=(const std::__cxx11::basic_string<char> &other);
 
     bool
     operator==(const String &other) const;

@@ -18,7 +18,7 @@
 #include "vsdk/toolkit/render/Rasterizer2D.h"
 #include "vsdk/toolkit/render/WireframeRenderer.h"
 
-static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const std::string& outputFile)
+static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& outputFile)
 {
     RGBImageUncompressed outputImage;
     outputImage.init((int)camera->getViewportXSize(), (int)camera->getViewportYSize());
@@ -51,9 +51,9 @@ static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const st
 
 int main(int argc, char** argv)
 {
-    std::string sceneFile = "../../../../etc/geometry/cow.obj";
-    std::string outputFile = "output.png";
-    if (argc > 1 && argv[1] != 0 && std::string(argv[1]).size() > 0) {
+    java::String sceneFile = "../../../../etc/geometry/cow.obj";
+    java::String outputFile = "output.png";
+    if (argc > 1 && argv[1] != 0 && java::String(argv[1]).size() > 0) {
         outputFile = argv[1];
     }
 

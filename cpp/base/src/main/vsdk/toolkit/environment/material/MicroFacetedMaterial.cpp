@@ -70,7 +70,7 @@ static int parseIntOr(const java::String& s, int fallback)
 
 static void splitCsv(const java::String& line, java::ArrayList<java::String>& cols)
 {
-    std::stringstream ss(line);
+    std::basic_stringstream<char> ss(line);
     java::String token;
     while ( std::getline(ss, token, ',') ) cols.add(token);
 }
