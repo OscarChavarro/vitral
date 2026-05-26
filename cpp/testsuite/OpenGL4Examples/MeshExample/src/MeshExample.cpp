@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <cstdio>
+#include <java/lang/Math.h>
 #include <cstdlib>
 #include <cmath>
 #include "java/util/ArrayList.txx"
@@ -575,8 +575,8 @@ public:
         camera.setUpMaintainingOrthogonality(Vector3Dd(0, 0, 1));
         camera.setFocusedPositionMaintainingOrthogonality(center);
 
-        double nearPlane = std::max(0.01, viewDistance - (radius * 2.2));
-        double farPlane = std::max(nearPlane + 1.0, viewDistance + (radius * 4.0));
+        double nearPlane = java::Math::max(0.01, viewDistance - (radius * 2.2));
+        double farPlane = java::Math::max(nearPlane + 1.0, viewDistance + (radius * 4.0));
         camera.setNearPlaneDistance(nearPlane);
         camera.setFarPlaneDistance(farPlane);
         camera.updateVectors();

@@ -26,7 +26,6 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
-#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include "java/lang/String.h"
@@ -309,7 +308,11 @@ void TriangleMesh::calculateNormals()
 void TriangleMesh::reorientateNormals()
 {
     for (long int i = 0; i < vertexNormals.size(); i++) vertexNormals[i] = -vertexNormals[i];
-    for (int i = 0; i < getNumTriangles(); i++) std::swap(triangleIndices[i*3+1], triangleIndices[i*3+2]);
+    for (int i = 0; i < getNumTriangles(); i++) {
+        int tmp = triangleIndices[i*3+1];
+        triangleIndices[i*3+1] = triangleIndices[i*3+2];
+        triangleIndices[i*3+2] = tmp;
+    }
 }
 
 double* TriangleMesh::calculateMinMaxPositions()

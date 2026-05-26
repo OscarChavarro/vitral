@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
 
-#include <algorithm>
 #include <cmath>
+#include <java/lang/Math.h>
 #include <cstdio>
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -99,7 +99,7 @@ bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
     bool updated = false;
 
     if ( clicks < 0 ) {
-        double expo = std::round(std::log10(std::max(eyePosition.z(), 1e-9))) - 1;
+        double expo = std::round(std::log10(java::Math::max(eyePosition.z(), 1e-9))) - 1;
         jumpStep = std::pow(10, expo);
 
         if ( (eyePosition.z() - jumpStep) <= 12 ) {
@@ -119,7 +119,7 @@ bool CameraControllerGoogleEarth::processMouseWheelEvent(const MouseEvent& e)
             return false;
         }
 
-        jumpStep = std::pow(10, std::round(std::log10(std::max(eyePosition.z(), 1e-9))) - 1);
+        jumpStep = std::pow(10, std::round(std::log10(java::Math::max(eyePosition.z(), 1e-9))) - 1);
 
         double h = eyePosition.z();
         nearPlaneDistance = h * 0.1;
@@ -219,7 +219,7 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
             updated = true;
             break;
         case KeyEvent::KEY_z: {
-            double expo = std::round(std::log10(std::max(eyePosition.z(), 1e-9))) - 1;
+            double expo = std::round(std::log10(java::Math::max(eyePosition.z(), 1e-9))) - 1;
             jumpStep = std::pow(10, expo);
 
             double h = eyePosition.z();
@@ -240,7 +240,7 @@ bool CameraControllerGoogleEarth::processKeyPressedEvent(const KeyEvent& keyEven
                 break;
             }
 
-            jumpStep = std::pow(10, std::round(std::log10(std::max(eyePosition.z(), 1e-9))) - 1);
+            jumpStep = std::pow(10, std::round(std::log10(java::Math::max(eyePosition.z(), 1e-9))) - 1);
             double h = eyePosition.z();
             nearPlaneDistance = h * 0.1;
             farPlaneDistance = h * 110;
