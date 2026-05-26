@@ -71,20 +71,22 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
 
     SimpleMaterial* currentMaterial = new SimpleMaterial();
 
-    java::String line;
+    std::string line;
     while ( std::getline(is, line) ) {
         size_t sharp = line.find('#');
-        if ( sharp != java::String::npos ) {
+        if ( sharp != std::string::npos ) {
             line = line.substr(0, sharp);
         }
-        line = trimLine(line);
-        if ( line.empty() ) {
+        java::String javaLine(line.c_str());
+        javaLine = trimLine(javaLine);
+        if ( javaLine.empty() ) {
             continue;
         }
 
-        std::istringstream ss(line);
-        java::String cmd;
-        ss >> cmd;
+        std::istringstream ss(javaLine.toCString());
+        std::string cmdStr;
+        ss >> cmdStr;
+        java::String cmd(cmdStr.c_str());
 
         if ( cmd == "viewport" ) {
             int w, h;
@@ -158,10 +160,11 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
         else if ( cmd == "light" ) {
             double r, g, b;
-            java::String type;
-            if ( !(ss >> r >> g >> b >> type) ) {
+            std::string typeStr;
+            if ( !(ss >> r >> g >> b >> typeStr) ) {
                 continue;
             }
+            java::String type(typeStr.c_str());
             if ( type == "ambient" ) {
                 outScene->addLight(new Light(LightType::AMBIENT, Vector3Dd(0,0,0), ColorRgb(r,g,b)));
             }

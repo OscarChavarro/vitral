@@ -135,5 +135,5 @@ java::String SimpleMaterial::toString() const
        << "  - Ambient (" << ambient.r() << ", " << ambient.g() << ", " << ambient.b() << ")\n"
        << "  - Phong exponent: " << phongExponent << "\n"
        << (doubleSided ? "  - Double sided\n\n" : "  - Single sided\n\n");
-    return ss.str();
+    return java::String(ss.str().c_str());
 }

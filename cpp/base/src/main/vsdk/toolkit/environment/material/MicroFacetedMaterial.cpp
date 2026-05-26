@@ -60,19 +60,19 @@ static double clamp01(double v)
 
 static double parseDoubleOr(const java::String& s, double fallback)
 {
-    try { return std::stod(trim(s)); } catch (...) { return fallback; }
+    try { return std::stod(trim(s).toCString()); } catch (...) { return fallback; }
 }
 
 static int parseIntOr(const java::String& s, int fallback)
 {
-    try { return std::stoi(trim(s)); } catch (...) { return fallback; }
+    try { return std::stoi(trim(s).toCString()); } catch (...) { return fallback; }
 }
 
 static void splitCsv(const java::String& line, java::ArrayList<java::String>& cols)
 {
-    std::basic_stringstream<char> ss(line);
-    java::String token;
-    while ( std::getline(ss, token, ',') ) cols.add(token);
+    std::basic_stringstream<char> ss(line.toCString());
+    std::string token;
+    while ( std::getline(ss, token, ',') ) cols.add(java::String(token.c_str()));
 }
 
 static MicrofacetConfig defaultConfig()
@@ -108,8 +108,9 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     std::ifstream in(csvFileName.c_str());
     if ( !in.good() ) return d;
 
-    java::String headerLine;
-    if ( !std::getline(in, headerLine) ) return d;
+    std::string headerLineStr;
+    if ( !std::getline(in, headerLineStr) ) return d;
+    java::String headerLine(headerLineStr.c_str());
     java::ArrayList<java::String> header;
     splitCsv(headerLine, header);
 
@@ -143,8 +144,9 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     const int iGeo = idx("geometry_model");
 
     const java::String target = lower(trim(materialName));
-    java::String line;
-    while ( std::getline(in, line) ) {
+    std::string lineStr;
+    while ( std::getline(in, lineStr) ) {
+        java::String line(lineStr.c_str());
         if ( trim(line).empty() ) continue;
         java::ArrayList<java::String> cols;
         splitCsv(line, cols);

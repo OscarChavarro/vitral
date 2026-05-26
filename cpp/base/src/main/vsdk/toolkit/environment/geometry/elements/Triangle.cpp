@@ -86,7 +86,7 @@ void Triangle::minMax(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd&
 
 java::String Triangle::toString() const
 {
-    return "f < " + std::to_string(p0) + ", " +
+    return java::String(("f < " + std::to_string(p0) + ", " +
         std::to_string(p1) + ", " +
-        std::to_string(p2) + " >";
+        std::to_string(p2) + " >").c_str());
 }

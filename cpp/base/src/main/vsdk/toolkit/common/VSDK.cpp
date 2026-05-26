@@ -12,7 +12,7 @@ java::String VSDK::formatDouble(double a)
 {
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << a;
-    return oss.str();
+    return java::String(oss.str().c_str());
 }
 
 java::String VSDK::formatDouble(double a, int digits)
@@ -22,6 +22,6 @@ java::String VSDK::formatDouble(double a, int digits)
     }
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(digits) << a;
-    return oss.str();
+    return java::String(oss.str().c_str());
 }
 

@@ -348,39 +348,86 @@ java::String Camera::toString() const {
         msg += "  - Camera in PERSPECTIVE projection mode\n";
     } else if (projectionMode == PROJECTION_MODE_ORTHOGONAL) {
         msg += "  - Camera in PARALLEL projection mode\n";
-        msg += "  - Orthogonal zoom = " + std::to_string(orthogonalZoom) + "\n";
+        msg += "  - Orthogonal zoom = ";
+        msg += std::to_string(orthogonalZoom).c_str();
+        msg += "\n";
     } else {
         msg += "  - UNKNOWN Camera projection mode!\n";
     }
 
-    msg += "  - eyePosition(x, y, z) = (" + std::to_string(eyePosition.x()) + ", "
-        + std::to_string(eyePosition.y()) + ", " + std::to_string(eyePosition.z()) + ")\n";
+    msg += "  - eyePosition(x, y, z) = (";
+    msg += std::to_string(eyePosition.x()).c_str();
+    msg += ", ";
+    msg += std::to_string(eyePosition.y()).c_str();
+    msg += ", ";
+    msg += std::to_string(eyePosition.z()).c_str();
+    msg += ")\n";
 
     Vector3Dd focusedPos = eyePosition.add(front.multiply(focalDistance));
-    msg += "  - focusedPointPosition(x, y, z) = (" + std::to_string(focusedPos.x()) + ", "
-        + std::to_string(focusedPos.y()) + ", " + std::to_string(focusedPos.z()) + ")\n";
+    msg += "  - focusedPointPosition(x, y, z) = (";
+    msg += std::to_string(focusedPos.x()).c_str();
+    msg += ", ";
+    msg += std::to_string(focusedPos.y()).c_str();
+    msg += ", ";
+    msg += std::to_string(focusedPos.z()).c_str();
+    msg += ")\n";
 
     Matrix4x4d R = getRotation();
     double yaw = R.obtainEulerYawAngle();
     double pitch = R.obtainEulerPitchAngle();
     double roll = R.obtainEulerRollAngle();
 
-    msg += "  - Rotation yaw/pitch/roll (RAD): <" + std::to_string(yaw) + ", "
-        + std::to_string(pitch) + ", " + std::to_string(roll) + ">\n";
+    msg += "  - Rotation yaw/pitch/roll (RAD): <";
+    msg += std::to_string(yaw).c_str();
+    msg += ", ";
+    msg += std::to_string(pitch).c_str();
+    msg += ", ";
+    msg += std::to_string(roll).c_str();
+    msg += ">\n";
 
     msg += "  - Reference frame:\n";
-    msg += "    . Vector UP = (" + std::to_string(up.x()) + ", " + std::to_string(up.y()) + ", "
-        + std::to_string(up.z()) + ") (length " + std::to_string(up.length()) + ")\n";
-    msg += "    . Vector FRONT = (" + std::to_string(front.x()) + ", " + std::to_string(front.y()) + ", "
-        + std::to_string(front.z()) + ") (length " + std::to_string(front.length()) + ")\n";
-    msg += "    . Vector LEFT = (" + std::to_string(left.x()) + ", " + std::to_string(left.y()) + ", "
-        + std::to_string(left.z()) + ") (length " + std::to_string(left.length()) + ")\n";
+    msg += "    . Vector UP = (";
+    msg += std::to_string(up.x()).c_str();
+    msg += ", ";
+    msg += std::to_string(up.y()).c_str();
+    msg += ", ";
+    msg += std::to_string(up.z()).c_str();
+    msg += ") (length ";
+    msg += std::to_string(up.length()).c_str();
+    msg += ")\n";
+    msg += "    . Vector FRONT = (";
+    msg += std::to_string(front.x()).c_str();
+    msg += ", ";
+    msg += std::to_string(front.y()).c_str();
+    msg += ", ";
+    msg += std::to_string(front.z()).c_str();
+    msg += ") (length ";
+    msg += std::to_string(front.length()).c_str();
+    msg += ")\n";
+    msg += "    . Vector LEFT = (";
+    msg += std::to_string(left.x()).c_str();
+    msg += ", ";
+    msg += std::to_string(left.y()).c_str();
+    msg += ", ";
+    msg += std::to_string(left.z()).c_str();
+    msg += ") (length ";
+    msg += std::to_string(left.length()).c_str();
+    msg += ")\n";
 
-    msg += "  - fov = " + std::to_string(fov) + "\n";
-    msg += "  - nearPlaneDistance = " + std::to_string(nearPlaneDistance) + "\n";
-    msg += "  - farPlaneDistance = " + std::to_string(farPlaneDistance) + "\n";
-    msg += "  - Viewport size in pixels = (" + std::to_string(viewportXSize) + ", "
-        + std::to_string(viewportYSize) + ")\n";
+    msg += "  - fov = ";
+    msg += std::to_string(fov).c_str();
+    msg += "\n";
+    msg += "  - nearPlaneDistance = ";
+    msg += std::to_string(nearPlaneDistance).c_str();
+    msg += "\n";
+    msg += "  - farPlaneDistance = ";
+    msg += std::to_string(farPlaneDistance).c_str();
+    msg += "\n";
+    msg += "  - Viewport size in pixels = (";
+    msg += std::to_string(viewportXSize).c_str();
+    msg += ", ";
+    msg += std::to_string(viewportYSize).c_str();
+    msg += ")\n";
 
     return msg;
 }

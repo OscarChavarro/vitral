@@ -4,12 +4,10 @@
 
 #include <stdexcept>
 #include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
 
 class VSDKFatalException : public std::runtime_error {
 public:
-    explicit VSDKFatalException(const java::String& message) : std::runtime_error(message) {}
+    explicit VSDKFatalException(const java::String& message) : std::runtime_error(message.toCString()) {}
 };
 
 

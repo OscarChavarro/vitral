@@ -4,7 +4,6 @@
 #include <cstdarg>
 #include <istream>
 #include <ostream>
-#include <string>
 
 namespace java {
 
@@ -21,7 +20,6 @@ class String {
     String();
     String(const String &other);
     String(const char *text);
-    String(const std::__cxx11::basic_string<char> &text);
     ~String();
 
     void
@@ -33,9 +31,6 @@ class String {
     String &
     operator=(const char *other);
 
-    String &
-    operator=(const std::__cxx11::basic_string<char> &other);
-
     const char *
     toCString() const;
 
@@ -44,11 +39,6 @@ class String {
 
     const char *
     data() const;
-
-    std::__cxx11::basic_string<char>
-    toStdString() const;
-
-    operator std::__cxx11::basic_string<char>() const;
 
     int
     length() const;
@@ -146,9 +136,6 @@ class String {
     String &
     operator+=(const char *other);
 
-    String &
-    operator+=(const std::__cxx11::basic_string<char> &other);
-
     bool
     operator==(const String &other) const;
 
@@ -197,13 +184,7 @@ class String {
 
 String operator+(const char *left, const String &right);
 std::ostream &operator<<(std::ostream &os, const String &value);
-std::istream &operator>>(std::istream &is, String &value);
 
-}
-
-namespace std {
-std::istream &getline(std::istream &is, java::String &value, char delim);
-std::istream &getline(std::istream &is, java::String &value);
 }
 
 #endif

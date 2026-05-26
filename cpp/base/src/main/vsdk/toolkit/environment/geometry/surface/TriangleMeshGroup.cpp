@@ -236,7 +236,7 @@ purposes.
 */
 java::String TriangleMeshGroup::toString() const
 {
-    return "TriangleMeshGroup < #Mesh: " + std::to_string(meshes.size()) + " >";
+    return java::String(("TriangleMeshGroup < #Mesh: " + std::to_string(meshes.size()) + " >").c_str());
 }
 
 /*
