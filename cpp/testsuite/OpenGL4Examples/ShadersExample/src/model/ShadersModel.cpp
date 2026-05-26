@@ -50,14 +50,15 @@ ShadersModel::ShadersModel()
 
     std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
     if ( csv.good() ) {
-        java::String line;
-        if ( std::getline(csv, line) ) {
-            while ( std::getline(csv, line) ) {
+        std::string lineStr;
+        if ( std::getline(csv, lineStr) ) {
+            while ( std::getline(csv, lineStr) ) {
+                java::String line(lineStr.c_str());
                 if ( line.empty() ) continue;
-                std::basic_stringstream<char> ss(line);
-                java::String token;
+                std::basic_stringstream<char> ss(lineStr);
+                std::string tokenStr;
                 java::ArrayList<java::String> cols;
-                while ( std::getline(ss, token, ',') ) cols.add(token);
+                while ( std::getline(ss, tokenStr, ',') ) cols.add(java::String(tokenStr.c_str()));
                 if ( cols.size() < 16 ) continue;
                 const java::String& name = cols[0];
                 if ( name.empty() ) continue;

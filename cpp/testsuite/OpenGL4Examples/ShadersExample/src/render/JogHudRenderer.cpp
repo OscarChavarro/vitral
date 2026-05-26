@@ -153,9 +153,12 @@ void JogHudRenderer::draw(
     java::String line1;
     if (gpuMode) {
         int triangles = std::max(0, (parallels - 1) * meridians * 2);
-        line1 = "MERIDIANS: " + std::to_string(meridians)
-            + " PARALLELS: " + std::to_string(parallels)
-            + " TRIANGLES: " + std::to_string(triangles);
+        line1 = java::String("MERIDIANS: ")
+            .concat(std::to_string(meridians).c_str())
+            .concat(" PARALLELS: ")
+            .concat(std::to_string(parallels).c_str())
+            .concat(" TRIANGLES: ")
+            .concat(std::to_string(triangles).c_str());
     }
     else {
         line1 = "RAYTRACING";

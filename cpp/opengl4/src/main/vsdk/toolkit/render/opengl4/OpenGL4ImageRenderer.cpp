@@ -358,28 +358,28 @@ void OpenGL4ImageRenderer::initializeShaderProgram() {
 
 java::String OpenGL4ImageRenderer::readShaderFile(const java::String& filename) {
     // Try primary path first
-    std::ifstream file(filename);
+    std::ifstream file(filename.c_str());
     if (file.is_open()) {
         std::basic_stringstream<char> buffer;
         buffer << file.rdbuf();
-        return buffer.str();
+        return java::String(buffer.str().c_str());
     }
 
     // Try alternative paths (for when running from different directories)
     java::ArrayList<java::String> alternatePaths;
     alternatePaths.reserve(4);
-    alternatePaths.add("../" + filename);
-    alternatePaths.add("../../" + filename);
-    alternatePaths.add("../../../" + filename);
-    alternatePaths.add("../../../../" + filename);
+    alternatePaths.add(java::String("../").concat(filename));
+    alternatePaths.add(java::String("../../").concat(filename));
+    alternatePaths.add(java::String("../../../").concat(filename));
+    alternatePaths.add(java::String("../../../../").concat(filename));
 
     for (long int ii = 0; ii < alternatePaths.size(); ii++) {
         java::String altPath = alternatePaths.get(ii);
-        file.open(altPath);
+        file.open(altPath.c_str());
         if (file.is_open()) {
             std::basic_stringstream<char> buffer;
             buffer << file.rdbuf();
-            return buffer.str();
+            return java::String(buffer.str().c_str());
         }
     }
 

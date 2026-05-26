@@ -22,21 +22,21 @@ unsigned int OpenGL4MatrixRenderer::shaderProgram = 0;
 bool OpenGL4MatrixRenderer::initialized = false;
 
 java::String OpenGL4MatrixRenderer::readShaderFile(const java::String& filename) {
-    std::ifstream file(filename);
+    std::ifstream file(filename.c_str());
     if (file.is_open()) {
         std::basic_stringstream<char> buffer;
         buffer << file.rdbuf();
-        return buffer.str();
+        return java::String(buffer.str().c_str());
     }
 
     const char* prefixes[] = { "../", "../../", "../../../", "../../../../", nullptr };
     for (int i = 0; prefixes[i] != nullptr; i++) {
-        java::String altPath = java::String(prefixes[i]) + filename;
-        file.open(altPath);
+        java::String altPath = java::String(prefixes[i]).concat(filename);
+        file.open(altPath.c_str());
         if (file.is_open()) {
             std::basic_stringstream<char> buffer;
             buffer << file.rdbuf();
-            return buffer.str();
+            return java::String(buffer.str().c_str());
         }
     }
 

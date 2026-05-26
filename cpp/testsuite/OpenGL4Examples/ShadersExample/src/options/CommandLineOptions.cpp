@@ -39,7 +39,7 @@ static ShaderOperationMode parseMethod(const java::String& raw)
     const java::String v = lower(raw);
     if (v == "opengl" || v == "opengl_4_1") return ShaderOperationMode::OPENGL_4_1;
     if (v == "software") return ShaderOperationMode::SOFTWARE;
-    throw std::invalid_argument("Unknown --method value: " + raw + ". Use opengl or software.");
+    throw std::invalid_argument(java::String("Unknown --method value: ").concat(raw).concat(". Use opengl or software.").toCString());
 }
 
 static int parseShading(const java::String& raw)
@@ -52,7 +52,7 @@ static int parseShading(const java::String& raw)
     if (v == "cook" || v == "cook_torrance" || v == "cook-torrance" || v == "cooktorrance") {
         return RendererConfiguration::SHADING_TYPE_COOK_TERRANCE;
     }
-    throw std::invalid_argument("Unknown --shading value: " + raw);
+    throw std::invalid_argument(java::String("Unknown --shading value: ").concat(raw).toCString());
 }
 
 static CommandLineOptions::TextureFilterOption parseTextureFilter(const java::String& raw)
@@ -60,7 +60,7 @@ static CommandLineOptions::TextureFilterOption parseTextureFilter(const java::St
     const java::String v = lower(raw);
     if (v == "linear") return CommandLineOptions::TextureFilterOption::LINEAR;
     if (v == "nearest") return CommandLineOptions::TextureFilterOption::NEAREST;
-    throw std::invalid_argument("Unknown --texture-filter value: " + raw);
+    throw std::invalid_argument(java::String("Unknown --texture-filter value: ").concat(raw).toCString());
 }
 
 static void applyFeatureSwitches(CommandLineOptions& o, const java::String& csv, bool enabled)
@@ -87,7 +87,7 @@ static void applyFeatureSwitches(CommandLineOptions& o, const java::String& csv,
             o.withBumpMap = enabled;
         }
         else if (!t.empty()) {
-            throw std::invalid_argument("Unknown feature in --with/--without: " + t);
+            throw std::invalid_argument(java::String("Unknown feature in --with/--without: ").concat(t).toCString());
         }
         b = e + 1;
     }
@@ -99,7 +99,7 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
     for (int i = 1; i < argc; i++) {
         java::String arg(argv[i]);
         auto readValue = [&](const java::String& name)->java::String {
-            if (i + 1 >= argc) throw std::invalid_argument(name + " requires a value");
+            if (i + 1 >= argc) throw std::invalid_argument(java::String(name).concat(" requires a value").toCString());
             return java::String(argv[++i]);
         };
 
@@ -133,7 +133,7 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
         if (startsWith(arg, "--height=")) { o.height = std::max(1, std::atoi(arg.substr(9).c_str())); continue; }
         if (arg == "--hud") { o.showHud = true; continue; }
         if (startsWith(arg, "--hud=")) { o.showHud = lower(arg.substr(6)) != "off"; continue; }
-        throw std::invalid_argument("Unknown option: " + arg);
+        throw std::invalid_argument(java::String("Unknown option: ").concat(arg).toCString());
     }
 
     if (o.offline && o.offlineOutputPath.empty()) {

@@ -274,11 +274,11 @@ private:
 
     java::String readShaderSource(const java::String& shaderFileName)
     {
-        java::String path = "../../../../etc/glslShaders/" + shaderFileName;
+        java::String path = java::String("../../../../etc/glslShaders/").concat(shaderFileName);
         FILE* file = fopen(path.c_str(), "r");
         if (!file) {
             fprintf(stderr, "Shader not found: %s\n", shaderFileName.c_str());
-            throw std::runtime_error("Shader file not found: " + shaderFileName);
+            throw std::runtime_error(java::String("Shader file not found: ").concat(shaderFileName).toCString());
         }
 
         fseek(file, 0, SEEK_END);

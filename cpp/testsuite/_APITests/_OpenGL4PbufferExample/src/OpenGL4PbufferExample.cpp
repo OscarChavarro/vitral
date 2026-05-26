@@ -10,10 +10,10 @@
 
 static java::String readShaderSource(const java::String& shaderFileName)
 {
-    java::String path = "../../../../etc/glslShaders/" + shaderFileName;
+    java::String path = java::String("../../../../etc/glslShaders/").concat(shaderFileName);
     FILE* file = std::fopen(path.c_str(), "r");
     if (!file) {
-        throw std::runtime_error("Shader not found: " + path);
+        throw std::runtime_error(java::String("Shader not found: ").concat(path).toCString());
     }
 
     std::fseek(file, 0, SEEK_END);
@@ -66,7 +66,7 @@ static GLuint compileShader(GLenum shaderType, const java::String& source)
     if (status == GL_FALSE) {
         java::String log = getShaderInfoLog(shader);
         glDeleteShader(shader);
-        throw std::runtime_error("Shader compile error: " + log);
+        throw std::runtime_error(java::String("Shader compile error: ").concat(log).toCString());
     }
     return shader;
 }
@@ -92,7 +92,7 @@ static GLuint createShaderProgram()
         glDeleteShader(vs);
         glDeleteShader(fs);
         glDeleteProgram(program);
-        throw std::runtime_error("Program link error: " + log);
+        throw std::runtime_error(java::String("Program link error: ").concat(log).toCString());
     }
 
     glDetachShader(program, vs);

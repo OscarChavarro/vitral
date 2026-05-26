@@ -19,7 +19,7 @@ int main(int argc, char** argv)
                 joined << argv[i];
                 if (i < argc - 1) joined << " ";
             }
-            expression = joined.str();
+            expression = java::String(joined.str().c_str());
             std::printf(
                 "Parsing from %d parameters with regexp \"%s\"\n",
                 argc - 1,
