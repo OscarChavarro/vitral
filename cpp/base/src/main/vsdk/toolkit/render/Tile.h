@@ -14,6 +14,7 @@ private:
     int dy;
 
 public:
+    Tile();
     Tile(Image* image, int x0, int y0, int dx, int dy);
 
     Image* getImage() const;

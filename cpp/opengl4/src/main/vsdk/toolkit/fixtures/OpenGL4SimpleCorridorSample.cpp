@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -110,8 +111,8 @@ unsigned int OpenGL4SimpleCorridorSample::compileShaders() {
 }
 
 void OpenGL4SimpleCorridorSample::initialize() {
-    std::vector<float> positions;
-    std::vector<float> colors;
+    java::ArrayList<float> positions;
+    java::ArrayList<float> colors;
 
     buildGeometry(positions, colors);
 
@@ -198,7 +199,7 @@ void OpenGL4SimpleCorridorSample::dispose() {
     vertexCount = 0;
 }
 
-void OpenGL4SimpleCorridorSample::buildGeometry(std::vector<float>& positions, std::vector<float>& colors) {
+void OpenGL4SimpleCorridorSample::buildGeometry(java::ArrayList<float>& positions, java::ArrayList<float>& colors) {
     appendTilesCenter(positions, colors, 0.5f, 0.5f, 0.9f, 0, false, 0);
     for (int i = 0; i < 4; i++) {
         appendTilesLong(positions, colors, 0.5f, 0.5f, 0.9f, 90 * i, false, 0);
@@ -233,8 +234,8 @@ void OpenGL4SimpleCorridorSample::buildGeometry(std::vector<float>& positions, s
 }
 
 void OpenGL4SimpleCorridorSample::appendTilesCenter(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double rotZDeg, bool flipYZ, double translateZ) {
 
@@ -256,8 +257,8 @@ void OpenGL4SimpleCorridorSample::appendTilesCenter(
 }
 
 void OpenGL4SimpleCorridorSample::appendTilesLong(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double rotZDeg, bool flipYZ, double translateZ) {
 
@@ -280,8 +281,8 @@ void OpenGL4SimpleCorridorSample::appendTilesLong(
 }
 
 void OpenGL4SimpleCorridorSample::appendTilesWallA(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double rotZDeg) {
 
@@ -303,8 +304,8 @@ void OpenGL4SimpleCorridorSample::appendTilesWallA(
 }
 
 void OpenGL4SimpleCorridorSample::appendTilesWallB(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double rotZDeg) {
 
@@ -326,8 +327,8 @@ void OpenGL4SimpleCorridorSample::appendTilesWallB(
 }
 
 void OpenGL4SimpleCorridorSample::appendTilesWallC(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double rotZDeg) {
 
@@ -349,8 +350,8 @@ void OpenGL4SimpleCorridorSample::appendTilesWallC(
 }
 
 void OpenGL4SimpleCorridorSample::addQuad(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     float r, float g, float bColor,
     double x1, double y1, double z1,
     double x2, double y2, double z2,
@@ -368,8 +369,8 @@ void OpenGL4SimpleCorridorSample::addQuad(
 }
 
 void OpenGL4SimpleCorridorSample::addVertex(
-    std::vector<float>& positions,
-    std::vector<float>& colors,
+    java::ArrayList<float>& positions,
+    java::ArrayList<float>& colors,
     double x, double y, double z,
     float r, float g, float bColor,
     double rotZDeg, bool flipYZ, double translateZ) {
@@ -391,13 +392,13 @@ void OpenGL4SimpleCorridorSample::addVertex(
     double ry = tx * sin_a + ty * cos_a;
     double rz = tz + translateZ;
 
-    positions.push_back((float)rx);
-    positions.push_back((float)ry);
-    positions.push_back((float)rz);
+    positions.add((float)rx);
+    positions.add((float)ry);
+    positions.add((float)rz);
 
-    colors.push_back(r);
-    colors.push_back(g);
-    colors.push_back(bColor);
+    colors.add(r);
+    colors.add(g);
+    colors.add(bColor);
 }
 
 }}}

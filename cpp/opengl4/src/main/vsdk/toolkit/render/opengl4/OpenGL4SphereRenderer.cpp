@@ -13,12 +13,12 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 
+#include "java/util/ArrayList.txx"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
 #include <string>
-#include <vector>
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -207,12 +207,19 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
     }
 
     Sphere unitSphere(1.0);
-    std::vector<float> positions;
-    std::vector<float> normals;
-    std::vector<float> uvs;
-    std::vector<float> tangents;
-    std::vector<float> binormals;
-    std::vector<unsigned int> indices;
+    long int vertexCount = (long int)(parallels + 1) * (long int)(meridians + 1);
+    java::ArrayList<float> positions;
+    java::ArrayList<float> normals;
+    java::ArrayList<float> uvs;
+    java::ArrayList<float> tangents;
+    java::ArrayList<float> binormals;
+    java::ArrayList<unsigned int> indices;
+    positions.reserve(vertexCount * 3);
+    normals.reserve(vertexCount * 3);
+    tangents.reserve(vertexCount * 3);
+    binormals.reserve(vertexCount * 3);
+    uvs.reserve(vertexCount * 2);
+    indices.reserve((long int)parallels * (long int)meridians * 6L);
 
     for (int p = 0; p <= parallels; ++p) {
         double t = static_cast<double>(p) / static_cast<double>(parallels);
@@ -226,20 +233,20 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
             Vector3Dd tan = unitSphere.sphereTangent(theta, phi);
             Vector3Dd bin = unitSphere.sphereBinormal(theta, phi);
 
-            positions.push_back((float)pos.x());
-            positions.push_back((float)pos.y());
-            positions.push_back((float)pos.z());
-            normals.push_back((float)nrm.x());
-            normals.push_back((float)nrm.y());
-            normals.push_back((float)nrm.z());
-            tangents.push_back((float)tan.x());
-            tangents.push_back((float)tan.y());
-            tangents.push_back((float)tan.z());
-            binormals.push_back((float)bin.x());
-            binormals.push_back((float)bin.y());
-            binormals.push_back((float)bin.z());
-            uvs.push_back((float)(1.0 - s)); // Java parity
-            uvs.push_back((float)t);
+            positions.add((float)pos.x());
+            positions.add((float)pos.y());
+            positions.add((float)pos.z());
+            normals.add((float)nrm.x());
+            normals.add((float)nrm.y());
+            normals.add((float)nrm.z());
+            tangents.add((float)tan.x());
+            tangents.add((float)tan.y());
+            tangents.add((float)tan.z());
+            binormals.add((float)bin.x());
+            binormals.add((float)bin.y());
+            binormals.add((float)bin.z());
+            uvs.add((float)(1.0 - s)); // Java parity
+            uvs.add((float)t);
         }
     }
 
@@ -250,8 +257,8 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
             unsigned int i1 = i0 + 1;
             unsigned int i2 = i0 + row;
             unsigned int i3 = i2 + 1;
-            indices.push_back(i0); indices.push_back(i2); indices.push_back(i1);
-            indices.push_back(i1); indices.push_back(i2); indices.push_back(i3);
+            indices.add(i0); indices.add(i2); indices.add(i1);
+            indices.add(i1); indices.add(i2); indices.add(i3);
         }
     }
 

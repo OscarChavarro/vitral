@@ -3,7 +3,7 @@
 
 #include <GL/glew.h>
 #include <map>
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class RGBAImageCompressed;
 
@@ -20,7 +20,7 @@ private:
     static std::map<RGBAImageCompressed*, GLuint> compiledImages;
     static GLuint upload(RGBAImageCompressed* img);
 
-    static std::vector<unsigned char> decompressToRGBA(const RGBAImageCompressed* img);
+    static java::ArrayList<unsigned char> decompressToRGBA(const RGBAImageCompressed* img);
     static int toOpenGlInternalFormat(int compressionFormat);
 
     static int readUShort(const unsigned char* data, int offset);

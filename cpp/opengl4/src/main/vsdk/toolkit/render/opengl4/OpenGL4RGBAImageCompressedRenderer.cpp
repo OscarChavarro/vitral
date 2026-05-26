@@ -1,6 +1,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "java/util/ArrayList.txx"
 #include <algorithm>
 #include <cstdio>
 
@@ -139,8 +140,8 @@ GLuint OpenGL4RGBAImageCompressedRenderer::upload(RGBAImageCompressed* img) {
     }
     else {
         fprintf(stderr, "Warning: S3TC extension not available; decoding compressed texture in CPU.\n");
-        std::vector<unsigned char> rgba = decompressToRGBA(img);
-        if (rgba.empty()) {
+        java::ArrayList<unsigned char> rgba = decompressToRGBA(img);
+        if (rgba.size() == 0) {
             glDeleteTextures(1, &textureId);
             glBindTexture(GL_TEXTURE_2D, 0);
             return 0;
@@ -168,8 +169,8 @@ GLuint OpenGL4RGBAImageCompressedRenderer::upload(RGBAImageCompressed* img) {
     return textureId;
 }
 
-std::vector<unsigned char> OpenGL4RGBAImageCompressedRenderer::decompressToRGBA(const RGBAImageCompressed* img) {
-    std::vector<unsigned char> empty;
+java::ArrayList<unsigned char> OpenGL4RGBAImageCompressedRenderer::decompressToRGBA(const RGBAImageCompressed* img) {
+    java::ArrayList<unsigned char> empty;
     if (img == nullptr) {
         return empty;
     }
@@ -189,7 +190,10 @@ std::vector<unsigned char> OpenGL4RGBAImageCompressedRenderer::decompressToRGBA(
         return empty;
     }
 
-    std::vector<unsigned char> rgba(static_cast<size_t>(width) * static_cast<size_t>(height) * 4U, 0);
+    long int rgbaSize = (long int)width * (long int)height * 4L;
+    java::ArrayList<unsigned char> rgba;
+    rgba.reserve(rgbaSize);
+    for (long int k = 0; k < rgbaSize; k++) rgba.add(0);
 
     int blockSize = (fmt == RGBAImageCompressed::COMPRESSION_DXT1) ? 8 : 16;
     int blockCountX = std::max(1, (width + 3) / 4);

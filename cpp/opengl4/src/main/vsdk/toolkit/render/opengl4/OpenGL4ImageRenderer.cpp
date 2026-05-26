@@ -6,10 +6,10 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "java/util/ArrayList.txx"
 #include <cstdio>
 #include <fstream>
 #include <sstream>
-#include <vector>
 
 OpenGL4ImageRenderer::TextureFilterMode OpenGL4ImageRenderer::textureFilterMode = OpenGL4ImageRenderer::TextureFilterMode::LINEAR;
 GLuint OpenGL4ImageRenderer::quadVaoId = 0;
@@ -365,14 +365,15 @@ std::string OpenGL4ImageRenderer::readShaderFile(const std::string& filename) {
     }
 
     // Try alternative paths (for when running from different directories)
-    std::vector<std::string> alternatePaths = {
-        "../" + filename,
-        "../../" + filename,
-        "../../../" + filename,
-        "../../../../" + filename,
-    };
+    java::ArrayList<std::string> alternatePaths;
+    alternatePaths.reserve(4);
+    alternatePaths.add("../" + filename);
+    alternatePaths.add("../../" + filename);
+    alternatePaths.add("../../../" + filename);
+    alternatePaths.add("../../../../" + filename);
 
-    for (const auto& altPath : alternatePaths) {
+    for (long int ii = 0; ii < alternatePaths.size(); ii++) {
+        std::string altPath = alternatePaths.get(ii);
         file.open(altPath);
         if (file.is_open()) {
             std::stringstream buffer;

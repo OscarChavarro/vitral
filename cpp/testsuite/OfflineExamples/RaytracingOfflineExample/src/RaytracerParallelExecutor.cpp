@@ -80,11 +80,11 @@ public:
     }
 };
 
-long long calculateTotalProgressElements(const std::vector<Tile>& generatedTiles)
+long long calculateTotalProgressElements(const java::ArrayList<Tile>& generatedTiles)
 {
     long long total = 0;
-    for (size_t i = 0; i < generatedTiles.size(); i++) {
-        total += generatedTiles[i].getDy();
+    for (long int i = 0; i < generatedTiles.size(); i++) {
+        total += generatedTiles.get(i).getDy();
     }
     return total;
 }
@@ -111,7 +111,7 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
                                 numberOfThreads);
     std::cout << "Starting parallel raytracing with " << numberOfThreads << " threads." << std::endl;
 
-    std::vector<Tile> generatedTiles = tileGenerator.getTiles();
+    java::ArrayList<Tile> generatedTiles = tileGenerator.getTiles();
     java::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);
     java::ExecutorService* executorService =
         java::Executors::newFixedThreadPool(numberOfThreads);

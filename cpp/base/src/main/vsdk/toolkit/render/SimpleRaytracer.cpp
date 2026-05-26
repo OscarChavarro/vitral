@@ -213,13 +213,12 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
     java::ArrayList<long long> versions;
     captureBodyVersions(bodies, versions);
     TileGenerator tileGenerator(TILE_STRATEGY, inoutViewport, limx1, limy1, limx2 - limx1, limy2 - limy1, TILE_WORKERS_HINT);
-    // TileGenerator still uses std::vector<Tile> internally; getTiles() returns const std::vector<Tile>&
-    const std::vector<Tile>& tiles = tileGenerator.getTiles();
+    const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
     RGBPixel outputPixel;
 
     if ( liveReport ) liveReport->begin();
-    for ( size_t ti=0; ti<tiles.size(); ti++ ) {
-        const Tile& tile = tiles[ti];
+    for ( long int ti=0; ti<tiles.size(); ti++ ) {
+        const Tile& tile = tiles.get(ti);
         Image* tileImage = tile.getImage();
         for ( int y = tile.getY0(); y < tile.getY1(); y++ ) {
             assertSceneUnmodifiedDuringRender(versions, bodies);

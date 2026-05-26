@@ -1,8 +1,8 @@
 #ifndef OPENGL4SIMPLECORRIDORSAMPLE_H
 #define OPENGL4SIMPLECORRIDORSAMPLE_H
 
-#include <vector>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/util/ArrayList.h"
 
 namespace vsdk { namespace toolkit { namespace fixtures {
 
@@ -35,41 +35,41 @@ private:
     int vertexCount;
 
     void initialize();
-    void buildGeometry(std::vector<float>& positions, std::vector<float>& colors);
+    void buildGeometry(java::ArrayList<float>& positions, java::ArrayList<float>& colors);
 
     void appendTilesCenter(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double rotZDeg, bool flipYZ, double translateZ);
 
     void appendTilesLong(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double rotZDeg, bool flipYZ, double translateZ);
 
     void appendTilesWallA(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double rotZDeg);
 
     void appendTilesWallB(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double rotZDeg);
 
     void appendTilesWallC(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double rotZDeg);
 
     void addQuad(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         float r, float g, float bColor,
         double x1, double y1, double z1,
         double x2, double y2, double z2,
@@ -78,8 +78,8 @@ private:
         double rotZDeg, bool flipYZ, double translateZ);
 
     void addVertex(
-        std::vector<float>& positions,
-        std::vector<float>& colors,
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
         double x, double y, double z,
         float r, float g, float bColor,
         double rotZDeg, bool flipYZ, double translateZ);

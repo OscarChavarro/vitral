@@ -1,6 +1,7 @@
 #include "vsdk/toolkit/render/TileGenerator.h"
 #include "vsdk/toolkit/render/Tile.h"
 #include "vsdk/toolkit/media/Image.h"
+#include "java/util/ArrayList.txx"
 #include <stdexcept>
 
 TileGenerator::TileGenerator(
@@ -34,34 +35,36 @@ TileGenerator::TileGenerator(
     tiles = generateTiles();
 }
 
-const std::vector<Tile>& TileGenerator::getTiles() const { return tiles; }
+const java::ArrayList<Tile>& TileGenerator::getTiles() const { return tiles; }
 
-std::vector<Tile> TileGenerator::generateTiles() const
+java::ArrayList<Tile> TileGenerator::generateTiles() const
 {
     if ( strategy == TileGenerationStrategy::LINEAR ) return generateLinearTiles();
     return generateSerialTile();
 }
 
-std::vector<Tile> TileGenerator::generateLinearTiles() const
+java::ArrayList<Tile> TileGenerator::generateLinearTiles() const
 {
-    std::vector<Tile> out;
+    java::ArrayList<Tile> out;
     int workerBands = numberOfThreads;
     if ( workerBands > height ) workerBands = height;
     int baseBandHeight = height / workerBands;
     int extraRows = height % workerBands;
     int y = 0;
 
+    out.reserve((long int)workerBands);
     for ( int i = 0; i < workerBands; i++ ) {
         int currentBandHeight = baseBandHeight + (i < extraRows ? 1 : 0);
-        out.push_back(Tile(image, x0, y0 + y, width, currentBandHeight));
+        out.add(Tile(image, x0, y0 + y, width, currentBandHeight));
         y += currentBandHeight;
     }
     return out;
 }
 
-std::vector<Tile> TileGenerator::generateSerialTile() const
+java::ArrayList<Tile> TileGenerator::generateSerialTile() const
 {
-    std::vector<Tile> out;
-    out.push_back(Tile(image, x0, y0, width, height));
+    java::ArrayList<Tile> out;
+    out.reserve(1);
+    out.add(Tile(image, x0, y0, width, height));
     return out;
 }

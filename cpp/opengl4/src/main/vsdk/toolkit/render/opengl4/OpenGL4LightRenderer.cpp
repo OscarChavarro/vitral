@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <vector>
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -122,9 +121,9 @@ static Vector3Dd mapPatternPointToWorld(const Vector3Dd& point, const Vector3Dd&
     return center.add(right.multiply(localX)).add(up.multiply(localY));
 }
 
-void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp, const std::vector<float>& positions, const std::vector<float>& colors)
+void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp, const java::ArrayList<float>& positions, const java::ArrayList<float>& colors)
 {
-    if (positions.empty() || colors.empty()) return;
+    if (positions.size() == 0 || colors.size() == 0) return;
 
     if (!initIfNeeded()) return;
 
@@ -137,12 +136,12 @@ void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp, const std::vector<fl
     glBindVertexArray(vao_);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboPositions_);
-    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), const_cast<java::ArrayList<float>&>(positions).data(), GL_STREAM_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboColors_);
-    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), const_cast<java::ArrayList<float>&>(colors).data(), GL_STREAM_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
 
@@ -206,18 +205,21 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
     float pz = (float)p.z();
     float d = (float)halfAxisLength;
 
-    std::vector<float> positions = {
-        px - d, py, pz, px + d, py, pz,
-        px, py - d, pz, px, py + d, pz,
-        px, py, pz - d, px, py, pz + d
-    };
+    java::ArrayList<float> positions;
+    positions.reserve(18);
+    positions.add(px - d); positions.add(py); positions.add(pz);
+    positions.add(px + d); positions.add(py); positions.add(pz);
+    positions.add(px); positions.add(py - d); positions.add(pz);
+    positions.add(px); positions.add(py + d); positions.add(pz);
+    positions.add(px); positions.add(py); positions.add(pz - d);
+    positions.add(px); positions.add(py); positions.add(pz + d);
 
-    std::vector<float> colors;
-    colors.reserve(positions.size());
-    for (size_t i = 0; i < positions.size() / 3; i++) {
-        colors.push_back((float)c.r());
-        colors.push_back((float)c.g());
-        colors.push_back((float)c.b());
+    java::ArrayList<float> colors;
+    colors.reserve(18);
+    for (long int i = 0; i < positions.size() / 3; i++) {
+        colors.add((float)c.r());
+        colors.add((float)c.g());
+        colors.add((float)c.b());
     }
 
     drawLines(mvp, positions, colors);
@@ -250,8 +252,8 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
     int lineCount = pattern.getNumLines();
     if (lineCount <= 0) return;
 
-    std::vector<float> positions;
-    positions.reserve((size_t)lineCount * 2 * 3);
+    java::ArrayList<float> positions;
+    positions.reserve((long int)lineCount * 2 * 3);
 
     for (int i = 0; i < lineCount; i++) {
         Vector3Dd* p0Pattern = pattern.get2DLinePoint0(i);
@@ -267,21 +269,21 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
         delete p0Pattern;
         delete p1Pattern;
 
-        positions.push_back((float)p0.x());
-        positions.push_back((float)p0.y());
-        positions.push_back((float)p0.z());
-        positions.push_back((float)p1.x());
-        positions.push_back((float)p1.y());
-        positions.push_back((float)p1.z());
+        positions.add((float)p0.x());
+        positions.add((float)p0.y());
+        positions.add((float)p0.z());
+        positions.add((float)p1.x());
+        positions.add((float)p1.y());
+        positions.add((float)p1.z());
     }
 
     ColorRgb c = light->getSpecular();
-    std::vector<float> colors;
+    java::ArrayList<float> colors;
     colors.reserve(positions.size());
-    for (size_t i = 0; i < positions.size() / 3; i++) {
-        colors.push_back((float)c.r());
-        colors.push_back((float)c.g());
-        colors.push_back((float)c.b());
+    for (long int i = 0; i < positions.size() / 3; i++) {
+        colors.add((float)c.r());
+        colors.add((float)c.g());
+        colors.add((float)c.b());
     }
 
     drawLines(mvp, positions, colors);

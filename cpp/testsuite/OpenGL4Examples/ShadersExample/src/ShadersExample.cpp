@@ -247,7 +247,7 @@ public:
                 softwareFrameImage->getXSize(),
                 softwareFrameImage->getYSize(),
                 softwareThreadCount);
-            const std::vector<Tile>& tiles = tileGenerator.getTiles();
+            const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
             std::atomic<size_t> nextTileIndex(0);
             std::vector<std::thread> workers;
             workers.reserve((size_t)softwareThreadCount);
@@ -260,8 +260,8 @@ public:
                     try {
                         while (true) {
                             size_t tileIndex = nextTileIndex.fetch_add(1);
-                            if (tileIndex >= tiles.size()) break;
-                            const Tile& tile = tiles[tileIndex];
+                            if ((long int)tileIndex >= tiles.size()) break;
+                            Tile tile = tiles.get((long int)tileIndex);
                             raytracer.execute(
                                 softwareFrameImage,
                                 &quality,

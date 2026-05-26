@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/render/TraceWorkspace.h"
+#include "java/util/ArrayList.txx"
 
 TraceWorkspace::TraceWorkspace() : TraceWorkspace(DEFAULT_MAX_RECURSION_LEVEL)
 {
@@ -10,13 +11,13 @@ TraceWorkspace::TraceWorkspace(int maxRecursionLevel)
       shadowCandidateHitObj(RayHit::DETAIL_NONE, false)
 {
     int levels = maxRecursionLevel + 1;
-    reflectionHits.reserve(levels);
-    shadingHits.reserve(levels);
-    reflectionColors.reserve(levels);
+    reflectionHits.reserve((long int)levels);
+    shadingHits.reserve((long int)levels);
+    reflectionColors.reserve((long int)levels);
     for ( int i = 0; i < levels; i++ ) {
-        reflectionHits.push_back(RayHit(RayHit::DETAIL_NONE, false));
-        shadingHits.push_back(RayHit());
-        reflectionColors.push_back(ColorRgb());
+        reflectionHits.add(RayHit(RayHit::DETAIL_NONE, false));
+        shadingHits.add(RayHit());
+        reflectionColors.add(ColorRgb());
     }
 }
 

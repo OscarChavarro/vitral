@@ -6,7 +6,7 @@ class Camera;
 
 #include "vsdk/toolkit/gui/LightGizmoStyle.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -29,7 +29,7 @@ private:
     static unsigned int program_;
 
     static bool initIfNeeded();
-    static void drawLines(const Matrix4x4d& mvp, const std::vector<float>& positions, const std::vector<float>& colors);
+    static void drawLines(const Matrix4x4d& mvp, const java::ArrayList<float>& positions, const java::ArrayList<float>& colors);
     static void drawCross(const Light* light, Camera* camera);
     static void drawOmniBillboard(const Light* light, Camera* camera);
 };

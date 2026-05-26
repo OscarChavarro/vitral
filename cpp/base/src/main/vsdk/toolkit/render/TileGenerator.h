@@ -1,8 +1,8 @@
 #ifndef __VSDK_TOOLKIT_RENDER_TILEGENERATOR_H__
 #define __VSDK_TOOLKIT_RENDER_TILEGENERATOR_H__
 
-#include <vector>
 #include "vsdk/toolkit/render/TileGenerationStrategy.h"
+#include "java/util/ArrayList.h"
 
 class Image;
 class Tile;
@@ -16,11 +16,11 @@ private:
     int width;
     int height;
     int numberOfThreads;
-    std::vector<Tile> tiles;
+    java::ArrayList<Tile> tiles;
 
-    std::vector<Tile> generateTiles() const;
-    std::vector<Tile> generateLinearTiles() const;
-    std::vector<Tile> generateSerialTile() const;
+    java::ArrayList<Tile> generateTiles() const;
+    java::ArrayList<Tile> generateLinearTiles() const;
+    java::ArrayList<Tile> generateSerialTile() const;
 
 public:
     TileGenerator(
@@ -39,7 +39,7 @@ public:
         int height,
         int numberOfThreads);
 
-    const std::vector<Tile>& getTiles() const;
+    const java::ArrayList<Tile>& getTiles() const;
 };
 
 #endif

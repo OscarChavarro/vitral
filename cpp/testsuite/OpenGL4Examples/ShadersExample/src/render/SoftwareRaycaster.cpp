@@ -135,7 +135,7 @@ void SoftwareRaycaster::render(
             outputImage->getXSize(),
             outputImage->getYSize(),
             numberOfThreads);
-        const std::vector<Tile>& tiles = tileGenerator.getTiles();
+        const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
         const int workerCount = std::max(1, numberOfThreads);
         std::atomic<size_t> nextTileIndex(0);
         std::vector<std::thread> workers;
@@ -149,10 +149,10 @@ void SoftwareRaycaster::render(
                 try {
                     while ( true ) {
                         size_t tileIndex = nextTileIndex.fetch_add(1);
-                        if ( tileIndex >= tiles.size() ) {
+                        if ( (long int)tileIndex >= tiles.size() ) {
                             break;
                         }
-                        const Tile& tile = tiles[tileIndex];
+                        Tile tile = tiles.get((long int)tileIndex);
                         raytracer.execute(
                             outputImage,
                             &model->quality,
