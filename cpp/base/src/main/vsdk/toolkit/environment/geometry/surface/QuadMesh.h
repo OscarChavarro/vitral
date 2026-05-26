@@ -2,8 +2,11 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_QUADMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Vertex;
 class Ray;
@@ -12,7 +15,7 @@ class TriangleMeshGroup;
 
 class QuadMesh : public Surface {
 private:
-    std::string name;
+    java::String name;
 
     java::ArrayList<double> vertexPositions;
     java::ArrayList<double> vertexNormals;
@@ -29,8 +32,8 @@ private:
 public:
     QuadMesh();
 
-    std::string getName() const;
-    void setName(const std::string& name);
+    java::String getName() const;
+    void setName(const java::String& name);
 
     void getVertexAt(int i, Vertex& vertex) const;
 
@@ -65,7 +68,7 @@ public:
     virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

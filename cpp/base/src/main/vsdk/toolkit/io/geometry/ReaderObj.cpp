@@ -1,28 +1,50 @@
 #include "vsdk/toolkit/io/geometry/ReaderObj.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/Image.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 #include <algorithm>
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 #include <cstdlib>
+#include "java/lang/String.h"
 #include <fstream>
+#include "java/lang/String.h"
 #include <map>
+#include "java/lang/String.h"
 #include <sstream>
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 struct ReaderObjVertex {
     int vertexPositionIndex;
@@ -40,20 +62,20 @@ struct ReaderObjVertex {
     }
 };
 
-static std::string dirnameOf(const std::string& path)
+static java::String dirnameOf(const java::String& path)
 {
     size_t p = path.find_last_of("/\\");
-    if (p == std::string::npos) return std::string(".");
+    if (p == java::String::npos) return java::String(".");
     return path.substr(0, p);
 }
 
-static std::string joinPath(const std::string& a, const std::string& b)
+static java::String joinPath(const java::String& a, const java::String& b)
 {
     if (a.empty() || a == ".") return b;
     return a + "/" + b;
 }
 
-static int readIndexInteger(const std::string& token)
+static int readIndexInteger(const java::String& token)
 {
     return std::atoi(token.c_str());
 }
@@ -69,12 +91,12 @@ static int resolveObjIndex(int rawIndex, int count)
     return -1;
 }
 
-static ReaderObjVertex readFaceVertex(const std::string& text)
+static ReaderObjVertex readFaceVertex(const java::String& text)
 {
     ReaderObjVertex r;
-    java::ArrayList<std::string> parts;
+    java::ArrayList<java::String> parts;
     std::stringstream ss(text);
-    std::string item;
+    java::String item;
     while (std::getline(ss, item, '/')) parts.add(item);
 
     if (parts.size() >= 1 && !parts[0].empty()) r.vertexPositionIndex = readIndexInteger(parts[0]);
@@ -87,15 +109,15 @@ static ReaderObjVertex readFaceVertex(const std::string& text)
     return r;
 }
 
-static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangleFan(const std::string& line)
+static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangleFan(const java::String& line)
 {
     java::ArrayList< java::ArrayList<ReaderObjVertex> > ret;
     std::istringstream ss(line);
-    std::string tag;
+    java::String tag;
     ss >> tag;
 
     java::ArrayList<ReaderObjVertex> poly;
-    std::string tok;
+    java::String tok;
     while (ss >> tok) poly.add(readFaceVertex(tok));
     if (poly.size() < 3) return ret;
 
@@ -109,19 +131,19 @@ static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangle
     return ret;
 }
 
-static Vector3Dd readVertex(const std::string& line)
+static Vector3Dd readVertex(const java::String& line)
 {
     std::istringstream ss(line);
-    std::string tag;
+    java::String tag;
     double x = 0, y = 0, z = 0;
     ss >> tag >> x >> y >> z;
     return Vector3Dd(x, y, z);
 }
 
-static Vector3Dd readVertexTexture(const std::string& line)
+static Vector3Dd readVertexTexture(const java::String& line)
 {
     std::istringstream ss(line);
-    std::string tag;
+    java::String tag;
     double x = 0, y = 0, z = 0;
     ss >> tag >> x >> y;
     if (!(ss >> z)) z = 0;
@@ -138,11 +160,11 @@ static SimpleMaterial defaultMaterial()
     return m;
 }
 
-static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mtllibLine, const std::string& objFile)
+static std::map<java::String, SimpleMaterial> readMaterials(const java::String& mtllibLine, const java::String& objFile)
 {
-    std::map<std::string, SimpleMaterial> ret;
+    std::map<java::String, SimpleMaterial> ret;
     std::istringstream ss(mtllibLine);
-    std::string tag, mtlFile;
+    java::String tag, mtlFile;
     ss >> tag >> mtlFile;
     if (mtlFile.empty()) return ret;
 
@@ -152,10 +174,10 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
     SimpleMaterial active;
     active = active.withDoubleSided(false).withName("default");
 
-    std::string line;
+    java::String line;
     while (std::getline(in, line)) {
         std::istringstream ls(line);
-        std::string cmd;
+        java::String cmd;
         ls >> cmd;
         if (cmd == "Ns") {
             double v; if (ls >> v) active = active.withPhongExponent(v);
@@ -188,7 +210,7 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
             // Ignored by Vitral material model.
         }
         else if (cmd == "newmtl") {
-            std::string name; ls >> name;
+            java::String name; ls >> name;
             ret[active.getName()] = active;
             active = SimpleMaterial().withDoubleSided(false).withName(name);
         }
@@ -199,7 +221,7 @@ static std::map<std::string, SimpleMaterial> readMaterials(const std::string& mt
 
 static void addMeshToGroup(
     java::ArrayList<TriangleMesh>& meshGroup,
-    const std::string& nextGeometricObjectName,
+    const java::String& nextGeometricObjectName,
     const java::ArrayList<Vector3Dd>& vertexPositionsArray,
     const java::ArrayList<Vector3Dd>& vertexNormalsArray,
     const java::ArrayList<Vector3Dd>& vertexTextureCoordinatesArray,
@@ -336,7 +358,7 @@ static void addMeshToGroup(
 
 static TriangleMeshGroup* readObj(const java::File& sceneFile)
 {
-    const std::string fileName = sceneFile.getPath().toCString();
+    const java::String fileName = sceneFile.getPath().toCString();
     std::ifstream in(fileName.c_str());
     if (!in.is_open()) return new TriangleMeshGroup();
 
@@ -345,7 +367,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     java::ArrayList<Vector3Dd> vertexTextureCoordinatesArray;
     java::ArrayList< java::ArrayList<ReaderObjVertex> > triangleDatasetsArray;
 
-    std::string nextGeometricObjectName = "OBJ_default_material";
+    java::String nextGeometricObjectName = "OBJ_default_material";
     java::ArrayList<Image*> nextTexturesArray;
     java::ArrayList<SimpleMaterial> nextMaterialsArray;
 
@@ -359,8 +381,8 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
     textureSpanTriangleRangeTable.add(initialTextureSpans);
     java::ArrayList< java::ArrayList<int> > materialTriangleRangeTable;
 
-    std::map<std::string, Image*> texturesHashMap;
-    std::map<std::string, SimpleMaterial> materialsHashMap;
+    std::map<java::String, Image*> texturesHashMap;
+    std::map<java::String, SimpleMaterial> materialsHashMap;
     int textureIndex = 0;
     auto ensureMaterialSelection = [&]() {
         if (nextMaterialsArray.size() > 0 || materialsHashMap.empty()) {
@@ -376,14 +398,14 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
         materialTriangleRangeTable.add(r);
     };
 
-    std::string line;
+    java::String line;
     while (std::getline(in, line)) {
         if (line.rfind("mtllib ", 0) == 0) {
             materialsHashMap = readMaterials(line, fileName);
         }
         if (line.rfind("usemtl ", 0) == 0) {
             std::istringstream ss(line);
-            std::string t, matName;
+            java::String t, matName;
             ss >> t >> matName;
             if (materialsHashMap.find(matName) != materialsHashMap.end()) nextMaterialsArray.add(materialsHashMap[matName]);
             else nextMaterialsArray.add(SimpleMaterial());
@@ -401,13 +423,13 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
         }
         if (line.rfind("usemap ", 0) == 0) {
             std::istringstream ss(line);
-            std::string t, texName;
+            java::String t, texName;
             ss >> t >> texName;
 
             if (texturesHashMap.find(texName) == texturesHashMap.end()) {
                 Image* tex = 0;
                 if (texName != "(null)") {
-                    std::string texPath = joinPath(dirnameOf(fileName), texName);
+                    java::String texPath = joinPath(dirnameOf(fileName), texName);
                     tex = ImagePersistence::importRGBA(java::File(texPath.c_str()));
                 }
                 texturesHashMap[texName] = tex;
@@ -456,7 +478,7 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
             }
 
             std::istringstream ss(line);
-            std::string t;
+            java::String t;
             ss >> t >> nextGeometricObjectName;
 
             if (vertexPositionsArray.size() > 0) {

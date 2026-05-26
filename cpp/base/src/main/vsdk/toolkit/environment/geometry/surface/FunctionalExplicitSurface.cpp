@@ -1,13 +1,21 @@
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
+#include "java/lang/String.h"
 
-FunctionalExplicitSurface::FunctionalExplicitSurface(const std::string& fxy) : internalGeometry(0)
+FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : internalGeometry(0)
 {
     init(fxy);
 }
@@ -17,7 +25,7 @@ FunctionalExplicitSurface::~FunctionalExplicitSurface()
     if (internalGeometry != 0) delete internalGeometry;
 }
 
-void FunctionalExplicitSurface::init(const std::string& fxy)
+void FunctionalExplicitSurface::init(const java::String& fxy)
 {
     functionExpression = fxy;
     minx = miny = minz = -1.0;
@@ -27,7 +35,7 @@ void FunctionalExplicitSurface::init(const std::string& fxy)
     updateInternalGeometry();
 }
 
-std::string FunctionalExplicitSurface::getFunctionExpression() const { return functionExpression; }
+java::String FunctionalExplicitSurface::getFunctionExpression() const { return functionExpression; }
 
 void FunctionalExplicitSurface::setBounds(double minx, double miny, double minz,
                                           double maxx, double maxy, double maxz)

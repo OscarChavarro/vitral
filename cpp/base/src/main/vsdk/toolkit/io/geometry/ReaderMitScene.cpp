@@ -1,25 +1,39 @@
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/background/SimpleBackground.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "java/lang/String.h"
 
 #include <sstream>
+#include "java/lang/String.h"
 #include <stdexcept>
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 
 ReaderMitScene::ReaderMitScene()
 {
 }
 
-static std::string trimLine(const std::string& in)
+static java::String trimLine(const java::String& in)
 {
     size_t a = 0;
     while ( a < in.size() && (in[a] == ' ' || in[a] == '\t' || in[a] == '\r' || in[a] == '\n') ) a++;
@@ -57,10 +71,10 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
 
     SimpleMaterial* currentMaterial = new SimpleMaterial();
 
-    std::string line;
+    java::String line;
     while ( std::getline(is, line) ) {
         size_t sharp = line.find('#');
-        if ( sharp != std::string::npos ) {
+        if ( sharp != java::String::npos ) {
             line = line.substr(0, sharp);
         }
         line = trimLine(line);
@@ -69,7 +83,7 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
 
         std::istringstream ss(line);
-        std::string cmd;
+        java::String cmd;
         ss >> cmd;
 
         if ( cmd == "viewport" ) {
@@ -144,7 +158,7 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
         else if ( cmd == "light" ) {
             double r, g, b;
-            std::string type;
+            java::String type;
             if ( !(ss >> r >> g >> b >> type) ) {
                 continue;
             }

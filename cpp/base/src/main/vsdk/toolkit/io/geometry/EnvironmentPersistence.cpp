@@ -1,13 +1,17 @@
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/io/geometry/ReaderObj.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/lang/String.h"
 #include <cctype>
+#include "java/lang/String.h"
 
 void EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleScene* scene)
 {
     char* extC = extractExtensionFromFile(sceneFile);
-    std::string ext = (extC != 0) ? std::string(extC) : std::string();
+    java::String ext = (extC != 0) ? java::String(extC) : java::String();
     if ( extC != 0 ) delete [] extC;
     for (size_t i = 0; i < ext.size(); i++) ext[i] = (char)std::tolower((unsigned char)ext[i]);
 

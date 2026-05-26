@@ -1,6 +1,9 @@
 #include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 #include <cctype>
+#include "java/lang/String.h"
 
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}
 _AnimationInfo::_AnimationInfo(const _AnimationInfo& ai) : name(ai.name), start(ai.start), end(ai.end) {}
@@ -46,7 +49,7 @@ void Md2Mesh::returnStartEndAnim(short inIndex, short outStartEnd[2])
     outStartEnd[1] = aniInfos[inIndex].end;
 }
 
-void Md2Mesh::returnStartEndAnim(const std::string& inNameAnim, short outStartEnd[2])
+void Md2Mesh::returnStartEndAnim(const java::String& inNameAnim, short outStartEnd[2])
 {
     if (frameNames.size() == 0) {
         outStartEnd[0] = 0;
@@ -67,9 +70,9 @@ void Md2Mesh::returnStartEndAnim(const std::string& inNameAnim, short outStartEn
     }
 }
 
-_AnimationInfo* Md2Mesh::getAniInfo(const std::string& nameAnim)
+_AnimationInfo* Md2Mesh::getAniInfo(const java::String& nameAnim)
 {
-    std::string needle = nameAnim;
+    java::String needle = nameAnim;
     while (!needle.empty() && std::isspace((unsigned char)needle[needle.size()-1])) {
         needle.erase(needle.size()-1);
     }
@@ -89,14 +92,14 @@ void Md2Mesh::fillAniInfo()
 
     short i = 0;
     for (i = 0; i < (short)frameNames.size(); i++) {
-        std::string fName = frameNames[i];
+        java::String fName = frameNames[i];
 
         while (!fName.empty() && std::isspace((unsigned char)fName[fName.size()-1])) {
             fName.erase(fName.size()-1);
         }
 
         size_t posNull = fName.find('\0');
-        if (posNull != std::string::npos) {
+        if (posNull != java::String::npos) {
             fName = fName.substr(0, posNull);
         }
 

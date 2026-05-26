@@ -1,6 +1,8 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 
 #include <sstream>
+#include "java/lang/String.h"
 
 SimpleMaterial::SimpleMaterial()
     : SimpleMaterial(
@@ -37,7 +39,7 @@ SimpleMaterial::SimpleMaterial(const SimpleMaterial& m)
 }
 
 SimpleMaterial::SimpleMaterial(
-    const std::string& inName,
+    const java::String& inName,
     const ColorRgb& inAmbient,
     const ColorRgb& inDiffuse,
     const ColorRgb& inSpecular,
@@ -65,7 +67,7 @@ SimpleMaterial::SimpleMaterial(
 }
 
 SimpleMaterial::SimpleMaterial(
-    const std::string& inName,
+    const java::String& inName,
     const ColorRgb& inAmbient,
     const ColorRgb& inDiffuse,
     const ColorRgb& inSpecular,
@@ -90,9 +92,9 @@ SimpleMaterial::SimpleMaterial(
 {
 }
 
-const std::string& SimpleMaterial::getName() const { return name; }
+const java::String& SimpleMaterial::getName() const { return name; }
 
-SimpleMaterial SimpleMaterial::withName(const std::string& n) const { return SimpleMaterial(n, ambient, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
+SimpleMaterial SimpleMaterial::withName(const java::String& n) const { return SimpleMaterial(n, ambient, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
 SimpleMaterial SimpleMaterial::withAmbient(const ColorRgb& a) const { return SimpleMaterial(name, a, diffuse, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
 SimpleMaterial SimpleMaterial::withDiffuse(const ColorRgb& d) const { return SimpleMaterial(name, ambient, d, specular, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
 SimpleMaterial SimpleMaterial::withSpecular(const ColorRgb& s) const { return SimpleMaterial(name, ambient, diffuse, s, emission, transmittance, doubleSided, reflectionCoefficient, refractionCoefficient, indexOfRefraction, opacity, phongExponent); }
@@ -124,7 +126,7 @@ double SimpleMaterial::getRefractionCoefficient() const { return refractionCoeff
 double SimpleMaterial::getIndexOfRefraction() const { return indexOfRefraction; }
 double SimpleMaterial::getOpacity() const { return opacity; }
 
-std::string SimpleMaterial::toString() const
+java::String SimpleMaterial::toString() const
 {
     std::ostringstream ss;
     ss << "SimpleMaterial [" << name << "]:\n"

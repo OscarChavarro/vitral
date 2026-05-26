@@ -2,9 +2,12 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_RENDERERCONFIGURATION_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/ShadingType.h"
+#include "java/lang/String.h"
 
 #include <string>
+#include "java/lang/String.h"
 
 class RendererConfiguration {
 public:
@@ -86,7 +89,7 @@ public:
     ColorRgb getBoundingVolumeColor() const;
     void setBoundingVolumeColor(const ColorRgb& boundingVolumeColor);
 
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

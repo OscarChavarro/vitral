@@ -1,12 +1,19 @@
 #include "vsdk/toolkit/environment/scene/SimpleBodyGroup.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 #include <cfloat>
+#include "java/lang/String.h"
 
 SimpleBodyGroup::SimpleBodyGroup()
     : position(0, 0, 0), scale(1, 1, 1), rotation(), rotation_i(), name("")
@@ -14,8 +21,8 @@ SimpleBodyGroup::SimpleBodyGroup()
 }
 
 java::ArrayList<SimpleBody*>& SimpleBodyGroup::getBodies() { return bodies; }
-const std::string& SimpleBodyGroup::getName() const { return name; }
-void SimpleBodyGroup::setName(const std::string& n) { name = n; }
+const java::String& SimpleBodyGroup::getName() const { return name; }
+void SimpleBodyGroup::setName(const java::String& n) { name = n; }
 
 Matrix4x4d SimpleBodyGroup::getRotation() const { return rotation; }
 void SimpleBodyGroup::setRotation(const Matrix4x4d& r) { rotation = r.withoutTranslation(); }

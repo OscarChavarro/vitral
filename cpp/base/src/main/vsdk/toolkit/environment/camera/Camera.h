@@ -2,9 +2,13 @@
 #define CAMERA_H
 
 #include <string>
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 
 class CameraSnapshot;
 
@@ -26,8 +30,8 @@ public:
     Matrix4x4d getNormalizingTransformation() const;
     long getModificationVersion() const;
 
-    std::string getName() const;
-    void setName(const std::string& name);
+    java::String getName() const;
+    void setName(const java::String& name);
 
     double getViewportXSize() const;
     double getViewportYSize() const;
@@ -77,7 +81,7 @@ public:
 
     float* toColumnMajorFloatArray() const;
 
-    std::string toString() const;
+    java::String toString() const;
     CameraSnapshot* exportToCameraSnapshot() const;
     CameraSnapshot* exportToCameraSnapshot(int viewportXSize, int viewportYSize) const;
 
@@ -94,7 +98,7 @@ private:
     double nearPlaneDistance;
     double farPlaneDistance;
 
-    std::string name;
+    java::String name;
 
     double viewportXSize;
     double viewportYSize;

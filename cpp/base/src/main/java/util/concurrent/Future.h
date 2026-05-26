@@ -2,10 +2,14 @@
 #define JAVA_UTIL_CONCURRENT_FUTURE_H
 
 #include "java/util/concurrent/ExecutionException.h"
+#include "java/lang/String.h"
 
 #include <memory>
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 #include <pthread.h>
+#include "java/lang/String.h"
 
 namespace java {
 
@@ -17,7 +21,7 @@ public:
         pthread_cond_t cond;
         bool done;
         bool failed;
-        std::string errorMessage;
+        java::String errorMessage;
         T value;
 
         SharedState() : done(false), failed(false), errorMessage(), value() {
@@ -45,12 +49,12 @@ public:
             pthread_cond_wait(&state_->cond, &state_->mutex);
         }
         bool failed = state_->failed;
-        std::string message = state_->errorMessage;
+        java::String message = state_->errorMessage;
         T value = state_->value;
         pthread_mutex_unlock(&state_->mutex);
 
         if ( failed ) {
-            throw ExecutionException(message.empty() ? std::string("Task execution failed") : message);
+            throw ExecutionException(message.empty() ? java::String("Task execution failed") : message);
         }
         return value;
     }

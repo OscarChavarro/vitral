@@ -2,9 +2,13 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESHGROUP_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Ray;
 class RayHit;
@@ -41,7 +45,7 @@ public:
 
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 
-    std::string toString() const;
+    java::String toString() const;
 
     void doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter);
 

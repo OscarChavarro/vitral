@@ -3,11 +3,13 @@
 
 
 #include <stdexcept>
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class VSDKFatalException : public std::runtime_error {
 public:
-    explicit VSDKFatalException(const std::string& message) : std::runtime_error(message) {}
+    explicit VSDKFatalException(const java::String& message) : std::runtime_error(message) {}
 };
 
 

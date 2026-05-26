@@ -2,7 +2,9 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_FUNCTIONALEXPLICITSURFACE_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class TriangleMesh;
 class Ray;
@@ -13,7 +15,7 @@ class ProgressMonitor;
 
 class FunctionalExplicitSurface : public Surface {
 private:
-    std::string functionExpression;
+    java::String functionExpression;
     double minx;
     double miny;
     double minz;
@@ -24,16 +26,16 @@ private:
     int ny;
     TriangleMesh* internalGeometry;
 
-    void init(const std::string& fxy);
+    void init(const java::String& fxy);
     int coord(int nx, int ny, int ix, int iy);
     void updateInternalGeometry();
     double evalExpression(double x, double y, bool& ok) const;
 
 public:
-    FunctionalExplicitSurface(const std::string& fxy);
+    FunctionalExplicitSurface(const java::String& fxy);
     virtual ~FunctionalExplicitSurface();
 
-    std::string getFunctionExpression() const;
+    java::String getFunctionExpression() const;
 
     void setBounds(double minx, double miny, double minz,
                    double maxx, double maxy, double maxz);

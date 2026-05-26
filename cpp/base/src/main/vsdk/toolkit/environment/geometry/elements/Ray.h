@@ -2,7 +2,9 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAY_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 /**
  This class models a mathematical RAY.
@@ -35,7 +37,7 @@ public:
 
     bool equals(const Ray& other) const;
     int hashCode() const;
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

@@ -1,9 +1,15 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 TriangleMeshGroup::TriangleMeshGroup()
     : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
@@ -228,7 +234,7 @@ readability and debugging. Do not use for serialization or persistence
 purposes.
 @return human readable report from current mesh group
 */
-std::string TriangleMeshGroup::toString() const
+java::String TriangleMeshGroup::toString() const
 {
     return "TriangleMeshGroup < #Mesh: " + std::to_string(meshes.size()) + " >";
 }

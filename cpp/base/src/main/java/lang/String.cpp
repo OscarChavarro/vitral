@@ -127,6 +127,40 @@ String::charAt(int index) const {
     return toCString()[index];
 }
 
+char
+String::operator[](int index) const {
+    return charAt(index);
+}
+
+char &
+String::operator[](int index) {
+    static char nullChar = '\0';
+    if ( index < 0 || index >= length() ) {
+        return nullChar;
+    }
+    return value[index];
+}
+
+char *
+String::begin() {
+    return value == nullptr ? nullptr : value;
+}
+
+char *
+String::end() {
+    return value == nullptr ? nullptr : (value + length());
+}
+
+const char *
+String::begin() const {
+    return toCString();
+}
+
+const char *
+String::end() const {
+    return toCString() + length();
+}
+
 bool
 String::equals(const String &other) const {
     return std::strcmp(toCString(), other.toCString()) == 0;
@@ -202,6 +236,49 @@ String::indexOf(char token, int fromIndex) const {
         }
     }
     return -1;
+}
+
+int
+String::find(char token, int fromIndex) const {
+    return indexOf(token, fromIndex);
+}
+
+int
+String::find_last_of(const char *tokens) const {
+    if ( tokens == nullptr || tokens[0] == '\0' ) {
+        return -1;
+    }
+    const char *source = toCString();
+    for ( int i = length() - 1; i >= 0; --i ) {
+        for ( int j = 0; tokens[j] != '\0'; ++j ) {
+            if ( source[i] == tokens[j] ) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+String &
+String::erase(int index, int count) {
+    const int sourceLength = length();
+    if ( index < 0 || index >= sourceLength || count <= 0 ) {
+        return *this;
+    }
+    if ( index + count > sourceLength ) {
+        count = sourceLength - index;
+    }
+    char *buffer = new char[static_cast<std::size_t>(sourceLength - count) + 1];
+    int out = 0;
+    for ( int i = 0; i < sourceLength; ++i ) {
+        if ( i < index || i >= index + count ) {
+            buffer[out++] = toCString()[i];
+        }
+    }
+    buffer[out] = '\0';
+    assignText(buffer);
+    delete[] buffer;
+    return *this;
 }
 
 bool
@@ -307,6 +384,24 @@ String::operator+(const char *other) const {
     return concat(other);
 }
 
+String &
+String::operator+=(const String &other) {
+    *this = concat(other);
+    return *this;
+}
+
+String &
+String::operator+=(const char *other) {
+    *this = concat(other);
+    return *this;
+}
+
+String &
+String::operator+=(const std::string &other) {
+    *this = concat(other.c_str());
+    return *this;
+}
+
 bool
 String::operator==(const String &other) const {
     return equals(other);
@@ -325,6 +420,26 @@ String::operator!=(const String &other) const {
 bool
 String::operator!=(const char *other) const {
     return !equals(other);
+}
+
+bool
+String::operator<(const String &other) const {
+    return std::strcmp(toCString(), other.toCString()) < 0;
+}
+
+bool
+String::operator<=(const String &other) const {
+    return std::strcmp(toCString(), other.toCString()) <= 0;
+}
+
+bool
+String::operator>(const String &other) const {
+    return std::strcmp(toCString(), other.toCString()) > 0;
+}
+
+bool
+String::operator>=(const String &other) const {
+    return std::strcmp(toCString(), other.toCString()) >= 0;
 }
 
 String
@@ -405,6 +520,40 @@ String::formatCStringToJavaString(const char *format, va_list arguments) {
 String
 operator+(const char *left, const String &right) {
     return String(left).concat(right);
+}
+
+std::ostream &
+operator<<(std::ostream &os, const String &value) {
+    os << value.toCString();
+    return os;
+}
+
+std::istream &
+operator>>(std::istream &is, String &value) {
+    std::string token;
+    is >> token;
+    value = token;
+    return is;
+}
+
+}
+
+namespace std {
+
+std::istream &
+getline(std::istream &is, java::String &value, char delim) {
+    std::string tmp;
+    std::getline(is, tmp, delim);
+    value = tmp;
+    return is;
+}
+
+std::istream &
+getline(std::istream &is, java::String &value) {
+    std::string tmp;
+    std::getline(is, tmp);
+    value = tmp;
+    return is;
 }
 
 }

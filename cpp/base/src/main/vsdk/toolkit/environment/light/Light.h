@@ -2,9 +2,12 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHT_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 
 #include <string>
+#include "java/lang/String.h"
 
 class Light {
 public:
@@ -16,14 +19,14 @@ private:
     ColorRgb diffuse;
     ColorRgb specular;
     int id;
-    std::string name;
+    java::String name;
 
 public:
     Light(int type, const Vector3Dd& pos, const ColorRgb& emission);
     virtual ~Light() {}
 
-    const std::string& getName() const;
-    void setName(const std::string& n);
+    const java::String& getName() const;
+    void setName(const java::String& n);
 
     int getId() const;
     void setId(int i);

@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "java/lang/String.h"
 
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
@@ -111,9 +112,9 @@ void RendererConfiguration::setUseVertexColors(bool value) { useVertexColors = v
 ColorRgb RendererConfiguration::getBoundingVolumeColor() const { return boundingVolumeColor; }
 void RendererConfiguration::setBoundingVolumeColor(const ColorRgb& c) { boundingVolumeColor = c; }
 
-std::string RendererConfiguration::toString() const
+java::String RendererConfiguration::toString() const
 {
-    std::string msg = "<RendererConfiguration>:\n";
+    java::String msg = "<RendererConfiguration>:\n";
     msg += "  - Shading type: ";
     switch ( shadingType ) {
         case SHADING_TYPE_NOLIGHT: msg += "LIGHTING DISABLED (ONLY AMBIENT COLOR)\n"; break;
@@ -123,14 +124,14 @@ std::string RendererConfiguration::toString() const
         case SHADING_TYPE_COOK_TERRANCE: msg += "COOK-TERRANCE\n"; break;
         default: msg += "INVALID!\n"; break;
     }
-    msg += "  - Draw points: " + std::string(points ? "ON" : "OFF") + "\n";
-    msg += "  - Draw wires: " + std::string(wires ? "ON" : "OFF") + "\n";
-    msg += "  - Draw surfaces: " + std::string(surfaces ? "ON" : "OFF") + "\n";
-    msg += "  - Draw bounding volume: " + std::string(boundingVolume ? "ON" : "OFF") + "\n";
-    msg += "  - Draw selection corners: " + std::string(selectionCorners ? "ON" : "OFF") + "\n";
-    msg += "  - Draw normals: " + std::string(normals ? "ON" : "OFF") + "\n";
-    msg += "  - Draw triangles normals: " + std::string(trianglesNormals ? "ON" : "OFF") + "\n";
-    msg += "  - With texture: " + std::string(texture ? "ON" : "OFF") + "\n";
-    msg += "  - With bump map: " + std::string(bumpMap ? "ON" : "OFF") + "\n";
+    msg += "  - Draw points: " + java::String(points ? "ON" : "OFF") + "\n";
+    msg += "  - Draw wires: " + java::String(wires ? "ON" : "OFF") + "\n";
+    msg += "  - Draw surfaces: " + java::String(surfaces ? "ON" : "OFF") + "\n";
+    msg += "  - Draw bounding volume: " + java::String(boundingVolume ? "ON" : "OFF") + "\n";
+    msg += "  - Draw selection corners: " + java::String(selectionCorners ? "ON" : "OFF") + "\n";
+    msg += "  - Draw normals: " + java::String(normals ? "ON" : "OFF") + "\n";
+    msg += "  - Draw triangles normals: " + java::String(trianglesNormals ? "ON" : "OFF") + "\n";
+    msg += "  - With texture: " + java::String(texture ? "ON" : "OFF") + "\n";
+    msg += "  - With bump map: " + java::String(bumpMap ? "ON" : "OFF") + "\n";
     return msg;
 }

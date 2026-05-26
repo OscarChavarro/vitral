@@ -3,13 +3,14 @@
 
 
 #include <string>
+#include "java/lang/String.h"
 
 class VSDK {
 public:
     static const double EPSILON;
 
-    static std::string formatDouble(double a);
-    static std::string formatDouble(double a, int digits);
+    static java::String formatDouble(double a);
+    static java::String formatDouble(double a, int digits);
 };
 
 

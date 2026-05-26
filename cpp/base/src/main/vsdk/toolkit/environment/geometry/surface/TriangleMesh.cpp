@@ -1,19 +1,35 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/Image.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 #include <algorithm>
+#include "java/lang/String.h"
 
 /*
 This class represents a "basic" triangle mesh. Its model is based in a set
@@ -38,8 +54,8 @@ TriangleMesh::TriangleMesh() : name("default"), intersectionTriangleIndex(-1) {}
 TriangleMesh::TriangleMesh(const TriangleMesh& o) = default;
 TriangleMesh* TriangleMesh::clone() const { return new TriangleMesh(*this); }
 
-std::string TriangleMesh::getName() const { return name; }
-void TriangleMesh::setName(const std::string& n) { name = n; }
+java::String TriangleMesh::getName() const { return name; }
+void TriangleMesh::setName(const java::String& n) { name = n; }
 
 void TriangleMesh::getVertexAt(int i, Vertex& vertex) const
 {
@@ -738,9 +754,9 @@ void TriangleMesh::slice(InfinitePlane& p)
     calculateNormals();
 }
 
-std::string TriangleMesh::toString() const
+java::String TriangleMesh::toString() const
 {
-    std::string msg;
+    java::String msg;
     msg += "- TriangleMesh ------------------------------------------------------------\n";
     msg += "  - Number of triangles:" + std::to_string(getNumTriangles()) + "\n";
     msg += "  - Number of vertexes:" + std::to_string(getNumVertices()) + "\n";

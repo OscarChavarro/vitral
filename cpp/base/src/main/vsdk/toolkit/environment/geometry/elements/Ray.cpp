@@ -1,8 +1,13 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 #include <functional>
+#include "java/lang/String.h"
 
 const double Ray::UNIT_DIRECTION_TOLERANCE = 1e-12;
 
@@ -86,7 +91,7 @@ readability and debugging. Do not use for serialization or persistence
 purposes.
 @return human-readable representation of current Ray
 */
-std::string Ray::toString() const
+java::String Ray::toString() const
 {
     return "Ray Origin: <" + VSDK::formatDouble(origin_.x()) + ", " +
         VSDK::formatDouble(origin_.y()) + ", " +

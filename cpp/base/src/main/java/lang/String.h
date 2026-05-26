@@ -2,6 +2,8 @@
 #define JAVA_STRING__
 
 #include <cstdarg>
+#include <istream>
+#include <ostream>
 #include <string>
 
 namespace java {
@@ -63,6 +65,24 @@ class String {
     char
     charAt(int index) const;
 
+    char
+    operator[](int index) const;
+
+    char &
+    operator[](int index);
+
+    char *
+    begin();
+
+    char *
+    end();
+
+    const char *
+    begin() const;
+
+    const char *
+    end() const;
+
     bool
     equals(const String &other) const;
 
@@ -83,6 +103,15 @@ class String {
 
     int
     indexOf(char token, int fromIndex = 0) const;
+
+    int
+    find(char token, int fromIndex = 0) const;
+
+    int
+    find_last_of(const char *tokens) const;
+
+    String &
+    erase(int index, int count = 1);
 
     bool
     startsWith(const char *prefix) const;
@@ -111,6 +140,15 @@ class String {
     String
     operator+(const char *other) const;
 
+    String &
+    operator+=(const String &other);
+
+    String &
+    operator+=(const char *other);
+
+    String &
+    operator+=(const std::string &other);
+
     bool
     operator==(const String &other) const;
 
@@ -122,6 +160,18 @@ class String {
 
     bool
     operator!=(const char *other) const;
+
+    bool
+    operator<(const String &other) const;
+
+    bool
+    operator<=(const String &other) const;
+
+    bool
+    operator>(const String &other) const;
+
+    bool
+    operator>=(const String &other) const;
 
     static String
     valueOf(long long value);
@@ -146,7 +196,14 @@ class String {
 };
 
 String operator+(const char *left, const String &right);
+std::ostream &operator<<(std::ostream &os, const String &value);
+std::istream &operator>>(std::istream &is, String &value);
 
+}
+
+namespace std {
+std::istream &getline(std::istream &is, java::String &value, char delim);
+std::istream &getline(std::istream &is, java::String &value);
 }
 
 #endif

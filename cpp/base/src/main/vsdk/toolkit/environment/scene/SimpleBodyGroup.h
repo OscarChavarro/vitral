@@ -2,10 +2,14 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODYGROUP_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 
 #include <string>
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 
 class SimpleBody;
 class Ray;
@@ -17,7 +21,7 @@ private:
     Vector3Dd scale;
     Matrix4x4d rotation;
     Matrix4x4d rotation_i;
-    std::string name;
+    java::String name;
 
 public:
     SimpleBodyGroup();
@@ -25,8 +29,8 @@ public:
 
     java::ArrayList<SimpleBody*>& getBodies();
 
-    const std::string& getName() const;
-    void setName(const std::string& n);
+    const java::String& getName() const;
+    void setName(const java::String& n);
 
     Matrix4x4d getRotation() const;
     void setRotation(const Matrix4x4d& rotation);

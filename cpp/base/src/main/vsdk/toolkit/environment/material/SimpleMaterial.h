@@ -2,8 +2,10 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_SIMPLEMATERIAL_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 
 #include <string>
+#include "java/lang/String.h"
 
 class SimpleMaterial {
 private:
@@ -16,7 +18,7 @@ private:
     double reflectionCoefficient;
     double refractionCoefficient;
     double indexOfRefraction;
-    std::string name;
+    java::String name;
     double opacity;
     double phongExponent;
 
@@ -24,7 +26,7 @@ public:
     SimpleMaterial();
     SimpleMaterial(const SimpleMaterial& m);
     SimpleMaterial(
-        const std::string& name,
+        const java::String& name,
         const ColorRgb& ambient,
         const ColorRgb& diffuse,
         const ColorRgb& specular,
@@ -38,7 +40,7 @@ public:
         double phongExponent);
 
     SimpleMaterial(
-        const std::string& name,
+        const java::String& name,
         const ColorRgb& ambient,
         const ColorRgb& diffuse,
         const ColorRgb& specular,
@@ -49,9 +51,9 @@ public:
         double phongExponent);
     virtual ~SimpleMaterial() {}
 
-    const std::string& getName() const;
+    const java::String& getName() const;
 
-    SimpleMaterial withName(const std::string& n) const;
+    SimpleMaterial withName(const java::String& n) const;
     SimpleMaterial withAmbient(const ColorRgb& a) const;
     SimpleMaterial withDiffuse(const ColorRgb& d) const;
     SimpleMaterial withSpecular(const ColorRgb& s) const;
@@ -83,7 +85,7 @@ public:
     double getIndexOfRefraction() const;
     double getOpacity() const;
 
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

@@ -1,14 +1,22 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 #include <set>
+#include "java/lang/String.h"
 
 bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>&) { return true; }
 bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>&, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext&) { return true; }
@@ -24,13 +32,13 @@ void PolyhedralBoundedSolidGeometricValidator::extractPointsFromFace(_Polyhedral
 
 bool PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(_PolyhedralBoundedSolidFace*) { return true; }
 bool PolyhedralBoundedSolidGeometricValidator::validateFaceIsPlanar(_PolyhedralBoundedSolidFace*, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext&) { return true; }
-bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid*, std::string*) { return true; }
-bool PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(PolyhedralBoundedSolid*, std::string*) { return true; }
-bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(PolyhedralBoundedSolid*, std::string*) { return true; }
-bool PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(PolyhedralBoundedSolid*, std::string*) { return true; }
-bool PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(PolyhedralBoundedSolid*, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext&, std::string*) { return true; }
+bool PolyhedralBoundedSolidGeometricValidator::validateAllFacesPlanarityAndPlanes(PolyhedralBoundedSolid*, java::String*) { return true; }
+bool PolyhedralBoundedSolidGeometricValidator::validateConsistentFaceOrientations(PolyhedralBoundedSolid*, java::String*) { return true; }
+bool PolyhedralBoundedSolidGeometricValidator::validateLoopsStrict(PolyhedralBoundedSolid*, java::String*) { return true; }
+bool PolyhedralBoundedSolidGeometricValidator::validateFaceIntersectionsStrict(PolyhedralBoundedSolid*, java::String*) { return true; }
+bool PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(PolyhedralBoundedSolid*, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext&, java::String*) { return true; }
 
-bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, std::string*)
+bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, java::String*)
 {
     if ( solid == 0 ) return false;
     std::set<int> faceIds;

@@ -53,7 +53,7 @@ java::String* PrimitiveCountShapeDescriptor::toString() const {
 
     for (int i = 0; i < numberOfElements; i++) {
         char line[256];
-        std::string formatted = VSDK::formatDouble(featureVector[i]);
+        java::String formatted = VSDK::formatDouble(featureVector[i]);
         offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "  - %s\n", formatted.c_str());
     }
 

@@ -2,16 +2,18 @@
 #define __VSDK_TOOLKIT_COMMON_SYMBOLICALGEBRA_ALGEBRAICEXPRESSION_H__
 
 #include <map>
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class AlgebraicExpression {
 private:
-    std::string expression;
-    std::map<std::string, double> vars;
+    java::String expression;
+    std::map<java::String, double> vars;
 
 public:
-    void setExpression(const std::string& expr);
-    void defineValue(const std::string& name, double value);
+    void setExpression(const java::String& expr);
+    void defineValue(const java::String& name, double value);
     double eval() const;
 };
 

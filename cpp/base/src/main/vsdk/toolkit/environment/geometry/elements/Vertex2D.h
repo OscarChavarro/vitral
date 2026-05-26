@@ -2,7 +2,9 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX2D_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Vertex2D
 {
@@ -15,7 +17,7 @@ public:
     Vertex2D(double x, double y);
     Vertex2D(double x, double y, double r, double g, double b);
 
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

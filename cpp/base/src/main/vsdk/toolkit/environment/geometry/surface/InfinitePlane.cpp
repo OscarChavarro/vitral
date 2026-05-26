@@ -1,8 +1,13 @@
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 
 InfinitePlane::InfinitePlane(const InfinitePlane& other) { clone(other); }
 
@@ -150,7 +155,7 @@ bool InfinitePlane::overlapsWith(const InfinitePlane& other, double tolerance) c
     return std::abs(a2-a1)<=tolerance && std::abs(b2-b1)<=tolerance && std::abs(c2-c1)<=tolerance && std::abs(d2-d1)<=tolerance;
 }
 
-std::string InfinitePlane::toString() const
+java::String InfinitePlane::toString() const
 {
     return "InfinitePlane: N=<" + VSDK::formatDouble(a) + ", " + VSDK::formatDouble(b) + ", " +
         VSDK::formatDouble(c) + ">, D=" + VSDK::formatDouble(d);

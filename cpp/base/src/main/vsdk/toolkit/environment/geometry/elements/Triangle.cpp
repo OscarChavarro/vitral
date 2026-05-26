@@ -1,9 +1,15 @@
 #include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/processing/Containment.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include <algorithm>
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 
 Triangle::Triangle() : p0(0), p1(0), p2(0), normal(0, 0, 0) {}
 Triangle::Triangle(int inP0, int inP1, int inP2)
@@ -78,7 +84,7 @@ void Triangle::minMax(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd&
     mm[5] = std::max(p0.z(), std::max(p1.z(), p2.z()));
 }
 
-std::string Triangle::toString() const
+java::String Triangle::toString() const
 {
     return "f < " + std::to_string(p0) + ", " +
         std::to_string(p1) + ", " +

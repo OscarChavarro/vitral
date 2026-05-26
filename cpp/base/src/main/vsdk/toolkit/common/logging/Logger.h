@@ -3,7 +3,9 @@
 
 
 #include <exception>
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Logger {
 public:
@@ -14,13 +16,13 @@ public:
     static void setWithSystemExit(bool flag);
     static void setWithFatalExceptions(bool flag);
 
-    static void reportMessage(const std::string& className, int level, const std::string& method, const std::string& message);
-    static void reportMessageWithException(const std::string& className, int level, const std::string& method, const std::string& message, const std::exception* cause);
+    static void reportMessage(const java::String& className, int level, const java::String& method, const java::String& message);
+    static void reportMessageWithException(const java::String& className, int level, const java::String& method, const java::String& message, const std::exception* cause);
 
 private:
     static bool withSystemExit_;
     static bool withFatalExceptions_;
-    static void processFatalError(const std::string& method, const std::string& message, const std::exception* cause);
+    static void processFatalError(const java::String& method, const java::String& message, const std::exception* cause);
 };
 
 

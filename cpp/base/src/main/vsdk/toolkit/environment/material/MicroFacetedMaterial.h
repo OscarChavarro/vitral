@@ -2,6 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
 
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 
 class MicroFacetedMaterial : public SimpleMaterial {
 public:
@@ -27,7 +28,7 @@ private:
 public:
     MicroFacetedMaterial();
     MicroFacetedMaterial(const MicroFacetedMaterial& other);
-    MicroFacetedMaterial(const std::string& csvFileName, const std::string& materialName);
+    MicroFacetedMaterial(const java::String& csvFileName, const java::String& materialName);
 
     double getRoughness() const;
     double getAlpha() const;

@@ -1,8 +1,13 @@
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 Vertex::Vertex()
     : position(0, 0, 0), normal(1, 0, 0), binormal(0, 1, 0), tangent(0, 0, 1),
@@ -53,7 +58,7 @@ Triangle Vertex::getIncidentTriangleAt(int index) const
     return incidentTriangles->get(index);
 }
 
-std::string Vertex::toString() const
+java::String Vertex::toString() const
 {
     return "v <" + VSDK::formatDouble(position.x()) + ", " +
         VSDK::formatDouble(position.y()) + ", " +

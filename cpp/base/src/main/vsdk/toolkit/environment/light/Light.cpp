@@ -1,5 +1,7 @@
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
+#include "java/lang/String.h"
 
 Light::Light(int type, const Vector3Dd& pos, const ColorRgb& emission)
     : tipo_de_luz(type), lvec(0, 0, 0), ambient(0, 0, 0), diffuse(1, 1, 1), specular(emission), id(0), name("")
@@ -12,8 +14,8 @@ Light::Light(int type, const Vector3Dd& pos, const ColorRgb& emission)
     }
 }
 
-const std::string& Light::getName() const { return name; }
-void Light::setName(const std::string& n) { name = n; }
+const java::String& Light::getName() const { return name; }
+void Light::setName(const java::String& n) { name = n; }
 
 int Light::getId() const { return id; }
 void Light::setId(int i) { id = i; }

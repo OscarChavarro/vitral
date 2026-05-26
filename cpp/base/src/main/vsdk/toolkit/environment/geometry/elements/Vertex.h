@@ -2,8 +2,11 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 class Triangle;
 
 /**
@@ -69,7 +72,7 @@ public:
     purposes.
     @return human readable representation of current vertex
     */
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

@@ -2,7 +2,9 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_INFINITEPLANE_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/HalfSpace.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Ray;
 class RayHit;
@@ -46,7 +48,7 @@ public:
     Vector3Dd mirrorPoint(const Vector3Dd& p) const;
 
     bool overlapsWith(const InfinitePlane& other, double tolerance) const;
-    std::string toString() const;
+    java::String toString() const;
 
     double getA() const;
     void setA(double a);

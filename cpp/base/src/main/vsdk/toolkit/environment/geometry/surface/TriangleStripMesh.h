@@ -2,8 +2,11 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLESTRIPMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Vertex;
 class Ray;
@@ -12,7 +15,7 @@ class RayHit;
 class TriangleStripMesh : public Surface {
 private:
     // Basic mesh data model
-    std::string name;
+    java::String name;
     java::ArrayList<Vertex> vertexes;
     java::ArrayList< java::ArrayList<int> > strips;
 

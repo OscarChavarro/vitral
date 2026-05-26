@@ -1,16 +1,27 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/Image.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/NormalMap.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "java/lang/String.h"
 
 #include <cmath>
+#include "java/lang/String.h"
 
 SimpleBody::SimpleBody()
     : geometry(0), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
@@ -74,9 +85,9 @@ void SimpleBody::updateTransformFlags()
     hasIdentityTransform = hasTranslationOnlyTransform && hasZeroTranslation;
 }
 
-const std::string& SimpleBody::getName() const { return name; }
+const java::String& SimpleBody::getName() const { return name; }
 long long SimpleBody::getModificationVersion() const { return modificationVersion; }
-void SimpleBody::setName(const std::string& n) { name = n; markModified(); }
+void SimpleBody::setName(const java::String& n) { name = n; markModified(); }
 
 Geometry* SimpleBody::getGeometry() const { return geometry; }
 void SimpleBody::setGeometry(Geometry* g)

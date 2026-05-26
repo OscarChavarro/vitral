@@ -2,8 +2,11 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Vertex;
 class Triangle;
@@ -19,7 +22,7 @@ class ProgressMonitor;
 
 class TriangleMesh : public Surface {
 private:
-    std::string name;
+    java::String name;
 
     java::ArrayList<double> vertexPositions;
     java::ArrayList<double> vertexNormals;
@@ -68,8 +71,8 @@ public:
 
     TriangleMesh* clone() const;
 
-    std::string getName() const;
-    void setName(const std::string& name);
+    java::String getName() const;
+    void setName(const java::String& name);
 
     void getVertexAt(int i, Vertex& vertex) const;
 
@@ -141,7 +144,7 @@ public:
     TriangleMeshGroup* exportToTriangleMeshGroup();
 
     void compact();
-    std::string toString() const;
+    java::String toString() const;
 
     void removeSelectedVertices();
     void slice(InfinitePlane& p);

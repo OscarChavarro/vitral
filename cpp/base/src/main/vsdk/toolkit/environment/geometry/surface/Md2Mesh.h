@@ -2,13 +2,15 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_MD2MESH_H__
 
 #include <string>
+#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/String.h"
 
 class Image;
 
 class _AnimationInfo {
 public:
-    std::string name;
+    java::String name;
     short start;
     short end;
 
@@ -36,9 +38,9 @@ public:
     int offsetGlCommands;
     int offsetEnd;
 
-    java::ArrayList<std::string> skinNames;
+    java::ArrayList<java::String> skinNames;
     java::ArrayList<Image*> skins;
-    java::ArrayList<std::string> frameNames;
+    java::ArrayList<java::String> frameNames;
     java::ArrayList< java::ArrayList<float> > frameVertices;
     java::ArrayList< java::ArrayList<short> > frameNormalIndices;
     java::ArrayList< java::ArrayList<float> > glCmdTexCoordsStrip;
@@ -55,7 +57,7 @@ private:
     short currentAnimationInd;
     short maxAnimationInd;
 
-    _AnimationInfo* getAniInfo(const std::string& nameAnim);
+    _AnimationInfo* getAniInfo(const java::String& nameAnim);
     void fillAniInfo();
 
 public:
@@ -71,7 +73,7 @@ public:
     void setElapsedTimeSeg(float elapsedTimeSeg);
 
     void returnStartEndAnim(short inIndex, short outStartEnd[2]);
-    void returnStartEndAnim(const std::string& inNameAnim, short outStartEnd[2]);
+    void returnStartEndAnim(const java::String& inNameAnim, short outStartEnd[2]);
 
     static const float anorms[162][3];
 };

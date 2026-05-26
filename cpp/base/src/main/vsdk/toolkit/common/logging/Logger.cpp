@@ -1,9 +1,13 @@
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/lang/String.h"
 
 #include <cstdlib>
+#include "java/lang/String.h"
 #include <iostream>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "java/lang/String.h"
 
 bool Logger::withSystemExit_ = true;
 bool Logger::withFatalExceptions_ = true;
@@ -11,7 +15,7 @@ bool Logger::withFatalExceptions_ = true;
 void Logger::setWithSystemExit(bool flag) { withSystemExit_ = flag; }
 void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions_ = flag; }
 
-void Logger::processFatalError(const std::string& method, const std::string& message, const std::exception* cause)
+void Logger::processFatalError(const java::String& method, const java::String& message, const std::exception* cause)
 {
     if ( withSystemExit_ ) {
         std::exit(1);
@@ -19,7 +23,7 @@ void Logger::processFatalError(const std::string& method, const std::string& mes
     if ( !withFatalExceptions_ ) {
         return;
     }
-    std::string m = method.empty() ? "VSDK fatal error" : ("VSDK fatal error at " + method);
+    java::String m = method.empty() ? "VSDK fatal error" : ("VSDK fatal error at " + method);
     if ( !message.empty() ) {
         m += ": " + message;
     }
@@ -30,7 +34,7 @@ void Logger::processFatalError(const std::string& method, const std::string& mes
     throw VSDKFatalException(m);
 }
 
-void Logger::reportMessage(const std::string& className, int level, const std::string& method, const std::string& message)
+void Logger::reportMessage(const java::String& className, int level, const java::String& method, const java::String& message)
 {
     std::cerr << "[VSDK][" << className << "] " << method << ": " << message << "\n";
     if ( level == FATAL_ERROR ) {
@@ -38,7 +42,7 @@ void Logger::reportMessage(const std::string& className, int level, const std::s
     }
 }
 
-void Logger::reportMessageWithException(const std::string& className, int level, const std::string& method, const std::string& message, const std::exception* cause)
+void Logger::reportMessageWithException(const java::String& className, int level, const java::String& method, const java::String& message, const std::exception* cause)
 {
     std::cerr << "[VSDK][" << className << "] " << method << ": " << message;
     if ( cause != nullptr ) {

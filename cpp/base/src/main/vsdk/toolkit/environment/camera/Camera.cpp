@@ -1,8 +1,13 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
+#include "java/lang/String.h"
 #include <cmath>
+#include "java/lang/String.h"
 #include <cstdio>
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/lang/String.h"
 
 static const double PI = 3.14159265358979323846;
 
@@ -57,11 +62,11 @@ void Camera::markModified() {
     modificationVersion++;
 }
 
-std::string Camera::getName() const {
+java::String Camera::getName() const {
     return name;
 }
 
-void Camera::setName(const std::string& n) {
+void Camera::setName(const java::String& n) {
     name = n;
     markModified();
 }
@@ -335,8 +340,8 @@ float* Camera::toColumnMajorFloatArray() const {
     return calculateProjectionMatrix().exportToFloatArrayColumnOrder();
 }
 
-std::string Camera::toString() const {
-    std::string msg = "<Camera>:\n";
+java::String Camera::toString() const {
+    java::String msg = "<Camera>:\n";
     msg += "  - Name: \"" + name + "\"\n";
 
     if (projectionMode == PROJECTION_MODE_PERSPECTIVE) {

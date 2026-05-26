@@ -1,14 +1,20 @@
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
+#include "java/lang/String.h"
 
 #include <algorithm>
+#include "java/lang/String.h"
 #include <cctype>
+#include "java/lang/String.h"
 #include <fstream>
+#include "java/lang/String.h"
 #include <sstream>
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 
 namespace {
 struct MicrofacetConfig {
-    std::string name;
+    java::String name;
     ColorRgb ambient;
     ColorRgb diffuse;
     ColorRgb specular;
@@ -29,7 +35,7 @@ struct MicrofacetConfig {
     int geometryModel;
 };
 
-static std::string trim(const std::string& s)
+static java::String trim(const java::String& s)
 {
     size_t a = 0;
     while ( a < s.size() && std::isspace((unsigned char)s[a]) ) a++;
@@ -38,9 +44,9 @@ static std::string trim(const std::string& s)
     return s.substr(a, b - a);
 }
 
-static std::string lower(const std::string& s)
+static java::String lower(const java::String& s)
 {
-    std::string out = s;
+    java::String out = s;
     for ( size_t i = 0; i < out.size(); i++ ) out[i] = (char)std::tolower((unsigned char)out[i]);
     return out;
 }
@@ -52,20 +58,20 @@ static double clamp01(double v)
     return v;
 }
 
-static double parseDoubleOr(const std::string& s, double fallback)
+static double parseDoubleOr(const java::String& s, double fallback)
 {
     try { return std::stod(trim(s)); } catch (...) { return fallback; }
 }
 
-static int parseIntOr(const std::string& s, int fallback)
+static int parseIntOr(const java::String& s, int fallback)
 {
     try { return std::stoi(trim(s)); } catch (...) { return fallback; }
 }
 
-static void splitCsv(const std::string& line, java::ArrayList<std::string>& cols)
+static void splitCsv(const java::String& line, java::ArrayList<java::String>& cols)
 {
     std::stringstream ss(line);
-    std::string token;
+    java::String token;
     while ( std::getline(ss, token, ',') ) cols.add(token);
 }
 
@@ -94,7 +100,7 @@ static MicrofacetConfig defaultConfig()
     return c;
 }
 
-static MicrofacetConfig loadFromCsv(const std::string& csvFileName, const std::string& materialName)
+static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java::String& materialName)
 {
     MicrofacetConfig d = defaultConfig();
     if ( csvFileName.empty() || materialName.empty() ) return d;
@@ -102,13 +108,13 @@ static MicrofacetConfig loadFromCsv(const std::string& csvFileName, const std::s
     std::ifstream in(csvFileName.c_str());
     if ( !in.good() ) return d;
 
-    std::string headerLine;
+    java::String headerLine;
     if ( !std::getline(in, headerLine) ) return d;
-    java::ArrayList<std::string> header;
+    java::ArrayList<java::String> header;
     splitCsv(headerLine, header);
 
-    auto idx = [&](const std::string& n) -> int {
-        const std::string needle = lower(n);
+    auto idx = [&](const java::String& n) -> int {
+        const java::String needle = lower(n);
         for ( long int i = 0; i < header.size(); i++ ) {
             if ( lower(trim(header[i])) == needle ) return (int)i;
         }
@@ -136,14 +142,14 @@ static MicrofacetConfig loadFromCsv(const std::string& csvFileName, const std::s
     const int iNdf = idx("ndf_model");
     const int iGeo = idx("geometry_model");
 
-    const std::string target = lower(trim(materialName));
-    std::string line;
+    const java::String target = lower(trim(materialName));
+    java::String line;
     while ( std::getline(in, line) ) {
         if ( trim(line).empty() ) continue;
-        java::ArrayList<std::string> cols;
+        java::ArrayList<java::String> cols;
         splitCsv(line, cols);
         if ( iName < 0 || iName >= (int)cols.size() ) continue;
-        const std::string rowName = trim(cols[(long int)iName]);
+        const java::String rowName = trim(cols[(long int)iName]);
         if ( lower(rowName) != target ) continue;
 
         d.name = rowName;
@@ -216,7 +222,7 @@ MicroFacetedMaterial::MicroFacetedMaterial(const MicroFacetedMaterial& other)
 {
 }
 
-MicroFacetedMaterial::MicroFacetedMaterial(const std::string& csvFileName, const std::string& materialName)
+MicroFacetedMaterial::MicroFacetedMaterial(const java::String& csvFileName, const java::String& materialName)
     : SimpleMaterial(),
       roughness(0.35),
       alpha(0.35 * 0.35),

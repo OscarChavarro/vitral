@@ -2,8 +2,11 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_TRIANGLE_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Intersection.h"
+#include "java/lang/String.h"
 #include <string>
+#include "java/lang/String.h"
 
 class Ray;
 
@@ -50,7 +53,7 @@ public:
     or persistence purposes.
     @return human readable representation of current triangle
     */
-    std::string toString() const;
+    java::String toString() const;
 };
 
 #endif

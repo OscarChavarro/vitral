@@ -1,22 +1,30 @@
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include "java/lang/String.h"
 #include <algorithm>
+#include "java/lang/String.h"
 
 QuadMesh::QuadMesh() : name("default")
 {
 }
 
-std::string QuadMesh::getName() const
+java::String QuadMesh::getName() const
 {
     return name;
 }
 
-void QuadMesh::setName(const std::string& inName)
+void QuadMesh::setName(const java::String& inName)
 {
     name = inName;
 }
@@ -262,9 +270,9 @@ void QuadMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
     delete g;
 }
 
-std::string QuadMesh::toString() const
+java::String QuadMesh::toString() const
 {
-    std::string msg;
+    java::String msg;
     QuadMesh* self = const_cast<QuadMesh*>(this);
     double* mm = self->getMinMax();
     msg += "- QuadMesh ------------------------------------------------------------\n";

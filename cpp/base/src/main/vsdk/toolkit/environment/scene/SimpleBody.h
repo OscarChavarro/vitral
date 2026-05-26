@@ -2,10 +2,14 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODY_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/lang/String.h"
 
 #include <string>
+#include "java/lang/String.h"
 
 class Geometry;
 class Ray;
@@ -38,7 +42,7 @@ private:
     NormalMap* globalNormalMap;
     RGBImageUncompressed* globalNormalMapRgb;
 
-    std::string name;
+    java::String name;
     long long modificationVersion;
 
     void markModified();
@@ -50,9 +54,9 @@ public:
     SimpleBody();
     virtual ~SimpleBody();
 
-    const std::string& getName() const;
+    const java::String& getName() const;
     long long getModificationVersion() const;
-    void setName(const std::string& n);
+    void setName(const java::String& n);
 
     Geometry* getGeometry() const;
     void setGeometry(Geometry* g);
