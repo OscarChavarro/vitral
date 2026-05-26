@@ -15,7 +15,6 @@
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include <cstdio>
-#include <string>
 
 QuadMesh::QuadMesh() : name("default")
 {
@@ -272,16 +271,16 @@ void QuadMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
     delete g;
 }
 
-static std::string doubleToStr(double val) {
+static java::String doubleToStr(double val) {
     char buf[64];
     snprintf(buf, sizeof(buf), "%g", val);
-    return buf;
+    return java::String(buf);
 }
 
-static std::string intToStr(int val) {
+static java::String intToStr(int val) {
     char buf[32];
     snprintf(buf, sizeof(buf), "%d", val);
-    return buf;
+    return java::String(buf);
 }
 
 java::String QuadMesh::toString() const
@@ -291,23 +290,23 @@ java::String QuadMesh::toString() const
     double* mm = self->getMinMax();
     msg += "- QuadMesh ------------------------------------------------------------\n";
     msg += "  - Number of quads:";
-    msg += intToStr(getNumQuads()).c_str();
+    msg += intToStr(getNumQuads());
     msg += "\n";
     msg += "  - Number of vertexes:";
-    msg += intToStr(getNumVertices()).c_str();
+    msg += intToStr(getNumVertices());
     msg += "\n";
     msg += "  - MINMAX: (";
-    msg += doubleToStr(mm[0]).c_str();
+    msg += doubleToStr(mm[0]);
     msg += ", ";
-    msg += doubleToStr(mm[1]).c_str();
+    msg += doubleToStr(mm[1]);
     msg += ", ";
-    msg += doubleToStr(mm[2]).c_str();
+    msg += doubleToStr(mm[2]);
     msg += ") - (";
-    msg += doubleToStr(mm[3]).c_str();
+    msg += doubleToStr(mm[3]);
     msg += ", ";
-    msg += doubleToStr(mm[4]).c_str();
+    msg += doubleToStr(mm[4]);
     msg += ", ";
-    msg += doubleToStr(mm[5]).c_str();
+    msg += doubleToStr(mm[5]);
     msg += ")\n";
     msg += "---------------------------------------------------------------------------\n";
     delete [] mm;

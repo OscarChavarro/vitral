@@ -5,7 +5,6 @@
 #include <cmath>
 #include "java/lang/String.h"
 #include <cstdio>
-#include <string>
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
@@ -16,10 +15,10 @@ static inline double degreesToRadians(double degrees) {
     return degrees * PI / 180.0;
 }
 
-static std::string doubleToStr(double val) {
+static java::String doubleToStr(double val) {
     char buf[64];
     snprintf(buf, sizeof(buf), "%g", val);
-    return buf;
+    return java::String(buf);
 }
 
 Camera::Camera()
@@ -356,27 +355,27 @@ java::String Camera::toString() const {
     } else if (projectionMode == PROJECTION_MODE_ORTHOGONAL) {
         msg += "  - Camera in PARALLEL projection mode\n";
         msg += "  - Orthogonal zoom = ";
-        msg += doubleToStr(orthogonalZoom).c_str();
+        msg += doubleToStr(orthogonalZoom);
         msg += "\n";
     } else {
         msg += "  - UNKNOWN Camera projection mode!\n";
     }
 
     msg += "  - eyePosition(x, y, z) = (";
-    msg += doubleToStr(eyePosition.x()).c_str();
+    msg += doubleToStr(eyePosition.x());
     msg += ", ";
-    msg += doubleToStr(eyePosition.y()).c_str();
+    msg += doubleToStr(eyePosition.y());
     msg += ", ";
-    msg += doubleToStr(eyePosition.z()).c_str();
+    msg += doubleToStr(eyePosition.z());
     msg += ")\n";
 
     Vector3Dd focusedPos = eyePosition.add(front.multiply(focalDistance));
     msg += "  - focusedPointPosition(x, y, z) = (";
-    msg += doubleToStr(focusedPos.x()).c_str();
+    msg += doubleToStr(focusedPos.x());
     msg += ", ";
-    msg += doubleToStr(focusedPos.y()).c_str();
+    msg += doubleToStr(focusedPos.y());
     msg += ", ";
-    msg += doubleToStr(focusedPos.z()).c_str();
+    msg += doubleToStr(focusedPos.z());
     msg += ")\n";
 
     Matrix4x4d R = getRotation();
@@ -385,55 +384,55 @@ java::String Camera::toString() const {
     double roll = R.obtainEulerRollAngle();
 
     msg += "  - Rotation yaw/pitch/roll (RAD): <";
-    msg += doubleToStr(yaw).c_str();
+    msg += doubleToStr(yaw);
     msg += ", ";
-    msg += doubleToStr(pitch).c_str();
+    msg += doubleToStr(pitch);
     msg += ", ";
-    msg += doubleToStr(roll).c_str();
+    msg += doubleToStr(roll);
     msg += ">\n";
 
     msg += "  - Reference frame:\n";
     msg += "    . Vector UP = (";
-    msg += doubleToStr(up.x()).c_str();
+    msg += doubleToStr(up.x());
     msg += ", ";
-    msg += doubleToStr(up.y()).c_str();
+    msg += doubleToStr(up.y());
     msg += ", ";
-    msg += doubleToStr(up.z()).c_str();
+    msg += doubleToStr(up.z());
     msg += ") (length ";
-    msg += doubleToStr(up.length()).c_str();
+    msg += doubleToStr(up.length());
     msg += ")\n";
     msg += "    . Vector FRONT = (";
-    msg += doubleToStr(front.x()).c_str();
+    msg += doubleToStr(front.x());
     msg += ", ";
-    msg += doubleToStr(front.y()).c_str();
+    msg += doubleToStr(front.y());
     msg += ", ";
-    msg += doubleToStr(front.z()).c_str();
+    msg += doubleToStr(front.z());
     msg += ") (length ";
-    msg += doubleToStr(front.length()).c_str();
+    msg += doubleToStr(front.length());
     msg += ")\n";
     msg += "    . Vector LEFT = (";
-    msg += doubleToStr(left.x()).c_str();
+    msg += doubleToStr(left.x());
     msg += ", ";
-    msg += doubleToStr(left.y()).c_str();
+    msg += doubleToStr(left.y());
     msg += ", ";
-    msg += doubleToStr(left.z()).c_str();
+    msg += doubleToStr(left.z());
     msg += ") (length ";
-    msg += doubleToStr(left.length()).c_str();
+    msg += doubleToStr(left.length());
     msg += ")\n";
 
     msg += "  - fov = ";
-    msg += doubleToStr(fov).c_str();
+    msg += doubleToStr(fov);
     msg += "\n";
     msg += "  - nearPlaneDistance = ";
-    msg += doubleToStr(nearPlaneDistance).c_str();
+    msg += doubleToStr(nearPlaneDistance);
     msg += "\n";
     msg += "  - farPlaneDistance = ";
-    msg += doubleToStr(farPlaneDistance).c_str();
+    msg += doubleToStr(farPlaneDistance);
     msg += "\n";
     msg += "  - Viewport size in pixels = (";
-    msg += doubleToStr(viewportXSize).c_str();
+    msg += doubleToStr(viewportXSize);
     msg += ", ";
-    msg += doubleToStr(viewportYSize).c_str();
+    msg += doubleToStr(viewportYSize);
     msg += ")\n";
 
     return msg;

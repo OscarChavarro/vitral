@@ -10,7 +10,6 @@
 #include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
-#include <string>
 #include "java/lang/String.h"
 
 Triangle::Triangle() : p0(0), p1(0), p2(0), normal(0, 0, 0) {}
@@ -86,15 +85,15 @@ void Triangle::minMax(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd&
     mm[5] = java::Math::max(p0.z(), java::Math::max(p1.z(), p2.z()));
 }
 
-static std::string intToStr(int val) {
+static java::String intToStr(int val) {
     char buf[32];
     snprintf(buf, sizeof(buf), "%d", val);
-    return buf;
+    return java::String(buf);
 }
 
 java::String Triangle::toString() const
 {
-    return java::String(("f < " + intToStr(p0) + ", " +
+    return java::String("f < ") + intToStr(p0) + ", " +
         intToStr(p1) + ", " +
-        intToStr(p2) + " >").c_str());
+        intToStr(p2) + " >";
 }
