@@ -15,9 +15,6 @@
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
 
-#include <set>
-#include "java/lang/String.h"
-
 bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>&) { return true; }
 bool PolyhedralBoundedSolidGeometricValidator::validateFacePointsAreCoplanar(java::ArrayList<Vector3Dd>&, const PolyhedralBoundedSolidNumericPolicy::ToleranceContext&) { return true; }
 
@@ -41,15 +38,23 @@ bool PolyhedralBoundedSolidGeometricValidator::validateNoCoincidentVertices(Poly
 bool PolyhedralBoundedSolidGeometricValidator::validateUniqueFaceAndVertexIds(PolyhedralBoundedSolid* solid, java::String*)
 {
     if ( solid == 0 ) return false;
-    std::set<int> faceIds;
-    std::set<int> vertexIds;
+    java::ArrayList<int> faceIds;
+    java::ArrayList<int> vertexIds;
     java::ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
     java::ArrayList<_PolyhedralBoundedSolidVertex*>& verts = solid->getVerticesList();
     for (long int i = 0; i < faces.size(); ++i) {
-        if ( !faceIds.insert(faces[i]->id).second ) return false;
+        int id = faces[i]->id;
+        for (long int j = 0; j < faceIds.size(); ++j) {
+            if ( faceIds[j] == id ) return false;
+        }
+        faceIds.add(id);
     }
     for (long int i = 0; i < verts.size(); ++i) {
-        if ( !vertexIds.insert(verts[i]->id).second ) return false;
+        int id = verts[i]->id;
+        for (long int j = 0; j < vertexIds.size(); ++j) {
+            if ( vertexIds[j] == id ) return false;
+        }
+        vertexIds.add(id);
     }
     return true;
 }
