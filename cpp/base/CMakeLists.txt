@@ -105,6 +105,12 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/Voxelization.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshGroupVoxelization.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/Volume.cpp

@@ -12,9 +12,6 @@
 
 class Ray;
 class RayHit;
-class VoxelVolume;
-class Matrix4x4d;
-class ProgressMonitor;
 
 class TriangleMeshGroup : public Surface {
 private:
@@ -46,8 +43,6 @@ public:
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 
     java::String toString() const;
-
-    void doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter);
 
     TriangleMeshGroup* exportToTriangleMeshGroup();
 };

@@ -48,6 +48,7 @@ private:
     void markModified();
     void updateTransformFlags();
     static bool isIdentityRotation(const Matrix4x4d& matrix);
+    bool doIntersectionWithTranslationOnly(const Ray& inOutRay, RayHit* outHit, int requiredDetailMask) const;
     bool doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
 
 public:

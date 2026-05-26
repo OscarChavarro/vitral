@@ -7,9 +7,6 @@ import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
-import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
-import vsdk.toolkit.environment.geometry.volume.Box;
-import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class TriangleMeshGroup extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;
@@ -164,26 +161,6 @@ public class TriangleMeshGroup extends Surface {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        double[] mm = getMinMax();
-        Vector3Dd size = new Vector3Dd(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-        Vector3Dd center = new Vector3Dd(
-            (mm[3]+mm[0])/2,
-            (mm[4]+mm[1])/2,
-            (mm[5]+mm[2])/2
-        );
-        Box boundingVolume = new Box(size);
-        Ray localRay = new Ray(
-            inRay.origin().subtract(center),
-            inRay.direction(),
-            inRay.t()
-        );
-        if ( !boundingVolume.doIntersection(localRay, null) ) {
-            int[] info = intersectionInformation.get();
-            info[0] = -1;
-            info[1] = -1;
-            return false;
-        }
-
         double minT = Double.MAX_VALUE;
         RayHit bestHit = null;
         int bestMesh = -1;
@@ -262,22 +239,6 @@ public class TriangleMeshGroup extends Surface {
         return "TriangleMeshGroup < #Mesh: " + this.meshes.size() + " >";
     }
 
-    /**
-    Check the general interface contract in superclass method
-    Geometry.doVoxelization.
-    */
-    @Override
-    public void doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
-    {
-        int i;
-
-        // Chain of responsability behavior design pattern with TriangleMesh
-        for ( i= 0; i< meshes.size(); i++ ) {
-            meshes.get(i).doVoxelization(vv, M, reporter);
-        }
-    }
-
-    @Override
     public TriangleMeshGroup exportToTriangleMeshGroup()
     {
         return this;

@@ -34,6 +34,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.geometricProcessing.Voxelization;
 import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -146,7 +147,7 @@ public class SearchEngine
 
                 //- Primitive rasterization ([FUNK2003].4.1.) -----------------
                 ProgressMonitorConsole reporter = new ProgressMonitorConsole();
-                referenceGeometry.doVoxelization(vv, M, reporter);
+                Voxelization.doVoxelization(referenceGeometry, vv, M, reporter);
 
                 System.out.println("Ok.");
 

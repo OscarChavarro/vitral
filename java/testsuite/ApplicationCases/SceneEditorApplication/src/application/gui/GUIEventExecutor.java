@@ -27,6 +27,7 @@ import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.geometricProcessing.Voxelization;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -181,7 +182,7 @@ public class GUIEventExecutor extends CommandListener{
             vv.init(nx, ny, nz);
 
             ProgressMonitorConsole reporter = new ProgressMonitorConsole();
-            referenceGeometry.doVoxelization(vv, M, reporter);
+            Voxelization.doVoxelization(referenceGeometry, vv, M, reporter);
 
             //- Append newly created volume to scene, matching reference form -
             SimpleBody newThing = parent.theScene.addThing(vv);

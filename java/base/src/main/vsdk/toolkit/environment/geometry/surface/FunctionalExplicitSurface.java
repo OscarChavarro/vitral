@@ -10,8 +10,6 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
-import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
-import vsdk.toolkit.gui.feedback.ProgressMonitor;
 
 public class FunctionalExplicitSurface extends Surface
 {
@@ -273,17 +271,4 @@ public class FunctionalExplicitSurface extends Surface
         return internalGeometry.doContainmentTest(p, distanceTolerance);
     }
 
-    /**
-    Check the general interface contract in superclass method
-    Geometry.doVoxelization.
-    @param vv
-    @param M
-    @param reporter
-    */
-    @Override
-    public void
-    doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
-    {
-        internalGeometry.doVoxelization(vv, M, reporter);
-    }
 }

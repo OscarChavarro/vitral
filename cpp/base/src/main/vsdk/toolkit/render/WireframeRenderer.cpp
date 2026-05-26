@@ -8,10 +8,10 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
-#include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/volume/Volume.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
@@ -170,38 +170,6 @@ static void processBrep(SimpleBody* body, const Matrix4x4d& proj,
     }
 }
 
-static void processBox(SimpleBody* body, const Matrix4x4d& proj,
-                       Calligraphic2DBuffer* lineSet, const Camera* camera,
-                       Box* box)
-{
-    const Vector3Dd size = box->getSize();
-    const double x = size.x() / 2.0;
-    const double y = size.y() / 2.0;
-    const double z = size.z() / 2.0;
-
-    Vector3Dd local[8] = {
-        Vector3Dd(-x, -y, -z), Vector3Dd( x, -y, -z),
-        Vector3Dd( x,  y, -z), Vector3Dd(-x,  y, -z),
-        Vector3Dd(-x, -y,  z), Vector3Dd( x, -y,  z),
-        Vector3Dd( x,  y,  z), Vector3Dd(-x,  y,  z)
-    };
-    const int edgePairs[12][2] = {
-        {0,1},{1,2},{2,3},{3,0},
-        {4,5},{5,6},{6,7},{7,4},
-        {0,4},{1,5},{2,6},{3,7}
-    };
-
-    Matrix4x4d M = body->getTransformationMatrix();
-    for (int i = 0; i < 12; i++) {
-        Vector3Dd a = M.multiply(local[edgePairs[i][0]]);
-        Vector3Dd b = M.multiply(local[edgePairs[i][1]]);
-        Vector3Dd cp0, cp1;
-        if ( clipLineCanonicVolume(a, b, camera, cp0, cp1) ) {
-            addLine(lineSet, cp0, cp1, proj);
-        }
-    }
-}
-
 void WireframeRenderer::execute(Calligraphic2DBuffer* outLineSet,
                                 java::ArrayList<SimpleBody*>& simpleBodies,
                                 const Camera* camera)
@@ -215,18 +183,13 @@ void WireframeRenderer::execute(Calligraphic2DBuffer* outLineSet,
         SimpleBody* body = simpleBodies[i];
         if ( body == 0 || body->getGeometry() == 0 ) continue;
         Geometry* g = body->getGeometry();
-        if ( TriangleMeshGroup* mg = dynamic_cast<TriangleMeshGroup*>(g) ) {
-            processTriangleMeshGroup(mg, body, proj, outLineSet, camera);
-        }
-        else if ( TriangleMesh* mesh = dynamic_cast<TriangleMesh*>(g) ) {
-            TriangleMeshGroup tmp;
-            tmp.addMesh(*mesh);
-            processTriangleMeshGroup(&tmp, body, proj, outLineSet, camera);
-        }
-        else if ( dynamic_cast<Solid*>(g) != 0 ) {
+        if ( dynamic_cast<Solid*>(g) != 0 ) {
             processBrep(body, proj, outLineSet, camera);
-            if ( Box* box = dynamic_cast<Box*>(g) ) {
-                processBox(body, proj, outLineSet, camera, box);
+        }
+        else {
+            TriangleMeshGroup mg;
+            if ( GeometryTriangulator::exportToTriangleMeshGroup(g, mg) ) {
+                processTriangleMeshGroup(&mg, body, proj, outLineSet, camera);
             }
         }
     }

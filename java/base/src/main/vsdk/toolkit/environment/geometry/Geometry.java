@@ -11,9 +11,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.RayHit;
-import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
-import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
-import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.processing.Containment;
 
 /**
@@ -150,17 +147,6 @@ public abstract class Geometry extends Entity {
     public abstract double[] getMinMax();
 
     /**
-    \todo  This method should be abstract, forcing all subclasses to define it.
-    The design of this method could change in future.
-    @return a new TriangleMeshGroup representing the surface of current Geometry
-    when possible, null if not possible
-    */
-    public TriangleMeshGroup exportToTriangleMeshGroup()
-    {
-        return null;
-    }
-
-    /**
     Given a point `p`, this method classifies if point lies `INSIDE` current
     geometry, `OUTSIDE` current geometry or `LIMIT` if it is near the geometry
     at some specified `distanceTolerance`.
@@ -174,70 +160,6 @@ public abstract class Geometry extends Entity {
     public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
         return OUTSIDE;
-    }
-
-    /**
-    This method implements a general voxelization strategy based on 
-    containment test. Note that in the case of multiple fragment geometries
-    (i.e. meshes and polylines) this method is usually inefficient, and
-    for that cases voxelization should be explicit, and overload this method.
-    Current method is usually well behaved for basic solid models.
-    Note that `reporter` can be null.
-    @param vv
-    @param M
-    @param reporter
-    */
-    public void doVoxelization(VoxelVolume vv, Matrix4x4d M, ProgressMonitor reporter)
-    {
-        int nx = vv.getXSize();
-        int ny = vv.getYSize();
-        int nz = vv.getZSize();
-        int nmax;
-        double minmax[] = getMinMax();
-        double greaterScale, sx, sy, sz;
-
-        sx = minmax[3]-minmax[0];
-        sy = minmax[4]-minmax[1];
-        sz = minmax[5]-minmax[2];
-        greaterScale = sx;
-        if ( sy > greaterScale ) {
-            greaterScale = sy;
-        }
-        if ( sz > greaterScale ) {
-            greaterScale = sz;
-        }
-
-        nmax = nx;
-        if ( ny > nmax ) nmax = ny;
-        if ( nz > nmax ) nmax = nz;
-        int containmentStatus;
-        int x, y, z;
-        Vector3Dd p;
-        Vector3Dd transformedP;
-
-        if ( reporter != null ) {
-            reporter.begin();
-        }
-        for ( x = 0; x < nx; x++ ) {
-            for ( y = 0; y < ny; y++ ) {
-                if ( reporter != null ) {
-                    reporter.update(0, nx*ny, x*ny);
-                }
-                for ( z = 0; z < nz; z++ ) {
-                    p = vv.getVoxelPosition(x, y, z);
-                    transformedP = M.multiply(p);
-                    containmentStatus = doContainmentTest(
-                            transformedP, (1/((double)nmax) * greaterScale));
-                    if ( containmentStatus == INSIDE ||
-                         containmentStatus == LIMIT ) {
-                        vv.putVoxel(x, y, z, (byte)-1);
-                    }
-                }
-            }
-        }
-        if ( reporter != null ) {
-            reporter.end();
-        }
     }
 
 }

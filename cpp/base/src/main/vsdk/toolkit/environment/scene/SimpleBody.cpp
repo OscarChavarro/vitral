@@ -5,6 +5,8 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "java/lang/String.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
@@ -21,6 +23,7 @@
 #include "java/lang/String.h"
 
 #include <cmath>
+#include <cfloat>
 #include "java/lang/String.h"
 
 SimpleBody::SimpleBody()
@@ -238,7 +241,11 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     }
 
     if ( hasIdentityTransform ) {
-        return geometry->doIntersection(inOutRay, outHit);
+        return SurfaceRayIntersection::doIntersection(geometry, inOutRay, outHit);
+    }
+
+    if ( hasTranslationOnlyTransform ) {
+        return doIntersectionWithTranslationOnly(inOutRay, outHit, requestedDetailMask);
     }
 
     Vector3Dd translatedOrigin = inOutRay.origin().subtract(position);
@@ -253,15 +260,27 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         rotatedDirection.x() * inverseScale.x(),
         rotatedDirection.y() * inverseScale.y(),
         rotatedDirection.z() * inverseScale.z());
-    localDirection = localDirection.normalized();
+    const double localDirectionLength = localDirection.length();
+    if ( localDirectionLength <= VSDK::EPSILON ) {
+        return false;
+    }
+    localDirection = localDirection.multiply(1.0 / localDirectionLength);
 
-    Ray localRay(localOrigin, localDirection, inOutRay.t());
+    double localRayT = inOutRay.t();
+    if ( localRayT >= DBL_MAX / localDirectionLength ) {
+        localRayT = DBL_MAX;
+    }
+    else {
+        localRayT *= localDirectionLength;
+    }
+
+    Ray localRay(localOrigin, localDirection, localRayT);
     const bool requestedStoreRay = outHit != 0 ? outHit->shouldStoreRay() : false;
 
     if ( outHit != 0 ) {
         outHit->setStoreRay(false);
         outHit->resetForDistanceOnly();
-        if ( !geometry->doIntersection(localRay, outHit) ) {
+        if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, outHit) ) {
             outHit->setStoreRay(requestedStoreRay);
             outHit->setRequiredDetailMask(requestedDetailMask);
             return false;
@@ -271,7 +290,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         RayHit localHitStorage;
         localHitStorage.setStoreRay(false);
         localHitStorage.resetForDistanceOnly();
-        if ( !geometry->doIntersection(localRay, &localHitStorage) ) {
+        if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, &localHitStorage) ) {
             return false;
         }
     }
@@ -288,12 +307,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
             return false;
         }
 
-        Vector3Dd localHitPoint = localOrigin.add(localDirection.multiply(localHitT));
-        Vector3Dd worldHitPoint = rotation.multiply(Vector3Dd(
-            localHitPoint.x() * scale.x(),
-            localHitPoint.y() * scale.y(),
-            localHitPoint.z() * scale.z())).add(position);
-        double worldT = worldHitPoint.subtract(inOutRay.origin()).length();
+        double worldT = localHitT / localDirectionLength;
 
         outHit->setStoreRay(requestedStoreRay);
         outHit->setRequiredDetailMask(requestedDetailMask);
@@ -308,6 +322,66 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
             outHit->setHitDistance(worldT);
         }
     }
+    return true;
+}
+
+bool SimpleBody::doIntersectionWithTranslationOnly(
+    const Ray& inOutRay,
+    RayHit* outHit,
+    int requiredDetailMask) const
+{
+    Ray localRay(inOutRay.origin().subtract(position), inOutRay.direction(), inOutRay.t());
+
+    RayHit localHitStorage;
+    RayHit* hit = outHit != 0 ? outHit : &localHitStorage;
+
+    if ( requiredDetailMask == RayHit::DETAIL_NONE ) {
+        hit->resetForDistanceOnly();
+    }
+    else {
+        hit->reset(requiredDetailMask);
+    }
+
+    if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, hit) ) {
+        return false;
+    }
+
+    double localHitT;
+    if ( hit->ray() != 0 ) {
+        localHitT = hit->ray()->t();
+    }
+    else if ( hit->hasHitDistance() ) {
+        localHitT = hit->hitDistance();
+    }
+    else {
+        return false;
+    }
+
+    if ( outHit != 0 ) {
+        if ( outHit->shouldStoreRay() || outHit->needsAnySurfaceData() ) {
+            outHit->setRay(inOutRay.withT(localHitT));
+        }
+        else {
+            outHit->setHitDistance(localHitT);
+        }
+        if ( outHit->needsPoint() ) {
+            outHit->p = hit->p.add(position);
+        }
+        if ( outHit->needsNormal() ) {
+            outHit->n = hit->n;
+        }
+        if ( outHit->needsTextureCoordinates() ) {
+            outHit->u = hit->u;
+            outHit->v = hit->v;
+        }
+        if ( outHit->needsTangent() ) {
+            outHit->t = hit->t;
+        }
+        outHit->material = hit->material;
+        outHit->texture = hit->texture;
+        outHit->normalMap = hit->normalMap;
+    }
+
     return true;
 }
 

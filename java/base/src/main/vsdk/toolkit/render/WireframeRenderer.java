@@ -17,6 +17,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.Surface;
 import vsdk.toolkit.environment.geometry.volume.Solid;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.geometricProcessing.GeometryTriangulator;
 import vsdk.toolkit.environment.geometry.volume.Volume;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -196,7 +197,7 @@ public class WireframeRenderer extends RenderingElement
         Vector3Dd mp0, mp1;         // Mesh points
         Vector3Dd[] clippedSegment;  // Clipped points
 
-        mg = body.getGeometry().exportToTriangleMeshGroup();
+        mg = GeometryTriangulator.exportToTriangleMeshGroup(body.getGeometry());
         if ( mg == null ) return;
 
         mp0 = new Vector3Dd();

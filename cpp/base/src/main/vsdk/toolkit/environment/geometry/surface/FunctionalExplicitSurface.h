@@ -9,9 +9,6 @@
 class TriangleMesh;
 class Ray;
 class RayHit;
-class VoxelVolume;
-class Matrix4x4d;
-class ProgressMonitor;
 
 class FunctionalExplicitSurface : public Surface {
 private:
@@ -59,7 +56,6 @@ public:
     virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
-    void doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter);
 };
 
 #endif

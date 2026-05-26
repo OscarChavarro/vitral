@@ -17,6 +17,7 @@ import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.RayHit;
+import vsdk.toolkit.environment.geometry.geometricProcessing.SurfaceRayIntersection;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 
 /**
@@ -353,7 +354,7 @@ public class SimpleBody extends Entity {
         }
 
         if ( hasIdentityTransform ) {
-            return geometry.doIntersection(inOutRay, outHit);
+            return SurfaceRayIntersection.doIntersection(geometry, inOutRay, outHit);
         }
 
         if ( hasTranslationOnlyTransform ) {
@@ -389,7 +390,7 @@ public class SimpleBody extends Entity {
         }
 
         // ... and compute doIntersection operation on object's coordinates
-        if ( geometry.doIntersection(localRay, hit) ) {
+        if ( SurfaceRayIntersection.doIntersection(geometry, localRay, hit) ) {
             double localHitT;
             if ( hit.ray() != null ) {
                 localHitT = hit.ray().t();
@@ -566,7 +567,7 @@ public class SimpleBody extends Entity {
             }
         }
 
-        if ( !geometry.doIntersection(localRay, hit) ) {
+        if ( !SurfaceRayIntersection.doIntersection(geometry, localRay, hit) ) {
             return false;
         }
         double localHitT;

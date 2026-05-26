@@ -185,13 +185,3 @@ int FunctionalExplicitSurface::doContainmentTest(const Vector3Dd& p, double dist
 {
     return internalGeometry ? internalGeometry->doContainmentTest(p, distanceTolerance) : OUTSIDE;
 }
-
-/*
-Check the general interface contract in superclass method
-Geometry.doVoxelization.
-*/
-void FunctionalExplicitSurface::doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter)
-{
-    if (internalGeometry == 0) return;
-    internalGeometry->doVoxelization(vv, M, reporter);
-}

@@ -6,8 +6,6 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/volume/Box.h"
-#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
 #include <cstdio>
@@ -137,20 +135,6 @@ Ray* TriangleMeshGroup::doIntersection(const Ray& inOut_Ray)
 
 bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
 {
-    double* mm = getMinMax();
-    Vector3Dd size(mm[3]-mm[0], mm[4]-mm[1], mm[5]-mm[2]);
-    Vector3Dd center((mm[3]+mm[0])/2, (mm[4]+mm[1])/2, (mm[5]+mm[2])/2);
-    delete [] mm;
-
-    Box bbox(size);
-    Ray localRay(inRay.origin().subtract(center), inRay.direction(), inRay.t());
-    RayHit coarseHit(RayHit::DETAIL_NONE, false);
-    if (!bbox.doIntersection(localRay, &coarseHit)) {
-        intersectionMeshIndex = -1;
-        intersectionTriangleIndex = -1;
-        return false;
-    }
-
     double minT = 1e308;
     RayHit bestHit;
     bool hasBestHit = false;
@@ -244,18 +228,6 @@ static java::String intToStr(int val) {
 java::String TriangleMeshGroup::toString() const
 {
     return java::String("TriangleMeshGroup < #Mesh: ") + intToStr((int)meshes.size()) + " >";
-}
-
-/*
-Check the general interface contract in superclass method
-Geometry.doVoxelization.
-*/
-void TriangleMeshGroup::doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter)
-{
-    // Chain of responsability behavior design pattern with TriangleMesh
-    for (long int i = 0; i < meshes.size(); i++) {
-        meshes[i].doVoxelization(vv, M, reporter);
-    }
 }
 
 TriangleMeshGroup* TriangleMeshGroup::exportToTriangleMeshGroup()

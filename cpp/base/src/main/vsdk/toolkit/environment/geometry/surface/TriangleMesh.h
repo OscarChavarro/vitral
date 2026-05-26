@@ -16,9 +16,6 @@ class Ray;
 class RayHit;
 class TriangleMeshGroup;
 class InfinitePlane;
-class VoxelVolume;
-class Matrix4x4d;
-class ProgressMonitor;
 
 class TriangleMesh : public Surface {
 private:
@@ -141,8 +138,6 @@ public:
 
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();
-
-    void doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter);
 
     TriangleMeshGroup* exportToTriangleMeshGroup();
 
