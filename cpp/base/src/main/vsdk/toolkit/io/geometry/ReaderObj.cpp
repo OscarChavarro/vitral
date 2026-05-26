@@ -43,7 +43,7 @@
 #include "java/lang/String.h"
 #include <sstream>
 #include "java/lang/String.h"
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 struct ReaderObjVertex {

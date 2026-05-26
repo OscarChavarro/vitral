@@ -15,7 +15,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 
 static const float IMAGE_DEPTH_BIAS_FACTOR = -1.0f;

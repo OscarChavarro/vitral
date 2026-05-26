@@ -8,7 +8,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/lang/String.h"
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class Geometry;

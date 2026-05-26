@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 #include "java/util/ArrayList.txx"
 #include <algorithm>

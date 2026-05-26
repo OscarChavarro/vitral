@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "java/io/File.h"

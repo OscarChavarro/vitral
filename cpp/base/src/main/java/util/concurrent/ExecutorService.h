@@ -5,7 +5,6 @@
 #include "java/util/concurrent/Future.h"
 
 #include <memory>
-#include <string>
 #include <exception>
 
 namespace java {

@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "java/lang/String.h"
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class SimpleMaterial {

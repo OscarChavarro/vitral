@@ -5,7 +5,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/elements/Intersection.h"
 #include "java/lang/String.h"
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class Ray;

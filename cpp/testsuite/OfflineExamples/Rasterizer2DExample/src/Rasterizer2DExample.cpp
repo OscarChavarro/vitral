@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdio>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"

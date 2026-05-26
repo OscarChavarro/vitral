@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include "java/lang/String.h"
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class MatrixDimensionMismatchException : public std::invalid_argument {

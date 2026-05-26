@@ -1,7 +1,7 @@
 #ifndef SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
 #define SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
 
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 #include "ShaderOperationMode.h"
 

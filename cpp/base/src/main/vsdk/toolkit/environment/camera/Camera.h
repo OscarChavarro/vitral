@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/lang/String.h"

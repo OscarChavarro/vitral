@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_COMMON_VSDK_H__
 
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class VSDK {

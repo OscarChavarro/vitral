@@ -2,7 +2,7 @@
 #ifndef RAYTRACING_OFFLINE_COMMANDOPTIONSPROCESSOR_H
 #define RAYTRACING_OFFLINE_COMMANDOPTIONSPROCESSOR_H
 
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 
 class CommandOptionsProcessor {

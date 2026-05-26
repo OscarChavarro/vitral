@@ -6,7 +6,7 @@
 #include "vsdk/toolkit/environment/material/ShadingType.h"
 #include "java/lang/String.h"
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class RendererConfiguration {

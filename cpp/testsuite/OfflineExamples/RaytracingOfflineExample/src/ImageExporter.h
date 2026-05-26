@@ -2,7 +2,7 @@
 #ifndef RAYTRACING_OFFLINE_IMAGEEXPORTER_H
 #define RAYTRACING_OFFLINE_IMAGEEXPORTER_H
 
-#include <string>
+#include "java/lang/String.h"
 
 class RGBImageUncompressed;
 

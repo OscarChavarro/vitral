@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 #include <cstring>
 

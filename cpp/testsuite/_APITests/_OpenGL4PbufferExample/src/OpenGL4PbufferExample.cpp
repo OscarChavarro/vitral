@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 
 static java::String readShaderSource(const java::String& shaderFileName)

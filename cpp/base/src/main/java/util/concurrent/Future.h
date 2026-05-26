@@ -6,7 +6,7 @@
 
 #include <memory>
 #include "java/lang/String.h"
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 #include <pthread.h>
 #include "java/lang/String.h"

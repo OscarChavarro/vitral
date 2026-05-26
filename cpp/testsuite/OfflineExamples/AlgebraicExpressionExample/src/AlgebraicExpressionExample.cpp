@@ -1,6 +1,6 @@
 #include <cstdio>
 #include <sstream>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"

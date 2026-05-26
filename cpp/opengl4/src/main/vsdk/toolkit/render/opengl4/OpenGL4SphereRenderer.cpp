@@ -19,7 +19,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
-#include <string>
+#include "java/lang/String.h"
 #include <vector>
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {

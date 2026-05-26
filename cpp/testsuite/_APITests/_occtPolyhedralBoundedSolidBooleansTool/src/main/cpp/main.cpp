@@ -26,7 +26,7 @@
 #include <cctype>
 #include <cstdio>
 #include <exception>
-#include <string>
+#include "java/lang/String.h"
 
 namespace {
 

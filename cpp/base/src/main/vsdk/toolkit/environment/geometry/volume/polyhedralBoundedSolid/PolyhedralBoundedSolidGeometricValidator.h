@@ -1,7 +1,7 @@
 #ifndef __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
 #define __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
 
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.h"

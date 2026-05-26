@@ -3,7 +3,7 @@
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
 
 #include <GL/glew.h>
-#include <string>
+#include "java/lang/String.h"
 
 class Image;
 class RGBImageUncompressed;

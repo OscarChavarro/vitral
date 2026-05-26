@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 #include "java/lang/String.h"
-#include <string>
+#include "java/lang/String.h"
 #include "java/lang/String.h"
 
 class VSDKFatalException : public std::runtime_error {
