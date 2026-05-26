@@ -22,7 +22,8 @@
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "java/lang/String.h"
 
-#include <sstream>
+#include <cstdio>
+#include <cstring>
 #include "java/lang/String.h"
 #include <stdexcept>
 #include "java/lang/String.h"
@@ -42,10 +43,15 @@ static java::String trimLine(const java::String& in)
     return in.substr(a, b - a);
 }
 
-void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
+void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outScene)
 {
     if ( outScene == 0 ) {
         throw std::runtime_error("ReaderMitScene::importEnvironment: outScene is null");
+    }
+
+    FILE* file = fopen(fileName, "r");
+    if ( !file ) {
+        throw std::runtime_error("ReaderMitScene::importEnvironment: could not open file");
     }
 
     outScene->clearOwnedElements();
@@ -71,26 +77,26 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
 
     SimpleMaterial* currentMaterial = new SimpleMaterial();
 
-    std::string line;
-    while ( std::getline(is, line) ) {
-        size_t sharp = line.find('#');
-        if ( sharp != std::string::npos ) {
-            line = line.substr(0, sharp);
+    char lineBuf[1024];
+    while ( fgets(lineBuf, sizeof(lineBuf), file) ) {
+        // Remove comment
+        char* sharp = strchr(lineBuf, '#');
+        if ( sharp ) {
+            *sharp = '\0';
         }
-        java::String javaLine(line.c_str());
+        java::String javaLine(lineBuf);
         javaLine = trimLine(javaLine);
         if ( javaLine.empty() ) {
             continue;
         }
 
-        std::istringstream ss(javaLine.toCString());
-        std::string cmdStr;
-        ss >> cmdStr;
-        java::String cmd(cmdStr.c_str());
+        char cmdStr[256] = {0};
+        sscanf(javaLine.toCString(), "%255s", cmdStr);
+        java::String cmd(cmdStr);
 
         if ( cmd == "viewport" ) {
             int w, h;
-            if ( ss >> w >> h ) {
+            if ( sscanf(javaLine.toCString(), "%*s %d %d", &w, &h) == 2 ) {
                 viewportXSize = w;
                 viewportYSize = h;
                 hasViewport = true;
@@ -98,34 +104,34 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
         else if ( cmd == "eye" ) {
             double x, y, z;
-            if ( ss >> x >> y >> z ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 eye = Vector3Dd(x, y, z);
                 hasEye = true;
             }
         }
         else if ( cmd == "up" ) {
             double x, y, z;
-            if ( ss >> x >> y >> z ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 up = Vector3Dd(x, y, z);
                 hasUp = true;
             }
         }
         else if ( cmd == "lookat" ) {
             double x, y, z;
-            if ( ss >> x >> y >> z ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &x, &y, &z) == 3 ) {
                 lookat = Vector3Dd(x, y, z);
                 hasLookat = true;
             }
         }
         else if ( cmd == "fov" ) {
             double fov;
-            if ( ss >> fov ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf", &fov) == 1 ) {
                 importedHorizontalFov = fov;
             }
         }
         else if ( cmd == "background" ) {
             double r, g, b;
-            if ( ss >> r >> g >> b ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf", &r, &g, &b) == 3 ) {
                 background->setColor(r, g, b);
             }
         }
@@ -134,7 +140,8 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
             double ka, kd, ks;
             double ns;
             double kr, kt, index;
-            if ( ss >> r >> g >> b >> ka >> kd >> ks >> ns >> kr >> kt >> index ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                        &r, &g, &b, &ka, &kd, &ks, &ns, &kr, &kt, &index) == 10 ) {
                 delete currentMaterial;
                 currentMaterial = new SimpleMaterial(
                     "surface",
@@ -150,7 +157,7 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
         else if ( cmd == "sphere" ) {
             double x, y, z, r;
-            if ( ss >> x >> y >> z >> r ) {
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf %lf", &x, &y, &z, &r) == 4 ) {
                 SimpleBody* b = new SimpleBody();
                 b->setGeometry(new Sphere(r));
                 b->setPosition(Vector3Dd(x, y, z));
@@ -160,28 +167,29 @@ void ReaderMitScene::importEnvironment(std::istream& is, SimpleScene* outScene)
         }
         else if ( cmd == "light" ) {
             double r, g, b;
-            std::string typeStr;
-            if ( !(ss >> r >> g >> b >> typeStr) ) {
-                continue;
-            }
-            java::String type(typeStr.c_str());
-            if ( type == "ambient" ) {
-                outScene->addLight(new Light(LightType::AMBIENT, Vector3Dd(0,0,0), ColorRgb(r,g,b)));
-            }
-            else if ( type == "point" ) {
-                double x, y, z;
-                if ( ss >> x >> y >> z ) {
-                    outScene->addLight(new Light(LightType::POINT, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+            char typeStr[256] = {0};
+            if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf %255s", &r, &g, &b, typeStr) == 4 ) {
+                java::String type(typeStr);
+                if ( type == "ambient" ) {
+                    outScene->addLight(new Light(LightType::AMBIENT, Vector3Dd(0,0,0), ColorRgb(r,g,b)));
                 }
-            }
-            else if ( type == "directional" ) {
-                double x, y, z;
-                if ( ss >> x >> y >> z ) {
-                    outScene->addLight(new Light(LightType::DIRECTIONAL, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+                else if ( type == "point" ) {
+                    double x, y, z;
+                    if ( sscanf(javaLine.toCString(), "%*s %*f %*f %*f %*s %lf %lf %lf", &x, &y, &z) == 3 ) {
+                        outScene->addLight(new Light(LightType::POINT, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+                    }
+                }
+                else if ( type == "directional" ) {
+                    double x, y, z;
+                    if ( sscanf(javaLine.toCString(), "%*s %*f %*f %*f %*s %lf %lf %lf", &x, &y, &z) == 3 ) {
+                        outScene->addLight(new Light(LightType::DIRECTIONAL, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+                    }
                 }
             }
         }
     }
+
+    fclose(file);
 
     if ( hasEye ) {
         camera->setPosition(eye);

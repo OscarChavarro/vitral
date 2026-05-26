@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include <cstring>
+#include <cstdio>
 #include <algorithm>
 
 RGBAImageCompressed::RGBAImageCompressed() :

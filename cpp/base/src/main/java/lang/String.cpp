@@ -495,10 +495,4 @@ operator+(const char *left, const String &right) {
     return String(left).concat(right);
 }
 
-std::ostream &
-operator<<(std::ostream &os, const String &value) {
-    os << value.toCString();
-    return os;
-}
-
 }

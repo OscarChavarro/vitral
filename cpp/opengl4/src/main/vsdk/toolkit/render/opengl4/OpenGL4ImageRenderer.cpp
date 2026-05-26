@@ -9,8 +9,6 @@
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
 #include "java/util/ArrayList.txx"
 #include <cstdio>
-#include <fstream>
-#include <sstream>
 
 OpenGL4ImageRenderer::TextureFilterMode OpenGL4ImageRenderer::textureFilterMode = OpenGL4ImageRenderer::TextureFilterMode::LINEAR;
 GLuint OpenGL4ImageRenderer::quadVaoId = 0;
@@ -358,11 +356,21 @@ void OpenGL4ImageRenderer::initializeShaderProgram() {
 
 java::String OpenGL4ImageRenderer::readShaderFile(const java::String& filename) {
     // Try primary path first
-    std::ifstream file(filename.c_str());
-    if (file.is_open()) {
-        std::basic_stringstream<char> buffer;
-        buffer << file.rdbuf();
-        return java::String(buffer.str().c_str());
+    FILE* file = fopen(filename.c_str(), "r");
+    if (file) {
+        fseek(file, 0, SEEK_END);
+        long fileSize = ftell(file);
+        if (fileSize > 0) {
+            fseek(file, 0, SEEK_SET);
+            char* buffer = new char[fileSize + 1];
+            size_t readSize = fread(buffer, 1, fileSize, file);
+            buffer[readSize] = '\0';
+            fclose(file);
+            java::String result(buffer);
+            delete[] buffer;
+            return result;
+        }
+        fclose(file);
     }
 
     // Try alternative paths (for when running from different directories)
@@ -375,11 +383,21 @@ java::String OpenGL4ImageRenderer::readShaderFile(const java::String& filename) 
 
     for (long int ii = 0; ii < alternatePaths.size(); ii++) {
         java::String altPath = alternatePaths.get(ii);
-        file.open(altPath.c_str());
-        if (file.is_open()) {
-            std::basic_stringstream<char> buffer;
-            buffer << file.rdbuf();
-            return java::String(buffer.str().c_str());
+        file = fopen(altPath.c_str(), "r");
+        if (file) {
+            fseek(file, 0, SEEK_END);
+            long fileSize = ftell(file);
+            if (fileSize > 0) {
+                fseek(file, 0, SEEK_SET);
+                char* buffer = new char[fileSize + 1];
+                size_t readSize = fread(buffer, 1, fileSize, file);
+                buffer[readSize] = '\0';
+                fclose(file);
+                java::String result(buffer);
+                delete[] buffer;
+                return result;
+            }
+            fclose(file);
         }
     }
 

@@ -2,8 +2,6 @@
 #include <cstdlib>
 #include <cmath>
 #include "java/util/ArrayList.txx"
-#include <fstream>
-#include <sstream>
 
 #include <GL/glew.h>
 #define GLFW_INCLUDE_NONE
@@ -42,14 +40,16 @@ static const float LINE_POLYGON_OFFSET_UNITS = -1.0f;
 
 static java::String readTextFile(const java::String& path)
 {
-    std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
-    if (!f.good()) return java::String();
-    f.seekg(0, std::ios::end);
-    const std::streamsize fileSize = f.tellg();
-    if (fileSize <= 0) return java::String();
-    f.seekg(0, std::ios::beg);
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f) return java::String();
+    fseek(f, 0, SEEK_END);
+    long fileSize = ftell(f);
+    if (fileSize <= 0) { fclose(f); return java::String(); }
+    fseek(f, 0, SEEK_SET);
     char* buffer = new char[(size_t)fileSize + 1]();
-    f.read(buffer, fileSize);
+    size_t readSize = fread(buffer, 1, fileSize, f);
+    fclose(f);
+    buffer[readSize] = '\0';
     java::String result(buffer);
     delete[] buffer;
     return result;
@@ -492,12 +492,12 @@ private:
         for (long int i = 0; i < lights.size(); i++) {
             Light* light = lights.get(i);
             if (light == nullptr) continue;
-            std::ostringstream pName;
-            std::ostringstream cName;
-            pName << "lightPositionsGlobal[" << lightCount << "]";
-            cName << "lightColorsGlobal[" << lightCount << "]";
-            setUniform3f(programId, pName.str().c_str(), light->getPosition());
-            setUniform3f(programId, cName.str().c_str(), light->getSpecular());
+            char pName[64];
+            char cName[64];
+            snprintf(pName, sizeof(pName), "lightPositionsGlobal[%d]", lightCount);
+            snprintf(cName, sizeof(cName), "lightColorsGlobal[%d]", lightCount);
+            setUniform3f(programId, pName, light->getPosition());
+            setUniform3f(programId, cName, light->getSpecular());
             lightCount++;
         }
 

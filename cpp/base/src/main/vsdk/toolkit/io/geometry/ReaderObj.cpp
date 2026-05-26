@@ -22,8 +22,7 @@
 #include "java/lang/String.h"
 #include <cstdlib>
 #include "java/lang/String.h"
-#include <fstream>
-#include <sstream>
+#include <cstdio>
 #include "java/lang/String.h"
 
 struct ReaderObjVertex {
@@ -82,9 +81,14 @@ static ReaderObjVertex readFaceVertex(const java::String& text)
 {
     ReaderObjVertex r;
     java::ArrayList<java::String> parts;
-    std::basic_stringstream<char> ss(text.toCString());
-    std::string item;
-    while (std::getline(ss, item, '/')) parts.add(java::String(item.c_str()));
+    // Split by '/', preserving empty tokens
+    int prev = 0;
+    for (int i = 0; i <= (int)text.size(); i++) {
+        if (i == (int)text.size() || text[i] == '/') {
+            parts.add(text.substr(prev, i - prev));
+            prev = i + 1;
+        }
+    }
 
     if (parts.size() >= 1 && !parts[0].empty()) r.vertexPositionIndex = readIndexInteger(parts[0]);
     if (parts.size() >= 2 && !parts[1].empty()) r.vertexTextureCoordinateIndex = readIndexInteger(parts[1]);
@@ -99,14 +103,29 @@ static ReaderObjVertex readFaceVertex(const java::String& text)
 static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangleFan(const java::String& line)
 {
     java::ArrayList< java::ArrayList<ReaderObjVertex> > ret;
-    std::istringstream ss(line.toCString());
-    std::string tagStr;
-    ss >> tagStr;
-    java::String tag(tagStr.c_str());
+
+    // Skip the 'f' tag and get the rest of the line
+    const char* lineStr = line.toCString();
+    int offset = 0;
+    while (offset < (int)line.size() && !std::isspace((unsigned char)lineStr[offset])) offset++;
+    while (offset < (int)line.size() && std::isspace((unsigned char)lineStr[offset])) offset++;
 
     java::ArrayList<ReaderObjVertex> poly;
-    std::string tokStr;
-    while (ss >> tokStr) poly.add(readFaceVertex(java::String(tokStr.c_str())));
+    // Parse remaining tokens (space-separated vertex specs)
+    while (offset < (int)line.size()) {
+        // Skip leading spaces
+        while (offset < (int)line.size() && std::isspace((unsigned char)lineStr[offset])) offset++;
+        if (offset >= (int)line.size()) break;
+
+        // Find end of token
+        int tokenStart = offset;
+        while (offset < (int)line.size() && !std::isspace((unsigned char)lineStr[offset])) offset++;
+
+        // Add vertex
+        java::String token = line.substr(tokenStart, offset - tokenStart);
+        poly.add(readFaceVertex(token));
+    }
+
     if (poly.size() < 3) return ret;
 
     for (size_t i = 2; i < poly.size(); i++) {
@@ -121,20 +140,19 @@ static java::ArrayList< java::ArrayList<ReaderObjVertex> > readPolygonAsTriangle
 
 static Vector3Dd readVertex(const java::String& line)
 {
-    std::istringstream ss(line.toCString());
-    std::string tagStr;
     double x = 0, y = 0, z = 0;
-    ss >> tagStr >> x >> y >> z;
+    sscanf(line.toCString(), "%*s %lf %lf %lf", &x, &y, &z);
     return Vector3Dd(x, y, z);
 }
 
 static Vector3Dd readVertexTexture(const java::String& line)
 {
-    std::istringstream ss(line.toCString());
-    std::string tagStr;
     double x = 0, y = 0, z = 0;
-    ss >> tagStr >> x >> y;
-    if (!(ss >> z)) z = 0;
+    int readCount = sscanf(line.toCString(), "%*s %lf %lf %lf", &x, &y, &z);
+    if (readCount < 2) {
+        sscanf(line.toCString(), "%*s %lf %lf", &x, &y);
+        z = 0;
+    }
     return Vector3Dd(x, y, z);
 }
 
@@ -151,61 +169,71 @@ static SimpleMaterial defaultMaterial()
 static void readMaterials(const java::String& mtllibLine, const java::String& objFile, java::HashMap<java::String, SimpleMaterial>& ret)
 {
     ret.clear();
-    std::istringstream ss(mtllibLine.toCString());
-    std::string tagStr, mtlFileStr;
-    ss >> tagStr >> mtlFileStr;
-    java::String mtlFile(mtlFileStr.c_str());
+    char tagStr[256] = {0}, mtlFileStr[256] = {0};
+    sscanf(mtllibLine.toCString(), "%255s %255s", tagStr, mtlFileStr);
+    java::String mtlFile(mtlFileStr);
     if (mtlFile.empty()) return;
 
-    std::ifstream in(joinPath(dirnameOf(objFile), mtlFile).c_str());
-    if (!in.is_open()) return;
+    java::String mtlPath = joinPath(dirnameOf(objFile), mtlFile);
+    FILE* in = fopen(mtlPath.c_str(), "r");
+    if (!in) return;
 
     SimpleMaterial active;
     active = active.withDoubleSided(false).withName("default");
 
-    std::string line;
-    while (std::getline(in, line)) {
-        std::istringstream ls(line);
-        std::string cmdStr;
-        ls >> cmdStr;
-        java::String cmd(cmdStr.c_str());
+    char line[1024];
+    while (fgets(line, sizeof(line), in)) {
+        char cmdStr[256] = {0};
+        sscanf(line, "%255s", cmdStr);
+        java::String cmd(cmdStr);
         if (cmd == "Ns") {
-            double v; if (ls >> v) active = active.withPhongExponent(v);
+            double v;
+            if (sscanf(line, "%*s %lf", &v) == 1) active = active.withPhongExponent(v);
         }
         else if (cmd == "d") {
-            double v; if (ls >> v) active = active.withOpacity(v);
+            double v;
+            if (sscanf(line, "%*s %lf", &v) == 1) active = active.withOpacity(v);
         }
         else if (cmd == "Tr") {
-            double tr; if (ls >> tr) active = active.withOpacity(1.0 - tr);
+            double tr;
+            if (sscanf(line, "%*s %lf", &tr) == 1) active = active.withOpacity(1.0 - tr);
         }
         else if (cmd == "Kd") {
-            double r,g,b; if (ls >> r >> g >> b) active = active.withDiffuse(ColorRgb(r,g,b));
+            double r, g, b;
+            if (sscanf(line, "%*s %lf %lf %lf", &r, &g, &b) == 3) active = active.withDiffuse(ColorRgb(r, g, b));
         }
         else if (cmd == "Ka") {
-            double r,g,b; if (ls >> r >> g >> b) active = active.withAmbient(ColorRgb(r,g,b));
+            double r, g, b;
+            if (sscanf(line, "%*s %lf %lf %lf", &r, &g, &b) == 3) active = active.withAmbient(ColorRgb(r, g, b));
         }
         else if (cmd == "Ks") {
-            double r,g,b; if (ls >> r >> g >> b) active = active.withSpecular(ColorRgb(r,g,b));
+            double r, g, b;
+            if (sscanf(line, "%*s %lf %lf %lf", &r, &g, &b) == 3) active = active.withSpecular(ColorRgb(r, g, b));
         }
         else if (cmd == "Ke") {
-            double r,g,b; if (ls >> r >> g >> b) active = active.withEmission(ColorRgb(r,g,b));
+            double r, g, b;
+            if (sscanf(line, "%*s %lf %lf %lf", &r, &g, &b) == 3) active = active.withEmission(ColorRgb(r, g, b));
         }
         else if (cmd == "Kt" || cmd == "Tf") {
-            double r,g,b; if (ls >> r >> g >> b) active = active.withTransmittance(ColorRgb(r,g,b));
+            double r, g, b;
+            if (sscanf(line, "%*s %lf %lf %lf", &r, &g, &b) == 3) active = active.withTransmittance(ColorRgb(r, g, b));
         }
         else if (cmd == "Ni") {
-            double ior; if (ls >> ior) active = active.withIndexOfRefraction(ior);
+            double ior;
+            if (sscanf(line, "%*s %lf", &ior) == 1) active = active.withIndexOfRefraction(ior);
         }
         else if (cmd == "illum") {
             // Ignored by Vitral material model.
         }
         else if (cmd == "newmtl") {
-            std::string nameStr; ls >> nameStr;
-            java::String name(nameStr.c_str());
+            char nameStr[256] = {0};
+            sscanf(line, "%*s %255s", nameStr);
+            java::String name(nameStr);
             ret.put(active.getName(), active);
             active = SimpleMaterial().withDoubleSided(false).withName(name);
         }
     }
+    fclose(in);
     ret.put(active.getName(), active);
 }
 
@@ -350,8 +378,8 @@ static void addMeshToGroup(
 static TriangleMeshGroup* readObj(const java::File& sceneFile)
 {
     const java::String fileName = sceneFile.getPath().toCString();
-    std::ifstream in(fileName.c_str());
-    if (!in.is_open()) return new TriangleMeshGroup();
+    FILE* in = fopen(fileName.c_str(), "r");
+    if (!in) return new TriangleMeshGroup();
 
     java::ArrayList<Vector3Dd> vertexPositionsArray;
     java::ArrayList<Vector3Dd> vertexNormalsArray;
@@ -388,17 +416,16 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
         materialTriangleRangeTable.add(r);
     };
 
-    std::string line;
-    while (std::getline(in, line)) {
-        java::String javaLine(line.c_str());
+    char lineBuf[1024];
+    while (fgets(lineBuf, sizeof(lineBuf), in)) {
+        java::String javaLine(lineBuf);
         if (javaLine.rfind("mtllib ", 0) == 0) {
             readMaterials(javaLine, fileName, materialsHashMap);
         }
         if (javaLine.rfind("usemtl ", 0) == 0) {
-            std::istringstream ss(line);
-            std::string tStr, matNameStr;
-            ss >> tStr >> matNameStr;
-            java::String matName(matNameStr.c_str());
+            char tStr[256] = {0}, matNameStr[256] = {0};
+            sscanf(lineBuf, "%255s %255s", tStr, matNameStr);
+            java::String matName(matNameStr);
             SimpleMaterial matValue;
             if (materialsHashMap.tryGet(matName, &matValue)) nextMaterialsArray.add(matValue);
             else nextMaterialsArray.add(SimpleMaterial());
@@ -415,10 +442,9 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
             for (size_t i = 0; i < fan.size(); i++) triangleDatasetsArray.add(fan[i]);
         }
         if (javaLine.rfind("usemap ", 0) == 0) {
-            std::istringstream ss(line);
-            std::string tStr, texNameStr;
-            ss >> tStr >> texNameStr;
-            java::String texName(texNameStr.c_str());
+            char tStr[256] = {0}, texNameStr[256] = {0};
+            sscanf(lineBuf, "%255s %255s", tStr, texNameStr);
+            java::String texName(texNameStr);
 
             Image* texValue = nullptr;
             if (!texturesHashMap.tryGet(texName, &texValue)) {
@@ -472,10 +498,9 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
                                nextMaterialsArray, materialTriangleRangeTable);
             }
 
-            std::istringstream ss(line);
-            std::string tStr, nameStr;
-            ss >> tStr >> nameStr;
-            nextGeometricObjectName = java::String(nameStr.c_str());
+            char tStr[256] = {0}, nameStr[256] = {0};
+            sscanf(lineBuf, "%255s %255s", tStr, nameStr);
+            nextGeometricObjectName = java::String(nameStr);
 
             if (vertexPositionsArray.size() > 0) {
                 nextTexturesArray.clear();
@@ -501,6 +526,8 @@ static TriangleMeshGroup* readObj(const java::File& sceneFile)
                        triangleDatasetsArray, nextTexturesArray, textureSpanTriangleRangeTable,
                        nextMaterialsArray, materialTriangleRangeTable);
     }
+
+    fclose(in);
 
     TriangleMeshGroup* finalGroup = new TriangleMeshGroup();
     for (long int i = 0; i < meshGroup.size(); i++) {

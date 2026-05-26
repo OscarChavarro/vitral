@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "java/lang/String.h"
 
-#include <sstream>
+#include <cstdio>
 #include "java/lang/String.h"
 
 SimpleMaterial::SimpleMaterial()
@@ -128,12 +128,19 @@ double SimpleMaterial::getOpacity() const { return opacity; }
 
 java::String SimpleMaterial::toString() const
 {
-    std::ostringstream ss;
-    ss << "SimpleMaterial [" << name << "]:\n"
-       << "  - Specular (" << specular.r() << ", " << specular.g() << ", " << specular.b() << ")\n"
-       << "  - Diffuse (" << diffuse.r() << ", " << diffuse.g() << ", " << diffuse.b() << ")\n"
-       << "  - Ambient (" << ambient.r() << ", " << ambient.g() << ", " << ambient.b() << ")\n"
-       << "  - Phong exponent: " << phongExponent << "\n"
-       << (doubleSided ? "  - Double sided\n\n" : "  - Single sided\n\n");
-    return java::String(ss.str().c_str());
+    char buf[512];
+    snprintf(buf, sizeof(buf),
+        "SimpleMaterial [%s]:\n"
+        "  - Specular (%.6g, %.6g, %.6g)\n"
+        "  - Diffuse (%.6g, %.6g, %.6g)\n"
+        "  - Ambient (%.6g, %.6g, %.6g)\n"
+        "  - Phong exponent: %.6g\n"
+        "  - %s\n\n",
+        name.c_str(),
+        specular.r(), specular.g(), specular.b(),
+        diffuse.r(), diffuse.g(), diffuse.b(),
+        ambient.r(), ambient.g(), ambient.b(),
+        phongExponent,
+        doubleSided ? "Double sided" : "Single sided");
+    return java::String(buf);
 }

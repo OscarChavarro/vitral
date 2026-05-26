@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 
 static const int HUD_HEIGHT = 64;
 static const int HUD_LEFT = 10;
@@ -153,12 +154,10 @@ void JogHudRenderer::draw(
     java::String line1;
     if (gpuMode) {
         int triangles = std::max(0, (parallels - 1) * meridians * 2);
-        line1 = java::String("MERIDIANS: ")
-            .concat(std::to_string(meridians).c_str())
-            .concat(" PARALLELS: ")
-            .concat(std::to_string(parallels).c_str())
-            .concat(" TRIANGLES: ")
-            .concat(std::to_string(triangles).c_str());
+        char buf[256];
+        snprintf(buf, sizeof(buf), "MERIDIANS: %d PARALLELS: %d TRIANGLES: %d",
+                 meridians, parallels, triangles);
+        line1 = java::String(buf);
     }
     else {
         line1 = "RAYTRACING";

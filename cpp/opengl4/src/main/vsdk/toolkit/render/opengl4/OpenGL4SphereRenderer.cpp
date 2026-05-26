@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
-#include <fstream>
 #include "java/lang/String.h"
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
@@ -48,14 +47,16 @@ static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
 static java::String readTextFile(const java::String& path)
 {
-    std::ifstream f(path.c_str(), std::ios::in | std::ios::binary);
-    if (!f.good()) return java::String();
-    f.seekg(0, std::ios::end);
-    const std::streamsize size = f.tellg();
-    f.seekg(0, std::ios::beg);
-    if (size <= 0) return java::String();
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f) return java::String();
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    if (size <= 0) { fclose(f); return java::String(); }
+    fseek(f, 0, SEEK_SET);
     char* buffer = new char[static_cast<size_t>(size) + 1u]();
-    f.read(buffer, size);
+    size_t readSize = fread(buffer, 1, size, f);
+    fclose(f);
+    buffer[readSize] = '\0';
     java::String result(buffer);
     delete[] buffer;
     return result;

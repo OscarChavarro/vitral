@@ -5,9 +5,9 @@
 #include "java/lang/String.h"
 #include <cctype>
 #include "java/lang/String.h"
-#include <fstream>
+#include <cstdio>
 #include "java/lang/String.h"
-#include <sstream>
+#include <cstdlib>
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
@@ -60,19 +60,31 @@ static double clamp01(double v)
 
 static double parseDoubleOr(const java::String& s, double fallback)
 {
-    try { return std::stod(trim(s).toCString()); } catch (...) { return fallback; }
+    const char* str = trim(s).toCString();
+    char* endptr = nullptr;
+    double val = strtod(str, &endptr);
+    if (endptr == str) return fallback;
+    return val;
 }
 
 static int parseIntOr(const java::String& s, int fallback)
 {
-    try { return std::stoi(trim(s).toCString()); } catch (...) { return fallback; }
+    const char* str = trim(s).toCString();
+    char* endptr = nullptr;
+    long val = strtol(str, &endptr, 10);
+    if (endptr == str) return fallback;
+    return (int)val;
 }
 
 static void splitCsv(const java::String& line, java::ArrayList<java::String>& cols)
 {
-    std::basic_stringstream<char> ss(line.toCString());
-    std::string token;
-    while ( std::getline(ss, token, ',') ) cols.add(java::String(token.c_str()));
+    int prev = 0;
+    for (int i = 0; i <= (int)line.size(); i++) {
+        if (i == (int)line.size() || line[i] == ',') {
+            cols.add(line.substr(prev, i - prev));
+            prev = i + 1;
+        }
+    }
 }
 
 static MicrofacetConfig defaultConfig()
@@ -105,12 +117,12 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     MicrofacetConfig d = defaultConfig();
     if ( csvFileName.empty() || materialName.empty() ) return d;
 
-    std::ifstream in(csvFileName.c_str());
-    if ( !in.good() ) return d;
+    FILE* in = fopen(csvFileName.c_str(), "r");
+    if ( !in ) return d;
 
-    std::string headerLineStr;
-    if ( !std::getline(in, headerLineStr) ) return d;
-    java::String headerLine(headerLineStr.c_str());
+    char headerLineStr[4096];
+    if ( !fgets(headerLineStr, sizeof(headerLineStr), in) ) { fclose(in); return d; }
+    java::String headerLine(headerLineStr);
     java::ArrayList<java::String> header;
     splitCsv(headerLine, header);
 
@@ -144,9 +156,9 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     const int iGeo = idx("geometry_model");
 
     const java::String target = lower(trim(materialName));
-    std::string lineStr;
-    while ( std::getline(in, lineStr) ) {
-        java::String line(lineStr.c_str());
+    char lineStr[4096];
+    while ( fgets(lineStr, sizeof(lineStr), in) ) {
+        java::String line(lineStr);
         if ( trim(line).empty() ) continue;
         java::ArrayList<java::String> cols;
         splitCsv(line, cols);
@@ -179,8 +191,10 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
         if ( iFModel >= 0 && iFModel < (int)cols.size() ) d.fresnelModel = parseIntOr(cols[(long int)iFModel], d.fresnelModel);
         if ( iNdf >= 0 && iNdf < (int)cols.size() ) d.ndfModel = parseIntOr(cols[(long int)iNdf], d.ndfModel);
         if ( iGeo >= 0 && iGeo < (int)cols.size() ) d.geometryModel = parseIntOr(cols[(long int)iGeo], d.geometryModel);
+        fclose(in);
         return d;
     }
+    fclose(in);
     return d;
 }
 }

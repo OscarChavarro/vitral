@@ -20,7 +20,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <iostream>
+#include <cstdio>
 #include <stdexcept>
 #include "java/util/ArrayList.txx"
 
@@ -108,7 +108,7 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
                                 resultingImage->getXSize(),
                                 resultingImage->getYSize(),
                                 numberOfThreads);
-    std::cout << "Starting parallel raytracing with " << numberOfThreads << " threads." << std::endl;
+    printf("Starting parallel raytracing with %d threads.\n", numberOfThreads);
 
     java::ArrayList<Tile> generatedTiles = tileGenerator.getTiles();
     java::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);

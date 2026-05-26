@@ -16,6 +16,7 @@
 #include "java/io/BufferedOutputStream.h"
 #include <cstring>
 #include <cstdio>
+#include <cstdlib>
 #include <cctype>
 #include "java/util/ArrayList.txx"
 

@@ -2,8 +2,6 @@
 #define JAVA_STRING__
 
 #include <cstdarg>
-#include <istream>
-#include <ostream>
 
 namespace java {
 
@@ -183,7 +181,6 @@ class String {
 };
 
 String operator+(const char *left, const String &right);
-std::ostream &operator<<(std::ostream &os, const String &value);
 
 }
 

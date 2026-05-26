@@ -1,6 +1,6 @@
 #include "CommandOptionsProcessor.h"
 
-#include <iostream>
+#include <cstdio>
 #include "java/util/ArrayList.txx"
 
 const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../etc/geometry/mitscenes/balls.ray";
@@ -33,7 +33,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
         }
         if ( arg == "--scene" || arg == "-s" ) {
             if ( i + 1 >= args.size() ) {
-                std::cerr << "Missing value for " << arg << "\n";
+                fprintf(stderr, "Missing value for %s\n", arg.c_str());
                 options.showHelp = true;
                 return options;
             }
@@ -42,7 +42,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
         }
         if ( arg == "--output" || arg == "-o" ) {
             if ( i + 1 >= args.size() ) {
-                std::cerr << "Missing value for " << arg << "\n";
+                fprintf(stderr, "Missing value for %s\n", arg.c_str());
                 options.showHelp = true;
                 return options;
             }
@@ -50,7 +50,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
             continue;
         }
         if ( !arg.empty() && arg[0] == '-' ) {
-            std::cerr << "Unknown option: " << arg << "\n";
+            fprintf(stderr, "Unknown option: %s\n", arg.c_str());
             options.showHelp = true;
             return options;
         }
@@ -58,7 +58,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
         if ( positionalCount == 0 ) options.sceneFile = arg;
         else if ( positionalCount == 1 ) options.outputFile = arg;
         else {
-            std::cerr << "Unexpected argument: " << arg << "\n";
+            fprintf(stderr, "Unexpected argument: %s\n", arg.c_str());
             options.showHelp = true;
             return options;
         }
@@ -70,15 +70,15 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<j
 
 void CommandOptionsProcessor::printUsage()
 {
-    std::cout << "Usage: RaytracerSimple [options] [scene_file]\n";
-    std::cout << "Options:\n";
-    std::cout << "  --scene, -s <file>     MIT scene file (.ray)\n";
-    std::cout << "  --output, -o <file>    Output image file (.ppm/.png/.jpg)\n";
-    std::cout << "  --nosave, -n           Render only, no image file\n";
-    std::cout << "  -parallel, --parallel  Render tiles in parallel\n";
-    std::cout << "  --help, -h             Show this help\n\n";
-    std::cout << "Legacy compatibility:\n";
-    std::cout << "  - `nosave` (without dashes) is still accepted.\n";
+    printf("Usage: RaytracerSimple [options] [scene_file]\n");
+    printf("Options:\n");
+    printf("  --scene, -s <file>     MIT scene file (.ray)\n");
+    printf("  --output, -o <file>    Output image file (.ppm/.png/.jpg)\n");
+    printf("  --nosave, -n           Render only, no image file\n");
+    printf("  -parallel, --parallel  Render tiles in parallel\n");
+    printf("  --help, -h             Show this help\n\n");
+    printf("Legacy compatibility:\n");
+    printf("  - `nosave` (without dashes) is still accepted.\n");
 }
 
 const java::String& CommandOptionsProcessor::getSceneFile() const { return sceneFile; }

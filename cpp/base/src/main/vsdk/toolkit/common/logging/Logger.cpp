@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 #include "java/lang/String.h"
-#include <iostream>
+#include <cstdio>
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/VSDKFatalException.h"
@@ -36,7 +36,7 @@ void Logger::processFatalError(const java::String& method, const java::String& m
 
 void Logger::reportMessage(const java::String& className, int level, const java::String& method, const java::String& message)
 {
-    std::cerr << "[VSDK][" << className << "] " << method << ": " << message << "\n";
+    fprintf(stderr, "[VSDK][%s] %s: %s\n", className.c_str(), method.c_str(), message.c_str());
     if ( level == FATAL_ERROR ) {
         processFatalError(method, message, nullptr);
     }
@@ -44,11 +44,11 @@ void Logger::reportMessage(const java::String& className, int level, const java:
 
 void Logger::reportMessageWithException(const java::String& className, int level, const java::String& method, const java::String& message, const std::exception* cause)
 {
-    std::cerr << "[VSDK][" << className << "] " << method << ": " << message;
     if ( cause != nullptr ) {
-        std::cerr << " | exception: " << cause->what();
+        fprintf(stderr, "[VSDK][%s] %s: %s | exception: %s\n", className.c_str(), method.c_str(), message.c_str(), cause->what());
+    } else {
+        fprintf(stderr, "[VSDK][%s] %s: %s\n", className.c_str(), method.c_str(), message.c_str());
     }
-    std::cerr << "\n";
     if ( level == FATAL_ERROR ) {
         processFatalError(method, message, cause);
     }

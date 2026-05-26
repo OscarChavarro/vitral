@@ -3,6 +3,7 @@
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
 #include <cctype>
+#include <cstddef>
 #include "java/lang/String.h"
 
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}

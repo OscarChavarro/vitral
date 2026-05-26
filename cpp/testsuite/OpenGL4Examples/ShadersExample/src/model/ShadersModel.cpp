@@ -2,8 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <sstream>
+#include <cstdio>
 #include "java/util/ArrayList.txx"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -48,17 +47,21 @@ ShadersModel::ShadersModel()
         "../../../../etc/materials/microFacetMAterials.csv",
         "Copper");
 
-    std::ifstream csv("../../../../etc/materials/microFacetMAterials.csv");
-    if ( csv.good() ) {
-        std::string lineStr;
-        if ( std::getline(csv, lineStr) ) {
-            while ( std::getline(csv, lineStr) ) {
-                java::String line(lineStr.c_str());
+    FILE* csv = fopen("../../../../etc/materials/microFacetMAterials.csv", "r");
+    if ( csv ) {
+        char lineStr[4096];
+        if ( fgets(lineStr, sizeof(lineStr), csv) ) {
+            while ( fgets(lineStr, sizeof(lineStr), csv) ) {
+                java::String line(lineStr);
                 if ( line.empty() ) continue;
-                std::basic_stringstream<char> ss(lineStr);
-                std::string tokenStr;
                 java::ArrayList<java::String> cols;
-                while ( std::getline(ss, tokenStr, ',') ) cols.add(java::String(tokenStr.c_str()));
+                int prev = 0;
+                for (int i = 0; i <= (int)line.size(); i++) {
+                    if (i == (int)line.size() || line[i] == ',') {
+                        cols.add(line.substr(prev, i - prev));
+                        prev = i + 1;
+                    }
+                }
                 if ( cols.size() < 16 ) continue;
                 const java::String& name = cols[0];
                 if ( name.empty() ) continue;
@@ -68,6 +71,7 @@ ShadersModel::ShadersModel()
                 }
             }
         }
+        fclose(csv);
     }
 
     try {

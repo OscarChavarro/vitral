@@ -18,8 +18,7 @@
 #include "vsdk/toolkit/processing/StopWatch.h"
 #include "vsdk/toolkit/render/SimpleRaytracer.h"
 
-#include <fstream>
-#include <iostream>
+#include <cstdio>
 #include <memory>
 #include "java/util/ArrayList.txx"
 
@@ -53,31 +52,25 @@ static void offlineExecution(const java::String& fileName,
 {
     SimpleScene scene;
 
-    std::cout << "Loading scene from " << fileName << ": \n";
-    std::ifstream is(fileName.c_str());
-    if ( !is.good() ) {
-        std::cerr << "Error reading " << fileName << "\n";
-        std::cerr << "There are scene samples on " << SCENE_SAMPLES_PATH << "\n";
-        std::exit(EXIT_CODE_READ_ERROR);
-    }
+    printf("Loading scene from %s: \n", fileName.c_str());
 
     try {
         ReaderMitScene readerMitScene;
-        readerMitScene.importEnvironment(is, &scene);
+        readerMitScene.importEnvironment(fileName.c_str(), &scene);
     }
     catch (const std::exception& e) {
-        std::cerr << "Error reading " << fileName << ": " << e.what() << "\n";
-        std::cerr << "There are scene samples on " << SCENE_SAMPLES_PATH << "\n";
+        fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.what());
+        fprintf(stderr, "There are scene samples on %s\n", SCENE_SAMPLES_PATH);
         std::exit(EXIT_CODE_READ_ERROR);
     }
 
-    std::cout << "Scene loaded OK!\n";
+    printf("Scene loaded OK!\n");
 
     RGBImageUncompressed resultingImage;
     Camera* activeCamera = scene.getActiveCamera();
     if ( !resultingImage.initNoFill((int)activeCamera->getViewportXSize(),
                                     (int)activeCamera->getViewportYSize()) ) {
-        std::cerr << "Error creating image!\n";
+        fprintf(stderr, "Error creating image!\n");
         std::exit(EXIT_CODE_IMAGE_ERROR);
     }
 
@@ -103,15 +96,14 @@ static void offlineExecution(const java::String& fileName,
                            &reporter);
     clock.stop();
 
-    std::cout << "Image generated in "
-              << VSDK::formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS)
-              << " seconds.\n";
+    printf("Image generated in %s seconds.\n",
+        VSDK::formatDouble(clock.getElapsedRealTime(), ELAPSED_TIME_DECIMALS).c_str());
     RaytraceStatistics::printSummary();
 
     if ( save ) {
         ImageExporter imageExporter;
         if ( !imageExporter.exportImage(outputFileName, &resultingImage) ) {
-            std::cerr << "Error saving output image!\n";
+            fprintf(stderr, "Error saving output image!\n");
             std::exit(EXIT_CODE_IMAGE_ERROR);
         }
     }

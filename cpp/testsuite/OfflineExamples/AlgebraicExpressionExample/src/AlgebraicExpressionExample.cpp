@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <sstream>
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
@@ -14,12 +13,11 @@ int main(int argc, char** argv)
             expression = "666.0";
         }
         else {
-            std::ostringstream joined;
+            expression = java::String("");
             for (int i = 1; i < argc; i++) {
-                joined << argv[i];
-                if (i < argc - 1) joined << " ";
+                expression += argv[i];
+                if (i < argc - 1) expression += " ";
             }
-            expression = java::String(joined.str().c_str());
             std::printf(
                 "Parsing from %d parameters with regexp \"%s\"\n",
                 argc - 1,

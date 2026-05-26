@@ -3,8 +3,6 @@
 #include "java/util/ArrayList.txx"
 #include <cmath>
 #include <cstdio>
-#include <fstream>
-#include <sstream>
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
@@ -30,21 +28,41 @@ OpenGL4SimpleCorridorSample::~OpenGL4SimpleCorridorSample() {
 }
 
 java::String OpenGL4SimpleCorridorSample::readShaderFile(const java::String& filename) {
-    std::ifstream file(filename.c_str());
-    if (file.is_open()) {
-        std::basic_stringstream<char> buffer;
-        buffer << file.rdbuf();
-        return java::String(buffer.str().c_str());
+    FILE* file = fopen(filename.c_str(), "r");
+    if (file) {
+        fseek(file, 0, SEEK_END);
+        long fileSize = ftell(file);
+        if (fileSize > 0) {
+            fseek(file, 0, SEEK_SET);
+            char* buffer = new char[fileSize + 1];
+            size_t readSize = fread(buffer, 1, fileSize, file);
+            buffer[readSize] = '\0';
+            fclose(file);
+            java::String result(buffer);
+            delete[] buffer;
+            return result;
+        }
+        fclose(file);
     }
 
     const char* prefixes[] = { "../", "../../", "../../../", "../../../../", nullptr };
     for (int i = 0; prefixes[i] != nullptr; i++) {
         java::String altPath = java::String(prefixes[i]).concat(filename);
-        file.open(altPath.c_str());
-        if (file.is_open()) {
-            std::basic_stringstream<char> buffer;
-            buffer << file.rdbuf();
-            return java::String(buffer.str().c_str());
+        file = fopen(altPath.c_str(), "r");
+        if (file) {
+            fseek(file, 0, SEEK_END);
+            long fileSize = ftell(file);
+            if (fileSize > 0) {
+                fseek(file, 0, SEEK_SET);
+                char* buffer = new char[fileSize + 1];
+                size_t readSize = fread(buffer, 1, fileSize, file);
+                buffer[readSize] = '\0';
+                fclose(file);
+                java::String result(buffer);
+                delete[] buffer;
+                return result;
+            }
+            fclose(file);
         }
     }
 
