@@ -14,6 +14,15 @@ _PolyhedralBoundedSolidLoop::_PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolid
     }
 }
 
+_PolyhedralBoundedSolidLoop::~_PolyhedralBoundedSolidLoop()
+{
+    for (long int i = 0; i < halfEdgesList.size(); ++i) {
+        if (halfEdgesList[i] != 0) {
+            delete halfEdgesList[i];
+        }
+    }
+}
+
 void _PolyhedralBoundedSolidLoop::unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     halfEdgesList.remove(he);

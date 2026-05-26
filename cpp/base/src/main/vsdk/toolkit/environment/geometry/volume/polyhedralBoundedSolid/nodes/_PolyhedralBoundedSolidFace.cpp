@@ -13,6 +13,15 @@ _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid*
 {
 }
 
+_PolyhedralBoundedSolidFace::~_PolyhedralBoundedSolidFace()
+{
+    for (long int i = 0; i < boundariesList.size(); ++i) {
+        if (boundariesList[i] != 0) {
+            delete boundariesList[i];
+        }
+    }
+}
+
 _PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int vn1, int vn2)
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {

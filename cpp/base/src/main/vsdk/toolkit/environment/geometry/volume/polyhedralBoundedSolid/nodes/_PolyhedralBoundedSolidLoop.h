@@ -13,6 +13,7 @@ public:
     java::ArrayList<_PolyhedralBoundedSolidHalfEdge*> halfEdgesList;
 
     explicit _PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent);
+    ~_PolyhedralBoundedSolidLoop();
 
     void unlistHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
     _PolyhedralBoundedSolidHalfEdge* halfEdgeVertices(int a, int b);

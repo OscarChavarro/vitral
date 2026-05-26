@@ -16,6 +16,7 @@ public:
     java::ArrayList<_PolyhedralBoundedSolidLoop*> boundariesList;
 
     _PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int id);
+    ~_PolyhedralBoundedSolidFace();
 
     _PolyhedralBoundedSolidHalfEdge* findHalfEdge(int vn1, int vn2);
     _PolyhedralBoundedSolidHalfEdge* findHalfEdge(int vn1);
