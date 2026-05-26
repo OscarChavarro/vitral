@@ -9,6 +9,9 @@ private:
     long long numberOfElementsToProcess;
 
 public:
+    ParallelProgressMonitorEvent()
+        : commandType(FINISH), numberOfElementsToProcess(0) {}
+
     ParallelProgressMonitorEvent(ParallelProgressMonitorCommand commandType, long long numberOfElementsToProcess)
         : commandType(commandType), numberOfElementsToProcess(numberOfElementsToProcess) {}
 

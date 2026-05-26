@@ -1,6 +1,6 @@
 #include "java/util/concurrent/Executors.h"
 
-#include <deque>
+#include "java/util/ArrayDeque.h"
 #include <pthread.h>
 #include "java/util/ArrayList.txx"
 
@@ -12,7 +12,7 @@ private:
         FixedThreadPoolExecutor* owner;
     };
 
-    std::deque<TaskBase*> queue_;
+    ArrayDeque<TaskBase*> queue_;
     pthread_mutex_t mutex_;
     pthread_cond_t hasWorkCond_;
     bool shutdown_;
@@ -30,17 +30,17 @@ private:
         while ( true ) {
             TaskBase* task = 0;
             pthread_mutex_lock(&self->mutex_);
-            while ( self->queue_.empty() && !self->shutdown_ ) {
+            while ( self->queue_.isEmpty() && !self->shutdown_ ) {
                 pthread_cond_wait(&self->hasWorkCond_, &self->mutex_);
             }
 
-            if ( self->shutdown_ && self->queue_.empty() ) {
+            if ( self->shutdown_ && self->queue_.isEmpty() ) {
                 pthread_mutex_unlock(&self->mutex_);
                 break;
             }
 
-            task = self->queue_.front();
-            self->queue_.pop_front();
+            task = self->queue_.peekFirst();
+            self->queue_.removeFirst();
             pthread_mutex_unlock(&self->mutex_);
 
             if ( task != 0 ) {
@@ -99,9 +99,9 @@ public:
 #endif
 
         pthread_mutex_lock(&mutex_);
-        while ( !queue_.empty() ) {
-            TaskBase* task = queue_.front();
-            queue_.pop_front();
+        while ( !queue_.isEmpty() ) {
+            TaskBase* task = queue_.peekFirst();
+            queue_.removeFirst();
             delete task;
         }
         pthread_mutex_unlock(&mutex_);
@@ -116,7 +116,7 @@ protected:
             return false;
         }
 #ifdef VITRAL_WITH_POSIX_THREADS
-        queue_.push_back(task);
+        queue_.addLast(task);
         pthread_cond_signal(&hasWorkCond_);
         pthread_mutex_unlock(&mutex_);
 #else
