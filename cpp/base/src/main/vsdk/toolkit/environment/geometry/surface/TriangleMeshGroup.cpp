@@ -10,6 +10,8 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
+#include <cstdio>
+#include <string>
 
 TriangleMeshGroup::TriangleMeshGroup()
     : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
@@ -234,9 +236,15 @@ readability and debugging. Do not use for serialization or persistence
 purposes.
 @return human readable report from current mesh group
 */
+static std::string intToStr(int val) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%d", val);
+    return buf;
+}
+
 java::String TriangleMeshGroup::toString() const
 {
-    return java::String(("TriangleMeshGroup < #Mesh: " + std::to_string(meshes.size()) + " >").c_str());
+    return java::String(("TriangleMeshGroup < #Mesh: " + intToStr((int)meshes.size()) + " >").c_str());
 }
 
 /*

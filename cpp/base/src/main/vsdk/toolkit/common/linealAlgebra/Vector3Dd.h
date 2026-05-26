@@ -3,7 +3,7 @@
 
 
 #include <cmath>
-#include <functional>
+#include <cstring>
 #include <stdexcept>
 #include "java/lang/String.h"
 
@@ -11,6 +11,15 @@ class Vector3Dd {
     double x_;
     double y_;
     double z_;
+
+    static unsigned int hashDouble(double val) {
+        unsigned char bytes[sizeof(double)];
+        memcpy(bytes, &val, sizeof(double));
+        unsigned int h = 0u;
+        for (int i = 0; i < (int)sizeof(double); ++i)
+            h = h * 31u + static_cast<unsigned int>(bytes[i]);
+        return h;
+    }
 
 public:
     Vector3Dd() : x_(0.0), y_(0.0), z_(0.0) {}
@@ -44,9 +53,9 @@ public:
     bool operator==(const Vector3Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_; }
     bool equals(const Vector3Dd& other) const { return (*this) == other; }
     int hashCode() const {
-        std::size_t result = std::hash<double>()(x_);
-        result = 31u * result + std::hash<double>()(y_);
-        result = 31u * result + std::hash<double>()(z_);
+        unsigned int result = hashDouble(x_);
+        result = 31u * result + hashDouble(y_);
+        result = 31u * result + hashDouble(z_);
         return (int)result;
     }
     java::String* toString() const;

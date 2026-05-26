@@ -3,7 +3,7 @@
 
 
 #include <cmath>
-#include <functional>
+#include <cstring>
 #include <stdexcept>
 #include "java/lang/String.h"
 
@@ -14,6 +14,15 @@ class Vector4Dd {
     double y_;
     double z_;
     double w_;
+
+    static unsigned int hashDouble(double val) {
+        unsigned char bytes[sizeof(double)];
+        memcpy(bytes, &val, sizeof(double));
+        unsigned int h = 0u;
+        for (int i = 0; i < (int)sizeof(double); ++i)
+            h = h * 31u + static_cast<unsigned int>(bytes[i]);
+        return h;
+    }
 
 public:
     Vector4Dd(double x, double y, double z, double w) : x_(x), y_(y), z_(z), w_(w) {}
@@ -40,10 +49,10 @@ public:
     bool operator==(const Vector4Dd& other) const { return x_ == other.x_ && y_ == other.y_ && z_ == other.z_ && w_ == other.w_; }
     bool equals(const Vector4Dd& other) const { return (*this) == other; }
     int hashCode() const {
-        std::size_t result = std::hash<double>()(x_);
-        result = 31u * result + std::hash<double>()(y_);
-        result = 31u * result + std::hash<double>()(z_);
-        result = 31u * result + std::hash<double>()(w_);
+        unsigned int result = hashDouble(x_);
+        result = 31u * result + hashDouble(y_);
+        result = 31u * result + hashDouble(z_);
+        result = 31u * result + hashDouble(w_);
         return (int)result;
     }
     java::String* toString() const;

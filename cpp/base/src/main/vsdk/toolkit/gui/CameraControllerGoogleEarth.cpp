@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 

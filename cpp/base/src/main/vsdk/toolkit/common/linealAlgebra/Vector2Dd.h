@@ -3,13 +3,22 @@
 
 
 #include <cmath>
-#include <functional>
+#include <cstring>
 #include <stdexcept>
 #include "java/lang/String.h"
 
 class Vector2Dd {
     double x_;
     double y_;
+
+    static unsigned int hashDouble(double val) {
+        unsigned char bytes[sizeof(double)];
+        memcpy(bytes, &val, sizeof(double));
+        unsigned int h = 0u;
+        for (int i = 0; i < (int)sizeof(double); ++i)
+            h = h * 31u + static_cast<unsigned int>(bytes[i]);
+        return h;
+    }
 
 public:
     Vector2Dd() : x_(0.0), y_(0.0) {}
@@ -36,8 +45,8 @@ public:
     bool operator==(const Vector2Dd& other) const { return x_ == other.x_ && y_ == other.y_; }
     bool equals(const Vector2Dd& other) const { return (*this) == other; }
     int hashCode() const {
-        std::size_t result = std::hash<double>()(x_);
-        result = 31u * result + std::hash<double>()(y_);
+        unsigned int result = hashDouble(x_);
+        result = 31u * result + hashDouble(y_);
         return (int)result;
     }
     java::String* toString() const;

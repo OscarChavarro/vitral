@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 
 #include <cmath>
-#include <functional>
+#include <cstring>
 #include <stdexcept>
 #include <cstdio>
 
@@ -200,11 +200,20 @@ bool MatrixNxM::operator==(const MatrixNxM& other) const
     return true;
 }
 
+static unsigned int hashDouble(double val) {
+    unsigned char bytes[sizeof(double)];
+    memcpy(bytes, &val, sizeof(double));
+    unsigned int h = 0u;
+    for (int i = 0; i < (int)sizeof(double); ++i)
+        h = h * 31u + static_cast<unsigned int>(bytes[i]);
+    return h;
+}
+
 int MatrixNxM::hashCode() const
 {
-    std::size_t result = 31u * (std::size_t)numRows_ + (std::size_t)numColumns_;
+    unsigned int result = 31u * (unsigned int)numRows_ + (unsigned int)numColumns_;
     for ( int i = 0; i < numRows_ * numColumns_; ++i ) {
-        result = 31u * result + std::hash<double>()(m_[i]);
+        result = 31u * result + hashDouble(m_[i]);
     }
     return (int)result;
 }

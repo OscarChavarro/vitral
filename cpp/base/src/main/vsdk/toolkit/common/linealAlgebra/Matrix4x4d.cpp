@@ -1,9 +1,9 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
 #include <cmath>
+#include <cstring>
 #include <stdexcept>
 #include <cstdio>
-#include <functional>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
@@ -402,12 +402,21 @@ bool Matrix4x4d::operator==(const Matrix4x4d& other) const
     return true;
 }
 
+static unsigned int hashDouble(double val) {
+    unsigned char bytes[sizeof(double)];
+    memcpy(bytes, &val, sizeof(double));
+    unsigned int h = 0u;
+    for (int i = 0; i < (int)sizeof(double); ++i)
+        h = h * 31u + static_cast<unsigned int>(bytes[i]);
+    return h;
+}
+
 int Matrix4x4d::hashCode() const
 {
-    std::size_t result = 1u;
+    unsigned int result = 1u;
     for ( int i = 0; i < 4; i++ ) {
         for ( int j = 0; j < 4; j++ ) {
-            result = 31u * result + std::hash<double>()(m_[i][j]);
+            result = 31u * result + hashDouble(m_[i][j]);
         }
     }
     return (int)result;

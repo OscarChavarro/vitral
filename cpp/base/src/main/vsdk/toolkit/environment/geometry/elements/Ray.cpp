@@ -5,8 +5,7 @@
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "java/lang/String.h"
 #include <cmath>
-#include "java/lang/String.h"
-#include <functional>
+#include <cstring>
 #include "java/lang/String.h"
 
 const double Ray::UNIT_DIRECTION_TOLERANCE = 1e-12;
@@ -77,11 +76,20 @@ bool Ray::equals(const Ray& other) const
     return t_ == other.t_ && origin_ == other.origin_ && direction_ == other.direction_;
 }
 
+static unsigned int hashDouble(double val) {
+    unsigned char bytes[sizeof(double)];
+    memcpy(bytes, &val, sizeof(double));
+    unsigned int h = 0u;
+    for (int i = 0; i < (int)sizeof(double); ++i)
+        h = h * 31u + static_cast<unsigned int>(bytes[i]);
+    return h;
+}
+
 int Ray::hashCode() const
 {
-    std::size_t result = std::hash<double>()(t_);
-    result = 31u * result + static_cast<std::size_t>(origin_.hashCode());
-    result = 31u * result + static_cast<std::size_t>(direction_.hashCode());
+    unsigned int result = hashDouble(t_);
+    result = 31u * result + static_cast<unsigned int>(origin_.hashCode());
+    result = 31u * result + static_cast<unsigned int>(direction_.hashCode());
     return static_cast<int>(result);
 }
 

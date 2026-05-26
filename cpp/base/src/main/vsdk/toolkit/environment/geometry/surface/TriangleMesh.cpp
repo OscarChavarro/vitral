@@ -27,6 +27,8 @@
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
 #include <cmath>
+#include <cstdio>
+#include <string>
 #include "java/lang/String.h"
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
@@ -778,53 +780,65 @@ void TriangleMesh::slice(InfinitePlane& p)
     calculateNormals();
 }
 
+static std::string doubleToStr(double val) {
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%g", val);
+    return buf;
+}
+
+static std::string intToStr(int val) {
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%d", val);
+    return buf;
+}
+
 java::String TriangleMesh::toString() const
 {
     java::String msg;
     msg += "- TriangleMesh ------------------------------------------------------------\n";
     msg += "  - Number of triangles:";
-    msg += std::to_string(getNumTriangles()).c_str();
+    msg += intToStr(getNumTriangles()).c_str();
     msg += "\n";
     msg += "  - Number of vertexes:";
-    msg += std::to_string(getNumVertices()).c_str();
+    msg += intToStr(getNumVertices()).c_str();
     msg += "\n";
 
     TriangleMesh* self = const_cast<TriangleMesh*>(this);
     double* mm = self->getMinMax();
     msg += "  - MINMAX: (";
-    msg += std::to_string(mm[0]).c_str();
+    msg += doubleToStr(mm[0]).c_str();
     msg += ", ";
-    msg += std::to_string(mm[1]).c_str();
+    msg += doubleToStr(mm[1]).c_str();
     msg += ", ";
-    msg += std::to_string(mm[2]).c_str();
+    msg += doubleToStr(mm[2]).c_str();
     msg += ") - (";
-    msg += std::to_string(mm[3]).c_str();
+    msg += doubleToStr(mm[3]).c_str();
     msg += ", ";
-    msg += std::to_string(mm[4]).c_str();
+    msg += doubleToStr(mm[4]).c_str();
     msg += ", ";
-    msg += std::to_string(mm[5]).c_str();
+    msg += doubleToStr(mm[5]).c_str();
     msg += ")\n";
     delete [] mm;
 
     if (materials.size() == 0) msg += "  - No materials available!\n";
     else {
         msg += "  - ";
-        msg += std::to_string(materials.size()).c_str();
+        msg += intToStr((int)materials.size()).c_str();
         msg += " materials\n";
     }
 
     if (materialRanges.size() == 0) msg += "  - No material ranges association table available!\n";
     else {
         msg += "  - ";
-        msg += std::to_string(materialRanges.size()).c_str();
+        msg += intToStr((int)materialRanges.size()).c_str();
         msg += " material spans:\n";
         for (long int i = 0; i < materialRanges.size(); i++) {
             java::ArrayList<int> mr = materialRanges.get(i);
             if (mr.size() >= 2) {
                 msg += "    . ";
-                msg += std::to_string(mr[0]).c_str();
+                msg += intToStr(mr[0]).c_str();
                 msg += " -> ";
-                msg += std::to_string(mr[1]).c_str();
+                msg += intToStr(mr[1]).c_str();
                 msg += "\n";
             }
         }
@@ -833,22 +847,22 @@ java::String TriangleMesh::toString() const
     if (textures.size() == 0) msg += "  - No textures available!\n";
     else {
         msg += "  - ";
-        msg += std::to_string(textures.size()).c_str();
+        msg += intToStr((int)textures.size()).c_str();
         msg += " textures\n";
     }
 
     if (textureRanges.size() == 0) msg += "  - No texture ranges association table available!\n";
     else {
         msg += "  - ";
-        msg += std::to_string(textureRanges.size()).c_str();
+        msg += intToStr((int)textureRanges.size()).c_str();
         msg += " texture spans:\n";
         for (long int i = 0; i < textureRanges.size(); i++) {
             java::ArrayList<int> tr = textureRanges.get(i);
             if (tr.size() >= 2) {
                 msg += "    . ";
-                msg += std::to_string(tr[0]).c_str();
+                msg += intToStr(tr[0]).c_str();
                 msg += " -> ";
-                msg += std::to_string(tr[1]).c_str();
+                msg += intToStr(tr[1]).c_str();
                 msg += "\n";
             }
         }

@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include <cmath>
+#include <cstdio>
 #include <java/lang/Math.h>
 
 static const double PI = 3.14159265358979323846;
