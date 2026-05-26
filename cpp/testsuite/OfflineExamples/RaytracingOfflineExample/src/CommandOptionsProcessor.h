@@ -3,7 +3,7 @@
 #define RAYTRACING_OFFLINE_COMMANDOPTIONSPROCESSOR_H
 
 #include "java/lang/String.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class CommandOptionsProcessor {
 private:
@@ -19,7 +19,7 @@ private:
 public:
     CommandOptionsProcessor();
 
-    static CommandOptionsProcessor process(const std::vector<java::String>& args);
+    static CommandOptionsProcessor process(const java::ArrayList<java::String>& args);
     static void printUsage();
 
     const java::String& getSceneFile() const;

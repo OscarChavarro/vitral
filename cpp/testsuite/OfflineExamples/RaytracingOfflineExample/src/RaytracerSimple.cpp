@@ -21,7 +21,6 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <vector>
 #include "java/util/ArrayList.txx"
 
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
@@ -122,9 +121,9 @@ static void offlineExecution(const java::String& fileName,
 
 int main(int argc, char** argv)
 {
-    std::vector<java::String> args;
+    java::ArrayList<java::String> args;
     for (int i = 1; i < argc; i++) {
-        args.push_back(argv[i]);
+        args.add(argv[i]);
     }
 
     CommandOptionsProcessor options = CommandOptionsProcessor::process(args);

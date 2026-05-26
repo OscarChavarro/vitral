@@ -21,7 +21,6 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <iostream>
-#include <vector>
 #include <stdexcept>
 #include "java/util/ArrayList.txx"
 

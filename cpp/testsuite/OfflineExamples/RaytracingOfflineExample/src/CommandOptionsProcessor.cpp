@@ -1,6 +1,7 @@
 #include "CommandOptionsProcessor.h"
 
 #include <iostream>
+#include "java/util/ArrayList.txx"
 
 const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../etc/geometry/mitscenes/balls.ray";
 const char* CommandOptionsProcessor::DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
@@ -11,13 +12,13 @@ CommandOptionsProcessor::CommandOptionsProcessor()
 {
 }
 
-CommandOptionsProcessor CommandOptionsProcessor::process(const std::vector<java::String>& args)
+CommandOptionsProcessor CommandOptionsProcessor::process(const java::ArrayList<java::String>& args)
 {
     CommandOptionsProcessor options;
     int positionalCount = 0;
 
-    for (size_t i = 0; i < args.size(); i++) {
-        const java::String& arg = args[i];
+    for (long int i = 0; i < args.size(); i++) {
+        java::String arg = args.get(i);
         if ( arg == "nosave" || arg == "--nosave" || arg == "-n" ) {
             options.save = false;
             continue;
@@ -36,7 +37,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const std::vector<java:
                 options.showHelp = true;
                 return options;
             }
-            options.sceneFile = args[++i];
+            options.sceneFile = args.get(++i);
             continue;
         }
         if ( arg == "--output" || arg == "-o" ) {
@@ -45,7 +46,7 @@ CommandOptionsProcessor CommandOptionsProcessor::process(const std::vector<java:
                 options.showHelp = true;
                 return options;
             }
-            options.outputFile = args[++i];
+            options.outputFile = args.get(++i);
             continue;
         }
         if ( !arg.empty() && arg[0] == '-' ) {

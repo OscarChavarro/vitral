@@ -7,7 +7,6 @@
 #include <cstring>
 #include <stdexcept>
 #include "java/lang/String.h"
-#include <vector>
 
 static java::String readShaderSource(const java::String& shaderFileName)
 {
@@ -21,11 +20,13 @@ static java::String readShaderSource(const java::String& shaderFileName)
     long size = std::ftell(file);
     std::fseek(file, 0, SEEK_SET);
 
-    std::vector<char> buffer((size_t)size + 1u, 0);
-    size_t readSize = std::fread(buffer.data(), 1, (size_t)size, file);
+    char* buffer = new char[(size_t)size + 1u]();
+    size_t readSize = std::fread(buffer, 1, (size_t)size, file);
     buffer[readSize] = '\0';
     std::fclose(file);
-    return java::String(buffer.data());
+    java::String result(buffer);
+    delete[] buffer;
+    return result;
 }
 
 static java::String getShaderInfoLog(GLuint shader)
@@ -33,9 +34,11 @@ static java::String getShaderInfoLog(GLuint shader)
     GLint length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
     if (length <= 1) return "(no log)";
-    std::vector<char> log((size_t)length, 0);
-    glGetShaderInfoLog(shader, length, &length, log.data());
-    return java::String(log.data());
+    char* log = new char[(size_t)length]();
+    glGetShaderInfoLog(shader, length, &length, log);
+    java::String result(log);
+    delete[] log;
+    return result;
 }
 
 static java::String getProgramInfoLog(GLuint program)
@@ -43,9 +46,11 @@ static java::String getProgramInfoLog(GLuint program)
     GLint length = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
     if (length <= 1) return "(no log)";
-    std::vector<char> log((size_t)length, 0);
-    glGetProgramInfoLog(program, length, &length, log.data());
-    return java::String(log.data());
+    char* log = new char[(size_t)length]();
+    glGetProgramInfoLog(program, length, &length, log);
+    java::String result(log);
+    delete[] log;
+    return result;
 }
 
 static GLuint compileShader(GLenum shaderType, const java::String& source)
@@ -117,14 +122,14 @@ static void setShaderUniforms(GLuint program)
     if (diffuseColor >= 0) glUniform3f(diffuseColor, 1.0f, 1.0f, 1.0f);
 }
 
-static void writeRgbToPpm(const char* outFile, const std::vector<unsigned char>& rgb, int w, int h)
+static void writeRgbToPpm(const char* outFile, const unsigned char* rgb, int w, int h)
 {
     FILE* f = std::fopen(outFile, "wb");
     if (!f) throw std::runtime_error("Could not open output file");
     std::fprintf(f, "P6\n%d %d\n255\n", w, h);
 
     for (int y = h - 1; y >= 0; y--) {
-        const unsigned char* row = &rgb[(size_t)y * (size_t)w * 3u];
+        const unsigned char* row = rgb + (size_t)y * (size_t)w * 3u;
         std::fwrite(row, 1, (size_t)w * 3u, f);
     }
     std::fclose(f);
@@ -212,10 +217,11 @@ int main()
         glUseProgram(0);
         glFinish();
 
-        std::vector<unsigned char> rgb((size_t)width * (size_t)height * 3u, 0u);
+        unsigned char* rgb = new unsigned char[(size_t)width * (size_t)height * 3u]();
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, rgb.data());
+        glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, rgb);
         writeRgbToPpm("./output.ppm", rgb, width, height);
+        delete[] rgb;
         std::printf("OpenGL4PbufferExample: exported ./output.ppm\n");
     }
     catch (const std::exception& e) {

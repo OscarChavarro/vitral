@@ -16,7 +16,7 @@
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/lang/String.h"
-#include <vector>
+#include "java/util/ArrayList.txx"
 
 static const float IMAGE_DEPTH_BIAS_FACTOR = -1.0f;
 static const float IMAGE_DEPTH_BIAS_UNITS = -8.0f;
@@ -175,15 +175,15 @@ public:
     }
 
     Image* loadImage(const char* filename) {
-        std::vector<java::String> candidates = {
-            java::String(filename),
-            java::String("../") + filename,
-            java::String("../../") + filename,
-            java::String("../../../") + filename,
-            java::String("../../../../") + filename
-        };
+        java::ArrayList<java::String> candidates;
+        candidates.add(java::String(filename));
+        candidates.add(java::String("../") + filename);
+        candidates.add(java::String("../../") + filename);
+        candidates.add(java::String("../../../") + filename);
+        candidates.add(java::String("../../../../") + filename);
 
-        for (const java::String& candidate : candidates) {
+        for (long int i = 0; i < candidates.size(); i++) {
+            const java::String& candidate = candidates[i];
             java::File file(candidate.c_str());
             if (!file.exists() || !file.canRead()) {
                 continue;

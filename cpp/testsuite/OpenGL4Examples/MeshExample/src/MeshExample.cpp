@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <vector>
 #include "java/util/ArrayList.txx"
 #include <fstream>
 #include <sstream>
@@ -49,9 +48,11 @@ static java::String readTextFile(const java::String& path)
     const std::streamsize fileSize = f.tellg();
     if (fileSize <= 0) return java::String();
     f.seekg(0, std::ios::beg);
-    std::vector<char> buffer((size_t)fileSize + 1, '\0');
-    f.read(&buffer[0], fileSize);
-    return java::String(&buffer[0]);
+    char* buffer = new char[(size_t)fileSize + 1]();
+    f.read(buffer, fileSize);
+    java::String result(buffer);
+    delete[] buffer;
+    return result;
 }
 
 static java::String findShaderSource(const java::String& shaderFileName)
@@ -225,24 +226,24 @@ public:
         }
     }
 
-    void drawBody(SimpleBody* body, Camera* camera, const std::vector<Light*>& lights, RendererConfiguration* quality)
+    void drawBody(SimpleBody* body, Camera* camera, const java::ArrayList<Light*>& lights, RendererConfiguration* quality)
     {
         if (body == nullptr || camera == nullptr || quality == nullptr) return;
 
         Geometry* geometry = body->getGeometry();
         if (geometry == nullptr) return;
 
-        std::vector<TriangleMesh*> meshes;
+        java::ArrayList<TriangleMesh*> meshes;
         TriangleMesh* tm = dynamic_cast<TriangleMesh*>(geometry);
         if (tm != nullptr) {
-            meshes.push_back(tm);
+            meshes.add(tm);
         }
         else {
             TriangleMeshGroup* group = dynamic_cast<TriangleMeshGroup*>(geometry);
             if (group == nullptr) return;
             java::ArrayList<TriangleMesh>& groupMeshes = group->getMeshes();
             for (long int i = 0; i < groupMeshes.size(); i++) {
-                meshes.push_back(&groupMeshes[i]);
+                meshes.add(&groupMeshes[i]);
             }
         }
 
@@ -253,11 +254,11 @@ public:
 
         SimpleMaterial material = body->getMaterial() ? *(body->getMaterial()) : defaultMaterial();
 
-        for (size_t mi = 0; mi < meshes.size(); mi++) {
+        for (long int mi = 0; mi < meshes.size(); mi++) {
             TriangleMesh* mesh = meshes[mi];
-            std::vector<float> positions;
-            std::vector<float> normals;
-            std::vector<float> uvs;
+            java::ArrayList<float> positions;
+            java::ArrayList<float> normals;
+            java::ArrayList<float> uvs;
             if (!buildFrame(mesh, positions, normals, uvs)) continue;
 
             uploadFrame(positions, normals, uvs);
@@ -381,7 +382,7 @@ private:
         return gouraudProgram;
     }
 
-    bool buildFrame(TriangleMesh* mesh, std::vector<float>& outPositions, std::vector<float>& outNormals, std::vector<float>& outUvs)
+    bool buildFrame(TriangleMesh* mesh, java::ArrayList<float>& outPositions, java::ArrayList<float>& outNormals, java::ArrayList<float>& outUvs)
     {
         if (mesh == nullptr) return false;
 
@@ -394,63 +395,63 @@ private:
         bool hasNormals = normals.size() >= vertices.size();
         bool hasUvs = (uvs.size() / 2) >= (vertices.size() / 3);
 
-        outPositions.resize((size_t)indices.size() * 3);
-        outNormals.resize((size_t)indices.size() * 3);
-        outUvs.resize((size_t)indices.size() * 2);
+        outPositions.clear();
+        outNormals.clear();
+        outUvs.clear();
+        outPositions.reserve((long int)indices.size() * 3);
+        outNormals.reserve((long int)indices.size() * 3);
+        outUvs.reserve((long int)indices.size() * 2);
 
-        int p = 0;
-        int n = 0;
-        int t = 0;
         for (long int i = 0; i < indices.size(); i++) {
             int idx = indices[i];
             int vp = idx * 3;
-            outPositions[p++] = (float)vertices[(long int)vp];
-            outPositions[p++] = (float)vertices[(long int)vp + 1];
-            outPositions[p++] = (float)vertices[(long int)vp + 2];
+            outPositions.add((float)vertices[(long int)vp]);
+            outPositions.add((float)vertices[(long int)vp + 1]);
+            outPositions.add((float)vertices[(long int)vp + 2]);
 
             if (hasNormals) {
-                outNormals[n++] = (float)normals[(long int)vp];
-                outNormals[n++] = (float)normals[(long int)vp + 1];
-                outNormals[n++] = (float)normals[(long int)vp + 2];
+                outNormals.add((float)normals[(long int)vp]);
+                outNormals.add((float)normals[(long int)vp + 1]);
+                outNormals.add((float)normals[(long int)vp + 2]);
             }
             else {
-                outNormals[n++] = 0.0f;
-                outNormals[n++] = 0.0f;
-                outNormals[n++] = 1.0f;
+                outNormals.add(0.0f);
+                outNormals.add(0.0f);
+                outNormals.add(1.0f);
             }
 
             if (hasUvs) {
                 int uv = idx * 2;
-                outUvs[t++] = (float)uvs[(long int)uv];
-                outUvs[t++] = (float)uvs[(long int)uv + 1];
+                outUvs.add((float)uvs[(long int)uv]);
+                outUvs.add((float)uvs[(long int)uv + 1]);
             }
             else {
-                outUvs[t++] = 0.0f;
-                outUvs[t++] = 0.0f;
+                outUvs.add(0.0f);
+                outUvs.add(0.0f);
             }
         }
 
         return true;
     }
 
-    void uploadFrame(const std::vector<float>& positions, const std::vector<float>& normals, const std::vector<float>& uvs)
+    void uploadFrame(java::ArrayList<float>& positions, java::ArrayList<float>& normals, java::ArrayList<float>& uvs)
     {
         vertexCount = (int)(positions.size() / 3);
 
         glBindVertexArray(vaoId);
 
         glBindBuffer(GL_ARRAY_BUFFER, positionVboId);
-        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), &positions[0], GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STREAM_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glBindBuffer(GL_ARRAY_BUFFER, normalVboId);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), &normals[0], GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STREAM_DRAW);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         glBindBuffer(GL_ARRAY_BUFFER, uvVboId);
-        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), &uvs[0], GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STREAM_DRAW);
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
@@ -464,7 +465,7 @@ private:
         const Matrix4x4d& model,
         const Matrix4x4d& modelIt,
         Camera* camera,
-        const std::vector<Light*>& lights,
+        const java::ArrayList<Light*>& lights,
         const SimpleMaterial& material,
         RendererConfiguration* quality,
         bool withTexture,
@@ -488,14 +489,15 @@ private:
         setUniform3f(programId, "cameraPositionGlobal", camera->getPosition());
 
         int lightCount = 0;
-        for (size_t i = 0; i < lights.size(); i++) {
-            if (lights[i] == nullptr) continue;
+        for (long int i = 0; i < lights.size(); i++) {
+            Light* light = lights.get(i);
+            if (light == nullptr) continue;
             std::ostringstream pName;
             std::ostringstream cName;
             pName << "lightPositionsGlobal[" << lightCount << "]";
             cName << "lightColorsGlobal[" << lightCount << "]";
-            setUniform3f(programId, pName.str().c_str(), lights[i]->getPosition());
-            setUniform3f(programId, cName.str().c_str(), lights[i]->getSpecular());
+            setUniform3f(programId, pName.str().c_str(), light->getPosition());
+            setUniform3f(programId, cName.str().c_str(), light->getSpecular());
             lightCount++;
         }
 
@@ -528,13 +530,13 @@ public:
         light0->setId(0);
         Light* light1 = new Light(LightType::POINT, Vector3Dd(-10, 20, 50), ColorRgb(1, 1, 1));
         light1->setId(1);
-        lights.push_back(light0);
-        lights.push_back(light1);
+        lights.add(light0);
+        lights.add(light1);
     }
 
     ~MeshModel()
     {
-        for (size_t i = 0; i < lights.size(); i++) {
+        for (long int i = 0; i < lights.size(); i++) {
             delete lights[i];
         }
         lights.clear();
@@ -589,7 +591,7 @@ public:
     SimpleScene scene;
     Camera camera;
     RendererConfiguration qualitySelection;
-    std::vector<Light*> lights;
+    java::ArrayList<Light*> lights;
 };
 
 class MeshExampleApp {

@@ -20,7 +20,6 @@
 #include <cstdio>
 #include <fstream>
 #include "java/lang/String.h"
-#include <vector>
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -55,9 +54,11 @@ static java::String readTextFile(const java::String& path)
     const std::streamsize size = f.tellg();
     f.seekg(0, std::ios::beg);
     if (size <= 0) return java::String();
-    std::vector<char> buffer(static_cast<size_t>(size) + 1u, '\0');
-    f.read(buffer.data(), size);
-    return java::String(buffer.data());
+    char* buffer = new char[static_cast<size_t>(size) + 1u]();
+    f.read(buffer, size);
+    java::String result(buffer);
+    delete[] buffer;
+    return result;
 }
 
 static java::String findShaderSource(const java::String& shaderFileName)

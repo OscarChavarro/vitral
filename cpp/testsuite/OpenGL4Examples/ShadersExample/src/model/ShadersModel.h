@@ -2,7 +2,7 @@
 #define SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
 
 #include "java/lang/String.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 #include "ShaderOperationMode.h"
 
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -28,7 +28,7 @@ public:
     Light* light;
     SimpleMaterial material;
     MicroFacetedMaterial* cookTorranceMaterial;
-    std::vector<java::String> cookTorranceMaterialNames;
+    java::ArrayList<java::String> cookTorranceMaterialNames;
     int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMapHeightRgb;

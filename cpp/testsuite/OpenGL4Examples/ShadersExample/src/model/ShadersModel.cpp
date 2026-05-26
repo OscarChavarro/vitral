@@ -4,7 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include "java/util/ArrayList.txx"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -56,12 +56,12 @@ ShadersModel::ShadersModel()
                 if ( line.empty() ) continue;
                 std::basic_stringstream<char> ss(line);
                 java::String token;
-                std::vector<java::String> cols;
-                while ( std::getline(ss, token, ',') ) cols.push_back(token);
+                java::ArrayList<java::String> cols;
+                while ( std::getline(ss, token, ',') ) cols.add(token);
                 if ( cols.size() < 16 ) continue;
                 const java::String& name = cols[0];
                 if ( name.empty() ) continue;
-                cookTorranceMaterialNames.push_back(name);
+                cookTorranceMaterialNames.add(name);
                 if ( name == "Copper" ) {
                     cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
                 }
@@ -152,9 +152,9 @@ java::String ShadersModel::getCookTorranceMaterialLabel() const
 
 void ShadersModel::cycleCookTorranceMaterial()
 {
-    if ( cookTorranceMaterialNames.empty() ) return;
+    if ( cookTorranceMaterialNames.size() == 0 ) return;
     cookTorranceMaterialIndex = (cookTorranceMaterialIndex + 1) % (int)cookTorranceMaterialNames.size();
-    const java::String& name = cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex];
+    java::String name = cookTorranceMaterialNames.get((long int)cookTorranceMaterialIndex);
     delete cookTorranceMaterial;
     cookTorranceMaterial = new MicroFacetedMaterial(
         "../../../../etc/materials/microFacetMAterials.csv",

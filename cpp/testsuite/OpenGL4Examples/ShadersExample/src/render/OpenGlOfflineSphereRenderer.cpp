@@ -1,8 +1,6 @@
 #include "OpenGlOfflineSphereRenderer.h"
 #include "../model/ShadersModel.h"
 
-#include <vector>
-
 #include <GL/glew.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -56,9 +54,9 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
 
     glFinish();
 
-    std::vector<unsigned char> bytes((size_t)width * (size_t)height * 3u, 0u);
+    unsigned char* bytes = new unsigned char[(size_t)width * (size_t)height * 3u]();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, bytes.data());
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, bytes);
 
     RGBImageUncompressed* image = new RGBImageUncompressed();
     image->init(width, height);
@@ -69,6 +67,7 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
             pos += 3;
         }
     }
+    delete[] bytes;
 
     OpenGL4SphereRenderer::dispose();
     OpenGL4ImageRenderer::dispose();

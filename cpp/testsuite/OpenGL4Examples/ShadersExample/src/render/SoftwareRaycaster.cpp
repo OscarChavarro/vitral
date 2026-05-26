@@ -5,7 +5,6 @@
 #include <atomic>
 #include <stdexcept>
 #include <thread>
-#include <vector>
 #include "java/util/ArrayList.txx"
 #if defined(_SC_NPROCESSORS_ONLN)
 #include <unistd.h>
@@ -138,13 +137,12 @@ void SoftwareRaycaster::render(
         const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
         const int workerCount = std::max(1, numberOfThreads);
         std::atomic<size_t> nextTileIndex(0);
-        std::vector<std::thread> workers;
-        workers.reserve((size_t)workerCount);
+        std::thread* workers = new std::thread[workerCount];
         std::atomic<bool> failed(false);
         std::exception_ptr firstError;
 
         for ( int w = 0; w < workerCount; w++ ) {
-            workers.push_back(std::thread([&]() {
+            workers[w] = std::thread([&]() {
                 SimpleRaytracer raytracer;
                 try {
                     while ( true ) {
@@ -170,12 +168,13 @@ void SoftwareRaycaster::render(
                         firstError = std::current_exception();
                     }
                 }
-            }));
+            });
         }
 
-        for ( size_t i = 0; i < workers.size(); i++ ) {
+        for ( int i = 0; i < workerCount; i++ ) {
             workers[i].join();
         }
+        delete[] workers;
 
         if ( firstError ) {
             std::rethrow_exception(firstError);

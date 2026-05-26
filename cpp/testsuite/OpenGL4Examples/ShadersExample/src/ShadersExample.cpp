@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cmath>
 #include "java/lang/String.h"
-#include <vector>
 #include "java/util/ArrayList.txx"
 #include <algorithm>
 #include <stdexcept>
@@ -62,10 +61,11 @@ static int detectCpuCount()
     return 1;
 }
 
-static RGBImageUncompressed* loadRgbByCandidates(const std::vector<java::String>& candidates)
+static RGBImageUncompressed* loadRgbByCandidates(const java::ArrayList<java::String>& candidates)
 {
-    for (size_t i = 0; i < candidates.size(); i++) {
-        java::File f(candidates[i].c_str());
+    for (long int i = 0; i < candidates.size(); i++) {
+        java::String candidate = candidates.get(i);
+        java::File f(candidate.c_str());
         if (!f.exists() || !f.canRead()) continue;
         RGBImageUncompressed* img = ImagePersistence::importRGB(f);
         if (img != 0 && img->getXSize() > 0 && img->getYSize() > 0) return img;
@@ -74,10 +74,11 @@ static RGBImageUncompressed* loadRgbByCandidates(const std::vector<java::String>
     return 0;
 }
 
-static NormalMap* loadBumpNormalMapByCandidates(const std::vector<java::String>& candidates)
+static NormalMap* loadBumpNormalMapByCandidates(const java::ArrayList<java::String>& candidates)
 {
-    for (size_t i = 0; i < candidates.size(); i++) {
-        java::File f(candidates[i].c_str());
+    for (long int i = 0; i < candidates.size(); i++) {
+        java::String candidate = candidates.get(i);
+        java::File f(candidate.c_str());
         if (!f.exists() || !f.canRead()) continue;
         IndexedColorImageUncompressed* bump = ImagePersistence::importIndexedColor(f);
         if (bump == 0 || bump->getXSize() <= 0 || bump->getYSize() <= 0) {
@@ -124,7 +125,7 @@ public:
     RendererConfiguration quality;
     SimpleMaterial material;
     MicroFacetedMaterial* cookTorranceMaterial;
-    std::vector<java::String> cookTorranceMaterialNames;
+    java::ArrayList<java::String> cookTorranceMaterialNames;
     int cookTorranceMaterialIndex;
     RGBImageUncompressed* textureMap;
     RGBImageUncompressed* bumpMap;
@@ -249,13 +250,12 @@ public:
                 softwareThreadCount);
             const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
             std::atomic<size_t> nextTileIndex(0);
-            std::vector<std::thread> workers;
-            workers.reserve((size_t)softwareThreadCount);
+            std::thread* workers = new std::thread[softwareThreadCount];
             std::atomic<bool> failed(false);
             std::exception_ptr firstError;
 
             for (int w = 0; w < softwareThreadCount; w++) {
-                workers.push_back(std::thread([&]() {
+                workers[w] = std::thread([&]() {
                     SimpleRaytracer raytracer;
                     try {
                         while (true) {
@@ -279,9 +279,10 @@ public:
                             firstError = std::current_exception();
                         }
                     }
-                }));
+                });
             }
-            for (size_t i = 0; i < workers.size(); i++) workers[i].join();
+            for (int i = 0; i < softwareThreadCount; i++) workers[i].join();
+            delete[] workers;
             if (firstError) std::rethrow_exception(firstError);
         }
         catch (...) {
@@ -308,12 +309,12 @@ public:
 
     void cycleCookTorranceMaterial()
     {
-        if (cookTorranceMaterialNames.empty()) return;
+        if (cookTorranceMaterialNames.size() == 0) return;
         cookTorranceMaterialIndex = (cookTorranceMaterialIndex + 1) % (int)cookTorranceMaterialNames.size();
         delete cookTorranceMaterial;
         cookTorranceMaterial = new MicroFacetedMaterial(
             "../../../../etc/materials/microFacetMAterials.csv",
-            cookTorranceMaterialNames[(size_t)cookTorranceMaterialIndex]);
+            cookTorranceMaterialNames.get((long int)cookTorranceMaterialIndex));
     }
 
     java::String getCookTorranceMaterialLabel() const
@@ -425,24 +426,25 @@ public:
                     if (line.empty()) continue;
                     std::basic_stringstream<char> ss(line);
                     java::String token;
-                    std::vector<java::String> cols;
-                    while (std::getline(ss, token, ',')) cols.push_back(token);
-                    if (cols.empty() || cols[0].empty()) continue;
-                    cookTorranceMaterialNames.push_back(cols[0]);
+                    java::ArrayList<java::String> cols;
+                    while (std::getline(ss, token, ',')) cols.add(token);
+                    if (cols.size() == 0 || cols[0].empty()) continue;
+                    cookTorranceMaterialNames.add(cols[0]);
                     if (cols[0] == "Copper") cookTorranceMaterialIndex = (int)cookTorranceMaterialNames.size() - 1;
                 }
             }
         }
 
-        textureMap = loadRgbByCandidates({
-            "../../../../etc/textures/miniearth.png",
-            "../etc/textures/miniearth.png",
-            "../../etc/textures/miniearth.png"
-        });
-        bumpNormalMap = loadBumpNormalMapByCandidates({
-            "../../../../etc/bumpmaps/earth.bw",
-            "../etc/bumpmaps/earth.bw"
-        });
+        java::ArrayList<java::String> textureCandidates;
+        textureCandidates.add("../../../../etc/textures/miniearth.png");
+        textureCandidates.add("../etc/textures/miniearth.png");
+        textureCandidates.add("../../etc/textures/miniearth.png");
+        textureMap = loadRgbByCandidates(textureCandidates);
+
+        java::ArrayList<java::String> bumpCandidates;
+        bumpCandidates.add("../../../../etc/bumpmaps/earth.bw");
+        bumpCandidates.add("../etc/bumpmaps/earth.bw");
+        bumpNormalMap = loadBumpNormalMapByCandidates(bumpCandidates);
         if (bumpNormalMap != 0) {
             bumpMap = bumpNormalMap->exportToRgbImage();
         }

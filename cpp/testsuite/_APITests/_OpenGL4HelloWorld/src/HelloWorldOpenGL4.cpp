@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <fstream>
 #include "java/lang/String.h"
-#include <vector>
 #include <cstring>
 
 class HelloWorldOpenGL4
@@ -305,9 +304,11 @@ private:
             return "(no log)";
         }
 
-        std::vector<char> log(length);
-        glGetShaderInfoLog(shader, length, &length, log.data());
-        return java::String(log.data());
+        char* log = new char[length]();
+        glGetShaderInfoLog(shader, length, &length, log);
+        java::String result(log);
+        delete[] log;
+        return result;
     }
 
     java::String getProgramInfoLog(GLuint program)
@@ -318,9 +319,11 @@ private:
             return "(no log)";
         }
 
-        std::vector<char> log(length);
-        glGetProgramInfoLog(program, length, &length, log.data());
-        return java::String(log.data());
+        char* log = new char[length]();
+        glGetProgramInfoLog(program, length, &length, log);
+        java::String result(log);
+        delete[] log;
+        return result;
     }
 
     void cleanup()
