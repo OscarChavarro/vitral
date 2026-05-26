@@ -3,7 +3,7 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/elements/Intersection.h"
+#include "vsdk/toolkit/environment/geometry/element/Intersection.h"
 #include "java/lang/String.h"
 #include "java/lang/String.h"
 #include "java/lang/String.h"

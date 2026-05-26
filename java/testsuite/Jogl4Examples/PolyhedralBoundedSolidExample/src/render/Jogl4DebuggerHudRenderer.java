@@ -17,7 +17,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import models.CsgSampleNames;
 import models.SolidModelNames;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
-import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;

@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/environment/geometry/elements/Intersection.h"
+#include "vsdk/toolkit/environment/geometry/element/Intersection.h"
 
 Intersection::Intersection() : t(0.0), point(0, 0, 0), normal(0, 0, 0) {}
 

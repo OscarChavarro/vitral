@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
-#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 
 const double Arrow::NO_HIT = 1e308;
 

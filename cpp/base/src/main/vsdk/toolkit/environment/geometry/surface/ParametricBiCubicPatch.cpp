@@ -8,8 +8,8 @@
 
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
-#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include <cstdio>
 

@@ -2,9 +2,9 @@ package vsdk.toolkit.environment.geometry.surface;
 import java.io.Serial;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 
 public class InfinitePlane extends HalfSpace {
     @Serial private static final long serialVersionUID = 20060502L;

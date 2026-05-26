@@ -7,7 +7,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "java/lang/String.h"
 
 class CameraSnapshot;

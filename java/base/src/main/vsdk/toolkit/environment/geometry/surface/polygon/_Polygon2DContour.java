@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vsdk.toolkit.common.FundamentalEntity;
-import vsdk.toolkit.environment.geometry.elements.Vertex2D;
+import vsdk.toolkit.environment.geometry.element.Vertex2D;
 
 public class _Polygon2DContour extends FundamentalEntity implements Comparable<_Polygon2DContour>
 {

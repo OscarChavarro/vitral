@@ -1,6 +1,6 @@
-#include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 #include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

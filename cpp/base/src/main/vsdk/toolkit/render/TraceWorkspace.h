@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_RENDER_TRACEWORKSPACE_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "java/util/ArrayList.h"
 
 class TraceWorkspace {

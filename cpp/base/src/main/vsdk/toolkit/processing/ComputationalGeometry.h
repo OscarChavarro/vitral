@@ -6,7 +6,7 @@
 class ComputationalGeometry {
 public:
     // Deprecated compatibility surface: triangle-related queries were moved
-    // to geometry/elements/Triangle.
+    // to geometry/element/Triangle.
 };
 
 #endif

@@ -6,9 +6,9 @@ package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
 
 // VSDK classes
-import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
 /**

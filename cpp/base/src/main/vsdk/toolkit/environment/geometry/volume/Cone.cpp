@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
-#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include <cmath>
 
 Cone::Cone(double inR1, double inR2, double inH) : r1(inR1), r2(inR2), h(inH) {}

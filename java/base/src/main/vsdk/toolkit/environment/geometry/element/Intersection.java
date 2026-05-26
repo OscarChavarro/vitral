@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.elements;
+package vsdk.toolkit.environment.geometry.element;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 

@@ -7,7 +7,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 public abstract class Shader {

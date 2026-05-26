@@ -5,11 +5,11 @@ import java.io.Serial;
 import java.util.ArrayList;
 
 // VitralSDK classes
-import vsdk.toolkit.environment.geometry.elements.Ray;
-import vsdk.toolkit.environment.geometry.elements.Triangle;
-import vsdk.toolkit.environment.geometry.elements.Vertex;
+import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.Triangle;
+import vsdk.toolkit.environment.geometry.element.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 
 /**
 This class represents a "basic" quad mesh. Its model is based in a set

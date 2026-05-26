@@ -14,12 +14,12 @@ import java.util.List;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.environment.geometry.elements.Vertex2D;
+import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
-import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Solid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;

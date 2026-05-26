@@ -3,7 +3,7 @@
 //=     Distance Fields From Triangle Meshes",  Technical report            =
 //=     IMM-TR-2002-21, Thecnical University of Denmark, 2002.              =
 
-package vsdk.toolkit.environment.geometry.elements;
+package vsdk.toolkit.environment.geometry.element;
 import java.io.Serial;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;

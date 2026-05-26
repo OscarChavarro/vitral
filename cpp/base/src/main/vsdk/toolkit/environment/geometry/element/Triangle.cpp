@@ -1,6 +1,6 @@
-#include "vsdk/toolkit/environment/geometry/elements/Triangle.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/processing/Containment.h"
 #include "java/lang/String.h"

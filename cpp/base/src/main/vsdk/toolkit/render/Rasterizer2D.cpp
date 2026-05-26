@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/render/Rasterizer2D.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/RGBPixel.h"

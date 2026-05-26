@@ -15,8 +15,8 @@ import java.util.StringTokenizer;
 // VitralSDK classes
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.environment.geometry.elements.Triangle;
-import vsdk.toolkit.environment.geometry.elements.Vertex;
+import vsdk.toolkit.environment.geometry.element.Triangle;
+import vsdk.toolkit.environment.geometry.element.Vertex;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.background.Background;

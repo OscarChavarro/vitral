@@ -1,9 +1,9 @@
 package vsdk.toolkit.environment.geometry.curve;
 import java.io.Serial;
 
-import vsdk.toolkit.environment.geometry.elements.Ray;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.elements.RayHit;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 
 public abstract class Curve extends Geometry {
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")

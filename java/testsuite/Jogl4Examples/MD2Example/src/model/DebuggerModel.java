@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vsdk.toolkit.environment.camera.Camera;
-import vsdk.toolkit.environment.geometry.elements.Vertex2D;
+import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;

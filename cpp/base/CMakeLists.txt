@@ -86,12 +86,12 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
     src/main/vsdk/toolkit/processing/StopWatch.cpp
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/Ray.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/RayHit.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/Intersection.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/Triangle.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/Vertex.cpp
-    src/main/vsdk/toolkit/environment/geometry/elements/Vertex2D.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/Intersection.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp
+    src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp
     src/main/vsdk/toolkit/environment/geometry/curve/Curve.cpp
     src/main/vsdk/toolkit/environment/geometry/curve/ParametricCurve.cpp
     src/main/vsdk/toolkit/environment/geometry/Geometry.cpp

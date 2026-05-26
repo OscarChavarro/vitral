@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/environment/geometry/elements/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"

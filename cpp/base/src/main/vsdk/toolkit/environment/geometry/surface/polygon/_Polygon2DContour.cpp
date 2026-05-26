@@ -1,5 +1,5 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/elements/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "java/util/ArrayList.txx"
 
 _Polygon2DContour::_Polygon2DContour() : exteriorContour(nullptr), fleetingFlag(false) {}

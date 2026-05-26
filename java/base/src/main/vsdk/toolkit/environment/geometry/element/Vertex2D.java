@@ -1,4 +1,4 @@
-package vsdk.toolkit.environment.geometry.elements;
+package vsdk.toolkit.environment.geometry.element;
 import java.io.Serial;
 import vsdk.toolkit.common.FundamentalEntity;
 import vsdk.toolkit.common.VSDK;

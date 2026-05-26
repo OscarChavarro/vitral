@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 
 static const Vector3Dd ZERO_VECTOR;
