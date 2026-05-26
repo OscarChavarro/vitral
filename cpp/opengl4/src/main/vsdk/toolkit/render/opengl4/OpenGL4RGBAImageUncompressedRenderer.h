@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4RGBAIMAGEUNCOMPRESSEDRENDERER_H__
 
 #include <GL/glew.h>
-#include <map>
+#include "java/util/HashMap.h"
 
 class RGBAImageUncompressed;
 
@@ -16,7 +16,7 @@ public:
     static void disposeAll();
 
 private:
-    static std::map<RGBAImageUncompressed*, GLuint> compiledImages;
+    static java::HashMap<RGBAImageUncompressed*, GLuint> compiledImages;
     static GLuint upload(RGBAImageUncompressed* img);
 };
 

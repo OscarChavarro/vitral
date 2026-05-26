@@ -1,28 +1,31 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "java/util/ArrayList.h"
+#include "java/util/ArrayList.txx"
 
-std::map<RGBImageUncompressed*, GLuint> OpenGL4RGBImageUncompressedRenderer::compiledImages;
+java::HashMap<RGBImageUncompressed*, GLuint> OpenGL4RGBImageUncompressedRenderer::compiledImages;
+static java::ArrayList<GLuint> compiledTextureIds;
 
 int OpenGL4RGBImageUncompressedRenderer::activate(RGBImageUncompressed* img) {
     if (img == nullptr) {
         return -1;
     }
 
-    auto it = compiledImages.find(img);
-    if (it == compiledImages.end()) {
-        GLuint textureId = upload(img);
-        compiledImages[img] = textureId;
+    GLuint textureId = 0;
+    if (!compiledImages.tryGet(img, &textureId)) {
+        textureId = upload(img);
+        compiledImages.put(img, textureId);
+        compiledTextureIds.add(textureId);
     }
 
-    GLuint textureId = compiledImages[img];
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureId);
     return static_cast<int>(textureId);
 }
 
 void OpenGL4RGBImageUncompressedRenderer::deactivate(RGBImageUncompressed* img) {
-    if (img != nullptr && compiledImages.find(img) != compiledImages.end()) {
+    if (img != nullptr && compiledImages.containsKey(img)) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
@@ -32,14 +35,13 @@ void OpenGL4RGBImageUncompressedRenderer::unload(RGBImageUncompressed* img) {
         return;
     }
 
-    auto it = compiledImages.find(img);
-    if (it == compiledImages.end()) {
+    GLuint textureId = 0;
+    if (!compiledImages.tryGet(img, &textureId)) {
         return;
     }
 
-    GLuint textureId = it->second;
     glDeleteTextures(1, &textureId);
-    compiledImages.erase(it);
+    compiledImages.remove(img);
 }
 
 void OpenGL4RGBImageUncompressedRenderer::draw(RGBImageUncompressed* img) {
@@ -128,8 +130,10 @@ GLuint OpenGL4RGBImageUncompressedRenderer::upload(RGBImageUncompressed* img) {
 }
 
 void OpenGL4RGBImageUncompressedRenderer::disposeAll() {
-    for (auto& pair : compiledImages) {
-        glDeleteTextures(1, &pair.second);
+    for (int i = 0; i < compiledTextureIds.size(); i++) {
+        GLuint textureId = compiledTextureIds.get(i);
+        glDeleteTextures(1, &textureId);
     }
     compiledImages.clear();
+    compiledTextureIds.clear();
 }
