@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Vector3Dd;
 class IndexedColorImageUncompressed;
@@ -17,7 +17,7 @@ class NormalMap : public MediaEntity {
 private:
     int xSize;
     int ySize;
-    std::vector<Vector3Dd*> data;
+    java::ArrayList<Vector3Dd*> data;
 
     Vector3Dd* bumpMapScale;
 

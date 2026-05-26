@@ -1,8 +1,8 @@
 #include "java/util/concurrent/Executors.h"
 
 #include <deque>
-#include <vector>
 #include <pthread.h>
+#include "java/util/ArrayList.txx"
 
 namespace java {
 
@@ -18,7 +18,7 @@ private:
     bool shutdown_;
 
 #ifdef VITRAL_WITH_POSIX_THREADS
-    std::vector<pthread_t> workers_;
+    ArrayList<pthread_t> workers_;
 #endif
 
     static void* workerMain(void* arg)
@@ -62,11 +62,13 @@ public:
         if ( numberOfThreads < 1 ) {
             numberOfThreads = 1;
         }
-        workers_.resize(static_cast<size_t>(numberOfThreads));
+        for (int i = 0; i < numberOfThreads; ++i) {
+            workers_.add((pthread_t)0);
+        }
         for (int i = 0; i < numberOfThreads; ++i) {
             WorkerContext* ctx = new WorkerContext();
             ctx->owner = this;
-            pthread_create(&workers_[static_cast<size_t>(i)], 0, &FixedThreadPoolExecutor::workerMain, ctx);
+            pthread_create(&workers_[i], 0, &FixedThreadPoolExecutor::workerMain, ctx);
         }
 #endif
     }
@@ -90,7 +92,7 @@ public:
         pthread_mutex_unlock(&mutex_);
 
 #ifdef VITRAL_WITH_POSIX_THREADS
-        for (size_t i = 0; i < workers_.size(); ++i) {
+        for (long int i = 0; i < workers_.size(); ++i) {
             pthread_join(workers_[i], 0);
         }
         workers_.clear();

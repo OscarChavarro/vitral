@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 
 static int positiveMod(int value, int modulus) {
@@ -36,7 +37,7 @@ NormalMap::NormalMap(const NormalMap& other) : xSize(0), ySize(0), bumpMapScale(
 }
 
 NormalMap::~NormalMap() {
-    for (size_t i = 0; i < data.size(); i++) {
+    for (long int i = 0; i < data.size(); i++) {
         if (data[i] != nullptr) {
             delete data[i];
             data[i] = nullptr;
@@ -52,7 +53,7 @@ NormalMap::~NormalMap() {
 
 bool NormalMap::init(int width, int height) {
     try {
-        for (size_t i = 0; i < data.size(); i++) {
+        for (long int i = 0; i < data.size(); i++) {
             if (data[i] != nullptr) {
                 delete data[i];
             }
@@ -60,7 +61,7 @@ bool NormalMap::init(int width, int height) {
         data.clear();
 
         for (int i = 0; i < width * height; i++) {
-            data.push_back(new Vector3Dd());
+            data.add(new Vector3Dd());
         }
     } catch (...) {
         return false;
@@ -108,8 +109,8 @@ Vector3Dd* NormalMap::getNormal(int u, int v) const {
         return nullptr;
     }
     int index = v * xSize + u;
-    if (data[index] != nullptr) {
-        return new Vector3Dd(*data[index]);
+    if (data.get(index) != nullptr) {
+        return new Vector3Dd(*data.get(index));
     }
     return nullptr;
 }

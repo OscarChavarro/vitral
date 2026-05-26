@@ -4,7 +4,7 @@
 #include <cctype>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include "java/util/ArrayList.txx"
 
 namespace {
 struct MicrofacetConfig {
@@ -62,13 +62,11 @@ static int parseIntOr(const std::string& s, int fallback)
     try { return std::stoi(trim(s)); } catch (...) { return fallback; }
 }
 
-static std::vector<std::string> splitCsv(const std::string& line)
+static void splitCsv(const std::string& line, java::ArrayList<std::string>& cols)
 {
-    std::vector<std::string> cols;
     std::stringstream ss(line);
     std::string token;
-    while ( std::getline(ss, token, ',') ) cols.push_back(token);
-    return cols;
+    while ( std::getline(ss, token, ',') ) cols.add(token);
 }
 
 static MicrofacetConfig defaultConfig()
@@ -106,11 +104,12 @@ static MicrofacetConfig loadFromCsv(const std::string& csvFileName, const std::s
 
     std::string headerLine;
     if ( !std::getline(in, headerLine) ) return d;
-    std::vector<std::string> header = splitCsv(headerLine);
+    java::ArrayList<std::string> header;
+    splitCsv(headerLine, header);
 
     auto idx = [&](const std::string& n) -> int {
         const std::string needle = lower(n);
-        for ( size_t i = 0; i < header.size(); i++ ) {
+        for ( long int i = 0; i < header.size(); i++ ) {
             if ( lower(trim(header[i])) == needle ) return (int)i;
         }
         return -1;
@@ -141,36 +140,37 @@ static MicrofacetConfig loadFromCsv(const std::string& csvFileName, const std::s
     std::string line;
     while ( std::getline(in, line) ) {
         if ( trim(line).empty() ) continue;
-        std::vector<std::string> cols = splitCsv(line);
+        java::ArrayList<std::string> cols;
+        splitCsv(line, cols);
         if ( iName < 0 || iName >= (int)cols.size() ) continue;
-        const std::string rowName = trim(cols[(size_t)iName]);
+        const std::string rowName = trim(cols[(long int)iName]);
         if ( lower(rowName) != target ) continue;
 
         d.name = rowName;
-        if ( iRoughness >= 0 && iRoughness < (int)cols.size() ) d.roughness = clamp01(parseDoubleOr(cols[(size_t)iRoughness], d.roughness));
-        if ( iAlpha >= 0 && iAlpha < (int)cols.size() ) d.alpha = clamp01(parseDoubleOr(cols[(size_t)iAlpha], d.roughness * d.roughness));
-        if ( iKd >= 0 && iKd < (int)cols.size() ) d.kd = clamp01(parseDoubleOr(cols[(size_t)iKd], d.kd));
-        if ( iKs >= 0 && iKs < (int)cols.size() ) d.ks = clamp01(parseDoubleOr(cols[(size_t)iKs], d.ks));
+        if ( iRoughness >= 0 && iRoughness < (int)cols.size() ) d.roughness = clamp01(parseDoubleOr(cols[(long int)iRoughness], d.roughness));
+        if ( iAlpha >= 0 && iAlpha < (int)cols.size() ) d.alpha = clamp01(parseDoubleOr(cols[(long int)iAlpha], d.roughness * d.roughness));
+        if ( iKd >= 0 && iKd < (int)cols.size() ) d.kd = clamp01(parseDoubleOr(cols[(long int)iKd], d.kd));
+        if ( iKs >= 0 && iKs < (int)cols.size() ) d.ks = clamp01(parseDoubleOr(cols[(long int)iKs], d.ks));
         d.diffuse = ColorRgb(
-            (iDr >= 0 && iDr < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iDr], d.diffuse.r()) : d.diffuse.r(),
-            (iDg >= 0 && iDg < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iDg], d.diffuse.g()) : d.diffuse.g(),
-            (iDb >= 0 && iDb < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iDb], d.diffuse.b()) : d.diffuse.b());
+            (iDr >= 0 && iDr < (int)cols.size()) ? parseDoubleOr(cols[(long int)iDr], d.diffuse.r()) : d.diffuse.r(),
+            (iDg >= 0 && iDg < (int)cols.size()) ? parseDoubleOr(cols[(long int)iDg], d.diffuse.g()) : d.diffuse.g(),
+            (iDb >= 0 && iDb < (int)cols.size()) ? parseDoubleOr(cols[(long int)iDb], d.diffuse.b()) : d.diffuse.b());
         d.fresnelF0 = ColorRgb(
-            (iF0r >= 0 && iF0r < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iF0r], d.fresnelF0.r()) : d.fresnelF0.r(),
-            (iF0g >= 0 && iF0g < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iF0g], d.fresnelF0.g()) : d.fresnelF0.g(),
-            (iF0b >= 0 && iF0b < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iF0b], d.fresnelF0.b()) : d.fresnelF0.b());
+            (iF0r >= 0 && iF0r < (int)cols.size()) ? parseDoubleOr(cols[(long int)iF0r], d.fresnelF0.r()) : d.fresnelF0.r(),
+            (iF0g >= 0 && iF0g < (int)cols.size()) ? parseDoubleOr(cols[(long int)iF0g], d.fresnelF0.g()) : d.fresnelF0.g(),
+            (iF0b >= 0 && iF0b < (int)cols.size()) ? parseDoubleOr(cols[(long int)iF0b], d.fresnelF0.b()) : d.fresnelF0.b());
         d.specular = d.fresnelF0;
         d.eta = ColorRgb(
-            (iEtaR >= 0 && iEtaR < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iEtaR], d.eta.r()) : d.eta.r(),
-            (iEtaG >= 0 && iEtaG < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iEtaG], d.eta.g()) : d.eta.g(),
-            (iEtaB >= 0 && iEtaB < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iEtaB], d.eta.b()) : d.eta.b());
+            (iEtaR >= 0 && iEtaR < (int)cols.size()) ? parseDoubleOr(cols[(long int)iEtaR], d.eta.r()) : d.eta.r(),
+            (iEtaG >= 0 && iEtaG < (int)cols.size()) ? parseDoubleOr(cols[(long int)iEtaG], d.eta.g()) : d.eta.g(),
+            (iEtaB >= 0 && iEtaB < (int)cols.size()) ? parseDoubleOr(cols[(long int)iEtaB], d.eta.b()) : d.eta.b());
         d.kappa = ColorRgb(
-            (iKappaR >= 0 && iKappaR < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iKappaR], d.kappa.r()) : d.kappa.r(),
-            (iKappaG >= 0 && iKappaG < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iKappaG], d.kappa.g()) : d.kappa.g(),
-            (iKappaB >= 0 && iKappaB < (int)cols.size()) ? parseDoubleOr(cols[(size_t)iKappaB], d.kappa.b()) : d.kappa.b());
-        if ( iFModel >= 0 && iFModel < (int)cols.size() ) d.fresnelModel = parseIntOr(cols[(size_t)iFModel], d.fresnelModel);
-        if ( iNdf >= 0 && iNdf < (int)cols.size() ) d.ndfModel = parseIntOr(cols[(size_t)iNdf], d.ndfModel);
-        if ( iGeo >= 0 && iGeo < (int)cols.size() ) d.geometryModel = parseIntOr(cols[(size_t)iGeo], d.geometryModel);
+            (iKappaR >= 0 && iKappaR < (int)cols.size()) ? parseDoubleOr(cols[(long int)iKappaR], d.kappa.r()) : d.kappa.r(),
+            (iKappaG >= 0 && iKappaG < (int)cols.size()) ? parseDoubleOr(cols[(long int)iKappaG], d.kappa.g()) : d.kappa.g(),
+            (iKappaB >= 0 && iKappaB < (int)cols.size()) ? parseDoubleOr(cols[(long int)iKappaB], d.kappa.b()) : d.kappa.b());
+        if ( iFModel >= 0 && iFModel < (int)cols.size() ) d.fresnelModel = parseIntOr(cols[(long int)iFModel], d.fresnelModel);
+        if ( iNdf >= 0 && iNdf < (int)cols.size() ) d.ndfModel = parseIntOr(cols[(long int)iNdf], d.ndfModel);
+        if ( iGeo >= 0 && iGeo < (int)cols.size() ) d.geometryModel = parseIntOr(cols[(long int)iGeo], d.geometryModel);
         return d;
     }
     return d;

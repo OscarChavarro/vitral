@@ -2,7 +2,7 @@
 #define __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Vector3Dd;
 class RGBImageUncompressed;
@@ -27,7 +27,7 @@ suggested that internal double coordinates be mapped to the range
 class Calligraphic2DBuffer : public MediaEntity {
 
 private:
-    std::vector<double> lineData;
+    java::ArrayList<double> lineData;
 
 public:
     Calligraphic2DBuffer();

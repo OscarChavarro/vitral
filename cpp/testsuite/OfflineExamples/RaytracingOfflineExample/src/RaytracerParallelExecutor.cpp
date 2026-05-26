@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include "java/util/ArrayList.txx"
 
 namespace {
 
@@ -130,10 +131,9 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
     consumer.run();
 #endif
 
-    std::vector<java::Future<java::Void> > futures;
-    futures.reserve((size_t)numberOfThreads);
+    java::ArrayList<java::Future<java::Void> > futures;
     for (int i = 0; i < numberOfThreads; i++) {
-        futures.push_back(executorService->submit(new TileWorker(
+        futures.add(executorService->submit(new TileWorker(
             &pendingTiles,
             resultingImage,
             rendererConfiguration,
@@ -141,7 +141,7 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
             &producer)));
     }
 
-    for (size_t i = 0; i < futures.size(); i++) {
+    for (long int i = 0; i < futures.size(); i++) {
         futures[i].get();
     }
 

@@ -95,6 +95,18 @@ ArrayList<T>::data() {
 }
 
 template <class T> void
+ArrayList<T>::reserve(long int n) {
+    if (n <= maxSize) return;
+    T* newData = new T[n];
+    for (long int i = 0; i < currentSize; i++) {
+        newData[i] = Data[i];
+    }
+    delete[] Data;
+    Data = newData;
+    maxSize = n;
+}
+
+template <class T> void
 ArrayList<T>::add(long int pos, T elem)
 {
     int lastPosition = size() - 1;

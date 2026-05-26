@@ -2,9 +2,9 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "java/util/ArrayList.txx"
 
 Calligraphic2DBuffer::Calligraphic2DBuffer() {
-    lineData.reserve(80000);
 }
 
 void Calligraphic2DBuffer::init() {
@@ -16,28 +16,28 @@ void Calligraphic2DBuffer::add2DLine(const Vector3Dd& p0, const Vector3Dd& p1) {
 }
 
 void Calligraphic2DBuffer::add2DLine(double x0, double y0, double x1, double y1) {
-    lineData.push_back(x0);
-    lineData.push_back(y0);
-    lineData.push_back(x1);
-    lineData.push_back(y1);
-    lineData.push_back(0.0);     // R
-    lineData.push_back(0.0);     // G
-    lineData.push_back(0.0);     // B
-    lineData.push_back(1.0);     // Width
+    lineData.add(x0);
+    lineData.add(y0);
+    lineData.add(x1);
+    lineData.add(y1);
+    lineData.add(0.0);     // R
+    lineData.add(0.0);     // G
+    lineData.add(0.0);     // B
+    lineData.add(1.0);     // Width
 }
 
 Vector3Dd* Calligraphic2DBuffer::get2DLinePoint0(int i) const {
     if (i < 0 || i >= getNumLines()) {
         return nullptr;
     }
-    return new Vector3Dd(lineData[8*i], lineData[8*i+1], 0.0);
+    return new Vector3Dd(lineData.get(8*i), lineData.get(8*i+1), 0.0);
 }
 
 Vector3Dd* Calligraphic2DBuffer::get2DLinePoint1(int i) const {
     if (i < 0 || i >= getNumLines()) {
         return nullptr;
     }
-    return new Vector3Dd(lineData[8*i+2], lineData[8*i+3], 0.0);
+    return new Vector3Dd(lineData.get(8*i+2), lineData.get(8*i+3), 0.0);
 }
 
 int Calligraphic2DBuffer::getNumLines() const {

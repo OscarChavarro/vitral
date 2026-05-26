@@ -2,7 +2,6 @@
 #define JAVA_UTIL_CONCURRENT_CONCURRENTLINKEDQUEUE_H
 
 #include <deque>
-#include <vector>
 #include <pthread.h>
 
 namespace java {
@@ -16,10 +15,11 @@ private:
 public:
     ConcurrentLinkedQueue() { pthread_mutex_init(&mutex_, 0); }
 
-    explicit ConcurrentLinkedQueue(const std::vector<T>& initial)
+    template<typename Container>
+    explicit ConcurrentLinkedQueue(Container& initial)
     {
         pthread_mutex_init(&mutex_, 0);
-        for (size_t i = 0; i < initial.size(); ++i) {
+        for (long int i = 0; i < (long int)initial.size(); ++i) {
             data_.push_back(initial[i]);
         }
     }

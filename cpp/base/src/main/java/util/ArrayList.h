@@ -27,6 +27,7 @@ namespace java {
         bool add(T elem);
         T &operator[](long int i);
         T *data();
+        void reserve(long int n);
         void add(long int pos, T elem);
         void remove(long int pos);
         void remove(T data);

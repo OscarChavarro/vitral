@@ -14,6 +14,7 @@
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
+#include "java/util/ArrayList.txx"
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
