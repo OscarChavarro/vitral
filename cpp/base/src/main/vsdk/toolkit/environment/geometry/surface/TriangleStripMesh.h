@@ -2,8 +2,8 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLESTRIPMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/util/ArrayList.h"
 #include <string>
-#include <vector>
 
 class Vertex;
 class Ray;
@@ -13,8 +13,8 @@ class TriangleStripMesh : public Surface {
 private:
     // Basic mesh data model
     std::string name;
-    std::vector<Vertex> vertexes;
-    std::vector< std::vector<int> > strips;
+    java::ArrayList<Vertex> vertexes;
+    java::ArrayList< java::ArrayList<int> > strips;
 
     double* calculateMinMaxPositions();
 
@@ -23,12 +23,12 @@ public:
 
     virtual double* getMinMax();
 
-    const std::vector<Vertex>& getVertexes() const;
-    const Vertex& getVertexAt(int index) const;
-    void setVertexes(const std::vector<Vertex>& vertexes);
+    const java::ArrayList<Vertex>& getVertexes() const;
+    Vertex getVertexAt(int index) const;
+    void setVertexes(const java::ArrayList<Vertex>& vertexes);
 
-    void setStrips(const std::vector< std::vector<int> >& indexes);
-    const std::vector< std::vector<int> >& getStrips() const;
+    void setStrips(const java::ArrayList< java::ArrayList<int> >& indexes);
+    java::ArrayList< java::ArrayList<int> >& getStrips();
 
     Ray* doIntersection(const Ray& inOut_Ray);
     virtual bool doIntersection(const Ray& inRay, RayHit* outHit);

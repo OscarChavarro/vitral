@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/environment/geometry/elements/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
+#include "java/util/ArrayList.txx"
 #include <algorithm>
 
 QuadMesh::QuadMesh() : name("default")
@@ -22,55 +23,63 @@ void QuadMesh::setName(const std::string& inName)
 
 void QuadMesh::getVertexAt(int i, Vertex& vertex) const
 {
-    vertex.position = Vector3Dd(vertexPositions[3*i], vertexPositions[3*i+1], vertexPositions[3*i+2]);
+    vertex.position = Vector3Dd(vertexPositions.get(3*i), vertexPositions.get(3*i+1), vertexPositions.get(3*i+2));
     if ((int)vertexNormals.size() >= (i+1)*3) {
-        vertex.normal = Vector3Dd(vertexNormals[3*i], vertexNormals[3*i+1], vertexNormals[3*i+2]);
+        vertex.normal = Vector3Dd(vertexNormals.get(3*i), vertexNormals.get(3*i+1), vertexNormals.get(3*i+2));
     }
     if ((int)vertexBinormals.size() >= (i+1)*3) {
-        vertex.binormal = Vector3Dd(vertexBinormals[3*i], vertexBinormals[3*i+1], vertexBinormals[3*i+2]);
+        vertex.binormal = Vector3Dd(vertexBinormals.get(3*i), vertexBinormals.get(3*i+1), vertexBinormals.get(3*i+2));
     }
     if ((int)vertexTangents.size() >= (i+1)*3) {
-        vertex.tangent = Vector3Dd(vertexTangents[3*i], vertexTangents[3*i+1], vertexTangents[3*i+2]);
+        vertex.tangent = Vector3Dd(vertexTangents.get(3*i), vertexTangents.get(3*i+1), vertexTangents.get(3*i+2));
     }
     if ((int)vertexUvs.size() >= (i+1)*2) {
-        vertex.u = vertexUvs[2*i];
-        vertex.v = vertexUvs[2*i+1];
+        vertex.u = vertexUvs.get(2*i);
+        vertex.v = vertexUvs.get(2*i+1);
     }
 }
 
 void QuadMesh::initVertexPositionsArray(int n)
 {
-    vertexPositions.assign(n*3, 0.0);
-    incidentQuadsPerVertexArray.assign(n, std::vector<int>());
+    vertexPositions.clear(); vertexPositions.reserve((long int)n*3);
+    for (long int i = 0; i < (long int)n*3; i++) vertexPositions.add(0.0);
+    incidentQuadsPerVertexArray.clear(); incidentQuadsPerVertexArray.reserve((long int)n);
+    for (long int i = 0; i < (long int)n; i++) incidentQuadsPerVertexArray.add(java::ArrayList<int>());
 }
 
 void QuadMesh::initVertexColorsArray()
 {
-    vertexColors.assign(getNumVertices()*3, 0.0);
+    long int nn = (long int)getNumVertices()*3;
+    vertexColors.clear(); vertexColors.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexColors.add(0.0);
 }
 
 void QuadMesh::initVertexNormalsArray()
 {
-    vertexNormals.assign(getNumVertices()*3, 0.0);
+    long int nn = (long int)getNumVertices()*3;
+    vertexNormals.clear(); vertexNormals.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexNormals.add(0.0);
 }
 
-void QuadMesh::setVertexes(const std::vector<Vertex>& vertexes)
+void QuadMesh::setVertexes(const java::ArrayList<Vertex>& vertexes)
 {
     initVertexPositionsArray((int)vertexes.size());
     initVertexNormalsArray();
     for (int i = 0; i < (int)vertexes.size(); i++) {
-        vertexPositions[3*i] = vertexes[i].position.x();
-        vertexPositions[3*i+1] = vertexes[i].position.y();
-        vertexPositions[3*i+2] = vertexes[i].position.z();
-        vertexNormals[3*i] = vertexes[i].normal.x();
-        vertexNormals[3*i+1] = vertexes[i].normal.y();
-        vertexNormals[3*i+2] = vertexes[i].normal.z();
+        Vertex v = vertexes.get(i);
+        vertexPositions[3*i] = v.position.x();
+        vertexPositions[3*i+1] = v.position.y();
+        vertexPositions[3*i+2] = v.position.z();
+        vertexNormals[3*i] = v.normal.x();
+        vertexNormals[3*i+1] = v.normal.y();
+        vertexNormals[3*i+2] = v.normal.z();
     }
 }
 
 void QuadMesh::initQuadArrays(int n)
 {
-    quadIndices.assign(n*4, 0);
+    quadIndices.clear(); quadIndices.reserve((long int)n*4);
+    for (long int i = 0; i < (long int)n*4; i++) quadIndices.add(0);
 }
 
 void QuadMesh::setVertexAt(int i, const Vertex& vertex)
@@ -117,13 +126,13 @@ int QuadMesh::getNumQuads() const
     return (int)quadIndices.size()/4;
 }
 
-std::vector<double>& QuadMesh::getVertexPositions() { return vertexPositions; }
-std::vector<double>& QuadMesh::getVertexNormals() { return vertexNormals; }
-std::vector<double>& QuadMesh::getVertexBinormals() { return vertexBinormals; }
-std::vector<double>& QuadMesh::getVertexTangents() { return vertexTangents; }
-std::vector<double>& QuadMesh::getVertexColors() { return vertexColors; }
-std::vector<double>& QuadMesh::getVertexUvs() { return vertexUvs; }
-std::vector<int>& QuadMesh::getQuadIndices() { return quadIndices; }
+java::ArrayList<double>& QuadMesh::getVertexPositions() { return vertexPositions; }
+java::ArrayList<double>& QuadMesh::getVertexNormals() { return vertexNormals; }
+java::ArrayList<double>& QuadMesh::getVertexBinormals() { return vertexBinormals; }
+java::ArrayList<double>& QuadMesh::getVertexTangents() { return vertexTangents; }
+java::ArrayList<double>& QuadMesh::getVertexColors() { return vertexColors; }
+java::ArrayList<double>& QuadMesh::getVertexUvs() { return vertexUvs; }
+java::ArrayList<int>& QuadMesh::getQuadIndices() { return quadIndices; }
 
 void QuadMesh::calculateNormals()
 {
@@ -212,7 +221,7 @@ TriangleMeshGroup* QuadMesh::exportToTriangleMeshGroup()
     mesh.getVertexUvs() = vertexUvs;
 
     mesh.initTriangleArrays(getNumQuads()*2);
-    std::vector<int>& tri = mesh.getTriangleIndexes();
+    java::ArrayList<int>& tri = mesh.getTriangleIndexes();
 
     int t = 0;
     for (int i = 0; i < getNumQuads(); i++) {

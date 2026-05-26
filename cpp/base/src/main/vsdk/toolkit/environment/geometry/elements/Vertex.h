@@ -37,6 +37,7 @@ public:
 
     java::ArrayList<Triangle>* incidentTriangles;
 
+    Vertex();
     Vertex(double x, double y, double z);
     explicit Vertex(const Vector3Dd& position);
     Vertex(const Vector3Dd& position, const Vector3Dd& normal);

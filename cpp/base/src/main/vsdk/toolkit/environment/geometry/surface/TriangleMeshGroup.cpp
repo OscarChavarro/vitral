@@ -3,13 +3,14 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "java/util/ArrayList.txx"
 
 TriangleMeshGroup::TriangleMeshGroup()
     : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
 {
 }
 
-TriangleMeshGroup::TriangleMeshGroup(const std::vector<TriangleMesh>& meshes)
+TriangleMeshGroup::TriangleMeshGroup(const java::ArrayList<TriangleMesh>& meshes)
     : meshes(meshes), intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
 {
 }
@@ -21,19 +22,19 @@ TriangleMeshGroup::TriangleMeshGroup(const TriangleMeshGroup& group)
 {
 }
 
-std::vector<TriangleMesh>& TriangleMeshGroup::getMeshes()
+java::ArrayList<TriangleMesh>& TriangleMeshGroup::getMeshes()
 {
     return meshes;
 }
 
-void TriangleMeshGroup::setMeshes(const std::vector<TriangleMesh>& inMeshes)
+void TriangleMeshGroup::setMeshes(const java::ArrayList<TriangleMesh>& inMeshes)
 {
     meshes = inMeshes;
 }
 
 void TriangleMeshGroup::addMesh(const TriangleMesh& mesh)
 {
-    meshes.push_back(mesh);
+    meshes.add(mesh);
 }
 
 TriangleMesh& TriangleMeshGroup::getMeshAt(int index)
@@ -53,7 +54,7 @@ double* TriangleMeshGroup::computeMinMaxPositions()
     double minX = 1e308, minY = 1e308, minZ = 1e308;
     double maxX = -1e308, maxY = -1e308, maxZ = -1e308;
 
-    for (size_t i = 0; i < meshes.size(); i++) {
+    for (long int i = 0; i < meshes.size(); i++) {
         double* mm = meshes[i].getMinMax();
         double x = mm[0], y = mm[1], z = mm[2];
         double X = mm[3], Y = mm[4], Z = mm[5];
@@ -150,7 +151,7 @@ bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
     int bestTriangle = -1;
     int triangleInformation = -1;
 
-    for (size_t i = 0; i < meshes.size(); i++) {
+    for (long int i = 0; i < meshes.size(); i++) {
         TriangleMesh& mesh = meshes[i];
         RayHit meshHit;
         if (mesh.doIntersection(inRay, &meshHit, &triangleInformation) &&
@@ -212,7 +213,7 @@ over the line.
 */
 int TriangleMeshGroup::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
 {
-    for (size_t i = 0; i < meshes.size(); i++) {
+    for (long int i = 0; i < meshes.size(); i++) {
         int status = meshes[i].doContainmentTest(p, distanceTolerance);
         if (status != OUTSIDE) {
             return status;
@@ -239,7 +240,7 @@ Geometry.doVoxelization.
 void TriangleMeshGroup::doVoxelization(VoxelVolume& vv, const Matrix4x4d& M, ProgressMonitor* reporter)
 {
     // Chain of responsability behavior design pattern with TriangleMesh
-    for (size_t i = 0; i < meshes.size(); i++) {
+    for (long int i = 0; i < meshes.size(); i++) {
         meshes[i].doVoxelization(vv, M, reporter);
     }
 }

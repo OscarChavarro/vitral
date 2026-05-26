@@ -240,8 +240,8 @@ public:
         else {
             TriangleMeshGroup* group = dynamic_cast<TriangleMeshGroup*>(geometry);
             if (group == nullptr) return;
-            std::vector<TriangleMesh>& groupMeshes = group->getMeshes();
-            for (size_t i = 0; i < groupMeshes.size(); i++) {
+            java::ArrayList<TriangleMesh>& groupMeshes = group->getMeshes();
+            for (long int i = 0; i < groupMeshes.size(); i++) {
                 meshes.push_back(&groupMeshes[i]);
             }
         }
@@ -385,33 +385,33 @@ private:
     {
         if (mesh == nullptr) return false;
 
-        std::vector<int>& indices = mesh->getTriangleIndexes();
-        std::vector<double>& vertices = mesh->getVertexPositions();
-        if (indices.empty() || vertices.empty()) return false;
+        java::ArrayList<int>& indices = mesh->getTriangleIndexes();
+        java::ArrayList<double>& vertices = mesh->getVertexPositions();
+        if (indices.size() == 0 || vertices.size() == 0) return false;
 
-        std::vector<double>& normals = mesh->getVertexNormals();
-        std::vector<double>& uvs = mesh->getVertexUvs();
+        java::ArrayList<double>& normals = mesh->getVertexNormals();
+        java::ArrayList<double>& uvs = mesh->getVertexUvs();
         bool hasNormals = normals.size() >= vertices.size();
         bool hasUvs = (uvs.size() / 2) >= (vertices.size() / 3);
 
-        outPositions.resize(indices.size() * 3);
-        outNormals.resize(indices.size() * 3);
-        outUvs.resize(indices.size() * 2);
+        outPositions.resize((size_t)indices.size() * 3);
+        outNormals.resize((size_t)indices.size() * 3);
+        outUvs.resize((size_t)indices.size() * 2);
 
         int p = 0;
         int n = 0;
         int t = 0;
-        for (size_t i = 0; i < indices.size(); i++) {
+        for (long int i = 0; i < indices.size(); i++) {
             int idx = indices[i];
             int vp = idx * 3;
-            outPositions[p++] = (float)vertices[(size_t)vp + 0];
-            outPositions[p++] = (float)vertices[(size_t)vp + 1];
-            outPositions[p++] = (float)vertices[(size_t)vp + 2];
+            outPositions[p++] = (float)vertices[(long int)vp];
+            outPositions[p++] = (float)vertices[(long int)vp + 1];
+            outPositions[p++] = (float)vertices[(long int)vp + 2];
 
             if (hasNormals) {
-                outNormals[n++] = (float)normals[(size_t)vp + 0];
-                outNormals[n++] = (float)normals[(size_t)vp + 1];
-                outNormals[n++] = (float)normals[(size_t)vp + 2];
+                outNormals[n++] = (float)normals[(long int)vp];
+                outNormals[n++] = (float)normals[(long int)vp + 1];
+                outNormals[n++] = (float)normals[(long int)vp + 2];
             }
             else {
                 outNormals[n++] = 0.0f;
@@ -421,8 +421,8 @@ private:
 
             if (hasUvs) {
                 int uv = idx * 2;
-                outUvs[t++] = (float)uvs[(size_t)uv + 0];
-                outUvs[t++] = (float)uvs[(size_t)uv + 1];
+                outUvs[t++] = (float)uvs[(long int)uv];
+                outUvs[t++] = (float)uvs[(long int)uv + 1];
             }
             else {
                 outUvs[t++] = 0.0f;
@@ -704,7 +704,7 @@ private:
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (size_t i = 0; i < model.scene.getSimpleBodies().size(); i++) {
+        for (long int i = 0; i < model.scene.getSimpleBodies().size(); i++) {
             renderer.drawBody(model.scene.getSimpleBodies()[i], &model.camera, model.lights, &model.qualitySelection);
         }
 

@@ -2,8 +2,8 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_QUADMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/util/ArrayList.h"
 #include <string>
-#include <vector>
 
 class Vertex;
 class Ray;
@@ -14,15 +14,15 @@ class QuadMesh : public Surface {
 private:
     std::string name;
 
-    std::vector<double> vertexPositions;
-    std::vector<double> vertexNormals;
-    std::vector<double> vertexBinormals;
-    std::vector<double> vertexTangents;
-    std::vector<double> vertexColors;
-    std::vector<double> vertexUvs;
+    java::ArrayList<double> vertexPositions;
+    java::ArrayList<double> vertexNormals;
+    java::ArrayList<double> vertexBinormals;
+    java::ArrayList<double> vertexTangents;
+    java::ArrayList<double> vertexColors;
+    java::ArrayList<double> vertexUvs;
 
-    std::vector< std::vector<int> > incidentQuadsPerVertexArray;
-    std::vector<int> quadIndices;
+    java::ArrayList< java::ArrayList<int> > incidentQuadsPerVertexArray;
+    java::ArrayList<int> quadIndices;
 
     double* calculateMinMaxPositions();
 
@@ -38,7 +38,7 @@ public:
     void initVertexColorsArray();
     void initVertexNormalsArray();
 
-    void setVertexes(const std::vector<Vertex>& vertexes);
+    void setVertexes(const java::ArrayList<Vertex>& vertexes);
     void initQuadArrays(int n);
 
     void setVertexAt(int i, const Vertex& vertex);
@@ -47,13 +47,13 @@ public:
     int getNumVertices() const;
     int getNumQuads() const;
 
-    std::vector<double>& getVertexPositions();
-    std::vector<double>& getVertexNormals();
-    std::vector<double>& getVertexBinormals();
-    std::vector<double>& getVertexTangents();
-    std::vector<double>& getVertexColors();
-    std::vector<double>& getVertexUvs();
-    std::vector<int>& getQuadIndices();
+    java::ArrayList<double>& getVertexPositions();
+    java::ArrayList<double>& getVertexNormals();
+    java::ArrayList<double>& getVertexBinormals();
+    java::ArrayList<double>& getVertexTangents();
+    java::ArrayList<double>& getVertexColors();
+    java::ArrayList<double>& getVertexUvs();
+    java::ArrayList<int>& getQuadIndices();
 
     void calculateNormals();
 

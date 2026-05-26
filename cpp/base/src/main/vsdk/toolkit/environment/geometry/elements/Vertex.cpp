@@ -4,6 +4,10 @@
 #include "java/util/ArrayList.h"
 #include "java/util/ArrayList.txx"
 
+Vertex::Vertex()
+    : position(0, 0, 0), normal(1, 0, 0), binormal(0, 1, 0), tangent(0, 0, 1),
+      u(0.0), v(0.0), incidentTriangles(nullptr) {}
+
 Vertex::Vertex(double x, double y, double z)
     : position(x, y, z), normal(1, 0, 0), binormal(0, 1, 0), tangent(0, 0, 1),
       u(0.0), v(0.0), incidentTriangles(nullptr) {}

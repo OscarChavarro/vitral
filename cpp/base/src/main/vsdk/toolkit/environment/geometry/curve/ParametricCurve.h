@@ -4,8 +4,7 @@
 #include "vsdk/toolkit/environment/geometry/curve/Curve.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class ParametricCurve : public Curve {
 public:
@@ -30,18 +29,18 @@ public:
     int getApproximationSteps() const;
     void setApproximationSteps(int n);
 
-    void addPoint(const std::vector<Vector3Dd>& point, int type);
-    void addPointAt(const std::vector<Vector3Dd>& point, int type, int position);
-    const std::vector<Vector3Dd>& getPointVector(int pos) const;
+    void addPoint(const java::ArrayList<Vector3Dd>& point, int type);
+    void addPointAt(const java::ArrayList<Vector3Dd>& point, int type, int position);
+    const java::ArrayList<Vector3Dd>& getPointVector(int pos) const;
     virtual const Vector3Dd* getPoint(int idx) const;
     int getPointSize() const;
     void removePoint(int pos);
-    void setPointAt(const std::vector<Vector3Dd>& p, int pos);
+    void setPointAt(const java::ArrayList<Vector3Dd>& p, int pos);
 
     int getNumPieces() const;
 
     bool evaluate(int endingSegment, double t, Vector3Dd& outPoint) const;
-    std::vector<Vector3Dd> calculatePoints(int endingPointForSegment, bool withBrokenRects) const;
+    java::ArrayList<Vector3Dd> calculatePoints(int endingPointForSegment, bool withBrokenRects) const;
 
     virtual double* getMinMax() override;
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
@@ -49,8 +48,8 @@ public:
 private:
     static const int INITIAL_APPROXIMATION_STEPS = 50;
 
-    std::vector<std::vector<Vector3Dd> > points;
-    std::vector<int> types;
+    java::ArrayList< java::ArrayList<Vector3Dd> > points;
+    java::ArrayList<int> types;
     int approximationSteps;
 
     bool evaluateLinear(int nseg, double t, Vector3Dd& outPoint) const;

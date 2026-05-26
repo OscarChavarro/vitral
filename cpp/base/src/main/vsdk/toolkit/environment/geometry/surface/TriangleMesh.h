@@ -2,8 +2,8 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "java/util/ArrayList.h"
 #include <string>
-#include <vector>
 
 class Vertex;
 class Triangle;
@@ -21,24 +21,24 @@ class TriangleMesh : public Surface {
 private:
     std::string name;
 
-    std::vector<double> vertexPositions;
-    std::vector<double> vertexNormals;
-    std::vector<double> vertexBinormals;
-    std::vector<double> vertexTangents;
-    std::vector<double> vertexColors;
-    std::vector<bool> vertexSelections;
-    std::vector<double> vertexUvs;
+    java::ArrayList<double> vertexPositions;
+    java::ArrayList<double> vertexNormals;
+    java::ArrayList<double> vertexBinormals;
+    java::ArrayList<double> vertexTangents;
+    java::ArrayList<double> vertexColors;
+    java::ArrayList<bool> vertexSelections;
+    java::ArrayList<double> vertexUvs;
 
-    std::vector< std::vector<int> > incidentTrianglesPerVertexArray;
+    java::ArrayList< java::ArrayList<int> > incidentTrianglesPerVertexArray;
 
-    std::vector<int> triangleIndices;
-    std::vector<double> triangleNormals;
+    java::ArrayList<int> triangleIndices;
+    java::ArrayList<double> triangleNormals;
 
-    std::vector<SimpleMaterial*> materials;
-    std::vector<Image*> textures;
+    java::ArrayList<SimpleMaterial*> materials;
+    java::ArrayList<Image*> textures;
 
-    std::vector< std::vector<int> > textureRanges;
-    std::vector< std::vector<int> > materialRanges;
+    java::ArrayList< java::ArrayList<int> > textureRanges;
+    java::ArrayList< java::ArrayList<int> > materialRanges;
 
     int intersectionTriangleIndex;
 
@@ -49,17 +49,17 @@ private:
 
     double* calculateMinMaxPositions();
 
-    void appendVertices(const std::vector<double>& ev);
-    void appendTriangles(const std::vector<int>& et);
+    void appendVertices(const java::ArrayList<double>& ev);
+    void appendTriangles(const java::ArrayList<int>& et);
 
-    void simpleTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                           std::vector<int>& extraTriangles, int nv, int i,
+    void simpleTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                           java::ArrayList<int>& extraTriangles, int nv, int i,
                            const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3);
-    void halfTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                         std::vector<int>& extraTriangles, int nv, int i, int j,
+    void halfTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                         java::ArrayList<int>& extraTriangles, int nv, int i, int j,
                          const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3);
-    void doubleTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                           std::vector<int>& extraTriangles, int nv, int i, int j,
+    void doubleTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                           java::ArrayList<int>& extraTriangles, int nv, int i, int j,
                            const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3);
 
 public:
@@ -85,13 +85,13 @@ public:
     void detachNormals();
     void detachUvs();
 
-    void setVertexes(const std::vector<Vertex>& vertexes, bool withNormals, bool withBinormals, bool withTangents, bool withUvs);
+    void setVertexes(const java::ArrayList<Vertex>& vertexes, bool withNormals, bool withBinormals, bool withTangents, bool withUvs);
 
     void initTriangleArrays(int n);
-    void setTriangles(const std::vector<Triangle>& triangles);
+    void setTriangles(const java::ArrayList<Triangle>& triangles);
 
-    void setTextures(const std::vector<Image*>& textures);
-    void setMaterials(const std::vector<SimpleMaterial*>& materials);
+    void setTextures(const java::ArrayList<Image*>& textures);
+    void setMaterials(const java::ArrayList<SimpleMaterial*>& materials);
 
     void setVertexAt(int i, const Vertex& vertex);
     void setTriangleAt(int i, const Triangle& triangle);
@@ -99,29 +99,29 @@ public:
     int getNumVertices() const;
     int getNumTriangles() const;
 
-    std::vector<bool>& getVertexSelections();
+    java::ArrayList<bool>& getVertexSelections();
 
-    std::vector<double>& getVertexPositions();
-    std::vector<double>& getVertexNormals();
-    std::vector<double>& getVertexBinormals();
-    std::vector<double>& getVertexTangents();
-    std::vector<double>& getVertexColors();
-    std::vector<double>& getVertexUvs();
-    std::vector<int>& getTriangleIndexes();
-    std::vector<double>& getTriangleNormals();
+    java::ArrayList<double>& getVertexPositions();
+    java::ArrayList<double>& getVertexNormals();
+    java::ArrayList<double>& getVertexBinormals();
+    java::ArrayList<double>& getVertexTangents();
+    java::ArrayList<double>& getVertexColors();
+    java::ArrayList<double>& getVertexUvs();
+    java::ArrayList<int>& getTriangleIndexes();
+    java::ArrayList<double>& getTriangleNormals();
 
-    std::vector<SimpleMaterial*>& getMaterials();
-    std::vector<Image*>& getTextures();
+    java::ArrayList<SimpleMaterial*>& getMaterials();
+    java::ArrayList<Image*>& getTextures();
     Image* getTextureAt(int index) const;
     void setTextureAt(int index, Image* image);
 
-    std::vector< std::vector<int> >& getTextureRanges();
-    std::vector<int> getTextureRangeAt(int spanRange) const;
-    void setTextureRanges(const std::vector< std::vector<int> >& ranges);
+    java::ArrayList< java::ArrayList<int> >& getTextureRanges();
+    java::ArrayList<int> getTextureRangeAt(int spanRange) const;
+    void setTextureRanges(const java::ArrayList< java::ArrayList<int> >& ranges);
 
-    std::vector< std::vector<int> >& getMaterialRanges();
-    std::vector<int> getMaterialRangeAt(int spanRange) const;
-    void setMaterialRanges(const std::vector< std::vector<int> >& ranges);
+    java::ArrayList< java::ArrayList<int> >& getMaterialRanges();
+    java::ArrayList<int> getMaterialRangeAt(int spanRange) const;
+    void setMaterialRanges(const java::ArrayList< java::ArrayList<int> >& ranges);
 
     void calculateNormals();
     void reorientateNormals();

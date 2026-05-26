@@ -17,7 +17,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cctype>
-#include <vector>
+#include "java/util/ArrayList.txx"
 
 int readIntLE(const unsigned char* data, int offset) {
     return (data[offset] & 0xFF) |
@@ -78,19 +78,25 @@ IndexedColorImageUncompressed* importSgiIndexed(const java::File& inImageFd)
     }
 
     const int tables = (int)ySize * (int)channels;
-    std::vector<unsigned int> starts((size_t)tables, 0);
-    std::vector<unsigned int> lengths((size_t)tables, 0);
-    std::vector<unsigned char> tmp((size_t)tables * 4u, 0u);
-    if (std::fread(tmp.data(), 1, tmp.size(), f) != tmp.size()) {
+    java::ArrayList<unsigned int> starts;
+    starts.reserve((long int)tables);
+    for (long int i = 0; i < (long int)tables; i++) starts.add(0u);
+    java::ArrayList<unsigned int> lengths;
+    lengths.reserve((long int)tables);
+    for (long int i = 0; i < (long int)tables; i++) lengths.add(0u);
+    java::ArrayList<unsigned char> tmp;
+    tmp.reserve((long int)tables * 4);
+    for (long int i = 0; i < (long int)tables * 4; i++) tmp.add(0u);
+    if (std::fread(tmp.data(), 1, (size_t)tmp.size(), f) != (size_t)tmp.size()) {
         std::fclose(f);
         return nullptr;
     }
-    for (int i = 0; i < tables; i++) starts[(size_t)i] = readU32BE(&tmp[(size_t)i * 4u]);
-    if (std::fread(tmp.data(), 1, tmp.size(), f) != tmp.size()) {
+    for (int i = 0; i < tables; i++) starts[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
+    if (std::fread(tmp.data(), 1, (size_t)tmp.size(), f) != (size_t)tmp.size()) {
         std::fclose(f);
         return nullptr;
     }
-    for (int i = 0; i < tables; i++) lengths[(size_t)i] = readU32BE(&tmp[(size_t)i * 4u]);
+    for (int i = 0; i < tables; i++) lengths[(long int)i] = readU32BE(&tmp[(long int)i * 4]);
 
     IndexedColorImageUncompressed* img = new IndexedColorImageUncompressed(new GrayScalePalette());
     if (!img->init((int)xSize, (int)ySize)) {
@@ -100,31 +106,33 @@ IndexedColorImageUncompressed* importSgiIndexed(const java::File& inImageFd)
     }
 
     for (int y = 0; y < (int)ySize; y++) {
-        const unsigned int start = starts[(size_t)y];
-        const unsigned int length = lengths[(size_t)y];
+        const unsigned int start = starts[(long int)y];
+        const unsigned int length = lengths[(long int)y];
         if (length == 0) continue;
         if (std::fseek(f, (long)start, SEEK_SET) != 0) continue;
-        std::vector<unsigned char> line(length, 0u);
+        java::ArrayList<unsigned char> line;
+        line.reserve((long int)length);
+        for (long int li = 0; li < (long int)length; li++) line.add(0u);
         if (std::fread(line.data(), 1, length, f) != length) continue;
 
         int x = 0;
         for (unsigned int pos = 0; pos < length && x < (int)xSize; pos++) {
-            bool literal = (line[pos] & 0x80) != 0;
-            int count = (line[pos] & 0x7F);
+            bool literal = (line[(long int)pos] & 0x80) != 0;
+            int count = (line[(long int)pos] & 0x7F);
             if (count == 0) break;
 
             if (literal) {
                 for (int i = 0; i < count && x < (int)xSize; i++) {
                     pos++;
                     if (pos >= length) break;
-                    img->putPixel(x, (int)ySize - y - 1, (char)line[pos]);
+                    img->putPixel(x, (int)ySize - y - 1, (char)line[(long int)pos]);
                     x++;
                 }
             }
             else {
                 pos++;
                 if (pos >= length) break;
-                char v = (char)line[pos];
+                char v = (char)line[(long int)pos];
                 for (int i = 0; i < count && x < (int)xSize; i++) {
                     img->putPixel(x, (int)ySize - y - 1, v);
                     x++;
@@ -154,16 +162,18 @@ RGBAImageCompressed* importDDSCompressed(const java::File& inImageFd) {
         return nullptr;
     }
 
-    std::vector<unsigned char> fileData(static_cast<size_t>(fileSize));
-    size_t readCount = std::fread(fileData.data(), 1, fileData.size(), f);
+    java::ArrayList<unsigned char> fileData;
+    fileData.reserve((long int)fileSize);
+    for (long int i = 0; i < (long int)fileSize; i++) fileData.add(0u);
+    size_t readCount = std::fread(fileData.data(), 1, (size_t)fileData.size(), f);
     std::fclose(f);
-    if (readCount != fileData.size()) {
+    if (readCount != (size_t)fileData.size()) {
         std::fprintf(stderr, "Error: could not read complete DDS file\\n");
         return nullptr;
     }
 
     if (fileData[0] != 'D' || fileData[1] != 'D' ||
-        fileData[2] != 'S' || fileData[3] != ' ') {
+        fileData[2] != 'S' || fileData[3] != (unsigned char)' ') {
         std::fprintf(stderr, "Error: DDS signature not recognized\\n");
         return nullptr;
     }
@@ -360,10 +370,14 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
 
         png_read_update_info(png_ptr, info_ptr);
 
-        std::vector<unsigned char> pixels((size_t)width * (size_t)height * 3u, 0u);
-        std::vector<png_bytep> row_ptrs((size_t)height);
+        java::ArrayList<unsigned char> pixels;
+        pixels.reserve((long int)width * (long int)height * 3);
+        for (long int i = 0; i < (long int)width * (long int)height * 3; i++) pixels.add(0u);
+        java::ArrayList<png_bytep> row_ptrs;
+        row_ptrs.reserve((long int)height);
+        for (long int i = 0; i < (long int)height; i++) row_ptrs.add(nullptr);
         for (int y = 0; y < height; y++) {
-            row_ptrs[(size_t)y] = reinterpret_cast<png_bytep>(&pixels[(size_t)y * (size_t)width * 3u]);
+            row_ptrs[(long int)y] = reinterpret_cast<png_bytep>(&pixels[(long int)y * (long int)width * 3]);
         }
         png_read_image(png_ptr, row_ptrs.data());
 
@@ -377,7 +391,7 @@ RGBImageUncompressed* ImagePersistence::importRGB(const java::File& inImageFd) {
             return new RGBImageUncompressed();
         }
 
-        size_t pos = 0;
+        long int pos = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 retImage->putPixel(x, y,

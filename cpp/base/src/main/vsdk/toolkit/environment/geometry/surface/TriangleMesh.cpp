@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 #include <algorithm>
 
@@ -42,20 +43,56 @@ void TriangleMesh::setName(const std::string& n) { name = n; }
 
 void TriangleMesh::getVertexAt(int i, Vertex& vertex) const
 {
-    vertex.position = Vector3Dd(vertexPositions[i*3], vertexPositions[i*3+1], vertexPositions[i*3+2]);
-    if ((int)vertexNormals.size() >= (i+1)*3) vertex.normal = Vector3Dd(vertexNormals[i*3], vertexNormals[i*3+1], vertexNormals[i*3+2]);
-    if ((int)vertexBinormals.size() >= (i+1)*3) vertex.binormal = Vector3Dd(vertexBinormals[i*3], vertexBinormals[i*3+1], vertexBinormals[i*3+2]);
-    if ((int)vertexTangents.size() >= (i+1)*3) vertex.tangent = Vector3Dd(vertexTangents[i*3], vertexTangents[i*3+1], vertexTangents[i*3+2]);
-    if ((int)vertexUvs.size() >= (i+1)*2) { vertex.u = vertexUvs[i*2]; vertex.v = vertexUvs[i*2+1]; }
+    vertex.position = Vector3Dd(vertexPositions.get(i*3), vertexPositions.get(i*3+1), vertexPositions.get(i*3+2));
+    if ((int)vertexNormals.size() >= (i+1)*3) vertex.normal = Vector3Dd(vertexNormals.get(i*3), vertexNormals.get(i*3+1), vertexNormals.get(i*3+2));
+    if ((int)vertexBinormals.size() >= (i+1)*3) vertex.binormal = Vector3Dd(vertexBinormals.get(i*3), vertexBinormals.get(i*3+1), vertexBinormals.get(i*3+2));
+    if ((int)vertexTangents.size() >= (i+1)*3) vertex.tangent = Vector3Dd(vertexTangents.get(i*3), vertexTangents.get(i*3+1), vertexTangents.get(i*3+2));
+    if ((int)vertexUvs.size() >= (i+1)*2) { vertex.u = vertexUvs.get(i*2); vertex.v = vertexUvs.get(i*2+1); }
 }
 
-void TriangleMesh::initVertexPositionsArray(int n) { vertexPositions.assign(n*3, 0.0); vertexSelections.assign(n, false); }
-void TriangleMesh::initVertexNormalsArray() { vertexNormals.assign(getNumVertices()*3, 0.0); }
-void TriangleMesh::initVertexBinormalsArray() { vertexBinormals.assign(getNumVertices()*3, 0.0); }
-void TriangleMesh::initVertexTangentsArray() { vertexTangents.assign(getNumVertices()*3, 0.0); }
-void TriangleMesh::initVertexColorsArray() { vertexColors.assign(getNumVertices()*3, 0.0); }
-void TriangleMesh::initVertexUvsArray() { vertexUvs.assign(getNumVertices()*2, 0.0); }
-void TriangleMesh::initIncidentTrianglesPerVertexArray() { incidentTrianglesPerVertexArray.assign(getNumVertices(), std::vector<int>()); }
+void TriangleMesh::initVertexPositionsArray(int n)
+{
+    vertexPositions.clear(); vertexPositions.reserve((long int)n*3);
+    for (long int i = 0; i < (long int)n*3; i++) vertexPositions.add(0.0);
+    vertexSelections.clear(); vertexSelections.reserve((long int)n);
+    for (long int i = 0; i < (long int)n; i++) vertexSelections.add(false);
+}
+void TriangleMesh::initVertexNormalsArray()
+{
+    long int nn = (long int)getNumVertices()*3;
+    vertexNormals.clear(); vertexNormals.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexNormals.add(0.0);
+}
+void TriangleMesh::initVertexBinormalsArray()
+{
+    long int nn = (long int)getNumVertices()*3;
+    vertexBinormals.clear(); vertexBinormals.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexBinormals.add(0.0);
+}
+void TriangleMesh::initVertexTangentsArray()
+{
+    long int nn = (long int)getNumVertices()*3;
+    vertexTangents.clear(); vertexTangents.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexTangents.add(0.0);
+}
+void TriangleMesh::initVertexColorsArray()
+{
+    long int nn = (long int)getNumVertices()*3;
+    vertexColors.clear(); vertexColors.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexColors.add(0.0);
+}
+void TriangleMesh::initVertexUvsArray()
+{
+    long int nn = (long int)getNumVertices()*2;
+    vertexUvs.clear(); vertexUvs.reserve(nn);
+    for (long int i = 0; i < nn; i++) vertexUvs.add(0.0);
+}
+void TriangleMesh::initIncidentTrianglesPerVertexArray()
+{
+    int nv = getNumVertices();
+    incidentTrianglesPerVertexArray.clear(); incidentTrianglesPerVertexArray.reserve((long int)nv);
+    for (int i = 0; i < nv; i++) incidentTrianglesPerVertexArray.add(java::ArrayList<int>());
+}
 
 void TriangleMesh::detachColors() { vertexColors.clear(); }
 void TriangleMesh::detachNormals() { vertexNormals.clear(); }
@@ -71,20 +108,22 @@ big meshes.
 @param withTangents
 @param withUvs
 */
-void TriangleMesh::setVertexes(const std::vector<Vertex>& vertexes, bool withNormals, bool withBinormals, bool withTangents, bool withUvs)
+void TriangleMesh::setVertexes(const java::ArrayList<Vertex>& vertexes, bool withNormals, bool withBinormals, bool withTangents, bool withUvs)
 {
     initVertexPositionsArray((int)vertexes.size());
     if (withNormals) initVertexNormalsArray();
     if (withBinormals) initVertexBinormalsArray();
     if (withTangents) initVertexTangentsArray();
     if (withUvs) initVertexUvsArray();
-    for (int i = 0; i < (int)vertexes.size(); i++) setVertexAt(i, vertexes[i]);
+    for (int i = 0; i < (int)vertexes.size(); i++) setVertexAt(i, vertexes.get(i));
 }
 
 void TriangleMesh::initTriangleArrays(int n)
 {
-    triangleIndices.assign(n*3, 0);
-    triangleNormals.assign(n*3, 0.0);
+    triangleIndices.clear(); triangleIndices.reserve((long int)n*3);
+    for (long int i = 0; i < (long int)n*3; i++) triangleIndices.add(0);
+    triangleNormals.clear(); triangleNormals.reserve((long int)n*3);
+    for (long int i = 0; i < (long int)n*3; i++) triangleNormals.add(0.0);
 }
 
 /*
@@ -93,14 +132,14 @@ but it is inefficient. Its use is discouraged for applications manipulating
 big meshes.
 @param triangles
 */
-void TriangleMesh::setTriangles(const std::vector<Triangle>& triangles)
+void TriangleMesh::setTriangles(const java::ArrayList<Triangle>& triangles)
 {
     initTriangleArrays((int)triangles.size());
-    for (int i = 0; i < (int)triangles.size(); i++) setTriangleAt(i, triangles[i]);
+    for (int i = 0; i < (int)triangles.size(); i++) setTriangleAt(i, triangles.get(i));
 }
 
-void TriangleMesh::setTextures(const std::vector<Image*>& t) { textures = t; }
-void TriangleMesh::setMaterials(const std::vector<SimpleMaterial*>& m) { materials = m; }
+void TriangleMesh::setTextures(const java::ArrayList<Image*>& t) { textures = t; }
+void TriangleMesh::setMaterials(const java::ArrayList<SimpleMaterial*>& m) { materials = m; }
 
 /*
 Given a vertex structure and an `i` position, this method copies
@@ -150,26 +189,30 @@ void TriangleMesh::setTriangleAt(int i, const Triangle& t)
 int TriangleMesh::getNumVertices() const { return (int)vertexPositions.size()/3; }
 int TriangleMesh::getNumTriangles() const { return (int)triangleIndices.size()/3; }
 
-std::vector<bool>& TriangleMesh::getVertexSelections()
+java::ArrayList<bool>& TriangleMesh::getVertexSelections()
 {
-    if ((int)vertexSelections.size() != getNumVertices()) vertexSelections.assign(getNumVertices(), false);
+    if ((int)vertexSelections.size() != getNumVertices()) {
+        int nv = getNumVertices();
+        vertexSelections.clear(); vertexSelections.reserve((long int)nv);
+        for (int i = 0; i < nv; i++) vertexSelections.add(false);
+    }
     return vertexSelections;
 }
-std::vector<double>& TriangleMesh::getVertexPositions() { return vertexPositions; }
-std::vector<double>& TriangleMesh::getVertexNormals() { return vertexNormals; }
-std::vector<double>& TriangleMesh::getVertexBinormals() { return vertexBinormals; }
-std::vector<double>& TriangleMesh::getVertexTangents() { return vertexTangents; }
-std::vector<double>& TriangleMesh::getVertexColors() { return vertexColors; }
-std::vector<double>& TriangleMesh::getVertexUvs() { return vertexUvs; }
-std::vector<int>& TriangleMesh::getTriangleIndexes() { return triangleIndices; }
-std::vector<double>& TriangleMesh::getTriangleNormals() { return triangleNormals; }
+java::ArrayList<double>& TriangleMesh::getVertexPositions() { return vertexPositions; }
+java::ArrayList<double>& TriangleMesh::getVertexNormals() { return vertexNormals; }
+java::ArrayList<double>& TriangleMesh::getVertexBinormals() { return vertexBinormals; }
+java::ArrayList<double>& TriangleMesh::getVertexTangents() { return vertexTangents; }
+java::ArrayList<double>& TriangleMesh::getVertexColors() { return vertexColors; }
+java::ArrayList<double>& TriangleMesh::getVertexUvs() { return vertexUvs; }
+java::ArrayList<int>& TriangleMesh::getTriangleIndexes() { return triangleIndices; }
+java::ArrayList<double>& TriangleMesh::getTriangleNormals() { return triangleNormals; }
 
-std::vector<SimpleMaterial*>& TriangleMesh::getMaterials() { return materials; }
-std::vector<Image*>& TriangleMesh::getTextures() { return textures; }
-Image* TriangleMesh::getTextureAt(int index) const { return (index>=0 && index<(int)textures.size()) ? textures[index] : nullptr; }
+java::ArrayList<SimpleMaterial*>& TriangleMesh::getMaterials() { return materials; }
+java::ArrayList<Image*>& TriangleMesh::getTextures() { return textures; }
+Image* TriangleMesh::getTextureAt(int index) const { return (index>=0 && index<(int)textures.size()) ? textures.get(index) : nullptr; }
 void TriangleMesh::setTextureAt(int index, Image* image) { if (index>=0 && index<(int)textures.size()) textures[index] = image; }
 
-std::vector< std::vector<int> >& TriangleMesh::getTextureRanges() { return textureRanges; }
+java::ArrayList< java::ArrayList<int> >& TriangleMesh::getTextureRanges() { return textureRanges; }
 /*
 Note this always returns an array with two (2) integers: the first one
 is an index to `triangles` array, the second one is an index to the
@@ -177,10 +220,10 @@ is an index to `triangles` array, the second one is an index to the
 @param spanRange
 @return an integer array for textures ranges indexes
 */
-std::vector<int> TriangleMesh::getTextureRangeAt(int spanRange) const { return textureRanges[spanRange]; }
-void TriangleMesh::setTextureRanges(const std::vector< std::vector<int> >& r) { textureRanges = r; }
+java::ArrayList<int> TriangleMesh::getTextureRangeAt(int spanRange) const { return textureRanges.get(spanRange); }
+void TriangleMesh::setTextureRanges(const java::ArrayList< java::ArrayList<int> >& r) { textureRanges = r; }
 
-std::vector< std::vector<int> >& TriangleMesh::getMaterialRanges() { return materialRanges; }
+java::ArrayList< java::ArrayList<int> >& TriangleMesh::getMaterialRanges() { return materialRanges; }
 /*
 Note this always returns an array with two (2) integers: the first one
 is an index to `triangles` array, the second one is an index to the
@@ -188,13 +231,17 @@ is an index to `triangles` array, the second one is an index to the
 @param spanRange
 @return a integer array with material ranges indexes
 */
-std::vector<int> TriangleMesh::getMaterialRangeAt(int spanRange) const { return materialRanges[spanRange]; }
-void TriangleMesh::setMaterialRanges(const std::vector< std::vector<int> >& r) { materialRanges = r; }
+java::ArrayList<int> TriangleMesh::getMaterialRangeAt(int spanRange) const { return materialRanges.get(spanRange); }
+void TriangleMesh::setMaterialRanges(const java::ArrayList< java::ArrayList<int> >& r) { materialRanges = r; }
 
 void TriangleMesh::calculateNormals()
 {
     initVertexNormalsArray();
-    triangleNormals.assign(getNumTriangles()*3, 0.0);
+    {
+        long int nn = (long int)getNumTriangles()*3;
+        triangleNormals.clear(); triangleNormals.reserve(nn);
+        for (long int i = 0; i < nn; i++) triangleNormals.add(0.0);
+    }
 
     for (int i = 0; i < getNumTriangles(); i++) {
         int i0 = triangleIndices[i*3], i1 = triangleIndices[i*3+1], i2 = triangleIndices[i*3+2];
@@ -219,7 +266,7 @@ void TriangleMesh::calculateNormals()
 
 void TriangleMesh::reorientateNormals()
 {
-    for (size_t i = 0; i < vertexNormals.size(); i++) vertexNormals[i] = -vertexNormals[i];
+    for (long int i = 0; i < vertexNormals.size(); i++) vertexNormals[i] = -vertexNormals[i];
     for (int i = 0; i < getNumTriangles(); i++) std::swap(triangleIndices[i*3+1], triangleIndices[i*3+2]);
 }
 
@@ -293,10 +340,10 @@ void TriangleMesh::interpolateTriangleData(int tri, double u, double v, RayHit* 
 void TriangleMesh::fillMaterialAndTexture(int triangleIndex, RayHit* outHit)
 {
     if (outHit == 0) return;
-    if (!materials.empty()) outHit->material = materials[0];
+    if (materials.size() != 0) outHit->material = materials[0];
 
-    if (!materialRanges.empty()) {
-        for (size_t i = 0; i + 1 < materialRanges.size(); i++) {
+    if (materialRanges.size() != 0) {
+        for (long int i = 0; i + 1 < materialRanges.size(); i++) {
             if (materialRanges[i].size() >= 1 && materialRanges[i+1].size() >= 2 &&
                 triangleIndex >= materialRanges[i][0] && triangleIndex < materialRanges[i+1][0]) {
                 int idx = materialRanges[i+1][1];
@@ -307,8 +354,8 @@ void TriangleMesh::fillMaterialAndTexture(int triangleIndex, RayHit* outHit)
     }
 
     outHit->texture = 0;
-    if (!textureRanges.empty()) {
-        for (size_t i = 0; i + 1 < textureRanges.size(); i++) {
+    if (textureRanges.size() != 0) {
+        for (long int i = 0; i + 1 < textureRanges.size(); i++) {
             if (textureRanges[i].size() >= 1 && textureRanges[i+1].size() >= 2 &&
                 triangleIndex >= textureRanges[i][0] && triangleIndex < textureRanges[i+1][0]) {
                 int idx = textureRanges[i+1][1] - 1;
@@ -443,21 +490,25 @@ void TriangleMesh::compact()
     vertexNormals.clear();
 
     int n = getNumVertices();
-    std::vector<bool> count(n, false);
-    for (size_t i = 0; i < triangleIndices.size(); i++) {
+    java::ArrayList<bool> count;
+    count.reserve((long int)n);
+    for (long int i = 0; i < (long int)n; i++) count.add(false);
+    for (long int i = 0; i < triangleIndices.size(); i++) {
         int a = triangleIndices[i];
         if (a >= 0 && a < n) count[a] = true;
     }
 
     int j = 0;
-    std::vector<int> map(n, -1);
+    java::ArrayList<int> map;
+    map.reserve((long int)n);
+    for (long int i = 0; i < (long int)n; i++) map.add(-1);
     for (int i = 0; i < n; i++) if (count[i]) map[i] = j++;
 
-    std::vector<double> oldPos = vertexPositions;
-    std::vector<double> oldNor = vertexNormals;
+    java::ArrayList<double> oldPos = vertexPositions;
+    java::ArrayList<double> oldNor = vertexNormals;
 
     initVertexPositionsArray(j);
-    if (!oldNor.empty()) initVertexNormalsArray();
+    if (oldNor.size() != 0) initVertexNormalsArray();
 
     j = 0;
     for (int i = 0; i < n; i++) {
@@ -465,7 +516,7 @@ void TriangleMesh::compact()
             vertexPositions[3*j+0] = oldPos[3*i+0];
             vertexPositions[3*j+1] = oldPos[3*i+1];
             vertexPositions[3*j+2] = oldPos[3*i+2];
-            if (!oldNor.empty()) {
+            if (oldNor.size() != 0) {
                 vertexNormals[3*j+0] = oldNor[3*i+0];
                 vertexNormals[3*j+1] = oldNor[3*i+1];
                 vertexNormals[3*j+2] = oldNor[3*i+2];
@@ -474,7 +525,7 @@ void TriangleMesh::compact()
         }
     }
 
-    std::vector<int> oldTri = triangleIndices;
+    java::ArrayList<int> oldTri = triangleIndices;
     j = 0;
     for (int i = 0; i < (int)oldTri.size()/3; i++) {
         int a = oldTri[3*i+0], b = oldTri[3*i+1], c = oldTri[3*i+2];
@@ -497,7 +548,7 @@ void TriangleMesh::compact()
 
 void TriangleMesh::removeSelectedVertices()
 {
-    if (vertexSelections.empty()) return;
+    if (vertexSelections.size() == 0) return;
 
     vertexNormals.clear();
     vertexBinormals.clear();
@@ -521,18 +572,18 @@ void TriangleMesh::removeSelectedVertices()
     calculateNormals();
 }
 
-void TriangleMesh::appendVertices(const std::vector<double>& ev)
+void TriangleMesh::appendVertices(const java::ArrayList<double>& ev)
 {
-    vertexPositions.insert(vertexPositions.end(), ev.begin(), ev.end());
+    for (long int i = 0; i < ev.size(); i++) vertexPositions.add(ev.get(i));
 }
 
-void TriangleMesh::appendTriangles(const std::vector<int>& et)
+void TriangleMesh::appendTriangles(const java::ArrayList<int>& et)
 {
-    triangleIndices.insert(triangleIndices.end(), et.begin(), et.end());
+    for (long int i = 0; i < et.size(); i++) triangleIndices.add(et.get(i));
 }
 
-void TriangleMesh::simpleTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                                     std::vector<int>& extraTriangles, int nv, int i,
+void TriangleMesh::simpleTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                                     java::ArrayList<int>& extraTriangles, int nv, int i,
                                      const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3)
 {
     Vector3Dd a = p2.subtract(p1).normalized();
@@ -554,17 +605,17 @@ void TriangleMesh::simpleTriangleCut(InfinitePlane& p, std::vector<double>& extr
         delete hitB;
     }
 
-    extraTriangles.push_back(i);
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
+    extraTriangles.add(i);
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
     if (!hasMa || !hasMb) return;
 
-    extraVertices.push_back(ma.x()); extraVertices.push_back(ma.y()); extraVertices.push_back(ma.z());
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
-    extraVertices.push_back(mb.x()); extraVertices.push_back(mb.y()); extraVertices.push_back(mb.z());
+    extraVertices.add(ma.x()); extraVertices.add(ma.y()); extraVertices.add(ma.z());
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
+    extraVertices.add(mb.x()); extraVertices.add(mb.y()); extraVertices.add(mb.z());
 }
 
-void TriangleMesh::halfTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                                   std::vector<int>& extraTriangles, int nv, int i, int j,
+void TriangleMesh::halfTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                                   java::ArrayList<int>& extraTriangles, int nv, int i, int j,
                                    const Vector3Dd&, const Vector3Dd& p2, const Vector3Dd& p3)
 {
     Vector3Dd a = p2.subtract(p3).normalized();
@@ -579,16 +630,16 @@ void TriangleMesh::halfTriangleCut(InfinitePlane& p, std::vector<double>& extraV
         delete hitA;
     }
 
-    extraTriangles.push_back(i);
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
+    extraTriangles.add(i);
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
     if (!hasMa) return;
 
-    extraVertices.push_back(ma.x()); extraVertices.push_back(ma.y()); extraVertices.push_back(ma.z());
-    extraTriangles.push_back(j);
+    extraVertices.add(ma.x()); extraVertices.add(ma.y()); extraVertices.add(ma.z());
+    extraTriangles.add(j);
 }
 
-void TriangleMesh::doubleTriangleCut(InfinitePlane& p, std::vector<double>& extraVertices,
-                                     std::vector<int>& extraTriangles, int nv, int i, int j,
+void TriangleMesh::doubleTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
+                                     java::ArrayList<int>& extraTriangles, int nv, int i, int j,
                                      const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3)
 {
     Vector3Dd a = p1.subtract(p3).normalized();
@@ -610,22 +661,22 @@ void TriangleMesh::doubleTriangleCut(InfinitePlane& p, std::vector<double>& extr
         delete hitB;
     }
 
-    extraTriangles.push_back(i);
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
+    extraTriangles.add(i);
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
     if (!hasMa || !hasMb) return;
 
-    extraVertices.push_back(ma.x()); extraVertices.push_back(ma.y()); extraVertices.push_back(ma.z());
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
-    extraTriangles.push_back(i);
-    extraTriangles.push_back((int)extraVertices.size()/3 + nv);
-    extraTriangles.push_back(j);
-    extraVertices.push_back(mb.x()); extraVertices.push_back(mb.y()); extraVertices.push_back(mb.z());
+    extraVertices.add(ma.x()); extraVertices.add(ma.y()); extraVertices.add(ma.z());
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
+    extraTriangles.add(i);
+    extraTriangles.add((int)extraVertices.size()/3 + nv);
+    extraTriangles.add(j);
+    extraVertices.add(mb.x()); extraVertices.add(mb.y()); extraVertices.add(mb.z());
 }
 
 void TriangleMesh::slice(InfinitePlane& p)
 {
-    std::vector<int> extraTriangles;
-    std::vector<double> extraVertices;
+    java::ArrayList<int> extraTriangles;
+    java::ArrayList<double> extraVertices;
 
     int nv = getNumVertices();
 
@@ -699,25 +750,27 @@ std::string TriangleMesh::toString() const
     msg += "  - MINMAX: (" + std::to_string(mm[0]) + ", " + std::to_string(mm[1]) + ", " + std::to_string(mm[2]) + ") - (" + std::to_string(mm[3]) + ", " + std::to_string(mm[4]) + ", " + std::to_string(mm[5]) + ")\n";
     delete [] mm;
 
-    if (materials.empty()) msg += "  - No materials available!\n";
+    if (materials.size() == 0) msg += "  - No materials available!\n";
     else msg += "  - " + std::to_string(materials.size()) + " materials\n";
 
-    if (materialRanges.empty()) msg += "  - No material ranges association table available!\n";
+    if (materialRanges.size() == 0) msg += "  - No material ranges association table available!\n";
     else {
         msg += "  - " + std::to_string(materialRanges.size()) + " material spans:\n";
-        for (size_t i = 0; i < materialRanges.size(); i++) {
-            if (materialRanges[i].size() >= 2) msg += "    . " + std::to_string(materialRanges[i][0]) + " -> " + std::to_string(materialRanges[i][1]) + "\n";
+        for (long int i = 0; i < materialRanges.size(); i++) {
+            java::ArrayList<int> mr = materialRanges.get(i);
+            if (mr.size() >= 2) msg += "    . " + std::to_string(mr[0]) + " -> " + std::to_string(mr[1]) + "\n";
         }
     }
 
-    if (textures.empty()) msg += "  - No textures available!\n";
+    if (textures.size() == 0) msg += "  - No textures available!\n";
     else msg += "  - " + std::to_string(textures.size()) + " textures\n";
 
-    if (textureRanges.empty()) msg += "  - No texture ranges association table available!\n";
+    if (textureRanges.size() == 0) msg += "  - No texture ranges association table available!\n";
     else {
         msg += "  - " + std::to_string(textureRanges.size()) + " texture spans:\n";
-        for (size_t i = 0; i < textureRanges.size(); i++) {
-            if (textureRanges[i].size() >= 2) msg += "    . " + std::to_string(textureRanges[i][0]) + " -> " + std::to_string(textureRanges[i][1]) + "\n";
+        for (long int i = 0; i < textureRanges.size(); i++) {
+            java::ArrayList<int> tr = textureRanges.get(i);
+            if (tr.size() >= 2) msg += "    . " + std::to_string(tr[0]) + " -> " + std::to_string(tr[1]) + "\n";
         }
     }
 

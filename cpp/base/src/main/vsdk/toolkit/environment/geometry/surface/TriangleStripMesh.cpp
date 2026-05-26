@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "java/util/ArrayList.txx"
 #include <cmath>
 
 TriangleStripMesh::TriangleStripMesh() : name("default") {}
@@ -13,7 +14,7 @@ double* TriangleStripMesh::calculateMinMaxPositions()
     double minX = 1e308, minY = 1e308, minZ = 1e308;
     double maxX = -1e308, maxY = -1e308, maxZ = -1e308;
 
-    for (size_t i = 0; i < vertexes.size(); i++) {
+    for (long int i = 0; i < vertexes.size(); i++) {
         double x = vertexes[i].getPosition().x();
         double y = vertexes[i].getPosition().y();
         double z = vertexes[i].getPosition().z();
@@ -27,11 +28,11 @@ double* TriangleStripMesh::calculateMinMaxPositions()
 
 double* TriangleStripMesh::getMinMax() { return calculateMinMaxPositions(); }
 
-const std::vector<Vertex>& TriangleStripMesh::getVertexes() const { return vertexes; }
-const Vertex& TriangleStripMesh::getVertexAt(int index) const { return vertexes[index]; }
-void TriangleStripMesh::setVertexes(const std::vector<Vertex>& v) { vertexes = v; }
-void TriangleStripMesh::setStrips(const std::vector< std::vector<int> >& indexes) { strips = indexes; }
-const std::vector< std::vector<int> >& TriangleStripMesh::getStrips() const { return strips; }
+const java::ArrayList<Vertex>& TriangleStripMesh::getVertexes() const { return vertexes; }
+Vertex TriangleStripMesh::getVertexAt(int index) const { return vertexes.get(index); }
+void TriangleStripMesh::setVertexes(const java::ArrayList<Vertex>& v) { vertexes = v; }
+void TriangleStripMesh::setStrips(const java::ArrayList< java::ArrayList<int> >& indexes) { strips = indexes; }
+java::ArrayList< java::ArrayList<int> >& TriangleStripMesh::getStrips() { return strips; }
 
 static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2, double& t)
 {
@@ -67,10 +68,10 @@ bool TriangleStripMesh::doIntersection(const Ray& inRay, RayHit* outHit)
     double bestT = 1e308;
     Vector3Dd bestN;
 
-    for (size_t s = 0; s < strips.size(); s++) {
-        const std::vector<int>& strip = strips[s];
+    for (long int s = 0; s < strips.size(); s++) {
+        java::ArrayList<int>& strip = strips[s];
         if (strip.size() < 3) continue;
-        for (size_t i = 2; i < strip.size(); i++) {
+        for (long int i = 2; i < strip.size(); i++) {
             int i0 = strip[i-2], i1 = strip[i-1], i2 = strip[i];
             if (i % 2 == 0) { int tmp = i1; i1 = i2; i2 = tmp; }
             if (i0 < 0 || i1 < 0 || i2 < 0 ||

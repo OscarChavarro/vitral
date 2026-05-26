@@ -122,11 +122,11 @@ static void processTriangleMeshGroup(TriangleMeshGroup* mg,
                         Calligraphic2DBuffer* lineSet, const Camera* camera)
 {
     Matrix4x4d M = body->getTransformationMatrix();
-    std::vector<TriangleMesh>& meshes = mg->getMeshes();
-    for (size_t j = 0; j < meshes.size(); j++) {
+    java::ArrayList<TriangleMesh>& meshes = mg->getMeshes();
+    for (long int j = 0; j < meshes.size(); j++) {
         TriangleMesh& mesh = meshes[j];
-        std::vector<double>& v = mesh.getVertexPositions();
-        std::vector<int>& tr = mesh.getTriangleIndexes();
+        java::ArrayList<double>& v = mesh.getVertexPositions();
+        java::ArrayList<int>& tr = mesh.getTriangleIndexes();
         for (int t = 0; t < mesh.getNumTriangles(); t++) {
             int p0 = tr[3*t];
             int p1 = tr[3*t+1];

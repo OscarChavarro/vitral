@@ -3,8 +3,8 @@
 
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/util/ArrayList.h"
 #include <string>
-#include <vector>
 
 class Ray;
 class RayHit;
@@ -14,7 +14,7 @@ class ProgressMonitor;
 
 class TriangleMeshGroup : public Surface {
 private:
-    std::vector<TriangleMesh> meshes;
+    java::ArrayList<TriangleMesh> meshes;
     int intersectionMeshIndex;
     int intersectionTriangleIndex;
 
@@ -22,11 +22,11 @@ private:
 
 public:
     TriangleMeshGroup();
-    TriangleMeshGroup(const std::vector<TriangleMesh>& meshes);
+    TriangleMeshGroup(const java::ArrayList<TriangleMesh>& meshes);
     TriangleMeshGroup(const TriangleMeshGroup& group);
 
-    std::vector<TriangleMesh>& getMeshes();
-    void setMeshes(const std::vector<TriangleMesh>& meshes);
+    java::ArrayList<TriangleMesh>& getMeshes();
+    void setMeshes(const java::ArrayList<TriangleMesh>& meshes);
     void addMesh(const TriangleMesh& mesh);
     TriangleMesh& getMeshAt(int index);
 

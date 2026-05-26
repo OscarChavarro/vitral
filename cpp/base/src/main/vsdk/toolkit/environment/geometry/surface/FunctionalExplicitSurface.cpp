@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/elements/Ray.h"
 #include "vsdk/toolkit/environment/geometry/elements/RayHit.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -74,7 +75,7 @@ void FunctionalExplicitSurface::updateInternalGeometry()
     double dy = (maxy - miny) / ((double)ny);
 
     internalGeometry->initVertexPositionsArray((nx+1)*(ny+1));
-    std::vector<double>& v = internalGeometry->getVertexPositions();
+    java::ArrayList<double>& v = internalGeometry->getVertexPositions();
 
     int index = 0;
     for (int iy = 0; iy <= ny; iy++) {
@@ -97,7 +98,7 @@ void FunctionalExplicitSurface::updateInternalGeometry()
     }
 
     internalGeometry->initTriangleArrays(nx*ny*2);
-    std::vector<int>& t = internalGeometry->getTriangleIndexes();
+    java::ArrayList<int>& t = internalGeometry->getTriangleIndexes();
 
     index = 0;
     for (int iy = 0; iy < ny; iy++) {

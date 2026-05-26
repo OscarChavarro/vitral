@@ -17,6 +17,8 @@ namespace java {
     public:
         ArrayList();
         explicit ArrayList(long i);
+        ArrayList(const ArrayList& other);
+        ArrayList& operator=(const ArrayList& other);
         ~ArrayList();
 
         void dispose();

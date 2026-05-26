@@ -34,6 +34,39 @@ ArrayList<T>::dispose() {
     maxSize = 0;
 }
 
+template <class T>
+ArrayList<T>::ArrayList(const ArrayList<T>& other)
+    : increaseChunk(other.increaseChunk)
+    , currentSize(other.currentSize)
+    , maxSize(other.maxSize)
+    , Data(nullptr)
+{
+    if (maxSize > 0) {
+        Data = new T[maxSize];
+        for (long int i = 0; i < currentSize; i++) {
+            Data[i] = other.Data[i];
+        }
+    }
+}
+
+template <class T> ArrayList<T>&
+ArrayList<T>::operator=(const ArrayList<T>& other)
+{
+    if (this == &other) return *this;
+    delete[] Data;
+    increaseChunk = other.increaseChunk;
+    currentSize = other.currentSize;
+    maxSize = other.maxSize;
+    Data = nullptr;
+    if (maxSize > 0) {
+        Data = new T[maxSize];
+        for (long int i = 0; i < currentSize; i++) {
+            Data[i] = other.Data[i];
+        }
+    }
+    return *this;
+}
+
 template <class T> void
 ArrayList<T>::init() {
     if ( maxSize > 0 ) {
