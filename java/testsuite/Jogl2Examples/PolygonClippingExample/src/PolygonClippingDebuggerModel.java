@@ -10,7 +10,7 @@ import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
-import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._Polygon2DWA;
 import vsdk.toolkit.environment.light.LightType;
 
 public class PolygonClippingDebuggerModel

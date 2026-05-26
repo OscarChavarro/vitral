@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import java.util.stream.Stream;
 
@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

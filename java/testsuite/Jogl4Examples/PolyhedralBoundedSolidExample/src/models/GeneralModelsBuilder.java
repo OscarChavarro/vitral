@@ -28,10 +28,10 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.render.awt.AwtFontReader;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 import vsdk.toolkit.io.geometry.stepCad.reader.StepReader;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 
 public final class GeneralModelsBuilder

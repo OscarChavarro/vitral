@@ -20,7 +20,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.environment.light.LightType;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
 
 public class DebuggerModel
 {

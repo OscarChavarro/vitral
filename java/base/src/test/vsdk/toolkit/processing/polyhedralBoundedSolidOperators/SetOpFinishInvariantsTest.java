@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import java.util.stream.Stream;
 

@@ -28,7 +28,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.processing.ComputationalGeometry;
-import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper.PolygonProcessor;
 
 /**
 This class encapsulates a polyhedral boundary representation for 2-manifold

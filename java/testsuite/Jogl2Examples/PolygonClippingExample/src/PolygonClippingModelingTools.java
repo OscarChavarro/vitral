@@ -1,11 +1,11 @@
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
-import vsdk.toolkit.processing.polygonClipper.WeilerAthertonPolygonClipper;
-import vsdk.toolkit.processing.polygonClipper._DoubleLinkedListNode;
-import vsdk.toolkit.processing.polygonClipper._Polygon2DContourWA;
-import vsdk.toolkit.processing.polygonClipper._Polygon2DWA;
-import vsdk.toolkit.processing.polygonClipper._VertexNode2D;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper.WeilerAthertonPolygonClipper;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._DoubleLinkedListNode;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._Polygon2DContourWA;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._Polygon2DWA;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._VertexNode2D;
 
 public class PolygonClippingModelingTools
 {

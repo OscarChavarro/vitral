@@ -9,8 +9,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.io.geometry.stepCad.StepLengthUnit;
 import vsdk.toolkit.io.geometry.stepCad.reader.StepReader;
 import vsdk.toolkit.io.geometry.stepCad.writer.StepWriter;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.CsgKurlanderBowlFixture;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 /**
 CLI example: builds two PolyhedralBoundedSolid objects for the selected model

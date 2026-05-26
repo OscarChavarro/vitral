@@ -39,7 +39,7 @@ import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.environment.light.LightType;
-import vsdk.toolkit.processing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class GUIEventExecutor extends CommandListener{
     

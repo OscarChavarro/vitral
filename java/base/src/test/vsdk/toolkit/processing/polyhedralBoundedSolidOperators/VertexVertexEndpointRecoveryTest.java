@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ class VertexVertexEndpointRecoveryTest
         separateEdgeSequenceMethod.setAccessible(true);
 
         resultEnum = Class.forName(
-            "vsdk.toolkit.processing.polyhedralBoundedSolidOperators."
+            "vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators."
             + "PolyhedralBoundedSolidSetOperator$SeparateEdgeSequenceResult");
     }
 

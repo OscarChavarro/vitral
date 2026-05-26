@@ -1,4 +1,4 @@
-package vsdk.toolkit.processing.polyhedralBoundedSolidOperators;
+package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;

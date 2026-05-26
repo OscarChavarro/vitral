@@ -10,7 +10,7 @@ import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.dataStructures.BinaryTreeNode;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.surface.Surface;
-import vsdk.toolkit.processing.polygonClipper.PolygonProcessor;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper.PolygonProcessor;
 
 public class Polygon2D extends Surface
 {
