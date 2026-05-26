@@ -15,7 +15,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 
 #include "java/util/ArrayList.txx"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cmath>
 #include <cstdio>
 #include "java/lang/String.h"
@@ -205,8 +205,8 @@ unsigned int OpenGL4SphereRenderer::selectProgram(const RendererConfiguration* q
 
 bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels)
 {
-    meridians = std::max(12, meridians);
-    parallels = std::max(8, parallels);
+    meridians = java::Math::max(12, meridians);
+    parallels = java::Math::max(8, parallels);
     if (cachedMeridians_ == meridians && cachedParallels_ == parallels && indexCount_ > 0) {
         return true;
     }

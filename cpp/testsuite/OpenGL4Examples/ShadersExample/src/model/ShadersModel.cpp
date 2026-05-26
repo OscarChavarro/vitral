@@ -1,6 +1,6 @@
 #include "ShadersModel.h"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cmath>
 #include <cstdio>
 #include "java/util/ArrayList.txx"
@@ -108,8 +108,8 @@ void ShadersModel::rotateRenderingMode() { renderingMode = nextShaderOperationMo
 void ShadersModel::toggleShowHud() { showHud = !showHud; }
 void ShadersModel::toggleAnimationEnabled() { animationEnabled = !animationEnabled; }
 void ShadersModel::toggleLightAnimationEnabled() { lightAnimationEnabled = !lightAnimationEnabled; }
-void ShadersModel::changeSphereMeridians(int delta) { sphereMeridians = std::max(12, sphereMeridians + delta); }
-void ShadersModel::changeSphereParallels(int delta) { sphereParallels = std::max(8, sphereParallels + delta); }
+void ShadersModel::changeSphereMeridians(int delta) { sphereMeridians = java::Math::max(12, sphereMeridians + delta); }
+void ShadersModel::changeSphereParallels(int delta) { sphereParallels = java::Math::max(8, sphereParallels + delta); }
 
 static double normalizeAngle(double a) {
     const double twoPi = 2.0 * M_PI;
@@ -140,8 +140,8 @@ SimpleMaterial* ShadersModel::createActiveMaterialCopy() const
 
 void ShadersModel::updateSoftwareViewportAndCamera(int width, int height)
 {
-    const int w = std::max(1, width);
-    const int h = std::max(1, height);
+    const int w = java::Math::max(1, width);
+    const int h = java::Math::max(1, height);
     camera->updateViewportResize(w, h);
     if (softwareFrameImage && softwareFrameImage->getXSize() == w && softwareFrameImage->getYSize() == h) return;
     delete softwareFrameImage;

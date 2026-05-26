@@ -6,7 +6,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include <cmath>
 #include "java/lang/String.h"
@@ -76,12 +76,12 @@ int Triangle::containmentTest(const Vector3Dd& p0, const Vector3Dd& p1, const Ve
 
 void Triangle::minMax(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd& p2, double mm[6])
 {
-    mm[0] = std::min(p0.x(), std::min(p1.x(), p2.x()));
-    mm[1] = std::min(p0.y(), std::min(p1.y(), p2.y()));
-    mm[2] = std::min(p0.z(), std::min(p1.z(), p2.z()));
-    mm[3] = std::max(p0.x(), std::max(p1.x(), p2.x()));
-    mm[4] = std::max(p0.y(), std::max(p1.y(), p2.y()));
-    mm[5] = std::max(p0.z(), std::max(p1.z(), p2.z()));
+    mm[0] = java::Math::min(p0.x(), java::Math::min(p1.x(), p2.x()));
+    mm[1] = java::Math::min(p0.y(), java::Math::min(p1.y(), p2.y()));
+    mm[2] = java::Math::min(p0.z(), java::Math::min(p1.z(), p2.z()));
+    mm[3] = java::Math::max(p0.x(), java::Math::max(p1.x(), p2.x()));
+    mm[4] = java::Math::max(p0.y(), java::Math::max(p1.y(), p2.y()));
+    mm[5] = java::Math::max(p0.z(), java::Math::max(p1.z(), p2.z()));
 }
 
 java::String Triangle::toString() const

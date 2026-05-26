@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cmath>
 #include "java/util/ArrayList.txx"
 
@@ -64,10 +64,10 @@ static double beckmannDistribution(double ndotH, double roughness)
 {
     if ( ndotH <= 0.0 ) return 0.0;
     double ndotHSquared = ndotH * ndotH;
-    double tanSquaredTheta = (1.0 - ndotHSquared) / std::max(EPS, ndotHSquared);
+    double tanSquaredTheta = (1.0 - ndotHSquared) / java::Math::max(EPS, ndotHSquared);
     double mSquared = roughness * roughness;
-    double exponent = -tanSquaredTheta / std::max(EPS, mSquared);
-    return std::exp(exponent) / (M_PI * std::max(EPS, mSquared) * ndotHSquared * ndotHSquared);
+    double exponent = -tanSquaredTheta / java::Math::max(EPS, mSquared);
+    return std::exp(exponent) / (M_PI * java::Math::max(EPS, mSquared) * ndotHSquared * ndotHSquared);
 }
 
 static double smithSchlickGeometry(double ndotV, double ndotL, double alpha)
@@ -202,9 +202,9 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         if ( !ok ) continue;
         if ( isShadowed(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace) ) continue;
 
-        double ndotL = std::max(0.0, normalX * ld.x + normalY * ld.y + normalZ * ld.z);
+        double ndotL = java::Math::max(0.0, normalX * ld.x + normalY * ld.y + normalZ * ld.z);
         if ( ndotL <= 0.0 ) continue;
-        double ndotV = std::max(0.0, normalX * viewDirX + normalY * viewDirY + normalZ * viewDirZ);
+        double ndotV = java::Math::max(0.0, normalX * viewDirX + normalY * viewDirY + normalZ * viewDirZ);
         if ( ndotV <= 0.0 ) continue;
 
         double halfX = ld.x + viewDirX;
@@ -214,12 +214,12 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         if ( halfLength <= EPS ) continue;
         double invHalf = 1.0 / halfLength;
         halfX *= invHalf; halfY *= invHalf; halfZ *= invHalf;
-        double ndotH = std::max(0.0, normalX * halfX + normalY * halfY + normalZ * halfZ);
-        double vdotH = std::max(0.0, viewDirX * halfX + viewDirY * halfY + viewDirZ * halfZ);
+        double ndotH = java::Math::max(0.0, normalX * halfX + normalY * halfY + normalZ * halfZ);
+        double vdotH = java::Math::max(0.0, viewDirX * halfX + viewDirY * halfY + viewDirZ * halfZ);
 
         MicrofacetParams p = resolveMicrofacetParams(material);
-        double roughness = std::max(MIN_ROUGHNESS, p.roughness);
-        double alpha = std::max(MIN_ROUGHNESS * MIN_ROUGHNESS, p.alpha);
+        double roughness = java::Math::max(MIN_ROUGHNESS, p.roughness);
+        double alpha = java::Math::max(MIN_ROUGHNESS * MIN_ROUGHNESS, p.alpha);
 
         const ColorRgb& baseDiffuse = material->getDiffuseReference();
         double diffuseR = baseDiffuse.r();
@@ -234,11 +234,11 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
 
         double distribution = beckmannDistribution(ndotH, roughness);
         double geometry = smithSchlickGeometry(ndotV, ndotL, alpha);
-        double fresnelPower = std::pow(std::max(0.0, 1.0 - vdotH), 5.0);
+        double fresnelPower = std::pow(java::Math::max(0.0, 1.0 - vdotH), 5.0);
         double fresnelR = p.fresnelF0.r() + (1.0 - p.fresnelF0.r()) * fresnelPower;
         double fresnelG = p.fresnelF0.g() + (1.0 - p.fresnelF0.g()) * fresnelPower;
         double fresnelB = p.fresnelF0.b() + (1.0 - p.fresnelF0.b()) * fresnelPower;
-        double denominator = std::max(EPS, 4.0 * ndotL * ndotV);
+        double denominator = java::Math::max(EPS, 4.0 * ndotL * ndotV);
 
         double specR = p.ks * distribution * geometry * fresnelR / denominator;
         double specG = p.ks * distribution * geometry * fresnelG / denominator;

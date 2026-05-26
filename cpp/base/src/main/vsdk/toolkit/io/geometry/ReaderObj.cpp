@@ -16,7 +16,7 @@
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"
 
-#include <algorithm>
+#include <cctype>
 #include "java/lang/String.h"
 #include <cmath>
 #include "java/lang/String.h"

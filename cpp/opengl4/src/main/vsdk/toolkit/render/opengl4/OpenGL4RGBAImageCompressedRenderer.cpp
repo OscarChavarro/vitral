@@ -3,7 +3,7 @@
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
 #include "java/util/ArrayList.h"
 #include "java/util/ArrayList.txx"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cstdio>
 
 #ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
@@ -197,8 +197,8 @@ java::ArrayList<unsigned char> OpenGL4RGBAImageCompressedRenderer::decompressToR
     for (long int k = 0; k < rgbaSize; k++) rgba.add(0);
 
     int blockSize = (fmt == RGBAImageCompressed::COMPRESSION_DXT1) ? 8 : 16;
-    int blockCountX = std::max(1, (width + 3) / 4);
-    int blockCountY = std::max(1, (height + 3) / 4);
+    int blockCountX = java::Math::max(1, (width + 3) / 4);
+    int blockCountY = java::Math::max(1, (height + 3) / 4);
     int srcOffset = 0;
 
     for (int by = 0; by < blockCountY; by++) {

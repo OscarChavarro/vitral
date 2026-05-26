@@ -35,6 +35,8 @@ class Math {
     static int max(int a, int b);
     static float min(float a, float b);
     static float max(float a, float b);
+    static double min(double a, double b);
+    static double max(double a, double b);
     static float sqrt(float a);
     static double sqrt(double a);
     static int getExponent(double a);
@@ -170,6 +172,16 @@ Math::min(float a, float b) {
 
 inline float
 Math::max(float a, float b) {
+    return a > b ? a : b;
+}
+
+inline double
+Math::min(double a, double b) {
+    return a < b ? a : b;
+}
+
+inline double
+Math::max(double a, double b) {
     return a > b ? a : b;
 }
 

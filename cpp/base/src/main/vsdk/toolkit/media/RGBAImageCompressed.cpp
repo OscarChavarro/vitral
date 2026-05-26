@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include <cstring>
 #include <cstdio>
-#include <algorithm>
+#include <java/lang/Math.h>
 
 RGBAImageCompressed::RGBAImageCompressed() :
     data(nullptr), xSize(0), ySize(0),
@@ -61,8 +61,8 @@ int RGBAImageCompressed::calculateTopLevelDataSize(
         return 0;
     }
 
-    int blockWidth = std::max(1, (width + 3) / 4);
-    int blockHeight = std::max(1, (height + 3) / 4);
+    int blockWidth = java::Math::max(1, (width + 3) / 4);
+    int blockHeight = java::Math::max(1, (height + 3) / 4);
     return blockWidth * blockHeight * blockSize;
 }
 

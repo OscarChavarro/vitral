@@ -3,7 +3,7 @@
 #include <cmath>
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <stdexcept>
 #include <thread>
 #include <atomic>
@@ -151,7 +151,7 @@ public:
           animationEnabled(false), lightAnimationEnabled(false), showHud(true),
           renderingMode(ShaderOperationMode::OPENGL_4_1),
           lastHudTitleTickSeconds(-1.0), softwareFrameImage(0), hudRenderer(0),
-          softwareThreadCount(std::max(1, detectCpuCount())),
+          softwareThreadCount(java::Math::max(1, detectCpuCount())),
           softwareThreadInfoPrinted(false) {}
 
     void updateHudTitle()
@@ -161,7 +161,7 @@ public:
         if (lastHudTitleTickSeconds > 0.0 && (now - lastHudTitleTickSeconds) < 0.20) return;
         lastHudTitleTickSeconds = now;
 
-        const int triangles = std::max(0, (parallels - 1) * meridians * 2);
+        const int triangles = java::Math::max(0, (parallels - 1) * meridians * 2);
         const char* modeText = renderingMode == ShaderOperationMode::OPENGL_4_1 ? "GPU" : "CPU";
         char title[512];
         std::snprintf(title, sizeof(title),
@@ -175,8 +175,8 @@ public:
         int w = 1;
         int h = 1;
         glfwGetFramebufferSize(window, &w, &h);
-        w = std::max(1, w);
-        h = std::max(1, h);
+        w = java::Math::max(1, w);
+        h = java::Math::max(1, h);
         if (softwareFrameImage != 0 && softwareFrameImage->getXSize() == w && softwareFrameImage->getYSize() == h) {
             return true;
         }

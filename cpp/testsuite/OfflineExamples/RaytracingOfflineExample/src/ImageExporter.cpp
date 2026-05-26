@@ -4,9 +4,9 @@
 #include "java/io/File.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
-#include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstring>
 
 bool ImageExporter::exportImage(const java::String& outputFileName, RGBImageUncompressed* image)
 {
@@ -14,7 +14,9 @@ bool ImageExporter::exportImage(const java::String& outputFileName, RGBImageUnco
     printf("Exporting result image to file \"%s\": ", outputFileName.c_str());
 
     java::String lower = outputFileName;
-    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    for (size_t i = 0; i < lower.size(); i++) {
+        lower[i] = std::tolower((unsigned char)lower[i]);
+    }
 
     bool ok = false;
     if ( lower.size() >= 4 && lower.substr(lower.size()-4) == ".png" ) {

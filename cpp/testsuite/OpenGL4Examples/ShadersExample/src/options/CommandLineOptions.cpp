@@ -1,6 +1,6 @@
 #include "CommandLineOptions.h"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cctype>
 #include <cstdlib>
 #include <stdexcept>
@@ -25,7 +25,9 @@ CommandLineOptions::CommandLineOptions()
 static java::String lower(const java::String& s)
 {
     java::String out = s;
-    std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    for (size_t i = 0; i < out.size(); i++) {
+        out[i] = std::tolower((unsigned char)out[i]);
+    }
     return out;
 }
 
@@ -119,18 +121,18 @@ CommandLineOptions CommandLineOptions::parse(int argc, char** argv)
         if (startsWith(arg, "--shading=")) { o.hasShadingType = true; o.shadingType = parseShading(arg.substr(10)); continue; }
         if (arg == "--texture-filter") { o.hasTextureFilter = true; o.textureFilter = parseTextureFilter(readValue("--texture-filter")); continue; }
         if (startsWith(arg, "--texture-filter=")) { o.hasTextureFilter = true; o.textureFilter = parseTextureFilter(arg.substr(17)); continue; }
-        if (arg == "--meridians") { o.hasMeridians = true; o.meridians = std::max(3, std::atoi(readValue("--meridians").c_str())); continue; }
-        if (startsWith(arg, "--meridians=")) { o.hasMeridians = true; o.meridians = std::max(3, std::atoi(arg.substr(12).c_str())); continue; }
-        if (arg == "--parallels") { o.hasParallels = true; o.parallels = std::max(2, std::atoi(readValue("--parallels").c_str())); continue; }
-        if (startsWith(arg, "--parallels=")) { o.hasParallels = true; o.parallels = std::max(2, std::atoi(arg.substr(12).c_str())); continue; }
+        if (arg == "--meridians") { o.hasMeridians = true; o.meridians = java::Math::max(3, std::atoi(readValue("--meridians").c_str())); continue; }
+        if (startsWith(arg, "--meridians=")) { o.hasMeridians = true; o.meridians = java::Math::max(3, std::atoi(arg.substr(12).c_str())); continue; }
+        if (arg == "--parallels") { o.hasParallels = true; o.parallels = java::Math::max(2, std::atoi(readValue("--parallels").c_str())); continue; }
+        if (startsWith(arg, "--parallels=")) { o.hasParallels = true; o.parallels = java::Math::max(2, std::atoi(arg.substr(12).c_str())); continue; }
         if (arg == "--cpu-texture-offset-u") { o.hasCpuTextureOffsetU = true; o.cpuTextureOffsetUTexels = std::atof(readValue("--cpu-texture-offset-u").c_str()); continue; }
         if (startsWith(arg, "--cpu-texture-offset-u=")) { o.hasCpuTextureOffsetU = true; o.cpuTextureOffsetUTexels = std::atof(arg.substr(23).c_str()); continue; }
         if (arg == "--cpu-texture-offset-v") { o.hasCpuTextureOffsetV = true; o.cpuTextureOffsetVTexels = std::atof(readValue("--cpu-texture-offset-v").c_str()); continue; }
         if (startsWith(arg, "--cpu-texture-offset-v=")) { o.hasCpuTextureOffsetV = true; o.cpuTextureOffsetVTexels = std::atof(arg.substr(23).c_str()); continue; }
-        if (arg == "--width") { o.width = std::max(1, std::atoi(readValue("--width").c_str())); continue; }
-        if (startsWith(arg, "--width=")) { o.width = std::max(1, std::atoi(arg.substr(8).c_str())); continue; }
-        if (arg == "--height") { o.height = std::max(1, std::atoi(readValue("--height").c_str())); continue; }
-        if (startsWith(arg, "--height=")) { o.height = std::max(1, std::atoi(arg.substr(9).c_str())); continue; }
+        if (arg == "--width") { o.width = java::Math::max(1, std::atoi(readValue("--width").c_str())); continue; }
+        if (startsWith(arg, "--width=")) { o.width = java::Math::max(1, std::atoi(arg.substr(8).c_str())); continue; }
+        if (arg == "--height") { o.height = java::Math::max(1, std::atoi(readValue("--height").c_str())); continue; }
+        if (startsWith(arg, "--height=")) { o.height = java::Math::max(1, std::atoi(arg.substr(9).c_str())); continue; }
         if (arg == "--hud") { o.showHud = true; continue; }
         if (startsWith(arg, "--hud=")) { o.showHud = lower(arg.substr(6)) != "off"; continue; }
         throw std::invalid_argument(java::String("Unknown option: ").concat(arg).toCString());

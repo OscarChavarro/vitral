@@ -1,7 +1,7 @@
 #include "SoftwareRaycaster.h"
 #include "../model/ShadersModel.h"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <atomic>
 #include <stdexcept>
 #include <thread>
@@ -41,7 +41,7 @@ static int detectCpuCount()
 }
 
 SoftwareRaycaster::SoftwareRaycaster()
-    : numberOfThreads(std::max(1, detectCpuCount())),
+    : numberOfThreads(java::Math::max(1, detectCpuCount())),
       bumpNormalMap(0)
 {
     try {
@@ -135,7 +135,7 @@ void SoftwareRaycaster::render(
             outputImage->getYSize(),
             numberOfThreads);
         const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
-        const int workerCount = std::max(1, numberOfThreads);
+        const int workerCount = java::Math::max(1, numberOfThreads);
         std::atomic<size_t> nextTileIndex(0);
         std::thread* workers = new std::thread[workerCount];
         std::atomic<bool> failed(false);

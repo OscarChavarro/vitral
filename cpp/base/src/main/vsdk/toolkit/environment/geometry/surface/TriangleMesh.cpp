@@ -28,7 +28,7 @@
 #include "java/lang/String.h"
 #include <cmath>
 #include "java/lang/String.h"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include "java/lang/String.h"
 
 /*
@@ -292,8 +292,8 @@ double* TriangleMesh::calculateMinMaxPositions()
     double minX=1e308,minY=1e308,minZ=1e308,maxX=-1e308,maxY=-1e308,maxZ=-1e308;
     for (int i = 0; i < getNumVertices(); i++) {
         double x=vertexPositions[i*3], y=vertexPositions[i*3+1], z=vertexPositions[i*3+2];
-        minX=std::min(minX,x); minY=std::min(minY,y); minZ=std::min(minZ,z);
-        maxX=std::max(maxX,x); maxY=std::max(maxY,y); maxZ=std::max(maxZ,z);
+        minX=java::Math::min(minX,x); minY=java::Math::min(minY,y); minZ=java::Math::min(minZ,z);
+        maxX=java::Math::max(maxX,x); maxY=java::Math::max(maxY,y); maxZ=java::Math::max(maxZ,z);
     }
     m[0]=minX; m[1]=minY; m[2]=minZ; m[3]=maxX; m[4]=maxY; m[5]=maxZ;
     return m;

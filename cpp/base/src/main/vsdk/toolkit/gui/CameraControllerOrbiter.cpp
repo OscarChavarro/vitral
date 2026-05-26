@@ -1,6 +1,6 @@
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cstdio>
 #include <cmath>
 
@@ -309,8 +309,8 @@ bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
     bool updated = false;
     double senseFactor = deltaMov / 5.0;
 
-    deltaX = std::max(-5, std::min(5, deltaX));
-    deltaY = std::max(-5, std::min(5, deltaY));
+    deltaX = java::Math::max(-5, java::Math::min(5, deltaX));
+    deltaY = java::Math::max(-5, java::Math::min(5, deltaY));
 
     Matrix4x4d R;
     Matrix4x4d DR;
@@ -325,8 +325,8 @@ bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
     Vector3Dd w(R.get(0, 2), R.get(1, 2), R.get(2, 2));
 
     if ( (modifiers & MouseEvent::BUTTON1_DOWN_MASK) != 0 ) {
-        double ax = -std::min(2.0, 0.01 * deltaX);
-        double ay = std::min(2.0, 0.01 * deltaY);
+        double ax = -java::Math::min(2.0, 0.01 * deltaX);
+        double ay = java::Math::min(2.0, 0.01 * deltaY);
         updated = orbitAroundPointOfInterest(ax, ay);
     }
     else if ( (modifiers & MouseEvent::BUTTON2_DOWN_MASK) != 0 ) {
@@ -338,7 +338,7 @@ bool CameraControllerOrbiter::processMouseDraggedEvent(const MouseEvent& e)
     }
     else if ( (modifiers & MouseEvent::BUTTON3_DOWN_MASK) != 0 ) {
         eyePosition = eyePosition.subtract(u.multiply(senseFactor * ((double)deltaY)));
-        double ax = std::min(2.0, 0.01 * deltaX);
+        double ax = java::Math::min(2.0, 0.01 * deltaX);
         DR = Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
         R = DR.multiply(R);
         updated = true;

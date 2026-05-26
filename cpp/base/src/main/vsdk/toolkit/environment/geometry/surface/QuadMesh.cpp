@@ -12,7 +12,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
-#include <algorithm>
+#include <java/lang/Math.h>
 #include "java/lang/String.h"
 
 QuadMesh::QuadMesh() : name("default")
@@ -199,12 +199,12 @@ double* QuadMesh::calculateMinMaxPositions()
         double x = vertexPositions[3*i];
         double y = vertexPositions[3*i+1];
         double z = vertexPositions[3*i+2];
-        minX = std::min(minX, x);
-        minY = std::min(minY, y);
-        minZ = std::min(minZ, z);
-        maxX = std::max(maxX, x);
-        maxY = std::max(maxY, y);
-        maxZ = std::max(maxZ, z);
+        minX = java::Math::min(minX, x);
+        minY = java::Math::min(minY, y);
+        minZ = java::Math::min(minZ, z);
+        maxX = java::Math::max(maxX, x);
+        maxY = java::Math::max(maxY, y);
+        maxZ = java::Math::max(maxZ, z);
     }
 
     minMax[0] = minX; minMax[1] = minY; minMax[2] = minZ;

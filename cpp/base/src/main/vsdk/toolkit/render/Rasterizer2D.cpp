@@ -7,7 +7,7 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "java/util/ArrayList.txx"
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cmath>
 
 static void sortDoubles(java::ArrayList<double>& arr)
@@ -211,9 +211,9 @@ void Rasterizer2D::fillSmoothPolygonCalculateColor(
     double normalizedR = outR / totaldistance;
     double normalizedG = outG / totaldistance;
     double normalizedB = outB / totaldistance;
-    double clippedR = std::max(0.0, std::min(1.0, normalizedR));
-    double clippedG = std::max(0.0, std::min(1.0, normalizedG));
-    double clippedB = std::max(0.0, std::min(1.0, normalizedB));
+    double clippedR = java::Math::max(0.0, java::Math::min(1.0, normalizedR));
+    double clippedG = java::Math::max(0.0, java::Math::min(1.0, normalizedG));
+    double clippedB = java::Math::max(0.0, java::Math::min(1.0, normalizedB));
     int rr = (int)(clippedR * 255.0);
     int gg = (int)(clippedG * 255.0);
     int bb = (int)(clippedB * 255.0);

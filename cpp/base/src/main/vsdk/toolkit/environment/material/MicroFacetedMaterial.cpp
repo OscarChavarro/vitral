@@ -1,7 +1,6 @@
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "java/lang/String.h"
 
-#include <algorithm>
 #include "java/lang/String.h"
 #include <cctype>
 #include "java/lang/String.h"

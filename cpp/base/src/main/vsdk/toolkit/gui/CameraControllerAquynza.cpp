@@ -3,7 +3,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include <cmath>
-#include <algorithm>
+#include <java/lang/Math.h>
 
 static const double PI = 3.14159265358979323846;
 
@@ -246,8 +246,8 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
     bool updated = false;
     double senseFactor = deltaMov / 5.0;
 
-    deltaX = std::max(-5, std::min(5, deltaX));
-    deltaY = std::max(-5, std::min(5, deltaY));
+    deltaX = java::Math::max(-5, java::Math::min(5, deltaX));
+    deltaY = java::Math::max(-5, java::Math::min(5, deltaY));
 
     Matrix4x4d R = camera->getRotation();
     Vector3Dd u(R.get(0, 0), R.get(1, 0), R.get(2, 0));
@@ -260,8 +260,8 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
     int modifiers = e.getModifiers();
 
     if ((modifiers & MouseEvent::BUTTON1_DOWN_MASK) != 0) {
-        double ax = -std::min(2.0, 0.01 * deltaX);
-        double ay = std::min(2.0, 0.01 * deltaY);
+        double ax = -java::Math::min(2.0, 0.01 * deltaX);
+        double ay = java::Math::min(2.0, 0.01 * deltaY);
 
         Matrix4x4d DR = Matrix4x4d().axisRotation(ay, v.x(), v.y(), v.z());
         R = DR.multiply(R);
@@ -278,7 +278,7 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
         updated = true;
     } else if ((modifiers & MouseEvent::BUTTON3_DOWN_MASK) != 0) {
         eyePosition = eyePosition.subtract(u.multiply(senseFactor * deltaY));
-        double ax = std::min(2.0, 0.01 * deltaX);
+        double ax = java::Math::min(2.0, 0.01 * deltaX);
         Matrix4x4d DR = Matrix4x4d().axisRotation(ax, u.x(), u.y(), u.z());
         R = DR.multiply(R);
         updated = true;

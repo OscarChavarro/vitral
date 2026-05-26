@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cmath>
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -92,26 +92,26 @@ bool OpenGL4LightRenderer::initIfNeeded()
 static double calculateHalfAxisLength(const Light* light, Camera* camera, int viewportWidth, int viewportHeight)
 {
     const double viewportFraction = 0.05;
-    const double targetPixels = viewportFraction * (double)std::min(viewportWidth, viewportHeight);
+    const double targetPixels = viewportFraction * (double)java::Math::min(viewportWidth, viewportHeight);
 
     if (camera == nullptr) {
-        return std::max(0.05, targetPixels / (double)std::max(viewportHeight, 1));
+        return java::Math::max(0.05, targetPixels / (double)java::Math::max(viewportHeight, 1));
     }
 
     if (camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL) {
         double worldViewHeight = 2.0 / camera->getOrthogonalZoom();
-        double worldPerPixel = worldViewHeight / (double)std::max(viewportHeight, 1);
-        return std::max(1e-5, 0.5 * targetPixels * worldPerPixel);
+        double worldPerPixel = worldViewHeight / (double)java::Math::max(viewportHeight, 1);
+        return java::Math::max(1e-5, 0.5 * targetPixels * worldPerPixel);
     }
 
     Vector3Dd toLight = light->getPosition().subtract(camera->getPosition());
     double depth = std::abs(toLight.dotProduct(camera->getFront()));
-    depth = std::max(depth, camera->getNearPlaneDistance());
+    depth = java::Math::max(depth, camera->getNearPlaneDistance());
 
     double fovRadians = camera->getFov() * M_PI / 180.0;
     double worldViewHeightAtDepth = 2.0 * depth * std::tan(fovRadians / 2.0);
-    double worldPerPixel = worldViewHeightAtDepth / (double)std::max(viewportHeight, 1);
-    return std::max(1e-5, 0.5 * targetPixels * worldPerPixel);
+    double worldPerPixel = worldViewHeightAtDepth / (double)java::Math::max(viewportHeight, 1);
+    return java::Math::max(1e-5, 0.5 * targetPixels * worldPerPixel);
 }
 
 static Vector3Dd mapPatternPointToWorld(const Vector3Dd& point, const Vector3Dd& center, const Vector3Dd& right, const Vector3Dd& up, double worldSize)
@@ -187,8 +187,8 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    int viewportWidth = std::max(viewport[2], 1);
-    int viewportHeight = std::max(viewport[3], 1);
+    int viewportWidth = java::Math::max(viewport[2], 1);
+    int viewportHeight = java::Math::max(viewport[3], 1);
 
     Matrix4x4d mvp = Matrix4x4d::identityMatrix();
     if (camera != nullptr) {
@@ -230,8 +230,8 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    int viewportWidth = std::max(viewport[2], 1);
-    int viewportHeight = std::max(viewport[3], 1);
+    int viewportWidth = java::Math::max(viewport[2], 1);
+    int viewportHeight = java::Math::max(viewport[3], 1);
 
     if (camera == nullptr) {
         drawCross(light, nullptr);

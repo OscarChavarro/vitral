@@ -22,7 +22,7 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
 
-#include <algorithm>
+#include <java/lang/Math.h>
 #include <cctype>
 #include <cstdio>
 #include <exception>
@@ -38,9 +38,9 @@ enum class OpCode {
 };
 
 java::String ToUpper(java::String value) {
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-    return static_cast<char>(std::toupper(c));
-  });
+  for (size_t i = 0; i < value.size(); i++) {
+    value[i] = static_cast<char>(std::toupper((unsigned char)value[i]));
+  }
   return value;
 }
 
@@ -165,7 +165,7 @@ TopoDS_Shape PlanarizeForStep(const TopoDS_Shape& input) {
     }
 
     if (!curve->IsKind(STANDARD_TYPE(Geom_Line))) {
-      const double tol = std::max(BRep_Tool::Tolerance(edge), Precision::Confusion());
+      const double tol = java::Math::max(BRep_Tool::Tolerance(edge), Precision::Confusion());
       double cf = first;
       double cl = last;
       double deviation = 0.0;

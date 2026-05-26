@@ -1,6 +1,6 @@
 #include "ShadersKeyboardInteractionTechniques.h"
 #include "../model/ShadersModel.h"
-#include <algorithm>
+#include <java/lang/Math.h>
 
 bool ShadersKeyboardInteractionTechniques::processPressed(const KeyEvent& event, ShadersModel* model, Actions* actions)
 {
@@ -105,9 +105,9 @@ bool ShadersKeyboardInteractionTechniques::processPressedForApp(
         case KeyEvent::KEY_T: if (quality) quality->changeTexture(); repaint = true; break;
         case KeyEvent::KEY_b:
         case KeyEvent::KEY_B: if (quality) quality->changeBumpMap(); repaint = true; break;
-        case KeyEvent::KEY_q: if (meridians) *meridians = std::max(12, *meridians - 1); repaint = true; break;
+        case KeyEvent::KEY_q: if (meridians) *meridians = java::Math::max(12, *meridians - 1); repaint = true; break;
         case KeyEvent::KEY_Q: if (meridians) *meridians = *meridians + 1; repaint = true; break;
-        case KeyEvent::KEY_w: if (parallels) *parallels = std::max(8, *parallels - 1); repaint = true; break;
+        case KeyEvent::KEY_w: if (parallels) *parallels = java::Math::max(8, *parallels - 1); repaint = true; break;
         case KeyEvent::KEY_W: if (parallels) *parallels = *parallels + 1; repaint = true; break;
         case KeyEvent::KEY_r:
         case KeyEvent::KEY_R:
