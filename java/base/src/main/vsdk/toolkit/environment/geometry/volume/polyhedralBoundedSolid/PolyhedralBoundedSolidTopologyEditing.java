@@ -276,25 +276,26 @@ public final class PolyhedralBoundedSolidTopologyEditing
         int distinctCount = 0;
         int i;
         for ( i = 0; i < loop.halfEdgesList.size(); i++ ) {
-            boolean repeated = false;
             int j;
             for ( j = 0; j < i; j++ ) {
                 if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
                         loop.halfEdgesList.get(i).startingVertex.position,
                         loop.halfEdgesList.get(j).startingVertex.position,
                         numericContext) ) {
-                    repeated = true;
-                    break;
+                    // Self-touching loop: vertex i shares position with vertex j.
+                    // This creates a figure-8 boundary that cannot bound a valid face.
+                    Logger.reportMessage(solid, VSDK.WARNING, "isDegenerateLoop",
+                        "finish: skipped degenerate loop with self-touching boundary "
+                        + "(vertex " + loop.halfEdgesList.get(i).startingVertex.id
+                        + " coincides with vertex "
+                        + loop.halfEdgesList.get(j).startingVertex.id + ")");
+                    return true;
                 }
             }
-            if ( !repeated ) {
-                distinctCount++;
-                if ( distinctCount >= 3 ) {
-                    return false;
-                }
-            }
+            distinctCount++;
         }
-        return true;
+        // A valid face boundary needs at least 3 geometrically distinct vertices.
+        return distinctCount < 3;
     }
 
     /**

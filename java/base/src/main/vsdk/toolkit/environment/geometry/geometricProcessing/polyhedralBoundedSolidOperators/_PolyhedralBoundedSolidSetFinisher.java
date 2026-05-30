@@ -347,24 +347,67 @@ final class _PolyhedralBoundedSolidSetFinisher
         return null;
     }
 
+    /**
+    Returns true when the loop has at least one vertex whose position
+    coincides with another vertex earlier in the loop (i.e., the boundary
+    is self-touching / figure-8). Uses scaled bigEpsilon from tol.
+
+    A self-touching inner ring cannot be extracted as a valid face via lmfkrh
+    because the resulting face would be a degenerate inverted membrane.
+    */
+    private static boolean hasSelfTouchingVertex(
+        _PolyhedralBoundedSolidLoop loop,
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext tol)
+    {
+        if ( loop == null ) {
+            return false;
+        }
+        int size = loop.halfEdgesList.size();
+        int i;
+        int j;
+        for ( i = 1; i < size; i++ ) {
+            for ( j = 0; j < i; j++ ) {
+                if ( PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                        loop.halfEdgesList.get(i).startingVertex.position,
+                        loop.halfEdgesList.get(j).startingVertex.position,
+                        tol) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static void extractInnerLoopsOfNonPlanarFace(
         PolyhedralBoundedSolid solid,
         _PolyhedralBoundedSolidFace face)
     {
         int safety;
         int maxLoops;
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext tol;
 
         if ( face == null || face.boundariesList == null ) {
             return;
         }
         maxLoops = face.boundariesList.size();
         safety = 0;
+        tol = PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
         while ( face.boundariesList.size() > 1 && safety <= maxLoops ) {
             _PolyhedralBoundedSolidLoop innerLoop;
 
             safety++;
             innerLoop = face.boundariesList.get(1);
             if ( innerLoop == null ) {
+                break;
+            }
+            // §3 guard: a self-touching inner loop would produce an inverted
+            // membrane face when extracted via lmfkrh. Retain it as-is so the
+            // containing face keeps its inner ring but no invalid face is created.
+            if ( hasSelfTouchingVertex(innerLoop, tol) ) {
+                Logger.reportMessage(solid, VSDK.WARNING,
+                    "extractInnerLoopsOfNonPlanarFace",
+                    "finish: skipped self-touching inner loop in face "
+                    + face.id + "; retaining loop to avoid membrane artifact");
                 break;
             }
             if ( PolyhedralBoundedSolidEulerOperators.lmfkrh(solid,
@@ -399,6 +442,34 @@ final class _PolyhedralBoundedSolidSetFinisher
 
             safetyCount++;
             face = solid.getPolygonsList().get(i);
+            // §3: For multi-loop faces, check whether any inner loop is self-touching
+            // BEFORE the planarity check. A self-touching inner ring can be coplanar
+            // with the outer boundary, causing validateFaceIsPlanar to return true and
+            // skip the face — leaving the guard in extractInnerLoopsOfNonPlanarFace
+            // unreachable. We only bypass the planarity gate when at least one inner
+            // loop is self-touching; valid inner rings preserve the baseline behaviour.
+            if ( face.boundariesList.size() > 1 ) {
+                boolean hasSelfTouching = false;
+                PolyhedralBoundedSolidNumericPolicy.ToleranceContext tol =
+                    PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+                int li;
+                for ( li = 1; li < face.boundariesList.size(); li++ ) {
+                    if ( hasSelfTouchingVertex(
+                             face.boundariesList.get(li), tol) ) {
+                        hasSelfTouching = true;
+                        break;
+                    }
+                }
+                if ( hasSelfTouching ) {
+                    extractInnerLoopsOfNonPlanarFace(solid, face);
+                    if ( face.boundariesList.size() != 1 ) {
+                        i++;
+                        continue;
+                    }
+                    // All inner loops were extracted or guarded; face now has
+                    // 1 loop — fall through to planarity check.
+                }
+            }
             if ( PolyhedralBoundedSolidGeometricValidator.
                     validateFaceIsPlanar(face) ) {
                 i++;

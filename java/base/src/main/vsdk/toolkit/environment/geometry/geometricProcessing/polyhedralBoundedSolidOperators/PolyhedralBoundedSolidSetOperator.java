@@ -1549,6 +1549,154 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             soneb);
     }
 
+    // TEMP moon-diagnostic: scans a solid for boundary loops whose vertices are
+    // coincident-but-distinct (self-touching / figure-8) — the signature of a
+    // broken double/cut face that Generate produces on a concave cap. Gated
+    // behind the pipeline-summary trace property; no effect in normal runs.
+    private static void traceSelfTouchingLoops(
+        PolyhedralBoundedSolid solid, String label)
+    {
+        if ( !Boolean.getBoolean("vsdk.setop.tracePipelineSummary") ) {
+            return;
+        }
+        if ( solid == null || solid.getPolygonsList() == null ) {
+            return;
+        }
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext tol =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+        int fi;
+        for ( fi = 0; fi < solid.getPolygonsList().size(); fi++ ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(fi);
+            int li;
+            for ( li = 0; li < face.boundariesList.size(); li++ ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(li);
+                int sz = loop.halfEdgesList.size();
+                int a;
+                for ( a = 0; a < sz; a++ ) {
+                    int b;
+                    for ( b = a + 1; b < sz; b++ ) {
+                        _PolyhedralBoundedSolidHalfEdge ha =
+                            loop.halfEdgesList.get(a);
+                        _PolyhedralBoundedSolidHalfEdge hb =
+                            loop.halfEdgesList.get(b);
+                        if ( ha.startingVertex.id != hb.startingVertex.id &&
+                             PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                                 ha.startingVertex.position,
+                                 hb.startingVertex.position, tol) ) {
+                            int gap = b - a;
+                            boolean adjacent = (gap == 1) || (gap == sz - 1);
+                            System.out.println("[SelfTouch] " + label
+                                + " face=" + face.id + " loop=" + li
+                                + " size=" + sz
+                                + " idx[" + a + "]v" + ha.startingVertex.id
+                                + "==idx[" + b + "]v" + hb.startingVertex.id
+                                + (adjacent ? " ADJACENT(zero-len-edge)"
+                                            : " NON-ADJACENT(pinch)")
+                                + " at (" + String.format("%.4f,%.4f,%.4f",
+                                    ha.startingVertex.position.x(),
+                                    ha.startingVertex.position.y(),
+                                    ha.startingVertex.position.z()) + ")");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+    Splits every boundary loop that is self-touching (pinched) — i.e. has two
+    non-adjacent half-edges whose start vertices are geometrically coincident —
+    into simple loops via {@code lmef}.
+
+    <p>This is run on each operand right after {@code setOpGenerate} and before
+    {@code setOpClassify}. At that point, the only coincident-vertex pairs that
+    exist in real boundary loops (size&gt;2) are genuine pinches introduced by
+    the intersector on concave faces (e.g. a crescent-shaped cap). Size-2 strut
+    loops (the normal null-edge form) are deliberately excluded.</p>
+
+    <p>For a pinch at loop positions {@code a} and {@code b}, {@code lmef(he_a,
+    he_b)} splits the loop into two simple loops. If the original loop had
+    multiple pinches, the outer restartable scan re-examines the face until all
+    pinches are resolved. This handles both nested and interleaved pinch pairs.</p>
+
+    <p>Tolerance: uses the pipeline's {@code numericContext} (scaled
+    {@code bigEpsilon}), consistent with other coincidence tests.</p>
+    */
+    private static void splitSelfTouchingLoops(PolyhedralBoundedSolid solid)
+    {
+        if ( solid == null || solid.getPolygonsList() == null ) {
+            return;
+        }
+        boolean tracing = isPipelineSummaryTraceEnabled();
+        int splitsFired = 0;
+        int fi = 0;
+        while ( fi < solid.getPolygonsList().size() ) {
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(fi);
+            boolean splitDone = false;
+            int li = 0;
+            while ( li < face.boundariesList.size() && !splitDone ) {
+                _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(li);
+                int sz = loop.halfEdgesList.size();
+                if ( sz <= 2 ) {
+                    li++;
+                    continue;
+                }
+                int a;
+                for ( a = 0; a < sz && !splitDone; a++ ) {
+                    int b;
+                    for ( b = a + 2; b < sz; b++ ) {
+                        if ( a == 0 && b == sz - 1 ) {
+                            continue; // adjacent via wrap-around
+                        }
+                        _PolyhedralBoundedSolidHalfEdge ha =
+                            loop.halfEdgesList.get(a);
+                        _PolyhedralBoundedSolidHalfEdge hb =
+                            loop.halfEdgesList.get(b);
+                        if ( ha.startingVertex.id != hb.startingVertex.id &&
+                             PolyhedralBoundedSolidNumericPolicy.pointsCoincident(
+                                 ha.startingVertex.position,
+                                 hb.startingVertex.position,
+                                 numericContext) ) {
+                            int newId = (idNamespace != null)
+                                ? idNamespace.nextFaceId(solid)
+                                : solid.getMaxFaceId() + 1;
+                            _PolyhedralBoundedSolidFace newFace =
+                                PolyhedralBoundedSolidEulerOperators.lmef(
+                                    solid, ha, hb, newId);
+                            if ( newFace != null ) {
+                                splitsFired++;
+                                if ( tracing ) {
+                                    tracePipelineSummary(
+                                        "splitSelfTouchingLoops #" + splitsFired
+                                        + " face=" + face.id + " loop=" + li
+                                        + " sz=" + sz
+                                        + " idx[" + a + "]v" + ha.startingVertex.id
+                                        + "==idx[" + b + "]v" + hb.startingVertex.id
+                                        + " -> newFace=" + newFace.id);
+                                }
+                                splitDone = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if ( !splitDone ) {
+                    li++;
+                }
+            }
+            if ( !splitDone ) {
+                fi++;
+            }
+            // If splitDone: stay at the same fi so the modified face is
+            // re-examined for any remaining pinches.
+        }
+        if ( tracing && splitsFired > 0 ) {
+            tracePipelineSummary(
+                "splitSelfTouchingLoops total=" + splitsFired
+                + " faces-after=" + solid.getPolygonsList().size());
+        }
+    }
+
     private static void setOpConnect(int op)
     {
         _PolyhedralBoundedSolidSetNullEdgesConnector.ConnectResult result;
@@ -3602,6 +3750,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidA, "outputA_stage02");
             debugSolid(inSolidB, "outputB_stage02");
         }
+        traceSelfTouchingLoops(inSolidA, "A-after-generate");
+        traceSelfTouchingLoops(inSolidB, "B-after-generate");
+        splitSelfTouchingLoops(inSolidA);
+        splitSelfTouchingLoops(inSolidB);
 
         setOpClassify(op, inSolidA, inSolidB);
 
@@ -3609,6 +3761,10 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             debugSolid(inSolidA, "outputA_stage03");
             debugSolid(inSolidB, "outputB_stage03");
         }
+        // NOTE: after Classify the algorithm has (by design) inserted null-edge
+        // struts (size-2 loops with coincident endpoints); scanning here would
+        // flag those normal struts. Genuine self-touch is only meaningful
+        // after Generate (above), so we deliberately do not scan post-Classify.
 
         if ( sonea.isEmpty() && sonvv.isEmpty() ) {
             // No intersections found

@@ -8,6 +8,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
@@ -646,139 +647,6 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return new ConnectResult(sonfa, sonfb);
     }
 
-    /**
-    Partitions a flat list of null-edges into topological rings by tracing
-    vertex-adjacency chains. Two null-edges are adjacent when they share an
-    endpoint vertex. The result preserves the original ordering within each
-    ring for later intra-ring geometric sort.
-
-    This prevents the Connect phase from pairing null-edges that belong to
-    distinct, non-intersecting curves (e.g., the outer and inner boundary
-    circles of a spherical shell intersecting a cylinder).
-    */
-    private static ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>>
-    partitionNullEdgesIntoRings(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone)
-    {
-        HashMap<Integer, ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>>
-            vertexMap = new HashMap<>();
-        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : sone) {
-            int v1 = ne.e.rightHalf.startingVertex.id;
-            int v2 = ne.e.leftHalf.startingVertex.id;
-            vertexMap.computeIfAbsent(v1, k -> new ArrayList<>()).add(ne);
-            if ( v2 != v1 ) {
-                vertexMap.computeIfAbsent(v2, k -> new ArrayList<>()).add(ne);
-            }
-        }
-
-        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> rings =
-            new ArrayList<>();
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> remaining =
-            new ArrayList<>(sone);
-
-        while ( !remaining.isEmpty() ) {
-            ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring =
-                new ArrayList<>();
-            ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> visited =
-                new ArrayList<>();
-            _PolyhedralBoundedSolidSetOperatorNullEdge start = remaining.get(0);
-            _PolyhedralBoundedSolidSetOperatorNullEdge current = start;
-            int nextVertexId = current.e.rightHalf.startingVertex.id;
-
-            while ( true ) {
-                ring.add(current);
-                visited.add(current);
-                ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> neighbors =
-                    vertexMap.get(nextVertexId);
-                _PolyhedralBoundedSolidSetOperatorNullEdge next = null;
-                if ( neighbors != null ) {
-                    for (_PolyhedralBoundedSolidSetOperatorNullEdge nb : neighbors) {
-                        if ( !visited.contains(nb) ) {
-                            next = nb;
-                            break;
-                        }
-                    }
-                }
-                if ( next == null ) {
-                    break;
-                }
-                int v1 = next.e.rightHalf.startingVertex.id;
-                int v2 = next.e.leftHalf.startingVertex.id;
-                nextVertexId = (v1 == nextVertexId) ? v2 : v1;
-                current = next;
-            }
-
-            remaining.removeAll(visited);
-            rings.add(ring);
-        }
-
-        return rings;
-    }
-
-    private static double[] ringCentroidXYZ(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring)
-    {
-        double cx = 0.0;
-        double cy = 0.0;
-        double cz = 0.0;
-        int count = 0;
-
-        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : ring) {
-            cx += ne.e.rightHalf.startingVertex.position.x();
-            cy += ne.e.rightHalf.startingVertex.position.y();
-            cz += ne.e.rightHalf.startingVertex.position.z();
-            cx += ne.e.leftHalf.startingVertex.position.x();
-            cy += ne.e.leftHalf.startingVertex.position.y();
-            cz += ne.e.leftHalf.startingVertex.position.z();
-            count += 2;
-        }
-        if ( count == 0 ) {
-            return new double[]{0.0, 0.0, 0.0};
-        }
-        return new double[]{cx / count, cy / count, cz / count};
-    }
-
-    private static double ringAverageRadius(
-        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> ring)
-    {
-        double[] c = ringCentroidXYZ(ring);
-        double cx = c[0];
-        double cy = c[1];
-        double cz = c[2];
-        double totalRadius = 0.0;
-        int count = 0;
-
-        for (_PolyhedralBoundedSolidSetOperatorNullEdge ne : ring) {
-            double dx = ne.e.rightHalf.startingVertex.position.x() - cx;
-            double dy = ne.e.rightHalf.startingVertex.position.y() - cy;
-            double dz = ne.e.rightHalf.startingVertex.position.z() - cz;
-            totalRadius += Math.sqrt(dx * dx + dy * dy + dz * dz);
-            dx = ne.e.leftHalf.startingVertex.position.x() - cx;
-            dy = ne.e.leftHalf.startingVertex.position.y() - cy;
-            dz = ne.e.leftHalf.startingVertex.position.z() - cz;
-            totalRadius += Math.sqrt(dx * dx + dy * dy + dz * dz);
-            count += 2;
-        }
-        return count > 0 ? totalRadius / count : 0.0;
-    }
-
-    private static void sortRingsBySignature(
-        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> rings)
-    {
-        Collections.sort(rings,
-            (r1, r2) -> {
-                double[] c1 = ringCentroidXYZ(r1);
-                double[] c2 = ringCentroidXYZ(r2);
-                int cmpX = Double.compare(c1[0], c2[0]);
-                if ( cmpX != 0 ) return cmpX;
-                int cmpY = Double.compare(c1[1], c2[1]);
-                if ( cmpY != 0 ) return cmpY;
-                int cmpZ = Double.compare(c1[2], c2[2]);
-                if ( cmpZ != 0 ) return cmpZ;
-                return Double.compare(ringAverageRadius(r1), ringAverageRadius(r2));
-            });
-    }
-
     private static void sortNullEdges()
     {
         // Always group null-edges by topological ring before any further
@@ -799,48 +667,197 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         Collections.sort(soneb);
     }
 
-    /**
-    Groups sonea and soneb so that null-edges belonging to the same
-    topological ring are contiguous and ring pairs are aligned between the
-    two lists. This prevents the connect loop from pairing null-edges that
-    belong to distinct intersection curves.
+    private static void dbgDumpNullEdges(String label,
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sone)
+    {
+        int k;
+        for ( k = 0; k < sone.size(); k++ ) {
+            _PolyhedralBoundedSolidSetOperatorNullEdge ne = sone.get(k);
+            _PolyhedralBoundedSolidHalfEdge rh = ne.e.rightHalf;
+            _PolyhedralBoundedSolidHalfEdge lh = ne.e.leftHalf;
+            System.out.println("[DBG-ne] " + label + "[" + k + "] "
+                + "R{v=" + rh.startingVertex.id
+                + " f=" + rh.parentLoop.parentFace.id
+                + " p=(" + String.format("%.4f,%.4f,%.4f",
+                    rh.startingVertex.position.x(),
+                    rh.startingVertex.position.y(),
+                    rh.startingVertex.position.z()) + ")}"
+                + " L{v=" + lh.startingVertex.id
+                + " f=" + lh.parentLoop.parentFace.id
+                + " p=(" + String.format("%.4f,%.4f,%.4f",
+                    lh.startingVertex.position.x(),
+                    lh.startingVertex.position.y(),
+                    lh.startingVertex.position.z()) + ")}");
+        }
+    }
 
-    The insertion order within each ring is preserved so that the connect
-    loop continues to use the compatible angular ordering produced by the
-    Intersect phase. Rings are matched between A and B by their geometric
-    signature (centroid + average radius).
+    private static int curveComponentFind(int[] parent, int x)
+    {
+        while ( parent[x] != x ) {
+            parent[x] = parent[parent[x]];
+            x = parent[x];
+        }
+        return x;
+    }
+
+    private static long[] nullEdgeFaceIds(
+        _PolyhedralBoundedSolidSetOperatorNullEdge ne)
+    {
+        return new long[] {
+            ne.e.rightHalf.parentLoop.parentFace.id,
+            ne.e.leftHalf.parentLoop.parentFace.id
+        };
+    }
+
+    private static boolean nullEdgesShareFace(long[] a, long[] b)
+    {
+        return a[0] == b[0] || a[0] == b[1] || a[1] == b[0] || a[1] == b[1];
+    }
+
+    /**
+    Reorders {@code sonea}/{@code soneb} so that null-edge pairs belonging to the
+    same intersection curve are contiguous and ordered for {@code scanjoin}, and
+    distinct curves are separated.
+
+    <p>Each intersection curve is recovered as a connected component over the
+    paired null-edge indices: pairs {@code k}, {@code k'} are adjacent when their
+    A-null-edges share a face <b>or</b> their B-null-edges share a face — pure
+    topological adjacency along the curve as it crosses from face to face. The
+    null-edges are zero-length struts whose two endpoints sit at the same point,
+    so consecutive struts share a <em>face</em> (not a vertex id and not a
+    position); face adjacency is therefore the correct connectivity.</p>
+
+    <p>Within each component the classifier's emission order is preserved — that
+    order is the curve-traversal order {@code scanjoin} (Program 15.13) requires.
+    Components are emitted by ascending lowest member index (stable). Pairs stay
+    index-aligned ({@code sonea[k]} with {@code soneb[k]}) because the same index
+    permutation is applied to both lists.</p>
+
+    <p>This replaces the former vertex-id ring partition plus spatial signature
+    sort: the struts never share a vertex id, so that partition produced only
+    singleton rings and the signature sort then scrambled the curve order.</p>
     */
     private static void groupNullEdgesByRing()
     {
-        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> ringsA =
-            partitionNullEdgesIntoRings(sonea);
-        ArrayList<ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>> ringsB =
-            partitionNullEdgesIntoRings(soneb);
+        if ( isPipelineSummaryTraceEnabled() ) {
+            dbgDumpNullEdges("A", sonea);
+            dbgDumpNullEdges("B", soneb);
+        }
 
-        tracePipelineSummary(
-            "connect ring-group: ringsA=" + ringsA.size() +
-            " ringsB=" + ringsB.size());
-
-        if ( ringsA.size() <= 1 && ringsB.size() <= 1 ) {
+        int n = Math.min(sonea.size(), soneb.size());
+        if ( n != sonea.size() || n != soneb.size() || n < 2 ) {
             return;
         }
 
-        sortRingsBySignature(ringsA);
-        sortRingsBySignature(ringsB);
+        // When all null-edge rings are singletons (every pair is a zero-length
+        // strut), there is no ring structure to separate, and a spatial
+        // signature sort only scrambles the classifier's already-valid emission
+        // order. Preserve insertion order in that case (fixes all 20 star motifs).
+        // For cases where at least one proper ring exists (e.g. the shell-cylinder
+        // intersection), fall through to the connected-component sort.
+        long[][] faceIdsA = new long[n][];
+        long[][] faceIdsB = new long[n][];
+        int k;
+        for ( k = 0; k < n; k++ ) {
+            faceIdsA[k] = nullEdgeFaceIds(sonea.get(k));
+            faceIdsB[k] = nullEdgeFaceIds(soneb.get(k));
+        }
 
+        int[] parent = new int[n];
+        for ( k = 0; k < n; k++ ) {
+            parent[k] = k;
+        }
+        int i;
+        int j;
+        for ( i = 0; i < n; i++ ) {
+            for ( j = i + 1; j < n; j++ ) {
+                if ( nullEdgesShareFace(faceIdsA[i], faceIdsA[j]) ||
+                     nullEdgesShareFace(faceIdsB[i], faceIdsB[j]) ) {
+                    parent[curveComponentFind(parent, i)] =
+                        curveComponentFind(parent, j);
+                }
+            }
+        }
+
+        // Count distinct curve components.
+        java.util.HashSet<Integer> roots =
+            new java.util.HashSet<Integer>();
+        for ( k = 0; k < n; k++ ) {
+            roots.add(curveComponentFind(parent, k));
+        }
+        int componentCount = roots.size();
+
+        // Decide whether to reorder.
+        // Two null-edges that share a vertex ID are topologically adjacent on
+        // the same intersection curve (the vertex is the meeting point of two
+        // consecutive null-edges). When ALL null-edges are isolated (no shared
+        // vertex IDs — they are zero-length struts each at a distinct vertex),
+        // the classifier's emission order is already the best available curve
+        // order and reordering would only scramble it (this is the case for all
+        // star-prism motifs AND for most moon motifs). Only reorder when at
+        // least one shared vertex exists, which signals a multi-curve
+        // intersection where distinct curves must be kept contiguous (e.g.
+        // the shell-cylinder construction).
+        //
+        // NOTE: this check deliberately uses vertex IDs (not positions) because
+        // after weldCoincidentVertices the coincident pairs are already merged;
+        // two null-edges that are truly adjacent on the curve share the same
+        // vertex object, not just the same position.
+        java.util.HashSet<Integer> vidsA =
+            new java.util.HashSet<Integer>();
+        boolean hasSharedA = false;
+        int ki;
+        for ( ki = 0; ki < n && !hasSharedA; ki++ ) {
+            int v1 = sonea.get(ki).e.rightHalf.startingVertex.id;
+            int v2 = sonea.get(ki).e.leftHalf.startingVertex.id;
+            if ( !vidsA.add(v1) || (v1 != v2 && !vidsA.add(v2)) ) {
+                hasSharedA = true;
+            }
+        }
+        boolean hasSharedB = false;
+        if ( !hasSharedA ) {
+            java.util.HashSet<Integer> vidsB =
+                new java.util.HashSet<Integer>();
+            for ( ki = 0; ki < n && !hasSharedB; ki++ ) {
+                int v1 = soneb.get(ki).e.rightHalf.startingVertex.id;
+                int v2 = soneb.get(ki).e.leftHalf.startingVertex.id;
+                if ( !vidsB.add(v1) || (v1 != v2 && !vidsB.add(v2)) ) {
+                    hasSharedB = true;
+                }
+            }
+        }
+        if ( !hasSharedA && !hasSharedB ) {
+            tracePipelineSummary("connect ring-group: all singletons; "
+                + "preserving insertion order");
+            return;
+        }
+
+        // Multiple pairs share face-adjacency → reconstruct curve order.
+        LinkedHashMap<Integer, ArrayList<Integer>> components =
+            new LinkedHashMap<Integer, ArrayList<Integer>>();
+        for ( k = 0; k < n; k++ ) {
+            int root = curveComponentFind(parent, k);
+            components.computeIfAbsent(root,
+                r -> new ArrayList<Integer>()).add(k);
+        }
+
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedA =
+            new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedB =
+            new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
+        for ( ArrayList<Integer> component : components.values() ) {
+            for ( int idx : component ) {
+                orderedA.add(sonea.get(idx));
+                orderedB.add(soneb.get(idx));
+            }
+        }
         sonea.clear();
+        sonea.addAll(orderedA);
         soneb.clear();
-        int n = Math.min(ringsA.size(), ringsB.size());
-        for (int i = 0; i < n; i++) {
-            sonea.addAll(ringsA.get(i));
-            soneb.addAll(ringsB.get(i));
-        }
-        for (int i = n; i < ringsA.size(); i++) {
-            sonea.addAll(ringsA.get(i));
-        }
-        for (int i = n; i < ringsB.size(); i++) {
-            soneb.addAll(ringsB.get(i));
-        }
+        soneb.addAll(orderedB);
+
+        tracePipelineSummary(
+            "connect curve-components: count=" + componentCount);
     }
 
     /**
