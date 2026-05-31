@@ -6,6 +6,7 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper;
 
 import java.util.ArrayList;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
+import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 
 /**
  * Implements the Weiler-Atherton polygon clipping algorithm for convex and
@@ -25,6 +26,57 @@ public class WeilerAthertonPolygonClipper {
     private boolean firstIntersection;
     private boolean previousOut;
     private final boolean coincidentPoints[] = new boolean[4];
+    private final PolygonTopologicalMerger topologicalMerger;
+
+    public WeilerAthertonPolygonClipper()
+    {
+        topologicalMerger = new PolygonTopologicalMerger();
+    }
+
+    /**
+     * Computes the boolean union {@code A ∪ B}.
+     *
+     * This method composes the result from:
+     * <ul>
+     *   <li>{@code A - B}</li>
+     *   <li>{@code B - A}</li>
+     *   <li>{@code A ∩ B}</li>
+     * </ul>
+     *
+     * using two clipping passes.
+     *
+     * @param polygonA first polygon operand
+     * @param polygonB second polygon operand
+     * @param unionPolyOut output polygon that receives the union
+     */
+    public void unionPolygons(Polygon2D polygonA, Polygon2D polygonB,
+        Polygon2D unionPolyOut)
+    {
+        Polygon2D aMinusB;
+        Polygon2D bMinusA;
+        Polygon2D intersectionAB;
+        Polygon2D temp;
+
+        if ( polygonA == null || polygonB == null || unionPolyOut == null ) {
+            return;
+        }
+
+        aMinusB = new Polygon2D();
+        bMinusA = new Polygon2D();
+        intersectionAB = new Polygon2D();
+        temp = new Polygon2D();
+
+        // A - B and A ∩ B
+        clipPolygons(polygonB, polygonA, intersectionAB, aMinusB);
+        // B - A
+        clipPolygons(polygonA, polygonB, temp, bMinusA);
+
+        resetOutputPolygon(unionPolyOut);
+        appendNonEmptyContours(aMinusB, unionPolyOut);
+        appendNonEmptyContours(bMinusA, unionPolyOut);
+        appendNonEmptyContours(intersectionAB, unionPolyOut);
+        topologicalMerger.mergeInPlace(unionPolyOut);
+    }
 
     /**
      * Computes the intersection and exterior regions produced by clipping the
@@ -1009,5 +1061,48 @@ public class WeilerAthertonPolygonClipper {
      */
     public _Polygon2DWA getSubjectPolyWA() {
         return subjectPolyWA;
+    }
+
+    private static void resetOutputPolygon(Polygon2D polygon)
+    {
+        polygon.loops.clear();
+        polygon.nextLoop();
+    }
+
+    private static void appendNonEmptyContours(Polygon2D source, Polygon2D target)
+    {
+        int i;
+        int j;
+        boolean hasOutputVertices = hasAnyVertex(target);
+
+        for ( i = 0; i < source.loops.size(); ++i ) {
+            _Polygon2DContour contour = source.loops.get(i);
+            if ( contour.vertices.isEmpty() ) {
+                continue;
+            }
+            if ( hasOutputVertices ) {
+                target.nextLoop();
+            }
+            for ( j = 0; j < contour.vertices.size(); ++j ) {
+                target.addVertex(contour.vertices.get(j).x,
+                    contour.vertices.get(j).y,
+                    contour.vertices.get(j).color.r(),
+                    contour.vertices.get(j).color.g(),
+                    contour.vertices.get(j).color.b());
+            }
+            hasOutputVertices = true;
+        }
+    }
+
+    private static boolean hasAnyVertex(Polygon2D polygon)
+    {
+        int i;
+
+        for ( i = 0; i < polygon.loops.size(); ++i ) {
+            if ( !polygon.loops.get(i).vertices.isEmpty() ) {
+                return true;
+            }
+        }
+        return false;
     }
 }

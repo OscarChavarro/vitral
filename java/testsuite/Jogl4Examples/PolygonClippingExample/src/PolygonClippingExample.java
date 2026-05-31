@@ -17,13 +17,20 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 // JOGL classes
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
+import gui.PolygonClippingKeyboardInteractionTechniques;
+import gui.PolygonClippingMouseInteractionTechniques;
+import model.PolygonClippingDebuggerModel;
+import model.PolygonClippingModelingTools;
+import render.JoglPolygonClippingRenderer;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
-import vsdk.toolkit.render.jogl.Jogl2Renderer;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.gui.AwtSystem;
 
 public class PolygonClippingExample extends JFrame implements MouseListener,
@@ -55,7 +62,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     public static void main(String[] args)
     {
-        if (!Jogl2Renderer.verifyOpenGLAvailability()) {
+        if (!Jogl4Renderer.verifyOpenGLAvailability()) {
             System.err.println("Can not open OpenGL context. Check graphics configuration");
             System.exit(0);
         }
@@ -102,7 +109,15 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     private GLCanvas createGUI()
     {
-        canvas = new GLCanvas();
+        GLProfile profile;
+        if ( GLProfile.isAvailable(GLProfile.GL4bc) ) {
+            profile = GLProfile.get(GLProfile.GL4bc);
+        }
+        else {
+            profile = GLProfile.get(GLProfile.GL4);
+        }
+        GLCapabilities caps = new GLCapabilities(profile);
+        canvas = new GLCanvas(caps);
         canvas.addGLEventListener(renderer);
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);

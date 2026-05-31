@@ -1,3 +1,5 @@
+package model;
+
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
@@ -15,14 +17,40 @@ public class PolygonClippingModelingTools
     {
         PolygonClippingTestCase testCase = model.getCurrentTestCase();
         WeilerAthertonPolygonClipper clipper = new WeilerAthertonPolygonClipper();
+        Polygon2D operationResult = new Polygon2D();
+        Polygon2D secondaryResult = new Polygon2D();
+        Polygon2D scratch = new Polygon2D();
 
         model.setClipPolygon(buildPolygon(testCase.clipLoops(), CLIP_Y_OFFSET));
         model.setSubjectPolygon(buildPolygon(testCase.subjectLoops(), 0.0));
-        model.setInnerPolygon(new Polygon2D());
-        model.setOuterPolygon(new Polygon2D());
+        model.setInnerPolygon(operationResult);
+        model.setOuterPolygon(secondaryResult);
 
-        clipper.clipPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
-            model.getInnerPolygon(), model.getOuterPolygon());
+        switch ( model.getOperation() ) {
+          case INTERSECTION:
+            clipper.clipPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
+                operationResult, secondaryResult);
+            break;
+          case UNION:
+            clipper.unionPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
+                operationResult);
+            resetPolygonToEmpty(secondaryResult);
+            break;
+          case A_MINUS_B:
+            clipper.clipPolygons(model.getSubjectPolygon(), model.getClipPolygon(),
+                scratch, operationResult);
+            resetPolygonToEmpty(secondaryResult);
+            break;
+          case B_MINUS_A:
+            clipper.clipPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
+                scratch, operationResult);
+            resetPolygonToEmpty(secondaryResult);
+            break;
+          default:
+            clipper.clipPolygons(model.getClipPolygon(), model.getSubjectPolygon(),
+                operationResult, secondaryResult);
+            break;
+        }
 
         model.setClipPolygonWA(clipper.getClipPolyWA());
         model.setSubjectPolygonWA(clipper.getSubjectPolyWA());
@@ -119,6 +147,12 @@ public class PolygonClippingModelingTools
                 bounds.include(loop.vertices.get(j).x, loop.vertices.get(j).y);
             }
         }
+    }
+
+    private static void resetPolygonToEmpty(Polygon2D polygon)
+    {
+        polygon.loops.clear();
+        polygon.nextLoop();
     }
 
     private static final class Bounds2D

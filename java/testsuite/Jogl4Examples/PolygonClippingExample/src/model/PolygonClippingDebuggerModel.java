@@ -1,3 +1,5 @@
+package model;
+
 import java.awt.Rectangle;
 import javax.swing.JFrame;
 
@@ -29,6 +31,7 @@ public class PolygonClippingDebuggerModel
     private _Polygon2DWA subjectPolygonWA;
 
     private int testIndex;
+    private PolygonClippingOperation operation;
     private boolean showReferenceFrame;
     private boolean showClipPolygon;
     private boolean showSubjectPolygon;
@@ -70,6 +73,7 @@ public class PolygonClippingDebuggerModel
         subjectPolygonWA = null;
 
         testIndex = 0;
+        operation = PolygonClippingOperation.INTERSECTION;
         showReferenceFrame = true;
         showClipPolygon = true;
         showSubjectPolygon = true;
@@ -90,12 +94,12 @@ public class PolygonClippingDebuggerModel
 
     public PolygonClippingTestCase getCurrentTestCase()
     {
-        return PolygonClippingTestCases.CASES[testIndex];
+        return PolygonClippingFixtures.CASES[testIndex];
     }
 
     public int getTotalTestCases()
     {
-        return PolygonClippingTestCases.CASES.length;
+        return PolygonClippingFixtures.CASES.length;
     }
 
     public void stepTest(int delta)
@@ -105,6 +109,11 @@ public class PolygonClippingDebuggerModel
         if ( testIndex < 0 ) {
             testIndex += total;
         }
+    }
+
+    public void cycleOperation()
+    {
+        operation = operation.next();
     }
 
     public void clearErrorState()
@@ -238,6 +247,16 @@ public class PolygonClippingDebuggerModel
     public void setTestIndex(int testIndex)
     {
         this.testIndex = testIndex;
+    }
+
+    public PolygonClippingOperation getOperation()
+    {
+        return operation;
+    }
+
+    public void setOperation(PolygonClippingOperation operation)
+    {
+        this.operation = operation;
     }
 
     public boolean isShowReferenceFrame()

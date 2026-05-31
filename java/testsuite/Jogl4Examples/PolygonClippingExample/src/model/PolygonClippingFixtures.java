@@ -1,4 +1,6 @@
-public class PolygonClippingTestCases
+package model;
+
+public class PolygonClippingFixtures
 {
     public static final PolygonClippingTestCase[] CASES = {
         new PolygonClippingTestCase("TRIANGLE_VS_QUAD",
@@ -338,10 +340,24 @@ public class PolygonClippingTestCases
             },
             new double[][] {
                 {-1, 1, 1, 1, 2, 0, 5, 0, 6, 1, 6.5, 2, 6.5, 3, 0.5, 3}
+            }),
+        new PolygonClippingTestCase("UNION_SQUARES_SHARED_EDGE",
+            new double[][] {
+                {0, 0, 4, 0, 4, 4, 0, 4}
+            },
+            new double[][] {
+                {4, 0, 8, 0, 8, 4, 4, 4}
+            }),
+        new PolygonClippingTestCase("UNION_SQUARES_SHARED_CORNER",
+            new double[][] {
+                {0, 0, 4, 0, 4, 4, 0, 4}
+            },
+            new double[][] {
+                {4, 3, 8, 3, 8, 7, 4, 7}
             })
     };
 
-    private PolygonClippingTestCases()
+    private PolygonClippingFixtures()
     {
     }
 }

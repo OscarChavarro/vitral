@@ -1,7 +1,10 @@
+package gui;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
 import com.jogamp.opengl.awt.GLCanvas;
+import model.PolygonClippingDebuggerModel;
 import vsdk.toolkit.gui.AwtSystem;
 
 public class PolygonClippingMouseInteractionTechniques

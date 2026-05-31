@@ -1,3 +1,6 @@
+package gui;
+
+import model.PolygonClippingDebuggerModel;
 import vsdk.toolkit.gui.KeyEvent;
 
 public class PolygonClippingKeyboardInteractionTechniques
@@ -30,6 +33,11 @@ public class PolygonClippingKeyboardInteractionTechniques
             break;
           case KeyEvent.KEY_2:
             model.stepTest(1);
+            actions.rebuildScene();
+            handled = true;
+            break;
+          case KeyEvent.KEY_3:
+            model.cycleOperation();
             actions.rebuildScene();
             handled = true;
             break;
