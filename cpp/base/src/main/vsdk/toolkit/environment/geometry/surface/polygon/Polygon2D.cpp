@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
 #include "java/util/ArrayList.txx"
 
 Polygon2D::Polygon2D() : currentLoop(nullptr), headNode(nullptr) { nextLoop(); }
@@ -40,6 +41,7 @@ void Polygon2D::eraseLastLoop()
         loops.remove(loops.size() - 1);
         currentLoop = loops[loops.size() - 1];
     }
+    PolygonProcessor::classifyContourHoles(this);
 }
 
 void Polygon2D::invert()

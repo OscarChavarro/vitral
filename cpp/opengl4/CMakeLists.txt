@@ -17,6 +17,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.cpp
 )

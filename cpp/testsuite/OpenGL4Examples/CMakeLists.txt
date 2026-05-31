@@ -1,4 +1,5 @@
 add_subdirectory(CameraExample)
 add_subdirectory(ImageExample)
 add_subdirectory(MeshExample)
+add_subdirectory(PolygonClippingExample)
 add_subdirectory(ShadersExample)

@@ -165,8 +165,10 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         Bounds2D bounds = calculateBounds();
         double panelWidth = Math.max(6.0, bounds.width());
         double panelDepth = Math.max(6.0, bounds.height());
-        RendererConfiguration polygonQuality = model.getQuality();
-        polygonQuality.setSurfaces(model.isShowFilledPolygons());
+        RendererConfiguration polygonQuality = new RendererConfiguration();
+        polygonQuality.clone(model.getQuality());
+        polygonQuality.setSurfaces(
+            polygonQuality.isSurfacesSet() && model.isShowFilledPolygons());
 
         if ( model.isShowClipPolygon() ) {
             drawPolygonWA(gl, projection, model.getClipPolygonWA(), 0.20f, 0.75f, 0.25f, 0.70f, 0.20f, 0.0f, 0.0f);

@@ -84,7 +84,7 @@ public class JoglPolygonClippingHudRenderer
             + countLoops(model.getOuterPolygon());
         String intersectionsMessage = "Intersections: "
             + PolygonClippingModelingTools.countPairedVertices(model.getSubjectPolygonWA());
-        String utilityMessage = "Fullscreen [F]  Snapshot [H]";
+        String utilityMessage = "Fullscreen [F]  Snapshot [H]  Quality [F1/F2/F3]";
 
         Graphics2D g = bufferedHud.createGraphics();
         g.setRenderingHint(
