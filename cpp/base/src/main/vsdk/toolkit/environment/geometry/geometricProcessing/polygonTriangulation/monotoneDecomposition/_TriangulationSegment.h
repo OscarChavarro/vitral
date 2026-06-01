@@ -1,0 +1,18 @@
+#ifndef __SEGMENT__
+#define __SEGMENT__
+
+#include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
+#include "_TriangulationTrapezoidQueryNode.h"
+
+class _TriangulationSegment {
+  public:
+    Vector2Dd startPoint;
+    Vector2Dd endPoint;
+    bool hasBeenInserted;
+    _TriangulationTrapezoidQueryNode *startPointQueryNode;
+    _TriangulationTrapezoidQueryNode *endPointQueryNode;
+    int nextSegmentIndex;
+    int previousSegmentIndex;
+};
+
+#endif
