@@ -8,9 +8,11 @@
 #include "java/lang/String.h"
 
 class Vector2Dd {
-    double x_;
-    double y_;
+public:
+    double x;
+    double y;
 
+private:
     static unsigned int hashDouble(double val) {
         unsigned char bytes[sizeof(double)];
         memcpy(bytes, &val, sizeof(double));
@@ -21,32 +23,30 @@ class Vector2Dd {
     }
 
 public:
-    Vector2Dd() : x_(0.0), y_(0.0) {}
-    Vector2Dd(double x, double y) : x_(x), y_(y) {}
-    Vector2Dd(const Vector2Dd& other) : x_(other.x_), y_(other.y_) {}
+    Vector2Dd() : x(0.0), y(0.0) {}
+    Vector2Dd(double x, double y) : x(x), y(y) {}
+    Vector2Dd(const Vector2Dd& other) : x(other.x), y(other.y) {}
 
     static Vector2Dd copyOf(const Vector2Dd& other) { return Vector2Dd(other); }
 
-    Vector2Dd multiply(double a) const { return Vector2Dd(a * x_, a * y_); }
-    double length() const { return std::sqrt(x_ * x_ + y_ * y_); }
-    Vector2Dd add(const Vector2Dd& b) const { return Vector2Dd(x_ + b.x_, y_ + b.y_); }
+    Vector2Dd multiply(double a) const { return Vector2Dd(a * x, a * y); }
+    double length() const { return std::sqrt(x * x + y * y); }
+    Vector2Dd add(const Vector2Dd& b) const { return Vector2Dd(x + b.x, y + b.y); }
 
-    Vector2Dd withX(double nx) const { return Vector2Dd(nx, y_); }
-    Vector2Dd withY(double ny) const { return Vector2Dd(x_, ny); }
-    double x() const { return x_; }
-    double y() const { return y_; }
+    Vector2Dd withX(double nx) const { return Vector2Dd(nx, y); }
+    Vector2Dd withY(double ny) const { return Vector2Dd(x, ny); }
 
     bool epsilonEquals(const Vector2Dd& other) const { return epsilonEquals(other, 1e-6); }
     bool epsilonEquals(const Vector2Dd& other, double epsilon) const {
         if ( epsilon < 0.0 ) throw std::invalid_argument("epsilon must be >= 0");
-        return std::abs(x_ - other.x_) <= epsilon && std::abs(y_ - other.y_) <= epsilon;
+        return std::abs(x - other.x) <= epsilon && std::abs(y - other.y) <= epsilon;
     }
 
-    bool operator==(const Vector2Dd& other) const { return x_ == other.x_ && y_ == other.y_; }
+    bool operator==(const Vector2Dd& other) const { return x == other.x && y == other.y; }
     bool equals(const Vector2Dd& other) const { return (*this) == other; }
     int hashCode() const {
-        unsigned int result = hashDouble(x_);
-        result = 31u * result + hashDouble(y_);
+        unsigned int result = hashDouble(x);
+        result = 31u * result + hashDouble(y);
         return (int)result;
     }
     java::String* toString() const;

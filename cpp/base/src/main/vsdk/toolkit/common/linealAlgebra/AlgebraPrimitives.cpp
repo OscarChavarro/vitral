@@ -12,7 +12,7 @@
 #include <cmath>
 #include <cstdio>
 
-Vector2Df::Vector2Df(const Vector2Dd& other) : x_((float)other.x()), y_((float)other.y()) {}
+Vector2Df::Vector2Df(const Vector2Dd& other) : x_((float)other.x), y_((float)other.y) {}
 
 Vector3Dd Vector3Dd::crossProduct(const Vector3Dd& other) const
 {
@@ -158,7 +158,7 @@ bool Quaternionf::epsilonEquals(const Quaternionf& other, float epsilon) const
 
 java::String* Vector2Dd::toString() const
 {
-    return new java::String(("<" + VSDK::formatDouble(x_) + ", " + VSDK::formatDouble(y_) + ">").c_str());
+    return new java::String(("<" + VSDK::formatDouble(x) + ", " + VSDK::formatDouble(y) + ">").c_str());
 }
 
 float* Vector3Dd::exportToFloatArrayVector() const
