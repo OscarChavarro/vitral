@@ -7,17 +7,12 @@ import java.nio.file.Path;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
-import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLException;
 
 // VSDK classes
-import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import java.nio.file.Files;
@@ -32,46 +27,50 @@ public class PbufferExample implements GLEventListener {
     private static final int IMAGE_HEIGHT = 240;
 
     private GLOffscreenAutoDrawable pbuffer;
+    private final EGLContextBuilder contextBuilder;
     private int shaderProgramId;
     private int vertexArrayId;
     private int vertexBufferId;
     private boolean done;
 
     public PbufferExample() {
+        contextBuilder = new EGLContextBuilder(isHeadlessEnvironment());
         createElements();
     }
 
     private void createElements() throws GLException
     {
-        GLProfile profile = GLProfile.get(GLProfile.GL4);
+        reportBackendConfiguration();
 
-        GLCapabilities pbCaps = new GLCapabilities(profile);
-        pbCaps.setDoubleBuffered(false);
-
-        try {
-            GLDrawableFactory creator = GLDrawableFactory.getFactory(profile);
-            pbuffer = creator.createOffscreenAutoDrawable(
-                null, pbCaps, null, IMAGE_WIDTH, IMAGE_HEIGHT);
-        }
-        catch ( Exception e ) {
-            Logger.reportMessageWithException(
-                this,
-                VSDK.FATAL_ERROR,
-                "PbufferExample.createElements",
-                "Error creating OpenGL Pbuffer. This program requires a 3D "
-                    + "accelerator card.",
-                e);
-            return;
-        }
-
+        pbuffer = contextBuilder.createDrawable(IMAGE_WIDTH, IMAGE_HEIGHT);
         pbuffer.addGLEventListener(this);
         pbuffer.display();
+    }
+
+    private void reportBackendConfiguration()
+    {
+        System.out.println("Offscreen rendering enabled: "
+            + contextBuilder.isOffscreenRenderingEnbled());
+        System.out.println("GPU enabled: " + contextBuilder.isGPUEnabled());
+        System.out.println("Renderer backend: "
+            + contextBuilder.getRendererBackendName());
+    }
+
+    private static boolean isHeadlessEnvironment()
+    {
+        String display = System.getenv("DISPLAY");
+        String waylandDisplay = System.getenv("WAYLAND_DISPLAY");
+        return (display == null || display.isBlank())
+            && (waylandDisplay == null || waylandDisplay.isBlank());
     }
 
     @Override
     public void init(GLAutoDrawable drawable)
     {
         GL4 gl = drawable.getGL().getGL4();
+
+        System.out.println("GL_VENDOR: " + gl.glGetString(GL.GL_VENDOR));
+        System.out.println("GL_RENDERER: " + gl.glGetString(GL.GL_RENDERER));
 
         checkOpenGLVersion(gl);
         shaderProgramId = createShaderProgram(gl);
