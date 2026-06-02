@@ -32,6 +32,7 @@ public class PolygonClippingDebuggerModel
 
     private int testIndex;
     private PolygonClippingOperation operation;
+    private PolygonSurfaceTessellationMode polygonSurfaceTessellationMode;
     private boolean showReferenceFrame;
     private boolean showClipPolygon;
     private boolean showSubjectPolygon;
@@ -74,6 +75,7 @@ public class PolygonClippingDebuggerModel
 
         testIndex = 0;
         operation = PolygonClippingOperation.INTERSECTION;
+        polygonSurfaceTessellationMode = PolygonSurfaceTessellationMode.GLU;
         showReferenceFrame = true;
         showClipPolygon = true;
         showSubjectPolygon = true;
@@ -114,6 +116,11 @@ public class PolygonClippingDebuggerModel
     public void cycleOperation()
     {
         operation = operation.next();
+    }
+
+    public void cyclePolygonSurfaceTessellationMode()
+    {
+        polygonSurfaceTessellationMode = polygonSurfaceTessellationMode.next();
     }
 
     public void clearErrorState()
@@ -257,6 +264,16 @@ public class PolygonClippingDebuggerModel
     public void setOperation(PolygonClippingOperation operation)
     {
         this.operation = operation;
+    }
+
+    public PolygonSurfaceTessellationMode getPolygonSurfaceTessellationMode()
+    {
+        return polygonSurfaceTessellationMode;
+    }
+
+    public void setPolygonSurfaceTessellationMode(PolygonSurfaceTessellationMode polygonSurfaceTessellationMode)
+    {
+        this.polygonSurfaceTessellationMode = polygonSurfaceTessellationMode;
     }
 
     public boolean isShowReferenceFrame()

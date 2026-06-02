@@ -62,7 +62,7 @@ public class JoglPolygonClippingHudRenderer
         int height = viewportHeight > 0 ? viewportHeight : viewport[3];
         int hudHeight = Math.min(
             Math.max(1, height),
-            HUD_TOP_PADDING + (5 * LINE_HEIGHT) + HUD_BOTTOM_PADDING);
+            HUD_TOP_PADDING + (6 * LINE_HEIGHT) + HUD_BOTTOM_PADDING);
         ensureHudBuffers(Math.max(1, width), hudHeight);
 
         PolygonClippingTestCase testCase = model.getCurrentTestCase();
@@ -71,6 +71,8 @@ public class JoglPolygonClippingHudRenderer
             + " (" + (model.getTestIndex() + 1) + "/" + model.getTotalTestCases() + ")";
         String operationMessage = "Operation [3]: "
             + model.getOperation().getDisplayName();
+        String tessellationMessage = "Surface tessellation [T]: "
+            + model.getPolygonSurfaceTessellationMode().getDisplayName();
         String sourcesMessage = "Clip [C]: " + onOff(model.isShowClipPolygon())
             + "  Subject [S]: " + onOff(model.isShowSubjectPolygon())
             + "  Points [P]: " + onOff(model.isShowIntersections());
@@ -97,9 +99,10 @@ public class JoglPolygonClippingHudRenderer
 
         g.drawString(testMessage, 16, HUD_TOP_PADDING);
         g.drawString(operationMessage, 16, HUD_TOP_PADDING + LINE_HEIGHT);
-        g.drawString(sourcesMessage, 16, HUD_TOP_PADDING + 2 * LINE_HEIGHT);
-        g.drawString(outputsMessage, 16, HUD_TOP_PADDING + 3 * LINE_HEIGHT);
-        g.drawString(referenceFrameMessage, 16, HUD_TOP_PADDING + 4 * LINE_HEIGHT);
+        g.drawString(tessellationMessage, 16, HUD_TOP_PADDING + 2 * LINE_HEIGHT);
+        g.drawString(sourcesMessage, 16, HUD_TOP_PADDING + 3 * LINE_HEIGHT);
+        g.drawString(outputsMessage, 16, HUD_TOP_PADDING + 4 * LINE_HEIGHT);
+        g.drawString(referenceFrameMessage, 16, HUD_TOP_PADDING + 5 * LINE_HEIGHT);
 
         drawTopRight(g, width, countsMessage, HUD_TOP_PADDING);
         drawTopRight(g, width, intersectionsMessage, HUD_TOP_PADDING + LINE_HEIGHT);
@@ -174,10 +177,10 @@ public class JoglPolygonClippingHudRenderer
         if ( model.getOperation() == PolygonClippingOperation.INTERSECTION ) {
             return "Inner [I]: " + onOff(model.isShowInnerPolygon())
                 + "  Outer [O]: " + onOff(model.isShowOuterPolygon())
-                + "  Fill [T]: " + onOff(model.isShowFilledPolygons());
+                + "  Fill [G]: " + onOff(model.isShowFilledPolygons());
         }
         return "Result [I]: " + onOff(model.isShowInnerPolygon())
             + "  Secondary [O]: " + onOff(model.isShowOuterPolygon())
-            + "  Fill [T]: " + onOff(model.isShowFilledPolygons());
+            + "  Fill [G]: " + onOff(model.isShowFilledPolygons());
     }
 }

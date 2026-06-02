@@ -71,6 +71,11 @@ public class PolygonClippingKeyboardInteractionTechniques
             handledLetterShortcut = true;
             break;
           case KeyEvent.KEY_t, KeyEvent.KEY_T:
+            model.cyclePolygonSurfaceTessellationMode();
+            handled = true;
+            handledLetterShortcut = true;
+            break;
+          case KeyEvent.KEY_g, KeyEvent.KEY_G:
             model.setShowFilledPolygons(!model.isShowFilledPolygons());
             handled = true;
             handledLetterShortcut = true;

@@ -13,6 +13,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import model.PolygonClippingDebuggerModel;
+import model.PolygonSurfaceTessellationMode;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -34,6 +35,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
 {
     private final PolygonClippingDebuggerModel model;
     private final JoglPolygonClippingHudRenderer hudRenderer;
+    private final JoglTriangularRenderer triangularRenderer;
 
     private int lineProgramId;
     private int constantProgramId;
@@ -45,6 +47,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
     {
         this.model = model;
         this.hudRenderer = new JoglPolygonClippingHudRenderer(model);
+        this.triangularRenderer = new JoglTriangularRenderer(model);
     }
 
     @Override
@@ -69,6 +72,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         colorVboId = tmp[0];
 
         hudRenderer.init(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+        triangularRenderer.init(drawable);
     }
 
     @Override
@@ -103,6 +107,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
 
         Jogl4CameraRenderer.dispose(gl);
         hudRenderer.dispose(gl);
+        triangularRenderer.dispose(gl);
     }
 
     @Override
@@ -115,7 +120,13 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
         Matrix4x4d projection = Jogl4CameraRenderer.activate(gl, model.getCamera());
-        drawObjects(gl, projection);
+        if ( model.getPolygonSurfaceTessellationMode()
+             == PolygonSurfaceTessellationMode.MONOTONE_DECOMPOSITION ) {
+            triangularRenderer.draw(gl, projection);
+        }
+        else {
+            drawObjects(gl, projection);
+        }
 
         int[] viewport = new int[4];
         gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
