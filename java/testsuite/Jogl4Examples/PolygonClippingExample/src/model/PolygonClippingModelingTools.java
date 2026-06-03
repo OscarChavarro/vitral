@@ -1,5 +1,11 @@
 package model;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
@@ -12,6 +18,7 @@ import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._Ver
 public class PolygonClippingModelingTools
 {
     private static final double CLIP_Y_OFFSET = -1.0;
+    private static final String POLYGONS_PATH = "../../../../etc/polygons/";
 
     public static void rebuildScene(PolygonClippingDebuggerModel model)
     {
@@ -21,8 +28,14 @@ public class PolygonClippingModelingTools
         Polygon2D secondaryResult = new Polygon2D();
         Polygon2D scratch = new Polygon2D();
 
-        model.setClipPolygon(buildPolygon(testCase.clipLoops(), CLIP_Y_OFFSET));
-        model.setSubjectPolygon(buildPolygon(testCase.subjectLoops(), 0.0));
+        try {
+            model.setClipPolygon(buildPolygon(testCase.clipFile(), CLIP_Y_OFFSET));
+            model.setSubjectPolygon(buildPolygon(testCase.subjectFile(), 0.0));
+        }
+        catch ( IOException e ) {
+            model.setErrorState("Failed to load polygon file: " + e.getMessage());
+            return;
+        }
         model.setInnerPolygon(operationResult);
         model.setOuterPolygon(secondaryResult);
 
@@ -112,21 +125,34 @@ public class PolygonClippingModelingTools
         return paired / 2;
     }
 
-    private static Polygon2D buildPolygon(double[][] loops, double yOffset)
+    private static Polygon2D buildPolygon(String filename, double yOffset) throws IOException
     {
-        Polygon2D polygon = null;
-        int i;
-        int j;
+        List<String> lines = Files.readAllLines(Path.of(POLYGONS_PATH + filename));
+        List<String> tokens = new ArrayList<>();
+        for ( String line : lines ) {
+            String trimmed = line.trim();
+            if ( trimmed.isEmpty() ) continue;
+            for ( String t : trimmed.split("\\s+") ) {
+                if ( !t.isEmpty() ) tokens.add(t);
+            }
+        }
 
-        for ( i = 0; i < loops.length; i++ ) {
+        int idx = 0;
+        int numberOfContours = Integer.parseInt(tokens.get(idx++));
+        Polygon2D polygon = null;
+
+        for ( int c = 0; c < numberOfContours; c++ ) {
             if ( polygon == null ) {
                 polygon = new Polygon2D();
             }
             else {
                 polygon.nextLoop();
             }
-            for ( j = 0; j < loops[i].length / 2; j++ ) {
-                polygon.addVertex(loops[i][j * 2], loops[i][j * 2 + 1] + yOffset);
+            int numberOfPoints = Integer.parseInt(tokens.get(idx++));
+            for ( int i = 0; i < numberOfPoints; i++ ) {
+                double x = Double.parseDouble(tokens.get(idx++));
+                double y = Double.parseDouble(tokens.get(idx++));
+                polygon.addVertex(x, y + yOffset);
             }
         }
         return polygon;

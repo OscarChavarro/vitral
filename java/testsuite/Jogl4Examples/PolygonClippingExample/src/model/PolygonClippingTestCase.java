@@ -1,8 +1,5 @@
 package model;
 
-public record PolygonClippingTestCase(
-    String name,
-    double[][] clipLoops,
-    double[][] subjectLoops)
+public record PolygonClippingTestCase(String name, String clipFile, String subjectFile)
 {
 }
