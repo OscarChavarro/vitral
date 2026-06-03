@@ -1,9 +1,10 @@
 #ifndef __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
 #define __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
 
+#include <vector>
+
 #include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-#include "java/util/ArrayList.h"
 
 class Image;
 class RGBPixel;
@@ -17,11 +18,27 @@ public:
     static void fillSmoothPolygon(Image* img, Polygon2D& p);
 
 private:
-    static void fillPolygonProcessLine(
-        const Vertex2D& va,
-        const Vertex2D& vb,
-        double h,
-        java::ArrayList<double>& spanBuffer);
+    struct FillEdge {
+        int yMin;
+        int yMaxExclusive;
+        double xAtCurrentY;
+        double inverseSlope;
+        int sortOrder;
+    };
+
+    class SpanShader {
+    public:
+        virtual ~SpanShader() {}
+        virtual void shade(Image* img, Polygon2D& polygon, int y, int xStart,
+            int xEndExclusive) = 0;
+    };
+
+    static int clamp(int value, int minValue, int maxValue);
+    static void addFillEdge(std::vector<std::vector<FillEdge> >& buckets,
+        const Vertex2D& a, const Vertex2D& b, int imageHeight, int yRange[2],
+        int sortOrder);
+    static void rasterizePolygonSpans(Image* img, Polygon2D& polygon,
+        SpanShader& shader);
     static void fillSmoothPolygonCalculateColor(
         Polygon2D& p,
         double x,

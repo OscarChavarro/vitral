@@ -96,6 +96,9 @@ public class ArrayListOfDoubles extends FundamentalEntity {
     Quicksort
     */
     public void sort() {
+        if ( mysize < 2 ) {
+            return;
+        }
         quicksort(array, 0, mysize-1);
     }
 

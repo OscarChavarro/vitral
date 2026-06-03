@@ -6,8 +6,12 @@
 
 package vsdk.toolkit.render;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.Image;
@@ -16,6 +20,40 @@ import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 
 public class Rasterizer2D extends RenderingElement
 {
+    private static final class FillEdge
+    {
+        int yMin;
+        int yMaxExclusive;
+        double xAtCurrentY;
+        double inverseSlope;
+        int sortOrder;
+    }
+
+    private interface SpanShader
+    {
+        void shade(Image img, Polygon2D polygon, int y, int xStart,
+            int xEndExclusive);
+    }
+
+    private static final Comparator<FillEdge> ACTIVE_EDGE_COMPARATOR =
+        new Comparator<FillEdge>() {
+            @Override
+            public int compare(FillEdge a, FillEdge b)
+            {
+                int cmp = Double.compare(a.xAtCurrentY, b.xAtCurrentY);
+                if ( cmp != 0 ) {
+                    return cmp;
+                }
+
+                cmp = Double.compare(a.inverseSlope, b.inverseSlope);
+                if ( cmp != 0 ) {
+                    return cmp;
+                }
+
+                return Integer.compare(a.sortOrder, b.sortOrder);
+            }
+        };
+
     /**
     This algorithm implements the Bresenham line algoritm with NO CLIPPING!
     See [BRES1965].
@@ -89,86 +127,179 @@ public class Rasterizer2D extends RenderingElement
     */
     public static void drawPolygon(Image img, Polygon2D p, RGBPixel color)
     {
-        _Polygon2DContour l;
         Vertex2D va;
         Vertex2D vb = null;
         int i;
         int j;
 
         for ( i = 0; i < p.loops.size(); i++ ) {
-            for ( j = 0; j < p.loops.get(i).vertices.size() - 1; j++ ) {
-                va = p.loops.get(i).vertices.get(j);
-                vb = p.loops.get(i).vertices.get(j + 1);
+            _Polygon2DContour contour = p.loops.get(i);
+            if ( contour.vertices.size() < 2 ) {
+                continue;
+            }
+            for ( j = 0; j < contour.vertices.size() - 1; j++ ) {
+                va = contour.vertices.get(j);
+                vb = contour.vertices.get(j + 1);
                 drawLine(img, (int)va.x, (int)va.y,
                               (int)vb.x, (int)vb.y, color);
             }
             va = vb;
-            vb = p.loops.get(i).vertices.get(0);
+            vb = contour.vertices.get(0);
             drawLine(img, (int)va.x, (int)va.y,
                           (int)vb.x, (int)vb.y, color);
         }
     }
 
-    private static void fillPolygonProcessLine(Vertex2D va, Vertex2D vb,
-        double h,
-        ArrayListOfDoubles spanBuffer)
+    private static int clamp(int value, int minValue, int maxValue)
     {
-        //-----------------------------------------------------------------
-        double dx;
-        double dy;
-        double dxdy;
-        double dydx;
-        double b;
-        double x;
+        if ( value < minValue ) {
+            return minValue;
+        }
+        if ( value > maxValue ) {
+            return maxValue;
+        }
+        return value;
+    }
 
-        dx = vb.x - va.x;
-        dy = vb.y - va.y;
+    private static void addFillEdge(List<List<FillEdge>> buckets,
+        Vertex2D a, Vertex2D b, int imageHeight, int[] yRange, int sortOrder)
+    {
+        double dx = b.x - a.x;
+        double dy = b.y - a.y;
 
-        if ( Math.abs(dx) > VSDK.EPSILON && 
-             Math.abs(dy/dx) <= 1 + VSDK.EPSILON ) {
-            // Slop between -1 and 1
-            dydx = dy/dx;
-            b = va.y - dydx*va.x;
+        if ( Math.abs(dx) < VSDK.EPSILON && Math.abs(dy) < VSDK.EPSILON ) {
+            return;
+        }
+        if ( Math.abs(dy) < VSDK.EPSILON ) {
+            return;
+        }
 
-            if ( Math.abs(dydx) < VSDK.EPSILON ) {
-                // Horizontal line case
-                if ( Math.abs(va.y - h) <= 0.5 ) {
-                    // Horizontal line is at "h" height
-                    spanBuffer.add(va.x);
-                    spanBuffer.add(vb.x);
-                }
+        Vertex2D top = a;
+        Vertex2D bottom = b;
+        if ( a.y > b.y ) {
+            top = b;
+            bottom = a;
+            dx = -dx;
+            dy = -dy;
+        }
+
+        double inverseSlope = dx / dy;
+        int yMin = (int)Math.ceil(top.y);
+        int yMaxExclusive = (int)Math.ceil(bottom.y);
+
+        if ( yMin >= yMaxExclusive ) {
+            return;
+        }
+
+        int clippedYMin = clamp(yMin, 0, imageHeight);
+        int clippedYMaxExclusive = clamp(yMaxExclusive, 0, imageHeight);
+
+        if ( clippedYMin >= clippedYMaxExclusive ) {
+            return;
+        }
+
+        FillEdge edge = new FillEdge();
+        edge.yMin = clippedYMin;
+        edge.yMaxExclusive = clippedYMaxExclusive;
+        edge.inverseSlope = inverseSlope;
+        edge.xAtCurrentY = top.x + (((double)clippedYMin) - top.y) * inverseSlope;
+        edge.sortOrder = sortOrder;
+
+        buckets.get(clippedYMin).add(edge);
+        yRange[0] = Math.min(yRange[0], clippedYMin);
+        yRange[1] = Math.max(yRange[1], clippedYMaxExclusive);
+    }
+
+    private static void rasterizePolygonSpans(Image img, Polygon2D polygon,
+        SpanShader shader)
+    {
+        int imageWidth = img.getXSize();
+        int imageHeight = img.getYSize();
+
+        if ( imageWidth <= 0 || imageHeight <= 0 ) {
+            return;
+        }
+
+        List<List<FillEdge>> buckets = new ArrayList<List<FillEdge>>(imageHeight);
+        int y;
+        for ( y = 0; y < imageHeight; y++ ) {
+            buckets.add(new ArrayList<FillEdge>());
+        }
+
+        int[] yRange = {imageHeight, 0};
+        int sortOrder = 0;
+        int i;
+        int j;
+
+        for ( i = 0; i < polygon.loops.size(); i++ ) {
+            _Polygon2DContour contour = polygon.loops.get(i);
+            int vertexCount = contour.vertices.size();
+            if ( vertexCount < 2 ) {
+                continue;
             }
-            else {
-                // Non-horizontal line with slope between -1 and 1
-                x = (h - b) / dydx;
-                if ( (va.y <= h && vb.y >= h) ||
-                     (va.y >= h && vb.y <= h) ) {
-                    spanBuffer.add(x);
-                }
+
+            for ( j = 0; j < vertexCount; j++ ) {
+                Vertex2D a = contour.vertices.get(j);
+                Vertex2D b = contour.vertices.get((j + 1) % vertexCount);
+                addFillEdge(buckets, a, b, imageHeight, yRange, sortOrder);
+                sortOrder++;
             }
         }
 
-        if ( Math.abs(dy) > VSDK.EPSILON && 
-             Math.abs(dx/dy) <= 1 ) {
-            // Slop between -1 and 1 with respect to y
-            dxdy = dx/dy;
-            b = va.x - dxdy*va.y;
+        if ( yRange[0] >= yRange[1] ) {
+            return;
+        }
 
-            if ( Math.abs(dxdy) < VSDK.EPSILON ) {
-                // Vertical line case
-                if ( (va.y <= h && vb.y >= h) ||
-                     (va.y >= h && vb.y <= h)  ) {
-                    // Horizontal line is at "h" height
-                    spanBuffer.add(va.x);
+        List<FillEdge> activeEdges = new ArrayList<FillEdge>();
+
+        for ( y = yRange[0]; y < yRange[1]; y++ ) {
+            List<FillEdge> bucket = buckets.get(y);
+            if ( !bucket.isEmpty() ) {
+                activeEdges.addAll(bucket);
+            }
+
+            for ( i = activeEdges.size() - 1; i >= 0; i-- ) {
+                if ( y >= activeEdges.get(i).yMaxExclusive ) {
+                    activeEdges.remove(i);
                 }
             }
-            else {
-                // Non-vertical line with slope between -1 and 1
-                x = dxdy*h + b;
-                if ( (va.y <= h && vb.y >= h) ||
-                     (va.y >= h && vb.y <= h) ) {
-                    spanBuffer.add(x);
+
+            if ( activeEdges.size() < 2 ) {
+                for ( i = 0; i < activeEdges.size(); i++ ) {
+                    activeEdges.get(i).xAtCurrentY += activeEdges.get(i).inverseSlope;
                 }
+                continue;
+            }
+
+            Collections.sort(activeEdges, ACTIVE_EDGE_COMPARATOR);
+
+            for ( i = 0; i + 1 < activeEdges.size(); i += 2 ) {
+                double xLeft = activeEdges.get(i).xAtCurrentY;
+                double xRight = activeEdges.get(i + 1).xAtCurrentY;
+
+                if ( xLeft > xRight ) {
+                    double tmp = xLeft;
+                    xLeft = xRight;
+                    xRight = tmp;
+                }
+
+                int xStart = (int)Math.ceil(xLeft);
+                int xEndExclusive = (int)Math.ceil(xRight);
+
+                if ( xEndExclusive <= 0 || xStart >= imageWidth ) {
+                    continue;
+                }
+
+                xStart = clamp(xStart, 0, imageWidth);
+                xEndExclusive = clamp(xEndExclusive, 0, imageWidth);
+
+                if ( xStart < xEndExclusive ) {
+                    shader.shade(img, polygon, y, xStart, xEndExclusive);
+                }
+            }
+
+            for ( i = 0; i < activeEdges.size(); i++ ) {
+                activeEdges.get(i).xAtCurrentY += activeEdges.get(i).inverseSlope;
             }
         }
     }
@@ -186,97 +317,19 @@ public class Rasterizer2D extends RenderingElement
     mid-point algoritms for intersection finding, or "active edge tables"
     (AETs) for efficient edge-coherence based traversals.
     */
-    public static void fillPolygon(Image img, Polygon2D p, RGBPixel color)
+    public static void fillPolygon(Image img, Polygon2D p, final RGBPixel color)
     {
-        int x;
-        int y;
-        _Polygon2DContour l;
-        Vertex2D va;
-        Vertex2D vb = null;
-        int i;
-        int j;
-
-        //- Calculate polygon's min-max (keep clipping border) ------------
-        int minx = img.getXSize();
-        int miny = img.getYSize();
-        int maxx = 0;
-        int maxy = 0;
-
-        for ( i = 0; i < p.loops.size(); i++ ) {
-            for ( j = 0; j < p.loops.get(i).vertices.size(); j++ ) {
-                va = p.loops.get(i).vertices.get(j);
-                if ( va.x < minx && va.x >= 0 ) {
-                    minx = (int)va.x;
-                }
-                if ( va.x > maxx && va.x < img.getXSize() ) {
-                    maxx = (int)va.x;
-                }
-                if ( va.y < miny && va.y >= 0 ) {
-                    miny = (int)va.y;
-                }
-                if ( va.y > maxy && va.y < img.getYSize() ) {
-                    maxy = (int)va.y;
+        rasterizePolygonSpans(img, p, new SpanShader() {
+            @Override
+            public void shade(Image image, Polygon2D polygon, int y, int xStart,
+                int xEndExclusive)
+            {
+                int x;
+                for ( x = xStart; x < xEndExclusive; x++ ) {
+                    image.putPixelRgb(x, y, color);
                 }
             }
-        }
-
-        //- Build spanbuffer (for each span) ------------------------------
-        ArrayListOfDoubles spanBuffer;
-        double h;
-
-        for ( y = miny; y <= maxy; y++ ) {
-            //-------------------------------------------------------------
-            h = y;
-            spanBuffer = new ArrayListOfDoubles(p.loops.size());
-
-            //- Brute force - analytical search of scan line intersections 
-            for ( i = 0; i < p.loops.size(); i++ ) {
-                for ( j = 0; j < p.loops.get(i).vertices.size() - 1; j++ ) {
-                    va = p.loops.get(i).vertices.get(j);
-                    vb = p.loops.get(i).vertices.get(j + 1);
-                    fillPolygonProcessLine(va, vb, h, spanBuffer);
-                }
-                va = vb;
-                vb = p.loops.get(i).vertices.get(0);
-                fillPolygonProcessLine(va, vb, h, spanBuffer);
-            }
-
-            //-------------------------------------------------------------
-            int s;
-
-            //- X-order quick sort of span line intersections distances ---
-            spanBuffer.sort();
-
-            //- Scan convert current span ---------------------------------
-            double xs1, xs2;
-            boolean state = false;
-
-            for ( s = 0; s < spanBuffer.size()-1; s++ ) {
-                xs1 = spanBuffer.get(s);
-                xs2 = spanBuffer.get(s+1);
-                state = state?false:true;
-
-                // Clipping...
-                if ( xs2 < minx || xs1 > maxx ) {
-                    continue;
-                }
-                else if ( xs2 < minx ) {
-                    xs2 = minx;
-                }
-                if ( xs2 > maxx ) {
-                    xs2 = maxx;
-                }
-
-                // Draw from xs1 to xs2 if "interior" state flagged
-                for ( x = (int)xs1; state == true && x < (int)xs2; x++ ) {
-                    img.putPixelRgb(x, y, color);
-                }
-            }
-
-            //-------------------------------------------------------------
-            //spanBuffer.reset();
-            //spanBuffer = null;
-        }
+        });
     }
 
     /**
@@ -291,7 +344,6 @@ public class Rasterizer2D extends RenderingElement
         RGBPixel outPixel)
     {
         Vertex2D va;
-        Vertex2D vb = null;
         int i;
         int j;
         double distance;
@@ -343,100 +395,19 @@ public class Rasterizer2D extends RenderingElement
     */
     public static void fillSmoothPolygon(Image img, Polygon2D p)
     {
-        int x;
-        int y;
-        _Polygon2DContour l;
-        Vertex2D va;
-        Vertex2D vb = null;
-        int i;
-        int j;
-
-        //- Calculate polygon's min-max (keep clipping border) ------------
-        int minx = img.getXSize();
-        int miny = img.getYSize();
-        int maxx = 0;
-        int maxy = 0;
-
-        for ( i = 0; i < p.loops.size(); i++ ) {
-            for ( j = 0; j < p.loops.get(i).vertices.size(); j++ ) {
-                va = p.loops.get(i).vertices.get(j);
-                if ( va.x < minx && va.x >= 0 ) {
-                    minx = (int)va.x;
-                }
-                if ( va.x > maxx && va.x < img.getXSize() ) {
-                    maxx = (int)va.x;
-                }
-                if ( va.y < miny && va.y >= 0 ) {
-                    miny = (int)va.y;
-                }
-                if ( va.y > maxy && va.y < img.getYSize() ) {
-                    maxy = (int)va.y;
-                }
-            }
-        }
-
-        //- Build spanbuffer (for each span) ------------------------------
-        ArrayListOfDoubles spanBuffer;
-        double h;
-
-        for ( y = miny; y <= maxy; y++ ) {
-            //-------------------------------------------------------------
-            h = y;
-            spanBuffer = new ArrayListOfDoubles(p.loops.size());
-
-            //- Brute force - analytical search of scan line intersections 
-            for ( i = 0; i < p.loops.size(); i++ ) {
-                for ( j = 0; j < p.loops.get(i).vertices.size() - 1; j++ ) {
-                    va = p.loops.get(i).vertices.get(j);
-                    vb = p.loops.get(i).vertices.get(j + 1);
-                    fillPolygonProcessLine(va, vb, h, spanBuffer);
-                }
-                va = vb;
-                vb = p.loops.get(i).vertices.get(0);
-                fillPolygonProcessLine(va, vb, h, spanBuffer);
-            }
-
-            //-------------------------------------------------------------
-            int s;
-
-            //- X-order quick sort of span line intersections distances ---
-            spanBuffer.sort();
-
-            //- Scan convert current span ---------------------------------
-            double xs1, xs2;
-            boolean state = false;
-
-            for ( s = 0; s < spanBuffer.size()-1; s++ ) {
-                xs1 = spanBuffer.get(s);
-                xs2 = spanBuffer.get(s+1);
-                state = state?false:true;
-
-                // Clipping...
-                if ( xs2 < minx || xs1 > maxx ) {
-                    continue;
-                }
-                else if ( xs2 < minx ) {
-                    xs2 = minx;
-                }
-                if ( xs2 > maxx ) {
-                    xs2 = maxx;
-                }
-
-                // Draw from xs1 to xs2 if "interior" state flagged
+        rasterizePolygonSpans(img, p, new SpanShader() {
+            @Override
+            public void shade(Image image, Polygon2D polygon, int y, int xStart,
+                int xEndExclusive)
+            {
                 RGBPixel color = new RGBPixel();
-                for ( x = (int)xs1; state == true && x < (int)xs2; x++ ) {
-                    // Interpolate and convert in place to avoid ColorRgb temporary allocation.
-                    fillSmoothPolygonCalculateColor(p, x, y, color);
-
-                    // Write resulting pixel into image
-                    img.putPixelRgb(x, y, color);
+                int x;
+                for ( x = xStart; x < xEndExclusive; x++ ) {
+                    fillSmoothPolygonCalculateColor(polygon, x, y, color);
+                    image.putPixelRgb(x, y, color);
                 }
             }
-
-            //-------------------------------------------------------------
-            //spanBuffer.reset();
-            //spanBuffer = null;
-        }
+        });
     }
 
 }

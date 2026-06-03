@@ -8,6 +8,7 @@
 #include "java/util/ArrayList.txx"
 
 #include <java/lang/Math.h>
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -50,8 +51,8 @@ static void quicksortDoubles(double* array, int left0, int right0)
 
 static void sortDoubles(java::ArrayList<double>& arr)
 {
-    if (arr.size() <= 0) {
-        throw std::out_of_range("Cannot sort an empty span buffer");
+    if (arr.size() < 2) {
+        return;
     }
     quicksortDoubles(arr.data(), 0, static_cast<int>(arr.size()) - 1);
 }
@@ -114,59 +115,171 @@ void Rasterizer2D::drawPolygon(Image* img, Polygon2D& p, const RGBPixel& color)
 {
     if (img == 0) return;
     for (long int i = 0; i < p.loops.size(); i++) {
-        if (p.loops[i]->vertices.size() == 0) continue;
+        _Polygon2DContour* contour = p.loops[i];
+        if (contour->vertices.size() < 2) continue;
         Vertex2D va(0, 0), vb(0, 0);
-        for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
-            va = p.loops[i]->vertices[j];
-            vb = p.loops[i]->vertices[j + 1];
+        for (long int j = 0; j + 1 < contour->vertices.size(); j++) {
+            va = contour->vertices[j];
+            vb = contour->vertices[j + 1];
             drawLine(img, (int)va.x, (int)va.y, (int)vb.x, (int)vb.y, color);
         }
-        va = p.loops[i]->vertices[p.loops[i]->vertices.size() - 1];
-        vb = p.loops[i]->vertices[0];
+        va = vb;
+        vb = contour->vertices[0];
         drawLine(img, (int)va.x, (int)va.y, (int)vb.x, (int)vb.y, color);
     }
 }
 
-void Rasterizer2D::fillPolygonProcessLine(
-    const Vertex2D& va,
-    const Vertex2D& vb,
-    double h,
-    java::ArrayList<double>& spanBuffer)
+int Rasterizer2D::clamp(int value, int minValue, int maxValue)
 {
-    double dx = vb.x - va.x;
-    double dy = vb.y - va.y;
-    double b, x;
+    if (value < minValue) {
+        return minValue;
+    }
+    if (value > maxValue) {
+        return maxValue;
+    }
+    return value;
+}
 
-    if (std::abs(dx) > VSDK::EPSILON && std::abs(dy / dx) <= 1.0 + VSDK::EPSILON) {
-        double dydx = dy / dx;
-        b = va.y - dydx * va.x;
-        if (std::abs(dydx) < VSDK::EPSILON) {
-            if (std::abs(va.y - h) <= 0.5) {
-                spanBuffer.add(va.x);
-                spanBuffer.add(vb.x);
-            }
+void Rasterizer2D::addFillEdge(std::vector<std::vector<FillEdge> >& buckets,
+    const Vertex2D& a, const Vertex2D& b, int imageHeight, int yRange[2],
+    int sortOrder)
+{
+    double dx = b.x - a.x;
+    double dy = b.y - a.y;
+
+    if (std::abs(dx) < VSDK::EPSILON && std::abs(dy) < VSDK::EPSILON) {
+        return;
+    }
+    if (std::abs(dy) < VSDK::EPSILON) {
+        return;
+    }
+
+    const Vertex2D* top = &a;
+    const Vertex2D* bottom = &b;
+    if (a.y > b.y) {
+        top = &b;
+        bottom = &a;
+        dx = -dx;
+        dy = -dy;
+    }
+
+    double inverseSlope = dx / dy;
+    int yMin = (int)std::ceil(top->y);
+    int yMaxExclusive = (int)std::ceil(bottom->y);
+
+    if (yMin >= yMaxExclusive) {
+        return;
+    }
+
+    int clippedYMin = clamp(yMin, 0, imageHeight);
+    int clippedYMaxExclusive = clamp(yMaxExclusive, 0, imageHeight);
+
+    if (clippedYMin >= clippedYMaxExclusive) {
+        return;
+    }
+
+    FillEdge edge;
+    edge.yMin = clippedYMin;
+    edge.yMaxExclusive = clippedYMaxExclusive;
+    edge.inverseSlope = inverseSlope;
+    edge.xAtCurrentY = top->x + (((double)clippedYMin) - top->y) * inverseSlope;
+    edge.sortOrder = sortOrder;
+
+    buckets[clippedYMin].push_back(edge);
+    yRange[0] = std::min(yRange[0], clippedYMin);
+    yRange[1] = std::max(yRange[1], clippedYMaxExclusive);
+}
+
+void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
+    SpanShader& shader)
+{
+    int imageWidth = img->getXSize();
+    int imageHeight = img->getYSize();
+
+    if (imageWidth <= 0 || imageHeight <= 0) {
+        return;
+    }
+
+    std::vector<std::vector<FillEdge> > buckets(imageHeight);
+    int yRange[2] = {imageHeight, 0};
+    int sortOrder = 0;
+
+    for (long int i = 0; i < polygon.loops.size(); i++) {
+        _Polygon2DContour* contour = polygon.loops[i];
+        long int vertexCount = contour->vertices.size();
+        if (vertexCount < 2) {
+            continue;
         }
-        else {
-            x = (h - b) / dydx;
-            if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.add(x);
-            }
+
+        for (long int j = 0; j < vertexCount; j++) {
+            const Vertex2D& a = contour->vertices[j];
+            const Vertex2D& b = contour->vertices[(j + 1) % vertexCount];
+            addFillEdge(buckets, a, b, imageHeight, yRange, sortOrder);
+            sortOrder++;
         }
     }
 
-    if (std::abs(dy) > VSDK::EPSILON && std::abs(dx / dy) <= 1.0) {
-        double dxdy = dx / dy;
-        b = va.x - dxdy * va.y;
-        if (std::abs(dxdy) < VSDK::EPSILON) {
-            if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.add(va.x);
+    if (yRange[0] >= yRange[1]) {
+        return;
+    }
+
+    std::vector<FillEdge> activeEdges;
+
+    for (int y = yRange[0]; y < yRange[1]; y++) {
+        std::vector<FillEdge>& bucket = buckets[y];
+        if (!bucket.empty()) {
+            activeEdges.insert(activeEdges.end(), bucket.begin(), bucket.end());
+        }
+
+        for (int i = (int)activeEdges.size() - 1; i >= 0; i--) {
+            if (y >= activeEdges[(size_t)i].yMaxExclusive) {
+                activeEdges.erase(activeEdges.begin() + i);
             }
         }
-        else {
-            x = dxdy * h + b;
-            if ((va.y <= h && vb.y >= h) || (va.y >= h && vb.y <= h)) {
-                spanBuffer.add(x);
+
+        if (activeEdges.size() < 2) {
+            for (size_t i = 0; i < activeEdges.size(); i++) {
+                activeEdges[i].xAtCurrentY += activeEdges[i].inverseSlope;
             }
+            continue;
+        }
+
+        std::sort(activeEdges.begin(), activeEdges.end(),
+            [](const FillEdge& a, const FillEdge& b) {
+                if (a.xAtCurrentY != b.xAtCurrentY) {
+                    return a.xAtCurrentY < b.xAtCurrentY;
+                }
+                if (a.inverseSlope != b.inverseSlope) {
+                    return a.inverseSlope < b.inverseSlope;
+                }
+                return a.sortOrder < b.sortOrder;
+            });
+
+        for (size_t i = 0; i + 1 < activeEdges.size(); i += 2) {
+            double xLeft = activeEdges[i].xAtCurrentY;
+            double xRight = activeEdges[i + 1].xAtCurrentY;
+
+            if (xLeft > xRight) {
+                std::swap(xLeft, xRight);
+            }
+
+            int xStart = (int)std::ceil(xLeft);
+            int xEndExclusive = (int)std::ceil(xRight);
+
+            if (xEndExclusive <= 0 || xStart >= imageWidth) {
+                continue;
+            }
+
+            xStart = clamp(xStart, 0, imageWidth);
+            xEndExclusive = clamp(xEndExclusive, 0, imageWidth);
+
+            if (xStart < xEndExclusive) {
+                shader.shade(img, polygon, y, xStart, xEndExclusive);
+            }
+        }
+
+        for (size_t i = 0; i < activeEdges.size(); i++) {
+            activeEdges[i].xAtCurrentY += activeEdges[i].inverseSlope;
         }
     }
 }
@@ -174,50 +287,26 @@ void Rasterizer2D::fillPolygonProcessLine(
 void Rasterizer2D::fillPolygon(Image* img, Polygon2D& p, const RGBPixel& color)
 {
     if (img == 0) return;
-    int minx = img->getXSize();
-    int miny = img->getYSize();
-    int maxx = 0;
-    int maxy = 0;
+    class SolidSpanShader : public SpanShader {
+    public:
+        explicit SolidSpanShader(const RGBPixel& color) : color(color) {}
 
-    for (long int i = 0; i < p.loops.size(); i++) {
-        for (long int j = 0; j < p.loops[i]->vertices.size(); j++) {
-            const Vertex2D& va = p.loops[i]->vertices[j];
-            if (va.x < minx && va.x >= 0) minx = (int)va.x;
-            if (va.x > maxx && va.x < img->getXSize()) maxx = (int)va.x;
-            if (va.y < miny && va.y >= 0) miny = (int)va.y;
-            if (va.y > maxy && va.y < img->getYSize()) maxy = (int)va.y;
-        }
-    }
-
-    for (int y = miny; y <= maxy; y++) {
-        java::ArrayList<double> spanBuffer;
-        double h = y;
-
-        for (long int i = 0; i < p.loops.size(); i++) {
-            if (p.loops[i]->vertices.size() == 0) continue;
-            for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
-                fillPolygonProcessLine(p.loops[i]->vertices[j], p.loops[i]->vertices[j + 1], h, spanBuffer);
-            }
-            fillPolygonProcessLine(
-                p.loops[i]->vertices[p.loops[i]->vertices.size() - 1],
-                p.loops[i]->vertices[0], h, spanBuffer);
-        }
-
-        sortDoubles(spanBuffer);
-        bool state = false;
-        for (long int s = 0; s + 1 < spanBuffer.size(); s++) {
-            double xs1 = spanBuffer[s];
-            double xs2 = spanBuffer[s + 1];
-            state = !state;
-            if (xs2 < minx || xs1 > maxx) continue;
-            else if (xs2 < minx) xs2 = minx;
-            if (xs2 > maxx) xs2 = maxx;
-            for (int x = (int)xs1; state && x < (int)xs2; x++) {
+        virtual void shade(Image* img, Polygon2D& polygon, int y, int xStart,
+            int xEndExclusive)
+        {
+            (void)polygon;
+            for (int x = xStart; x < xEndExclusive; x++) {
                 RGBPixel c(color);
                 img->putPixelRgb(x, y, &c);
             }
         }
-    }
+
+    private:
+        RGBPixel color;
+    };
+
+    SolidSpanShader shader(color);
+    rasterizePolygonSpans(img, p, shader);
 }
 
 void Rasterizer2D::fillSmoothPolygonCalculateColor(
@@ -257,49 +346,20 @@ void Rasterizer2D::fillSmoothPolygonCalculateColor(
 void Rasterizer2D::fillSmoothPolygon(Image* img, Polygon2D& p)
 {
     if (img == 0) return;
-    int minx = img->getXSize();
-    int miny = img->getYSize();
-    int maxx = 0;
-    int maxy = 0;
-
-    for (long int i = 0; i < p.loops.size(); i++) {
-        for (long int j = 0; j < p.loops[i]->vertices.size(); j++) {
-            const Vertex2D& va = p.loops[i]->vertices[j];
-            if (va.x < minx && va.x >= 0) minx = (int)va.x;
-            if (va.x > maxx && va.x < img->getXSize()) maxx = (int)va.x;
-            if (va.y < miny && va.y >= 0) miny = (int)va.y;
-            if (va.y > maxy && va.y < img->getYSize()) maxy = (int)va.y;
-        }
-    }
-
-    for (int y = miny; y <= maxy; y++) {
-        java::ArrayList<double> spanBuffer;
-        double h = y;
-
-        for (long int i = 0; i < p.loops.size(); i++) {
-            if (p.loops[i]->vertices.size() == 0) continue;
-            for (long int j = 0; j + 1 < p.loops[i]->vertices.size(); j++) {
-                fillPolygonProcessLine(p.loops[i]->vertices[j], p.loops[i]->vertices[j + 1], h, spanBuffer);
-            }
-            fillPolygonProcessLine(
-                p.loops[i]->vertices[p.loops[i]->vertices.size() - 1],
-                p.loops[i]->vertices[0], h, spanBuffer);
-        }
-
-        sortDoubles(spanBuffer);
-        bool state = false;
-        RGBPixel color;
-        for (long int s = 0; s + 1 < spanBuffer.size(); s++) {
-            double xs1 = spanBuffer[s];
-            double xs2 = spanBuffer[s + 1];
-            state = !state;
-            if (xs2 < minx || xs1 > maxx) continue;
-            else if (xs2 < minx) xs2 = minx;
-            if (xs2 > maxx) xs2 = maxx;
-            for (int x = (int)xs1; state && x < (int)xs2; x++) {
-                fillSmoothPolygonCalculateColor(p, x, y, color);
+    class SmoothSpanShader : public SpanShader {
+    public:
+        virtual void shade(Image* img, Polygon2D& polygon, int y, int xStart,
+            int xEndExclusive)
+        {
+            RGBPixel color;
+            for (int x = xStart; x < xEndExclusive; x++) {
+                Rasterizer2D::fillSmoothPolygonCalculateColor(
+                    polygon, x, y, color);
                 img->putPixelRgb(x, y, &color);
             }
         }
-    }
+    };
+
+    SmoothSpanShader shader;
+    rasterizePolygonSpans(img, p, shader);
 }
