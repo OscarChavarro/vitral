@@ -73,9 +73,9 @@ int MonotoneDecompositionTriangulator::stage4FinalizeAndExtractTriangles(
     out.clear();
     for (int i = 0; i < ntriangles; ++i) {
         Triangle triangle;
-        triangle.add(op[i][0]);
-        triangle.add(op[i][1]);
-        triangle.add(op[i][2]);
+        triangle.add(op[i][0] - 1);
+        triangle.add(op[i][1] - 1);
+        triangle.add(op[i][2] - 1);
         out.add(triangle);
     }
 

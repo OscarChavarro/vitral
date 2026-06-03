@@ -9,19 +9,51 @@
 
 #include <java/lang/Math.h>
 #include <cmath>
+#include <stdexcept>
+
+static void quicksortDoubles(double* array, int left0, int right0)
+{
+    int left = left0;
+    int right = right0 + 1;
+    double pivot;
+    double temp;
+
+    pivot = array[left0];
+    do {
+        do {
+            left++;
+        } while (left <= right0 && array[left] < pivot);
+        do {
+            right--;
+            if (right < 0) {
+                throw std::out_of_range("quicksort span underflow");
+            }
+        } while (array[right] > pivot);
+        if (left < right) {
+            temp = array[left];
+            array[left] = array[right];
+            array[right] = temp;
+        }
+    } while (left <= right);
+
+    temp = array[left0];
+    array[left0] = array[right];
+    array[right] = temp;
+
+    if (left0 < right) {
+        quicksortDoubles(array, left0, right);
+    }
+    if (left < right0) {
+        quicksortDoubles(array, left, right0);
+    }
+}
 
 static void sortDoubles(java::ArrayList<double>& arr)
 {
-    long int n = arr.size();
-    for (long int i = 1; i < n; i++) {
-        double key = arr[i];
-        long int j = i - 1;
-        while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
+    if (arr.size() <= 0) {
+        throw std::out_of_range("Cannot sort an empty span buffer");
     }
+    quicksortDoubles(arr.data(), 0, static_cast<int>(arr.size()) - 1);
 }
 
 void Rasterizer2D::drawLine(Image* img, int x0, int y0, int x1, int y1, const RGBPixel& p)

@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <polygon_file>" >&2
+  exit 1
+fi
+
+DATA_FILE="$1"
+if [[ "${DATA_FILE}" != /* ]]; then
+  DATA_FILE="$(pwd)/${DATA_FILE}"
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 BIN="${SCRIPT_DIR}/build/triangulatePolygon2D"
-DATA_FILE="${SCRIPT_DIR}/example1.polygon"
 
 if [[ ! -x "${BIN}" ]]; then
   cmake -S . -B build
@@ -16,7 +25,4 @@ if [[ ! -f "${DATA_FILE}" ]]; then
   exit 1
 fi
 
-OUTPUT="$(${BIN} "${DATA_FILE}")"
-TRIANGLE_COUNT="$(printf '%s\n' "${OUTPUT}" | grep -c '^triangle #[0-9]\+: ' || true)"
-
-printf '%s\n' "${OUTPUT}"
+"${BIN}" "${DATA_FILE}"
