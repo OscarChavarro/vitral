@@ -157,7 +157,7 @@ subprojects { subproject ->
 
     tasks.register('runMain', JavaExec) {
         group = 'application'
-        description = 'Runs a module main class. Use -PrunMainClass=<fqcn> and optional -PrunJvmArgs=<a|b>.'
+        description = 'Runs a module main class. Use -PrunMainClass=<fqcn>, optional -PrunJvmArgs=<a|b>, and optional -PrunArgs=<a|b>.'
         dependsOn tasks.named('classes')
         classpath = sourceSets.main.runtimeClasspath
         standardInput = System.in
@@ -168,6 +168,14 @@ subprojects { subproject ->
             def parsedJvmArgs = rawJvmArgs.split('\\|').findAll { !it.isBlank() }
             if (!parsedJvmArgs.isEmpty()) {
                 jvmArgs(parsedJvmArgs)
+            }
+        }
+
+        def rawRunArgs = project.findProperty('runArgs')?.toString()
+        if (rawRunArgs) {
+            def parsedRunArgs = rawRunArgs.split('\\|').findAll { !it.isBlank() }
+            if (!parsedRunArgs.isEmpty()) {
+                args(parsedRunArgs)
             }
         }
 

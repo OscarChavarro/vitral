@@ -7,7 +7,7 @@ class _TriangulationTrapezoidQueryNode;
 class _TriangulationTrapezoid {
   public:
     _TriangulationTrapezoid()
-        : leftSegmentIndex(-1), rightSegmentIndex(-1), upperPoint(), lowerPoint(), upperLeftTrapezoidIndex(0), upperRightTrapezoidIndex(0), lowerLeftTrapezoidIndex(0), lowerRightTrapezoidIndex(0),
+        : leftSegmentIndex(0), rightSegmentIndex(0), upperPoint(), lowerPoint(), upperLeftTrapezoidIndex(0), upperRightTrapezoidIndex(0), lowerLeftTrapezoidIndex(0), lowerRightTrapezoidIndex(0),
           sinkNode(nullptr), savedUpperNeighborIndex(0), savedUpperNeighborSide(0), status(1) {}
     int insidePolygon();
     int leftSegmentIndex;

@@ -1,8 +1,14 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
 final class _TriangulationTrapezoid {
-    int leftSegmentIndex = -1;
-    int rightSegmentIndex = -1;
+    // [SEID1991].3 Bounding segment indices. The original reference allocates
+    // the trapezoid table with calloc, so unassigned bounding segments default
+    // to 0, which is the reserved zeroed "no segment" slot (segmentAt(0)). All
+    // logic compares these fields with > 0 / <= 0, so 0 behaves as "absent"
+    // while keeping segmentAt() in bounds for degenerate trapezoids (a negative
+    // sentinel would index out of the segment table and crash).
+    int leftSegmentIndex = 0;
+    int rightSegmentIndex = 0;
     _Point2D upperPoint = new _Point2D();
     _Point2D lowerPoint = new _Point2D();
     int upperLeftTrapezoidIndex;

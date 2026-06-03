@@ -12,6 +12,11 @@ import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 
 public class MonotoneDecompositionTriangulator {
+    /**
+    Resulting triangle of a polygon triangulation. The three fields are
+    0-based indices into the input polygon vertices, taken in the order the
+    contours are traversed (all loops concatenated, first loop first).
+    */
     public static final class Triangle {
         public final int a;
         public final int b;
@@ -73,7 +78,12 @@ public class MonotoneDecompositionTriangulator {
 
         out.clear();
         for (int i = 0; i < ntriangles; ++i) {
-            out.add(new Triangle(op[i][0], op[i][1], op[i][2]));
+            // The Seidel decomposition numbers segments/vertices from 1 to
+            // numVertices internally (see _SegmentTableBuilder.prepareSegments).
+            // The public Triangle indices must reference the caller's 0-based
+            // Polygon2D vertex ordering, so the internal 1-based vertex numbers
+            // are normalized back to 0-based here.
+            out.add(new Triangle(op[i][0] - 1, op[i][1] - 1, op[i][2] - 1));
         }
 
         return ntriangles;

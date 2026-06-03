@@ -70,7 +70,16 @@ public class PolygonClippingKeyboardInteractionTechniques
             handled = true;
             handledLetterShortcut = true;
             break;
-          case KeyEvent.KEY_t, KeyEvent.KEY_T:
+          case KeyEvent.KEY_t:
+            // Lowercase 't' keeps its original behaviour from prior commits:
+            // toggling whether polygon surfaces are filled.
+            model.setShowFilledPolygons(!model.isShowFilledPolygons());
+            handled = true;
+            handledLetterShortcut = true;
+            break;
+          case KeyEvent.KEY_T:
+            // Uppercase 'T' cycles the surface tessellation mode
+            // (GLU vs monotone-decomposition triangulation).
             model.cyclePolygonSurfaceTessellationMode();
             handled = true;
             handledLetterShortcut = true;

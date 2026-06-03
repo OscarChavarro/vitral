@@ -8,7 +8,6 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import model.PolygonClippingDebuggerModel;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.MonotoneDecompositionTriangulator;
@@ -18,21 +17,33 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ShaderProgramUtil;
 
+/**
+Fills polygon surfaces by decomposing them with the
+{@link MonotoneDecompositionTriangulator}, as an alternative to the GLU-based
+tessellation used by {@code Jogl4Polygon2DRenderer}.
+
+Multi-pass rendering with depth bias guarantees correct visibility ordering:
+surfaces are drawn with {@code GL_POLYGON_OFFSET_FILL} so they are pushed
+slightly behind co-planar wires and points; wires (all triangle edges, which
+expose the full triangulation structure) are drawn with a small negative NDC
+depth bias so they always appear in front of the fill; and points are drawn
+with an even larger negative NDC depth bias so they remain visible over both.
+*/
 public class JoglTriangularRenderer
 {
-    private final PolygonClippingDebuggerModel model;
+    private static final float WIRE_DEPTH_BIAS_NDC  = -0.001f;
+    private static final float POINT_DEPTH_BIAS_NDC = -0.002f;
 
-    private int lineProgramId;
     private int constantProgramId;
+    private int lineProgramId;
     private int vaoId;
     private int positionVboId;
     private int colorVboId;
 
-    public JoglTriangularRenderer(PolygonClippingDebuggerModel model)
+    public JoglTriangularRenderer()
     {
-        this.model = model;
-        this.lineProgramId = 0;
         this.constantProgramId = 0;
+        this.lineProgramId = 0;
         this.vaoId = 0;
         this.positionVboId = 0;
         this.colorVboId = 0;
@@ -41,14 +52,14 @@ public class JoglTriangularRenderer
     public void init(GLAutoDrawable drawable)
     {
         GL4 gl = drawable.getGL().getGL4();
-        lineProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
-            gl,
-            "lineVertexShader.glsl",
-            "linePixelShader.glsl");
         constantProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
             gl,
             "constantVertexShader.glsl",
             "constantPixelShader.glsl");
+        lineProgramId = Jogl4ShaderProgramUtil.createProgramFromFiles(
+            gl,
+            "lineVertexShader.glsl",
+            "linePixelShader.glsl");
 
         int[] tmp = new int[1];
         gl.glGenVertexArrays(1, tmp, 0);
@@ -63,15 +74,15 @@ public class JoglTriangularRenderer
     {
         int[] tmp = new int[1];
 
-        if ( positionVboId != 0 ) {
-            tmp[0] = positionVboId;
-            gl.glDeleteBuffers(1, tmp, 0);
-            positionVboId = 0;
-        }
         if ( colorVboId != 0 ) {
             tmp[0] = colorVboId;
             gl.glDeleteBuffers(1, tmp, 0);
             colorVboId = 0;
+        }
+        if ( positionVboId != 0 ) {
+            tmp[0] = positionVboId;
+            gl.glDeleteBuffers(1, tmp, 0);
+            positionVboId = 0;
         }
         if ( vaoId != 0 ) {
             tmp[0] = vaoId;
@@ -88,60 +99,33 @@ public class JoglTriangularRenderer
         }
     }
 
-    public void draw(GL4 gl, Matrix4x4d projection)
+    /**
+    Triangulates the given polygon with the monotone decomposition triangulator
+    and draws the resulting geometry according to {@code config}. The render
+    order is: surfaces first (with polygon offset), then wires (triangle edges,
+    revealing the triangulation), then points. Each subsequent pass uses a
+    larger negative NDC depth bias so it always draws in front of the previous
+    one. Degenerate or invalid polygons are silently skipped.
+
+    @param gl     active GL4 context
+    @param mvp    model-view-projection transform for this polygon
+    @param polygon polygon to render
+    @param config  rendering configuration; controls which passes are drawn
+    @param fillR, fillG, fillB surface fill color
+    @param lineR, lineG, lineB wire and point color
+    */
+    public void fillPolygonSurface(GL4 gl, Matrix4x4d mvp, Polygon2D polygon,
+        RendererConfiguration config,
+        float fillR, float fillG, float fillB,
+        float lineR, float lineG, float lineB)
     {
-        if ( model.isShowReferenceFrame() ) {
-            drawReferenceFrame(gl, projection);
+        if ( polygon == null || polygon.loops == null || polygon.loops.isEmpty() ) {
+            return;
         }
-
-        Bounds2D bounds = calculateBounds();
-        double panelWidth = Math.max(6.0, bounds.width());
-        double panelDepth = Math.max(6.0, bounds.height());
-        RendererConfiguration polygonQuality = new RendererConfiguration();
-        polygonQuality.clone(model.getQuality());
-        polygonQuality.setSurfaces(
-            polygonQuality.isSurfacesSet() && model.isShowFilledPolygons());
-
-        if ( model.isShowClipPolygon() ) {
-            drawTriangulatedPolygon(gl, projection, model.getClipPolygon(),
-                polygonQuality, 0.20f, 0.75f, 0.25f, 0.0, 0.0);
+        if ( config == null ) {
+            return;
         }
-        if ( model.isShowSubjectPolygon() ) {
-            drawTriangulatedPolygon(gl, projection, model.getSubjectPolygon(),
-                polygonQuality, 0.80f, 0.74f, 0.20f, 0.0, 0.0);
-        }
-
-        Matrix4x4d innerTransform = new Matrix4x4d().translation(0.0, 0.0, -panelDepth * 1.25);
-        if ( model.isShowInnerPolygon() ) {
-            drawTriangulatedPolygon(gl, projection.multiply(innerTransform),
-                model.getInnerPolygon(), polygonQuality,
-                0.65f, 0.65f, 0.70f, 0.0, 0.0);
-        }
-
-        Matrix4x4d outerTransform = new Matrix4x4d().translation(panelWidth * 1.25, 0.0, 0.0);
-        if ( model.isShowOuterPolygon() ) {
-            drawTriangulatedPolygon(gl, projection.multiply(outerTransform),
-                model.getOuterPolygon(), polygonQuality,
-                0.68f, 0.78f, 0.68f, 0.0, 0.0);
-        }
-    }
-
-    private void drawReferenceFrame(GL4 gl, Matrix4x4d mvp)
-    {
-        List<Float> positions = new ArrayList<>();
-        List<Float> colors = new ArrayList<>();
-        addSegment(positions, colors, 0, 0, 0, 2, 0, 0, 1f, 0f, 0f);
-        addSegment(positions, colors, 0, 0, 0, 0, 2, 0, 0f, 1f, 0f);
-        addSegment(positions, colors, 0, 0, 0, 0, 0, 2, 0f, 0f, 1f);
-        drawLines(gl, mvp, positions, colors, GL4.GL_LINES, 3.0f);
-    }
-
-    private void drawTriangulatedPolygon(GL4 gl, Matrix4x4d mvp,
-        Polygon2D polygon, RendererConfiguration quality, float fillR,
-        float fillG, float fillB, double tx, double tz)
-    {
-        if ( polygon == null || polygon.loops == null || polygon.loops.isEmpty()
-             || quality == null || !quality.isSurfacesSet() ) {
+        if ( !config.isSurfacesSet() && !config.isWiresSet() && !config.isPointsSet() ) {
             return;
         }
 
@@ -156,32 +140,98 @@ public class JoglTriangularRenderer
             }
 
             List<double[]> vertices = flattenVertices(polygon);
-            List<Float> positions = new ArrayList<>(triangleCount * 9);
-            for ( int i = 0; i < triangleCount; i++ ) {
-                MonotoneDecompositionTriangulator.Triangle triangle =
-                    triangles.get(i);
-                addTriangle(positions, vertices.get(triangle.a), vertices.get(triangle.b),
-                    vertices.get(triangle.c), tx, tz);
+
+            if ( config.isSurfacesSet() ) {
+                List<Float> fillPositions =
+                    buildFillPositions(triangleCount, triangles, vertices);
+                if ( !fillPositions.isEmpty() ) {
+                    drawTriangleSurfaces(gl, mvp, fillPositions, fillR, fillG, fillB);
+                }
             }
 
-            drawTriangles(gl, mvp, positions, fillR, fillG, fillB);
+            if ( config.isWiresSet() ) {
+                List<Float> wirePositions = new ArrayList<>();
+                List<Float> wireColors = new ArrayList<>();
+                buildWirePositions(triangleCount, triangles, vertices,
+                    wirePositions, wireColors, lineR, lineG, lineB);
+                if ( !wirePositions.isEmpty() ) {
+                    drawTriangleWires(gl, mvp, wirePositions, wireColors);
+                }
+            }
+
+            if ( config.isPointsSet() ) {
+                List<Float> pointPositions = new ArrayList<>();
+                List<Float> pointColors = new ArrayList<>();
+                buildPointPositions(triangleCount, triangles, vertices,
+                    pointPositions, pointColors, lineR, lineG, lineB);
+                if ( !pointPositions.isEmpty() ) {
+                    drawTrianglePoints(gl, mvp, pointPositions, pointColors);
+                }
+            }
         }
         catch ( RuntimeException e ) {
             // Invalid or degenerate polygons are skipped by the visualizer.
         }
     }
 
-    private void drawTriangles(GL4 gl, Matrix4x4d mvp, List<Float> positions,
+    private static List<Float> buildFillPositions(int triangleCount,
+        List<MonotoneDecompositionTriangulator.Triangle> triangles,
+        List<double[]> vertices)
+    {
+        List<Float> out = new ArrayList<>(triangleCount * 9);
+        for ( int i = 0; i < triangleCount; i++ ) {
+            MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
+            addFillTriangle(out, vertices.get(t.a), vertices.get(t.b), vertices.get(t.c));
+        }
+        return out;
+    }
+
+    private static void buildWirePositions(int triangleCount,
+        List<MonotoneDecompositionTriangulator.Triangle> triangles,
+        List<double[]> vertices,
+        List<Float> positions, List<Float> colors,
+        float r, float g, float b)
+    {
+        for ( int i = 0; i < triangleCount; i++ ) {
+            MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
+            double[] a = vertices.get(t.a);
+            double[] b2 = vertices.get(t.b);
+            double[] c = vertices.get(t.c);
+            addLineEdge(positions, colors, a, b2, r, g, b);
+            addLineEdge(positions, colors, b2, c, r, g, b);
+            addLineEdge(positions, colors, c, a, r, g, b);
+        }
+    }
+
+    private static void buildPointPositions(int triangleCount,
+        List<MonotoneDecompositionTriangulator.Triangle> triangles,
+        List<double[]> vertices,
+        List<Float> positions, List<Float> colors,
+        float r, float g, float b)
+    {
+        for ( int i = 0; i < triangleCount; i++ ) {
+            MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
+            addLinePoint(positions, colors, vertices.get(t.a), r, g, b);
+            addLinePoint(positions, colors, vertices.get(t.b), r, g, b);
+            addLinePoint(positions, colors, vertices.get(t.c), r, g, b);
+        }
+    }
+
+    private void drawTriangleSurfaces(GL4 gl, Matrix4x4d mvp, List<Float> positions,
         float r, float g, float b)
     {
         if ( positions.isEmpty() ) {
             return;
         }
 
+        gl.glEnable(GL4.GL_POLYGON_OFFSET_FILL);
+        gl.glPolygonOffset(1.0f, 1.0f);
+
         gl.glUseProgram(constantProgramId);
         setMvpUniform(gl, constantProgramId, mvp);
         int withTextureLoc = gl.glGetUniformLocation(constantProgramId, "withTexture");
-        int withVertexColorsLoc = gl.glGetUniformLocation(constantProgramId, "withVertexColors");
+        int withVertexColorsLoc =
+            gl.glGetUniformLocation(constantProgramId, "withVertexColors");
         int diffuseLoc = gl.glGetUniformLocation(constantProgramId, "diffuseColor");
         if ( withTextureLoc >= 0 ) {
             gl.glUniform1i(withTextureLoc, 0);
@@ -197,10 +247,13 @@ public class JoglTriangularRenderer
         bindConstantAttributes(gl, posArray);
         gl.glDrawArrays(GL4.GL_TRIANGLES, 0, posArray.length / 3);
         unbind(gl);
+
+        gl.glPolygonOffset(0.0f, 0.0f);
+        gl.glDisable(GL4.GL_POLYGON_OFFSET_FILL);
     }
 
-    private void drawLines(GL4 gl, Matrix4x4d mvp, List<Float> positions,
-        List<Float> colors, int primitive, float lineWidth)
+    private void drawTriangleWires(GL4 gl, Matrix4x4d mvp,
+        List<Float> positions, List<Float> colors)
     {
         if ( positions.isEmpty() ) {
             return;
@@ -210,30 +263,33 @@ public class JoglTriangularRenderer
         setMvpUniform(gl, lineProgramId, mvp);
         int depthBiasLoc = gl.glGetUniformLocation(lineProgramId, "depthBiasNdc");
         if ( depthBiasLoc >= 0 ) {
-            gl.glUniform1f(depthBiasLoc, 0.0f);
+            gl.glUniform1f(depthBiasLoc, WIRE_DEPTH_BIAS_NDC);
         }
 
         bindLineAttributes(gl, toArray(positions), toArray(colors));
-        gl.glLineWidth(lineWidth);
-        gl.glDrawArrays(primitive, 0, positions.size() / 3);
+        gl.glLineWidth(1.0f);
+        gl.glDrawArrays(GL4.GL_LINES, 0, positions.size() / 3);
         unbind(gl);
     }
 
-    private void bindLineAttributes(GL4 gl, float[] positions, float[] colors)
+    private void drawTrianglePoints(GL4 gl, Matrix4x4d mvp,
+        List<Float> positions, List<Float> colors)
     {
-        gl.glBindVertexArray(vaoId);
+        if ( positions.isEmpty() ) {
+            return;
+        }
 
-        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, positionVboId);
-        FloatBuffer posBuffer = Buffers.newDirectFloatBuffer(positions);
-        gl.glBufferData(GL4.GL_ARRAY_BUFFER, (long)positions.length * Float.BYTES, posBuffer, GL4.GL_STREAM_DRAW);
-        gl.glEnableVertexAttribArray(0);
-        gl.glVertexAttribPointer(0, 3, GL4.GL_FLOAT, false, 0, 0L);
+        gl.glUseProgram(lineProgramId);
+        setMvpUniform(gl, lineProgramId, mvp);
+        int depthBiasLoc = gl.glGetUniformLocation(lineProgramId, "depthBiasNdc");
+        if ( depthBiasLoc >= 0 ) {
+            gl.glUniform1f(depthBiasLoc, POINT_DEPTH_BIAS_NDC);
+        }
 
-        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, colorVboId);
-        FloatBuffer colorBuffer = Buffers.newDirectFloatBuffer(colors);
-        gl.glBufferData(GL4.GL_ARRAY_BUFFER, (long)colors.length * Float.BYTES, colorBuffer, GL4.GL_STREAM_DRAW);
-        gl.glEnableVertexAttribArray(1);
-        gl.glVertexAttribPointer(1, 3, GL4.GL_FLOAT, false, 0, 0L);
+        bindLineAttributes(gl, toArray(positions), toArray(colors));
+        gl.glPointSize(8.0f);
+        gl.glDrawArrays(GL4.GL_POINTS, 0, positions.size() / 3);
+        unbind(gl);
     }
 
     private void bindConstantAttributes(GL4 gl, float[] positions)
@@ -242,7 +298,9 @@ public class JoglTriangularRenderer
 
         gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, positionVboId);
         FloatBuffer posBuffer = Buffers.newDirectFloatBuffer(toVec4Array(positions));
-        gl.glBufferData(GL4.GL_ARRAY_BUFFER, (long)(positions.length / 3) * 4 * Float.BYTES, posBuffer, GL4.GL_STREAM_DRAW);
+        gl.glBufferData(GL4.GL_ARRAY_BUFFER,
+            (long)(positions.length / 3) * 4 * Float.BYTES, posBuffer,
+            GL4.GL_STREAM_DRAW);
         gl.glEnableVertexAttribArray(0);
         gl.glVertexAttribPointer(0, 4, GL4.GL_FLOAT, false, 0, 0L);
 
@@ -250,6 +308,27 @@ public class JoglTriangularRenderer
         gl.glVertexAttrib3f(1, 0.0f, 0.0f, 0.0f);
         gl.glDisableVertexAttribArray(2);
         gl.glVertexAttrib2f(2, 0.0f, 0.0f);
+        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+    }
+
+    private void bindLineAttributes(GL4 gl, float[] positions, float[] colors)
+    {
+        gl.glBindVertexArray(vaoId);
+
+        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, positionVboId);
+        FloatBuffer posBuffer = Buffers.newDirectFloatBuffer(positions);
+        gl.glBufferData(GL4.GL_ARRAY_BUFFER, (long)positions.length * Float.BYTES,
+            posBuffer, GL4.GL_STREAM_DRAW);
+        gl.glEnableVertexAttribArray(0);
+        gl.glVertexAttribPointer(0, 3, GL4.GL_FLOAT, false, 0, 0L);
+
+        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, colorVboId);
+        FloatBuffer colorBuffer = Buffers.newDirectFloatBuffer(colors);
+        gl.glBufferData(GL4.GL_ARRAY_BUFFER, (long)colors.length * Float.BYTES,
+            colorBuffer, GL4.GL_STREAM_DRAW);
+        gl.glEnableVertexAttribArray(1);
+        gl.glVertexAttribPointer(1, 3, GL4.GL_FLOAT, false, 0, 0L);
+
         gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
     }
 
@@ -276,36 +355,34 @@ public class JoglTriangularRenderer
         }
     }
 
-    private static void addTriangle(List<Float> positions, double[] a,
-        double[] b, double[] c, double tx, double tz)
+    private static void addFillTriangle(List<Float> positions,
+        double[] a, double[] b, double[] c)
     {
-        addPoint(positions, a[0] + tx, 0.0, a[1] + tz);
-        addPoint(positions, b[0] + tx, 0.0, b[1] + tz);
-        addPoint(positions, c[0] + tx, 0.0, c[1] + tz);
+        addFillPoint(positions, a[0], 0.0, a[1]);
+        addFillPoint(positions, b[0], 0.0, b[1]);
+        addFillPoint(positions, c[0], 0.0, c[1]);
     }
 
-    private static void addSegment(List<Float> positions, List<Float> colors,
-        double x1, double y1, double z1, double x2, double y2, double z2,
-        float r, float g, float b)
-    {
-        addPoint(positions, colors, x1, y1, z1, r, g, b);
-        addPoint(positions, colors, x2, y2, z2, r, g, b);
-    }
-
-    private static void addPoint(List<Float> positions, double x, double y, double z)
+    private static void addFillPoint(List<Float> positions, double x, double y, double z)
     {
         positions.add((float)x);
         positions.add((float)y);
         positions.add((float)z);
     }
 
-    private static void addPoint(List<Float> positions, List<Float> colors,
-        double x, double y, double z, float r, float g, float b)
+    private static void addLineEdge(List<Float> positions, List<Float> colors,
+        double[] a, double[] b, float r, float g, float bColor)
     {
-        positions.add((float)x);
-        positions.add((float)y);
-        positions.add((float)z);
+        addLinePoint(positions, colors, a, r, g, bColor);
+        addLinePoint(positions, colors, b, r, g, bColor);
+    }
 
+    private static void addLinePoint(List<Float> positions, List<Float> colors,
+        double[] p, float r, float g, float b)
+    {
+        positions.add((float)p[0]);
+        positions.add(0.0f);
+        positions.add((float)p[1]);
         colors.add(r);
         colors.add(g);
         colors.add(b);
@@ -324,7 +401,7 @@ public class JoglTriangularRenderer
     {
         float[] out = new float[(positions.length / 3) * 4];
         for ( int i = 0, j = 0; i < positions.length; i += 3, j += 4 ) {
-            out[j] = positions[i];
+            out[j]     = positions[i];
             out[j + 1] = positions[i + 1];
             out[j + 2] = positions[i + 2];
             out[j + 3] = 1.0f;
@@ -349,93 +426,5 @@ public class JoglTriangularRenderer
             }
         }
         return vertices;
-    }
-
-    private Bounds2D calculateBounds()
-    {
-        Bounds2D bounds = new Bounds2D();
-
-        includePolygonBounds(bounds, model.getClipPolygon());
-        includePolygonBounds(bounds, model.getSubjectPolygon());
-        includePolygonBounds(bounds, model.getInnerPolygon());
-        includePolygonBounds(bounds, model.getOuterPolygon());
-
-        if ( !bounds.initialized() ) {
-            bounds.include(0.0, 0.0);
-            bounds.include(4.0, 4.0);
-        }
-
-        return bounds;
-    }
-
-    private void includePolygonBounds(Bounds2D bounds, Polygon2D polygon)
-    {
-        if ( polygon == null || polygon.loops == null ) {
-            return;
-        }
-
-        for ( int i = 0; i < polygon.loops.size(); i++ ) {
-            _Polygon2DContour contour = polygon.loops.get(i);
-            if ( contour.vertices == null ) {
-                continue;
-            }
-            for ( Vertex2D vertex : contour.vertices ) {
-                bounds.include(vertex.x, vertex.y);
-            }
-        }
-    }
-
-    private static final class Bounds2D
-    {
-        private double minX;
-        private double minY;
-        private double maxX;
-        private double maxY;
-        private boolean initialized;
-
-        Bounds2D()
-        {
-            initialized = false;
-        }
-
-        void include(double x, double y)
-        {
-            if ( !initialized ) {
-                minX = x;
-                maxX = x;
-                minY = y;
-                maxY = y;
-                initialized = true;
-                return;
-            }
-
-            if ( x < minX ) {
-                minX = x;
-            }
-            if ( x > maxX ) {
-                maxX = x;
-            }
-            if ( y < minY ) {
-                minY = y;
-            }
-            if ( y > maxY ) {
-                maxY = y;
-            }
-        }
-
-        boolean initialized()
-        {
-            return initialized;
-        }
-
-        double width()
-        {
-            return initialized ? maxX - minX : 0.0;
-        }
-
-        double height()
-        {
-            return initialized ? maxY - minY : 0.0;
-        }
     }
 }

@@ -47,7 +47,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
     {
         this.model = model;
         this.hudRenderer = new JoglPolygonClippingHudRenderer(model);
-        this.triangularRenderer = new JoglTriangularRenderer(model);
+        this.triangularRenderer = new JoglTriangularRenderer();
     }
 
     @Override
@@ -120,13 +120,7 @@ public class JoglPolygonClippingRenderer implements GLEventListener
         gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
         Matrix4x4d projection = Jogl4CameraRenderer.activate(gl, model.getCamera());
-        if ( model.getPolygonSurfaceTessellationMode()
-             == PolygonSurfaceTessellationMode.MONOTONE_DECOMPOSITION ) {
-            triangularRenderer.draw(gl, projection);
-        }
-        else {
-            drawObjects(gl, projection);
-        }
+        drawObjects(gl, projection);
 
         int[] viewport = new int[4];
         gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
@@ -190,25 +184,48 @@ public class JoglPolygonClippingRenderer implements GLEventListener
 
         Matrix4x4d innerTransform = new Matrix4x4d().translation(0.0, 0.0, -panelDepth * 1.25);
         if ( model.isShowInnerPolygon() ) {
-            Jogl4Polygon2DRenderer.draw(gl,
+            drawResultPolygon(gl,
                 projection.multiply(innerTransform),
                 model.getInnerPolygon(),
                 polygonQuality,
                 0.65f, 0.65f, 0.70f,
-                0.82f, 0.58f, 0.36f,
-                lineProgramId, constantProgramId, vaoId, positionVboId, colorVboId);
+                0.82f, 0.58f, 0.36f);
         }
 
         Matrix4x4d outerTransform = new Matrix4x4d().translation(panelWidth * 1.25, 0.0, 0.0);
         if ( model.isShowOuterPolygon() ) {
-            Jogl4Polygon2DRenderer.draw(gl,
+            drawResultPolygon(gl,
                 projection.multiply(outerTransform),
                 model.getOuterPolygon(),
                 polygonQuality,
                 0.68f, 0.78f, 0.68f,
-                0.18f, 0.72f, 0.24f,
-                lineProgramId, constantProgramId, vaoId, positionVboId, colorVboId);
+                0.18f, 0.72f, 0.24f);
         }
+    }
+
+    /**
+    Draws a clipping-result polygon (inner/outer). The filled surface is
+    produced either by the GLU tessellator or by the monotone-decomposition
+    triangulator depending on the active tessellation mode, while wires and
+    points are always rendered through {@link Jogl4Polygon2DRenderer} so both
+    modes look identical except for the surface triangulation method.
+    */
+    private void drawResultPolygon(GL4 gl, Matrix4x4d mvp, Polygon2D polygon,
+        RendererConfiguration polygonQuality, float fillR, float fillG,
+        float fillB, float lineR, float lineG, float lineB)
+    {
+        boolean monotoneMode = model.getPolygonSurfaceTessellationMode()
+            == PolygonSurfaceTessellationMode.MONOTONE_DECOMPOSITION;
+
+        if ( !monotoneMode ) {
+            Jogl4Polygon2DRenderer.draw(gl, mvp, polygon, polygonQuality,
+                fillR, fillG, fillB, lineR, lineG, lineB,
+                lineProgramId, constantProgramId, vaoId, positionVboId, colorVboId);
+            return;
+        }
+
+        triangularRenderer.fillPolygonSurface(gl, mvp, polygon, polygonQuality,
+            fillR, fillG, fillB, lineR, lineG, lineB);
     }
 
     private void drawReferenceFrame(GL4 gl, Matrix4x4d mvp)

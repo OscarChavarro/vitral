@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -24,6 +25,8 @@ import gui.PolygonClippingKeyboardInteractionTechniques;
 import gui.PolygonClippingMouseInteractionTechniques;
 import model.PolygonClippingDebuggerModel;
 import model.PolygonClippingModelingTools;
+import options.CommandLineOptions;
+import render.JoglPolygonClippingOfflineRenderer;
 import render.JoglPolygonClippingRenderer;
 
 // Vitral classes
@@ -47,41 +50,65 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
 
     public PolygonClippingExample()
     {
-        model = new PolygonClippingDebuggerModel();
+        this(new PolygonClippingDebuggerModel());
+    }
+
+    public PolygonClippingExample(PolygonClippingDebuggerModel model)
+    {
+        this.model = model;
         keyboardInteractionTechniques = new PolygonClippingKeyboardInteractionTechniques();
         mouseInteractionTechniques = new PolygonClippingMouseInteractionTechniques();
         renderer = new JoglPolygonClippingRenderer(model);
         canvas = null;
 
-        VSDK.setWithSystemExit(false);
-        VSDK.setWithFatalExceptions(true);
-
-        rebuildScene();
-        focusCameraOnCurrentScene();
+        rebuildScene(model);
+        focusCameraOnCurrentScene(model);
     }
 
     public static void main(String[] args)
     {
+        PolygonClippingDebuggerModel model = new PolygonClippingDebuggerModel();
+        CommandLineOptions options = new CommandLineOptions(model);
+        try {
+            options.parse(args);
+        }
+        catch ( IllegalArgumentException e ) {
+            System.err.println("[PolygonClippingExample] " + e.getMessage());
+            System.err.println(CommandLineOptions.usage());
+            return;
+        }
+
+        VSDK.setWithSystemExit(false);
+        VSDK.setWithFatalExceptions(true);
+
+        if ( options.isOfflineMode() ) {
+            rebuildScene(model);
+            focusCameraOnCurrentScene(model);
+            renderOffline(model);
+            return;
+        }
+
         if (!Jogl4Renderer.verifyOpenGLAvailability()) {
             System.err.println("Can not open OpenGL context. Check graphics configuration");
             System.exit(0);
         }
-        PolygonClippingExample instance = new PolygonClippingExample();
+
+        PolygonClippingExample instance = new PolygonClippingExample(model);
         instance.createMainWindow(false);
     }
 
-    private void rebuildScene()
+    private static void rebuildScene(PolygonClippingDebuggerModel model)
     {
         try {
             model.clearErrorState();
             PolygonClippingModelingTools.rebuildScene(model);
         }
         catch ( Exception e ) {
-            model.setErrorState(formatBuildErrorMessage(e));
+            model.setErrorState(formatBuildErrorMessage(model, e));
         }
     }
 
-    private void focusCameraOnCurrentScene()
+    private static void focusCameraOnCurrentScene(PolygonClippingDebuggerModel model)
     {
         Vector3Dd center = PolygonClippingModelingTools.calculateSceneCenter(model);
         Vector3Dd eye = model.getCamera().getPosition();
@@ -98,7 +125,21 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
         }
     }
 
-    private String formatBuildErrorMessage(Throwable e)
+    private static void renderOffline(PolygonClippingDebuggerModel model)
+    {
+        try {
+            new JoglPolygonClippingOfflineRenderer(model, new File("output.png"))
+                .render();
+            System.out.println("[PolygonClippingExample] Exported output.png");
+        }
+        catch ( RuntimeException e ) {
+            System.err.println("[PolygonClippingExample] " + e.getMessage());
+        }
+    }
+
+    private static String formatBuildErrorMessage(
+        PolygonClippingDebuggerModel model,
+        Throwable e)
     {
         return "Build error [" + model.getCurrentTestCase().name() + "]: "
             + e.getClass().getSimpleName()
@@ -117,6 +158,7 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
             profile = GLProfile.get(GLProfile.GL4);
         }
         GLCapabilities caps = new GLCapabilities(profile);
+        caps.setDepthBits(64);
         canvas = new GLCanvas(caps);
         canvas.addGLEventListener(renderer);
         canvas.addMouseListener(this);
@@ -366,8 +408,8 @@ public class PolygonClippingExample extends JFrame implements MouseListener,
                 @Override
                 public void rebuildScene()
                 {
-                    PolygonClippingExample.this.rebuildScene();
-                    PolygonClippingExample.this.focusCameraOnCurrentScene();
+                    PolygonClippingExample.rebuildScene(model);
+                    PolygonClippingExample.focusCameraOnCurrentScene(model);
                 }
 
                 @Override

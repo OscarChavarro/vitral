@@ -543,23 +543,19 @@ public final class _IncrementalSegmentInserter {
                 if (_Construct.fpEqual(trap(t).lowerPoint.y, trap(tlast).lowerPoint.y) &&
                     _Construct.fpEqual(trap(t).lowerPoint.x, trap(tlast).lowerPoint.x) &&
                     tribot != 0) {
-                    if (isSwapped.value) {
-                        tmptriseg = _Construct.segments.get(segmentIndex).previousSegmentIndex;
-                    }
-                    else {
-                        tmptriseg = _Construct.segments.get(segmentIndex).nextSegmentIndex;
-                    }
+                    // [SEID1991].3 This case arises only at the lowest trapezoid
+                    // (tlast) when the lower endpoint of the segment is already
+                    // inserted. Both lower neighbours are split between t (left)
+                    // and tn (right); the traversal then terminates.
+                    trap(trap(t).lowerLeftTrapezoidIndex).upperLeftTrapezoidIndex = t;
+                    trap(trap(t).lowerLeftTrapezoidIndex).upperRightTrapezoidIndex = -1;
+                    trap(trap(t).lowerRightTrapezoidIndex).upperLeftTrapezoidIndex = tn;
+                    trap(trap(t).lowerRightTrapezoidIndex).upperRightTrapezoidIndex = -1;
 
-                    if ((tmptriseg > 0) && isLeftOf(tmptriseg, s.startPoint)) {
-                        trap(trap(t).lowerLeftTrapezoidIndex).upperLeftTrapezoidIndex = t;
-                        trap(tn).lowerLeftTrapezoidIndex = -1;
-                        trap(tn).lowerRightTrapezoidIndex = -1;
-                    }
-                    else {
-                        trap(trap(tn).lowerLeftTrapezoidIndex).upperRightTrapezoidIndex = tn;
-                        trap(t).lowerLeftTrapezoidIndex = -1;
-                        trap(t).lowerRightTrapezoidIndex = -1;
-                    }
+                    trap(tn).lowerLeftTrapezoidIndex = trap(t).lowerRightTrapezoidIndex;
+                    trap(t).lowerRightTrapezoidIndex = -1;
+                    trap(tn).lowerRightTrapezoidIndex = -1;
+
                     tnext = trap(t).lowerRightTrapezoidIndex;
                 }
                 else if (isD0) {
