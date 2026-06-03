@@ -14,9 +14,12 @@ add_executable(PolygonClippingExample
     src/PolygonClippingExample.cpp
     src/model/PolygonClippingFixtures.cpp
     src/render/PolygonClippingHudRenderer.cpp
+    src/render/PolygonTriangularRenderer.cpp
+    src/options/CommandLineOptions.cpp
 )
 
 target_include_directories(PolygonClippingExample PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}/../../../base/src/main"
     "${CMAKE_CURRENT_LIST_DIR}/../../../glfw/src/main"
     "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/main"

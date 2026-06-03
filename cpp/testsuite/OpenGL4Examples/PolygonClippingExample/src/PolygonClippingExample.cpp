@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "java/lang/String.h"
+#include "java/io/File.h"
 #include "java/util/ArrayList.txx"
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -22,9 +23,14 @@
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.h"
 #include "model/PolygonClippingFixtures.h"
+#include "model/PolygonSurfaceTessellationMode.h"
+#include "options/CommandLineOptions.h"
 #include "render/PolygonClippingHudRenderer.h"
+#include "render/PolygonTriangularRenderer.h"
 
 enum Operation { INTERSECTION=0, UNION=1, A_MINUS_B=2, B_MINUS_A=3 };
 
@@ -44,6 +50,7 @@ struct App {
     GLuint vao, vboP, vboC;
     int testIndex;
     Operation op;
+    PolygonSurfaceTessellationMode tessellationMode;
     bool showRef, showClip, showSubj, showInner, showOuter, showIntersections, showFilled;
     Polygon2D* clipPolygon;
     Polygon2D* subjectPolygon;
@@ -57,6 +64,7 @@ struct App {
     PolygonClippingHudRenderer* hud;
 
     App() : w(0), lineProg(0), constantProg(0), vao(0), vboP(0), vboC(0), testIndex(0), op(INTERSECTION),
+        tessellationMode(PolygonSurfaceTessellationMode::GLU),
         showRef(true), showClip(true), showSubj(true), showInner(true), showOuter(true),
         showIntersections(true), showFilled(true), clipPolygon(0), subjectPolygon(0), innerPolygon(0), outerPolygon(0),
         clipper(0), cameraController(0), qualityController(0), hud(0)
@@ -267,6 +275,23 @@ static void drawReference(App* a, const Matrix4x4d& mvp)
     OpenGL4Polygon2DRenderer::draw(mvp, &axis, &a->quality, 0.4f,0.1f,0.1f, 1.0f,0.2f,0.2f, a->lineProg, a->constantProg, a->vao, a->vboP, a->vboC);
 }
 
+static void drawResultPolygon(App* a, const Matrix4x4d& mvp, Polygon2D* polygon,
+    RendererConfiguration* polygonQuality,
+    float fillR, float fillG, float fillB,
+    float lineR, float lineG, float lineB)
+{
+    if (a->tessellationMode == PolygonSurfaceTessellationMode::MONOTONE_DECOMPOSITION) {
+        PolygonTriangularRenderer::fillPolygonSurface(
+            mvp, polygon, polygonQuality,
+            fillR, fillG, fillB, lineR, lineG, lineB,
+            a->lineProg, a->constantProg, a->vao, a->vboP, a->vboC);
+    } else {
+        OpenGL4Polygon2DRenderer::draw(mvp, polygon, polygonQuality,
+            fillR, fillG, fillB, lineR, lineG, lineB,
+            a->lineProg, a->constantProg, a->vao, a->vboP, a->vboC);
+    }
+}
+
 static java::String onOff(bool v)
 {
     return v ? java::String("ON") : java::String("OFF");
@@ -306,14 +331,17 @@ static java::String buildHudLine2(const App* a)
 
 static java::String buildHudLine3(const App* a)
 {
+    java::String base;
     if (a->op == INTERSECTION) {
-        return java::String("Inner [I]: ") + onOff(a->showInner)
-            + "  Outer [O]: " + onOff(a->showOuter)
-            + "  Fill [T]: " + onOff(a->showFilled);
+        base = java::String("Inner [I]: ") + onOff(a->showInner)
+            + "  Outer [O]: " + onOff(a->showOuter);
+    } else {
+        base = java::String("Result [I]: ") + onOff(a->showInner)
+            + "  Secondary [O]: " + onOff(a->showOuter);
     }
-    return java::String("Result [I]: ") + onOff(a->showInner)
-        + "  Secondary [O]: " + onOff(a->showOuter)
-        + "  Fill [T]: " + onOff(a->showFilled);
+    return base
+        + "  Fill [t]: " + onOff(a->showFilled)
+        + "  Tess [T]: " + java::String(tessellationModeDisplayName(a->tessellationMode));
 }
 
 static java::String buildHudLine4(const App* a)
@@ -427,7 +455,17 @@ static void keyCb(GLFWwindow* w, int key, int, int action, int)
         else if (key == GLFW_KEY_I) { a->showInner = !a->showInner; handledLetterShortcut = true; }
         else if (key == GLFW_KEY_O) { a->showOuter = !a->showOuter; handledLetterShortcut = true; }
         else if (key == GLFW_KEY_P) { a->showIntersections = !a->showIntersections; handledLetterShortcut = true; }
-        else if (key == GLFW_KEY_T) { a->showFilled = !a->showFilled; handledLetterShortcut = true; }
+        else if (key == GLFW_KEY_T) {
+            if (mods & KeyEvent::MASK_SHIFT) {
+                // Uppercase T: cycle surface tessellation mode (GLU vs monotone decomposition)
+                a->tessellationMode = nextTessellationMode(a->tessellationMode);
+            } else {
+                // Lowercase t: toggle whether polygon surfaces are filled
+                a->showFilled = !a->showFilled;
+            }
+            handledLetterShortcut = true;
+        }
+        else if (key == GLFW_KEY_G) { a->showFilled = !a->showFilled; handledLetterShortcut = true; }
         else if (key == GLFW_KEY_F) { handledLetterShortcut = true; }
         else if (key == GLFW_KEY_H) { handledLetterShortcut = true; }
 
@@ -460,7 +498,16 @@ static void framebufferSizeCb(GLFWwindow* w, int width, int height)
     a->camera.updateViewportResize(width, height);
 }
 
-int main()
+static void applyOptions(App& app, const CommandLineOptions& options)
+{
+    if (options.hasFixtureIndex) app.testIndex = options.fixtureIndex;
+    if (options.hasWires) app.quality.setWires(options.wires);
+    if (options.hasSurfaces) app.quality.setSurfaces(options.surfaces);
+    if (options.hasPoints) app.quality.setPoints(options.points);
+    if (options.hasTessellationMode) app.tessellationMode = options.tessellationMode;
+}
+
+static int initGlfw(int width, int height, bool visible, GLFWwindow*& outWindow)
 {
 #ifdef __APPLE__
 #ifdef GLFW_COCOA_CHDIR_RESOURCES
@@ -474,24 +521,133 @@ int main()
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    GLFWwindow* w = glfwCreateWindow(1100, 900, "PolygonClippingExample", 0, 0);
-    if (!w) return 1;
-    glfwMakeContextCurrent(w);
-    glfwSwapInterval(1);
+    if (!visible) {
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+    }
+    outWindow = glfwCreateWindow(width, height, "PolygonClippingExample", nullptr, nullptr);
+    if (!outWindow) { glfwTerminate(); return 1; }
+    glfwMakeContextCurrent(outWindow);
+    if (visible) glfwSwapInterval(1);
     glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) return 1;
+    if (glewInit() != GLEW_OK) { glfwDestroyWindow(outWindow); glfwTerminate(); return 1; }
+    return 0;
+}
 
-    App app;
-    app.w = w;
-    glfwSetWindowUserPointer(w, &app);
-    glfwSetKeyCallback(w, keyCb);
-    glfwSetFramebufferSizeCallback(w, framebufferSizeCb);
-
+static void setupGlResources(App& app)
+{
     app.lineProg = buildLineProgram();
     app.constantProg = buildConstantProgram();
     glGenVertexArrays(1, &app.vao);
     glGenBuffers(1, &app.vboP);
     glGenBuffers(1, &app.vboC);
+}
+
+static void releaseGlResources(App& app)
+{
+    if (app.vboP) { glDeleteBuffers(1, &app.vboP); app.vboP = 0; }
+    if (app.vboC) { glDeleteBuffers(1, &app.vboC); app.vboC = 0; }
+    if (app.vao)  { glDeleteVertexArrays(1, &app.vao); app.vao = 0; }
+    if (app.lineProg)     { glDeleteProgram(app.lineProg); app.lineProg = 0; }
+    if (app.constantProg) { glDeleteProgram(app.constantProg); app.constantProg = 0; }
+}
+
+static int runOffline(const CommandLineOptions& options)
+{
+    const int width = 1280;
+    const int height = 800;
+
+    GLFWwindow* w = nullptr;
+    if (initGlfw(width, height, false, w) != 0) {
+        std::fprintf(stderr, "[PolygonClippingExample] Could not create offline OpenGL context\n");
+        return 1;
+    }
+
+    App app;
+    applyOptions(app, options);
+    app.w = w;
+    setupGlResources(app);
+    glViewport(0, 0, width, height);
+    app.camera.updateViewportResize(width, height);
+
+    rebuildScene(&app);
+    focusCameraOnCurrentScene(&app);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Matrix4x4d mvp = app.camera.calculateProjectionMatrix();
+    RendererConfiguration polygonQuality = app.quality.clone();
+    polygonQuality.setSurfaces(polygonQuality.isSurfacesSet() && app.showFilled);
+
+    if (app.showRef) drawReference(&app, mvp);
+    if (app.showClip) drawPolygonWA(&app, mvp, app.clipper ? app.clipper->getClipPolyWA() : 0, 0.20f, 0.75f, 0.25f, 0.70f, 0.20f, 0.0f, 0.0f);
+    if (app.showSubj) drawPolygonWA(&app, mvp, app.clipper ? app.clipper->getSubjectPolyWA() : 0, 0.80f, 0.74f, 0.20f, 0.82f, 0.56f, 0.0f, 0.0f);
+
+    Bounds2D b = calculateBounds(&app);
+    double panelWidth = b.maxX - b.minX; if (panelWidth < 6.0) panelWidth = 6.0;
+    double panelDepth = b.maxY - b.minY; if (panelDepth < 6.0) panelDepth = 6.0;
+    Matrix4x4d innerTransform = Matrix4x4d().translation(0.0, 0.0, -panelDepth * 1.25);
+    Matrix4x4d outerTransform = Matrix4x4d().translation(panelWidth * 1.25, 0.0, 0.0);
+    if (app.showInner) drawResultPolygon(&app, mvp.multiply(innerTransform), app.innerPolygon, &polygonQuality, 0.65f,0.65f,0.70f, 0.82f,0.58f,0.36f);
+    if (app.showOuter) drawResultPolygon(&app, mvp.multiply(outerTransform), app.outerPolygon, &polygonQuality, 0.68f,0.78f,0.68f, 0.18f,0.72f,0.24f);
+
+    glFinish();
+
+    // Capture framebuffer
+    RGBImageUncompressed image;
+    image.init(width, height);
+    unsigned char* buf = new unsigned char[(size_t)width * (size_t)height * 3u];
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buf);
+
+    // OpenGL pixel rows are bottom-to-top; flip to top-to-bottom for the image
+    int pos = 0;
+    for (int row = 0; row < height; row++) {
+        int imageY = height - 1 - row;
+        for (int x = 0; x < width; x++) {
+            image.putPixel(x, imageY, (char)buf[pos], (char)buf[pos+1], (char)buf[pos+2]);
+            pos += 3;
+        }
+    }
+    delete[] buf;
+
+    releaseGlResources(app);
+    glfwDestroyWindow(w);
+    glfwTerminate();
+
+    bool ok = ImagePersistence::exportPNG(java::File("output.png"), &image);
+    if (!ok) {
+        std::fprintf(stderr, "[PolygonClippingExample] Failed to write output.png\n");
+        return 1;
+    }
+    std::printf("[PolygonClippingExample] Exported output.png\n");
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    CommandLineOptions options;
+    if (!CommandLineOptions::parse(argc, argv, options)) {
+        return 1;
+    }
+
+    if (options.offlineMode) {
+        return runOffline(options);
+    }
+
+    GLFWwindow* w = nullptr;
+    if (initGlfw(1100, 900, true, w) != 0) return 1;
+
+    App app;
+    applyOptions(app, options);
+    app.w = w;
+    glfwSetWindowUserPointer(w, &app);
+    glfwSetKeyCallback(w, keyCb);
+    glfwSetFramebufferSizeCallback(w, framebufferSizeCb);
+
+    setupGlResources(app);
     app.hud = new PolygonClippingHudRenderer();
 
     rebuildScene(&app);
@@ -518,8 +674,8 @@ int main()
         double panelDepth = b.maxY - b.minY; if (panelDepth < 6.0) panelDepth = 6.0;
         Matrix4x4d innerTransform = Matrix4x4d().translation(0.0, 0.0, -panelDepth * 1.25);
         Matrix4x4d outerTransform = Matrix4x4d().translation(panelWidth * 1.25, 0.0, 0.0);
-        if (app.showInner) OpenGL4Polygon2DRenderer::draw(mvp.multiply(innerTransform), app.innerPolygon, &polygonQuality, 0.65f,0.65f,0.70f, 0.82f,0.58f,0.36f, app.lineProg, app.constantProg, app.vao, app.vboP, app.vboC);
-        if (app.showOuter) OpenGL4Polygon2DRenderer::draw(mvp.multiply(outerTransform), app.outerPolygon, &polygonQuality, 0.68f,0.78f,0.68f, 0.18f,0.72f,0.24f, app.lineProg, app.constantProg, app.vao, app.vboP, app.vboC);
+        if (app.showInner) drawResultPolygon(&app, mvp.multiply(innerTransform), app.innerPolygon, &polygonQuality, 0.65f,0.65f,0.70f, 0.82f,0.58f,0.36f);
+        if (app.showOuter) drawResultPolygon(&app, mvp.multiply(outerTransform), app.outerPolygon, &polygonQuality, 0.68f,0.78f,0.68f, 0.18f,0.72f,0.24f);
 
         int vp[4] = {0,0,1,1};
         glGetIntegerv(GL_VIEWPORT, vp);
@@ -542,11 +698,7 @@ int main()
         glfwPollEvents();
     }
 
-    glDeleteBuffers(1, &app.vboP);
-    glDeleteBuffers(1, &app.vboC);
-    glDeleteVertexArrays(1, &app.vao);
-    glDeleteProgram(app.lineProg);
-    glDeleteProgram(app.constantProg);
+    releaseGlResources(app);
     glfwDestroyWindow(w);
     glfwTerminate();
     return 0;
