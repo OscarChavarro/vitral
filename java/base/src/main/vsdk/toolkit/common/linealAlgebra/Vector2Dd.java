@@ -25,8 +25,8 @@ public final class Vector2Dd extends FundamentalEntity {
     @Serial
     private static final long serialVersionUID = 20060502L;
 
-    private final double x;
-    private final double y;
+    public double x;
+    public double y;
 
     /**
     The default Vector3Dd value is the zero value
@@ -72,6 +72,19 @@ public final class Vector2Dd extends FundamentalEntity {
     public final Vector2Dd add(Vector2Dd b)
     {
         return new Vector2Dd(x + b.x, y + b.y);
+    }
+
+    public void set(Vector2Dd other)
+    {
+        Objects.requireNonNull(other, "Vector2Dd to copy cannot be null");
+        this.x = other.x;
+        this.y = other.y;
+    }
+
+    public void set(double nx, double ny)
+    {
+        this.x = nx;
+        this.y = ny;
     }
     
     public Vector2Dd withX(double nx) { return new Vector2Dd(nx, y); }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition._Construct;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition._ContourAwarePolygonTriangulator;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition._Monotone;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition._RandomSegmentOrder;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition._SegmentTableBuilder;
@@ -90,6 +91,12 @@ public class MonotoneDecompositionTriangulator {
     }
 
     public int triangulate(Polygon2D input, List<Triangle> triangles) {
+        int contourAwareTriangles =
+            _ContourAwarePolygonTriangulator.triangulate(input, triangles);
+        if (contourAwareTriangles >= 0) {
+            return contourAwareTriangles;
+        }
+
         int[] numVertices = new int[] {0};
         stage1PrepareAndOrder(input, numVertices);
         stage2BootStrap(numVertices[0]);

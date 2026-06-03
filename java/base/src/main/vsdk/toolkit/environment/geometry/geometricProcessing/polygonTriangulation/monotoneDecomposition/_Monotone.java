@@ -1,6 +1,7 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
 import java.util.Arrays;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 
 public final class _Monotone {
     public static final int SP_SIMPLE_LRUP = 1;
@@ -36,17 +37,17 @@ public final class _Monotone {
     private static int newMonotone() { return ++nextMonotonePolygonIndex; }
     private static int newChainElement() { return ++nextChainNodeIndex; }
 
-    private static double crossSine(_Point2D firstVector, _Point2D secondVector) {
+    private static double crossSine(Vector2Dd firstVector, Vector2Dd secondVector) {
         return (firstVector.x * secondVector.y - secondVector.x * firstVector.y);
     }
 
-    private static double length(_Point2D vector) {
+    private static double length(Vector2Dd vector) {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
 
-    private static double getAngle(_Point2D basePoint, _Point2D nextPoint, _Point2D otherPoint) {
-        _Point2D edgeFromBasePoint = new _Point2D(nextPoint.x - basePoint.x, nextPoint.y - basePoint.y);
-        _Point2D edgeToOtherPoint = new _Point2D(otherPoint.x - basePoint.x, otherPoint.y - basePoint.y);
+    private static double getAngle(Vector2Dd basePoint, Vector2Dd nextPoint, Vector2Dd otherPoint) {
+        Vector2Dd edgeFromBasePoint = new Vector2Dd(nextPoint.x - basePoint.x, nextPoint.y - basePoint.y);
+        Vector2Dd edgeToOtherPoint = new Vector2Dd(otherPoint.x - basePoint.x, otherPoint.y - basePoint.y);
 
         if (crossSine(edgeFromBasePoint, edgeToOtherPoint) >= 0) {
             return _Construct.dot(edgeFromBasePoint, edgeToOtherPoint) / length(edgeFromBasePoint) / length(edgeToOtherPoint);
@@ -409,8 +410,8 @@ public final class _Monotone {
 
     public static int triangulateMonotonePolygons(int numberOfVertices, int numberOfMonotonePolygons, int[][] op) {
         int i;
-        _Point2D yMaxPoint;
-        _Point2D yMinPoint;
+        Vector2Dd yMaxPoint;
+        Vector2Dd yMinPoint;
         int p;
         int vfirst;
         int posmax;
@@ -423,8 +424,8 @@ public final class _Monotone {
             vcount = 1;
             processed = false;
             vfirst = monotoneChainNodes[monotonePolygonEntryNode[i]].vertexIndex;
-            yMaxPoint = new _Point2D(vertexChains[vfirst].point);
-            yMinPoint = new _Point2D(vertexChains[vfirst].point);
+            yMaxPoint = new Vector2Dd(vertexChains[vfirst].point);
+            yMinPoint = new Vector2Dd(vertexChains[vfirst].point);
             posmax = monotonePolygonEntryNode[i];
             monotoneChainNodes[monotonePolygonEntryNode[i]].isMarked = true;
             p = monotoneChainNodes[monotonePolygonEntryNode[i]].nextNodeIndex;
@@ -438,11 +439,11 @@ public final class _Monotone {
                 }
 
                 if (_Construct.greaterThan(vertexChains[v].point, yMaxPoint)) {
-                    yMaxPoint = new _Point2D(vertexChains[v].point);
+                    yMaxPoint = new Vector2Dd(vertexChains[v].point);
                     posmax = p;
                 }
                 if (_Construct.lessThan(vertexChains[v].point, yMinPoint)) {
-                    yMinPoint = new _Point2D(vertexChains[v].point);
+                    yMinPoint = new Vector2Dd(vertexChains[v].point);
                 }
                 p = monotoneChainNodes[p].nextNodeIndex;
                 vcount++;

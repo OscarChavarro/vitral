@@ -2,6 +2,7 @@
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_RandomSegmentOrder.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 
@@ -85,6 +86,13 @@ int MonotoneDecompositionTriangulator::stage4FinalizeAndExtractTriangles(
 void MonotoneDecompositionTriangulator::triangulate(
     const Polygon2D &input, java::ArrayList<Triangle> &triangles,
     int &triangleCount) {
+    const int contourAwareTriangles =
+        _ContourAwarePolygonTriangulator::triangulate(input, triangles);
+    if (contourAwareTriangles >= 0) {
+        triangleCount = contourAwareTriangles;
+        return;
+    }
+
     int numVertices = 0;
 
     stage1PrepareAndOrder(input, numVertices);

@@ -1,5 +1,7 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+
 final class _TriangulationTrapezoid {
     // [SEID1991].3 Bounding segment indices. The original reference allocates
     // the trapezoid table with calloc, so unassigned bounding segments default
@@ -9,8 +11,8 @@ final class _TriangulationTrapezoid {
     // sentinel would index out of the segment table and crash).
     int leftSegmentIndex = 0;
     int rightSegmentIndex = 0;
-    _Point2D upperPoint = new _Point2D();
-    _Point2D lowerPoint = new _Point2D();
+    Vector2Dd upperPoint = new Vector2Dd();
+    Vector2Dd lowerPoint = new Vector2Dd();
     int upperLeftTrapezoidIndex;
     int upperRightTrapezoidIndex;
     int lowerLeftTrapezoidIndex;

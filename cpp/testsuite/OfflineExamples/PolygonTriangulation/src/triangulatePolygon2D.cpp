@@ -296,33 +296,6 @@ void triangulatePolygon(
     triangulator.triangulate(inputPolygon, triangles, triangleCount);
 }
 
-bool isExample22QuadrilateralFallback(const std::string& inputFileName,
-    const Polygon2D& inputPolygon)
-{
-    return basenameOf(inputFileName) == "example22.polygon" &&
-        inputPolygon.loops.size() == 1 &&
-        inputPolygon.loops.get(0)->vertices.size() == 4;
-}
-
-MonotoneDecompositionTriangulator::Triangle makeTriangle(int a, int b, int c)
-{
-    MonotoneDecompositionTriangulator::Triangle triangle;
-    triangle.add(a);
-    triangle.add(b);
-    triangle.add(c);
-    return triangle;
-}
-
-void triangulateExample22Quadrilateral(
-    java::ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
-    int& triangleCount)
-{
-    triangles.clear();
-    triangles.add(makeTriangle(1, 3, 0));
-    triangles.add(makeTriangle(1, 2, 3));
-    triangleCount = 2;
-}
-
 void printTriangles(
     const java::ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
     int triangleCount)
@@ -600,13 +573,7 @@ int run(int argc, char* argv[])
     PolygonModel model = commandLineOptions.toPolygonModel(inputPolygon);
     java::ArrayList<MonotoneDecompositionTriangulator::Triangle> triangles;
     int triangleCount = 0;
-    if (isExample22QuadrilateralFallback(commandLineOptions.inputFileName,
-            inputPolygon)) {
-        triangulateExample22Quadrilateral(triangles, triangleCount);
-    }
-    else {
-        triangulatePolygon(inputPolygon, triangles, triangleCount);
-    }
+    triangulatePolygon(inputPolygon, triangles, triangleCount);
     printTriangles(triangles, triangleCount);
 
     RGBImageUncompressed image;

@@ -1,15 +1,17 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+
 final class _TriangulationTrapezoidQueryNode {
     int queryNodeType;
     int segmentIndex;
-    _Point2D splitPoint = new _Point2D();
+    Vector2Dd splitPoint = new Vector2Dd();
     int trapezoidIndex;
     _TriangulationTrapezoidQueryNode parent;
     _TriangulationTrapezoidQueryNode leftChild;
     _TriangulationTrapezoidQueryNode rightChild;
 
-    int locateEndpoint(_Point2D queryPoint, _Point2D otherPoint) {
+    int locateEndpoint(Vector2Dd queryPoint, Vector2Dd otherPoint) {
         switch (queryNodeType) {
         case _Construct.T_SINK:
             return trapezoidIndex;
@@ -38,7 +40,7 @@ final class _TriangulationTrapezoidQueryNode {
         }
     }
 
-    private static boolean isLeftOf(int segmentIndex, _Point2D queryPoint) {
+    private static boolean isLeftOf(int segmentIndex, Vector2Dd queryPoint) {
         _TriangulationSegment s = _Construct.segmentAt(segmentIndex);
         double area;
 

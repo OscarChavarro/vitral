@@ -1,6 +1,7 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
 import java.util.ArrayList;
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 
 public final class _Construct {
     public static final int T_X = 1;
@@ -73,45 +74,45 @@ public final class _Construct {
         nextTrapezoidIndex = 1;
     }
 
-    private static void max(_Point2D out, _Point2D a, _Point2D b) {
+    private static void max(Vector2Dd out, Vector2Dd a, Vector2Dd b) {
         if (a.y > b.y + TRIANGULATOR_EPSILON) out.set(a);
         else if (fpEqual(a.y, b.y)) out.set((a.x > b.x + TRIANGULATOR_EPSILON) ? a : b);
         else out.set(b);
     }
 
-    private static void min(_Point2D out, _Point2D a, _Point2D b) {
+    private static void min(Vector2Dd out, Vector2Dd a, Vector2Dd b) {
         if (a.y < b.y - TRIANGULATOR_EPSILON) out.set(a);
         else if (fpEqual(a.y, b.y)) out.set((a.x < b.x) ? a : b);
         else out.set(b);
     }
 
-    public static boolean greaterThan(_Point2D a, _Point2D b) {
+    public static boolean greaterThan(Vector2Dd a, Vector2Dd b) {
         if (a.y > b.y + TRIANGULATOR_EPSILON) return true;
         if (a.y < b.y - TRIANGULATOR_EPSILON) return false;
         return a.x > b.x;
     }
 
-    public static boolean equalTo(_Point2D a, _Point2D b) {
+    public static boolean equalTo(Vector2Dd a, Vector2Dd b) {
         return fpEqual(a.y, b.y) && fpEqual(a.x, b.x);
     }
 
-    public static boolean greaterThanEqualTo(_Point2D a, _Point2D b) {
+    public static boolean greaterThanEqualTo(Vector2Dd a, Vector2Dd b) {
         if (a.y > b.y + TRIANGULATOR_EPSILON) return true;
         if (a.y < b.y - TRIANGULATOR_EPSILON) return false;
         return a.x >= b.x;
     }
 
-    public static boolean lessThan(_Point2D a, _Point2D b) {
+    public static boolean lessThan(Vector2Dd a, Vector2Dd b) {
         if (a.y < b.y - TRIANGULATOR_EPSILON) return true;
         if (a.y > b.y + TRIANGULATOR_EPSILON) return false;
         return a.x < b.x;
     }
 
-    public static double cross(_Point2D v0, _Point2D v1, _Point2D v2) {
+    public static double cross(Vector2Dd v0, Vector2Dd v1, Vector2Dd v2) {
         return ((v1.x - v0.x) * (v2.y - v0.y) - (v1.y - v0.y) * (v2.x - v0.x));
     }
 
-    public static double dot(_Point2D v0, _Point2D v1) {
+    public static double dot(Vector2Dd v0, Vector2Dd v1) {
         return (v0.x * v1.x + v0.y * v1.y);
     }
 

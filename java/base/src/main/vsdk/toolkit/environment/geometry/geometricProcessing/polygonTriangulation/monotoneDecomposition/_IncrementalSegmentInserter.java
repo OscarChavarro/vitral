@@ -1,5 +1,7 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polygonTriangulation.monotoneDecomposition;
 
+import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
+
 public final class _IncrementalSegmentInserter {
     private _IncrementalSegmentInserter() {}
     private static _TriangulationTrapezoid trap(int i) { return _Construct.trapezoids.get(i); }
@@ -11,7 +13,7 @@ public final class _IncrementalSegmentInserter {
     private static void normalizeSegmentForInsertion(_TriangulationSegment segment, BoolRef isSwapped) {
         isSwapped.value = false;
         if (_Construct.greaterThan(segment.endPoint, segment.startPoint)) {
-            _Point2D swapPoint = new _Point2D(segment.startPoint);
+            Vector2Dd swapPoint = new Vector2Dd(segment.startPoint);
             _TriangulationTrapezoidQueryNode tmp = segment.startPointQueryNode;
             segment.startPoint.set(segment.endPoint);
             segment.endPoint.set(swapPoint);
@@ -44,8 +46,8 @@ public final class _IncrementalSegmentInserter {
     }
 
     private static int splitTrapezoidAtEndpoint(int segmentIndex, _TriangulationSegment segment, boolean useFirstEndpoint) {
-        _Point2D endpoint = useFirstEndpoint ? segment.startPoint : segment.endPoint;
-        _Point2D otherEndpoint = useFirstEndpoint ? segment.endPoint : segment.startPoint;
+        Vector2Dd endpoint = useFirstEndpoint ? segment.startPoint : segment.endPoint;
+        Vector2Dd otherEndpoint = useFirstEndpoint ? segment.endPoint : segment.startPoint;
 
         int upperTrapezoid = (useFirstEndpoint ? segment.startPointQueryNode : segment.endPointQueryNode)
             .locateEndpoint(endpoint, otherEndpoint);
@@ -95,8 +97,8 @@ public final class _IncrementalSegmentInserter {
     private static int locateOrInsertEndpointTrapezoid(
         int segmentIndex, _TriangulationSegment segment, boolean useFirstEndpoint,
         boolean endpointAlreadyInserted, BoolRef wasEndpointInserted) {
-        _Point2D endpoint = useFirstEndpoint ? segment.startPoint : segment.endPoint;
-        _Point2D otherEndpoint = useFirstEndpoint ? segment.endPoint : segment.startPoint;
+        Vector2Dd endpoint = useFirstEndpoint ? segment.startPoint : segment.endPoint;
+        Vector2Dd otherEndpoint = useFirstEndpoint ? segment.endPoint : segment.startPoint;
 
         wasEndpointInserted.value = false;
         if (endpointAlreadyInserted) {
@@ -108,7 +110,7 @@ public final class _IncrementalSegmentInserter {
         return splitTrapezoidAtEndpoint(segmentIndex, segment, useFirstEndpoint);
     }
 
-    private static boolean isLeftOf(int segmentIndex, _Point2D queryPoint) {
+    private static boolean isLeftOf(int segmentIndex, Vector2Dd queryPoint) {
         _TriangulationSegment s = _Construct.segments.get(segmentIndex);
         double area;
 
@@ -460,7 +462,7 @@ public final class _IncrementalSegmentInserter {
             else {
                 double y0;
                 double yt;
-                _Point2D tmpPoint = new _Point2D();
+                Vector2Dd tmpPoint = new Vector2Dd();
                 int tnext;
                 boolean isD0;
 
