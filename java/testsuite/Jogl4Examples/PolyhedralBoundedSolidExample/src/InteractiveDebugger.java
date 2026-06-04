@@ -16,6 +16,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import java.io.File;
+import java.io.FileOutputStream;
 
 // JOGL classes
 import com.jogamp.opengl.GLCapabilities;
@@ -25,9 +26,11 @@ import com.jogamp.opengl.awt.GLCanvas;
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.KeyEvent;
+import vsdk.toolkit.io.geometry.stl.StlWriter;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
 // Application classes
@@ -43,6 +46,7 @@ public class InteractiveDebugger extends JFrame implements
     private static final String WINDOW_TITLE =
         "VITRAL concept test - Polyhedral bounded solid example";
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(1024, 768);
+    private static final double STL_EXPORT_SCALE_FACTOR = 1.0 / 100.0;
 
     private final DebuggerModel model;
     private final DebuggerKeyboardInteractionTechniques keyboardInteractionTechniques;
@@ -106,6 +110,36 @@ public class InteractiveDebugger extends JFrame implements
         if ( model.getCanvas() != null ) {
             model.getCanvas().repaint();
             model.getCanvas().display();
+        }
+    }
+
+    private void exportCurrentSolidToStl()
+    {
+        PolyhedralBoundedSolid solid = model.getSolid();
+        if ( solid == null ) {
+            System.err.println("[PolyhedralBoundedSolidExample] No selected solid "
+                + "available for STL export");
+            return;
+        }
+
+        File outputFile = new File("output.stl");
+        ensureParentFolder(outputFile);
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            StlWriter.exportSolid(solid, outputStream, STL_EXPORT_SCALE_FACTOR);
+            System.out.println("[PolyhedralBoundedSolidExample] Exported " +
+                outputFile.getPath());
+        }
+        catch ( Exception e ) {
+            System.err.println("[PolyhedralBoundedSolidExample] STL export failed: "
+                + e.getMessage());
+        }
+    }
+
+    private static void ensureParentFolder(File outputFile)
+    {
+        File parent = outputFile.getParentFile();
+        if ( parent != null && !parent.exists() ) {
+            parent.mkdirs();
         }
     }
 
@@ -443,6 +477,11 @@ public class InteractiveDebugger extends JFrame implements
                          InteractiveDebugger.this.joglDebuggerRenderer
                              .requestScreenshot(new File("screenshot.png"));
                          InteractiveDebugger.this.repaintCanvas();
+                     }
+
+                     @Override
+                     public void requestStlExport() {
+                         InteractiveDebugger.this.exportCurrentSolidToStl();
                      }
                  }) ) {
             recenterOrbiterAfterModelChange(

@@ -25,6 +25,7 @@ public class DebuggerKeyboardInteractionTechniques
         void rebuildSolid();
         void toggleFullscreen();
         void requestScreenshot();
+        void requestStlExport();
     }
 
     public boolean processPressed(DebuggerModel model, KeyEvent event, Actions actions)
@@ -89,6 +90,10 @@ public class DebuggerKeyboardInteractionTechniques
             }
             case KeyEvent.KEY_PERIOD -> {
                 actions.requestScreenshot();
+                handled = true;
+            }
+            case KeyEvent.KEY_m, KeyEvent.KEY_M -> {
+                actions.requestStlExport();
                 handled = true;
             }
 
