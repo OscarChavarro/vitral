@@ -41,7 +41,7 @@ public class InteractiveModelPreviewer extends JFrame implements
     private static final String WINDOW_TITLE =
         "VITRAL concept test - Tangible Interface Gizmo Creator";
     private static final Dimension DEFAULT_WINDOW_SIZE = new Dimension(1024, 768);
-    private static final double STL_EXPORT_SCALE_FACTOR = 1.0 / 10.0;
+    private static final double STL_EXPORT_SCALE_FACTOR = 100;
 
     private final TangibleInterfaceGizmosModel model;
     private final DebuggerKeyboardInteractionTechniques keyboardInteractionTechniques;

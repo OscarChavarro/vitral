@@ -52,7 +52,7 @@ public class DebuggerKeyboardInteractionTechniques
             model.setDebugVertices(model.notDebugVertices());
             handled = true;
             break;
-          case KeyEvent.KEY_f:
+          case KeyEvent.KEY_g:
             actions.toggleFullscreen();
             handled = true;
             break;
@@ -76,7 +76,6 @@ public class DebuggerKeyboardInteractionTechniques
             handled = true;
             break;
           case KeyEvent.KEY_m:
-          case KeyEvent.KEY_M:
             actions.requestStlExport();
             handled = true;
             break;
@@ -104,34 +103,11 @@ public class DebuggerKeyboardInteractionTechniques
             actions.exportCurrentModelStlIfMissing();
             handled = true;
             break;
-          case KeyEvent.KEY_q:
-            model.setSubdivisionCircumference(model.getSubdivisionCircumference() - 1);
-            model.clampSubdivisions();
-            actions.rebuildSolid();
-            handled = true;
-            break;
-          case KeyEvent.KEY_Q:
-            model.setSubdivisionCircumference(model.getSubdivisionCircumference() + 1);
-            actions.rebuildSolid();
-            handled = true;
-            break;
-          case KeyEvent.KEY_w:
-            model.setSubdivisionHeight(model.getSubdivisionHeight() - 1);
-            model.clampSubdivisions();
-            actions.rebuildSolid();
-            handled = true;
-            break;
-          case KeyEvent.KEY_W:
-            model.setSubdivisionHeight(model.getSubdivisionHeight() + 1);
-            actions.rebuildSolid();
-            handled = true;
-            break;
           default:
             break;
         }
 
         model.clampFaceIndex();
-        model.clampSubdivisions();
         return repaint || handled;
     }
 

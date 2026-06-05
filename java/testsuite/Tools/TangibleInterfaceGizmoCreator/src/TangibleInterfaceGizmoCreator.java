@@ -72,8 +72,21 @@ public class TangibleInterfaceGizmoCreator
     private static void ensureParentFolder(File outputFile)
     {
         File parent = outputFile.getParentFile();
-        if ( parent != null && !parent.exists() ) {
-            parent.mkdirs();
+        if ( parent == null ) {
+            return;
+        }
+        if ( parent.exists() ) {
+            if ( !parent.isDirectory() ) {
+                throw new IllegalStateException("Output parent path is not a directory: "
+                    + parent.getPath());
+            }
+            return;
+        }
+
+        boolean created = parent.mkdirs();
+        if ( !created && !parent.isDirectory() ) {
+            throw new IllegalStateException("Unable to create output directory: "
+                + parent.getPath());
         }
     }
 
@@ -107,7 +120,7 @@ public class TangibleInterfaceGizmoCreator
                 throw new IllegalStateException("Solid builder returned null");
             }
         }
-        catch ( Throwable e ) {
+        catch ( Exception e ) {
             model.setErrorState(formatBuildErrorMessage(model, e));
         }
     }

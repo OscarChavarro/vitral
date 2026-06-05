@@ -16,17 +16,12 @@ import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.gui.CameraController;
-import vsdk.toolkit.gui.CameraControllerOrbiter;
+import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.RendererConfigurationController;
 
 public class TangibleInterfaceGizmosModel
 {
-    private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
-    private static final int MIN_SUBDIVISION_HEIGHT = 1;
-
     private GizmoNames solidModelName = GizmoNames.CUBE_PART_1;
-    private int subdivisionCircumference = 16;
-    private int subdivisionHeight = 8;
     private final Camera camera;
     private final SimpleMaterial material;
     private final Light light1;
@@ -48,16 +43,16 @@ public class TangibleInterfaceGizmosModel
     public TangibleInterfaceGizmosModel()
     {
         camera = new Camera();
-        camera.setPosition(new Vector3Dd(2, -1, 2));
+        camera.setPosition(new Vector3Dd(0.75, 0.50, 2.00));
         Matrix4x4d rotationMatrix = new Matrix4x4d();
         rotationMatrix = rotationMatrix.eulerAnglesRotation(
-            Math.toRadians(135), Math.toRadians(-35), 0);
+            Math.toRadians(90), Math.toRadians(-90), 0);
         camera.setRotation(rotationMatrix);
 
         quality = new RendererConfiguration();
         quality.changeWires();
         qualityController = new RendererConfigurationController(quality);
-        cameraController = new CameraControllerOrbiter(camera);
+        cameraController = new CameraControllerAquynza(camera);
 
         material = defaultMaterial();
         light1 = new Light(LightType.POINT, new Vector3Dd(3, -3, 2),
@@ -92,16 +87,6 @@ public class TangibleInterfaceGizmosModel
         System.err.println("[TangibleInterfaceGizmoCreator] " + errorMessage);
     }
 
-    public void clampSubdivisions()
-    {
-        if ( subdivisionCircumference < MIN_SUBDIVISION_CIRCUMFERENCE ) {
-            subdivisionCircumference = MIN_SUBDIVISION_CIRCUMFERENCE;
-        }
-        if ( subdivisionHeight < MIN_SUBDIVISION_HEIGHT ) {
-            subdivisionHeight = MIN_SUBDIVISION_HEIGHT;
-        }
-    }
-
     public GizmoNames getSolidModelName()
     {
         return solidModelName;
@@ -132,26 +117,6 @@ public class TangibleInterfaceGizmosModel
     public void setSolidModelName(GizmoNames solidModelName)
     {
         this.solidModelName = solidModelName;
-    }
-
-    public int getSubdivisionCircumference()
-    {
-        return subdivisionCircumference;
-    }
-
-    public void setSubdivisionCircumference(int subdivisionCircumference)
-    {
-        this.subdivisionCircumference = subdivisionCircumference;
-    }
-
-    public int getSubdivisionHeight()
-    {
-        return subdivisionHeight;
-    }
-
-    public void setSubdivisionHeight(int subdivisionHeight)
-    {
-        this.subdivisionHeight = subdivisionHeight;
     }
 
     public Camera getCamera()

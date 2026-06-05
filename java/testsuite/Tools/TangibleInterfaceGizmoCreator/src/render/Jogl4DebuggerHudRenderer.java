@@ -79,8 +79,6 @@ public class Jogl4DebuggerHudRenderer
             + (model.notDebugVertices() ? "OFF" : "ON");
         String referenceFrameMessage = "Reference frame [Space]: "
             + (model.isShowCoordinateSystem() ? "ON" : "OFF");
-        String nrMessage = "NR [q, Q]: " + model.getSubdivisionCircumference();
-        String nhMessage = "NH [w, W]: " + model.getSubdivisionHeight();
 
         hudTextRenderer.beginRendering(width, height);
         hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -89,9 +87,6 @@ public class Jogl4DebuggerHudRenderer
         hudTextRenderer.draw(verticesMessage, 16, height - (28 + 2 * LINE_HEIGHT));
         hudTextRenderer.draw(referenceFrameMessage, 16,
             height - (28 + 3 * LINE_HEIGHT));
-        drawTopRight(hudTextRenderer, width, height, nrMessage, 28);
-        drawTopRight(hudTextRenderer, width, height, nhMessage,
-            28 + LINE_HEIGHT);
         if ( model.isErrorState() ) {
             hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
             hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
