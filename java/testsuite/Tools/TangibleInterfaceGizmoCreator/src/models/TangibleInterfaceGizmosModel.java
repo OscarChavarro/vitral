@@ -35,6 +35,8 @@ public class TangibleInterfaceGizmosModel
     private final RendererConfigurationController qualityController;
     private final CameraController cameraController;
     private PolyhedralBoundedSolid solid;
+    private int faceIndex = -2;
+    private boolean debugVertices = false;
     private GLCanvas canvas;
     private boolean showCoordinateSystem = true;
     private boolean errorState = false;
@@ -105,6 +107,28 @@ public class TangibleInterfaceGizmosModel
         return solidModelName;
     }
 
+    public int getFaceCount()
+    {
+        if ( solid == null || solid.getPolygonsList() == null ) {
+            return 0;
+        }
+        return solid.getPolygonsList().size();
+    }
+
+    public void clampFaceIndex()
+    {
+        if ( faceIndex < -2 ) {
+            faceIndex = -2;
+            return;
+        }
+
+        int totalFaces = getFaceCount();
+        int maxFaceIndex = totalFaces - 1;
+        if ( faceIndex > maxFaceIndex ) {
+            faceIndex = maxFaceIndex;
+        }
+    }
+
     public void setSolidModelName(GizmoNames solidModelName)
     {
         this.solidModelName = solidModelName;
@@ -173,6 +197,27 @@ public class TangibleInterfaceGizmosModel
     public void setSolid(PolyhedralBoundedSolid solid)
     {
         this.solid = solid;
+        clampFaceIndex();
+    }
+
+    public int getFaceIndex()
+    {
+        return faceIndex;
+    }
+
+    public void setFaceIndex(int faceIndex)
+    {
+        this.faceIndex = faceIndex;
+    }
+
+    public boolean notDebugVertices()
+    {
+        return !debugVertices;
+    }
+
+    public void setDebugVertices(boolean debugVertices)
+    {
+        this.debugVertices = debugVertices;
     }
 
     public GLCanvas getCanvas()

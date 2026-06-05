@@ -339,6 +339,12 @@ public class PolyhedralBoundedSolidNumericPolicy
         return context.bigEpsilon();
     }
 
+    public static double areaTolerance2D(ToleranceContext context)
+    {
+        double linearTolerance = context.bigEpsilon();
+        return linearTolerance * linearTolerance;
+    }
+
     private static double clamp(double value, double min, double max)
     {
         if ( value < min ) {

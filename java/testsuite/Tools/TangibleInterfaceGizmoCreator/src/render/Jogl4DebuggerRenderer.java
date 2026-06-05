@@ -112,7 +112,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         gl.glPolygonOffset(2.0f, 2.0f);
         drawReferenceFrame(gl);
         Jogl4PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl,
-            model.getSolid(), -2);
+            model.getSolid(), model.getFaceIndex());
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl,
+            model.getSolid(), model.getFaceIndex());
         gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
     }
 

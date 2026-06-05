@@ -387,8 +387,7 @@ public final class _ContourAwarePolygonTriangulator {
                 _IndexedVertex previous = polygon.get((i + polygon.size() - 1) % polygon.size());
                 _IndexedVertex current = polygon.get(i);
                 _IndexedVertex next = polygon.get((i + 1) % polygon.size());
-                if (samePoint(previous, current) || samePoint(current, next) ||
-                    Math.abs(cross(previous, current, next)) <= EPSILON) {
+                if (samePoint(previous, current) || samePoint(current, next)) {
                     polygon.remove(i);
                     removed = true;
                     break;

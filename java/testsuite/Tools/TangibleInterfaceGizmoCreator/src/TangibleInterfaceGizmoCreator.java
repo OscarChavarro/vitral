@@ -1,12 +1,16 @@
 import java.io.File;
+import java.io.FileOutputStream;
 
 import models.TangibleInterfaceGizmosModel;
 import options.CommandLineOptions;
 import render.Jogl4HeadlessRenderer;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.io.geometry.stl.StlWriter;
 
 public class TangibleInterfaceGizmoCreator
 {
+    private static final double STL_EXPORT_SCALE_FACTOR = 1.0 / 100.0;
+
     public static void main(String[] args)
     {
         TangibleInterfaceGizmosModel model = new TangibleInterfaceGizmosModel();
@@ -29,6 +33,7 @@ public class TangibleInterfaceGizmoCreator
         buildSolidWithRecovery(model);
 
         if ( options.isOffline() ) {
+            exportOfflineStl(model);
             Jogl4HeadlessRenderer renderer = new Jogl4HeadlessRenderer(
                 model, new File(options.getOutputPath()));
             renderer.render();
@@ -41,6 +46,35 @@ public class TangibleInterfaceGizmoCreator
         }
 
         InteractiveModelPreviewer.launch(model);
+    }
+
+    private static void exportOfflineStl(TangibleInterfaceGizmosModel model)
+    {
+        if ( model.getSolid() == null || model.isErrorState() ) {
+            return;
+        }
+
+        int modelIndex = model.getSolidModelName().getDisplayIndex();
+        File outputFile = new File("output" + modelIndex + ".stl");
+        ensureParentFolder(outputFile);
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            StlWriter.exportSolid(model.getSolid(), outputStream,
+                STL_EXPORT_SCALE_FACTOR);
+            System.out.println("[TangibleInterfaceGizmoCreator] Exported " +
+                outputFile.getPath());
+        }
+        catch ( Exception e ) {
+            System.err.println("[TangibleInterfaceGizmoCreator] STL export failed: "
+                + e.getMessage());
+        }
+    }
+
+    private static void ensureParentFolder(File outputFile)
+    {
+        File parent = outputFile.getParentFile();
+        if ( parent != null && !parent.exists() ) {
+            parent.mkdirs();
+        }
     }
 
     private static void applyOptionOverrides(

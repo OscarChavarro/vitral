@@ -9,12 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
@@ -35,6 +37,10 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     public static final int UNION = 1;
     public static final int INTERSECTION = 2;
     public static final int SUBTRACT = 3;
+
+    // Weld tolerance for glyph/poly-line simplification, expressed as a
+    // fraction of the contour bounding-box diagonal.
+    private static final double GLYPH_WELD_RELATIVE_FACTOR = 1.0e-2;
 
     /**
     Applies a transformation matrix to all vertices in the solid.
@@ -387,14 +393,16 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
         state.firstPointInLoop = new Vector3Dd(point);
         state.lastAcceptedPoint = new Vector3Dd(point);
+        state.verticesInCurrentLoop = 1;
     }
 
     private static boolean shouldAcceptPolyLinePoint(_BoundaryRepresentationFromCurveBuildState state,
                                                      Vector3Dd point)
     {
         return Vector3Dd.distance(point, state.lastAcceptedPoint) >
-            VSDK.EPSILON &&
-            Vector3Dd.distance(point, state.firstPointInLoop) > VSDK.EPSILON;
+            state.weldEpsilon &&
+            Vector3Dd.distance(point, state.firstPointInLoop) >
+            state.weldEpsilon;
     }
 
     private static void appendPointToCurrentLoop(_BoundaryRepresentationFromCurveBuildState state,
@@ -404,6 +412,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
             new Vector3Dd(point));
         state.nextVertexId++;
         state.lastAcceptedPoint = new Vector3Dd(point);
+        state.verticesInCurrentLoop++;
     }
 
     private static void processSampledSegment(_BoundaryRepresentationFromCurveBuildState state,
@@ -423,6 +432,12 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
     private static void closeLoopWithMef(_BoundaryRepresentationFromCurveBuildState state)
     {
+        if ( state.verticesInCurrentLoop < 3 ) {
+            Logger.reportMessage(null, VSDK.WARNING, "closeLoopWithMef",
+                "Degenerate glyph loop with " + state.verticesInCurrentLoop +
+                " distinct vertices after welding; result may be invalid.");
+        }
+
         // [MANT1988] 12.2: close current wire by creating the face boundary.
         PolyhedralBoundedSolidEulerOperators.mef(state.solid, 1, 1,
             state.lastLoopStartVertexId, state.lastLoopStartVertexId+1,
@@ -436,6 +451,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         state.firstLoop = false;
         state.beginningOfLoop = true;
         state.lastAcceptedPoint = null;
+        state.verticesInCurrentLoop = 0;
     }
 
     public static PolyhedralBoundedSolid createBrepFromParametricCurve(
@@ -443,6 +459,33 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     {
         int i;
         _BoundaryRepresentationFromCurveBuildState state = new _BoundaryRepresentationFromCurveBuildState();
+        double[] minMax = curve.getMinMax();
+        double dx;
+        double dy;
+        double dz;
+        double bboxDiagonal;
+
+        if ( minMax == null || minMax.length < 6 ) {
+            Logger.reportMessage(null, VSDK.WARNING,
+                "createBrepFromParametricCurve",
+                "Glyph bbox unavailable, falling back to BREP_BIG_EPSILON weld.");
+        }
+        else {
+            dx = minMax[3] - minMax[0];
+            dy = minMax[4] - minMax[1];
+            dz = minMax[5] - minMax[2];
+            bboxDiagonal = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if ( Double.isFinite(bboxDiagonal) && bboxDiagonal > 0.0 ) {
+                state.weldEpsilon = Math.max(
+                    PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON,
+                    GLYPH_WELD_RELATIVE_FACTOR * bboxDiagonal);
+            }
+            else {
+                Logger.reportMessage(null, VSDK.WARNING,
+                    "createBrepFromParametricCurve",
+                    "Glyph bbox degenerate, falling back to BREP_BIG_EPSILON weld.");
+            }
+        }
 
         for ( i = 1; i < curve.types.size(); i++ ) {
             if ( isBreakMarker(curve, i) ) {

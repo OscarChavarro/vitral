@@ -15,13 +15,13 @@ import vsdk.toolkit.render.awt.AwtFontReader;
 public final class GeneralModelsBuilder
 {
     private static final double DEFAULT_EXTRUSION_HEIGHT = 0.03;
+    private static final double TEXT_EXTRUSION_HEIGHT = 0.027;
     private static final String[] TEXT_FONT_CANDIDATES = {
         "../../../../etc/fonts/cyrvetic.ttf"
     };
     private static final String[] CUBE_PART_GLYPHS = {
         "A", "B", "C", "D", "E", "F"
     };
-    private static final String TEXT_GLYPH = "A";
     private static final double TEXT_TARGET_EXTENT = 0.144;
     private static final double TEXT_Z_OFFSET = 0.01;
 
@@ -93,7 +93,7 @@ public final class GeneralModelsBuilder
         sanitizeSolid(solid);
 
         Matrix4x4d sweep = new Matrix4x4d();
-        sweep = sweep.translation(0.0, 0.0, DEFAULT_EXTRUSION_HEIGHT);
+        sweep = sweep.translation(0.0, 0.0, TEXT_EXTRUSION_HEIGHT);
         PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
             solid, solid.findFace(1), sweep);
         sanitizeSolid(solid);

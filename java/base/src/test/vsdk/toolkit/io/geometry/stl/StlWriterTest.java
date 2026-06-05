@@ -7,13 +7,16 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTestFixtures;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.io.PersistenceElement;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,6 +92,42 @@ class StlWriterTest
             assertVectorClose(b.b, a.b.multiply(1000.0), 1.0e-3);
             assertVectorClose(b.c, a.c.multiply(1000.0), 1.0e-3);
         }
+    }
+
+    @Test
+    void given_rotatedSolid_when_exporting_then_preservesOriginalVertexPositionsAndClosedEdges()
+        throws Exception
+    {
+        // Arrange
+        PolyhedralBoundedSolid solid =
+            PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0,
+                0.0, 0.0, 0.0);
+        Matrix4x4d rotation = new Matrix4x4d();
+        rotation = rotation.eulerAnglesRotation(0.37, 0.41, 0.19);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, rotation);
+        assertThat(PolyhedralBoundedSolidValidationEngine
+            .validateIntermediate(solid)).isTrue();
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        // Action
+        StlWriter.exportSolid(solid, output);
+
+        // Assert
+        ParsedStl stl = parseBinaryStl(output.toByteArray());
+        ArrayList<String> expectedVertices = new ArrayList<>();
+        int i;
+        for ( i = 0; i < solid.getVerticesList().size(); i++ ) {
+            expectedVertices.add(asFloatKey(solid.getVerticesList().get(i).position));
+        }
+
+        for ( i = 0; i < stl.facets.size(); i++ ) {
+            Facet facet = stl.facets.get(i);
+            assertThat(expectedVertices).contains(asFloatKey(facet.a));
+            assertThat(expectedVertices).contains(asFloatKey(facet.b));
+            assertThat(expectedVertices).contains(asFloatKey(facet.c));
+        }
+        assertThat(countBoundaryEdges(stl)).isZero();
     }
 
     @Test
@@ -181,6 +220,49 @@ class StlWriterTest
                                           double epsilon)
     {
         assertThat(actual.epsilonEquals(expected, epsilon)).isTrue();
+    }
+
+    private static int countBoundaryEdges(ParsedStl stl)
+    {
+        java.util.HashMap<String, Integer> edgeCounts = new java.util.HashMap<>();
+        int i;
+        for ( i = 0; i < stl.facets.size(); i++ ) {
+            Facet facet = stl.facets.get(i);
+            increment(edgeCounts, edgeKey(facet.a, facet.b));
+            increment(edgeCounts, edgeKey(facet.b, facet.c));
+            increment(edgeCounts, edgeKey(facet.c, facet.a));
+        }
+
+        int boundaryEdges = 0;
+        for ( int count : edgeCounts.values() ) {
+            if ( count == 1 ) {
+                boundaryEdges++;
+            }
+        }
+        return boundaryEdges;
+    }
+
+    private static void increment(java.util.HashMap<String, Integer> counts,
+                                  String key)
+    {
+        counts.put(key, counts.getOrDefault(key, 0) + 1);
+    }
+
+    private static String edgeKey(Vector3Dd a, Vector3Dd b)
+    {
+        String aKey = asFloatKey(a);
+        String bKey = asFloatKey(b);
+        if ( aKey.compareTo(bKey) <= 0 ) {
+            return aKey + "|" + bKey;
+        }
+        return bKey + "|" + aKey;
+    }
+
+    private static String asFloatKey(Vector3Dd vector)
+    {
+        return Float.floatToIntBits((float)vector.x()) + ","
+            + Float.floatToIntBits((float)vector.y()) + ","
+            + Float.floatToIntBits((float)vector.z());
     }
 
     private static final class ParsedStl {

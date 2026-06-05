@@ -71,8 +71,9 @@ final class _StlFaceTriangulator
 
         FaceBasis basis = buildBasis(face, plane);
         ArrayList<ProjectedVertex> flattenedVertices = new ArrayList<>();
+        ArrayList<Vector3Dd> originalVertices = new ArrayList<>();
         Polygon2D polygon = buildProjectedPolygon(face, basis, numericContext,
-            flattenedVertices);
+            flattenedVertices, originalVertices);
 
         ArrayList<MonotoneDecompositionTriangulator.Triangle> triangles =
             new ArrayList<>();
@@ -89,7 +90,7 @@ final class _StlFaceTriangulator
         int i;
         for ( i = 0; i < triangles.size(); i++ ) {
             MonotoneDecompositionTriangulator.Triangle triangle = triangles.get(i);
-            facets.add(buildFacet(face, triangle, flattenedVertices, basis,
+            facets.add(buildFacet(face, triangle, originalVertices, basis.normal,
                 numericContext, i));
         }
         return facets;
@@ -110,7 +111,8 @@ final class _StlFaceTriangulator
         _PolyhedralBoundedSolidFace face,
         FaceBasis basis,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
-        List<ProjectedVertex> flattenedVertices)
+        List<ProjectedVertex> flattenedVertices,
+        List<Vector3Dd> originalVertices)
     {
         Polygon2D polygon = new Polygon2D();
         polygon.loops.clear();
@@ -133,7 +135,9 @@ final class _StlFaceTriangulator
             }
 
             double area = signedArea(loopVertices);
-            if ( Math.abs(area) <= numericContext.bigEpsilon() ) {
+            if ( Math.abs(area) <=
+                 PolyhedralBoundedSolidNumericPolicy.areaTolerance2D(
+                     numericContext) ) {
                 throw new IllegalStateException(
                     "STL export rejected: face " + face.id + " loop " + i
                     + " has near-zero projected area");
@@ -145,6 +149,7 @@ final class _StlFaceTriangulator
                 ProjectedVertex vertex = loopVertices.get(j);
                 polygon.addVertex(vertex.x, vertex.y);
                 flattenedVertices.add(vertex);
+                originalVertices.add(vertex.original);
             }
         }
 
@@ -187,16 +192,16 @@ final class _StlFaceTriangulator
     private static _StlFacetEmitter.Facet buildFacet(
         _PolyhedralBoundedSolidFace face,
         MonotoneDecompositionTriangulator.Triangle triangle,
-        List<ProjectedVertex> flattenedVertices,
-        FaceBasis basis,
+        List<Vector3Dd> originalVertices,
+        Vector3Dd faceNormal,
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext,
         int triangleIndex)
     {
-        validateTriangleIndices(face, triangle, flattenedVertices.size());
+        validateTriangleIndices(face, triangle, originalVertices.size());
 
-        Vector3Dd a = reproject(flattenedVertices.get(triangle.a), basis);
-        Vector3Dd b = reproject(flattenedVertices.get(triangle.b), basis);
-        Vector3Dd c = reproject(flattenedVertices.get(triangle.c), basis);
+        Vector3Dd a = originalVertices.get(triangle.a);
+        Vector3Dd b = originalVertices.get(triangle.b);
+        Vector3Dd c = originalVertices.get(triangle.c);
 
         if ( !PolyhedralBoundedSolidNumericPolicy.pointsSeparated(a, b, numericContext) ||
              !PolyhedralBoundedSolidNumericPolicy.pointsSeparated(b, c, numericContext) ||
@@ -208,20 +213,22 @@ final class _StlFaceTriangulator
 
         Vector3Dd normal = b.subtract(a).crossProduct(c.subtract(a));
         double normalLength = normal.length();
-        if ( normalLength <= numericContext.bigEpsilon() ) {
+        if ( normalLength <=
+             PolyhedralBoundedSolidNumericPolicy.areaTolerance2D(
+                 numericContext) ) {
             throw new IllegalStateException(
                 "STL export rejected: face " + face.id + " triangulation produced "
                 + "a zero-area triangle at index " + triangleIndex);
         }
         normal = normal.multiply(1.0 / normalLength);
 
-        if ( normal.dotProduct(basis.normal) < 0.0 ) {
+        if ( normal.dotProduct(faceNormal) < 0.0 ) {
             Vector3Dd temp = b;
             b = c;
             c = temp;
             normal = b.subtract(a).crossProduct(c.subtract(a)).normalized();
-            if ( normal.dotProduct(basis.normal) < 0.0 ) {
-                normal = basis.normal;
+            if ( normal.dotProduct(faceNormal) < 0.0 ) {
+                normal = faceNormal;
             }
         }
 
@@ -240,13 +247,6 @@ final class _StlFaceTriangulator
                 "STL export rejected: face " + face.id
                 + " triangulation returned an out-of-range index");
         }
-    }
-
-    private static Vector3Dd reproject(ProjectedVertex projected, FaceBasis basis)
-    {
-        return basis.origin
-            .add(basis.u.multiply(projected.x))
-            .add(basis.v.multiply(projected.y));
     }
 
     private static double signedArea(List<ProjectedVertex> vertices)

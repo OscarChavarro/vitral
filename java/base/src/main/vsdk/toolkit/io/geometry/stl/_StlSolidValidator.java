@@ -114,10 +114,15 @@ final class _StlSolidValidator
                     "STL export rejected: face " + face.id + " loop " + i
                     + " has fewer than 3 vertices");
             }
-            if ( projectedLoopAreaMagnitude(points, face) <= numericContext.bigEpsilon() ) {
+            double areaTolerance = PolyhedralBoundedSolidNumericPolicy
+                .areaTolerance2D(PolyhedralBoundedSolidNumericPolicy.forFace(face));
+            double projectedArea = projectedLoopAreaMagnitude(points, face);
+            if ( projectedArea <= areaTolerance ) {
                 throw new IllegalStateException(
                     "STL export rejected: face " + face.id + " loop " + i
-                    + " has near-zero area");
+                    + " has near-zero area"
+                    + buildLoopDiagnostics(face, loop, i, projectedArea,
+                        areaTolerance));
             }
         }
     }
@@ -183,5 +188,41 @@ final class _StlSolidValidator
             return new Vector3Dd(0.0, 1.0, 0.0);
         }
         return new Vector3Dd(0.0, 0.0, 1.0);
+    }
+
+    private static String buildLoopDiagnostics(
+        _PolyhedralBoundedSolidFace face,
+        _PolyhedralBoundedSolidLoop loop,
+        int loopIndex,
+        double projectedArea,
+        double areaTolerance)
+    {
+        StringBuilder msg = new StringBuilder();
+        msg.append("\n  projectedArea=").append(projectedArea);
+        msg.append(" areaTolerance=").append(areaTolerance);
+        msg.append(" faceScale=")
+            .append(PolyhedralBoundedSolidNumericPolicy.forFace(face).modelScale());
+        msg.append(" solidScale=")
+            .append(PolyhedralBoundedSolidNumericPolicy.forSolid(face.parentSolid)
+                .modelScale());
+        if ( face.getContainingPlane() != null ) {
+            Vector3Dd normal = face.getContainingPlane().getNormal();
+            msg.append(" normal=(")
+                .append(normal.x()).append(", ")
+                .append(normal.y()).append(", ")
+                .append(normal.z()).append(")");
+        }
+        msg.append("\n  loop ").append(loopIndex).append(" vertices:");
+
+        _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+        _PolyhedralBoundedSolidHalfEdge current = start;
+        do {
+            msg.append("\n    v").append(current.startingVertex.id).append("=(")
+                .append(current.startingVertex.position.x()).append(", ")
+                .append(current.startingVertex.position.y()).append(", ")
+                .append(current.startingVertex.position.z()).append(")");
+            current = current.next();
+        } while ( current != null && current != start );
+        return msg.toString();
     }
 }
