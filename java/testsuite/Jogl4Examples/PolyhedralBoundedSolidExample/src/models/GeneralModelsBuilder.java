@@ -153,7 +153,7 @@ public final class GeneralModelsBuilder
             mySolid = createLaminaWithHole();
             break;
           case FONT_BLOCK:
-            mySolid = createFontBlock("../../../../samples/fonts/microsoftArial.ttf", "\u7c8b\u00e1\u00d1\u3055\u3042\u307d");
+            mySolid = createFontBlock("../../../../etc/fonts/cyrvetic.ttf", "A");
 
             translationMatrix = new Matrix4x4d();
             translationMatrix = translationMatrix.translation(0.0, 0.0, 0.1);
@@ -602,24 +602,26 @@ public final class GeneralModelsBuilder
 
     public static PolyhedralBoundedSolid createFontBlock(String fontFile, String msg)
     {
-        //-----------------------------------------------------------------
-        AwtFontReader fontReader = new AwtFontReader();
-        ParametricCurve curve = null;
-
-        for ( int i = 0; i < msg.length(); i++ ) {
-            if ( i != 5 ) continue;
-            String character = msg.substring(i, i+1);
-            curve = fontReader.extractGlyph(fontFile, character);
-            curve.setApproximationSteps(2);
-            break;
+        if ( msg == null || msg.isBlank() ) {
+            throw new IllegalArgumentException("Font block text cannot be blank");
         }
 
-        //-----------------------------------------------------------------
-        PolyhedralBoundedSolid solid;
+        AwtFontReader fontReader = new AwtFontReader();
+        int codePoint = msg.codePointAt(0);
+        String character = new String(Character.toChars(codePoint));
+        ParametricCurve curve = fontReader.extractGlyph(fontFile, character);
+        if ( curve == null ) {
+            throw new IllegalStateException(
+                "Unable to extract glyph '" + character + "' from font " + fontFile);
+        }
+        if ( curve.types == null || curve.types.size() < 2 ) {
+            throw new IllegalStateException(
+                "Glyph '" + character + "' from font " + fontFile
+                + " did not produce a usable parametric curve");
+        }
+        curve.setApproximationSteps(8);
 
-        solid = PolyhedralBoundedSolidModeler.createBrepFromParametricCurve(curve);
-
-        return solid;
+        return PolyhedralBoundedSolidModeler.createBrepFromParametricCurve(curve);
     }
 
     /**

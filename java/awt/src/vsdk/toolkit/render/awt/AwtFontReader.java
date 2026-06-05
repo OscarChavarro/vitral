@@ -9,6 +9,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.AffineTransform;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.io.geometry.FontReader;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
@@ -88,9 +89,15 @@ public class AwtFontReader extends FontReader
 
         GlyphVector gv = currentFont.createGlyphVector(frc, characterAndItsContext);
         GeneralPath p = (GeneralPath)gv.getGlyphOutline(0);
+        if ( p == null ) {
+            System.err.println("Glyph outline is null for [" +
+                characterAndItsContext + "] in font " + fontFile);
+            return null;
+        }
 
         boolean endIt = false;
         int code;
+        Vector3Dd lastAddedEndpoint = null;
 
 
 //*****************************************************************
@@ -121,6 +128,7 @@ public class AwtFontReader extends FontReader
             code = 0;
             switch ( type ) {
               case PathIterator.SEG_CUBICTO:
+                code = 4;
                 break;
               case PathIterator.SEG_LINETO:
                 code = 1;
@@ -143,26 +151,49 @@ public class AwtFontReader extends FontReader
                 switch ( code ) {
                   case 0:
                     curve.addPoint(null, ParametricCurve.BREAK);
+                    lastAddedEndpoint = null;
 
                     pointParameters = new Vector3Dd[1];
                     pointParameters[0] = 
                         new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, ParametricCurve.CORNER);
+                    if ( shouldAddEndpoint(lastAddedEndpoint, pointParameters[0]) ) {
+                        curve.addPoint(pointParameters, ParametricCurve.CORNER);
+                        lastAddedEndpoint = pointParameters[0];
+                    }
                     break;
                   case 1:
                     pointParameters = new Vector3Dd[1];
                     pointParameters[0] = new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, ParametricCurve.CORNER);
+                    if ( shouldAddEndpoint(lastAddedEndpoint, pointParameters[0]) ) {
+                        curve.addPoint(pointParameters, ParametricCurve.CORNER);
+                        lastAddedEndpoint = pointParameters[0];
+                    }
                     break;
                   case 2:
                     pointParameters = new Vector3Dd[2];
                     // Note the inverse order of awt with respect to VSDK!
                     pointParameters[0] = new Vector3Dd(coords[2]/factor, -coords[3]/factor, 0);
                     pointParameters[1] = new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0);
-                    curve.addPoint(pointParameters, ParametricCurve.QUAD);
+                    if ( shouldAddEndpoint(lastAddedEndpoint, pointParameters[0]) ) {
+                        curve.addPoint(pointParameters, ParametricCurve.QUAD);
+                        lastAddedEndpoint = pointParameters[0];
+                    }
                     break;
                   case 3:
                     //endIt = true;
+                    break;
+                  case 4:
+                    pointParameters = new Vector3Dd[2];
+                    pointParameters[0] =
+                        new Vector3Dd(coords[4]/factor, -coords[5]/factor, 0);
+                    pointParameters[1] =
+                        new Vector3Dd(coords[2]/factor, -coords[3]/factor, 0);
+                    if ( shouldAddEndpoint(lastAddedEndpoint, pointParameters[0]) ) {
+                        attachBezierControlToPreviousPoint(curve,
+                            new Vector3Dd(coords[0]/factor, -coords[1]/factor, 0));
+                        curve.addPoint(pointParameters, ParametricCurve.BEZIER);
+                        lastAddedEndpoint = pointParameters[0];
+                    }
                     break;
                   default:
                     break;
@@ -170,6 +201,47 @@ public class AwtFontReader extends FontReader
             }
         }
 
+        if ( curve.types.size() < 2 ) {
+            System.err.println("Glyph [" + characterAndItsContext + "] in font "
+                + fontFile + " produced too few curve segments");
+            return null;
+        }
+
         return curve;
+    }
+
+    private static void attachBezierControlToPreviousPoint(
+        ParametricCurve curve,
+        Vector3Dd controlPoint)
+    {
+        if ( curve.points.isEmpty() ) {
+            return;
+        }
+
+        int lastIndex = curve.points.size() - 1;
+        Vector3Dd[] previous = curve.points.get(lastIndex);
+        if ( previous == null || previous.length == 0 || previous[0] == null ) {
+            return;
+        }
+
+        if ( previous.length >= 3 ) {
+            previous[2] = controlPoint;
+            return;
+        }
+
+        Vector3Dd[] expanded = new Vector3Dd[3];
+        expanded[0] = previous[0];
+        if ( previous.length > 1 ) {
+            expanded[1] = previous[1];
+        }
+        expanded[2] = controlPoint;
+        curve.setPointAt(expanded, lastIndex);
+    }
+
+    private static boolean shouldAddEndpoint(Vector3Dd lastAddedEndpoint,
+        Vector3Dd candidateEndpoint)
+    {
+        return lastAddedEndpoint == null ||
+            Vector3Dd.distance(lastAddedEndpoint, candidateEndpoint) >= VSDK.EPSILON;
     }
 }

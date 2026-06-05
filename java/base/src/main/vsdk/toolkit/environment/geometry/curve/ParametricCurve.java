@@ -202,6 +202,9 @@ public class ParametricCurve extends Curve {
             // segment is available in the curve model.
             return;
         }
+        if ( shouldSkipConsecutiveEndpoint(point, type) ) {
+            return;
+        }
         points.add(point);
         types.add(Integer.valueOf(type));
     }
@@ -232,6 +235,27 @@ public class ParametricCurve extends Curve {
         }
         points.add(position, point);
         types.add(position, Integer.valueOf(type));
+    }
+
+    private boolean shouldSkipConsecutiveEndpoint(Vector3Dd[] point, int type)
+    {
+        if ( type == BREAK || point == null || point.length < 1 || point[0] == null ||
+             points.isEmpty() ) {
+            return false;
+        }
+
+        int previousIndex = points.size() - 1;
+        if ( types.get(previousIndex).intValue() == BREAK ) {
+            return false;
+        }
+
+        Vector3Dd[] previousPoint = points.get(previousIndex);
+        if ( previousPoint == null || previousPoint.length < 1 ||
+             previousPoint[0] == null ) {
+            return false;
+        }
+
+        return Vector3Dd.distance(previousPoint[0], point[0]) < VSDK.EPSILON;
     }
 
     public Vector3Dd[] getPoint(int pos) {

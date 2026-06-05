@@ -1,0 +1,237 @@
+package models;
+
+import java.awt.Rectangle;
+
+import javax.swing.JFrame;
+
+import com.jogamp.opengl.awt.GLCanvas;
+
+import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.gui.CameraController;
+import vsdk.toolkit.gui.CameraControllerOrbiter;
+import vsdk.toolkit.gui.RendererConfigurationController;
+
+public class TangibleInterfaceGizmosModel
+{
+    private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
+    private static final int MIN_SUBDIVISION_HEIGHT = 1;
+
+    private GizmoNames solidModelName = GizmoNames.CUBE_PART_1;
+    private int subdivisionCircumference = 16;
+    private int subdivisionHeight = 8;
+    private final Camera camera;
+    private final SimpleMaterial material;
+    private final Light light1;
+    private final Light light2;
+    private final RendererConfiguration quality;
+    private final RendererConfigurationController qualityController;
+    private final CameraController cameraController;
+    private PolyhedralBoundedSolid solid;
+    private GLCanvas canvas;
+    private boolean showCoordinateSystem = true;
+    private boolean errorState = false;
+    private String errorMessage = "";
+    private JFrame mainFrame;
+    private Rectangle windowedBounds;
+    private boolean fullScreenMode = false;
+
+    public TangibleInterfaceGizmosModel()
+    {
+        camera = new Camera();
+        camera.setPosition(new Vector3Dd(2, -1, 2));
+        Matrix4x4d rotationMatrix = new Matrix4x4d();
+        rotationMatrix = rotationMatrix.eulerAnglesRotation(
+            Math.toRadians(135), Math.toRadians(-35), 0);
+        camera.setRotation(rotationMatrix);
+
+        quality = new RendererConfiguration();
+        quality.changeWires();
+        qualityController = new RendererConfigurationController(quality);
+        cameraController = new CameraControllerOrbiter(camera);
+
+        material = defaultMaterial();
+        light1 = new Light(LightType.POINT, new Vector3Dd(3, -3, 2),
+            new ColorRgb(1, 1, 1));
+        light2 = new Light(LightType.POINT, new Vector3Dd(-2, 5, -2),
+            new ColorRgb(0.9, 0.5, 0.5));
+        light1.setId(0);
+        light2.setId(1);
+    }
+
+    private SimpleMaterial defaultMaterial()
+    {
+        SimpleMaterial m = new SimpleMaterial();
+        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDiffuse(new ColorRgb(0.5, 0.5, 0.9));
+        m = m.withSpecular(new ColorRgb(1, 1, 1));
+        m = m.withDoubleSided(false);
+        m = m.withPhongExponent(100);
+        return m;
+    }
+
+    public void clearErrorState()
+    {
+        errorState = false;
+        errorMessage = "";
+    }
+
+    public void setErrorState(String message)
+    {
+        errorState = true;
+        errorMessage = message;
+        System.err.println("[TangibleInterfaceGizmoCreator] " + errorMessage);
+    }
+
+    public void clampSubdivisions()
+    {
+        if ( subdivisionCircumference < MIN_SUBDIVISION_CIRCUMFERENCE ) {
+            subdivisionCircumference = MIN_SUBDIVISION_CIRCUMFERENCE;
+        }
+        if ( subdivisionHeight < MIN_SUBDIVISION_HEIGHT ) {
+            subdivisionHeight = MIN_SUBDIVISION_HEIGHT;
+        }
+    }
+
+    public GizmoNames getSolidModelName()
+    {
+        return solidModelName;
+    }
+
+    public void setSolidModelName(GizmoNames solidModelName)
+    {
+        this.solidModelName = solidModelName;
+    }
+
+    public int getSubdivisionCircumference()
+    {
+        return subdivisionCircumference;
+    }
+
+    public void setSubdivisionCircumference(int subdivisionCircumference)
+    {
+        this.subdivisionCircumference = subdivisionCircumference;
+    }
+
+    public int getSubdivisionHeight()
+    {
+        return subdivisionHeight;
+    }
+
+    public void setSubdivisionHeight(int subdivisionHeight)
+    {
+        this.subdivisionHeight = subdivisionHeight;
+    }
+
+    public Camera getCamera()
+    {
+        return camera;
+    }
+
+    public SimpleMaterial getMaterial()
+    {
+        return material;
+    }
+
+    public Light getLight1()
+    {
+        return light1;
+    }
+
+    public Light getLight2()
+    {
+        return light2;
+    }
+
+    public RendererConfiguration getQuality()
+    {
+        return quality;
+    }
+
+    public RendererConfigurationController getQualityController()
+    {
+        return qualityController;
+    }
+
+    public CameraController getCameraController()
+    {
+        return cameraController;
+    }
+
+    public PolyhedralBoundedSolid getSolid()
+    {
+        return solid;
+    }
+
+    public void setSolid(PolyhedralBoundedSolid solid)
+    {
+        this.solid = solid;
+    }
+
+    public GLCanvas getCanvas()
+    {
+        return canvas;
+    }
+
+    public void setCanvas(GLCanvas canvas)
+    {
+        this.canvas = canvas;
+    }
+
+    public boolean isShowCoordinateSystem()
+    {
+        return showCoordinateSystem;
+    }
+
+    public void setShowCoordinateSystem(boolean showCoordinateSystem)
+    {
+        this.showCoordinateSystem = showCoordinateSystem;
+    }
+
+    public boolean isErrorState()
+    {
+        return errorState;
+    }
+
+    public String getErrorMessage()
+    {
+        return errorMessage;
+    }
+
+    public JFrame getMainFrame()
+    {
+        return mainFrame;
+    }
+
+    public void setMainFrame(JFrame mainFrame)
+    {
+        this.mainFrame = mainFrame;
+    }
+
+    public Rectangle getWindowedBounds()
+    {
+        return windowedBounds;
+    }
+
+    public void setWindowedBounds(Rectangle windowedBounds)
+    {
+        this.windowedBounds = windowedBounds;
+    }
+
+    public boolean isFullScreenMode()
+    {
+        return fullScreenMode;
+    }
+
+    public void setFullScreenMode(boolean fullScreenMode)
+    {
+        this.fullScreenMode = fullScreenMode;
+    }
+}

@@ -235,6 +235,16 @@ project(':testsuite:_APITests:_JOGL4PbufferExample') {
     }
 }
 
+project(':testsuite:Tools:TangibleInterfaceGizmoCreator') {
+    dependencies {
+        implementation project(':jogl4')
+        implementation 'org.jogamp.jogl:jogl-all:2.5.0'
+        implementation 'org.jogamp.gluegen:gluegen-rt:2.5.0'
+        runtimeOnly 'org.jogamp.jogl:jogl-all-main:2.5.0'
+        runtimeOnly 'org.jogamp.gluegen:gluegen-rt-main:2.5.0'
+    }
+}
+
 configure(subprojects.findAll {
     it.path.startsWith(':testsuite:') &&
     it.buildFile.exists() &&
@@ -266,6 +276,7 @@ configure(subprojects.findAll {
     it.path != ':testsuite:_APITests:_JOGL2HelloWorld' &&
     it.path != ':testsuite:_APITests:_JOGL4HelloWorld' &&
     it.path != ':testsuite:_APITests:_JOGL4PbufferExample' &&
+    it.path != ':testsuite:Tools:TangibleInterfaceGizmoCreator' &&
     !it.path.startsWith(':testsuite:VSDKExamples:') &&
     !it.path.startsWith(':testsuite:Jogl4Examples:')
 }) {
