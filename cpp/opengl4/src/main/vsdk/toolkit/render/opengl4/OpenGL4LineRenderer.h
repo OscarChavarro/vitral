@@ -4,8 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
+#include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
 
 class OpenGL4LineRenderer {
 public:
@@ -34,6 +33,18 @@ private:
     static bool initializeIfNeeded();
     static java::String readShaderFile(const java::String& filename);
     static unsigned int compileShader(const java::String& source, unsigned int type);
+    static double evaluateClipPlane(const double plane[4], const Vector4Dd& point);
+    static Vector4Dd interpolate(const Vector4Dd& start, const Vector4Dd& end, double t);
+    static bool clipLineToClipVolume(
+        const Vector4Dd& start,
+        const Vector4Dd& end,
+        Vector4Dd& outStart,
+        Vector4Dd& outEnd);
+    static void addVertex(
+        java::ArrayList<float>& positions,
+        java::ArrayList<float>& colors,
+        const float point[3],
+        const float color[3]);
     static void drawThinLines(
         const Matrix4x4d& modelViewProjection,
         const java::ArrayList<float>& positions,
@@ -55,7 +66,5 @@ private:
         java::ArrayList<float>& trianglePositions,
         java::ArrayList<float>& triangleColors);
 };
-
-}}}}
 
 #endif

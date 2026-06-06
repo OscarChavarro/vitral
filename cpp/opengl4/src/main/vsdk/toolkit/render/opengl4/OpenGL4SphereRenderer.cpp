@@ -20,8 +20,6 @@
 #include <cstdio>
 #include "java/lang/String.h"
 
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
-
 unsigned int OpenGL4SphereRenderer::vao_ = 0;
 unsigned int OpenGL4SphereRenderer::vboPositions_ = 0;
 unsigned int OpenGL4SphereRenderer::vboNormals_ = 0;
@@ -45,7 +43,7 @@ unsigned int OpenGL4SphereRenderer::indexCount_ = 0;
 
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
-static java::String readTextFile(const java::String& path)
+java::String OpenGL4SphereRenderer::readTextFile(const java::String& path)
 {
     FILE* f = fopen(path.c_str(), "rb");
     if (!f) return java::String();
@@ -62,7 +60,7 @@ static java::String readTextFile(const java::String& path)
     return result;
 }
 
-static java::String findShaderSource(const java::String& shaderFileName)
+java::String OpenGL4SphereRenderer::findShaderSource(const java::String& shaderFileName)
 {
     const char* candidates[] = {
         "../../../../etc/glslShaders/", // from testsuite/OpenGL4Examples/ShadersExample/build
@@ -96,7 +94,7 @@ unsigned int OpenGL4SphereRenderer::compileShader(unsigned int type, const char*
     return shader;
 }
 
-static unsigned int buildProgram(const char* vsFile, const char* fsFile)
+unsigned int OpenGL4SphereRenderer::buildProgram(const char* vsFile, const char* fsFile)
 {
     java::String vsSource = findShaderSource(vsFile);
     java::String fsSource = findShaderSource(fsFile);
@@ -305,31 +303,31 @@ bool OpenGL4SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels
     return true;
 }
 
-static void setUniform3f(unsigned int program, const char* name, const Vector3Dd& v)
+void OpenGL4SphereRenderer::setUniform3f(unsigned int program, const char* name, const Vector3Dd& v)
 {
     GLint loc = glGetUniformLocation(program, name);
     if (loc >= 0) glUniform3f(loc, (float)v.x(), (float)v.y(), (float)v.z());
 }
 
-static void setUniform3f(unsigned int program, const char* name, const ColorRgb& c)
+void OpenGL4SphereRenderer::setUniform3f(unsigned int program, const char* name, const ColorRgb& c)
 {
     GLint loc = glGetUniformLocation(program, name);
     if (loc >= 0) glUniform3f(loc, (float)c.r(), (float)c.g(), (float)c.b());
 }
 
-static void setUniform1i(unsigned int program, const char* name, int v)
+void OpenGL4SphereRenderer::setUniform1i(unsigned int program, const char* name, int v)
 {
     GLint loc = glGetUniformLocation(program, name);
     if (loc >= 0) glUniform1i(loc, v);
 }
 
-static void setUniform1f(unsigned int program, const char* name, float v)
+void OpenGL4SphereRenderer::setUniform1f(unsigned int program, const char* name, float v)
 {
     GLint loc = glGetUniformLocation(program, name);
     if (loc >= 0) glUniform1f(loc, v);
 }
 
-static void configureMicrofacetUniforms(unsigned int programId, const SimpleMaterial* material)
+void OpenGL4SphereRenderer::configureMicrofacetUniforms(unsigned int programId, const SimpleMaterial* material)
 {
     float roughness = 0.35f;
     float alpha = roughness * roughness;
@@ -532,5 +530,3 @@ void OpenGL4SphereRenderer::dispose()
     cachedParallels_ = -1;
     indexCount_ = 0;
 }
-
-}}}}

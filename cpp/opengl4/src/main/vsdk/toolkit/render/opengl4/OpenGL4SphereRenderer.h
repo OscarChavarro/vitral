@@ -1,7 +1,10 @@
 #ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4SPHERERENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4SPHERERENDERER_H__
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class Sphere;
 class Light;
@@ -9,8 +12,6 @@ class SimpleMaterial;
 class RendererConfiguration;
 class RGBImageUncompressed;
 class Camera;
-
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
 class OpenGL4SphereRenderer {
 public:
@@ -53,9 +54,15 @@ private:
     static bool initProgramIfNeeded();
     static bool buildSphereMeshIfNeeded(int meridians, int parallels);
     static unsigned int selectProgram(const RendererConfiguration* quality, bool hasTexture, bool hasNormalMap);
+    static java::String readTextFile(const java::String& path);
+    static java::String findShaderSource(const java::String& shaderFileName);
+    static unsigned int buildProgram(const char* vsFile, const char* fsFile);
     static unsigned int compileShader(unsigned int type, const char* source);
+    static void setUniform3f(unsigned int program, const char* name, const Vector3Dd& v);
+    static void setUniform3f(unsigned int program, const char* name, const ColorRgb& c);
+    static void setUniform1i(unsigned int program, const char* name, int v);
+    static void setUniform1f(unsigned int program, const char* name, float v);
+    static void configureMicrofacetUniforms(unsigned int programId, const SimpleMaterial* material);
 };
-
-}}}}
 
 #endif

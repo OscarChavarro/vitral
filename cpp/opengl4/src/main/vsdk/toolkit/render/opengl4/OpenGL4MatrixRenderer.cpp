@@ -14,8 +14,6 @@
 
 #include "java/util/ArrayList.txx"
 
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
-
 unsigned int OpenGL4MatrixRenderer::VAO = 0;
 unsigned int OpenGL4MatrixRenderer::VBO_positions = 0;
 unsigned int OpenGL4MatrixRenderer::VBO_colors = 0;
@@ -244,5 +242,3 @@ void OpenGL4MatrixRenderer::release() {
 
     initialized = false;
 }
-
-}}}}

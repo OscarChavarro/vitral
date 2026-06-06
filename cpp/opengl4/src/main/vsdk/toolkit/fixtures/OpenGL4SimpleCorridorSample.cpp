@@ -11,8 +11,6 @@
 #include <GL/gl.h>
 #endif
 
-namespace vsdk { namespace toolkit { namespace fixtures {
-
 OpenGL4SimpleCorridorSample::OpenGL4SimpleCorridorSample()
     : a(6), na(6), b(20), nb(20), c(4), nc(4), interSpace(0.05),
       initialized(false), shaderProgramId(0), vertexArrayId(0),
@@ -419,5 +417,3 @@ void OpenGL4SimpleCorridorSample::addVertex(
     colors.add(g);
     colors.add(bColor);
 }
-
-}}}

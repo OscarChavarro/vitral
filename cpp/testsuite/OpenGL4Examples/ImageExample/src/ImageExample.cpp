@@ -38,7 +38,7 @@ private:
     CameraControllerAquynza* cameraController;
     Image* renderImage;
     Image* earthImage;
-    vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample* corridor;
+    OpenGL4SimpleCorridorSample* corridor;
     bool shouldClose;
     int lastFramebufferWidth;
     int lastFramebufferHeight;
@@ -103,7 +103,7 @@ public:
         camera->updateViewportResize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         cameraController = new CameraControllerAquynza(camera);
-        corridor = new vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample();
+        corridor = new OpenGL4SimpleCorridorSample();
 
         renderImage = loadImage("etc/images/render.jpg");
         if (renderImage == nullptr || renderImage->getXSize() <= 0) {
@@ -366,7 +366,7 @@ public:
         drawWorldImagesDepthBiased(mvp);
         drawHud();
 
-        vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::draw(mvp, identity);
+        OpenGL4MatrixRenderer::draw(mvp, identity);
 
         delete[] mvp;
     }
@@ -396,7 +396,7 @@ public:
         }
 
         OpenGL4ImageRenderer::dispose();
-        vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::release();
+        OpenGL4MatrixRenderer::release();
 
         if (cameraController != nullptr) {
             delete cameraController;

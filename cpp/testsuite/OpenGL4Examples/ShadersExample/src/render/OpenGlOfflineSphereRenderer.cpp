@@ -10,9 +10,6 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 
-using vsdk::toolkit::render::opengl4::OpenGL4SphereRenderer;
-using vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer;
-
 RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
     ShadersModel* model,
     const Matrix4x4d& modelRotation,

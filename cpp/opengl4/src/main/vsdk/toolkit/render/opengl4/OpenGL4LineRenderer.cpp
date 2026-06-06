@@ -11,11 +11,6 @@
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
-
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
-
-namespace {
 
 const double CLIP_PLANES[][4] = {
     { 1.0, 0.0, 0.0, 1.0 },
@@ -26,18 +21,18 @@ const double CLIP_PLANES[][4] = {
     { 0.0, 0.0, -1.0, 1.0 }
 };
 
-double evaluateClipPlane(const double plane[4], const Vector4Dd& point)
+double OpenGL4LineRenderer::evaluateClipPlane(const double plane[4], const Vector4Dd& point)
 {
     return plane[0] * point.x() + plane[1] * point.y() +
         plane[2] * point.z() + plane[3] * point.w();
 }
 
-Vector4Dd interpolate(const Vector4Dd& start, const Vector4Dd& end, double t)
+Vector4Dd OpenGL4LineRenderer::interpolate(const Vector4Dd& start, const Vector4Dd& end, double t)
 {
     return start.multiply(1.0 - t).add(end.multiply(t));
 }
 
-bool clipLineToClipVolume(
+bool OpenGL4LineRenderer::clipLineToClipVolume(
     const Vector4Dd& start,
     const Vector4Dd& end,
     Vector4Dd& outStart,
@@ -70,7 +65,7 @@ bool clipLineToClipVolume(
     return true;
 }
 
-void addVertex(
+void OpenGL4LineRenderer::addVertex(
     java::ArrayList<float>& positions,
     java::ArrayList<float>& colors,
     const float point[3],
@@ -82,8 +77,6 @@ void addVertex(
     colors.add(color[0]);
     colors.add(color[1]);
     colors.add(color[2]);
-}
-
 }
 
 unsigned int OpenGL4LineRenderer::vao_ = 0;
@@ -405,5 +398,3 @@ void OpenGL4LineRenderer::release()
     }
     initialized_ = false;
 }
-
-}}}}

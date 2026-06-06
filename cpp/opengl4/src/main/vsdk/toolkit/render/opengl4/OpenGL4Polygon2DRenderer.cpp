@@ -5,9 +5,9 @@
 #include "java/util/ArrayList.txx"
 #include <OpenGL/glu.h>
 
-static void push3(java::ArrayList<float>& a, float x, float y, float z) { a.add(x); a.add(y); a.add(z); }
-static void push4(java::ArrayList<float>& a, float x, float y, float z, float w) { a.add(x); a.add(y); a.add(z); a.add(w); }
-static void toColumnMajor(const Matrix4x4d& m, float out[16])
+void OpenGL4Polygon2DRenderer::push3(java::ArrayList<float>& a, float x, float y, float z) { a.add(x); a.add(y); a.add(z); }
+void OpenGL4Polygon2DRenderer::push4(java::ArrayList<float>& a, float x, float y, float z, float w) { a.add(x); a.add(y); a.add(z); a.add(w); }
+void OpenGL4Polygon2DRenderer::toColumnMajor(const Matrix4x4d& m, float out[16])
 {
     int k = 0;
     for (int c = 0; c < 4; ++c) {
@@ -15,29 +15,21 @@ static void toColumnMajor(const Matrix4x4d& m, float out[16])
     }
 }
 
-struct TessCollector {
-    java::ArrayList<float>* out;
-    java::ArrayList<double*> allocs;
-    GLenum mode;
-    java::ArrayList<float> pending;
-    TessCollector() : out(0), mode(GL_TRIANGLES) {}
-};
-
-static void tessBegin(GLenum which, void* userData)
+void OpenGL4Polygon2DRenderer::tessBegin(GLenum which, void* userData)
 {
     TessCollector* c = (TessCollector*)userData;
     c->mode = which;
     c->pending.clear();
 }
 
-static void tessVertex(void* vertexData, void* userData)
+void OpenGL4Polygon2DRenderer::tessVertex(void* vertexData, void* userData)
 {
     TessCollector* c = (TessCollector*)userData;
     double* v = (double*)vertexData;
     c->pending.add((float)v[0]); c->pending.add((float)v[1]); c->pending.add((float)v[2]);
 }
 
-static void tessEnd(void* userData)
+void OpenGL4Polygon2DRenderer::tessEnd(void* userData)
 {
     TessCollector* c = (TessCollector*)userData;
     if (c->mode == GL_TRIANGLES) {
@@ -74,7 +66,12 @@ static void tessEnd(void* userData)
     }
 }
 
-static void tessCombine(GLdouble coords[3], void* [4], GLfloat [4], void** outData, void* userData)
+void OpenGL4Polygon2DRenderer::tessCombine(
+    GLdouble coords[3],
+    void* [4],
+    GLfloat [4],
+    void** outData,
+    void* userData)
 {
     TessCollector* c = (TessCollector*)userData;
     double* nv = new double[3];
@@ -83,9 +80,9 @@ static void tessCombine(GLdouble coords[3], void* [4], GLfloat [4], void** outDa
     *outData = nv;
 }
 
-static void tessError(GLenum, void*) {}
+void OpenGL4Polygon2DRenderer::tessError(GLenum, void*) {}
 
-static void tessellatePolygonToTriangles(Polygon2D* polygon, java::ArrayList<float>& out)
+void OpenGL4Polygon2DRenderer::tessellatePolygonToTriangles(Polygon2D* polygon, java::ArrayList<float>& out)
 {
     GLUtesselator* tess = gluNewTess();
     if (!tess) return;

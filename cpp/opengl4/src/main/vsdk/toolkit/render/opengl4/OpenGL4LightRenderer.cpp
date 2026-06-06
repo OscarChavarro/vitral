@@ -16,15 +16,13 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "java/util/ArrayList.txx"
 
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
-
 double OpenGL4LightRenderer::scale_ = 1.0;
 unsigned int OpenGL4LightRenderer::vao_ = 0;
 unsigned int OpenGL4LightRenderer::vboPositions_ = 0;
 unsigned int OpenGL4LightRenderer::vboColors_ = 0;
 unsigned int OpenGL4LightRenderer::program_ = 0;
 
-static unsigned int compileShader(unsigned int type, const char* source)
+unsigned int OpenGL4LightRenderer::compileShader(unsigned int type, const char* source)
 {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, nullptr);
@@ -90,7 +88,7 @@ bool OpenGL4LightRenderer::initIfNeeded()
     return true;
 }
 
-static double calculateHalfAxisLength(const Light* light, Camera* camera, int viewportWidth, int viewportHeight)
+double OpenGL4LightRenderer::calculateHalfAxisLength(const Light* light, Camera* camera, int viewportWidth, int viewportHeight)
 {
     const double viewportFraction = 0.05;
     const double targetPixels = viewportFraction * (double)java::Math::min(viewportWidth, viewportHeight);
@@ -115,7 +113,12 @@ static double calculateHalfAxisLength(const Light* light, Camera* camera, int vi
     return java::Math::max(1e-5, 0.5 * targetPixels * worldPerPixel);
 }
 
-static Vector3Dd mapPatternPointToWorld(const Vector3Dd& point, const Vector3Dd& center, const Vector3Dd& right, const Vector3Dd& up, double worldSize)
+Vector3Dd OpenGL4LightRenderer::mapPatternPointToWorld(
+    const Vector3Dd& point,
+    const Vector3Dd& center,
+    const Vector3Dd& right,
+    const Vector3Dd& up,
+    double worldSize)
 {
     double localX = (point.x() - 0.5) * worldSize;
     double localY = (point.y() - 0.5) * worldSize;
@@ -279,5 +282,3 @@ void OpenGL4LightRenderer::dispose()
     if (vao_ != 0) { glDeleteVertexArrays(1, &vao_); vao_ = 0; }
     if (program_ != 0) { glDeleteProgram(program_); program_ = 0; }
 }
-
-}}}}

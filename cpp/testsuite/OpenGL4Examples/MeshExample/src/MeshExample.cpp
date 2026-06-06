@@ -713,7 +713,7 @@ private:
 
         for (size_t i = 0; i < model.lights.size(); i++) {
             if (model.lights[i] == nullptr) continue;
-            vsdk::toolkit::render::opengl4::OpenGL4LightRenderer::draw(
+            OpenGL4LightRenderer::draw(
                 model.lights[i],
                 &model.camera,
                 LightGizmoStyle::OMNI_BILLBOARD);
@@ -723,7 +723,7 @@ private:
     void cleanup()
     {
         renderer.dispose();
-        vsdk::toolkit::render::opengl4::OpenGL4LightRenderer::dispose();
+        OpenGL4LightRenderer::dispose();
         OpenGL4ImageRenderer::dispose();
 
         if (qualityController != nullptr) {

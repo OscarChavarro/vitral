@@ -4,8 +4,6 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/util/ArrayList.h"
 
-namespace vsdk { namespace toolkit { namespace fixtures {
-
 class OpenGL4SimpleCorridorSample {
 public:
     OpenGL4SimpleCorridorSample();
@@ -88,7 +86,5 @@ private:
     java::String readShaderFile(const java::String& filename);
     unsigned int compileShader(const java::String& source, int type);
 };
-
-}}}
 
 #endif // OPENGL4SIMPLECORRIDORSAMPLE_H

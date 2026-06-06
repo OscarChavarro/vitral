@@ -19,7 +19,7 @@
 GLFWwindow* window = nullptr;
 Camera* camera = nullptr;
 CameraControllerAquynza* controller = nullptr;
-vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample* corridor = nullptr;
+OpenGL4SimpleCorridorSample* corridor = nullptr;
 int lastFramebufferWidth = 640;
 int lastFramebufferHeight = 480;
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
     camera->updateViewportResize(640, 480);
 
     controller = new CameraControllerAquynza(camera);
-    corridor = new vsdk::toolkit::fixtures::OpenGL4SimpleCorridorSample();
+    corridor = new OpenGL4SimpleCorridorSample();
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetKeyCallback(window, keyCallback);
@@ -162,14 +162,14 @@ int main(int argc, char** argv) {
         Matrix4x4d identity = Matrix4x4d::identityMatrix();
 
         corridor->drawGL(mvp, identity);
-        vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::draw(mvp, identity);
+        OpenGL4MatrixRenderer::draw(mvp, identity);
 
         delete[] mvp;
 
         glfwSwapBuffers(window);
     }
 
-    vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::release();
+    OpenGL4MatrixRenderer::release();
 
     if (corridor) {
         corridor->dispose();

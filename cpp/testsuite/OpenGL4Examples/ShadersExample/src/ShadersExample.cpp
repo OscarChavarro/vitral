@@ -362,9 +362,9 @@ public:
         delete qualityController;
         delete controller;
         delete camera;
-        vsdk::toolkit::render::opengl4::OpenGL4SphereRenderer::dispose();
+        OpenGL4SphereRenderer::dispose();
         OpenGL4ImageRenderer::dispose();
-        vsdk::toolkit::render::opengl4::OpenGL4MatrixRenderer::release();
+        OpenGL4MatrixRenderer::release();
         if (window) glfwDestroyWindow(window);
         glfwTerminate();
     }
@@ -569,7 +569,7 @@ public:
                      cookTorranceMaterial != 0)
                     ? static_cast<const SimpleMaterial*>(cookTorranceMaterial)
                     : static_cast<const SimpleMaterial*>(&material);
-                vsdk::toolkit::render::opengl4::OpenGL4SphereRenderer::draw(
+                OpenGL4SphereRenderer::draw(
                     sphere,
                     camera,
                     light,

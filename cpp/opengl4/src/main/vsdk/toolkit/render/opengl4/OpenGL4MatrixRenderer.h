@@ -3,8 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 
-namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
-
 class OpenGL4MatrixRenderer {
 public:
     static void draw(const float* mvpColumnMajor16, const Matrix4x4d& A);
@@ -26,7 +24,5 @@ private:
     OpenGL4MatrixRenderer();
     ~OpenGL4MatrixRenderer();
 };
-
-}}}}
 
 #endif // OPENGL4MATRIXRENDERER_H
