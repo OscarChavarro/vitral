@@ -5,16 +5,17 @@ import java.io.File;
 import java.nio.ByteBuffer;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLEventListener;
 
 import models.TangibleInterfaceGizmosModel;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
@@ -67,68 +68,56 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         });
     }
 
-    private void drawReferenceFrame(GL2 gl)
+    private void drawReferenceFrame(GL4 gl, Matrix4x4d mvp)
     {
         if ( !model.isShowCoordinateSystem() ) {
             return;
         }
-        gl.glBegin(GL2.GL_LINES);
-            gl.glColor3d(1, 0, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(1, 0, 0);
-
-            gl.glColor3d(0, 1, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 1, 0);
-
-            gl.glColor3d(0, 0, 1);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 0, 1);
-        gl.glEnd();
+        float[] positions = new float[] {
+            0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0, 1
+        };
+        float[] colors = new float[] {
+            1, 0, 0, 1, 0, 0,
+            0, 1, 0, 0, 1, 0,
+            0, 0, 1, 0, 0, 1
+        };
+        Jogl4LineRenderer.drawLines(gl, mvp, positions, colors, 3.0f, -3.0e-4f);
     }
 
-    private void drawObjectsGL(GL2 gl)
+    private void drawObjectsGL(GL4 gl)
     {
-        gl.glLoadIdentity();
         if ( model.getSolid() == null ) {
             return;
         }
+        Matrix4x4d modelMatrix = Matrix4x4d.identityMatrix();
+        Matrix4x4d mvp = model.getCamera().calculateProjectionMatrix()
+            .multiply(modelMatrix);
 
-        gl.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
-        gl.glPolygonOffset(4.0f, 4.0f);
         Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
         Jogl4LightRenderer.activate(gl, model.getLight1());
         Jogl4LightRenderer.draw(gl, model.getLight1(), model.getCamera());
         Jogl4LightRenderer.activate(gl, model.getLight2());
         Jogl4LightRenderer.draw(gl, model.getLight2(), model.getCamera());
-        gl.glEnable(GL2.GL_LIGHTING);
         Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(),
-            model.getCamera(), model.getQuality());
-        gl.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+            model.getCamera(), model.getQuality(), modelMatrix);
 
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glLineWidth(3.0f);
-        gl.glEnable(GL2.GL_POLYGON_OFFSET_LINE);
-        gl.glPolygonOffset(2.0f, 2.0f);
-        drawReferenceFrame(gl);
+        drawReferenceFrame(gl, mvp);
         Jogl4PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl,
-            model.getSolid(), model.getFaceIndex());
-        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl,
-            model.getSolid(), model.getFaceIndex());
-        gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
+            model.getSolid(), model.getFaceIndex(), mvp);
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(),
+            model.getFaceIndex(), modelMatrix, mvp, model.getCamera());
     }
 
     @Override
     public void display(GLAutoDrawable drawable)
     {
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
 
         gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-        gl.glColor3d(1, 1, 1);
-        gl.glEnable(GL2.GL_DEPTH_TEST);
-
-        Jogl2CameraRenderer.activate(gl, model.getCamera());
+        gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
         drawObjectsGL(gl);
         hudRenderer.draw(drawable);
         exportPendingScreenshot(gl, drawable.getSurfaceWidth(),
@@ -150,13 +139,13 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
     {
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
         gl.glViewport(0, 0, width, height);
         model.getCamera().updateViewportResize(width, height);
         hudRenderer.updateViewportSize(width, height);
     }
 
-    private void exportPendingScreenshot(GL2 gl, int width, int height)
+    private void exportPendingScreenshot(GL4 gl, int width, int height)
     {
         File outputFile = pendingScreenshotFile;
         if ( outputFile == null || width <= 0 || height <= 0 ) {
@@ -172,7 +161,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             outputFile.getPath());
     }
 
-    private static RGBImageUncompressed captureRgbImage(GL2 gl, int width, int height)
+    private static RGBImageUncompressed captureRgbImage(GL4 gl, int width, int height)
     {
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
         gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);

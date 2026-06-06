@@ -1,9 +1,10 @@
 package render;
 
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 import models.DebuggerModel;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -107,7 +108,7 @@ public class Jogl4HudOperandsRenderer
                   .add(up.multiply(offsetY));
     }
 
-    private void drawInsetSolid(GL2 gl,
+    private void drawInsetSolid(GL4 gl,
         PolyhedralBoundedSolid solid,
         SimpleMaterial material,
         Vector3Dd anchorPoint,
@@ -130,17 +131,17 @@ public class Jogl4HudOperandsRenderer
         }
         scale = 0.75 * (mainSolidExtent / extent);
 
-        gl.glPushMatrix();
-        gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
-        gl.glScaled(scale, scale, scale);
-        gl.glTranslated(-center.x(), -center.y(), -center.z());
+        Matrix4x4d modelMatrix = new Matrix4x4d()
+            .translation(anchorPoint)
+            .multiply(new Matrix4x4d().scale(scale, scale, scale)
+                .multiply(new Matrix4x4d().translation(-center.x(), -center.y(),
+                    -center.z())));
         Jogl4SimpleMaterialRenderer.activate(gl, material);
         Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
-            model.getQuality());
-        gl.glPopMatrix();
+            model.getQuality(), modelMatrix);
     }
 
-    public void draw(GL2 gl, int viewportWidth, int viewportHeight)
+    public void draw(GL4 gl, int viewportWidth, int viewportHeight)
     {
         PolyhedralBoundedSolid operandA = model.getCsgPreviewOperandA();
         PolyhedralBoundedSolid operandB = model.getCsgPreviewOperandB();

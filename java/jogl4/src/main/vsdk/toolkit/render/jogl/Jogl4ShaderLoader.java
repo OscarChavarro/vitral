@@ -17,12 +17,15 @@ final class Jogl4ShaderLoader {
         List<Path> candidates = new ArrayList<>();
         Path cwd = Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize();
 
-        candidates.add(Paths.get("../../../etc/glslShaders", shaderFileName));
-        candidates.add(Paths.get("etc", "glslShaders", shaderFileName));
+        candidates.add(Paths.get("../../../../etc/glslShaders", shaderFileName));
+        candidates.add(Paths.get("../../etc/glslShaders", shaderFileName));
 
         Path cursor = cwd;
         for ( int i = 0; i < 6; i++ ) {
-            candidates.add(cursor.resolve("etc").resolve("glslShaders").resolve(shaderFileName));
+            if ( cursor.getParent() != null ) {
+                candidates.add(cursor.getParent().resolve("etc")
+                    .resolve("glslShaders").resolve(shaderFileName));
+            }
             if ( cursor.getParent() == null ) {
                 break;
             }

@@ -1,77 +1,134 @@
 package render;
 
-// Java Awt classes
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import models.DebuggerModel;
-import java.awt.geom.Rectangle2D;
 
-// JOGL classes
-import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-import com.jogamp.opengl.util.awt.TextRenderer;
+
 import models.CsgSampleNames;
+import models.DebuggerModel;
 import models.SolidModelNames;
-import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
-import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
+import vsdk.toolkit.common.statistics.PolyhedralBoundedSolidStatistics;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
-import com.jogamp.opengl.glu.GLU;
+import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 
 public class Jogl4DebuggerHudRenderer
 {
     private static final int LINE_HEIGHT = 34;
+    private static final int HUD_TOP_PADDING = 28;
+    private static final int HUD_LEFT_PADDING = 16;
+    private static final int HUD_BOTTOM_PADDING = 16;
     private static final double VERTEX_LABEL_GROUPING_PIXELS = 18.0;
-    private static final double SCREEN_DISTANCE_DELTA = 1;
+    private static final double SCREEN_DISTANCE_DELTA = 1.0;
 
     private final DebuggerModel model;
-    private TextRenderer hudTextRenderer;
-    private TextRenderer vertexLabelRenderer;
+    private final Font hudFont;
+    private final Font labelFont;
+    private RGBAImageUncompressed overlayImage;
+    private BufferedImage bufferedOverlay;
     private int viewportWidth;
     private int viewportHeight;
+
     public Jogl4DebuggerHudRenderer(DebuggerModel model)
     {
         this.model = model;
-        this.hudTextRenderer = null;
-        this.vertexLabelRenderer = null;
+        this.hudFont = new Font("SansSerif", Font.BOLD, 18);
+        this.labelFont = new Font("SansSerif", Font.PLAIN, 12);
+        this.overlayImage = null;
+        this.bufferedOverlay = null;
         this.viewportWidth = 0;
         this.viewportHeight = 0;
     }
 
     public void init(GLAutoDrawable drawable)
     {
-        hudTextRenderer = new TextRenderer(
-            new Font("SansSerif", Font.BOLD, 18), true, true);
-        vertexLabelRenderer = new TextRenderer(
-            new Font("SansSerif", Font.PLAIN, 12), true, true);
         updateViewportSize(drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
     }
 
     public void updateViewportSize(int width, int height)
     {
-        viewportWidth = width;
-        viewportHeight = height;
+        viewportWidth = Math.max(1, width);
+        viewportHeight = Math.max(1, height);
     }
 
     public void draw(GLAutoDrawable drawable)
     {
-        if ( hudTextRenderer == null || vertexLabelRenderer == null ) {
+        if ( drawable == null || model == null ) {
             return;
         }
 
-        int width = viewportWidth > 0 ? viewportWidth : drawable.getSurfaceWidth();
-        int height = viewportHeight > 0 ? viewportHeight : drawable.getSurfaceHeight();
+        GL4 gl = drawable.getGL().getGL4();
+        int[] viewport = new int[4];
+        gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
+        int width = viewportWidth > 0 ? viewportWidth : Math.max(1, viewport[2]);
+        int height = viewportHeight > 0 ? viewportHeight : Math.max(1, viewport[3]);
+        updateViewportSize(width, height);
+        ensureOverlayBuffers(width, height);
+
+        Graphics2D g = bufferedOverlay.createGraphics();
+        g.setRenderingHint(
+            RenderingHints.KEY_TEXT_ANTIALIASING,
+            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(
+            RenderingHints.KEY_RENDERING,
+            RenderingHints.VALUE_RENDER_QUALITY);
+        g.setBackground(new Color(0, 0, 0, 0));
+        g.clearRect(0, 0, width, height);
+
+        drawHudText(g, width, height);
+        drawSelectedFaceLabel(g);
+        drawDebugVertexLabels(g);
+        g.dispose();
+
+        copyBufferedOverlayToImage(width, height);
+        Jogl4ImageRenderer.unload(gl, overlayImage);
+        Jogl4ImageRenderer.draw(gl, overlayImage);
+    }
+
+    public void dispose(GLAutoDrawable drawable)
+    {
+        if ( drawable != null && overlayImage != null ) {
+            Jogl4ImageRenderer.unload(drawable.getGL().getGL4(), overlayImage);
+        }
+        overlayImage = null;
+        bufferedOverlay = null;
+    }
+
+    private void drawHudText(Graphics2D g, int width, int height)
+    {
+        int nextLeftLine = 2;
+        int blockHeight = HUD_TOP_PADDING + 5 * LINE_HEIGHT + HUD_BOTTOM_PADDING;
+        if ( model.getSolidModelName().usesCsgDebugControls() ) {
+            blockHeight += model.usesKurlanderBowlSingleMotifControls()
+                ? 2 * LINE_HEIGHT
+                : LINE_HEIGHT;
+        }
+
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(0, 0, width, Math.min(height, blockHeight));
+        g.setFont(hudFont);
+        g.setColor(new Color(255, 242, 51));
+
         String showingFaceLoopMessage = "Face [1, 2]: " + formatFaceLoopLabel();
         String selectedModelMessage = "Selected model [3, 4]: "
             + model.getSolidModelName().name()
@@ -80,48 +137,45 @@ public class Jogl4DebuggerHudRenderer
         String csgSampleMessage = "CSG sample [6]: " + model.getCsgSample().getLabel()
             + " (" + model.getCsgSample().getDisplayIndex()
             + "/" + CsgSampleNames.getTotalSamples() + ")";
-        String kurlanderMotifMessage = "Motif [e, E]: " +
-            model.getKurlanderBowlSingleMotifLabel();
-        String csgOperationMessage = "CSG op [5]: " + model.getCsgOperation().getLabel();
-        String referenceFrameMessage = "Reference frame [Space]: " +
-            (model.isShowCoordinateSystem() ? "ON" : "OFF");
+        String kurlanderMotifMessage = "Motif [e, E]: "
+            + model.getKurlanderBowlSingleMotifLabel();
+        String csgOperationMessage = "CSG op [5]: "
+            + model.getCsgOperation().getLabel();
+        String referenceFrameMessage = "Reference frame [Space]: "
+            + (model.isShowCoordinateSystem() ? "ON" : "OFF");
         String nrMessage = "NR [q, Q]: " + model.getSubdivisionCircumference();
         String nhMessage = "NH [w, W]: " + model.getSubdivisionHeight();
 
-        hudTextRenderer.beginRendering(width, height);
-        hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
-        hudTextRenderer.draw(showingFaceLoopMessage, 16, height - 28);
-        hudTextRenderer.draw(selectedModelMessage, 16, height - (28 + LINE_HEIGHT));
-        int nextLeftLine = 2;
+        g.drawString(showingFaceLoopMessage, HUD_LEFT_PADDING, height - (height - HUD_TOP_PADDING));
+        g.drawString(selectedModelMessage, HUD_LEFT_PADDING, HUD_TOP_PADDING + LINE_HEIGHT);
+
         if ( model.getSolidModelName().usesCsgDebugControls() ) {
-            hudTextRenderer.draw(csgSampleMessage, 16,
-                height - (28 + nextLeftLine*LINE_HEIGHT));
+            g.drawString(csgSampleMessage, HUD_LEFT_PADDING,
+                HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
             nextLeftLine++;
             if ( model.usesKurlanderBowlSingleMotifControls() ) {
-                hudTextRenderer.draw(kurlanderMotifMessage, 16,
-                    height - (28 + nextLeftLine*LINE_HEIGHT));
+                g.drawString(kurlanderMotifMessage, HUD_LEFT_PADDING,
+                    HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
                 nextLeftLine++;
             }
-            hudTextRenderer.draw(csgOperationMessage, 16,
-                height - (28 + nextLeftLine*LINE_HEIGHT));
+            g.drawString(csgOperationMessage, HUD_LEFT_PADDING,
+                HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
             nextLeftLine++;
         }
-        hudTextRenderer.draw(referenceFrameMessage, 16,
-            height - (28 + nextLeftLine*LINE_HEIGHT));
-        drawTopRight(hudTextRenderer, width, height, nrMessage, 28);
-        drawTopRight(hudTextRenderer, width, height, nhMessage,
-            28 + LINE_HEIGHT);
+        g.drawString(referenceFrameMessage, HUD_LEFT_PADDING,
+            HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
+        drawTopRight(g, width, nrMessage, HUD_TOP_PADDING);
+        drawTopRight(g, width, nhMessage, HUD_TOP_PADDING + LINE_HEIGHT);
+
         if ( model.isErrorState() ) {
-            hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
-            hudTextRenderer.draw(model.getErrorMessage(), 16, 16);
+            g.setColor(new Color(255, 38, 38));
+            g.drawString(model.getErrorMessage(), HUD_LEFT_PADDING, height - 16);
+            g.setColor(new Color(255, 242, 51));
         }
-        drawCsgStatisticsSummary(height);
-        hudTextRenderer.endRendering();
-        drawSelectedFaceLabel(drawable, width, height);
-        drawDebugVertexLabels(drawable, width, height);
+        drawCsgStatisticsSummary(g, height);
     }
 
-    private void drawCsgStatisticsSummary(int height)
+    private void drawCsgStatisticsSummary(Graphics2D g, int height)
     {
         if ( !model.getSolidModelName().usesCsgDebugControls() ) {
             return;
@@ -150,16 +204,65 @@ public class Jogl4DebuggerHudRenderer
         int lineGap = 22;
         int startY = model.isErrorState() ? (16 + (3 * lineGap)) : 16;
 
-        hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
-        hudTextRenderer.draw("CSG stats issues:", 16, startY);
-        hudTextRenderer.draw(
+        g.setColor(new Color(255, 38, 38));
+        g.drawString("CSG stats issues:", HUD_LEFT_PADDING, height - startY - 2 * lineGap);
+        g.drawString(
             "fail=" + failures + " warn=" + warnings +
             " he1==he2=" + he1eqhe2,
-            16, startY + lineGap);
-        hudTextRenderer.draw(
+            HUD_LEFT_PADDING, height - startY - lineGap);
+        g.drawString(
             "joinIncomplete=" + joinIncomplete +
             " invalidHE=" + invalidInputs,
-            16, startY + (2 * lineGap));
+            HUD_LEFT_PADDING, height - startY);
+    }
+
+    private void drawDebugVertexLabels(Graphics2D g)
+    {
+        PolyhedralBoundedSolid solid = model.getSolid();
+        if ( model.notDebugVertices() || solid == null || solid.getVerticesList() == null ) {
+            return;
+        }
+
+        ArrayList<VertexLabelGroup> vertexGroups = buildVertexGroups(solid);
+        g.setFont(labelFont);
+
+        for ( int i = 0; i < vertexGroups.size(); i++ ) {
+            VertexLabelGroup group = vertexGroups.get(i);
+            ArrayList<_PolyhedralBoundedSolidVertex> visibleVertices =
+                filterVisibleVertices(group.vertices, solid, model.getCamera());
+
+            if ( !visibleVertices.isEmpty() ) {
+                g.setColor(Color.WHITE);
+                g.drawString(buildVertexIdsLabel(visibleVertices),
+                    (int)Math.round(group.projectedPosition.x()) + 4,
+                    (int)Math.round(group.projectedPosition.y()) + 4);
+            }
+        }
+    }
+
+    private void drawSelectedFaceLabel(Graphics2D g)
+    {
+        PolyhedralBoundedSolid solid = model.getSolid();
+        int faceIndex = model.getFaceIndex();
+        if ( solid == null || solid.getPolygonsList() == null || faceIndex < 0 ) {
+            return;
+        }
+        if ( faceIndex >= solid.getPolygonsList().size() ) {
+            return;
+        }
+
+        _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(faceIndex);
+        ArrayList<Vector3Dd> projectedVertices = collectProjectedFaceVertices(face);
+        if ( projectedVertices.isEmpty() ) {
+            return;
+        }
+
+        Vector3Dd projectedMidpoint = averageProjectedPosition(projectedVertices);
+        g.setFont(labelFont);
+        g.setColor(Color.CYAN);
+        g.drawString(Integer.toString(face.id),
+            (int)Math.round(projectedMidpoint.x()),
+            (int)Math.round(projectedMidpoint.y()));
     }
 
     private String formatFaceLoopLabel()
@@ -179,141 +282,102 @@ public class Jogl4DebuggerHudRenderer
         return "[" + currentFace + "/" + totalFaces + "]";
     }
 
-    public void dispose(GLAutoDrawable drawable)
+    private void ensureOverlayBuffers(int width, int height)
     {
-        if ( hudTextRenderer != null ) {
-            hudTextRenderer.dispose();
-            hudTextRenderer = null;
-        }
-        if ( vertexLabelRenderer != null ) {
-            vertexLabelRenderer.dispose();
-            vertexLabelRenderer = null;
-        }
-    }
-
-    private static void drawTopRight(TextRenderer renderer, int width,
-        int height, String text, int offsetFromTop)
-    {
-        Rectangle2D textBounds = renderer.getBounds(text);
-        int x = width - 16 - (int)Math.ceil(textBounds.getWidth());
-        int y = height - (int)Math.round((double)offsetFromTop);
-        renderer.draw(text, x, y);
-    }
-
-    private void drawDebugVertexLabels(GLAutoDrawable drawable, int width, int height)
-    {
-        PolyhedralBoundedSolid solid = model.getSolid();
-        if ( model.notDebugVertices() || solid == null || solid.getVerticesList() == null ) {
+        if ( overlayImage != null && bufferedOverlay != null &&
+             overlayImage.getXSize() == width && overlayImage.getYSize() == height ) {
             return;
         }
+        overlayImage = new RGBAImageUncompressed();
+        overlayImage.init(width, height);
+        bufferedOverlay = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
 
-        GL2 gl = drawable.getGL().getGL2();
-        double[] modelview = new double[16];
-        double[] projection = new double[16];
-        int[] viewport = new int[4];
-
-        gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, modelview, 0);
-        gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
-        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-        if ( viewport[2] > 0 && viewport[3] > 0 ) {
-            model.getCamera().updateViewportResize(viewport[2], viewport[3]);
-        }
-
-        ArrayList<VertexLabelGroup> vertexGroups = buildVertexGroups(solid,
-            modelview, projection, viewport);
-
-        vertexLabelRenderer.beginRendering(width, height);
-
-        for ( int i = 0; i < vertexGroups.size(); i++ ) {
-            VertexLabelGroup group = vertexGroups.get(i);
-            Vector3Dd projectedPosition = group.projectedPosition;
-            ArrayList<_PolyhedralBoundedSolidVertex> visibleVertices =
-                filterVisibleVertices(group.vertices, solid, model.getCamera());
-
-            if ( !visibleVertices.isEmpty() ) {
-                vertexLabelRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-                vertexLabelRenderer.draw(buildVertexIdsLabel(visibleVertices),
-                    (int)Math.round(projectedPosition.x()) + 4,
-                    (int)Math.round(projectedPosition.y()) + 4);
+    private void copyBufferedOverlayToImage(int width, int height)
+    {
+        for ( int y = 0; y < height; y++ ) {
+            for ( int x = 0; x < width; x++ ) {
+                int rgba = bufferedOverlay.getRGB(x, y);
+                byte r = (byte)((rgba >> 16) & 0xFF);
+                byte g = (byte)((rgba >> 8) & 0xFF);
+                byte b = (byte)(rgba & 0xFF);
+                byte a = (byte)((rgba >> 24) & 0xFF);
+                overlayImage.putPixel(x, y, r, g, b, a);
             }
         }
-        vertexLabelRenderer.endRendering();
     }
 
-    private void drawSelectedFaceLabel(GLAutoDrawable drawable, int width, int height)
+    private static void drawTopRight(Graphics2D g, int width, String text, int baselineY)
     {
-        PolyhedralBoundedSolid solid = model.getSolid();
-        int faceIndex = model.getFaceIndex();
-        GL2 gl;
-        double[] modelview;
-        double[] projection;
-        int[] viewport;
-        _PolyhedralBoundedSolidFace face;
-        ArrayList<Vector3Dd> projectedVertices;
-        Vector3Dd projectedMidpoint;
-        String label;
-
-        if ( solid == null || solid.getPolygonsList() == null || faceIndex < 0 ) {
-            return;
-        }
-        if ( faceIndex >= solid.getPolygonsList().size() ) {
-            return;
-        }
-
-        face = solid.getPolygonsList().get(faceIndex);
-        gl = drawable.getGL().getGL2();
-        modelview = new double[16];
-        projection = new double[16];
-        viewport = new int[4];
-
-        gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, modelview, 0);
-        gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projection, 0);
-        gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-
-        projectedVertices = collectProjectedFaceVertices(face, modelview,
-            projection, viewport);
-        if ( projectedVertices.isEmpty() ) {
-            return;
-        }
-
-        projectedMidpoint = averageProjectedPosition(projectedVertices);
-        label = Integer.toString(face.id);
-
-        vertexLabelRenderer.beginRendering(width, height);
-        vertexLabelRenderer.setColor(0.0f, 1.0f, 1.0f, 1.0f);
-        vertexLabelRenderer.draw(label,
-            (int)Math.round(projectedMidpoint.x()),
-            (int)Math.round(projectedMidpoint.y()));
-        vertexLabelRenderer.endRendering();
+        Rectangle2D textBounds = g.getFontMetrics().getStringBounds(text, g);
+        int x = width - HUD_LEFT_PADDING - (int)Math.ceil(textBounds.getWidth());
+        g.drawString(text, Math.max(HUD_LEFT_PADDING, x), baselineY);
     }
 
-    private static ArrayList<Vector3Dd> collectProjectedFaceVertices(
-        _PolyhedralBoundedSolidFace face,
-        double[] modelview,
-        double[] projection,
-        int[] viewport)
+    private ArrayList<VertexLabelGroup> buildVertexGroups(PolyhedralBoundedSolid solid)
+    {
+        ArrayList<VertexLabelGroup> vertexGroups =
+            new ArrayList<VertexLabelGroup>();
+        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
+        double spatialTolerance = numericContext.bigEpsilon() * SCREEN_DISTANCE_DELTA;
+
+        for ( int i = 0; i < solid.getVerticesList().size(); i++ ) {
+            _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);
+            Vector3Dd projectedPosition = projectVertexToViewport(vertex.position);
+            VertexLabelGroup group;
+
+            if ( projectedPosition == null ) {
+                continue;
+            }
+            group = findVertexGroup(vertexGroups, vertex, projectedPosition,
+                spatialTolerance);
+            if ( group == null ) {
+                vertexGroups.add(new VertexLabelGroup(vertex, projectedPosition));
+            }
+            else {
+                group.add(vertex, projectedPosition);
+            }
+        }
+        return vertexGroups;
+    }
+
+    private static VertexLabelGroup findVertexGroup(
+        ArrayList<VertexLabelGroup> vertexGroups,
+        _PolyhedralBoundedSolidVertex vertex,
+        Vector3Dd projectedPosition,
+        double spatialTolerance)
+    {
+        for ( int i = 0; i < vertexGroups.size(); i++ ) {
+            VertexLabelGroup group = vertexGroups.get(i);
+            if ( group.containsCloseVertex(vertex, projectedPosition,
+                 spatialTolerance) ) {
+                return group;
+            }
+        }
+        return null;
+    }
+
+    private ArrayList<Vector3Dd> collectProjectedFaceVertices(
+        _PolyhedralBoundedSolidFace face)
     {
         ArrayList<Vector3Dd> projected = new ArrayList<Vector3Dd>();
         Set<Integer> visitedVertexIds = new LinkedHashSet<Integer>();
 
         for ( int i = 0; i < face.boundariesList.size(); i++ ) {
             _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(i);
-            _PolyhedralBoundedSolidHalfEdge start;
-            _PolyhedralBoundedSolidHalfEdge he;
-
             if ( loop == null || loop.boundaryStartHalfEdge == null ) {
                 continue;
             }
 
-            start = loop.boundaryStartHalfEdge;
-            he = start;
+            _PolyhedralBoundedSolidHalfEdge start = loop.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge he = start;
             do {
                 _PolyhedralBoundedSolidVertex vertex = he.startingVertex;
                 if ( vertex != null &&
                      visitedVertexIds.add(vertex.id) &&
                      vertex.position != null ) {
-                    Vector3Dd projectedVertex = projectVertexToViewport(
-                        vertex.position, modelview, projection, viewport);
+                    Vector3Dd projectedVertex = projectVertexToViewport(vertex.position);
                     if ( projectedVertex != null ) {
                         projected.add(projectedVertex);
                     }
@@ -324,22 +388,32 @@ public class Jogl4DebuggerHudRenderer
         return projected;
     }
 
-    private static Vector3Dd averageProjectedPosition(
-        ArrayList<Vector3Dd> projectedVertices)
+    private Vector3Dd projectVertexToViewport(Vector3Dd worldPosition)
     {
-        double sx = 0.0;
-        double sy = 0.0;
-        double sz = 0.0;
-
-        for ( int i = 0; i < projectedVertices.size(); i++ ) {
-            Vector3Dd p = projectedVertices.get(i);
-            sx += p.x();
-            sy += p.y();
-            sz += p.z();
+        if ( worldPosition == null || model.getCamera() == null ) {
+            return null;
         }
 
-        double n = projectedVertices.size();
-        return new Vector3Dd(sx / n, sy / n, sz / n);
+        Camera camera = model.getCamera();
+        Matrix4x4d projection = camera.calculateProjectionMatrix();
+        Vector4Dd clip = projection.multiply(new Vector4Dd(worldPosition.x(),
+            worldPosition.y(), worldPosition.z(), 1.0));
+        if ( Math.abs(clip.w()) <= VSDK.EPSILON ) {
+            return null;
+        }
+
+        double ndcX = clip.x() / clip.w();
+        double ndcY = clip.y() / clip.w();
+        double ndcZ = clip.z() / clip.w();
+        if ( ndcX < -1.0 || ndcX > 1.0 || ndcY < -1.0 || ndcY > 1.0 ||
+             ndcZ < -1.0 || ndcZ > 1.0 ) {
+            return null;
+        }
+
+        double x = ((ndcX + 1.0) * 0.5) * viewportWidth;
+        double y = viewportHeight - (((ndcY + 1.0) * 0.5) * viewportHeight);
+        double z = (ndcZ + 1.0) * 0.5;
+        return new Vector3Dd(x, y, z);
     }
 
     private static ArrayList<_PolyhedralBoundedSolidVertex> filterVisibleVertices(
@@ -399,54 +473,22 @@ public class Jogl4DebuggerHudRenderer
         return !(vertexRayT - hit.t() >= numericContext.bigEpsilon());
     }
 
-    private static ArrayList<VertexLabelGroup> buildVertexGroups(
-        PolyhedralBoundedSolid solid,
-        double[] modelview,
-        double[] projection,
-        int[] viewport)
+    private static Vector3Dd averageProjectedPosition(
+        ArrayList<Vector3Dd> projectedVertices)
     {
-        ArrayList<VertexLabelGroup> vertexGroups =
-            new ArrayList<VertexLabelGroup>();
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
-        double spatialTolerance = numericContext.bigEpsilon() * SCREEN_DISTANCE_DELTA;
+        double sx = 0.0;
+        double sy = 0.0;
+        double sz = 0.0;
 
-        for ( int i = 0; i < solid.getVerticesList().size(); i++ ) {
-            _PolyhedralBoundedSolidVertex vertex = solid.getVerticesList().get(i);
-            Vector3Dd projectedPosition = projectVertexToViewport(
-                vertex.position, modelview, projection, viewport);
-            VertexLabelGroup group;
-
-            if ( projectedPosition == null ) {
-                continue;
-            }
-            group = findVertexGroup(vertexGroups, vertex, projectedPosition,
-                spatialTolerance);
-            if ( group == null ) {
-                vertexGroups.add(new VertexLabelGroup(vertex,
-                    projectedPosition));
-            }
-            else {
-                group.add(vertex, projectedPosition);
-            }
+        for ( int i = 0; i < projectedVertices.size(); i++ ) {
+            Vector3Dd p = projectedVertices.get(i);
+            sx += p.x();
+            sy += p.y();
+            sz += p.z();
         }
-        return vertexGroups;
-    }
 
-    private static VertexLabelGroup findVertexGroup(
-        ArrayList<VertexLabelGroup> vertexGroups,
-        _PolyhedralBoundedSolidVertex vertex,
-        Vector3Dd projectedPosition,
-        double spatialTolerance)
-    {
-        for ( int i = 0; i < vertexGroups.size(); i++ ) {
-            VertexLabelGroup group = vertexGroups.get(i);
-            if ( group.containsCloseVertex(vertex, projectedPosition,
-                 spatialTolerance) ) {
-                return group;
-            }
-        }
-        return null;
+        double n = projectedVertices.size();
+        return new Vector3Dd(sx / n, sy / n, sz / n);
     }
 
     private static double distanceSquared3D(Vector3Dd a, Vector3Dd b)
@@ -507,8 +549,7 @@ public class Jogl4DebuggerHudRenderer
             Vector3Dd projectedPosition,
             double spatialTolerance)
         {
-            double spatialToleranceSquared = spatialTolerance *
-                spatialTolerance;
+            double spatialToleranceSquared = spatialTolerance * spatialTolerance;
             double viewportToleranceSquared = VERTEX_LABEL_GROUPING_PIXELS *
                 VERTEX_LABEL_GROUPING_PIXELS;
 
@@ -524,23 +565,5 @@ public class Jogl4DebuggerHudRenderer
             }
             return false;
         }
-    }
-
-    private static Vector3Dd projectVertexToViewport(
-        Vector3Dd worldPosition,
-        double[] modelview,
-        double[] projection,
-        int[] viewport)
-    {
-        double[] projected = new double[4];
-        if ( !(new GLU()).gluProject(worldPosition.x(), worldPosition.y(),
-                worldPosition.z(), modelview, 0, projection, 0,
-                viewport, 0, projected, 0) ) {
-            return null;
-        }
-        if ( projected[2] < 0.0 || projected[2] > 1.0 ) {
-            return null;
-        }
-        return new Vector3Dd(projected[0], projected[1], projected[2]);
     }
 }

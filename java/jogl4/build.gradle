@@ -1,7 +1,6 @@
 dependencies {
     api project(':base')
     api project(':awt')
-    implementation project(':jogl2')
 
     api 'org.jogamp.jogl:jogl-all:2.5.0'
     api 'org.jogamp.gluegen:gluegen-rt:2.5.0'

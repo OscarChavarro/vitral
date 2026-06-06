@@ -83,9 +83,6 @@ public class InteractiveDebugger extends JFrame implements
         if ( GLProfile.isAvailable(GLProfile.GL4bc) ) {
             return GLProfile.get(GLProfile.GL4bc);
         }
-        if ( GLProfile.isAvailable(GLProfile.GL2) ) {
-            return GLProfile.get(GLProfile.GL2);
-        }
         return GLProfile.get(GLProfile.GL4);
     }
 

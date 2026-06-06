@@ -7,7 +7,7 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 
-final class Jogl4LineRenderer {
+public final class Jogl4LineRenderer {
     private static final String VERTEX_SHADER_FILE = "lineVertexShader.glsl";
     private static final String FRAGMENT_SHADER_FILE = "linePixelShader.glsl";
 
@@ -22,7 +22,7 @@ final class Jogl4LineRenderer {
     private Jogl4LineRenderer() {
     }
 
-    static void drawLines(
+    public static void drawLines(
         GL4 gl,
         Matrix4x4d modelViewProjection,
         float[] positions,
@@ -32,7 +32,7 @@ final class Jogl4LineRenderer {
         drawLines(gl, modelViewProjection, positions, colors, lineWidth, 0.0f);
     }
 
-    static void drawLines(
+    public static void drawLines(
         GL4 gl,
         Matrix4x4d modelViewProjection,
         float[] positions,
@@ -91,7 +91,7 @@ final class Jogl4LineRenderer {
         gl.glUseProgram(0);
     }
 
-    static void release(GL4 gl)
+    public static void release(GL4 gl)
     {
         if ( !initialized ) {
             return;

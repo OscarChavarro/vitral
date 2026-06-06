@@ -10,7 +10,7 @@ import models.DebuggerModel;
 import java.awt.EventQueue;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
@@ -23,7 +23,7 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.HiddenLineRenderer;
-import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
@@ -135,7 +135,19 @@ public class Jogl4DebuggerRenderer implements GLEventListener
                   .add(up.multiply(offsetY));
     }
 
-    private void drawInsetSolid(GL2 gl,
+    private static Matrix4x4d buildInsetModelMatrix(
+        Vector3Dd anchorPoint,
+        double scale,
+        Vector3Dd center)
+    {
+        return new Matrix4x4d()
+            .translation(anchorPoint)
+            .multiply(new Matrix4x4d().scale(scale, scale, scale)
+                .multiply(new Matrix4x4d().translation(-center.x(), -center.y(),
+                    -center.z())));
+    }
+
+    private void drawInsetSolid(GL4 gl,
         PolyhedralBoundedSolid solid,
         SimpleMaterial material,
         Vector3Dd anchorPoint,
@@ -158,17 +170,13 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         }
         scale = 0.75 * (mainSolidExtent / extent);
 
-        gl.glPushMatrix();
-        gl.glTranslated(anchorPoint.x(), anchorPoint.y(), anchorPoint.z());
-        gl.glScaled(scale, scale, scale);
-        gl.glTranslated(-center.x(), -center.y(), -center.z());
+        Matrix4x4d modelMatrix = buildInsetModelMatrix(anchorPoint, scale, center);
         Jogl4SimpleMaterialRenderer.activate(gl, material);
         Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, model.getCamera(),
-            model.getQuality());
-        gl.glPopMatrix();
+            model.getQuality(), modelMatrix);
     }
 
-    private void drawCsgOperandInsets(GL2 gl, int viewportWidth, int viewportHeight)
+    private void drawCsgOperandInsets(GL4 gl, int viewportWidth, int viewportHeight)
     {
         PolyhedralBoundedSolid operandA = model.getCsgPreviewOperandA();
         PolyhedralBoundedSolid operandB = model.getCsgPreviewOperandB();
@@ -226,110 +234,100 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         });
     }
 
+    private static void appendSegmentedLines(
+        List<Vector3Dd> source,
+        float r,
+        float g,
+        float b,
+        ArrayList<Float> positions,
+        ArrayList<Float> colors)
+    {
+        for ( int i = 0; i + 1 < source.size(); i += 2 ) {
+            Vector3Dd p0 = source.get(i);
+            Vector3Dd p1 = source.get(i + 1);
+            positions.add((float)p0.x());
+            positions.add((float)p0.y());
+            positions.add((float)p0.z());
+            positions.add((float)p1.x());
+            positions.add((float)p1.y());
+            positions.add((float)p1.z());
+            for ( int v = 0; v < 2; v++ ) {
+                colors.add(r);
+                colors.add(g);
+                colors.add(b);
+            }
+        }
+    }
+
+    private static float[] toFloatArray(List<Float> values)
+    {
+        float[] out = new float[values.size()];
+        for ( int i = 0; i < values.size(); i++ ) {
+            out[i] = values.get(i);
+        }
+        return out;
+    }
+
     private void
-    renderLinesResult(GL2 gl, List <Vector3Dd> contourLines,
+    renderLinesResult(GL4 gl, Matrix4x4d mvp, List <Vector3Dd> contourLines,
                       List <Vector3Dd> visibleLines,
                       List <Vector3Dd> hiddenLines)
     {
-        int i;
-        Vector3Dd p;
+        ArrayList<Float> positions = new ArrayList<Float>();
+        ArrayList<Float> colors = new ArrayList<Float>();
 
-        gl.glPushAttrib(GL.GL_DEPTH_TEST);
-        gl.glDisable(GL.GL_DEPTH_TEST);
+        appendSegmentedLines(contourLines, 0.0f, 0.0f, 0.0f, positions, colors);
+        appendSegmentedLines(visibleLines, 0.0f, 0.0f, 0.0f, positions, colors);
+        appendSegmentedLines(hiddenLines, 0.3f, 0.3f, 0.3f, positions, colors);
 
-        //-----------------------------------------------------------------
-        gl.glLineWidth(4.0f);
-        gl.glColor3d(0, 0, 0);
-        gl.glBegin(GL2.GL_LINES);
-        for ( i = 0; i < contourLines.size(); i++ ) {
-            p = contourLines.get(i);
-            gl.glVertex3d(p.x(), p.y(), p.z());
+        if ( positions.isEmpty() ) {
+            return;
         }
-        gl.glEnd();
-
-        gl.glLineWidth(4.0f);
-        gl.glColor3d(0, 0, 0);
-        gl.glBegin(GL2.GL_LINES);
-        for ( i = 0; i < visibleLines.size(); i++ ) {
-            p = visibleLines.get(i);
-            gl.glVertex3d(p.x(), p.y(), p.z());
-        }
-        gl.glEnd();
-
-/*
-        gl.glLineWidth(1.0f);
-        gl.glColor3d(0, 0, 0);
-        gl.glBegin(gl.GL_LINES);
-        for ( i = 0; i < hiddenLines.size(); i++ ) {
-            p = hiddenLines.get(i);
-            gl.glVertex3d(p.x, p.y, p.z);
-        }
-        gl.glEnd();
-*/
-        //-----------------------------------------------------------------
-/*
-        gl.glPointSize(4.0f);
-        gl.glColor3d(0.5, 0.5, 0.9);
-        gl.glBegin(gl.GL_POINTS);
-        for ( i = 0; i < contourLines.size(); i++ ) {
-            p = contourLines.get(i);
-            gl.glVertex3d(p.x, p.y, p.z);
-        }
-        for ( i = 0; i < visibleLines.size(); i++ ) {
-            p = visibleLines.get(i);
-            gl.glVertex3d(p.x, p.y, p.z);
-        }
-        gl.glEnd();
-*/
-        //-----------------------------------------------------------------
-        gl.glPopAttrib();
+        Jogl4LineRenderer.drawLines(gl, mvp, toFloatArray(positions),
+            toFloatArray(colors), 4.0f, -4.0e-4f);
     }
 
-    private void drawObjectsGL(GL2 gl, int viewportWidth, int viewportHeight)
+    private void drawReferenceFrame(GL4 gl, Matrix4x4d mvp)
     {
-        gl.glLoadIdentity();
+        if ( model.getEdgeIndex() <= -3 || !model.isShowCoordinateSystem() ) {
+            return;
+        }
+        float[] positions = new float[] {
+            0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0, 1
+        };
+        float[] colors = new float[] {
+            1, 0, 0, 1, 0, 0,
+            0, 1, 0, 0, 1, 0,
+            0, 0, 1, 0, 0, 1
+        };
+        Jogl4LineRenderer.drawLines(gl, mvp, positions, colors, 3.0f, -3.0e-4f);
+    }
 
+    private void drawObjectsGL(GL4 gl, int viewportWidth, int viewportHeight)
+    {
         if ( model.getSolid() == null ) {
             return;
         }
+        Matrix4x4d modelMatrix = Matrix4x4d.identityMatrix();
+        Matrix4x4d mvp = model.getCamera().calculateProjectionMatrix()
+            .multiply(modelMatrix);
 
-        // Surface pass: farthest depth bias.
-        gl.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
-        gl.glPolygonOffset(4.0f, 4.0f);
         Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
         Jogl4LightRenderer.activate(gl, model.getLight1());
         Jogl4LightRenderer.draw(gl, model.getLight1(), model.getCamera());
         Jogl4LightRenderer.activate(gl, model.getLight2());
         Jogl4LightRenderer.draw(gl, model.getLight2(), model.getCamera());
-        gl.glEnable(GL2.GL_LIGHTING);
-        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(), model.getCamera(), model.getQuality());
-        gl.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(),
+            model.getCamera(), model.getQuality(), modelMatrix);
 
-        // Line pass: middle depth bias.
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glLineWidth(3.0f);
-        gl.glEnable(GL2.GL_POLYGON_OFFSET_LINE);
-        gl.glPolygonOffset(2.0f, 2.0f);
-        if ( model.getEdgeIndex() > -3 && model.isShowCoordinateSystem() ) {
-            gl.glBegin(GL2.GL_LINES);
-                gl.glColor3d(1, 0, 0);
-                gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(1, 0, 0);
+        drawReferenceFrame(gl, mvp);
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl,
+            model.getSolid(), model.getFaceIndex(), mvp);
+        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(),
+            model.getFaceIndex(), modelMatrix, mvp, model.getCamera());
 
-                gl.glColor3d(0, 1, 0);
-                gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(0, 1, 0);
-
-                gl.glColor3d(0, 0, 1);
-                gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(0, 0, 1);
-            gl.glEnd();
-        }
-        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFaceBoundary(gl, model.getSolid(), model.getFaceIndex());
-        Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(), model.getFaceIndex());
-        gl.glDisable(GL2.GL_POLYGON_OFFSET_LINE);
-
-        // Points pass: nearest depth bias.
         List<Vector3Dd> contourLines;
         List <Vector3Dd> visibleLines;
         List <Vector3Dd> hiddenLines;
@@ -337,10 +335,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         SimpleBody body;
 
         if ( model.isDebugEdges() && model.getEdgeIndex() > -3 ) {
-            gl.glEnable(GL2.GL_POLYGON_OFFSET_POINT);
-            gl.glPolygonOffset(1.0f, 1.0f);
-            Jogl4PolyhedralBoundedSolidRenderer.drawDebugEdges(gl, model.getSolid(), model.getCamera(), model.getEdgeIndex());
-            gl.glDisable(GL2.GL_POLYGON_OFFSET_POINT);
+            Jogl4PolyhedralBoundedSolidRenderer.drawDebugEdges(gl,
+                model.getSolid(), model.getCamera(), model.getEdgeIndex(), mvp);
         }
         else if ( model.getEdgeIndex() == -3 ) {
             contourLines = new ArrayList <Vector3Dd>();
@@ -356,7 +352,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             bodyArray.add(body);
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);
-            renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
+            renderLinesResult(gl, mvp, contourLines, visibleLines, hiddenLines);
         }
 
         /*
@@ -373,17 +369,14 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     */
     @Override
     public void display(GLAutoDrawable drawable) {
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
 
         gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
-        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-        gl.glColor3d(1, 1, 1);
-        gl.glEnable(GL2.GL_DEPTH_TEST);
-
-        Jogl2CameraRenderer.activate(gl, model.getCamera());
+        gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
 
         drawObjectsGL(gl, drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
-        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL4.GL_DEPTH_BUFFER_BIT);
         drawCsgOperandInsets(gl, drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());
         hudRenderer.draw(drawable);
@@ -420,14 +413,14 @@ public class Jogl4DebuggerRenderer implements GLEventListener
                          int y,
                          int width,
                          int height) {
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
         gl.glViewport(0, 0, width, height); 
 
         model.getCamera().updateViewportResize(width, height);
         hudRenderer.updateViewportSize(width, height);
     }
 
-    private void exportPendingScreenshot(GL2 gl, int width, int height)
+    private void exportPendingScreenshot(GL4 gl, int width, int height)
     {
         File outputFile = pendingScreenshotFile;
         if ( outputFile == null || width <= 0 || height <= 0 ) {
@@ -443,7 +436,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             outputFile.getPath());
     }
 
-    private static RGBImageUncompressed captureRgbImage(GL2 gl, int width, int height)
+    private static RGBImageUncompressed captureRgbImage(GL4 gl, int width, int height)
     {
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
         gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);

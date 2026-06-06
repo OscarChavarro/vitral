@@ -27,7 +27,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
-    private SolidModelNames solidModelName = SolidModelNames.FONT_BLOCK;
+    private SolidModelNames solidModelName = SolidModelNames.GLUED_CYLINDERS;
     private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
     private int kurlanderBowlSingleMotifIndex = 19;
     private int subdivisionCircumference = 16;

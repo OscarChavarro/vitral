@@ -1,6 +1,10 @@
 package vsdk.toolkit.render.jogl;
 
-import com.jogamp.opengl.GL2;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.color.ColorRgb;
@@ -8,36 +12,39 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.gui.LightGizmoOmniBillboard;
 import vsdk.toolkit.gui.LightGizmoStyle;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class Jogl4LightRenderer extends Jogl4Renderer
 {
+    private static final LinkedHashMap<Integer, Light> ACTIVE_LIGHTS =
+        new LinkedHashMap<Integer, Light>();
     private static double scale = 1.0;
 
-    public static void activate(GL2 gl, Light light)
+    public static void activate(GL gl, Light light)
     {
-        Jogl2LightRenderer.activate(gl, light);
+        if ( light == null ) {
+            return;
+        }
+        ACTIVE_LIGHTS.put(light.getId(), copyLight(light));
     }
 
-    public static void draw(GL2 gl, Light light)
+    public static void draw(GL gl, Light light)
     {
         draw(gl, light, null, LightGizmoStyle.CROSS);
     }
 
-    public static void draw(GL2 gl, Light light, Camera camera)
+    public static void draw(GL gl, Light light, Camera camera)
     {
         draw(gl, light, camera, LightGizmoStyle.CROSS);
     }
 
-    public static void draw(GL2 gl, Light light, Camera camera,
+    public static void draw(GL gl, Light light, Camera camera,
                             LightGizmoStyle lightGizmoStyle)
     {
-        if ( gl == null ) {
-            return;
-        }
-        if ( !gl.isGL4() ) {
+        if ( gl == null || !gl.isGL4() ) {
             return;
         }
         draw(gl.getGL4(), light, camera, lightGizmoStyle);
@@ -71,6 +78,21 @@ public class Jogl4LightRenderer extends Jogl4Renderer
     public static void setScale(double newScale)
     {
         scale = newScale;
+    }
+
+    static List<Light> getActiveLights()
+    {
+        if ( ACTIVE_LIGHTS.isEmpty() ) {
+            ArrayList<Light> defaults = new ArrayList<Light>();
+            defaults.add(defaultLight());
+            return defaults;
+        }
+
+        ArrayList<Light> out = new ArrayList<Light>();
+        for ( Light light : ACTIVE_LIGHTS.values() ) {
+            out.add(copyLight(light));
+        }
+        return out;
     }
 
     private static void drawCross(GL4 gl, Light light, Camera camera)
@@ -225,5 +247,27 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         double worldViewHeightAtDepth = 2.0 * depth * Math.tan(fovRadians / 2.0);
         double worldPerPixel = worldViewHeightAtDepth / Math.max(viewportHeight, 1);
         return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
+    }
+
+    private static Light copyLight(Light light)
+    {
+        Light copy = new Light(light.getLightType(), light.getPosition(),
+            light.getSpecular());
+        copy.setId(light.getId());
+        copy.setAmbient(light.getAmbient());
+        copy.setDiffuse(light.getDiffuse());
+        copy.setSpecular(light.getSpecular());
+        copy.setName(light.getName());
+        return copy;
+    }
+
+    private static Light defaultLight()
+    {
+        Light light = new Light(LightType.POINT, new Vector3Dd(10, 10, 10),
+            new ColorRgb(1, 1, 1));
+        light.setId(0);
+        light.setAmbient(new ColorRgb(0, 0, 0));
+        light.setDiffuse(new ColorRgb(1, 1, 1));
+        return light;
     }
 }

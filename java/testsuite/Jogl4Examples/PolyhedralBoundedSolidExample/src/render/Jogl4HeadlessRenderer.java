@@ -4,11 +4,11 @@ import java.io.File;
 import java.nio.ByteBuffer;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 
@@ -72,7 +72,7 @@ public class Jogl4HeadlessRenderer implements GLEventListener
             return;
         }
         delegate.display(drawable);
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
         gl.glFinish();
 
         RGBImageUncompressed image = captureRgbImage(gl, width, height);
@@ -102,13 +102,10 @@ public class Jogl4HeadlessRenderer implements GLEventListener
         if ( GLProfile.isAvailable(GLProfile.GL4bc) ) {
             return GLProfile.get(GLProfile.GL4bc);
         }
-        if ( GLProfile.isAvailable(GLProfile.GL2) ) {
-            return GLProfile.get(GLProfile.GL2);
-        }
         return GLProfile.get(GLProfile.GL4);
     }
 
-    private static RGBImageUncompressed captureRgbImage(GL2 gl, int width, int height)
+    private static RGBImageUncompressed captureRgbImage(GL4 gl, int width, int height)
     {
         ByteBuffer bb = ByteBuffer.allocateDirect(3 * width * height);
         gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
