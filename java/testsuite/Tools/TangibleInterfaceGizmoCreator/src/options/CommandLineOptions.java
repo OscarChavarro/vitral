@@ -153,9 +153,6 @@ public class CommandLineOptions
         if ( "sphere".equalsIgnoreCase(rawValue) ) {
             return GizmoNames.CUBE_PART_2;
         }
-        if ( "text".equalsIgnoreCase(rawValue) ) {
-            return GizmoNames.EXPERIMENTAL;
-        }
         try {
             return GizmoNames.fromId(Integer.parseInt(rawValue));
         }

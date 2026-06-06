@@ -8,7 +8,8 @@ public enum GizmoNames
     CUBE_PART_4(4),
     CUBE_PART_5(5),
     CUBE_PART_6(6),
-    EXPERIMENTAL(7);
+    CUBE_STICK_BASE(7),
+    CUBE_STICK_HOLED(8);
 
     private final int id;
 

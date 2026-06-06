@@ -8,6 +8,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
@@ -19,6 +20,18 @@ public class TangibleInterfaceCubeFixture {
     private static final double BASE_PATTERN_SCALE = 0.01;
     private static final double BASE_POSITION_TOLERANCE = 1.0e-9;
     private static final double BASE_DEFAULT_EXTRUSION_HEIGHT = 0.03;
+    private static final int GLYPH_MODEL_PART_1 = 0;
+    private static final int GLYPH_MODEL_PART_2 = 1;
+    private static final int GLYPH_MODEL_PART_3 = 2;
+    private static final int GLYPH_MODEL_PART_4 = 3;
+    private static final int GLYPH_MODEL_PART_5 = 4;
+    private static final int BASE_ONLY_STICK = 5;
+    private static final int BASE_ONLY_STICK_HOLED = 6;
+    private static final int GLYPH_MODEL_PART_6 = 7;
+    private static final int BASE_PATH_INDEX_PART_5 = 4;
+    private static final int BASE_PATH_INDEX_PART_6 = 5;
+    private static final int BASE_CYLINDER_SIDES = 32;
+    private static final int BASE_CYLINDER_HEIGHT_DIVISIONS = 1;
     private static final double GLYPH_TEXT_EXTRUSION_HEIGHT = 0.027;
     private static final double GLYPH_TEXT_TARGET_EXTENT = 0.144;
     private static final double GLYPH_TEXT_Z_OFFSET = 0.01;
@@ -31,21 +44,91 @@ public class TangibleInterfaceCubeFixture {
 
     private final String[] basePathLoops = new String[] {
         "M 0 40 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -4 h -3 v -3 h 6 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 4 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 4 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -7 Z",
-        "M 53 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 4 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 4 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -4 v -4 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 Z",
-        "M 100 33 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -6 h 3 v 3 h 4 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 6 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 7 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -4 v 3 h -3 Z",
-        "M 3 87 v -4 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 6 v 4 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -6 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 Z",
-        "M 83 90 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v -4 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 7 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -7 Z",
-        "M 137 90 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -4 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -4 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 6 v 3 h -3 v 4 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 6 Z",
+        "M 3 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 4 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 4 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -4 v -4 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 Z",
+        "M 0 33 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -6 h 3 v 3 h 4 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 6 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 7 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -4 v 3 h -3 Z",
+        "M 3 37 v -4 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 6 v 4 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -6 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 Z",
+        "M 33 40 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v -4 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 7 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -7 Z",
+        "M 37 40 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -4 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -4 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 6 v 3 h -3 v 4 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 6 Z",
     };
 
     public PolyhedralBoundedSolid buildGizmoModel(int index) {
+        return buildGizmoModel(index, 0.0, 0.0, 0.0);
+    }
+
+    public PolyhedralBoundedSolid buildGizmoModel(
+        int index,
+        double innerRadius,
+        double outer,
+        double baseHeight)
+    {
+        return switch ( index ) {
+            case GLYPH_MODEL_PART_1, GLYPH_MODEL_PART_2, GLYPH_MODEL_PART_3,
+                 GLYPH_MODEL_PART_4, GLYPH_MODEL_PART_5 ->
+                glyphBuildModel(index, index);
+            case GLYPH_MODEL_PART_6 ->
+                glyphBuildModel(BASE_PATH_INDEX_PART_6, BASE_PATH_INDEX_PART_6);
+            case BASE_ONLY_STICK ->
+                baseBuildStickModel(innerRadius/100, outer/100, baseHeight/10);
+            case BASE_ONLY_STICK_HOLED ->
+                baseBuildStickHoledModel(innerRadius/100);
+            default -> throw new IllegalArgumentException(
+                "Unsupported gizmo model index: " + index);
+        };
+    }
+
+    private PolyhedralBoundedSolid glyphBuildModel(int baseIndex, int glyphIndex)
+    {
         PolyhedralBoundedSolid baseSolid =
-            baseCreatePart(index, BASE_DEFAULT_EXTRUSION_HEIGHT);
+            baseCreatePart(baseIndex, BASE_DEFAULT_EXTRUSION_HEIGHT);
         PolyhedralBoundedSolid glyphSolid = glyphCreateCenteredTextSolid(
-            glyphForIndex(index), baseSolid, GLYPH_TEXT_Z_OFFSET);
+            glyphForIndex(glyphIndex), baseSolid, GLYPH_TEXT_Z_OFFSET);
 
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             baseSolid, glyphSolid, PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
+        return result;
+    }
+
+    private PolyhedralBoundedSolid baseBuildStickModel(
+        double innerRadius,
+        double outterRadius,
+        double baseHeight)
+    {
+        PolyhedralBoundedSolid baseSolid = baseCreatePart(
+            BASE_PATH_INDEX_PART_6, BASE_DEFAULT_EXTRUSION_HEIGHT);
+        double[] baseMinMax = baseSolid.getMinMax();
+        Vector3Dd baseCenter = new Vector3Dd(
+            (baseMinMax[0] + baseMinMax[3]) * 0.5,
+            (baseMinMax[1] + baseMinMax[4]) * 0.5,
+            0.0);
+        PolyhedralBoundedSolid tubeSolid = baseCreateStickTube(
+            innerRadius, outterRadius, baseHeight, baseCenter);
+
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            baseSolid, tubeSolid, PolyhedralBoundedSolidModeler.UNION, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
+        return result;
+    }
+
+    private PolyhedralBoundedSolid baseBuildStickHoledModel(double innerRadius)
+    {
+        PolyhedralBoundedSolid baseSolid = baseCreatePart(
+            BASE_PATH_INDEX_PART_5, BASE_DEFAULT_EXTRUSION_HEIGHT);
+        double[] baseMinMax = baseSolid.getMinMax();
+        Vector3Dd baseCenter = new Vector3Dd(
+            (baseMinMax[0] + baseMinMax[3]) * 0.5,
+            (baseMinMax[1] + baseMinMax[4]) * 0.5,
+            0.0);
+        PolyhedralBoundedSolid holeCylinder = baseCreateCylinder(
+            baseResolveInnerRadius(innerRadius, 0.45),
+            BASE_DEFAULT_EXTRUSION_HEIGHT * 3.0,
+            new Vector3Dd(
+                baseCenter.x(),
+                baseCenter.y(),
+                -BASE_DEFAULT_EXTRUSION_HEIGHT));
+
+        PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
+            baseSolid, holeCylinder, PolyhedralBoundedSolidModeler.SUBTRACT, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
         return result;
     }
@@ -77,6 +160,79 @@ public class TangibleInterfaceCubeFixture {
             solid, solid.findFace(1), sweep);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
         return solid;
+    }
+
+    private double baseResolveExtrusionHeight(double baseHeight)
+    {
+        if ( baseHeight > 0.0 ) {
+            return baseHeight;
+        }
+        return BASE_DEFAULT_EXTRUSION_HEIGHT;
+    }
+
+    private PolyhedralBoundedSolid baseCreateStickTube(
+        double innerRadius,
+        double outterRadius,
+        double baseHeight,
+        Vector3Dd baseCenter)
+    {
+        double resolvedBaseHeight = baseResolveExtrusionHeight(baseHeight);
+        double resolvedOuterRadius = baseResolveOuterRadius(outterRadius);
+        double resolvedInnerRadius = baseResolveInnerRadius(
+            innerRadius, resolvedOuterRadius);
+
+        PolyhedralBoundedSolid cylinderA = baseCreateCylinder(
+            resolvedOuterRadius,
+            resolvedBaseHeight + BASE_DEFAULT_EXTRUSION_HEIGHT / 3.0,
+            new Vector3Dd(
+                baseCenter.x(),
+                baseCenter.y(),
+                2.0 * BASE_DEFAULT_EXTRUSION_HEIGHT / 3.0));
+        PolyhedralBoundedSolid cylinderB = baseCreateCylinder(
+            resolvedInnerRadius,
+            resolvedBaseHeight + BASE_DEFAULT_EXTRUSION_HEIGHT,
+            new Vector3Dd(
+                baseCenter.x(),
+                baseCenter.y(),
+                BASE_DEFAULT_EXTRUSION_HEIGHT / 3.0));
+
+        PolyhedralBoundedSolid tube = PolyhedralBoundedSolidModeler.setOp(
+            cylinderA, cylinderB, PolyhedralBoundedSolidModeler.SUBTRACT, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(tube);
+        return tube;
+    }
+
+    private PolyhedralBoundedSolid baseCreateCylinder(
+        double radius,
+        double height,
+        Vector3Dd translation)
+    {
+        PolyhedralBoundedSolid solid = new Cone(radius, radius, height)
+            .exportToPolyhedralBoundedSolid(
+                BASE_CYLINDER_SIDES, BASE_CYLINDER_HEIGHT_DIVISIONS);
+        Matrix4x4d move = new Matrix4x4d();
+        move = move.translation(translation);
+        PolyhedralBoundedSolidModeler.applyTransformation(solid, move);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+        return solid;
+    }
+
+    private double baseResolveOuterRadius(double outterRadius)
+    {
+        if ( outterRadius > 0.0 ) {
+            return outterRadius;
+        }
+        return 0.45;
+    }
+
+    private double baseResolveInnerRadius(
+        double innerRadius,
+        double outterRadius)
+    {
+        if ( innerRadius > 0.0 ) {
+            return Math.min(innerRadius, outterRadius);
+        }
+        return outterRadius * 0.75;
     }
 
     private String glyphForIndex(int index)

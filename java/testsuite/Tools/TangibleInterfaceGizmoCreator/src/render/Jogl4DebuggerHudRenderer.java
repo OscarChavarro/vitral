@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import com.jogamp.opengl.GL;
@@ -79,6 +80,9 @@ public class Jogl4DebuggerHudRenderer
             + (model.notDebugVertices() ? "OFF" : "ON");
         String referenceFrameMessage = "Reference frame [Space]: "
             + (model.isShowCoordinateSystem() ? "ON" : "OFF");
+        String geometryControlsMessage = String.format(Locale.US,
+            "Inner radius (5/6): %.2f, outterRadius (7/8): %.2f, base height (9/0): %.2f",
+            model.getInnerRadius(), model.getOuterRadius(), model.getBaseHeight());
 
         hudTextRenderer.beginRendering(width, height);
         hudTextRenderer.setColor(1.0f, 1.0f, 0.0f, 1.0f);
@@ -87,6 +91,8 @@ public class Jogl4DebuggerHudRenderer
         hudTextRenderer.draw(verticesMessage, 16, height - (28 + 2 * LINE_HEIGHT));
         hudTextRenderer.draw(referenceFrameMessage, 16,
             height - (28 + 3 * LINE_HEIGHT));
+        hudTextRenderer.draw(geometryControlsMessage, 16,
+            height - (28 + 4 * LINE_HEIGHT));
         if ( model.isErrorState() ) {
             hudTextRenderer.setColor(1.0f, 0.1f, 0.1f, 1.0f);
             hudTextRenderer.draw(model.getErrorMessage(), 16, 16);

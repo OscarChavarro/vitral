@@ -21,6 +21,13 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 
 public class TangibleInterfaceGizmosModel
 {
+    private static final double MIN_RADIUS = 0.1;
+    private static final double MAX_RADIUS = 2.0;
+    private static final double RADIUS_STEP = 0.1;
+    private static final double MIN_BASE_HEIGHT = 0.1;
+    private static final double MAX_BASE_HEIGHT = 3.0;
+    private static final double BASE_HEIGHT_STEP = 0.5;
+
     private GizmoNames solidModelName = GizmoNames.CUBE_PART_1;
     private final Camera camera;
     private final SimpleMaterial material;
@@ -36,6 +43,9 @@ public class TangibleInterfaceGizmosModel
     private boolean showCoordinateSystem = true;
     private boolean errorState = false;
     private String errorMessage = "";
+    private double innerRadius = 3.04/2;
+    private double outerRadius = 3.04/2 + 1.2;
+    private double baseHeight = 1.0;
     private JFrame mainFrame;
     private Rectangle windowedBounds;
     private boolean fullScreenMode = false;
@@ -208,6 +218,76 @@ public class TangibleInterfaceGizmosModel
     public boolean isErrorState()
     {
         return errorState;
+    }
+
+    public double getInnerRadius()
+    {
+        return innerRadius;
+    }
+
+    public void setInnerRadius(double innerRadius)
+    {
+        this.innerRadius = innerRadius;
+    }
+
+    public double getOuterRadius()
+    {
+        return outerRadius;
+    }
+
+    public void setOuterRadius(double outerRadius)
+    {
+        this.outerRadius = outerRadius;
+    }
+
+    public double getBaseHeight()
+    {
+        return baseHeight;
+    }
+
+    public void setBaseHeight(double baseHeight)
+    {
+        this.baseHeight = baseHeight;
+    }
+
+    public void decreaseInnerRadius()
+    {
+        innerRadius = Math.max(MIN_RADIUS, innerRadius - RADIUS_STEP);
+        if ( innerRadius > outerRadius) {
+            innerRadius = outerRadius;
+        }
+    }
+
+    public void increaseInnerRadius()
+    {
+        innerRadius = Math.min(MAX_RADIUS, innerRadius + RADIUS_STEP);
+        if ( innerRadius > outerRadius) {
+            innerRadius = outerRadius;
+        }
+    }
+
+    public void decreaseOutterRadius()
+    {
+        outerRadius = Math.max(innerRadius, outerRadius - RADIUS_STEP);
+        outerRadius = Math.min(MAX_RADIUS, outerRadius);
+    }
+
+    public void increaseOutterRadius()
+    {
+        outerRadius = Math.min(MAX_RADIUS, outerRadius + RADIUS_STEP);
+        if ( outerRadius < innerRadius ) {
+            outerRadius = innerRadius;
+        }
+    }
+
+    public void decreaseBaseHeight()
+    {
+        baseHeight = Math.max(MIN_BASE_HEIGHT, baseHeight - BASE_HEIGHT_STEP);
+    }
+
+    public void increaseBaseHeight()
+    {
+        baseHeight = Math.min(MAX_BASE_HEIGHT, baseHeight + BASE_HEIGHT_STEP);
     }
 
     public String getErrorMessage()

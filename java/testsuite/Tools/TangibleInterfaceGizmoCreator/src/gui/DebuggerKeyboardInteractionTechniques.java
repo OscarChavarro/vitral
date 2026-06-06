@@ -103,6 +103,36 @@ public class DebuggerKeyboardInteractionTechniques
             actions.exportCurrentModelStlIfMissing();
             handled = true;
             break;
+          case KeyEvent.KEY_5:
+            model.decreaseInnerRadius();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+          case KeyEvent.KEY_6:
+            model.increaseInnerRadius();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+          case KeyEvent.KEY_7:
+            model.decreaseOutterRadius();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+          case KeyEvent.KEY_8:
+            model.increaseOutterRadius();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+          case KeyEvent.KEY_9:
+            model.decreaseBaseHeight();
+            actions.rebuildSolid();
+            handled = true;
+            break;
+          case KeyEvent.KEY_0:
+            model.increaseBaseHeight();
+            actions.rebuildSolid();
+            handled = true;
+            break;
           default:
             break;
         }
