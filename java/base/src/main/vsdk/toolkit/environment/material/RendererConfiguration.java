@@ -37,6 +37,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     private boolean normals;
     private boolean trianglesNormals;
     private boolean useVertexColors;
+    private double vertexNormalSmoothingThresholdDegrees;
     private ColorRgb wireColor;
     private ColorRgb boundingVolumeColor;
 
@@ -56,6 +57,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         if ( this.normals ) valThis += 0x0080;
         if ( this.trianglesNormals ) valThis += 0x0100;
         valThis += this.shadingType * 0x1000;
+        valThis += Math.round(this.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
         valOther = 0x00;
         if ( other.surfaces ) valOther += 0x0001;
@@ -68,6 +70,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         if ( other.normals ) valOther += 0x0080;
         if ( other.trianglesNormals ) valOther += 0x0100;
         valOther += other.shadingType * 0x1000;
+        valOther += Math.round(other.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
         if ( valThis > valOther ) {
             return 1;
@@ -93,6 +96,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.wireColor = new ColorRgb(other.wireColor);
         this.boundingVolumeColor = new ColorRgb(other.boundingVolumeColor);
         this.useVertexColors = other.useVertexColors;
+        this.vertexNormalSmoothingThresholdDegrees =
+            other.vertexNormalSmoothingThresholdDegrees;
     }
 
     // To be used in future: depending of the rendering implementation for
@@ -129,6 +134,7 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         wireColor = new ColorRgb(1, 1, 1);
         boundingVolumeColor = new ColorRgb(1, 1, 0);
         useVertexColors = false;
+        vertexNormalSmoothingThresholdDegrees = 15.0;
     }
 
     public void setWireColor(ColorRgb c)
@@ -210,6 +216,21 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         this.shadingType = shadingType.getCode();
     }
 
+    public void setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees)
+    {
+        if ( Double.isNaN(thresholdDegrees) ) {
+            this.vertexNormalSmoothingThresholdDegrees = 15.0;
+            return;
+        }
+        if ( thresholdDegrees < 0.0 ) {
+            thresholdDegrees = 0.0;
+        }
+        if ( thresholdDegrees > 180.0 ) {
+            thresholdDegrees = 180.0;
+        }
+        this.vertexNormalSmoothingThresholdDegrees = thresholdDegrees;
+    }
+
     public boolean isSurfacesSet()
     {
         return this.surfaces;
@@ -258,6 +279,11 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
     public int getShadingType()
     {
         return this.shadingType;
+    }
+
+    public double getVertexNormalSmoothingThresholdDegrees()
+    {
+        return vertexNormalSmoothingThresholdDegrees;
     }
 
     public ShadingType getShadingTypeEnum()
@@ -353,6 +379,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         msg = msg + "  - Draw triangles normals: " + (trianglesNormals?"ON":"OFF") + "\n";
         msg = msg + "  - With texture: " + (texture?"ON":"OFF") + "\n";
         msg = msg + "  - With bump map: " + (bumpMap?"ON":"OFF") + "\n";
+        msg = msg + "  - Vertex normal smoothing threshold: " +
+            vertexNormalSmoothingThresholdDegrees + " deg\n";
 
         return msg;
     }
@@ -387,6 +415,8 @@ public class RendererConfiguration extends FundamentalEntity /*implements Compar
         copy.wireColor = new ColorRgb(wireColor);
         copy.boundingVolumeColor = new ColorRgb(boundingVolumeColor);
         copy.useVertexColors = useVertexColors;
+        copy.vertexNormalSmoothingThresholdDegrees =
+            vertexNormalSmoothingThresholdDegrees;
         return copy;
     }
 

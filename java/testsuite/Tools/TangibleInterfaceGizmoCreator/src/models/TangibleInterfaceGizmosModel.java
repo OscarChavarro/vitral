@@ -61,6 +61,7 @@ public class TangibleInterfaceGizmosModel
 
         quality = new RendererConfiguration();
         quality.changeWires();
+	quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
         qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerAquynza(camera);
 

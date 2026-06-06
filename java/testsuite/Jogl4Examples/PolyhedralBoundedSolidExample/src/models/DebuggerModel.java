@@ -66,6 +66,7 @@ public class DebuggerModel
 
         quality = new RendererConfiguration();
         quality.changeWires();
+	quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
         qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerOrbiter(camera);
 

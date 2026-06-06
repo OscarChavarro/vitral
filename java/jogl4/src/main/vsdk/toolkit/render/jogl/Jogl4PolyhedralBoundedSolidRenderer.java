@@ -170,7 +170,7 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
         boolean smoothNormals =
             quality.getShadingType() != RendererConfiguration.SHADING_TYPE_FLAT &&
             quality.getShadingType() != RendererConfiguration.SHADING_TYPE_NOLIGHT;
-        MeshData mesh = buildMesh(solid, smoothNormals);
+        MeshData mesh = buildMesh(solid, smoothNormals, quality);
         SimpleMaterial material = Jogl4SimpleMaterialRenderer.getActiveMaterial();
         List<Light> activeLights = Jogl4LightRenderer.getActiveLights();
         Vector3Dd cameraPosition = camera.getPosition();
@@ -423,17 +423,19 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
     }
 
     private static MeshData buildMesh(PolyhedralBoundedSolid solid,
-                                      boolean smoothNormals)
+                                      boolean smoothNormals,
+                                      RendererConfiguration quality)
     {
         ArrayList<Float> positions = new ArrayList<Float>();
         ArrayList<Float> normals = new ArrayList<Float>();
         ArrayList<Float> uvs = new ArrayList<Float>();
-        Map<VertexCoordinateKey, Vector3Dd> vertexNormals =
+        Map<VertexCoordinateKey, List<Vector3Dd>> vertexNormals =
             smoothNormals ? buildSmoothedVertexNormals(solid) : null;
 
         for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
             _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
-            appendFaceMesh(face, positions, normals, uvs, vertexNormals);
+            appendFaceMesh(face, positions, normals, uvs, vertexNormals,
+                quality.getVertexNormalSmoothingThresholdDegrees());
         }
         return new MeshData(toArray(positions), toArray(normals), toArray(uvs));
     }
@@ -447,7 +449,7 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
 
         if ( faceIndex >= 0 && faceIndex < solid.getPolygonsList().size() ) {
             appendFaceMesh(solid.getPolygonsList().get(faceIndex), positions,
-                normals, uvs, null);
+                normals, uvs, null, 0.0);
         }
         return new MeshData(toArray(positions), toArray(normals), toArray(uvs));
     }
@@ -457,7 +459,8 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
         List<Float> positions,
         List<Float> normals,
         List<Float> uvs,
-        Map<VertexCoordinateKey, Vector3Dd> vertexNormals)
+        Map<VertexCoordinateKey, List<Vector3Dd>> vertexNormals,
+        double smoothingThresholdDegrees)
     {
         if ( face == null || shouldDrawFaceAsBoundaryOnly(face) ) {
             return;
@@ -474,7 +477,7 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
             float py = faceTriangles.positions.get(i + 1);
             float pz = faceTriangles.positions.get(i + 2);
             Vector3Dd vertexNormal = resolveVertexNormal(vertexNormals,
-                px, py, pz, normal);
+                px, py, pz, normal, smoothingThresholdDegrees);
             positions.add(faceTriangles.positions.get(i));
             positions.add(faceTriangles.positions.get(i + 1));
             positions.add(faceTriangles.positions.get(i + 2));
@@ -487,14 +490,14 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
         }
     }
 
-    private static Map<VertexCoordinateKey, Vector3Dd> buildSmoothedVertexNormals(
+    private static Map<VertexCoordinateKey, List<Vector3Dd>> buildSmoothedVertexNormals(
         PolyhedralBoundedSolid solid)
     {
-        Map<VertexCoordinateKey, Vector3Dd> sums =
-            new HashMap<VertexCoordinateKey, Vector3Dd>();
+        Map<VertexCoordinateKey, List<Vector3Dd>> incidentNormals =
+            new HashMap<VertexCoordinateKey, List<Vector3Dd>>();
 
         if ( solid == null || solid.getPolygonsList() == null ) {
-            return sums;
+            return incidentNormals;
         }
 
         for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
@@ -519,44 +522,64 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
                 _PolyhedralBoundedSolidHalfEdge he = start;
                 do {
                     if ( he.startingVertex != null &&
-                         he.startingVertex.position != null ) {
+                        he.startingVertex.position != null ) {
                         VertexCoordinateKey key = VertexCoordinateKey.from(
                             he.startingVertex.position);
-                        Vector3Dd current = sums.get(key);
-                        sums.put(key, current == null
-                            ? faceNormal
-                            : current.add(faceNormal));
+                        List<Vector3Dd> current = incidentNormals.get(key);
+                        if ( current == null ) {
+                            current = new ArrayList<Vector3Dd>();
+                            incidentNormals.put(key, current);
+                        }
+                        current.add(faceNormal);
                     }
                     he = he.next();
                 } while ( he != null && he != start );
             }
         }
-
-        Map<VertexCoordinateKey, Vector3Dd> normals =
-            new HashMap<VertexCoordinateKey, Vector3Dd>();
-        for ( Map.Entry<VertexCoordinateKey, Vector3Dd> entry : sums.entrySet() ) {
-            Vector3Dd value = entry.getValue();
-            normals.put(entry.getKey(),
-                value.length() <= VSDK.EPSILON ? value : value.normalized());
-        }
-        return normals;
+        return incidentNormals;
     }
 
     private static Vector3Dd resolveVertexNormal(
-        Map<VertexCoordinateKey, Vector3Dd> vertexNormals,
+        Map<VertexCoordinateKey, List<Vector3Dd>> vertexNormals,
         float px,
         float py,
         float pz,
-        Vector3Dd fallback)
+        Vector3Dd fallback,
+        double smoothingThresholdDegrees)
     {
         if ( vertexNormals == null || vertexNormals.isEmpty() ) {
             return fallback;
         }
-        Vector3Dd normal = vertexNormals.get(new VertexCoordinateKey(
+        List<Vector3Dd> incidentNormals = vertexNormals.get(new VertexCoordinateKey(
             quantizeCoordinate(px),
             quantizeCoordinate(py),
             quantizeCoordinate(pz)));
-        return normal != null ? normal : fallback;
+        if ( incidentNormals == null || incidentNormals.isEmpty() ) {
+            return fallback;
+        }
+
+        double clampedThreshold = Math.max(0.0,
+            Math.min(180.0, smoothingThresholdDegrees));
+        double cosineThreshold = Math.cos(Math.toRadians(clampedThreshold));
+        Vector3Dd sum = new Vector3Dd(0, 0, 0);
+        int count = 0;
+
+        for ( int i = 0; i < incidentNormals.size(); i++ ) {
+            Vector3Dd candidate = incidentNormals.get(i);
+            if ( candidate == null || candidate.length() <= VSDK.EPSILON ) {
+                continue;
+            }
+            Vector3Dd normalizedCandidate = candidate.normalized();
+            if ( fallback.dotProduct(normalizedCandidate) >= cosineThreshold ) {
+                sum = sum.add(normalizedCandidate);
+                count++;
+            }
+        }
+
+        if ( count == 0 || sum.length() <= VSDK.EPSILON ) {
+            return fallback;
+        }
+        return sum.normalized();
     }
 
     private static long quantizeCoordinate(double value)

@@ -158,6 +158,10 @@ public class PolyhedralBoundedSolidExample
         if ( options.getShadingType() != null ) {
             quality.setShadingType(options.getShadingType());
         }
+        if ( options.getVertexNormalSmoothingThresholdDegrees() != null ) {
+            quality.setVertexNormalSmoothingThresholdDegrees(
+                options.getVertexNormalSmoothingThresholdDegrees().doubleValue());
+        }
         if ( options.getKurlanderBowlMotifIndex() != null ) {
             model.setKurlanderBowlSingleMotifIndex(
                 options.getKurlanderBowlMotifIndex().intValue());

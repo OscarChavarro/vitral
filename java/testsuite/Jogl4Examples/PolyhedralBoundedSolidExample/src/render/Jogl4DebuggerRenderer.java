@@ -26,6 +26,7 @@ import vsdk.toolkit.render.HiddenLineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
+import vsdk.toolkit.gui.LightGizmoStyle;
 import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -316,9 +317,11 @@ public class Jogl4DebuggerRenderer implements GLEventListener
 
         Jogl4SimpleMaterialRenderer.activate(gl, model.getMaterial());
         Jogl4LightRenderer.activate(gl, model.getLight1());
-        Jogl4LightRenderer.draw(gl, model.getLight1(), model.getCamera());
+        Jogl4LightRenderer.draw(gl, model.getLight1(), model.getCamera(),
+            LightGizmoStyle.OMNI_BILLBOARD);
         Jogl4LightRenderer.activate(gl, model.getLight2());
-        Jogl4LightRenderer.draw(gl, model.getLight2(), model.getCamera());
+        Jogl4LightRenderer.draw(gl, model.getLight2(), model.getCamera(),
+            LightGizmoStyle.OMNI_BILLBOARD);
         Jogl4PolyhedralBoundedSolidRenderer.draw(gl, model.getSolid(),
             model.getCamera(), model.getQuality(), modelMatrix);
 
