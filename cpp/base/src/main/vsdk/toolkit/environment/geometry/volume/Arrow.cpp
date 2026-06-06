@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
@@ -269,27 +270,36 @@ double* Arrow::getMinMax() {
 
 PolyhedralBoundedSolid* Arrow::exportToPolyhedralBoundedSolid()
 {
-    return buildPolyhedralBoundedSolid();
+    return buildPolyhedralBoundedSolid(
+        DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
 }
 
-PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid()
+PolyhedralBoundedSolid* Arrow::exportToPolyhedralBoundedSolid(
+    int circumferenceDivisions, int heightDivisions)
 {
-    int nsides = normalizedSweepSides();
-    PolyhedralBoundedSolid* solid =
-        createCircularLamina(0.0, 0.0, baseRadius, 0.0, nsides);
+    int normalizedCircumferenceDivisions =
+        circumferenceDivisions < MIN_CIRCUMFERENCE_DIVISIONS ?
+        MIN_CIRCUMFERENCE_DIVISIONS : circumferenceDivisions;
+    int normalizedHeightDivisions =
+        heightDivisions < MIN_HEIGHT_DIVISIONS ?
+        MIN_HEIGHT_DIVISIONS : heightDivisions;
 
-    Matrix4x4d transform;
-    transform = transform.translation(0.0, 0.0, baseLength);
-    translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), transform);
+    if ( normalizedCircumferenceDivisions ==
+             DEFAULT_CIRCUMFERENCE_DIVISIONS &&
+         normalizedHeightDivisions == DEFAULT_HEIGHT_DIVISIONS ) {
+        return exportToPolyhedralBoundedSolid();
+    }
 
-    double scaleFactor = headRadius / baseRadius;
-    Matrix4x4d scaleTransform;
-    scaleTransform = scaleTransform.scale(scaleFactor, scaleFactor, 1.0);
-    translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), scaleTransform);
+    return buildPolyhedralBoundedSolid(
+        normalizedCircumferenceDivisions, normalizedHeightDivisions);
+}
 
+void Arrow::closeTopFaceToApex(
+    PolyhedralBoundedSolid* solid, int nsides, double apexZ)
+{
     int base1 = 2 * nsides + 1;
     int base2 = 3 * nsides + 1;
-    Vector3Dd apex(0, 0, baseLength + headLength);
+    Vector3Dd apex(0, 0, apexZ);
     PolyhedralBoundedSolidEulerOperators::smev(solid, 1, base1, base2, apex);
 
     int i = 0;
@@ -300,6 +310,41 @@ PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid()
 
     PolyhedralBoundedSolidEulerOperators::mef(
         solid, 1, 1, base2, base1 + i, base1 + i + 1, base1, base2 + i + 1);
+}
+
+PolyhedralBoundedSolid* Arrow::buildPolyhedralBoundedSolid(
+    int nsides, int heightDivisions)
+{
+    PolyhedralBoundedSolid* solid =
+        createCircularLamina(0.0, 0.0, baseRadius, 0.0, nsides);
+
+    Matrix4x4d transform;
+    double cylinderZStep = baseLength / static_cast<double>(heightDivisions);
+    for ( int i = 0; i < heightDivisions; ++i ) {
+        transform = transform.translation(0.0, 0.0, cylinderZStep);
+        translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), transform);
+    }
+
+    double scaleFactor = headRadius / baseRadius;
+    Matrix4x4d scaleTransform;
+    scaleTransform = scaleTransform.scale(scaleFactor, scaleFactor, 1.0);
+    translationalSweepExtrudeFacePlanar(solid, solid->findFace(1), scaleTransform);
+
+    double prevRadius = headRadius;
+    double coneZStep = headLength / static_cast<double>(heightDivisions);
+    for ( int i = 1; i < heightDivisions; ++i ) {
+        double nextRadius = headRadius *
+            (1.0 - (static_cast<double>(i) / static_cast<double>(heightDivisions)));
+        double coneScale = std::abs(prevRadius) > VSDK::EPSILON ?
+            nextRadius / prevRadius : 0.0;
+        transform = transform.translation(0.0, 0.0, coneZStep);
+        scaleTransform = scaleTransform.scale(coneScale, coneScale, 1.0);
+        translationalSweepExtrudeFacePlanar(
+            solid, solid->findFace(1), transform.multiply(scaleTransform));
+        prevRadius = nextRadius;
+    }
+
+    closeTopFaceToApex(solid, nsides, baseLength + headLength);
 
     return solid;
 }

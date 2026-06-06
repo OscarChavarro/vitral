@@ -25,6 +25,19 @@ private:
     int maxFaceId;
     bool modelIsValid;
 
+    bool boundaryHitProducesInteriorPenetration(
+        const Vector3Dd& hitPoint,
+        const Vector3Dd& direction,
+        double tolerance);
+    bool isFaceBoundaryTouchAtHit(
+        _PolyhedralBoundedSolidFace* face,
+        const Vector3Dd& hitPoint,
+        double tolerance);
+    bool isForwardProbeInsideFaceHalfSpace(
+        _PolyhedralBoundedSolidFace* face,
+        const Vector3Dd& probePoint,
+        double tolerance);
+
 public:
     PolyhedralBoundedSolid();
     virtual ~PolyhedralBoundedSolid() override;

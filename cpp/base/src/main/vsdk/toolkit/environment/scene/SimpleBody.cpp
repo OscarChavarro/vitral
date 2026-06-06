@@ -385,9 +385,29 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
     return true;
 }
 
-int SimpleBody::computeQuantitativeInvisibility(const Vector3Dd&, const Vector3Dd&) const
+int SimpleBody::computeQuantitativeInvisibility(
+    const Vector3Dd& origin,
+    const Vector3Dd& p) const
 {
-    return 0;
+    if ( geometry == 0 || !hasInvertibleScale ) {
+        return 0;
+    }
+
+    Vector3Dd translatedOrigin = origin.subtract(position);
+    Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
+    Vector3Dd myOrigin(
+        rotatedOrigin.x() * inverseScale.x(),
+        rotatedOrigin.y() * inverseScale.y(),
+        rotatedOrigin.z() * inverseScale.z());
+
+    Vector3Dd translatedPoint = p.subtract(position);
+    Vector3Dd rotatedPoint = rotationInverseQuaternion.rotate(translatedPoint);
+    Vector3Dd myPoint(
+        rotatedPoint.x() * inverseScale.x(),
+        rotatedPoint.y() * inverseScale.y(),
+        rotatedPoint.z() * inverseScale.z());
+
+    return geometry->computeQuantitativeInvisibility(myOrigin, myPoint);
 }
 
 void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const

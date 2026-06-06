@@ -3,8 +3,11 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 
 #include "java/util/ArrayList.txx"
 
@@ -101,12 +104,139 @@ void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
     }
 }
 
-int PolyhedralBoundedSolid::computeQuantitativeInvisibility(const Vector3Dd&, const Vector3Dd&) { return 0; }
+int PolyhedralBoundedSolid::computeQuantitativeInvisibility(
+    const Vector3Dd& origin,
+    const Vector3Dd& p)
+{
+    int qi = 0;
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
+        PolyhedralBoundedSolidNumericPolicy::forSolid(this);
+    Vector3Dd d = p.subtract(origin);
+    double t0 = d.length();
+    d = d.normalized();
+    java::ArrayList<double> distances;
+    int frontHitCount = 0;
+
+    Ray ray(origin, d);
+
+    for ( long int i = 0; i < polygonsList.size(); i++ ) {
+        _PolyhedralBoundedSolidFace* face = polygonsList.get(i);
+        if ( face == 0 ) {
+            continue;
+        }
+
+        InfinitePlane* plane = face->getContainingPlane();
+        if ( plane == 0 ) {
+            continue;
+        }
+
+        RayHit planeHit;
+        bool intersectsPlane = plane->doIntersection(ray, &planeHit);
+        delete plane;
+        if ( !intersectsPlane || planeHit.ray() == 0 ) {
+            continue;
+        }
+
+        Ray hit = *(planeHit.ray());
+        if ( hit.t() >= t0 - numericContext.epsilon() ) {
+            continue;
+        }
+
+        hit = hit.withDirection(hit.direction().normalized());
+        Vector3Dd pi = hit.origin().add(hit.direction().multiply(hit.t()));
+        int pos = face->testPointInside(pi, numericContext.bigEpsilon());
+        if ( pos != Geometry::INSIDE &&
+             !(pos == Geometry::LIMIT &&
+               boundaryHitProducesInteriorPenetration(
+                   pi, d, numericContext.bigEpsilon())) ) {
+            continue;
+        }
+
+        if ( planeHit.n.dotProduct(d) < 0.0 ) {
+            bool considerIt = true;
+            for ( int j = 0; j < frontHitCount; j++ ) {
+                if ( std::abs(distances.get(j) - hit.t()) <
+                     numericContext.bigEpsilon() ) {
+                    considerIt = false;
+                    break;
+                }
+            }
+            if ( considerIt ) {
+                qi++;
+                distances.add(hit.t());
+                frontHitCount++;
+            }
+        }
+    }
+
+    return qi;
+}
+
 int PolyhedralBoundedSolid::compareValue(double a, double b, double tolerance)
 {
     double delta = std::abs(a - b);
     if ( delta < tolerance ) return 0;
     return (a > b) ? 1 : -1;
+}
+
+bool PolyhedralBoundedSolid::boundaryHitProducesInteriorPenetration(
+    const Vector3Dd& hitPoint,
+    const Vector3Dd& direction,
+    double tolerance)
+{
+    Vector3Dd afterHit = hitPoint.add(direction.multiply(4.0 * tolerance));
+    bool touchesBoundary = false;
+
+    for ( long int i = 0; i < polygonsList.size(); i++ ) {
+        _PolyhedralBoundedSolidFace* face = polygonsList.get(i);
+        if ( !isFaceBoundaryTouchAtHit(face, hitPoint, tolerance) ) {
+            continue;
+        }
+
+        touchesBoundary = true;
+        if ( !isForwardProbeInsideFaceHalfSpace(face, afterHit, tolerance) ) {
+            return false;
+        }
+    }
+    return touchesBoundary;
+}
+
+bool PolyhedralBoundedSolid::isFaceBoundaryTouchAtHit(
+    _PolyhedralBoundedSolidFace* face,
+    const Vector3Dd& hitPoint,
+    double tolerance)
+{
+    if ( face == 0 ) {
+        return false;
+    }
+    InfinitePlane* plane = face->getContainingPlane();
+    if ( plane == 0 ) {
+        return false;
+    }
+    bool samePlane = std::abs(plane->pointDistance(hitPoint)) <= tolerance;
+    delete plane;
+    if ( !samePlane ) {
+        return false;
+    }
+    return face->testPointInside(hitPoint, tolerance) != Geometry::OUTSIDE;
+}
+
+bool PolyhedralBoundedSolid::isForwardProbeInsideFaceHalfSpace(
+    _PolyhedralBoundedSolidFace* face,
+    const Vector3Dd& probePoint,
+    double tolerance)
+{
+    if ( face == 0 ) {
+        return false;
+    }
+    InfinitePlane* plane = face->getContainingPlane();
+    if ( plane == 0 ) {
+        return false;
+    }
+    int halfSpaceStatus = plane->doContainmentTestHalfSpace(
+        probePoint, tolerance);
+    delete plane;
+    return halfSpaceStatus == Geometry::INSIDE;
 }
 
 void PolyhedralBoundedSolid::revert()

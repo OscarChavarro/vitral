@@ -1,5 +1,6 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
@@ -10,6 +11,8 @@
 
 #include <cstdio>
 #include <cstring>
+
+#include "java/util/ArrayList.txx"
 
 namespace vsdk { namespace toolkit { namespace render { namespace opengl4 {
 
@@ -169,49 +172,55 @@ void OpenGL4MatrixRenderer::initializeIfNeeded() {
 }
 
 void OpenGL4MatrixRenderer::draw(const float* mvpColumnMajor16, const Matrix4x4d& A) {
-    initializeIfNeeded();
-
-    if (!initialized || shaderProgram == 0) {
-        fprintf(stderr, "Error: OpenGL4MatrixRenderer not initialized\n");
-        return;
-    }
-
     Vector3Dd x(A.get(0, 0), A.get(1, 0), A.get(2, 0));
     Vector3Dd y(A.get(0, 1), A.get(1, 1), A.get(2, 1));
     Vector3Dd z(A.get(0, 2), A.get(1, 2), A.get(2, 2));
     Vector3Dd translation(A.get(0, 3), A.get(1, 3), A.get(2, 3));
+    java::ArrayList<float> positions;
+    positions.reserve(18);
+    positions.add((float)translation.x());
+    positions.add((float)translation.y());
+    positions.add((float)translation.z());
+    positions.add((float)(translation.x() + x.x()));
+    positions.add((float)(translation.y() + x.y()));
+    positions.add((float)(translation.z() + x.z()));
 
-    float positions[18] = {
-        (float)translation.x(), (float)translation.y(), (float)translation.z(),
-        (float)(translation.x() + x.x()), (float)(translation.y() + x.y()), (float)(translation.z() + x.z()),
+    positions.add((float)translation.x());
+    positions.add((float)translation.y());
+    positions.add((float)translation.z());
+    positions.add((float)(translation.x() + y.x()));
+    positions.add((float)(translation.y() + y.y()));
+    positions.add((float)(translation.z() + y.z()));
 
-        (float)translation.x(), (float)translation.y(), (float)translation.z(),
-        (float)(translation.x() + y.x()), (float)(translation.y() + y.y()), (float)(translation.z() + y.z()),
+    positions.add((float)translation.x());
+    positions.add((float)translation.y());
+    positions.add((float)translation.z());
+    positions.add((float)(translation.x() + z.x()));
+    positions.add((float)(translation.y() + z.y()));
+    positions.add((float)(translation.z() + z.z()));
 
-        (float)translation.x(), (float)translation.y(), (float)translation.z(),
-        (float)(translation.x() + z.x()), (float)(translation.y() + z.y()), (float)(translation.z() + z.z())
-    };
+    java::ArrayList<float> colors;
+    colors.reserve(18);
+    colors.add(1.0f); colors.add(0.0f); colors.add(0.0f);
+    colors.add(1.0f); colors.add(0.0f); colors.add(0.0f);
+    colors.add(0.0f); colors.add(1.0f); colors.add(0.0f);
+    colors.add(0.0f); colors.add(1.0f); colors.add(0.0f);
+    colors.add(0.0f); colors.add(0.0f); colors.add(1.0f);
+    colors.add(0.0f); colors.add(0.0f); colors.add(1.0f);
 
-    glUseProgram(shaderProgram);
-
-    GLint mvpLoc = glGetUniformLocation(shaderProgram, "modelViewProjectionLocal");
-    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, mvpColumnMajor16);
-
-    GLint depthBiasLoc = glGetUniformLocation(shaderProgram, "depthBiasNdc");
-    glUniform1f(depthBiasLoc, 0.0f);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_positions);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(positions), positions);
-
-    glDrawArrays(GL_LINES, 0, 6);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
+    double mvpValues[4][4];
+    int pos = 0;
+    for ( int column = 0; column < 4; column++ ) {
+        for ( int row = 0; row < 4; row++, pos++ ) {
+            mvpValues[row][column] = mvpColumnMajor16[pos];
+        }
+    }
+    Matrix4x4d mvp(mvpValues);
+    OpenGL4LineRenderer::drawLines(mvp, positions, colors, 1.0f);
 }
 
 void OpenGL4MatrixRenderer::release() {
+    OpenGL4LineRenderer::release();
     if (!initialized) {
         return;
     }

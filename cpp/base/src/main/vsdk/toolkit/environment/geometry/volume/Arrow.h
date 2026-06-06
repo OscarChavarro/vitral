@@ -10,6 +10,10 @@ class RayHit;
 class Arrow : public Solid {
 private:
     static const double NO_HIT;
+    static const int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36 / 4;
+    static const int DEFAULT_HEIGHT_DIVISIONS = 1;
+    static const int MIN_CIRCUMFERENCE_DIVISIONS = 3;
+    static const int MIN_HEIGHT_DIVISIONS = 1;
 
     double baseLength;
     double headLength;
@@ -21,7 +25,10 @@ private:
     Cone* lastElement;
 
     bool doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit);
-    PolyhedralBoundedSolid* buildPolyhedralBoundedSolid();
+    static void closeTopFaceToApex(
+        PolyhedralBoundedSolid* solid, int nsides, double apexZ);
+    PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(
+        int nsides, int heightDivisions);
 
 public:
     Arrow(double baseLength, double headLength, double baseRadius, double headRadius);
@@ -41,6 +48,8 @@ public:
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
     virtual double* getMinMax() override;
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
+    PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(
+        int circumferenceDivisions, int heightDivisions);
 };
 
 #endif

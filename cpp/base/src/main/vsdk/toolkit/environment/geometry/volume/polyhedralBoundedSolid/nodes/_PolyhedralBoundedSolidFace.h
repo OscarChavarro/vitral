@@ -11,6 +11,34 @@ class _PolyhedralBoundedSolidHalfEdge;
 
 class _PolyhedralBoundedSolidFace {
 public:
+    class PointInsideResult {
+    private:
+        int status_;
+        _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge_;
+        class _PolyhedralBoundedSolidVertex* intersectedVertex_;
+
+    public:
+        PointInsideResult(
+            int status,
+            _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge,
+            class _PolyhedralBoundedSolidVertex* intersectedVertex)
+            : status_(status),
+              intersectedHalfedge_(intersectedHalfedge),
+              intersectedVertex_(intersectedVertex)
+        {
+        }
+
+        int status() const { return status_; }
+        _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge() const
+        {
+            return intersectedHalfedge_;
+        }
+        class _PolyhedralBoundedSolidVertex* intersectedVertex() const
+        {
+            return intersectedVertex_;
+        }
+    };
+
     int id;
     PolyhedralBoundedSolid* parentSolid;
     java::ArrayList<_PolyhedralBoundedSolidLoop*> boundariesList;
@@ -23,7 +51,14 @@ public:
     bool calculatePlane();
     InfinitePlane* getContainingPlane();
     int testPointInside(const Vector3Dd& point, double tolerance);
+    PointInsideResult testPointInsideDetailed(
+        const Vector3Dd& point,
+        double tolerance);
     void revert();
+
+private:
+    InfinitePlane* calculatePlaneByCorner(double tolerance);
+    Vector3Dd dropCoordinate(const Vector3Dd& in, int coord) const;
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -123,41 +124,13 @@ static Vector3Dd mapPatternPointToWorld(const Vector3Dd& point, const Vector3Dd&
 
 void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp, const java::ArrayList<float>& positions, const java::ArrayList<float>& colors)
 {
-    if (positions.size() == 0 || colors.size() == 0) return;
-
-    if (!initIfNeeded()) return;
-
-    float* mvpFloat = mvp.exportToFloatArrayColumnOrder();
-
-    glUseProgram(program_);
-    GLint mvpLoc = glGetUniformLocation(program_, "modelViewProjectionLocal");
-    if (mvpLoc >= 0) glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, mvpFloat);
-
-    glBindVertexArray(vao_);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vboPositions_);
-    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), const_cast<java::ArrayList<float>&>(positions).data(), GL_STREAM_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vboColors_);
-    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), const_cast<java::ArrayList<float>&>(colors).data(), GL_STREAM_DRAW);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(1);
-
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
-    glLineWidth(2.0f);
-    glDrawArrays(GL_LINES, 0, (GLsizei)(positions.size() / 3));
-
+    OpenGL4LineRenderer::drawLines(mvp, positions, colors, 2.0f);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
-    glBindVertexArray(0);
-    glUseProgram(0);
-
-    delete[] mvpFloat;
 }
 
 void OpenGL4LightRenderer::draw(const Light* light)

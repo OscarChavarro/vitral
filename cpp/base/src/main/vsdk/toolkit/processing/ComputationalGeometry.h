@@ -5,8 +5,20 @@
 
 class ComputationalGeometry {
 public:
-    // Deprecated compatibility surface: triangle-related queries were moved
-    // to geometry/element/Triangle.
+    static double lineToPointDistance(
+        const Vector3Dd& p0,
+        const Vector3Dd& p1,
+        const Vector3Dd& p);
+    static int lineContainmentTest(
+        const Vector3Dd& p0,
+        const Vector3Dd& p1,
+        const Vector3Dd& p,
+        double distanceTolerance);
+    static int lineSegmentContainmentTest(
+        const Vector3Dd& p0,
+        const Vector3Dd& p1,
+        const Vector3Dd& p,
+        double distanceTolerance);
 };
 
 #endif
