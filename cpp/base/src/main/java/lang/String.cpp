@@ -458,6 +458,20 @@ String::valueOf(unsigned int value) {
 }
 
 String
+String::valueOf(double value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%g", value);
+    return String(buffer);
+}
+
+String
+String::valueOf(float value) {
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer), "%g", static_cast<double>(value));
+    return String(buffer);
+}
+
+String
 String::formatCStringToJavaString(const char *format, va_list arguments) {
     if ( format == nullptr ) {
         return String();

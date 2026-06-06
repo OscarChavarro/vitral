@@ -1,9 +1,11 @@
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "java/lang/String.h"
+#include <cmath>
 
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
       texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), useVertexColors(false),
+      vertexNormalSmoothingThresholdDegrees(15.0),
       wireColor(1, 1, 1), boundingVolumeColor(1, 1, 0), lodHint(0)
 {
 }
@@ -21,6 +23,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( normals ) valThis += 0x0080;
     if ( trianglesNormals ) valThis += 0x0100;
     valThis += shadingType * 0x1000;
+    valThis += std::lround(vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
     long valOther = 0x00;
     if ( other.surfaces ) valOther += 0x0001;
@@ -33,6 +36,7 @@ int RendererConfiguration::compareTo(const RendererConfiguration& other) const
     if ( other.normals ) valOther += 0x0080;
     if ( other.trianglesNormals ) valOther += 0x0100;
     valOther += other.shadingType * 0x1000;
+    valOther += std::lround(other.vertexNormalSmoothingThresholdDegrees) * 0x100000;
 
     if ( valThis > valOther ) return 1;
     if ( valThis < valOther ) return -1;
@@ -54,6 +58,7 @@ void RendererConfiguration::cloneFrom(const RendererConfiguration& other)
     wireColor = ColorRgb(other.wireColor);
     boundingVolumeColor = ColorRgb(other.boundingVolumeColor);
     useVertexColors = other.useVertexColors;
+    vertexNormalSmoothingThresholdDegrees = other.vertexNormalSmoothingThresholdDegrees;
     lodHint = other.lodHint;
 }
 
@@ -82,6 +87,26 @@ void RendererConfiguration::setNormals(bool b) { normals = b; }
 void RendererConfiguration::setTrianglesNormals(bool b) { trianglesNormals = b; }
 void RendererConfiguration::setShadingType(int type) { shadingType = type; }
 void RendererConfiguration::setShadingType(ShadingType type) { shadingType = static_cast<int>(type); }
+
+void RendererConfiguration::setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees)
+{
+    if ( std::isnan(thresholdDegrees) ) {
+        vertexNormalSmoothingThresholdDegrees = 15.0;
+        return;
+    }
+    if ( thresholdDegrees < 0.0 ) {
+        thresholdDegrees = 0.0;
+    }
+    if ( thresholdDegrees > 180.0 ) {
+        thresholdDegrees = 180.0;
+    }
+    vertexNormalSmoothingThresholdDegrees = thresholdDegrees;
+}
+
+double RendererConfiguration::getVertexNormalSmoothingThresholdDegrees() const
+{
+    return vertexNormalSmoothingThresholdDegrees;
+}
 
 bool RendererConfiguration::isSurfacesSet() const { return surfaces; }
 bool RendererConfiguration::isWiresSet() const { return wires; }
@@ -133,5 +158,7 @@ java::String RendererConfiguration::toString() const
     msg += "  - Draw triangles normals: " + java::String(trianglesNormals ? "ON" : "OFF") + "\n";
     msg += "  - With texture: " + java::String(texture ? "ON" : "OFF") + "\n";
     msg += "  - With bump map: " + java::String(bumpMap ? "ON" : "OFF") + "\n";
+    msg += "  - Vertex normal smoothing threshold: " +
+        java::String::valueOf(vertexNormalSmoothingThresholdDegrees) + " deg\n";
     return msg;
 }

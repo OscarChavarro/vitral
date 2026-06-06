@@ -29,6 +29,7 @@ private:
     bool normals;
     bool trianglesNormals;
     bool useVertexColors;
+    double vertexNormalSmoothingThresholdDegrees;
     ColorRgb wireColor;
     ColorRgb boundingVolumeColor;
     int lodHint;
@@ -59,6 +60,7 @@ public:
     void setTrianglesNormals(bool b);
     void setShadingType(int type);
     void setShadingType(ShadingType type);
+    void setVertexNormalSmoothingThresholdDegrees(double thresholdDegrees);
 
     bool isSurfacesSet() const;
     bool isWiresSet() const;
@@ -72,6 +74,7 @@ public:
 
     int getShadingType() const;
     ShadingType getShadingTypeEnum() const;
+    double getVertexNormalSmoothingThresholdDegrees() const;
 
     void changeSurfaces();
     void changeWires();

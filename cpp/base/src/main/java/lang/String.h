@@ -177,6 +177,12 @@ class String {
     valueOf(unsigned int value);
 
     static String
+    valueOf(double value);
+
+    static String
+    valueOf(float value);
+
+    static String
     formatCStringToJavaString(const char *format, va_list arguments);
 };
 
