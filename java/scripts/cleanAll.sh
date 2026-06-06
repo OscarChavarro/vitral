@@ -5,6 +5,7 @@ JAVA_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$JAVA_DIR" || exit 1
 
+rm -rf build
 ./gradlew clean
 cd ../pkgs/SpharmonicKit27 && make clean && cd "$JAVA_DIR"
 cd ../pkgs/LempelZivWelch && make clean && cd "$JAVA_DIR"
