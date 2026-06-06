@@ -3,6 +3,7 @@ package vsdk.toolkit.environment.geometry.volume;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import java.io.Serial;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -22,6 +23,11 @@ public class Arrow extends Solid {
     private Cone baseCylinder;
     private Cone headCone;
     private Cone lastElement;
+
+    private static final int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36/4;
+    private static final int DEFAULT_HEIGHT_DIVISIONS = 1;
+    private static final int MIN_CIRCUMFERENCE_DIVISIONS = 3;
+    private static final int MIN_HEIGHT_DIVISIONS = 1;
 
     public Arrow(double baseLength, double headLength, double baseRadius, double headRadius) {
         this.baseLength = baseLength;
@@ -236,7 +242,26 @@ public class Arrow extends Solid {
     @Override
     public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid()
     {
-        return buildPolyhedralBoundedSolid();
+        return buildPolyhedralBoundedSolid(
+            DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
+    }
+
+    public PolyhedralBoundedSolid exportToPolyhedralBoundedSolid(
+        int circumferenceDivisions, int heightDivisions)
+    {
+        int normalizedCircumferenceDivisions = Math.max(
+            MIN_CIRCUMFERENCE_DIVISIONS, circumferenceDivisions);
+        int normalizedHeightDivisions = Math.max(
+            MIN_HEIGHT_DIVISIONS, heightDivisions);
+
+        if ( normalizedCircumferenceDivisions ==
+                 DEFAULT_CIRCUMFERENCE_DIVISIONS &&
+             normalizedHeightDivisions == DEFAULT_HEIGHT_DIVISIONS ) {
+            return exportToPolyhedralBoundedSolid();
+        }
+
+        return buildPolyhedralBoundedSolid(normalizedCircumferenceDivisions,
+            normalizedHeightDivisions);
     }
 
     /**
@@ -245,21 +270,55 @@ public class Arrow extends Solid {
     cylinder is built upon a circular lamina base and an extrusion 
     (translational sweep) operation. The cone case is done manually,
     */
-    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid()
+    private static void closeTopFaceToApex(PolyhedralBoundedSolid solid,
+        int nsides, double apexZ)
+    {
+        Vector3Dd apex = new Vector3Dd(0, 0, apexZ);
+        int i;
+        int base1 = 2*nsides+1;
+        int base2 = 3*nsides+1;
+
+        PolyhedralBoundedSolidEulerOperators.smev(
+            solid, 1, base1, base2, apex);
+
+        for ( i = 0; i < nsides-2; i++ ) {
+            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,
+                1,
+                base2,
+                base1+i,
+                base1+i+1,
+                base1+i+2,
+                base2+i+1);
+        }
+
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1,
+            1,
+            base2,
+            base1+i,
+            base1+i+1,
+            base1,
+            base2+i+1);
+    }
+
+    private PolyhedralBoundedSolid buildPolyhedralBoundedSolid(int nsides,
+        int heightDivisions)
     {
         PolyhedralBoundedSolid solid;
         Matrix4x4d T, S, M;
-        int nsides = 36/4;
 
         solid = PolyhedralBoundedSolidModeler.createCircularLamina(
             0.0, 0.0, baseRadius, 0.0, nsides
         );
 
         // Cylinder case
-        T = new Matrix4x4d();
-        T = T.translation(0.0, 0.0, baseLength);
-        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
-            solid, solid.findFace(1), T);
+        double cylinderZStep = baseLength / ((double)heightDivisions);
+        int i;
+        for ( i = 0; i < heightDivisions; i++ ) {
+            T = new Matrix4x4d();
+            T = T.translation(0.0, 0.0, cylinderZStep);
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), T);
+        }
 
         T = new Matrix4x4d();
         T = T.translation(0.0, 0.0, 0);
@@ -271,31 +330,24 @@ public class Arrow extends Solid {
             solid, solid.findFace(1), M);
 
         // Cone case
-        Vector3Dd apex;
-        int i;
-        int base1 = 2*nsides+1;
-        int base2 = 3*nsides+1;
-
-        apex = new Vector3Dd(0, 0, baseLength + headLength);
-        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, apex);
-
-        for ( i = 0; i < nsides-2; i++ ) {
-            PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
-                      1,           /* seed face, always face 1 */
-                      base2,       /* start of half edge 1 */
-                      base1+i,     /* end of half edge 1 */
-                      base1+i+1,   /* start of half edge 2 */
-                      base1+i+2,   /* end of half edge 2 */
-                      base2+i+1    /* new face id */);
+        double prevRadius = headRadius;
+        double coneZStep = headLength / ((double)heightDivisions);
+        for ( i = 1; i < heightDivisions; i++ ) {
+            double nextRadius = headRadius *
+                (1.0 - (((double)i) / ((double)heightDivisions)));
+            double coneScale = prevRadius > VSDK.EPSILON ?
+                nextRadius / prevRadius : 0.0;
+            T = new Matrix4x4d();
+            T = T.translation(0.0, 0.0, coneZStep);
+            S = new Matrix4x4d();
+            S = S.scale(coneScale, coneScale, 1.0);
+            M = T.multiply(S);
+            PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+                solid, solid.findFace(1), M);
+            prevRadius = nextRadius;
         }
 
-        PolyhedralBoundedSolidEulerOperators.mef(solid, 1,           /* seed face, always face 1 */
-                  1,           /* seed face, always face 1 */
-                  base2,       /* start of half edge 1 */
-                  base1+i,     /* end of half edge 1 */
-                  base1+i+1,   /* start of half edge 2 */
-                  base1,   /* end of half edge 2 */
-                  base2+i+1    /* new face id */);
+        closeTopFaceToApex(solid, nsides, baseLength + headLength);
 
         return solid;
     }

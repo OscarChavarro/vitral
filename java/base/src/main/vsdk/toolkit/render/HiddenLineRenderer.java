@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.element.Intersection;
 import vsdk.toolkit.environment.geometry.element.Triangle;
@@ -29,6 +30,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
+import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
@@ -253,21 +255,96 @@ public class HiddenLineRenderer extends RenderingElement
     /**
     This method takes an edge that is candidate to be visible, breaks it into
     segments and for each segment determines visibility. Visible segments
-    are reported in `outVisibleContourLineEndPoints` and `outVisibleNonContourLineEndPoints`,
-    and hidden segments are reported on `outHiddenLineEndPoints`.
+    are reported in `outVisibleContourLineSet` and
+    `outVisibleNonContourLineSet`, and hidden segments are reported on
+    `outHiddenLineSet`.
     PRE:
       - Current edge is known to correspond to a material line (normal or
         contour)
       - `contourCache` contains the list of contour lines
     */
+    private static final double[][] CLIP_PLANES = new double[][] {
+        { 1.0, 0.0, 0.0, 1.0 },
+        { -1.0, 0.0, 0.0, 1.0 },
+        { 0.0, 1.0, 0.0, 1.0 },
+        { 0.0, -1.0, 0.0, 1.0 },
+        { 0.0, 0.0, 1.0, 1.0 },
+        { 0.0, 0.0, -1.0, 1.0 }
+    };
+
+    private static double evaluateClipPlane(double[] plane, Vector4Dd point)
+    {
+        return plane[0] * point.x() + plane[1] * point.y() +
+            plane[2] * point.z() + plane[3] * point.w();
+    }
+
+    private static Vector4Dd interpolate(Vector4Dd start,
+                                         Vector4Dd end,
+                                         double t)
+    {
+        return start.multiply(1.0 - t).add(end.multiply(t));
+    }
+
+    private static Vector4Dd[] clipLineToClipVolume(Vector4Dd start,
+                                                    Vector4Dd end)
+    {
+        Vector4Dd clippedStart = start;
+        Vector4Dd clippedEnd = end;
+
+        for ( int i = 0; i < CLIP_PLANES.length; i++ ) {
+            double[] plane = CLIP_PLANES[i];
+            double d0 = evaluateClipPlane(plane, clippedStart);
+            double d1 = evaluateClipPlane(plane, clippedEnd);
+
+            if ( d0 < 0.0 && d1 < 0.0 ) {
+                return null;
+            }
+            if ( d0 < 0.0 || d1 < 0.0 ) {
+                double denominator = d0 - d1;
+                if ( Math.abs(denominator) < VSDK.EPSILON ) {
+                    return null;
+                }
+                double t = d0 / denominator;
+                Vector4Dd intersection = interpolate(clippedStart, clippedEnd,
+                    t);
+                if ( d0 < 0.0 ) {
+                    clippedStart = intersection;
+                }
+                else {
+                    clippedEnd = intersection;
+                }
+            }
+        }
+        return new Vector4Dd[] { clippedStart, clippedEnd };
+    }
+
+    private static void addProjectedLine(Calligraphic2DBuffer lineSet,
+                                         Vector3Dd point0,
+                                         Vector3Dd point1,
+                                         Camera camera)
+    {
+        Vector4Dd clip0 = camera.calculateProjectionMatrix().multiply(
+            new Vector4Dd(point0));
+        Vector4Dd clip1 = camera.calculateProjectionMatrix().multiply(
+            new Vector4Dd(point1));
+        Vector4Dd[] clipped = clipLineToClipVolume(clip0, clip1);
+        if ( clipped == null ) {
+            return;
+        }
+
+        Vector4Dd ndc0 = clipped[0].dividedByW();
+        Vector4Dd ndc1 = clipped[1].dividedByW();
+        lineSet.add2DLine(ndc0.x(), ndc0.y(), ndc1.x(), ndc1.y());
+    }
+
     private static void
     processLineToBeDrawn(
         List <SimpleBody> solids,
         _AppelEdgeCache inEdge,
         Camera inCamera,
-        List <Vector3Dd> outVisibleContourLineEndPoints,
-        List <Vector3Dd> outVisibleNonContourLineEndPoints,
-        List <Vector3Dd> outHiddenLineEndPoints,
+        Calligraphic2DBuffer outVisibleContourLineSet,
+        Calligraphic2DBuffer outVisibleNonContourLineSet,
+        Calligraphic2DBuffer outHiddenLineSet,
         List <_AppelEdgeCache> contourCache)
     {
         //- 1. Compute the sweep plane triangle ---------------------------
@@ -401,17 +478,16 @@ public class HiddenLineRenderer extends RenderingElement
 
             if ( qi == 0 ) {
                 if ( inEdge.edgeType == _AppelEdgeCache.CONTOUR_LINE ) {
-                    outVisibleContourLineEndPoints.add(new Vector3Dd(pos1));
-                    outVisibleContourLineEndPoints.add(new Vector3Dd(pos2));
+                    addProjectedLine(outVisibleContourLineSet, pos1, pos2,
+                        inCamera);
                 }
                 else {
-                    outVisibleNonContourLineEndPoints.add(new Vector3Dd(pos1));
-                    outVisibleNonContourLineEndPoints.add(new Vector3Dd(pos2));
+                    addProjectedLine(outVisibleNonContourLineSet, pos1, pos2,
+                        inCamera);
                 }
             }
             else {
-                outHiddenLineEndPoints.add(new Vector3Dd(pos1));
-                outHiddenLineEndPoints.add(new Vector3Dd(pos2));
+                addProjectedLine(outHiddenLineSet, pos1, pos2, inCamera);
             }
         }
 
@@ -421,17 +497,16 @@ public class HiddenLineRenderer extends RenderingElement
     /**
     Given a viewing camera and a set of bodies, this method generates three
     sets of lines for visible/hidden line rendering, as described in
-    paper [APPE1967] and section [FOLE1992].15.3.2. The calculated end line
-    points are in 3D space and contains viewer's perception to respect to which
-    line segments are visible (as part of the object contour or non-contour
-    material lines) and which line segments are visible.
+    paper [APPE1967] and section [FOLE1992].15.3.2. The resulting line sets
+    are projected to 2D calligraphic buffers and separated into visible
+    contour, visible non-contour and hidden segments.
     */
     public static void executeAppelAlgorithm(
         List<SimpleBody> inSimpleBodyArray,
         Camera inCamera,
-        List <Vector3Dd> outVisibleContourLineEndPoints,
-        List <Vector3Dd> outVisibleNonContourLineEndPoints,
-        List <Vector3Dd> outHiddenLineEndPoints)
+        Calligraphic2DBuffer outVisibleContourLineSet,
+        Calligraphic2DBuffer outVisibleNonContourLineSet,
+        Calligraphic2DBuffer outHiddenLineSet)
     {
         //-----------------------------------------------------------------
         ArrayList <_AppelEdgeCache> cache;
@@ -459,15 +534,15 @@ public class HiddenLineRenderer extends RenderingElement
             // not marked as a hidden line.
             switch ( edge.edgeType ) {
               case _AppelEdgeCache.HIDDEN_LINE:
-                outHiddenLineEndPoints.add(new Vector3Dd(edge.start));
-                outHiddenLineEndPoints.add(new Vector3Dd(edge.end));
+                addProjectedLine(outHiddenLineSet, edge.start, edge.end,
+                    inCamera);
                 break;
               case _AppelEdgeCache.CONTOUR_LINE:
               case _AppelEdgeCache.VISIBLE_LINE:
                 processLineToBeDrawn(
                     solids,
-                    edge, inCamera, outVisibleContourLineEndPoints,
-                    outVisibleNonContourLineEndPoints, outHiddenLineEndPoints,
+                    edge, inCamera, outVisibleContourLineSet,
+                    outVisibleNonContourLineSet, outHiddenLineSet,
                     contourCache);
                 break;
               default: break;

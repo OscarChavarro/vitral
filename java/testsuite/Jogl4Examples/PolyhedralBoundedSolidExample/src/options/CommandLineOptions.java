@@ -17,6 +17,7 @@ public class CommandLineOptions
     private ShadingType shadingType;
     private Integer kurlanderBowlMotifIndex;
     private Integer faceId;
+    private Integer edgeIndex;
     private Double vertexNormalSmoothingThresholdDegrees;
 
     public CommandLineOptions()
@@ -32,6 +33,7 @@ public class CommandLineOptions
         shadingType = null;
         kurlanderBowlMotifIndex = null;
         faceId = null;
+        edgeIndex = null;
         vertexNormalSmoothingThresholdDegrees = null;
     }
 
@@ -93,6 +95,11 @@ public class CommandLineOptions
     public Double getVertexNormalSmoothingThresholdDegrees()
     {
         return vertexNormalSmoothingThresholdDegrees;
+    }
+
+    public Integer getEdgeIndex()
+    {
+        return edgeIndex;
     }
 
     public static CommandLineOptions parse(String[] args)
@@ -204,6 +211,17 @@ public class CommandLineOptions
                 options.faceId = parseFaceId(
                     arg.substring("--faceId=".length()));
             }
+            else if ( "--edgeIndex".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing value for --edgeIndex");
+                }
+                options.edgeIndex = parseEdgeIndex(args[++i]);
+            }
+            else if ( arg.startsWith("--edgeIndex=") ) {
+                options.edgeIndex = parseEdgeIndex(
+                    arg.substring("--edgeIndex=".length()));
+            }
             else if ( "--normalThresholdDeg".equals(arg) ) {
                 if ( i + 1 >= args.length ) {
                     throw new IllegalArgumentException(
@@ -234,6 +252,7 @@ public class CommandLineOptions
         String offlineProperty = System.getProperty("poly.offline");
         String outputProperty = System.getProperty("poly.output");
         String thresholdProperty = System.getProperty("poly.normalThresholdDeg");
+        String edgeIndexProperty = System.getProperty("poly.edgeIndex");
 
         if ( offlineProperty != null ) {
             options.offline = Boolean.parseBoolean(offlineProperty);
@@ -244,6 +263,9 @@ public class CommandLineOptions
         if ( thresholdProperty != null && !thresholdProperty.isBlank() ) {
             options.vertexNormalSmoothingThresholdDegrees =
                 parseNormalThresholdDegrees(thresholdProperty);
+        }
+        if ( edgeIndexProperty != null && !edgeIndexProperty.isBlank() ) {
+            options.edgeIndex = parseEdgeIndex(edgeIndexProperty);
         }
 
         String solidModelProperty = System.getProperty("poly.solidModel");
@@ -307,6 +329,17 @@ public class CommandLineOptions
         catch ( NumberFormatException e ) {
             throw new IllegalArgumentException(
                 "Invalid --faceId value '" + rawValue + "'");
+        }
+    }
+
+    private static Integer parseEdgeIndex(String rawValue)
+    {
+        try {
+            return Integer.valueOf(rawValue);
+        }
+        catch ( NumberFormatException e ) {
+            throw new IllegalArgumentException(
+                "Invalid --edgeIndex value '" + rawValue + "'");
         }
     }
 

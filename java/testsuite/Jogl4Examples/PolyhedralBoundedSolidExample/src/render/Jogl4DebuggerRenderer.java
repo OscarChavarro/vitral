@@ -29,6 +29,7 @@ import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.gui.LightGizmoStyle;
 import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
+import vsdk.toolkit.media.Calligraphic2DBuffer;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 public class Jogl4DebuggerRenderer implements GLEventListener
@@ -236,16 +237,17 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     }
 
     private static void appendSegmentedLines(
-        List<Vector3Dd> source,
+        Calligraphic2DBuffer source,
         float r,
         float g,
         float b,
         ArrayList<Float> positions,
         ArrayList<Float> colors)
     {
-        for ( int i = 0; i + 1 < source.size(); i += 2 ) {
-            Vector3Dd p0 = source.get(i);
-            Vector3Dd p1 = source.get(i + 1);
+        for ( int i = 0; i < source.getNumLines(); i++ ) {
+            Vector3Dd[] segment = source.get2DLine(i);
+            Vector3Dd p0 = segment[0];
+            Vector3Dd p1 = segment[1];
             positions.add((float)p0.x());
             positions.add((float)p0.y());
             positions.add((float)p0.z());
@@ -269,23 +271,33 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         return out;
     }
 
-    private void
-    renderLinesResult(GL4 gl, Matrix4x4d mvp, List <Vector3Dd> contourLines,
-                      List <Vector3Dd> visibleLines,
-                      List <Vector3Dd> hiddenLines)
+    private static void drawBufferedLines(GL4 gl,
+                                          Calligraphic2DBuffer lines,
+                                          float r,
+                                          float g,
+                                          float b,
+                                          float lineWidth)
     {
         ArrayList<Float> positions = new ArrayList<Float>();
         ArrayList<Float> colors = new ArrayList<Float>();
 
-        appendSegmentedLines(contourLines, 0.0f, 0.0f, 0.0f, positions, colors);
-        appendSegmentedLines(visibleLines, 0.0f, 0.0f, 0.0f, positions, colors);
-        appendSegmentedLines(hiddenLines, 0.3f, 0.3f, 0.3f, positions, colors);
-
+        appendSegmentedLines(lines, r, g, b, positions, colors);
         if ( positions.isEmpty() ) {
             return;
         }
-        Jogl4LineRenderer.drawLines(gl, mvp, toFloatArray(positions),
-            toFloatArray(colors), 4.0f, -4.0e-4f);
+        Jogl4LineRenderer.drawLines(gl, Matrix4x4d.identityMatrix(),
+            toFloatArray(positions), toFloatArray(colors), lineWidth, -4.0e-4f);
+    }
+
+    private void
+    renderLinesResult(GL4 gl,
+                      Calligraphic2DBuffer contourLines,
+                      Calligraphic2DBuffer visibleLines,
+                      Calligraphic2DBuffer hiddenLines)
+    {
+        drawBufferedLines(gl, hiddenLines, 0.7f, 0.7f, 0.7f, 1.0f);
+        drawBufferedLines(gl, visibleLines, 0.0f, 0.0f, 0.0f, 4.0f);
+        drawBufferedLines(gl, contourLines, 0.0f, 0.0f, 0.0f, 8.0f);
     }
 
     private void drawReferenceFrame(GL4 gl, Matrix4x4d mvp)
@@ -331,9 +343,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         Jogl4PolyhedralBoundedSolidRenderer.drawDebugFace(gl, model.getSolid(),
             model.getFaceIndex(), modelMatrix, mvp, model.getCamera());
 
-        List<Vector3Dd> contourLines;
-        List <Vector3Dd> visibleLines;
-        List <Vector3Dd> hiddenLines;
+        Calligraphic2DBuffer contourLines;
+        Calligraphic2DBuffer visibleLines;
+        Calligraphic2DBuffer hiddenLines;
         List <SimpleBody> bodyArray;
         SimpleBody body;
 
@@ -342,9 +354,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
                 model.getSolid(), model.getCamera(), model.getEdgeIndex(), mvp);
         }
         else if ( model.getEdgeIndex() == -3 ) {
-            contourLines = new ArrayList <Vector3Dd>();
-            visibleLines = new ArrayList <Vector3Dd>();
-            hiddenLines = new ArrayList <Vector3Dd>();
+            contourLines = new Calligraphic2DBuffer();
+            visibleLines = new Calligraphic2DBuffer();
+            hiddenLines = new Calligraphic2DBuffer();
             bodyArray = new ArrayList <SimpleBody>();
 
             body = new SimpleBody();
@@ -355,7 +367,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             bodyArray.add(body);
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);
-            renderLinesResult(gl, mvp, contourLines, visibleLines, hiddenLines);
+            renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
         }
 
         /*

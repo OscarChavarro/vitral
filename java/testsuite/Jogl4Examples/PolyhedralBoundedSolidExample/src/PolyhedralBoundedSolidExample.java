@@ -27,7 +27,7 @@ public class PolyhedralBoundedSolidExample
         catch ( IllegalArgumentException e ) {
             System.err.println("[PolyhedralBoundedSolidExample] " + e.getMessage());
             System.err.println(
-                "Usage: [--offline] [--screenshot <file.png>] [--faceId <id>]");
+                "Usage: [--offline] [--screenshot <file.png>] [--faceId <id>] [--edgeIndex <id>]");
             return;
         }
 
@@ -161,6 +161,9 @@ public class PolyhedralBoundedSolidExample
         if ( options.getVertexNormalSmoothingThresholdDegrees() != null ) {
             quality.setVertexNormalSmoothingThresholdDegrees(
                 options.getVertexNormalSmoothingThresholdDegrees().doubleValue());
+        }
+        if ( options.getEdgeIndex() != null ) {
+            model.setEdgeIndex(options.getEdgeIndex().intValue());
         }
         if ( options.getKurlanderBowlMotifIndex() != null ) {
             model.setKurlanderBowlSingleMotifIndex(
