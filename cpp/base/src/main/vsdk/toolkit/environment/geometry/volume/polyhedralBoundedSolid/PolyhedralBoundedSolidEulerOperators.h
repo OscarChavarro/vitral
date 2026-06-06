@@ -7,6 +7,7 @@ class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidVertex;
 
 class PolyhedralBoundedSolidEulerOperators {
 public:
@@ -17,23 +18,30 @@ public:
     static void lkev(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2);
     static void lkef(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2);
     static _PolyhedralBoundedSolidFace* lmef(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2, int newFaceId);
+    static void lkemr(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2);
+    static void lkfmrh(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidFace* face1, _PolyhedralBoundedSolidFace* face2);
+    static _PolyhedralBoundedSolidFace* lmfkrh(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, int newFaceId);
+    static void lkimrh(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidFace* face1, _PolyhedralBoundedSolidFace* face2);
+    static _PolyhedralBoundedSolidFace* lmikrh(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, int newFaceId);
+    static void lmekr(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidHalfEdge* he1, _PolyhedralBoundedSolidHalfEdge* he2);
 
     static bool lringmv(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, _PolyhedralBoundedSolidFace* toFace, bool setAsOuterLoop);
 
+    static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int newVertexId, const Vector3Dd& p);
     static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int newVertexId, const Vector3Dd& p);
     static bool kemr(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4);
     static bool kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2);
 
     // compatibility overloads already used by existing C++ code
-    static void smev(PolyhedralBoundedSolid* solid, int seedSolidId, int fromVertexId, int toVertexId, const Vector3Dd& pos);
-    static void mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
+    static bool smev(PolyhedralBoundedSolid* solid, int seedSolidId, int fromVertexId, int toVertexId, const Vector3Dd& pos);
+    static bool mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
                     int startHalfEdge1, int endHalfEdge1,
                     int startHalfEdge2, int endHalfEdge2,
                     int newFaceId);
-    static void mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
+    static bool mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
                     int startHalfEdge1, int endHalfEdge1,
                     int startHalfEdge2, int endHalfEdge2);
-    static void smef(PolyhedralBoundedSolid* solid, int seedFaceId,
+    static bool smef(PolyhedralBoundedSolid* solid, int seedFaceId,
                      int startVertexId, int endVertexId,
                      int newFaceId);
 };

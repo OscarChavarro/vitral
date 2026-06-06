@@ -5,7 +5,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
@@ -66,7 +66,6 @@ int main(int argc, char** argv)
     camera.setFarPlaneDistance(100);
     camera.setRotation(R);
     camera.updateViewportResize(640, 480);
-
     SimpleScene scene;
     EnvironmentPersistence::importEnvironment(java::File(sceneFile.c_str()), &scene);
     if (scene.getSimpleBodies().size() == 0) {
@@ -74,10 +73,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    SimpleBody* boxBody = new SimpleBody();
-    boxBody->setGeometry(new Box(Vector3Dd(1, 1, 1)));
-    boxBody->setPosition(Vector3Dd(1, 2, 3));
-    scene.addBody(boxBody);
+    SimpleBody* arrowBody = new SimpleBody();
+    arrowBody->setGeometry(new Arrow(1.0, 0.5, 0.15, 0.3));
+    arrowBody->setPosition(Vector3Dd(1, 2, 3));
+    scene.addBody(arrowBody);
 
     Calligraphic2DBuffer lineSet;
     WireframeRenderer::execute(&lineSet, scene.getSimpleBodies(), &camera);

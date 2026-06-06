@@ -5,7 +5,7 @@ import java.io.File;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;     // Model elements
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
-import vsdk.toolkit.environment.geometry.volume.Box;
+import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
@@ -69,11 +69,11 @@ public class WireframeOfflineExample {
 
         //-----------------------------------------------------------------
         SimpleBody b;
-        Box box;
+        Arrow arrow;
 
         b = new SimpleBody();
-        box = new Box(1, 1, 1);
-        b.setGeometry(box);
+        arrow = new Arrow(1.0, 0.5, 0.15, 0.3);
+        b.setGeometry(arrow);
         b.setPosition(new Vector3Dd(1, 2, 3));
         scene.addBody(b);
     }

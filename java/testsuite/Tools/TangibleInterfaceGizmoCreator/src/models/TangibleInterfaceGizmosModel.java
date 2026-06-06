@@ -43,8 +43,8 @@ public class TangibleInterfaceGizmosModel
     private boolean showCoordinateSystem = true;
     private boolean errorState = false;
     private String errorMessage = "";
-    private double innerRadius = 3.04/2;
-    private double outerRadius = 3.04/2 + 1.2;
+    private double innerRadius = 7.86/2; // 3.04/2;
+    private double outerRadius = 7.86/2 + 1.6; // 3.04/2 + 1.2;
     private double baseHeight = 1.0;
     private JFrame mainFrame;
     private Rectangle windowedBounds;

@@ -1,8 +1,76 @@
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
-
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
-
 #include <cmath>
+
+#include "java/util/ArrayList.txx"
+
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+
+namespace {
+
+double sanitizeScale(double modelScale)
+{
+    double safeScale = std::abs(modelScale);
+    if ( !std::isfinite(safeScale) || safeScale < 1.0 ) {
+        return 1.0;
+    }
+    return safeScale;
+}
+
+double diagonalSize(double minX, double minY, double minZ,
+                    double maxX, double maxY, double maxZ)
+{
+    double dx = maxX - minX;
+    double dy = maxY - minY;
+    double dz = maxZ - minZ;
+    return sanitizeScale(std::sqrt(dx*dx + dy*dy + dz*dz));
+}
+
+double estimateFaceScale(_PolyhedralBoundedSolidFace* face)
+{
+    if ( face == 0 ) {
+        return 1.0;
+    }
+
+    double minX = 1e308;
+    double minY = 1e308;
+    double minZ = 1e308;
+    double maxX = -1e308;
+    double maxY = -1e308;
+    double maxZ = -1e308;
+    bool found = false;
+
+    for ( long int i = 0; i < face->boundariesList.size(); ++i ) {
+        _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
+        if ( loop == 0 ) {
+            continue;
+        }
+        for ( long int j = 0; j < loop->halfEdgesList.size(); ++j ) {
+            _PolyhedralBoundedSolidHalfEdge* he = loop->halfEdgesList.get(j);
+            if ( he == 0 || he->startingVertex == 0 ) {
+                continue;
+            }
+            Vector3Dd p = he->startingVertex->position;
+            found = true;
+            if ( p.x() < minX ) minX = p.x();
+            if ( p.y() < minY ) minY = p.y();
+            if ( p.z() < minZ ) minZ = p.z();
+            if ( p.x() > maxX ) maxX = p.x();
+            if ( p.y() > maxY ) maxY = p.y();
+            if ( p.z() > maxZ ) maxZ = p.z();
+        }
+    }
+
+    if ( !found ) {
+        return 1.0;
+    }
+    return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
+}
+
+}
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext::ToleranceContext()
     : modelScale_(1.0), epsilon_(1e-9), bigEpsilon_(1e-6), unitVectorTolerance_(1e-8),
@@ -24,9 +92,11 @@ double PolyhedralBoundedSolidNumericPolicy::ToleranceContext::unitIntervalTolera
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNumericPolicy::defaultContext() { return ToleranceContext(); }
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNumericPolicy::fromScale(double modelScale)
 {
-    double s = std::abs(modelScale);
-    if ( s < 1e-9 ) s = 1.0;
-    return ToleranceContext(s, 1e-9*s, 1e-6*s, 1e-8, 1e-8, 1e-8, 1e-8);
+    double s = sanitizeScale(modelScale);
+    double unitIntervalTolerance = (1e-6 * s) / s;
+    if ( unitIntervalTolerance < 1e-6 ) unitIntervalTolerance = 1e-6;
+    if ( unitIntervalTolerance > 1e-3 ) unitIntervalTolerance = 1e-3;
+    return ToleranceContext(s, 1e-9*s, 1e-8*s, 1e-8, 1e-8, 1e-7, unitIntervalTolerance);
 }
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNumericPolicy::forSolid(PolyhedralBoundedSolid* solid)
 {
@@ -36,7 +106,10 @@ PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNume
     delete[] mm;
     return fromScale(std::sqrt(dx*dx + dy*dy + dz*dz));
 }
-PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNumericPolicy::forFace(_PolyhedralBoundedSolidFace*) { return defaultContext(); }
+PolyhedralBoundedSolidNumericPolicy::ToleranceContext PolyhedralBoundedSolidNumericPolicy::forFace(_PolyhedralBoundedSolidFace* face)
+{
+    return fromScale(estimateFaceScale(face));
+}
 
 int PolyhedralBoundedSolidNumericPolicy::compare(double a, double b, double tolerance)
 {
