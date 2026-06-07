@@ -7,7 +7,7 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "java/util/ArrayList.txx"
 
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>

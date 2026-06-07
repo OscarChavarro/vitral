@@ -1,6 +1,6 @@
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 #include <cstdio>
 #include <cmath>
 

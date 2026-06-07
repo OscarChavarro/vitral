@@ -1,7 +1,7 @@
 #include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
 
 #include <cmath>
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 #include <cstdio>
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

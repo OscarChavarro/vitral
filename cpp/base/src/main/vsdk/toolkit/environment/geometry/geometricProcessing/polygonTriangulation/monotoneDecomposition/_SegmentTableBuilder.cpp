@@ -1,6 +1,6 @@
-#include "_SegmentTableBuilder.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_SegmentTableBuilder.h"
 
-#include "_Construct.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 
 int _SegmentTableBuilder::prepareSegments(double *vertices,
                                           int numberOfVertices,

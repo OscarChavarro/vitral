@@ -1,9 +1,9 @@
 #ifndef __TRIANGULATION_MONOTONE__
 #define __TRIANGULATION_MONOTONE__
 
-#include "_Construct.h"
-#include "_MonotoneChainNode.h"
-#include "_VertexChain.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_MonotoneChainNode.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_VertexChain.h"
 
 constexpr int SP_SIMPLE_LRUP = 1;
 constexpr int SP_SIMPLE_LRDN = 2;

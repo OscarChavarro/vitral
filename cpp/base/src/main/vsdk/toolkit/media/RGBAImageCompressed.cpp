@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include <cstring>
 #include <cstdio>
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 
 RGBAImageCompressed::RGBAImageCompressed() :
     data(nullptr), xSize(0), ySize(0),

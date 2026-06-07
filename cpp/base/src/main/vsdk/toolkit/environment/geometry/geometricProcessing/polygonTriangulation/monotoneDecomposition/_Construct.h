@@ -7,9 +7,9 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
-#include "_TriangulationSegment.h"
-#include "_TriangulationTrapezoid.h"
-#include "_TriangulationTrapezoidQueryNode.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationSegment.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoid.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoidQueryNode.h"
 
 constexpr int T_X = 1;
 constexpr int T_Y = 2;

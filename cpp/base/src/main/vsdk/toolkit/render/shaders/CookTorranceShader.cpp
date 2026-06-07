@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 #include <cmath>
 #include "java/util/ArrayList.txx"
 

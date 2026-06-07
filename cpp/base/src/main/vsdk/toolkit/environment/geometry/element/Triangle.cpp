@@ -6,7 +6,7 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
-#include <java/lang/Math.h>
+#include "java/lang/Math.h"
 #include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>

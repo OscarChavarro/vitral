@@ -1,10 +1,10 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-#include "_Construct.h"
-#include "_IncrementalSegmentInserter.h"
-#include "_InsertionBatchSchedule.h"
-#include "_RandomSegmentOrder.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_IncrementalSegmentInserter.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_InsertionBatchSchedule.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_RandomSegmentOrder.h"
 
 // References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
 // for Computing Trapezoidal Decompositions and for Triangulating Polygons".
