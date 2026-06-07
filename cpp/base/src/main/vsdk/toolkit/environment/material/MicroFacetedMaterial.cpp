@@ -11,7 +11,6 @@
 #include "java/util/ArrayList.txx"
 #include "java/lang/String.h"
 
-namespace {
 struct MicrofacetConfig {
     java::String name;
     ColorRgb ambient;
@@ -196,8 +195,6 @@ static MicrofacetConfig loadFromCsv(const java::String& csvFileName, const java:
     fclose(in);
     return d;
 }
-}
-
 MicroFacetedMaterial::MicroFacetedMaterial()
     : SimpleMaterial(
         defaultConfig().name,

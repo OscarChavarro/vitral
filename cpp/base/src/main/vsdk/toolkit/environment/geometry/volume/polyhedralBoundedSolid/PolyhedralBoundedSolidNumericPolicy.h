@@ -43,6 +43,12 @@ public:
     static bool pointsSeparated(const Vector3Dd& a, const Vector3Dd& b, const ToleranceContext& context);
     static bool isZero(double value, const ToleranceContext& context);
     static double linearTolerance2D(const ToleranceContext& context);
+
+private:
+    static double sanitizeScale(double modelScale);
+    static double diagonalSize(double minX, double minY, double minZ,
+        double maxX, double maxY, double maxZ);
+    static double estimateFaceScale(_PolyhedralBoundedSolidFace* face);
 };
 
 #endif

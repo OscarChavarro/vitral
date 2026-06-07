@@ -57,6 +57,12 @@ public:
     void revert();
 
 private:
+    static double boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop);
+    static _PolyhedralBoundedSolidLoop* selectLoopForPlaneCalculation(
+        java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList);
+    static InfinitePlane* calculatePlaneByNewell(
+        java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
+        double tolerance);
     InfinitePlane* calculatePlaneByCorner(double tolerance);
     Vector3Dd dropCoordinate(const Vector3Dd& in, int coord) const;
 };

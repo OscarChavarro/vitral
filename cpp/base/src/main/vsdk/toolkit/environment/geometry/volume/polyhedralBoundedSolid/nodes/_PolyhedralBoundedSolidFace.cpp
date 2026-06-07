@@ -11,9 +11,7 @@
 
 #include "java/util/ArrayList.txx"
 
-namespace {
-
-double boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop)
+double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop)
 {
     if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
         return 0.0;
@@ -35,7 +33,7 @@ double boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop)
     return normalAccumulator.length();
 }
 
-_PolyhedralBoundedSolidLoop* selectLoopForPlaneCalculation(
+_PolyhedralBoundedSolidLoop* _PolyhedralBoundedSolidFace::selectLoopForPlaneCalculation(
     java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList)
 {
     if ( boundariesList.size() < 1 ) {
@@ -55,7 +53,7 @@ _PolyhedralBoundedSolidLoop* selectLoopForPlaneCalculation(
     return selectedLoop;
 }
 
-InfinitePlane* calculatePlaneByNewell(
+InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
     java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList,
     double tolerance)
 {
@@ -99,8 +97,6 @@ InfinitePlane* calculatePlaneByNewell(
 
     Vector3Dd centroid(cx / count, cy / count, cz / count);
     return new InfinitePlane(normal, centroid);
-}
-
 }
 
 _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int inId)

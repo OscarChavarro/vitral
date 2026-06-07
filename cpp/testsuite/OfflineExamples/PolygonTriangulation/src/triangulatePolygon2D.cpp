@@ -21,8 +21,6 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/render/Rasterizer2D.h"
 
-namespace {
-
 const char* const DEFAULT_INPUT_FILE =
     "../../../../etc/polygons/example01.polygon";
 const int DEFAULT_ZONE_WIDTH = 512;
@@ -592,8 +590,6 @@ int run(int argc, char* argv[])
     exportImage(image, model.outputFileName);
 
     return 0;
-}
-
 }
 
 int main(int argc, char* argv[])

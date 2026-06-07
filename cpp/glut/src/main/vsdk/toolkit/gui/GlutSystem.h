@@ -4,8 +4,6 @@
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 class GlutSystem {
 public:
     static KeyEvent glut2vsdkKeyEvent(unsigned char glutKey, int modifiers);
@@ -18,7 +16,5 @@ private:
     GlutSystem();
     ~GlutSystem();
 };
-
-}}}
 
 #endif // GLUTSYSTEM_H

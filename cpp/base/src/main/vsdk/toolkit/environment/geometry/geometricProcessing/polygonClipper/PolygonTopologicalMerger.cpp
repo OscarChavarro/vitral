@@ -8,8 +8,6 @@
 #include <vector>
 #include "java/util/ArrayList.txx"
 
-namespace {
-
 static Vertex2D copyVertex(const Vertex2D& v)
 {
     return Vertex2D(v.x, v.y, v.color.r(), v.color.g(), v.color.b());
@@ -342,8 +340,6 @@ static std::vector<std::vector<Vertex2D>> weldInternalEdges(
     if (boundaryEdges.empty()) return std::vector<std::vector<Vertex2D>>();
     return extractLoopsFromBoundaryEdges(boundaryEdges, epsilon);
 }
-
-} // namespace
 
 void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon) { mergeInPlace(polygon, 1E-9); }
 

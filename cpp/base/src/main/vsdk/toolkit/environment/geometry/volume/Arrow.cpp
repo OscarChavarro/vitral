@@ -19,19 +19,17 @@
 
 const double Arrow::NO_HIT = 1e308;
 
-namespace {
-
-int normalizedSweepSides()
+int Arrow::normalizedSweepSides()
 {
     return 36 / 4;
 }
 
-double snapSweepCoordinate(double value)
+double Arrow::snapSweepCoordinate(double value)
 {
     return std::round(value * 1.0e10) / 1.0e10;
 }
 
-void addArcToExistingFace(
+void Arrow::addArcToExistingFace(
     PolyhedralBoundedSolid* solid,
     int faceId,
     int vertexId,
@@ -58,7 +56,7 @@ void addArcToExistingFace(
     }
 }
 
-PolyhedralBoundedSolid* createCircularLamina(
+PolyhedralBoundedSolid* Arrow::createCircularLamina(
     double cx, double cy, double radius, double height, int sides)
 {
     PolyhedralBoundedSolid* solid = new PolyhedralBoundedSolid();
@@ -71,7 +69,7 @@ PolyhedralBoundedSolid* createCircularLamina(
     return solid;
 }
 
-void translationalSweepExtrudeFacePlanar(
+void Arrow::translationalSweepExtrudeFacePlanar(
     PolyhedralBoundedSolid* solid,
     _PolyhedralBoundedSolidFace* face,
     const Matrix4x4d& transformationMatrix)
@@ -146,8 +144,6 @@ void translationalSweepExtrudeFacePlanar(
     }
 
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(solid);
-}
-
 }
 
 Arrow::Arrow(double bl, double hl, double br, double hr)

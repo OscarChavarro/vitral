@@ -6,8 +6,6 @@
 #include <GL/glut.h>
 #endif
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 KeyEvent GlutSystem::glut2vsdkKeyEvent(unsigned char glutKey, int modifiers)
 {
     KeyEvent event;
@@ -215,5 +213,3 @@ MouseEvent GlutSystem::glut2vsdkWheelEvent(int wheel, int direction, int x, int 
     event.setClicks(direction);
     return event;
 }
-
-}}}

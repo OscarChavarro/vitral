@@ -9,8 +9,6 @@
 
 #include "java/util/ArrayList.txx"
 
-namespace {
-
 template <typename T>
 long indexOf(const java::ArrayList<T>& list, T elem)
 {
@@ -241,8 +239,6 @@ void splitVertexNeighborhood(
 
     newVertex->emanatingHalfEdge = he2->previous();
     he2->startingVertex->emanatingHalfEdge = he2;
-}
-
 }
 
 void PolyhedralBoundedSolidEulerOperators::mvfs(PolyhedralBoundedSolid* solid, const Vector3Dd& pos, int vertexId, int faceId)

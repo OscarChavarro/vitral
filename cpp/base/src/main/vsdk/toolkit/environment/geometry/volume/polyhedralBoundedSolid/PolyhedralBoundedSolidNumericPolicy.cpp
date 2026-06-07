@@ -9,9 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 
-namespace {
-
-double sanitizeScale(double modelScale)
+double PolyhedralBoundedSolidNumericPolicy::sanitizeScale(double modelScale)
 {
     double safeScale = std::abs(modelScale);
     if ( !std::isfinite(safeScale) || safeScale < 1.0 ) {
@@ -20,7 +18,7 @@ double sanitizeScale(double modelScale)
     return safeScale;
 }
 
-double diagonalSize(double minX, double minY, double minZ,
+double PolyhedralBoundedSolidNumericPolicy::diagonalSize(double minX, double minY, double minZ,
                     double maxX, double maxY, double maxZ)
 {
     double dx = maxX - minX;
@@ -29,7 +27,7 @@ double diagonalSize(double minX, double minY, double minZ,
     return sanitizeScale(std::sqrt(dx*dx + dy*dy + dz*dz));
 }
 
-double estimateFaceScale(_PolyhedralBoundedSolidFace* face)
+double PolyhedralBoundedSolidNumericPolicy::estimateFaceScale(_PolyhedralBoundedSolidFace* face)
 {
     if ( face == 0 ) {
         return 1.0;
@@ -68,8 +66,6 @@ double estimateFaceScale(_PolyhedralBoundedSolidFace* face)
         return 1.0;
     }
     return diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
-}
-
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext::ToleranceContext()

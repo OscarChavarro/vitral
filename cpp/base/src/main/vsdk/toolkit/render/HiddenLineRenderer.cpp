@@ -51,7 +51,9 @@ public:
     Vector3Dd start;
     Vector3Dd end;
     Vector3Dd d;
+    SimpleBody* ownerBody;
     _PolyhedralBoundedSolidFace* visibleEdgeForContourLine;
+    SimpleBody* visibleEdgeBody;
 
     AppelEdgeCache()
         : edgeType(VISIBLE_LINE),
@@ -59,7 +61,9 @@ public:
           start(),
           end(),
           d(),
-          visibleEdgeForContourLine(0)
+          ownerBody(0),
+          visibleEdgeForContourLine(0),
+          visibleEdgeBody(0)
     {
     }
 
@@ -161,6 +165,117 @@ int computeQuantitativeInvisibility(
     return qi;
 }
 
+Vector3Dd transformToWorld(SimpleBody* body, const Vector3Dd& localPoint)
+{
+    if ( body == 0 ) {
+        return localPoint;
+    }
+    return body->getTransformationMatrix().multiply(localPoint);
+}
+
+Vector3Dd transformToLocal(SimpleBody* body, const Vector3Dd& worldPoint)
+{
+    if ( body == 0 ) {
+        return worldPoint;
+    }
+
+    Vector3Dd translatedPoint = worldPoint.subtract(body->getPosition());
+    Vector3Dd rotatedPoint = body->getRotationInverse().multiply(translatedPoint);
+    Vector3Dd scale = body->getScale();
+
+    double x = std::abs(scale.x()) > VSDK::EPSILON ? rotatedPoint.x() / scale.x() : 0.0;
+    double y = std::abs(scale.y()) > VSDK::EPSILON ? rotatedPoint.y() / scale.y() : 0.0;
+    double z = std::abs(scale.z()) > VSDK::EPSILON ? rotatedPoint.z() / scale.z() : 0.0;
+    return Vector3Dd(x, y, z);
+}
+
+InfinitePlane* getWorldContainingPlane(
+    _PolyhedralBoundedSolidFace* face,
+    SimpleBody* body)
+{
+    if ( face == 0 ) {
+        return 0;
+    }
+
+    for ( long int i = 0; i < face->boundariesList.size(); i++ ) {
+        _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
+        _PolyhedralBoundedSolidHalfEdge* he = loop != 0 ? loop->boundaryStartHalfEdge : 0;
+        if ( he == 0 ) {
+            continue;
+        }
+
+        _PolyhedralBoundedSolidHalfEdge* he1 = he->next();
+        _PolyhedralBoundedSolidHalfEdge* he2 = he1 != 0 ? he1->next() : 0;
+        if ( he1 == 0 || he2 == 0 || he->startingVertex == 0 ||
+             he1->startingVertex == 0 || he2->startingVertex == 0 ) {
+            continue;
+        }
+
+        Vector3Dd p0 = transformToWorld(body, he->startingVertex->position);
+        Vector3Dd p1 = transformToWorld(body, he1->startingVertex->position);
+        Vector3Dd p2 = transformToWorld(body, he2->startingVertex->position);
+        if ( p1.subtract(p0).crossProduct(p2.subtract(p0)).length() >
+             VSDK::EPSILON ) {
+            return new InfinitePlane(p0, p1, p2);
+        }
+    }
+
+    return 0;
+}
+
+int isFaceVisibleFromCameraTransformed(
+    _PolyhedralBoundedSolidFace* face,
+    SimpleBody* body,
+    const Camera* camera)
+{
+    if ( face == 0 || camera == 0 ) {
+        return 0;
+    }
+
+    Vector3Dd iv(1, 0, 0);
+    Vector3Dd viewingVector = camera->getRotation().multiply(iv);
+    InfinitePlane* plane = getWorldContainingPlane(face, body);
+    if ( plane == 0 ) {
+        return 0;
+    }
+    Vector3Dd n = plane->getNormal().normalized();
+    delete plane;
+
+    if ( camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL ) {
+        viewingVector = viewingVector.normalized();
+        double dot = n.dotProduct(viewingVector);
+        if ( dot > VSDK::EPSILON ) {
+            return -1;
+        }
+        else if ( dot < -VSDK::EPSILON ) {
+            return 1;
+        }
+        return 0;
+    }
+
+    Vector3Dd cameraPosition = camera->getPosition();
+    for ( long int i = 0; i < face->boundariesList.size(); i++ ) {
+        _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
+        if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
+            continue;
+        }
+        _PolyhedralBoundedSolidHalfEdge* he = loop->boundaryStartHalfEdge;
+        _PolyhedralBoundedSolidHalfEdge* heStart = he;
+        do {
+            he = he->next();
+            if ( he == 0 || he->startingVertex == 0 ) {
+                break;
+            }
+            Vector3Dd p = transformToWorld(body, he->startingVertex->position);
+            Vector3Dd t = p.subtract(cameraPosition).multiply(-1).normalized();
+            if ( t.dotProduct(n) > 0.0 ) {
+                return 1;
+            }
+        } while ( he != heStart );
+    }
+    return -1;
+}
+
 void buildCache(
     java::ArrayList<SimpleBody*>& solids,
     SimpleBody* body,
@@ -183,6 +298,7 @@ void buildCache(
     }
 
     solids.add(body);
+    Matrix4x4d bodyTransform = body->getTransformationMatrix();
 
     Vector3Dd prevEnd;
     bool hasPrevEnd = false;
@@ -204,16 +320,19 @@ void buildCache(
             continue;
         }
 
-        Vector3Dd startPosition = edge->leftHalf->startingVertex->position;
-        Vector3Dd endPosition = edge->rightHalf->startingVertex->position;
-        bool f1 = HiddenLineRenderer::isFaceVisibleFromCamera(face1, camera) >= 0;
-        bool f2 = HiddenLineRenderer::isFaceVisibleFromCamera(face2, camera) >= 0;
+        Vector3Dd startPosition =
+            bodyTransform.multiply(edge->leftHalf->startingVertex->position);
+        Vector3Dd endPosition =
+            bodyTransform.multiply(edge->rightHalf->startingVertex->position);
+        bool f1 = isFaceVisibleFromCameraTransformed(face1, body, camera) >= 0;
+        bool f2 = isFaceVisibleFromCameraTransformed(face2, body, camera) >= 0;
 
         cache.push_back(AppelEdgeCache());
         AppelEdgeCache& materialLine = cache.back();
         materialLine.setStart(startPosition);
         materialLine.setEnd(endPosition);
         materialLine.d = endPosition.subtract(startPosition);
+        materialLine.ownerBody = body;
         materialLine.onSequence = hasPrevEnd &&
             prevEnd.subtract(startPosition).length() < VSDK::EPSILON;
 
@@ -223,6 +342,7 @@ void buildCache(
         else if ( (f1 && !f2) || (!f1 && f2) ) {
             materialLine.edgeType = AppelEdgeCache::CONTOUR_LINE;
             materialLine.visibleEdgeForContourLine = f1 ? face1 : face2;
+            materialLine.visibleEdgeBody = body;
             contourCache.push_back(&materialLine);
         }
         else {
@@ -275,16 +395,17 @@ void processLineToBeDrawn(
                 Vector3Dd K = inEdge.start.add(
                     inEdge.d.multiply(segment.t - 2 * VSDK::EPSILON));
                 Ray projectionRay(K, sp2c.subtract(K).normalized());
-                InfinitePlane* contourPlane =
-                    cl->visibleEdgeForContourLine != 0 ?
-                    cl->visibleEdgeForContourLine->getContainingPlane() : 0;
+                InfinitePlane* contourPlane = getWorldContainingPlane(
+                    cl->visibleEdgeForContourLine,
+                    cl->visibleEdgeBody);
                 if ( contourPlane != 0 ) {
                     Ray* contourHit = contourPlane->doIntersection(projectionRay);
                     if ( contourHit != 0 ) {
                         Vector3Dd J = contourHit->origin().add(
                             contourHit->direction().multiply(contourHit->t()));
+                        Vector3Dd localJ = transformToLocal(cl->visibleEdgeBody, J);
                         int pos = cl->visibleEdgeForContourLine->testPointInside(
-                            J, VSDK::EPSILON);
+                            localJ, VSDK::EPSILON);
                         segment.deltaQI =
                             (pos == Geometry::INSIDE || pos == Geometry::LIMIT) ?
                             1 : -1;

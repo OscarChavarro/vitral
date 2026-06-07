@@ -15,7 +15,6 @@
 #include <cmath>
 #include "java/util/ArrayList.txx"
 
-namespace {
 const double DEFAULT_ROUGHNESS = 0.35;
 const double MIN_ROUGHNESS = 0.02;
 const double EPS = 1e-8;
@@ -155,8 +154,6 @@ static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
     }
     return p;
 }
-}
-
 CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnabledIn)
     : textureEnabled(textureEnabledIn), bumpMapEnabled(bumpMapEnabledIn)
 {

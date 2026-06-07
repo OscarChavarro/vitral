@@ -428,13 +428,13 @@ static void keyCallback(GLFWwindow* win, int key, int scancode, int action, int 
     if (!app) return;
 
     if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         app->onKeyPressed(event);
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(win, GLFW_TRUE);
         }
     } else if (action == GLFW_RELEASE) {
-        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         app->onKeyReleased(event);
     }
 }
@@ -445,7 +445,7 @@ static void mouseButtonCallback(GLFWwindow* win, int button, int action, int mod
 
     double xpos, ypos;
     glfwGetCursorPos(win, &xpos, &ypos);
-    MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
+    MouseEvent event = GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
 
     if (action == GLFW_PRESS) {
         app->onMousePressed(event);
@@ -458,7 +458,7 @@ static void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
     ImageExampleApp* app = (ImageExampleApp*)glfwGetWindowUserPointer(win);
     if (!app) return;
 
-    MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
+    MouseEvent event = GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
     int leftButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT);
     int middleButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE);
     int rightButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT);
@@ -486,7 +486,7 @@ static void scrollCallback(GLFWwindow* win, double xoffset, double yoffset) {
     ImageExampleApp* app = (ImageExampleApp*)glfwGetWindowUserPointer(win);
     if (!app) return;
 
-    MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
+    MouseEvent event = GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
     app->onMouseWheel(event);
 }
 

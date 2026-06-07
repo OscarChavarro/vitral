@@ -5,8 +5,6 @@
 #endif
 #include <GLFW/glfw3.h>
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 KeyEvent GlfwSystem::glfw2vsdkKeyEvent(int glfwKey, int glfwMods) {
     KeyEvent event;
 
@@ -347,5 +345,3 @@ MouseEvent GlfwSystem::glfw2vsdkWheelEvent(double xoffset, double yoffset) {
     event.setClicks((int)yoffset);
     return event;
 }
-
-}}}

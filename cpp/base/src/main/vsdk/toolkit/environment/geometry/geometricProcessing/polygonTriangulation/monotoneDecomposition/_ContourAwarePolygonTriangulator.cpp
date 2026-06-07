@@ -8,8 +8,6 @@
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 
-namespace {
-
 const double EPSILON = 1.0e-9;
 
 struct IndexedVertex {
@@ -548,8 +546,6 @@ bool triangulateFilledRegion(const std::vector<IndexedVertex> &outerInput,
 
     return earClipSimplePolygon(polygon, output);
 }
-
-} // namespace
 
 int _ContourAwarePolygonTriangulator::triangulate(
     const Polygon2D &input,

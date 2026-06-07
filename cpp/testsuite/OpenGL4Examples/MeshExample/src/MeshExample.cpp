@@ -761,7 +761,7 @@ private:
                 return;
             }
 
-            KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+            KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
             if (app->cameraController != nullptr) {
                 app->cameraController->processKeyPressedEvent(event);
             }
@@ -776,7 +776,7 @@ private:
             }
         }
         else if (action == GLFW_RELEASE) {
-            KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+            KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
             if (app->cameraController != nullptr) {
                 app->cameraController->processKeyReleasedEvent(event);
             }
@@ -795,7 +795,7 @@ private:
         double ypos = 0.0;
         glfwGetCursorPos(win, &xpos, &ypos);
 
-        MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
+        MouseEvent event = GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
         if (action == GLFW_PRESS) {
             app->cameraController->processMousePressedEvent(event);
         }
@@ -809,7 +809,7 @@ private:
         MeshExampleApp* app = static_cast<MeshExampleApp*>(glfwGetWindowUserPointer(win));
         if (app == nullptr || app->cameraController == nullptr) return;
 
-        MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
+        MouseEvent event = GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
 
         int leftButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT);
         int middleButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE);
@@ -834,7 +834,7 @@ private:
         MeshExampleApp* app = static_cast<MeshExampleApp*>(glfwGetWindowUserPointer(win));
         if (app == nullptr || app->cameraController == nullptr) return;
 
-        MouseEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
+        MouseEvent event = GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
         app->cameraController->processMouseWheelEvent(event);
     }
 };

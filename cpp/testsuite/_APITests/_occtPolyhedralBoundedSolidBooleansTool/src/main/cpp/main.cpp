@@ -28,8 +28,6 @@
 #include <exception>
 #include "java/lang/String.h"
 
-namespace {
-
 enum class OpCode {
   Union,
   AMinusB,
@@ -215,8 +213,6 @@ void PrintUsage(const char* argv0) {
                "Opcodes: UNION | A_MINUS_B | B_MINUS_A | INTERSECTION\n",
                argv0);
 }
-
-}  // namespace
 
 int main(int argc, char** argv) {
   if (argc != 5) {

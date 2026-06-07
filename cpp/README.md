@@ -174,7 +174,7 @@ This allows you to defer building optional dependencies until needed.
 
 1. **Image I/O**: Uses native `libpng` and `libjpeg` instead of Java AWT or JNI bindings
 2. **Memory management**: Explicit `new`/`delete` (no garbage collection)
-3. **Namespaces**: Code organization uses C++ namespaces (primary namespace: `vsdk`)
+3. **Namespaces**: Avoid introducing project-specific C++ namespaces; preserve only `java::` where needed for the Java-compatibility layer
 4. **Build system**: CMake instead of Gradle
 5. **Standard library**: C++11 STL instead of Java Collections
 

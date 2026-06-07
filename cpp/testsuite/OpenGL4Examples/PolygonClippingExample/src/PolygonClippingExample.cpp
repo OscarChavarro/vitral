@@ -469,7 +469,7 @@ static void keyCb(GLFWwindow* w, int key, int, int action, int)
         else if (key == GLFW_KEY_F) { handledLetterShortcut = true; }
         else if (key == GLFW_KEY_H) { handledLetterShortcut = true; }
 
-        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         if (!handledLetterShortcut && a->cameraController) {
             a->cameraController->processKeyPressedEvent(event);
         }
@@ -478,7 +478,7 @@ static void keyCb(GLFWwindow* w, int key, int, int action, int)
         }
     }
     else if (action == GLFW_RELEASE) {
-        KeyEvent event = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
         if (a->cameraController) {
             a->cameraController->processKeyReleasedEvent(event);
         }

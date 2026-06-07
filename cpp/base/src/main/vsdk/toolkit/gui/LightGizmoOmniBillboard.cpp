@@ -5,13 +5,11 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 
-namespace {
 static const int NUMBER_OF_SIDES = 32;
 static const int NUMBER_OF_RAYS = 8;
 static const double CIRCLE_RADIUS = 0.2;
 static const double RAY_INNER_RADIUS = 0.3;
 static const double RAY_OUTER_RADIUS = 0.5;
-}
 
 Calligraphic2DBuffer LightGizmoOmniBillboard::createLinePattern()
 {

@@ -4,8 +4,6 @@
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 
-namespace vsdk { namespace toolkit { namespace gui {
-
 class GlfwSystem {
 public:
     static KeyEvent glfw2vsdkKeyEvent(int glfwKey, int glfwMods);
@@ -18,7 +16,5 @@ private:
     GlfwSystem();
     ~GlfwSystem();
 };
-
-}}}
 
 #endif // GLFWSYSTEM_H

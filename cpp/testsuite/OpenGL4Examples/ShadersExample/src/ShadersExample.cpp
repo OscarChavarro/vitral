@@ -473,7 +473,7 @@ public:
             App* app = reinterpret_cast<App*>(glfwGetWindowUserPointer(w));
             if (!app) return;
             if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                KeyEvent ev = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+                KeyEvent ev = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
                 class CallbackActions : public ShadersKeyboardInteractionTechniques::Actions {
                 public:
                     explicit CallbackActions(GLFWwindow* inWindow) : window(inWindow) {}
@@ -499,7 +499,7 @@ public:
                     app->cycleCookTorranceMaterial();
                 }
             } else if (action == GLFW_RELEASE) {
-                KeyEvent ev = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+                KeyEvent ev = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
                 app->keyboardInteractionTechniques.processReleasedForApp(
                     ev,
                     app->controller);
@@ -511,7 +511,7 @@ public:
             if (!app) return;
             double x, y;
             glfwGetCursorPos(w, &x, &y);
-            MouseEvent e = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMouseEvent(button, action, x, y);
+            MouseEvent e = GlfwSystem::glfw2vsdkMouseEvent(button, action, x, y);
             if (action == GLFW_PRESS) app->mouseInteractionTechniques.processMousePressedForApp(app->controller, e);
             if (action == GLFW_RELEASE) app->mouseInteractionTechniques.processMouseReleasedForApp(app->controller, e);
         });
@@ -519,7 +519,7 @@ public:
         glfwSetCursorPosCallback(window, [](GLFWwindow* w, double x, double y) {
             App* app = reinterpret_cast<App*>(glfwGetWindowUserPointer(w));
             if (!app) return;
-            MouseEvent e = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkMotionEvent(x, y);
+            MouseEvent e = GlfwSystem::glfw2vsdkMotionEvent(x, y);
             int l = glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_LEFT);
             int m = glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_MIDDLE);
             int r = glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_RIGHT);
@@ -539,7 +539,7 @@ public:
         glfwSetScrollCallback(window, [](GLFWwindow* w, double xoff, double yoff) {
             App* app = reinterpret_cast<App*>(glfwGetWindowUserPointer(w));
             if (!app) return;
-            MouseEvent e = vsdk::toolkit::gui::GlfwSystem::glfw2vsdkWheelEvent(xoff, yoff);
+            MouseEvent e = GlfwSystem::glfw2vsdkWheelEvent(xoff, yoff);
             app->mouseInteractionTechniques.processMouseWheelMovedForApp(app->controller, e);
         });
 

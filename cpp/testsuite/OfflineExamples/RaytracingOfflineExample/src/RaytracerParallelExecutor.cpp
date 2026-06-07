@@ -24,13 +24,11 @@
 #include <stdexcept>
 #include "java/util/ArrayList.txx"
 
-namespace {
-
 struct ConsumerThreadData {
     ParallelProgressMonitorConsumer* consumer;
 };
 
-void* progressConsumerMain(void* arg)
+void* RaytracerParallelExecutor::progressConsumerMain(void* arg)
 {
     ConsumerThreadData* data = reinterpret_cast<ConsumerThreadData*>(arg);
     data->consumer->run();
@@ -79,15 +77,13 @@ public:
     }
 };
 
-long long calculateTotalProgressElements(const java::ArrayList<Tile>& generatedTiles)
+long long RaytracerParallelExecutor::calculateTotalProgressElements(const java::ArrayList<Tile>& generatedTiles)
 {
     long long total = 0;
     for (long int i = 0; i < generatedTiles.size(); i++) {
         total += generatedTiles.get(i).getDy();
     }
     return total;
-}
-
 }
 
 void RaytracerParallelExecutor::run(SimpleRaytracer*,
