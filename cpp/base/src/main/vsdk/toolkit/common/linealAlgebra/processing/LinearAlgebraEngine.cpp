@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.h"
+#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
 
 #include <cmath>
 
@@ -220,49 +220,93 @@ MatrixNxM GaussCpuStrategy::inverse(const MatrixNxM& matrix) const
             tmp = inv[pivot]; inv[pivot] = inv[col]; inv[col] = tmp;
         }
 
-        double pv = a[col][col];
+        double pivotValue = a[col][col];
         for ( int j = 0; j < n; ++j ) {
-            a[col][j] /= pv;
-            inv[col][j] /= pv;
+            a[col][j] /= pivotValue;
+            inv[col][j] /= pivotValue;
         }
 
-        for ( int i = 0; i < n; ++i ) {
-            if ( i == col ) continue;
-            double factor = a[i][col];
+        for ( int row = 0; row < n; ++row ) {
+            if ( row == col ) continue;
+            double factor = a[row][col];
             for ( int j = 0; j < n; ++j ) {
-                a[i][j] -= factor * a[col][j];
-                inv[i][j] -= factor * inv[col][j];
+                a[row][j] -= factor * a[col][j];
+                inv[row][j] -= factor * inv[col][j];
             }
         }
     }
 
     MatrixNxM out(n, n);
-    for ( int i = 0; i < n; ++i ) for ( int j = 0; j < n; ++j ) out = out.withVal(i, j, inv[i][j]);
+    for ( int i = 0; i < n; ++i ) {
+        for ( int j = 0; j < n; ++j ) {
+            out = out.withVal(i, j, inv[i][j]);
+        }
+    }
 
     freeSquare(a, n);
     freeSquare(inv, n);
     return out;
 }
 
-LinearAlgebraEngine::LinearAlgebraEngine(ComputeStrategy strategy) : strategy_(strategy) {}
-LinearAlgebraEngine LinearAlgebraEngine::defaultEngine() { return LinearAlgebraEngine(NAIVE_COFACTOR_CPU); }
-LinearAlgebraEngine LinearAlgebraEngine::fromStrategy(ComputeStrategy strategy) { return LinearAlgebraEngine(strategy); }
+LinearAlgebraEngine::LinearAlgebraEngine(ComputeStrategy strategy)
+    : strategy_(strategy)
+{
+}
+
+LinearAlgebraEngine LinearAlgebraEngine::defaultEngine()
+{
+    return LinearAlgebraEngine(LU_CPU);
+}
+
+LinearAlgebraEngine LinearAlgebraEngine::fromStrategy(ComputeStrategy strategy)
+{
+    return LinearAlgebraEngine(strategy);
+}
 
 double LinearAlgebraEngine::determinant(const MatrixNxM& m) const
 {
-    if ( strategy_ == LU_CPU ) { LuCpuStrategy s; return s.determinant(m); }
-    if ( strategy_ == GAUSS_CPU ) { GaussCpuStrategy s; return s.determinant(m); }
-    NaiveCofactorCpuStrategy s;
-    return s.determinant(m);
+    switch ( strategy_ ) {
+        case NAIVE_COFACTOR_CPU: {
+            NaiveCofactorCpuStrategy s;
+            return s.determinant(m);
+        }
+        case LU_CPU: {
+            LuCpuStrategy s;
+            return s.determinant(m);
+        }
+        case GAUSS_CPU: {
+            GaussCpuStrategy s;
+            return s.determinant(m);
+        }
+    }
+    return determinantDefault(m);
 }
 
 MatrixNxM LinearAlgebraEngine::inverse(const MatrixNxM& m) const
 {
-    if ( strategy_ == LU_CPU ) { LuCpuStrategy s; return s.inverse(m); }
-    if ( strategy_ == GAUSS_CPU ) { GaussCpuStrategy s; return s.inverse(m); }
-    NaiveCofactorCpuStrategy s;
-    return s.inverse(m);
+    switch ( strategy_ ) {
+        case NAIVE_COFACTOR_CPU: {
+            NaiveCofactorCpuStrategy s;
+            return s.inverse(m);
+        }
+        case LU_CPU: {
+            LuCpuStrategy s;
+            return s.inverse(m);
+        }
+        case GAUSS_CPU: {
+            GaussCpuStrategy s;
+            return s.inverse(m);
+        }
+    }
+    return inverseDefault(m);
 }
 
-double LinearAlgebraEngine::determinantDefault(const MatrixNxM& m) { return defaultEngine().determinant(m); }
-MatrixNxM LinearAlgebraEngine::inverseDefault(const MatrixNxM& m) { return defaultEngine().inverse(m); }
+double LinearAlgebraEngine::determinantDefault(const MatrixNxM& m)
+{
+    return defaultEngine().determinant(m);
+}
+
+MatrixNxM LinearAlgebraEngine::inverseDefault(const MatrixNxM& m)
+{
+    return defaultEngine().inverse(m);
+}

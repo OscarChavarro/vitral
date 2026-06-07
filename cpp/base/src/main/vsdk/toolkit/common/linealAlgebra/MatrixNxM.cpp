@@ -6,7 +6,7 @@
 
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.h"
+#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
