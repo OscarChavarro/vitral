@@ -16,7 +16,7 @@
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/render/Rasterizer2D.h"
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 
 const char* const DEFAULT_INPUT_FILE =
     "../../../../etc/polygons/example01.polygon";

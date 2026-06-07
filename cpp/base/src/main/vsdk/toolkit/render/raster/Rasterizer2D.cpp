@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/render/Rasterizer2D.h"
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"

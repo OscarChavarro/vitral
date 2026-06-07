@@ -1,10 +1,10 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SIMPLERAYTRACER_H__
-#define __VSDK_TOOLKIT_RENDER_SIMPLERAYTRACER_H__
+#ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
+#define __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
 
 #include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/RenderContext.h"
-#include "vsdk/toolkit/render/TileGenerationStrategy.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
 #include "java/util/ArrayList.h"
 
 class Ray;
@@ -28,7 +28,7 @@ class CameraSnapshot;
 class SimpleRaytracer : public RenderingElement {
 private:
     static const int MAX_RECURSION_LEVEL = TraceWorkspace::DEFAULT_MAX_RECURSION_LEVEL;
-    static const TileGenerationStrategy TILE_STRATEGY = TileGenerationStrategy::SERIAL;
+    static const RasterTileGenerationStrategy TILE_STRATEGY = RasterTileGenerationStrategy::SERIAL;
     static const int TILE_WORKERS_HINT = 1;
 
     struct SceneObjectRenderData {

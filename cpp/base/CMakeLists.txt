@@ -150,13 +150,13 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/CameraControllerBlender.cpp
     src/main/vsdk/toolkit/gui/CameraControllerGoogleEarth.cpp
     src/main/vsdk/toolkit/render/TraceWorkspace.cpp
-    src/main/vsdk/toolkit/render/Tile.cpp
-    src/main/vsdk/toolkit/render/TileGenerator.cpp
-    src/main/vsdk/toolkit/render/SimpleRaytracer.cpp
+    src/main/vsdk/toolkit/render/raytracing/RasterTileArea.cpp
+    src/main/vsdk/toolkit/render/raytracing/RasterTileGenerator.cpp
+    src/main/vsdk/toolkit/render/raytracing/SimpleRaytracer.cpp
     src/main/vsdk/toolkit/render/AutoStereogramGenerator.cpp
-    src/main/vsdk/toolkit/render/HiddenLineRenderer.cpp
-    src/main/vsdk/toolkit/render/Rasterizer2D.cpp
-    src/main/vsdk/toolkit/render/WireframeRenderer.cpp
+    src/main/vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.cpp
+    src/main/vsdk/toolkit/render/raster/Rasterizer2D.cpp
+    src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.cpp
     src/main/vsdk/toolkit/render/PolyhedralBoundedSolidDebugger.cpp
     src/main/vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.cpp
     src/main/vsdk/toolkit/render/shaders/LightingShader.cpp

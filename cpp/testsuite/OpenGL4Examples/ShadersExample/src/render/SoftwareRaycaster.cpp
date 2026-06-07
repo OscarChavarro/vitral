@@ -26,9 +26,9 @@
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
-#include "vsdk/toolkit/render/Tile.h"
-#include "vsdk/toolkit/render/TileGenerator.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
@@ -130,13 +130,13 @@ void SoftwareRaycaster::render(
         outputImage);
 
     try {
-        TileGenerator tileGenerator(
-            TileGenerationStrategy::LINEAR,
+        RasterTileGenerator tileGenerator(
+            RasterTileGenerationStrategy::LINEAR,
             outputImage,
             outputImage->getXSize(),
             outputImage->getYSize(),
             numberOfThreads);
-        const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
+        const java::ArrayList<RasterTileArea>& tiles = tileGenerator.getTiles();
         const int workerCount = java::Math::max(1, numberOfThreads);
         std::atomic<size_t> nextTileIndex(0);
         std::thread* workers = new std::thread[workerCount];
@@ -152,7 +152,7 @@ void SoftwareRaycaster::render(
                         if ( (long int)tileIndex >= tiles.size() ) {
                             break;
                         }
-                        Tile tile = tiles.get((long int)tileIndex);
+                        RasterTileArea tile = tiles.get((long int)tileIndex);
                         raytracer.execute(
                             outputImage,
                             &model->quality,

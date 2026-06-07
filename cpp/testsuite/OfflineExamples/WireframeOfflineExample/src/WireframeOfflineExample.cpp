@@ -15,8 +15,8 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/render/Rasterizer2D.h"
-#include "vsdk/toolkit/render/WireframeRenderer.h"
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
+#include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
 
 static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& outputFile)
 {

@@ -13,10 +13,10 @@
 #include "java/util/concurrent/Future.h"
 #include "java/util/concurrent/Void.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
-#include "vsdk/toolkit/render/Tile.h"
-#include "vsdk/toolkit/render/TileGenerationStrategy.h"
-#include "vsdk/toolkit/render/TileGenerator.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 
 #include <pthread.h>
 #include <unistd.h>
@@ -38,14 +38,14 @@ void* RaytracerParallelExecutor::progressConsumerMain(void* arg)
 
 class TileWorker : public java::Callable<java::Void> {
 private:
-    java::ConcurrentLinkedQueue<Tile>* pendingTiles;
+    java::ConcurrentLinkedQueue<RasterTileArea>* pendingTiles;
     RGBImageUncompressed* resultingImage;
     const RendererConfiguration* rendererConfiguration;
     SimpleSceneSnapshot* sceneSnapshot;
     ProgressMonitor* progressReporter;
 
 public:
-    TileWorker(java::ConcurrentLinkedQueue<Tile>* pendingTiles,
+    TileWorker(java::ConcurrentLinkedQueue<RasterTileArea>* pendingTiles,
                RGBImageUncompressed* resultingImage,
                const RendererConfiguration* rendererConfiguration,
                SimpleSceneSnapshot* sceneSnapshot,
@@ -60,7 +60,7 @@ public:
 
     virtual java::Void call() override
     {
-        Tile tile(resultingImage, 0, 0, resultingImage->getXSize(), resultingImage->getYSize());
+        RasterTileArea tile(resultingImage, 0, 0, resultingImage->getXSize(), resultingImage->getYSize());
         SimpleRaytracer raytracer;
 
         while ( pendingTiles->poll(&tile) ) {
@@ -78,7 +78,7 @@ public:
     }
 };
 
-long long RaytracerParallelExecutor::calculateTotalProgressElements(const java::ArrayList<Tile>& generatedTiles)
+long long RaytracerParallelExecutor::calculateTotalProgressElements(const java::ArrayList<RasterTileArea>& generatedTiles)
 {
     long long total = 0;
     for (long int i = 0; i < generatedTiles.size(); i++) {
@@ -100,15 +100,15 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
     int numberOfThreads = 1;
 #endif
 
-    TileGenerator tileGenerator(TileGenerationStrategy::LINEAR,
+    RasterTileGenerator tileGenerator(RasterTileGenerationStrategy::LINEAR,
                                 resultingImage,
                                 resultingImage->getXSize(),
                                 resultingImage->getYSize(),
                                 numberOfThreads);
     printf("Starting parallel raytracing with %d threads.\n", numberOfThreads);
 
-    java::ArrayList<Tile> generatedTiles = tileGenerator.getTiles();
-    java::ConcurrentLinkedQueue<Tile> pendingTiles(generatedTiles);
+    java::ArrayList<RasterTileArea> generatedTiles = tileGenerator.getTiles();
+    java::ConcurrentLinkedQueue<RasterTileArea> pendingTiles(generatedTiles);
     java::ExecutorService* executorService =
         java::Executors::newFixedThreadPool(numberOfThreads);
 

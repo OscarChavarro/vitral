@@ -16,7 +16,7 @@
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/processing/StopWatch.h"
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 
 #include <cstdlib>
 #include <exception>

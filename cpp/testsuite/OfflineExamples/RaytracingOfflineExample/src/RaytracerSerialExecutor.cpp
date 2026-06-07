@@ -5,7 +5,7 @@
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 
 void RaytracerSerialExecutor::run(SimpleRaytracer* visualizationEngine,
                                   RGBImageUncompressed* resultingImage,

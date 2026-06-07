@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/render/HiddenLineRenderer.h"
+#include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"

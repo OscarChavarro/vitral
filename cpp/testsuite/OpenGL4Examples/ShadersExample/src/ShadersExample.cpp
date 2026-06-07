@@ -33,9 +33,9 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
-#include "vsdk/toolkit/render/Tile.h"
-#include "vsdk/toolkit/render/TileGenerator.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
@@ -239,13 +239,13 @@ public:
                 softwareThreadInfoPrinted = true;
             }
 
-            TileGenerator tileGenerator(
-                TileGenerationStrategy::LINEAR,
+            RasterTileGenerator tileGenerator(
+                RasterTileGenerationStrategy::LINEAR,
                 softwareFrameImage,
                 softwareFrameImage->getXSize(),
                 softwareFrameImage->getYSize(),
                 softwareThreadCount);
-            const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
+            const java::ArrayList<RasterTileArea>& tiles = tileGenerator.getTiles();
             std::atomic<size_t> nextTileIndex(0);
             std::thread* workers = new std::thread[softwareThreadCount];
             std::atomic<bool> failed(false);
@@ -258,7 +258,7 @@ public:
                         while (true) {
                             size_t tileIndex = nextTileIndex.fetch_add(1);
                             if ((long int)tileIndex >= tiles.size()) break;
-                            Tile tile = tiles.get((long int)tileIndex);
+                            RasterTileArea tile = tiles.get((long int)tileIndex);
                             raytracer.execute(
                                 softwareFrameImage,
                                 &quality,

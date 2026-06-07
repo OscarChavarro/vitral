@@ -7,7 +7,7 @@
 #include "java/io/File.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/render/Rasterizer2D.h"
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 
 static java::String argOrDefault(int argc, char** argv, int idx, const java::String& fallback)
 {

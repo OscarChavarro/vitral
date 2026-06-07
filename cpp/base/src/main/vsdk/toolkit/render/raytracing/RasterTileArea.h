@@ -1,9 +1,9 @@
-#ifndef __VSDK_TOOLKIT_RENDER_TILE_H__
-#define __VSDK_TOOLKIT_RENDER_TILE_H__
+#ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEAREA_H__
+#define __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEAREA_H__
 
 class Image;
 
-class Tile {
+class RasterTileArea {
 private:
     Image* image;
     int x0;
@@ -12,8 +12,8 @@ private:
     int dy;
 
 public:
-    Tile();
-    Tile(Image* image, int x0, int y0, int dx, int dy);
+    RasterTileArea();
+    RasterTileArea(Image* image, int x0, int y0, int dx, int dy);
 
     Image* getImage() const;
     int getX0() const;

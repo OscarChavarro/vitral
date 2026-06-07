@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/render/WireframeRenderer.h"
+#include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
 
 #include "java/util/ArrayList.txx"
 

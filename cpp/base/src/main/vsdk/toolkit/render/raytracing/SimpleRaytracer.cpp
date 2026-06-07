@@ -1,4 +1,4 @@
-#include "vsdk/toolkit/render/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
@@ -23,8 +23,8 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
-#include "vsdk/toolkit/render/TileGenerator.h"
-#include "vsdk/toolkit/render/Tile.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/shaders/Shader.h"
 #include "vsdk/toolkit/render/shaders/ShaderSelector.h"
 
@@ -219,13 +219,13 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 
     java::ArrayList<long long> versions;
     captureBodyVersions(bodies, versions);
-    TileGenerator tileGenerator(TILE_STRATEGY, inoutViewport, limx1, limy1, limx2 - limx1, limy2 - limy1, TILE_WORKERS_HINT);
-    const java::ArrayList<Tile>& tiles = tileGenerator.getTiles();
+    RasterTileGenerator tileGenerator(TILE_STRATEGY, inoutViewport, limx1, limy1, limx2 - limx1, limy2 - limy1, TILE_WORKERS_HINT);
+    const java::ArrayList<RasterTileArea>& tiles = tileGenerator.getTiles();
     RGBPixel outputPixel;
 
     if ( liveReport ) liveReport->begin();
     for ( long int ti=0; ti<tiles.size(); ti++ ) {
-        const Tile& tile = tiles.get(ti);
+        const RasterTileArea& tile = tiles.get(ti);
         Image* tileImage = tile.getImage();
         for ( int y = tile.getY0(); y < tile.getY1(); y++ ) {
             assertSceneUnmodifiedDuringRender(versions, bodies);

@@ -3,7 +3,7 @@
 
 #include "RaytracerExecutor.h"
 #include "java/util/ArrayList.h"
-#include "vsdk/toolkit/render/Tile.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 
 class RaytracerParallelExecutor : public RaytracerExecutor {
 public:
@@ -15,7 +15,7 @@ public:
 
 private:
     static void* progressConsumerMain(void* arg);
-    static long long calculateTotalProgressElements(const java::ArrayList<Tile>& generatedTiles);
+    static long long calculateTotalProgressElements(const java::ArrayList<RasterTileArea>& generatedTiles);
 };
 
 #endif
