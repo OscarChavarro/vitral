@@ -1,4 +1,5 @@
-#include <stdexcept>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
@@ -12,8 +13,9 @@
 void MonotoneDecompositionTriangulator::stage1PrepareAndOrder(
     const Polygon2D &input, int &numVertices) {
     if (input.loops.size() <= 0) {
-        throw std::runtime_error(
+        Logger::reportMessage("MonotoneDecompositionTriangulator", Logger::ERROR, "stage1PrepareAndOrder",
             "Polygon input must contain at least one contour");
+        throw VSDKFatalException("Polygon input must contain at least one contour");
     }
     java::ArrayList<int> contourSizes;
     java::ArrayList<double> vertices;
@@ -33,8 +35,9 @@ void MonotoneDecompositionTriangulator::stage1PrepareAndOrder(
     }
 
     if (contourSizes.size() <= 0 || vertices.size() <= 0) {
-        throw std::runtime_error(
+        Logger::reportMessage("MonotoneDecompositionTriangulator", Logger::ERROR, "stage1PrepareAndOrder",
             "Polygon input must contain at least one vertex");
+        throw VSDKFatalException("Polygon input must contain at least one vertex");
     }
 
     numVertices = _SegmentTableBuilder::prepareSegments(

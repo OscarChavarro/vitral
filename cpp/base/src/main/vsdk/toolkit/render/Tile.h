@@ -1,8 +1,6 @@
 #ifndef __VSDK_TOOLKIT_RENDER_TILE_H__
 #define __VSDK_TOOLKIT_RENDER_TILE_H__
 
-#include <stdexcept>
-
 class Image;
 
 class Tile {

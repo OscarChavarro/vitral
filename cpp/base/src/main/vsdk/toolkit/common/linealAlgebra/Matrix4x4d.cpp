@@ -2,9 +2,10 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
 #include <cstdio>
 
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 
@@ -137,7 +138,10 @@ Matrix4x4d Matrix4x4d::inverse() const { return invert(); }
 Matrix4x4d Matrix4x4d::invert() const
 {
     double d = determinant();
-    if ( std::abs(d) < VSDK::EPSILON ) throw std::runtime_error("Trying to invert a matrix with zero determinant");
+    if ( std::abs(d) < VSDK::EPSILON ) {
+        Logger::reportMessage("Matrix4x4d", Logger::ERROR, "invert", "Trying to invert a matrix with zero determinant");
+        throw VSDKFatalException("Trying to invert a matrix with zero determinant");
+    }
     return cofactors().transpose().multiply(1.0 / d);
 }
 
@@ -387,7 +391,10 @@ double Matrix4x4d::obtainEulerRollAngle() const
 
 bool Matrix4x4d::epsilonEquals(const Matrix4x4d& other, double epsilon) const
 {
-    if ( epsilon < 0.0 ) throw std::invalid_argument("epsilon must be >= 0");
+    if ( epsilon < 0.0 ) {
+        Logger::reportMessage("Matrix4x4d", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
+        throw VSDKFatalException("epsilon must be >= 0");
+    }
     for ( int i = 0; i < 4; ++i ) {
         for ( int j = 0; j < 4; ++j ) {
             if ( std::abs(m_[i][j] - other.m_[i][j]) > epsilon ) return false;

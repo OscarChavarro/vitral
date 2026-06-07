@@ -1,8 +1,7 @@
 #ifndef __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
 #define __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
 
-#include <vector>
-
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 
@@ -34,7 +33,8 @@ private:
     };
 
     static int clamp(int value, int minValue, int maxValue);
-    static void addFillEdge(std::vector<std::vector<FillEdge> >& buckets,
+    static void sortFillEdges(java::ArrayList<FillEdge>& edges);
+    static void addFillEdge(java::ArrayList< java::ArrayList<FillEdge> >& buckets,
         const Vertex2D& a, const Vertex2D& b, int imageHeight, int yRange[2],
         int sortOrder);
     static void rasterizePolygonSpans(Image* img, Polygon2D& polygon,

@@ -1,10 +1,9 @@
 #ifndef JACKSON_DATABIND_JSON_NODE_H
 #define JACKSON_DATABIND_JSON_NODE_H
 
-#include <map>
-#include <string>
-#include <vector>
 #include "java/lang/String.h"
+#include "java/util/HashMap.h"
+#include "java/util/ArrayList.h"
 
 namespace jackson {
 namespace databind {
@@ -47,8 +46,8 @@ private:
     bool boolValue_;
     double numberValue_;
     java::String stringValue_;
-    std::vector<JsonNode> arrayValue_;
-    std::map<std::string, JsonNode> objectValue_;
+    java::ArrayList<JsonNode> arrayValue_;
+    java::HashMap<java::String, JsonNode> objectValue_;
 };
 
 }

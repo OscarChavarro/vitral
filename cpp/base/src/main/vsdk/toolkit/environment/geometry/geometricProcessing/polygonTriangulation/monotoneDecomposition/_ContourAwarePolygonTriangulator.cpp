@@ -1,7 +1,5 @@
-#include <algorithm>
 #include <cmath>
 #include <limits>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
@@ -10,6 +8,35 @@
 
 const double EPSILON = 1.0e-9;
 
+template <typename T>
+static const T& minValue(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+template <typename T>
+static const T& maxValue(const T& a, const T& b)
+{
+    return (a < b) ? b : a;
+}
+
+template <typename T>
+static void reverseArray(T* values, size_t count)
+{
+    if (count < 2) {
+        return;
+    }
+    size_t left = 0;
+    size_t right = count - 1;
+    while (left < right) {
+        T temp = values[left];
+        values[left] = values[right];
+        values[right] = temp;
+        ++left;
+        --right;
+    }
+}
+
 struct IndexedVertex {
     double x;
     double y;
@@ -17,14 +44,14 @@ struct IndexedVertex {
 };
 
 struct ContourData {
-    std::vector<IndexedVertex> vertices;
-    std::vector<int> childContours;
+    java::ArrayList<IndexedVertex> vertices;
+    java::ArrayList<int> childContours;
     double signedArea = 0.0;
     int parentContour = -1;
     int depth = -1;
 };
 
-double signedArea(const std::vector<IndexedVertex> &vertices)
+double signedArea(const java::ArrayList<IndexedVertex> &vertices)
 {
     double area = 0.0;
     for (size_t i = 0; i < vertices.size(); i++) {
@@ -46,28 +73,28 @@ double cross(const IndexedVertex &a, const IndexedVertex &b,
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
 }
 
-std::vector<IndexedVertex> removeConsecutiveDuplicates(
-    const std::vector<IndexedVertex> &polygon)
+java::ArrayList<IndexedVertex> removeConsecutiveDuplicates(
+    const java::ArrayList<IndexedVertex> &polygon)
 {
-    std::vector<IndexedVertex> result;
+    java::ArrayList<IndexedVertex> result;
     for (size_t i = 0; i < polygon.size(); i++) {
-        if (result.empty() || !samePoint(result.back(), polygon[i])) {
-            result.push_back(polygon[i]);
+        if (result.size() == 0 || !samePoint(result[result.size() - 1], polygon[i])) {
+            result.add(polygon[i]);
         }
     }
-    if (result.size() > 1 && samePoint(result.front(), result.back())) {
-        result.pop_back();
+    if (result.size() > 1 && samePoint(result[0], result[result.size() - 1])) {
+        result.remove(result.size() - 1);
     }
     return result;
 }
 
-void normalizeOrientation(std::vector<IndexedVertex> &vertices,
+void normalizeOrientation(java::ArrayList<IndexedVertex> &vertices,
     bool wantCounterClockwise)
 {
     const double area = signedArea(vertices);
     if ((wantCounterClockwise && area < 0.0) ||
         (!wantCounterClockwise && area > 0.0)) {
-        std::reverse(vertices.begin(), vertices.end());
+        reverseArray(vertices.data(), vertices.size());
     }
 }
 
@@ -80,13 +107,13 @@ bool pointOnSegment(double x, double y, const IndexedVertex &a,
         return false;
     }
 
-    return x >= std::min(a.x, b.x) - EPSILON &&
-        x <= std::max(a.x, b.x) + EPSILON &&
-        y >= std::min(a.y, b.y) - EPSILON &&
-        y <= std::max(a.y, b.y) + EPSILON;
+    return x >= minValue(a.x, b.x) - EPSILON &&
+        x <= maxValue(a.x, b.x) + EPSILON &&
+        y >= minValue(a.y, b.y) - EPSILON &&
+        y <= maxValue(a.y, b.y) + EPSILON;
 }
 
-bool containsPoint(const std::vector<IndexedVertex> &contour, double x, double y)
+bool containsPoint(const java::ArrayList<IndexedVertex> &contour, double x, double y)
 {
     bool inside = false;
     for (size_t i = 0, j = contour.size() - 1; i < contour.size(); j = i++) {
@@ -115,11 +142,11 @@ double squaredDistance(const IndexedVertex &a, const IndexedVertex &b)
 
 bool rangesOverlap(double a0, double a1, double b0, double b1)
 {
-    const double minA = std::min(a0, a1);
-    const double maxA = std::max(a0, a1);
-    const double minB = std::min(b0, b1);
-    const double maxB = std::max(b0, b1);
-    return std::max(minA, minB) <= std::min(maxA, maxB) + EPSILON;
+    const double minA = minValue(a0, a1);
+    const double maxA = maxValue(a0, a1);
+    const double minB = minValue(b0, b1);
+    const double maxB = maxValue(b0, b1);
+    return maxValue(minA, minB) <= minValue(maxA, maxB) + EPSILON;
 }
 
 bool segmentsIntersectProperly(const IndexedVertex &a, const IndexedVertex &b,
@@ -148,7 +175,7 @@ bool segmentsIntersectProperly(const IndexedVertex &a, const IndexedVertex &b,
 }
 
 bool segmentCrossesAnyEdge(const IndexedVertex &a, const IndexedVertex &b,
-    const std::vector<IndexedVertex> &boundary, int allowedVertexIndex)
+    const java::ArrayList<IndexedVertex> &boundary, int allowedVertexIndex)
 {
     for (size_t i = 0; i < boundary.size(); i++) {
         const IndexedVertex &edgeStart = boundary[i];
@@ -170,8 +197,8 @@ bool segmentCrossesAnyEdge(const IndexedVertex &a, const IndexedVertex &b,
 }
 
 bool segmentCrossesBoundary(const IndexedVertex &a, const IndexedVertex &b,
-    const std::vector<IndexedVertex> &polygon, int polygonVertexIndex,
-    const std::vector<IndexedVertex> &hole, int holeVertexIndex)
+    const java::ArrayList<IndexedVertex> &polygon, int polygonVertexIndex,
+    const java::ArrayList<IndexedVertex> &hole, int holeVertexIndex)
 {
     if (segmentCrossesAnyEdge(a, b, polygon, polygonVertexIndex)) {
         return true;
@@ -179,7 +206,7 @@ bool segmentCrossesBoundary(const IndexedVertex &a, const IndexedVertex &b,
     return segmentCrossesAnyEdge(a, b, hole, holeVertexIndex);
 }
 
-int findRightmostVertexIndex(const std::vector<IndexedVertex> &contour)
+int findRightmostVertexIndex(const java::ArrayList<IndexedVertex> &contour)
 {
     int bestIndex = 0;
     IndexedVertex bestVertex = contour[0];
@@ -195,7 +222,7 @@ int findRightmostVertexIndex(const std::vector<IndexedVertex> &contour)
     return bestIndex;
 }
 
-int computeDepth(std::vector<ContourData> &contours, int contourIndex)
+int computeDepth(java::ArrayList<ContourData> &contours, int contourIndex)
 {
     ContourData &contour = contours[contourIndex];
     if (contour.depth >= 0) {
@@ -210,9 +237,9 @@ int computeDepth(std::vector<ContourData> &contours, int contourIndex)
     return contour.depth;
 }
 
-std::vector<ContourData> flattenContours(const Polygon2D &input)
+java::ArrayList<ContourData> flattenContours(const Polygon2D &input)
 {
-    std::vector<ContourData> contours;
+    java::ArrayList<ContourData> contours;
     int flattenedIndex = 0;
     Polygon2D &mutableInput = const_cast<Polygon2D &>(input);
 
@@ -227,19 +254,22 @@ std::vector<ContourData> flattenContours(const Polygon2D &input)
         for (long vertexIndex = 0; vertexIndex < loop->vertices.size();
              vertexIndex++) {
             const Vertex2D &vertex = loop->vertices[vertexIndex];
-            contour.vertices.push_back(
-                {vertex.x, vertex.y, flattenedIndex++});
+            IndexedVertex indexedVertex;
+            indexedVertex.x = vertex.x;
+            indexedVertex.y = vertex.y;
+            indexedVertex.originalIndex = flattenedIndex++;
+            contour.vertices.add(indexedVertex);
         }
         contour.signedArea = signedArea(contour.vertices);
         if (std::abs(contour.signedArea) > EPSILON) {
-            contours.push_back(contour);
+            contours.add(contour);
         }
     }
 
     return contours;
 }
 
-void classifyContourHierarchy(std::vector<ContourData> &contours)
+void classifyContourHierarchy(java::ArrayList<ContourData> &contours)
 {
     for (size_t i = 0; i < contours.size(); i++) {
         ContourData &contour = contours[i];
@@ -272,7 +302,7 @@ void classifyContourHierarchy(std::vector<ContourData> &contours)
     for (size_t i = 0; i < contours.size(); i++) {
         const int parentIndex = contours[i].parentContour;
         if (parentIndex >= 0) {
-            contours[parentIndex].childContours.push_back(static_cast<int>(i));
+            contours[parentIndex].childContours.add(static_cast<int>(i));
         }
     }
 }
@@ -300,7 +330,7 @@ bool pointInTriangle(const IndexedVertex &a, const IndexedVertex &b,
     return !(hasNegative && hasPositive);
 }
 
-void simplifyCollinearVertices(std::vector<IndexedVertex> &polygon)
+void simplifyCollinearVertices(java::ArrayList<IndexedVertex> &polygon)
 {
     bool removed;
     do {
@@ -315,7 +345,7 @@ void simplifyCollinearVertices(std::vector<IndexedVertex> &polygon)
             const IndexedVertex &next = polygon[(i + 1) % polygon.size()];
             if (samePoint(previous, current) || samePoint(current, next) ||
                 std::abs(cross(previous, current, next)) <= EPSILON) {
-                polygon.erase(polygon.begin() + static_cast<long>(i));
+                polygon.remove(static_cast<long>(i));
                 removed = true;
                 break;
             }
@@ -324,17 +354,17 @@ void simplifyCollinearVertices(std::vector<IndexedVertex> &polygon)
     while (removed);
 }
 
-bool earClipSimplePolygon(const std::vector<IndexedVertex> &polygon,
+bool earClipSimplePolygon(const java::ArrayList<IndexedVertex> &polygon,
     java::ArrayList<MonotoneDecompositionTriangulator::Triangle> &output)
 {
-    std::vector<IndexedVertex> work = removeConsecutiveDuplicates(polygon);
+    java::ArrayList<IndexedVertex> work = removeConsecutiveDuplicates(polygon);
     simplifyCollinearVertices(work);
     if (work.size() < 3) {
         return true;
     }
 
     if (signedArea(work) < 0.0) {
-        std::reverse(work.begin(), work.end());
+        reverseArray(work.data(), work.size());
     }
 
     int guard = static_cast<int>(work.size() * work.size());
@@ -375,7 +405,7 @@ bool earClipSimplePolygon(const std::vector<IndexedVertex> &polygon,
             triangle.add(next.originalIndex);
             output.add(triangle);
 
-            work.erase(work.begin() + static_cast<long>(i));
+            work.remove(static_cast<long>(i));
             simplifyCollinearVertices(work);
             clippedEar = true;
             break;
@@ -397,11 +427,11 @@ bool earClipSimplePolygon(const std::vector<IndexedVertex> &polygon,
         return true;
     }
 
-    return work.empty() || work.size() < 3;
+    return work.size() == 0 || work.size() < 3;
 }
 
 int findRightmostHoleIndex(
-    const std::vector<std::vector<IndexedVertex> > &holes)
+    const java::ArrayList< java::ArrayList<IndexedVertex> > &holes)
 {
     int bestHoleIndex = 0;
     IndexedVertex bestVertex = holes[0][findRightmostVertexIndex(holes[0])];
@@ -419,9 +449,9 @@ int findRightmostHoleIndex(
     return bestHoleIndex;
 }
 
-int findVisibleBridgeVertex(const std::vector<IndexedVertex> &polygon,
-    const std::vector<IndexedVertex> &hole, int holeVertexIndex,
-    const std::vector<std::vector<IndexedVertex> > &remainingHoles)
+int findVisibleBridgeVertex(const java::ArrayList<IndexedVertex> &polygon,
+    const java::ArrayList<IndexedVertex> &hole, int holeVertexIndex,
+    const java::ArrayList< java::ArrayList<IndexedVertex> > &remainingHoles)
 {
     const IndexedVertex &holeVertex = hole[holeVertexIndex];
     int bestPolygonVertexIndex = -1;
@@ -468,15 +498,15 @@ int findVisibleBridgeVertex(const std::vector<IndexedVertex> &polygon,
     return bestPolygonVertexIndex;
 }
 
-std::vector<IndexedVertex> bridgeHoleIntoPolygon(
-    const std::vector<IndexedVertex> &polygonInput,
-    const std::vector<IndexedVertex> &holeInput,
-    const std::vector<std::vector<IndexedVertex> > &remainingHoles,
+java::ArrayList<IndexedVertex> bridgeHoleIntoPolygon(
+    const java::ArrayList<IndexedVertex> &polygonInput,
+    const java::ArrayList<IndexedVertex> &holeInput,
+    const java::ArrayList< java::ArrayList<IndexedVertex> > &remainingHoles,
     bool &ok)
 {
-    const std::vector<IndexedVertex> polygon =
+    const java::ArrayList<IndexedVertex> polygon =
         removeConsecutiveDuplicates(polygonInput);
-    const std::vector<IndexedVertex> hole =
+    const java::ArrayList<IndexedVertex> hole =
         removeConsecutiveDuplicates(holeInput);
     if (hole.size() < 3) {
         ok = true;
@@ -489,53 +519,53 @@ std::vector<IndexedVertex> bridgeHoleIntoPolygon(
         polygon, hole, holeVertexIndex, remainingHoles);
     if (bridgePolygonVertexIndex < 0) {
         ok = false;
-        return std::vector<IndexedVertex>();
+        return java::ArrayList<IndexedVertex>();
     }
 
-    std::vector<IndexedVertex> merged;
+    java::ArrayList<IndexedVertex> merged;
     for (int i = 0; i <= bridgePolygonVertexIndex; i++) {
-        merged.push_back(polygon[i]);
+        merged.add(polygon[i]);
     }
 
-    merged.push_back(holeVertex);
+    merged.add(holeVertex);
     for (size_t offset = 1; offset < hole.size(); offset++) {
         const int index =
             (holeVertexIndex + static_cast<int>(offset)) % static_cast<int>(hole.size());
-        merged.push_back(hole[index]);
+        merged.add(hole[index]);
     }
-    merged.push_back(holeVertex);
+    merged.add(holeVertex);
 
     for (size_t i = static_cast<size_t>(bridgePolygonVertexIndex);
          i < polygon.size(); i++) {
-        merged.push_back(polygon[i]);
+        merged.add(polygon[i]);
     }
 
     ok = true;
     return removeConsecutiveDuplicates(merged);
 }
 
-bool triangulateFilledRegion(const std::vector<IndexedVertex> &outerInput,
-    const std::vector<std::vector<IndexedVertex> > &holesInput,
+bool triangulateFilledRegion(const java::ArrayList<IndexedVertex> &outerInput,
+    const java::ArrayList< java::ArrayList<IndexedVertex> > &holesInput,
     java::ArrayList<MonotoneDecompositionTriangulator::Triangle> &output)
 {
-    std::vector<IndexedVertex> outer = outerInput;
+    java::ArrayList<IndexedVertex> outer = outerInput;
     normalizeOrientation(outer, true);
 
-    std::vector<std::vector<IndexedVertex> > holes = holesInput;
+    java::ArrayList< java::ArrayList<IndexedVertex> > holes = holesInput;
     for (size_t i = 0; i < holes.size(); i++) {
         normalizeOrientation(holes[i], false);
     }
 
-    std::vector<IndexedVertex> polygon = removeConsecutiveDuplicates(outer);
+    java::ArrayList<IndexedVertex> polygon = removeConsecutiveDuplicates(outer);
     if (polygon.size() < 3) {
         return true;
     }
 
-    std::vector<std::vector<IndexedVertex> > remainingHoles = holes;
-    while (!remainingHoles.empty()) {
+    java::ArrayList< java::ArrayList<IndexedVertex> > remainingHoles = holes;
+    while (remainingHoles.size() > 0) {
         const int nextHoleIndex = findRightmostHoleIndex(remainingHoles);
-        const std::vector<IndexedVertex> hole = remainingHoles[nextHoleIndex];
-        remainingHoles.erase(remainingHoles.begin() + nextHoleIndex);
+        const java::ArrayList<IndexedVertex> hole = remainingHoles[nextHoleIndex];
+        remainingHoles.remove(nextHoleIndex);
 
         bool ok = false;
         polygon = bridgeHoleIntoPolygon(polygon, hole, remainingHoles, ok);
@@ -551,8 +581,8 @@ int _ContourAwarePolygonTriangulator::triangulate(
     const Polygon2D &input,
     java::ArrayList<MonotoneDecompositionTriangulator::Triangle> &output)
 {
-    std::vector<ContourData> contours = flattenContours(input);
-    if (contours.empty()) {
+    java::ArrayList<ContourData> contours = flattenContours(input);
+    if (contours.size() == 0) {
         output.clear();
         return 0;
     }
@@ -567,10 +597,10 @@ int _ContourAwarePolygonTriangulator::triangulate(
             continue;
         }
 
-        std::vector<std::vector<IndexedVertex> > holes;
+        java::ArrayList< java::ArrayList<IndexedVertex> > holes;
         for (size_t childIndex = 0; childIndex < contour.childContours.size();
              childIndex++) {
-            holes.push_back(
+            holes.add(
                 contours[contour.childContours[childIndex]].vertices);
         }
 

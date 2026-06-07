@@ -3,7 +3,12 @@
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "java/util/ArrayList.h"
 #include "java/util/ArrayList.txx"
+
+#ifdef __APPLE__
 #include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
 
 void OpenGL4Polygon2DRenderer::push3(java::ArrayList<float>& a, float x, float y, float z) { a.add(x); a.add(y); a.add(z); }
 void OpenGL4Polygon2DRenderer::push4(java::ArrayList<float>& a, float x, float y, float z, float w) { a.add(x); a.add(y); a.add(z); a.add(w); }

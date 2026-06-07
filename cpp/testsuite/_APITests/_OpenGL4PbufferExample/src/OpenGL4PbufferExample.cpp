@@ -5,15 +5,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <stdexcept>
 #include "java/lang/String.h"
+
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 static java::String readShaderSource(const java::String& shaderFileName)
 {
     java::String path = java::String("../../../../etc/glslShaders/").concat(shaderFileName);
     FILE* file = std::fopen(path.c_str(), "r");
     if (!file) {
-        throw std::runtime_error(java::String("Shader not found: ").concat(path).toCString());
+        Logger::reportMessage("OpenGL4PbufferExample", Logger::ERROR, "readShaderSource", java::String("Shader not found: ").concat(path).toCString());
+        throw VSDKFatalException(java::String("Shader not found: ").concat(path));
     }
 
     std::fseek(file, 0, SEEK_END);
@@ -66,7 +69,8 @@ static GLuint compileShader(GLenum shaderType, const java::String& source)
     if (status == GL_FALSE) {
         java::String log = getShaderInfoLog(shader);
         glDeleteShader(shader);
-        throw std::runtime_error(java::String("Shader compile error: ").concat(log).toCString());
+        Logger::reportMessage("OpenGL4PbufferExample", Logger::ERROR, "compileShader", java::String("Shader compile error: ").concat(log).toCString());
+        throw VSDKFatalException(java::String("Shader compile error: ").concat(log));
     }
     return shader;
 }
@@ -92,7 +96,8 @@ static GLuint createShaderProgram()
         glDeleteShader(vs);
         glDeleteShader(fs);
         glDeleteProgram(program);
-        throw std::runtime_error(java::String("Program link error: ").concat(log).toCString());
+        Logger::reportMessage("OpenGL4PbufferExample", Logger::ERROR, "createShaderProgram", java::String("Program link error: ").concat(log).toCString());
+        throw VSDKFatalException(java::String("Program link error: ").concat(log));
     }
 
     glDetachShader(program, vs);
@@ -125,7 +130,10 @@ static void setShaderUniforms(GLuint program)
 static void writeRgbToPpm(const char* outFile, const unsigned char* rgb, int w, int h)
 {
     FILE* f = std::fopen(outFile, "wb");
-    if (!f) throw std::runtime_error("Could not open output file");
+    if (!f) {
+        Logger::reportMessage("OpenGL4PbufferExample", Logger::ERROR, "writeRgbToPpm", "Could not open output file");
+        throw VSDKFatalException("Could not open output file");
+    }
     std::fprintf(f, "P6\n%d %d\n255\n", w, h);
 
     for (int y = h - 1; y >= 0; y--) {

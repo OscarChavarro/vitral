@@ -18,6 +18,8 @@
 #include "vsdk/toolkit/processing/StopWatch.h"
 #include "vsdk/toolkit/render/SimpleRaytracer.h"
 
+#include <cstdlib>
+#include <exception>
 #include <cstdio>
 #include "java/util/ArrayList.txx"
 

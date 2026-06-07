@@ -28,7 +28,9 @@ namespace java {
 
         bool add(T elem);
         T &operator[](long int i);
+        const T &operator[](long int i) const;
         T *data();
+        const T *data() const;
         void reserve(long int n);
         void add(long int pos, T elem);
         void remove(long int pos);

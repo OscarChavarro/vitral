@@ -25,10 +25,12 @@
 #include <cstdio>
 #include <cstring>
 #include "java/lang/String.h"
-#include <stdexcept>
 #include "java/lang/String.h"
 #include <cmath>
 #include "java/lang/String.h"
+
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 ReaderMitScene::ReaderMitScene()
 {
@@ -46,12 +48,14 @@ static java::String trimLine(const java::String& in)
 void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outScene)
 {
     if ( outScene == 0 ) {
-        throw std::runtime_error("ReaderMitScene::importEnvironment: outScene is null");
+        Logger::reportMessage("ReaderMitScene", Logger::ERROR, "importEnvironment", "outScene is null");
+        throw VSDKFatalException("ReaderMitScene::importEnvironment: outScene is null");
     }
 
     FILE* file = fopen(fileName, "r");
     if ( !file ) {
-        throw std::runtime_error("ReaderMitScene::importEnvironment: could not open file");
+        Logger::reportMessage("ReaderMitScene", Logger::ERROR, "importEnvironment", "could not open file");
+        throw VSDKFatalException("ReaderMitScene::importEnvironment: could not open file");
     }
 
     outScene->clearOwnedElements();

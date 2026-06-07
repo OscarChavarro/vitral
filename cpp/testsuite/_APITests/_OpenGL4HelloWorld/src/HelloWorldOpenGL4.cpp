@@ -6,7 +6,9 @@
 #include <cstdlib>
 #include "java/lang/String.h"
 #include <cstring>
-#include <stdexcept>
+
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 class HelloWorldOpenGL4
 {
@@ -182,7 +184,8 @@ private:
 
         if (major < 4 || (major == 4 && minor < 1)) {
             fprintf(stderr, "This example requires OpenGL 4.1+. Current context is %d.%d\n", major, minor);
-            throw std::runtime_error("OpenGL version too old");
+            Logger::reportMessage("HelloWorldOpenGL4", Logger::ERROR, "checkOpenGLVersion", "OpenGL version too old");
+            throw VSDKFatalException("OpenGL version too old");
         }
     }
 
@@ -278,7 +281,8 @@ private:
         FILE* file = fopen(path.c_str(), "r");
         if (!file) {
             fprintf(stderr, "Shader not found: %s\n", shaderFileName.c_str());
-            throw std::runtime_error(java::String("Shader file not found: ").concat(shaderFileName).toCString());
+            Logger::reportMessage("HelloWorldOpenGL4", Logger::ERROR, "readShaderSource", java::String("Shader file not found: ").concat(shaderFileName).toCString());
+            throw VSDKFatalException(java::String("Shader file not found: ").concat(shaderFileName));
         }
 
         fseek(file, 0, SEEK_END);

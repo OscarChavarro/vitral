@@ -117,6 +117,11 @@ ArrayList<T>::operator[](long int i) {
     return Data[i];
 }
 
+template <class T> const T &
+ArrayList<T>::operator[](long int i) const {
+    return Data[i];
+}
+
 template <class T> T
 ArrayList<T>::get(long int i) const {
     return Data[i];
@@ -124,6 +129,11 @@ ArrayList<T>::get(long int i) const {
 
 template <class T> T*
 ArrayList<T>::data() {
+    return Data;
+}
+
+template <class T> const T*
+ArrayList<T>::data() const {
     return Data;
 }
 

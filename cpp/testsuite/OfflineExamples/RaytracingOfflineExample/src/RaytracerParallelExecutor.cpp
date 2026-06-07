@@ -21,7 +21,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <cstdio>
-#include <stdexcept>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "java/util/ArrayList.txx"
 
 struct ConsumerThreadData {
@@ -149,6 +150,7 @@ void RaytracerParallelExecutor::run(SimpleRaytracer*,
 #endif
 
     if ( !pendingTiles.isEmpty() ) {
-        throw std::runtime_error("Parallel raytracing finished with pending tiles");
+        Logger::reportMessage("RaytracerParallelExecutor", Logger::ERROR, "run", "Parallel raytracing finished with pending tiles");
+        throw VSDKFatalException("Parallel raytracing finished with pending tiles");
     }
 }

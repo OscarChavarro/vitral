@@ -1,6 +1,8 @@
 #include "vsdk/toolkit/render/Tile.h"
 #include "vsdk/toolkit/media/Image.h"
 
+#include <stdexcept>
+
 Tile::Tile() : image(nullptr), x0(0), y0(0), dx(0), dy(0) {}
 
 Tile::Tile(Image* imageIn, int x0In, int y0In, int dxIn, int dyIn)

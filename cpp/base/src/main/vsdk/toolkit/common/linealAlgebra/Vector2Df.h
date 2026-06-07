@@ -3,7 +3,8 @@
 
 
 #include <cmath>
-#include <stdexcept>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 class Vector2Dd;
 
@@ -28,7 +29,10 @@ public:
 
     bool epsilonEquals(const Vector2Df& other) const { return epsilonEquals(other, 1e-6f); }
     bool epsilonEquals(const Vector2Df& other, float epsilon) const {
-        if ( epsilon < 0.0f ) throw std::invalid_argument("epsilon must be >= 0");
+        if ( epsilon < 0.0f ) {
+            Logger::reportMessage("Vector2Df", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
+            throw VSDKFatalException("epsilon must be >= 0");
+        }
         return std::abs(x_ - other.x_) <= epsilon && std::abs(y_ - other.y_) <= epsilon;
     }
 

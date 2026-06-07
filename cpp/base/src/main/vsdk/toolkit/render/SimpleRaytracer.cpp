@@ -18,6 +18,8 @@
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
@@ -29,7 +31,6 @@
 #include "java/util/ArrayList.txx"
 
 #include <cmath>
-#include <stdexcept>
 
 SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
 {
@@ -70,9 +71,15 @@ void SimpleRaytracer::captureBodyVersions(java::ArrayList<SimpleBody*>& bodies, 
 
 void SimpleRaytracer::assertSceneUnmodifiedDuringRender(java::ArrayList<long long>& expected,java::ArrayList<SimpleBody*>& bodies)
 {
-    if ( expected.size() != bodies.size() ) throw std::runtime_error("Scene bodies list changed while raytracing");
+    if ( expected.size() != bodies.size() ) {
+        Logger::reportMessage("SimpleRaytracer", Logger::ERROR, "assertSceneUnmodifiedDuringRender", "Scene bodies list changed while raytracing");
+        throw VSDKFatalException("Scene bodies list changed while raytracing");
+    }
     for ( long int i = 0; i < bodies.size(); i++ ) {
-        if ( bodies.get(i)->getModificationVersion() != expected.get(i) ) throw std::runtime_error("SimpleBody modified while raytracing");
+        if ( bodies.get(i)->getModificationVersion() != expected.get(i) ) {
+            Logger::reportMessage("SimpleRaytracer", Logger::ERROR, "assertSceneUnmodifiedDuringRender", "SimpleBody modified while raytracing");
+            throw VSDKFatalException("SimpleBody modified while raytracing");
+        }
     }
 }
 

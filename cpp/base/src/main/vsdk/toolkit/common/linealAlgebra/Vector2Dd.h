@@ -4,7 +4,8 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "java/lang/String.h"
 
 class Vector2Dd {
@@ -38,7 +39,10 @@ public:
 
     bool epsilonEquals(const Vector2Dd& other) const { return epsilonEquals(other, 1e-6); }
     bool epsilonEquals(const Vector2Dd& other, double epsilon) const {
-        if ( epsilon < 0.0 ) throw std::invalid_argument("epsilon must be >= 0");
+        if ( epsilon < 0.0 ) {
+            Logger::reportMessage("Vector2Dd", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
+            throw VSDKFatalException("epsilon must be >= 0");
+        }
         return std::abs(x - other.x) <= epsilon && std::abs(y - other.y) <= epsilon;
     }
 

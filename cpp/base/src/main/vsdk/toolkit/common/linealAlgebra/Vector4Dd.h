@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
 #include "java/lang/String.h"
 
 class Vector3Dd;

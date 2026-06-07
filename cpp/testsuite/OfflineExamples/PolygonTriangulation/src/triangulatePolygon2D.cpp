@@ -1,17 +1,14 @@
-#include <algorithm>
 #include <cerrno>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <limits>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
+#include "java/lang/String.h"
 #include "java/io/File.h"
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
@@ -28,10 +25,16 @@ const int DEFAULT_ZONE_HEIGHT = 512;
 const double EPSILON = 1e-9;
 const int DEFAULT_IMAGE_MARGIN = 10;
 
+static void fail(const char* method, const java::String& message)
+{
+    Logger::reportMessage("PolygonTriangulation", Logger::ERROR, method, message);
+    throw VSDKFatalException(message);
+}
+
 struct PolygonModel {
     Polygon2D* polygon2D;
-    std::string inputFileName;
-    std::string outputFileName;
+    java::String inputFileName;
+    java::String outputFileName;
     int zoneWidth;
     int zoneHeight;
 
@@ -48,8 +51,8 @@ struct RenderTransform {
 };
 
 struct CommandLineOptions {
-    std::string inputFileName;
-    std::string outputFileName;
+    java::String inputFileName;
+    java::String outputFileName;
     int zoneWidth;
     int zoneHeight;
     bool showHelp;
@@ -75,76 +78,92 @@ struct CommandLineOptions {
     }
 };
 
-std::string basenameOf(const std::string& path)
+java::String basenameOf(const java::String& path)
 {
-    const std::string::size_type slash = path.find_last_of("/\\");
-    if (slash == std::string::npos) {
+    const int slash = path.find_last_of("/\\");
+    if (slash == java::String::npos) {
         return path;
     }
     return path.substr(slash + 1);
 }
 
-bool startsWith(const std::string& value, const std::string& prefix)
+bool startsWith(const java::String& value, const java::String& prefix)
 {
-    return value.compare(0, prefix.size(), prefix) == 0;
+    return value.startsWith(prefix.c_str());
 }
 
-bool endsWith(const std::string& value, const std::string& suffix)
+bool endsWith(const java::String& value, const java::String& suffix)
 {
     return value.size() >= suffix.size() &&
-        value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
+        value.substr(value.size() - suffix.size()) == suffix;
 }
 
-std::string deriveOutputFileName(const std::string& inputFileName)
+java::String deriveOutputFileName(const java::String& inputFileName)
 {
-    const std::string inputBaseName = basenameOf(inputFileName);
-    const std::string prefix = "example";
-    const std::string suffix = ".polygon";
+    const java::String inputBaseName = basenameOf(inputFileName);
+    const java::String prefix = "example";
+    const java::String suffix = ".polygon";
 
     if (startsWith(inputBaseName, prefix) && endsWith(inputBaseName, suffix)) {
-        const std::string number = inputBaseName.substr(
+        const java::String number = inputBaseName.substr(
             prefix.size(),
             inputBaseName.size() - prefix.size() - suffix.size());
-        if (!number.empty() &&
-            std::all_of(number.begin(), number.end(), [](char c) {
-                return c >= '0' && c <= '9';
-            })) {
-            return "output" + number + ".png";
+        bool allDigits = !number.empty();
+        for (int i = 0; allDigits && i < number.size(); ++i) {
+            const char c = number[i];
+            if (c < '0' || c > '9') {
+                allDigits = false;
+            }
+        }
+        if (allDigits) {
+            return java::String("output").concat(number).concat(".png");
         }
     }
-    return "output.png";
+    return java::String("output.png");
 }
 
-const char* requireValue(int argc, char* argv[], int index, const std::string& option)
+template <typename T>
+static const T& minValue(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+template <typename T>
+static const T& maxValue(const T& a, const T& b)
+{
+    return (a < b) ? b : a;
+}
+
+java::String requireValue(int argc, char* argv[], int index, const java::String& option)
 {
     if (index >= argc) {
-        throw std::invalid_argument("Missing value for " + option);
+        fail("requireValue", java::String("Missing value for ").concat(option));
     }
-    return argv[index];
+    return java::String(argv[index]);
 }
 
-int parsePositiveInt(const std::string& value, const std::string& option)
+int parsePositiveInt(const java::String& value, const java::String& option)
 {
     errno = 0;
     char* endPointer = nullptr;
     const long parsed = std::strtol(value.c_str(), &endPointer, 10);
     if (errno != 0 || endPointer == value.c_str() || *endPointer != '\0' ||
         parsed <= 0 || parsed > INT_MAX) {
-        throw std::invalid_argument(
-            option + " must be a positive integer: " + value);
+        fail("parsePositiveInt",
+            java::String(option).concat(" must be a positive integer: ").concat(value));
     }
     return static_cast<int>(parsed);
 }
 
 void printUsage()
 {
-    std::cout << "Usage: PolygonTriangulation [options] [input_file] [output_file]\n";
-    std::cout << "Options:\n";
-    std::cout << "  --input, -i <file>       Polygon input file (.polygon)\n";
-    std::cout << "  --output, -o <file>      PNG output file\n";
-    std::cout << "  --zone-width <pixels>    Width of each image zone (default 512)\n";
-    std::cout << "  --zone-height <pixels>   Height of each image zone (default 512)\n";
-    std::cout << "  --help, -h               Show this help\n";
+    std::printf("Usage: PolygonTriangulation [options] [input_file] [output_file]\n");
+    std::printf("Options:\n");
+    std::printf("  --input, -i <file>       Polygon input file (.polygon)\n");
+    std::printf("  --output, -o <file>      PNG output file\n");
+    std::printf("  --zone-width <pixels>    Width of each image zone (default 512)\n");
+    std::printf("  --zone-height <pixels>   Height of each image zone (default 512)\n");
+    std::printf("  --help, -h               Show this help\n");
 }
 
 CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
@@ -153,7 +172,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
     int positionalIndex = 0;
 
     for (int i = 1; i < argc; ++i) {
-        const std::string argument(argv[i]);
+        const java::String argument(argv[i]);
 
         if (argument == "--help" || argument == "-h") {
             options.showHelp = true;
@@ -183,7 +202,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         }
 
         if (!argument.empty() && argument[0] == '-') {
-            throw std::invalid_argument("Unknown option: " + argument);
+            fail("parseCommandLineOptions", java::String("Unknown option: ").concat(argument));
         }
 
         if (positionalIndex == 0) {
@@ -193,8 +212,8 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
             options.outputFileName = argument;
         }
         else {
-            throw std::invalid_argument(
-                "Unexpected positional argument: " + argument);
+            fail("parseCommandLineOptions",
+                java::String("Unexpected positional argument: ").concat(argument));
         }
         positionalIndex++;
     }
@@ -214,70 +233,44 @@ void clearPolygonLoops(Polygon2D& polygon)
     polygon.loops.clear();
 }
 
-std::vector<std::string> readTokens(const std::string& fileName)
+static void failReadPolygon(FILE* input, const java::String& fileName, const char* reason)
 {
-    std::ifstream input(fileName.c_str());
+    if (input != 0) {
+        fclose(input);
+    }
+    fail("failReadPolygon", java::String(reason).concat(fileName));
+}
+
+void readPolygon(const java::String& fileName, Polygon2D& polygon)
+{
+    FILE* input = fopen(fileName.c_str(), "r");
     if (!input) {
-        throw std::runtime_error("failed reading polygon file: " + fileName);
+        fail("readPolygon", java::String("failed reading polygon file: ").concat(fileName));
     }
 
-    std::vector<std::string> tokens;
-    std::string token;
-    while (input >> token) {
-        tokens.push_back(token);
+    int contourCount = 0;
+    if (std::fscanf(input, "%d", &contourCount) != 1) {
+        failReadPolygon(input, fileName, "Invalid or missing contour count in polygon file: ");
     }
-    return tokens;
-}
-
-int parseIntegerToken(const std::vector<std::string>& tokens, size_t& tokenIndex)
-{
-    if (tokenIndex >= tokens.size()) {
-        throw std::runtime_error("Unexpected end of polygon file");
-    }
-
-    const std::string& token = tokens[tokenIndex++];
-    errno = 0;
-    char* endPointer = nullptr;
-    const long parsed = std::strtol(token.c_str(), &endPointer, 10);
-    if (errno != 0 || endPointer == token.c_str() || *endPointer != '\0' ||
-        parsed < INT_MIN || parsed > INT_MAX) {
-        throw std::runtime_error("Invalid integer token: " + token);
-    }
-    return static_cast<int>(parsed);
-}
-
-double parseDoubleToken(const std::vector<std::string>& tokens, size_t& tokenIndex)
-{
-    if (tokenIndex >= tokens.size()) {
-        throw std::runtime_error("Unexpected end of polygon file");
-    }
-
-    const std::string& token = tokens[tokenIndex++];
-    errno = 0;
-    char* endPointer = nullptr;
-    const double parsed = std::strtod(token.c_str(), &endPointer);
-    if (errno != 0 || endPointer == token.c_str() || *endPointer != '\0') {
-        throw std::runtime_error("Invalid double token: " + token);
-    }
-    return parsed;
-}
-
-void readPolygon(const std::string& fileName, Polygon2D& polygon)
-{
-    const std::vector<std::string> tokens = readTokens(fileName);
-    size_t tokenIndex = 0;
-    const int contourCount = parseIntegerToken(tokens, tokenIndex);
 
     clearPolygonLoops(polygon);
     for (int contourIndex = 0; contourIndex < contourCount; ++contourIndex) {
         polygon.nextLoop();
-        const int pointCount = parseIntegerToken(tokens, tokenIndex);
+        int pointCount = 0;
+        if (std::fscanf(input, "%d", &pointCount) != 1) {
+            failReadPolygon(input, fileName, "Invalid or missing point count in polygon file: ");
+        }
         for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
-            const double x = parseDoubleToken(tokens, tokenIndex);
-            const double y = parseDoubleToken(tokens, tokenIndex);
+            double x = 0.0;
+            double y = 0.0;
+            if (std::fscanf(input, "%lf %lf", &x, &y) != 2) {
+                failReadPolygon(input, fileName, "Invalid or missing coordinate data in polygon file: ");
+            }
             polygon.addVertex(x, y);
         }
     }
+
+    fclose(input);
 
     if (polygon.loops.size() > 0 && polygon.loops[0]->vertices.size() == 0) {
         delete polygon.loops[0];
@@ -321,10 +314,10 @@ RenderTransform computeRenderTransform(const Polygon2D& polygon,
         _Polygon2DContour* contour = polygon.loops.get(i);
         for (long int j = 0; j < contour->vertices.size(); ++j) {
             const Vertex2D& vertex = contour->vertices[j];
-            minX = std::min(minX, vertex.x);
-            minY = std::min(minY, vertex.y);
-            maxX = std::max(maxX, vertex.x);
-            maxY = std::max(maxY, vertex.y);
+            minX = minValue(minX, vertex.x);
+            minY = minValue(minY, vertex.y);
+            maxX = maxValue(maxX, vertex.x);
+            maxY = maxValue(maxY, vertex.y);
         }
     }
 
@@ -336,7 +329,7 @@ RenderTransform computeRenderTransform(const Polygon2D& polygon,
         model.zoneHeight - 1.0 - 2.0 * DEFAULT_IMAGE_MARGIN;
     const double scale =
         (polygonWidth < EPSILON || polygonHeight < EPSILON) ? 1.0 :
-        std::min(usableWidth / polygonWidth, usableHeight / polygonHeight);
+        minValue(usableWidth / polygonWidth, usableHeight / polygonHeight);
     const double scaledWidth = polygonWidth * scale;
     const double scaledHeight = polygonHeight * scale;
 
@@ -393,13 +386,13 @@ void renderPolygonBorder(RGBImageUncompressed& image, const PolygonModel& model,
     Rasterizer2D::drawPolygon(&image, projectedPolygon, borderColor);
 }
 
-std::vector<Vertex2D> flattenVertices(const Polygon2D& polygon)
+java::ArrayList<Vertex2D> flattenVertices(const Polygon2D& polygon)
 {
-    std::vector<Vertex2D> vertices;
+    java::ArrayList<Vertex2D> vertices;
     for (long int i = 0; i < polygon.loops.size(); ++i) {
         _Polygon2DContour* contour = polygon.loops.get(i);
         for (long int j = 0; j < contour->vertices.size(); ++j) {
-            vertices.push_back(contour->vertices[j]);
+            vertices.add(contour->vertices[j]);
         }
     }
     return vertices;
@@ -425,8 +418,10 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
 {
     const int imageWidth = image.getXSize();
     const int imageHeight = image.getYSize();
-    int yMin = std::max(0, std::min(y0, std::min(y1, y2)));
-    int yMax = std::min(imageHeight - 1, std::max(y0, std::max(y1, y2)));
+    int yMin = minValue(y0, minValue(y1, y2));
+    yMin = maxValue(0, yMin);
+    int yMax = maxValue(y0, maxValue(y1, y2));
+    yMax = minValue(imageHeight - 1, yMax);
     const int vertices[3][2] = {{x0, y0}, {x1, y1}, {x2, y2}};
 
     for (int y = yMin; y <= yMax; ++y) {
@@ -441,8 +436,8 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
 
             if (ay == by) {
                 if (ay == y) {
-                    xMin = std::min(xMin, std::min(ax, bx));
-                    xMax = std::max(xMax, std::max(ax, bx));
+                    xMin = minValue(xMin, minValue(ax, bx));
+                    xMax = maxValue(xMax, maxValue(ax, bx));
                 }
             }
             else if ((ay <= y && y <= by) || (by <= y && y <= ay)) {
@@ -450,8 +445,8 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
                     static_cast<double>(y - ay) / static_cast<double>(by - ay);
                 const int xIntersection = static_cast<int>(
                     ax + interpolationFactor * (bx - ax));
-                xMin = std::min(xMin, xIntersection);
-                xMax = std::max(xMax, xIntersection);
+                xMin = minValue(xMin, xIntersection);
+                xMax = maxValue(xMax, xIntersection);
             }
         }
 
@@ -459,8 +454,8 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
             continue;
         }
 
-        xMin = std::max(0, xMin);
-        xMax = std::min(imageWidth - 1, xMax);
+        xMin = maxValue(0, xMin);
+        xMax = minValue(imageWidth - 1, xMax);
 
         for (int x = xMin; x <= xMax; ++x) {
             image.putPixelRgb(x, y, &color);
@@ -484,7 +479,7 @@ void renderTriangulatedPolygon(RGBImageUncompressed& image,
         {200, 140, 60},
         {140, 80, 200},
     };
-    const std::vector<Vertex2D> polygonVertices = flattenVertices(*model.polygon2D);
+    const java::ArrayList<Vertex2D> polygonVertices = flattenVertices(*model.polygon2D);
 
     RGBPixel edgeColor;
     edgeColor.r = static_cast<char>(255);
@@ -540,12 +535,12 @@ RGBPixel createBorderColor()
     return borderColor;
 }
 
-void exportImage(RGBImageUncompressed& image, const std::string& outputFileName)
+void exportImage(RGBImageUncompressed& image, const java::String& outputFileName)
 {
     if (!ImagePersistence::exportPNG(java::File(outputFileName.c_str()), &image)) {
-        throw std::runtime_error("failed writing PNG file: " + outputFileName);
+        fail("exportImage", java::String("failed writing PNG file: ").concat(outputFileName));
     }
-    std::cout << "Image written to: " << outputFileName << "\n";
+    std::printf("Image written to: %s\n", outputFileName.toCString());
 }
 
 int run(int argc, char* argv[])
@@ -554,8 +549,8 @@ int run(int argc, char* argv[])
     try {
         commandLineOptions = parseCommandLineOptions(argc, argv);
     }
-    catch (const std::invalid_argument& exception) {
-        std::cerr << exception.what() << "\n";
+    catch (const std::exception& exception) {
+        Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "run", "invalid command line argument", &exception);
         printUsage();
         return 0;
     }
@@ -598,7 +593,7 @@ int main(int argc, char* argv[])
         return run(argc, argv);
     }
     catch (const std::exception& exception) {
-        std::cerr << "PolygonTriangulation failed: " << exception.what() << "\n";
+        Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "main", "PolygonTriangulation failed", &exception);
         return 1;
     }
 }

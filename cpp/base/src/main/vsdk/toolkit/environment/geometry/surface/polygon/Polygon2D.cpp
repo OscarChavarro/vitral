@@ -5,8 +5,12 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
 #include "java/util/ArrayList.txx"
+
+class PolygonProcessor {
+public:
+    static void classifyContourHoles(Polygon2D* polygon);
+};
 
 Polygon2D::Polygon2D() : currentLoop(nullptr), headNode(nullptr) { nextLoop(); }
 

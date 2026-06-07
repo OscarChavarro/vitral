@@ -1,11 +1,9 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include "java/util/HashMap.h"
 #include "java/util/ArrayList.txx"
 
 static Vertex2D copyVertex(const Vertex2D& v)
@@ -28,18 +26,20 @@ static bool areCollinear(const Vertex2D& a, const Vertex2D& b, const Vertex2D& c
     return std::fabs(cross) <= epsilon;
 }
 
-static std::vector<Vertex2D> normalizeContour(_Polygon2DContour* contour, double epsilon)
+static java::ArrayList<Vertex2D> normalizeContour(_Polygon2DContour* contour, double epsilon)
 {
-    std::vector<Vertex2D> withoutDuplicates;
-    std::vector<Vertex2D> simplified;
+    java::ArrayList<Vertex2D> withoutDuplicates;
+    java::ArrayList<Vertex2D> simplified;
     for (long int i = 0; i < contour->vertices.size(); ++i) {
         Vertex2D v = contour->vertices[i];
-        if (withoutDuplicates.empty() || !samePoint(withoutDuplicates.back(), v, epsilon)) {
-            withoutDuplicates.push_back(copyVertex(v));
+        if (withoutDuplicates.size() == 0 ||
+            !samePoint(withoutDuplicates[withoutDuplicates.size() - 1], v, epsilon)) {
+            withoutDuplicates.add(copyVertex(v));
         }
     }
-    if (withoutDuplicates.size() > 1 && samePoint(withoutDuplicates.front(), withoutDuplicates.back(), epsilon)) {
-        withoutDuplicates.pop_back();
+    if (withoutDuplicates.size() > 1 &&
+        samePoint(withoutDuplicates[0], withoutDuplicates[withoutDuplicates.size() - 1], epsilon)) {
+        withoutDuplicates.remove(withoutDuplicates.size() - 1);
     }
     for (size_t i = 0; i < withoutDuplicates.size(); ++i) {
         const Vertex2D& prev = withoutDuplicates[(i + withoutDuplicates.size() - 1) % withoutDuplicates.size()];
@@ -48,12 +48,12 @@ static std::vector<Vertex2D> normalizeContour(_Polygon2DContour* contour, double
         if (withoutDuplicates.size() >= 3 && areCollinear(prev, cur, next, epsilon)) {
             continue;
         }
-        simplified.push_back(copyVertex(cur));
+        simplified.add(copyVertex(cur));
     }
     return simplified;
 }
 
-static bool areEquivalentContours(const std::vector<Vertex2D>& a, const std::vector<Vertex2D>& b, double epsilon)
+static bool areEquivalentContours(const java::ArrayList<Vertex2D>& a, const java::ArrayList<Vertex2D>& b, double epsilon)
 {
     if (a.size() != b.size()) return false;
     int n = static_cast<int>(a.size());
@@ -94,9 +94,10 @@ struct PointKey {
 struct PointKeyHasher {
     std::size_t operator()(const PointKey& k) const
     {
-        std::size_t h1 = std::hash<long long>()(k.qx);
-        std::size_t h2 = std::hash<long long>()(k.qy);
-        return h1 ^ (h2 << 1);
+        std::size_t h = static_cast<std::size_t>(k.qx);
+        std::size_t v = static_cast<std::size_t>(k.qy);
+        h ^= v + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+        return h;
     }
 };
 
@@ -107,6 +108,30 @@ static int compareKeys(const PointKey& a, const PointKey& b)
     if (a.qy < b.qy) return -1;
     if (a.qy > b.qy) return 1;
     return 0;
+}
+
+static bool containsIndex(const java::ArrayList<int>& values, int value)
+{
+    for (long int i = 0; i < values.size(); ++i) {
+        if (values[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void addOutgoingIndex(
+    java::HashMap<PointKey, java::ArrayList<int> >& outgoing,
+    const PointKey& key, int index)
+{
+    java::ArrayList<int>* values = outgoing.get(key);
+    if (values == 0) {
+        java::ArrayList<int> newValues;
+        newValues.add(index);
+        outgoing.put(key, newValues);
+        return;
+    }
+    values->add(index);
 }
 
 struct EdgeKey {
@@ -147,19 +172,35 @@ struct EdgeKeyHasher {
 struct Segment2D {
     Vertex2D a;
     Vertex2D b;
+    Segment2D() : a(), b() {}
     Segment2D(const Vertex2D& aIn, const Vertex2D& bIn) : a(aIn), b(bIn) {}
 };
 
 struct SplitPoint {
     double t;
     Vertex2D p;
+    SplitPoint() : t(0.0), p() {}
     SplitPoint(double tIn, const Vertex2D& pIn) : t(tIn), p(pIn) {}
     bool operator<(const SplitPoint& o) const { return t < o.t; }
 };
 
+static void sortSplitPoints(java::ArrayList<SplitPoint>& values)
+{
+    for (size_t i = 1; i < values.size(); ++i) {
+        SplitPoint key = values[i];
+        size_t j = i;
+        while (j > 0 && key < values[j - 1]) {
+            values[j] = values[j - 1];
+            --j;
+        }
+        values[j] = key;
+    }
+}
+
 struct DirectedEdge {
     Vertex2D start;
     Vertex2D end;
+    DirectedEdge() : start(), end() {}
     DirectedEdge(const Vertex2D& s, const Vertex2D& e) : start(s), end(e) {}
 };
 
@@ -180,64 +221,68 @@ static double parameterOnSegment(const Segment2D& seg, const Vertex2D& p, double
     return t;
 }
 
-static void maybeAddPointOnSegment(const Segment2D& seg, const Vertex2D& p, double epsilon, std::vector<SplitPoint>& out)
+static void maybeAddPointOnSegment(const Segment2D& seg, const Vertex2D& p, double epsilon, java::ArrayList<SplitPoint>& out)
 {
     double t = parameterOnSegment(seg, p, epsilon);
     if (t < -0.5) return;
-    out.push_back(SplitPoint(t, copyVertex(p)));
+    out.add(SplitPoint(t, copyVertex(p)));
 }
 
-static std::vector<SplitPoint> dedupSplitPoints(const std::vector<SplitPoint>& in, double epsilon)
+static java::ArrayList<SplitPoint> dedupSplitPoints(const java::ArrayList<SplitPoint>& in, double epsilon)
 {
-    std::vector<SplitPoint> out;
+    java::ArrayList<SplitPoint> out;
     for (size_t i = 0; i < in.size(); ++i) {
         const SplitPoint& cur = in[i];
-        if (out.empty()
-            || std::fabs(out.back().t - cur.t) > epsilon
-            || !samePoint(out.back().p, cur.p, epsilon)) {
-            out.push_back(cur);
+        if (out.size() == 0
+            || std::fabs(out[out.size() - 1].t - cur.t) > epsilon
+            || !samePoint(out[out.size() - 1].p, cur.p, epsilon)) {
+            out.add(cur);
         }
     }
     return out;
 }
 
 static void splitAndAccumulateSegments(
-    const std::vector<Segment2D>& segments, double epsilon,
-    std::unordered_map<EdgeKey, int, EdgeKeyHasher>& signedUsage)
+    const java::ArrayList<Segment2D>& segments, double epsilon,
+    java::HashMap<EdgeKey, int>& signedUsage)
 {
     for (size_t i = 0; i < segments.size(); ++i) {
         const Segment2D& seg = segments[i];
-        std::vector<SplitPoint> splitPoints;
-        splitPoints.push_back(SplitPoint(0.0, seg.a));
-        splitPoints.push_back(SplitPoint(1.0, seg.b));
+        java::ArrayList<SplitPoint> splitPoints;
+        splitPoints.add(SplitPoint(0.0, seg.a));
+        splitPoints.add(SplitPoint(1.0, seg.b));
         for (size_t j = 0; j < segments.size(); ++j) {
             maybeAddPointOnSegment(seg, segments[j].a, epsilon, splitPoints);
             maybeAddPointOnSegment(seg, segments[j].b, epsilon, splitPoints);
         }
-        std::sort(splitPoints.begin(), splitPoints.end());
-        std::vector<SplitPoint> dedup = dedupSplitPoints(splitPoints, epsilon);
+        sortSplitPoints(splitPoints);
+        java::ArrayList<SplitPoint> dedup = dedupSplitPoints(splitPoints, epsilon);
         for (size_t j = 0; j + 1 < dedup.size(); ++j) {
             const Vertex2D& p0 = dedup[j].p;
             const Vertex2D& p1 = dedup[j + 1].p;
             if (samePoint(p0, p1, epsilon)) continue;
             EdgeKey key(p0, p1, epsilon);
             int delta = key.isForward(p0, epsilon) ? 1 : -1;
-            auto it = signedUsage.find(key);
-            if (it == signedUsage.end()) signedUsage[key] = delta;
-            else it->second += delta;
+            int* current = signedUsage.get(key);
+            if (current == 0) {
+                signedUsage.put(key, delta);
+            }
+            else {
+                *current += delta;
+            }
         }
     }
 }
 
 static int chooseNextEdge(
-    const std::vector<DirectedEdge>& edges, const std::vector<int>& candidates,
-    const std::unordered_set<int>& used, double prevDx, double prevDy)
+    const java::ArrayList<DirectedEdge>& edges, const java::ArrayList<int>& candidates,
+    const java::ArrayList<int>& used, double prevDx, double prevDy)
 {
     int selected = -1;
     double bestAngle = 1e308;
     for (size_t i = 0; i < candidates.size(); ++i) {
         int idx = candidates[i];
-        if (used.find(idx) != used.end()) continue;
+        if (containsIndex(used, idx)) continue;
         const DirectedEdge& e = edges[idx];
         double dx = e.end.x - e.start.x;
         double dy = e.end.y - e.start.y;
@@ -253,12 +298,12 @@ static int chooseNextEdge(
     return selected;
 }
 
-static std::vector<Vertex2D> traceLoop(
-    const std::vector<DirectedEdge>& edges, int startEdgeIndex,
-    const std::unordered_map<PointKey, std::vector<int>, PointKeyHasher>& outgoing,
-    std::unordered_set<int>& used, double epsilon)
+static java::ArrayList<Vertex2D> traceLoop(
+    const java::ArrayList<DirectedEdge>& edges, int startEdgeIndex,
+    const java::HashMap<PointKey, java::ArrayList<int> >& outgoing,
+    java::ArrayList<int>& used, double epsilon)
 {
-    std::vector<Vertex2D> loop;
+    java::ArrayList<Vertex2D> loop;
     const DirectedEdge& startEdge = edges[startEdgeIndex];
     Vertex2D start = startEdge.start;
     Vertex2D current = startEdge.end;
@@ -266,78 +311,80 @@ static std::vector<Vertex2D> traceLoop(
     double prevDy = startEdge.end.y - startEdge.start.y;
     int guard = static_cast<int>(edges.size()) * 2 + 4;
 
-    used.insert(startEdgeIndex);
-    loop.push_back(copyVertex(start));
-    loop.push_back(copyVertex(current));
+    used.add(startEdgeIndex);
+    loop.add(copyVertex(start));
+    loop.add(copyVertex(current));
 
     while (!samePoint(current, start, epsilon) && guard > 0) {
         PointKey key(current, epsilon);
-        auto it = outgoing.find(key);
         int nextEdge = -1;
-        if (it != outgoing.end()) {
-            nextEdge = chooseNextEdge(edges, it->second, used, prevDx, prevDy);
+        const java::ArrayList<int>* candidates = outgoing.get(key);
+        if (candidates != 0) {
+            nextEdge = chooseNextEdge(edges, *candidates, used, prevDx, prevDy);
         }
         if (nextEdge < 0) break;
-        used.insert(nextEdge);
+        used.add(nextEdge);
         const DirectedEdge& e = edges[nextEdge];
         prevDx = e.end.x - e.start.x;
         prevDy = e.end.y - e.start.y;
         current = e.end;
         if (!samePoint(current, start, epsilon)) {
-            loop.push_back(copyVertex(current));
+            loop.add(copyVertex(current));
         }
         guard--;
     }
-    if (loop.size() > 1 && samePoint(loop.front(), loop.back(), epsilon)) {
-        loop.pop_back();
+    if (loop.size() > 1 && samePoint(loop[0], loop[loop.size() - 1], epsilon)) {
+        loop.remove(loop.size() - 1);
     }
     return loop;
 }
 
-static std::vector<std::vector<Vertex2D>> extractLoopsFromBoundaryEdges(
-    const std::vector<DirectedEdge>& edges, double epsilon)
+static java::ArrayList< java::ArrayList<Vertex2D> > extractLoopsFromBoundaryEdges(
+    const java::ArrayList<DirectedEdge>& edges, double epsilon)
 {
-    std::unordered_map<PointKey, std::vector<int>, PointKeyHasher> outgoing;
-    std::unordered_set<int> used;
-    std::vector<std::vector<Vertex2D>> loops;
+    java::HashMap<PointKey, java::ArrayList<int> > outgoing;
+    java::ArrayList<int> used;
+    java::ArrayList< java::ArrayList<Vertex2D> > loops;
     for (size_t i = 0; i < edges.size(); ++i) {
         PointKey key(edges[i].start, epsilon);
-        outgoing[key].push_back(static_cast<int>(i));
+        addOutgoingIndex(outgoing, key, static_cast<int>(i));
     }
     for (size_t i = 0; i < edges.size(); ++i) {
-        if (used.find(static_cast<int>(i)) != used.end()) continue;
-        std::vector<Vertex2D> loop = traceLoop(edges, static_cast<int>(i), outgoing, used, epsilon);
-        if (loop.size() >= 3) loops.push_back(loop);
+        if (containsIndex(used, static_cast<int>(i))) continue;
+        java::ArrayList<Vertex2D> loop = traceLoop(edges, static_cast<int>(i), outgoing, used, epsilon);
+        if (loop.size() >= 3) loops.add(loop);
     }
     return loops;
 }
 
-static std::vector<std::vector<Vertex2D>> weldInternalEdges(
-    const std::vector<std::vector<Vertex2D>>& contours, double epsilon)
+static java::ArrayList< java::ArrayList<Vertex2D> > weldInternalEdges(
+    const java::ArrayList< java::ArrayList<Vertex2D> >& contours, double epsilon)
 {
-    std::vector<Segment2D> segments;
+    java::ArrayList<Segment2D> segments;
     for (size_t i = 0; i < contours.size(); ++i) {
-        const std::vector<Vertex2D>& contour = contours[i];
+        const java::ArrayList<Vertex2D>& contour = contours[i];
         for (size_t j = 0; j < contour.size(); ++j) {
             const Vertex2D& a = contour[j];
             const Vertex2D& b = contour[(j + 1) % contour.size()];
             if (samePoint(a, b, epsilon)) continue;
-            segments.push_back(Segment2D(copyVertex(a), copyVertex(b)));
+            segments.add(Segment2D(copyVertex(a), copyVertex(b)));
         }
     }
-    if (segments.empty()) return contours;
+    if (segments.size() == 0) return contours;
 
-    std::unordered_map<EdgeKey, int, EdgeKeyHasher> signedUsage;
+    java::HashMap<EdgeKey, int> signedUsage;
     splitAndAccumulateSegments(segments, epsilon, signedUsage);
 
-    std::vector<DirectedEdge> boundaryEdges;
-    for (auto it = signedUsage.begin(); it != signedUsage.end(); ++it) {
-        int balance = it->second;
-        if (balance == 0) continue;
-        if (balance > 0) boundaryEdges.push_back(DirectedEdge(it->first.a, it->first.b));
-        else boundaryEdges.push_back(DirectedEdge(it->first.b, it->first.a));
+    java::ArrayList<DirectedEdge> boundaryEdges;
+    for (size_t i = 0; i < segments.size(); ++i) {
+        const Segment2D& seg = segments[i];
+        EdgeKey key(seg.a, seg.b, epsilon);
+        const int* balance = signedUsage.get(key);
+        if (balance == 0 || *balance == 0) continue;
+        if (*balance > 0) boundaryEdges.add(DirectedEdge(key.a, key.b));
+        else boundaryEdges.add(DirectedEdge(key.b, key.a));
     }
-    if (boundaryEdges.empty()) return std::vector<std::vector<Vertex2D>>();
+    if (boundaryEdges.size() == 0) return java::ArrayList< java::ArrayList<Vertex2D> >();
     return extractLoopsFromBoundaryEdges(boundaryEdges, epsilon);
 }
 
@@ -346,11 +393,11 @@ void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon) { mergeInPlace(p
 void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon, double epsilon)
 {
     if (polygon == 0) return;
-    std::vector<std::vector<Vertex2D>> canonicalContours;
+    java::ArrayList< java::ArrayList<Vertex2D> > canonicalContours;
 
     for (long int i = 0; i < polygon->loops.size(); ++i) {
         _Polygon2DContour* contour = polygon->loops.get(i);
-        std::vector<Vertex2D> normalized = normalizeContour(contour, epsilon);
+        java::ArrayList<Vertex2D> normalized = normalizeContour(contour, epsilon);
         if (normalized.size() < 3) continue;
 
         bool duplicate = false;
@@ -360,7 +407,7 @@ void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon, double epsilon)
                 break;
             }
         }
-        if (!duplicate) canonicalContours.push_back(normalized);
+        if (!duplicate) canonicalContours.add(normalized);
     }
 
     canonicalContours = weldInternalEdges(canonicalContours, epsilon);
@@ -372,7 +419,7 @@ void PolygonTopologicalMerger::mergeInPlace(Polygon2D* polygon, double epsilon)
 
     for (size_t i = 0; i < canonicalContours.size(); ++i) {
         polygon->nextLoop();
-        const std::vector<Vertex2D>& contour = canonicalContours[i];
+        const java::ArrayList<Vertex2D>& contour = canonicalContours[i];
         for (size_t j = 0; j < contour.size(); ++j) {
             const Vertex2D& v = contour[j];
             polygon->addVertex(v.x, v.y, v.color.r(), v.color.g(), v.color.b());

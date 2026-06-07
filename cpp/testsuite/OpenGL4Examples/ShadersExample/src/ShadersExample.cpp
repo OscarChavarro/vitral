@@ -4,7 +4,6 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include <java/lang/Math.h>
-#include <stdexcept>
 #include <thread>
 #include <atomic>
 

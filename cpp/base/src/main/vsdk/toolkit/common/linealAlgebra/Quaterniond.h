@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_QUATERNIOND_H__
 
 
-#include <stdexcept>
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

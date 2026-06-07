@@ -26,7 +26,7 @@ add_library(vitral_opengl4 SHARED
 target_include_directories(vitral_opengl4 PUBLIC src/main)
 target_include_directories(vitral_opengl4 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../base/src/main)
 target_include_directories(vitral_opengl4 SYSTEM PUBLIC ${GLEW_INCLUDE_DIRS})
-target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL ${VITRAL_GLEW_LIB})
+target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL OpenGL::GLU ${VITRAL_GLEW_LIB})
 target_link_libraries(vitral_opengl4 PRIVATE vitral_base)
 
 if(APPLE)

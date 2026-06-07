@@ -2,12 +2,20 @@
 #define __VSDK_TOOLKIT_COMMON_VSDKFATALEXCEPTION_H__
 
 
-#include <stdexcept>
+#include <exception>
 #include "java/lang/String.h"
 
-class VSDKFatalException : public std::runtime_error {
+class VSDKFatalException : public std::exception {
+private:
+    java::String message_;
+
 public:
-    explicit VSDKFatalException(const java::String& message) : std::runtime_error(message.toCString()) {}
+    explicit VSDKFatalException(const java::String& message) : message_(message) {}
+
+    const char* what() const noexcept override
+    {
+        return message_.c_str();
+    }
 };
 
 

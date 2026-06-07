@@ -3,8 +3,9 @@
 
 #include <java/lang/Math.h>
 #include <atomic>
-#include <stdexcept>
 #include <thread>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "java/util/ArrayList.txx"
 #if defined(_SC_NPROCESSORS_ONLN)
 #include <unistd.h>
@@ -58,7 +59,8 @@ SoftwareRaycaster::SoftwareRaycaster()
             delete bumpNormalMap;
             bumpNormalMap = 0;
         }
-        throw std::runtime_error("Failed loading software bump map");
+        Logger::reportMessage("SoftwareRaycaster", Logger::ERROR, "SoftwareRaycaster", "Failed loading software bump map");
+        throw VSDKFatalException("Failed loading software bump map");
     }
 }
 

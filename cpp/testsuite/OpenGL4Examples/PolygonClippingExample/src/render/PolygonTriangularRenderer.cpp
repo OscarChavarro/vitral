@@ -1,7 +1,5 @@
 #include "render/PolygonTriangularRenderer.h"
 
-#include <stdexcept>
-
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"

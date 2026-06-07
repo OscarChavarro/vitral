@@ -1,9 +1,5 @@
 #include "vsdk/toolkit/render/HiddenLineRenderer.h"
 
-#include <algorithm>
-#include <deque>
-#include <vector>
-
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -89,6 +85,23 @@ double evaluateClipPlane(const double plane[4], const Vector4Dd& point)
 Vector4Dd interpolate(const Vector4Dd& start, const Vector4Dd& end, double t)
 {
     return start.multiply(1.0 - t).add(end.multiply(t));
+}
+
+void sortAppelEdgeSegments(java::ArrayList<AppelEdgeSegment>& segments)
+{
+    for (size_t i = 1; i < segments.size(); ++i) {
+        AppelEdgeSegment key = segments[i];
+        size_t j = i;
+        while (j > 0) {
+            const AppelEdgeSegment& prev = segments[j - 1];
+            if (prev.t <= key.t + VSDK::EPSILON) {
+                break;
+            }
+            segments[j] = prev;
+            --j;
+        }
+        segments[j] = key;
+    }
 }
 
 bool clipLineToClipVolume(
@@ -279,8 +292,8 @@ int isFaceVisibleFromCameraTransformed(
 void buildCache(
     java::ArrayList<SimpleBody*>& solids,
     SimpleBody* body,
-    std::deque<AppelEdgeCache>& cache,
-    std::vector<AppelEdgeCache*>& contourCache,
+    java::ArrayList<AppelEdgeCache>& cache,
+    java::ArrayList<AppelEdgeCache*>& contourCache,
     const Camera* camera)
 {
     if ( body == 0 || body->getGeometry() == 0 ) {
@@ -327,8 +340,8 @@ void buildCache(
         bool f1 = isFaceVisibleFromCameraTransformed(face1, body, camera) >= 0;
         bool f2 = isFaceVisibleFromCameraTransformed(face2, body, camera) >= 0;
 
-        cache.push_back(AppelEdgeCache());
-        AppelEdgeCache& materialLine = cache.back();
+        cache.add(AppelEdgeCache());
+        AppelEdgeCache& materialLine = cache[cache.size() - 1];
         materialLine.setStart(startPosition);
         materialLine.setEnd(endPosition);
         materialLine.d = endPosition.subtract(startPosition);
@@ -343,7 +356,7 @@ void buildCache(
             materialLine.edgeType = AppelEdgeCache::CONTOUR_LINE;
             materialLine.visibleEdgeForContourLine = f1 ? face1 : face2;
             materialLine.visibleEdgeBody = body;
-            contourCache.push_back(&materialLine);
+            contourCache.add(&materialLine);
         }
         else {
             materialLine.edgeType = AppelEdgeCache::VISIBLE_LINE;
@@ -361,17 +374,17 @@ void processLineToBeDrawn(
     Calligraphic2DBuffer* outVisibleContourLineSet,
     Calligraphic2DBuffer* outVisibleNonContourLineSet,
     Calligraphic2DBuffer* outHiddenLineSet,
-    std::vector<AppelEdgeCache*>& contourCache)
+    java::ArrayList<AppelEdgeCache*>& contourCache)
 {
     Vector3Dd sp1a = inEdge.start;
     Vector3Dd sp1b = inEdge.end;
     Vector3Dd sp1c = inCamera->getPosition();
     Vector3Dd sp2c = inCamera->getPosition();
 
-    std::vector<AppelEdgeSegment> segments;
-    segments.push_back(AppelEdgeSegment());
+    java::ArrayList<AppelEdgeSegment> segments;
+    segments.add(AppelEdgeSegment());
 
-    for ( size_t i = 0; i < contourCache.size(); i++ ) {
+    for ( long int i = 0; i < contourCache.size(); i++ ) {
         AppelEdgeCache* cl = contourCache[i];
         if ( cl == 0 || cl == &inEdge ) {
             continue;
@@ -409,7 +422,7 @@ void processLineToBeDrawn(
                         segment.deltaQI =
                             (pos == Geometry::INSIDE || pos == Geometry::LIMIT) ?
                             1 : -1;
-                        segments.push_back(segment);
+        segments.add(segment);
                         delete contourHit;
                     }
                     delete contourPlane;
@@ -422,18 +435,13 @@ void processLineToBeDrawn(
 
     AppelEdgeSegment endSegment;
     endSegment.t = 1.0;
-    segments.push_back(endSegment);
+    segments.add(endSegment);
 
-    std::sort(segments.begin(), segments.end(),
-        [](const AppelEdgeSegment& a, const AppelEdgeSegment& b) {
-            if ( a.t < b.t - VSDK::EPSILON ) return true;
-            if ( a.t > b.t + VSDK::EPSILON ) return false;
-            return false;
-        });
+    sortAppelEdgeSegments(segments);
 
-    for ( size_t i = 0; i + 1 < segments.size(); ) {
+    for ( long int i = 0; i + 1 < segments.size(); ) {
         if ( segments[i].samePosition(segments[i + 1]) ) {
-            segments.erase(segments.begin() + static_cast<long>(i));
+            segments.remove(i);
         }
         else {
             i++;
@@ -539,8 +547,8 @@ void HiddenLineRenderer::executeAppelAlgorithm(
         return;
     }
 
-    std::deque<AppelEdgeCache> cache;
-    std::vector<AppelEdgeCache*> contourCache;
+    java::ArrayList<AppelEdgeCache> cache;
+    java::ArrayList<AppelEdgeCache*> contourCache;
     java::ArrayList<SimpleBody*> solids;
 
     for ( long int i = 0; i < inSimpleBodyArray.size(); i++ ) {
@@ -548,7 +556,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
             inCamera);
     }
 
-    for ( size_t i = 0; i < cache.size(); i++ ) {
+    for ( long int i = 0; i < cache.size(); i++ ) {
         AppelEdgeCache& edge = cache[i];
         switch ( edge.edgeType ) {
           case AppelEdgeCache::HIDDEN_LINE:

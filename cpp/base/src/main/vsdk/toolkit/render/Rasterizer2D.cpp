@@ -8,9 +8,9 @@
 #include "java/util/ArrayList.txx"
 
 #include "java/lang/Math.h"
-#include <algorithm>
 #include <cmath>
-#include <stdexcept>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 
 static void quicksortDoubles(double* array, int left0, int right0)
 {
@@ -27,7 +27,8 @@ static void quicksortDoubles(double* array, int left0, int right0)
         do {
             right--;
             if (right < 0) {
-                throw std::out_of_range("quicksort span underflow");
+                Logger::reportMessage("Rasterizer2D", Logger::ERROR, "quicksortDoubles", "quicksort span underflow");
+                throw VSDKFatalException("quicksort span underflow");
             }
         } while (array[right] > pivot);
         if (left < right) {
@@ -55,6 +56,29 @@ static void sortDoubles(java::ArrayList<double>& arr)
         return;
     }
     quicksortDoubles(arr.data(), 0, static_cast<int>(arr.size()) - 1);
+}
+
+void Rasterizer2D::sortFillEdges(java::ArrayList<FillEdge>& edges)
+{
+    for (size_t i = 1; i < edges.size(); ++i) {
+        FillEdge key = edges[i];
+        size_t j = i;
+        while (j > 0) {
+            const FillEdge& prev = edges[j - 1];
+            bool shouldMove =
+                prev.xAtCurrentY > key.xAtCurrentY ||
+                (prev.xAtCurrentY == key.xAtCurrentY &&
+                    (prev.inverseSlope > key.inverseSlope ||
+                        (prev.inverseSlope == key.inverseSlope &&
+                            prev.sortOrder > key.sortOrder)));
+            if (!shouldMove) {
+                break;
+            }
+            edges[j] = prev;
+            --j;
+        }
+        edges[j] = key;
+    }
 }
 
 void Rasterizer2D::drawLine(Image* img, int x0, int y0, int x1, int y1, const RGBPixel& p)
@@ -140,7 +164,7 @@ int Rasterizer2D::clamp(int value, int minValue, int maxValue)
     return value;
 }
 
-void Rasterizer2D::addFillEdge(std::vector<std::vector<FillEdge> >& buckets,
+void Rasterizer2D::addFillEdge(java::ArrayList< java::ArrayList<FillEdge> >& buckets,
     const Vertex2D& a, const Vertex2D& b, int imageHeight, int yRange[2],
     int sortOrder)
 {
@@ -185,9 +209,13 @@ void Rasterizer2D::addFillEdge(std::vector<std::vector<FillEdge> >& buckets,
     edge.xAtCurrentY = top->x + (((double)clippedYMin) - top->y) * inverseSlope;
     edge.sortOrder = sortOrder;
 
-    buckets[clippedYMin].push_back(edge);
-    yRange[0] = std::min(yRange[0], clippedYMin);
-    yRange[1] = std::max(yRange[1], clippedYMaxExclusive);
+    buckets[clippedYMin].add(edge);
+    if (clippedYMin < yRange[0]) {
+        yRange[0] = clippedYMin;
+    }
+    if (clippedYMaxExclusive > yRange[1]) {
+        yRange[1] = clippedYMaxExclusive;
+    }
 }
 
 void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
@@ -200,7 +228,10 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
         return;
     }
 
-    std::vector<std::vector<FillEdge> > buckets(imageHeight);
+    java::ArrayList< java::ArrayList<FillEdge> > buckets(imageHeight);
+    for (int i = 0; i < imageHeight; i++) {
+        buckets.add(java::ArrayList<FillEdge>());
+    }
     int yRange[2] = {imageHeight, 0};
     int sortOrder = 0;
 
@@ -223,17 +254,17 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
         return;
     }
 
-    std::vector<FillEdge> activeEdges;
+    java::ArrayList<FillEdge> activeEdges;
 
     for (int y = yRange[0]; y < yRange[1]; y++) {
-        std::vector<FillEdge>& bucket = buckets[y];
-        if (!bucket.empty()) {
-            activeEdges.insert(activeEdges.end(), bucket.begin(), bucket.end());
+        java::ArrayList<FillEdge>& bucket = buckets[y];
+        for (long int i = 0; i < bucket.size(); i++) {
+            activeEdges.add(bucket[i]);
         }
 
         for (int i = (int)activeEdges.size() - 1; i >= 0; i--) {
             if (y >= activeEdges[(size_t)i].yMaxExclusive) {
-                activeEdges.erase(activeEdges.begin() + i);
+                activeEdges.remove(i);
             }
         }
 
@@ -244,23 +275,16 @@ void Rasterizer2D::rasterizePolygonSpans(Image* img, Polygon2D& polygon,
             continue;
         }
 
-        std::sort(activeEdges.begin(), activeEdges.end(),
-            [](const FillEdge& a, const FillEdge& b) {
-                if (a.xAtCurrentY != b.xAtCurrentY) {
-                    return a.xAtCurrentY < b.xAtCurrentY;
-                }
-                if (a.inverseSlope != b.inverseSlope) {
-                    return a.inverseSlope < b.inverseSlope;
-                }
-                return a.sortOrder < b.sortOrder;
-            });
+        sortFillEdges(activeEdges);
 
         for (size_t i = 0; i + 1 < activeEdges.size(); i += 2) {
             double xLeft = activeEdges[i].xAtCurrentY;
             double xRight = activeEdges[i + 1].xAtCurrentY;
 
             if (xLeft > xRight) {
-                std::swap(xLeft, xRight);
+                double tmp = xLeft;
+                xLeft = xRight;
+                xRight = tmp;
             }
 
             int xStart = (int)std::ceil(xLeft);

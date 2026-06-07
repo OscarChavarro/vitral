@@ -1,4 +1,5 @@
 #include "jackson/databind/JsonNode.h"
+#include "java/util/ArrayList.txx"
 
 namespace jackson {
 namespace databind {
@@ -33,25 +34,23 @@ long JsonNode::size() const {
 
 const JsonNode* JsonNode::get(long index) const {
     if (!isArray()) return nullptr;
-    if (index < 0 || static_cast<size_t>(index) >= arrayValue_.size()) return nullptr;
-    return &arrayValue_[static_cast<size_t>(index)];
+    if (index < 0 || index >= arrayValue_.size()) return nullptr;
+    return &arrayValue_[index];
 }
 
 const JsonNode* JsonNode::get(const java::String& key) const {
     if (!isObject()) return nullptr;
-    std::map<std::string, JsonNode>::const_iterator it = objectValue_.find(std::string(key.c_str()));
-    if (it == objectValue_.end()) return nullptr;
-    return &it->second;
+    return objectValue_.get(key);
 }
 
 void JsonNode::add(const JsonNode& value) {
     if (!isArray()) return;
-    arrayValue_.push_back(value);
+    arrayValue_.add(value);
 }
 
 void JsonNode::put(const java::String& key, const JsonNode& value) {
     if (!isObject()) return;
-    objectValue_[std::string(key.c_str())] = value;
+    objectValue_.put(key, value);
 }
 
 }

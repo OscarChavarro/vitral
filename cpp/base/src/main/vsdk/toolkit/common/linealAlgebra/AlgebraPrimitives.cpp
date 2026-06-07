@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <stdexcept>
 
 Vector2Df::Vector2Df(const Vector2Dd& other) : x_((float)other.x), y_((float)other.y) {}
 

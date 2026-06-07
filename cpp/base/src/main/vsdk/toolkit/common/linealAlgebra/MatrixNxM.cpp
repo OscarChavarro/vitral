@@ -2,9 +2,10 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
 #include <cstdio>
 
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/linealAlgebra/processing/LinearAlgebraEngine.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -185,7 +186,10 @@ bool MatrixNxM::epsilonEquals(const MatrixNxM& other) const { return epsilonEqua
 
 bool MatrixNxM::epsilonEquals(const MatrixNxM& other, double epsilon) const
 {
-    if ( epsilon < 0.0 ) throw std::invalid_argument("epsilon must be >= 0");
+    if ( epsilon < 0.0 ) {
+        Logger::reportMessage("MatrixNxM", Logger::ERROR, "epsilonEquals", "epsilon must be >= 0");
+        throw VSDKFatalException("epsilon must be >= 0");
+    }
     if ( numRows_ != other.numRows_ || numColumns_ != other.numColumns_ ) return false;
     for ( int i = 0; i < numRows_ * numColumns_; ++i ) {
         if ( std::abs(m_[i] - other.m_[i]) > epsilon ) return false;
