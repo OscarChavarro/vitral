@@ -6,7 +6,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.Rasterizer2D;
+import vsdk.toolkit.render.raster.Rasterizer2D;
 
 public class LineTest
 {

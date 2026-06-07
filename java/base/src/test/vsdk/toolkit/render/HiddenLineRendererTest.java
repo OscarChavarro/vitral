@@ -11,6 +11,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

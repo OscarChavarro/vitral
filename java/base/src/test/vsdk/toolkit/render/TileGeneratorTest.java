@@ -5,6 +5,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.raytracing.RasterTileArea;
+import vsdk.toolkit.render.raytracing.RasterTileGenerationStrategy;
+import vsdk.toolkit.render.raytracing.RasterTileGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,15 +20,15 @@ class TileGeneratorTest
         RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(10, 6);
 
-        TileGenerator generator = new TileGenerator(
-            TileGenerationStrategy.SERIAL, image, 10, 6, 4);
+        RasterTileGenerator generator = new RasterTileGenerator(
+            RasterTileGenerationStrategy.SERIAL, image, 10, 6, 4);
 
         // Action
-        List<Tile> tiles = generator.getTiles();
+        List<RasterTileArea> tiles = generator.getTiles();
 
         // Assert
         assertThat(tiles).hasSize(1);
-        Tile tile = tiles.get(0);
+        RasterTileArea tile = tiles.get(0);
         assertThat(tile.getImage()).isSameAs(image);
         assertThat(tile.getX0()).isEqualTo(0);
         assertThat(tile.getY0()).isEqualTo(0);
@@ -42,11 +45,11 @@ class TileGeneratorTest
         RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(8, 7);
 
-        TileGenerator generator = new TileGenerator(
-            TileGenerationStrategy.LINEAR, image, 8, 7, 3);
+        RasterTileGenerator generator = new RasterTileGenerator(
+            RasterTileGenerationStrategy.LINEAR, image, 8, 7, 3);
 
         // Action
-        List<Tile> tiles = generator.getTiles();
+        List<RasterTileArea> tiles = generator.getTiles();
 
         // Assert
         assertThat(tiles).hasSize(3);
@@ -73,11 +76,11 @@ class TileGeneratorTest
         RGBImageUncompressed image = new RGBImageUncompressed();
         image.init(20, 20);
 
-        TileGenerator generator = new TileGenerator(
-            TileGenerationStrategy.SERIAL, image, 4, 6, 9, 5, 1);
+        RasterTileGenerator generator = new RasterTileGenerator(
+            RasterTileGenerationStrategy.SERIAL, image, 4, 6, 9, 5, 1);
 
         // Action
-        Tile tile = generator.getTiles().get(0);
+        RasterTileArea tile = generator.getTiles().get(0);
 
         // Assert
         assertThat(tile.getImage()).isSameAs(image);

@@ -12,7 +12,7 @@ import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
 import vsdk.toolkit.io.image.ImagePersistence;
-import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
+import vsdk.toolkit.render.hiddenLine.WireframeRenderer;           // Processing elements
 
 /**
 This example program is the most fundamental computer graphics example in

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.raytracing;
 import vsdk.toolkit.render.shaders.Shader;
 
 final class RenderContext {

@@ -30,7 +30,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
-import vsdk.toolkit.render.HiddenLineRenderer;
+import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
 
 public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
 {

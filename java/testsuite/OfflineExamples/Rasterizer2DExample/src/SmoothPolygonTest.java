@@ -10,7 +10,7 @@ import java.io.File;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
-import vsdk.toolkit.render.Rasterizer2D;
+import vsdk.toolkit.render.raster.Rasterizer2D;
 import vsdk.toolkit.io.image.ImagePersistence;
 
 public class SmoothPolygonTest

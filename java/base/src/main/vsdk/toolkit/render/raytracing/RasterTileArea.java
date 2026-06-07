@@ -1,4 +1,4 @@
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.raytracing;
 
 import vsdk.toolkit.media.Image;
 
@@ -10,7 +10,7 @@ target image. Rendering code must iterate from x0 to x1 and y0 to y1, and
 write directly to the target image at those absolute coordinates. The width
 and height values are extents, not a local coordinate system.
 */
-public class Tile
+public class RasterTileArea
 {
     private final Image image;
     private final int x0;
@@ -18,7 +18,7 @@ public class Tile
     private final int dx;
     private final int dy;
 
-    public Tile(Image image, int x0, int y0, int dx, int dy)
+    public RasterTileArea(Image image, int x0, int y0, int dx, int dy)
     {
         if ( image == null ) {
             throw new IllegalArgumentException("image can not be null");

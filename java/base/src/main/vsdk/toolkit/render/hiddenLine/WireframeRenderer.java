@@ -3,7 +3,7 @@
 //=          principles and practice" - second edition, Addison Wesley,     =
 //=          1992.                                                          =
 
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.hiddenLine;
 
 // Java classes
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.render.RenderingElement;
 
 public class WireframeRenderer extends RenderingElement
 {

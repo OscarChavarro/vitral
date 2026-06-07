@@ -16,7 +16,7 @@ import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
-import vsdk.toolkit.render.SimpleRaytracer;
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 
 class VitralVisualizationServerProtocol implements Runnable
 {

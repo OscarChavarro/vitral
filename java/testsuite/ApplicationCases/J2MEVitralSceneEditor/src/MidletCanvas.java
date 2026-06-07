@@ -33,8 +33,8 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.render.j2me.J2meRGBImageUncompressedRenderer;   // View elements
 import vsdk.toolkit.render.j2me.J2meCalligraphic2DBufferRenderer;
-import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
-import vsdk.toolkit.render.SimpleRaytracer;
+import vsdk.toolkit.render.hiddenLine.WireframeRenderer;           // Processing elements
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 import vsdk.toolkit.gui.J2meSystem;                     // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;

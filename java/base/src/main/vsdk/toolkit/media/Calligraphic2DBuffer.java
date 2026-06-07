@@ -3,7 +3,7 @@ import java.io.Serial;
 
 import vsdk.toolkit.common.dataStructures.ArrayListOfDoubles;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.render.Rasterizer2D;
+import vsdk.toolkit.render.raster.Rasterizer2D;
 
 /**
 The Calligraphic2DBuffer class represents a set of elements suitable for a

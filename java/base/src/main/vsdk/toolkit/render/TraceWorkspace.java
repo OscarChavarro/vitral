@@ -6,12 +6,12 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 public final class TraceWorkspace {
     public static final int DEFAULT_MAX_RECURSION_LEVEL = 8;
 
-    final RayHit traversalCandidateHit;
-    final RayHit nearestHit;
-    final RayHit shadowCandidateHit;
-    final RayHit[] reflectionHits;
-    final RayHit[] shadingHits;
-    final ColorRgb[] reflectionColors;
+    public final RayHit traversalCandidateHit;
+    public final RayHit nearestHit;
+    public final RayHit shadowCandidateHit;
+    public final RayHit[] reflectionHits;
+    public final RayHit[] shadingHits;
+    public final ColorRgb[] reflectionColors;
 
     public TraceWorkspace()
     {

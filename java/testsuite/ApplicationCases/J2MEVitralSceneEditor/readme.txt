@@ -52,9 +52,9 @@ source tree:
 ./vsdk/toolkit/common/VSDKException.java
 ./vsdk/toolkit/render/j2me/J2meRGBImageRenderer.java
 ./vsdk/toolkit/render/j2me/J2meCalligraphic2DBufferRenderer.java
-./vsdk/toolkit/render/SimpleRaytracer.java
+./vsdk/toolkit/render/raytracing/SimpleRaytracer.java
 ./vsdk/toolkit/render/RenderingElement.java
-./vsdk/toolkit/render/WireframeRenderer.java
+./vsdk/toolkit/render/hiddenLine/WireframeRenderer.java
 ./vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/_PolyhedralBoundedSolidEdge.java
 ./vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/_PolyhedralBoundedSolidLoop.java
 ./vsdk/toolkit/environment/geometry/polyhedralBoundedSolidNodes/_PolyhedralBoundedSolidVertex.java

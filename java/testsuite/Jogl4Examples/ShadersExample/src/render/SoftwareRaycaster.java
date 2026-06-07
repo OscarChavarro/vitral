@@ -29,10 +29,10 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.render.SimpleRaytracer;
-import vsdk.toolkit.render.Tile;
-import vsdk.toolkit.render.TileGenerationStrategy;
-import vsdk.toolkit.render.TileGenerator;
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
+import vsdk.toolkit.render.raytracing.RasterTileArea;
+import vsdk.toolkit.render.raytracing.RasterTileGenerationStrategy;
+import vsdk.toolkit.render.raytracing.RasterTileGenerator;
 
 public class SoftwareRaycaster
 {
@@ -69,14 +69,14 @@ public class SoftwareRaycaster
             activeCamera,
             modelRotation,
             outputImage);
-        TileGenerator tileGenerator = new TileGenerator(
-            TileGenerationStrategy.LINEAR,
+        RasterTileGenerator tileGenerator = new RasterTileGenerator(
+            RasterTileGenerationStrategy.LINEAR,
             outputImage,
             outputImage.getXSize(),
             outputImage.getYSize(),
             numberOfThreads);
-        ConcurrentLinkedQueue<Tile> pendingTiles =
-            new ConcurrentLinkedQueue<Tile>(tileGenerator.getTiles());
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles =
+            new ConcurrentLinkedQueue<RasterTileArea>(tileGenerator.getTiles());
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
 
         try {
@@ -171,7 +171,7 @@ public class SoftwareRaycaster
     }
 
     private record TileWorker(
-        ConcurrentLinkedQueue<Tile> pendingTiles,
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
         RGBImageUncompressed resultingImage,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot)
@@ -180,7 +180,7 @@ public class SoftwareRaycaster
         @Override
         public Void call()
         {
-            Tile tile;
+            RasterTileArea tile;
             SimpleRaytracer raytracer = new SimpleRaytracer();
             while ( (tile = pendingTiles.poll()) != null ) {
                 raytracer.execute(

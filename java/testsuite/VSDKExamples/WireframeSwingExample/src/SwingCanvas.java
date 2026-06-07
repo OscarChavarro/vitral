@@ -28,8 +28,8 @@ import vsdk.toolkit.media.Calligraphic2DBuffer;         // I/O artifacts
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;     // View elements
 import vsdk.toolkit.render.awt.AwtCalligraphic2DBufferRenderer;
-import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
-import vsdk.toolkit.render.SimpleRaytracer;
+import vsdk.toolkit.render.hiddenLine.WireframeRenderer;           // Processing elements
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 import vsdk.toolkit.gui.AwtSystem;                      // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;

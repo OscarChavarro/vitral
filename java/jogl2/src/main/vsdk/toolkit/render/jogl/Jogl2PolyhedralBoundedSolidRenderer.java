@@ -18,7 +18,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
-import vsdk.toolkit.render.HiddenLineRenderer;
+import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
 
 public class Jogl2PolyhedralBoundedSolidRenderer extends Jogl2Renderer
 {

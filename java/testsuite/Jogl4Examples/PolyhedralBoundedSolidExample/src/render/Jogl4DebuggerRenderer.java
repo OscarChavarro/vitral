@@ -22,7 +22,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.render.HiddenLineRenderer;
+import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;

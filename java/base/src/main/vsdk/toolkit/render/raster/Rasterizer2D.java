@@ -4,7 +4,7 @@
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.raster;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +17,7 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
+import vsdk.toolkit.render.RenderingElement;
 
 public class Rasterizer2D extends RenderingElement
 {

@@ -11,7 +11,7 @@
 //=   for inclusion of sub-viewport spec.                                   =
 //=   sub-materials inside geometry.                                         =
 
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.raytracing;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.List;
@@ -37,6 +37,8 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitor;
 import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.render.RenderingElement;
+import vsdk.toolkit.render.TraceWorkspace;
 import vsdk.toolkit.render.shaders.Shader;
 import vsdk.toolkit.render.shaders.ShaderSelector;
 
@@ -54,8 +56,8 @@ public class SimpleRaytracer extends RenderingElement {
     private static final double TINY = 0.0001;
     private static final int MAX_RECURSION_LEVEL =
         TraceWorkspace.DEFAULT_MAX_RECURSION_LEVEL;
-    private static final TileGenerationStrategy TILE_STRATEGY =
-        TileGenerationStrategy.SERIAL;
+    private static final RasterTileGenerationStrategy TILE_STRATEGY =
+        RasterTileGenerationStrategy.SERIAL;
     private static final int TILE_WORKERS_HINT = 1;
 
     private final ThreadLocal<TraceWorkspace> traceWorkspace =
@@ -627,15 +629,15 @@ public class SimpleRaytracer extends RenderingElement {
             new SceneRenderCache(inSimpleBodiesArray, renderContext);
         TraceWorkspace workspace = traceWorkspace.get();
         long[] initialBodyVersions = captureBodyVersions(inSimpleBodiesArray);
-        TileGenerator tileGenerator = new TileGenerator(
+        RasterTileGenerator tileGenerator = new RasterTileGenerator(
             TILE_STRATEGY,
             inoutViewport,
             limx1, limy1,
             limx2 - limx1, limy2 - limy1,
             TILE_WORKERS_HINT);
-        ConcurrentLinkedQueue<Tile> pendingTiles =
-            new ConcurrentLinkedQueue<Tile>(tileGenerator.getTiles());
-        Tile tile;
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles =
+            new ConcurrentLinkedQueue<RasterTileArea>(tileGenerator.getTiles());
+        RasterTileArea tile;
 
         if ( liveReport != null ) {
             liveReport.begin();

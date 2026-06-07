@@ -33,7 +33,7 @@ import vsdk.toolkit.gui.CameraController;               // Interaction
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence; // Persistence elements
-import vsdk.toolkit.render.WireframeRenderer;           // Processing elements
+import vsdk.toolkit.render.hiddenLine.WireframeRenderer;           // Processing elements
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;     // View elements
 import vsdk.toolkit.render.jogl.Jogl2Calligraphic2DBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;

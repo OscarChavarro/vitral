@@ -14,10 +14,10 @@ import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorConsumer;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorEvent;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorProducer;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.render.SimpleRaytracer;
-import vsdk.toolkit.render.Tile;
-import vsdk.toolkit.render.TileGenerationStrategy;
-import vsdk.toolkit.render.TileGenerator;
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
+import vsdk.toolkit.render.raytracing.RasterTileArea;
+import vsdk.toolkit.render.raytracing.RasterTileGenerationStrategy;
+import vsdk.toolkit.render.raytracing.RasterTileGenerator;
 
 final class RaytracerParallelExecutor implements RaytracerExecutor {
     @Override
@@ -28,16 +28,16 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
                     ProgressMonitor reporter)
     {
         int numberOfThreads = Runtime.getRuntime().availableProcessors();
-        TileGenerator tileGenerator = new TileGenerator(
-            TileGenerationStrategy.LINEAR,
+        RasterTileGenerator tileGenerator = new RasterTileGenerator(
+            RasterTileGenerationStrategy.LINEAR,
             resultingImage,
             resultingImage.getXSize(),
             resultingImage.getYSize(),
             numberOfThreads);
         System.out.println(
             "Starting parallel raytracing with " + numberOfThreads + " threads.");
-        List<Tile> generatedTiles = tileGenerator.getTiles();
-        ConcurrentLinkedQueue<Tile> pendingTiles =
+        List<RasterTileArea> generatedTiles = tileGenerator.getTiles();
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles =
             new ConcurrentLinkedQueue<>(generatedTiles);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents =
@@ -81,11 +81,11 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         }
     }
 
-    private long calculateTotalProgressElements(List<Tile> generatedTiles)
+    private long calculateTotalProgressElements(List<RasterTileArea> generatedTiles)
     {
         long totalElements = 0;
 
-        for ( Tile tile : generatedTiles ) {
+        for ( RasterTileArea tile : generatedTiles ) {
             totalElements += tile.getDy();
         }
         return totalElements;
@@ -94,7 +94,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
     private List<Future<Void>> startWorkers(
         ExecutorService executorService,
         int numberOfThreads,
-        ConcurrentLinkedQueue<Tile> pendingTiles,
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
         RGBImageUncompressed resultingImage,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot,
@@ -115,7 +115,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
     }
 
     private void awaitWorkers(
-        ConcurrentLinkedQueue<Tile> pendingTiles,
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
         List<Future<Void>> futures)
         throws InterruptedException, ExecutionException
     {
@@ -128,7 +128,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
     }
 
     private record TileWorker(
-        ConcurrentLinkedQueue<Tile> pendingTiles,
+        ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
         RGBImageUncompressed resultingImage,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot,
@@ -138,7 +138,7 @@ final class RaytracerParallelExecutor implements RaytracerExecutor {
         @Override
         public Void call()
         {
-            Tile tile;
+            RasterTileArea tile;
             SimpleRaytracer raytracer = new SimpleRaytracer();
 
             while ( (tile = pendingTiles.poll()) != null ) {

@@ -25,7 +25,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.render.SimpleRaytracer;
+import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 
 // Application classes
 import application.render.jogl.SimpleCorridor;

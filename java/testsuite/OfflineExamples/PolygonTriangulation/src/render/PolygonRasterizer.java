@@ -6,7 +6,7 @@ import vsdk.toolkit.environment.geometry.surface.polygon.Polygon2D;
 import vsdk.toolkit.environment.geometry.surface.polygon._Polygon2DContour;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBPixel;
-import vsdk.toolkit.render.Rasterizer2D;
+import vsdk.toolkit.render.raster.Rasterizer2D;
 
 public class PolygonRasterizer
 {

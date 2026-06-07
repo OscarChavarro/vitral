@@ -6,7 +6,7 @@
 //=          the machine rendering of solids". Proceedings, ACM National    =
 //=          meeting 1967.                                                  =
 
-package vsdk.toolkit.render;
+package vsdk.toolkit.render.hiddenLine;
 
 // Java classes
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
+import vsdk.toolkit.render.RenderingElement;
 
 class _AppelEdgeSegment extends RenderingElement implements Comparable <_AppelEdgeSegment>
 {
