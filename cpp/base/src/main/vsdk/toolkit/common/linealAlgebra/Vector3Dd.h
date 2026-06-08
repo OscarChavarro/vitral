@@ -29,6 +29,15 @@ public:
     static inline Vector3Dd copyOf(const Vector3Dd& other) { return Vector3Dd(other); }
 
     inline Vector3Dd multiply(double a) const { return Vector3Dd(a * x_, a * y_, a * z_); }
+    inline Vector3Dd multiply(const Vector3Dd& other) const
+    {
+        return Vector3Dd(x_ * other.x_, y_ * other.y_, z_ * other.z_);
+    }
+    inline Vector3Dd midpoint(const Vector3Dd& other) const
+    {
+        return Vector3Dd(
+            0.5 * (x_ + other.x_), 0.5 * (y_ + other.y_), 0.5 * (z_ + other.z_));
+    }
     inline Vector3Dd crossProduct(const Vector3Dd& other) const
     {
         return Vector3Dd(
@@ -49,6 +58,11 @@ public:
             t = 1.0 / std::sqrt(t);
         }
         return Vector3Dd(x_ * t, y_ * t, z_ * t);
+    }
+    inline Vector3Dd normalizedFast() const
+    {
+        const double vTemp = std::sqrt(x_*x_ + y_*y_ + z_*z_);
+        return Vector3Dd(x_ / vTemp, y_ / vTemp, z_ / vTemp);
     }
     inline double length() const { return std::sqrt(x_ * x_ + y_ * y_ + z_ * z_); }
     inline Vector3Dd add(const Vector3Dd& b) const
