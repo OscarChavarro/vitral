@@ -1,20 +1,12 @@
 package vsdk.toolkit.media;
 import java.io.Serial;
 
-// Note that on (old or incomplete) Java implementations as such those found
-// on mobile devices, this class can be disabled, by commenting out following
-// line and all dependant methods, and using the basic version of this class
-// (not the direct buffer optimized).
 import java.nio.ByteBuffer;
 
-//#define WITH_JAVA_DIRECT_BUFFERS
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import vsdk.toolkit.io.PersistenceElement;
-//#endif
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
@@ -42,13 +34,7 @@ public class RGBAImageUncompressed extends Image
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20060502L;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//    private byte data[];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
     transient private ByteBuffer data;
-//#endif
 
     private int xSize;
     private int ySize;
@@ -95,24 +81,11 @@ public class RGBAImageUncompressed extends Image
     public boolean init(int width, int height)
     {
         try {
-
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//          data = new byte[width * height * 4];
-//          for ( int i = 0; i < width*height*4; i++ ) {
-//              data[i] = 0;
-//          }
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
-          //byte arr[] = new byte[width * height * 4];
-          //data = ByteBuffer.wrap(arr);
           data = ByteBuffer.allocateDirect(width * height * 4);
           data.rewind();
           for ( int i = 0; i < width*height*4; i++ ) {
               data.put((byte)0);
           }
-//#endif
-
         }
         catch (Exception e) {
           data = null;
@@ -141,18 +114,8 @@ public class RGBAImageUncompressed extends Image
         }
 
         try {
-
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//          data = new byte[width * height * 4];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
-          //byte arr[] = new byte[width * height * 4];
-          //data = ByteBuffer.wrap(arr);
           data = ByteBuffer.allocateDirect(width * height * 4);
           data.rewind();
-//#endif
-
         }
         catch (Exception e) {
           data = null;
@@ -177,60 +140,29 @@ public class RGBAImageUncompressed extends Image
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        data[index] = r;
-//        data[index+1] = g;
-//        data[index+2] = b;
-//        data[index+3] = (byte)-1;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         data.put(index, r);
         data.put(index+1, g);
         data.put(index+2, b);
         data.put(index+3, (byte)-1);
-//#endif
-
     }
     
     public void putPixel(int x, int y, byte r, byte g, byte b, byte a)
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        data[index] = r;
-//        data[index+1] = g;
-//        data[index+2] = b;
-//        data[index+3] = a;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         data.put(index, r);
         data.put(index+1, g);
         data.put(index+2, b);
         data.put(index+3, a);
-//#endif
-
     }
 
     public void putPixel(int x, int y, RGBAPixel p)
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
-
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        data[index] = p.r;
-//        data[index+1] = p.g;
-//        data[index+2] = p.b;
-//        data[index+3] = p.a;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         data.put(index, p.r);
         data.put(index+1, p.g);
         data.put(index+2, p.b);
         data.put(index+3, p.a);
-//#endif
-
     }
 
     /**
@@ -242,20 +174,10 @@ public class RGBAImageUncompressed extends Image
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        data[index] = p.r;
-//        data[index+1] = p.g;
-//        data[index+2] = p.b;
-//        data[index+3] = Byte.MAX_VALUE;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         data.put(index, p.r);
         data.put(index+1, p.g);
         data.put(index+2, p.b);
         data.put(index+3, Byte.MAX_VALUE);
-//#endif
-
     }
 
     /**
@@ -270,19 +192,10 @@ public class RGBAImageUncompressed extends Image
         RGBAPixel p = new RGBAPixel();
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        p.r = data[index];
-//        p.g = data[index+1];
-//        p.b = data[index+2];
-//        p.a = data[index+3];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         p.r = data.get(index);
         p.g = data.get(index+1);
         p.b = data.get(index+2);
         p.a = data.get(index+3);
-//#endif
 
         return p;
     }
@@ -298,17 +211,9 @@ public class RGBAImageUncompressed extends Image
         RGBPixel p = new RGBPixel();
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        p.r = data[index];
-//        p.g = data[index+1];
-//        p.b = data[index+2];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         p.r = data.get(index);
         p.g = data.get(index+1);
         p.b = data.get(index+2);
-//#endif
 
         return p;
     }
@@ -317,20 +222,10 @@ public class RGBAImageUncompressed extends Image
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        p.r = data[index];
-//        p.g = data[index+1];
-//        p.b = data[index+2];
-//        p.a = data[index+3];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         p.r = data.get(index);
         p.g = data.get(index+1);
         p.b = data.get(index+2);
         p.a = data.get(index+3);
-//#endif
-
     }
 
     /**
@@ -342,18 +237,9 @@ public class RGBAImageUncompressed extends Image
     {
         int index = ((xSize*(ySize-1-y)) + x)*4;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        p.r = data[index];
-//        p.g = data[index+1];
-//        p.b = data[index+2];
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         p.r = data.get(index);
         p.g = data.get(index+1);
         p.b = data.get(index+2);
-//#endif
-
     }
 
     /**
@@ -381,31 +267,16 @@ public class RGBAImageUncompressed extends Image
     public byte[] getRawImage()
     {
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        return data;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         if ( !data.hasArray() ) {
             Logger.reportMessage(this, VSDK.FATAL_ERROR, "getRawImage", "cannot return raw bytes for a direct buffer optimized image, use getRawImageDirectBuffer instead.");
         }
         return data.array();
-//#endif
-
     }
 
     public ByteBuffer getRawImageDirectBuffer()
     {
-
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        return ByteBuffer.wrap(data);
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
         data.rewind();
         return data;
-//#endif
-
     }
 
     public void setRawImage(int xSize, int ySize, byte[] data)
@@ -413,14 +284,7 @@ public class RGBAImageUncompressed extends Image
         this.xSize = xSize;
         this.ySize = ySize;
 
-//#ifndef WITH_JAVA_DIRECT_BUFFERS
-//        this.data = data;
-//#endif
-
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
-            Logger.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
-//#endif
-
+        Logger.reportMessage(this, VSDK.FATAL_ERROR, "setRawImage", "NOT IMPLEMENTED! CHECK VSDK CODE!");
     }
     
     /** 
@@ -474,7 +338,6 @@ public class RGBAImageUncompressed extends Image
         return copy;
     }
 
-//#ifdef WITH_JAVA_DIRECT_BUFFERS
     private void writeObject(ObjectOutputStream out) throws IOException
     {
         try {
@@ -521,6 +384,4 @@ public class RGBAImageUncompressed extends Image
             }
         }
     }
-//#endif
-
 }

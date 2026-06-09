@@ -180,6 +180,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/Image.cpp
     src/main/vsdk/toolkit/media/RGBImageUncompressed.cpp
     src/main/vsdk/toolkit/media/RGBAImageUncompressed.cpp
+    src/main/vsdk/toolkit/media/RGBAImageHDRUncompressed.cpp
     src/main/vsdk/toolkit/media/IndexedColorImageUncompressed.cpp
     src/main/vsdk/toolkit/media/RGBAImageCompressed.cpp
     src/main/vsdk/toolkit/media/ZBuffer.cpp
