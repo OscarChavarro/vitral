@@ -19,16 +19,9 @@ Nevertheless, get and set methods are provided.
 class RGBAPixel : public MediaEntity {
 
 public:
-    /// The red component of this RGBAPixel
     char r;
-
-    /// The green component of this RGBAPixel
     char g;
-
-    /// The blue component of this RGBAPixel
     char b;
-
-    /// The alpha component of this RGBAPixel
     char a;
 
     RGBAPixel() : r(0), g(0), b(0), a(0) {}
