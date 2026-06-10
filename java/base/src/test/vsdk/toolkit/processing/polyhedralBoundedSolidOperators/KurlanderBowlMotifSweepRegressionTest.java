@@ -2,7 +2,6 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidGeometricValidator;
@@ -21,27 +20,30 @@ EXCEPTION.  The test asserts that the per-category counts stay at or above the
 observed baseline so that regressions are caught immediately.
 
 Marked {@code @Tag("slow")} because building and operating on 40 independent
-bowl copies takes several minutes.  Run explicitly before release:
-{@code gradle :base:test --tests "*KurlanderBowlMotifSweepRegressionTest"}
+bowl copies takes several minutes. Slow-tagged tests are excluded from the
+default build (see base/build.gradle); run explicitly with:
+{@code gradle :base:test -PincludeSlowTests --tests "*KurlanderBowlMotifSweepRegressionTest"}
 */
 @Tag("slow")
-@Disabled("Temporarily disabled: 40-motif Kurlander bowl sweep is too slow for regular build runs.")
 class KurlanderBowlMotifSweepRegressionTest
 {
     /**
     Minimum number of motifs that must classify as OK.
-    Observed baseline after §9.5 fixes (2026-05-16): 15.
-    Breakdown: 14 stars (0-3,5,7,10,12,14-15) + 1 moon (21-23,26,37).
+    Observed after mythosPlan Phase 2 (2026-06-10): 32 = 20 stars +
+    12 moons (curve-ordered connect; see
+    _PolyhedralBoundedSolidSetIntersectionCurveBuilder).
     Update this constant whenever a fix legitimately improves the count.
     */
-    private static final int MINIMUM_OK_COUNT = 15;
+    private static final int MINIMUM_OK_COUNT = 32;
 
     /**
     Maximum allowed sum of EMPTY + INVALID + BLACK_FACES + EXCEPTION.
-    Observed after §9.5 (2026-05-16): empty=16, invalid=0, blackFaces=9
-    → total failures = 25. Decreasing this value tightens the guard.
+    Observed after mythosPlan Phase 2 (2026-06-10): empty=4 (moons
+    22/27/32/37), blackFaces=4 (moons 20/25/30/35) — both are crescent-cusp
+    chord-crossing degeneracies owned by mythosPlan Phase 3.
+    Decreasing this value tightens the guard.
     */
-    private static final int MAXIMUM_FAILURE_COUNT = 25;
+    private static final int MAXIMUM_FAILURE_COUNT = 8;
 
     @Test
     void given_kurlanderBowlAndAllSingleMotifs_when_subtracting_then_sweepResultsMeetMinimumThresholds()
@@ -77,6 +79,8 @@ class KurlanderBowlMotifSweepRegressionTest
             }
 
             try {
+                _PolyhedralBoundedSolidSetNullEdgesConnector
+                    .lastCurveReport = null;
                 result = PolyhedralBoundedSolidModeler.setOp(
                     operands[0], operands[1],
                     PolyhedralBoundedSolidModeler.SUBTRACT, false);
@@ -148,8 +152,12 @@ class KurlanderBowlMotifSweepRegressionTest
                     }
                 }
             }
+            _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
+                curveReport = _PolyhedralBoundedSolidSetNullEdgesConnector
+                    .lastCurveReport;
             System.out.println("[SWEEP-" + status + "] " + tag +
-                " motif=" + motif + detail);
+                " motif=" + motif + detail +
+                (curveReport == null ? "" : " | " + curveReport.summarize()));
         }
 
         int failures = empty + invalid + blackFaces + exception;

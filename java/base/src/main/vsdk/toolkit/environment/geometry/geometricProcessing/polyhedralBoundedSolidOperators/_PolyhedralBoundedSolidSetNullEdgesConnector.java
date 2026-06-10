@@ -93,6 +93,34 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     private static int currentConnectPairIndex;
     private static int nextSyntheticPairIndex;
 
+    /**
+    Structural report of the intersection curves reconstructed from the
+    sonea/soneb pairs of the most recent {@link #connect} call. Captured
+    unconditionally (the reconstruction is cheap) so tests and diagnostics
+    can audit curve closure without enabling pipeline traces.
+    */
+    static _PolyhedralBoundedSolidSetIntersectionCurveBuilder.Report
+        lastCurveReport;
+
+    /**
+    Test-only injection point: when non-null and matching the pair count,
+    {@link #sortNullEdges()} reorders sonea/soneb by this permutation
+    (entry {@code position -> originalIndex}) instead of the production
+    ordering. Lets contract tests probe the connect stage's sensitivity to
+    processing order without any production flag. Always null in production;
+    cleared by the caller after use.
+    */
+    static int[] testOnlyForcedConnectOrder;
+
+    /**
+    True when {@link #sortNullEdges()} already oriented every strut along
+    the intersection curves (mythosPlan §5.3). The connect loop must then
+    respect that orientation instead of re-normalizing edge halves by
+    vertex-id comparison (the legacy rule, which encodes classifier emission
+    order and breaks when that order is not the curve order).
+    */
+    private static boolean curveOrientationApplied;
+
     private static boolean isPipelineSummaryTraceEnabled()
     {
         return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
@@ -649,6 +677,19 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static void sortNullEdges()
     {
+        curveOrientationApplied = false;
+        if ( testOnlyForcedConnectOrder != null &&
+             testOnlyForcedConnectOrder.length == sonea.size() &&
+             testOnlyForcedConnectOrder.length == soneb.size() ) {
+            applyOrderPermutation(testOnlyForcedConnectOrder);
+            lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+                .build(sonea, soneb,
+                    PolyhedralBoundedSolidNumericPolicy.defaultContext()
+                        .unitVectorTolerance());
+            tracePipelineSummary("connect TEST-ONLY forced order applied");
+            return;
+        }
+
         // Always group null-edges by topological ring before any further
         // processing. Without this, the connect loop pairs null-edges from
         // different intersection curves (e.g., the outer and inner boundary
@@ -689,6 +730,29 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
                     lh.startingVertex.position.y(),
                     lh.startingVertex.position.z()) + ")}");
         }
+    }
+
+    /**
+    Reorders sonea/soneb in lockstep by the given permutation
+    ({@code position -> originalIndex}).
+    @param order permutation covering every index exactly once
+    */
+    private static void applyOrderPermutation(int[] order)
+    {
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedA;
+        ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedB;
+        int i;
+
+        orderedA = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
+        orderedB = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
+        for ( i = 0; i < order.length; i++ ) {
+            orderedA.add(sonea.get(order[i]));
+            orderedB.add(soneb.get(order[i]));
+        }
+        sonea.clear();
+        sonea.addAll(orderedA);
+        soneb.clear();
+        soneb.addAll(orderedB);
     }
 
     private static int curveComponentFind(int[] parent, int x)
@@ -744,9 +808,43 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             dbgDumpNullEdges("B", soneb);
         }
 
+        // Reconstruct the intersection curves for diagnosis (§5 of
+        // doc/mythosPlan.md). The report is captured before any reordering
+        // decision so it always describes the classifier's raw emission.
+        lastCurveReport = _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+            .build(sonea, soneb,
+                PolyhedralBoundedSolidNumericPolicy.defaultContext()
+                    .unitVectorTolerance());
+        tracePipelineSummary("connect " + lastCurveReport.summarize());
+
         int n = Math.min(sonea.size(), soneb.size());
         if ( n != sonea.size() || n != soneb.size() || n < 2 ) {
             return;
+        }
+
+        // mythosPlan §5.3 (Phase 2): when every null-edge pair lies on a
+        // cleanly closed intersection curve, reorder pairs along each curve
+        // AND orient every strut consistently with the traversal. Probe
+        // evidence (mythosPlan §9, 2026-06-10): order alone is insufficient
+        // — the legacy in-loop vertex-id normalization encodes classifier
+        // emission order, so curve order with mismatched strut orientation
+        // leaves loose ends at the seams. With both applied, scanjoin closes
+        // every consecutive pair by construction (derivation in
+        // _PolyhedralBoundedSolidSetIntersectionCurveBuilder.applyCurveOrientation).
+        // On any anomaly (open chain, isolated node, pinch, odd/degenerate
+        // face-pair group) fall through to the legacy ordering below.
+        if ( lastCurveReport.isCleanlyClosed() ) {
+            int[] curveOrder =
+                _PolyhedralBoundedSolidSetIntersectionCurveBuilder
+                    .orderAndOrientAlongCurves(lastCurveReport.cycles, n,
+                        sonea, soneb);
+            if ( curveOrder != null ) {
+                applyOrderPermutation(curveOrder);
+                curveOrientationApplied = true;
+                tracePipelineSummary("connect curve-order applied: cycles="
+                    + lastCurveReport.cycles.size());
+                return;
+            }
         }
 
         // When all null-edge rings are singletons (every pair is a zero-length
@@ -1190,15 +1288,22 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             h2a = null;
             h1b = null;
             h2b = null;
-            if ( ha.startingVertex.id > ham.startingVertex.id ) {
-                tmp = nextedgea.rightHalf;
-                nextedgea.rightHalf = nextedgea.leftHalf;
-                nextedgea.leftHalf = tmp;
-            }
-            if ( hb.startingVertex.id > hbm.startingVertex.id ) {
-                tmp = nextedgeb.rightHalf;
-                nextedgeb.rightHalf = nextedgeb.leftHalf;
-                nextedgeb.leftHalf = tmp;
+            // Legacy strut orientation: vertex-id order encodes classifier
+            // emission order. When sortNullEdges already oriented the struts
+            // along the intersection curves (mythosPlan §5.3), that
+            // orientation must be respected — re-normalizing by id here
+            // would undo it and reintroduce seam mismatches in scanjoin.
+            if ( !curveOrientationApplied ) {
+                if ( ha.startingVertex.id > ham.startingVertex.id ) {
+                    tmp = nextedgea.rightHalf;
+                    nextedgea.rightHalf = nextedgea.leftHalf;
+                    nextedgea.leftHalf = tmp;
+                }
+                if ( hb.startingVertex.id > hbm.startingVertex.id ) {
+                    tmp = nextedgeb.rightHalf;
+                    nextedgeb.rightHalf = nextedgeb.leftHalf;
+                    nextedgeb.leftHalf = tmp;
+                }
             }
 
             rebindClassicCurrentNullEdgesIfNeeded(
