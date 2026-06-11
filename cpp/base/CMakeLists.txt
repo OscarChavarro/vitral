@@ -175,6 +175,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/RGBAPixel.cpp
     src/main/vsdk/toolkit/media/ShapeDescriptor.cpp
     src/main/vsdk/toolkit/media/RGBColorPalette.cpp
+    src/main/vsdk/toolkit/media/RGBAColorPalette.cpp
     src/main/vsdk/toolkit/media/RGBProceduralColorPalette.cpp
     src/main/vsdk/toolkit/media/GrayScalePalette.cpp
     src/main/vsdk/toolkit/media/Image.cpp
@@ -182,6 +183,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/media/RGBAImageUncompressed.cpp
     src/main/vsdk/toolkit/media/RGBAImageHDRUncompressed.cpp
     src/main/vsdk/toolkit/media/IndexedColorImageUncompressed.cpp
+    src/main/vsdk/toolkit/media/IndexedColorImageHDRUncompressed.cpp
     src/main/vsdk/toolkit/media/RGBAImageCompressed.cpp
     src/main/vsdk/toolkit/media/ZBuffer.cpp
     src/main/vsdk/toolkit/media/NormalMap.cpp

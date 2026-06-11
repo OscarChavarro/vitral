@@ -24,6 +24,8 @@ class Math {
     static float tan(float a);
     static double acos(double a);
     static float acos(float a);
+    static double asin(double a);
+    static float asin(float a);
     static double atan(double a);
     static double exp(double a);
     static float exp(float a);
@@ -118,6 +120,16 @@ Math::acos(float a) {
 inline double
 Math::acos(double a) {
     return std::acos(a);
+}
+
+inline float
+Math::asin(float a) {
+    return std::asin(a);
+}
+
+inline double
+Math::asin(double a) {
+    return std::asin(a);
 }
 
 inline double
