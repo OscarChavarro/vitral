@@ -135,6 +135,15 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         }
     }
 
+    /**
+    For each processing position of the most recent
+    {@link #orderAndOrientAlongCurves} result, the two processing positions
+    of its cycle-adjacent pairs (its junction partners along the curve).
+    Lets the connect stage restrict junction-repair logic to true curve
+    neighbors. Null until an order is computed.
+    */
+    static int[][] lastTraversalNeighborPositions;
+
     /** Internal carrier for one face-pair point group. */
     private static final class FacePairGroup
     {
@@ -587,6 +596,7 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
         int c;
         int j;
 
+        lastTraversalNeighborPositions = null;
         if ( computeTraversalOrder(cycles, nodeCount) == null ||
              sonea == null || soneb == null ) {
             return null;
@@ -706,6 +716,29 @@ final class _PolyhedralBoundedSolidSetIntersectionCurveBuilder
             }
             round++;
         }
+
+        // Export curve-junction adjacency in processing-position space:
+        // positionOf[originalIndex] inverts the permutation; each pair's
+        // junction partners are its cycle-adjacent pairs.
+        int[] positionOf = new int[nodeCount];
+        for ( j = 0; j < nodeCount; j++ ) {
+            positionOf[permutation[j]] = j;
+        }
+        int[][] neighborPositions = new int[nodeCount][];
+        for ( c = 0; c < directedCycles.size(); c++ ) {
+            int[] cycle = directedCycles.get(c);
+            int len = cycle.length;
+            for ( j = 0; j < len; j++ ) {
+                int original = cycle[j];
+                int previousOriginal = cycle[(j - 1 + len) % len];
+                int nextOriginal = cycle[(j + 1) % len];
+                neighborPositions[positionOf[original]] = new int[] {
+                    positionOf[previousOriginal],
+                    positionOf[nextOriginal]
+                };
+            }
+        }
+        lastTraversalNeighborPositions = neighborPositions;
         return permutation;
     }
 

@@ -573,22 +573,89 @@ pending):**
    existing pipeline is calibrated to the unconditional move-all behavior
    (e.g. the shell∩cylinder bowl construction relies on it). The principle
    is right but the calibration is subtle; reverted via git checkout.
-6. **Continuation entry point (next session):** study where the move-all
-   behavior is load-bearing. Concretely: for HOLLOW_BRICK ∩ and the bowl
-   construction, dump ring positions vs the two faces after each `join`
-   `lmef`, and determine the correct containment-based destination in each
-   case. Hypotheses to test: (a) the parity test must use the
-   POST-division outer loops (the first division changes oldf's outer
-   loop before laringmv runs — verify which loop laringmv sees); (b) the
-   strut-ring representative point lies exactly ON the chord between the
-   two new faces for the common single-chord case (zero-length ring at a
-   curve point ON the dividing edge!) — containment is then a LIMIT case
-   and the legacy "move" is the correct tie-break; only struts strictly
-   inside one half (the multi-chord cusp case) need the geometric
-   decision. Refinement (b) is the most promising: move rings on LIMIT
-   (legacy behavior preserved), place strictly-contained rings
-   geometrically. The A∩B EMPTY for moons 21/23 plausibly shares this
-   root cause — verify with the same instrumentation.
+6. **Shadow study (2026-06-11, `traceRingMoveShadowDecision`):** with the
+   `[LARINGMV]` shadow on both `laringmv` and the second-`lmef` site:
+   star 0 shows legacy ≡ geometry everywhere (kept rings are inside their
+   face, the one moved ring is outside); but the MOON_BLOCK cap
+   construction has legacy MOVEs with `inside(f1)=true, clearance=0.225` —
+   the interior-closed-curve case, where which half keeps the original
+   outer loop depends on h1/h2, and mid-connect loops are not simple
+   regions (bridges, spikes, half-built chains). Conclusion: **no purely
+   geometric redistribution rule is decidable mid-connect.** Both
+   geometric attempts (strict containment; two-face containment with
+   nesting disambiguation) regressed reference flows and were reverted
+   (the two-face rule survives as diagnostic via `wouldMove=` in the
+   shadow trace).
+7. **FIX THAT CLOSED THE SWEEP (2026-06-11) — curve-neighbor ring rescue
+   in scanjoin** (`rescueRingFaceNearMiss`,
+   `_PolyhedralBoundedSolidSetNullEdgesConnector`): purely topological,
+   curve-informed, active only on the curve-ordered path. When scanjoin
+   finds no full match, it looks for a loose entry that (a) was pushed by
+   one of the current pair's two **cycle-adjacent pairs** (junction
+   adjacency exported as processing positions by
+   `orderAndOrientAlongCurves.lastTraversalNeighborPositions`, tracked per
+   loose entry in `endsPairIndex`), (b) matches on one solid, and (c) on
+   the other solid differs ONLY by parent face with opposite edge roles,
+   one side being a pending two-half-edge strut ring (`makeRing` output).
+   The ring is re-parented to the partner's face with `lringmv` and the
+   match completes. Uniqueness-guarded; without the curve-neighbor guard
+   the rescue stitched cycle seeds to leftovers of other curves and
+   regressed MANT1988_15_2_HOLED — the guard eliminated that completely.
+   This repairs exactly the junctions that face fragmentation had severed,
+   and nothing else: it can only fire where the junction would otherwise
+   die.
+8. **Phase 3 gate (2026-06-11):** sweep
+   **`ok=40 empty=0 invalid=0 blackFaces=0`** — all 20 stars and all 20
+   moons OK (valid, oriented, non-empty). The BLACK_FACES family
+   (20/25/30/35) was the same junction defect as the EMPTY family
+   (22/27/32/37), manifesting as one inverted face instead of a dead
+   result. `KurlanderBowlStarInvariantTest` 20/20,
+   `CsgKurlanderBowlAllMotifsRegressionTest` all green (first AND third
+   moon, shell+moon), full reference corpus green. Sweep thresholds
+   tightened to `MINIMUM_OK_COUNT=40 / MAXIMUM_FAILURE_COUNT=0`.
+
+**Phase 5 execution log (2026-06-11):**
+
+| Step | Result |
+|------|--------|
+| Full suite after Phase 3 | 396 tests, **8 failures** — all of them stale stage-3 `TopologicalSummary` baselines in `KurlanderMotif4OperationMatrixTest` (motifs 1,2,5,7,12,14,15,23). The parameterized `motif[21]`/`motif[23]` cases now PASS, i.e. **A∩B for moons was fixed by the same ring rescue** (it was the same severed-junction defect under a different Finish selection). |
+| Baseline re-capture | Temporary `MythosBaselineCaptureTest` printed `TopologicalSummary.toLiteral()` for the 9 affected motifs × 4 ops (36 literals); spliced into the hardcoded `expectedMotifN*()` methods. All `KurlanderMotif4OperationMatrixTest` tests green, including the B−A `shellCount==2` invariant asserts. Temporary capture/probe tests deleted. |
+
+**Status of the original phases after this session:**
+
+- Phase 0/1/2: closed. Phase 2's full closure (ordering authority) required
+  the Phase 3 companion fix below — the two land together.
+- Phase 3 (cusp/pinch): **closed by the curve-neighbor ring rescue** (§9
+  item 7). Note the root cause turned out to be in Connect's interaction
+  with face divisions (ring mis-parenting), not in Generate as originally
+  hypothesized: `splitSelfTouchingLoops` already neutralizes the pinch
+  before Classify, and the curve graph never showed pinch nodes.
+- Phase 4 (tangential struts): the 40-motif corpus never exhibited
+  isolated nodes; the only known tangential case (MANT1988_15_1
+  vertex-grazing, 2 isolated nodes) is pinned in
+  `IntersectionCurveBuilderTest` and is handled by the legacy fallback
+  path. No classifier change needed for Tier 1; keep the builder's
+  isolated-node report as the detector if future geometry hits it.
+- Phase 5 (consolidation): baselines re-captured (above). Remaining
+  optional cleanup: decide fate of `testOnlyForcedConnectOrder` (kept as
+  contract-test hook), the `[LARINGMV]`/`[SelfTouch]`/`[DBG-ne]` gated
+  diagnostics (kept, all behind `vsdk.setop.tracePipelineSummary`), and
+  the legacy singleton-guard/face-OR-components fallback in
+  `groupNullEdgesByRing` (kept deliberately: it serves the
+  anomaly-fallback path, e.g. MANT1988_15_1).
+
+**FINAL GATE (2026-06-11): full `:base:test` = 393 tests, 0 failures,
+35 skipped** — including the 40-motif sweep at `MINIMUM_OK_COUNT=40 /
+MAXIMUM_FAILURE_COUNT=0` and the complete 4-operation matrix baselines.
+**Definition of Done Tier 1 (§11) is met** except for the visual
+spot-checks of §7, which cannot run in this environment (offline GL
+renderer fails with GLException 0x502 — verify interactively in
+`PolyhedralBoundedSolidExample`: the moon imprint on the bowl must be a
+closed ring and `CSG_DIRECT` must show the crescent indentation for all
+20 moons). Tier 2 partially exceeded: the 4-op matrix is green for the
+14 motifs with hardcoded baselines and `motif[21]`/`motif[23]`
+parameterized cases; extending `ENABLED[]` to all 40 remains optional
+follow-up (runtime cost in the default build).
 
 ---
 

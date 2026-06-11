@@ -29,21 +29,18 @@ class KurlanderBowlMotifSweepRegressionTest
 {
     /**
     Minimum number of motifs that must classify as OK.
-    Observed after mythosPlan Phase 2 (2026-06-10): 32 = 20 stars +
-    12 moons (curve-ordered connect; see
-    _PolyhedralBoundedSolidSetIntersectionCurveBuilder).
-    Update this constant whenever a fix legitimately improves the count.
+    Observed after mythosPlan Phase 3 (2026-06-11): 40/40 — all stars and
+    all moons (curve-ordered connect + curve-neighbor ring rescue; see
+    _PolyhedralBoundedSolidSetIntersectionCurveBuilder and
+    _PolyhedralBoundedSolidSetNullEdgesConnector.rescueRingFaceNearMiss).
     */
-    private static final int MINIMUM_OK_COUNT = 32;
+    private static final int MINIMUM_OK_COUNT = 40;
 
     /**
     Maximum allowed sum of EMPTY + INVALID + BLACK_FACES + EXCEPTION.
-    Observed after mythosPlan Phase 2 (2026-06-10): empty=4 (moons
-    22/27/32/37), blackFaces=4 (moons 20/25/30/35) — both are crescent-cusp
-    chord-crossing degeneracies owned by mythosPlan Phase 3.
-    Decreasing this value tightens the guard.
+    Observed after mythosPlan Phase 3 (2026-06-11): 0.
     */
-    private static final int MAXIMUM_FAILURE_COUNT = 8;
+    private static final int MAXIMUM_FAILURE_COUNT = 0;
 
     @Test
     void given_kurlanderBowlAndAllSingleMotifs_when_subtracting_then_sweepResultsMeetMinimumThresholds()
