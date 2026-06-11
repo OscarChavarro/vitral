@@ -34,6 +34,12 @@ public class CsgKurlanderBowlFixture
     private static final double STAR_AXIS_ROLL_DEGREES = -90.0;
     private static final double MOON_AXIS_ROLL_DEGREES = 90.0;
     private static final double MOON_BOWL_INSET_FRACTION = 0.10;
+    private static final double MOON_CYLINDER_HEIGHT = 5.5;
+    private static final double MOON_AXIS_PROXIMITY_FRACTION = 0.1;
+    private static final double MOON_AXIS_PROXIMITY_REFERENCE_HEIGHT = 5.0;
+    private static final double MOON_AXIS_PROXIMITY_SHIFT =
+        MOON_AXIS_PROXIMITY_FRACTION
+            * scale(MOON_AXIS_PROXIMITY_REFERENCE_HEIGHT);
 
     private CsgKurlanderBowlFixture()
     {
@@ -125,22 +131,24 @@ public class CsgKurlanderBowlFixture
     private static PolyhedralBoundedSolid createMoon()
     {
         PolyhedralBoundedSolid a = createCylinder(
-            scale(1.5), scale(5.0), new Vector3Dd(0, 0, 0));
+            scale(1.5), scale(MOON_CYLINDER_HEIGHT), new Vector3Dd(0, 0, 0));
         PolyhedralBoundedSolid b = createCylinder(
-            scale(1.5), scale(5.0), new Vector3Dd(scale(1.1), 0, scale(0.6)));
+            scale(1.5), scale(MOON_CYLINDER_HEIGHT),
+            new Vector3Dd(scale(1.1), 0, scale(0.6)));
         return booleanOp(a, b, PolyhedralBoundedSolidModeler.SUBTRACT);
     }
 
     private static PolyhedralBoundedSolid placeStar(
         PolyhedralBoundedSolid star, double z, double azimuthDeg)
     {
-        return placeMotif(star, z, azimuthDeg, 1.0, STAR_AXIS_ROLL_DEGREES);
+        return placeMotif(star, z, azimuthDeg, 1.0, 0.0,
+            STAR_AXIS_ROLL_DEGREES);
     }
 
     static Matrix4x4d createStarPlacementTransformation(
         double z, double azimuthDeg)
     {
-        return createMotifPlacementTransformation(z, azimuthDeg, 1.0,
+        return createMotifPlacementTransformation(z, azimuthDeg, 1.0, 0.0,
             STAR_AXIS_ROLL_DEGREES);
     }
 
@@ -148,30 +156,48 @@ public class CsgKurlanderBowlFixture
         PolyhedralBoundedSolid moon, double z, double azimuthDeg)
     {
         return placeMotif(moon, z, azimuthDeg,
-            1.0 - MOON_BOWL_INSET_FRACTION, MOON_AXIS_ROLL_DEGREES);
+            1.0 - MOON_BOWL_INSET_FRACTION, -MOON_AXIS_PROXIMITY_SHIFT,
+            MOON_AXIS_ROLL_DEGREES);
     }
 
     static Matrix4x4d createMoonPlacementTransformation(
         double z, double azimuthDeg)
     {
         return createMotifPlacementTransformation(z, azimuthDeg,
-            1.0 - MOON_BOWL_INSET_FRACTION, MOON_AXIS_ROLL_DEGREES);
+            1.0 - MOON_BOWL_INSET_FRACTION, -MOON_AXIS_PROXIMITY_SHIFT,
+            MOON_AXIS_ROLL_DEGREES);
     }
 
     private static PolyhedralBoundedSolid placeMotif(
         PolyhedralBoundedSolid motif, double z, double azimuthDeg,
-        double radialDistanceFactor, double axisRollDeg)
+        double radialDistanceFactor, double radialOffset, double axisRollDeg)
     {
         Matrix4x4d m = createMotifPlacementTransformation(
-            z, azimuthDeg, radialDistanceFactor, axisRollDeg);
+            z, azimuthDeg, radialDistanceFactor, radialOffset, axisRollDeg);
 
         PolyhedralBoundedSolidModeler.applyTransformation(motif, m);
         return motif;
     }
 
+    /**
+    Builds the rigid transformation that places a motif on the bowl's
+    inner surface.
+
+    @param z motif height along the bowl axis, in unscaled model units.
+    @param azimuthDeg motif azimuth angle around the bowl axis, in degrees.
+    @param radialDistanceFactor fraction of {@link #MOTIF_RADIAL_DISTANCE}
+        used as the motif's nominal radial distance from the bowl axis.
+    @param radialOffset additional radial displacement, in scaled world
+        units, applied along the same azimuth direction; negative values
+        move the motif closer to the bowl axis. Used to nudge moon motifs
+        toward the axis by {@link #MOON_AXIS_PROXIMITY_SHIFT}.
+    @param axisRollDeg roll angle, in degrees, applied to the motif around
+        its own placement axis.
+    @return the combined translation/rotation matrix for the motif.
+    */
     private static Matrix4x4d createMotifPlacementTransformation(
         double z, double azimuthDeg, double radialDistanceFactor,
-        double axisRollDeg)
+        double radialOffset, double axisRollDeg)
     {
         Matrix4x4d ry = new Matrix4x4d();
         Matrix4x4d rz = new Matrix4x4d();
@@ -180,8 +206,10 @@ public class CsgKurlanderBowlFixture
         Matrix4x4d m;
         double azimuthRad = Math.toRadians(azimuthDeg);
         double radialDistance = MOTIF_RADIAL_DISTANCE * radialDistanceFactor;
-        double x = scale(radialDistance * Math.cos(azimuthRad));
-        double y = scale(radialDistance * Math.sin(azimuthRad));
+        double x = scale(radialDistance * Math.cos(azimuthRad))
+            + radialOffset * Math.cos(azimuthRad);
+        double y = scale(radialDistance * Math.sin(azimuthRad))
+            + radialOffset * Math.sin(azimuthRad);
 
         ry = ry.axisRotation(Math.toRadians(90.0), 0, 1, 0);
         rz = rz.axisRotation(Math.toRadians(azimuthDeg), 0, 0, 1);

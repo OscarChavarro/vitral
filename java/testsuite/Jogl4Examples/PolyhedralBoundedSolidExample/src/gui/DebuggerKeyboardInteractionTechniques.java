@@ -54,7 +54,7 @@ public class DebuggerKeyboardInteractionTechniques
             }
 
             // Full screen
-            case KeyEvent.KEY_f -> {
+            case KeyEvent.KEY_g -> {
                 actions.toggleFullscreen();
                 handled = true;
             }

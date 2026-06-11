@@ -125,8 +125,8 @@ class CsgKurlanderBowlAllMotifsRegressionTest
 
         assertThat(moon.getVerticesList().size()).isGreaterThan(0);
         assertThat(minMax[1]).isCloseTo(-1.04, within(GEOMETRY_TOLERANCE));
-        assertThat(minMax[4]).isCloseTo(-0.54, within(GEOMETRY_TOLERANCE));
-        assertVectorClose(origin, new Vector3Dd(0.0, -0.54, 0.4));
+        assertThat(minMax[4]).isCloseTo(-0.49, within(GEOMETRY_TOLERANCE));
+        assertVectorClose(origin, new Vector3Dd(0.0, -0.49, 0.4));
         assertVectorClose(cylinderAxis, new Vector3Dd(0.0, -0.5, 0.0));
         assertVectorClose(crescentOffset, new Vector3Dd(0.11, -0.06, 0.0));
     }
