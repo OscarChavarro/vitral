@@ -16,6 +16,10 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
+import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.isCoplanarTangentialTraceEnabled;
+import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.traceCoplanarTangential;
+import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.tracePipelineSummary;
+
 /**
 Classification stages, connection stages, and no-intersection containment
 logic for the Boolean set-operations pipeline of chapter [MANT1988].15.
@@ -23,10 +27,6 @@ logic for the Boolean set-operations pipeline of chapter [MANT1988].15.
 final class _PolyhedralBoundedSolidSetClassifier
     extends _PolyhedralBoundedSolidOperator
 {
-    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
-        "vsdk.setop.traceCoplanarTangential";
-    private static final String TRACE_PIPELINE_SUMMARY_PROPERTY =
-        "vsdk.setop.tracePipelineSummary";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
     private static final int DEBUG_99_SHOW_OPERATIONS = 0x40;
@@ -38,36 +38,21 @@ final class _PolyhedralBoundedSolidSetClassifier
 
     private static int debugFlags;
 
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> sonvv;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonva;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> sonvb;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
-
     static void runSetOpClassify(int op,
                                  PolyhedralBoundedSolid inSolidA,
                                  PolyhedralBoundedSolid inSolidB,
                                  int flags,
-                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexVertex> inSonvv,
-                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> inSonva,
-                                 ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace> inSonvb,
-                                 ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSonea,
-                                 ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSoneb)
+                                 _SetOperationContext ctx)
     {
         debugFlags = flags;
-        sonvv = inSonvv;
-        sonva = inSonva;
-        sonvb = inSonvb;
-        sonea = inSonea;
-        soneb = inSoneb;
-        setOpClassify(op, inSolidA, inSolidB);
+        setOpClassify(ctx, op, inSolidA, inSolidB);
         tracePipelineSummary(
             "classify done op=" + op +
-            " sonva=" + sonva.size() +
-            " sonvb=" + sonvb.size() +
-            " sonvv=" + sonvv.size() +
-            " sonea=" + sonea.size() +
-            " soneb=" + soneb.size());
+            " sonva=" + ctx.sonva.size() +
+            " sonvb=" + ctx.sonvb.size() +
+            " sonvv=" + ctx.sonvv.size() +
+            " sonea=" + ctx.sonea.size() +
+            " soneb=" + ctx.soneb.size());
     }
 
     static PolyhedralBoundedSolid runSetOpNoIntersectionCase(
@@ -92,32 +77,6 @@ final class _PolyhedralBoundedSolidSetClassifier
     {
         return _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             .compareToZero(value);
-    }
-
-    private static boolean isCoplanarTangentialTraceEnabled()
-    {
-        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
-    }
-
-    private static void traceCoplanarTangential(String message)
-    {
-        if ( !isCoplanarTangentialTraceEnabled() ) {
-            return;
-        }
-        System.out.println("[SetOpCoplanarTrace] " + message);
-    }
-
-    private static boolean isPipelineSummaryTraceEnabled()
-    {
-        return Boolean.getBoolean(TRACE_PIPELINE_SUMMARY_PROPERTY);
-    }
-
-    private static void tracePipelineSummary(String message)
-    {
-        if ( !isPipelineSummaryTraceEnabled() ) {
-            return;
-        }
-        System.out.println("[SetOpPipelineTrace] " + message);
     }
 
     private static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge he)
@@ -432,7 +391,8 @@ final class _PolyhedralBoundedSolidSetClassifier
     Taking in to account the updated version modifications from
     [.wMANT2008].
     */
-    private static void separateEdgeSequence(_PolyhedralBoundedSolidHalfEdge from,
+    private static void separateEdgeSequence(_SetOperationContext ctx,
+        _PolyhedralBoundedSolidHalfEdge from,
                                _PolyhedralBoundedSolidHalfEdge to,
                                int type,
                                String traceContext,
@@ -554,27 +514,27 @@ final class _PolyhedralBoundedSolidSetClassifier
             _PolyhedralBoundedSolidSetOperatorNullEdge edge;
             edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
                 from.previous().parentEdge);
-            sonea.add(edge);
+            ctx.sonea.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
                 " separateEdgeSequence sourceFrom=" + summarizeHalfEdge(from) +
                 " sourceTo=" + summarizeHalfEdge(to) +
                 " inserted=" + summarizeNullEdge(edge) +
-                " soneaSize=" + sonea.size() +
-                " sonebSize=" + soneb.size());
+                " soneaSize=" + ctx.sonea.size() +
+                " sonebSize=" + ctx.soneb.size());
         }
         else {
             _PolyhedralBoundedSolidSetOperatorNullEdge edge;
             edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
                 from.previous().parentEdge);
-            soneb.add(edge);
+            ctx.soneb.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
                 " separateEdgeSequence sourceFrom=" + summarizeHalfEdge(from) +
                 " sourceTo=" + summarizeHalfEdge(to) +
                 " inserted=" + summarizeNullEdge(edge) +
-                " soneaSize=" + sonea.size() +
-                " sonebSize=" + soneb.size());
+                " soneaSize=" + ctx.sonea.size() +
+                " sonebSize=" + ctx.soneb.size());
         }
 
     }
@@ -590,7 +550,8 @@ final class _PolyhedralBoundedSolidSetClassifier
     @param orient true when the null-edge natural direction is already correct
     @param traceContext caller label for pipeline-summary diagnostics
     */
-    private static void flipNullEdgeOrientationForOpenSide(_PolyhedralBoundedSolidHalfEdge he,
+    private static void flipNullEdgeOrientationForOpenSide(_SetOperationContext ctx,
+        _PolyhedralBoundedSolidHalfEdge he,
                                int type,
                                boolean orient,
                                String traceContext,
@@ -645,27 +606,27 @@ final class _PolyhedralBoundedSolidSetClassifier
             _PolyhedralBoundedSolidSetOperatorNullEdge edge;
             edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
                 he.previous().parentEdge);
-            sonea.add(edge);
+            ctx.sonea.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
                 " flipNullEdgeOrientationForOpenSide orient=" + orient +
                 " source=" + summarizeHalfEdge(he) +
                 " inserted=" + summarizeNullEdge(edge) +
-                " soneaSize=" + sonea.size() +
-                " sonebSize=" + soneb.size());
+                " soneaSize=" + ctx.sonea.size() +
+                " sonebSize=" + ctx.soneb.size());
         }
         else {
             _PolyhedralBoundedSolidSetOperatorNullEdge edge;
             edge = new _PolyhedralBoundedSolidSetOperatorNullEdge(
                 he.previous().parentEdge);
-            soneb.add(edge);
+            ctx.soneb.add(edge);
             tracePipelineSummary(
                 "emit " + traceContext +
                 " flipNullEdgeOrientationForOpenSide orient=" + orient +
                 " source=" + summarizeHalfEdge(he) +
                 " inserted=" + summarizeNullEdge(edge) +
-                " soneaSize=" + sonea.size() +
-                " sonebSize=" + soneb.size());
+                " soneaSize=" + ctx.sonea.size() +
+                " sonebSize=" + ctx.soneb.size());
         }
 
     }
@@ -870,6 +831,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     Following section [MANT1988].15.6.2. and program [MANT1988].15.11.
     */
     private static void vertexVertexInsertNullEdges(
+        _SetOperationContext ctx,
         _PolyhedralBoundedSolidSetVertexVertexClassifier.VertexVertexClassificationData data,
         int op,
         PolyhedralBoundedSolid inSolidA,
@@ -988,10 +950,10 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT A CASE");
                 }
-                flipNullEdgeOrientationForOpenSide(ha1, 0, getOrientation(ha1, hb1, hb2),
+                flipNullEdgeOrientationForOpenSide(ctx, ha1, 0, getOrientation(ha1, hb1, hb2),
                     traceContext,
                     inSolidA, inSolidB);
-                separateEdgeSequence(hb1, hb2, 1,
+                separateEdgeSequence(ctx, hb1, hb2, 1,
                     formatVertexVertexTraceContext(
                         op, i, "STRUT_A", "separate", 1),
                     inSolidA, inSolidB);
@@ -1006,10 +968,10 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . STRUT B CASE");
                 }
-                flipNullEdgeOrientationForOpenSide(hb1, 1, getOrientation(hb1, ha2, ha1),
+                flipNullEdgeOrientationForOpenSide(ctx, hb1, 1, getOrientation(hb1, ha2, ha1),
                     traceContext,
                     inSolidA, inSolidB);
-                separateEdgeSequence(ha2, ha1, 0,
+                separateEdgeSequence(ctx, ha2, ha1, 0,
                     formatVertexVertexTraceContext(
                         op, i, "STRUT_B", "separate", 0),
                     inSolidA, inSolidB);
@@ -1022,11 +984,11 @@ final class _PolyhedralBoundedSolidSetClassifier
                 if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
                     System.out.println("    . PARALLEL CASE");
                 }
-                separateEdgeSequence(ha2, ha1, 0,
+                separateEdgeSequence(ctx, ha2, ha1, 0,
                     formatVertexVertexTraceContext(
                         op, i, "PARALLEL", "separate", 0),
                     inSolidA, inSolidB);
-                separateEdgeSequence(hb1, hb2, 1,
+                separateEdgeSequence(ctx, hb1, hb2, 1,
                     formatVertexVertexTraceContext(
                         op, i, "PARALLEL", "separate", 1),
                     inSolidA, inSolidB);
@@ -1043,6 +1005,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     [MANT1988].14.3.
     */
     private static void vertexVertexClassify(
+        _SetOperationContext ctx,
         _PolyhedralBoundedSolidVertex va,
         _PolyhedralBoundedSolidVertex vb,
         int op,
@@ -1052,9 +1015,9 @@ final class _PolyhedralBoundedSolidSetClassifier
         _PolyhedralBoundedSolidSetVertexVertexClassifier
             .VertexVertexClassificationData data;
 
-        data = _PolyhedralBoundedSolidSetVertexVertexClassifier.classify(
+        data = new _PolyhedralBoundedSolidSetVertexVertexClassifier().classify(
             va, vb, op, debugFlags);
-        vertexVertexInsertNullEdges(data, op, inSolidA, inSolidB);
+        vertexVertexInsertNullEdges(ctx, data, op, inSolidA, inSolidB);
     }
 
     /**
@@ -1063,7 +1026,7 @@ final class _PolyhedralBoundedSolidSetClassifier
     `setOpGenerate`.
     Following section [MANT1988].16.6.1. and program [MANT1988].15.5.
     */
-    private static void setOpClassify(int op,
+    private static void setOpClassify(_SetOperationContext ctx, int op,
                                       PolyhedralBoundedSolid inSolidA,
                                       PolyhedralBoundedSolid inSolidB)
     {
@@ -1071,33 +1034,33 @@ final class _PolyhedralBoundedSolidSetClassifier
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("- 1.A. ----------------------------------------------------------------------------------------------------------------------------------------------------");
-                System.out.println("VERTICES OF {A} TOUCHING FACES ON {B} (sonva array of " + sonva.size() + " matches)");
+                System.out.println("VERTICES OF {A} TOUCHING FACES ON {B} (sonva array of " + ctx.sonva.size() + " matches)");
         }
 
-        for ( i = 0; i < sonva.size(); i++ ) {
-            _PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
-                sonva.get(i).v, sonva.get(i).f, op, 0, debugFlags,
-                sonea, soneb, inSolidA, inSolidB);
+        for ( i = 0; i < ctx.sonva.size(); i++ ) {
+            new _PolyhedralBoundedSolidSetVertexFaceClassifier().classify(
+                ctx.sonva.get(i).v, ctx.sonva.get(i).f, op, 0, debugFlags,
+                ctx.sonea, ctx.soneb, inSolidA, inSolidB);
         }
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("- 1.B. ----------------------------------------------------------------------------------------------------------------------------------------------------");
-            System.out.println("VERTICES OF {B} TOUCHING FACES ON {A} (sonvb array of " + sonvb.size() + " matches):");
+            System.out.println("VERTICES OF {B} TOUCHING FACES ON {A} (sonvb array of " + ctx.sonvb.size() + " matches):");
         }
 
-        for ( i = 0; i < sonvb.size(); i++ ) {
-            _PolyhedralBoundedSolidSetVertexFaceClassifier.classify(
-                sonvb.get(i).v, sonvb.get(i).f, op, 1, debugFlags,
-                sonea, soneb, inSolidA, inSolidB);
+        for ( i = 0; i < ctx.sonvb.size(); i++ ) {
+            new _PolyhedralBoundedSolidSetVertexFaceClassifier().classify(
+                ctx.sonvb.get(i).v, ctx.sonvb.get(i).f, op, 1, debugFlags,
+                ctx.sonea, ctx.soneb, inSolidA, inSolidB);
         }
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("- 2. ------------------------------------------------------------------------------------------------------------------------------------------------------");
-            System.out.println("VERTEX-VERTEX PAIRS (sonvv array of " + sonvv.size() + " pairs):");
+            System.out.println("VERTEX-VERTEX PAIRS (sonvv array of " + ctx.sonvv.size() + " pairs):");
         }
 
-        for ( i = 0; i < sonvv.size(); i++ ) {
-            vertexVertexClassify(sonvv.get(i).va, sonvv.get(i).vb, op, inSolidA, inSolidB);
+        for ( i = 0; i < ctx.sonvv.size(); i++ ) {
+            vertexVertexClassify(ctx, ctx.sonvv.get(i).va, ctx.sonvv.get(i).vb, op, inSolidA, inSolidB);
         }
     }
 }

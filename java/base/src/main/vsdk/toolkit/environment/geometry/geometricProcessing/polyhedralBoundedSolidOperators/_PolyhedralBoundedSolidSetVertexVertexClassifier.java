@@ -12,6 +12,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
+import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace.traceCoplanarTangential;
+
 /**
 Geometric preprocessing and sector reclassification for vertex/vertex matches,
 following section [MANT1988].15.6.2 and programs [MANT1988].15.7 through
@@ -20,8 +22,6 @@ following section [MANT1988].15.6.2 and programs [MANT1988].15.7 through
 final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     extends _PolyhedralBoundedSolidOperator
 {
-    private static final String TRACE_COPLANAR_TANGENTIAL_PROPERTY =
-        "vsdk.setop.traceCoplanarTangential";
     private static final int DEBUG_01_STRUCTURE = 0x01;
     private static final int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
 
@@ -43,24 +43,12 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     }
 
     private static int debugFlags;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nba;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nbb;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector> sectors;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nba;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex> nbb;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector> sectors;
 
-    private static boolean isCoplanarTangentialTraceEnabled()
-    {
-        return Boolean.getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
-    }
 
-    private static void traceCoplanarTangential(String message)
-    {
-        if ( !isCoplanarTangentialTraceEnabled() ) {
-            return;
-        }
-        System.out.println("[SetOpCoplanarTrace] " + message);
-    }
-
-    private static Boolean coplanarSameOrientationForSectorPair(int secta,
+    private Boolean coplanarSameOrientationForSectorPair(int secta,
         int sectb)
     {
         _PolyhedralBoundedSolidHalfEdge ha;
@@ -99,7 +87,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     Following program [MANT1988].15.6. Similar in structure to program
     [MANT1988].14.3.
     */
-    static VertexVertexClassificationData classify(
+    VertexVertexClassificationData classify(
         _PolyhedralBoundedSolidVertex va,
         _PolyhedralBoundedSolidVertex vb,
         int op,
@@ -259,7 +247,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     Sector intersection test.
     Following program [MANT1988].15.9 and section [MANT1988].15.6.2.
     */
-    private static boolean vertexVertexSectorIntersectionTest(int i, int j)
+    private boolean vertexVertexSectorIntersectionTest(int i, int j)
     {
         _PolyhedralBoundedSolidHalfEdge h1;
         _PolyhedralBoundedSolidHalfEdge h2;
@@ -321,7 +309,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     lists `nba`, `nbb`, and `sectors` as explained in section
     [MANT1988].15.6.2 and program [MANT1988].15.7.
     */
-    private static void vertexVertexGetNeighborhood(
+    private void vertexVertexGetNeighborhood(
         _PolyhedralBoundedSolidVertex va,
         _PolyhedralBoundedSolidVertex vb)
     {
@@ -401,7 +389,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     /**
     Following section [MANT1988].15.6.2 and program [MANT1988].15.10.
     */
-    private static void vertexVertexReclassifyOnSectors(int op)
+    private void vertexVertexReclassifyOnSectors(int op)
     {
         _PolyhedralBoundedSolidHalfEdge ha;
         _PolyhedralBoundedSolidHalfEdge hb;
@@ -519,7 +507,7 @@ final class _PolyhedralBoundedSolidSetVertexVertexClassifier
     and the case structures of figures [MANT1988].15.10, [MANT1988].15.11,
     and [MANT1988].15.12.
     */
-    private static void vertexVertexReclassifyOnEdges(int op)
+    private void vertexVertexReclassifyOnEdges(int op)
     {
         int i;
         int j;

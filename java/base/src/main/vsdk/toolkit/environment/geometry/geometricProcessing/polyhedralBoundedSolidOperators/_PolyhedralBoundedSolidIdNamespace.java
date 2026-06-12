@@ -5,6 +5,8 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidVertex;
 
 /**
 Centralizes face-ID and vertex-ID allocation for the duration of a single
@@ -138,5 +140,64 @@ class _PolyhedralBoundedSolidIdNamespace
     int peekNextFaceId()
     {
         return nextFaceId;
+    }
+
+    /**
+    Procedure `updmaxnames` functionality is described on section
+    [MANT1988].15.4. Increments the face and vertex identifiers of
+    `solidToUpdate` so that they do not overlap with `referenceSolid`
+    identifiers. Centralized here in Stage 7 R3 so the ID-renaming policy
+    lives in one place; {@link PolyhedralBoundedSolidSetOperator#updmaxnames}
+    delegates to this method.
+    @param solidToUpdate solid whose IDs are offset past the reference.
+    @param referenceSolid solid whose maxima define the offset.
+    */
+    static void updmaxnames(PolyhedralBoundedSolid solidToUpdate,
+                            PolyhedralBoundedSolid referenceSolid)
+    {
+        _PolyhedralBoundedSolidVertex v;
+        _PolyhedralBoundedSolidFace f;
+        int i;
+
+        for ( i = 0; i < solidToUpdate.getVerticesList().size(); i++ ) {
+            v = solidToUpdate.getVerticesList().get(i);
+            v.id += referenceSolid.getMaxVertexId();
+            if ( v.id > solidToUpdate.getMaxVertexId() ) {
+                solidToUpdate.setMaxVertexId(v.id);
+            }
+        }
+
+        for ( i = 0; i < solidToUpdate.getPolygonsList().size(); i++ ) {
+            f = solidToUpdate.getPolygonsList().get(i);
+            f.id += referenceSolid.getMaxFaceId();
+            if ( f.id > solidToUpdate.getMaxFaceId() ) {
+                solidToUpdate.setMaxFaceId(f.id);
+            }
+        }
+    }
+
+    /**
+    Resolves the next vertex ID through the given namespace when available,
+    falling back to the legacy {@code max(maxVertexId)+1} policy when no
+    namespace is active. Centralizes the null-namespace fallback that used
+    to live inline in {@link PolyhedralBoundedSolidSetOperator}.
+    @param current first operand.
+    @param other second operand.
+    @param namespace active namespace, or {@code null} to use the fallback.
+    @return a vertex ID unique within the current pipeline invocation.
+    */
+    static int nextVertexId(PolyhedralBoundedSolid current,
+                            PolyhedralBoundedSolid other,
+                            _PolyhedralBoundedSolidIdNamespace namespace)
+    {
+        int a;
+        int b;
+
+        if ( namespace != null ) {
+            return namespace.nextVertexId(current, other);
+        }
+        a = current.getMaxVertexId();
+        b = other.getMaxVertexId();
+        return (b > a ? b : a) + 1;
     }
 }

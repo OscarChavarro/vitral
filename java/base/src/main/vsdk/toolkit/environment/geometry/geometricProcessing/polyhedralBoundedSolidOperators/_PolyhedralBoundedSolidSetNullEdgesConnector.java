@@ -76,13 +76,13 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
 
     private static int debugFlags;
     private static int operation;
-    private static int nextNullEdgeIndex;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
+    private int nextNullEdgeIndex;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsa;
     private static ArrayList<_PolyhedralBoundedSolidHalfEdge> endsb;
-    private static ArrayList<_PolyhedralBoundedSolidFace> sonfa;
-    private static ArrayList<_PolyhedralBoundedSolidFace> sonfb;
+    private ArrayList<_PolyhedralBoundedSolidFace> sonfa;
+    private ArrayList<_PolyhedralBoundedSolidFace> sonfb;
     private static Map<Integer, Integer> sonfaPairIndexByFaceId;
     private static Map<Integer, Integer> sonfbPairIndexByFaceId;
     private static int lastLooseACount;
@@ -401,7 +401,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
             isPointLikeHalfEdge(secondB);
     }
 
-    private static void finalizeCoincidentLooseA(
+    private void finalizeCoincidentLooseA(
         _PolyhedralBoundedSolidHalfEdge he)
     {
         if ( canCutCoincidentFinishFace(he) ) {
@@ -412,7 +412,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         }
     }
 
-    private static void finalizeCoincidentLooseB(
+    private void finalizeCoincidentLooseB(
         _PolyhedralBoundedSolidHalfEdge he)
     {
         if ( canCutCoincidentFinishFace(he) ) {
@@ -455,7 +455,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return lastPairCount;
     }
 
-    private static void updateLastSnapshot()
+    private void updateLastSnapshot()
     {
         lastLooseACount = (endsa != null) ? endsa.size() : 0;
         lastLooseBCount = (endsb != null) ? endsb.size() : 0;
@@ -666,7 +666,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     }
 
 
-    static ConnectResult connect(
+    ConnectResult connect(
         int op,
         int flags,
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> inSonea,
@@ -690,7 +690,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return new ConnectResult(sonfa, sonfb);
     }
 
-    private static void sortNullEdges()
+    private void sortNullEdges()
     {
         curveOrientationApplied = false;
         curveNeighborPositions = null;
@@ -753,7 +753,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     ({@code position -> originalIndex}).
     @param order permutation covering every index exactly once
     */
-    private static void applyOrderPermutation(int[] order)
+    private void applyOrderPermutation(int[] order)
     {
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedA;
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> orderedB;
@@ -817,7 +817,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     sort: the struts never share a vertex id, so that partition produced only
     singleton rings and the signature sort then scrambled the curve order.</p>
     */
-    private static void groupNullEdgesByRing()
+    private void groupNullEdgesByRing()
     {
         if ( isPipelineSummaryTraceEnabled() ) {
             dbgDumpNullEdges("A", sonea);
@@ -989,7 +989,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     the loop starts. Order is the parametric ordering produced by
     {@link #sortNullEdges()} (§4.3 of plan-csg-boolean-fix-stage2).</p>
     */
-    private static boolean sgetnextnulledge(NullEdgePair out)
+    private boolean sgetnextnulledge(NullEdgePair out)
     {
         if ( nextNullEdgeIndex >= sonea.size() ||
              nextNullEdgeIndex >= soneb.size() ) {
@@ -1017,7 +1017,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     {@code null} is returned, signalling that the caller must not perform
     {@code join}/{@code cut} for this pair.</p>
     */
-    private static _PolyhedralBoundedSolidHalfEdge[]
+    private _PolyhedralBoundedSolidHalfEdge[]
     scanjoin(_PolyhedralBoundedSolidHalfEdge hea,
              _PolyhedralBoundedSolidHalfEdge heb)
     {
@@ -1136,7 +1136,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     @param heb query half on solid B
     @return the matched loose pair after the rescue, or null
     */
-    private static _PolyhedralBoundedSolidHalfEdge[]
+    private _PolyhedralBoundedSolidHalfEdge[]
     rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge hea,
         _PolyhedralBoundedSolidHalfEdge heb)
     {
@@ -1256,7 +1256,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return false;
     }
 
-    private static _PolyhedralBoundedSolidFace cutA(
+    private _PolyhedralBoundedSolidFace cutA(
         _PolyhedralBoundedSolidHalfEdge he)
     {
         PolyhedralBoundedSolid s;
@@ -1291,7 +1291,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
         return addedFace;
     }
 
-    private static _PolyhedralBoundedSolidFace cutB(
+    private _PolyhedralBoundedSolidFace cutB(
         _PolyhedralBoundedSolidHalfEdge he)
     {
         PolyhedralBoundedSolid s;
@@ -1348,7 +1348,7 @@ final class _PolyhedralBoundedSolidSetNullEdgesConnector
     (big phase 3).
     Following section [MANT1988].15.7. and program [MANT1988].15.14.
     */
-    private static void setOpConnect()
+    private void setOpConnect()
     {
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("- 3. ------------------------------------------------------------------------------------------------------------------------------------------------------");

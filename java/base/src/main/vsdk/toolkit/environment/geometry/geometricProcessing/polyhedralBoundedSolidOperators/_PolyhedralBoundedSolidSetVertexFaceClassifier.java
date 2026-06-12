@@ -30,8 +30,8 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     private static final int DEBUG_99_SHOW_OPERATIONS = 0x40;
 
     private static int debugFlags;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
-    private static ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> sonea;
+    private ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb;
 
     private static boolean isCoplanarTangentialTraceEnabled()
     {
@@ -50,7 +50,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     Vertex/Face classifier for the set operations algorithm (big phase 1).
     Answer to problem [MANT1988].15.4.
     */
-    static void classify(_PolyhedralBoundedSolidVertex v,
+    void classify(_PolyhedralBoundedSolidVertex v,
                          _PolyhedralBoundedSolidFace f,
                          int op,
                          int BvsA,
@@ -375,7 +375,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     [MANT1988].14.7, biased for set operations as indicated by
     [MANT1988].15.6.1.
     */
-    private static void vertexFaceInsertNullEdges(
+    private void vertexFaceInsertNullEdges(
         ArrayList<_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace> nbr,
         _PolyhedralBoundedSolidFace f,
         _PolyhedralBoundedSolidVertex v,
@@ -475,7 +475,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
     Vertex/Face classifier for the set operations algorithm (big phase 1).
     Answer to problem [MANT1988].15.4.
     */
-    private static void vertexFaceClassify(
+    private void vertexFaceClassify(
         _PolyhedralBoundedSolidVertex v,
         _PolyhedralBoundedSolidFace f,
         int op,
@@ -530,7 +530,7 @@ final class _PolyhedralBoundedSolidSetVertexFaceClassifier
         vertexFaceInsertNullEdges(nbr, f, v, BvsA, inSolidA, inSolidB);
     }
 
-    private static void makeRing(
+    private void makeRing(
         _PolyhedralBoundedSolidFace f,
         _PolyhedralBoundedSolidVertex v,
         int type,
