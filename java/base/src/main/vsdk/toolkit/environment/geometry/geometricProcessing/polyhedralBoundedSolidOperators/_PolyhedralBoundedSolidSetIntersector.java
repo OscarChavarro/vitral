@@ -370,13 +370,33 @@ final class _PolyhedralBoundedSolidSetIntersector
         // Without this, such a vertex triggers the crossing branch and produces
         // a null-edge whose original endpoint is off-plane; after Connect, that
         // endpoint ends up in the result face and fails the coplanarity check.
+        //
+        // The snap is only valid when the vertex actually lies over the bounded
+        // face: this test runs for every (edge, face) pair, so the infinite
+        // plane of a face can pass within bigEpsilon of vertices that are
+        // arbitrarily far from the face itself. Snapping those would drag
+        // unrelated vertices off their own faces and make remote, previously
+        // planar faces non-planar (stage-6 finding: moon motifs at z=9.0 moved
+        // the bowl vertex antipodal to the motif). A vertex whose projection
+        // falls outside the bounded face cannot contribute an intersection
+        // inside that face, so skipping the snap there is always safe.
         if ( isZeroBig(d1) && !isZero(d1) ) {
-            v1.position = f.getContainingPlane().projectPoint(v1.position);
-            d1 = 0.0;
+            Vector3Dd snapped1 = f.getContainingPlane().projectPoint(
+                v1.position);
+            if ( pointInFaceDetailed(f, snapped1).status() !=
+                 Geometry.OUTSIDE ) {
+                v1.position = snapped1;
+                d1 = 0.0;
+            }
         }
         if ( isZeroBig(d2) && !isZero(d2) ) {
-            v2.position = f.getContainingPlane().projectPoint(v2.position);
-            d2 = 0.0;
+            Vector3Dd snapped2 = f.getContainingPlane().projectPoint(
+                v2.position);
+            if ( pointInFaceDetailed(f, snapped2).status() !=
+                 Geometry.OUTSIDE ) {
+                v2.position = snapped2;
+                d2 = 0.0;
+            }
         }
 
         s1 = compareToZero(d1);
