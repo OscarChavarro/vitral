@@ -1233,7 +1233,7 @@ public class Torus extends Solid
               Root[3]=x3;
         }
         
-        // Revisa de las raices encontradas cual está más cerca al punto del rayo
+        // Check which of the roots found is closest to the ray point
         
         double root = 0;
         int cont = 0;

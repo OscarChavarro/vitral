@@ -1,6 +1,5 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -24,7 +23,6 @@ the boolean pipeline must keep this green.</p>
 are the open investigation of §4-bis. Their status is tracked by the {@code
 ENABLED[]}/{@code assumeTrue} mechanism in {@link KurlanderMotif4OperationMatrixTest}.</p>
 */
-@Tag("slow")
 class KurlanderBowlStarInvariantTest
 {
     @ParameterizedTest(name = "STAR motif {0}")

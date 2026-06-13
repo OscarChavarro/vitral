@@ -38,7 +38,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         setxOld(e.getX());
         setyOld(e.getY());
 
-        //Procedimiento para selección de lineas
+        // Procedure for line selection
         camera.updateVectors();
         Ray RayA = camera.generateRay(getxOld(), getyOld());
 
@@ -83,7 +83,7 @@ public class CameraControllerGoogleEarth extends CameraController {
     public boolean processMouseDraggedEvent(MouseEvent e) {
 
         //---------------------------------------------------------------------
-        // 1. Posición inicial y final
+        // 1. Initial and final position
         int PrevX = getxOld();
         int PrevY = getyOld();
 
@@ -91,12 +91,12 @@ public class CameraControllerGoogleEarth extends CameraController {
         int y = e.getY();
 
         //---------------------------------------------------------------------
-        // 2. Calculo rayo 1 y 2
+        // 2. Ray 1 and 2 calculation
         Ray RayA = camera.generateRay(PrevX, PrevY);
         Ray RayB = camera.generateRay(x, y);
 
         //----------------------------------------------------------------------
-        //3. Intercepción con plano infinito
+        // 3. Intersection with the infinite plane
         InfinitePlane infinitePlane = new InfinitePlane(new Vector3Dd(0, 0, 1), new Vector3Dd(0, 0, 0));
         Ray hitA = infinitePlane.doIntersection(RayA);
         Ray hitB = infinitePlane.doIntersection(RayB);
@@ -105,7 +105,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         }
 
         //----------------------------------------------------------------------
-        //4. Distancia entre RayA y RayB
+        // 4. Distance between RayA and RayB
         Vector3Dd pA = new Vector3Dd();
         Vector3Dd pB = new Vector3Dd();
 
@@ -120,7 +120,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         Vector3Dd d = pB.subtract(pA);
 
         //----------------------------------------------------------------------
-        //5. Mover la cámara
+        // 5. Move the camera
         Vector3Dd currentPosition = camera.getPosition();
         camera.setPosition(new Vector3Dd(
             currentPosition.x() - d.x(),
@@ -165,14 +165,14 @@ public class CameraControllerGoogleEarth extends CameraController {
         //------------------------------------------------------------
         if (clicks < 0) {
 
-            //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
+            // Adjust the delta so the zoom matches the image size
             double expo = Math.round(Math.log10(eyePosition.z())) - 1;
             jumpStep = Math.pow(10, expo);//
 
-            //Limite inferiror
+            // Lower limit
             if ((eyePosition.z() - jumpStep) <= 12) {
                 return false;
-            } //Fotos 0.0000000000000000000001
+            } // Photos 0.0000000000000000000001
 
             nearPlaneDistance = altura * 0.1;
             farPlaneDistance = altura * 110;
@@ -182,12 +182,12 @@ public class CameraControllerGoogleEarth extends CameraController {
 
             updated = true;
         } else if (clicks > 0) {
-            //Limite superior
+            // Upper limit
             if ((eyePosition.z() + jumpStep) >= Math.pow(10, 24)) {
                 return false;
-            }//Para las fotos Math.pow(10, 25)
+            } // For photos Math.pow(10, 25)
 
-            //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
+            // Adjust the delta so the zoom matches the image size
             jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z())) - 1);
 
             altura = eyePosition.z();
@@ -335,16 +335,16 @@ public class CameraControllerGoogleEarth extends CameraController {
                 updated = true;
                 break;
             case KeyEvent.KEY_z:
-                //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
+                // Adjust the delta so the zoom matches the image size
                 double expo = Math.round(Math.log10(eyePosition.z())) - 1;
                 jumpStep = Math.pow(10, expo);//
 
                 double altura = eyePosition.z();
 
-                //Limite inferiror
+                // Lower limit
                 if ((eyePosition.z() - jumpStep) <= 12) {
                     break;
-                } //Fotos 0.0000000000000000000001
+                } // Photos 0.0000000000000000000001
 
                 nearPlaneDistance = altura * 0.1;
                 farPlaneDistance = altura * 110;
@@ -357,12 +357,12 @@ public class CameraControllerGoogleEarth extends CameraController {
 
             case KeyEvent.KEY_Z:
 
-                //Limite superior
+                // Upper limit
                 if ((eyePosition.z() + jumpStep) >= Math.pow(10, 4)) {
                     break;
-                }//Para las fotos Math.pow(10, 25)
+                } // For photos Math.pow(10, 25)
 
-                //Cambia el delta para que el zoom vaya acorde al tamaño de la imagen
+                // Adjust the delta so the zoom matches the image size
                 jumpStep = Math.pow(10, Math.round(Math.log10(eyePosition.z())) - 1);
 
                 altura = eyePosition.z();

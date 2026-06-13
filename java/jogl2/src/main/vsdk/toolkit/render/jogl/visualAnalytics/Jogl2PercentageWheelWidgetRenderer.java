@@ -63,8 +63,8 @@ public class Jogl2PercentageWheelWidgetRenderer extends Jogl2Renderer {
         gl.glPushMatrix();
         
         r.begin3DRendering();
-        r.setColor((float)c.r(), (float)c.g(), (float)c.b(), 1.0f); // Recuerda RGB son los tres primeros
-        r.draw3D(key, 0.0f, 0.0f, 0.0f, 0.05f); // La cadena y la posicion
+        r.setColor((float)c.r(), (float)c.g(), (float)c.b(), 1.0f); // Remember RGB are the first three components
+        r.draw3D(key, 0.0f, 0.0f, 0.0f, 0.05f); // The string and the position
         r.endRendering();
         
         gl.glMatrixMode(GL2.GL_MODELVIEW);

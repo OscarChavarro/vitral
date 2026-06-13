@@ -3,7 +3,6 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,9 +22,8 @@ result face structure for an OK moon (21) and the four formerly failing moons,
 with and without the post-process stage (maximizeFaces +
 triangulateNonPlanarFaces), and asserts that no non-planar faces remain, that
 finish() never needs to ear-clip, and that the bowl region antipodal to the
-moon stays bit-identical to the untouched operand.  Tagged slow.
+moon stays bit-identical to the untouched operand.
 */
-@Tag("slow")
 class Stage6FaceSubdivisionDiagnosticTest
 {
     private static final int[] MOTIFS = { 21, 23, 28, 33, 38 };

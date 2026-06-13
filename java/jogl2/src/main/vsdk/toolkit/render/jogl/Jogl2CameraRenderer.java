@@ -65,7 +65,7 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
         gl.glDisable(GL.GL_TEXTURE_2D);
         gl.glShadeModel(GL2.GL_FLAT);
 
-        //- Calcule los extremos del volumen de visualizacion ---------------
+        //- Calculate the bounds of the viewing volume ---------------------
         double xn;
         double yn;
         double xf;
@@ -98,9 +98,9 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
             xf = yf * (cam.getViewportXSize()/cam.getViewportYSize());
         }
 
-        //- Genere las primitivas que muestran el volumen de visualizacion --
+        //- Generate the primitives that show the viewing volume -----------
         double delta = 0.1;
-        gl.glColor3d(1, 0.5, 0.5);   // Origen de la camara
+        gl.glColor3d(1, 0.5, 0.5);   // Camera origin
         gl.glLineWidth((float)1.0);
         gl.glBegin(GL.GL_LINES);
             gl.glVertex3d(0, 0, 0);
@@ -112,7 +112,7 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
         gl.glEnd();
 
         gl.glDisable(GL2.GL_LIGHTING);
-        gl.glColor3f(0, 1, 1);       // Plano de proyeccion
+        gl.glColor3f(0, 1, 1);       // Projection plane
         gl.glLineWidth((float)2.0);
         gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(npd, -xn/2, -yn/2);
@@ -131,7 +131,7 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
             gl.glVertex3d(npd, xn/10, yn/2);
         gl.glEnd();
 
-        gl.glColor3f(0, 1, 1);       // Plano lejano
+        gl.glColor3f(0, 1, 1);       // Far plane
         gl.glBegin(GL.GL_LINE_LOOP);
             gl.glVertex3d(fpd, -xf/2, -yf/2);
             gl.glVertex3d(fpd, xf/2, -yf/2);
@@ -149,7 +149,7 @@ public class Jogl2CameraRenderer extends Jogl2Renderer
             gl.glVertex3d(fpd, xf/10, yf/2);
         gl.glEnd();
 
-        gl.glBegin(GL.GL_LINES);  // Lineas de los bordes
+        gl.glBegin(GL.GL_LINES);  // Edge lines
             gl.glVertex3d(npd, -xn/2, -yn/2);
             gl.glVertex3d(fpd, -xf/2, -yf/2);
             gl.glVertex3d(npd, xn/2, -yn/2);

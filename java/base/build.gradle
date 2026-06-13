@@ -12,15 +12,7 @@ jacoco {
 }
 
 tasks.named('test') {
-    // Opt-in: '-PexcludeSlow' skips @Tag("slow") classes for fast local
-    // iteration. Default behavior (CI, plain ':base:test') runs everything.
-    if ( project.hasProperty('excludeSlow') ) {
-        useJUnitPlatform {
-            excludeTags 'slow'
-        }
-    } else {
-        useJUnitPlatform()
-    }
+    useJUnitPlatform()
     // Keep base tests in serial mode by default.
     maxParallelForks = 1
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'

@@ -283,7 +283,7 @@ public class NormalMap extends MediaEntity
         int yySize = inBumpmap.getYSize();
         Vector3Dd scale = inScale;
 
-        //- 1. Si el vector de escala dado es erroneo, crear uno base -------
+        //- 1. If the given scale vector is invalid, create a default one ----
         if( scale.x() < VSDK.EPSILON || scale.y() < VSDK.EPSILON ||
             scale.z() < VSDK.EPSILON ) {
             double val = ((double)xxSize) / ((double)yySize);
@@ -297,7 +297,7 @@ public class NormalMap extends MediaEntity
         bumpMapScale = Vector3Dd.copyOf(scale);
         init(xxSize, yySize);
 
-        //- 2. Calculo de las derivadas parciales al interior de la imagen --
+        //- 2. Calculate the partial derivatives inside the image ----------
         Vector3Dd normal;
         int a, b, c, d;
         int u, v;
@@ -314,7 +314,7 @@ public class NormalMap extends MediaEntity
 
                 normal = df_du.crossProduct(df_dv);
 
-                // Modular el vector `normal` respecto al vector `inOutScale`
+                // Scale the `normal` vector relative to the `inOutScale` vector
                 normal = new Vector3Dd(
                     normal.x() * scale.x(),
                     normal.y() * scale.y(),
@@ -325,7 +325,7 @@ public class NormalMap extends MediaEntity
             }
         }
 
-        //- 3. Copia de las derivadas para los bordes de la imagen ----------
+        //- 3. Copy the derivatives to the image borders -------------------
         // \todo : check why are two pixels down and left needed!
         for( u = 0; u < xxSize; u++ ) {
             putNormal(u, 0, getNormal(u, 1));

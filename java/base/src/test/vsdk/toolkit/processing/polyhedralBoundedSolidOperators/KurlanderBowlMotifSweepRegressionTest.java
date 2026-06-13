@@ -1,6 +1,5 @@
 package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
@@ -19,12 +18,10 @@ fresh bowl and classified as OK / EMPTY / UNCHANGED / INVALID / BLACK_FACES /
 EXCEPTION.  The test asserts that the per-category counts stay at or above the
 observed baseline so that regressions are caught immediately.
 
-Marked {@code @Tag("slow")} because building and operating on 40 independent
-bowl copies takes several minutes. Slow-tagged tests are excluded from the
-default build (see base/build.gradle); run explicitly with:
-{@code gradle :base:test -PincludeSlowTests --tests "*KurlanderBowlMotifSweepRegressionTest"}
+Building and operating on 40 independent bowl copies takes several minutes.
+Run explicitly with:
+{@code gradle :base:test --tests "*KurlanderBowlMotifSweepRegressionTest"}
 */
-@Tag("slow")
 class KurlanderBowlMotifSweepRegressionTest
 {
     /**
