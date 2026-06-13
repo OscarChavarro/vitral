@@ -339,7 +339,7 @@ public class CsgKurlanderBowlFixture
         return operands;
     }
 
-    private static PolyhedralBoundedSolid createSingleMotif(int motifIndex)
+    public static PolyhedralBoundedSolid createSingleMotif(int motifIndex)
     {
         int normalizedIndex = normalizeSingleMotifIndex(motifIndex);
         int motifTypeIndex;
