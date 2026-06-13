@@ -12,10 +12,27 @@ jacoco {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    // Opt-in: '-PexcludeSlow' skips @Tag("slow") classes for fast local
+    // iteration. Default behavior (CI, plain ':base:test') runs everything.
+    if ( project.hasProperty('excludeSlow') ) {
+        useJUnitPlatform {
+            excludeTags 'slow'
+        }
+    } else {
+        useJUnitPlatform()
+    }
     // Keep base tests in serial mode by default.
     maxParallelForks = 1
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+    // Opt-in: '-Pjfr' attaches Java Flight Recorder for CSG boolean profiling.
+    // Writes base/build/profiling/test.jfr (settings=profile, dumponexit=true).
+    if ( project.hasProperty('jfr') ) {
+        File profilingDir = layout.buildDirectory.dir('profiling').get().asFile
+        profilingDir.mkdirs()
+        jvmArgs(
+            '-XX:StartFlightRecording=settings=profile,dumponexit=true,' +
+            'filename=' + new File(profilingDir, 'test.jfr').absolutePath)
+    }
     finalizedBy(tasks.named('jacocoTestReport'))
 }
 

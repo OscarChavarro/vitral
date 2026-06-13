@@ -13,11 +13,27 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
     private _CircularDoubleLinkedListNode<E> window;
     private int currentSize;
 
+    // Sequential-access memo for get(int): the dominant access pattern in the
+    // CSG kernel is `for (i = 0; i < list.size(); i++) list.get(i)`, which on a
+    // plain head-relative scan is O(n^2) per loop. Caching the last accessed
+    // (index, node) lets an ascending walk continue from where it left off,
+    // making such loops O(n) amortized. Reset on any structural change. Marked
+    // transient so it never participates in serialization/equality.
+    private transient int accessMemoIndex;
+    private transient _CircularDoubleLinkedListNode<E> accessMemoNode;
+
     public CircularDoubleLinkedList()
     {
         head = null;
         window = null;
         currentSize = 0;
+        invalidateAccessMemo();
+    }
+
+    private void invalidateAccessMemo()
+    {
+        accessMemoIndex = -1;
+        accessMemoNode = null;
     }
 
     public int size()
@@ -42,6 +58,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             head.previous = newContainer;
         }
         currentSize++;
+        invalidateAccessMemo();
     }
 
     public void insertBefore(E newElem, E pivot)
@@ -72,6 +89,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             window.previous = newContainer;
         }
         currentSize++;
+        invalidateAccessMemo();
     }
 
     public void locateWindowAtIndex(int index)
@@ -114,6 +132,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
 
         window1.data = window2.data;
         window2.data = temp;
+        invalidateAccessMemo();
     }
 
     public E next()
@@ -186,10 +205,23 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             return null;
         }
         int i;
-        for ( i = 0, current = head;
-              i < currentSize && i < index; i++, current = current.next ) {
+        // Start from the access memo when it is at or before the requested
+        // index, so ascending get(i) walks continue forward instead of
+        // restarting from head; otherwise scan from head.
+        if ( accessMemoNode != null && accessMemoIndex >= 0 &&
+             accessMemoIndex <= index ) {
+            i = accessMemoIndex;
+            current = accessMemoNode;
+        }
+        else {
+            i = 0;
+            current = head;
+        }
+        for ( ; i < currentSize && i < index; i++, current = current.next ) {
             // Local traversal keeps indexed reads independent from window.
 	}
+        accessMemoIndex = index;
+        accessMemoNode = current;
         return current.data;
     }
 
@@ -207,6 +239,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
         window.next.previous = window.previous;
         window = null;
         currentSize--;
+        invalidateAccessMemo();
     }
 
     public void push(E newElem)
@@ -237,6 +270,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             window.previous = newContainer;
         }
         currentSize++;
+        invalidateAccessMemo();
     }
 
     public void reverse()
@@ -256,6 +290,7 @@ public class CircularDoubleLinkedList<E> extends FundamentalEntity
             qtr = qtr.previous;
             i++;
         } while ( ptr != head && i < currentSize/2 );
+        invalidateAccessMemo();
     }
 
 }

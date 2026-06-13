@@ -480,8 +480,29 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
         return testPointInsideDetailed(p, tolerance).status();
     }
 
+    /**
+    Variant that reuses a caller-supplied containing plane instead of
+    recomputing it. Read-only analysis passes (point classification) test many
+    points against the same unchanged face, so precomputing the plane once and
+    threading it here avoids a full Newell recompute (plus tolerance-context
+    rebuild) per point. The supplied plane must be {@code this} face's
+    containing plane (or null to fall back to recomputation).
+    @param plane precomputed containing plane for this face, or null.
+    */
+    public int
+    testPointInside(Vector3Dd p, double tolerance, InfinitePlane plane)
+    {
+        return testPointInsideDetailed(p, tolerance, plane).status();
+    }
+
     public PointInsideResult
     testPointInsideDetailed(Vector3Dd p, double tolerance)
+    {
+        return testPointInsideDetailed(p, tolerance, getContainingPlane());
+    }
+
+    public PointInsideResult
+    testPointInsideDetailed(Vector3Dd p, double tolerance, InfinitePlane plane)
     {
         int nc; // Number of crossings
         int sh; // Sign holder for vertex crossings
@@ -503,7 +524,10 @@ public class _PolyhedralBoundedSolidFace extends FundamentalEntity {
 
         polygon2Dh = new ArrayList<_PolyhedralBoundedSolidHalfEdge>();
         polygon2Dvv = new ArrayList<_PolyhedralBoundedSolidVertex>();
-        n = getContainingPlane().getNormal();
+        if ( plane == null ) {
+            plane = getContainingPlane();
+        }
+        n = plane.getNormal();
 
         if ( Math.abs(n.x()) >= Math.abs(n.y()) &&
              Math.abs(n.x()) >= Math.abs(n.z()) ) {

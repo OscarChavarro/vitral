@@ -686,6 +686,15 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             .runTouchingOnlyPreflightCase(inSolidA, inSolidB);
     }
 
+    private static boolean isTouchingOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        _PolyhedralBoundedSolidSetNonIntersectingClassifier._PreflightCache cache)
+    {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            .runTouchingOnlyPreflightCase(inSolidA, inSolidB, cache);
+    }
+
     private static boolean isContainmentOnlyPreflightCase(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
@@ -694,8 +703,19 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             .runContainmentOnlyPreflightCase(inSolidA, inSolidB);
     }
 
+    private static boolean isContainmentOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        _PolyhedralBoundedSolidSetNonIntersectingClassifier._PreflightCache cache)
+    {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            .runContainmentOnlyPreflightCase(inSolidA, inSolidB, cache);
+    }
+
     /**
-    Handles no-intersection cases (book problem [MANT1988].15.1).
+    Handles no-intersection cases (book problem [MANT1988].15.1). This overload
+    builds a fresh classification: use it after the generate/classify stages,
+    where the operands have already been mutated and the preflight memo is stale.
     */
     private static PolyhedralBoundedSolid setOpNoIntersectionCase(
         PolyhedralBoundedSolid inSolidA,
@@ -705,6 +725,22 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
     {
         return _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op);
+    }
+
+    /**
+    Handles no-intersection cases (book problem [MANT1988].15.1), reusing the
+    per-setOp preflight memo. Only valid while the operands are still unmutated
+    (i.e. inside the preflight block).
+    */
+    private static PolyhedralBoundedSolid setOpNoIntersectionCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op,
+        _PolyhedralBoundedSolidSetNonIntersectingClassifier._PreflightCache cache)
+    {
+        return _PolyhedralBoundedSolidSetNonIntersectingClassifier
+            .runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op, cache);
     }
 
     public static PolyhedralBoundedSolid setOp(
@@ -1003,9 +1039,19 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             debugSolid(inSolidB, "outputB_stage01");
         }
 
+        // Per-setOp memo shared across all "no real intersection" preflights:
+        // operands are not mutated until setOpGenerate runs (below), so the
+        // heavy classification/overlap/edge-face predicates are computed once
+        // and reused. See _PreflightCache.
+        _PolyhedralBoundedSolidSetNonIntersectingClassifier._PreflightCache
+            preflightCache =
+                _PolyhedralBoundedSolidSetNonIntersectingClassifier
+                    .newPreflightCache(inSolidA, inSolidB);
+
         PolyhedralBoundedSolid coplanarAreaContactResult =
             _PolyhedralBoundedSolidSetNonIntersectingClassifier
-                .runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op);
+                .runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, res, op,
+                    preflightCache);
         if ( coplanarAreaContactResult != null ) {
             res = coplanarAreaContactResult;
             if ( res.getPolygonsList().size() > 0 ) {
@@ -1014,8 +1060,9 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             return res;
         }
 
-        if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB) ) {
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+        if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB, preflightCache) ) {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
+                preflightCache);
             if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }
@@ -1055,8 +1102,10 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         // second step of absorption identities A ∪ (A ∩ B) where
         // A ∩ B ⊂ A), the regular pipeline produces ∅. Dispatch to a
         // dedicated containment table per Mäntylä Ch.15.1.
-        if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB) ) {
-            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
+        if ( isContainmentOnlyPreflightCase(inSolidA, inSolidB,
+                preflightCache) ) {
+            res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
+                preflightCache);
             if ( res.getPolygonsList().size() > 0 ) {
                 postProcessResult(res, maximizeResultFaces);
             }

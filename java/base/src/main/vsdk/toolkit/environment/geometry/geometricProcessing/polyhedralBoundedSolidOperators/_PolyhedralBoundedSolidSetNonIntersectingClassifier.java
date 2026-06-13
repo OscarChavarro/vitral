@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.common.linealAlgebra.Vector2Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
@@ -39,6 +40,97 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     }
 
     /**
+    Per-{@code setOp} memo for the expensive, order-independent preflight
+    predicates. Within a single Boolean operation the operand solids are not
+    mutated until the Mäntylä generate stage runs (after every preflight has
+    either fired or declined), so each predicate is a pure function of
+    {@code (a, b)} and may be computed once and reused across
+    {@link #runPartialCoplanarFaceAreaCase}, {@link #runTouchingOnlyPreflightCase},
+    {@link #runContainmentOnlyPreflightCase} and {@link #runSetOpNoIntersectionCase}.
+
+    <p>The cache only memoizes the heavy primitives (two
+    {@code classifySolidAgainstSolid} scans, the interior-overlap grid test and
+    the two edge/face intersection scans). It does not change any decision: a
+    request that hits the cache returns exactly the value the uncached path
+    would have recomputed.</p>
+    */
+    static final class _PreflightCache
+    {
+        private static final int UNSET = Integer.MIN_VALUE;
+
+        private final PolyhedralBoundedSolid a;
+        private final PolyhedralBoundedSolid b;
+        private int aInB = UNSET;
+        private int bInA = UNSET;
+        private byte interiorOverlap = -1;
+        private byte edgeFaceAB = -1;
+        private byte edgeFaceBA = -1;
+
+        private _PreflightCache(PolyhedralBoundedSolid a,
+            PolyhedralBoundedSolid b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+
+        int aInB()
+        {
+            if ( aInB == UNSET ) {
+                aInB = classifySolidAgainstSolid(a, b);
+            }
+            return aInB;
+        }
+
+        int bInA()
+        {
+            if ( bInA == UNSET ) {
+                bInA = classifySolidAgainstSolid(b, a);
+            }
+            return bInA;
+        }
+
+        boolean hasInteriorOverlap()
+        {
+            if ( interiorOverlap < 0 ) {
+                interiorOverlap = (byte)(hasConfirmedInteriorOverlap(a, b)
+                    ? 1 : 0);
+            }
+            return interiorOverlap == 1;
+        }
+
+        boolean hasEdgeFaceIntersectionAB()
+        {
+            if ( edgeFaceAB < 0 ) {
+                edgeFaceAB = (byte)(hasProperEdgeFaceIntersection(a, b)
+                    ? 1 : 0);
+            }
+            return edgeFaceAB == 1;
+        }
+
+        boolean hasEdgeFaceIntersectionBA()
+        {
+            if ( edgeFaceBA < 0 ) {
+                edgeFaceBA = (byte)(hasProperEdgeFaceIntersection(b, a)
+                    ? 1 : 0);
+            }
+            return edgeFaceBA == 1;
+        }
+    }
+
+    /**
+    Builds a fresh per-{@code setOp} preflight memo for the operand pair. The
+    caller is responsible for using it only while {@code inSolidA}/{@code inSolidB}
+    remain unmutated (i.e. across the preflight block, before the generate
+    stage).
+    */
+    static _PreflightCache newPreflightCache(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB)
+    {
+        return new _PreflightCache(inSolidA, inSolidB);
+    }
+
+    /**
     §7.3.1.D preflight — detects the case where one solid is strictly
     contained in the other (A⊂B or B⊂A) without any real edge/face
     intersection and without partial coplanar overlap. When this holds,
@@ -55,12 +147,20 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
+        return runContainmentOnlyPreflightCase(inSolidA, inSolidB,
+            newPreflightCache(inSolidA, inSolidB));
+    }
+
+    static boolean runContainmentOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        _PreflightCache cache)
+    {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
 
-        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
-        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
-        int relation = classifyNoIntersectionRelation(aInB, bInA);
+        int relation = classifyNoIntersectionRelation(cache.aInB(),
+            cache.bInA());
 
         // Restricted to strict containment only. An earlier attempt to
         // extend this preflight to "tangent containment" (one solid
@@ -76,10 +176,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
+        if ( cache.hasEdgeFaceIntersectionAB() ) {
             return false;
         }
-        if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+        if ( cache.hasEdgeFaceIntersectionBA() ) {
             return false;
         }
 
@@ -90,25 +190,33 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB)
     {
+        return runTouchingOnlyPreflightCase(inSolidA, inSolidB,
+            newPreflightCache(inSolidA, inSolidB));
+    }
+
+    static boolean runTouchingOnlyPreflightCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        _PreflightCache cache)
+    {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
 
-        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
-        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
-        int relation = classifyNoIntersectionRelation(aInB, bInA);
+        int relation = classifyNoIntersectionRelation(cache.aInB(),
+            cache.bInA());
 
         if ( relation != NO_INT_RELATION_TOUCHING ) {
             return false;
         }
 
-        if ( hasConfirmedInteriorOverlap(inSolidA, inSolidB) ) {
+        if ( cache.hasInteriorOverlap() ) {
             return false;
         }
 
-        if ( hasProperEdgeFaceIntersection(inSolidA, inSolidB) ) {
+        if ( cache.hasEdgeFaceIntersectionAB() ) {
             return false;
         }
-        if ( hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+        if ( cache.hasEdgeFaceIntersectionBA() ) {
             return false;
         }
 
@@ -125,12 +233,22 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid outRes,
         int op)
     {
+        return runSetOpNoIntersectionCase(inSolidA, inSolidB, outRes, op,
+            newPreflightCache(inSolidA, inSolidB));
+    }
+
+    static PolyhedralBoundedSolid runSetOpNoIntersectionCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op,
+        _PreflightCache cache)
+    {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
 
-        int aInB = classifySolidAgainstSolid(inSolidA, inSolidB);
-        int bInA = classifySolidAgainstSolid(inSolidB, inSolidA);
-        int relation = classifyNoIntersectionRelation(aInB, bInA);
+        int relation = classifyNoIntersectionRelation(cache.aInB(),
+            cache.bInA());
 
         if ( op == INTERSECTION ) {
             if ( relation == NO_INT_RELATION_A_IN_B ) {
@@ -176,6 +294,17 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         PolyhedralBoundedSolid outRes,
         int op)
     {
+        return runPartialCoplanarFaceAreaCase(inSolidA, inSolidB, outRes, op,
+            newPreflightCache(inSolidA, inSolidB));
+    }
+
+    static PolyhedralBoundedSolid runPartialCoplanarFaceAreaCase(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        PolyhedralBoundedSolid outRes,
+        int op,
+        _PreflightCache cache)
+    {
         ArrayList<ArrayList<Vector3Dd>> contactPolygons;
         int i;
 
@@ -186,9 +315,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
 
-        if ( hasConfirmedInteriorOverlap(inSolidA, inSolidB) ||
-             hasProperEdgeFaceIntersection(inSolidA, inSolidB) ||
-             hasProperEdgeFaceIntersection(inSolidB, inSolidA) ) {
+        if ( cache.hasInteriorOverlap() ||
+             cache.hasEdgeFaceIntersectionAB() ||
+             cache.hasEdgeFaceIntersectionBA() ) {
             return null;
         }
 
@@ -227,7 +356,40 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             .pointInFace(face, point);
     }
 
+    /**
+    Precomputes the containing plane of every face of {@code solid}, indexed by
+    face position. Point classification tests many points against the same
+    unmutated solid, so computing each plane once (instead of once per point per
+    face) removes the dominant Newell/tolerance-context recompute from the hot
+    path. The returned array is only valid while {@code solid} is not mutated.
+    */
+    private static InfinitePlane[] precomputeFacePlanes(
+        PolyhedralBoundedSolid solid)
+    {
+        int n;
+        int i;
+        InfinitePlane[] planes;
+
+        if ( solid == null ) {
+            return new InfinitePlane[0];
+        }
+        n = solid.getPolygonsList().size();
+        planes = new InfinitePlane[n];
+        for ( i = 0; i < n; i++ ) {
+            planes[i] = solid.getPolygonsList().get(i).getContainingPlane();
+        }
+        return planes;
+    }
+
     private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
+        Vector3Dd point)
+    {
+        return classifyPointAgainstSolid(solid, precomputeFacePlanes(solid),
+            point);
+    }
+
+    private static int classifyPointAgainstSolid(PolyhedralBoundedSolid solid,
+        InfinitePlane[] facePlanes,
         Vector3Dd point)
     {
         int i;
@@ -243,11 +405,13 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
         for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
             face = solid.getPolygonsList().get(i);
-            if ( face.getContainingPlane() == null ) {
+            InfinitePlane facePlane = facePlanes[i];
+            if ( facePlane == null ) {
                 continue;
             }
-            if ( Math.abs(face.getContainingPlane().pointDistance(point)) <= eps ) {
-                if ( face.testPointInside(point, eps) != Geometry.OUTSIDE ) {
+            if ( Math.abs(facePlane.pointDistance(point)) <= eps ) {
+                if ( face.testPointInside(point, eps, facePlane) !=
+                     Geometry.OUTSIDE ) {
                     return Geometry.LIMIT;
                 }
             }
@@ -267,12 +431,13 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
             for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
                 face = solid.getPolygonsList().get(i);
-                if ( face.getContainingPlane() == null ) {
+                InfinitePlane facePlane = facePlanes[i];
+                if ( facePlane == null ) {
                     ambiguous = true;
                     break;
                 }
                 Ray rayHit = new Ray(ray);
-                Ray hit = face.getContainingPlane().doIntersection(rayHit);
+                Ray hit = facePlane.doIntersection(rayHit);
                 if ( hit == null ) {
                     continue;
                 }
@@ -282,7 +447,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
                 Vector3Dd pi = hit.origin().add(
                     hit.direction().multiply(hit.t()));
-                int status = face.testPointInside(pi, eps);
+                int status = face.testPointInside(pi, eps, facePlane);
                 if ( status == Geometry.LIMIT ) {
                     ambiguous = true;
                     break;
@@ -346,6 +511,55 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         return bounds[3] - bounds[0] > eps &&
             bounds[4] - bounds[1] > eps &&
             bounds[5] - bounds[2] > eps;
+    }
+
+    /**
+    Cheap, constant-size existence probe for a point interior to both solids.
+    Tests the 27 quarter/center/three-quarter combinations of the overlap AABB
+    {@code bounds} (a strict superset of the per-axis center samples the full
+    grid uses). Returns {@code true} only on a genuine INSIDE/INSIDE witness, so
+    a positive result is always exact; a negative result is inconclusive and the
+    caller must still run the exhaustive grid.
+    */
+    private static boolean hasInteriorOverlapWitnessInAabb(
+        double[] bounds,
+        PolyhedralBoundedSolid solidA,
+        PolyhedralBoundedSolid solidB,
+        InfinitePlane[] planesA,
+        InfinitePlane[] planesB)
+    {
+        double[] sx = axisProbeCoordinates(bounds[0], bounds[3]);
+        double[] sy = axisProbeCoordinates(bounds[1], bounds[4]);
+        double[] sz = axisProbeCoordinates(bounds[2], bounds[5]);
+        int i;
+        int j;
+        int k;
+
+        for ( i = 0; i < sx.length; i++ ) {
+            for ( j = 0; j < sy.length; j++ ) {
+                for ( k = 0; k < sz.length; k++ ) {
+                    Vector3Dd sample = new Vector3Dd(sx[i], sy[j], sz[k]);
+                    if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
+                         Geometry.INSIDE &&
+                         classifyPointAgainstSolid(solidB, planesB, sample) ==
+                         Geometry.INSIDE ) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static double[] axisProbeCoordinates(double min, double max)
+    {
+        double span = max - min;
+
+        return new double[] {
+            min + span / 4.0,
+            min + span / 2.0,
+            max - span / 4.0
+        };
     }
 
     private static double vertexCoordinate(
@@ -481,6 +695,25 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
+        // Precompute each solid's face planes once; every probe/grid point is
+        // classified against the same unmutated solids, so this removes the
+        // per-point Newell/tolerance-context recompute (P2 scoped cache).
+        InfinitePlane[] planesA = precomputeFacePlanes(solidA);
+        InfinitePlane[] planesB = precomputeFacePlanes(solidB);
+
+        // P1.2 — cheap early-positive pass. hasConfirmedInteriorOverlap is an
+        // existence test ("is there a point interior to both solids"); any
+        // witness gives the same answer. Probe a constant-size set of likely
+        // interior candidates (the 27 quarter/center/three-quarter combinations
+        // of the overlap AABB) before paying for the full vertex-derived grid,
+        // which can reach 10^4-10^6 points for the bowl. This only returns true
+        // on a genuine INSIDE/INSIDE witness; the exhaustive grid below remains
+        // the exact fallback for the negative case.
+        if ( hasInteriorOverlapWitnessInAabb(bounds, solidA, solidB,
+                 planesA, planesB) ) {
+            return true;
+        }
+
         xs = sampleCoordinates(bounds[0], bounds[3], solidA, solidB, 0);
         ys = sampleCoordinates(bounds[1], bounds[4], solidA, solidB, 1);
         zs = sampleCoordinates(bounds[2], bounds[5], solidA, solidB, 2);
@@ -489,9 +722,9 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             for ( j = 0; j < ys.length; j++ ) {
                 for ( k = 0; k < zs.length; k++ ) {
                     Vector3Dd sample = new Vector3Dd(xs[i], ys[j], zs[k]);
-                    if ( classifyPointAgainstSolid(solidA, sample) ==
+                    if ( classifyPointAgainstSolid(solidA, planesA, sample) ==
                          Geometry.INSIDE &&
-                         classifyPointAgainstSolid(solidB, sample) ==
+                         classifyPointAgainstSolid(solidB, planesB, sample) ==
                          Geometry.INSIDE ) {
                         return true;
                     }
@@ -514,9 +747,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return Geometry.OUTSIDE;
         }
 
+        InfinitePlane[] planesB = precomputeFacePlanes(solidB);
         for ( i = 0; i < solidA.getVerticesList().size(); i++ ) {
             _PolyhedralBoundedSolidVertex v = solidA.getVerticesList().get(i);
-            int status = classifyPointAgainstSolid(solidB, v.position);
+            int status = classifyPointAgainstSolid(solidB, planesB, v.position);
             if ( status == Geometry.INSIDE ) {
                 return Geometry.INSIDE;
             }
@@ -587,12 +821,16 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
 
             for ( j = 0; j < other.getPolygonsList().size(); j++ ) {
                 face = other.getPolygonsList().get(j);
-                if ( face == null || face.getContainingPlane() == null ) {
+                if ( face == null ) {
+                    continue;
+                }
+                InfinitePlane facePlane = face.getContainingPlane();
+                if ( facePlane == null ) {
                     continue;
                 }
 
-                d1 = face.getContainingPlane().pointDistance(v1.position);
-                d2 = face.getContainingPlane().pointDistance(v2.position);
+                d1 = facePlane.pointDistance(v1.position);
+                d2 = facePlane.pointDistance(v2.position);
                 s1 = compareToZero(d1);
                 s2 = compareToZero(d2);
 
@@ -603,7 +841,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 t = d1 / (d1 - d2);
                 p = v1.position.add(
                     v2.position.subtract(v1.position).multiply(t));
-                d3 = face.getContainingPlane().pointDistance(p);
+                d3 = facePlane.pointDistance(p);
                 if ( compareToZero(d3) != 0 ) {
                     continue;
                 }
@@ -675,14 +913,16 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
     private static boolean coplanarFaces(_PolyhedralBoundedSolidFace faceA,
                                          _PolyhedralBoundedSolidFace faceB)
     {
-        if ( faceA == null || faceB == null ||
-             faceA.getContainingPlane() == null ||
-             faceB.getContainingPlane() == null ) {
+        if ( faceA == null || faceB == null ) {
+            return false;
+        }
+        InfinitePlane planeA = faceA.getContainingPlane();
+        InfinitePlane planeB = faceB.getContainingPlane();
+        if ( planeA == null || planeB == null ) {
             return false;
         }
         if ( !PolyhedralBoundedSolidNumericPolicy.unitVectorsParallel(
-                 faceA.getContainingPlane().getNormal(),
-                 faceB.getContainingPlane().getNormal(), numericContext) ) {
+                 planeA.getNormal(), planeB.getNormal(), numericContext) ) {
             return false;
         }
         if ( faceB.boundariesList.size() < 1 ||
@@ -690,7 +930,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
             return false;
         }
 
-        return Math.abs(faceA.getContainingPlane().pointDistance(
+        return Math.abs(planeA.pointDistance(
             faceB.boundariesList.get(0).boundaryStartHalfEdge
                 .startingVertex.position)) <= numericContext.bigEpsilon();
     }
@@ -717,10 +957,10 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
         appendFaceVerticesInsideOther(points, faceA, faceB);
         appendFaceVerticesInsideOther(points, faceB, faceA);
         appendBoundaryIntersections(points, faceA, faceB);
-        sortCoplanarPolygon(points, faceA.getContainingPlane().getNormal());
+        Vector3Dd planeNormalA = faceA.getContainingPlane().getNormal();
+        sortCoplanarPolygon(points, planeNormalA);
 
-        if ( coplanarPolygonAreaMagnitude(points,
-                 faceA.getContainingPlane().getNormal()) <=
+        if ( coplanarPolygonAreaMagnitude(points, planeNormalA) <=
              numericContext.bigEpsilon() * numericContext.bigEpsilon() ) {
             points.clear();
         }
