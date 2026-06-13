@@ -264,6 +264,32 @@ public class SimpleBody extends Entity {
     }
 
     /**
+    Transforms an object-space surface normal into world space, applying the
+    inverse-scale then the body rotation (the correct normal transform for an
+    affine body transform), and renormalizing. Orientation is preserved, so an
+    outward object-space normal maps to an outward world-space normal.
+
+    @param normal object-space normal
+    @return the corresponding unit world-space normal
+    */
+    public Vector3Dd transformNormalToWorld(Vector3Dd normal)
+    {
+        return objectNormalToWorldSpace(normal);
+    }
+
+    /**
+    Transforms an object-space point into world space (scale, rotation,
+    translation).
+
+    @param point object-space point
+    @return the corresponding world-space point
+    */
+    public Vector3Dd transformPointToWorld(Vector3Dd point)
+    {
+        return objectPointToWorldSpace(point);
+    }
+
+    /**
     @return object-to-world matrix with scale, rotation and translation
     */
     public Matrix4x4d getTransformationMatrix()

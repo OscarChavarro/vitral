@@ -149,6 +149,11 @@ public class Jogl4DebuggerHudRenderer
         }
         g.drawString(referenceFrameMessage, HUD_LEFT_PADDING,
             HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
+        nextLeftLine++;
+        String hiddenLineMessage = "Hidden line [8]: "
+            + model.getAppelDisplayMode().getLabel();
+        g.drawString(hiddenLineMessage, HUD_LEFT_PADDING,
+            HUD_TOP_PADDING + nextLeftLine * LINE_HEIGHT);
         drawTopRight(g, width, nrMessage, HUD_TOP_PADDING);
         drawTopRight(g, width, nhMessage, HUD_TOP_PADDING + LINE_HEIGHT);
 

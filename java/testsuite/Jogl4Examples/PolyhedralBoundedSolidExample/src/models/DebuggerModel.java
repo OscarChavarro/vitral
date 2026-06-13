@@ -48,6 +48,7 @@ public class DebuggerModel
     private GLCanvas canvas;
     private CsgOperationNames csgOperation = CsgOperationNames.DIFFERENCE_A_MINUS_B;
     private boolean debugEdges = false;
+    private AppelDisplayMode appelDisplayMode = AppelDisplayMode.OFF;
     private boolean showCoordinateSystem = false;
     private boolean debugCsg = false;
     private boolean errorState = false;
@@ -235,6 +236,21 @@ public class DebuggerModel
     public void setEdgeIndex(int edgeIndex)
     {
         this.edgeIndex = edgeIndex;
+    }
+
+    public AppelDisplayMode getAppelDisplayMode()
+    {
+        return appelDisplayMode;
+    }
+
+    public void setAppelDisplayMode(AppelDisplayMode appelDisplayMode)
+    {
+        this.appelDisplayMode = appelDisplayMode;
+    }
+
+    public void cycleAppelDisplayMode()
+    {
+        appelDisplayMode = appelDisplayMode.nextCircular();
     }
 
     public boolean notDebugVertices()

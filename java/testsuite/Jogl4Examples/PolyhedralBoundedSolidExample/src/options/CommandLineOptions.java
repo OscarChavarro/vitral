@@ -18,6 +18,7 @@ public class CommandLineOptions
     private Integer kurlanderBowlMotifIndex;
     private Integer faceId;
     private Integer edgeIndex;
+    private String appelDumpPath;
     private Double vertexNormalSmoothingThresholdDegrees;
 
     public CommandLineOptions()
@@ -34,6 +35,7 @@ public class CommandLineOptions
         kurlanderBowlMotifIndex = null;
         faceId = null;
         edgeIndex = null;
+        appelDumpPath = null;
         vertexNormalSmoothingThresholdDegrees = null;
     }
 
@@ -100,6 +102,11 @@ public class CommandLineOptions
     public Integer getEdgeIndex()
     {
         return edgeIndex;
+    }
+
+    public String getAppelDumpPath()
+    {
+        return appelDumpPath;
     }
 
     public static CommandLineOptions parse(String[] args)
@@ -222,6 +229,16 @@ public class CommandLineOptions
                 options.edgeIndex = parseEdgeIndex(
                     arg.substring("--edgeIndex=".length()));
             }
+            else if ( "--appelDump".equals(arg) ) {
+                if ( i + 1 >= args.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing value for --appelDump");
+                }
+                options.appelDumpPath = args[++i];
+            }
+            else if ( arg.startsWith("--appelDump=") ) {
+                options.appelDumpPath = arg.substring("--appelDump=".length());
+            }
             else if ( "--normalThresholdDeg".equals(arg) ) {
                 if ( i + 1 >= args.length ) {
                     throw new IllegalArgumentException(
@@ -253,6 +270,7 @@ public class CommandLineOptions
         String outputProperty = System.getProperty("poly.output");
         String thresholdProperty = System.getProperty("poly.normalThresholdDeg");
         String edgeIndexProperty = System.getProperty("poly.edgeIndex");
+        String appelDumpProperty = System.getProperty("poly.appelDump");
 
         if ( offlineProperty != null ) {
             options.offline = Boolean.parseBoolean(offlineProperty);
@@ -266,6 +284,9 @@ public class CommandLineOptions
         }
         if ( edgeIndexProperty != null && !edgeIndexProperty.isBlank() ) {
             options.edgeIndex = parseEdgeIndex(edgeIndexProperty);
+        }
+        if ( appelDumpProperty != null && !appelDumpProperty.isBlank() ) {
+            options.appelDumpPath = appelDumpProperty;
         }
 
         String solidModelProperty = System.getProperty("poly.solidModel");

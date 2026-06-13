@@ -148,7 +148,7 @@ public class DebuggerKeyboardInteractionTechniques
                 handled = true;
             }
             case KeyEvent.KEY_8 -> {
-                model.setEdgeIndex(model.getEdgeIndex() - 1);
+                model.cycleAppelDisplayMode();
                 handled = true;
             }
             case KeyEvent.KEY_9 -> {

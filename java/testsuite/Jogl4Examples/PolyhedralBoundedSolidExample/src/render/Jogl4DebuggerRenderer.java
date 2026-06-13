@@ -6,6 +6,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import models.AppelDisplayMode;
 import models.DebuggerModel;
 import java.awt.EventQueue;
 
@@ -295,9 +296,12 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     renderLinesResult(GL4 gl,
                       Calligraphic2DBuffer contourLines,
                       Calligraphic2DBuffer visibleLines,
-                      Calligraphic2DBuffer hiddenLines)
+                      Calligraphic2DBuffer hiddenLines,
+                      boolean showHiddenLines)
     {
-        drawBufferedLines(gl, hiddenLines, 0.7f, 0.7f, 0.7f, 1.0f);
+        if ( showHiddenLines ) {
+            drawBufferedLines(gl, hiddenLines, 0.7f, 0.7f, 0.7f, 1.0f);
+        }
         drawBufferedLines(gl, visibleLines, 0.0f, 0.0f, 0.0f, 4.0f);
         drawBufferedLines(gl, contourLines, 0.0f, 0.0f, 0.0f, 8.0f);
     }
@@ -355,7 +359,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             Jogl4PolyhedralBoundedSolidRenderer.drawDebugEdges(gl,
                 model.getSolid(), model.getCamera(), model.getEdgeIndex(), mvp);
         }
-        else if ( model.getEdgeIndex() == -3 ) {
+        else if ( model.getEdgeIndex() == -3 ||
+                  model.getAppelDisplayMode() != AppelDisplayMode.OFF ) {
             contourLines = new Calligraphic2DBuffer();
             visibleLines = new Calligraphic2DBuffer();
             hiddenLines = new Calligraphic2DBuffer();
@@ -369,7 +374,10 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             bodyArray.add(body);
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);
-            renderLinesResult(gl, contourLines, visibleLines, hiddenLines);
+            boolean showHiddenLines = model.getAppelDisplayMode() !=
+                AppelDisplayMode.EDGES_VISIBLE;
+            renderLinesResult(gl, contourLines, visibleLines, hiddenLines,
+                showHiddenLines);
         }
 
         /*
