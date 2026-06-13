@@ -45,6 +45,11 @@ public class CameraControllerOrbiter extends CameraController {
         this.pointOfInterest = Vector3Dd.copyOf(pointOfInterest);
     }
 
+    private void syncPointOfInterestWithFocusedPosition(Vector3Dd focusedPosition)
+    {
+        pointOfInterest = Vector3Dd.copyOf(focusedPosition);
+    }
+
     private double augmentLogarithmic(double val, double EPSILON)
     {
         if ( val < 0.001 ) val += 0.0001;
@@ -286,6 +291,15 @@ public class CameraControllerOrbiter extends CameraController {
             camera.setPosition(eyePosition);
             camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
             camera.setRotation(R);
+
+            if ( keyEvent.keycode == KeyEvent.KEY_x ||
+                 keyEvent.keycode == KeyEvent.KEY_X ||
+                 keyEvent.keycode == KeyEvent.KEY_y ||
+                 keyEvent.keycode == KeyEvent.KEY_Y ||
+                 keyEvent.keycode == KeyEvent.KEY_z ||
+                 keyEvent.keycode == KeyEvent.KEY_Z ) {
+                syncPointOfInterestWithFocusedPosition(focusedPosition);
+            }
         }
         camera.setOrthogonalZoom(orthogonalZoom);
         camera.setFov(fov);
@@ -393,6 +407,10 @@ public class CameraControllerOrbiter extends CameraController {
             camera.setPosition(eyePosition);
             camera.setFocusedPositionMaintainingOrthogonality(focusedPosition);
             camera.setRotation(R);
+
+            if ( (modifiers & MouseEvent.BUTTON2_DOWN_MASK) != 0 ) {
+                syncPointOfInterestWithFocusedPosition(focusedPosition);
+            }
         }
 
         //------------------------------------------------------------

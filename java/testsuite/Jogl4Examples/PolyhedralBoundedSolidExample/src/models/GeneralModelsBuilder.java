@@ -229,7 +229,7 @@ public final class GeneralModelsBuilder
             }
             break;
           case STEP_IMPORT:
-            mySolid = importFromStepFile("../../../../etc/solids/moonMotif.step");
+            mySolid = importFromStepFile("../../../../etc/solids/kurlanderBowl.step");
             break;
           case HOLLOW_BOX:
             mySolid = createHollowBox();

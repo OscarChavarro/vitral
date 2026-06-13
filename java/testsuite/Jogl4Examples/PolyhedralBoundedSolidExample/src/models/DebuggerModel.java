@@ -27,7 +27,7 @@ public class DebuggerModel
     private static final int MIN_SUBDIVISION_CIRCUMFERENCE = 3;
     private static final int MIN_SUBDIVISION_HEIGHT = 1;
 
-    private SolidModelNames solidModelName = SolidModelNames.CSG_DIRECT;
+    private SolidModelNames solidModelName = SolidModelNames.STEP_IMPORT;
     private CsgSampleNames csgSample = CsgSampleNames.KURLANDER_BOWL_SINGLE_MOTIF;
     private int kurlanderBowlSingleMotifIndex = 38;
     private int subdivisionCircumference = 16;

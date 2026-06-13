@@ -82,12 +82,39 @@ class CameraControllerInteractionTest
         assertVectorEquals(camera.getPosition(), expectedPosition);
     }
 
+    @Test
+    void given_orbiterTranslation_when_orbitingAfterwards_then_usesTranslatedFocusAsPointOfInterest()
+    {
+        // Arrange
+        Camera camera = new Camera();
+        CameraControllerOrbiter controller = new CameraControllerOrbiter(camera);
+        controller.setPointOfInterest(new Vector3Dd(0, 0, 0));
+
+        // Action
+        boolean translated = controller.processKeyPressedEvent(keyEvent(KeyEvent.KEY_X));
+        Vector3Dd translatedFocus = camera.getFocusedPosition();
+        boolean orbited = controller.processKeyPressedEvent(keyEvent(KeyEvent.KEY_LEFT));
+
+        // Assert
+        assertThat(translated).isTrue();
+        assertThat(orbited).isTrue();
+        assertVectorEquals(controller.getPointOfInterest(), translatedFocus);
+        assertVectorEquals(camera.getFocusedPosition(), translatedFocus);
+    }
+
     private static MouseEvent mouseEvent(int x, int y, int modifiers)
     {
         MouseEvent event = new MouseEvent();
         event.setX(x);
         event.setY(y);
         event.setModifiers(modifiers);
+        return event;
+    }
+
+    private static KeyEvent keyEvent(int keyCode)
+    {
+        KeyEvent event = new KeyEvent();
+        event.keycode = keyCode;
         return event;
     }
 
