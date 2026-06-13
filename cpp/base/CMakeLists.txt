@@ -43,6 +43,8 @@ message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
+    src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
+    src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.h
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
@@ -51,6 +53,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/linealAlgebra/AlgebraPrimitives.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.cpp
     src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableChecksum16.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableSine.cpp
     src/main/java/lang/Object.cpp
     src/main/java/lang/String.cpp
     src/main/java/lang/System.cpp
@@ -83,7 +87,6 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/scene/SimpleSceneSnapshot.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBodyGroup.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBody.cpp
-    src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
     src/main/vsdk/toolkit/processing/StopWatch.cpp
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp
@@ -171,6 +174,13 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
     src/main/java/io/BufferedOutputStream.cpp
     src/main/vsdk/toolkit/media/MediaEntity.h
+    src/main/vsdk/toolkit/media/solidTexture/TextureUtils.cpp
+    src/main/vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.cpp
+    src/main/vsdk/toolkit/media/solidTexture/from2d/ImageTexture.cpp
+    src/main/vsdk/toolkit/media/solidTexture/from2d/SolidTextureCoordinateMapper.cpp
+    src/main/vsdk/toolkit/media/solidTexture/procedural/BumpTextureFixture.cpp
+    src/main/vsdk/toolkit/media/solidTexture/procedural/ColorTextureFixture.cpp
+    src/main/vsdk/toolkit/media/solidTexture/procedural/ProceduralNoise.cpp
     src/main/vsdk/toolkit/media/RGBPixel.cpp
     src/main/vsdk/toolkit/media/RGBAPixel.cpp
     src/main/vsdk/toolkit/media/ShapeDescriptor.cpp

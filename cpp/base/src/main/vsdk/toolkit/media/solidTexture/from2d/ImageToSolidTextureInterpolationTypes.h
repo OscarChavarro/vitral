@@ -1,0 +1,12 @@
+#ifndef __SOLID_TEXTURE_BITMAP_INTERPOLATION_TYPES_H__
+#define __SOLID_TEXTURE_BITMAP_INTERPOLATION_TYPES_H__
+
+enum ImageToSolidTextureInterpolationTypes {
+    NO_INTERPOLATION = 0,
+    NEAREST_NEIGHBOR = 1,
+    BI_LINEAR = 2,
+    CUBIC_SPLINE = 3,
+    NORMALIZED_DIST = 4
+};
+
+#endif
