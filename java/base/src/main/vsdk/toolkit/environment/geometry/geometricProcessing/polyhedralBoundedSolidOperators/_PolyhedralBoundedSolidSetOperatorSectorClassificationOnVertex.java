@@ -43,7 +43,7 @@ public class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex
         double an;
         Vector3Dd a = ref1;
 
-        if ( PolyhedralBoundedSolidSetOperator.colinearVectorsWithDirection(ref1, referenceLine) ) {
+        if ( _PolyhedralBoundedSolidSetOperator.colinearVectorsWithDirection(ref1, referenceLine) ) {
             a = ref2;
         }
 

@@ -147,7 +147,7 @@ class _PolyhedralBoundedSolidIdNamespace
     [MANT1988].15.4. Increments the face and vertex identifiers of
     `solidToUpdate` so that they do not overlap with `referenceSolid`
     identifiers. Centralized here in Stage 7 R3 so the ID-renaming policy
-    lives in one place; {@link PolyhedralBoundedSolidSetOperator#updmaxnames}
+    lives in one place; {@link _PolyhedralBoundedSolidSetOperator#updmaxnames}
     delegates to this method.
     @param solidToUpdate solid whose IDs are offset past the reference.
     @param referenceSolid solid whose maxima define the offset.
@@ -180,7 +180,7 @@ class _PolyhedralBoundedSolidIdNamespace
     Resolves the next vertex ID through the given namespace when available,
     falling back to the legacy {@code max(maxVertexId)+1} policy when no
     namespace is active. Centralizes the null-namespace fallback that used
-    to live inline in {@link PolyhedralBoundedSolidSetOperator}.
+    to live inline in {@link _PolyhedralBoundedSolidSetOperator}.
     @param current first operand.
     @param other second operand.
     @param namespace active namespace, or {@code null} to use the fallback.

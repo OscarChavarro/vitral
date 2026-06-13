@@ -731,7 +731,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
             he.startingVertex.position);
         ref2 = he.next().startingVertex.position.subtract(
             he.startingVertex.position);
-        probe = PolyhedralBoundedSolidSetOperator.inside(he);
+        probe = _PolyhedralBoundedSolidSetOperator.inside(he);
         if ( probe == null || probe.length() <=
              numericContext.unitVectorTolerance() ) {
             probe = selectSectorInteriorProbe(ref1, ref2, ref1.crossProduct(ref2),
@@ -753,7 +753,7 @@ final class _PolyhedralBoundedSolidSetGeometricPredicateProcessor
 
         fallbackProbe = null;
         if ( sector.he != null ) {
-            fallbackProbe = PolyhedralBoundedSolidSetOperator.inside(sector.he);
+            fallbackProbe = _PolyhedralBoundedSolidSetOperator.inside(sector.he);
         }
         probe = selectSectorInteriorProbe(sector.ref1, sector.ref2,
             sector.ref12, fallbackProbe);

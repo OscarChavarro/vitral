@@ -341,7 +341,7 @@ class SetOpConnectScanJoinTest
 
     /**
     §6.2 regression guard: the retry-with-forceARingMove path was
-    deleted from {@link PolyhedralBoundedSolidSetOperator}; no helper
+    deleted from {@link _PolyhedralBoundedSolidSetOperator}; no helper
     name from that family may reappear.
      */
     @Test
@@ -354,7 +354,7 @@ class SetOpConnectScanJoinTest
         };
         ArrayList<String> survivors = new ArrayList<String>();
         for ( Method m :
-              PolyhedralBoundedSolidSetOperator.class.getDeclaredMethods() ) {
+              _PolyhedralBoundedSolidSetOperator.class.getDeclaredMethods() ) {
             for ( String banned : forbidden ) {
                 if ( m.getName().equals(banned) ) {
                     survivors.add(banned);

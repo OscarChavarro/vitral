@@ -18,7 +18,7 @@ import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBo
 Structural-shape boolean fallback for extruded YZ profiles: detects the
 profile-subtraction case where the general pipeline emits only degenerate
 vertex/face rings and rebuilds the difference directly from the clipped
-profile. Extracted verbatim from {@link PolyhedralBoundedSolidSetOperator} in
+profile. Extracted verbatim from {@link _PolyhedralBoundedSolidSetOperator} in
 Stage 7 R2 (one family per class); pure code motion, no behavior change.
  */
 final class _PolyhedralBoundedSolidProfileDifferenceFallback

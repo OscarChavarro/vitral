@@ -74,18 +74,18 @@ public final class Mant1988Section15_2UnionDiagnostic
             (coplanarAreaResult != null));
         System.out.println("touchingOnlyPreflight=" + touchingOnly);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpGenerate",
             new Class<?>[] { PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             solidA, solidB);
 
         ArrayList<?> sonva = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonva");
+            _PolyhedralBoundedSolidSetOperator.class, "sonva");
         ArrayList<?> sonvb = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonvb");
+            _PolyhedralBoundedSolidSetOperator.class, "sonvb");
         ArrayList<?> sonvv = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonvv");
+            _PolyhedralBoundedSolidSetOperator.class, "sonvv");
 
         System.out.println();
         System.out.println("=== After Generate ===");
@@ -100,21 +100,21 @@ public final class Mant1988Section15_2UnionDiagnostic
             new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> soneb =
             new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "sonea", sonea);
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "soneb", soneb);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpClassify",
             new Class<?>[] { int.class, PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             PolyhedralBoundedSolidModeler.UNION, solidA, solidB);
 
         sonea = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonea");
+            _PolyhedralBoundedSolidSetOperator.class, "sonea");
         soneb = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "soneb");
+            _PolyhedralBoundedSolidSetOperator.class, "soneb");
 
         System.out.println();
         System.out.println("=== After Classify ===");
@@ -125,15 +125,15 @@ public final class Mant1988Section15_2UnionDiagnostic
         printSolidSummary("classifiedA:block", solidA);
         printSolidSummary("classifiedB:wedge", solidB);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpConnect",
             new Class<?>[] { int.class },
             PolyhedralBoundedSolidModeler.UNION);
 
         ArrayList<_PolyhedralBoundedSolidFace> sonfa = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonfa");
+            _PolyhedralBoundedSolidSetOperator.class, "sonfa");
         ArrayList<_PolyhedralBoundedSolidFace> sonfb = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonfb");
+            _PolyhedralBoundedSolidSetOperator.class, "sonfb");
 
         System.out.println();
         System.out.println("=== After Connect ===");
@@ -149,7 +149,7 @@ public final class Mant1988Section15_2UnionDiagnostic
         printSelectedFaces("connectedB:wedge", solidB, new int[] { 15, 21 });
 
         PolyhedralBoundedSolid result = new PolyhedralBoundedSolid();
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpFinish",
             new Class<?>[] { PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class, PolyhedralBoundedSolid.class,
@@ -220,7 +220,7 @@ public final class Mant1988Section15_2UnionDiagnostic
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(solidB);
         PolyhedralBoundedSolidTopologyEditing.compactIds(solidA);
         PolyhedralBoundedSolidTopologyEditing.compactIds(solidB);
-        PolyhedralBoundedSolidSetOperator.updmaxnames(solidB, solidA);
+        _PolyhedralBoundedSolidSetOperator.updmaxnames(solidB, solidA);
 
         numericContext = PolyhedralBoundedSolidNumericPolicy.forSolids(
             solidA, solidB);
@@ -708,32 +708,32 @@ public final class Mant1988Section15_2UnionDiagnostic
 
         prepareOperandsLikeSetOp(solidA, solidB);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpGenerate",
             new Class<?>[] { PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             solidA, solidB);
 
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "sonea", new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>());
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "soneb", new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>());
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpClassify",
             new Class<?>[] { int.class, PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             PolyhedralBoundedSolidModeler.UNION, solidA, solidB);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpConnect",
             new Class<?>[] { int.class },
             PolyhedralBoundedSolidModeler.UNION);
 
         ArrayList<_PolyhedralBoundedSolidFace> sonfa = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonfa");
+            _PolyhedralBoundedSolidSetOperator.class, "sonfa");
         ArrayList<_PolyhedralBoundedSolidFace> sonfb = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonfb");
+            _PolyhedralBoundedSolidSetOperator.class, "sonfb");
 
         int oldsize = sonfa.size();
         int i;
@@ -781,30 +781,30 @@ public final class Mant1988Section15_2UnionDiagnostic
 
         prepareOperandsLikeSetOp(solidA, solidB);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpGenerate",
             new Class<?>[] { PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             solidA, solidB);
 
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "sonea", new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>());
-        setPrivateStaticField(PolyhedralBoundedSolidSetOperator.class,
+        setPrivateStaticField(_PolyhedralBoundedSolidSetOperator.class,
             "soneb", new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>());
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpClassify",
             new Class<?>[] { int.class, PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class },
             PolyhedralBoundedSolidModeler.UNION, solidA, solidB);
 
-        invokePrivateStatic(PolyhedralBoundedSolidSetOperator.class,
+        invokePrivateStatic(_PolyhedralBoundedSolidSetOperator.class,
             "setOpConnect",
             new Class<?>[] { int.class },
             PolyhedralBoundedSolidModeler.UNION);
 
         ArrayList<_PolyhedralBoundedSolidFace> sonfb = getPrivateStaticList(
-            PolyhedralBoundedSolidSetOperator.class, "sonfb");
+            _PolyhedralBoundedSolidSetOperator.class, "sonfb");
         ArrayList<_PolyhedralBoundedSolidFace> sonfa =
             new ArrayList<_PolyhedralBoundedSolidFace>();
         int i;

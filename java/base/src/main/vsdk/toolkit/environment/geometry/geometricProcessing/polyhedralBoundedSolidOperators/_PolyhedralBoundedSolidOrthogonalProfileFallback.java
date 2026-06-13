@@ -21,7 +21,7 @@ import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBo
 Structural-shape boolean fallback for orthogonal extruded profiles (X-extruded
 YZ and Y-extruded XZ): detects the profile-cell boolean case and rebuilds the
 result cell-by-cell. Extracted verbatim from
-{@link PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
+{@link _PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
 pure code motion, no behavior change.
  */
 final class _PolyhedralBoundedSolidOrthogonalProfileFallback

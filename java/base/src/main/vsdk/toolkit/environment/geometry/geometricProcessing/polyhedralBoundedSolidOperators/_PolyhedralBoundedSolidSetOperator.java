@@ -65,7 +65,7 @@ The algorithm is structured in 5 big phases:
 Note that each big phase is controlled in a method (mark as "big phase" in
 its documentation).
 */
-public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOperator
+public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOperator
 {
     /**
     Debug flags.
@@ -771,7 +771,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             snapshot = bytes.toByteArray();
         }
         catch ( IOException e ) {
-            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to clone " + solidLabel +
                 " for subtract connect recovery: " +
@@ -785,21 +785,21 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
             return (PolyhedralBoundedSolid)input.readObject();
         }
         catch ( IOException e ) {
-            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +
                 e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         catch ( StackOverflowError e ) {
-            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +
                 e.getClass().getSimpleName());
         }
         catch ( ClassNotFoundException e ) {
-            Logger.reportMessage(PolyhedralBoundedSolidSetOperator.class,
+            Logger.reportMessage(_PolyhedralBoundedSolidSetOperator.class,
                 VSDK.WARNING, "deepCloneSolid",
                 "Unable to restore " + solidLabel +
                 " for subtract connect recovery: " +
@@ -929,7 +929,7 @@ public class PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidOp
 
         if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
             System.out.println("= [START OF SETOP REPORT] =================================================================================================================================");
-            System.out.println("Dumping debug log for PolyhedralBoundedSolidSetOperator.setOp.");
+            System.out.println("Dumping debug log for _PolyhedralBoundedSolidSetOperator.setOp.");
             System.out.println("The algorithm structure is:");
             System.out.println("  0. Calculate vertex/face and vertex/vertex crossings.");
             System.out.println("  1. Classify and split for vertex/face cases.");

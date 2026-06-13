@@ -37,21 +37,21 @@ class PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest
     @BeforeEach
     void setUpReflectionHandles() throws Exception
     {
-        sectorOverlapMethod = PolyhedralBoundedSolidSetOperator.class
+        sectorOverlapMethod = _PolyhedralBoundedSolidSetOperator.class
             .getDeclaredMethod("sectoroverlap",
                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex.class,
                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex.class);
         sectorOverlapMethod.setAccessible(true);
 
         classifyCoplanarSectorRelationMethod =
-            PolyhedralBoundedSolidSetOperator.class.getDeclaredMethod(
+            _PolyhedralBoundedSolidSetOperator.class.getDeclaredMethod(
                 "classifyCoplanarSectorRelation",
                 _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.class,
                 _PolyhedralBoundedSolidFace.class);
         classifyCoplanarSectorRelationMethod.setAccessible(true);
 
         touchingOnlyPreflightCaseMethod =
-            PolyhedralBoundedSolidSetOperator.class.getDeclaredMethod(
+            _PolyhedralBoundedSolidSetOperator.class.getDeclaredMethod(
                 "isTouchingOnlyPreflightCase",
                 PolyhedralBoundedSolid.class,
                 PolyhedralBoundedSolid.class);

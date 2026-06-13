@@ -14,7 +14,7 @@ import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBo
 Structural-shape boolean fallback for an offset vertical-cylinder difference:
 detects two vertical cylinders in a subtract and rebuilds the difference from
 analytic cylinder descriptions. Extracted verbatim from
-{@link PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
+{@link _PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
 pure code motion, no behavior change.
  */
 final class _PolyhedralBoundedSolidOffsetCylinderFallback
@@ -230,7 +230,7 @@ final class _PolyhedralBoundedSolidOffsetCylinderFallback
             heightDivisions);
 
         try {
-            result = PolyhedralBoundedSolidSetOperator.setOp(fallbackA, fallbackB, SUBTRACT, false, true);
+            result = _PolyhedralBoundedSolidSetOperator.setOp(fallbackA, fallbackB, SUBTRACT, false, true);
         }
         catch ( RuntimeException e ) {
             _SetOperationTrace.tracePipelineSummary(
@@ -238,7 +238,7 @@ final class _PolyhedralBoundedSolidOffsetCylinderFallback
                 e.getClass().getSimpleName());
             return null;
         }
-        if ( !PolyhedralBoundedSolidSetOperator.isStructurallyUsableSetOpResult(result) ) {
+        if ( !_PolyhedralBoundedSolidSetOperator.isStructurallyUsableSetOpResult(result) ) {
             _SetOperationTrace.tracePipelineSummary("offset cylinder fallback rejected");
             return null;
         }

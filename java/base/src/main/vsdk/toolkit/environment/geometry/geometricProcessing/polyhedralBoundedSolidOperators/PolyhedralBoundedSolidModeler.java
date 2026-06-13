@@ -520,7 +520,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
     }
 
     /**
-    Convenience wrapper over `PolyhedralBoundedSolidSetOperator.setOp`.
+    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`.
     */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
@@ -528,11 +528,11 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         int op)
     {
         PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
+        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
     }
 
     /**
-    Convenience wrapper over `PolyhedralBoundedSolidSetOperator.setOp`
+    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`
     including debug mode.
     */
     public static PolyhedralBoundedSolid setOp(
@@ -542,12 +542,12 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         boolean withDebug)
     {
         PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
+        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
             withDebug);
     }
 
     /**
-    Convenience wrapper over `PolyhedralBoundedSolidSetOperator.setOp`
+    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`
     including debug mode and optional final face maximization.
     */
     public static PolyhedralBoundedSolid setOp(
@@ -558,7 +558,7 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         boolean maximizeResultFaces)
     {
         PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
+        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
             withDebug, maximizeResultFaces);
     }
 }

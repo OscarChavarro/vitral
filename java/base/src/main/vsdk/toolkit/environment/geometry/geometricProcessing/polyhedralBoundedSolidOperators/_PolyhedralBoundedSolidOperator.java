@@ -22,7 +22,7 @@ import vsdk.toolkit.processing.ProcessingElement;
 /**
 This class is not intended to be used directly, but rather as a common service
 provider for classes _PolyhedralBoundedSolidSplitter and
-PolyhedralBoundedSolidSetOperator.
+_PolyhedralBoundedSolidSetOperator.
 */
 public class _PolyhedralBoundedSolidOperator extends ProcessingElement
 {
@@ -221,7 +221,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     \todo : check current assumptions!
 
     This protected method is here for exclusive use of subclasses
-    `_PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    `_PolyhedralBoundedSolidSplitter` and `_PolyhedralBoundedSolidSetOperator`.
     */
     protected static Vector3Dd bisector(_PolyhedralBoundedSolidHalfEdge he)
     {
@@ -634,7 +634,7 @@ public class _PolyhedralBoundedSolidOperator extends ProcessingElement
     face equations.
 
     This protected method is here for exclusive use of subclasses
-    `_PolyhedralBoundedSolidSplitter` and `PolyhedralBoundedSolidSetOperator`.
+    `_PolyhedralBoundedSolidSplitter` and `_PolyhedralBoundedSolidSetOperator`.
     */
     protected static boolean checkWideness (_PolyhedralBoundedSolidHalfEdge he)
     {

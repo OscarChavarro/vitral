@@ -27,7 +27,7 @@ import static vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBo
 Structural-shape boolean fallback for axis-aligned cell decompositions: when
 both operands are axis-aligned, classifies the uniform cell grid against each
 operand and rebuilds the boolean result cell-by-cell. Extracted verbatim from
-{@link PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
+{@link _PolyhedralBoundedSolidSetOperator} in Stage 7 R2 (one family per class);
 pure code motion, no behavior change.
  */
 final class _PolyhedralBoundedSolidAxisAlignedCellFallback

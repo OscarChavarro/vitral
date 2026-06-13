@@ -12,7 +12,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._Po
 Low-level geometric primitives shared by the structural-shape boolean fallback
 builders (profile-difference, axis-aligned cell, orthogonal-profile and
 offset-cylinder families). Extracted from
-{@link PolyhedralBoundedSolidSetOperator} in Stage 7 R2 so that more than one
+{@link _PolyhedralBoundedSolidSetOperator} in Stage 7 R2 so that more than one
 fallback family can reuse the same coordinate/profile helpers without
 duplicating them. Pure code motion; no behavior change.
 

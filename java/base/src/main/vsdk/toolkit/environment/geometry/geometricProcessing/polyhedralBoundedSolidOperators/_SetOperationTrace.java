@@ -3,7 +3,7 @@ package vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedS
 /**
 Centralized, property-gated diagnostic tracing for the boolean set-operation
 pipeline. Extracted in Stage 7 R4 from the per-class copies that lived in
-{@link PolyhedralBoundedSolidSetOperator}, {@link _PolyhedralBoundedSolidSetClassifier}
+{@link _PolyhedralBoundedSolidSetOperator}, {@link _PolyhedralBoundedSolidSetClassifier}
 and {@link _PolyhedralBoundedSolidSetVertexVertexClassifier}.
 
 <p>Tracing is enabled per category through JVM system properties, so it stays
