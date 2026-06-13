@@ -55,6 +55,9 @@ public class DebuggerModel
     private JFrame mainFrame;
     private Rectangle windowedBounds;
     private boolean fullScreenMode = false;
+    private boolean hudEnabled = true;
+    private boolean solidAnimationEnabled = false;
+    private double solidRotationZDegrees = 0.0;
 
     public DebuggerModel()
     {
@@ -385,5 +388,46 @@ public class DebuggerModel
     public void setFullScreenMode(boolean fullScreenMode)
     {
         this.fullScreenMode = fullScreenMode;
+    }
+
+    public boolean isHudEnabled()
+    {
+        return hudEnabled;
+    }
+
+    public void setHudEnabled(boolean hudEnabled)
+    {
+        this.hudEnabled = hudEnabled;
+    }
+
+    public boolean isSolidAnimationEnabled()
+    {
+        return solidAnimationEnabled;
+    }
+
+    public void setSolidAnimationEnabled(boolean solidAnimationEnabled)
+    {
+        this.solidAnimationEnabled = solidAnimationEnabled;
+    }
+
+    public void toggleSolidAnimationEnabled()
+    {
+        solidAnimationEnabled = !solidAnimationEnabled;
+    }
+
+    public double getSolidRotationZDegrees()
+    {
+        return solidRotationZDegrees;
+    }
+
+    public void rotateSolidAroundZDegrees(double deltaDegrees)
+    {
+        solidRotationZDegrees += deltaDegrees;
+    }
+
+    public Matrix4x4d getSolidModelMatrix()
+    {
+        return new Matrix4x4d().axisRotation(
+            Math.toRadians(solidRotationZDegrees), 0, 0, 1);
     }
 }

@@ -34,6 +34,7 @@ import vsdk.toolkit.io.geometry.stl.StlWriter;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
 // Application classes
+import animation.SolidAnimationController;
 import gui.DebuggerKeyboardInteractionTechniques;
 import gui.DebuggerMouseInteractionTechniques;
 import models.DebuggerModel;
@@ -52,6 +53,7 @@ public class InteractiveDebugger extends JFrame implements
     private final DebuggerKeyboardInteractionTechniques keyboardInteractionTechniques;
     private final DebuggerMouseInteractionTechniques mouseInteractionTechniques;
     private final Jogl4DebuggerRenderer joglDebuggerRenderer;
+    private final SolidAnimationController solidAnimationController;
     private boolean shutdownRequested;
 
     public InteractiveDebugger(DebuggerModel model) {
@@ -59,6 +61,7 @@ public class InteractiveDebugger extends JFrame implements
         keyboardInteractionTechniques = new DebuggerKeyboardInteractionTechniques();
         mouseInteractionTechniques = new DebuggerMouseInteractionTechniques();
         joglDebuggerRenderer = new Jogl4DebuggerRenderer(model);
+        solidAnimationController = new SolidAnimationController();
 
         shutdownRequested = false;
     }
@@ -74,6 +77,7 @@ public class InteractiveDebugger extends JFrame implements
         model.getCanvas().addMouseMotionListener(this);
         model.getCanvas().addMouseWheelListener(this);
         model.getCanvas().addKeyListener(this);
+        solidAnimationController.start(model, model.getCanvas());
 
         return model.getCanvas();
     }
@@ -467,6 +471,12 @@ public class InteractiveDebugger extends JFrame implements
                      @Override
                      public void toggleFullscreen() {
                          InteractiveDebugger.this.toggleFullscreenMode();
+                     }
+
+                     @Override
+                     public void toggleSolidAnimation() {
+                         InteractiveDebugger.this.solidAnimationController
+                             .toggleAnimation(model);
                      }
 
                      @Override

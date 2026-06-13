@@ -24,6 +24,7 @@ public class DebuggerKeyboardInteractionTechniques
         void requestExit();
         void rebuildSolid();
         void toggleFullscreen();
+        void toggleSolidAnimation();
         void requestScreenshot();
         void requestStlExport();
     }
@@ -56,6 +57,14 @@ public class DebuggerKeyboardInteractionTechniques
             // Full screen
             case KeyEvent.KEY_g -> {
                 actions.toggleFullscreen();
+                handled = true;
+            }
+            case KeyEvent.KEY_h -> {
+                model.setHudEnabled(!model.isHudEnabled());
+                handled = true;
+            }
+            case KeyEvent.KEY_r -> {
+                actions.toggleSolidAnimation();
                 handled = true;
             }
 

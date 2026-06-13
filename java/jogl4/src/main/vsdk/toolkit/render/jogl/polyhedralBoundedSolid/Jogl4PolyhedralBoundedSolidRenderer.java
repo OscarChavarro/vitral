@@ -201,6 +201,57 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
         initialized = true;
     }
 
+    public static void release(GL4 gl)
+    {
+        if ( !initialized ) {
+            return;
+        }
+
+        int[] ids = new int[1];
+
+        if ( meshPositionVboId != 0 ) {
+            ids[0] = meshPositionVboId;
+            gl.glDeleteBuffers(1, ids, 0);
+            meshPositionVboId = 0;
+        }
+        if ( meshNormalVboId != 0 ) {
+            ids[0] = meshNormalVboId;
+            gl.glDeleteBuffers(1, ids, 0);
+            meshNormalVboId = 0;
+        }
+        if ( meshUvVboId != 0 ) {
+            ids[0] = meshUvVboId;
+            gl.glDeleteBuffers(1, ids, 0);
+            meshUvVboId = 0;
+        }
+        if ( colorPositionVboId != 0 ) {
+            ids[0] = colorPositionVboId;
+            gl.glDeleteBuffers(1, ids, 0);
+            colorPositionVboId = 0;
+        }
+        if ( colorDataVboId != 0 ) {
+            ids[0] = colorDataVboId;
+            gl.glDeleteBuffers(1, ids, 0);
+            colorDataVboId = 0;
+        }
+        if ( meshVaoId != 0 ) {
+            ids[0] = meshVaoId;
+            gl.glDeleteVertexArrays(1, ids, 0);
+            meshVaoId = 0;
+        }
+        if ( colorVaoId != 0 ) {
+            ids[0] = colorVaoId;
+            gl.glDeleteVertexArrays(1, ids, 0);
+            colorVaoId = 0;
+        }
+        if ( colorProgramId != 0 ) {
+            gl.glDeleteProgram(colorProgramId);
+            colorProgramId = 0;
+        }
+
+        initialized = false;
+    }
+
     static void configureSurfaceProgram(
         GL4 gl,
         int programId,

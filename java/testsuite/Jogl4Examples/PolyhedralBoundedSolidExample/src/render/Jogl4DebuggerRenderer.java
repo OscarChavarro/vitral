@@ -23,9 +23,11 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.render.hiddenLine.HiddenLineRenderer;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
 import vsdk.toolkit.gui.LightGizmoStyle;
 import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -323,7 +325,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         if ( model.getSolid() == null ) {
             return;
         }
-        Matrix4x4d modelMatrix = Matrix4x4d.identityMatrix();
+        Matrix4x4d modelMatrix = model.getSolidModelMatrix();
         Matrix4x4d mvp = model.getCamera().calculateProjectionMatrix()
             .multiply(modelMatrix);
 
@@ -362,8 +364,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener
             body = new SimpleBody();
             body.setGeometry(model.getSolid());
             body.setPosition(new Vector3Dd());
-            body.setRotation(new Matrix4x4d());
-            body.setRotationInverse(new Matrix4x4d());
+            body.setRotation(modelMatrix);
+            body.setRotationInverse(modelMatrix.inverse());
             bodyArray.add(body);
             HiddenLineRenderer.executeAppelAlgorithm(bodyArray, model.getCamera(),
                 contourLines, visibleLines, hiddenLines);
@@ -394,7 +396,9 @@ public class Jogl4DebuggerRenderer implements GLEventListener
         gl.glClear(GL4.GL_DEPTH_BUFFER_BIT);
         drawCsgOperandInsets(gl, drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());
-        hudRenderer.draw(drawable);
+        if ( model.isHudEnabled() ) {
+            hudRenderer.draw(drawable);
+        }
         exportPendingScreenshot(gl, drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());
     }
@@ -412,6 +416,13 @@ public class Jogl4DebuggerRenderer implements GLEventListener
     */
     @Override
     public void dispose(GLAutoDrawable drawable) {
+        if ( drawable != null ) {
+            GL4 gl = drawable.getGL().getGL4();
+            Jogl4LineRenderer.release(gl);
+            Jogl4PolyhedralBoundedSolidRenderer.release(gl);
+            Jogl4ImageRenderer.dispose(gl);
+            Jogl4RendererConfigurationShaderSelector.dispose(gl);
+        }
         hudRenderer.dispose(drawable);
     }
     
