@@ -80,7 +80,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         scale = newScale;
     }
 
-    static List<Light> getActiveLights()
+    public static List<Light> getActiveLights()
     {
         if ( ACTIVE_LIGHTS.isEmpty() ) {
             ArrayList<Light> defaults = new ArrayList<Light>();

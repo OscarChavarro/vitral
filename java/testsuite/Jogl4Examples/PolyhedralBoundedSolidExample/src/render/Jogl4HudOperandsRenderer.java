@@ -10,7 +10,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
-import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 
 public class Jogl4HudOperandsRenderer
 {

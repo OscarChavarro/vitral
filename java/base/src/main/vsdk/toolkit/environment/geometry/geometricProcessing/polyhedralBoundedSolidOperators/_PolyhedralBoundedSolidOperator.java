@@ -20,9 +20,9 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.processing.ProcessingElement;
 
 /**
-This class is not intended to be used directly, but rather as a common service
-provider for classes _PolyhedralBoundedSolidSplitter and
-_PolyhedralBoundedSolidSetOperator.
+Shared low-level services for B-Rep operators. This class is not intended to
+be used directly; it provides common behavior for slicing and boolean
+operators.
 */
 public class _PolyhedralBoundedSolidOperator extends ProcessingElement
 {

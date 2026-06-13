@@ -17,7 +17,7 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
-import vsdk.toolkit.render.jogl.Jogl4PolyhedralBoundedSolidRenderer;
+import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
 
 public class Jogl4DebuggerRenderer implements GLEventListener

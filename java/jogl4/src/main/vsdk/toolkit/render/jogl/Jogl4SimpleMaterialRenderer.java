@@ -18,7 +18,7 @@ public class Jogl4SimpleMaterialRenderer extends Jogl4Renderer
         activeMaterial = new SimpleMaterial(material);
     }
 
-    static SimpleMaterial getActiveMaterial()
+    public static SimpleMaterial getActiveMaterial()
     {
         return new SimpleMaterial(activeMaterial);
     }
