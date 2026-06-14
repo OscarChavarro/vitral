@@ -13,6 +13,9 @@ public:
     enum Type { NULL_VALUE, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT };
 
     JsonNode();
+    JsonNode(const JsonNode& other);
+    JsonNode& operator=(const JsonNode& other);
+    ~JsonNode();
 
     static JsonNode newNull();
     static JsonNode newBoolean(bool value);
@@ -42,12 +45,20 @@ public:
     void put(const java::String& key, const JsonNode& value);
 
 private:
+    using ArrayStorage = java::ArrayList<JsonNode>;
+    using ObjectStorage = java::HashMap<java::String, JsonNode>;
+
     Type type_;
     bool boolValue_;
     double numberValue_;
     java::String stringValue_;
-    java::ArrayList<JsonNode> arrayValue_;
-    java::HashMap<java::String, JsonNode> objectValue_;
+    ArrayStorage* arrayValue_;
+    ObjectStorage* objectValue_;
+
+    void copyFrom(const JsonNode& other);
+    void disposeStorage();
+    ArrayStorage* ensureArrayStorage();
+    ObjectStorage* ensureObjectStorage();
 };
 
 }
