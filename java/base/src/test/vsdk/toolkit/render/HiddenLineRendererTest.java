@@ -252,6 +252,119 @@ class HiddenLineRendererTest
     compared against an orientation-free ground-truth ray-march of the rotated
     solid, skipping the measure-zero band around each true visibility transition.
      */
+    // The APPE1967 featured object is the union of 12 axis-aligned boxes
+    // (center x,y,z; half-extent x,y,z), giving a trivial, trustworthy
+    // point-in-solid for ground-truth visibility.
+    private static final double[][] FEATURED_BOXES = {
+        {0.5,0.1,0.1, 0.5,0.1,0.1},{0.5,0.9,0.1, 0.5,0.1,0.1},
+        {0.1,0.5,0.1, 0.1,0.5,0.1},{0.9,0.5,0.1, 0.1,0.5,0.1},
+        {0.1,0.5,0.1, 0.1,0.5,0.1},{0.1,0.5,0.9, 0.1,0.5,0.1},
+        {0.1,0.1,0.5, 0.1,0.1,0.5},{0.1,0.9,0.5, 0.1,0.1,0.5},
+        {0.3,0.5,0.5, 0.3,0.1,0.1},{0.5,0.5,0.5, 0.1,0.1,0.5},
+        {0.7,0.5,0.9, 0.3,0.1,0.1},{0.9,0.5,0.9, 0.1,0.5,0.1}
+    };
+
+    private static boolean insideFeaturedLocal(Vector3Dd p)
+    {
+        for ( double[] b : FEATURED_BOXES ) {
+            if ( Math.abs(p.x() - b[0]) <= b[3] - 1e-7 &&
+                 Math.abs(p.y() - b[1]) <= b[4] - 1e-7 &&
+                 Math.abs(p.z() - b[2]) <= b[5] - 1e-7 ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean featuredOccluded(Matrix4x4d mInv, Vector3Dd eye,
+        Vector3Dd target)
+    {
+        Vector3Dd d = target.subtract(eye);
+        int n = 3000;
+        for ( int i = 1; i < n; i++ ) {
+            double s = (double) i / n;
+            if ( s >= 1.0 - 3e-4 ) {
+                break;
+            }
+            if ( insideFeaturedLocal(mInv.multiply(eye.add(d.multiply(s)))) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    Guards the quantitative-invisibility fix where a perpendicular jitter
+    counted faces INCIDENT to the sample point (its own surface, including the
+    silhouette edge running through a face boundary) as phantom occluders, on the
+    axis-aligned APPE1967 featured object. At rot(45,60) the whole edge v(47-48)'s
+    neighbour edge 31 was drawn hidden though it is fully visible. Compared
+    against the 12-box ground truth, skipping the band around true transitions.
+     */
+    @Test
+    void given_featuredObject_atRotation_then_visibleEdgeNotPhantomHidden()
+    {
+        PolyhedralBoundedSolid solid =
+            SimpleTestGeometryLibrary.createTestObjectAPPE1967_3();
+        if ( solid == null ) {
+            return;
+        }
+        Camera camera = createFeaturedCamera();
+        Vector3Dd eye = camera.getPosition();
+        Matrix4x4d rotation = new Matrix4x4d().axisRotation(
+                Math.toRadians(45.0), 0.0, 0.0, 1.0)
+            .multiply(new Matrix4x4d().axisRotation(
+                Math.toRadians(60.0), 1.0, 0.0, 0.0));
+        SimpleBody body = createBody(solid, rotation);
+        Matrix4x4d mInv = body.getTransformationMatrix().inverse();
+        HiddenLineRenderer.AppelAlgorithmDump dump =
+            HiddenLineRenderer.executeAppelAlgorithmWithDiagnostics(
+                createSingleBodyScene(body), camera,
+                new Calligraphic2DBuffer(), new Calligraphic2DBuffer(),
+                new Calligraphic2DBuffer());
+
+        StringBuilder bad = new StringBuilder();
+        HiddenLineRenderer.AppelEdgeDump edge = null;
+        for ( int i = 0; i < dump.edges.size(); i++ ) {
+            if ( dump.edges.get(i).edgeIndex == 31 ) {
+                edge = dump.edges.get(i);
+            }
+        }
+        assertThat(edge).as("edge index 31 present").isNotNull();
+        int samples = 30;
+        double band = 1.5 / samples;
+        for ( int k = 1; k < samples; k++ ) {
+            double t = (double) k / samples;
+            Vector3Dd p = edge.start.multiply(1 - t).add(edge.end.multiply(t));
+            boolean occ = featuredOccluded(mInv, eye, p);
+            Vector3Dd pa = edge.start.multiply(1 - (t - band))
+                .add(edge.end.multiply(t - band));
+            Vector3Dd pb = edge.start.multiply(1 - (t + band))
+                .add(edge.end.multiply(t + band));
+            if ( featuredOccluded(mInv, eye, pa) != occ ||
+                 featuredOccluded(mInv, eye, pb) != occ ) {
+                continue;
+            }
+            String cls = null;
+            for ( int j = 0; j < edge.segments.size(); j++ ) {
+                HiddenLineRenderer.AppelSegmentDump sd = edge.segments.get(j);
+                if ( t >= sd.tStart - 1e-9 && t <= sd.tEnd + 1e-9 ) {
+                    cls = sd.classification;
+                    break;
+                }
+            }
+            boolean rendVisible = "visible".equals(cls);
+            if ( rendVisible == occ ) {
+                bad.append(String.format("t=%.3f truth=%s renderer=%s%n", t,
+                    occ ? "hidden" : "visible",
+                    rendVisible ? "visible" : "hidden"));
+            }
+        }
+        assertThat(bad.length())
+            .as("Phantom-occluder mismatches on a visible featured edge:%n%s", bad)
+            .isZero();
+    }
+
     @Test
     void given_splitTestPart1_partialOcclusion_then_edgesClippedToGroundTruth()
     {

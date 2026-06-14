@@ -73,13 +73,6 @@ class _AppelEdgeCache extends RenderingElement
     /// planar surface marked as "S" on figure [APPE1967].5.
     public _PolyhedralBoundedSolidFace visibleEdgeForContourLine;
     public SimpleBody visibleEdgeBody;
-    /// World point a small step INTO the visible face S from the contour edge,
-    /// along the in-plane inward normal (cross(outwardNormal, edgeDir) in loop
-    /// winding). It marks which side of the contour line S lies on, robustly for
-    /// non-convex faces (a local step, unlike the face centroid which can fall on
-    /// the wrong side of the edge for a concave face). Used by the image-space
-    /// deltaQI side rule.
-    public Vector3Dd visibleFaceInteriorRef;
     public _PolyhedralBoundedSolidFace leftFace;
     public _PolyhedralBoundedSolidFace rightFace;
     public int edgeIndex;
@@ -419,20 +412,13 @@ public class HiddenLineRenderer extends RenderingElement
                     else if ( f1 && !f2 || !f1 && f2 ) {
                         // Contour lines
                         materialLine.edgeType = _AppelEdgeCache.CONTOUR_LINE;
-                        _PolyhedralBoundedSolidHalfEdge visibleHalf;
                         if ( f1 ) {
                             materialLine.visibleEdgeForContourLine = face1;
-                            visibleHalf = e.leftHalf;
                         }
                         else {
                             materialLine.visibleEdgeForContourLine = face2;
-                            visibleHalf = e.rightHalf;
                         }
                         materialLine.visibleEdgeBody = body;
-                        materialLine.visibleFaceInteriorRef =
-                            contourFaceInteriorRef(
-                                materialLine.visibleEdgeForContourLine,
-                                visibleHalf, body);
                         contourCache.add(materialLine);
                     }
                     else {
@@ -580,113 +566,6 @@ public class HiddenLineRenderer extends RenderingElement
         lineSet.add2DLine(ndc0.x(), ndc0.y(), ndc1.x(), ndc1.y());
     }
 
-    /**
-    Projects a world point to 2D normalized device coordinates, or null if the
-    point is at/behind the eye plane (w &lt;= 0) where the projection is invalid.
-
-    @param point world point
-    @param camera viewing camera
-    @return {x, y} in NDC, or null
-    */
-    private static double[] projectToNdc(Vector3Dd point, Camera camera)
-    {
-        Vector4Dd clip = camera.calculateProjectionMatrix().multiply(
-            new Vector4Dd(point));
-        if ( clip.w() <= VSDK.EPSILON ) {
-            return null;
-        }
-        return new double[] { clip.x() / clip.w(), clip.y() / clip.w() };
-    }
-
-    /** Sign of which side of the 2D line (a -&gt; b) the point p lies on. */
-    private static double sideOfLine2D(double[] a, double[] b, double[] p)
-    {
-        return (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
-    }
-
-    /**
-    World point a small step into the interior of face S across its edge,
-    measured by the in-plane inward normal at that edge (cross of the outward
-    face normal with the edge direction in loop winding). Local, so it is on the
-    correct side even for a concave S. Returns null if it cannot be built.
-
-    @param face the visible face S
-    @param visibleHalf the half-edge of S lying on the contour edge
-    @param body owning body
-    @return world interior reference point, or null
-    */
-    private static Vector3Dd contourFaceInteriorRef(
-        _PolyhedralBoundedSolidFace face,
-        _PolyhedralBoundedSolidHalfEdge visibleHalf, SimpleBody body)
-    {
-        if ( face == null || visibleHalf == null ||
-             visibleHalf.startingVertex == null || visibleHalf.next() == null ||
-             visibleHalf.next().startingVertex == null ) {
-            return null;
-        }
-        InfinitePlane plane = face.getContainingPlane();
-        if ( plane == null ) {
-            return null;
-        }
-        Vector3Dd v1 = visibleHalf.startingVertex.position;
-        Vector3Dd v2 = visibleHalf.next().startingVertex.position;
-        Vector3Dd edgeDir = v2.subtract(v1);
-        double edgeLength = edgeDir.length();
-        if ( edgeLength <= VSDK.EPSILON ) {
-            return null;
-        }
-        Vector3Dd inward = plane.getNormal().normalized().crossProduct(edgeDir);
-        if ( inward.length() <= VSDK.EPSILON ) {
-            return null;
-        }
-        inward = inward.normalized();
-        Vector3Dd midpoint = v1.add(v2).multiply(0.5);
-        Vector3Dd interiorLocal = midpoint.add(inward.multiply(0.25 * edgeLength));
-        return transformToWorld(body, interiorLocal);
-    }
-
-    /**
-    Appel's image-space change in quantitative invisibility when the processed
-    edge crosses contour `cl` (known to pass in front of the edge). Crossing the
-    contour line in the image, the edge moves from one side of it to the other;
-    Q.I. increases by one if it moves onto the side where the contour's
-    front-facing face projects (the edge goes behind that face) and decreases by
-    one otherwise. All inputs are taken far from the crossing (edge endpoints and
-    the face centroid), so the sign is free of silhouette-grazing degeneracy and
-    does not depend on which face actually lies deepest behind the edge.
-
-    @param inEdge the edge being classified
-    @param cl the crossing contour edge (its front face is cl.visibleEdgeForContourLine)
-    @param camera viewing camera
-    @return +1, -1, or 0 when the configuration is degenerate/unprojectable
-    */
-    private static int contourCrossingDeltaQI(_AppelEdgeCache inEdge,
-        _AppelEdgeCache cl, Camera camera)
-    {
-        Vector3Dd interiorRef = cl.visibleFaceInteriorRef;
-        if ( interiorRef == null ) {
-            return 0;
-        }
-        double[] clStart = projectToNdc(cl.start, camera);
-        double[] clEnd = projectToNdc(cl.end, camera);
-        double[] edgeEnd = projectToNdc(inEdge.end, camera);
-        double[] faceSide = projectToNdc(interiorRef, camera);
-        if ( clStart == null || clEnd == null || edgeEnd == null ||
-             faceSide == null ) {
-            return 0;
-        }
-        double edgeEndSide = sideOfLine2D(clStart, clEnd, edgeEnd);
-        double faceCentroidSide = sideOfLine2D(clStart, clEnd, faceSide);
-        if ( Math.abs(edgeEndSide) < VSDK.EPSILON ||
-             Math.abs(faceCentroidSide) < VSDK.EPSILON ) {
-            return 0;
-        }
-        // The edge start (s=0) and end (s=1) lie on opposite sides of the
-        // contour line, so the end's side is "after the crossing". If that side
-        // matches the front face's side, the edge has moved behind the face.
-        return (edgeEndSide > 0.0) == (faceCentroidSide > 0.0) ? 1 : -1;
-    }
-
     private static void
     processLineToBeDrawn(
         List <SimpleBody> solids,
@@ -778,16 +657,10 @@ public class HiddenLineRenderer extends RenderingElement
                 // A contour line crosses this edge in the image at parameter
                 // segment.t, so the edge is split there: the quantitative
                 // invisibility can only change where the edge crosses a contour.
-                // The +/-1 change is decided now by Appel's image-space side rule
-                // (robust, no occlusion sampling); coincident crossings are
-                // summed in step 3.
-                // deltaQI feeds the diagnostic incremental-Q.I. dump only; skip
-                // its image-space projection work on the rendering path.
-                segment.deltaQI = edgeDump != null ?
-                    contourCrossingDeltaQI(inEdge, cl, inCamera) : 0;
+                // Each resulting sub-segment is classified independently in
+                // step 4 by its midpoint Q.I.
                 debugSplit(inEdge.edgeIndex, "  cl=" + cl.edgeIndex +
-                    " ADDED split t=" + String.format("%.5f", segment.t) +
-                    " deltaQI=" + segment.deltaQI);
+                    " ADDED split t=" + String.format("%.5f", segment.t));
                 segments.add(segment);
             }
         }
@@ -811,26 +684,18 @@ public class HiddenLineRenderer extends RenderingElement
             }
         }
 
-        //- 4. Determine visibility by incremental [APPE1967] propagation ---
+        //- 4. Determine visibility of each sub-segment by its midpoint Q.I. -
         // The contour crossings (step 2) partition the edge into sub-segments of
-        // UNIFORM visibility: the quantitative invisibility changes ONLY where
-        // the edge crosses a contour, and there by the +/-1 already computed from
-        // the image-space side rule (step 2/3). So the Q.I. is seeded once by a
-        // single kernel ray cast on the first sub-segment, then propagated by
-        // accumulating each crossing's deltaQI. The per-sub-segment midpoint
-        // kernel Q.I. is still recorded in the dump as an independent cross-check.
+        // UNIFORM visibility (the quantitative invisibility can change only where
+        // the edge crosses a contour). Each sub-segment is classified by the
+        // robust kernel Q.I. sampled at its midpoint
+        // (PolyhedralBoundedSolid.computeQuantitativeInvisibility, delegated to
+        // PolyhedralBoundedSolidPredicates). Incremental +/-1 deltaQI propagation
+        // (Appel's original scheme) was investigated and dropped: the cheap
+        // per-crossing deltaQI sign could not be made to reproduce the robust Q.I.
+        // even at non-grazing orientations, so per-sub-segment sampling is the
+        // correct classifier. See doc plan-stage09-appel-hidden-line-plan.md (P4).
         Vector3Dd pos1, pos2;
-        int qi = 0;
-
-        // The propagation seed is a diagnostic-only quantity (classification uses
-        // each sub-segment's own midpoint Q.I.), so the seed ray cast runs only
-        // when collecting the dump.
-        if ( edgeDump != null ) {
-            double seedMidT = (segments.get(0).t + segments.get(1).t) / 2.0;
-            qi = computeMidpointQuantitativeInvisibility(solids, inCamera,
-                inEdge.start.add(inEdge.d.multiply(seedMidT)));
-            edgeDump.initialQuantitativeInvisibility = qi;
-        }
 
         for ( i = 0; i < segments.size()-1; i++ ) {
             double val1 = segments.get(i).t;
@@ -839,28 +704,8 @@ public class HiddenLineRenderer extends RenderingElement
             pos2 = inEdge.start.add(inEdge.d.multiply(val2));
             Vector3Dd posx = inEdge.start.add(inEdge.d.multiply((val1+val2)/2));
 
-            // Propagate the incremental Q.I. (diagnostic): accumulate the
-            // crossing at the left boundary (segments.get(0)'s deltaQI is 0, so
-            // the first sub-segment keeps the seed).
-            qi += segments.get(i).deltaQI;
-
-            // Classification AUTHORITY is the robust per-sub-segment kernel Q.I.
-            // at the (non-degenerate) midpoint. The incrementally propagated `qi`
-            // is recorded in the dump for comparison, but is not used to draw:
-            // the cheap per-crossing deltaQI (image-space side rule) is not yet
-            // robust on concave faces, so until it matches the kernel everywhere
-            // the kernel midpoint Q.I. drives rendering.
             int midpointQi = computeMidpointQuantitativeInvisibility(
                 solids, inCamera, posx);
-
-            if ( i > 0 && edgeDump != null ) {
-                AppelEventDump event = new AppelEventDump();
-                event.t = val1;
-                event.deltaQI = segments.get(i).deltaQI;
-                event.contourEdgeIndex = -1;
-                event.visibleFaceId = -1;
-                edgeDump.events.add(event);
-            }
 
             if ( midpointQi == 0 ) {
                 if ( inEdge.edgeType == _AppelEdgeCache.CONTOUR_LINE ) {

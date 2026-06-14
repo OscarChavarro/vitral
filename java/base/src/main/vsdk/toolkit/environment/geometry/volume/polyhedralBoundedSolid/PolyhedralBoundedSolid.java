@@ -661,7 +661,12 @@ public class PolyhedralBoundedSolid extends Solid {
         queryNumericContext = null;
     }
 
-    private InfinitePlane cachedFacePlane(int faceIndex)
+    // Package-private query accessors so PolyhedralBoundedSolidPredicates can
+    // reuse the per-frame snapshot (plane cache + face AABBs + tolerance) taken
+    // by beginVisibilityQueries, falling back to on-the-fly computation when no
+    // snapshot is active.
+
+    InfinitePlane cachedFacePlane(int faceIndex)
     {
         if ( queryPlaneCache != null && faceIndex < queryPlaneCache.length ) {
             return queryPlaneCache[faceIndex];
@@ -669,186 +674,56 @@ public class PolyhedralBoundedSolid extends Solid {
         return polygonsList.get(faceIndex).getContainingPlane();
     }
 
+    /** Tolerance context for visibility queries: the cached one if a snapshot is
+        active, otherwise computed for this solid. */
+    PolyhedralBoundedSolidNumericPolicy.ToleranceContext queryToleranceContext()
+    {
+        return queryNumericContext != null ? queryNumericContext :
+            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+    }
+
+    /** AABB reject for a query ray against face `faceIndex`. Returns true (do not
+        cull) when no AABB snapshot is active. */
+    boolean queryRayReachesFace(Vector3Dd origin, double dirX, double dirY,
+        double dirZ, double maxT, int faceIndex, double pad)
+    {
+        if ( queryFaceAabb == null ) {
+            return true;
+        }
+        return rayReachesFaceAabb(origin, dirX, dirY, dirZ, maxT, faceIndex, pad);
+    }
+
+    /** AABB reject for a query POINT against face `faceIndex` (is the point in
+        the face's padded box?). Returns true (do not cull) when no snapshot is
+        active. Used to skip the on-surface test for far faces. */
+    boolean queryPointNearFace(Vector3Dd point, int faceIndex, double pad)
+    {
+        if ( queryFaceAabb == null ) {
+            return true;
+        }
+        int o = faceIndex * 6;
+        return point.x() >= queryFaceAabb[o] - pad &&
+               point.x() <= queryFaceAabb[o + 3] + pad &&
+               point.y() >= queryFaceAabb[o + 1] - pad &&
+               point.y() <= queryFaceAabb[o + 4] + pad &&
+               point.z() >= queryFaceAabb[o + 2] - pad &&
+               point.z() <= queryFaceAabb[o + 5] + pad;
+    }
+
     @Override
     public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
-        // Quantitative invisibility [APPE1967]: number of front-facing surface
-        // elements strictly between `origin` and `p`. A measure-zero line of
-        // sight that grazes an edge or vertex of an occluder makes the per-face
-        // boundary (LIMIT) classification ambiguous, which previously produced
-        // spurious or missing occluders for axis-aligned solids (the failure
-        // the original Javadoc warned about). Rather than special-casing
-        // boundary hits, the count is taken from generic rays obtained by
-        // jittering the target slightly perpendicular to the line of sight. The
-        // jitter is proportional to the sight distance (an angular, hence
-        // scale-invariant, perturbation), so every ray/face hit is
-        // unambiguously INSIDE or OUTSIDE and the visibility of the (1D) edge
-        // segment is the value the surrounding generic rays agree on.
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
-            queryNumericContext != null ? queryNumericContext :
-            PolyhedralBoundedSolidNumericPolicy.forSolid(this);
-        Vector3Dd d = p.subtract(origin);
-        double t0 = d.length();
-        if ( t0 <= numericContext.epsilon() ) {
-            return 0;
-        }
-        d = d.multiply(1.0 / t0);
-
-        // Generic (deliberately non-axis-aligned) orthonormal basis (u, v)
-        // perpendicular to the line of sight. For axis-aligned solids this
-        // ensures no jitter direction slides along a model edge: a target that
-        // is firmly occluded then yields unanimous samples (a real crossing,
-        // e.g. a ray entering a box through an edge, is counted), while only a
-        // genuine silhouette/tangent contact produces a split vote.
-        Vector3Dd helper = new Vector3Dd(0.3172, 0.5490, 0.7725);
-        if ( Math.abs(d.dotProduct(helper)) > 0.99 ) {
-            helper = new Vector3Dd(0.8030, -0.1399, 0.5793);
-        }
-        Vector3Dd u = d.crossProduct(helper).normalized();
-        Vector3Dd v = d.crossProduct(u).normalized();
-
-        // The sample point `p` is, in the Appel setting, a point ON an edge of
-        // this very solid, hence it lies on the solid surface and the two faces
-        // incident to that edge pass through it. A purely perpendicular jitter
-        // can push the sample across one of those incident faces (this happens
-        // at concave edges, e.g. a notch floor, where the incident face extends
-        // toward the eye side), making the line of sight cross the sample's own
-        // surface and spuriously reporting the visible edge as hidden.
-        //
-        // To avoid counting the sample's own incident faces, the target is first
-        // pulled a small step back toward the eye, off the surface. When the
-        // point is genuinely visible this lands it in free space just outside
-        // the solid (no occluders); when the point is truly occluded the
-        // occluding material is thicker than the pull-back, so the sample stays
-        // inside it and the front occluder is still counted. The pull-back is
-        // larger than the perpendicular jitter so that, even after jittering,
-        // the incident faces remain beyond the (pulled) target distance.
-        double pullBack = t0 * 1.0e-3;
-        Vector3Dd pulled = p.subtract(d.multiply(pullBack));
-
-        // Angular jitter (~1e-4 rad): well above the inside-test tolerance and
-        // well below feature size, so grazing degeneracies where the line of
-        // sight enters an occluder through one of its edges/vertices are
-        // resolved while genuine occlusion is preserved.
-        double delta = t0 * 1.0e-4;
-        int[] counts = new int[4];
-        counts[0] = countStrictFrontOccluders(origin,
-            pulled.add(u.multiply(delta)), numericContext);
-        counts[1] = countStrictFrontOccluders(origin,
-            pulled.add(u.multiply(-delta)), numericContext);
-        counts[2] = countStrictFrontOccluders(origin,
-            pulled.add(v.multiply(delta)), numericContext);
-        counts[3] = countStrictFrontOccluders(origin,
-            pulled.add(v.multiply(-delta)), numericContext);
-
-        return majorityFavoringVisible(counts);
-    }
-
-    /**
-    Counts front-facing faces pierced strictly between `origin` and `target`,
-    using strict interior point-in-face tests only. Intended to be called with
-    a generic (non-grazing) line of sight produced by the jitter in
-    computeQuantitativeInvisibility.
-
-    @param origin world-space observer position
-    @param target world-space point being tested
-    @param numericContext tolerance context for the current solid
-    @return number of distinct front-facing surface elements in front of target
-    */
-    private int countStrictFrontOccluders(
-        Vector3Dd origin,
-        Vector3Dd target,
-        PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext)
-    {
-        Vector3Dd d = target.subtract(origin);
-        double t0 = d.length();
-        if ( t0 <= numericContext.epsilon() ) {
-            return 0;
-        }
-        d = d.multiply(1.0 / t0);
-        Ray ray = new Ray(origin, d);
-        int qi = 0;
-        int frontHitCount = 0;
-        double[] distances = new double[polygonsList.size()];
-
-        double aabbPad = numericContext.bigEpsilon();
-        for ( int i = 0; i < polygonsList.size(); i++ ) {
-            // Cheap AABB reject: skip faces the segment cannot reach.
-            if ( queryFaceAabb != null &&
-                 !rayReachesFaceAabb(origin, d.x(), d.y(), d.z(), t0, i,
-                     aabbPad) ) {
-                continue;
-            }
-            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
-            InfinitePlane facePlane = cachedFacePlane(i);
-            if ( facePlane == null ) {
-                continue;
-            }
-            RayHit planeHit = new RayHit();
-            if ( !facePlane.doIntersection(ray, planeHit) ) {
-                continue;
-            }
-            Ray hit = planeHit.ray();
-            hit = hit.withDirection(hit.direction().normalized());
-            if ( hit.t() <= numericContext.epsilon() ||
-                 hit.t() >= t0 - numericContext.epsilon() ) {
-                continue;
-            }
-            // Only front-facing surface elements (normal opposing the line of
-            // sight) occlude.
-            if ( planeHit.n.dotProduct(d) >= 0.0 ) {
-                continue;
-            }
-            Vector3Dd pi = hit.origin().add(hit.direction().multiply(hit.t()));
-            if ( face.testPointInside(pi, numericContext.bigEpsilon(),
-                 facePlane) != Geometry.INSIDE ) {
-                continue;
-            }
-            boolean considerIt = true;
-            for ( int j = 0; j < frontHitCount; j++ ) {
-                if ( Math.abs(distances[j] - hit.t()) <
-                     numericContext.bigEpsilon() ) {
-                    considerIt = false;
-                    break;
-                }
-            }
-            if ( considerIt ) {
-                qi++;
-                distances[frontHitCount] = hit.t();
-                frontHitCount++;
-            }
-        }
-        return qi;
-    }
-
-    /**
-    Returns the count most of the jittered samples agree on. On ties (a point
-    that lies essentially on a silhouette) the smaller count is chosen, so a
-    segment sitting exactly on a contour is reported visible rather than
-    dropped.
-
-    @param counts occluder counts from the jittered generic rays
-    @return the robust, majority-agreed occluder count
-    */
-    private static int majorityFavoringVisible(int[] counts)
-    {
-        int best = counts[0];
-        int bestVotes = -1;
-
-        for ( int i = 0; i < counts.length; i++ ) {
-            int votes = 0;
-            for ( int j = 0; j < counts.length; j++ ) {
-                if ( counts[j] == counts[i] ) {
-                    votes++;
-                }
-            }
-            if ( votes > bestVotes ||
-                 (votes == bestVotes && counts[i] < best) ) {
-                best = counts[i];
-                bestVotes = votes;
-            }
-        }
-        return best;
+        // Delegated to the robust predicate layer: QI = the number of times the
+        // (straight, pulled-back) line of sight enters this solid's interior
+        // before reaching the surface point `p`, computed by a boundary-crossing
+        // count whose interval classification uses the robust point-in-solid
+        // test (PolyhedralBoundedSolidPredicates). This replaces the earlier
+        // perpendicular-jitter majority vote, which fabricated phantom occluders
+        // at axis-aligned silhouette corners and missed occluders entered through
+        // an edge. The per-frame plane/AABB snapshot taken by
+        // beginVisibilityQueries is reused by the predicates for speed.
+        return PolyhedralBoundedSolidPredicates.quantitativeInvisibility(this,
+            origin, p);
     }
 
     /**

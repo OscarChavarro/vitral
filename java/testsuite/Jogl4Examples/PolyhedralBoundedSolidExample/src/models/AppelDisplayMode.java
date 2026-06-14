@@ -3,14 +3,16 @@ package models;
 /**
 Display states for the Appel hidden-line algorithm, cycled with key [8]:
 OFF disables it, EDGES_VISIBLE_HIDDEN draws contour, visible and hidden lines,
-and EDGES_VISIBLE draws only contour and visible lines (the hidden ones are
-suppressed).
+EDGES_VISIBLE draws only contour and visible lines (the hidden ones are
+suppressed), and EDGES_ONLY draws only the contour (border) lines (both the
+visible non-contour and the hidden lines are suppressed).
 */
 public enum AppelDisplayMode
 {
     OFF("OFF"),
     EDGES_VISIBLE_HIDDEN("edges + visible + hidden"),
-    EDGES_VISIBLE("edges + visible");
+    EDGES_VISIBLE("edges + visible"),
+    EDGES_ONLY("edges only");
 
     private final String label;
 
