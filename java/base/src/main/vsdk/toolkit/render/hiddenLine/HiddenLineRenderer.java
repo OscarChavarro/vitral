@@ -781,7 +781,10 @@ public class HiddenLineRenderer extends RenderingElement
                 // The +/-1 change is decided now by Appel's image-space side rule
                 // (robust, no occlusion sampling); coincident crossings are
                 // summed in step 3.
-                segment.deltaQI = contourCrossingDeltaQI(inEdge, cl, inCamera);
+                // deltaQI feeds the diagnostic incremental-Q.I. dump only; skip
+                // its image-space projection work on the rendering path.
+                segment.deltaQI = edgeDump != null ?
+                    contourCrossingDeltaQI(inEdge, cl, inCamera) : 0;
                 debugSplit(inEdge.edgeIndex, "  cl=" + cl.edgeIndex +
                     " ADDED split t=" + String.format("%.5f", segment.t) +
                     " deltaQI=" + segment.deltaQI);
@@ -817,12 +820,15 @@ public class HiddenLineRenderer extends RenderingElement
         // accumulating each crossing's deltaQI. The per-sub-segment midpoint
         // kernel Q.I. is still recorded in the dump as an independent cross-check.
         Vector3Dd pos1, pos2;
-        int qi;
+        int qi = 0;
 
-        double seedMidT = (segments.get(0).t + segments.get(1).t) / 2.0;
-        qi = computeMidpointQuantitativeInvisibility(solids, inCamera,
-            inEdge.start.add(inEdge.d.multiply(seedMidT)));
+        // The propagation seed is a diagnostic-only quantity (classification uses
+        // each sub-segment's own midpoint Q.I.), so the seed ray cast runs only
+        // when collecting the dump.
         if ( edgeDump != null ) {
+            double seedMidT = (segments.get(0).t + segments.get(1).t) / 2.0;
+            qi = computeMidpointQuantitativeInvisibility(solids, inCamera,
+                inEdge.start.add(inEdge.d.multiply(seedMidT)));
             edgeDump.initialQuantitativeInvisibility = qi;
         }
 
@@ -900,9 +906,11 @@ public class HiddenLineRenderer extends RenderingElement
         Calligraphic2DBuffer outVisibleNonContourLineSet,
         Calligraphic2DBuffer outHiddenLineSet)
     {
-        executeAppelAlgorithmWithDiagnostics(
-            inSimpleBodyArray, inCamera, outVisibleContourLineSet,
-            outVisibleNonContourLineSet, outHiddenLineSet);
+        // Rendering path: do not collect the per-edge diagnostic dump, which
+        // also lets each edge skip the diagnostic-only seed Q.I. sample and the
+        // image-space deltaQI projection.
+        runAppelAlgorithm(inSimpleBodyArray, inCamera, outVisibleContourLineSet,
+            outVisibleNonContourLineSet, outHiddenLineSet, false);
     }
 
     public static AppelAlgorithmDump executeAppelAlgorithmWithDiagnostics(
@@ -911,6 +919,19 @@ public class HiddenLineRenderer extends RenderingElement
         Calligraphic2DBuffer outVisibleContourLineSet,
         Calligraphic2DBuffer outVisibleNonContourLineSet,
         Calligraphic2DBuffer outHiddenLineSet)
+    {
+        return runAppelAlgorithm(inSimpleBodyArray, inCamera,
+            outVisibleContourLineSet, outVisibleNonContourLineSet,
+            outHiddenLineSet, true);
+    }
+
+    private static AppelAlgorithmDump runAppelAlgorithm(
+        List<SimpleBody> inSimpleBodyArray,
+        Camera inCamera,
+        Calligraphic2DBuffer outVisibleContourLineSet,
+        Calligraphic2DBuffer outVisibleNonContourLineSet,
+        Calligraphic2DBuffer outHiddenLineSet,
+        boolean collectDiagnostics)
     {
         //-----------------------------------------------------------------
         ArrayList <_AppelEdgeCache> cache;
@@ -929,13 +950,26 @@ public class HiddenLineRenderer extends RenderingElement
             buildCache(solids, inSimpleBodyArray.get(i), cache, contourCache, inCamera);
         }
 
+        // Snapshot each solid's face planes and tolerance once: every edge below
+        // issues many quantitative-invisibility samples against these unchanged
+        // solids, so caching avoids recomputing each face plane per ray per
+        // sample (the dominant cost on dense models such as the kurlanderBowl).
+        for ( i = 0; i < solids.size(); i++ ) {
+            Geometry geometry = solids.get(i).getGeometry();
+            if ( geometry instanceof PolyhedralBoundedSolid ) {
+                ((PolyhedralBoundedSolid) geometry).beginVisibilityQueries();
+            }
+        }
+
         //-----------------------------------------------------------------
         _AppelEdgeCache edge;
         AppelAlgorithmDump dump = new AppelAlgorithmDump();
 
+        try {
         for ( i = 0; i < cache.size(); i++ ) {
             edge = cache.get(i);
-            AppelEdgeDump edgeDump = createEdgeDump(edge);
+            AppelEdgeDump edgeDump =
+                collectDiagnostics ? createEdgeDump(edge) : null;
             // Every cached edge is resolved through the quantitative
             // invisibility test, including those whose two adjacent faces are
             // both back-facing (edgeType HIDDEN_LINE). Such an edge must NOT be
@@ -957,7 +991,18 @@ public class HiddenLineRenderer extends RenderingElement
                 break;
               default: break;
             }
-            dump.edges.add(edgeDump);
+            if ( edgeDump != null ) {
+                dump.edges.add(edgeDump);
+            }
+        }
+        }
+        finally {
+            for ( i = 0; i < solids.size(); i++ ) {
+                Geometry geometry = solids.get(i).getGeometry();
+                if ( geometry instanceof PolyhedralBoundedSolid ) {
+                    ((PolyhedralBoundedSolid) geometry).endVisibilityQueries();
+                }
+            }
         }
         //-----------------------------------------------------------------
         //cache = null;

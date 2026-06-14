@@ -523,6 +523,152 @@ public class PolyhedralBoundedSolid extends Solid {
     @return  the number of front facing surface elements (with
     respect to `origin`) between the `origin` point and the `p` point
     */
+    /// Transient per-frame caches for repeated visibility (quantitative
+    /// invisibility) queries. The Appel hidden-line renderer issues tens of
+    /// thousands of QI samples against a STATIC solid in a single frame; without
+    /// these, every sample recomputed each face's containing plane (a Newell fit
+    /// + a face-scale estimate) for every one of the four jittered rays — tens of
+    /// millions of redundant plane fits. `beginVisibilityQueries` snapshots the
+    /// face planes and tolerance once; `endVisibilityQueries` drops the snapshot.
+    /// While active the solid MUST NOT be modified.
+    private transient InfinitePlane[] queryPlaneCache;
+    /// Per-face axis-aligned bounding box (6 doubles: minX,minY,minZ,maxX,maxY,
+    /// maxZ) used to cull faces a query ray cannot hit before the plane test.
+    private transient double[] queryFaceAabb;
+    private transient PolyhedralBoundedSolidNumericPolicy.ToleranceContext
+        queryNumericContext;
+
+    /**
+    Snapshots per-face containing planes and the tolerance context for a batch of
+    visibility queries on this (unchanged) solid. Call once before issuing many
+    computeQuantitativeInvisibility queries, then endVisibilityQueries when done.
+    */
+    public void beginVisibilityQueries()
+    {
+        queryNumericContext = PolyhedralBoundedSolidNumericPolicy.forSolid(this);
+        int faceCount = polygonsList.size();
+        queryPlaneCache = new InfinitePlane[faceCount];
+        queryFaceAabb = new double[faceCount * 6];
+        for ( int i = 0; i < faceCount; i++ ) {
+            _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            queryPlaneCache[i] = face.getContainingPlane();
+            computeFaceAabb(face, i);
+        }
+    }
+
+    private void computeFaceAabb(_PolyhedralBoundedSolidFace face, int index)
+    {
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+        double maxZ = -Double.MAX_VALUE;
+        for ( int b = 0; b < face.boundariesList.size(); b++ ) {
+            _PolyhedralBoundedSolidLoop loop = face.boundariesList.get(b);
+            if ( loop == null || loop.boundaryStartHalfEdge == null ) {
+                continue;
+            }
+            _PolyhedralBoundedSolidHalfEdge he = loop.boundaryStartHalfEdge;
+            _PolyhedralBoundedSolidHalfEdge start = he;
+            do {
+                if ( he.startingVertex != null ) {
+                    Vector3Dd q = he.startingVertex.position;
+                    if ( q.x() < minX ) minX = q.x();
+                    if ( q.y() < minY ) minY = q.y();
+                    if ( q.z() < minZ ) minZ = q.z();
+                    if ( q.x() > maxX ) maxX = q.x();
+                    if ( q.y() > maxY ) maxY = q.y();
+                    if ( q.z() > maxZ ) maxZ = q.z();
+                }
+                he = he.next();
+            } while ( he != null && he != start );
+        }
+        int o = index * 6;
+        queryFaceAabb[o] = minX;
+        queryFaceAabb[o + 1] = minY;
+        queryFaceAabb[o + 2] = minZ;
+        queryFaceAabb[o + 3] = maxX;
+        queryFaceAabb[o + 4] = maxY;
+        queryFaceAabb[o + 5] = maxZ;
+    }
+
+    /**
+    Slab test: does the segment from `origin` along unit `direction` for length
+    `maxT` reach the cached AABB of face `faceIndex`? A cheap, allocation-free
+    reject for faces a query ray cannot hit. Conservative (a small epsilon pad),
+    so it never culls a face the ray actually crosses.
+    */
+    private boolean rayReachesFaceAabb(Vector3Dd origin, double dirX, double dirY,
+        double dirZ, double maxT, int faceIndex, double pad)
+    {
+        int o = faceIndex * 6;
+        double tMin = 0.0;
+        double tMax = maxT;
+        // X slab
+        if ( Math.abs(dirX) < 1.0e-12 ) {
+            if ( origin.x() < queryFaceAabb[o] - pad ||
+                 origin.x() > queryFaceAabb[o + 3] + pad ) {
+                return false;
+            }
+        }
+        else {
+            double t1 = (queryFaceAabb[o] - pad - origin.x()) / dirX;
+            double t2 = (queryFaceAabb[o + 3] + pad - origin.x()) / dirX;
+            if ( t1 > t2 ) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if ( t1 > tMin ) tMin = t1;
+            if ( t2 < tMax ) tMax = t2;
+            if ( tMin > tMax ) return false;
+        }
+        // Y slab
+        if ( Math.abs(dirY) < 1.0e-12 ) {
+            if ( origin.y() < queryFaceAabb[o + 1] - pad ||
+                 origin.y() > queryFaceAabb[o + 4] + pad ) {
+                return false;
+            }
+        }
+        else {
+            double t1 = (queryFaceAabb[o + 1] - pad - origin.y()) / dirY;
+            double t2 = (queryFaceAabb[o + 4] + pad - origin.y()) / dirY;
+            if ( t1 > t2 ) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if ( t1 > tMin ) tMin = t1;
+            if ( t2 < tMax ) tMax = t2;
+            if ( tMin > tMax ) return false;
+        }
+        // Z slab
+        if ( Math.abs(dirZ) < 1.0e-12 ) {
+            if ( origin.z() < queryFaceAabb[o + 2] - pad ||
+                 origin.z() > queryFaceAabb[o + 5] + pad ) {
+                return false;
+            }
+        }
+        else {
+            double t1 = (queryFaceAabb[o + 2] - pad - origin.z()) / dirZ;
+            double t2 = (queryFaceAabb[o + 5] + pad - origin.z()) / dirZ;
+            if ( t1 > t2 ) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if ( t1 > tMin ) tMin = t1;
+            if ( t2 < tMax ) tMax = t2;
+            if ( tMin > tMax ) return false;
+        }
+        return true;
+    }
+
+    /** Releases the visibility-query snapshot taken by beginVisibilityQueries. */
+    public void endVisibilityQueries()
+    {
+        queryPlaneCache = null;
+        queryFaceAabb = null;
+        queryNumericContext = null;
+    }
+
+    private InfinitePlane cachedFacePlane(int faceIndex)
+    {
+        if ( queryPlaneCache != null && faceIndex < queryPlaneCache.length ) {
+            return queryPlaneCache[faceIndex];
+        }
+        return polygonsList.get(faceIndex).getContainingPlane();
+    }
+
     @Override
     public int computeQuantitativeInvisibility(Vector3Dd origin, Vector3Dd p)
     {
@@ -539,6 +685,7 @@ public class PolyhedralBoundedSolid extends Solid {
         // unambiguously INSIDE or OUTSIDE and the visibility of the (1D) edge
         // segment is the value the surrounding generic rays agree on.
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
+            queryNumericContext != null ? queryNumericContext :
             PolyhedralBoundedSolidNumericPolicy.forSolid(this);
         Vector3Dd d = p.subtract(origin);
         double t0 = d.length();
@@ -624,10 +771,21 @@ public class PolyhedralBoundedSolid extends Solid {
         int frontHitCount = 0;
         double[] distances = new double[polygonsList.size()];
 
+        double aabbPad = numericContext.bigEpsilon();
         for ( int i = 0; i < polygonsList.size(); i++ ) {
+            // Cheap AABB reject: skip faces the segment cannot reach.
+            if ( queryFaceAabb != null &&
+                 !rayReachesFaceAabb(origin, d.x(), d.y(), d.z(), t0, i,
+                     aabbPad) ) {
+                continue;
+            }
             _PolyhedralBoundedSolidFace face = polygonsList.get(i);
+            InfinitePlane facePlane = cachedFacePlane(i);
+            if ( facePlane == null ) {
+                continue;
+            }
             RayHit planeHit = new RayHit();
-            if ( !face.getContainingPlane().doIntersection(ray, planeHit) ) {
+            if ( !facePlane.doIntersection(ray, planeHit) ) {
                 continue;
             }
             Ray hit = planeHit.ray();
@@ -642,8 +800,8 @@ public class PolyhedralBoundedSolid extends Solid {
                 continue;
             }
             Vector3Dd pi = hit.origin().add(hit.direction().multiply(hit.t()));
-            if ( face.testPointInside(pi, numericContext.bigEpsilon()) !=
-                 Geometry.INSIDE ) {
+            if ( face.testPointInside(pi, numericContext.bigEpsilon(),
+                 facePlane) != Geometry.INSIDE ) {
                 continue;
             }
             boolean considerIt = true;
