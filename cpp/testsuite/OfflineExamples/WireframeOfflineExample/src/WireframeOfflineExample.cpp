@@ -15,10 +15,30 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 #include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
 
-static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& outputFile)
+static void
+appendLineSet(Calligraphic2DBuffer* destination, const Calligraphic2DBuffer* source)
+{
+    if (destination == 0 || source == 0) {
+        return;
+    }
+
+    for (int j = 0; j < source->getNumLines(); j++) {
+        Vector3Dd* e0 = source->get2DLinePoint0(j);
+        Vector3Dd* e1 = source->get2DLinePoint1(j);
+        if (e0 != 0 && e1 != 0) {
+            destination->add2DLine(*e0, *e1);
+        }
+        delete e0;
+        delete e1;
+    }
+}
+
+static void
+rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& outputFile)
 {
     RGBImageUncompressed outputImage;
     outputImage.init((int)camera->getViewportXSize(), (int)camera->getViewportYSize());
@@ -49,7 +69,8 @@ static void rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const ja
     ImagePersistence::exportPNG(java::File(outputFile.c_str()), &outputImage);
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     java::String sceneFile = "../../../../etc/geometry/cow.obj";
     java::String outputFile = "output.png";
@@ -65,7 +86,7 @@ int main(int argc, char** argv)
     camera.setNearPlaneDistance(0.001);
     camera.setFarPlaneDistance(100);
     camera.setRotation(R);
-    camera.updateViewportResize(640, 480);
+    camera.updateViewportResize(1024, 768);
     SimpleScene scene;
     EnvironmentPersistence::importEnvironment(java::File(sceneFile.c_str()), &scene);
     if (scene.getSimpleBodies().size() == 0) {
@@ -75,12 +96,41 @@ int main(int argc, char** argv)
 
     SimpleBody* arrowBody = new SimpleBody();
     arrowBody->setGeometry(new Arrow(1.0, 0.5, 0.15, 0.3));
-    arrowBody->setPosition(Vector3Dd(1, 2, 3));
+    arrowBody->setRotation(Matrix4x4d().axisRotation(-30.0 * pi / 180.0, 1.0, 0.0, 0.0));
+    arrowBody->setPosition(Vector3Dd(1, 2, 1.2));
+    arrowBody->setScale(Vector3Dd(2, 2, 2));
     scene.addBody(arrowBody);
 
-    Calligraphic2DBuffer lineSet;
-    WireframeRenderer::execute(&lineSet, scene.getSimpleBodies(), &camera);
-    rasterOutput(&camera, &lineSet, outputFile);
+    java::ArrayList<SimpleBody*> wireframeBodies;
+    java::ArrayList<SimpleBody*>& sceneBodies = scene.getSimpleBodies();
+    for (long int i = 0; i < sceneBodies.size(); i++) {
+        SimpleBody* body = sceneBodies.get(i);
+        if (body != 0 && body != arrowBody) {
+            wireframeBodies.add(body);
+        }
+    }
+
+    java::ArrayList<SimpleBody*> hiddenLineBodies;
+    hiddenLineBodies.add(arrowBody);
+
+    Calligraphic2DBuffer cowWireframe;
+    Calligraphic2DBuffer arrowVisibleContour;
+    Calligraphic2DBuffer arrowVisibleNonContour;
+    Calligraphic2DBuffer arrowHidden;
+    Calligraphic2DBuffer finalLineSet;
+
+    WireframeRenderer::execute(&cowWireframe, wireframeBodies, &camera);
+    HiddenLineRenderer::executeAppelAlgorithm(
+        hiddenLineBodies,
+        &camera,
+        &arrowVisibleContour,
+        &arrowVisibleNonContour,
+        &arrowHidden);
+
+    appendLineSet(&finalLineSet, &cowWireframe);
+    appendLineSet(&finalLineSet, &arrowVisibleContour);
+    appendLineSet(&finalLineSet, &arrowVisibleNonContour);
+    rasterOutput(&camera, &finalLineSet, outputFile);
 
     std::printf("Resulting image has been written to \"%s\"\n", outputFile.c_str());
     return 0;

@@ -8,7 +8,20 @@
 class Camera;
 class Calligraphic2DBuffer;
 class SimpleBody;
+class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
+
+class HiddenLineQuerySolid {
+public:
+    SimpleBody* body;
+    PolyhedralBoundedSolid* solid;
+    bool ownsSolid;
+
+    HiddenLineQuerySolid()
+        : body(0), solid(0), ownsSolid(false)
+    {
+    }
+};
 
 class HiddenLineRenderer : public RenderingElement {
 public:

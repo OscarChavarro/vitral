@@ -8,6 +8,7 @@ class PolyhedralBoundedSolid;
 class InfinitePlane;
 class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidHalfEdge;
+class _PolyhedralBoundedSolidVertex;
 
 class _PolyhedralBoundedSolidFace {
 public:
@@ -15,13 +16,13 @@ public:
     private:
         int status_;
         _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge_;
-        class _PolyhedralBoundedSolidVertex* intersectedVertex_;
+        _PolyhedralBoundedSolidVertex* intersectedVertex_;
 
     public:
         PointInsideResult(
             int status,
             _PolyhedralBoundedSolidHalfEdge* intersectedHalfedge,
-            class _PolyhedralBoundedSolidVertex* intersectedVertex)
+            _PolyhedralBoundedSolidVertex* intersectedVertex)
             : status_(status),
               intersectedHalfedge_(intersectedHalfedge),
               intersectedVertex_(intersectedVertex)
@@ -33,7 +34,7 @@ public:
         {
             return intersectedHalfedge_;
         }
-        class _PolyhedralBoundedSolidVertex* intersectedVertex() const
+        _PolyhedralBoundedSolidVertex* intersectedVertex() const
         {
             return intersectedVertex_;
         }
@@ -51,9 +52,17 @@ public:
     bool calculatePlane();
     InfinitePlane* getContainingPlane();
     int testPointInside(const Vector3Dd& point, double tolerance);
+    int testPointInside(
+        const Vector3Dd& point,
+        double tolerance,
+        InfinitePlane* plane);
     PointInsideResult testPointInsideDetailed(
         const Vector3Dd& point,
         double tolerance);
+    PointInsideResult testPointInsideDetailed(
+        const Vector3Dd& point,
+        double tolerance,
+        InfinitePlane* plane);
     void revert();
 
 private:

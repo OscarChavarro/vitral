@@ -2,12 +2,14 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_POLYHEDRALBOUNDEDSOLID_POLYHEDRALBOUNDEDSOLID_H__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
 #include "java/util/ArrayList.h"
 
 class Ray;
 class RayHit;
 class Vector3Dd;
+class InfinitePlane;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidVertex;
@@ -25,18 +27,21 @@ private:
     int maxFaceId;
     bool modelIsValid;
 
-    bool boundaryHitProducesInteriorPenetration(
-        const Vector3Dd& hitPoint,
-        const Vector3Dd& direction,
-        double tolerance);
-    bool isFaceBoundaryTouchAtHit(
-        _PolyhedralBoundedSolidFace* face,
-        const Vector3Dd& hitPoint,
-        double tolerance);
-    bool isForwardProbeInsideFaceHalfSpace(
-        _PolyhedralBoundedSolidFace* face,
-        const Vector3Dd& probePoint,
-        double tolerance);
+    InfinitePlane** queryPlaneCache;
+    double* queryFaceAabb;
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext* queryNumericContext;
+    int queryFaceCount;
+
+    void computeFaceAabb(_PolyhedralBoundedSolidFace* face, int index);
+    bool rayReachesFaceAabb(
+        const Vector3Dd& origin,
+        double dirX,
+        double dirY,
+        double dirZ,
+        double maxT,
+        int faceIndex,
+        double pad);
+    void clearVisibilityQueryCache();
 
 public:
     PolyhedralBoundedSolid();
@@ -66,6 +71,25 @@ public:
     void setValidationState(bool flag);
 
     void merge(PolyhedralBoundedSolid* other);
+
+    void beginVisibilityQueries();
+    void endVisibilityQueries();
+    bool visibilityQueriesActive() const;
+    InfinitePlane* cachedFacePlane(int faceIndex);
+    PolyhedralBoundedSolidNumericPolicy::ToleranceContext queryToleranceContext();
+    bool queryRayReachesFace(
+        const Vector3Dd& origin,
+        double dirX,
+        double dirY,
+        double dirZ,
+        double maxT,
+        int faceIndex,
+        double pad);
+    bool queryPointNearFace(
+        const Vector3Dd& point,
+        int faceIndex,
+        double pad);
+
     virtual int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p) override;
     static int compareValue(double a, double b, double tolerance);
     void revert();

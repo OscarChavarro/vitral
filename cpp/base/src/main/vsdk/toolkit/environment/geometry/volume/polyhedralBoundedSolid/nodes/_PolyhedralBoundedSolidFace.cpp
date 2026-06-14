@@ -1,19 +1,21 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
-#include "vsdk/toolkit/environment/geometry/Geometry.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
-#include "vsdk/toolkit/processing/ComputationalGeometry.h"
+#include <cmath>
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 
-double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop)
+double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(
+    _PolyhedralBoundedSolidLoop* loop)
 {
-    if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
+    if (loop == 0 || loop->boundaryStartHalfEdge == 0) {
         return 0.0;
     }
 
@@ -28,7 +30,7 @@ double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(_PolyhedralBounded
             (p.z() - q.z()) * (p.x() + q.x()),
             (p.x() - q.x()) * (p.y() + q.y())));
         he = he->next();
-    } while ( he != start );
+    } while (he != start);
 
     return normalAccumulator.length();
 }
@@ -36,16 +38,16 @@ double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(_PolyhedralBounded
 _PolyhedralBoundedSolidLoop* _PolyhedralBoundedSolidFace::selectLoopForPlaneCalculation(
     java::ArrayList<_PolyhedralBoundedSolidLoop*>& boundariesList)
 {
-    if ( boundariesList.size() < 1 ) {
+    if (boundariesList.size() < 1) {
         return 0;
     }
 
     _PolyhedralBoundedSolidLoop* selectedLoop = boundariesList.get(0);
     double maxAreaMagnitude = boundaryLoopAreaMagnitude(selectedLoop);
-    for ( long int i = 1; i < boundariesList.size(); i++ ) {
+    for (long int i = 1; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidLoop* candidate = boundariesList.get(i);
         double candidateAreaMagnitude = boundaryLoopAreaMagnitude(candidate);
-        if ( candidateAreaMagnitude > maxAreaMagnitude ) {
+        if (candidateAreaMagnitude > maxAreaMagnitude) {
             maxAreaMagnitude = candidateAreaMagnitude;
             selectedLoop = candidate;
         }
@@ -59,7 +61,7 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
 {
     _PolyhedralBoundedSolidLoop* loop =
         selectLoopForPlaneCalculation(boundariesList);
-    if ( loop == 0 || loop->boundaryStartHalfEdge == 0 ) {
+    if (loop == 0 || loop->boundaryStartHalfEdge == 0) {
         return 0;
     }
 
@@ -82,16 +84,16 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
         cx += p.x();
         cy += p.y();
         cz += p.z();
-        count++;
+        ++count;
         he = he->next();
-    } while ( he != start );
+    } while (he != start);
 
-    if ( count < 3 ) {
+    if (count < 3) {
         return 0;
     }
 
     Vector3Dd normal(nx, ny, nz);
-    if ( normal.length() <= tolerance ) {
+    if (normal.length() <= tolerance) {
         return 0;
     }
 
@@ -99,7 +101,9 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByNewell(
     return new InfinitePlane(normal, centroid);
 }
 
-_PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid* parent, int inId)
+_PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(
+    PolyhedralBoundedSolid* parent,
+    int inId)
     : id(inId), parentSolid(parent)
 {
 }
@@ -107,26 +111,29 @@ _PolyhedralBoundedSolidFace::_PolyhedralBoundedSolidFace(PolyhedralBoundedSolid*
 _PolyhedralBoundedSolidFace::~_PolyhedralBoundedSolidFace()
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        if (boundariesList[i] != 0) {
-            delete boundariesList[i];
-        }
+        delete boundariesList[i];
     }
 }
 
-_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int vn1, int vn2)
+_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
+    int vn1,
+    int vn2)
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        _PolyhedralBoundedSolidHalfEdge* he = boundariesList[i]->halfEdgeVertices(vn1, vn2);
-        if ( he != 0 ) return he;
+        _PolyhedralBoundedSolidHalfEdge* he =
+            boundariesList[i]->halfEdgeVertices(vn1, vn2);
+        if (he != 0) return he;
     }
     return 0;
 }
 
-_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(int vn1)
+_PolyhedralBoundedSolidHalfEdge* _PolyhedralBoundedSolidFace::findHalfEdge(
+    int vn1)
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        _PolyhedralBoundedSolidHalfEdge* he = boundariesList[i]->firstHalfEdgeAtVertex(vn1);
-        if ( he != 0 ) return he;
+        _PolyhedralBoundedSolidHalfEdge* he =
+            boundariesList[i]->firstHalfEdgeAtVertex(vn1);
+        if (he != 0) return he;
     }
     return 0;
 }
@@ -142,7 +149,7 @@ InfinitePlane* _PolyhedralBoundedSolidFace::getContainingPlane()
         PolyhedralBoundedSolidNumericPolicy::forFace(this);
     InfinitePlane* plane =
         calculatePlaneByNewell(boundariesList, numericContext.bigEpsilon());
-    if ( plane == 0 ) {
+    if (plane == 0) {
         plane = calculatePlaneByCorner(numericContext.bigEpsilon());
     }
     return plane;
@@ -155,10 +162,30 @@ int _PolyhedralBoundedSolidFace::testPointInside(
     return testPointInsideDetailed(p, tolerance).status();
 }
 
+int _PolyhedralBoundedSolidFace::testPointInside(
+    const Vector3Dd& p,
+    double tolerance,
+    InfinitePlane* plane)
+{
+    return testPointInsideDetailed(p, tolerance, plane).status();
+}
+
 _PolyhedralBoundedSolidFace::PointInsideResult
 _PolyhedralBoundedSolidFace::testPointInsideDetailed(
     const Vector3Dd& p,
     double tolerance)
+{
+    InfinitePlane* plane = getContainingPlane();
+    PointInsideResult result = testPointInsideDetailed(p, tolerance, plane);
+    delete plane;
+    return result;
+}
+
+_PolyhedralBoundedSolidFace::PointInsideResult
+_PolyhedralBoundedSolidFace::testPointInsideDetailed(
+    const Vector3Dd& p,
+    double tolerance,
+    InfinitePlane* plane)
 {
     int nc;
     int sh;
@@ -169,37 +196,35 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
     Vector3Dd projectedPoint;
     int dominantCoordinate;
 
-    InfinitePlane* plane = getContainingPlane();
-    if ( plane == 0 ) {
+    if (plane == 0) {
         return PointInsideResult(Geometry::OUTSIDE, 0, 0);
     }
     Vector3Dd n = plane->getNormal();
-    delete plane;
 
-    if ( std::abs(n.x()) >= std::abs(n.y()) &&
-         std::abs(n.x()) >= std::abs(n.z()) ) {
+    if (std::abs(n.x()) >= std::abs(n.y()) &&
+        std::abs(n.x()) >= std::abs(n.z())) {
         dominantCoordinate = 1;
     }
-    else if ( std::abs(n.y()) >= std::abs(n.x()) &&
-              std::abs(n.y()) >= std::abs(n.z()) ) {
+    else if (std::abs(n.y()) >= std::abs(n.x()) &&
+             std::abs(n.y()) >= std::abs(n.z())) {
         dominantCoordinate = 2;
     }
     else {
         dominantCoordinate = 3;
     }
 
-    for ( long int i = 0; i < boundariesList.size(); i++ ) {
+    for (long int i = 0; i < boundariesList.size(); ++i) {
         _PolyhedralBoundedSolidLoop* loop = boundariesList.get(i);
-        _PolyhedralBoundedSolidHalfEdge* he = loop != 0 ?
-            loop->boundaryStartHalfEdge : 0;
-        if ( he == 0 ) {
+        _PolyhedralBoundedSolidHalfEdge* he =
+            loop != 0 ? loop->boundaryStartHalfEdge : 0;
+        if (he == 0) {
             return PointInsideResult(Geometry::OUTSIDE, 0, 0);
         }
         _PolyhedralBoundedSolidHalfEdge* heStart = he;
 
         do {
-            if ( p.subtract(he->startingVertex->position).length() <
-                 2 * tolerance ) {
+            if (p.subtract(he->startingVertex->position).length() <
+                2 * tolerance) {
                 return PointInsideResult(
                     Geometry::LIMIT, 0, he->startingVertex);
             }
@@ -212,7 +237,7 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
 
             _PolyhedralBoundedSolidHalfEdge* heOld = he;
             he = he->next();
-            if ( he == 0 ) {
+            if (he == 0) {
                 return PointInsideResult(Geometry::OUTSIDE, 0, 0);
             }
 
@@ -222,33 +247,33 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
             polygon2Dv.add(projectedPoint.y());
             polygon2Dvv.add(he->startingVertex);
 
-            if ( p.subtract(he->startingVertex->position).length() <
-                 2 * tolerance ) {
+            if (p.subtract(he->startingVertex->position).length() <
+                2 * tolerance) {
                 return PointInsideResult(
                     Geometry::LIMIT, 0, he->startingVertex);
             }
 
-            if ( ComputationalGeometry::lineSegmentContainmentTest(
-                     heOld->startingVertex->position,
-                     he->startingVertex->position,
-                     p,
-                     tolerance) == Geometry::LIMIT ) {
+            if (ComputationalGeometry::lineSegmentContainmentTest(
+                    heOld->startingVertex->position,
+                    he->startingVertex->position,
+                    p,
+                    tolerance) == Geometry::LIMIT) {
                 return PointInsideResult(Geometry::LIMIT, heOld, 0);
             }
-        } while ( he != heStart );
+        } while (he != heStart);
     }
 
     projectedPoint = dropCoordinate(p, dominantCoordinate);
     double u = projectedPoint.x();
     double v = projectedPoint.y();
 
-    for ( long int i = 0; i < polygon2Du.size(); i++ ) {
+    for (long int i = 0; i < polygon2Du.size(); ++i) {
         polygon2Du.set(i, polygon2Du.get(i) - u);
         polygon2Dv.set(i, polygon2Dv.get(i) - v);
     }
     nc = 0;
 
-    for ( long int i = 0; i < polygon2Du.size() - 1; i += 2 ) {
+    for (long int i = 0; i < polygon2Du.size() - 1; i += 2) {
         double ua = polygon2Du.get(i);
         double va = polygon2Dv.get(i);
         double ub = polygon2Du.get(i + 1);
@@ -257,19 +282,19 @@ _PolyhedralBoundedSolidFace::testPointInsideDetailed(
         sh = va < 0 ? -1 : 1;
         nsh = vb < 0 ? -1 : 1;
 
-        if ( sh != nsh ) {
-            if ( ua >= 0 && ub >= 0 ) {
+        if (sh != nsh) {
+            if (ua >= 0 && ub >= 0) {
                 nc++;
             }
-            else if ( ua >= 0 || ub >= 0 ) {
-                if ( ua - va * (ub - ua) / (vb - va) > 0 ) {
+            else if (ua >= 0 || ub >= 0) {
+                if (ua - va * (ub - ua) / (vb - va) > 0) {
                     nc++;
                 }
             }
         }
     }
 
-    if ( (nc % 2) == 1 ) {
+    if ((nc % 2) == 1) {
         return PointInsideResult(Geometry::INSIDE, 0, 0);
     }
     return PointInsideResult(Geometry::OUTSIDE, 0, 0);
@@ -298,15 +323,15 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
     Vector3Dd vPrev;
     Vector3Dd vNext;
 
-    if ( boundariesList.size() < 1 ) {
+    if (boundariesList.size() < 1) {
         return 0;
     }
     loop = selectLoopForPlaneCalculation(boundariesList);
-    if ( loop == 0 ) {
+    if (loop == 0) {
         return 0;
     }
     he = loop->boundaryStartHalfEdge;
-    if ( he == 0 ) {
+    if (he == 0) {
         return 0;
     }
     heStart = he;
@@ -318,43 +343,43 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
         p0 = he->startingVertex->position;
         p1 = he->next()->startingVertex->position;
         temp = p1.subtract(p0);
-        if ( !readyVecA ) {
-            if ( temp.length() > tolerance ) {
+        if (!readyVecA) {
+            if (temp.length() > tolerance) {
                 a = temp.normalized();
                 readyVecA = true;
             }
         }
-        else if ( !readyVecB ) {
-            if ( temp.length() > tolerance ) {
+        else if (!readyVecB) {
+            if (temp.length() > tolerance) {
                 temp = temp.normalized();
                 dotP = std::abs(temp.dotProduct(a));
-                if ( dotP < 1 - nonColinearDotTolerance ) {
+                if (dotP < 1 - nonColinearDotTolerance) {
                     b = temp;
                     readyVecB = true;
                 }
             }
         }
         he = he->next();
-    } while ( he != heStart && !readyVecB );
+    } while (he != heStart && !readyVecB);
 
-    if ( a.length() == 0 || b.length() == 0 ) {
+    if (a.length() == 0 || b.length() == 0) {
         return 0;
     }
+
     n1 = a.crossProduct(b);
-    if ( loop->halfEdgesList.size() == 3 ) {
-        n1 = n1.normalized();
-        return new InfinitePlane(n1, p0);
+    if (loop->halfEdgesList.size() == 3) {
+        return new InfinitePlane(n1.normalized(), p0);
     }
 
-    if ( std::abs(n1.z()) > std::abs(n1.x()) ) {
-        if ( std::abs(n1.z()) > std::abs(n1.y()) ) {
+    if (std::abs(n1.z()) > std::abs(n1.x())) {
+        if (std::abs(n1.z()) > std::abs(n1.y())) {
             domPlane = 1;
         }
         else {
             domPlane = 2;
         }
     }
-    else if ( std::abs(n1.x()) > std::abs(n1.y()) ) {
+    else if (std::abs(n1.x()) > std::abs(n1.y())) {
         domPlane = 3;
     }
     else {
@@ -364,21 +389,21 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
     he = loop->boundaryStartHalfEdge;
     heInferior = he;
     he = he->next();
-    while ( he != heStart ) {
+    while (he != heStart) {
         p0 = he->startingVertex->position;
-        switch ( domPlane ) {
+        switch (domPlane) {
           case 1:
-            if ( p0.y() < heInferior->startingVertex->position.y() ) {
+            if (p0.y() < heInferior->startingVertex->position.y()) {
                 heInferior = he;
             }
             break;
           case 2:
-            if ( p0.z() < heInferior->startingVertex->position.z() ) {
+            if (p0.z() < heInferior->startingVertex->position.z()) {
                 heInferior = he;
             }
             break;
           case 3:
-            if ( p0.z() < heInferior->startingVertex->position.z() ) {
+            if (p0.z() < heInferior->startingVertex->position.z()) {
                 heInferior = he;
             }
             break;
@@ -392,25 +417,25 @@ InfinitePlane* _PolyhedralBoundedSolidFace::calculatePlaneByCorner(
         he = he->next();
         p1 = he->startingVertex->position;
         vNext = p1.subtract(p0);
-        if ( vNext.length() > tolerance ) {
+        if (vNext.length() > tolerance) {
             vNext = vNext.normalized();
             break;
         }
-    } while ( he != heInferior );
+    } while (he != heInferior);
 
     he = heInferior;
     do {
         he = he->previous();
         p1 = he->startingVertex->position;
         vPrev = p1.subtract(p0);
-        if ( vPrev.length() > tolerance ) {
+        if (vPrev.length() > tolerance) {
             vPrev = vPrev.normalized();
             dotP = std::abs(vPrev.dotProduct(vNext));
-            if ( dotP < 1 - nonColinearDotTolerance ) {
+            if (dotP < 1 - nonColinearDotTolerance) {
                 break;
             }
         }
-    } while ( he != heInferior );
+    } while (he != heInferior);
 
     n1 = vNext.crossProduct(vPrev);
     return new InfinitePlane(n1, p0);
@@ -420,7 +445,7 @@ Vector3Dd _PolyhedralBoundedSolidFace::dropCoordinate(
     const Vector3Dd& in,
     int coord) const
 {
-    switch ( coord ) {
+    switch (coord) {
       case 1:
         return Vector3Dd(in.y(), in.z(), 0);
       case 2:
@@ -434,6 +459,6 @@ Vector3Dd _PolyhedralBoundedSolidFace::dropCoordinate(
 void _PolyhedralBoundedSolidFace::revert()
 {
     for (long int i = 0; i < boundariesList.size(); ++i) {
-        if ( boundariesList[i] != 0 ) boundariesList[i]->revert();
+        if (boundariesList[i] != 0) boundariesList[i]->revert();
     }
 }
