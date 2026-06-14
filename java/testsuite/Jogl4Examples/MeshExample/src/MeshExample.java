@@ -29,15 +29,21 @@ import vsdk.toolkit.gui.AwtSystem;
 
 // Application classes
 import awt.FileSelectorDialog;
+import gui.MeshKeyboardInteractionTechniques;
+import gui.MeshMouseInteractionTechniques;
 import model.MeshModel;
+import options.CommandLineOptions;
 import render.Jogl4DebuggerRenderer;
 
 public class MeshExample
     extends JFrame implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
     private MeshModel model;
+    private CommandLineOptions commandLineOptions;
     private CameraController cameraController;
     private RendererConfigurationController qualityController;
+    private MeshMouseInteractionTechniques mouseInteractionTechniques;
+    private MeshKeyboardInteractionTechniques keyboardInteractionTechniques;
     public GLCanvas canvas;
     private Jogl4DebuggerRenderer renderer;
 
@@ -46,6 +52,7 @@ public class MeshExample
         File file = null;
 
         model = new MeshModel();
+        commandLineOptions = new CommandLineOptions(model);
 
         //-----------------------------------------------------------------
         if ( fileName == null ) {
@@ -87,9 +94,20 @@ public class MeshExample
 
         cameraController = new CameraControllerOrbiter(model.getCamera());
         qualityController = new RendererConfigurationController(model.getQualitySelection());
+        mouseInteractionTechniques = new MeshMouseInteractionTechniques(cameraController);
+        keyboardInteractionTechniques =
+            new MeshKeyboardInteractionTechniques(model, cameraController, qualityController);
 
         renderer = new Jogl4DebuggerRenderer(model);
         canvas.addGLEventListener(renderer);
+    }
+
+    public void processCommandLineArguments(String[] args) {
+        commandLineOptions.processArguments(args);
+    }
+
+    public MeshModel getModel() {
+        return model;
     }
 
     public Dimension getPreferredSize() {
@@ -98,17 +116,33 @@ public class MeshExample
 
     public static void main(String[] args) {
         JFrame f;
+        MeshExample app;
 
-
-        if ( args.length == 1 ) {
-            f = new MeshExample(args[0]);
-        }
-        else {
-            f = new MeshExample(null);
-        }
+        app = new MeshExample(extractFileName(args));
+        app.processCommandLineArguments(args);
+        System.out.println("Searching tangible interface server on " + app.getModel().getTangibleServiceUrl());
+        f = app;
 
         f.pack();
         f.setVisible(true);
+    }
+
+    private static String extractFileName(String[] args) {
+        if ( args == null ) {
+            return null;
+        }
+
+        for ( int i = 0; i < args.length; i++ ) {
+            if ( "-tangibleServer".equals(args[i]) ) {
+                i++;
+                continue;
+            }
+            if ( !args[i].startsWith("-") ) {
+                return args[i];
+            }
+        }
+
+        return null;
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -119,63 +153,49 @@ public class MeshExample
     }
 
     public void mousePressed(MouseEvent e) {
-        if (cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseMoved(MouseEvent e) {
-        if (cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseDragged(MouseEvent e) {
-        if (cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void mouseWheelMoved(MouseWheelEvent e) {
-        System.out.println(".");
-        if (cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (mouseInteractionTechniques.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }
 
     public void keyPressed(KeyEvent e) {
-        if ( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-            System.exit(0);
-        }
-        if ( e.getKeyCode() == KeyEvent.VK_I ) {
-            System.out.println(model.getQualitySelection());
-        }
-        if ( cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-            canvas.repaint();
-        }
-        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
-            System.out.println(model.getQualitySelection());
+        if ( keyboardInteractionTechniques.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
             canvas.repaint();
         }
     }
 
     public void keyReleased(KeyEvent e) {
-        if (cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
-            canvas.repaint();
-        }
-        if (qualityController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
+        if (keyboardInteractionTechniques.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e))) {
             canvas.repaint();
         }
     }

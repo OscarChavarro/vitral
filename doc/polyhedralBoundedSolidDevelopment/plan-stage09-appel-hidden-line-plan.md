@@ -453,6 +453,40 @@ does the edge move to). Seed QI once per edge, propagate ΔQI, drop the
 per-sub-segment resampling → the ≈6× fewer QI casts that the 1967 algorithm was
 designed to deliver.
 
+**P4 — INVESTIGATED 2026-06-14: NOT VIABLE as a cheap drop-in.** The cheap
+image-space ΔQI side rule was implemented (seed QI at sub-segment 0, +
+`contourCrossingDeltaQI` accumulated at each contour crossing) and validated
+edge-by-edge against the robust per-sub-segment QI (the ground truth from P2/P3).
+Result: **3146 disagreements / 24830 sub-segments (~13%)**, *wrong even at a
+clean, non-grazing orientation* `rot(0,0)` (e.g. `e=3 seg=1 prop=1 robust=0`,
+and nonsensical accumulated values like `-1`, `2`). Two independent root causes,
+both structural — not tuning:
+  1. **False-positive crossings.** The sweep-triangle detection admits a contour
+     edge CL when CL pierces `triangle(eye, edge.start, edge.end)`, i.e. CL is in
+     front of *some* part of the edge. But the ΔQI is applied at the *image
+     crossing* parameter `t_c`, where CL may actually be *behind* `edgePoint(t_c)`
+     → no real occlusion change there → the side rule still charges ±1. A correct
+     rule needs a per-crossing depth test (is CL closer to the eye than
+     `edgePoint(t_c)` at the crossing's image location?), which the detection does
+     not provide.
+  2. **Missed crossings.** The same detection also *misses* QI-changing crossings
+     (under-counts: `prop=0 robust=1`), so even a perfect ΔQI sign cannot recover
+     the right total — the set of split points is itself incomplete with respect
+     to the robust interior-entry structure.
+Fixing both means re-engineering contour detection for completeness **and**
+depth ordering (effectively computing, per edge, the t-intervals over which each
+front face occludes the edge — an interval-overlap sweep), a substantial redesign
+that risks the correctness the robust QI already guarantees. Per §5.3 ("Do not
+ship any variant that is not net-better … all existing tests"), the side-rule
+machinery was **removed** (`contourCrossingDeltaQI`, `contourFaceInteriorRef`,
+`sideOfLine2D`, `projectToNdc`, the `_AppelEdgeCache.visibleFaceInteriorRef`
+field, the throwaway `PropagationValidateTest`). **Final state:** the production
+renderer classifies every sub-segment with the robust `computeMidpointQuantitative
+Invisibility` (P2/P3). Correct, guarded, and 30× faster than the original
+(49 s → 1.6 s). The remaining ~1.3× over the old jitter kernel is the accepted
+price of correctness; the ≈6× propagation win is deferred to a future stage that
+is willing to redesign contour detection.
+
 ### 5.3 Risks / notes
 
 - The featured object's box union *may* leave coincident/internal faces from CSG;
@@ -482,9 +516,105 @@ designed to deliver.
 | Robust `isPointInside` (P1) | ✅ done, verified 3375/3375 vs 12-box ground truth |
 | Robust `quantitativeInvisibility` (P2) | ✅ done, verified 0 real errors vs depth-banded ground truth (beats stable kernel's ~16) |
 | Thread caches + wire predicate QI into renderer (P3) | ✅ done — delegated, all guards green, kurlanderBowl ≈1.6 s |
-| Incremental [APPE1967] ΔQI propagation (P4) | ⏳ NEXT — now unblocked; ~1 QI per edge instead of per sub-segment, recovers perf |
+| Incremental [APPE1967] ΔQI propagation (P4) | ❌ investigated, NOT VIABLE cheaply — side-rule ΔQI 3146/24830 wrong (false-positive + missed crossings); machinery removed; needs contour-detection redesign |
 
 Full base suite at this stage: **407 tests, 0 failures.** The production renderer
 now uses the robust predicate QI; the convex-corner grazing bugs on axis-aligned
-solids are resolved in production. Remaining: P4 (incremental propagation) for
-fidelity to [APPE1967] and to recover the ~1.3× frame-time cost.
+solids are resolved in production. P4 (cheap incremental propagation) was
+investigated and proven not viable without a substantial contour-detection
+redesign; the robust per-sub-segment QI is the final, correct state.
+
+---
+
+## 7. Stage 10 — Incremental QI propagation via robust contour detection (deferred)
+
+**Status: NOT STARTED. Deferred by user decision 2026-06-14.** This section
+specifies the complex solution that P4 proved is required to recover the ≈6×
+fewer QI casts the [APPE1967] algorithm was designed to deliver, without
+regressing the correctness the robust per-sub-segment QI (P2/P3) now guarantees.
+
+### 7.1 Why the cheap P4 failed (carry-over context)
+The current renderer splits each edge at *contour crossings* found by a
+sweep-triangle test (a contour edge CL is admitted if it pierces
+`triangle(eye, edge.start, edge.end)`), then classifies every resulting
+sub-segment independently with the robust QI. P4 tried to keep the splits but
+replace the per-sub-segment QI with a seed + image-space ΔQI side rule. That
+failed for two structural reasons (validated: 3146/24830 disagreements, wrong
+even at `rot(0,0)`):
+1. **False-positive splits** — the detection admits CL when it is in front of
+   *some* part of the edge, but ΔQI is charged at the image-crossing parameter
+   `t_c`, where CL may be *behind* `edgePoint(t_c)` (no real occlusion change).
+2. **Missed splits** — the detection also omits QI-changing crossings, so the
+   split set is incomplete with respect to the robust interior-entry structure.
+
+So the split set is **both over- and under-complete** relative to the true QI
+profile. Stage 10 must therefore *redefine the split set itself*, not just the
+ΔQI computed on top of it.
+
+### 7.2 Goal
+For each edge, compute the piecewise-constant function `QI(t)`, `t ∈ [0,1]`,
+with **one robust QI evaluation per edge** (the seed) plus **O(crossings)**
+work, where the crossings are exactly the `t` values at which `QI(t)` changes by
+±1. Output identical to the current per-sub-segment classification; cost ≈ one
+QI cast per edge instead of one per sub-segment.
+
+### 7.3 Approach — per-edge occlusion-interval sweep
+`QI(t)` = number of front faces strictly between the eye and `edgePoint(t)` that
+also cover `edgePoint(t)` in the image. Each front face `F` contributes to
+`QI(t)` over a (possibly empty) set of `t`-intervals; `QI(t)` is the count of
+intervals covering `t`. Plan:
+
+1. **Candidate faces.** Collect front-facing faces whose view-frustum/AABB
+   projection overlaps the edge's image span (reuse the per-frame plane cache and
+   face-AABB cull already in `PolyhedralBoundedSolid`). Cheap reject of the vast
+   majority.
+2. **Per-face occlusion interval(s).** For each candidate `F`, compute the
+   `t`-sub-interval(s) of the edge whose image lies inside `F`'s image polygon
+   **and** whose 3-D point is behind `F` (depth test against `F`'s supporting
+   plane along the eye ray). Interval endpoints come from:
+   - edge-image ∩ each projected boundary edge of `F` (the silhouette/contour
+     edges), giving the `t` where coverage toggles; **and**
+   - the `t` where the edge pierces `F`'s plane (coverage can only exist on the
+     behind-`F` side).
+   This is the robust replacement for the sweep-triangle test: it is **complete**
+   (every coverage toggle is found) and **depth-correct** (only behind-`F`
+   sub-intervals count).
+3. **Merge.** Collect all interval endpoints across all candidate faces, sort
+   the `t` values → these are the true split points. `QI(t)` on each resulting
+   sub-interval = number of face-intervals covering it (running count via a
+   sweep over sorted endpoints, +1 on interval-open, −1 on interval-close).
+4. **Seed check.** Evaluate the robust QI once on the first sub-interval and
+   assert it equals the sweep's running count there (cheap invariant guard; if it
+   ever mismatches, fall back to per-sub-segment robust QI for that edge).
+
+### 7.4 Robust predicates this needs (extend `PolyhedralBoundedSolidPredicates`)
+- `orientation2D` / `sideOfLine` as an **exact/adaptive** sign predicate (for
+  edge-image ∩ contour-image and point-in-image-polygon), to avoid the float
+  degeneracies that sank the side rule. Consider Shewchuk-style adaptive
+  arithmetic or the project's existing exact-sign utilities.
+- `segmentPlaneT` — robust parameter `t` where the edge pierces a face plane,
+  with explicit on-plane (LIMIT) handling consistent with §3 of this plan.
+- Reuse `isPointInside` (P1) only for the per-edge **seed** and the fallback.
+
+### 7.5 Validation strategy (must pass before shipping)
+- **Profile equality:** for the 12-box object and kurlanderBowl, across the full
+  24×24 featured scan, assert `QI_sweep(t)` equals the robust per-sub-segment QI
+  at every sub-segment midpoint (0 disagreements — the bar P4 missed by 3146).
+- **Regression:** all existing renderer grazing/partial-occlusion guards stay
+  green; full base suite stays at its current count, 0 failures.
+- **Performance:** kurlanderBowl frame time strictly below the current ~1.6 s and
+  ideally approaching the old jitter-kernel ~1.2 s, confirming the ≈6× cast
+  reduction materialized.
+- Per §5.3: **do not ship** any variant not net-better on the full scan **and**
+  all tests. Keep the robust per-sub-segment QI as the always-correct fallback.
+
+### 7.6 Risks
+- The exact 2-D sign predicate is the crux; without it, step 2's interval
+  endpoints inherit the same degeneracies that made the side rule non-robust.
+- Coplanar / grazing views (edge image parallel to a contour) must resolve via
+  the same ON_SURFACE / LIMIT discipline as P2, not via tilt.
+- Faces shared edges and silhouette T-junctions can create coincident endpoints;
+  the sweep must treat equal-`t` opens/closes deterministically (close before
+  open, or vice-versa, chosen to match the robust seed).
+- Keep everything **inside the kernel**; the renderer, `SimpleBody`, and the
+  public QI signature stay unchanged so existing guards keep their meaning.

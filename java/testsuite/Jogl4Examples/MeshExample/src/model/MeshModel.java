@@ -17,6 +17,7 @@ public class MeshModel {
     private final List<Light> lights;
     private final SimpleScene scene;
     private final RendererConfiguration qualitySelection;
+    private String tangibleServiceUrl = "ws://localhost/8090";
 
     public MeshModel() {
         scene = new SimpleScene();
@@ -45,6 +46,17 @@ public class MeshModel {
 
     public RendererConfiguration getQualitySelection() {
         return qualitySelection;
+    }
+
+    public String getTangibleServiceUrl() {
+        return tangibleServiceUrl;
+    }
+
+    public void setTangibleServiceUrl(String tangibleServiceUrl) {
+        if ( tangibleServiceUrl == null || tangibleServiceUrl.trim().isEmpty() ) {
+            return;
+        }
+        this.tangibleServiceUrl = tangibleServiceUrl;
     }
 
     public void configureInitialViewAndLightToScene() {
