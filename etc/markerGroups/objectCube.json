@@ -1,0 +1,13 @@
+{
+  "label": "objectCube",
+  "color": [1.0, 0.0, 0.0],
+  "physicalSideLength": 0.035,
+  "markers": [
+    { "id": 0, "position": [0.0, 0.02, 0.0], "yawPitchRoll": [270.0, 180.0, 0.0] },
+    { "id": 1, "position": [0.0, 0.0, 0.02], "yawPitchRoll": [270.0, 90.0, 0.0] },
+    { "id": 2, "position": [-0.02, 0.0, 0.0], "yawPitchRoll": [0.0, -180.0, 0.0] },
+    { "id": 3, "position": [0.02, 0.0, 0.0], "yawPitchRoll": [180.0, 180.0, 0.0] },
+    { "id": 4, "position": [0.0, 0.0, -0.02], "yawPitchRoll": [0.0, 270.0, 90.0] },
+    { "id": 5, "position": [0.0, -0.02, 0.0], "yawPitchRoll": [-90.0, 0.0, 0.0] }
+  ]
+}

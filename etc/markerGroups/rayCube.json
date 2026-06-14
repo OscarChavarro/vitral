@@ -1,0 +1,13 @@
+{
+  "label": "rayCube",
+  "color": [1.0, 0.0, 0.0],
+  "physicalSideLength": 0.035,
+  "markers": [
+    { "id": 10, "position": [0.0, 0.02, 0.0], "yawPitchRoll": [270.0, 180.0, 0.0] },
+    { "id": 11, "position": [0.0, 0.0, 0.02], "yawPitchRoll": [270.0, 90.0, 0.0] },
+    { "id": 12, "position": [-0.02, 0.0, 0.0], "yawPitchRoll": [0.0, -180.0, 0.0] },
+    { "id": 13, "position": [0.02, 0.0, 0.0], "yawPitchRoll": [180.0, 180.0, 0.0] },
+    { "id": 14, "position": [0.0, 0.0, -0.02], "yawPitchRoll": [0.0, 270.0, 90.0] },
+    { "id": 15, "position": [0.0, -0.02, 0.0], "yawPitchRoll": [-90.0, 0.0, 0.0] }
+  ]
+}

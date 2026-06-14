@@ -1,0 +1,3 @@
+add_subdirectory(TangibleInterfaceLabelsCreator)
+add_subdirectory(TangibleInterfaceMarkersCreator)
+add_subdirectory(TangibleInterfaceMarkersDetectorServer)
