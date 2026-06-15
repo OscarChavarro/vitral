@@ -17,7 +17,7 @@ public class MeshModel {
     private final List<Light> lights;
     private final SimpleScene scene;
     private final RendererConfiguration qualitySelection;
-    private String tangibleServiceUrl = "ws://localhost/8090";
+    private String tangibleServiceUrl = "ws://localhost:8090/v1/values";
 
     public MeshModel() {
         scene = new SimpleScene();

@@ -145,10 +145,16 @@ bool WebSocketProtocol::performHandshake(java::InputStream* in, java::OutputStre
     const char* req = request.c_str();
     int reqLen = request.length();
 
-    if (reqLen < 4 || req[0] != 'G' || req[1] != 'E' || req[2] != 'T' || req[3] != ' ') return false;
+    if (reqLen < 4 || req[0] != 'G' || req[1] != 'E' || req[2] != 'T' || req[3] != ' ') {
+        writeAll(out, java::String("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"));
+        return false;
+    }
 
     int sp = request.find(' ', 4);
-    if (sp == java::String::npos) return false;
+    if (sp == java::String::npos) {
+        writeAll(out, java::String("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"));
+        return false;
+    }
     java::String path = request.substr(4, sp - 4);
 
     if (requiredPath && requiredPath[0] != '\0') {
@@ -169,22 +175,23 @@ bool WebSocketProtocol::performHandshake(java::InputStream* in, java::OutputStre
     const char* keyStr = "sec-websocket-key:";
     int keyLen = std::strlen(keyStr);
     for (int i = 0; i + keyLen <= reqLen; ++i) {
-        if (req[i] >= 'a' && req[i] <= 'z' || req[i] == '-' || req[i] == ':') {
-            bool match = true;
-            for (int j = 0; j < keyLen; ++j) {
-                char c1 = (req[i+j] >= 'A' && req[i+j] <= 'Z') ? req[i+j] - 'A' + 'a' : req[i+j];
-                if (c1 != keyStr[j]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                keyPos = i + keyLen;
+        bool match = true;
+        for (int j = 0; j < keyLen; ++j) {
+            char c1 = (req[i+j] >= 'A' && req[i+j] <= 'Z') ? req[i+j] - 'A' + 'a' : req[i+j];
+            if (c1 != keyStr[j]) {
+                match = false;
                 break;
             }
         }
+        if (match) {
+            keyPos = i + keyLen;
+            break;
+        }
     }
-    if (keyPos == -1) return false;
+    if (keyPos == -1) {
+        writeAll(out, java::String("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"));
+        return false;
+    }
 
     while (keyPos < reqLen && (req[keyPos] == ' ' || req[keyPos] == '\t'))
         ++keyPos;
@@ -196,7 +203,10 @@ bool WebSocketProtocol::performHandshake(java::InputStream* in, java::OutputStre
             break;
         }
     }
-    if (keyEnd == -1) return false;
+    if (keyEnd == -1) {
+        writeAll(out, java::String("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n"));
+        return false;
+    }
 
     java::String key = request.substr(keyPos, keyEnd - keyPos);
     java::String magic = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";

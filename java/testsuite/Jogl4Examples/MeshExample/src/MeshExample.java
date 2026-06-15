@@ -26,11 +26,13 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient;
 
 // Application classes
 import awt.FileSelectorDialog;
 import gui.MeshKeyboardInteractionTechniques;
 import gui.MeshMouseInteractionTechniques;
+import gui.TangibleInterfaceInteractionTechniques;
 import model.MeshModel;
 import options.CommandLineOptions;
 import render.Jogl4DebuggerRenderer;
@@ -121,6 +123,12 @@ public class MeshExample
         app = new MeshExample(extractFileName(args));
         app.processCommandLineArguments(args);
         System.out.println("Searching tangible interface server on " + app.getModel().getTangibleServiceUrl());
+
+        TangibleInterfaceNetworkClient tangibleInterfaceClient =
+            new TangibleInterfaceNetworkClient(app.getModel().getTangibleServiceUrl());
+        tangibleInterfaceClient.addListener(new TangibleInterfaceInteractionTechniques());
+        tangibleInterfaceClient.run();
+
         f = app;
 
         f.pack();
