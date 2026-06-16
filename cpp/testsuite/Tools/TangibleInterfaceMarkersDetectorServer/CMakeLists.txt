@@ -16,31 +16,51 @@ endif()
 option(WITH_APRILTAG "Use AprilTag library for marker detection" ON)
 option(WITH_OPENCV "Use OpenCV library for camera/video" ON)
 
+set(BUILD_TANGIBLE_INTERFACE_SERVER TRUE)
+
 if(WITH_APRILTAG)
-  find_package(apriltag QUIET)
-  if(NOT apriltag_FOUND)
-    message(FATAL_ERROR
-      "apriltag library not found. Install it with:\n"
+  if(NOT TARGET apriltag::apriltag AND NOT TARGET apriltag)
+    find_package(apriltag QUIET)
+  endif()
+  if(NOT TARGET apriltag::apriltag AND NOT TARGET apriltag AND NOT apriltag_FOUND)
+    message(WARNING
+      "apriltag library not found. TangibleInterfaceMarkersDetectorServer will be skipped.\n"
+      "  To enable, install with:\n"
       "  macOS (Homebrew):  brew install apriltag\n"
       "  Linux (apt):       sudo apt-get install libapriltag-dev\n"
       "  From source:       git clone https://github.com/AprilRobotics/apriltag.git\n"
       "                     cd apriltag && mkdir build && cd build && cmake .. && make install")
-  endif()
-  if(TARGET apriltag::apriltag)
-    set(APRILTAG_TARGET apriltag::apriltag)
+    set(WITH_APRILTAG OFF)
+    set(BUILD_TANGIBLE_INTERFACE_SERVER FALSE)
   else()
-    set(APRILTAG_TARGET apriltag)
+    if(TARGET apriltag::apriltag)
+      set(APRILTAG_TARGET apriltag::apriltag)
+    elseif(TARGET apriltag)
+      set(APRILTAG_TARGET apriltag)
+    else()
+      message(WARNING "apriltag package found but targets not defined properly. Trying fallback...")
+      find_library(APRILTAG_LIB apriltag)
+      if(APRILTAG_LIB)
+        set(APRILTAG_TARGET ${APRILTAG_LIB})
+      else()
+        message(WARNING "Could not find apriltag library. TangibleInterfaceMarkersDetectorServer will be skipped.")
+        set(BUILD_TANGIBLE_INTERFACE_SERVER FALSE)
+      endif()
+    endif()
   endif()
 endif()
 
 if(WITH_OPENCV)
   find_package(OpenCV QUIET COMPONENTS core imgproc videoio calib3d highgui)
   if(NOT OpenCV_FOUND)
-    message(FATAL_ERROR
-      "OpenCV library not found. Install it with:\n"
+    message(WARNING
+      "OpenCV library not found. TangibleInterfaceMarkersDetectorServer will be skipped.\n"
+      "  To enable, install with:\n"
       "  macOS (Homebrew):  brew install opencv\n"
       "  Linux (apt):       sudo apt-get install libopencv-dev\n"
       "  From source:       https://opencv.org/releases/")
+    set(WITH_OPENCV OFF)
+    set(BUILD_TANGIBLE_INTERFACE_SERVER FALSE)
   endif()
 endif()
 
@@ -52,7 +72,8 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_executable(tangibleInterfaceServer
+if(BUILD_TANGIBLE_INTERFACE_SERVER)
+  add_executable(tangibleInterfaceServer
   src/main.cpp
   src/vision/MarkerTracker.cpp
   src/model/CleanerConsumer.cpp
@@ -93,3 +114,6 @@ target_link_libraries(tangibleInterfaceServer PRIVATE
 set_target_properties(tangibleInterfaceServer PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build"
 )
+else()
+  message(STATUS "TangibleInterfaceMarkersDetectorServer skipped due to missing dependencies")
+endif()

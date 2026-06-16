@@ -15,24 +15,35 @@ endif()
 
 option(CAIRO_ENABLED "Enable Cairo PDF generation" ON)
 
+set(BUILD_LABELS_CREATOR TRUE)
+
 if(NOT CAIRO_ENABLED)
-  message(FATAL_ERROR "CAIRO_ENABLED is OFF. This project requires Cairo to generate PDF files.")
+  message(WARNING "CAIRO_ENABLED is OFF. TangibleInterfaceLabelsCreator will be skipped.")
+  set(BUILD_LABELS_CREATOR FALSE)
 endif()
 
-find_package(PkgConfig QUIET)
-if(NOT PkgConfig_FOUND)
-  message(FATAL_ERROR
-    "pkg-config not found. Install it first.\n"
-    "macOS (Homebrew): brew install pkg-config cairo\n"
-    "Linux (apt): sudo apt-get update && sudo apt-get install -y pkg-config libcairo2-dev")
+if(BUILD_LABELS_CREATOR)
+  find_package(PkgConfig QUIET)
+  if(NOT PkgConfig_FOUND)
+    message(WARNING
+      "pkg-config not found. TangibleInterfaceLabelsCreator will be skipped.\n"
+      "  To enable, install with:\n"
+      "  macOS (Homebrew): brew install pkg-config cairo\n"
+      "  Linux (apt): sudo apt-get update && sudo apt-get install -y pkg-config libcairo2-dev")
+    set(BUILD_LABELS_CREATOR FALSE)
+  endif()
 endif()
 
-pkg_check_modules(CAIRO QUIET IMPORTED_TARGET cairo)
-if(NOT CAIRO_FOUND)
-  message(FATAL_ERROR
-    "Cairo not found. Install it first.\n"
-    "macOS (Homebrew): brew install cairo\n"
-    "Linux (apt): sudo apt-get update && sudo apt-get install -y libcairo2-dev")
+if(BUILD_LABELS_CREATOR)
+  pkg_check_modules(CAIRO QUIET IMPORTED_TARGET cairo)
+  if(NOT CAIRO_FOUND)
+    message(WARNING
+      "Cairo not found. TangibleInterfaceLabelsCreator will be skipped.\n"
+      "  To enable, install with:\n"
+      "  macOS (Homebrew): brew install cairo\n"
+      "  Linux (apt): sudo apt-get update && sudo apt-get install -y libcairo2-dev")
+    set(BUILD_LABELS_CREATOR FALSE)
+  endif()
 endif()
 
 set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
@@ -40,7 +51,8 @@ if(NOT TARGET vitral_base)
   add_subdirectory(../../../base base)
 endif()
 
-add_executable(tangibleInterfaceLabelsCreator
+if(BUILD_LABELS_CREATOR)
+  add_executable(tangibleInterfaceLabelsCreator
   src/main.cpp
   src/TangibleInterfaceLabelsCreator.cpp
   src/model/Label.cpp
@@ -65,3 +77,6 @@ target_link_libraries(tangibleInterfaceLabelsCreator PRIVATE
 set_target_properties(tangibleInterfaceLabelsCreator PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build"
 )
+else()
+  message(STATUS "TangibleInterfaceLabelsCreator skipped due to missing dependencies")
+endif()

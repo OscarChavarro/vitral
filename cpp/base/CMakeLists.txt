@@ -55,6 +55,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/processing/ComputationalGeometry.cpp
     src/main/vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableChecksum16.cpp
     src/main/vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableSine.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/polynomial/PolynomialSolver.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/polynomial/CubicSolver.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/polynomial/QuadraticSolver.cpp
+    src/main/vsdk/toolkit/numericalAnalysis/polynomial/QuarticSolver.cpp
     src/main/java/lang/Object.cpp
     src/main/java/lang/String.cpp
     src/main/java/lang/System.cpp
