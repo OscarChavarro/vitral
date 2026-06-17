@@ -1,11 +1,10 @@
-#include "InteractiveMarkers.hpp"
-#include "model/MarkersModel.hpp"
-#include "vision/MarkerTracker.hpp"
-#include "gui/KeyboardInteractionTechniques.hpp"
-#include "render/OpenCVMarkersRenderer.hpp"
-
 #include <cstdio>
 
+#include "InteractiveMarkers.hpp"
+#include "gui/KeyboardInteractionTechniques.hpp"
+#include "model/MarkersModel.hpp"
+#include "render/OpenCVMarkersRenderer.hpp"
+#include "vision/MarkerTracker.hpp"
 InteractiveMarkers::InteractiveMarkers(MarkersModel* model, MarkerTracker* tracker)
     : model_(model), tracker_(tracker) {}
 

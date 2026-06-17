@@ -1,12 +1,11 @@
-#include "render/OpenCVMarkersRenderer.hpp"
-#include "render/OpenCVHudRenderer.hpp"
-#include "model/MarkersModel.hpp"
-#include "java/util/ArrayList.txx"
-
 #include <cstdio>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 
+#include "java/util/ArrayList.txx"
+#include "model/MarkersModel.hpp"
+#include "render/OpenCVHudRenderer.hpp"
+#include "render/OpenCVMarkersRenderer.hpp"
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 OpenCVMarkersRenderer::OpenCVMarkersRenderer(MarkersModel* model)
     : model_(model), hudRenderer_(new OpenCVHudRenderer(model)) {}
 

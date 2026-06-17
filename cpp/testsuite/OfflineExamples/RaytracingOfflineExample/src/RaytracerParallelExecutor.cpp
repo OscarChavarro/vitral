@@ -1,30 +1,28 @@
-#include "RaytracerParallelExecutor.h"
+#include <cstdio>
 
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
-#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
-#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
-#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
-#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
+#include "java/util/ArrayList.txx"
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
 #include "java/util/concurrent/ExecutorService.h"
 #include "java/util/concurrent/Executors.h"
 #include "java/util/concurrent/Future.h"
 #include "java/util/concurrent/Void.h"
+#include "RaytracerParallelExecutor.h"
+#include <pthread.h>
+#include <unistd.h>
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
-
-#include <pthread.h>
-#include <unistd.h>
-#include <cstdio>
-#include "vsdk/toolkit/common/VSDKFatalException.h"
-#include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 struct ConsumerThreadData {
     ParallelProgressMonitorConsumer* consumer;
 };

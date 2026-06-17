@@ -2,9 +2,8 @@
 #define __TANGIBLEINTERFACEMARKERSCREATOR_H__
 
 #include "model/MarkersModel.h"
-#include "options/CommandLineOptions.h"
 #include "render/CairoPdfPageRenderer.h"
-
+#include "options/CommandLineOptions.h"
 class TangibleInterfaceMarkersCreator {
   public:
     TangibleInterfaceMarkersCreator(int argc, char** argv);

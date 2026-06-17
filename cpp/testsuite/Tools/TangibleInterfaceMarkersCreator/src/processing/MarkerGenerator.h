@@ -3,7 +3,6 @@
 
 #include "model/Marker.h"
 #include <apriltag.h>
-
 class MarkerGenerator {
 public:
     MarkerGenerator();

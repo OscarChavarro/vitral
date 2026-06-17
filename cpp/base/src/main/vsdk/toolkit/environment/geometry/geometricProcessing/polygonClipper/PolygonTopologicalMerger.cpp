@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include "java/util/HashMap.h"
-#include "java/util/ArrayList.txx"
 
+#include "java/util/ArrayList.txx"
+#include "java/util/HashMap.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonTopologicalMerger.h"
 static Vertex2D copyVertex(const Vertex2D& v)
 {
     return Vertex2D(v.x, v.y, v.color.r(), v.color.g(), v.color.b());

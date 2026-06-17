@@ -1,8 +1,7 @@
-#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
-
-#include <thread>
 #include <chrono>
 
+#include <thread>
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.h"
 ParallelProgressMonitorConsumer::ParallelProgressMonitorConsumer(
     java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
     : concreteProgressMonitor(),

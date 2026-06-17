@@ -1,14 +1,11 @@
-#include "CommandLineOptions.h"
-
-#include <java/lang/Math.h>
 #include <cctype>
 #include <cstdlib>
 
+#include <java/lang/Math.h>
+#include "CommandLineOptions.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-
 CommandLineOptions::CommandLineOptions()
     : offline(false),
       method(ShaderOperationMode::OPENGL_4_1),

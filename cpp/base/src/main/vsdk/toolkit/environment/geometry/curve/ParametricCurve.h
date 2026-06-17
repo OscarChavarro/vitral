@@ -1,11 +1,10 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_PARAMETRICCURVE_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_PARAMETRICCURVE_H__
 
-#include "vsdk/toolkit/environment/geometry/curve/Curve.h"
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/environment/geometry/curve/Curve.h"
 class ParametricCurve : public Curve {
 public:
     static const int BREAK = 1;

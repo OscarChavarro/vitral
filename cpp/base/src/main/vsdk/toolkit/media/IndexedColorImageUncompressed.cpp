@@ -1,9 +1,8 @@
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
-#include "vsdk/toolkit/common/color/ColorRgb.h"
-
 IndexedColorImageUncompressed::IndexedColorImageUncompressed(RGBColorPalette* colorTable_) :
     data(nullptr), xSize(0), ySize(0), staticColor(nullptr) {
     if (colorTable_ != nullptr) {

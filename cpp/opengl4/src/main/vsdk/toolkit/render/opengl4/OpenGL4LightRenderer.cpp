@@ -1,21 +1,18 @@
-#include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
-
-#include <GL/glew.h>
-#include <GL/gl.h>
-
-#include <java/lang/Math.h>
 #include <cmath>
 
+#include <java/lang/Math.h>
+#include "java/util/ArrayList.txx"
+#include <GL/glew.h>
+#include <GL/gl.h>
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
-#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 double OpenGL4LightRenderer::scale_ = 1.0;
 unsigned int OpenGL4LightRenderer::vao_ = 0;
 unsigned int OpenGL4LightRenderer::vboPositions_ = 0;

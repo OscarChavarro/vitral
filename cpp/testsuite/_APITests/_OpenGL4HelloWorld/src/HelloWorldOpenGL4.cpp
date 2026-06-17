@@ -1,15 +1,12 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
 #include "java/lang/String.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <cstdio>
-#include <cstdlib>
-#include "java/lang/String.h"
-#include <cstring>
-
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-
 class HelloWorldOpenGL4
 {
 public:

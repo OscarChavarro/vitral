@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
 
 #include "java/lang/String.h"
-
 class Complex {
 public:
     double r;

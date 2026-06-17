@@ -2,7 +2,6 @@
 #define JAVA_STRING_BUILDER__
 
 #include "java/lang/String.h"
-
 namespace java {
 
 class StringBuilder {

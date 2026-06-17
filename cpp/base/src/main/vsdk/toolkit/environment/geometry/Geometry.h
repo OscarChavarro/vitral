@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/processing/Containment.h"
-
 class Ray;
 class RayHit;
 

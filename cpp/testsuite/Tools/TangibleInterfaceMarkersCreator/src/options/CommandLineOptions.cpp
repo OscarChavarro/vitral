@@ -1,8 +1,7 @@
-#include "options/CommandLineOptions.h"
-
 #include <cstdlib>
 #include <cstring>
 
+#include "options/CommandLineOptions.h"
 CommandLineOptions::CommandLineOptions(int argc, char** argv)
     : startId_(0),
       markerSizeMm_(40.0) {

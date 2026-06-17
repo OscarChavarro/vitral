@@ -1,24 +1,23 @@
-#include <cstdio>
 #include <cmath>
-#include "java/lang/String.h"
+#include <cstdio>
 
+#include "java/io/File.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/environment/scene/SimpleScene.h"
-#include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "java/io/File.h"
-#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
+#include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
-#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 #include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
-
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 static void
 appendLineSet(Calligraphic2DBuffer* destination, const Calligraphic2DBuffer* source)
 {

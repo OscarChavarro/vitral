@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_CURVE_H__
 
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
-
 class Ray;
 class RayHit;
 

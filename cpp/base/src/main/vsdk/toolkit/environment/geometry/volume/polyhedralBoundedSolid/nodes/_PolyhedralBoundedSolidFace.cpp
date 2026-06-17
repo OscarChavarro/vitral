@@ -1,17 +1,15 @@
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
-
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
-#include "vsdk/toolkit/processing/ComputationalGeometry.h"
-
 double _PolyhedralBoundedSolidFace::boundaryLoopAreaMagnitude(
     _PolyhedralBoundedSolidLoop* loop)
 {

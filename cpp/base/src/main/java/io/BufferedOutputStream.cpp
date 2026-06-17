@@ -1,5 +1,4 @@
 #include "java/io/BufferedOutputStream.h"
-
 namespace java {
 
 BufferedOutputStream::BufferedOutputStream(OutputStream *outputStream):

@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"
-
 class _Polygon2DContourWA {
 public:
     _CircularDoubleLinkedList<_VertexNode2D> vertices;

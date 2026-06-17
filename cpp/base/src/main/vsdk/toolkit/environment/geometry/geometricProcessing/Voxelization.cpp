@@ -1,17 +1,15 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/Voxelization.h"
-
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshGroupVoxelization.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
-#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshGroupVoxelization.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/Voxelization.h"
 void Voxelization::doVoxelization(
     Geometry& geometry,
     VoxelVolume& vv,

@@ -1,8 +1,8 @@
-#include "java/net/SocketOutputStream.h"
-#include <unistd.h>
-#include <sys/socket.h>
 #include <cstdint>
 
+#include "java/net/SocketOutputStream.h"
+#include <sys/socket.h>
+#include <unistd.h>
 namespace java {
 namespace net {
 

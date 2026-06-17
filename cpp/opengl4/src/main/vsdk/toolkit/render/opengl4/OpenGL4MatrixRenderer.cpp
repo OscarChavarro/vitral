@@ -1,19 +1,16 @@
-#include "java/lang/String.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+#include <cstdio>
+#include <cstring>
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
 #include <GL/glew.h>
 #include <GL/gl.h>
 #endif
-
-#include <cstdio>
-#include <cstring>
-
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 unsigned int OpenGL4MatrixRenderer::VAO = 0;
 unsigned int OpenGL4MatrixRenderer::VBO_positions = 0;
 unsigned int OpenGL4MatrixRenderer::VBO_colors = 0;

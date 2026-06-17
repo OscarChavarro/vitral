@@ -1,19 +1,17 @@
-#include "OfflineControl.h"
-
 #include <cmath>
 #include <cstdio>
 
+#include "java/io/File.h"
+#include "OfflineControl.h"
 #include "model/ShadersModel.h"
-#include "options/CommandLineOptions.h"
 #include "render/OpenGlOfflineSphereRenderer.h"
 #include "render/SoftwareRaycaster.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "options/CommandLineOptions.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "java/io/File.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
-
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 int OfflineControl::run(const CommandLineOptions& options)
 {
     ShadersModel model = ShadersModel::createDefault();

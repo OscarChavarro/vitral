@@ -1,10 +1,9 @@
-#include "webservice/WebServiceClient.hpp"
-#include "model/MarkerEventBus.hpp"
-#include "java/util/ArrayList.txx"
-
 #include <cstdio>
-#include <unistd.h>
 
+#include "java/util/ArrayList.txx"
+#include "model/MarkerEventBus.hpp"
+#include "webservice/WebServiceClient.hpp"
+#include <unistd.h>
 WebServiceClient::WebServiceClient(int socketFd, const WebServiceConfig& cfg, MarkerEventBus* bus)
     : socket_(socketFd), config_(cfg), bus_(bus) {}
 

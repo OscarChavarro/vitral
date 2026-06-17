@@ -2,7 +2,6 @@
 #define CAMERACONTROLLERGOOGLEEARTH_H
 
 #include "vsdk/toolkit/gui/CameraController.h"
-
 class Camera;
 
 class CameraControllerGoogleEarth : public CameraController {

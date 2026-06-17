@@ -1,10 +1,8 @@
-#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
-
-#include "vsdk/toolkit/common/VSDK.h"
-
 #include <cmath>
 #include <cstdio>
 
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
 ProgressMonitorConsoleLongFormat::ProgressMonitorConsoleLongFormat()
     : n(0), charactersPrintedInLastLine(0), currentPercent(0)
 {

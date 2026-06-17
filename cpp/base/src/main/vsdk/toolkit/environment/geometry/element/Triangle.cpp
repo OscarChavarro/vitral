@@ -1,17 +1,12 @@
-#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/processing/Containment.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-#include "java/lang/Math.h"
-#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
-#include "java/lang/String.h"
 
+#include "java/lang/Math.h"
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/processing/Containment.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 Triangle::Triangle() : p0(0), p1(0), p2(0), normal(0, 0, 0) {}
 Triangle::Triangle(int inP0, int inP1, int inP2)
     : p0(inP0), p1(inP1), p2(inP2), normal(0, 0, 0) {}

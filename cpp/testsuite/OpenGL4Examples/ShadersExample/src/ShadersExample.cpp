@@ -1,14 +1,14 @@
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+
+#include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <java/lang/Math.h>
-#include <thread>
-#include <atomic>
-
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <atomic>
+#include <thread>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 

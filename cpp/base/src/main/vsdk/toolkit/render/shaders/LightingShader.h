@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_RENDER_SHADERS_LIGHTINGSHADER_H__
 
 #include "vsdk/toolkit/render/shaders/Shader.h"
-
 class LightingShader : public Shader {
 private:
     bool specularEnabled;

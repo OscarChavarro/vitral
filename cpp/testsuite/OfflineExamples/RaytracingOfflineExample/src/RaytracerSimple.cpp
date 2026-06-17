@@ -1,28 +1,26 @@
+#include <cstdio>
+#include <cstdlib>
+
+#include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
 #include "ImageExporter.h"
 #include "RaytracerExecutor.h"
 #include "RaytracerParallelExecutor.h"
 #include "RaytracerSerialExecutor.h"
-
+#include <exception>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/processing/StopWatch.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
-#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/processing/StopWatch.h"
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
-
-#include <cstdlib>
-#include <exception>
-#include <cstdio>
-#include "java/util/ArrayList.txx"
-
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;
 static const int EXIT_CODE_READ_ERROR = -1;

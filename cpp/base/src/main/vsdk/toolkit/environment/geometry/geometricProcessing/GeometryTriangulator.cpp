@@ -1,12 +1,10 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
-
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/QuadMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 bool GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, TriangleMeshGroup& outGroup)
 {
     if ( geometry == 0 ) {

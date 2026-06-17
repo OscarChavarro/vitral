@@ -2,22 +2,21 @@
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
-#include <limits>
 
-#include "java/lang/String.h"
 #include "java/io/File.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#include <limits>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
-
 const char* const DEFAULT_INPUT_FILE =
     "../../../../etc/polygons/example01.polygon";
 const int DEFAULT_ZONE_WIDTH = 512;

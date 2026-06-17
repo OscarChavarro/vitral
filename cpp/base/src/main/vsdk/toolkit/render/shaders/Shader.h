@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_RENDER_SHADERS_SHADER_H__
 #define __VSDK_TOOLKIT_RENDER_SHADERS_SHADER_H__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/util/ArrayList.h"
-
 class RayHit;
 class Light;
 class SimpleBody;

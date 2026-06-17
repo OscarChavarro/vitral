@@ -1,10 +1,8 @@
-#include "vsdk/toolkit/processing/ComputationalGeometry.h"
-
 #include <cmath>
 
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include "vsdk/toolkit/processing/Containment.h"
-
 double ComputationalGeometry::lineToPointDistance(
     const Vector3Dd& p0,
     const Vector3Dd& p1,

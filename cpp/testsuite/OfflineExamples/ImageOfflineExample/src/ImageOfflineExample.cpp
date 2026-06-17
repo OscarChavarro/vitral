@@ -1,10 +1,9 @@
 #include <cstdio>
-#include "java/lang/String.h"
 
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "java/io/File.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 static void performImageOperation1(RGBImageUncompressed* img)
 {
     if (img == 0) return;

@@ -1,16 +1,10 @@
 #ifndef JAVA_UTIL_CONCURRENT_FUTURE_H
 #define JAVA_UTIL_CONCURRENT_FUTURE_H
 
+#include "java/lang/String.h"
 #include "java/util/concurrent/ExecutionException.h"
-#include "java/lang/String.h"
-
-#include <memory>
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
 #include <pthread.h>
-#include "java/lang/String.h"
-
+#include <memory>
 namespace java {
 
 template<typename T>

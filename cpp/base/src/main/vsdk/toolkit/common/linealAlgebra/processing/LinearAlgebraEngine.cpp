@@ -1,10 +1,8 @@
-#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
-
 #include <cmath>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
-
+#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
 static void requireSquare(const MatrixNxM& matrix)
 {
     if ( matrix.getNumRows() != matrix.getNumColumns() ) {

@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 #include "vsdk/toolkit/common/linealAlgebra/processing/Strategies.h"
-
 class LinearAlgebraEngine {
 private:
     ComputeStrategy strategy_;

@@ -1,15 +1,13 @@
-#include "JogHudRenderer.h"
-
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-
-#include <GL/glew.h>
-#include <java/lang/Math.h>
 #include <cctype>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
+#include <java/lang/Math.h>
+#include "JogHudRenderer.h"
+#include <GL/glew.h>
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 static const int HUD_HEIGHT = 64;
 static const int HUD_LEFT = 10;
 static const int HUD_BASELINE_1 = 12;

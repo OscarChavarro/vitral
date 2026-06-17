@@ -1,14 +1,12 @@
-#include "options/CommandLineOptions.h"
-
 #include <cctype>
 #include <cerrno>
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <climits>
 
 #include "model/PolygonClippingFixtures.h"
-
+#include "options/CommandLineOptions.h"
 CommandLineOptions::CommandLineOptions()
     : offlineMode(false)
     , hasFixtureIndex(false)

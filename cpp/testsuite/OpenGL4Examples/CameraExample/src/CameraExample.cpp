@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
 #include <OpenGL/gl3.h>
@@ -9,13 +10,10 @@
 #include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
-
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
-#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
-
 GLFWwindow* window = nullptr;
 Camera* camera = nullptr;
 CameraControllerAquynza* controller = nullptr;

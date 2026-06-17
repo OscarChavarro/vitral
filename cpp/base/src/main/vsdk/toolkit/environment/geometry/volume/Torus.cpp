@@ -1,9 +1,9 @@
-#include "vsdk/toolkit/environment/geometry/volume/Torus.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "vsdk/toolkit/common/VSDK.h"
 #include <cmath>
 
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/Torus.h"
 Torus::Torus(double inMajorRadius, double inMinorRadius)
     : majorRadius(inMajorRadius), minorRadius(inMinorRadius) {}
 

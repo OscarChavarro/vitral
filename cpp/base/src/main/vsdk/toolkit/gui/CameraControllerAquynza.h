@@ -2,7 +2,6 @@
 #define CAMERACONTROLLERAQUYNZA_H
 
 #include "vsdk/toolkit/gui/CameraController.h"
-
 class Camera;
 
 class CameraControllerAquynza : public CameraController {

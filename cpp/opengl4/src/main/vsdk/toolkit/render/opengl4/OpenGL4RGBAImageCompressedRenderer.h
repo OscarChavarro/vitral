@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4RGBAIMAGECOMPRESSEDRENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4RGBAIMAGECOMPRESSEDRENDERER_H__
 
-#include <GL/glew.h>
-#include "java/util/HashMap.h"
 #include "java/util/ArrayList.h"
-
+#include "java/util/HashMap.h"
+#include <GL/glew.h>
 class RGBAImageCompressed;
 
 class OpenGL4RGBAImageCompressedRenderer {

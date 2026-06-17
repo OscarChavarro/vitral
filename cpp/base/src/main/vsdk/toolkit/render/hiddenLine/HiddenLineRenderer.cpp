@@ -1,15 +1,13 @@
-#include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
-
-#include <algorithm>
 #include <cmath>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
+#include <algorithm>
+#include <vector>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/geometry/element/Intersection.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
@@ -21,9 +19,9 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
+#include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 namespace {
 
 class AppelEdgeSegment {

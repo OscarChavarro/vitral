@@ -1,9 +1,8 @@
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/util/ArrayList.txx"
-
 Calligraphic2DBuffer::Calligraphic2DBuffer() {
 }
 

@@ -1,6 +1,5 @@
 #include "java/net/Socket.h"
 #include <unistd.h>
-
 namespace java {
 namespace net {
 

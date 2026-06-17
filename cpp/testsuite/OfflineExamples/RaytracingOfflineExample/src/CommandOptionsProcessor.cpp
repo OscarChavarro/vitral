@@ -1,8 +1,7 @@
-#include "CommandOptionsProcessor.h"
-
 #include <cstdio>
-#include "java/util/ArrayList.txx"
 
+#include "java/util/ArrayList.txx"
+#include "CommandOptionsProcessor.h"
 const char* CommandOptionsProcessor::DEFAULT_SCENE_FILE = "../../../../etc/geometry/mitscenes/balls.ray";
 const char* CommandOptionsProcessor::DEFAULT_OUTPUT_FILE_NAME = "./output.ppm";
 

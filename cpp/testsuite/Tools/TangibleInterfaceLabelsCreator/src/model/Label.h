@@ -2,7 +2,6 @@
 #define __LABEL_H__
 
 #include <java/lang/String.h>
-
 class Label {
   public:
     Label();

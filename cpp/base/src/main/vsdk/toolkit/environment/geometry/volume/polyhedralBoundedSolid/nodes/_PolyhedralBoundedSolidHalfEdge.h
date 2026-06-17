@@ -2,7 +2,6 @@
 #define __VSDK_PBS_NODE_HALFEDGE_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidEdge;
 class _PolyhedralBoundedSolidVertex;

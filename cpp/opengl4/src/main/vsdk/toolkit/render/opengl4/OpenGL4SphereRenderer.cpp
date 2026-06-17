@@ -1,25 +1,21 @@
-#include "java/lang/String.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+#include <cmath>
+#include <cstdio>
 
+#include <java/lang/Math.h>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 #include <GL/glew.h>
 #include <GL/gl.h>
-
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
-#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-
-#include "java/util/ArrayList.txx"
-#include <java/lang/Math.h>
-#include <cmath>
-#include <cstdio>
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 unsigned int OpenGL4SphereRenderer::vao_ = 0;
 unsigned int OpenGL4SphereRenderer::vboPositions_ = 0;
 unsigned int OpenGL4SphereRenderer::vboNormals_ = 0;

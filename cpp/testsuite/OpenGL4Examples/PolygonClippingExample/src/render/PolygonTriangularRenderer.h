@@ -3,9 +3,8 @@
 
 #include <GL/glew.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-
+#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 class PolygonTriangularRenderer {
 public:
     static void fillPolygonSurface(

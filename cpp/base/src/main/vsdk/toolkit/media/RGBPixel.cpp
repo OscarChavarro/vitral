@@ -1,8 +1,8 @@
-#include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/lang/String.h"
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 void RGBPixel::importFromColorRgb(const ColorRgb& c) {
     double ir = c.r();
     double ig = c.g();

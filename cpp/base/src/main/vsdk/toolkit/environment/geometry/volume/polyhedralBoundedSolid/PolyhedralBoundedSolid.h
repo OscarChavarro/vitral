@@ -1,11 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_POLYHEDRALBOUNDEDSOLID_POLYHEDRALBOUNDEDSOLID_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_POLYHEDRALBOUNDEDSOLID_POLYHEDRALBOUNDEDSOLID_H__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
-
-#include "java/util/ArrayList.h"
-
 class Ray;
 class RayHit;
 class Vector3Dd;

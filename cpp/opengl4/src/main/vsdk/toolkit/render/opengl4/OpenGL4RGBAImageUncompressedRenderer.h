@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4RGBAIMAGEUNCOMPRESSEDRENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4RGBAIMAGEUNCOMPRESSEDRENDERER_H__
 
-#include <GL/glew.h>
 #include "java/util/HashMap.h"
-
+#include <GL/glew.h>
 class RGBAImageUncompressed;
 
 class OpenGL4RGBAImageUncompressedRenderer {

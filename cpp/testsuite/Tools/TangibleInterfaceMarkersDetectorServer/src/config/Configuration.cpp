@@ -1,12 +1,11 @@
-#include "config/Configuration.hpp"
-#include "options/CommandLineOptions.hpp"
-#include "model/MarkersModel.hpp"
-#include "io/MarkerGroupPersistence.hpp"
-#include "java/util/ArrayList.txx"
-
 #include <cstdio>
-#include <dirent.h>
 
+#include "java/util/ArrayList.txx"
+#include "config/Configuration.hpp"
+#include "io/MarkerGroupPersistence.hpp"
+#include "model/MarkersModel.hpp"
+#include <dirent.h>
+#include "options/CommandLineOptions.hpp"
 Configuration::Configuration(const CommandLineOptions& opts) : opts_(opts) {}
 
 MarkerTrackerConfig Configuration::getMarkerTrackerConfig() const {

@@ -1,9 +1,7 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.h"
-
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
 void FunctionalExplicitSurfaceVoxelization::doVoxelization(
     FunctionalExplicitSurface& surface,
     VoxelVolume& vv,

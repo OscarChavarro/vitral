@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-
 class ShadersModel;
 class NormalMap;
 class SimpleSceneSnapshot;

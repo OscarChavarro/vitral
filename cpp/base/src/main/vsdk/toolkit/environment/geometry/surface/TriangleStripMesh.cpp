@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/util/ArrayList.txx"
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.h"
 TriangleStripMesh::TriangleStripMesh() : name("default") {}
 
 double* TriangleStripMesh::calculateMinMaxPositions()

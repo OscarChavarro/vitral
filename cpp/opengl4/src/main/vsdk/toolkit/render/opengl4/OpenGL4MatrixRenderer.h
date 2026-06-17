@@ -2,7 +2,6 @@
 #define OPENGL4MATRIXRENDERER_H
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-
 class OpenGL4MatrixRenderer {
 public:
     static void draw(const float* mvpColumnMajor16, const Matrix4x4d& A);

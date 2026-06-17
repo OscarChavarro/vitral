@@ -1,11 +1,10 @@
 #include <cmath>
-#include <limits>
 
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
+#include <limits>
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
 const double EPSILON = 1.0e-9;
 
 template <typename T>

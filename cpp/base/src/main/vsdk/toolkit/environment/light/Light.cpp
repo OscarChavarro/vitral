@@ -1,8 +1,6 @@
+#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
-#include "java/lang/String.h"
-
 Light::Light(int type, const Vector3Dd& pos, const ColorRgb& emission)
     : tipo_de_luz(type), lvec(0, 0, 0), ambient(0, 0, 0), diffuse(1, 1, 1), specular(emission), id(0), name("")
 {

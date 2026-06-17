@@ -2,7 +2,6 @@
 #define __VSDK_PBS_NODE_LOOP_H__
 
 #include "java/util/ArrayList.h"
-
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
 

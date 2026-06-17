@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_IO_GEOMETRY_ENVIRONMENTPERSISTENCE_H__
 #define __VSDK_TOOLKIT_IO_GEOMETRY_ENVIRONMENTPERSISTENCE_H__
 
-#include "vsdk/toolkit/io/PersistenceElement.h"
 #include "java/io/File.h"
-
+#include "vsdk/toolkit/io/PersistenceElement.h"
 class SimpleScene;
 
 class EnvironmentPersistence : public PersistenceElement {

@@ -1,12 +1,11 @@
 #ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
 #define __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
 
+#include "java/util/ArrayList.h"
+#include "vsdk/toolkit/render/RenderContext.h"
 #include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
-#include "vsdk/toolkit/render/RenderContext.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
-#include "java/util/ArrayList.h"
-
 class Ray;
 class RayHit;
 class ColorRgb;

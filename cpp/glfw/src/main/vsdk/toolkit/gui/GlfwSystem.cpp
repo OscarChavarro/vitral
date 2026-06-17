@@ -1,10 +1,8 @@
 #include "GlfwSystem.h"
-
+#include <GLFW/glfw3.h>
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
 #endif
-#include <GLFW/glfw3.h>
-
 KeyEvent GlfwSystem::glfw2vsdkKeyEvent(int glfwKey, int glfwMods) {
     KeyEvent event;
 

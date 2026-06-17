@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_COMMON_SYMBOLICALGEBRA_ALGEBRAICEXPRESSIONEXCEPTION_H__
 #define __VSDK_TOOLKIT_COMMON_SYMBOLICALGEBRA_ALGEBRAICEXPRESSIONEXCEPTION_H__
 
-#include <exception>
 #include "java/lang/String.h"
-
+#include <exception>
 class AlgebraicExpressionException : public std::exception {
 private:
     java::String message_;

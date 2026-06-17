@@ -1,18 +1,18 @@
-#include "vsdk/toolkit/render/shaders/LightingShader.h"
-#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
+#include <cmath>
+
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
-#include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
-#include <cmath>
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/render/shaders/LightingShader.h"
 static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd& surfaceNormal)
 {
     if ( info == 0 || info->normalMap == 0 ) {

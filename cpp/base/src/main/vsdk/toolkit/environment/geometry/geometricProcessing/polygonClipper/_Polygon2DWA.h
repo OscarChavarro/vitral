@@ -5,7 +5,6 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_Polygon2DContourWA.h"
-
 class _Polygon2DWA {
 public:
     java::ArrayList<_Polygon2DContourWA*> loops;

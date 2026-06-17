@@ -2,9 +2,8 @@
 #define __TANGIBLEINTERFACELABELSCREATOR_H__
 
 #include "model/LabelsModel.h"
-#include "options/CommandLineOptions.h"
 #include "render/CairoPdfPageRenderer.h"
-
+#include "options/CommandLineOptions.h"
 class TangibleInterfaceLabelsCreator {
   public:
     TangibleInterfaceLabelsCreator(int argc, char** argv);

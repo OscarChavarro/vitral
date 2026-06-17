@@ -1,14 +1,9 @@
-#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/VSDK.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
-#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 Vertex::Vertex()
     : position(0, 0, 0), normal(1, 0, 0), binormal(0, 1, 0), tangent(0, 0, 1),
       u(0.0), v(0.0), incidentTriangles(nullptr) {}

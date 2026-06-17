@@ -1,11 +1,10 @@
-#include "webservice/WebSocketProtocol.hpp"
-#include "webservice/Protocol.hpp"
-#include "java/util/ArrayList.txx"
-
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <cstddef>
 
+#include "java/util/ArrayList.txx"
+#include "webservice/Protocol.hpp"
+#include "webservice/WebSocketProtocol.hpp"
 WebSocketProtocol::WebSocketProtocol() {}
 
 uint32_t WebSocketProtocol::Sha1::rol(uint32_t v, int b) {

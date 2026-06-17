@@ -1,10 +1,8 @@
 #ifndef __VSDK_TOOLKIT_RENDER_HIDDENLINERENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_HIDDENLINERENDERER_H__
 
-#include "vsdk/toolkit/render/RenderingElement.h"
-
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/render/RenderingElement.h"
 class Camera;
 class Calligraphic2DBuffer;
 class SimpleBody;

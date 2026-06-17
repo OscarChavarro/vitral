@@ -2,13 +2,8 @@
 #define __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
 
 #include "java/lang/String.h"
-#include "java/lang/String.h"
-
 #include "java/util/ArrayList.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
-#include "java/lang/String.h"
-
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 class Vector3Dd;

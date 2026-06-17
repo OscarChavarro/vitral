@@ -1,11 +1,10 @@
-#include "Animation.h"
+#include <cmath>
+
 #include "../model/ShadersModel.h"
+#include "Animation.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-
-#include <cmath>
-
 Animation::Animation()
     : lastSphereTickSeconds(-1.0),
       lastLightTickSeconds(-1.0),

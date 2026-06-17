@@ -1,5 +1,4 @@
 #include "TangibleInterfaceLabelsCreator.h"
-
 int
 main(int argc, char** argv) {
     TangibleInterfaceLabelsCreator application(argc, argv);

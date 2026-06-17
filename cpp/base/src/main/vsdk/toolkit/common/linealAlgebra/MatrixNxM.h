@@ -1,7 +1,6 @@
 #ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
 #define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
 #include "java/lang/String.h"
-
 class MatrixNxM {
 private:
     int numRows_;

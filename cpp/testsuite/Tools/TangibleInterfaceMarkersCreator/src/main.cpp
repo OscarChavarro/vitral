@@ -1,5 +1,4 @@
 #include "TangibleInterfaceMarkersCreator.h"
-
 int
 main(int argc, char** argv) {
     TangibleInterfaceMarkersCreator application(argc, argv);

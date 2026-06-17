@@ -1,10 +1,10 @@
 #ifndef __CAIROPDFMARKERRENDERER_H__
 #define __CAIROPDFMARKERRENDERER_H__
 
-#include "model/Marker.h"
-#include "processing/ConstructivePolygonGeometryProcessor.h"
 #include <cairo.h>
 
+#include "model/Marker.h"
+#include "processing/ConstructivePolygonGeometryProcessor.h"
 class CairoPdfMarkerRenderer {
 public:
     CairoPdfMarkerRenderer();

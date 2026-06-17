@@ -1,13 +1,10 @@
 #include <gtest/gtest.h>
-
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Df.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Df.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Df.h"
-
-
 TEST(Vector2DdTest, AddAndScale) {
     EXPECT_TRUE(Vector2Dd(1.5, -2.0).add(Vector2Dd(-0.5, 3.0)).epsilonEquals(Vector2Dd(1.0, 1.0), 1e-9));
     EXPECT_TRUE(Vector2Dd(2.0, -3.0).multiply(2.5).epsilonEquals(Vector2Dd(5.0, -7.5), 1e-12));

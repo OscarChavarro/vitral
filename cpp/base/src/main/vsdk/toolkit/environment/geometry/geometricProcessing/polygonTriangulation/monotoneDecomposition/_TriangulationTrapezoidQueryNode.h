@@ -2,7 +2,6 @@
 #define __NODE__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
-
 class _TriangulationTrapezoidQueryNode {
   public:
     int queryNodeType;

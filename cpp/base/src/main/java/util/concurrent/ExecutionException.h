@@ -1,10 +1,9 @@
 #ifndef JAVA_UTIL_CONCURRENT_EXECUTIONEXCEPTION_H
 #define JAVA_UTIL_CONCURRENT_EXECUTIONEXCEPTION_H
 
-#include <exception>
 #include "java/lang/String.h"
 #include "java/lang/System.h"
-
+#include <exception>
 namespace java {
 
 class ExecutionException : public std::exception {

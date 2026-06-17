@@ -1,7 +1,6 @@
 #include <cstring>
 
 #include "java/lang/StringBuilder.h"
-
 namespace java {
 
 void

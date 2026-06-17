@@ -1,9 +1,8 @@
 #ifndef SHADERSEXAMPLE_GUI_SHADERSMOUSEINTERACTIONTECHNIQUES_H
 #define SHADERSEXAMPLE_GUI_SHADERSMOUSEINTERACTIONTECHNIQUES_H
 
-#include "vsdk/toolkit/gui/MouseEvent.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
-
+#include "vsdk/toolkit/gui/MouseEvent.h"
 class ShadersModel;
 
 class ShadersMouseInteractionTechniques {

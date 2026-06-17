@@ -1,20 +1,19 @@
-#include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
-#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
+#include <cmath>
+
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
-#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
-
-#include "java/lang/Math.h"
-#include <cmath>
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 const double DEFAULT_ROUGHNESS = 0.35;
 const double MIN_ROUGHNESS = 0.02;
 const double EPS = 1e-8;

@@ -1,9 +1,8 @@
-#include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
-#include "java/util/ArrayList.txx"
-
 #include <cmath>
-#include <limits>
 
+#include "java/util/ArrayList.txx"
+#include <limits>
+#include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 static Matrix4x4d buildLinearMatrix()
 {
     const double m[4][4] = {

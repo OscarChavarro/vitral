@@ -1,10 +1,9 @@
 // References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
 // for Computing Trapezoidal Decompositions and for Triangulating Polygons".
 
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_IncrementalSegmentInserter.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_IncrementalSegmentInserter.h"
 void _IncrementalSegmentInserter::normalizeSegmentForInsertion(_TriangulationSegment &segment,
                                                                bool &isSwapped) {
     isSwapped = false;

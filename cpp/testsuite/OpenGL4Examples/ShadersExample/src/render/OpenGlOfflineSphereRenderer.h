@@ -2,7 +2,6 @@
 #define SHADERSEXAMPLE_RENDER_OPENGLOFFLINESPHERERENDERER_H
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-
 class RGBImageUncompressed;
 class ShadersModel;
 

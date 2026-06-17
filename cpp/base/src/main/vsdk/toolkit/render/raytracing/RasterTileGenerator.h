@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEGENERATOR_H__
 #define __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEGENERATOR_H__
 
-#include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
 class Image;
 class RasterTileArea;
 

@@ -2,7 +2,6 @@
 #define __ICONGENERATOR_H__
 
 #include <java/lang/String.h>
-
 class Calligraphic2DBuffer;
 class Camera;
 class SimpleScene;

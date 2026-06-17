@@ -1,14 +1,10 @@
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
-#include "java/lang/String.h"
 #include <cmath>
-#include "java/lang/String.h"
 #include <cstdio>
+
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 static const double PI = 3.14159265358979323846;
 
 static inline double degreesToRadians(double degrees) {

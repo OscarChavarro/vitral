@@ -1,21 +1,18 @@
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
-
+#include "processing/IconGenerator.h"
+#include "processing/StyledCalligraphic2DBuffer.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
-#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
-
-#include "processing/IconGenerator.h"
-#include "processing/StyledCalligraphic2DBuffer.h"
-
 Calligraphic2DBuffer* IconGenerator::buildVisibleIcon(SimpleScene& scene, const Camera& camera) const {
     StyledCalligraphic2DBuffer* lineSet = new StyledCalligraphic2DBuffer();
     Calligraphic2DBuffer hiddenLineSet;

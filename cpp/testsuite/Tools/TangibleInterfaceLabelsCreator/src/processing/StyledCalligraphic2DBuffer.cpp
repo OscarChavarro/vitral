@@ -1,5 +1,4 @@
 #include "processing/StyledCalligraphic2DBuffer.h"
-
 Calligraphic2DBuffer& StyledCalligraphic2DBuffer::visibleContourLines() {
     return contourLines;
 }

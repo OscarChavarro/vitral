@@ -1,10 +1,9 @@
 #ifndef __CAIROPDFPAGERENDERER_H__
 #define __CAIROPDFPAGERENDERER_H__
 
+#include <java/util/ArrayList.h>
 #include "model/Marker.h"
 #include "render/CairoPdfMarkerRenderer.h"
-#include <java/util/ArrayList.h>
-
 class CairoPdfPageRenderer {
 public:
     CairoPdfPageRenderer();

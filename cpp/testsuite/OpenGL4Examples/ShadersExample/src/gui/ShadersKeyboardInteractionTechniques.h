@@ -1,13 +1,12 @@
 #ifndef SHADERSEXAMPLE_GUI_SHADERSKEYBOARDINTERACTIONTECHNIQUES_H
 #define SHADERSEXAMPLE_GUI_SHADERSKEYBOARDINTERACTIONTECHNIQUES_H
 
-#include "vsdk/toolkit/gui/KeyEvent.h"
-#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
-#include "vsdk/toolkit/gui/RendererConfigurationController.h"
-#include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "../model/ShaderOperationMode.h"
-
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
+#include "vsdk/toolkit/gui/KeyEvent.h"
+#include "vsdk/toolkit/gui/RendererConfigurationController.h"
 class ShadersModel;
 
 class ShadersKeyboardInteractionTechniques {

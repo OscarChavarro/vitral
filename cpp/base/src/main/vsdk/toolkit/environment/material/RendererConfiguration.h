@@ -1,14 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_RENDERERCONFIGURATION_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_RENDERERCONFIGURATION_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/ShadingType.h"
-#include "java/lang/String.h"
-
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 class RendererConfiguration {
 public:
     static const int SHADING_TYPE_NOLIGHT = 0;

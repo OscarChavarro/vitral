@@ -1,11 +1,8 @@
-#include "render/CairoPdfCalligraphic2DBufferRenderer.h"
-
-#include <algorithm>
-
 #include "processing/StyledCalligraphic2DBuffer.h"
+#include "render/CairoPdfCalligraphic2DBufferRenderer.h"
+#include <algorithm>
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
 void CairoPdfCalligraphic2DBufferRenderer::updateBounds(
     const Calligraphic2DBuffer& icon,
     double& minX,

@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_RENDER_TRACEWORKSPACE_H__
 #define __VSDK_TOOLKIT_RENDER_TRACEWORKSPACE_H__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "java/util/ArrayList.h"
-
 class TraceWorkspace {
 public:
     static const int DEFAULT_MAX_RECURSION_LEVEL = 8;

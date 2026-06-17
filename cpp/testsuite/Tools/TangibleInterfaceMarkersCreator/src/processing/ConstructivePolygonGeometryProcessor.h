@@ -3,7 +3,6 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-
 class ConstructivePolygonGeometryProcessor {
 public:
     ConstructivePolygonGeometryProcessor();

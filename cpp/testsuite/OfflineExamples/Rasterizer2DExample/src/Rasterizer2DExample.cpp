@@ -1,14 +1,13 @@
 #include <cmath>
 #include <cstdio>
-#include "java/lang/String.h"
 
-#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "java/io/File.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
-
 static java::String argOrDefault(int argc, char** argv, int idx, const java::String& fallback)
 {
     if (argc > idx && argv[idx] != 0 && java::String(argv[idx]).size() > 0) return java::String(argv[idx]);

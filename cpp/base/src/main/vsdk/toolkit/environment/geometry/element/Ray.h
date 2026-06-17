@@ -1,11 +1,8 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAY_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAY_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 /**
  This class models a mathematical RAY.
  */
@@ -34,10 +31,30 @@ public:
     const Vector3Dd& getOrigin() const;
     const Vector3Dd& getDirection() const;
     double getT() const;
+    void setOrigin(const Vector3Dd& newOrigin);
+    void setDirection(const Vector3Dd& newDirection);
+    void setT(double newT);
+    void setOriginAndDirection(
+        const Vector3Dd& newOrigin, const Vector3Dd& newDirection);
 
     bool equals(const Ray& other) const;
     int hashCode() const;
     java::String toString() const;
 };
+
+inline const Vector3Dd& Ray::getOrigin() const
+{
+    return origin;
+}
+
+inline const Vector3Dd& Ray::getDirection() const
+{
+    return direction;
+}
+
+inline double Ray::getT() const
+{
+    return t;
+}
 
 #endif

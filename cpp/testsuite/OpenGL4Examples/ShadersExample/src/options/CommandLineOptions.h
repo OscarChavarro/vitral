@@ -3,7 +3,6 @@
 
 #include "java/lang/String.h"
 #include "../model/ShaderOperationMode.h"
-
 class CommandLineOptions {
 public:
     enum class TextureFilterOption {

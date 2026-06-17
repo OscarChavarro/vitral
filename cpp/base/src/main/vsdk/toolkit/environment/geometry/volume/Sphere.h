@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_SPHERE_H__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
-
 class Ray;
 class RayHit;
 class PolyhedralBoundedSolid;

@@ -1,8 +1,6 @@
-#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
-#include "vsdk/toolkit/media/Image.h"
-
 #include <stdexcept>
-
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 RasterTileArea::RasterTileArea() : image(nullptr), x0(0), y0(0), dx(0), dy(0) {}
 
 RasterTileArea::RasterTileArea(Image* imageIn, int x0In, int y0In, int dxIn, int dyIn)

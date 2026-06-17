@@ -1,6 +1,5 @@
-#include "jackson/databind/JsonNode.h"
 #include "java/util/ArrayList.txx"
-
+#include "jackson/databind/JsonNode.h"
 namespace jackson {
 namespace databind {
 

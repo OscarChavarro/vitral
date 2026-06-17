@@ -1,10 +1,8 @@
-#include <gtest/gtest.h>
 #include <cmath>
 
+#include <gtest/gtest.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4f.h"
-
-
 TEST(Matrix4x4dTest, TranslationRotationInverse) {
     Matrix4x4d t = Matrix4x4d().translation(5, -2, 1.5);
     EXPECT_TRUE(t.multiply(Vector3Dd(1,2,3)).epsilonEquals(Vector3Dd(6,0,4.5), 1e-9));

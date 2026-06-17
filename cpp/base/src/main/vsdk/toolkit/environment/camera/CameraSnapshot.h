@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_CAMERA_CAMERASNAPSHOT_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class CameraSnapshot {
 private:
     Vector3Dd eyePosition;

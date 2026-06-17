@@ -1,16 +1,14 @@
-#include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
-
 #include <cmath>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
+#include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/common/linealAlgebra/processing/LinearAlgebraEngine.h"
 int MatrixNxM::index(int row, int column) const
 {
     return row * numColumns_ + column;

@@ -1,5 +1,3 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
-
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -8,7 +6,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/geometry/volume/Box.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
 static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 {
     double* mm = geometry->getMinMax();

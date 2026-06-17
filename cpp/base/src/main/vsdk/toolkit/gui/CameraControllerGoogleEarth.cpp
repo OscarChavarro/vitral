@@ -1,15 +1,13 @@
-#include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
-
 #include <cmath>
-#include "java/lang/Math.h"
 #include <cstdio>
 
+#include "java/lang/Math.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
-
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/gui/CameraControllerGoogleEarth.h"
 static const double PI = 3.14159265358979323846;
 
 CameraControllerGoogleEarth::CameraControllerGoogleEarth(Camera* camera)

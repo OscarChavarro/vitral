@@ -4,7 +4,6 @@
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
-
 class Camera;
 
 class CameraController : public Controller {

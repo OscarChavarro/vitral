@@ -1,7 +1,6 @@
-#include "model/LabelsModel.h"
-
 #include <cstring>
 
+#include "model/LabelsModel.h"
 LabelsModel::LabelsModel()
     : count_(0),
       labelSizeMm_(0.0),

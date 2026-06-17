@@ -2,9 +2,8 @@
 #define __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
 
 #include "java/util/ArrayList.h"
-#include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-
+#include "vsdk/toolkit/render/RenderingElement.h"
 class Image;
 class RGBPixel;
 class Vertex2D;

@@ -2,14 +2,9 @@
 #define CAMERA_H
 
 #include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include "java/lang/String.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-
 class CameraSnapshot;
 
 class Camera {

@@ -1,14 +1,10 @@
-#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include <cmath>
+
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-#include <cmath>
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 InfinitePlane::InfinitePlane(const InfinitePlane& other) { clone(other); }
 
 InfinitePlane::InfinitePlane(double a_, double b_, double c_, double d_)

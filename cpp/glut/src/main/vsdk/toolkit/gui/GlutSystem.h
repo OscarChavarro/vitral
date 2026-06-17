@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
-
 class GlutSystem {
 public:
     static KeyEvent glut2vsdkKeyEvent(unsigned char glutKey, int modifiers);

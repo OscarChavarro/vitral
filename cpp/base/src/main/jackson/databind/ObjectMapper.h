@@ -3,7 +3,6 @@
 
 #include "java/lang/String.h"
 #include "jackson/databind/JsonNode.h"
-
 namespace jackson {
 namespace databind {
 

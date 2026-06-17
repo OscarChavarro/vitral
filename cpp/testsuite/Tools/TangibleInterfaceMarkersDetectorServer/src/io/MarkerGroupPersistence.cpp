@@ -1,13 +1,11 @@
-#include "io/MarkerGroupPersistence.hpp"
-
 #include <cmath>
 #include <cstdio>
 
 #include "java/io/FileInputStream.h"
 #include "java/util/ArrayList.txx"
+#include "io/MarkerGroupPersistence.hpp"
 #include "jackson/databind/ObjectMapper.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-
 Quaterniond MarkerGroupPersistence::eulerDegToQuaternion(double yawDeg, double pitchDeg, double rollDeg) const {
     const double toRad = 3.14159265358979323846 / 180.0;
     Matrix4x4d r = Matrix4x4d().eulerAnglesRotation(yawDeg * toRad, pitchDeg * toRad, rollDeg * toRad);

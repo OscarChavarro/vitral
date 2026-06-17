@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_GUI_FEEDBACK_PARALLEL_PARALLELPROGRESSMONITOREVENT_H__
 
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorCommand.h"
-
 class ParallelProgressMonitorEvent {
 private:
     ParallelProgressMonitorCommand commandType;

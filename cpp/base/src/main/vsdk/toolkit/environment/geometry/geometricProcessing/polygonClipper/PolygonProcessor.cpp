@@ -1,8 +1,8 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
-#include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
 #include <cmath>
-#include "java/util/ArrayList.txx"
 
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
 static bool pointOnSegment(const Vertex2D& p, const Vertex2D& a, const Vertex2D& b)
 {
     double cross = (p.y-a.y)*(b.x-a.x) - (p.x-a.x)*(b.y-a.y);

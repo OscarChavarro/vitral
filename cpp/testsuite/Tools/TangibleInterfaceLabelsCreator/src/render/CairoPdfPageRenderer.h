@@ -2,10 +2,8 @@
 #define __CAIROPDFLABELSPAGERENDERER_H__
 
 #include <java/util/ArrayList.h>
-
 #include "model/Label.h"
 #include "render/CairoPdfLabelRenderer.h"
-
 class CairoPdfPageRenderer {
   public:
     CairoPdfPageRenderer();

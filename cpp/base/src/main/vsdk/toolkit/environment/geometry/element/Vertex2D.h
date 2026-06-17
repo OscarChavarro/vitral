@@ -1,11 +1,8 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX2D_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX2D_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 class Vertex2D
 {
 public:

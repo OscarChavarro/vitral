@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLESCENESNAPSHOT_H__
 
 #include "java/util/ArrayList.h"
-
 class SimpleBody;
 class Light;
 class Background;

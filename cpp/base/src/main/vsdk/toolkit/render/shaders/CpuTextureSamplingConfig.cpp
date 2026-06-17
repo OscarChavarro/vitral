@@ -1,9 +1,8 @@
-#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/media/NormalMap.h"
-
+#include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
 double CpuTextureSamplingConfig::textureOffsetUTexels = -0.5;
 double CpuTextureSamplingConfig::textureOffsetVTexels = -0.5;
 const double CpuTextureSamplingConfig::NORMAL_OFFSET_U_TEXELS = -0.5;

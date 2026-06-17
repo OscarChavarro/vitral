@@ -1,19 +1,18 @@
 #include <cstdio>
 #include <cstdlib>
-#include <pthread.h>
-#include <unistd.h>
 
-#include "model/MarkersModel.hpp"
-#include "model/MarkerEventBus.hpp"
+#include "java/util/ArrayList.txx"
+#include "java/util/concurrent/Executors.h"
+#include "InteractiveMarkers.hpp"
+#include "config/Configuration.hpp"
 #include "model/CleanerConsumer.hpp"
+#include "model/MarkerEventBus.hpp"
+#include "model/MarkersModel.hpp"
 #include "vision/MarkerTracker.hpp"
 #include "webservice/WebServiceServer.hpp"
+#include <pthread.h>
+#include <unistd.h>
 #include "options/CommandLineOptions.hpp"
-#include "config/Configuration.hpp"
-#include "InteractiveMarkers.hpp"
-#include "java/util/concurrent/Executors.h"
-#include "java/util/ArrayList.txx"
-
 void*
 webServiceThreadEntry(void* arg) {
     WebServiceServer* webService = static_cast<WebServiceServer*>(arg);

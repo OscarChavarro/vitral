@@ -1,12 +1,11 @@
 #ifndef __CAIROPDFLABELRENDERER_H__
 #define __CAIROPDFLABELRENDERER_H__
 
-#include <string>
-#include <vector>
 #include <cairo.h>
 
 #include "model/Label.h"
-
+#include <string>
+#include <vector>
 class Calligraphic2DBuffer;
 
 class CairoPdfLabelRenderer {

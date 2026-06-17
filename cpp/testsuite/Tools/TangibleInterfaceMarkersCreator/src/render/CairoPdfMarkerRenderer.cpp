@@ -1,7 +1,6 @@
-#include "render/CairoPdfMarkerRenderer.h"
 #include "java/util/ArrayList.txx"
+#include "render/CairoPdfMarkerRenderer.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-
 CairoPdfMarkerRenderer::CairoPdfMarkerRenderer() {
 }
 

@@ -1,14 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHT_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHT_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
-
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 class Light {
 public:
     int tipo_de_luz;

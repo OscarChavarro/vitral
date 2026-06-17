@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/media/NormalMap.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "java/util/ArrayList.txx"
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
 static int positiveMod(int value, int modulus) {
     int result = value % modulus;
     if (result < 0) {

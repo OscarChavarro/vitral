@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_MEDIA_INDEXEDCOLORIMAGEUNCOMPRESSED_H__
 
 #include "vsdk/toolkit/media/Image.h"
-
 class RGBColorPalette;
 class RGBPixel;
 class ColorRgb;

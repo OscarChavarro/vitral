@@ -8,7 +8,6 @@
 #include "vsdk/toolkit/io/wrapper/PipeInputStream.h"
 #include "vsdk/toolkit/io/wrapper/PipeOutputStream.h"
 #include "vsdk/toolkit/io/wrapper/StreamOpenMode.h"
-
 const char *
 FileUncompressWrapper::modeToLogAction(StreamOpenMode mode) {
     return mode == StreamOpenMode::READ ? "reading" : "writing";

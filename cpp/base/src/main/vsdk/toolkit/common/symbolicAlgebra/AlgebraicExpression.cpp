@@ -1,9 +1,9 @@
-#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
-#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
 
+#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
+#include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
 class Parser {
 private:
     const java::String& s;

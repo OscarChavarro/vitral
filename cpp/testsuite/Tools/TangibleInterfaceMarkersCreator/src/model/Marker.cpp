@@ -1,5 +1,4 @@
 #include "model/Marker.h"
-
 Marker::Marker(int id, Grid* grid) : id(id), grid(grid) {
 }
 

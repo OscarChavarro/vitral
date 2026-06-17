@@ -1,13 +1,9 @@
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
-#include "java/lang/String.h"
 #include <cmath>
 #include <cstring>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
 const double Ray::UNIT_DIRECTION_TOLERANCE = 1e-12;
 
 Ray::Ray() : Ray(Vector3Dd(0, 0, 0), Vector3Dd(1, 0, 0), 0.0) {}
@@ -37,26 +33,32 @@ Ray Ray::withDirection(const Vector3Dd& newDirection) const
 
 Ray Ray::withT(double newT) const
 {
-    RaytraceStatistics::recordRayWithT();
     if ( newT == t ) {
         return *this;
     }
     return Ray(origin, direction, newT);
 }
 
-const Vector3Dd& Ray::getOrigin() const
+void Ray::setOrigin(const Vector3Dd& newOrigin)
 {
-    return origin;
+    origin = newOrigin;
 }
 
-const Vector3Dd& Ray::getDirection() const
+void Ray::setDirection(const Vector3Dd& newDirection)
 {
-    return direction;
+    direction = newDirection;
 }
 
-double Ray::getT() const
+void Ray::setT(double newT)
 {
-    return t;
+    t = newT;
+}
+
+void Ray::setOriginAndDirection(
+    const Vector3Dd& newOrigin, const Vector3Dd& newDirection)
+{
+    origin = newOrigin;
+    direction = newDirection;
 }
 
 Vector3Dd Ray::normalizeDirection(const Vector3Dd& direction)

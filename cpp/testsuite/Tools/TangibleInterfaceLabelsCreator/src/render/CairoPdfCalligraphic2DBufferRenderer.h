@@ -2,7 +2,6 @@
 #define __CAIROPDFCALLIGRAPHIC2DBUFFERRENDERER_H__
 
 #include <cairo.h>
-
 class Calligraphic2DBuffer;
 
 class CairoPdfCalligraphic2DBufferRenderer {

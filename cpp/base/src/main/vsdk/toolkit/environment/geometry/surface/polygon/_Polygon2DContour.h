@@ -3,7 +3,6 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
-
 class _Polygon2DContour
 {
 public:

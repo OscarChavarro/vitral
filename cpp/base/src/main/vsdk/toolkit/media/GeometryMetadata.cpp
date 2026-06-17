@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/media/GeometryMetadata.h"
-#include "vsdk/toolkit/media/ShapeDescriptor.h"
-#include "java/lang/String.h"
-#include "java/util/ArrayList.txx"
 #include <cmath>
 #include <cstdio>
-#include <limits>
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include <limits>
+#include "vsdk/toolkit/media/GeometryMetadata.h"
+#include "vsdk/toolkit/media/ShapeDescriptor.h"
 long GeometryMetadata::lastId = 0;
 
 GeometryMetadata::GeometryMetadata() : objectFilename(nullptr) {

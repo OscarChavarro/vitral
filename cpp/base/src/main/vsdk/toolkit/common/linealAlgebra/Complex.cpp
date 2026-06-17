@@ -1,9 +1,9 @@
-#include "vsdk/toolkit/common/linealAlgebra/Complex.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
 #include <cmath>
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/linealAlgebra/Complex.h"
 double Complex::abs() const { return std::hypot(r, i); }
 double Complex::phase() const { return std::atan2(i, r); }
 Complex Complex::plus(const Complex& b) const { return Complex(r + b.r, i + b.i); }

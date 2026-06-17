@@ -1,8 +1,7 @@
-#include "jackson/databind/ObjectMapper.h"
-
 #include <cctype>
 #include <cstdlib>
 
+#include "jackson/databind/ObjectMapper.h"
 namespace jackson {
 namespace databind {
 

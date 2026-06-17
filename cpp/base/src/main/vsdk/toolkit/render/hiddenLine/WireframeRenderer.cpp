@@ -1,14 +1,10 @@
-#include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
-
 #include "java/util/ArrayList.txx"
-
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
@@ -18,9 +14,10 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/GeometryTriangulator.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
+#include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
 static int calculateCanonicalOutcode(const Vector3Dd& p, double fpd)
 {
     int bits = 0x0;

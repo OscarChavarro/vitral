@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_ARROW_H__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
-
 class Cone;
 class Matrix4x4d;
 class PolyhedralBoundedSolid;

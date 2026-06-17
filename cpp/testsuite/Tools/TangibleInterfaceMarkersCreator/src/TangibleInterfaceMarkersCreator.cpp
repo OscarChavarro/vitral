@@ -1,10 +1,8 @@
-#include "TangibleInterfaceMarkersCreator.h"
-
 #include <cstdio>
+
 #include <java/util/ArrayList.txx>
-
+#include "TangibleInterfaceMarkersCreator.h"
 #include "processing/MarkerGenerator.h"
-
 TangibleInterfaceMarkersCreator::TangibleInterfaceMarkersCreator(int argc, char** argv)
     : options_(argc, argv),
       pageRenderer_(nullptr) {

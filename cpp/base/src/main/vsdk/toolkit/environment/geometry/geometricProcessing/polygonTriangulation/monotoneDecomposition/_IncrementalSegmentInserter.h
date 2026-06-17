@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationSegment.h"
-
 class _IncrementalSegmentInserter {
   public:
     static int addSegment(int segmentIndex);

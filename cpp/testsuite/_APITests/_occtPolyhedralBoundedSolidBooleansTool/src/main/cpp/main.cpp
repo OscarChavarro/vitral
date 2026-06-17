@@ -1,3 +1,7 @@
+#include <cctype>
+#include <cstdio>
+
+#include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -11,9 +15,9 @@
 #include <IFSelect_ReturnStatus.hxx>
 #include <NCollection_IndexedMap.hxx>
 #include <Precision.hxx>
-#include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Failure.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
@@ -21,13 +25,7 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
-
-#include <java/lang/Math.h>
-#include <cctype>
-#include <cstdio>
 #include <exception>
-#include "java/lang/String.h"
-
 enum class OpCode {
   Union,
   AMinusB,

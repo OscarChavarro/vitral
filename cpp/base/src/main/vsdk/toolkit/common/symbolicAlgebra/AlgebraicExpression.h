@@ -3,7 +3,6 @@
 
 #include "java/lang/String.h"
 #include "java/util/HashMap.h"
-
 class AlgebraicExpression {
 private:
     java::String expression;

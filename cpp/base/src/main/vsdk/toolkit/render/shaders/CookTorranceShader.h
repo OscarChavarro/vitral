@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_RENDER_SHADERS_COOKTORRANCESHADER_H__
 
 #include "vsdk/toolkit/render/shaders/Shader.h"
-
 class CookTorranceShader : public Shader {
 private:
     bool textureEnabled;

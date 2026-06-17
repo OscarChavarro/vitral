@@ -1,5 +1,4 @@
 #include "PolygonClippingFixtures.h"
-
 const PolygonClippingTestCase PolygonClippingFixtures::CASES[] = {
     {"TRIANGLE_VS_QUAD", "3,0,6,4,2,6,1,3", "3,3,8,1,9,5,7,7"},
     {"TRIANGLE_VS_QUAD_WITH_HOLE", "3,0,6,4,2,6,1,3", "3,3,8,1,9,5,7,7;4,3,6,5,8,3,7,2"},

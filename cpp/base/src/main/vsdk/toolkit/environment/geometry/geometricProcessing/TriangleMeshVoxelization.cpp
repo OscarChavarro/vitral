@@ -1,11 +1,9 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
-
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
-#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
-#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
 void TriangleMeshVoxelization::doVoxelization(
     TriangleMesh& mesh,
     VoxelVolume& vv,

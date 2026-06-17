@@ -1,23 +1,20 @@
 #include <cmath>
+#include <common/matd.h>
 #include <cstdio>
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/videoio.hpp>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/highgui.hpp>
-
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include <apriltag.h>
-#include <tag36h11.h>
-#include <apriltag_pose.h>
-#include <common/matd.h>
 #include "java/util/ArrayList.txx"
-
-#include "vision/MarkerTracker.hpp"
 #include "model/MarkersModel.hpp"
 #include "render/OpenCVMarkerGroupRenderer.hpp"
-
+#include "vision/MarkerTracker.hpp"
+#include <apriltag.h>
+#include <apriltag_pose.h>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/videoio.hpp>
+#include <tag36h11.h>
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 Matrix4x4d MarkerTracker::buildAprilToModelRotation() const {
     // Maps model marker frame (normal +X, up +Z) into AprilTag local frame
     // (x right, y down, z into tag).

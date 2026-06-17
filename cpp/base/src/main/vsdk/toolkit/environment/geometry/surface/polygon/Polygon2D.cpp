@@ -1,12 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "vsdk/toolkit/common/dataStructures/BinaryTreeNode.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 class PolygonProcessor {
 public:
     static void classifyContourHoles(Polygon2D* polygon);

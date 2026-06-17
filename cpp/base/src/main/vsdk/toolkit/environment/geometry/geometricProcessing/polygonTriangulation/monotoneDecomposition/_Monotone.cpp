@@ -1,10 +1,7 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Monotone.h"
 #include <cmath>
 #include <cstring>
 
-// References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
-// for Computing Trapezoidal Decompositions and for Triangulating Polygons".
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Monotone.h"
 _MonotoneChainNode _Monotone::monotoneChainNodes[TRAPEZOID_TABLE_SIZE]; /* Table to hold all the monotone */
 /* polygons . Each monotone polygon */
 /* is a circularly linked list */

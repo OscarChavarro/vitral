@@ -1,13 +1,11 @@
-#include "vsdk/toolkit/environment/scene/SimpleScene.h"
-
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/background/Background.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 SimpleScene::SimpleScene()
     : activeCameraIndex(0), activeBackgroundIndex(0)
 {

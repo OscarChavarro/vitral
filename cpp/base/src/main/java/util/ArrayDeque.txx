@@ -1,5 +1,4 @@
 #include "java/util/ArrayDeque.h"
-
 namespace java {
 
 template <class E>

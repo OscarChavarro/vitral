@@ -1,16 +1,10 @@
-#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
-#include "java/lang/String.h"
-
-#include "java/lang/String.h"
 #include <cctype>
-#include "java/lang/String.h"
 #include <cstdio>
-#include "java/lang/String.h"
 #include <cstdlib>
+
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 struct MicrofacetConfig {
     java::String name;
     ColorRgb ambient;

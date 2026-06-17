@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
+#include <cmath>
+
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include <cmath>
-
+#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 VoxelVolume::VoxelVolume() : data(nullptr), xSize(0), ySize(0), zSize(0) {}
 
 VoxelVolume::~VoxelVolume() {

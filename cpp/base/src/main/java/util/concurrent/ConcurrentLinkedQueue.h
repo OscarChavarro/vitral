@@ -3,7 +3,6 @@
 
 #include "java/util/ArrayDeque.h"
 #include <pthread.h>
-
 namespace java {
 
 template<typename T>

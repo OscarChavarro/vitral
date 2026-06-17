@@ -1,13 +1,11 @@
-#include "render/CairoPdfLabelRenderer.h"
-
 #include <cmath>
+
+#include "render/CairoPdfCalligraphic2DBufferRenderer.h"
+#include "render/CairoPdfLabelRenderer.h"
 #include <algorithm>
 #include <string>
 #include <vector>
-
-#include "render/CairoPdfCalligraphic2DBufferRenderer.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
 const double kIconAreaRatio = 0.34;
 
 std::vector<std::string> CairoPdfLabelRenderer::splitLines(const char* text) const {

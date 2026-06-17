@@ -1,6 +1,5 @@
-#include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/TraceWorkspace.h"
 TraceWorkspace::TraceWorkspace() : TraceWorkspace(DEFAULT_MAX_RECURSION_LEVEL)
 {
 }

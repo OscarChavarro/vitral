@@ -5,7 +5,6 @@
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector4Dd.h"
-
 class OpenGL4LineRenderer {
 public:
     static void drawLines(

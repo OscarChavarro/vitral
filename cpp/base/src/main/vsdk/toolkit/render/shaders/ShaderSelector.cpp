@@ -1,16 +1,15 @@
-#include "vsdk/toolkit/render/shaders/ShaderSelector.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/render/shaders/ConstantShader.h"
 #include "vsdk/toolkit/render/shaders/ConstantTextureShader.h"
+#include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
 #include "vsdk/toolkit/render/shaders/FlatShader.h"
 #include "vsdk/toolkit/render/shaders/FlatTexturedShader.h"
 #include "vsdk/toolkit/render/shaders/GouraudTextureShader.h"
-#include "vsdk/toolkit/render/shaders/PhongShader.h"
 #include "vsdk/toolkit/render/shaders/PhongBumpShader.h"
-#include "vsdk/toolkit/render/shaders/PhongTextureShader.h"
+#include "vsdk/toolkit/render/shaders/PhongShader.h"
 #include "vsdk/toolkit/render/shaders/PhongTextureBumpShader.h"
-#include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-
+#include "vsdk/toolkit/render/shaders/PhongTextureShader.h"
+#include "vsdk/toolkit/render/shaders/ShaderSelector.h"
 Shader* ShaderSelector::select(const RendererConfiguration* qualitySelection)
 {
     int shadingType = qualitySelection->getShadingType();

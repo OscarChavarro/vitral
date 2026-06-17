@@ -2,9 +2,7 @@
 #define __LABELSMODEL_H__
 
 #include <java/util/ArrayList.h>
-
 #include "model/Label.h"
-
 class LabelsModel {
   public:
     LabelsModel();

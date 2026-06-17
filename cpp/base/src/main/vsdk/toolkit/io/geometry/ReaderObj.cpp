@@ -1,30 +1,25 @@
-#include "vsdk/toolkit/io/geometry/ReaderObj.h"
+#include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+
 #include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "java/util/HashMap.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/media/Image.h"
-#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
-#include "java/util/ArrayList.txx"
-#include "java/util/HashMap.h"
-
-#include <cctype>
-#include "java/lang/String.h"
-#include <cmath>
-#include "java/lang/String.h"
-#include <cstdlib>
-#include "java/lang/String.h"
-#include <cstdio>
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/io/geometry/ReaderObj.h"
 struct ReaderObjVertex {
     int vertexPositionIndex;
     int vertexNormalIndex;

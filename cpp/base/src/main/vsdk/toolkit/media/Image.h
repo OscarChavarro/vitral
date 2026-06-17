@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_MEDIA_IMAGE_H__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
-
 class RGBPixel;
 class ColorRgb;
 

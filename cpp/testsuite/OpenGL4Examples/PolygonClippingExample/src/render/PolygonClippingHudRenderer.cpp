@@ -1,10 +1,10 @@
-#include "PolygonClippingHudRenderer.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-#include <GL/glew.h>
 #include <cctype>
 #include <cstring>
 
+#include "PolygonClippingHudRenderer.h"
+#include <GL/glew.h>
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 static const int HUD_HEIGHT = 122;
 static const int CHAR_W = 12;
 static const int PIXEL_SCALE = 2;

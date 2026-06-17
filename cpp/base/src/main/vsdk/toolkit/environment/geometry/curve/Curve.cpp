@@ -1,8 +1,6 @@
 #include "vsdk/toolkit/environment/geometry/curve/Curve.h"
-
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-
 Ray* Curve::doIntersection(const Ray&)
 {
     return nullptr;

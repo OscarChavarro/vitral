@@ -7,7 +7,6 @@
 #include "java/lang/Object.h"
 #include "java/lang/String.h"
 #include "java/util/HashMapEntry.h"
-
 namespace java {
 template <class K, class V>
 class HashMap final: public Object {

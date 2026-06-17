@@ -1,20 +1,12 @@
-#include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : internalGeometry(0)
 {
     init(fxy);

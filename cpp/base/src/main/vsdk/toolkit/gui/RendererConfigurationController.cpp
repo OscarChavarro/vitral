@@ -1,8 +1,6 @@
-#include "vsdk/toolkit/gui/RendererConfigurationController.h"
-
-#include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-
+#include "vsdk/toolkit/gui/KeyEvent.h"
+#include "vsdk/toolkit/gui/RendererConfigurationController.h"
 RendererConfigurationController::RendererConfigurationController()
     : qualitySelection(0)
 {

@@ -5,7 +5,6 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
-
 class _RandomSegmentOrder {
   private:
     static int nextPermutationIndex;

@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_BACKGROUND_SIMPLEBACKGROUND_H__
 
 #include "vsdk/toolkit/environment/background/Background.h"
-
 class SimpleBackground : public Background {
 private:
     ColorRgb color_;

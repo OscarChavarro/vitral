@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PARALLEL_PARALLELPROGRESSMONITORCONSUMER_H__
 #define __VSDK_TOOLKIT_GUI_FEEDBACK_PARALLEL_PARALLELPROGRESSMONITORCONSUMER_H__
 
-#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
-#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
-
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"
+#include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
 class ParallelProgressMonitorConsumer {
 private:
     ProgressMonitorConsoleLongFormat concreteProgressMonitor;

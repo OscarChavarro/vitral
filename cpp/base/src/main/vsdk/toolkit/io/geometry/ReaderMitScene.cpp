@@ -1,37 +1,21 @@
-#include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
-#include "java/lang/String.h"
-
-#include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/background/SimpleBackground.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/light/Light.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/scene/SimpleScene.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
-#include "java/lang/String.h"
-
+#include <cmath>
 #include <cstdio>
 #include <cstring>
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include <cmath>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "vsdk/toolkit/environment/background/SimpleBackground.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 ReaderMitScene::ReaderMitScene()
 {
 }

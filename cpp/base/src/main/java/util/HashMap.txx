@@ -1,5 +1,4 @@
 #include "java/util/HashMap.h"
-
 namespace java {
 
 template <class K, class V>

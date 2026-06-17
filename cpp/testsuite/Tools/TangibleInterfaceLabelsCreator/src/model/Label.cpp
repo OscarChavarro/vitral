@@ -1,5 +1,4 @@
 #include "model/Label.h"
-
 Label::Label() {
 }
 

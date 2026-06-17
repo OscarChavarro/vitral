@@ -2,7 +2,6 @@
 #define JAVA_NET_SERVER_SOCKET_H__
 
 #include "java/net/Socket.h"
-
 namespace java {
 namespace net {
 

@@ -1,9 +1,7 @@
-#include "render/OpenCVHudRenderer.hpp"
-#include "model/MarkersModel.hpp"
 #include "java/util/ArrayList.txx"
-
+#include "model/MarkersModel.hpp"
+#include "render/OpenCVHudRenderer.hpp"
 #include <opencv2/imgproc.hpp>
-
 OpenCVHudRenderer::OpenCVHudRenderer(MarkersModel* model)
     : model_(model) {}
 

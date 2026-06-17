@@ -1,13 +1,11 @@
-#include "ImageExporter.h"
-
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "java/io/File.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-
 #include <cctype>
 #include <cstdio>
 #include <cstring>
 
+#include "java/io/File.h"
+#include "ImageExporter.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 bool ImageExporter::exportImage(const java::String& outputFileName, RGBImageUncompressed* image)
 {
     java::File outFile(outputFileName.c_str());

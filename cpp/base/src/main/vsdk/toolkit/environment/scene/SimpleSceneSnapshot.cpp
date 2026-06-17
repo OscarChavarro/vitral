@@ -1,7 +1,6 @@
-#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
-#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 SimpleSceneSnapshot::SimpleSceneSnapshot(
     java::ArrayList<SimpleBody*>& inSimpleBodies,
     java::ArrayList<Light*>& inLights,

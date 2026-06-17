@@ -1,12 +1,12 @@
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include <cmath>
+
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
-#include <cmath>
-
 Sphere::Sphere(double r) : radius_(r), radiusSquared_(r * r) {}
 
 Ray* Sphere::doIntersection(const Ray& inoutRay) {

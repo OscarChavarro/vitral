@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/media/RGBAImageCompressed.h"
-#include "vsdk/toolkit/media/RGBPixel.h"
+#include <cstdio>
+#include <cstring>
+
+#include "java/lang/Math.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include <cstring>
-#include <cstdio>
-#include "java/lang/Math.h"
-
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 RGBAImageCompressed::RGBAImageCompressed() :
     data(nullptr), xSize(0), ySize(0),
     compressionFormat(COMPRESSION_UNKNOWN), compressedDataSize(0) {

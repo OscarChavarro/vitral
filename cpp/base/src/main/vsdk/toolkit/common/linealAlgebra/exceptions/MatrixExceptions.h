@@ -3,7 +3,6 @@
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
-
 class MatrixDimensionMismatchException : public VSDKFatalException {
 public:
     explicit MatrixDimensionMismatchException(const java::String& message) : VSDKFatalException(message) {}

@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_PROCESSING_STOPWATCH_H__
 
 #include <chrono>
-
 class StopWatch {
 private:
     bool running_;

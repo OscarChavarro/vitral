@@ -1,4 +1,3 @@
-#include "java/lang/String.h"
 #ifndef RAYTRACING_OFFLINE_COMMANDOPTIONSPROCESSOR_H
 #define RAYTRACING_OFFLINE_COMMANDOPTIONSPROCESSOR_H
 
@@ -30,3 +29,4 @@ public:
 };
 
 #endif
+#include "java/lang/String.h"

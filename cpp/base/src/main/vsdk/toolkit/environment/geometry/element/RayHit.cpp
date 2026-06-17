@@ -1,6 +1,5 @@
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
-
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 static const Vector3Dd ZERO_VECTOR;
 
 RayHit::RayHit() : RayHit(DETAIL_ALL, true) {}

@@ -2,7 +2,6 @@
 #define CAMERACONTROLLERBLENDER_H
 
 #include "vsdk/toolkit/gui/CameraController.h"
-
 class Camera;
 
 class CameraControllerBlender : public CameraController {

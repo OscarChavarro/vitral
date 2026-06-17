@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
 
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 class MicroFacetedMaterial : public SimpleMaterial {
 public:
     static const int FRESNEL_MODEL_SCHLICK = 0;

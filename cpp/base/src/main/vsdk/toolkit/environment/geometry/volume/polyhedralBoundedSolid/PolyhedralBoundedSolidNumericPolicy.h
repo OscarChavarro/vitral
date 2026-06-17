@@ -2,7 +2,6 @@
 #define __VSDK_PBS_NUMERIC_POLICY_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 

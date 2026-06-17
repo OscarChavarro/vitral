@@ -1,8 +1,8 @@
-#include "vsdk/toolkit/media/RGBColorPalette.h"
-#include "vsdk/toolkit/common/color/ColorRgb.h"
-#include "java/util/ArrayList.txx"
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/media/RGBColorPalette.h"
 RGBColorPalette::RGBColorPalette() {
     init(256);
 }

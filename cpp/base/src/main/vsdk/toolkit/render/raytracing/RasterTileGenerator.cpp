@@ -1,10 +1,9 @@
-#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
-#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
-#include "vsdk/toolkit/media/Image.h"
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
+#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 RasterTileGenerator::RasterTileGenerator(
     RasterTileGenerationStrategy strategyIn,
     Image* imageIn,

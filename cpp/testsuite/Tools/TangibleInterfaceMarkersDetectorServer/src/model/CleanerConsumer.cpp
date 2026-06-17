@@ -1,8 +1,8 @@
-#include "model/CleanerConsumer.hpp"
-#include "java/util/ArrayList.txx"
-#include <unistd.h>
 #include <cstdio>
 
+#include "java/util/ArrayList.txx"
+#include "model/CleanerConsumer.hpp"
+#include <unistd.h>
 CleanerConsumer::CleanerConsumer(MarkerEventBus* bus)
     : bus_(bus), running_(true) {}
 

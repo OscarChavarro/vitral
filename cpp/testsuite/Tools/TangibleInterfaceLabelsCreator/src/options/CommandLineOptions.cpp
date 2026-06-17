@@ -1,9 +1,8 @@
-#include "options/CommandLineOptions.h"
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
+#include "options/CommandLineOptions.h"
 CommandLineOptions::CommandLineOptions(int argc, char** argv)
     : labelSizeMm_(40.0),
       circleHoledRadiusMm_(-1.0) {

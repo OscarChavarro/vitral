@@ -1,9 +1,8 @@
 #ifndef OPENGL4SIMPLECORRIDORSAMPLE_H
 #define OPENGL4SIMPLECORRIDORSAMPLE_H
 
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class OpenGL4SimpleCorridorSample {
 public:
     OpenGL4SimpleCorridorSample();

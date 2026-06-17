@@ -1,9 +1,7 @@
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshGroupVoxelization.h"
-
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshGroupVoxelization.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/TriangleMeshVoxelization.h"
 void TriangleMeshGroupVoxelization::doVoxelization(
     TriangleMeshGroup& meshGroup,
     VoxelVolume& vv,

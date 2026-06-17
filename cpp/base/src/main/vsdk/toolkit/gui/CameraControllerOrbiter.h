@@ -1,9 +1,8 @@
 #ifndef CAMERACONTROLLERORBITER_H
 #define CAMERACONTROLLERORBITER_H
 
-#include "vsdk/toolkit/gui/CameraController.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
+#include "vsdk/toolkit/gui/CameraController.h"
 class Camera;
 
 class CameraControllerOrbiter : public CameraController {

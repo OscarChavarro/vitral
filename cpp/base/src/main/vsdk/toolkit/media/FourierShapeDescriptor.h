@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
 #define __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
 
-#include "vsdk/toolkit/media/ShapeDescriptor.h"
 #include "java/lang/String.h"
-
+#include "vsdk/toolkit/media/ShapeDescriptor.h"
 /**
 Stores the feature vector for a set of 32 elements
 around a volume or image.

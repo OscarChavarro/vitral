@@ -1,10 +1,8 @@
-#include <gtest/gtest.h>
 #include <cmath>
 
+#include <gtest/gtest.h>
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaternionf.h"
-
-
 TEST(QuaterniondTest, RotationAndConjugate) {
     double half90 = M_PI / 4.0;
     Quaterniond q(Vector3Dd(0.0, 0.0, std::sin(half90)), std::cos(half90));

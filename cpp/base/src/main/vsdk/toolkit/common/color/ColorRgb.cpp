@@ -1,6 +1,6 @@
-#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 ColorRgb::ColorRgb() : r_(0), g_(0), b_(0) {
 }
 

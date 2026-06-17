@@ -1,7 +1,6 @@
-#include "model/MarkersModel.h"
-
 #include <cstring>
 
+#include "model/MarkersModel.h"
 MarkersModel::MarkersModel()
     : startId_(0),
       count_(0),

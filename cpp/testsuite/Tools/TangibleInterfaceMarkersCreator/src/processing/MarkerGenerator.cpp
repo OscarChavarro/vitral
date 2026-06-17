@@ -1,7 +1,7 @@
-#include "processing/MarkerGenerator.h"
-#include <tag36h11.h>
 #include <cstdio>
 
+#include "processing/MarkerGenerator.h"
+#include <tag36h11.h>
 MarkerGenerator::MarkerGenerator() {
     family = tag36h11_create();
     if (!family) {

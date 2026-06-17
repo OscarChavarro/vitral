@@ -1,8 +1,8 @@
-#include "vsdk/toolkit/media/PrimitiveCountShapeDescriptor.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/VSDK.h"
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/media/PrimitiveCountShapeDescriptor.h"
 PrimitiveCountShapeDescriptor::PrimitiveCountShapeDescriptor(const java::String* label) :
     ShapeDescriptor(label) {
     featureVector = new double[numberOfElements];

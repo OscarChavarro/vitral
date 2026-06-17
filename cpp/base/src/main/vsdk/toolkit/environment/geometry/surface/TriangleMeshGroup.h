@@ -1,15 +1,10 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESHGROUP_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESHGROUP_H__
 
-#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 class Ray;
 class RayHit;
 

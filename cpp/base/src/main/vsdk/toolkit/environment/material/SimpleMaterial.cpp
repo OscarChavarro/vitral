@@ -1,9 +1,7 @@
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
-#include "java/lang/String.h"
-
 #include <cstdio>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 SimpleMaterial::SimpleMaterial()
     : SimpleMaterial(
         "VSDK_default_material",

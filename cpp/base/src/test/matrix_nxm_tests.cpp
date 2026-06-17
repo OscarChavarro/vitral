@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
-
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 #include "vsdk/toolkit/common/linealAlgebra/exceptions/MatrixExceptions.h"
-
-
 TEST(MatrixNxMTest, DeterminantInverse) {
     MatrixNxM m = MatrixNxM(2,2).withVal(0,0,4).withVal(0,1,7).withVal(1,0,2).withVal(1,1,6);
     EXPECT_NEAR(m.determinant(), 10.0, 1e-9);

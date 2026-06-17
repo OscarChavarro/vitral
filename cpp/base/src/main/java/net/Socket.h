@@ -3,7 +3,6 @@
 
 #include "java/net/SocketInputStream.h"
 #include "java/net/SocketOutputStream.h"
-
 namespace java {
 namespace net {
 

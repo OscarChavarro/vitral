@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class Background {
 public:
     virtual ~Background() {}

@@ -1,8 +1,6 @@
-#include "render/OpenCVMarkerGroupRenderer.hpp"
 #include "java/util/ArrayList.txx"
-
+#include "render/OpenCVMarkerGroupRenderer.hpp"
 #include <opencv2/imgproc.hpp>
-
 OpenCVMarkerGroupRenderer::OpenCVMarkerGroupRenderer(MarkersModel* model)
     : model_(model) {}
 

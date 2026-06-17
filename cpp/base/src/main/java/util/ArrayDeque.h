@@ -2,7 +2,6 @@
 #define ArrayDeque__
 
 #include "java/lang/Object.h"
-
 namespace java {
     template <class E>
     class ArrayDeque final : public Object {

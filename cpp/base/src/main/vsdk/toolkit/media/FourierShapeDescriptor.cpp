@@ -1,9 +1,9 @@
-#include "vsdk/toolkit/media/FourierShapeDescriptor.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/VSDK.h"
 #include <cmath>
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/media/FourierShapeDescriptor.h"
 FourierShapeDescriptor::FourierShapeDescriptor(const java::String* label) :
     ShapeDescriptor(label) {
     featureVector = new double[numberOfElements * numberOfHarmonics];

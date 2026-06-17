@@ -2,9 +2,7 @@
 #define __MARKERSMODEL_H__
 
 #include <java/util/ArrayList.h>
-
 #include "model/Marker.h"
-
 class MarkersModel {
   public:
     MarkersModel();

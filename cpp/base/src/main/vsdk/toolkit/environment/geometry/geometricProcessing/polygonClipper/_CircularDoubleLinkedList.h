@@ -1,11 +1,10 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_CIRCULARDOUBLELINKEDLIST_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_CIRCULARDOUBLELINKEDLIST_H__
 
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_DoubleLinkedListNode.h"
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_DoubleLinkedListNode.h"
 template <class E>
 class _CircularDoubleLinkedList {
 private:

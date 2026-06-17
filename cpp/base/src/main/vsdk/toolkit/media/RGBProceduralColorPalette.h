@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_MEDIA_RGBPROCEDURALCOLORPALETTE_H__
 
 #include "vsdk/toolkit/media/RGBColorPalette.h"
-
 /**
 The RGBProceduralColorPalette abstract class provides an interface for
 procedural color palette classes. This serves two purposes:

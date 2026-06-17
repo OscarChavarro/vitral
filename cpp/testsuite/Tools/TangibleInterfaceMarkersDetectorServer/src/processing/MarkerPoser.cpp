@@ -1,10 +1,8 @@
-#include "processing/MarkerPoser.hpp"
-#include "java/util/ArrayList.txx"
-
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
+#include "processing/MarkerPoser.hpp"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-
 Matrix4x4d MarkerPoser::buildTransform(const Vector3Dd& position, const Quaterniond& rotation) const {
     Matrix4x4d r = Matrix4x4d().importFromQuaternion(rotation.normalized());
     return r.withTranslation(position);

@@ -1,5 +1,4 @@
 #include "model/Grid.h"
-
 Grid::Grid() {
     for (int y = 0; y < SIZE; ++y) {
         for (int x = 0; x < SIZE; ++x) {

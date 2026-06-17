@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include <cmath>
+
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/Box.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
-#include <cmath>
-
 static const Vector3Dd NORMAL_POS_Z(0, 0, 1);
 static const Vector3Dd NORMAL_NEG_Z(0, 0, -1);
 static const Vector3Dd NORMAL_POS_Y(0, 1, 0);

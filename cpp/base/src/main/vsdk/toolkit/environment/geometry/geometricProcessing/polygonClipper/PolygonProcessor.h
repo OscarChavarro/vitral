@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_POLYGONPROCESSOR_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_POLYGONPROCESSOR_H__
 
+#include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "java/util/ArrayList.h"
-
 class PolygonProcessor {
 public:
     static Polygon2D* polygon2DSimplify(const Polygon2D& pol2DIn, double epsilon, bool copy);

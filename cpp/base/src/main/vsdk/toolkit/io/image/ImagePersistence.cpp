@@ -1,25 +1,25 @@
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/io/PersistenceElement.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBAImageCompressed.h"
-#include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
-#include "vsdk/toolkit/media/GrayScalePalette.h"
-#include "vsdk/toolkit/common/logging/Logger.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/io/File.h"
-#include "java/lang/String.h"
-#include "java/io/FileInputStream.h"
-#include "java/io/FileOutputStream.h"
-#include "java/io/BufferedInputStream.h"
-#include "java/io/BufferedOutputStream.h"
-#include <cstring>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
-#include <cctype>
-#include "java/util/ArrayList.txx"
+#include <cstring>
 
+#include "java/io/BufferedInputStream.h"
+#include "java/io/BufferedOutputStream.h"
+#include "java/io/File.h"
+#include "java/io/FileInputStream.h"
+#include "java/io/FileOutputStream.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/io/PersistenceElement.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/media/GrayScalePalette.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 int readIntLE(const unsigned char* data, int offset) {
     return (data[offset] & 0xFF) |
            ((data[offset + 1] & 0xFF) << 8) |

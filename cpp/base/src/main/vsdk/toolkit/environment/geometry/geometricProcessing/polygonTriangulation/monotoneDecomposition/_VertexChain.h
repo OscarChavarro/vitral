@@ -2,7 +2,6 @@
 #define __VERTEX_CHAIN__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
-
 class _VertexChain {
   public:
     Vector2Dd point;

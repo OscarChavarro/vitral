@@ -2,9 +2,8 @@
 #define JACKSON_DATABIND_JSON_NODE_H
 
 #include "java/lang/String.h"
-#include "java/util/HashMap.h"
 #include "java/util/ArrayList.h"
-
+#include "java/util/HashMap.h"
 namespace jackson {
 namespace databind {
 

@@ -1,14 +1,10 @@
-#include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
-#include "java/lang/String.h"
-
-#include "vsdk/toolkit/io/geometry/ReaderObj.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/lang/String.h"
 #include <cctype>
 #include <cstdlib>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
+#include "vsdk/toolkit/io/geometry/ReaderObj.h"
 void EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleScene* scene)
 {
     char* extC = extractExtensionFromFile(sceneFile);

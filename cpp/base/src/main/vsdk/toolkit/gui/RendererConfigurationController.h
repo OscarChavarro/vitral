@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
-
 class RendererConfiguration;
 
 class RendererConfigurationController : public Controller {

@@ -6,13 +6,13 @@
 //= [FOLE1992] Foley, vanDam, Feiner, Hughes. "Computer Graphics, princi-   =
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
-#include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
+#include <cstdio>
+
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "vsdk/toolkit/common/VSDK.h"
-#include <cstdio>
-
+#include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 ParametricBiCubicPatch::ParametricBiCubicPatch()
     : contourCurve(nullptr), hasControlMeshPoints(false),
       approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)

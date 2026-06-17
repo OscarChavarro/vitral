@@ -1,16 +1,15 @@
-#include "java/lang/String.h"
-#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
-#include "java/util/ArrayList.txx"
 #include <cmath>
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
 #include <GL/glew.h>
 #include <GL/gl.h>
 #endif
-
 OpenGL4SimpleCorridorSample::OpenGL4SimpleCorridorSample()
     : a(6), na(6), b(20), nb(20), c(4), nc(4), interSpace(0.05),
       initialized(false), shaderProgramId(0), vertexArrayId(0),

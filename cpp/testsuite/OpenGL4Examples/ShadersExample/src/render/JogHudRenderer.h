@@ -2,7 +2,6 @@
 #define SHADERSEXAMPLE_JOGHUDRENDERER_H
 
 #include "java/lang/String.h"
-
 class RGBImageUncompressed;
 class RendererConfiguration;
 

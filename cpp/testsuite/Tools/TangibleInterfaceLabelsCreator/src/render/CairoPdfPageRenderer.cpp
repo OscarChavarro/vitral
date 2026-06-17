@@ -1,13 +1,11 @@
-#include "render/CairoPdfPageRenderer.h"
-
 #include <cairo-pdf.h>
 #include <cmath>
-#include <vector>
+
 #include <java/util/ArrayList.txx>
-
 #include "processing/IconGenerator.h"
+#include "render/CairoPdfPageRenderer.h"
+#include <vector>
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
 CairoPdfPageRenderer::CairoPdfPageRenderer()
     : labelSizeMm_(REFERENCE_LABEL_SIZE_MM),
       circleRadiusMm_(REFERENCE_LABEL_SIZE_MM * 0.1) {

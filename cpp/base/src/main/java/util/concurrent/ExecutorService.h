@@ -3,10 +3,8 @@
 
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/Future.h"
-
-#include <memory>
 #include <exception>
-
+#include <memory>
 namespace java {
 
 class ExecutorService {

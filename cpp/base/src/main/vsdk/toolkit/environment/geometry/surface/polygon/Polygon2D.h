@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON_POLYGON2D_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON_POLYGON2D_H__
 
-#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class _Polygon2DContour;
 class Vertex2D;
 class Ray;

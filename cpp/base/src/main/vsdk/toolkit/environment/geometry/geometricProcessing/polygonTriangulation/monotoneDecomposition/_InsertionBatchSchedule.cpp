@@ -1,10 +1,6 @@
 #include <cmath>
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_InsertionBatchSchedule.h"
-
-// References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
-// for Computing Trapezoidal Decompositions and for Triangulating Polygons".
-
 double _InsertionBatchSchedule::log2Value(double x) { return log(x) / log(2.0); }
 
 int _InsertionBatchSchedule::mathLogStarN(int n) {

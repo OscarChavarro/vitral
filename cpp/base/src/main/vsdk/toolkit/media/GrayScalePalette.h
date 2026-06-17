@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_MEDIA_GRAYSCALEPALETTE_H__
 
 #include "vsdk/toolkit/media/RGBProceduralColorPalette.h"
-
 class ColorRgb;
 
 /**

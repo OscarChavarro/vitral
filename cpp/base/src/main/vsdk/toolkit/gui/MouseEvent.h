@@ -2,7 +2,6 @@
 #define MOUSEEVENT_H
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
-
 class MouseEvent : public PresentationElement {
 public:
     static const int BUTTON1 = 1;

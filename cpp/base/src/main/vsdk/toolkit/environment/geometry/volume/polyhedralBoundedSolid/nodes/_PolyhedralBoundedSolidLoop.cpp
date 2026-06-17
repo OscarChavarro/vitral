@@ -1,11 +1,8 @@
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
-
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
-
-#include "java/util/ArrayList.txx"
-
 _PolyhedralBoundedSolidLoop::_PolyhedralBoundedSolidLoop(_PolyhedralBoundedSolidFace* parent)
     : parentFace(parent), boundaryStartHalfEdge(0)
 {

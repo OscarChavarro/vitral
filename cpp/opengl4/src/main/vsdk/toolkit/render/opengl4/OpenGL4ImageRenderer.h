@@ -1,4 +1,3 @@
-#include "java/lang/String.h"
 #ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
 #define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
 
@@ -69,3 +68,4 @@ private:
 };
 
 #endif // __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
+#include "java/lang/String.h"

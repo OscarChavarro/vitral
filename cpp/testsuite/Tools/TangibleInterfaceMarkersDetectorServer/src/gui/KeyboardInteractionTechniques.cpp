@@ -1,5 +1,4 @@
 #include "gui/KeyboardInteractionTechniques.hpp"
-
 KeyboardInteractionTechniques::KeyboardInteractionTechniques(MarkersModel* model)
     : model_(model) {}
 

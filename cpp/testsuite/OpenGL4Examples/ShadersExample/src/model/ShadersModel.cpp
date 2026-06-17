@@ -1,18 +1,16 @@
-#include "ShadersModel.h"
-
-#include <java/lang/Math.h>
 #include <cmath>
 #include <cstdio>
-#include "java/util/ArrayList.txx"
 
+#include "java/io/File.h"
+#include <java/lang/Math.h>
+#include "java/util/ArrayList.txx"
+#include "ShadersModel.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "java/io/File.h"
-#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
-
 ShadersModel ShadersModel::createDefault() { return ShadersModel(); }
 
 ShadersModel::ShadersModel()

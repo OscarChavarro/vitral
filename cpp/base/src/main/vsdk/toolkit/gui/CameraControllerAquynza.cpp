@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include <cmath>
 #include <cstdio>
-#include "java/lang/Math.h"
 
+#include "java/lang/Math.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 static const double PI = 3.14159265358979323846;
 
 static inline double degreesToRadians(double degrees) {

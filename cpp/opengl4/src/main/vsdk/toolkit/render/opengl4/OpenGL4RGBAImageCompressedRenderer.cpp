@@ -1,11 +1,11 @@
-#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-#include "vsdk/toolkit/media/RGBAImageCompressed.h"
-#include "java/util/ArrayList.h"
-#include "java/util/ArrayList.txx"
-#include <java/lang/Math.h>
 #include <cstdio>
 
+#include <java/lang/Math.h>
+#include "java/util/ArrayList.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
 #ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
 #endif
@@ -15,7 +15,6 @@
 #ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 #endif
-
 java::HashMap<RGBAImageCompressed*, GLuint> OpenGL4RGBAImageCompressedRenderer::compiledImages;
 static java::ArrayList<GLuint> compiledTextureIds;
 

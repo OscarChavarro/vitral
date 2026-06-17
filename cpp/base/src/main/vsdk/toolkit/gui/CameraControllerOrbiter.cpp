@@ -1,12 +1,10 @@
-#include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
+#include <cmath>
+#include <cstdio>
 
 #include "java/lang/Math.h"
-#include <cstdio>
-#include <cmath>
-
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-
+#include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 static const double PI = 3.14159265358979323846;
 
 CameraControllerOrbiter::CameraControllerOrbiter(Camera* cam)

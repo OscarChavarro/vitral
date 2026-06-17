@@ -1,17 +1,15 @@
-#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
-
-#include "vsdk/toolkit/common/VSDK.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/media/Image.h"
-#include "vsdk/toolkit/media/RGBPixel.h"
-#include "java/util/ArrayList.txx"
+#include <cmath>
 
 #include "java/lang/Math.h"
-#include <cmath>
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
+#include "vsdk/toolkit/render/raster/Rasterizer2D.h"
 static void quicksortDoubles(double* array, int left0, int right0)
 {
     int left = left0;

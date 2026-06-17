@@ -1,35 +1,32 @@
-#include "SoftwareRaycaster.h"
-#include "../model/ShadersModel.h"
-
+#include "java/io/File.h"
 #include <java/lang/Math.h>
+#include "java/util/ArrayList.txx"
+#include "../model/ShadersModel.h"
+#include "SoftwareRaycaster.h"
+#if defined(_SC_NPROCESSORS_ONLN)
+#include <unistd.h>
+#endif
 #include <atomic>
 #include <thread>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-#include "java/util/ArrayList.txx"
-#if defined(_SC_NPROCESSORS_ONLN)
-#include <unistd.h>
-#endif
-
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "vsdk/toolkit/environment/background/SimpleBackground.h"
-#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
-#include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "java/io/File.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "vsdk/toolkit/environment/background/SimpleBackground.h"
+#include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
+#include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
-
+#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
 static int detectCpuCount()

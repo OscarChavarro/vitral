@@ -1,15 +1,15 @@
-#include "java/lang/String.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
-#include "vsdk/toolkit/media/Image.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBAImageCompressed.h"
-#include "java/util/ArrayList.txx"
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBAImageCompressed.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
 OpenGL4ImageRenderer::TextureFilterMode OpenGL4ImageRenderer::textureFilterMode = OpenGL4ImageRenderer::TextureFilterMode::LINEAR;
 GLuint OpenGL4ImageRenderer::quadVaoId = 0;
 GLuint OpenGL4ImageRenderer::quadPositionVboId = 0;

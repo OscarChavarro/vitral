@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_PROCESSING_COMPUTATIONALGEOMETRY_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class ComputationalGeometry {
 public:
     static double lineToPointDistance(

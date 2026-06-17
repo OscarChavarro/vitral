@@ -1,13 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
 
-#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
+#include "vsdk/toolkit/environment/geometry/surface/Surface.h"
 class Vertex;
 class Triangle;
 class SimpleMaterial;

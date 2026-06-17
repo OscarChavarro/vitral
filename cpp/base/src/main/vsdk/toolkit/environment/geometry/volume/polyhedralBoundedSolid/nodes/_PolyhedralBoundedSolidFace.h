@@ -3,7 +3,6 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class PolyhedralBoundedSolid;
 class InfinitePlane;
 class _PolyhedralBoundedSolidLoop;

@@ -3,7 +3,6 @@
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
-
 class Image;
 class RGBImageUncompressed;
 class RGBAImageUncompressed;

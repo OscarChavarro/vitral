@@ -1,17 +1,14 @@
-#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+#include <cmath>
+#include <cstdio>
 
+#include "java/util/ArrayList.txx"
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
 #include <GL/glew.h>
 #include <GL/gl.h>
 #endif
-
-#include <cmath>
-#include <cstdio>
-
-#include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 const double CLIP_PLANES[][4] = {
     { 1.0, 0.0, 0.0, 1.0 },
     { -1.0, 0.0, 0.0, 1.0 },

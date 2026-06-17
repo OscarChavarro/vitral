@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
-
 class PolyhedralBoundedSolid;
 
 class PolyhedralBoundedSolidPredicates {

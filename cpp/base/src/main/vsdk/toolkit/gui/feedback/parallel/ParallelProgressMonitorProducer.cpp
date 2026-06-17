@@ -1,5 +1,4 @@
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
-
 ParallelProgressMonitorProducer::ParallelProgressMonitorProducer(
     java::ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* queue)
     : sharedEventQueue(queue), processedElements(0), totalElements(0)

@@ -1,13 +1,9 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_TRIANGLE_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_TRIANGLE_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/element/Intersection.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 class Ray;
 
 class Triangle

@@ -1,8 +1,8 @@
-#include "render/CairoPdfPageRenderer.h"
-#include "java/util/ArrayList.txx"
 #include <cairo-pdf.h>
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
+#include "render/CairoPdfPageRenderer.h"
 CairoPdfPageRenderer::CairoPdfPageRenderer()
     : markerSizeMm_(REFERENCE_MARKER_SIZE_MM) {
     computeLayout();

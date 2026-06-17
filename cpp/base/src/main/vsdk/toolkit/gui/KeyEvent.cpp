@@ -1,5 +1,4 @@
 #include "vsdk/toolkit/gui/KeyEvent.h"
-
 const char* KeyEvent::getKeyName(int key)
 {
     switch (key) {

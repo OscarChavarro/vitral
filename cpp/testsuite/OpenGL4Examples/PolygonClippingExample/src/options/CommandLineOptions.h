@@ -2,7 +2,6 @@
 #define POLYGONCLIPPING_OPTIONS_COMMANDLINEOPTIONS_H
 
 #include "model/PolygonSurfaceTessellationMode.h"
-
 struct CommandLineOptions {
     bool offlineMode;
 

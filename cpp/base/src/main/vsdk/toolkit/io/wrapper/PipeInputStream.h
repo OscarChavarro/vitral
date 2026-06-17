@@ -4,7 +4,6 @@
 #include <cstdio>
 
 #include "java/io/InputStream.h"
-
 class PipeInputStream : public java::InputStream {
   private:
     void *pipeHandle;

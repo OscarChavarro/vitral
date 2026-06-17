@@ -1,8 +1,8 @@
-#include "vsdk/toolkit/media/Image.h"
-#include "vsdk/toolkit/media/RGBPixel.h"
-#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include <cmath>
 
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBPixel.h"
 int Image::positiveMod(int value, int modulus) {
     int result = value % modulus;
     if (result < 0) {

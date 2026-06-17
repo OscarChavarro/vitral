@@ -1,13 +1,11 @@
-#include "webservice/WebServiceServer.hpp"
-#include "webservice/WebServiceClient.hpp"
-
 #include <cstdio>
 #include <cstdlib>
-#include <pthread.h>
 
 #include "java/net/ServerSocket.h"
 #include "java/net/Socket.h"
-
+#include "webservice/WebServiceClient.hpp"
+#include "webservice/WebServiceServer.hpp"
+#include <pthread.h>
 WebServiceServer::WebServiceServer(const WebServiceConfig& cfg, MarkerEventBus* bus)
     : config_(cfg), bus_(bus), shouldStop_(false) {}
 

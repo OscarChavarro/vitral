@@ -1,14 +1,12 @@
-#include "processing/ConstructivePolygonGeometryProcessor.h"
-
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
+#include "processing/ConstructivePolygonGeometryProcessor.h"
 #include <algorithm>
 #include <map>
 #include <set>
 #include <utility>
 #include <vector>
-
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
 static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
 {
     if (!loop || loop->vertices.size() < 3) return false;

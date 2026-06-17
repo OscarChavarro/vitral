@@ -1,9 +1,8 @@
 #include <cstdio>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
-
 int main(int argc, char** argv)
 {
     AlgebraicExpression regexp;

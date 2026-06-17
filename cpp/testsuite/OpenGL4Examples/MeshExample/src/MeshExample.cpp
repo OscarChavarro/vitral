@@ -1,9 +1,9 @@
-#include <cstdio>
-#include <java/lang/Math.h>
-#include <cstdlib>
 #include <cmath>
-#include "java/util/ArrayList.txx"
+#include <cstdio>
+#include <cstdlib>
 
+#include <java/lang/Math.h>
+#include "java/util/ArrayList.txx"
 #include <GL/glew.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

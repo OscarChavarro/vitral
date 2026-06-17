@@ -4,7 +4,6 @@
 #include "java/io/InputStream.h"
 #include "java/io/OutputStream.h"
 #include "vsdk/toolkit/io/wrapper/StreamOpenMode.h"
-
 class FileUncompressWrapper {
   public:
     static java::InputStream *openInputStreamCompressWrapper(const char *fileName, int *isPipe);

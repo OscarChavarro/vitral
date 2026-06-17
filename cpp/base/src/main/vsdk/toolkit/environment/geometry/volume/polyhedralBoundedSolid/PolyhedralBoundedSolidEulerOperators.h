@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_POLYHEDRALBOUNDEDSOLID_POLYHEDRALBOUNDEDSOLIDEULEROPERATORS_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidLoop;

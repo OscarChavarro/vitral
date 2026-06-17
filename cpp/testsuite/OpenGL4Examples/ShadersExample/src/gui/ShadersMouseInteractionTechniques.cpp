@@ -1,6 +1,5 @@
-#include "ShadersMouseInteractionTechniques.h"
 #include "../model/ShadersModel.h"
-
+#include "ShadersMouseInteractionTechniques.h"
 bool ShadersMouseInteractionTechniques::processMousePressed(ShadersModel* model, const MouseEvent& e) { return model && model->cameraController->processMousePressedEvent(e); }
 bool ShadersMouseInteractionTechniques::processMouseReleased(ShadersModel* model, const MouseEvent& e) { return model && model->cameraController->processMouseReleasedEvent(e); }
 bool ShadersMouseInteractionTechniques::processMouseClicked(ShadersModel* model, const MouseEvent& e) { return model && model->cameraController->processMouseClickedEvent(e); }

@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_VERTEXNODE2D_H__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-
 template <class E> class _DoubleLinkedListNode;
 
 class _VertexNode2D {

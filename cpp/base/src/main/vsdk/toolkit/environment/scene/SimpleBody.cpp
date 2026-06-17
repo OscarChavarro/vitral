@@ -1,31 +1,18 @@
-#include "vsdk/toolkit/environment/scene/SimpleBody.h"
-#include "java/lang/String.h"
-
-#include "vsdk/toolkit/common/VSDK.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/Geometry.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/media/Image.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/media/NormalMap.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "java/lang/String.h"
-
-#include <cmath>
 #include <cfloat>
-#include "java/lang/String.h"
+#include <cmath>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
 SimpleBody::SimpleBody()
     : geometry(0), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
       rotationQuaternion(rotation.exportToQuaternion()), rotationInverseQuaternion(rotationInverse.exportToQuaternion()),

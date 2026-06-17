@@ -2,7 +2,6 @@
 #define JAVA_UTIL_CONCURRENT_ATOMIC_ATOMICLONG_H
 
 #include <atomic>
-
 namespace java {
 
 class AtomicLong {

@@ -1,7 +1,6 @@
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 _Polygon2DContour::_Polygon2DContour() : exteriorContour(nullptr), fleetingFlag(false) {}
 
 void _Polygon2DContour::addVertex(double x, double y, double r, double g, double b) { vertices.add(Vertex2D(x, y, r, g, b)); }

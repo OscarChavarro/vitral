@@ -1,15 +1,11 @@
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/Ray.h"
-#include "java/lang/String.h"
-#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-#include "java/lang/String.h"
-#include "java/util/ArrayList.txx"
-#include "java/lang/String.h"
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
+#include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 TriangleMeshGroup::TriangleMeshGroup()
     : intersectionMeshIndex(-1), intersectionTriangleIndex(-1)
 {

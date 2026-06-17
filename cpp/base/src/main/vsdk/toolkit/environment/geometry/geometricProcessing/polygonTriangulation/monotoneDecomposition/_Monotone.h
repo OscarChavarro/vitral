@@ -4,7 +4,6 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_MonotoneChainNode.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_VertexChain.h"
-
 constexpr int SP_SIMPLE_LRUP = 1;
 constexpr int SP_SIMPLE_LRDN = 2;
 constexpr int SP_2UP_2DN = 3;

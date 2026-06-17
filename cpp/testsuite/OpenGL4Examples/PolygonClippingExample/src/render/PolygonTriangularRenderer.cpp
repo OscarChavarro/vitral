@@ -1,9 +1,7 @@
-#include "render/PolygonTriangularRenderer.h"
-
 #include "java/util/ArrayList.txx"
-#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
+#include "render/PolygonTriangularRenderer.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
 static void setMvp(GLuint prog, const Matrix4x4d& mvp)
 {
     GLint loc = glGetUniformLocation(prog, "modelViewProjectionLocal");

@@ -1,9 +1,7 @@
-#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
-
-#include "vsdk/toolkit/common/VSDK.h"
-
 #include <cstdio>
 
+#include "vsdk/toolkit/common/VSDK.h"
+#include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
 ProgressMonitorConsole::ProgressMonitorConsole()
     : currentPercent(0.0), jumpPercent(2.0), lastPrintedLabel(0)
 {

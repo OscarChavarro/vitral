@@ -1,10 +1,8 @@
 #ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLE_H__
 #define __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLE_H__
 
-#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
-
 #include <pthread.h>
-
+#include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsole : public ProgressMonitor {
 private:
     pthread_mutex_t lock;

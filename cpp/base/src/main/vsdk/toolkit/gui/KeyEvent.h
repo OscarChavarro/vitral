@@ -2,7 +2,6 @@
 #define KEYEVENT_H
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
-
 class KeyEvent : public PresentationElement {
 public:
     static const int MASK_CTRL = 0x0001;

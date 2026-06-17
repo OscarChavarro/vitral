@@ -1,23 +1,22 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
 
-#include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
-#include "vsdk/toolkit/gui/GlfwSystem.h"
-#include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "java/io/File.h"
-#include "vsdk/toolkit/media/Image.h"
-#include "vsdk/toolkit/media/RGBImageUncompressed.h"
-#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
-#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
-#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-
+#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/io/image/ImagePersistence.h"
+#include "vsdk/toolkit/gui/CameraControllerAquynza.h"
+#include "vsdk/toolkit/gui/GlfwSystem.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 static const float IMAGE_DEPTH_BIAS_FACTOR = -1.0f;
 static const float IMAGE_DEPTH_BIAS_UNITS = -8.0f;
 static const int WINDOW_WIDTH = 1024;

@@ -2,10 +2,7 @@
 #define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_MD2MESH_H__
 
 #include "java/lang/String.h"
-#include "java/lang/String.h"
 #include "java/util/ArrayList.h"
-#include "java/lang/String.h"
-
 class Image;
 
 class _AnimationInfo {

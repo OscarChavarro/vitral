@@ -1,11 +1,9 @@
-#include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
-#include "java/lang/String.h"
-#include "java/util/ArrayList.txx"
-#include "java/lang/String.h"
 #include <cctype>
 #include <cstddef>
-#include "java/lang/String.h"
 
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/surface/Md2Mesh.h"
 _AnimationInfo::_AnimationInfo() : start(0), end(0) {}
 _AnimationInfo::_AnimationInfo(const _AnimationInfo& ai) : name(ai.name), start(ai.start), end(ai.end) {}
 

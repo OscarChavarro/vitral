@@ -1,10 +1,9 @@
-#include "options/CommandLineOptions.hpp"
-
 #include <cstdio>
 #include <cstdlib>
+
 #include "java/lang/String.h"
 #include <opencv2/videoio.hpp>
-
+#include "options/CommandLineOptions.hpp"
 CommandLineOptions::CommandLineOptions(int argc, char** argv)
     : action_(RUN), port_(8090), cameraIndex_(0), markerSize_(0.035),
       decisionMarginThreshold_(30.0), viewAngleCosThreshold_(0.5),

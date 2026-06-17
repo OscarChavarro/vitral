@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_STRATEGIES_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
-
 class DeterminantStrategy {
 public:
     virtual ~DeterminantStrategy() {}

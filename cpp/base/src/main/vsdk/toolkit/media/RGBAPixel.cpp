@@ -1,7 +1,7 @@
-#include "vsdk/toolkit/media/RGBAPixel.h"
-#include "java/lang/String.h"
 #include <cstdio>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/media/RGBAPixel.h"
 java::String* RGBAPixel::toString() const {
     char buffer[256];
     int ur = (int)(unsigned char)r;

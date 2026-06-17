@@ -2,7 +2,6 @@
 #define __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITOR_H__
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
-
 class ProgressMonitor : public PresentationElement {
 public:
     virtual ~ProgressMonitor() {}

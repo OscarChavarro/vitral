@@ -1,7 +1,7 @@
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
-#include "java/lang/String.h"
 #include <cmath>
 
+#include "java/lang/String.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 RendererConfiguration::RendererConfiguration()
     : shadingType(SHADING_TYPE_GOURAUD), surfaces(true), wires(false), boundingVolume(false), selectionCorners(false),
       texture(true), bumpMap(false), points(false), normals(false), trianglesNormals(false), useVertexColors(false),

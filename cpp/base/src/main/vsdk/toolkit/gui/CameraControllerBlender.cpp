@@ -1,12 +1,10 @@
-#include "vsdk/toolkit/gui/CameraControllerBlender.h"
-
 #include <cmath>
 #include <cstdio>
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-
+#include "vsdk/toolkit/gui/CameraControllerBlender.h"
 static const double PI = 3.14159265358979323846;
 
 CameraControllerBlender::CameraControllerBlender(Camera* camera)

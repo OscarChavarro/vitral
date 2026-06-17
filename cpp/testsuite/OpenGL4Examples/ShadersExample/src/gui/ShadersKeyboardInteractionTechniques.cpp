@@ -1,7 +1,6 @@
-#include "ShadersKeyboardInteractionTechniques.h"
-#include "../model/ShadersModel.h"
 #include <java/lang/Math.h>
-
+#include "../model/ShadersModel.h"
+#include "ShadersKeyboardInteractionTechniques.h"
 bool ShadersKeyboardInteractionTechniques::processPressed(const KeyEvent& event, ShadersModel* model, Actions* actions)
 {
     if (model == 0) return false;

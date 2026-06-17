@@ -2,7 +2,6 @@
 #define JAVA_NET_SOCKET_INPUT_STREAM_H__
 
 #include "java/io/InputStream.h"
-
 namespace java {
 namespace net {
 

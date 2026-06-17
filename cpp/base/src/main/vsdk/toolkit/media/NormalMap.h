@@ -1,9 +1,8 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
 #define __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
 
-#include "vsdk/toolkit/media/MediaEntity.h"
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/media/MediaEntity.h"
 class Vector3Dd;
 class IndexedColorImageUncompressed;
 class RGBImageUncompressed;

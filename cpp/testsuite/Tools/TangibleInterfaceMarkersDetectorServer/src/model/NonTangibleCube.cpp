@@ -1,9 +1,9 @@
-#include "model/NonTangibleCube.hpp"
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-
+#include "model/NonTangibleCube.hpp"
 NonTangibleCube::NonTangibleCube() : hasMapping_(false) {}
 
 void NonTangibleCube::mapMarker(int markerId, int cubeId) {

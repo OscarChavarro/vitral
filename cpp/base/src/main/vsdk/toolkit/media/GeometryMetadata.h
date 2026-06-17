@@ -1,10 +1,9 @@
 #ifndef __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
 #define __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
 
-#include "vsdk/toolkit/media/MediaEntity.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
-
+#include "vsdk/toolkit/media/MediaEntity.h"
 class ShapeDescriptor;
 
 /**

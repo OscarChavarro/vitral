@@ -2,7 +2,6 @@
 #define __STYLEDCALLIGRAPHIC2DBUFFER_H__
 
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-
 class StyledCalligraphic2DBuffer : public Calligraphic2DBuffer {
   public:
     StyledCalligraphic2DBuffer() = default;

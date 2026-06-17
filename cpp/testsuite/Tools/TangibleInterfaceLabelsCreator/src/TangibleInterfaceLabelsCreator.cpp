@@ -1,10 +1,8 @@
-#include "TangibleInterfaceLabelsCreator.h"
-
 #include <cstdio>
+
 #include <java/util/ArrayList.txx>
-
+#include "TangibleInterfaceLabelsCreator.h"
 #include "model/Label.h"
-
 TangibleInterfaceLabelsCreator::TangibleInterfaceLabelsCreator(int argc, char** argv)
     : options_(argc, argv),
       pageRenderer_(nullptr) {

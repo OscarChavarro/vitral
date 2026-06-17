@@ -1,10 +1,6 @@
 #include <cstdio>
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
-
-// References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
-// for Computing Trapezoidal Decompositions and for Triangulating Polygons".
-
 bool _TriangulationTrapezoidQueryNode::isLeftOf(int segmentIndex, Vector2Dd *queryPoint) {
     _TriangulationSegment *segment = &_Construct::segmentAt(segmentIndex);
     double area;

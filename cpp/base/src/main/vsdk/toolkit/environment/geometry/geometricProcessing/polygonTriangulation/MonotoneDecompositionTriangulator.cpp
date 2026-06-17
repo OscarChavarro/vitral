@@ -1,15 +1,10 @@
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-
-#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_RandomSegmentOrder.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-
-// References: [SEID1991] Seidel, R. "A simple and Fast Randomized Algorithm
-// for Computing Trapezoidal Decompositions and for Triangulating Polygons".
-
 void MonotoneDecompositionTriangulator::stage1PrepareAndOrder(
     const Polygon2D &input, int &numVertices) {
     if (input.loops.size() <= 0) {

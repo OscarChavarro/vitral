@@ -3,7 +3,6 @@
 
 #include "java/io/File.h"
 #include "java/io/InputStream.h"
-
 namespace java {
 
 class BufferedInputStream : public InputStream {

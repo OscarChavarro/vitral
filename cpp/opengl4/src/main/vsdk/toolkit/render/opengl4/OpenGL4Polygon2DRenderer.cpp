@@ -1,15 +1,12 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.h"
-#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
-#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
-#include "java/util/ArrayList.h"
 #include "java/util/ArrayList.txx"
-
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else
 #include <GL/glu.h>
 #endif
-
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 void OpenGL4Polygon2DRenderer::push3(java::ArrayList<float>& a, float x, float y, float z) { a.add(x); a.add(y); a.add(z); }
 void OpenGL4Polygon2DRenderer::push4(java::ArrayList<float>& a, float x, float y, float z, float w) { a.add(x); a.add(y); a.add(z); a.add(w); }
 void OpenGL4Polygon2DRenderer::toColumnMajor(const Matrix4x4d& m, float out[16])

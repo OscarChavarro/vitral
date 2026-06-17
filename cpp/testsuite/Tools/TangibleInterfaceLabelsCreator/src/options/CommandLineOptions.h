@@ -2,7 +2,6 @@
 #define __LABELSCOMMANDLINEOPTIONS_H__
 
 #include <string>
-
 class CommandLineOptions {
   public:
     CommandLineOptions(int argc, char** argv);

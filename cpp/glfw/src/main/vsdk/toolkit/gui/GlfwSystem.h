@@ -3,7 +3,6 @@
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
-
 class GlfwSystem {
 public:
     static KeyEvent glfw2vsdkKeyEvent(int glfwKey, int glfwMods);

@@ -1,16 +1,10 @@
 #ifndef __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODY_H__
 #define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODY_H__
 
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
-#include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-#include "java/lang/String.h"
-
-#include "java/lang/String.h"
-#include "java/lang/String.h"
-
 class Geometry;
 class Ray;
 class RayHit;
