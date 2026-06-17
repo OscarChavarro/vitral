@@ -441,12 +441,12 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 if ( hit == null ) {
                     continue;
                 }
-                if ( hit.t() <= eps ) {
+                if ( hit.getT() <= eps ) {
                     continue;
                 }
 
-                Vector3Dd pi = hit.origin().add(
-                    hit.direction().multiply(hit.t()));
+                Vector3Dd pi = hit.getOrigin().add(
+                    hit.getDirection().multiply(hit.getT()));
                 int status = face.testPointInside(pi, eps, facePlane);
                 if ( status == Geometry.LIMIT ) {
                     ambiguous = true;
@@ -456,14 +456,14 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     boolean duplicated = false;
                     int k;
                     for ( k = 0; k < distances.size(); k++ ) {
-                        if ( Math.abs(distances.get(k).doubleValue() - hit.t())
+                        if ( Math.abs(distances.get(k).doubleValue() - hit.getT())
                              <= eps ) {
                             duplicated = true;
                             break;
                         }
                     }
                     if ( !duplicated ) {
-                        distances.add(Double.valueOf(hit.t()));
+                        distances.add(Double.valueOf(hit.getT()));
                         hits++;
                     }
                 }

@@ -86,22 +86,22 @@ public class Triangle extends FundamentalEntity
     {
         Vector3Dd e1 = v1.subtract(v0);
         Vector3Dd e2 = v2.subtract(v0);
-        Vector3Dd h = ray.direction().crossProduct(e2);
+        Vector3Dd h = ray.getDirection().crossProduct(e2);
         double a = e1.dotProduct(h);
         if ( Math.abs(a) < VSDK.EPSILON ) return null;
         double f = 1.0 / a;
-        Vector3Dd s = ray.origin().subtract(v0);
+        Vector3Dd s = ray.getOrigin().subtract(v0);
         double u = f * s.dotProduct(h);
         if ( u < 0 || u > 1 ) return null;
         Vector3Dd q = s.crossProduct(e1);
-        double v = f * ray.direction().dotProduct(q);
+        double v = f * ray.getDirection().dotProduct(q);
         if ( v < 0 || u + v > 1 ) return null;
         double t = f * e2.dotProduct(q);
         if ( t <= VSDK.EPSILON ) return null;
 
         return new Intersection(
             t,
-            ray.origin().add(ray.direction().multiply(t)),
+            ray.getOrigin().add(ray.getDirection().multiply(t)),
             e1.crossProduct(e2).normalized()
         );
     }

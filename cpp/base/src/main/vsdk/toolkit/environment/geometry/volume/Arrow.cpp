@@ -169,7 +169,7 @@ void Arrow::setHeadRadius(double val) { headRadius = val; headCone->setBaseRadiu
 
 Ray* Arrow::doIntersection(const Ray& inOutRay) {
     Vector3Dd tr(0,0,-baseLength);
-    Ray headRay(inOutRay.origin().add(tr), inOutRay.direction());
+    Ray headRay(inOutRay.getOrigin().add(tr), inOutRay.getDirection());
     Ray baseRay(inOutRay);
 
     Ray* baseHit = baseCylinder->doIntersection(baseRay);
@@ -177,14 +177,14 @@ Ray* Arrow::doIntersection(const Ray& inOutRay) {
 
     Ray* result = nullptr;
     if ((baseHit != nullptr && headHit == nullptr) ||
-        (baseHit != nullptr && headHit != nullptr && baseHit->t() < headHit->t())) {
+        (baseHit != nullptr && headHit != nullptr && baseHit->getT() < headHit->getT())) {
         lastElement = baseCylinder;
-        result = new Ray(inOutRay.withT(baseHit->t()));
+        result = new Ray(inOutRay.withT(baseHit->getT()));
     }
     else if ((baseHit == nullptr && headHit != nullptr) ||
-             (baseHit != nullptr && headHit != nullptr && headHit->t() < baseHit->t())) {
+             (baseHit != nullptr && headHit != nullptr && headHit->getT() < baseHit->getT())) {
         lastElement = headCone;
-        result = new Ray(inOutRay.withT(headHit->t()));
+        result = new Ray(inOutRay.withT(headHit->getT()));
     }
 
     if (baseHit) delete baseHit;
@@ -193,8 +193,8 @@ Ray* Arrow::doIntersection(const Ray& inOutRay) {
 }
 
 bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
-    Vector3Dd shiftedHeadOrigin(inRay.origin().x(), inRay.origin().y(), inRay.origin().z() - baseLength);
-    Ray shiftedHeadRay(shiftedHeadOrigin, inRay.direction(), inRay.t());
+    Vector3Dd shiftedHeadOrigin(inRay.getOrigin().x(), inRay.getOrigin().y(), inRay.getOrigin().z() - baseLength);
+    Ray shiftedHeadRay(shiftedHeadOrigin, inRay.getDirection(), inRay.getT());
 
     RayHit localHit(RayHit::DETAIL_NONE, false);
     RayHit* candidateHit = (outHit != nullptr) ? outHit : &localHit;
@@ -226,7 +226,7 @@ bool Arrow::doIntersection(const Ray& inRay, RayHit* outHit) {
     }
 
     Vector3Dd tr(0,0,-baseLength);
-    Ray shiftedHeadRay(inRay.origin().add(tr), inRay.direction(), inRay.t());
+    Ray shiftedHeadRay(inRay.getOrigin().add(tr), inRay.getDirection(), inRay.getT());
 
     RayHit baseHit(outHit->requiredDetailMask());
     RayHit headHit(outHit->requiredDetailMask());
@@ -234,8 +234,8 @@ bool Arrow::doIntersection(const Ray& inRay, RayHit* outHit) {
     bool hasHead = headCone->doIntersection(shiftedHeadRay, &headHit);
     if (!hasBase && !hasHead) return false;
 
-    double baseT = hasBase ? (baseHit.ray()!=nullptr ? baseHit.ray()->t() : baseHit.hitDistance()) : NO_HIT;
-    double headT = hasHead ? (headHit.ray()!=nullptr ? headHit.ray()->t() : headHit.hitDistance()) : NO_HIT;
+    double baseT = hasBase ? (baseHit.ray()!=nullptr ? baseHit.ray()->getT() : baseHit.hitDistance()) : NO_HIT;
+    double headT = hasHead ? (headHit.ray()!=nullptr ? headHit.ray()->getT() : headHit.hitDistance()) : NO_HIT;
 
     if (hasBase && (!hasHead || baseT < headT)) {
         outHit->clone(baseHit);

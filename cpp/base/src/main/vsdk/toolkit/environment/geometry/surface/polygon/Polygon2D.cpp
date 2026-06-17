@@ -105,11 +105,11 @@ Ray* Polygon2D::doIntersection(const Ray& inOut_ray)
 
 bool Polygon2D::doIntersection(const Ray& inRay, RayHit* outHit)
 {
-    if (std::abs(inRay.direction().z()) < VSDK::EPSILON) return false;
-    double t = -inRay.origin().z() / inRay.direction().z();
+    if (std::abs(inRay.getDirection().z()) < VSDK::EPSILON) return false;
+    double t = -inRay.getOrigin().z() / inRay.getDirection().z();
     if (t < 0) return false;
 
-    Vector3Dd p = inRay.origin().add(inRay.direction().multiply(t));
+    Vector3Dd p = inRay.getOrigin().add(inRay.getDirection().multiply(t));
     bool inside = false;
     for (long int i = 0; i < loops.size(); i++) {
         if (pointInLoop(loops[i], p.x(), p.y())) {
@@ -131,7 +131,7 @@ bool Polygon2D::doIntersection(const Ray& inRay, RayHit* outHit)
 void Polygon2D::doExtraInformation(const Ray& inRay, double intT, RayHit* outData)
 {
     if (outData == nullptr) return;
-    outData->p = inRay.origin().add(inRay.direction().multiply(intT));
+    outData->p = inRay.getOrigin().add(inRay.getDirection().multiply(intT));
     outData->n = Vector3Dd(0,0,1);
 }
 

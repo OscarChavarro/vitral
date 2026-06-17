@@ -177,7 +177,7 @@ public class RayHit extends FundamentalEntity {
     {
         this.ray = ray;
         if ( ray != null ) {
-            hitDistance = ray.t();
+            hitDistance = ray.getT();
             hasHitDistance = true;
         }
     }
@@ -193,7 +193,7 @@ public class RayHit extends FundamentalEntity {
             return hitDistance;
         }
         if ( ray != null ) {
-            return ray.t();
+            return ray.getT();
         }
         return 0;
     }

@@ -67,17 +67,17 @@ public final class Ray extends FundamentalEntity
         return new Ray(origin, direction, newT, true);
     }
 
-    public Vector3Dd origin()
+    public Vector3Dd getOrigin()
     {
         return origin;
     }
 
-    public Vector3Dd direction()
+    public Vector3Dd getDirection()
     {
         return direction;
     }
 
-    public double t()
+    public double getT()
     {
         return t;
     }

@@ -135,16 +135,16 @@ bool PolyhedralBoundedSolid::doIntersection(const Ray& inRay, RayHit* outHit)
 
         RayHit planeHit;
         bool hitsPlane = containingPlane->doIntersection(inRay, &planeHit);
-        if (hitsPlane && planeHit.ray() != 0 && planeHit.ray()->t() < minT) {
+        if (hitsPlane && planeHit.ray() != 0 && planeHit.ray()->getT() < minT) {
             Ray hit = *(planeHit.ray());
-            hit = hit.withDirection(hit.direction().normalized());
-            Vector3Dd p = hit.origin().add(hit.direction().multiply(hit.t()));
+            hit = hit.withDirection(hit.getDirection().normalized());
+            Vector3Dd p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
             int pos = face->testPointInside(
                 p,
                 numericContext.bigEpsilon(),
                 containingPlane);
             if (pos == Geometry::INSIDE || pos == Geometry::LIMIT) {
-                minT = hit.t();
+                minT = hit.getT();
                 bestInfo = planeHit;
                 found = true;
             }

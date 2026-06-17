@@ -10,10 +10,10 @@
 Sphere::Sphere(double r) : radius_(r), radiusSquared_(r * r) {}
 
 Ray* Sphere::doIntersection(const Ray& inoutRay) {
-    double dx = -inoutRay.origin().x();
-    double dy = -inoutRay.origin().y();
-    double dz = -inoutRay.origin().z();
-    const Vector3Dd& direction = inoutRay.direction();
+    double dx = -inoutRay.getOrigin().x();
+    double dy = -inoutRay.getOrigin().y();
+    double dz = -inoutRay.getOrigin().z();
+    const Vector3Dd& direction = inoutRay.getDirection();
     double v = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
     double t = radiusSquared_ + v * v - dx * dx - dy * dy - dz * dz;
@@ -31,10 +31,10 @@ Ray* Sphere::doIntersection(const Ray& inoutRay) {
 }
 
 bool Sphere::doIntersection(const Ray& inRay, RayHit* outHit) {
-    double dx = -inRay.origin().x();
-    double dy = -inRay.origin().y();
-    double dz = -inRay.origin().z();
-    const Vector3Dd& direction = inRay.direction();
+    double dx = -inRay.getOrigin().x();
+    double dy = -inRay.getOrigin().y();
+    double dz = -inRay.getOrigin().z();
+    const Vector3Dd& direction = inRay.getDirection();
     double projection = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
     double discriminant = radiusSquared_ + projection * projection - dx * dx - dy * dy - dz * dz;
@@ -75,9 +75,9 @@ void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     }
 
     Vector3Dd point(
-        inRay.origin().x() + inT * inRay.direction().x(),
-        inRay.origin().y() + inT * inRay.direction().y(),
-        inRay.origin().z() + inT * inRay.direction().z());
+        inRay.getOrigin().x() + inT * inRay.getDirection().x(),
+        inRay.getOrigin().y() + inT * inRay.getDirection().y(),
+        inRay.getOrigin().z() + inT * inRay.getDirection().z());
 
     if (outData->needsPoint()) {
         outData->p = point;

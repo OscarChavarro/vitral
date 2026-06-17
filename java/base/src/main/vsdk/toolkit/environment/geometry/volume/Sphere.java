@@ -37,10 +37,10 @@ public class Sphere extends Solid {
     */
     public Ray
     doIntersection(Ray inout_rayo) {
-        double dx = -inout_rayo.origin().x();
-        double dy = -inout_rayo.origin().y();
-        double dz = -inout_rayo.origin().z();
-        Vector3Dd direction = inout_rayo.direction();
+        double dx = -inout_rayo.getOrigin().x();
+        double dy = -inout_rayo.getOrigin().y();
+        double dz = -inout_rayo.getOrigin().z();
+        Vector3Dd direction = inout_rayo.getDirection();
         double v = direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
         // Test if the inout_rayo actually intersects the sphere
@@ -65,10 +65,10 @@ public class Sphere extends Solid {
     @Override
     public boolean doIntersection(Ray inRay, RayHit outHit)
     {
-        double dx = -inRay.origin().x();
-        double dy = -inRay.origin().y();
-        double dz = -inRay.origin().z();
-        Vector3Dd direction = inRay.direction();
+        double dx = -inRay.getOrigin().x();
+        double dy = -inRay.getOrigin().y();
+        double dz = -inRay.getOrigin().z();
+        Vector3Dd direction = inRay.getDirection();
         double projection =
             direction.x()*dx + direction.y()*dy + direction.z()*dz;
 
@@ -119,9 +119,9 @@ public class Sphere extends Solid {
         }
 
         Vector3Dd point = new Vector3Dd(
-            inRay.origin().x() + inT*inRay.direction().x(),
-            inRay.origin().y() + inT*inRay.direction().y(),
-            inRay.origin().z() + inT*inRay.direction().z());
+            inRay.getOrigin().x() + inT*inRay.getDirection().x(),
+            inRay.getOrigin().y() + inT*inRay.getDirection().y(),
+            inRay.getOrigin().z() + inT*inRay.getDirection().z());
         if ( outData.needsPoint() ) {
             outData.p = point;
         }

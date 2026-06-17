@@ -48,22 +48,22 @@ static Vector3Dd closestPointOnTriangle(const Vector3Dd& p, const Vector3Dd& a, 
 
 Intersection* Triangle::doIntersectionWithTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3Dd& v1, const Vector3Dd& v2)
 {
-    Vector3Dd e1 = v1.subtract(v0), e2 = v2.subtract(v0), h = ray.direction().crossProduct(e2);
+    Vector3Dd e1 = v1.subtract(v0), e2 = v2.subtract(v0), h = ray.getDirection().crossProduct(e2);
     double a = e1.dotProduct(h);
     if (std::abs(a) < VSDK::EPSILON) return 0;
     double f = 1.0/a;
-    Vector3Dd s = ray.origin().subtract(v0);
+    Vector3Dd s = ray.getOrigin().subtract(v0);
     double u = f * s.dotProduct(h);
     if (u < 0 || u > 1) return 0;
     Vector3Dd q = s.crossProduct(e1);
-    double v = f * ray.direction().dotProduct(q);
+    double v = f * ray.getDirection().dotProduct(q);
     if (v < 0 || u + v > 1) return 0;
     double t = f * e2.dotProduct(q);
     if (t <= VSDK::EPSILON) return 0;
 
     Intersection* out = new Intersection();
     out->t = t;
-    out->point = ray.origin().add(ray.direction().multiply(t));
+    out->point = ray.getOrigin().add(ray.getDirection().multiply(t));
     out->normal = e1.crossProduct(e2).normalized();
     return out;
 }

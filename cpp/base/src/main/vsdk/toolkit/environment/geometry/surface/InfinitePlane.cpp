@@ -37,9 +37,9 @@ void InfinitePlane::clone(const InfinitePlane& other)
 
 Ray* InfinitePlane::doIntersection(const Ray& inout_rayo)
 {
-    double denominator = a*inout_rayo.direction().x() + b*inout_rayo.direction().y() + c*inout_rayo.direction().z();
+    double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
     if (std::abs(denominator) < VSDK::EPSILON) return nullptr;
-    double t = -(a*inout_rayo.origin().x() + b*inout_rayo.origin().y() + c*inout_rayo.origin().z() + d)/denominator;
+    double t = -(a*inout_rayo.getOrigin().x() + b*inout_rayo.getOrigin().y() + c*inout_rayo.getOrigin().z() + d)/denominator;
     if (t < 0) return nullptr;
     return new Ray(inout_rayo.withT(t));
 }
@@ -50,7 +50,7 @@ bool InfinitePlane::doIntersection(const Ray& inRay, RayHit* outHit)
     if (hit == nullptr) return false;
     if (outHit != nullptr) {
         outHit->setRay(*hit);
-        doExtraInformation(*hit, hit->t(), outHit);
+        doExtraInformation(*hit, hit->getT(), outHit);
     }
     delete hit;
     return true;
@@ -58,18 +58,18 @@ bool InfinitePlane::doIntersection(const Ray& inRay, RayHit* outHit)
 
 Ray* InfinitePlane::doIntersectionWithNegative(const Ray& inout_rayo)
 {
-    double denominator = a*inout_rayo.direction().x() + b*inout_rayo.direction().y() + c*inout_rayo.direction().z();
+    double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
     if (std::abs(denominator) < VSDK::EPSILON) {
-        Ray r(inout_rayo.origin(), inout_rayo.direction().multiply(-1));
+        Ray r(inout_rayo.getOrigin(), inout_rayo.getDirection().multiply(-1));
         Ray* hit = doIntersection(r);
         if (hit != nullptr) {
-            Ray* out = new Ray(inout_rayo.withT(-hit->t()));
+            Ray* out = new Ray(inout_rayo.withT(-hit->getT()));
             delete hit;
             return out;
         }
         return nullptr;
     }
-    double t = -(a*inout_rayo.origin().x() + b*inout_rayo.origin().y() + c*inout_rayo.origin().z() + d)/denominator;
+    double t = -(a*inout_rayo.getOrigin().x() + b*inout_rayo.getOrigin().y() + c*inout_rayo.getOrigin().z() + d)/denominator;
     return new Ray(inout_rayo.withT(t));
 }
 
@@ -95,9 +95,9 @@ void InfinitePlane::doExtraInformation(const Ray& inRay, double inT, RayHit* out
 {
     if (outData == nullptr) return;
     outData->p = Vector3Dd(
-        inRay.origin().x() + inT*inRay.direction().x(),
-        inRay.origin().y() + inT*inRay.direction().y(),
-        inRay.origin().z() + inT*inRay.direction().z());
+        inRay.getOrigin().x() + inT*inRay.getDirection().x(),
+        inRay.getOrigin().y() + inT*inRay.getDirection().y(),
+        inRay.getOrigin().z() + inT*inRay.getDirection().z());
     outData->n = getNormal();
 }
 

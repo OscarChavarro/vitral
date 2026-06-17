@@ -417,8 +417,8 @@ void processLineToBeDrawn(
         Ray ray(
             cl->start.add(cl->d.multiply(3 * VSDK::EPSILON)),
             cl->d);
-        double t0 = ray.direction().length() - 6 * VSDK::EPSILON;
-        ray = ray.withDirection(ray.direction().normalized());
+        double t0 = ray.getDirection().length() - 6 * VSDK::EPSILON;
+        ray = ray.withDirection(ray.getDirection().normalized());
         Intersection* hit = Triangle::doIntersectionWithTriangle(
             ray, sp1a, sp1b, sp1c);
         if (hit != 0 && hit->t < t0) {
@@ -427,7 +427,7 @@ void processLineToBeDrawn(
             Ray* planeHit = plane.doIntersection(edgeRay);
             if (planeHit != 0) {
                 AppelEdgeSegment segment;
-                segment.t = planeHit->t() / inEdge.d.length();
+                segment.t = planeHit->getT() / inEdge.d.length();
                 if (isUnitInterval(segment.t)) {
                     segments.push_back(segment);
                 }

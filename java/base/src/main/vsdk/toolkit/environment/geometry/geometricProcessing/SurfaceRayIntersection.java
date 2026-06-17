@@ -38,9 +38,9 @@ public class SurfaceRayIntersection {
         );
         Box boundingVolume = new Box(size);
         Ray localRay = new Ray(
-            inRay.origin().subtract(center),
-            inRay.direction(),
-            inRay.t()
+            inRay.getOrigin().subtract(center),
+            inRay.getDirection(),
+            inRay.getT()
         );
         return boundingVolume.doIntersection(localRay, null);
     }

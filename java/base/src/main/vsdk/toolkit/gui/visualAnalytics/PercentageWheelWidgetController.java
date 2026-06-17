@@ -74,7 +74,7 @@ public class PercentageWheelWidgetController extends Controller {
         double r;
         double angle;
         
-        inPlane = hit.origin().add(hit.direction().multiply(hit.t())).subtract(p);
+        inPlane = hit.getOrigin().add(hit.getDirection().multiply(hit.getT())).subtract(p);
         r = inPlane.length();
         angle = Math.toDegrees(inPlane.obtainSphericalThetaAngle());
 

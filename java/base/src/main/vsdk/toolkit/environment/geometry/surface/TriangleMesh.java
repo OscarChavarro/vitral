@@ -900,7 +900,7 @@ public class TriangleMesh extends Surface {
             outHit.u = 0;
             outHit.v = 0;
 
-            interpolateTriangleData(bestTriangle, outHit, inRay.direction());
+            interpolateTriangleData(bestTriangle, outHit, inRay.getDirection());
             fillMaterialAndTexture(bestTriangle, outHit);
         }
         return true;

@@ -331,15 +331,15 @@ bool TriangleMesh::intersectTriangle(const Ray& ray, const Vector3Dd& v0, const 
 {
     Vector3Dd e1 = v1.subtract(v0);
     Vector3Dd e2 = v2.subtract(v0);
-    Vector3Dd h = ray.direction().crossProduct(e2);
+    Vector3Dd h = ray.getDirection().crossProduct(e2);
     double a = e1.dotProduct(h);
     if (std::abs(a) < VSDK::EPSILON) return false;
     double f = 1.0 / a;
-    Vector3Dd s = ray.origin().subtract(v0);
+    Vector3Dd s = ray.getOrigin().subtract(v0);
     u = f * s.dotProduct(h);
     if (u < 0.0 || u > 1.0) return false;
     Vector3Dd q = s.crossProduct(e1);
-    v = f * ray.direction().dotProduct(q);
+    v = f * ray.getDirection().dotProduct(q);
     if (v < 0.0 || u + v > 1.0) return false;
     t = f * e2.dotProduct(q);
     return t > VSDK::EPSILON;
@@ -443,12 +443,12 @@ bool TriangleMesh::doIntersectionInternal(const Ray& inRay, RayHit* outHit, int*
 
     if (outHit != 0) {
         outHit->setRay(inRay.withT(bestT));
-        outHit->p = inRay.origin().add(inRay.direction().multiply(bestT));
+        outHit->p = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
         outHit->n = Vector3Dd(triangleNormals[bestTri*3], triangleNormals[bestTri*3+1], triangleNormals[bestTri*3+2]).normalized();
         outHit->t = Vector3Dd();
         outHit->u = 0;
         outHit->v = 0;
-        interpolateTriangleData(bestTri, bestU, bestV, outHit, inRay.direction());
+        interpolateTriangleData(bestTri, bestU, bestV, outHit, inRay.getDirection());
         fillMaterialAndTexture(bestTri, outHit);
     }
     return true;

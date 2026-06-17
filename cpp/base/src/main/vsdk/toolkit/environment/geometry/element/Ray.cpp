@@ -16,9 +16,9 @@ Ray::Ray(const Vector3Dd& origin, const Vector3Dd& direction)
     : Ray(origin, direction, 0.0) {}
 
 Ray::Ray(const Vector3Dd& origin, const Vector3Dd& direction, double t)
-    : origin_(origin), direction_(normalizeDirection(direction)), t_(t) {}
+    : origin(origin), direction(normalizeDirection(direction)), t(t) {}
 
-Ray::Ray(const Ray& b) : origin_(b.origin_), direction_(b.direction_), t_(b.t_) {}
+Ray::Ray(const Ray& b) : origin(b.origin), direction(b.direction), t(b.t) {}
 
 Ray Ray::copyOf(const Ray& other)
 {
@@ -27,36 +27,36 @@ Ray Ray::copyOf(const Ray& other)
 
 Ray Ray::withOrigin(const Vector3Dd& newOrigin) const
 {
-    return Ray(newOrigin, direction_, t_);
+    return Ray(newOrigin, direction, t);
 }
 
 Ray Ray::withDirection(const Vector3Dd& newDirection) const
 {
-    return Ray(origin_, newDirection, t_);
+    return Ray(origin, newDirection, t);
 }
 
 Ray Ray::withT(double newT) const
 {
     RaytraceStatistics::recordRayWithT();
-    if ( newT == t_ ) {
+    if ( newT == t ) {
         return *this;
     }
-    return Ray(origin_, direction_, newT);
+    return Ray(origin, direction, newT);
 }
 
-const Vector3Dd& Ray::origin() const
+const Vector3Dd& Ray::getOrigin() const
 {
-    return origin_;
+    return origin;
 }
 
-const Vector3Dd& Ray::direction() const
+const Vector3Dd& Ray::getDirection() const
 {
-    return direction_;
+    return direction;
 }
 
-double Ray::t() const
+double Ray::getT() const
 {
-    return t_;
+    return t;
 }
 
 Vector3Dd Ray::normalizeDirection(const Vector3Dd& direction)
@@ -73,7 +73,7 @@ Vector3Dd Ray::normalizeDirection(const Vector3Dd& direction)
 
 bool Ray::equals(const Ray& other) const
 {
-    return t_ == other.t_ && origin_ == other.origin_ && direction_ == other.direction_;
+    return t == other.t && origin == other.origin && direction == other.direction;
 }
 
 static unsigned int hashDouble(double val) {
@@ -87,9 +87,9 @@ static unsigned int hashDouble(double val) {
 
 int Ray::hashCode() const
 {
-    unsigned int result = hashDouble(t_);
-    result = 31u * result + static_cast<unsigned int>(origin_.hashCode());
-    result = 31u * result + static_cast<unsigned int>(direction_.hashCode());
+    unsigned int result = hashDouble(t);
+    result = 31u * result + static_cast<unsigned int>(origin.hashCode());
+    result = 31u * result + static_cast<unsigned int>(direction.hashCode());
     return static_cast<int>(result);
 }
 
@@ -101,11 +101,11 @@ purposes.
 */
 java::String Ray::toString() const
 {
-    return "Ray Origin: <" + VSDK::formatDouble(origin_.x()) + ", " +
-        VSDK::formatDouble(origin_.y()) + ", " +
-        VSDK::formatDouble(origin_.z()) + ">; Direction: <" +
-        VSDK::formatDouble(direction_.x()) + ", " +
-        VSDK::formatDouble(direction_.y()) + ", " +
-        VSDK::formatDouble(direction_.z()) + "> T: " +
-        VSDK::formatDouble(t_);
+    return "Ray Origin: <" + VSDK::formatDouble(origin.x()) + ", " +
+        VSDK::formatDouble(origin.y()) + ", " +
+        VSDK::formatDouble(origin.z()) + ">; Direction: <" +
+        VSDK::formatDouble(direction.x()) + ", " +
+        VSDK::formatDouble(direction.y()) + ", " +
+        VSDK::formatDouble(direction.z()) + "> T: " +
+        VSDK::formatDouble(t);
 }

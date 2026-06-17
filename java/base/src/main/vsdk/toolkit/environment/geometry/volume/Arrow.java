@@ -94,21 +94,21 @@ public class Arrow extends Solid {
     doIntersection(Ray inOutRay) {
         Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
 
-        Ray headRay = new Ray(inOutRay.origin().add(tr), inOutRay.direction());
+        Ray headRay = new Ray(inOutRay.getOrigin().add(tr), inOutRay.getDirection());
         Ray baseRay = new Ray(inOutRay);
 
         Ray baseHit = baseCylinder.doIntersection(baseRay);
         Ray headHit = headCone.doIntersection(headRay);
 
         if ( (baseHit != null && headHit == null) ||
-             (baseHit != null && headHit != null && (baseHit.t() < headHit.t()) ) ) {
+             (baseHit != null && headHit != null && (baseHit.getT() < headHit.getT()) ) ) {
             lastElement = baseCylinder;
-            return inOutRay.withT(baseHit.t());
+            return inOutRay.withT(baseHit.getT());
         }
         else if ( (baseHit == null && headHit != null) ||
-                  (baseHit != null && headHit != null && (headHit.t() < baseHit.t()) ) ) {
+                  (baseHit != null && headHit != null && (headHit.getT() < baseHit.getT()) ) ) {
             lastElement = headCone;
-            return inOutRay.withT(headHit.t());
+            return inOutRay.withT(headHit.getT());
         }
 
         return null;
@@ -117,11 +117,11 @@ public class Arrow extends Solid {
     private boolean doIntersectionDistanceOnly(Ray inRay, RayHit outHit)
     {
         Vector3Dd shiftedHeadOrigin = new Vector3Dd(
-            inRay.origin().x(),
-            inRay.origin().y(),
-            inRay.origin().z() - baseLength);
+            inRay.getOrigin().x(),
+            inRay.getOrigin().y(),
+            inRay.getOrigin().z() - baseLength);
         Ray shiftedHeadRay =
-            new Ray(shiftedHeadOrigin, inRay.direction(), inRay.t());
+            new Ray(shiftedHeadOrigin, inRay.getDirection(), inRay.getT());
 
         RayHit candidateHit;
         boolean shouldStoreRay = false;
@@ -171,7 +171,7 @@ public class Arrow extends Solid {
         }
 
         Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
-        Ray shiftedHeadRay = new Ray(inRay.origin().add(tr), inRay.direction(), inRay.t());
+        Ray shiftedHeadRay = new Ray(inRay.getOrigin().add(tr), inRay.getDirection(), inRay.getT());
 
         RayHit baseHit = new RayHit(outHit.requiredDetailMask());
         RayHit headHit = new RayHit(outHit.requiredDetailMask());
@@ -183,10 +183,10 @@ public class Arrow extends Solid {
         }
 
         double baseT =
-            hasBase ? (baseHit.ray() != null ? baseHit.ray().t() : baseHit.hitDistance()) :
+            hasBase ? (baseHit.ray() != null ? baseHit.ray().getT() : baseHit.hitDistance()) :
             NO_HIT;
         double headT =
-            hasHead ? (headHit.ray() != null ? headHit.ray().t() : headHit.hitDistance()) :
+            hasHead ? (headHit.ray() != null ? headHit.ray().getT() : headHit.hitDistance()) :
             NO_HIT;
 
         if ( hasBase && (!hasHead || baseT < headT) ) {

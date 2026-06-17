@@ -19,20 +19,20 @@ double Torus::implicitValue(const Vector3Dd& p) const {
 }
 
 Ray* Torus::doIntersection(const Ray& inOutRay) {
-    Ray normalized(inOutRay.origin(), inOutRay.direction().normalized(), inOutRay.t());
+    Ray normalized(inOutRay.getOrigin(), inOutRay.getDirection().normalized(), inOutRay.getT());
 
     const double tMin = 0.0;
     const double tMax = 1e4;
     const int samples = 2048;
     double prevT = tMin;
-    double prevF = implicitValue(normalized.origin().add(normalized.direction().multiply(prevT)));
+    double prevF = implicitValue(normalized.getOrigin().add(normalized.getDirection().multiply(prevT)));
 
     bool found = false;
     double rootT = 0.0;
 
     for (int i = 1; i <= samples; ++i) {
         double t = tMin + (tMax - tMin) * ((double)i / (double)samples);
-        double f = implicitValue(normalized.origin().add(normalized.direction().multiply(t)));
+        double f = implicitValue(normalized.getOrigin().add(normalized.getDirection().multiply(t)));
 
         if ((prevF <= 0 && f >= 0) || (prevF >= 0 && f <= 0)) {
             double a = prevT;
@@ -40,7 +40,7 @@ Ray* Torus::doIntersection(const Ray& inOutRay) {
             double fa = prevF;
             for (int it = 0; it < 60; ++it) {
                 double m = 0.5 * (a + b);
-                double fm = implicitValue(normalized.origin().add(normalized.direction().multiply(m)));
+                double fm = implicitValue(normalized.getOrigin().add(normalized.getDirection().multiply(m)));
                 if ((fa <= 0 && fm >= 0) || (fa >= 0 && fm <= 0)) {
                     b = m;
                 }
@@ -71,7 +71,7 @@ bool Torus::doIntersection(const Ray& inRay, RayHit* outHit) {
 
     if (outHit != nullptr) {
         outHit->setRay(*hit);
-        doExtraInformation(*hit, hit->t(), outHit);
+        doExtraInformation(*hit, hit->getT(), outHit);
         outHit->setRay(*hit);
     }
     delete hit;
@@ -81,7 +81,7 @@ bool Torus::doIntersection(const Ray& inRay, RayHit* outHit) {
 void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {
     if (outHit == nullptr) return;
 
-    Vector3Dd p = inRay.origin().add(inRay.direction().multiply(inT));
+    Vector3Dd p = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
     if (outHit->needsPoint()) {
         outHit->p = p;
     }

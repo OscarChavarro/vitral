@@ -17,7 +17,7 @@ bool Curve::doIntersection(const Ray& inRay, RayHit* outHit)
 
     if ( outHit != nullptr ) {
         outHit->setRay(*hit);
-        doExtraInformation(*hit, hit->t(), outHit);
+        doExtraInformation(*hit, hit->getT(), outHit);
     }
     return true;
 }

@@ -109,13 +109,13 @@ public class CameraControllerGoogleEarth extends CameraController {
         Vector3Dd pA = new Vector3Dd();
         Vector3Dd pB = new Vector3Dd();
 
-        pA = pA.withX(hitA.origin().x() + (hitA.direction().x() * hitA.t()));
-        pA = pA.withY(hitA.origin().y() + (hitA.direction().y() * hitA.t()));
-        pA = pA.withZ(hitA.origin().z() + (hitA.direction().z() * hitA.t()));
+        pA = pA.withX(hitA.getOrigin().x() + (hitA.getDirection().x() * hitA.getT()));
+        pA = pA.withY(hitA.getOrigin().y() + (hitA.getDirection().y() * hitA.getT()));
+        pA = pA.withZ(hitA.getOrigin().z() + (hitA.getDirection().z() * hitA.getT()));
 
-        pB = pB.withX(hitB.origin().x() + (hitB.direction().x() * hitB.t()));
-        pB = pB.withY(hitB.origin().y() + (hitB.direction().y() * hitB.t()));
-        pB = pB.withZ(hitB.origin().z() + (hitB.direction().z() * hitB.t()));
+        pB = pB.withX(hitB.getOrigin().x() + (hitB.getDirection().x() * hitB.getT()));
+        pB = pB.withY(hitB.getOrigin().y() + (hitB.getDirection().y() * hitB.getT()));
+        pB = pB.withZ(hitB.getOrigin().z() + (hitB.getDirection().z() * hitB.getT()));
 
         Vector3Dd d = pB.subtract(pA);
 

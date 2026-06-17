@@ -146,8 +146,8 @@ bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
         TriangleMesh& mesh = meshes[i];
         RayHit meshHit;
         if (mesh.doIntersection(inRay, &meshHit, &triangleInformation) &&
-            meshHit.ray() != 0 && meshHit.ray()->t() < minT) {
-            minT = meshHit.ray()->t();
+            meshHit.ray() != 0 && meshHit.ray()->getT() < minT) {
+            minT = meshHit.ray()->getT();
             bestHit.clone(meshHit);
             bestMesh = (int)i;
             bestTriangle = triangleInformation;

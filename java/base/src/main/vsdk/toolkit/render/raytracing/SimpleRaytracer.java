@@ -258,7 +258,7 @@ public class SimpleRaytracer extends RenderingElement {
         outHit.reset(detailMask);
         outHit.setRay(hitRay);
         if ( detailMask != RayHit.DETAIL_NONE ) {
-            nearestObject.doExtraInformation(hitRay, hitRay.t(), outHit);
+            nearestObject.doExtraInformation(hitRay, hitRay.getT(), outHit);
             outHit.setRay(hitRay);
         }
 
@@ -383,9 +383,9 @@ public class SimpleRaytracer extends RenderingElement {
                         subInfo);
                     ColorRgb rcolor = evaluateIlluminationModel(
                         subInfo,
-                        -reflected_ray.direction().x(),
-                        -reflected_ray.direction().y(),
-                        -reflected_ray.direction().z(),
+                        -reflected_ray.getDirection().x(),
+                        -reflected_ray.getDirection().y(),
+                        -reflected_ray.getDirection().z(),
                         lights,
                         objects,
                         sceneRenderCache,
@@ -503,9 +503,9 @@ public class SimpleRaytracer extends RenderingElement {
 
             return evaluateIlluminationModel(
                 shadingInfo,
-                -inRay.direction().x(),
-                -inRay.direction().y(),
-                -inRay.direction().z(),
+                -inRay.getDirection().x(),
+                -inRay.getDirection().y(),
+                -inRay.getDirection().z(),
                 inLightsArray,
                 inSimpleBodiesArray,
                 sceneRenderCache,
@@ -517,7 +517,7 @@ public class SimpleRaytracer extends RenderingElement {
                 workspace);
           }
           else {
-            return in_background.colorInDireccion(inRay.direction());
+            return in_background.colorInDireccion(inRay.getDirection());
         }
     }
 
@@ -664,7 +664,7 @@ public class SimpleRaytracer extends RenderingElement {
                                           inLightsArray, inBackground,
                                           renderContext, sceneRenderCache, workspace);
                     if ( outDepthmap != null ) {
-                        outDepthmap.setZ(x, y, (float)rayo.t());
+                        outDepthmap.setZ(x, y, (float)rayo.getT());
                     }
                     //- Exporto el result de color del pixel ----------------
                     outputPixel.r = (byte)(255 * color.r());

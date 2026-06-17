@@ -106,8 +106,8 @@ bool VoxelVolume::doIntersection(const Ray& inRay, RayHit* outHit) {
     const double bounds[2] = {-1.0, 1.0};
 
     for (int axis = 0; axis < 3; axis++) {
-        double o = axis == 0 ? inRay.origin().x() : (axis == 1 ? inRay.origin().y() : inRay.origin().z());
-        double d = axis == 0 ? inRay.direction().x() : (axis == 1 ? inRay.direction().y() : inRay.direction().z());
+        double o = axis == 0 ? inRay.getOrigin().x() : (axis == 1 ? inRay.getOrigin().y() : inRay.getOrigin().z());
+        double d = axis == 0 ? inRay.getDirection().x() : (axis == 1 ? inRay.getDirection().y() : inRay.getDirection().z());
 
         if (std::abs(d) <= VSDK::EPSILON) {
             if (o < bounds[0] || o > bounds[1]) return false;
@@ -136,7 +136,7 @@ bool VoxelVolume::doIntersection(const Ray& inRay, RayHit* outHit) {
 void VoxelVolume::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData == nullptr) return;
     if (outData->needsPoint()) {
-        outData->p = inRay.origin().add(inRay.direction().multiply(inT));
+        outData->p = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
     }
 }
 

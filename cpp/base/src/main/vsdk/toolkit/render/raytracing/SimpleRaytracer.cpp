@@ -113,7 +113,7 @@ void SimpleRaytracer::prepareSurfaceHit(SimpleBody* nearestObject, const SceneOb
     outHit->reset(objectData.detailMask);
     outHit->setRay(hitRay);
     if ( objectData.detailMask != RayHit::DETAIL_NONE ) {
-        nearestObject->doExtraInformation(hitRay, hitRay.t(), outHit);
+        nearestObject->doExtraInformation(hitRay, hitRay.getT(), outHit);
         outHit->setRay(hitRay);
     }
     if ( !outHit->needsTextureCoordinates() ) outHit->texture = 0;
@@ -150,7 +150,7 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
                 RayHit* subInfo = &workspace.shadingHits[recursionLevel + 1];
                 Ray reflectedHitRay = reflectedRay.withT(reflectedHit->hitDistance());
                 prepareSurfaceHit(nearestObject, objectData, reflectedHitRay, subInfo);
-                ColorRgb rcolor = evaluateIlluminationModel(subInfo, -reflectedRay.direction().x(), -reflectedRay.direction().y(), -reflectedRay.direction().z(), lights, objects, cache, background, resolveMaterial(subInfo, objectData), renderContext, recursions - 1, recursionLevel + 1);
+                ColorRgb rcolor = evaluateIlluminationModel(subInfo, -reflectedRay.getDirection().x(), -reflectedRay.getDirection().y(), -reflectedRay.getDirection().z(), lights, objects, cache, background, resolveMaterial(subInfo, objectData), renderContext, recursions - 1, recursionLevel + 1);
                 outR += rcolor.r() * kr; outG += rcolor.g() * kr; outB += rcolor.b() * kr;
             }
             else {
@@ -190,9 +190,9 @@ ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,java::ArrayList<SimpleB
         Ray primaryHitRay = inRay.withT(hitInfo->hitDistance());
         RayHit* shadingInfo = &workspace.shadingHits[0];
         prepareSurfaceHit(nearestObject, objectData, primaryHitRay, shadingInfo);
-        return evaluateIlluminationModel(shadingInfo, -inRay.direction().x(), -inRay.direction().y(), -inRay.direction().z(), lights, bodies, cache, background, resolveMaterial(shadingInfo, objectData), renderContext, MAX_RECURSION_LEVEL, 0);
+        return evaluateIlluminationModel(shadingInfo, -inRay.getDirection().x(), -inRay.getDirection().y(), -inRay.getDirection().z(), lights, bodies, cache, background, resolveMaterial(shadingInfo, objectData), renderContext, MAX_RECURSION_LEVEL, 0);
     }
-    return background->colorInDireccion(inRay.direction());
+    return background->colorInDireccion(inRay.getDirection());
 }
 
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* report)
@@ -234,7 +234,7 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
                 RaytraceStatistics::recordPrimaryRay();
                 Ray ray = generateRay(cameraSnapshot, x, y);
                 ColorRgb color = followRayPath(ray, bodies, lights, bg, renderContext, cache);
-                if ( outDepthmap ) outDepthmap->setDepth(x, y, (float)ray.t());
+                if ( outDepthmap ) outDepthmap->setDepth(x, y, (float)ray.getT());
                 outputPixel.r = (char)(255 * color.r()); outputPixel.g = (char)(255 * color.g()); outputPixel.b = (char)(255 * color.b());
                 tileImage->putPixelRgb(x, y, &outputPixel);
             }

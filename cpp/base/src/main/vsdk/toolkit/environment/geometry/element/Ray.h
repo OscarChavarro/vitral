@@ -13,9 +13,9 @@ class Ray {
 private:
     static const double UNIT_DIRECTION_TOLERANCE;
 
-    Vector3Dd origin_;
-    Vector3Dd direction_;
-    double t_;
+    Vector3Dd origin;
+    Vector3Dd direction;
+    double t;
 
     static Vector3Dd normalizeDirection(const Vector3Dd& direction);
 
@@ -31,9 +31,9 @@ public:
     Ray withDirection(const Vector3Dd& newDirection) const;
     Ray withT(double newT) const;
 
-    const Vector3Dd& origin() const;
-    const Vector3Dd& direction() const;
-    double t() const;
+    const Vector3Dd& getOrigin() const;
+    const Vector3Dd& getDirection() const;
+    double getT() const;
 
     bool equals(const Ray& other) const;
     int hashCode() const;

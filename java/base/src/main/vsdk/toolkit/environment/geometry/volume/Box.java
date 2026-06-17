@@ -59,12 +59,12 @@ public class Box extends Solid {
         double x2 = size.x()/2;
         double y2 = size.y()/2;
         double z2 = size.z()/2;
-        double ox = inRay.origin().x();
-        double oy = inRay.origin().y();
-        double oz = inRay.origin().z();
-        double dx = inRay.direction().x();
-        double dy = inRay.direction().y();
-        double dz = inRay.direction().z();
+        double ox = inRay.getOrigin().x();
+        double oy = inRay.getOrigin().y();
+        double oz = inRay.getOrigin().z();
+        double dx = inRay.getDirection().x();
+        double dy = inRay.getDirection().y();
+        double dz = inRay.getDirection().z();
 
         if ( Math.abs(dz) > VSDK.EPSILON ) {
             double t = (z2 - oz) / dz;
@@ -220,9 +220,9 @@ public class Box extends Solid {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
-        double hitX = inRay.origin().x() + inRay.direction().x()*inT;
-        double hitY = inRay.origin().y() + inRay.direction().y()*inT;
-        double hitZ = inRay.origin().z() + inRay.direction().z()*inT;
+        double hitX = inRay.getOrigin().x() + inRay.getDirection().x()*inT;
+        double hitY = inRay.getOrigin().y() + inRay.getDirection().y()*inT;
+        double hitZ = inRay.getOrigin().z() + inRay.getDirection().z()*inT;
         int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
 
         if ( outData.needsPoint() ) {

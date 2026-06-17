@@ -61,13 +61,13 @@ bool CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
     }
 
     Vector3Dd pA(
-        hitA->origin().x() + hitA->direction().x() * hitA->t(),
-        hitA->origin().y() + hitA->direction().y() * hitA->t(),
-        hitA->origin().z() + hitA->direction().z() * hitA->t());
+        hitA->getOrigin().x() + hitA->getDirection().x() * hitA->getT(),
+        hitA->getOrigin().y() + hitA->getDirection().y() * hitA->getT(),
+        hitA->getOrigin().z() + hitA->getDirection().z() * hitA->getT());
     Vector3Dd pB(
-        hitB->origin().x() + hitB->direction().x() * hitB->t(),
-        hitB->origin().y() + hitB->direction().y() * hitB->t(),
-        hitB->origin().z() + hitB->direction().z() * hitB->t());
+        hitB->getOrigin().x() + hitB->getDirection().x() * hitB->getT(),
+        hitB->getOrigin().y() + hitB->getDirection().y() * hitB->getT(),
+        hitB->getOrigin().z() + hitB->getDirection().z() * hitB->getT());
     Vector3Dd d = pB.subtract(pA);
 
     Vector3Dd currentPosition = camera->getPosition();

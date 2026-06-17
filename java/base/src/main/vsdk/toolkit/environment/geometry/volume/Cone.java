@@ -78,12 +78,12 @@ public class Cone extends Solid {
                       RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
-        double ox = inOutRay.origin().x();
-        double oy = inOutRay.origin().y();
-        double oz = inOutRay.origin().z();
-        double dx = inOutRay.direction().x();
-        double dy = inOutRay.direction().y();
-        double dz = inOutRay.direction().z();
+        double ox = inOutRay.getOrigin().x();
+        double oy = inOutRay.getOrigin().y();
+        double oz = inOutRay.getOrigin().z();
+        double dx = inOutRay.getDirection().x();
+        double dy = inOutRay.getDirection().y();
+        double dz = inOutRay.getDirection().z();
 
         //- Calcula el termino A --------------------------------------------
         A = VSDK.square(dx) + VSDK.square(dy);
@@ -130,12 +130,12 @@ public class Cone extends Solid {
                       RayHit outInfo) 
     {
         double A, B, C, discriminant, t0;
-        double ox = inOutRay.origin().x();
-        double oy = inOutRay.origin().y();
-        double oz = inOutRay.origin().z();
-        double dx = inOutRay.direction().x();
-        double dy = inOutRay.direction().y();
-        double dz = inOutRay.direction().z();
+        double ox = inOutRay.getOrigin().x();
+        double oy = inOutRay.getOrigin().y();
+        double oz = inOutRay.getOrigin().z();
+        double dx = inOutRay.getDirection().x();
+        double dy = inOutRay.getDirection().y();
+        double dz = inOutRay.getDirection().z();
         if ( inH <= VSDK.EPSILON ) {
             return null;
         }
@@ -195,12 +195,12 @@ public class Cone extends Solid {
     private Ray
     doIntersectionTap(Ray inOutRay, double inR, double inH,
                       RayHit outInfo) {
-        double dx = inOutRay.direction().x();
-        double dy = inOutRay.direction().y();
-        double dz = inOutRay.direction().z();
-        double ox = inOutRay.origin().x();
-        double oy = inOutRay.origin().y();
-        double oz = inOutRay.origin().z();
+        double dx = inOutRay.getDirection().x();
+        double dy = inOutRay.getDirection().y();
+        double dz = inOutRay.getDirection().z();
+        double ox = inOutRay.getOrigin().x();
+        double oy = inOutRay.getOrigin().y();
+        double oz = inOutRay.getOrigin().z();
 
         if ( Math.abs(dz) > VSDK.EPSILON ) {
             double t = (inH - oz) / dz;
@@ -226,12 +226,12 @@ public class Cone extends Solid {
 
     private double doIntersectionCylinderDistance(Ray inOutRay, double inR, double inH)
     {
-        double dx = inOutRay.direction().x();
-        double dy = inOutRay.direction().y();
-        double dz = inOutRay.direction().z();
-        double ox = inOutRay.origin().x();
-        double oy = inOutRay.origin().y();
-        double oz = inOutRay.origin().z();
+        double dx = inOutRay.getDirection().x();
+        double dy = inOutRay.getDirection().y();
+        double dz = inOutRay.getDirection().z();
+        double ox = inOutRay.getOrigin().x();
+        double oy = inOutRay.getOrigin().y();
+        double oz = inOutRay.getOrigin().z();
         double A = VSDK.square(dx) + VSDK.square(dy);
         if ( Math.abs(A) <= VSDK.EPSILON ) {
             return NO_HIT;
@@ -261,12 +261,12 @@ public class Cone extends Solid {
             return NO_HIT;
         }
 
-        double dx = inOutRay.direction().x();
-        double dy = inOutRay.direction().y();
-        double dz = inOutRay.direction().z();
-        double ox = inOutRay.origin().x();
-        double oy = inOutRay.origin().y();
-        double shiftedOz = inOutRay.origin().z() - inH;
+        double dx = inOutRay.getDirection().x();
+        double dy = inOutRay.getDirection().y();
+        double dz = inOutRay.getDirection().z();
+        double ox = inOutRay.getOrigin().x();
+        double oy = inOutRay.getOrigin().y();
+        double shiftedOz = inOutRay.getOrigin().z() - inH;
         double ratio = inR / inH;
         double ratioSquared = VSDK.square(ratio);
         double A = VSDK.square(dx) + VSDK.square(dy) - VSDK.square(dz * ratio);
@@ -295,18 +295,18 @@ public class Cone extends Solid {
 
     private double doIntersectionTapDistance(Ray inOutRay, double inR, double inH)
     {
-        double dz = inOutRay.direction().z();
+        double dz = inOutRay.getDirection().z();
         if ( Math.abs(dz) <= VSDK.EPSILON ) {
             return NO_HIT;
         }
 
-        double t = (inH - inOutRay.origin().z()) / dz;
+        double t = (inH - inOutRay.getOrigin().z()) / dz;
         if ( t <= VSDK.EPSILON ) {
             return NO_HIT;
         }
 
-        double px = inOutRay.origin().x() + inOutRay.direction().x()*t;
-        double py = inOutRay.origin().y() + inOutRay.direction().y()*t;
+        double px = inOutRay.getOrigin().x() + inOutRay.getDirection().x()*t;
+        double py = inOutRay.getOrigin().y() + inOutRay.getDirection().y()*t;
         if ( VSDK.square(px) + VSDK.square(py) >= VSDK.square(inR) ) {
             return NO_HIT;
         }
@@ -396,13 +396,13 @@ public class Cone extends Solid {
             bodyHit = doIntersectionCone(inOutRay, r1, h, infoBody);
             tap1Hit = doIntersectionTap(inOutRay, r1, 0, infoTap1);
             if ( (tap1Hit != null && bodyHit == null) ||
-                 (tap1Hit != null && bodyHit != null && (tap1Hit.t() < bodyHit.t())) ) {
+                 (tap1Hit != null && bodyHit != null && (tap1Hit.getT() < bodyHit.getT())) ) {
                 infoTap1.n = infoTap1.n.multiply(-1);
-                winner = inOutRay.withT(tap1Hit.t());
+                winner = inOutRay.withT(tap1Hit.getT());
                 winnerInfo = infoTap1;
             }
             else if ( bodyHit != null ) {
-                winner = inOutRay.withT(bodyHit.t());
+                winner = inOutRay.withT(bodyHit.getT());
                 winnerInfo = infoBody;
             }
         }
@@ -413,13 +413,13 @@ public class Cone extends Solid {
             tap2Hit = doIntersectionTap(inOutRay, r1, h, infoTap2);
 
             if ( bodyHit != null &&
-                 ((tap1Hit != null && (bodyHit.t() < tap1Hit.t())) || tap1Hit == null) &&
-                 ((tap2Hit != null && (bodyHit.t() < tap2Hit.t())) || tap2Hit == null) ) {
+                 ((tap1Hit != null && (bodyHit.getT() < tap1Hit.getT())) || tap1Hit == null) &&
+                 ((tap2Hit != null && (bodyHit.getT() < tap2Hit.getT())) || tap2Hit == null) ) {
                 nearest = 1;
             }
             else if ( tap1Hit != null &&
-                      (bodyHit != null && (tap1Hit.t() < bodyHit.t()) || bodyHit == null) &&
-                      (tap2Hit != null && (tap1Hit.t() < tap2Hit.t()) || tap2Hit == null) ) {
+                      (bodyHit != null && (tap1Hit.getT() < bodyHit.getT()) || bodyHit == null) &&
+                      (tap2Hit != null && (tap1Hit.getT() < tap2Hit.getT()) || tap2Hit == null) ) {
                 nearest = 3;
             }
             else if ( tap2Hit != null ) {
@@ -427,15 +427,15 @@ public class Cone extends Solid {
             }
 
             if ( nearest == 1 ) {
-                winner = inOutRay.withT(bodyHit.t());
+                winner = inOutRay.withT(bodyHit.getT());
                 winnerInfo = infoBody;
             }
             else if ( nearest == 2 ) {
-                winner = inOutRay.withT(tap2Hit.t());
+                winner = inOutRay.withT(tap2Hit.getT());
                 winnerInfo = infoTap2;
             }
             else if ( nearest == 3 ) {
-                winner = inOutRay.withT(tap1Hit.t());
+                winner = inOutRay.withT(tap1Hit.getT());
                 winnerInfo = infoTap1;
             }
         }

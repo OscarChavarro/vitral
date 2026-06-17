@@ -224,16 +224,16 @@ public class Jogl4PolyhedralBoundedSolidDebugHUDRenderer
 
         Ray visibilityRay = new Ray(camera.getPosition(),
             vertex.position.subtract(camera.getPosition()));
-        double vertexRayT = vertex.position.subtract(visibilityRay.origin())
-            .dotProduct(visibilityRay.direction());
+        double vertexRayT = vertex.position.subtract(visibilityRay.getOrigin())
+            .dotProduct(visibilityRay.getDirection());
         if ( vertexRayT <= VSDK.EPSILON ) {
             return true;
         }
 
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
-        Vector3Dd closestPointOnRay = visibilityRay.origin().add(
-            visibilityRay.direction().multiply(vertexRayT));
+        Vector3Dd closestPointOnRay = visibilityRay.getOrigin().add(
+            visibilityRay.getDirection().multiply(vertexRayT));
         if ( closestPointOnRay.subtract(vertex.position).length() >=
              numericContext.bigEpsilon() ) {
             return true;
@@ -244,7 +244,7 @@ public class Jogl4PolyhedralBoundedSolidDebugHUDRenderer
             return true;
         }
 
-        return !(vertexRayT - hit.t() >= numericContext.bigEpsilon());
+        return !(vertexRayT - hit.getT() >= numericContext.bigEpsilon());
     }
 
     private static Vector3Dd averageProjectedPosition(

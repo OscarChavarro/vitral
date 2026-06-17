@@ -46,9 +46,9 @@ Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
     Ray inOutRay = inputRay.withT(DBL_MAX);
 
     Ray myRay(
-        rotation_i.multiply(inOutRay.origin().subtract(position)),
-        rotation_i.multiply(inOutRay.direction()),
-        inOutRay.t());
+        rotation_i.multiply(inOutRay.getOrigin().subtract(position)),
+        rotation_i.multiply(inOutRay.getDirection()),
+        inOutRay.getT());
 
     Ray* nearestHit = 0;
 
@@ -56,8 +56,8 @@ Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
         if ( bodies[i] == 0 || bodies[i]->getGeometry() == 0 ) continue;
         RayHit hit;
         if ( bodies[i]->getGeometry()->doIntersection(myRay, &hit) && hit.ray() != 0 ) {
-            if ( hit.ray()->t() < inOutRay.t() ) {
-                inOutRay = inOutRay.withT(hit.ray()->t());
+            if ( hit.ray()->getT() < inOutRay.getT() ) {
+                inOutRay = inOutRay.withT(hit.ray()->getT());
                 if ( nearestHit != 0 ) delete nearestHit;
                 nearestHit = new Ray(inOutRay);
             }

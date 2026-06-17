@@ -267,13 +267,13 @@ public class PolyhedralBoundedSolid extends Solid {
             RayHit planeHit = new RayHit();
             if ( containingPlane.doIntersection(ray, planeHit) ) {
                 Ray hit = planeHit.ray();
-                if ( hit.t() < minT ) {
-                    hit = hit.withDirection(hit.direction().normalized());
-                    p = hit.origin().add(hit.direction().multiply(hit.t()));
+                if ( hit.getT() < minT ) {
+                    hit = hit.withDirection(hit.getDirection().normalized());
+                    p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
                     pos = testPointInsideForRayIntersection(
                         face, p, numericContext.bigEpsilon());
                     if ( pos == Geometry.INSIDE || pos == Geometry.LIMIT ) {
-                        minT = hit.t();
+                        minT = hit.getT();
                         bestInfo = new RayHit(planeHit);
                     }
                 }

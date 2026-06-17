@@ -199,8 +199,8 @@ Ray* SimpleBody::doIntersection(const Ray& inRay) const
 bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const
 {
     const Sphere* sphere = static_cast<const Sphere*>(geometry);
-    const Vector3Dd& origin = inOutRay.origin();
-    const Vector3Dd& direction = inOutRay.direction();
+    const Vector3Dd& origin = inOutRay.getOrigin();
+    const Vector3Dd& direction = inOutRay.getDirection();
     const double dx = position.x() - origin.x();
     const double dy = position.y() - origin.y();
     const double dz = position.z() - origin.z();
@@ -248,14 +248,14 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         return doIntersectionWithTranslationOnly(inOutRay, outHit, requestedDetailMask);
     }
 
-    Vector3Dd translatedOrigin = inOutRay.origin().subtract(position);
+    Vector3Dd translatedOrigin = inOutRay.getOrigin().subtract(position);
     Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
     Vector3Dd localOrigin(
         rotatedOrigin.x() * inverseScale.x(),
         rotatedOrigin.y() * inverseScale.y(),
         rotatedOrigin.z() * inverseScale.z());
 
-    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(inOutRay.direction());
+    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(inOutRay.getDirection());
     Vector3Dd localDirection(
         rotatedDirection.x() * inverseScale.x(),
         rotatedDirection.y() * inverseScale.y(),
@@ -266,7 +266,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     }
     localDirection = localDirection.multiply(1.0 / localDirectionLength);
 
-    double localRayT = inOutRay.t();
+    double localRayT = inOutRay.getT();
     if ( localRayT >= DBL_MAX / localDirectionLength ) {
         localRayT = DBL_MAX;
     }
@@ -298,7 +298,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     if ( outHit != 0 ) {
         double localHitT;
         if ( outHit->ray() != 0 ) {
-            localHitT = outHit->ray()->t();
+            localHitT = outHit->ray()->getT();
         }
         else if ( outHit->hasHitDistance() ) {
             localHitT = outHit->hitDistance();
@@ -312,7 +312,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         outHit->setStoreRay(requestedStoreRay);
         outHit->setRequiredDetailMask(requestedDetailMask);
         if ( requestedStoreRay || requestedDetailMask != RayHit::DETAIL_NONE ) {
-            Ray worldRay(inOutRay.origin(), inOutRay.direction(), worldT);
+            Ray worldRay(inOutRay.getOrigin(), inOutRay.getDirection(), worldT);
             outHit->setRay(worldRay);
             if ( requestedDetailMask != RayHit::DETAIL_NONE ) {
                 doExtraInformation(worldRay, worldT, outHit);
@@ -330,7 +330,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
     RayHit* outHit,
     int requiredDetailMask) const
 {
-    Ray localRay(inOutRay.origin().subtract(position), inOutRay.direction(), inOutRay.t());
+    Ray localRay(inOutRay.getOrigin().subtract(position), inOutRay.getDirection(), inOutRay.getT());
 
     RayHit localHitStorage;
     RayHit* hit = outHit != 0 ? outHit : &localHitStorage;
@@ -348,7 +348,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
 
     double localHitT;
     if ( hit->ray() != 0 ) {
-        localHitT = hit->ray()->t();
+        localHitT = hit->ray()->getT();
     }
     else if ( hit->hasHitDistance() ) {
         localHitT = hit->hitDistance();
@@ -423,16 +423,16 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
     }
 
     const Ray worldRay = *worldRayPtr;
-    const double worldT = worldRay.t();
+    const double worldT = worldRay.getT();
 
-    Vector3Dd translatedOrigin = worldRay.origin().subtract(position);
+    Vector3Dd translatedOrigin = worldRay.getOrigin().subtract(position);
     Vector3Dd rotatedOrigin = rotationInverseQuaternion.rotate(translatedOrigin);
     Vector3Dd localOrigin(
         rotatedOrigin.x() * inverseScale.x(),
         rotatedOrigin.y() * inverseScale.y(),
         rotatedOrigin.z() * inverseScale.z());
 
-    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(worldRay.direction());
+    Vector3Dd rotatedDirection = rotationInverseQuaternion.rotate(worldRay.getDirection());
     Vector3Dd localDirection(
         rotatedDirection.x() * inverseScale.x(),
         rotatedDirection.y() * inverseScale.y(),

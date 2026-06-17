@@ -60,9 +60,9 @@ public class InfinitePlane extends HalfSpace {
     }
     public Ray
     doIntersection(Ray inout_rayo) {
-        double denominator = a*inout_rayo.direction().x() + b*inout_rayo.direction().y() + c*inout_rayo.direction().z();
+        double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) return null;
-        double t = -(a*inout_rayo.origin().x() + b*inout_rayo.origin().y() + c*inout_rayo.origin().z() + d)/denominator;
+        double t = -(a*inout_rayo.getOrigin().x() + b*inout_rayo.getOrigin().y() + c*inout_rayo.getOrigin().z() + d)/denominator;
 
         if ( t < 0 ) return null;
 
@@ -78,25 +78,25 @@ public class InfinitePlane extends HalfSpace {
         }
         if ( outHit != null ) {
             outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            doExtraInformation(hit, hit.getT(), outHit);
         }
         return true;
     }
 
     public Ray
     doIntersectionWithNegative(Ray inout_rayo) {
-        double denominator = a*inout_rayo.direction().x() + b*inout_rayo.direction().y() + c*inout_rayo.direction().z();
+        double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) {
-            Ray r = new Ray(inout_rayo.origin(), inout_rayo.direction().multiply(-1));
+            Ray r = new Ray(inout_rayo.getOrigin(), inout_rayo.getDirection().multiply(-1));
             Ray hit = doIntersection(r);
             if ( hit != null ) {
-                return inout_rayo.withT(-hit.t());
+                return inout_rayo.withT(-hit.getT());
             }
             else {
                 return null;
             }
         }
-        double t = -(a*inout_rayo.origin().x() + b*inout_rayo.origin().y() + c*inout_rayo.origin().z() + d)/denominator;
+        double t = -(a*inout_rayo.getOrigin().x() + b*inout_rayo.getOrigin().y() + c*inout_rayo.getOrigin().z() + d)/denominator;
 
         return inout_rayo.withT(t);
     }
@@ -155,9 +155,9 @@ public class InfinitePlane extends HalfSpace {
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
         outData.p = new Vector3Dd(
-            inRay.origin().x() + inT*inRay.direction().x(),
-            inRay.origin().y() + inT*inRay.direction().y(),
-            inRay.origin().z() + inT*inRay.direction().z()
+            inRay.getOrigin().x() + inT*inRay.getDirection().x(),
+            inRay.getOrigin().y() + inT*inRay.getDirection().y(),
+            inRay.getOrigin().z() + inT*inRay.getDirection().z()
         );
         outData.n = getNormal();
     }

@@ -171,8 +171,8 @@ public class TriangleMeshGroup extends Surface {
             TriangleMesh mesh = meshes.get(i);
             RayHit meshHit = new RayHit();
             if ( mesh.doIntersection(inRay, meshHit, triangleInformation) &&
-                 meshHit.ray().t() < minT ) {
-                minT = meshHit.ray().t();
+                 meshHit.ray().getT() < minT ) {
+                minT = meshHit.ray().getT();
                 bestHit = new RayHit(meshHit);
                 bestMesh = i;
                 bestTriangle = triangleInformation[0];

@@ -33,8 +33,8 @@ bool Box::doIntersection(const Ray& inRay, RayHit* outHit) {
     double minT = 1e308;
     int hitPlane = 0;
     double x2 = size.x()/2, y2 = size.y()/2, z2 = size.z()/2;
-    double ox = inRay.origin().x(), oy = inRay.origin().y(), oz = inRay.origin().z();
-    double dx = inRay.direction().x(), dy = inRay.direction().y(), dz = inRay.direction().z();
+    double ox = inRay.getOrigin().x(), oy = inRay.getOrigin().y(), oz = inRay.getOrigin().z();
+    double dx = inRay.getDirection().x(), dy = inRay.getDirection().y(), dz = inRay.getDirection().z();
 
     if (std::abs(dz) > VSDK::EPSILON) {
         double t = (z2 - oz) / dz;
@@ -107,9 +107,9 @@ bool Box::doIntersection(const Ray& inRay, RayHit* outHit) {
 
 void Box::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData == nullptr) return;
-    double hitX = inRay.origin().x() + inRay.direction().x()*inT;
-    double hitY = inRay.origin().y() + inRay.direction().y()*inT;
-    double hitZ = inRay.origin().z() + inRay.direction().z()*inT;
+    double hitX = inRay.getOrigin().x() + inRay.getDirection().x()*inT;
+    double hitY = inRay.getOrigin().y() + inRay.getDirection().y()*inT;
+    double hitZ = inRay.getOrigin().z() + inRay.getDirection().z()*inT;
     int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
     if (outData->needsPoint()) outData->p = Vector3Dd(hitX, hitY, hitZ);
     if (outData->needsNormal()) outData->n = planeNormal(hitPlane);

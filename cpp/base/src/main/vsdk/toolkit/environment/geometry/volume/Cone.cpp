@@ -17,8 +17,8 @@ void Cone::setTopRadius(double val) { r2 = val; }
 void Cone::setHeight(double val) { h = val; }
 
 Ray* Cone::doIntersectionCylinder(const Ray& inOutRay, double inR, double inH, RayHit* outInfo) {
-    double ox=inOutRay.origin().x(), oy=inOutRay.origin().y(), oz=inOutRay.origin().z();
-    double dx=inOutRay.direction().x(), dy=inOutRay.direction().y(), dz=inOutRay.direction().z();
+    double ox=inOutRay.getOrigin().x(), oy=inOutRay.getOrigin().y(), oz=inOutRay.getOrigin().z();
+    double dx=inOutRay.getDirection().x(), dy=inOutRay.getDirection().y(), dz=inOutRay.getDirection().z();
     double A = sq(dx)+sq(dy); if (std::abs(A) <= VSDK::EPSILON) return nullptr;
     double B = 2*((dx*ox)+(dy*oy));
     double C = sq(ox)+sq(oy)-sq(inR);
@@ -39,8 +39,8 @@ Ray* Cone::doIntersectionCylinder(const Ray& inOutRay, double inR, double inH, R
 }
 
 Ray* Cone::doIntersectionCone(const Ray& inOutRay, double inR, double inH, RayHit* outInfo) {
-    double ox=inOutRay.origin().x(), oy=inOutRay.origin().y(), oz=inOutRay.origin().z();
-    double dx=inOutRay.direction().x(), dy=inOutRay.direction().y(), dz=inOutRay.direction().z();
+    double ox=inOutRay.getOrigin().x(), oy=inOutRay.getOrigin().y(), oz=inOutRay.getOrigin().z();
+    double dx=inOutRay.getDirection().x(), dy=inOutRay.getDirection().y(), dz=inOutRay.getDirection().z();
     if (inH <= VSDK::EPSILON) return nullptr;
     double shiftedOz = oz - inH;
     double ratio = inR / inH;
@@ -65,8 +65,8 @@ Ray* Cone::doIntersectionCone(const Ray& inOutRay, double inR, double inH, RayHi
 }
 
 Ray* Cone::doIntersectionTap(const Ray& inOutRay, double inR, double inH, RayHit* outInfo) {
-    double dx=inOutRay.direction().x(), dy=inOutRay.direction().y(), dz=inOutRay.direction().z();
-    double ox=inOutRay.origin().x(), oy=inOutRay.origin().y(), oz=inOutRay.origin().z();
+    double dx=inOutRay.getDirection().x(), dy=inOutRay.getDirection().y(), dz=inOutRay.getDirection().z();
+    double ox=inOutRay.getOrigin().x(), oy=inOutRay.getOrigin().y(), oz=inOutRay.getOrigin().z();
     if (std::abs(dz) > VSDK::EPSILON) {
         double t=(inH-oz)/dz;
         if (t > VSDK::EPSILON) {
@@ -104,13 +104,13 @@ bool Cone::doIntersection(const Ray& inOutRay, RayHit* outHit) {
         bodyHit = doIntersectionCone(inOutRay, r1, h, &infoBody);
         tap1Hit = doIntersectionTap(inOutRay, r1, 0, &infoTap1);
         if ((tap1Hit != nullptr && bodyHit == nullptr) ||
-            (tap1Hit != nullptr && bodyHit != nullptr && tap1Hit->t() < bodyHit->t())) {
+            (tap1Hit != nullptr && bodyHit != nullptr && tap1Hit->getT() < bodyHit->getT())) {
             infoTap1.n = infoTap1.n.multiply(-1);
-            winner = new Ray(inOutRay.withT(tap1Hit->t()));
+            winner = new Ray(inOutRay.withT(tap1Hit->getT()));
             winnerInfo = &infoTap1;
         }
         else if (bodyHit != nullptr) {
-            winner = new Ray(inOutRay.withT(bodyHit->t()));
+            winner = new Ray(inOutRay.withT(bodyHit->getT()));
             winnerInfo = &infoBody;
         }
     }
@@ -121,16 +121,16 @@ bool Cone::doIntersection(const Ray& inOutRay, RayHit* outHit) {
         tap2Hit = doIntersectionTap(inOutRay, r1, h, &infoTap2);
 
         if (bodyHit != nullptr &&
-            ((tap1Hit != nullptr && bodyHit->t() < tap1Hit->t()) || tap1Hit == nullptr) &&
-            ((tap2Hit != nullptr && bodyHit->t() < tap2Hit->t()) || tap2Hit == nullptr)) nearest = 1;
+            ((tap1Hit != nullptr && bodyHit->getT() < tap1Hit->getT()) || tap1Hit == nullptr) &&
+            ((tap2Hit != nullptr && bodyHit->getT() < tap2Hit->getT()) || tap2Hit == nullptr)) nearest = 1;
         else if (tap1Hit != nullptr &&
-            ((bodyHit != nullptr && tap1Hit->t() < bodyHit->t()) || bodyHit == nullptr) &&
-            ((tap2Hit != nullptr && tap1Hit->t() < tap2Hit->t()) || tap2Hit == nullptr)) nearest = 3;
+            ((bodyHit != nullptr && tap1Hit->getT() < bodyHit->getT()) || bodyHit == nullptr) &&
+            ((tap2Hit != nullptr && tap1Hit->getT() < tap2Hit->getT()) || tap2Hit == nullptr)) nearest = 3;
         else if (tap2Hit != nullptr) nearest = 2;
 
-        if (nearest == 1) { winner = new Ray(inOutRay.withT(bodyHit->t())); winnerInfo = &infoBody; }
-        else if (nearest == 2) { winner = new Ray(inOutRay.withT(tap2Hit->t())); winnerInfo = &infoTap2; }
-        else if (nearest == 3) { winner = new Ray(inOutRay.withT(tap1Hit->t())); winnerInfo = &infoTap1; }
+        if (nearest == 1) { winner = new Ray(inOutRay.withT(bodyHit->getT())); winnerInfo = &infoBody; }
+        else if (nearest == 2) { winner = new Ray(inOutRay.withT(tap2Hit->getT())); winnerInfo = &infoTap2; }
+        else if (nearest == 3) { winner = new Ray(inOutRay.withT(tap1Hit->getT())); winnerInfo = &infoTap1; }
     }
 
     if (bodyHit) delete bodyHit;

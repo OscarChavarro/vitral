@@ -22,9 +22,9 @@ static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
 
     Box boundingVolume(size);
     Ray localRay(
-        inRay.origin().subtract(center),
-        inRay.direction(),
-        inRay.t()
+        inRay.getOrigin().subtract(center),
+        inRay.getDirection(),
+        inRay.getT()
     );
     return boundingVolume.doIntersection(localRay, 0);
 }

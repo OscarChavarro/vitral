@@ -82,14 +82,14 @@ int countBoundaryCrossingsToInfinity(
         }
 
         Ray hit = *(planeHit.ray());
-        hit = hit.withDirection(hit.direction().normalized());
-        double t = hit.t();
+        hit = hit.withDirection(hit.getDirection().normalized());
+        double t = hit.getT();
         if (t <= bigEps || t >= maxT) {
             if (!borrowedPlanes) delete plane;
             continue;
         }
 
-        Vector3Dd pi = hit.origin().add(hit.direction().multiply(t));
+        Vector3Dd pi = hit.getOrigin().add(hit.getDirection().multiply(t));
         int classification = face->testPointInside(pi, bigEps, plane);
         if (!borrowedPlanes) delete plane;
 
@@ -144,14 +144,14 @@ std::vector<double> collectBoundaryCrossings(
         }
 
         Ray hit = *(planeHit.ray());
-        hit = hit.withDirection(hit.direction().normalized());
-        double t = hit.t();
+        hit = hit.withDirection(hit.getDirection().normalized());
+        double t = hit.getT();
         if (t <= bigEps || t >= reach) {
             if (!borrowedPlanes) delete plane;
             continue;
         }
 
-        Vector3Dd pi = hit.origin().add(hit.direction().multiply(t));
+        Vector3Dd pi = hit.getOrigin().add(hit.getDirection().multiply(t));
         int classification = face->testPointInside(pi, bigEps, plane);
         if (!borrowedPlanes) delete plane;
         if (classification == Geometry::OUTSIDE) {

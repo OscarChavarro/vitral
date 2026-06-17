@@ -227,10 +227,10 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
                 continue;
             }
             hit = face.getContainingPlane().doIntersection(new Ray(ray));
-            if ( hit == null || hit.t() <= eps ) {
+            if ( hit == null || hit.getT() <= eps ) {
                 continue;
             }
-            p = hit.origin().add(hit.direction().multiply(hit.t()));
+            p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
             status = face.testPointInside(p, eps);
             if ( status != Geometry.INSIDE ) {
                 continue;
@@ -238,13 +238,13 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
 
             duplicate = false;
             for ( j = 0; j < distances.size(); j++ ) {
-                if ( Math.abs(distances.get(j) - hit.t()) <= eps ) {
+                if ( Math.abs(distances.get(j) - hit.getT()) <= eps ) {
                     duplicate = true;
                     break;
                 }
             }
             if ( !duplicate ) {
-                distances.add(hit.t());
+                distances.add(hit.getT());
                 hits++;
             }
         }

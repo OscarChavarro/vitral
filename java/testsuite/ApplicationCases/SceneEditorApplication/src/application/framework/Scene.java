@@ -200,9 +200,9 @@ public class Scene
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
             RayHit hit = new RayHit();
-            if ( gi.doIntersection(r, hit) && hit.ray().t() < nearestDistance ) {
+            if ( gi.doIntersection(r, hit) && hit.ray().getT() < nearestDistance ) {
                 ii.clone(hit);
-                nearestDistance = hit.ray().t();
+                nearestDistance = hit.ray().getT();
                 r = hit.ray();
                 intersected = true;
             }
@@ -236,8 +236,8 @@ public class Scene
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
             Ray hit = gi.doIntersection(r);
-            if ( hit != null && hit.t() < nearestDistance ) {
-                nearestDistance = hit.t();
+            if ( hit != null && hit.getT() < nearestDistance ) {
+                nearestDistance = hit.getT();
                 r = hit;
                 if ( !composite ) {
                     selectedThings.unselectAll();

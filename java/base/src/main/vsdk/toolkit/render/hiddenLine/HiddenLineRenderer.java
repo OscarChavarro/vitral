@@ -614,8 +614,8 @@ public class HiddenLineRenderer extends RenderingElement
             }
             ray = ray.withOrigin(cl.start.add(cl.d.multiply(3*VSDK.EPSILON)));
             ray = ray.withDirection(cl.d);
-            t0 = ray.direction().length() - 6*VSDK.EPSILON;
-            ray = ray.withDirection(ray.direction().normalized());
+            t0 = ray.getDirection().length() - 6*VSDK.EPSILON;
+            ray = ray.withDirection(ray.getDirection().normalized());
             Intersection hit =
                 Triangle.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
             if ( inEdge.edgeIndex == DEBUG_EDGE_INDEX && hit != null ) {
@@ -646,7 +646,7 @@ public class HiddenLineRenderer extends RenderingElement
                 // Point PP2 lies on the current edge, so its parameter must
                 // come from the edge/plane intersection rather than from the
                 // contour line piercing the sweep triangle.
-                segment.t = planeHit.t() / inEdge.d.length();
+                segment.t = planeHit.getT() / inEdge.d.length();
                 if ( !isUnitInterval(segment.t) ) {
                     debugSplit(inEdge.edgeIndex, "  cl=" + cl.edgeIndex +
                         " DISCARDED: split t=" + String.format("%.5f",

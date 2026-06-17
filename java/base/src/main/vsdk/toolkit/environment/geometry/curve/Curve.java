@@ -37,7 +37,7 @@ public abstract class Curve extends Geometry {
         }
         if ( outHit != null ) {
             outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            doExtraInformation(hit, hit.getT(), outHit);
         }
         return true;
     }

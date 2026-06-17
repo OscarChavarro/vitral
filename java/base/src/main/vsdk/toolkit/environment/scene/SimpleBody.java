@@ -390,8 +390,8 @@ public class SimpleBody extends Entity {
                 requiredDetailMask);
         }
 
-        Vector3Dd localOrigin = worldPointToObjectSpace(inOutRay.origin());
-        Vector3Dd localDirection = worldDirectionToObjectSpace(inOutRay.direction());
+        Vector3Dd localOrigin = worldPointToObjectSpace(inOutRay.getOrigin());
+        Vector3Dd localDirection = worldDirectionToObjectSpace(inOutRay.getDirection());
         double localDirectionLength = localDirection.length();
         if ( localDirectionLength <= VSDK.EPSILON ) {
             return false;
@@ -400,7 +400,7 @@ public class SimpleBody extends Entity {
         Ray localRay = new Ray(
             localOrigin,
             localDirection.multiply(1.0 / localDirectionLength),
-            scaleRayParameterForObjectSpace(inOutRay.t(), localDirectionLength));
+            scaleRayParameterForObjectSpace(inOutRay.getT(), localDirectionLength));
 
         RayHit hit = outHit;
         if ( hit == null ) {
@@ -419,7 +419,7 @@ public class SimpleBody extends Entity {
         if ( SurfaceRayIntersection.doIntersection(geometry, localRay, hit) ) {
             double localHitT;
             if ( hit.ray() != null ) {
-                localHitT = hit.ray().t();
+                localHitT = hit.ray().getT();
             }
             else if ( hit.hasHitDistance() ) {
                 localHitT = hit.hitDistance();
@@ -499,7 +499,7 @@ public class SimpleBody extends Entity {
         }
 
         if ( hasTranslationOnlyTransform ) {
-            Ray localRay = inRay.withOrigin(inRay.origin().subtract(position));
+            Ray localRay = inRay.withOrigin(inRay.getOrigin().subtract(position));
             outInfo.setRay(inRay);
             geometry.doExtraInformation(localRay, inT, outInfo);
             outInfo.setRay(inRay);
@@ -509,8 +509,8 @@ public class SimpleBody extends Entity {
             return;
         }
 
-        Vector3Dd localOrigin = worldPointToObjectSpace(inRay.origin());
-        Vector3Dd localDirection = worldDirectionToObjectSpace(inRay.direction());
+        Vector3Dd localOrigin = worldPointToObjectSpace(inRay.getOrigin());
+        Vector3Dd localDirection = worldDirectionToObjectSpace(inRay.getDirection());
         double localDirectionLength = localDirection.length();
         if ( localDirectionLength <= VSDK.EPSILON ) {
             return;
@@ -578,7 +578,7 @@ public class SimpleBody extends Entity {
         RayHit outHit,
         int requiredDetailMask)
     {
-        Ray localRay = inOutRay.withOrigin(inOutRay.origin().subtract(position));
+        Ray localRay = inOutRay.withOrigin(inOutRay.getOrigin().subtract(position));
 
         RayHit hit = outHit;
         if ( hit == null ) {
@@ -598,7 +598,7 @@ public class SimpleBody extends Entity {
         }
         double localHitT;
         if ( hit.ray() != null ) {
-            localHitT = hit.ray().t();
+            localHitT = hit.ray().getT();
         }
         else if ( hit.hasHitDistance() ) {
             localHitT = hit.hitDistance();
@@ -638,10 +638,10 @@ public class SimpleBody extends Entity {
         RayHit outHit,
         Sphere sphere)
     {
-        double dx = position.x() - inOutRay.origin().x();
-        double dy = position.y() - inOutRay.origin().y();
-        double dz = position.z() - inOutRay.origin().z();
-        Vector3Dd direction = inOutRay.direction();
+        double dx = position.x() - inOutRay.getOrigin().x();
+        double dy = position.y() - inOutRay.getOrigin().y();
+        double dz = position.z() - inOutRay.getOrigin().z();
+        Vector3Dd direction = inOutRay.getDirection();
         double projection =
             direction.x()*dx + direction.y()*dy + direction.z()*dz;
         double discriminant =

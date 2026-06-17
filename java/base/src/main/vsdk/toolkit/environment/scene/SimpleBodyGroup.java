@@ -131,18 +131,18 @@ public class SimpleBodyGroup extends Entity {
         inOutRay = inOutRay.withT(Double.MAX_VALUE);
 
         myRay = new Ray (
-            rotation_i.multiply(inOutRay.origin().subtract(position)),
-            rotation_i.multiply(inOutRay.direction())
+            rotation_i.multiply(inOutRay.getOrigin().subtract(position)),
+            rotation_i.multiply(inOutRay.getDirection())
         );
-        myRay = myRay.withT(inOutRay.t());
+        myRay = myRay.withT(inOutRay.getT());
 
         Ray nearestHit = null;
 
         for ( i = 0; i < bodies.size(); i++ ) {
             RayHit hit = new RayHit();
             if ( bodies.get(i).getGeometry().doIntersection(myRay, hit) ) {
-                if ( hit.ray().t() < inOutRay.t() ) {
-                    inOutRay = inOutRay.withT(hit.ray().t());
+                if ( hit.ray().getT() < inOutRay.getT() ) {
+                    inOutRay = inOutRay.withT(hit.ray().getT());
                     nearestHit = inOutRay;
                 }
             }

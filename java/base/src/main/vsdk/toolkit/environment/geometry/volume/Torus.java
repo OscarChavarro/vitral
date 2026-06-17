@@ -66,10 +66,10 @@ public class Torus extends Solid
 
     public Ray doIntersection(Ray inOut_ray) 
     {
-        Vector3Dd p = inOut_ray.origin();
+        Vector3Dd p = inOut_ray.getOrigin();
 
-        inOut_ray = inOut_ray.withDirection(inOut_ray.direction().normalized());
-        Vector3Dd d = inOut_ray.direction();
+        inOut_ray = inOut_ray.withDirection(inOut_ray.getDirection().normalized());
+        Vector3Dd d = inOut_ray.getDirection();
 
         double alpha, beta, gama;
 
@@ -125,7 +125,7 @@ public class Torus extends Solid
         }
         if ( outHit != null ) {
             outHit.setRay(hit);
-            doExtraInformation(hit, hit.t(), outHit);
+            doExtraInformation(hit, hit.getT(), outHit);
             outHit.setRay(hit);
         }
         return true;
@@ -1276,9 +1276,9 @@ public class Torus extends Solid
             return;
         }
         Vector3Dd hitPoint = new Vector3Dd(
-            inRay.origin().x() + intT*inRay.direction().x(),
-            inRay.origin().y() + intT*inRay.direction().y(),
-            inRay.origin().z() + intT*inRay.direction().z());
+            inRay.getOrigin().x() + intT*inRay.getDirection().x(),
+            inRay.getOrigin().y() + intT*inRay.getDirection().y(),
+            inRay.getOrigin().z() + intT*inRay.getDirection().z());
         outData.p = hitPoint;
         double r2=minorRadius*minorRadius;
         double R2=majorRadius*majorRadius;

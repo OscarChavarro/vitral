@@ -792,7 +792,7 @@ public class TranslateGizmo extends Gizmo {
 
         if ( interactionTechnique == 2 ) {
             r = camera.generateRay(mousex, mousey);
-            if ( r.direction().dotProduct(v) > 0 ) {
+            if ( r.getDirection().dotProduct(v) > 0 ) {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
@@ -803,7 +803,7 @@ public class TranslateGizmo extends Gizmo {
                 p = o;
             }
             else {
-                p = hit.direction().multiply(hit.t()).add(hit.origin());
+                p = hit.getDirection().multiply(hit.getT()).add(hit.getOrigin());
             }
         }
         else if ( interactionTechnique == 1 ) {
@@ -853,7 +853,7 @@ public class TranslateGizmo extends Gizmo {
                 oldmousey = e.getY();
                 return false;
             }
-            p = hit.origin().add(hit.direction().multiply(hit.t()));
+            p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
         }
         oldmousex = e.getX();
         oldmousey = e.getY();
@@ -914,8 +914,8 @@ public class TranslateGizmo extends Gizmo {
             SimpleBody gi = elementInstances.get(i);
 
             Ray hit = gi.getGeometry() != null ? gi.doIntersection(r) : null;
-            if ( hit != null && hit.t() < nearestDistance ) {
-                nearestDistance = hit.t();
+            if ( hit != null && hit.getT() < nearestDistance ) {
+                nearestDistance = hit.getT();
                 nearestElement = index;
             }
         }
@@ -1049,7 +1049,7 @@ public class TranslateGizmo extends Gizmo {
 
         if ( interactionTechnique == 2 ) {
             r = camera.generateRay(mousex, mousey);
-            if ( r.direction().dotProduct(v) > 0 ) {
+            if ( r.getDirection().dotProduct(v) > 0 ) {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
@@ -1060,7 +1060,7 @@ public class TranslateGizmo extends Gizmo {
                 p = o;
             }
             else {
-                p = hit.direction().multiply(hit.t()).add(hit.origin());
+                p = hit.getDirection().multiply(hit.getT()).add(hit.getOrigin());
             }
         }
         else if ( interactionTechnique == 1 ) {
@@ -1110,7 +1110,7 @@ public class TranslateGizmo extends Gizmo {
                 oldmousey = e.getY();
                 return false;
             }
-            p = hit.origin().add(hit.direction().multiply(hit.t()));
+            p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
         }
         oldmousex = e.getX();
         oldmousey = e.getY();

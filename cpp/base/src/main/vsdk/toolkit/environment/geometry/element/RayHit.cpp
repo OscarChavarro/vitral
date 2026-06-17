@@ -145,7 +145,7 @@ void RayHit::setRay(const Ray& ray)
 {
     rayValue_ = ray;
     hasRay_ = true;
-    hitDistance_ = ray.t();
+    hitDistance_ = ray.getT();
     hasHitDistance_ = true;
 }
 
@@ -160,7 +160,7 @@ double RayHit::hitDistance() const
         return hitDistance_;
     }
     if ( hasRay_ ) {
-        return rayValue_.t();
+        return rayValue_.getT();
     }
     return 0;
 }

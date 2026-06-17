@@ -970,7 +970,7 @@ public class JoglDrawingArea implements
 
         //-----------------------------------------------------------------
         Vector3Dd p;
-        Vector3Dd d = new Vector3Dd(ray.direction());
+        Vector3Dd d = new Vector3Dd(ray.getDirection());
         d = d.normalized();
         RayHit info;
 
@@ -981,34 +981,34 @@ public class JoglDrawingArea implements
         Jogl2SimpleMaterialRenderer.activate(gl, rayOriginMaterial);
         Sphere s = new Sphere(0.05);
         gl.glPushMatrix();
-        gl.glTranslated(ray.origin().x(), ray.origin().y(), ray.origin().z());
+        gl.glTranslated(ray.getOrigin().x(), ray.getOrigin().y(), ray.getOrigin().z());
         Jogl2GeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
         gl.glPopMatrix();
 
         //-----------------------------------------------------------------
         if ( parent.theScene.doIntersection(ray, info) ) {
-            d = d.multiply(ray.t());
-            p = ray.origin().add(d);
+            d = d.multiply(ray.getT());
+            p = ray.getOrigin().add(d);
 
-            drawVisualRayDebugSegment(gl, ray.origin(), p, false, 0.07, 0.4, rayOriginMaterial);
+            drawVisualRayDebugSegment(gl, ray.getOrigin(), p, false, 0.07, 0.4, rayOriginMaterial);
             if ( level >= 1 ) {
                 // Draw normal
                 SimpleMaterial normalMaterial = visualDebugMaterial.withDiffuse(new ColorRgb(0.9, 0.9, 0.5));
                 drawVisualRayDebugSegment(gl, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2, normalMaterial);
             }
             // Reflection ray
-            Vector3Dd dd = ray.direction().multiply(-1);
+            Vector3Dd dd = ray.getDirection().multiply(-1);
             dd = dd.normalized();
             Vector3Dd h = info.n.multiply(dd.dotProduct(info.n)).subtract(dd);
             Ray subray = new Ray(p, dd.add(h.multiply(2)));
             subray = subray.withOrigin(
-                subray.origin().add(subray.direction().multiply(VSDK.EPSILON*10.0)));
+                subray.getOrigin().add(subray.getDirection().multiply(VSDK.EPSILON*10.0)));
             drawVisualRayDebug(gl, subray, level-1);
         }
         else {
             d = d.multiply(1.4);
-            p = ray.origin().add(d);
-            drawVisualRayDebugSegment(gl, ray.origin(), p, true, 0.07, 0.4, rayOriginMaterial);
+            p = ray.getOrigin().add(d);
+            drawVisualRayDebugSegment(gl, ray.getOrigin(), p, true, 0.07, 0.4, rayOriginMaterial);
         }
         gl.glPopMatrix();
     }
@@ -1666,37 +1666,37 @@ public class JoglDrawingArea implements
               case '4': // Numpad 4
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withX(parent.visualDebugRay.origin().x() - 0.1));
+                        parent.visualDebugRay.getOrigin().withX(parent.visualDebugRay.getOrigin().x() - 0.1));
                 }
                 break;
               case '6': // Numpad 6
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withX(parent.visualDebugRay.origin().x() + 0.1));
+                        parent.visualDebugRay.getOrigin().withX(parent.visualDebugRay.getOrigin().x() + 0.1));
                 }
                 break;
               case '8': // Numpad 8
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withY(parent.visualDebugRay.origin().y() + 0.1));
+                        parent.visualDebugRay.getOrigin().withY(parent.visualDebugRay.getOrigin().y() + 0.1));
                 }
                 break;
               case '2': // Numpad 2
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withY(parent.visualDebugRay.origin().y() - 0.1));
+                        parent.visualDebugRay.getOrigin().withY(parent.visualDebugRay.getOrigin().y() - 0.1));
                 }
                 break;
               case '1': // Numpad 1
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withZ(parent.visualDebugRay.origin().z() - 0.1));
+                        parent.visualDebugRay.getOrigin().withZ(parent.visualDebugRay.getOrigin().z() - 0.1));
                 }
                 break;
               case '7': // Numpad 7
                 if ( parent.withVisualDebugRay ) {
                     parent.visualDebugRay = parent.visualDebugRay.withOrigin(
-                        parent.visualDebugRay.origin().withZ(parent.visualDebugRay.origin().z() + 0.1));
+                        parent.visualDebugRay.getOrigin().withZ(parent.visualDebugRay.getOrigin().z() + 0.1));
                 }
                 break;
               case '9': // Numpad 9
@@ -1718,9 +1718,9 @@ public class JoglDrawingArea implements
               case '*': // Numpad *
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                        parent.visualDebugRay.direction().obtainSphericalThetaAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalThetaAngle();
                     phi =
-                        parent.visualDebugRay.direction().obtainSphericalPhiAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalPhiAngle();
                     theta -= Math.toRadians(5);
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
                         Vector3Dd.fromSpherical(1, theta, phi));
@@ -1729,9 +1729,9 @@ public class JoglDrawingArea implements
               case '/': // Numpad /
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                        parent.visualDebugRay.direction().obtainSphericalThetaAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalThetaAngle();
                     phi =
-                        parent.visualDebugRay.direction().obtainSphericalPhiAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalPhiAngle();
                     theta += Math.toRadians(5);
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
                         Vector3Dd.fromSpherical(1, theta, phi));
@@ -1740,9 +1740,9 @@ public class JoglDrawingArea implements
               case '+': // Numpad +
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                        parent.visualDebugRay.direction().obtainSphericalThetaAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalThetaAngle();
                     phi =
-                        parent.visualDebugRay.direction().obtainSphericalPhiAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalPhiAngle();
                     phi += Math.toRadians(5);
                     if ( phi > Math.PI ) phi = Math.PI;
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
@@ -1752,9 +1752,9 @@ public class JoglDrawingArea implements
               case '-': // Numpad -
                 if ( parent.withVisualDebugRay ) {
                     theta =
-                        parent.visualDebugRay.direction().obtainSphericalThetaAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalThetaAngle();
                     phi =
-                        parent.visualDebugRay.direction().obtainSphericalPhiAngle();
+                        parent.visualDebugRay.getDirection().obtainSphericalPhiAngle();
                     phi -= Math.toRadians(5);
                     if ( phi < 0 ) phi = 0;
                     parent.visualDebugRay = parent.visualDebugRay.withDirection(
