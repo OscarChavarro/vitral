@@ -873,8 +873,8 @@ public class TriangleMesh extends Surface {
 
             Intersection hit =
                 Triangle.doIntersectionWithTriangle(ray, v0, v1, v2);
-            if ( hit != null && hit.t < minT ) {
-                minT = hit.t;
+            if ( hit != null && hit.getT() < minT ) {
+                minT = hit.getT();
                 bestTriangle = i;
                 bestHit = hit;
             }
@@ -893,9 +893,9 @@ public class TriangleMesh extends Surface {
         }
 
         if ( outHit != null ) {
-            outHit.setRay(inRay.withT(bestHit.t));
-            outHit.p = new Vector3Dd(bestHit.point);
-            outHit.n = new Vector3Dd(bestHit.normal).normalized();
+            outHit.setRay(inRay.withT(bestHit.getT()));
+            outHit.p = new Vector3Dd(bestHit.getPoint());
+            outHit.n = new Vector3Dd(bestHit.getNormal()).normalized();
             outHit.t = new Vector3Dd();
             outHit.u = 0;
             outHit.v = 0;

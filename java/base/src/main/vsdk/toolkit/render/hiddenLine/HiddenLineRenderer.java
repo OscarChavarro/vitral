@@ -621,12 +621,12 @@ public class HiddenLineRenderer extends RenderingElement
             if ( inEdge.edgeIndex == DEBUG_EDGE_INDEX && hit != null ) {
                 debugSplit(inEdge.edgeIndex, "contour cl.edgeIndex=" +
                     cl.edgeIndex + " sweepHit t=" +
-                    String.format("%.5f", hit.t) + " t0=" +
-                    String.format("%.5f", t0) + " accepted=" + (hit.t < t0));
+                    String.format("%.5f", hit.getT()) + " t0=" +
+                    String.format("%.5f", t0) + " accepted=" + (hit.getT() < t0));
             }
             if (
              hit != null &&
-             hit.t < t0
+             hit.getT() < t0
             ) {
                 // The breaking point in the current testing edge corresponding
                 // to the passing contour is the piercing point where the
