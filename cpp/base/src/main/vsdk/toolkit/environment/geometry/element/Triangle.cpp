@@ -56,11 +56,9 @@ Intersection* Triangle::doIntersectionWithTriangle(const Ray& ray, const Vector3
     double t = f * e2.dotProduct(q);
     if (t <= VSDK::EPSILON) return 0;
 
-    Intersection* out = new Intersection();
-    out->t = t;
-    out->point = ray.getOrigin().add(ray.getDirection().multiply(t));
-    out->normal = e1.crossProduct(e2).normalized();
-    return out;
+    Vector3Dd point = ray.getOrigin().add(ray.getDirection().multiply(t));
+    Vector3Dd normal = e1.crossProduct(e2).normalized();
+    return new Intersection(t, point, normal);
 }
 
 int Triangle::containmentTest(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p, double distanceTolerance)

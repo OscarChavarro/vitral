@@ -419,7 +419,7 @@ void processLineToBeDrawn(
         ray = ray.withDirection(ray.getDirection().normalized());
         Intersection* hit = Triangle::doIntersectionWithTriangle(
             ray, sp1a, sp1b, sp1c);
-        if (hit != 0 && hit->t < t0) {
+        if (hit != 0 && hit->getT() < t0) {
             InfinitePlane plane(cl->start, cl->end, sp2c);
             Ray edgeRay(inEdge.start, inEdge.d.normalized());
             Ray* planeHit = plane.doIntersection(edgeRay);
