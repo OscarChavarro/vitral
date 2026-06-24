@@ -220,7 +220,7 @@ public class FunctionalExplicitSurface extends Surface
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
 
     \todo  Should not delegate work over tesselated geometry version. Should
     evaluate directly from algebraic function surface!
@@ -228,18 +228,18 @@ public class FunctionalExplicitSurface extends Surface
     @return true if given ray intersects current FunctionalExplicitSurface
     */
     public Ray
-    doIntersection(Ray inOut_Ray) {
+    doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit();
-        if ( internalGeometry.doIntersection(inOut_Ray, hit) ) {
+        if ( internalGeometry.doIntersectionFirstHit(inOut_Ray, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        return internalGeometry.doIntersection(inRay, outHit);
+        return internalGeometry.doIntersectionFirstHit(inRay, outHit);
     }
 
     /**
@@ -253,7 +253,7 @@ public class FunctionalExplicitSurface extends Surface
     doExtraInformation(Ray inRay, double inT,
                                    RayHit outData) {
         RayHit hit = new RayHit();
-        if ( internalGeometry.doIntersection(inRay.withT(inT), hit) ) {
+        if ( internalGeometry.doIntersectionFirstHit(inRay.withT(inT), hit) ) {
             outData.clone(hit);
         }
     }

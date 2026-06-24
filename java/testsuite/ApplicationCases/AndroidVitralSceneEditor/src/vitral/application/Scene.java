@@ -75,7 +75,7 @@ public class Scene
 
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            Ray hit = gi.doIntersection(r);
+            Ray hit = gi.doIntersectionFirstHit(r);
             if ( hit != null && hit.getT() < nearestDistance ) {
                 nearestDistance = hit.getT();
                 r = hit;

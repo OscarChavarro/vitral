@@ -93,15 +93,15 @@ double* VoxelVolume::getMinMax() {
     return m;
 }
 
-Ray* VoxelVolume::doIntersection(const Ray& inOutRay) {
+Ray* VoxelVolume::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersection(inOutRay, &hit) && hit.ray() != nullptr) {
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
         return new Ray(*hit.ray());
     }
     return nullptr;
 }
 
-bool VoxelVolume::doIntersection(const Ray& inRay, RayHit* outHit) {
+bool VoxelVolume::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double tmin = -1e308, tmax = 1e308;
     const double bounds[2] = {-1.0, 1.0};
 

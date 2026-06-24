@@ -92,19 +92,19 @@ public class TriangleStripMesh extends Surface {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
 
     \todo  Method not implemented!
     @param inOut_Ray
     @return true if given ray intersects current TriangleStripMesh
     */
     public Ray
-    doIntersection(Ray inOut_Ray) {
+    doIntersectionFirstHit(Ray inOut_Ray) {
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         return false;
     }

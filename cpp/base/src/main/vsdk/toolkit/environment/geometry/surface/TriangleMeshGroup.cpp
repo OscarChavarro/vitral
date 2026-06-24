@@ -115,21 +115,21 @@ void TriangleMeshGroup::calculateMinMaxPositions()
 
 /*
 Check the general interface contract in superclass method
-Geometry.doIntersection.
+Geometry.doIntersectionFirstHit.
 
 @param inOut_Ray
 @return true if given ray intersects current TriangleMeshGroup
 */
-Ray* TriangleMeshGroup::doIntersection(const Ray& inOut_Ray)
+Ray* TriangleMeshGroup::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit(RayHit::DETAIL_NONE, true);
-    if (doIntersection(inOut_Ray, &hit) && hit.ray() != 0) {
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) {
         return new Ray(*hit.ray());
     }
     return 0;
 }
 
-bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
+bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     double minT = 1e308;
     RayHit bestHit;
@@ -141,7 +141,7 @@ bool TriangleMeshGroup::doIntersection(const Ray& inRay, RayHit* outHit)
     for (long int i = 0; i < meshes.size(); i++) {
         TriangleMesh& mesh = meshes[i];
         RayHit meshHit;
-        if (mesh.doIntersection(inRay, &meshHit, &triangleInformation) &&
+        if (mesh.doIntersectionFirstHit(inRay, &meshHit, &triangleInformation) &&
             meshHit.ray() != 0 && meshHit.ray()->getT() < minT) {
             minT = meshHit.ray()->getT();
             bestHit.clone(meshHit);
@@ -178,7 +178,7 @@ void TriangleMeshGroup::doExtraInformation(const Ray& inRay, double inT, RayHit*
     if (outData == 0) {
         return;
     }
-    doIntersection(inRay.withT(inT), outData);
+    doIntersectionFirstHit(inRay.withT(inT), outData);
 }
 
 int* TriangleMeshGroup::doIntersectionInformation()

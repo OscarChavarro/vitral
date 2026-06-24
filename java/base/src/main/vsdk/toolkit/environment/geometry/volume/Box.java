@@ -38,21 +38,21 @@ public class Box extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOutRay
     @return true if given ray intersects current Box
     */
     public Ray
-    doIntersection(Ray inOutRay) {
+    doIntersectionFirstHit(Ray inOutRay) {
         RayHit hit = new RayHit();
-        if ( doIntersection(inOutRay, hit) ) {
+        if ( doIntersectionFirstHit(inOutRay, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         double minT = Double.MAX_VALUE;
         int hitPlane = 0;

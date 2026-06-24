@@ -11,27 +11,27 @@ public abstract class Curve extends Geometry {
     
     /**
     This method is provided to ease the integration with generic operation
-    Geometry.doIntersection.  A default behavior of not responding the test
+    Geometry.doIntersectionFirstHit.  A default behavior of not responding the test
     is provided here for 1-dimensional forms. Note that a Loft creation
     between current curve and a circle curve for emulating a tube like
     structure, gives as a result a 2-dimensional Surface, from which a
-    Loft.doIntersection operation will give similar results to that
+    Loft.doIntersectionFirstHit operation will give similar results to that
     expected from this 1-dimensional case. However, as real mathematical
-    1-dimensional objects are infinitively thin, a doIntersection operation
+    1-dimensional objects are infinitively thin, a doIntersectionFirstHit operation
     will always fail as the operation is regularized for constructive
     solid modelling compatible interpretation.
     @param r
     @return always if false
     */
-    public Ray doIntersection(Ray r)
+    public Ray doIntersectionFirstHit(Ray r)
     {
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
+        Ray hit = doIntersectionFirstHit(inRay);
         if ( hit == null ) {
             return false;
         }

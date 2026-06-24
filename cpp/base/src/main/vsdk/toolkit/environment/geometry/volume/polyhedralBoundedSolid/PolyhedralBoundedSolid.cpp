@@ -103,16 +103,16 @@ void PolyhedralBoundedSolid::setMaxVertexId(int v) { maxVertexId = v; }
 int PolyhedralBoundedSolid::getMaxFaceId() const { return maxFaceId; }
 void PolyhedralBoundedSolid::setMaxFaceId(int v) { maxFaceId = v; }
 
-Ray* PolyhedralBoundedSolid::doIntersection(const Ray& inOutRay)
+Ray* PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inOutRay)
 {
     RayHit hit(RayHit::DETAIL_NONE, true);
-    if (doIntersection(inOutRay, &hit) && hit.ray() != 0) {
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != 0) {
         return new Ray(*hit.ray());
     }
     return 0;
 }
 
-bool PolyhedralBoundedSolid::doIntersection(const Ray& inRay, RayHit* outHit)
+bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     double minT = DBL_MAX;
     RayHit bestInfo;
@@ -132,7 +132,7 @@ bool PolyhedralBoundedSolid::doIntersection(const Ray& inRay, RayHit* outHit)
         }
 
         RayHit planeHit;
-        bool hitsPlane = containingPlane->doIntersection(inRay, &planeHit);
+        bool hitsPlane = containingPlane->doIntersectionFirstHit(inRay, &planeHit);
         if (hitsPlane && planeHit.ray() != 0 && planeHit.ray()->getT() < minT) {
             Ray hit = *(planeHit.ray());
             hit = hit.withDirection(hit.getDirection().normalized());
@@ -170,7 +170,7 @@ void PolyhedralBoundedSolid::doExtraInformation(
     if (outData == 0) {
         return;
     }
-    doIntersection(inRay.withT(inT), outData);
+    doIntersectionFirstHit(inRay.withT(inT), outData);
 }
 
 double* PolyhedralBoundedSolid::getMinMax()

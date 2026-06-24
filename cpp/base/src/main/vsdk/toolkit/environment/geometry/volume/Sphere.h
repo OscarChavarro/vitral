@@ -23,8 +23,8 @@ public:
     explicit Sphere(double r);
     virtual ~Sphere() {}
 
-    Ray* doIntersection(const Ray& inoutRay);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inoutRay);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
     virtual double* getMinMax();

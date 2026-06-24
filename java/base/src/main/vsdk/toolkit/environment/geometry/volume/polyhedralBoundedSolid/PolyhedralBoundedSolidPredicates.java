@@ -238,7 +238,7 @@ public class PolyhedralBoundedSolidPredicates
                 continue;
             }
             RayHit planeHit = new RayHit();
-            if ( !plane.doIntersection(ray, planeHit) ) {
+            if ( !plane.doIntersectionFirstHit(ray, planeHit) ) {
                 continue;
             }
             Ray hit = planeHit.ray();
@@ -286,7 +286,7 @@ public class PolyhedralBoundedSolidPredicates
                 continue;
             }
             RayHit planeHit = new RayHit();
-            if ( !plane.doIntersection(ray, planeHit) ) {
+            if ( !plane.doIntersectionFirstHit(ray, planeHit) ) {
                 continue;
             }
             Ray hit = planeHit.ray();

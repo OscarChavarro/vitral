@@ -219,12 +219,12 @@ Vector3Dd ParametricBiCubicPatch::evaluateNormal(double s, double t)
     return dQds.crossProduct(dQdt).normalized();
 }
 
-Ray* ParametricBiCubicPatch::doIntersection(const Ray&)
+Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray&)
 {
     return nullptr;
 }
 
-bool ParametricBiCubicPatch::doIntersection(const Ray&, RayHit*)
+bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray&, RayHit*)
 {
     return false;
 }

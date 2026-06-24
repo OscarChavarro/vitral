@@ -86,19 +86,19 @@ public class Arrow extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOutRay
     @return true if given ray intersects current Arrow
     */
     public Ray
-    doIntersection(Ray inOutRay) {
+    doIntersectionFirstHit(Ray inOutRay) {
         Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
 
         Ray headRay = new Ray(inOutRay.getOrigin().add(tr), inOutRay.getDirection());
         Ray baseRay = new Ray(inOutRay);
 
-        Ray baseHit = baseCylinder.doIntersection(baseRay);
-        Ray headHit = headCone.doIntersection(headRay);
+        Ray baseHit = baseCylinder.doIntersectionFirstHit(baseRay);
+        Ray headHit = headCone.doIntersectionFirstHit(headRay);
 
         if ( (baseHit != null && headHit == null) ||
              (baseHit != null && headHit != null && (baseHit.getT() < headHit.getT()) ) ) {
@@ -136,13 +136,13 @@ public class Arrow extends Solid {
 
         double baseT = NO_HIT;
         candidateHit.resetForDistanceOnly();
-        if ( baseCylinder.doIntersection(inRay, candidateHit) ) {
+        if ( baseCylinder.doIntersectionFirstHit(inRay, candidateHit) ) {
             baseT = candidateHit.hitDistance();
         }
 
         double headT = NO_HIT;
         candidateHit.resetForDistanceOnly();
-        if ( headCone.doIntersection(shiftedHeadRay, candidateHit) ) {
+        if ( headCone.doIntersectionFirstHit(shiftedHeadRay, candidateHit) ) {
             headT = candidateHit.hitDistance();
         }
 
@@ -164,7 +164,7 @@ public class Arrow extends Solid {
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         if ( outHit == null || !outHit.needsAnySurfaceData() ) {
             return doIntersectionDistanceOnly(inRay, outHit);
@@ -175,8 +175,8 @@ public class Arrow extends Solid {
 
         RayHit baseHit = new RayHit(outHit.requiredDetailMask());
         RayHit headHit = new RayHit(outHit.requiredDetailMask());
-        boolean hasBase = baseCylinder.doIntersection(inRay, baseHit);
-        boolean hasHead = headCone.doIntersection(shiftedHeadRay, headHit);
+        boolean hasBase = baseCylinder.doIntersectionFirstHit(inRay, baseHit);
+        boolean hasHead = headCone.doIntersectionFirstHit(shiftedHeadRay, headHit);
 
         if ( !hasBase && !hasHead ) {
             return false;
@@ -214,7 +214,7 @@ public class Arrow extends Solid {
     doExtraInformation(Ray inRay, double inT, 
            RayHit outData) {
         RayHit hit = new RayHit();
-        if ( doIntersection(inRay.withT(inT), hit) ) {
+        if ( doIntersectionFirstHit(inRay.withT(inT), hit) ) {
             outData.clone(hit);
         }
     }

@@ -636,7 +636,7 @@ public class HiddenLineRenderer extends RenderingElement
                 plane = new InfinitePlane(sp2a, sp2b, sp2c);
                 ray = ray.withOrigin(inEdge.start);
                 ray = ray.withDirection(inEdge.d.normalized());
-                Ray planeHit = plane.doIntersection(ray);
+                Ray planeHit = plane.doIntersectionFirstHit(ray);
                 if ( planeHit == null ) {
                     debugSplit(inEdge.edgeIndex, "  cl=" + cl.edgeIndex +
                         " DISCARDED: edge/SP2 plane intersection null");

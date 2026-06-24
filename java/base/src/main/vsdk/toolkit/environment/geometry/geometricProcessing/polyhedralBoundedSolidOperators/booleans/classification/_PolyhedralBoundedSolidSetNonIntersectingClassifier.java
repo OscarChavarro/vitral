@@ -437,7 +437,7 @@ final class _PolyhedralBoundedSolidSetNonIntersectingClassifier
                     break;
                 }
                 Ray rayHit = new Ray(ray);
-                Ray hit = facePlane.doIntersection(rayHit);
+                Ray hit = facePlane.doIntersectionFirstHit(rayHit);
                 if ( hit == null ) {
                     continue;
                 }

@@ -22,8 +22,8 @@ public:
 
     void clone(const InfinitePlane& other);
 
-    Ray* doIntersection(const Ray& inout_rayo);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inout_rayo);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
 
     Ray* doIntersectionWithNegative(const Ray& inout_rayo);
 

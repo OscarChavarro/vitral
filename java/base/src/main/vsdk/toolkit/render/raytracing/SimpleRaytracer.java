@@ -448,7 +448,7 @@ public class SimpleRaytracer extends RenderingElement {
             SimpleBody gi = inSimpleBodiesArray.get(i);
             candidateHit.resetForDistanceOnly();
             RaytraceStatistics.recordObjectIntersectionTest();
-            if ( gi.doIntersection(inRay, candidateHit) ) {
+            if ( gi.doIntersectionFirstHit(inRay, candidateHit) ) {
                 double hitDistance = candidateHit.hitDistance();
                 if ( hitDistance < nearestDistance && hitDistance > VSDK.EPSILON ) {
                     nearestDistance = hitDistance;

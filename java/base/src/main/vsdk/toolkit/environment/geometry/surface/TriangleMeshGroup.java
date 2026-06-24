@@ -127,14 +127,14 @@ public class TriangleMeshGroup extends Surface {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
 
     @param inOut_Ray
     @return true if given ray intersects current TriangleMeshGroup
     */
-    public Ray doIntersection(Ray inOut_Ray) {
+    public Ray doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
-        if ( doIntersection(inOut_Ray, hit) ) {
+        if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
             return hit.ray();
         }
         return null;
@@ -155,11 +155,11 @@ public class TriangleMeshGroup extends Surface {
         if ( outData == null ) {
             return;
         }
-        doIntersection(inRay.withT(inT), outData);
+        doIntersectionFirstHit(inRay.withT(inT), outData);
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         double minT = Double.MAX_VALUE;
         RayHit bestHit = null;
@@ -170,7 +170,7 @@ public class TriangleMeshGroup extends Surface {
         for ( int i = 0; i < meshes.size(); i++ ) {
             TriangleMesh mesh = meshes.get(i);
             RayHit meshHit = new RayHit();
-            if ( mesh.doIntersection(inRay, meshHit, triangleInformation) &&
+            if ( mesh.doIntersectionFirstHit(inRay, meshHit, triangleInformation) &&
                  meshHit.ray().getT() < minT ) {
                 minT = meshHit.ray().getT();
                 bestHit = new RayHit(meshHit);

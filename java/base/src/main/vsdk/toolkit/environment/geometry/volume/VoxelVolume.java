@@ -268,19 +268,19 @@ public class VoxelVolume extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
 
     NOT IMPLEMENTED YET!
 
     @param inOut_Ray
     @return true if given ray intersects current VoxelVolume
     */
-    public Ray doIntersection(Ray inOut_Ray) {
+    public Ray doIntersectionFirstHit(Ray inOut_Ray) {
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         return false;
     }

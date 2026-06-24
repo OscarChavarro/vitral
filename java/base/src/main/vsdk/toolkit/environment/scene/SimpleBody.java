@@ -346,10 +346,10 @@ public class SimpleBody extends Entity {
     @return a new ray containing the closest hit distance, or {@code null}
         when the ray misses the body
     */
-    public final Ray doIntersection(Ray inRay)
+    public final Ray doIntersectionFirstHit(Ray inRay)
     {
         RayHit hit = new RayHit();
-        if ( doIntersection(inRay, hit) ) {
+        if ( doIntersectionFirstHit(inRay, hit) ) {
             return hit.ray();
         }
         return null;
@@ -363,7 +363,7 @@ public class SimpleBody extends Entity {
     @param outHit output structure populated on hit; may be {@code null}
     @return {@code true} when the ray intersects the body
     */
-    public final boolean doIntersection(Ray inOutRay, RayHit outHit)
+    public final boolean doIntersectionFirstHit(Ray inOutRay, RayHit outHit)
     {
         if ( geometry == null || !hasInvertibleScale ) {
             return false;
@@ -380,7 +380,7 @@ public class SimpleBody extends Entity {
         }
 
         if ( hasIdentityTransform ) {
-            return SurfaceRayIntersection.doIntersection(geometry, inOutRay, outHit);
+            return SurfaceRayIntersection.doIntersectionFirstHit(geometry, inOutRay, outHit);
         }
 
         if ( hasTranslationOnlyTransform ) {
@@ -415,8 +415,8 @@ public class SimpleBody extends Entity {
             }
         }
 
-        // ... and compute doIntersection operation on object's coordinates
-        if ( SurfaceRayIntersection.doIntersection(geometry, localRay, hit) ) {
+        // ... and compute doIntersectionFirstHit operation on object's coordinates
+        if ( SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, hit) ) {
             double localHitT;
             if ( hit.ray() != null ) {
                 localHitT = hit.ray().getT();
@@ -593,7 +593,7 @@ public class SimpleBody extends Entity {
             }
         }
 
-        if ( !SurfaceRayIntersection.doIntersection(geometry, localRay, hit) ) {
+        if ( !SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, hit) ) {
             return false;
         }
         double localHitT;

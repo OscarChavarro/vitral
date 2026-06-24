@@ -59,7 +59,7 @@ public class InfinitePlane extends HalfSpace {
         this.d = other.d;
     }
     public Ray
-    doIntersection(Ray inout_rayo) {
+    doIntersectionFirstHit(Ray inout_rayo) {
         double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) return null;
         double t = -(a*inout_rayo.getOrigin().x() + b*inout_rayo.getOrigin().y() + c*inout_rayo.getOrigin().z() + d)/denominator;
@@ -70,9 +70,9 @@ public class InfinitePlane extends HalfSpace {
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
+        Ray hit = doIntersectionFirstHit(inRay);
         if ( hit == null ) {
             return false;
         }
@@ -88,7 +88,7 @@ public class InfinitePlane extends HalfSpace {
         double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
         if ( Math.abs(denominator) < VSDK.EPSILON ) {
             Ray r = new Ray(inout_rayo.getOrigin(), inout_rayo.getDirection().multiply(-1));
-            Ray hit = doIntersection(r);
+            Ray hit = doIntersectionFirstHit(r);
             if ( hit != null ) {
                 return inout_rayo.withT(-hit.getT());
             }

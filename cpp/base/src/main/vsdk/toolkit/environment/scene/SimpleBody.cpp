@@ -174,10 +174,10 @@ void SimpleBody::setScale(const Vector3Dd& s)
     markModified();
 }
 
-Ray* SimpleBody::doIntersection(const Ray& inRay) const
+Ray* SimpleBody::doIntersectionFirstHit(const Ray& inRay) const
 {
     RayHit hit;
-    if ( !doIntersection(inRay, &hit) || hit.ray() == 0 ) {
+    if ( !doIntersectionFirstHit(inRay, &hit) || hit.ray() == 0 ) {
         return 0;
     }
     return new Ray(*hit.ray());
@@ -215,7 +215,7 @@ bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOu
     return true;
 }
 
-bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
+bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const
 {
     if ( geometry == 0 || !hasInvertibleScale ) {
         return false;
@@ -228,7 +228,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     }
 
     if ( hasIdentityTransform ) {
-        return SurfaceRayIntersection::doIntersection(geometry, inOutRay, outHit);
+        return SurfaceRayIntersection::doIntersectionFirstHit(geometry, inOutRay, outHit);
     }
 
     if ( hasTranslationOnlyTransform ) {
@@ -267,7 +267,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
     if ( outHit != 0 ) {
         outHit->setStoreRay(false);
         outHit->resetForDistanceOnly();
-        if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, outHit) ) {
+        if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, outHit) ) {
             outHit->setStoreRay(requestedStoreRay);
             outHit->setRequiredDetailMask(requestedDetailMask);
             return false;
@@ -277,7 +277,7 @@ bool SimpleBody::doIntersection(const Ray& inOutRay, RayHit* outHit) const
         RayHit localHitStorage;
         localHitStorage.setStoreRay(false);
         localHitStorage.resetForDistanceOnly();
-        if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, &localHitStorage) ) {
+        if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, &localHitStorage) ) {
             return false;
         }
     }
@@ -329,7 +329,7 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
         hit->reset(requiredDetailMask);
     }
 
-    if ( !SurfaceRayIntersection::doIntersection(geometry, localRay, hit) ) {
+    if ( !SurfaceRayIntersection::doIntersectionFirstHit(geometry, localRay, hit) ) {
         return false;
     }
 

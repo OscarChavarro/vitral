@@ -1136,7 +1136,7 @@ public class Camera extends Entity
                 }
 
                 if ( clippingPlane != null ) {
-                    Ray hit = clippingPlane.doIntersection(testRay);
+                    Ray hit = clippingPlane.doIntersectionFirstHit(testRay);
                     if ( hit == null ) {
                         Logger.reportMessage(this, VSDK.WARNING, 
                             "clipLineCohenSutherlandPlanes", 
@@ -1458,7 +1458,7 @@ public class Camera extends Entity
             r = new Ray(p, inPoint.subtract(p));
 
             // 3.3. Project point in view plane from perspective eyepoint
-            Ray hit = viewPlane.doIntersection(r);
+            Ray hit = viewPlane.doIntersectionFirstHit(r);
             if ( hit == null ||
                  r.getDirection().length() < VSDK.EPSILON ) {
                 return false;

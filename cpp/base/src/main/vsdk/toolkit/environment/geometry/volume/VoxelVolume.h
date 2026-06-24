@@ -38,8 +38,8 @@ public:
     void putVoxelAtPosition(const Vector3Dd& p, char val);
 
     virtual double* getMinMax();
-    Ray* doIntersection(const Ray& inOutRay);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inOutRay);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 
     static Matrix4x4d getTransformFromVoxelFrameToMinMax(const double minmax[6]);

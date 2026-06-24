@@ -50,8 +50,8 @@ bool CameraControllerGoogleEarth::processMouseDraggedEvent(const MouseEvent& e)
     Ray rayA = camera->generateRay(prevX, prevY);
     Ray rayB = camera->generateRay(x, y);
     InfinitePlane infinitePlane(Vector3Dd(0, 0, 1), Vector3Dd(0, 0, 0));
-    Ray* hitA = infinitePlane.doIntersection(rayA);
-    Ray* hitB = infinitePlane.doIntersection(rayB);
+    Ray* hitA = infinitePlane.doIntersectionFirstHit(rayA);
+    Ray* hitB = infinitePlane.doIntersectionFirstHit(rayB);
     if ( hitA == nullptr || hitB == nullptr ) {
         delete hitA;
         delete hitB;

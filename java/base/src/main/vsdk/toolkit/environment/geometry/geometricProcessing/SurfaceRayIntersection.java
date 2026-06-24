@@ -10,7 +10,7 @@ import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.Box;
 
 public class SurfaceRayIntersection {
-    public static boolean doIntersection(Geometry geometry, Ray inRay, RayHit outHit)
+    public static boolean doIntersectionFirstHit(Geometry geometry, Ray inRay, RayHit outHit)
     {
         if ( geometry == null ) {
             return false;
@@ -24,7 +24,7 @@ public class SurfaceRayIntersection {
             }
         }
 
-        return geometry.doIntersection(inRay, outHit);
+        return geometry.doIntersectionFirstHit(inRay, outHit);
     }
 
     private static boolean rayIntersectsGeometryBounds(Geometry geometry, Ray inRay)
@@ -42,6 +42,6 @@ public class SurfaceRayIntersection {
             inRay.getDirection(),
             inRay.getT()
         );
-        return boundingVolume.doIntersection(localRay, null);
+        return boundingVolume.doIntersectionFirstHit(localRay, null);
     }
 }

@@ -14,7 +14,7 @@ public:
 
     virtual ~Geometry() {}
 
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit) = 0;
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) = 0;
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outHit);
     virtual int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p);
     virtual double* getMinMax() = 0;

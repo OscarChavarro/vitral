@@ -57,8 +57,8 @@ public:
     Vector3Dd evaluateBinormal(double s, double t);
     Vector3Dd evaluateNormal(double s, double t);
 
-    Ray* doIntersection(const Ray& r);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& r);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double intT, RayHit* outData);
     virtual double* getMinMax();
 

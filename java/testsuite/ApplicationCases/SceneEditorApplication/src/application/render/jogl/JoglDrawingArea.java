@@ -986,7 +986,7 @@ public class JoglDrawingArea implements
         gl.glPopMatrix();
 
         //-----------------------------------------------------------------
-        if ( parent.theScene.doIntersection(ray, info) ) {
+        if ( parent.theScene.doIntersectionFirstHit(ray, info) ) {
             d = d.multiply(ray.getT());
             p = ray.getOrigin().add(d);
 

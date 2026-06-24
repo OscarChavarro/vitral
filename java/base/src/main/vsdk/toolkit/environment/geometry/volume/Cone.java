@@ -363,21 +363,21 @@ public class Cone extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOutRay
     @return true if given ray intersects current Cone
     */
     public Ray
-    doIntersection(Ray inOutRay) {
+    doIntersectionFirstHit(Ray inOutRay) {
         RayHit hit = new RayHit();
-        if ( doIntersection(inOutRay, hit) ) {
+        if ( doIntersectionFirstHit(inOutRay, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inOutRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inOutRay, RayHit outHit)
     {
         if ( outHit == null || !outHit.needsAnySurfaceData() ) {
             return doIntersectionDistanceOnly(inOutRay, outHit);
@@ -469,7 +469,7 @@ public class Cone extends Solid {
                                   RayHit outData)
     {
         RayHit hit = new RayHit();
-        if ( doIntersection(inRay.withT(Double.MAX_VALUE), hit) ) {
+        if ( doIntersectionFirstHit(inRay.withT(Double.MAX_VALUE), hit) ) {
             outData.clone(hit);
         }
     }

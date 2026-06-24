@@ -118,12 +118,12 @@ public class SimpleBodyGroup extends Entity {
     SPACE COORDINATES. Note that this technique is a central part of the
     VSDK geometric modeling proposal, where geometric transformations are
     not included in the geometries representations, making the internal
-    code of `doIntersection` methods much easier to develop and maintain.
+    code of `doIntersectionFirstHit` methods much easier to develop and maintain.
     @param inOutRay
     @return true if given line intersects with any body inside current body
     group
     */
-    public Ray doIntersection(Ray inOutRay)
+    public Ray doIntersectionFirstHit(Ray inOutRay)
     {
         Ray myRay;
         int i;
@@ -140,7 +140,7 @@ public class SimpleBodyGroup extends Entity {
 
         for ( i = 0; i < bodies.size(); i++ ) {
             RayHit hit = new RayHit();
-            if ( bodies.get(i).getGeometry().doIntersection(myRay, hit) ) {
+            if ( bodies.get(i).getGeometry().doIntersectionFirstHit(myRay, hit) ) {
                 if ( hit.ray().getT() < inOutRay.getT() ) {
                     inOutRay = inOutRay.withT(hit.ray().getT());
                     nearestHit = inOutRay;

@@ -183,7 +183,7 @@ public abstract class LightingShader extends Shader {
         for ( int i = 0; i < objects.size(); i++ ) {
             SimpleBody candidateObject = objects.get(i);
             shadowCandidateHit.resetForDistanceOnly();
-            if ( candidateObject.doIntersection(shadowRay, shadowCandidateHit) ) {
+            if ( candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
                 double hitDistance = shadowCandidateHit.hitDistance();
                 if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
                     return true;

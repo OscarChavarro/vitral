@@ -60,8 +60,8 @@ public:
     int getMaxFaceId() const;
     void setMaxFaceId(int maxFaceId);
 
-    Ray* doIntersection(const Ray& inOutRay);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit) override;
+    Ray* doIntersectionFirstHit(const Ray& inOutRay);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
     virtual double* getMinMax() override;
 

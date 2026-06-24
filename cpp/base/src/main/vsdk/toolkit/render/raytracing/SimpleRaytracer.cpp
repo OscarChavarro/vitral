@@ -168,7 +168,7 @@ int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,java::Arr
     for ( long int i=0; i<bodies.size(); i++ ) {
         candidateHit->resetForDistanceOnly();
         RaytraceStatistics::recordObjectIntersectionTest();
-        if ( bodies.get(i)->doIntersection(inRay, candidateHit) ) {
+        if ( bodies.get(i)->doIntersectionFirstHit(inRay, candidateHit) ) {
             double d = candidateHit->hitDistance();
             if ( d < nearestDistance && d > VSDK::EPSILON ) { nearestDistance = d; nearestIndex = (int)i; }
         }

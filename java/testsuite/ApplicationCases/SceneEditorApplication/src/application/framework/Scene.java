@@ -189,7 +189,7 @@ public class Scene
         return thing;
     }
 
-    public boolean doIntersection(Ray r, RayHit info)
+    public boolean doIntersectionFirstHit(Ray r, RayHit info)
     {
         int i;
         double nearestDistance = Float.MAX_VALUE;
@@ -200,7 +200,7 @@ public class Scene
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
             RayHit hit = new RayHit();
-            if ( gi.doIntersection(r, hit) && hit.ray().getT() < nearestDistance ) {
+            if ( gi.doIntersectionFirstHit(r, hit) && hit.ray().getT() < nearestDistance ) {
                 ii.clone(hit);
                 nearestDistance = hit.ray().getT();
                 r = hit.ray();
@@ -235,7 +235,7 @@ public class Scene
         ArrayList<SimpleBody> things = scene.getSimpleBodies();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
-            Ray hit = gi.doIntersection(r);
+            Ray hit = gi.doIntersectionFirstHit(r);
             if ( hit != null && hit.getT() < nearestDistance ) {
                 nearestDistance = hit.getT();
                 r = hit;

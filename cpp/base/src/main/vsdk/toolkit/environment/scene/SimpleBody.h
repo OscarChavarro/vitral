@@ -78,8 +78,8 @@ public:
     Matrix4x4d getTransformationMatrix() const;
     void setScale(const Vector3Dd& s);
 
-    Ray* doIntersection(const Ray& inRay) const;
-    bool doIntersection(const Ray& inOutRay, RayHit* outHit) const;
+    Ray* doIntersectionFirstHit(const Ray& inRay) const;
+    bool doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) const;
     int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p) const;
     void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) const;
 };

@@ -74,7 +74,7 @@ int countBoundaryCrossingsToInfinity(
         }
 
         RayHit planeHit;
-        if (!plane->doIntersection(ray, &planeHit) || planeHit.ray() == 0) {
+        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.ray() == 0) {
             if (!borrowedPlanes) delete plane;
             continue;
         }
@@ -136,7 +136,7 @@ std::vector<double> collectBoundaryCrossings(
         }
 
         RayHit planeHit;
-        if (!plane->doIntersection(ray, &planeHit) || planeHit.ray() == 0) {
+        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.ray() == 0) {
             if (!borrowedPlanes) delete plane;
             continue;
         }

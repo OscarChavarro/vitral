@@ -750,7 +750,7 @@ public class TriangleMesh extends Surface {
     /**
     This method is supposed to be a friend of TriangleMesh related objects.
     The method is used to query the last intersected triangle, after a
-    positive called to the doIntersection method.
+    positive called to the doIntersectionFirstHit method.
     @return selected triangle
     */
     public int doIntersectionInformation() {
@@ -819,26 +819,26 @@ public class TriangleMesh extends Surface {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOut_Ray
     @return true if given ray intersects current TriangleMesh
     */
     public Ray
-    doIntersection(Ray inOut_Ray) {
+    doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
-        if ( doIntersection(inOut_Ray, hit) ) {
+        if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         return doIntersectionInternal(inRay, outHit, null);
     }
 
-    boolean doIntersection(Ray inRay, RayHit outHit, int[] outTriangleIndex)
+    boolean doIntersectionFirstHit(Ray inRay, RayHit outHit, int[] outTriangleIndex)
     {
         return doIntersectionInternal(inRay, outHit, outTriangleIndex);
     }
@@ -1012,7 +1012,7 @@ public class TriangleMesh extends Surface {
             return;
         }
         Ray queryRay = inRay.withT(inT);
-        doIntersection(queryRay, outData);
+        doIntersectionFirstHit(queryRay, outData);
     }
 
     /**
@@ -1273,13 +1273,13 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            if ( p.doIntersection(hitA, gia) ) {
+            if ( p.doIntersectionFirstHit(hitA, gia) ) {
                 ma = gia.p;
             }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
-            if ( p.doIntersection(hitB, gib) ) {
+            if ( p.doIntersectionFirstHit(hitB, gib) ) {
                 mb = gib.p;
             }
         }
@@ -1326,7 +1326,7 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            if ( p.doIntersection(hitA, gia) ) {
+            if ( p.doIntersectionFirstHit(hitA, gia) ) {
                 ma = gia.p;
             }
         }
@@ -1372,13 +1372,13 @@ public class TriangleMesh extends Surface {
 
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
-            if ( p.doIntersection(hitA, gia) ) {
+            if ( p.doIntersectionFirstHit(hitA, gia) ) {
                 ma = gia.p;
             }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
-            if ( p.doIntersection(hitB, gib) ) {
+            if ( p.doIntersectionFirstHit(hitB, gib) ) {
                 mb = gib.p;
             }
         }

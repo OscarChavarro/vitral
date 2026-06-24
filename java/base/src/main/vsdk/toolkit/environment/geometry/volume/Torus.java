@@ -64,7 +64,7 @@ public class Torus extends Solid
         this.minorRadius = rMinor;
     }
 
-    public Ray doIntersection(Ray inOut_ray) 
+    public Ray doIntersectionFirstHit(Ray inOut_ray) 
     {
         Vector3Dd p = inOut_ray.getOrigin();
 
@@ -117,9 +117,9 @@ public class Torus extends Solid
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        Ray hit = doIntersection(inRay);
+        Ray hit = doIntersectionFirstHit(inRay);
         if ( hit == null ) {
             return false;
         }

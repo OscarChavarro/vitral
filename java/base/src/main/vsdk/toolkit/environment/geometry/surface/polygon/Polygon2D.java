@@ -127,13 +127,13 @@ public class Polygon2D extends Surface
         return minMax;
     }
 
-    public Ray doIntersection(Ray inOut_ray)
+    public Ray doIntersectionFirstHit(Ray inOut_ray)
     {
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         return false;
     }

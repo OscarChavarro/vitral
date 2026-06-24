@@ -508,18 +508,18 @@ public class ParametricBiCubicPatch extends Surface {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
 
     \todo  implement the method
     @param r
     @return true if given ray intersects current ParametricBicubicPatch
     */
-    public Ray doIntersection(Ray r) {
+    public Ray doIntersectionFirstHit(Ray r) {
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         return false;
     }

@@ -9,8 +9,8 @@ class Curve : public Geometry {
 public:
     virtual ~Curve() override {}
 
-    virtual Ray* doIntersection(const Ray& r);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit) override;
+    virtual Ray* doIntersectionFirstHit(const Ray& r);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
 };
 

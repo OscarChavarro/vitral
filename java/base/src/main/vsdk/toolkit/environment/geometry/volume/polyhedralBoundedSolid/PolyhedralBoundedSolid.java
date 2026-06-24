@@ -231,20 +231,20 @@ public class PolyhedralBoundedSolid extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOutRay input ray to test.
     @return hit ray with updated `t` when intersection exists, or null otherwise.
     */
-    public Ray doIntersection(Ray inOutRay) {
+    public Ray doIntersectionFirstHit(Ray inOutRay) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
-        if ( doIntersection(inOutRay, hit) ) {
+        if ( doIntersectionFirstHit(inOutRay, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         int i;
         double minT; // Shortest distance founded so far
@@ -265,7 +265,7 @@ public class PolyhedralBoundedSolid extends Solid {
                 continue;
             }
             RayHit planeHit = new RayHit();
-            if ( containingPlane.doIntersection(ray, planeHit) ) {
+            if ( containingPlane.doIntersectionFirstHit(ray, planeHit) ) {
                 Ray hit = planeHit.ray();
                 if ( hit.getT() < minT ) {
                     hit = hit.withDirection(hit.getDirection().normalized());
@@ -392,7 +392,7 @@ public class PolyhedralBoundedSolid extends Solid {
         if ( outData == null ) {
             return;
         }
-        doIntersection(inRay.withT(inT), outData);
+        doIntersectionFirstHit(inRay.withT(inT), outData);
     }
 
     /** Needed for supplying the Geometry.getMinMax operation */

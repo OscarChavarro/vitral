@@ -34,8 +34,8 @@ public:
     void setTopRadius(double val);
     void setHeight(double val);
 
-    Ray* doIntersection(const Ray& inOutRay);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inOutRay);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual double* getMinMax();
 

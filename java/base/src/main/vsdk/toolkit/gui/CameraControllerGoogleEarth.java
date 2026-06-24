@@ -98,8 +98,8 @@ public class CameraControllerGoogleEarth extends CameraController {
         //----------------------------------------------------------------------
         // 3. Intersection with the infinite plane
         InfinitePlane infinitePlane = new InfinitePlane(new Vector3Dd(0, 0, 1), new Vector3Dd(0, 0, 0));
-        Ray hitA = infinitePlane.doIntersection(RayA);
-        Ray hitB = infinitePlane.doIntersection(RayB);
+        Ray hitA = infinitePlane.doIntersectionFirstHit(RayA);
+        Ray hitB = infinitePlane.doIntersectionFirstHit(RayB);
         if ( hitA == null || hitB == null ) {
             return false;
         }

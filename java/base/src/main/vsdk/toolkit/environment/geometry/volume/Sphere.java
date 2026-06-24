@@ -31,12 +31,12 @@ public class Sphere extends Solid {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inout_rayo
     @return true if given ray intersects current Sphere
     */
     public Ray
-    doIntersection(Ray inout_rayo) {
+    doIntersectionFirstHit(Ray inout_rayo) {
         double dx = -inout_rayo.getOrigin().x();
         double dy = -inout_rayo.getOrigin().y();
         double dz = -inout_rayo.getOrigin().z();
@@ -63,7 +63,7 @@ public class Sphere extends Solid {
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
         double dx = -inRay.getOrigin().x();
         double dy = -inRay.getOrigin().y();

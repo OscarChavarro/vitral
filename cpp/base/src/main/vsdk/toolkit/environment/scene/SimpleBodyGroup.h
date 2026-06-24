@@ -40,7 +40,7 @@ public:
 
     Matrix4x4d getTransformationMatrix() const;
 
-    Ray* doIntersection(const Ray& inOutRay);
+    Ray* doIntersectionFirstHit(const Ray& inOutRay);
     double* getMinMax();
 };
 

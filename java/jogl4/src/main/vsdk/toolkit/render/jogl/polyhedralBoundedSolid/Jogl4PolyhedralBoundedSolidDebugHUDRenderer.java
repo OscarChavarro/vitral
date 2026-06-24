@@ -239,7 +239,7 @@ public class Jogl4PolyhedralBoundedSolidDebugHUDRenderer
             return true;
         }
 
-        Ray hit = solid.doIntersection(visibilityRay);
+        Ray hit = solid.doIntersectionFirstHit(visibilityRay);
         if ( hit == null ) {
             return true;
         }

@@ -226,7 +226,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             if ( face.getContainingPlane() == null ) {
                 continue;
             }
-            hit = face.getContainingPlane().doIntersection(new Ray(ray));
+            hit = face.getContainingPlane().doIntersectionFirstHit(new Ray(ray));
             if ( hit == null || hit.getT() <= eps ) {
                 continue;
             }

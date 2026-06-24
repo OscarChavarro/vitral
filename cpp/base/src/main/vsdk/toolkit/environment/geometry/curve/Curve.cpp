@@ -1,14 +1,14 @@
 #include "vsdk/toolkit/environment/geometry/curve/Curve.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
-Ray* Curve::doIntersection(const Ray&)
+Ray* Curve::doIntersectionFirstHit(const Ray&)
 {
     return nullptr;
 }
 
-bool Curve::doIntersection(const Ray& inRay, RayHit* outHit)
+bool Curve::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    Ray* hit = doIntersection(inRay);
+    Ray* hit = doIntersectionFirstHit(inRay);
     if ( hit == nullptr ) {
         return false;
     }

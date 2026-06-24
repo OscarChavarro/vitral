@@ -93,16 +93,16 @@ static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
     return inside;
 }
 
-Ray* Polygon2D::doIntersection(const Ray& inOut_ray)
+Ray* Polygon2D::doIntersectionFirstHit(const Ray& inOut_ray)
 {
     RayHit hit;
-    if (doIntersection(inOut_ray, &hit) && hit.ray() != nullptr) {
+    if (doIntersectionFirstHit(inOut_ray, &hit) && hit.ray() != nullptr) {
         return new Ray(*hit.ray());
     }
     return nullptr;
 }
 
-bool Polygon2D::doIntersection(const Ray& inRay, RayHit* outHit)
+bool Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     if (std::abs(inRay.getDirection().z()) < VSDK::EPSILON) return false;
     double t = -inRay.getOrigin().z() / inRay.getDirection().z();

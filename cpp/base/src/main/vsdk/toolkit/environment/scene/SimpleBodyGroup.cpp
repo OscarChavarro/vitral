@@ -33,7 +33,7 @@ Matrix4x4d SimpleBodyGroup::getTransformationMatrix() const
     return T.multiply(rotation.multiply(S));
 }
 
-Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
+Ray* SimpleBodyGroup::doIntersectionFirstHit(const Ray& inputRay)
 {
     Ray inOutRay = inputRay.withT(DBL_MAX);
 
@@ -47,7 +47,7 @@ Ray* SimpleBodyGroup::doIntersection(const Ray& inputRay)
     for (long int i = 0; i < bodies.size(); i++) {
         if ( bodies[i] == 0 || bodies[i]->getGeometry() == 0 ) continue;
         RayHit hit;
-        if ( bodies[i]->getGeometry()->doIntersection(myRay, &hit) && hit.ray() != 0 ) {
+        if ( bodies[i]->getGeometry()->doIntersectionFirstHit(myRay, &hit) && hit.ray() != 0 ) {
             if ( hit.ray()->getT() < inOutRay.getT() ) {
                 inOutRay = inOutRay.withT(hit.ray()->getT());
                 if ( nearestHit != 0 ) delete nearestHit;

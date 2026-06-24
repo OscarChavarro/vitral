@@ -72,7 +72,7 @@ public abstract class Geometry extends Entity {
     ILLUSTRATION: As a path following example take into account the red Sphere
     and the gray Box shown in the figure. From the point indicated by the green
     Sphere emanates a Ray in the direction shown by the cyan Arrow. The 
-    Geometry.doIntersection method returns true the first time is called,
+    Geometry.doIntersectionFirstHit method returns true the first time is called,
     and the Ray is modified to have the distance between the Ray origin and
     the red Sphere surface in its Ray.t() attribute. From this operation,
     the Geometry.doExtraInformation method could be used to recall the
@@ -91,7 +91,7 @@ public abstract class Geometry extends Entity {
     @return If the specified input Ray intersects current Geometry, true
     value is returned, otherwise false is returned.
     */
-    public abstract boolean doIntersection(Ray inRay, RayHit outHit);
+    public abstract boolean doIntersectionFirstHit(Ray inRay, RayHit outHit);
 
     /**
     Rebuilds additional surface information for a ray/parameter pair already
@@ -109,7 +109,7 @@ public abstract class Geometry extends Entity {
     This method returns the number of front facing surface elements (with
     respect to `origin`) between the `origin` point and the `p` point. The
     internal working of this method is usually related with the
-    `doIntersection` method.
+    `doIntersectionFirstHit` method.
 
     This operation is used in queries as the specified on [APPE1967]. Note,
     that as stated on [APPE1967]: "...A bounded surface hides a point when the

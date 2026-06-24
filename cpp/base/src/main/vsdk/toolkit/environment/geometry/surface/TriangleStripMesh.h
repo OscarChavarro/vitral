@@ -29,8 +29,8 @@ public:
     void setStrips(const java::ArrayList< java::ArrayList<int> >& indexes);
     java::ArrayList< java::ArrayList<int> >& getStrips();
 
-    Ray* doIntersection(const Ray& inOut_Ray);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
 };
 

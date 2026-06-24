@@ -50,7 +50,7 @@ public class CubemapBackground extends Background {
         d = d.normalized();
         Ray r = new Ray(new Vector3Dd(0, 0, 0), d);
         RayHit hit = new RayHit();
-        if ( !boundingCube.doIntersection(r, hit) ) {
+        if ( !boundingCube.doIntersectionFirstHit(r, hit) ) {
             return new ColorRgb();
         }
         int plane = classifyPlane(hit.n);

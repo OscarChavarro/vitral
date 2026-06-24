@@ -321,23 +321,23 @@ public class QuadMesh extends Surface {
 
     /**
     Check the general interface contract in superclass method
-    Geometry.doIntersection.
+    Geometry.doIntersectionFirstHit.
     @param inOut_Ray
     @return true if given ray intersects current QuadMesh
     */
     public Ray
-    doIntersection(Ray inOut_Ray) {
+    doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
-        if ( doIntersection(inOut_Ray, hit) ) {
+        if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
             return hit.ray();
         }
         return null;
     }
 
     @Override
-    public boolean doIntersection(Ray inRay, RayHit outHit)
+    public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        return exportToTriangleMeshGroup().doIntersection(inRay, outHit);
+        return exportToTriangleMeshGroup().doIntersectionFirstHit(inRay, outHit);
     }
 
     /**

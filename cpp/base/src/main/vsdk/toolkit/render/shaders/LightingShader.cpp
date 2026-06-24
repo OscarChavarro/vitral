@@ -131,7 +131,7 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
                 SimpleBody* candidateObject = objects.get(oi);
                 shadowCandidateHit->resetForDistanceOnly();
                 RaytraceStatistics::recordShadowRay();
-                if ( candidateObject != 0 && candidateObject->doIntersection(shadowRay, shadowCandidateHit) ) {
+                if ( candidateObject != 0 && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
                     double hitDistance = shadowCandidateHit->hitDistance();
                     if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
                         shadowed = true;

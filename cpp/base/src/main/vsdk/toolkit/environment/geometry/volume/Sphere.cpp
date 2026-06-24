@@ -9,7 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 Sphere::Sphere(double r) : radius_(r), radiusSquared_(r * r) {}
 
-Ray* Sphere::doIntersection(const Ray& inoutRay) {
+Ray* Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     double dx = -inoutRay.getOrigin().x();
     double dy = -inoutRay.getOrigin().y();
     double dz = -inoutRay.getOrigin().z();
@@ -30,7 +30,7 @@ Ray* Sphere::doIntersection(const Ray& inoutRay) {
     return new Ray(r);
 }
 
-bool Sphere::doIntersection(const Ray& inRay, RayHit* outHit) {
+bool Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double dx = -inRay.getOrigin().x();
     double dy = -inRay.getOrigin().y();
     double dz = -inRay.getOrigin().z();

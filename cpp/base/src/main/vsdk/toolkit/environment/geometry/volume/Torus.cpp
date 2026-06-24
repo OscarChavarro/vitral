@@ -18,7 +18,7 @@ double Torus::implicitValue(const Vector3Dd& p) const {
     return sum*sum - 4.0*majorRadius*majorRadius*(x*x + y*y);
 }
 
-Ray* Torus::doIntersection(const Ray& inOutRay) {
+Ray* Torus::doIntersectionFirstHit(const Ray& inOutRay) {
     Ray normalized(inOutRay.getOrigin(), inOutRay.getDirection().normalized(), inOutRay.getT());
 
     const double tMin = 0.0;
@@ -65,8 +65,8 @@ Ray* Torus::doIntersection(const Ray& inOutRay) {
     return new Ray(out);
 }
 
-bool Torus::doIntersection(const Ray& inRay, RayHit* outHit) {
-    Ray* hit = doIntersection(inRay);
+bool Torus::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
+    Ray* hit = doIntersectionFirstHit(inRay);
     if (hit == nullptr) return false;
 
     if (outHit != nullptr) {

@@ -241,18 +241,18 @@ TriangleMeshGroup* QuadMesh::exportToTriangleMeshGroup()
     return g;
 }
 
-Ray* QuadMesh::doIntersection(const Ray& inOut_Ray)
+Ray* QuadMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     TriangleMeshGroup* g = exportToTriangleMeshGroup();
-    Ray* out = g->doIntersection(inOut_Ray);
+    Ray* out = g->doIntersectionFirstHit(inOut_Ray);
     delete g;
     return out;
 }
 
-bool QuadMesh::doIntersection(const Ray& inRay, RayHit* outHit)
+bool QuadMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     TriangleMeshGroup* g = exportToTriangleMeshGroup();
-    bool out = g->doIntersection(inRay, outHit);
+    bool out = g->doIntersectionFirstHit(inRay, outHit);
     delete g;
     return out;
 }

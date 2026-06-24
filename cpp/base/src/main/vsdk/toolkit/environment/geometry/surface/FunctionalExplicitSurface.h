@@ -49,8 +49,8 @@ public:
 
     virtual double* getMinMax();
 
-    Ray* doIntersection(const Ray& inOut_Ray);
-    virtual bool doIntersection(const Ray& inRay, RayHit* outHit);
+    Ray* doIntersectionFirstHit(const Ray& inOut_Ray);
+    virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData);
     virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance);
 };

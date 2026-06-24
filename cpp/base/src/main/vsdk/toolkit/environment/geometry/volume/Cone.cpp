@@ -84,15 +84,15 @@ Ray* Cone::doIntersectionTap(const Ray& inOutRay, double inR, double inH, RayHit
     return nullptr;
 }
 
-Ray* Cone::doIntersection(const Ray& inOutRay) {
+Ray* Cone::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersection(inOutRay, &hit) && hit.ray() != nullptr) {
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
         return new Ray(*hit.ray());
     }
     return nullptr;
 }
 
-bool Cone::doIntersection(const Ray& inOutRay, RayHit* outHit) {
+bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
     RayHit infoTap1, infoTap2, infoBody;
     Ray* bodyHit = nullptr;
     Ray* tap1Hit = nullptr;
@@ -157,7 +157,7 @@ bool Cone::doIntersection(const Ray& inOutRay, RayHit* outHit) {
 void Cone::doExtraInformation(const Ray& inRay, double, RayHit* outData) {
     if (outData == nullptr) return;
     RayHit hit;
-    if (doIntersection(inRay.withT(1e308), &hit)) {
+    if (doIntersectionFirstHit(inRay.withT(1e308), &hit)) {
         outData->clone(hit);
     }
 }

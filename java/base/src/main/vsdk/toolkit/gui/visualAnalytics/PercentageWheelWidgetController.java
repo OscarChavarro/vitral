@@ -65,7 +65,7 @@ public class PercentageWheelWidgetController extends Controller {
         ray = c.generateRay(x, y);
         InfinitePlane plane;
         plane = new InfinitePlane(new Vector3Dd(0, 0, 1), p);
-        Ray hit = plane.doIntersection(ray);
+        Ray hit = plane.doIntersectionFirstHit(ray);
         if ( hit == null ) {
             return -1;
         }

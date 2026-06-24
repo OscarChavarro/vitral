@@ -7,7 +7,7 @@ class RayHit;
 
 class SurfaceRayIntersection {
 public:
-    static bool doIntersection(Geometry* geometry, const Ray& inRay, RayHit* outHit);
+    static bool doIntersectionFirstHit(Geometry* geometry, const Ray& inRay, RayHit* outHit);
 };
 
 #endif

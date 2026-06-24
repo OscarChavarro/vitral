@@ -331,10 +331,10 @@ bool TriangleMesh::intersectTriangle(const Ray& ray, const Vector3Dd& v0, const 
     return t > VSDK::EPSILON;
 }
 
-Ray* TriangleMesh::doIntersection(const Ray& inOut_Ray)
+Ray* TriangleMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit;
-    if (doIntersection(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
     return 0;
 }
 
@@ -440,12 +440,12 @@ bool TriangleMesh::doIntersectionInternal(const Ray& inRay, RayHit* outHit, int*
     return true;
 }
 
-bool TriangleMesh::doIntersection(const Ray& inRay, RayHit* outHit)
+bool TriangleMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     return doIntersectionInternal(inRay, outHit, 0);
 }
 
-bool TriangleMesh::doIntersection(const Ray& inRay, RayHit* outHit, int* outTriangleIndex)
+bool TriangleMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit, int* outTriangleIndex)
 {
     return doIntersectionInternal(inRay, outHit, outTriangleIndex);
 }
@@ -454,7 +454,7 @@ void TriangleMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outD
 {
     if (outData == 0) return;
     RayHit hit;
-    if (doIntersection(inRay.withT(inT), &hit)) outData->clone(hit);
+    if (doIntersectionFirstHit(inRay.withT(inT), &hit)) outData->clone(hit);
 }
 
 int TriangleMesh::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
@@ -588,13 +588,13 @@ void TriangleMesh::simpleTriangleCut(InfinitePlane& p, java::ArrayList<double>& 
     Ray* hitA = p.doIntersectionWithNegative(Ray(p1, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersection(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
         delete hitA;
     }
     Ray* hitB = p.doIntersectionWithNegative(Ray(p1, b));
     if (hitB != 0) {
         RayHit gib;
-        if (p.doIntersection(*hitB, &gib)) { mb = gib.p; hasMb = true; }
+        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.p; hasMb = true; }
         delete hitB;
     }
 
@@ -619,7 +619,7 @@ void TriangleMesh::halfTriangleCut(InfinitePlane& p, java::ArrayList<double>& ex
     Ray* hitA = p.doIntersectionWithNegative(Ray(p2, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersection(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
         delete hitA;
     }
 
@@ -644,13 +644,13 @@ void TriangleMesh::doubleTriangleCut(InfinitePlane& p, java::ArrayList<double>& 
     Ray* hitA = p.doIntersectionWithNegative(Ray(p3, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersection(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
         delete hitA;
     }
     Ray* hitB = p.doIntersectionWithNegative(Ray(p3, b));
     if (hitB != 0) {
         RayHit gib;
-        if (p.doIntersection(*hitB, &gib)) { mb = gib.p; hasMb = true; }
+        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.p; hasMb = true; }
         delete hitB;
     }
 

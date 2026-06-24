@@ -24,10 +24,10 @@ static bool rayIntersectsGeometryBounds(Geometry* geometry, const Ray& inRay)
         inRay.getDirection(),
         inRay.getT()
     );
-    return boundingVolume.doIntersection(localRay, 0);
+    return boundingVolume.doIntersectionFirstHit(localRay, 0);
 }
 
-bool SurfaceRayIntersection::doIntersection(Geometry* geometry, const Ray& inRay, RayHit* outHit)
+bool SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const Ray& inRay, RayHit* outHit)
 {
     if ( geometry == 0 ) {
         return false;
@@ -41,5 +41,5 @@ bool SurfaceRayIntersection::doIntersection(Geometry* geometry, const Ray& inRay
         }
     }
 
-    return geometry->doIntersection(inRay, outHit);
+    return geometry->doIntersectionFirstHit(inRay, outHit);
 }

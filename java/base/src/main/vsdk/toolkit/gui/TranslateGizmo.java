@@ -796,7 +796,7 @@ public class TranslateGizmo extends Gizmo {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
-            Ray hit = plane.doIntersection(r);
+            Ray hit = plane.doIntersectionFirstHit(r);
             if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();
@@ -913,7 +913,7 @@ public class TranslateGizmo extends Gizmo {
             r = r.withT(Double.MAX_VALUE);
             SimpleBody gi = elementInstances.get(i);
 
-            Ray hit = gi.getGeometry() != null ? gi.doIntersection(r) : null;
+            Ray hit = gi.getGeometry() != null ? gi.doIntersectionFirstHit(r) : null;
             if ( hit != null && hit.getT() < nearestDistance ) {
                 nearestDistance = hit.getT();
                 nearestElement = index;
@@ -1053,7 +1053,7 @@ public class TranslateGizmo extends Gizmo {
                 v = v.multiply(-1);
             }
             plane = new InfinitePlane(v, o);
-            Ray hit = plane.doIntersection(r);
+            Ray hit = plane.doIntersectionFirstHit(r);
             if ( hit == null ) {
                 oldmousex = e.getX();
                 oldmousey = e.getY();

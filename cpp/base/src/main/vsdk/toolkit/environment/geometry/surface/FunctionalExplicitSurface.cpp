@@ -130,24 +130,24 @@ double* FunctionalExplicitSurface::getMinMax() { return internalGeometry ? inter
 
 /*
 Check the general interface contract in superclass method
-Geometry.doIntersection.
+Geometry.doIntersectionFirstHit.
 
 \todo  Should not delegate work over tesselated geometry version. Should
 evaluate directly from algebraic function surface!
 @param inOut_Ray
 @return true if given ray intersects current FunctionalExplicitSurface
 */
-Ray* FunctionalExplicitSurface::doIntersection(const Ray& inOut_Ray)
+Ray* FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     if (internalGeometry == 0) return 0;
     RayHit hit;
-    if (internalGeometry->doIntersection(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
+    if (internalGeometry->doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
     return 0;
 }
 
-bool FunctionalExplicitSurface::doIntersection(const Ray& inRay, RayHit* outHit)
+bool FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    return internalGeometry ? internalGeometry->doIntersection(inRay, outHit) : false;
+    return internalGeometry ? internalGeometry->doIntersectionFirstHit(inRay, outHit) : false;
 }
 
 /*
@@ -161,7 +161,7 @@ void FunctionalExplicitSurface::doExtraInformation(const Ray& inRay, double inT,
 {
     if (internalGeometry == 0 || outData == 0) return;
     RayHit hit;
-    if (internalGeometry->doIntersection(inRay.withT(inT), &hit)) outData->clone(hit);
+    if (internalGeometry->doIntersectionFirstHit(inRay.withT(inT), &hit)) outData->clone(hit);
 }
 
 /*

@@ -21,15 +21,15 @@ static const Vector3Dd ZERO_VECTOR(0, 0, 0);
 Box::Box(double dx, double dy, double dz) : size(dx, dy, dz) {}
 Box::Box(const Vector3Dd& s) : size(s) {}
 
-Ray* Box::doIntersection(const Ray& inOutRay) {
+Ray* Box::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersection(inOutRay, &hit) && hit.ray() != nullptr) {
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
         return new Ray(*hit.ray());
     }
     return nullptr;
 }
 
-bool Box::doIntersection(const Ray& inRay, RayHit* outHit) {
+bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double minT = 1e308;
     int hitPlane = 0;
     double x2 = size.x()/2, y2 = size.y()/2, z2 = size.z()/2;

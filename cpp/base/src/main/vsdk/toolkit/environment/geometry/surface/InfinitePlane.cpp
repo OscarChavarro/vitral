@@ -31,7 +31,7 @@ void InfinitePlane::clone(const InfinitePlane& other)
     a = other.a; b = other.b; c = other.c; d = other.d;
 }
 
-Ray* InfinitePlane::doIntersection(const Ray& inout_rayo)
+Ray* InfinitePlane::doIntersectionFirstHit(const Ray& inout_rayo)
 {
     double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
     if (std::abs(denominator) < VSDK::EPSILON) return nullptr;
@@ -40,9 +40,9 @@ Ray* InfinitePlane::doIntersection(const Ray& inout_rayo)
     return new Ray(inout_rayo.withT(t));
 }
 
-bool InfinitePlane::doIntersection(const Ray& inRay, RayHit* outHit)
+bool InfinitePlane::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    Ray* hit = doIntersection(inRay);
+    Ray* hit = doIntersectionFirstHit(inRay);
     if (hit == nullptr) return false;
     if (outHit != nullptr) {
         outHit->setRay(*hit);
@@ -57,7 +57,7 @@ Ray* InfinitePlane::doIntersectionWithNegative(const Ray& inout_rayo)
     double denominator = a*inout_rayo.getDirection().x() + b*inout_rayo.getDirection().y() + c*inout_rayo.getDirection().z();
     if (std::abs(denominator) < VSDK::EPSILON) {
         Ray r(inout_rayo.getOrigin(), inout_rayo.getDirection().multiply(-1));
-        Ray* hit = doIntersection(r);
+        Ray* hit = doIntersectionFirstHit(r);
         if (hit != nullptr) {
             Ray* out = new Ray(inout_rayo.withT(-hit->getT()));
             delete hit;

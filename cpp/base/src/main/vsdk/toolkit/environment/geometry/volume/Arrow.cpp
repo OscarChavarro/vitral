@@ -166,13 +166,13 @@ void Arrow::setBaseRadius(double val) { baseRadius = val; baseCylinder->setBaseR
 double Arrow::getHeadRadius() const { return headRadius; }
 void Arrow::setHeadRadius(double val) { headRadius = val; headCone->setBaseRadius(val); }
 
-Ray* Arrow::doIntersection(const Ray& inOutRay) {
+Ray* Arrow::doIntersectionFirstHit(const Ray& inOutRay) {
     Vector3Dd tr(0,0,-baseLength);
     Ray headRay(inOutRay.getOrigin().add(tr), inOutRay.getDirection());
     Ray baseRay(inOutRay);
 
-    Ray* baseHit = baseCylinder->doIntersection(baseRay);
-    Ray* headHit = headCone->doIntersection(headRay);
+    Ray* baseHit = baseCylinder->doIntersectionFirstHit(baseRay);
+    Ray* headHit = headCone->doIntersectionFirstHit(headRay);
 
     Ray* result = nullptr;
     if ((baseHit != nullptr && headHit == nullptr) ||
@@ -202,11 +202,11 @@ bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
 
     double baseT = NO_HIT;
     candidateHit->resetForDistanceOnly();
-    if (baseCylinder->doIntersection(inRay, candidateHit)) baseT = candidateHit->hitDistance();
+    if (baseCylinder->doIntersectionFirstHit(inRay, candidateHit)) baseT = candidateHit->hitDistance();
 
     double headT = NO_HIT;
     candidateHit->resetForDistanceOnly();
-    if (headCone->doIntersection(shiftedHeadRay, candidateHit)) headT = candidateHit->hitDistance();
+    if (headCone->doIntersectionFirstHit(shiftedHeadRay, candidateHit)) headT = candidateHit->hitDistance();
 
     double winnerT = (baseT < headT) ? baseT : headT;
     if (winnerT == NO_HIT) return false;
@@ -219,7 +219,7 @@ bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
     return true;
 }
 
-bool Arrow::doIntersection(const Ray& inRay, RayHit* outHit) {
+bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     if (outHit == nullptr || !outHit->needsAnySurfaceData()) {
         return doIntersectionDistanceOnly(inRay, outHit);
     }
@@ -229,8 +229,8 @@ bool Arrow::doIntersection(const Ray& inRay, RayHit* outHit) {
 
     RayHit baseHit(outHit->requiredDetailMask());
     RayHit headHit(outHit->requiredDetailMask());
-    bool hasBase = baseCylinder->doIntersection(inRay, &baseHit);
-    bool hasHead = headCone->doIntersection(shiftedHeadRay, &headHit);
+    bool hasBase = baseCylinder->doIntersectionFirstHit(inRay, &baseHit);
+    bool hasHead = headCone->doIntersectionFirstHit(shiftedHeadRay, &headHit);
     if (!hasBase && !hasHead) return false;
 
     double baseT = hasBase ? (baseHit.ray()!=nullptr ? baseHit.ray()->getT() : baseHit.hitDistance()) : NO_HIT;
@@ -253,7 +253,7 @@ bool Arrow::doIntersection(const Ray& inRay, RayHit* outHit) {
 void Arrow::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData == nullptr) return;
     RayHit hit;
-    if (doIntersection(inRay.withT(inT), &hit)) outData->clone(hit);
+    if (doIntersectionFirstHit(inRay.withT(inT), &hit)) outData->clone(hit);
 }
 
 double* Arrow::getMinMax() {

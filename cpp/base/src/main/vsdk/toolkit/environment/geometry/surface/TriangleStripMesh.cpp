@@ -53,16 +53,16 @@ static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3
     return false;
 }
 
-Ray* TriangleStripMesh::doIntersection(const Ray& inOut_Ray)
+Ray* TriangleStripMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit;
-    if (doIntersection(inOut_Ray, &hit) && hit.ray() != nullptr) {
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != nullptr) {
         return new Ray(*hit.ray());
     }
     return nullptr;
 }
 
-bool TriangleStripMesh::doIntersection(const Ray& inRay, RayHit* outHit)
+bool TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
     bool found = false;
     double bestT = 1e308;
