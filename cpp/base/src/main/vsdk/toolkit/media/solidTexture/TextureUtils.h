@@ -9,20 +9,21 @@
 #include "vsdk/toolkit/media/solidTexture/procedural/ProceduralNoise.h"
 class TextureUtils {
   private:
-    ProceduralNoise proceduralNoise;
-    static TextureUtils* textureInstance;
-    static java::ArrayList<double> frequencyInstance;
-    static java::ArrayList<Vector3Dd> waveSourcesInstance;
+    ProceduralNoise* proceduralNoise;
+    java::ArrayList<double> frequencyInstance;
+    java::ArrayList<Vector3Dd> waveSourcesInstance;
     explicit TextureUtils(SolidTextureStatistics *stats);
 
   public:
-    static void initialize(SolidTextureStatistics *stats);
-    static TextureUtils& instance();
+    TextureUtils() : proceduralNoise(nullptr) {}
+    ~TextureUtils() { delete proceduralNoise; }
+
+    void initialize(SolidTextureStatistics *stats);
     ProceduralNoise& getProceduralNoise();
     static double floorInline(double x);
     static double fabsInline(double x);
-    static double *waveFrequency();
-    static Vector3Dd *waveSources();
+    inline double *waveFrequency() { return frequencyInstance.data(); }
+    inline Vector3Dd *waveSources() { return waveSourcesInstance.data(); }
     static void computeColor(ColorRgba *color, const RGBAColorPalette *colorMap, double value);
     void initializeNoise(int numberOfWaves);
 };

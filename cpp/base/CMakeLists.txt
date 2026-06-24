@@ -44,7 +44,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/VSDK.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
-    src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.h
+    src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.cpp
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
@@ -95,7 +95,6 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Ray.cpp
     src/main/vsdk/toolkit/environment/geometry/element/RayHit.cpp
-    src/main/vsdk/toolkit/environment/geometry/element/Intersection.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Triangle.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex.cpp
     src/main/vsdk/toolkit/environment/geometry/element/Vertex2D.cpp

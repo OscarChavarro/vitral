@@ -1,66 +1,17 @@
-#ifndef __INTERSECTION__
-#define __INTERSECTION__
+#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_INTERSECTION_H__
+#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_INTERSECTION_H__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-
-class Intersection {
-  private:
+class Intersection
+{
+public:
     double t;
     Vector3Dd point;
     Vector3Dd normal;
 
-  public:
-    Intersection(double inT, const Vector3Dd& inPoint, const Vector3Dd& inNormal);
-    double getT() const;
-    void setT(double value);
-    const Vector3Dd& getPoint() const;
-    void setPoint(const Vector3Dd &value);
-    const Vector3Dd& getNormal() const;
-    void setNormal(const Vector3Dd &value);
-
-    Vector3Dd& getPoint();
+    inline Intersection() : t(0.0), point(0, 0, 0), normal(0, 0, 0) {}
+    inline Intersection(double t, const Vector3Dd& point, const Vector3Dd& normal)
+        : t(t), point(point), normal(normal) {}
 };
-
-inline double
-Intersection::getT() const
-{
-    return t;
-}
-
-inline void
-Intersection::setT(double value)
-{
-    t = value;
-}
-
-inline const Vector3Dd&
-Intersection::getPoint() const
-{
-    return point;
-}
-
-inline void
-Intersection::setPoint(const Vector3Dd &value)
-{
-    point = value;
-}
-
-inline const Vector3Dd&
-Intersection::getNormal() const
-{
-    return normal;
-}
-
-inline void
-Intersection::setNormal(const Vector3Dd &value)
-{
-    normal = value;
-}
-
-inline Vector3Dd&
-Intersection::getPoint()
-{
-    return point;
-}
 
 #endif

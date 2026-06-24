@@ -1,13 +1,14 @@
-#ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEGENERATOR_H__
-#define __VSDK_TOOLKIT_RENDER_RAYTRACING_RASTERTILEGENERATOR_H__
+#ifndef __RASTER_TILE_GENERATOR__
+#define __RASTER_TILE_GENERATOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
+
 class Image;
 class RasterTileArea;
 
 class RasterTileGenerator {
-private:
+  private:
     RasterTileGenerationStrategy strategy;
     Image* image;
     int x0;
@@ -21,7 +22,7 @@ private:
     java::ArrayList<RasterTileArea> generateLinearTiles() const;
     java::ArrayList<RasterTileArea> generateSerialTile() const;
 
-public:
+  public:
     RasterTileGenerator(
         RasterTileGenerationStrategy strategy,
         Image* image,

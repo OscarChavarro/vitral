@@ -4,6 +4,7 @@
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
+
 RasterTileGenerator::RasterTileGenerator(
     RasterTileGenerationStrategy strategyIn,
     Image* imageIn,
@@ -48,7 +49,9 @@ RasterTileGenerator::RasterTileGenerator(
     tiles = generateTiles();
 }
 
-const java::ArrayList<RasterTileArea>& RasterTileGenerator::getTiles() const { return tiles; }
+const java::ArrayList<RasterTileArea>& RasterTileGenerator::getTiles() const {
+    return tiles;
+}
 
 java::ArrayList<RasterTileArea> RasterTileGenerator::generateTiles() const
 {

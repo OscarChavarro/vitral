@@ -20,32 +20,25 @@ constexpr long kWaveRandomMask = 0x7FFF;
 constexpr float kWaveRandomDivisor = static_cast<float>(kWaveRandomMask);
 }
 
-TextureUtils* TextureUtils::textureInstance = nullptr;
-java::ArrayList<double> TextureUtils::frequencyInstance;
-java::ArrayList<Vector3Dd> TextureUtils::waveSourcesInstance;
-
 TextureUtils::TextureUtils(SolidTextureStatistics *stats)
-    : proceduralNoise(stats)
+    : proceduralNoise(new ProceduralNoise(stats))
 {
 }
 
 void
 TextureUtils::initialize(SolidTextureStatistics *stats)
 {
-    static TextureUtils inst(stats);
-    textureInstance = &inst;
-}
-
-TextureUtils&
-TextureUtils::instance()
-{
-    return *textureInstance;
+    delete proceduralNoise;
+    proceduralNoise = new ProceduralNoise(stats);
 }
 
 ProceduralNoise&
 TextureUtils::getProceduralNoise()
 {
-    return proceduralNoise;
+    if (!proceduralNoise) {
+        proceduralNoise = new ProceduralNoise();
+    }
+    return *proceduralNoise;
 }
 
 double
@@ -58,18 +51,6 @@ double
 TextureUtils::fabsInline(double x)
 {
     return (x < 0.0) ? (0.0 - x) : x;
-}
-
-double *
-TextureUtils::waveFrequency()
-{
-    return frequencyInstance.data();
-}
-
-Vector3Dd *
-TextureUtils::waveSources()
-{
-    return waveSourcesInstance.data();
 }
 
 void
@@ -86,7 +67,7 @@ TextureUtils::initializeNoise(int numberOfWaves)
 {
     Vector3Dd point;
 
-    proceduralNoise.initialize();
+    proceduralNoise->initialize();
 
     frequencyInstance.clear();
     waveSourcesInstance.clear();
@@ -99,8 +80,8 @@ TextureUtils::initializeNoise(int numberOfWaves)
     }
 
     for (int i = 0; i < numberOfWaves; i++) {
-        proceduralNoise.differentialNoise(&point, (double)i, 0.0, 0.0);
-        waveSources()[i] = point.normalizedFast();
-        waveFrequency()[i] = (rand() & kWaveRandomMask) / kWaveRandomDivisor + 0.01;
+        proceduralNoise->differentialNoise(&point, (double)i, 0.0, 0.0);
+        this->waveSources()[i] = point.normalizedFast();
+        this->waveFrequency()[i] = (rand() & kWaveRandomMask) / kWaveRandomDivisor + 0.01;
     }
 }
