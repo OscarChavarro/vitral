@@ -88,7 +88,9 @@ void WebServiceServer::requestStop() {
 
 void* WebServiceServer::clientThreadEntry(void* arg) {
     ClientThreadArg* threadArg = static_cast<ClientThreadArg*>(arg);
-    threadArg->server->handleClient(threadArg->socketFd);
+    try {
+        threadArg->server->handleClient(threadArg->socketFd);
+    } catch (...) {}
     delete threadArg;
     return NULL;
 }

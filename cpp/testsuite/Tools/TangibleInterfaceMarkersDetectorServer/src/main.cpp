@@ -11,6 +11,7 @@
 #include "vision/MarkerTracker.hpp"
 #include "webservice/WebServiceServer.hpp"
 #include <pthread.h>
+#include <signal.h>
 #include <unistd.h>
 #include "options/CommandLineOptions.hpp"
 void*
@@ -61,6 +62,8 @@ runNormalMode(WebServiceServer& webService) {
 
 int
 main(int argc, char** argv) {
+    signal(SIGPIPE, SIG_IGN);
+
     CommandLineOptions opts(argc, argv);
 
     if (opts.getAction() == CommandLineOptions::SHOW_HELP ||
@@ -83,8 +86,8 @@ main(int argc, char** argv) {
     WebServiceServer webService(webCfg, &bus);
 
     java::ExecutorService* executorService = java::Executors::newFixedThreadPool(1);
-    CleanerConsumer cleaner(&bus);
-    java::Future<java::Void> cleanerFuture = executorService->submit(&cleaner);
+    CleanerConsumer* cleaner = new CleanerConsumer(&bus);
+    java::Future<java::Void> cleanerFuture = executorService->submit(cleaner);
 
     model->setMarkerTracker(&markerTracker);
 
@@ -101,7 +104,7 @@ main(int argc, char** argv) {
         }
     }
 
-    cleaner.stop();
+    cleaner->stop();
     executorService->shutdownNow();
     delete executorService;
     delete model;
