@@ -126,7 +126,8 @@ public class MeshExample
 
         TangibleInterfaceNetworkClient tangibleInterfaceClient =
             new TangibleInterfaceNetworkClient(app.getModel().getTangibleServiceUrl());
-        tangibleInterfaceClient.addListener(new TangibleInterfaceInteractionTechniques());
+        tangibleInterfaceClient.addListener(
+            new TangibleInterfaceInteractionTechniques(app.getModel(), app.canvas::repaint));
         tangibleInterfaceClient.run();
 
         f = app;

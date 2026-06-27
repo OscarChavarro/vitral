@@ -27,6 +27,7 @@ import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl4RayGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
 
 public class Jogl4DebuggerRenderer implements GLEventListener {
@@ -86,6 +87,11 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
                 Jogl4LightRenderer.draw(gl, light, model.getCamera(), LightGizmoStyle.OMNI_BILLBOARD);
             }
         }
+
+        // Apply any pending network update before drawing the ray gizmo so the
+        // body state is stable for the entire frame.
+        model.getRayGizmo().acquireSnapshot();
+        Jogl4RayGizmoRenderer.draw(gl, model.getRayGizmo(), model.getCamera(), activeLights);
     }
 
     @Override
@@ -102,6 +108,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
 
         Jogl4RendererConfigurationShaderSelector.dispose(gl);
         Jogl4CameraRenderer.dispose(gl);
+        Jogl4RayGizmoRenderer.dispose(gl);
 
         if ( positionVboId != 0 ) {
             ids[0] = positionVboId;

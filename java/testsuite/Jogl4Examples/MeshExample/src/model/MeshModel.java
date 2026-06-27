@@ -11,18 +11,21 @@ import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.gui.RayGizmo;
 
 public class MeshModel {
     private final Camera camera;
     private final List<Light> lights;
     private final SimpleScene scene;
     private final RendererConfiguration qualitySelection;
+    private final RayGizmo rayGizmo;
     private String tangibleServiceUrl = "ws://localhost:8090/v1/values";
 
     public MeshModel() {
         scene = new SimpleScene();
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
+        rayGizmo = new RayGizmo();
         lights = new ArrayList<>();
         Light light0 = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
         light0.setId(0);
@@ -46,6 +49,10 @@ public class MeshModel {
 
     public RendererConfiguration getQualitySelection() {
         return qualitySelection;
+    }
+
+    public RayGizmo getRayGizmo() {
+        return rayGizmo;
     }
 
     public String getTangibleServiceUrl() {
@@ -103,7 +110,7 @@ public class MeshModel {
             .normalized()
             .multiply(radius * 3.0));
 
-        if ( lights.size() > 0 ) {
+        if ( !lights.isEmpty() ) {
             lights.get(0).setPosition(lightPos0);
         }
         if ( lights.size() > 1 ) {
