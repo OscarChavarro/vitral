@@ -11,7 +11,7 @@ import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
-import vsdk.toolkit.gui.RayGizmo;
+import vsdk.toolkit.gui.gizmo.RayGizmo;
 
 public class MeshModel {
     private final Camera camera;

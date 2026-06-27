@@ -24,7 +24,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
-#include "vsdk/toolkit/gui/LightGizmoStyle.h"
+#include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "java/io/File.h"

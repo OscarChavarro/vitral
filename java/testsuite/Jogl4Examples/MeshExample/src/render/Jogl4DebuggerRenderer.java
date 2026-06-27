@@ -21,7 +21,7 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.gui.LightGizmoStyle;
+import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;

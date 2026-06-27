@@ -2,7 +2,7 @@
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
-#include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
+#include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 static const int NUMBER_OF_SIDES = 32;
 static const int NUMBER_OF_RAYS = 8;
 static const double CIRCLE_RADIUS = 0.2;

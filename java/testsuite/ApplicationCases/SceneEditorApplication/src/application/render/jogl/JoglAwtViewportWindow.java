@@ -27,7 +27,7 @@ import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.gui.AwtSystem;
-import vsdk.toolkit.gui.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
 
 public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener

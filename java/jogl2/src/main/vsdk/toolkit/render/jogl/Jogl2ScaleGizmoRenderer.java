@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.gui.ScaleGizmo;
+import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 
 public class Jogl2ScaleGizmoRenderer extends Jogl2Renderer 
 {

@@ -1,4 +1,6 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.gizmo;
+
+import vsdk.toolkit.gui.PresentationElement;
 
 /**
 The Gizmo abstract class provides an interface for *Gizmo

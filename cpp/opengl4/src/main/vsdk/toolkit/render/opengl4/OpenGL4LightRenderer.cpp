@@ -10,7 +10,7 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
+#include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 double OpenGL4LightRenderer::scale_ = 1.0;

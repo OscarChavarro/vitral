@@ -77,7 +77,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/util/StringTokenizer.cpp
     src/main/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
-    src/main/vsdk/toolkit/gui/LightGizmoOmniBillboard.cpp
+    src/main/vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.cpp
     src/main/vsdk/toolkit/gui/RendererConfigurationController.cpp
     src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.cpp
     src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.cpp

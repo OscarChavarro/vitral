@@ -6,7 +6,7 @@ import com.jogamp.opengl.GL2;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.gui.RotateGizmo;
+import vsdk.toolkit.gui.gizmo.RotateGizmo;
 
 public class Jogl2RotateGizmoRenderer extends Jogl2Renderer 
 {

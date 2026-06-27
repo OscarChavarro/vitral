@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.gizmo;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.Calligraphic2DBuffer;

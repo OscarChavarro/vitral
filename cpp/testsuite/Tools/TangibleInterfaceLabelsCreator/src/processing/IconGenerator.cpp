@@ -11,7 +11,7 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
-#include "vsdk/toolkit/gui/LightGizmoOmniBillboard.h"
+#include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 Calligraphic2DBuffer* IconGenerator::buildVisibleIcon(SimpleScene& scene, const Camera& camera) const {
     StyledCalligraphic2DBuffer* lineSet = new StyledCalligraphic2DBuffer();

@@ -16,7 +16,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.statistics.RenderingStatistics;
-import vsdk.toolkit.gui.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.geometry.Geometry;

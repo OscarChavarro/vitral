@@ -14,7 +14,7 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.gui.RayGizmo;
+import vsdk.toolkit.gui.gizmo.RayGizmo;
 
 /**
 Renders a {@link RayGizmo} as a lit arrow (cylinder shaft + cone head) using

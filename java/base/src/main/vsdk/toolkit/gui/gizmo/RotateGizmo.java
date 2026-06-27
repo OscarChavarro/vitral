@@ -1,7 +1,9 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.gizmo;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.gui.KeyEvent;
+import vsdk.toolkit.gui.MouseEvent;
 
 public class RotateGizmo extends Gizmo {
 

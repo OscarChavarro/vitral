@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.gizmo;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -19,6 +19,8 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.processing.CurveModeler;
+import vsdk.toolkit.gui.KeyEvent;
+import vsdk.toolkit.gui.MouseEvent;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state

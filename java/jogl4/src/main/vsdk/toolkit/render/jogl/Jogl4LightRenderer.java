@@ -13,8 +13,8 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;
-import vsdk.toolkit.gui.LightGizmoOmniBillboard;
-import vsdk.toolkit.gui.LightGizmoStyle;
+import vsdk.toolkit.gui.gizmo.LightGizmoOmniBillboard;
+import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
 
 public class Jogl4LightRenderer extends Jogl4Renderer

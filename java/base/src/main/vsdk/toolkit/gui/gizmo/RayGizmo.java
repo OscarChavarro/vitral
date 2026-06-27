@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.gizmo;
 
 import java.util.concurrent.atomic.AtomicReference;
 

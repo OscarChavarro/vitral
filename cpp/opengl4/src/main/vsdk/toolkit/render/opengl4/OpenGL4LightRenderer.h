@@ -4,7 +4,7 @@
 class Light;
 class Camera;
 
-#include "vsdk/toolkit/gui/LightGizmoStyle.h"
+#include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/util/ArrayList.h"
