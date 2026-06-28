@@ -1,21 +1,21 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
 import java.util.ArrayList;
 
-public class GuiMenu extends GuiMenuElement{
-    private ArrayList <GuiMenuElement> children;
+public class WidgetMenu extends WidgetMenuElement{
+    private ArrayList <WidgetMenuElement> children;
     private String name;
     private char mnemonic;
     private String accelerator;
 
-    public GuiMenu(Gui c)
+    public WidgetMenu(Widget c)
     {
         context = c;
-        children = new ArrayList<GuiMenuElement>();
+        children = new ArrayList<WidgetMenuElement>();
         name = null;
     }
 
-    public ArrayList <GuiMenuElement> getChildren()
+    public ArrayList <WidgetMenuElement> getChildren()
     {
         return children;
     }
@@ -27,7 +27,7 @@ public class GuiMenu extends GuiMenuElement{
         accelerator = processAccelerator(n);
     }
 
-    public void addChild(GuiMenuElement i)
+    public void addChild(WidgetMenuElement i)
     {
         children.add(i);
     }

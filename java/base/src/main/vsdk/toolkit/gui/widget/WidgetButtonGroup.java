@@ -1,10 +1,10 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
 import java.util.ArrayList;
 
-public class GuiButtonGroup extends GuiElement
+public class WidgetButtonGroup extends WidgetElement
 {
-    private final ArrayList<GuiCommand> commandReferenceList;
+    private final ArrayList<WidgetCommand> commandReferenceList;
     private String name;
 
     private boolean showText;
@@ -15,9 +15,9 @@ public class GuiButtonGroup extends GuiElement
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
 
-    public GuiButtonGroup(Gui parent)
+    public WidgetButtonGroup(Widget parent)
     {
-        commandReferenceList = new ArrayList<GuiCommand>();
+        commandReferenceList = new ArrayList<WidgetCommand>();
         context = parent;
     }
 
@@ -61,7 +61,7 @@ public class GuiButtonGroup extends GuiElement
         return showTitle;
     }
 
-    public ArrayList<GuiCommand> getCommands()
+    public ArrayList<WidgetCommand> getCommands()
     {
         return commandReferenceList;
     }
@@ -78,7 +78,7 @@ public class GuiButtonGroup extends GuiElement
 
     public void addCommandByName(String commandName)
     {
-        GuiCommand command = context.getCommandByName(commandName);
+        WidgetCommand command = context.getCommandByName(commandName);
 
         if ( command != null ) {
             commandReferenceList.add(command);

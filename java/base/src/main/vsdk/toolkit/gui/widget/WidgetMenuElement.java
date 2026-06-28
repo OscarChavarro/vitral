@@ -1,6 +1,6 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
-public abstract class GuiMenuElement extends GuiElement
+public abstract class WidgetMenuElement extends WidgetElement
 {
 
     @Override
@@ -77,7 +77,7 @@ public abstract class GuiMenuElement extends GuiElement
                     if ( num < 0 ) {
                         break;
                     }
-                    if ( i == start+1 ) { 
+                    if ( i == start+1 ) {
                         num1 = num;
                     }
                     else if ( i == start+2 ) {

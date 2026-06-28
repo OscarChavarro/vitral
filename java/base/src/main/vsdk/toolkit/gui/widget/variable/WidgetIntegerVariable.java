@@ -1,17 +1,17 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
-public class GuiIntegerVariable extends GuiVariable {
+public class WidgetIntegerVariable extends WidgetVariable {
     @Override
     public String getType() {
         return "Integer";
     }
 
-    public GuiIntegerVariable() {
+    public WidgetIntegerVariable() {
         super();
-                
+
         this.validRange = "(-INF, INF)";
     }
-    
+
     @Override
     public String getValidRange() {
         return validRange;

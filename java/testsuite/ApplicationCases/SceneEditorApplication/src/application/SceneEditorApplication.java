@@ -38,7 +38,7 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Internal classes
-import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
@@ -69,7 +69,7 @@ public class SceneEditorApplication {
     public int visualDebugRayLevels;
 
     // Application GUI
-    public Gui gui;
+    public Widget gui;
     public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
     public JPanel statusBarPanel;

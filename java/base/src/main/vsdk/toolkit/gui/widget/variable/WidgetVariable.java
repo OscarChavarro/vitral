@@ -1,13 +1,13 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
-import vsdk.toolkit.gui.GuiElement;
+import vsdk.toolkit.gui.widget.WidgetElement;
 
 /**
-A GuiVariable is a value stored at computer memory which has a type, and is
+A WidgetVariable is a value stored at computer memory which has a type, and is
 assigned to a name and that is inside a valid values range. For example, the
 radius of an sphere has a valid value range expressed as an interval: "[0,
 INF]". A current value for that variable could be the number "5.0", and its
-name could be "r". This variable is of type "GuiDoubleVariable".
+name could be "r". This variable is of type "WidgetDoubleVariable".
 
 This class is the superclass of several other classes, each one representing
 an specific variable type.
@@ -18,7 +18,7 @@ pattern.
 This class plays a role of leaf on an n-ary tree in the composite design
 pattern.
 */
-public abstract class GuiVariable extends GuiElement {
+public abstract class WidgetVariable extends WidgetElement {
     /// Variable names follows a convention of scope operator. Example:
     /// "position" is a global name, "camera.position" is the same variable
     /// under the "camera" scope. "scene.camera.position" could be a full
@@ -28,7 +28,7 @@ public abstract class GuiVariable extends GuiElement {
     protected String validRange;
     protected String initialvalue;
 
-    public GuiVariable() {
+    public WidgetVariable() {
         name = "";
         validRange = "";
         initialvalue = "";
@@ -65,14 +65,14 @@ public abstract class GuiVariable extends GuiElement {
     /**
     Each variable has a type. Examples: "Integer", "Double", "String",
     "Vector3Dd".
-    @return 
+    @return
     */
     public abstract String getType();
 
     /**
     Gets the current String specifying valid value range. The returned String
     contains an specification expressed in Vitral GUI value ranges language.
-     * @return 
+     * @return
     */
     public abstract String getValidRange();
 

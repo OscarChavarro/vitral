@@ -1,12 +1,12 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
-public class GuiVector3DVariable extends GuiVariable {
+public class WidgetVector3DVariable extends WidgetVariable {
     @Override
     public String getType() {
         return "Vector3Dd";
     }
-    
-    public GuiVector3DVariable() {
+
+    public WidgetVector3DVariable() {
         super();
         this.validRange = "<(-INF, INF), (-INF, INF), (-INF, INF)>";
     }
@@ -17,7 +17,7 @@ public class GuiVector3DVariable extends GuiVariable {
     }
 
     public void setValidRange() {
-        
+
     }
 
     @Override

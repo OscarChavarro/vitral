@@ -9,21 +9,21 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 // Vitral classes
-import vsdk.toolkit.gui.ExceptionGuiBadName;
-import vsdk.toolkit.gui.ExceptionGuiParseError;
-import vsdk.toolkit.gui.GuiDialog;
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiMenu;
-import vsdk.toolkit.gui.GuiMenuItem;
-import vsdk.toolkit.gui.GuiButtonGroup;
-import vsdk.toolkit.gui.GuiCommand;
-import vsdk.toolkit.gui.variable.GuiVariable;
-import vsdk.toolkit.gui.variable.GuiDoubleVariable;
-import vsdk.toolkit.gui.variable.GuiIntegerVariable;
-import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
-import vsdk.toolkit.gui.variable.GuiVector3DVariable;
-import vsdk.toolkit.gui.variable.GuiStringVariable;
-import vsdk.toolkit.gui.variable.GuiBooleanVariable;
+import vsdk.toolkit.gui.widget.ExceptionWidgetBadName;
+import vsdk.toolkit.gui.widget.ExceptionWidgetParseError;
+import vsdk.toolkit.gui.widget.WidgetDialog;
+import vsdk.toolkit.gui.widget.Widget;
+import vsdk.toolkit.gui.widget.WidgetMenu;
+import vsdk.toolkit.gui.widget.WidgetMenuItem;
+import vsdk.toolkit.gui.widget.WidgetButtonGroup;
+import vsdk.toolkit.gui.widget.WidgetCommand;
+import vsdk.toolkit.gui.widget.variable.WidgetVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetDoubleVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetIntegerVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetColorRgbVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetVector3DVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetStringVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetBooleanVariable;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -32,7 +32,7 @@ import vsdk.toolkit.io.PersistenceElement;
 public class GuiPersistence extends PersistenceElement {
     private static void importAquynzaGuiMessages(
             StreamTokenizer parser,
-            Gui context) throws Exception {
+            Widget context) throws Exception {
         int tokenType;
         int level = 0;
 
@@ -67,7 +67,7 @@ public class GuiPersistence extends PersistenceElement {
                         if (content == '{') {
                             level++;
                             if (level > 2) {
-                                throw new ExceptionGuiParseError();
+                                throw new ExceptionWidgetParseError();
                             }
                         } else if (content == '}') {
                             level--;
@@ -75,7 +75,7 @@ public class GuiPersistence extends PersistenceElement {
                                 return;
                             }
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -83,12 +83,12 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
     }
 
-    private static GuiButtonGroup importAquynzaGuiButtonGroup(
+    private static WidgetButtonGroup importAquynzaGuiButtonGroup(
             StreamTokenizer parser,
-            Gui context) throws Exception {
-        GuiButtonGroup item;
+            Widget context) throws Exception {
+        WidgetButtonGroup item;
 
-        item = new GuiButtonGroup(context);
+        item = new WidgetButtonGroup(context);
         int tokenType;
         int level = 0;
 
@@ -119,9 +119,9 @@ public class GuiPersistence extends PersistenceElement {
                         parameter = 1;
                     } else if (parameter == 1) {
                         if (parser.sval.equals("horizontal")) {
-                            item.setDirection(GuiButtonGroup.HORIZONTAL);
+                            item.setDirection(WidgetButtonGroup.HORIZONTAL);
                         } else {
-                            item.setDirection(GuiButtonGroup.VERTICAL);
+                            item.setDirection(WidgetButtonGroup.VERTICAL);
                         }
                         parameter = 0;
                     } else if (parameter == 0 && parser.sval.equals("showIcons")) {
@@ -165,7 +165,7 @@ public class GuiPersistence extends PersistenceElement {
                         if (content == '{') {
                             level++;
                             if (level > 2) {
-                                throw new ExceptionGuiParseError();
+                                throw new ExceptionWidgetParseError();
                             }
                         } else if (content == '}') {
                             level--;
@@ -173,7 +173,7 @@ public class GuiPersistence extends PersistenceElement {
                                 return item;
                             }
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -182,20 +182,20 @@ public class GuiPersistence extends PersistenceElement {
 
         if (name == null) {
             System.out.println("Salida 2");
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
 
         return item;
     }
 
-    private static GuiCommand importAquynzaGuiCommand(
-        StreamTokenizer parser, String globalDataPath) throws Exception 
+    private static WidgetCommand importAquynzaGuiCommand(
+        StreamTokenizer parser, String globalDataPath) throws Exception
     {
-        GuiCommand item;
+        WidgetCommand item;
         RGBAImageUncompressed img;
         RGBImageUncompressed mask;
 
-        item = new GuiCommand();
+        item = new WidgetCommand();
 
         int tokenType;
 
@@ -207,7 +207,7 @@ public class GuiPersistence extends PersistenceElement {
         do {
             try {
                 tokenType = parser.nextToken();
-            } 
+            }
             catch (IOException e) {
                 throw e;
             }
@@ -223,10 +223,10 @@ public class GuiPersistence extends PersistenceElement {
                     if (idString == null) {
                         idString = parser.sval;
                         item.setId(parser.sval);
-                    } 
+                    }
                     else if (parser.sval.equals("name")) {
                         stringMode = 1;
-                    } 
+                    }
                     else if (parser.sval.equals("icon")) {
                         stringMode = 2;
                         iconId = 1;
@@ -237,10 +237,10 @@ public class GuiPersistence extends PersistenceElement {
                     }
                     else if (parser.sval.equals("brief")) {
                         stringMode = 3;
-                    } 
+                    }
                     else if (parser.sval.equals("help")) {
                         stringMode = 4;
-                    } 
+                    }
                     else if (parser.sval.equals("iconTransparency")) {
                         stringMode = 5;
                         iconId = 1;
@@ -281,7 +281,7 @@ public class GuiPersistence extends PersistenceElement {
                             case 5: // icon transparency
                                 try {
                                     String filename;
-                                    filename = globalDataPath + "/" + 
+                                    filename = globalDataPath + "/" +
                                             parser.sval;
                                     mask = ImagePersistence.importRGB(
                                         new File(filename));
@@ -304,14 +304,14 @@ public class GuiPersistence extends PersistenceElement {
                         char content = parser.toString().charAt(7);
                         if (content == '{') {
                             if (idString == null) {
-                                throw new ExceptionGuiParseError();
+                                throw new ExceptionWidgetParseError();
                             }
                         } else if (content == '}') {
                             item.applyTransparency();
                             item.applySecondTransparency();
                             return item;
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -319,7 +319,7 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
 
         if (idString == null) {
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
 
         item.applyTransparency();
@@ -328,12 +328,12 @@ public class GuiPersistence extends PersistenceElement {
         return item;
     }
 
-    private static GuiMenuItem importAquynzaGuiMenuItem(
+    private static WidgetMenuItem importAquynzaGuiMenuItem(
             StreamTokenizer parser,
-            Gui context) throws Exception {
-        GuiMenuItem item;
+            Widget context) throws Exception {
+        WidgetMenuItem item;
 
-        item = new GuiMenuItem(context);
+        item = new WidgetMenuItem(context);
 
         int tokenType;
 
@@ -369,13 +369,13 @@ public class GuiPersistence extends PersistenceElement {
                         // Only supposed to contain '{' or '}'
                         char content = parser.toString().charAt(7);
                         if (content == '{') {
-                            throw new ExceptionGuiParseError();
+                            throw new ExceptionWidgetParseError();
                         } else if (content == '}') {
                             parser.pushBack();
                             item.setName(name);
                             return item;
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -383,17 +383,17 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
 
         if (name == null) {
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
         item.setName(name);
         return item;
     }
 
-    private static GuiMenu importAquynzaGuiMenu(StreamTokenizer parser,
-            Gui context) throws Exception {
-        GuiMenu menu;
+    private static WidgetMenu importAquynzaGuiMenu(StreamTokenizer parser,
+            Widget context) throws Exception {
+        WidgetMenu menu;
 
-        menu = new GuiMenu(context);
+        menu = new WidgetMenu(context);
 
         int level = 0;
 
@@ -416,11 +416,11 @@ public class GuiPersistence extends PersistenceElement {
                     break;
                 case StreamTokenizer.TT_WORD:
                     if (parser.sval.equals("POPUP")) {
-                        GuiMenu popup = importAquynzaGuiMenu(parser, context);
+                        WidgetMenu popup = importAquynzaGuiMenu(parser, context);
                         context.addPopupMenu(popup);
                         menu.addChild(popup);
                     } else if (parser.sval.equals("MENUITEM")) {
-                        GuiMenuItem item;
+                        WidgetMenuItem item;
                         item = importAquynzaGuiMenuItem(parser, context);
                         menu.addChild(item);
                     }
@@ -442,7 +442,7 @@ public class GuiPersistence extends PersistenceElement {
                                 tokenType = StreamTokenizer.TT_EOF;
                             }
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -450,7 +450,7 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
 
         if (name == null) {
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
         menu.setName(name);
 
@@ -459,17 +459,17 @@ public class GuiPersistence extends PersistenceElement {
 
     /**
     WARNING, pending to check character format
-     
+
     @param source
     @param globalDataPath
     @return
     @throws Exception
     */
-    public static Gui importAquynzaGui(InputStream source,
+    public static Widget importAquynzaGui(InputStream source,
         String globalDataPath) throws Exception {
-        Gui context;
+        Widget context;
 
-        context = new Gui();
+        context = new Widget();
 
         StreamTokenizer parser = new StreamTokenizer(new InputStreamReader(source));
 
@@ -505,36 +505,36 @@ public class GuiPersistence extends PersistenceElement {
                     break;
                 case StreamTokenizer.TT_WORD:
                     if (parser.sval.equals("MENU")) {
-                        GuiMenu menubar =
+                        WidgetMenu menubar =
                                 importAquynzaGuiMenu(parser, context);
                         context.setMenubar(menubar);
                     } else if (parser.sval.equals("POPUP")) {
-                        GuiMenu popup =
+                        WidgetMenu popup =
                                 importAquynzaGuiMenu(parser, context);
                         context.addPopupMenu(popup);
                     } else if (parser.sval.equals("COMMAND")) {
-                        GuiCommand command =
-                                importAquynzaGuiCommand(parser, 
+                        WidgetCommand command =
+                                importAquynzaGuiCommand(parser,
                                     globalDataPath);
                         context.addCommand(command);
                     } else if (parser.sval.equals("DIALOG")) {
-                        GuiDialog dialog =
+                        WidgetDialog dialog =
                                 importAquynzaGuiDialog(parser, context);
                         context.addDialog(dialog);
                     } else if (parser.sval.equals("VARIABLE")) {
-                        GuiVariable variable =
+                        WidgetVariable variable =
                                 importAquynzaGuiVariable(parser, context);
                         context.addVariable(variable);
                     } else if (parser.sval.equals("BUTTON_GROUP")) {
-                        GuiButtonGroup bg =
+                        WidgetButtonGroup bg =
                                 importAquynzaGuiButtonGroup(parser, context);
                         context.addButtonGroup(bg);
                     } else if (parser.sval.equals("MESSAGES")) {
                         importAquynzaGuiMessages(parser, context);
-                    } 
+                    }
                     else if(parser.sval.equals("IMAGE"))
                     {
-                    
+
                     }
                     else {
                         System.out.println("NotProcessedIdentifier " + parser.sval);
@@ -567,7 +567,7 @@ public class GuiPersistence extends PersistenceElement {
 
         // Second pass process
         int i, j;
-        ArrayList<GuiDialog> dl;
+        ArrayList<WidgetDialog> dl;
 
         dl = context.getDialogList();
         for (i = 0; i < dl.size(); i++) {
@@ -589,11 +589,11 @@ public class GuiPersistence extends PersistenceElement {
         return context;
     }
 
-    private static GuiDialog importAquynzaGuiDialog(StreamTokenizer parser,
-            Gui context) throws ExceptionGuiBadName, ExceptionGuiParseError {
-        GuiDialog dialog;
+    private static WidgetDialog importAquynzaGuiDialog(StreamTokenizer parser,
+            Widget context) throws ExceptionWidgetBadName, ExceptionWidgetParseError {
+        WidgetDialog dialog;
 
-        dialog = new GuiDialog();
+        dialog = new WidgetDialog();
         int tokenType = 0;
         String idString = null;
         int stringMode = 0;
@@ -627,7 +627,7 @@ public class GuiPersistence extends PersistenceElement {
                     } else if (parser.sval.equals("command")) {
                         stringMode = 3;
                     } else if (parser.sval.equals("DIALOG")) {
-                        GuiDialog dialogS =
+                        WidgetDialog dialogS =
                                 importAquynzaGuiDialog(parser, context);
                         dialog.getChildren().add(dialogS);
                     } else if (parser.sval.equals("dialogref")) {
@@ -659,9 +659,9 @@ public class GuiPersistence extends PersistenceElement {
                                 break;
                             case 7: // orientation
                                 if (parser.sval.equals("vertical")) {
-                                    dialog.setOrientation(GuiDialog.ORIENTATION_VERTICAL);
+                                    dialog.setOrientation(WidgetDialog.ORIENTATION_VERTICAL);
                                 } else {
-                                    dialog.setOrientation(GuiDialog.ORIENTATION_HORIZONTAL);
+                                    dialog.setOrientation(WidgetDialog.ORIENTATION_HORIZONTAL);
                                 }
 
                                 break;
@@ -697,9 +697,9 @@ public class GuiPersistence extends PersistenceElement {
                                 break;
                             case 7: // orientation
                                 if (parser.sval.equals("vertical")) {
-                                    dialog.setOrientation(GuiDialog.ORIENTATION_VERTICAL);
+                                    dialog.setOrientation(WidgetDialog.ORIENTATION_VERTICAL);
                                 } else {
-                                    dialog.setOrientation(GuiDialog.ORIENTATION_HORIZONTAL);
+                                    dialog.setOrientation(WidgetDialog.ORIENTATION_HORIZONTAL);
                                 }
 
                                 break;
@@ -716,12 +716,12 @@ public class GuiPersistence extends PersistenceElement {
                         char content = parser.toString().charAt(7);
                         if (content == '{') {
                             if (idString == null) {
-                                throw new ExceptionGuiParseError();
+                                throw new ExceptionWidgetParseError();
                             }
                         } else if (content == '}') {
                             return dialog;
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -729,15 +729,15 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
 
         if (idString == null) {
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
 
         return dialog;
     }
 
-    private static GuiVariable importAquynzaGuiVariable(StreamTokenizer parser,
-            Gui context) throws ExceptionGuiBadName, ExceptionGuiParseError {
-        GuiVariable variable;
+    private static WidgetVariable importAquynzaGuiVariable(StreamTokenizer parser,
+            Widget context) throws ExceptionWidgetBadName, ExceptionWidgetParseError {
+        WidgetVariable variable;
         variable = null;
         int tokenType = 0;
         String idString = null;
@@ -826,41 +826,41 @@ public class GuiPersistence extends PersistenceElement {
                         char content = parser.toString().charAt(7);
                         if (content == '{') {
                             if (idString == null) {
-                                throw new ExceptionGuiParseError();
+                                throw new ExceptionWidgetParseError();
                             }
                         } else if (content == '}') {
                             if (typeName != null && typeName.equalsIgnoreCase("double")) {
-                                variable = new GuiDoubleVariable();
+                                variable = new WidgetDoubleVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if (typeName != null && typeName.equalsIgnoreCase("Vector3Dd")) {
-                                variable = new GuiVector3DVariable();
+                                variable = new WidgetVector3DVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if (typeName != null && typeName.equalsIgnoreCase("ColorRgb")) {
-                                variable = new GuiColorRgbVariable();
+                                variable = new WidgetColorRgbVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if (typeName != null && typeName.equalsIgnoreCase("Integer")) {
-                                variable = new GuiIntegerVariable();
+                                variable = new WidgetIntegerVariable();
                                 variable.setName(idString);
                                 variable.setValidRange(rangeName);
                                 variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if (typeName != null && typeName.equalsIgnoreCase("boolean")) {
-                                variable = new GuiBooleanVariable();
+                                variable = new WidgetBooleanVariable();
                                 variable.setName(idString);
                                 //variable.setValidRange(rangeName);
                                 //variable.setInitialvalue(initialvalueName);
                                 return variable;
                             } else if (typeName != null && typeName.equalsIgnoreCase("String")) {
-                                variable = new GuiStringVariable();
+                                variable = new WidgetStringVariable();
                                 variable.setName(idString);
                                 //variable.setValidRange(rangeName);
                                 //variable.setInitialvalue(initialvalueName);
@@ -868,7 +868,7 @@ public class GuiPersistence extends PersistenceElement {
                             }
 
                         } else {
-                            //throw new ExceptionGuiParseError();
+                            //throw new ExceptionWidgetParseError();
                         }
                     }
                     break;
@@ -876,7 +876,7 @@ public class GuiPersistence extends PersistenceElement {
         } while (tokenType != StreamTokenizer.TT_EOF);
 
         if (idString == null) {
-            throw new ExceptionGuiBadName();
+            throw new ExceptionWidgetBadName();
         }
         return variable;
     }

@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -7,10 +7,10 @@ import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.RGBAPixel;
 
 /**
-This class plays a role of leaf on an n-ary tree in the composite design 
+This class plays a role of leaf on an n-ary tree in the composite design
 pattern.
 */
-public class GuiCommand extends GuiElement {
+public class WidgetCommand extends WidgetElement {
     private String id;
     private String name;
     private String briefDescription;
@@ -20,7 +20,7 @@ public class GuiCommand extends GuiElement {
     private RGBAImageUncompressed secondaryIcon;
     private RGBImageUncompressed secondaryIconTransparency;
 
-    public GuiCommand()
+    public WidgetCommand()
     {
         id = null;
         name = null;
@@ -33,8 +33,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public String getId()
     {
@@ -42,8 +42,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public String getName()
     {
@@ -51,8 +51,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public String getBriefDescription()
     {
@@ -60,8 +60,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public String getHelp()
     {
@@ -69,8 +69,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public RGBAImageUncompressed getIcon()
     {
@@ -78,8 +78,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     public RGBImageUncompressed getIconTransparency()
     {
@@ -145,8 +145,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param i 
+
+    @param i
     */
     public void setId(String i)
     {
@@ -154,8 +154,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param n 
+
+    @param n
     */
     public void setName(String n)
     {
@@ -163,8 +163,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param b 
+
+    @param b
     */
     public void setBrief(String b)
     {
@@ -172,8 +172,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param h 
+
+    @param h
     */
     public void setHelp(String h)
     {
@@ -181,8 +181,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param h 
+
+    @param h
     */
     public void appendToHelp(String h)
     {
@@ -195,8 +195,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param i 
+
+    @param i
     */
     public void setIcon(RGBAImageUncompressed i)
     {
@@ -204,8 +204,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @param i 
+
+    @param i
     */
     public void setIconTransparency(RGBImageUncompressed i)
     {
@@ -213,8 +213,8 @@ public class GuiCommand extends GuiElement {
     }
 
     /**
-    
-    @return 
+
+    @return
     */
     @Override
     public String toString()

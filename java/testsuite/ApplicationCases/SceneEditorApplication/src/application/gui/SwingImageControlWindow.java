@@ -20,7 +20,7 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
 
 // Application classes
-import vsdk.toolkit.gui.Gui;
+import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 public class SwingImageControlWindow
@@ -31,7 +31,7 @@ public class SwingImageControlWindow
     private ImageDisplayPanel workArea;
 
     public SwingImageControlWindow(RGBImageUncompressed image,
-                                 Gui gui, ActionListener executor) {
+                                 Widget gui, ActionListener executor) {
         controlledImage = image;
 
         windowWidget = new JFrame("Image control tool");

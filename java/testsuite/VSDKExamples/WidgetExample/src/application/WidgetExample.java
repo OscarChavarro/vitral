@@ -18,36 +18,36 @@ import javax.swing.JMenuBar;
 import javax.swing.border.TitledBorder;
 
 // VSDK classes
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiDialog;
+import vsdk.toolkit.gui.widget.Widget;
+import vsdk.toolkit.gui.widget.WidgetDialog;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
-public class GUIExample {
+public class WidgetExample {
 
     // Application GUI
-    public Gui gui;
+    public Widget gui;
     private String languageGuiFile;
     private JFrame mainWindowWidget;
-    private GUIEventExecutor executor;
+    private WidgetEventExecutor executor;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        GUIExample instance = new GUIExample();
+        WidgetExample instance = new WidgetExample();
         instance.createGUI();
     }
 
-    public GUIExample() {
-        executor = new GUIEventExecutor();
+    public WidgetExample() {
+        executor = new WidgetEventExecutor();
     }
 
     public void createGUI() {
         languageGuiFile = "./etc/english.gui";
 
-        mainWindowWidget = new JFrame("VITRAL GUI Example");
-        
+        mainWindowWidget = new JFrame("VITRAL Widget Example");
+
         mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
@@ -65,9 +65,9 @@ public class GUIExample {
         Dimension d = new Dimension(800, 800);
         JPanel workspace = new JPanel();
         //workspace.setPreferredSize(new Dimension(400, mainWindowWidget.getHeight()));
-        
-        
-        
+
+
+
         JPanel p = new JPanel();
         p.setLayout(new GridLayout(gui.getDialogList().size(), 1));
         //p.setPreferredSize(new Dimension(300, 800));
@@ -78,7 +78,7 @@ public class GUIExample {
         p.setBorder(tb);
         //p.setBackground(Color.WHITE);
         workspace.setBorder(tb2);
-        
+
         /*
          * Dialog english.gui file construction
          */
@@ -95,14 +95,14 @@ public class GUIExample {
         mainWindowWidget.setVisible(true);
     }
 
-    public JPanel buildDialogGui(GuiDialog d) {
+    public JPanel buildDialogGui(WidgetDialog d) {
         JPanel pan = SwingGuiRenderer.buildDialog(d, gui, executor);
         if (d.getChildren().isEmpty() || d.getChildren() == null) {
             return pan;
         } else {
             for (int j = 0; j < d.getChildren().size(); j++) {
                 JPanel panel = null;
-                GuiDialog dial = (GuiDialog) d.getChildren().get(j);
+                WidgetDialog dial = (WidgetDialog) d.getChildren().get(j);
                 panel = buildDialogGui(dial);
                 pan.add(panel);
             }

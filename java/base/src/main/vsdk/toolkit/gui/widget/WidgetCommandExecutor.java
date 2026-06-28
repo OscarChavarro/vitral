@@ -1,11 +1,12 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
 import java.util.HashMap;
+import vsdk.toolkit.gui.PresentationElement;
 
-public abstract class GuiCommandExecutor extends PresentationElement {
+public abstract class WidgetCommandExecutor extends PresentationElement {
     protected HashMap<Integer, String> commandCache;
-    
-    public GuiCommandExecutor()
+
+    public WidgetCommandExecutor()
     {
         commandCache = new HashMap<Integer, String>();
     }
@@ -15,12 +16,12 @@ public abstract class GuiCommandExecutor extends PresentationElement {
         Integer number = Integer.valueOf(id);
         commandCache.put(number, command);
     }
-    
+
     public String getCommandFromId(int id)
     {
         Integer number = Integer.valueOf(id);
         return commandCache.get(number);
     }
-    
+
     public abstract boolean executeMenuCommand(String inIdCommand);
 }

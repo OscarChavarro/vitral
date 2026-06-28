@@ -1,4 +1,4 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
 import java.util.ArrayList;
 
@@ -9,29 +9,29 @@ import vsdk.toolkit.common.logging.Logger;
 This class plays a role of internal node on an n-ary tree in the composite
 design pattern.
 */
-public class GuiDialog extends GuiElement {
+public class WidgetDialog extends WidgetElement {
 
     public static final int ORIENTATION_HORIZONTAL = 0x01;
     public static final int ORIENTATION_VERTICAL = 0x02;
     private String id;
     private String name;
     private int orientation;
-    private ArrayList<GuiElement> children;
+    private ArrayList<WidgetElement> children;
     /// In the importing from file process, a dialog could be "incomplete",
     /// due to having a variable reference to a variable that is not loaded
     /// yet.  In such situation, a two pass processing is performed:
     /// On first pass does not create neither associate any variable, but store
     /// its incomplete references (names) on this ArrayList. On second pass
     /// the factory traverse this list in order to add current variables
-    /// from context. Check GuiPersistence.importAquynzaGuiDialog method.
+    /// from context. Check WidgetPersistence.importAquynzaWidgetDialog method.
     private ArrayList<String> pendingVariableNames;
     private ArrayList<String> pendingCommandNames;
     private ArrayList<String> pendingDialogNames;
     private ArrayList<String> pendingDialogRefNames;
     private boolean collapsable;
 
-    public GuiDialog() {
-        children = new ArrayList<GuiElement>();
+    public WidgetDialog() {
+        children = new ArrayList<WidgetElement>();
         pendingVariableNames = new ArrayList<String>();
         pendingCommandNames = new ArrayList<String>();
         pendingDialogNames = new ArrayList<String>();
@@ -48,7 +48,7 @@ public class GuiDialog extends GuiElement {
         this.collapsable = collapsable;
     }
 
-    
+
     public ArrayList<String> getPendingCommandNames() {
         return pendingCommandNames;
     }
@@ -57,12 +57,12 @@ public class GuiDialog extends GuiElement {
         this.pendingCommandNames = pendingCommandNames;
     }
 
-    public ArrayList<GuiElement> getGuiElementList() {
+    public ArrayList<WidgetElement> getWidgetElementList() {
         return children;
     }
 
-    public void setGuiElementList(ArrayList<GuiElement> guiElementList) {
-        this.children = guiElementList;
+    public void setWidgetElementList(ArrayList<WidgetElement> widgetElementList) {
+        this.children = widgetElementList;
     }
 
     public String getId() {
@@ -105,11 +105,11 @@ public class GuiDialog extends GuiElement {
         this.pendingDialogNames = pendingDialogNames;
     }
 
-    public ArrayList<GuiElement> getChildren() {
+    public ArrayList<WidgetElement> getChildren() {
         return children;
     }
 
-    public void setChildren(ArrayList<GuiElement> children) {
+    public void setChildren(ArrayList<WidgetElement> children) {
         this.children = children;
     }
 
@@ -122,7 +122,7 @@ public class GuiDialog extends GuiElement {
     }
 
     /**
-     * Given a variableName, this method asks the context for a GuiVariable
+     * Given a variableName, this method asks the context for a WidgetVariable
      * pointer in order to reference the given variable. If that variable
      * doesn't exist, an exception is thrown.
      */
@@ -137,7 +137,7 @@ public class GuiDialog extends GuiElement {
 
     @Override
     public String toString() {
-        GuiDialog dialog;
+        WidgetDialog dialog;
         String msg = "";
 
         msg = msg + "    DIALOG: " + this.getId() + "\n";

@@ -8,11 +8,11 @@ import android.view.Menu;
 import android.view.SubMenu;
 
 // Vitral classes
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiCommandExecutor;
-import vsdk.toolkit.gui.GuiMenu;
-import vsdk.toolkit.gui.GuiMenuElement;
-import vsdk.toolkit.gui.GuiMenuItem;
+import vsdk.toolkit.gui.widget.Widget;
+import vsdk.toolkit.gui.widget.WidgetCommandExecutor;
+import vsdk.toolkit.gui.widget.WidgetMenu;
+import vsdk.toolkit.gui.widget.WidgetMenuElement;
+import vsdk.toolkit.gui.widget.WidgetMenuItem;
 import vsdk.toolkit.gui.PresentationElement;
 
 public class AndroidGuiRenderer extends PresentationElement {
@@ -20,7 +20,7 @@ public class AndroidGuiRenderer extends PresentationElement {
     public static int currentCommandId = 1;
 
     public static boolean
-    executeCommandById(Gui inOutContext, int id, GuiCommandExecutor executor)
+    executeCommandById(Widget inOutContext, int id, WidgetCommandExecutor executor)
     {
         String command = executor.getCommandFromId(id);
         return executor.executeMenuCommand(command);
@@ -38,9 +38,9 @@ public class AndroidGuiRenderer extends PresentationElement {
     @return
     */
     public static SubMenu buildMenubar(
-        Gui inOutContext,
+        Widget inOutContext,
         Menu inOutParentMenu,
-        GuiCommandExecutor executor)
+        WidgetCommandExecutor executor)
     {
         // Activate menu for new devices without menu button, on Android
         // versions 4.0 and up: put it on the action bar
@@ -58,65 +58,65 @@ public class AndroidGuiRenderer extends PresentationElement {
     Vitral based GUI.
     */
     private static void buildMenubar(
-        Gui inOutContext, 
+        Widget inOutContext,
         SubMenu inOutPopupMenu,
-        GuiCommandExecutor executor) {
-        
+        WidgetCommandExecutor executor) {
+
         if ( inOutContext == null ) {
             inOutPopupMenu.addSubMenu(0, 100, 0, "NO GUI SPECIFIED!");
             return;
         }
-        
-        GuiMenu menubar = inOutContext.getMenubar();
+
+        WidgetMenu menubar = inOutContext.getMenubar();
         if ( menubar == null ) {
             inOutPopupMenu.addSubMenu(0, 100, 0, "NO MENUBAR IN GUI FILE!");
             return;
         }
 
-        ArrayList<GuiMenuElement> children;
+        ArrayList<WidgetMenuElement> children;
         int i;
-        GuiMenuElement element;
-        GuiMenu menu;
-        
+        WidgetMenuElement element;
+        WidgetMenu menu;
+
         children = menubar.getChildren();
-        
+
         for ( i = 0; i < children.size(); i++ ) {
             element = children.get(i);
-            if ( element instanceof GuiMenu ) {
-                menu = (GuiMenu)element;
+            if ( element instanceof WidgetMenu ) {
+                menu = (WidgetMenu)element;
                 buildPopupMenu(inOutContext, inOutPopupMenu, menu.getName(), executor);
             }
         }
     }
 
     private static void buildPopupMenu(
-        Gui inOutContext, SubMenu parent, String name, GuiCommandExecutor executor) {
-        GuiMenu menu = inOutContext.getPopup(name);
+        Widget inOutContext, SubMenu parent, String name, WidgetCommandExecutor executor) {
+        WidgetMenu menu = inOutContext.getPopup(name);
         SubMenu currentAndroidMenuWidget;
 
         currentAndroidMenuWidget = parent.addSubMenu(1, currentMenuId, 1, name);
         currentMenuId--;
-        
+
         if ( menu == null ) {
             System.out.println("  - Popup menu not found on GUI");
         } else {
-            ArrayList<GuiMenuElement> children;
+            ArrayList<WidgetMenuElement> children;
             int i;
-            GuiMenuElement element;
+            WidgetMenuElement element;
 
             children = menu.getChildren();
             for (i = 0; i < children.size(); i++) {
                 element = children.get(i);
-                
-                if ( element instanceof GuiMenu ) {
-                    GuiMenu submenu = (GuiMenu) element;
+
+                if ( element instanceof WidgetMenu ) {
+                    WidgetMenu submenu = (WidgetMenu) element;
                     buildPopupMenu(
-                        inOutContext, 
-                        currentAndroidMenuWidget, 
-                        submenu.getName(), 
+                        inOutContext,
+                        currentAndroidMenuWidget,
+                        submenu.getName(),
                         executor);
-                } else if ( element instanceof GuiMenuItem ) {
-                    GuiMenuItem option = (GuiMenuItem) element;
+                } else if ( element instanceof WidgetMenuItem ) {
+                    WidgetMenuItem option = (WidgetMenuItem) element;
                     if ( option.isSeparator() ) {
                         currentAndroidMenuWidget.add(0, currentCommandId, 0, "------");
                         currentCommandId++;

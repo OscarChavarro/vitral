@@ -1,6 +1,6 @@
-package vsdk.toolkit.gui;
+package vsdk.toolkit.gui.widget;
 
-public class GuiMenuItem extends GuiMenuElement
+public class WidgetMenuItem extends WidgetMenuElement
 {
     private String name;
     private String commandName;
@@ -13,7 +13,7 @@ public class GuiMenuItem extends GuiMenuElement
         return isSeparatorFlag;
     }
 
-    public GuiMenuItem(Gui c)
+    public WidgetMenuItem(Widget c)
     {
         context = c;
         name = null;

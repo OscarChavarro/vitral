@@ -1,21 +1,21 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
 import vsdk.toolkit.media.Image;
 
-public class GuiBooleanVariable extends GuiVariable {
+public class WidgetBooleanVariable extends WidgetVariable {
 
     private Image imageForTrueState;
     private Image imageForFalseState;
     private int style;
-    
-    public GuiBooleanVariable() {
+
+    public WidgetBooleanVariable() {
         this.validRange = "false, true";
         imageForTrueState = null;
         imageForFalseState = null;
     }
 
-    
-    
+
+
     @Override
     public String getType() {
         return "Boolean";
@@ -42,7 +42,7 @@ public class GuiBooleanVariable extends GuiVariable {
     public void setValidRange(String vr) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     //New Oscar August 13/2014
     public void setImageForTrueState(Image imageForTrueState) {
         this.imageForTrueState = imageForTrueState;
@@ -52,5 +52,5 @@ public class GuiBooleanVariable extends GuiVariable {
         this.imageForFalseState = imageForFalseState;
     }
 
-  
+
 }

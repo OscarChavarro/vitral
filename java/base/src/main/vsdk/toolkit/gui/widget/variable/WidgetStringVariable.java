@@ -1,6 +1,6 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
-public class GuiStringVariable extends GuiVariable {
+public class WidgetStringVariable extends WidgetVariable {
     @Override
     public String getType() {
         return "String";

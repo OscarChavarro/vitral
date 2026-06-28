@@ -34,20 +34,20 @@ import javax.swing.border.Border;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.awt.AwtRGBAImageUncompressedRenderer;
 import vsdk.toolkit.gui.PresentationElement;
-import vsdk.toolkit.gui.variable.GuiBooleanVariable;
-import vsdk.toolkit.gui.variable.GuiColorRgbVariable;
-import vsdk.toolkit.gui.variable.GuiDoubleVariable;
-import vsdk.toolkit.gui.variable.GuiIntegerVariable;
-import vsdk.toolkit.gui.variable.GuiStringVariable;
-import vsdk.toolkit.gui.variable.GuiVariable;
-import vsdk.toolkit.gui.variable.GuiVector3DVariable;
-import vsdk.toolkit.gui.Gui;
-import vsdk.toolkit.gui.GuiButtonGroup;
-import vsdk.toolkit.gui.GuiCommand;
-import vsdk.toolkit.gui.GuiMenu;
-import vsdk.toolkit.gui.GuiMenuItem;
-import vsdk.toolkit.gui.GuiMenuElement;
-import vsdk.toolkit.gui.GuiDialog;
+import vsdk.toolkit.gui.widget.variable.WidgetBooleanVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetColorRgbVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetDoubleVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetIntegerVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetStringVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetVariable;
+import vsdk.toolkit.gui.widget.variable.WidgetVector3DVariable;
+import vsdk.toolkit.gui.widget.Widget;
+import vsdk.toolkit.gui.widget.WidgetButtonGroup;
+import vsdk.toolkit.gui.widget.WidgetCommand;
+import vsdk.toolkit.gui.widget.WidgetMenu;
+import vsdk.toolkit.gui.widget.WidgetMenuItem;
+import vsdk.toolkit.gui.widget.WidgetMenuElement;
+import vsdk.toolkit.gui.widget.WidgetDialog;
 
 public class SwingGuiRenderer extends PresentationElement {
 
@@ -170,7 +170,7 @@ public class SwingGuiRenderer extends PresentationElement {
         return output;
     }
 
-    public static JMenu buildPopupMenu(Gui context, String name,
+    public static JMenu buildPopupMenu(Widget context, String name,
             ActionListener executor) {
         JMenu widgetPopup;
         JMenuItem widgetOption;
@@ -180,30 +180,30 @@ public class SwingGuiRenderer extends PresentationElement {
         widgetPopup = new JMenu(name);
         widgetPopup.getPopupMenu().setLightWeightPopupEnabled(false);
 
-        GuiMenu menu = context.getPopup(name);
+        WidgetMenu menu = context.getPopup(name);
 
         if (menu == null) {
             //widgetOption =
             widgetPopup.add(new JMenuItem("Popup menu not found on GUI"));
         } else {
-            ArrayList<GuiMenuElement> children;
+            ArrayList<WidgetMenuElement> children;
             children = menu.getChildren();
 
             int i;
-            GuiMenuElement element;
+            WidgetMenuElement element;
             String className;
 
             for (i = 0; i < children.size(); i++) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if (className.equals("vsdk.toolkit.gui.GuiMenu")) {
-                    GuiMenu submenu = (GuiMenu) element;
+                if (className.equals("vsdk.toolkit.gui.widget.WidgetMenu")) {
+                    WidgetMenu submenu = (WidgetMenu) element;
                     JMenu widgetSubmenu = buildPopupMenu(context,
                             submenu.getName(),
                             executor);
                     widgetPopup.add(widgetSubmenu);
-                } else if (className.equals("vsdk.toolkit.gui.GuiMenuItem")) {
-                    GuiMenuItem option = (GuiMenuItem) element;
+                } else if (className.equals("vsdk.toolkit.gui.widget.WidgetMenuItem")) {
+                    WidgetMenuItem option = (WidgetMenuItem) element;
                     if (option.isSeparator()) {
                         widgetPopup.addSeparator();
                     } else {
@@ -224,13 +224,13 @@ public class SwingGuiRenderer extends PresentationElement {
     }
 
     public static JPanel buildButtonGroup(
-        Gui context, String name, ActionListener executor) {
+        Widget context, String name, ActionListener executor) {
         JPanel frame;
         JLabel l;
         JButton b;
 
         frame = new JPanel();
-        GuiButtonGroup group;
+        WidgetButtonGroup group;
         group = context.getButtonGroup(name);
 
         if (group == null) {
@@ -242,16 +242,16 @@ public class SwingGuiRenderer extends PresentationElement {
 
         Border empty = BorderFactory.createEmptyBorder(0, 0, 0, 0);
         frame.setBorder(empty);
-        if (group.getDirection() == GuiButtonGroup.HORIZONTAL) {
+        if (group.getDirection() == WidgetButtonGroup.HORIZONTAL) {
             //frame.setLayout(new BoxLayout(frame, BoxLayout.X_AXIS));
             frame.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         } else {
             frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
         }
 
-        ArrayList<GuiCommand> list = group.getCommands();
+        ArrayList<WidgetCommand> list = group.getCommands();
         int i;
-        GuiCommand element;
+        WidgetCommand element;
         RGBAImageUncompressed img;
 
         for ( i = 0; i < list.size(); i++ ) {
@@ -260,10 +260,10 @@ public class SwingGuiRenderer extends PresentationElement {
             // Button goes with images ... if any inside command
             img = element.getIcon();
 
-            
+
             if ( img == null || !group.isShowIconsSet() ) {
                 b = new JButton(element.getName());
-            } 
+            }
             else {
                 final ImageIcon primaryIcon;
                 primaryIcon = new ImageIcon(
@@ -294,7 +294,7 @@ public class SwingGuiRenderer extends PresentationElement {
                     //    AwtRGBAImageUncompressedRenderer.exportToAwtBufferedImage(img)));
                 }
             }
-            
+
             b.setName(element.getId());
 
             if ( group.isShowTextSet() ) {
@@ -324,31 +324,31 @@ public class SwingGuiRenderer extends PresentationElement {
     data context which has the specified name. If null is given as name, the
     context's menubar is used. In this way, different frame windows could
     have different menubars.
-    
+
     The builded menu is supposed to be used as a menubar inside a swing
     JFrame.
-    
+
     \todo : permit the selection of a different name menu
     @param context
     @param name
     @param executor
-    @return 
+    @return
     */
     public static JMenuBar buildMenubar(
-        Gui context, String name, ActionListener executor) 
+        Widget context, String name, ActionListener executor)
     {
         JMenu widgetPopup;
         JMenuItem widgetOption;
         JMenuBar widgetMenubar;
-        GuiMenu menubar = null;
+        WidgetMenu menubar = null;
         String errorMenu = null;
         int mnemonic;
 
         if ( context != null ) {
             menubar = context.getMenubar();
-        } 
+        }
         else {
-            errorMenu = "No Gui specified!";
+            errorMenu = "No Widget specified!";
         }
         if ( menubar == null ) {
             errorMenu = "No menubar in GUI!";
@@ -370,19 +370,19 @@ public class SwingGuiRenderer extends PresentationElement {
 
             widgetPopup.getPopupMenu().setLightWeightPopupEnabled(false);
         } else {
-            ArrayList<GuiMenuElement> children;
+            ArrayList<WidgetMenuElement> children;
             children = menubar.getChildren();
 
             int i;
-            GuiMenuElement element;
-            GuiMenu menu;
+            WidgetMenuElement element;
+            WidgetMenu menu;
             String className;
 
             for (i = 0; i < children.size(); i++) {
                 element = children.get(i);
                 className = element.getClass().getName();
-                if (className.equals("vsdk.toolkit.gui.GuiMenu")) {
-                    menu = (GuiMenu) element;
+                if (className.equals("vsdk.toolkit.gui.widget.WidgetMenu")) {
+                    menu = (WidgetMenu) element;
                     widgetPopup = buildPopupMenu(context, menu.getName(),
                             executor);
                     mnemonic = convertMnemonic2Swing(menu.getMnemonic());
@@ -397,53 +397,53 @@ public class SwingGuiRenderer extends PresentationElement {
     }
 ///codeOscar
     // Code Oz
-    public static JPanel buildBooleanVariable(GuiBooleanVariable v, ActionListener executor) {
+    public static JPanel buildBooleanVariable(WidgetBooleanVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         /*
         v.getImageForFalseState();
         v.getImageForTrueState();
         */
-   
+
         JButton optionA;
         JButton optionB = new JButton();
-    
+
             optionA= new JButton("./etc/1.jpg");
                 p.add(optionA);
-        
-           
+
+
         JCheckBox cb = new JCheckBox(v.getName());
       //  p.add(buildNumberWidget(v.getName()));
-        
+
         cb.addActionListener(executor);
         p.add(cb);
         p.add(optionA);
-        
 
-        
+
+
         //JCheckBox cb = new JCheckBox(v.getName());
         //p.add(buildNumberWidget(v.getName()));
         //cb.addActionListener(executor);
         //p.add(cb);
-        
+
       /*
         JCheckBox b = new JCheckBox("NUll);
         p.add(b);
         b = new JCheckBox("False");
         p.add(b);*/
-        
+
        // RGBAImageUncompressed image = ImagePersistence.importRGBA(new File());
-    
+
         /*
         getImageForTrueState
         */
-        
-        
+
+
         return p;
     }
 
-    
-    
-    
+
+
+
     private static JPanel buildNumberWidget(String subname, ActionListener executor) {
         JPanel p;
         JLabel l;
@@ -457,7 +457,7 @@ public class SwingGuiRenderer extends PresentationElement {
         return p;
     }
 
-    public static JPanel buildVector3DVariable(GuiVector3DVariable v, ActionListener executor) {
+    public static JPanel buildVector3DVariable(WidgetVector3DVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         JLabel lv = new JLabel(v.getName());
         p.add(lv);
@@ -467,7 +467,7 @@ public class SwingGuiRenderer extends PresentationElement {
         return p;
     }
 
-    public static JPanel buildColorRgbVariable(GuiColorRgbVariable v, ActionListener executor) {
+    public static JPanel buildColorRgbVariable(WidgetColorRgbVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         p.add(buildNumberWidget("R:", executor));
         p.add(buildNumberWidget("G:", executor));
@@ -475,13 +475,13 @@ public class SwingGuiRenderer extends PresentationElement {
         return p;
     }
 
-    public static JPanel buildDoubleVariable(GuiDoubleVariable v, ActionListener executor) {
+    public static JPanel buildDoubleVariable(WidgetDoubleVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         p.add(buildNumberWidget(v.getName() + ":", executor));
         return p;
     }
 
-    public static JPanel buildIntegerVariable(GuiIntegerVariable v, ActionListener executor) {
+    public static JPanel buildIntegerVariable(WidgetIntegerVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         //JScrollBar sb = new JScrollBar();
         //JSlider js = new JSlider();
@@ -491,7 +491,7 @@ public class SwingGuiRenderer extends PresentationElement {
         return p;
     }
 
-    public static JPanel buildStringVariable(GuiStringVariable v, ActionListener executor) {
+    public static JPanel buildStringVariable(WidgetStringVariable v, ActionListener executor) {
         JPanel p = new JPanel();
         //JLabel l = new JLabel(v.getName());
         //p.add(l);
@@ -499,14 +499,14 @@ public class SwingGuiRenderer extends PresentationElement {
         return p;
     }
 
-    public static JButton buildCommandButton(GuiCommand c, ActionListener executor) {
+    public static JButton buildCommandButton(WidgetCommand c, ActionListener executor) {
         JButton b = new JButton(c.getName());
         b.setToolTipText("Test Message: " + c.getName());
         b.addActionListener(executor);
         return b;
     }
 
-    public static JPanel buildVariable(GuiVariable v, ActionListener executor) {
+    public static JPanel buildVariable(WidgetVariable v, ActionListener executor) {
         JPanel containingPanelWidget = new JPanel();
         if (v == null) {
             JLabel l = new JLabel("NULL Variable ");
@@ -514,18 +514,18 @@ public class SwingGuiRenderer extends PresentationElement {
             return containingPanelWidget;
         }
 
-        if (v instanceof vsdk.toolkit.gui.variable.GuiBooleanVariable) {
-            containingPanelWidget = buildBooleanVariable((GuiBooleanVariable) v, executor);
-        } else if (v instanceof vsdk.toolkit.gui.variable.GuiVector3DVariable) {
-            containingPanelWidget = buildVector3DVariable((GuiVector3DVariable) v, executor);
-        } else if (v instanceof vsdk.toolkit.gui.variable.GuiColorRgbVariable) {
-            containingPanelWidget = buildColorRgbVariable((GuiColorRgbVariable) v, executor);
-        } else if (v instanceof vsdk.toolkit.gui.variable.GuiDoubleVariable) {
-            containingPanelWidget = buildDoubleVariable((GuiDoubleVariable) v, executor);
-        } else if (v instanceof vsdk.toolkit.gui.variable.GuiIntegerVariable) {
-            containingPanelWidget = buildIntegerVariable((GuiIntegerVariable) v, executor);
-        } else if (v instanceof vsdk.toolkit.gui.variable.GuiStringVariable) {
-            containingPanelWidget = buildStringVariable((GuiStringVariable) v, executor);
+        if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetBooleanVariable) {
+            containingPanelWidget = buildBooleanVariable((WidgetBooleanVariable) v, executor);
+        } else if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetVector3DVariable) {
+            containingPanelWidget = buildVector3DVariable((WidgetVector3DVariable) v, executor);
+        } else if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetColorRgbVariable) {
+            containingPanelWidget = buildColorRgbVariable((WidgetColorRgbVariable) v, executor);
+        } else if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetDoubleVariable) {
+            containingPanelWidget = buildDoubleVariable((WidgetDoubleVariable) v, executor);
+        } else if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetIntegerVariable) {
+            containingPanelWidget = buildIntegerVariable((WidgetIntegerVariable) v, executor);
+        } else if (v instanceof vsdk.toolkit.gui.widget.variable.WidgetStringVariable) {
+            containingPanelWidget = buildStringVariable((WidgetStringVariable) v, executor);
         } else {
             JLabel l = new JLabel("Variable of type " + v.getClass().getName() + " not supported yet");
             containingPanelWidget.add(l);
@@ -533,7 +533,7 @@ public class SwingGuiRenderer extends PresentationElement {
         return containingPanelWidget;
     }
 
-    public static void buildGuiCommandConfiguration(JPanel panel, String aux, GridBagConstraints cons, GuiCommand c, ActionListener executor) {
+    public static void buildGuiCommandConfiguration(JPanel panel, String aux, GridBagConstraints cons, WidgetCommand c, ActionListener executor) {
         if (aux.equals("Camera Rotations")) {
             if (c.getName().equals("UP")) {
                 cons.gridx = 1;
@@ -547,7 +547,7 @@ public class SwingGuiRenderer extends PresentationElement {
                 cons.gridy = 1;
                 cons.gridwidth = 1;
                 cons.gridheight = 1;
-                panel.add(buildCommandButton(c,executor), cons);
+                panel.add(buildCommandButton(c, executor), cons);
             } else if (c.getName().equals("LEFT")) {
                 cons.gridx = 0;
                 cons.gridy = 1;
@@ -692,12 +692,12 @@ public class SwingGuiRenderer extends PresentationElement {
                 cons.gridheight = 1;
                 panel.add(buildCommandButton(c,executor), cons);
             }
-          
+
     }
     }
-    
-    
-        public static void buildGuiVariableConfiguration(JPanel panel, String aux, GridBagConstraints cons, Gui gui, ActionListener executor) {
+
+
+        public static void buildGuiVariableConfiguration(JPanel panel, String aux, GridBagConstraints cons, Widget gui, ActionListener executor) {
             if (aux.equals("MODE_1")) {
                 cons.gridx = 0;
                 cons.gridy = 0;
@@ -737,7 +737,7 @@ public class SwingGuiRenderer extends PresentationElement {
         }
     }
 
-    public static JPanel buildDialog(GuiDialog d, Gui gui, ActionListener executor) {
+    public static JPanel buildDialog(WidgetDialog d, Widget gui, ActionListener executor) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         LayoutManager cons;
@@ -759,7 +759,7 @@ public class SwingGuiRenderer extends PresentationElement {
         //- Define geometry management for panel ---------------------------
         int ncols;
         int nrows;
-        if (d.getOrientation() == GuiDialog.ORIENTATION_HORIZONTAL) {
+        if (d.getOrientation() == WidgetDialog.ORIENTATION_HORIZONTAL) {
             ncols = d.getPendingVariableNames().size()
                     + d.getPendingCommandNames().size()
                     + d.getPendingDialogRefNames().size();
@@ -786,14 +786,14 @@ public class SwingGuiRenderer extends PresentationElement {
         }
 
         for (int i = 0; i < d.getPendingCommandNames().size(); i++) {
-            GuiCommand c = new GuiCommand();
+            WidgetCommand c = new WidgetCommand();
             c.setName(d.getPendingCommandNames().get(i));
             panel.add(buildCommandButton(c, executor));
             //buildGuiCommandConfiguration(panel, aux, cons, c);
         }
 
         for (int i = 0; i < d.getPendingDialogRefNames().size(); i++) {
-            GuiDialog dial = new GuiDialog();
+            WidgetDialog dial = new WidgetDialog();
             dial.setId(d.getPendingDialogRefNames().get(i));
             panel.add(buildDialog(dial, gui, executor));
         }

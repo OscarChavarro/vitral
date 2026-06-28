@@ -1,12 +1,12 @@
-package vsdk.toolkit.gui.variable;
+package vsdk.toolkit.gui.widget.variable;
 
-public class GuiDoubleVariable extends GuiVariable {
+public class WidgetDoubleVariable extends WidgetVariable {
     @Override
     public String getType() {
         return "Double";
     }
-    
-    public GuiDoubleVariable() {
+
+    public WidgetDoubleVariable() {
         super();
         this.validRange = "(-INF, INF)";
     }
