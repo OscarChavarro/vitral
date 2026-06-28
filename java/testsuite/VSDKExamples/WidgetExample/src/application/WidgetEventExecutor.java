@@ -9,7 +9,10 @@ public class WidgetEventExecutor extends CommandListener implements ActionListen
 
     @Override
     public boolean executeCommand(String label) {
-        System.out.println("Ejecuto el comando "+label);
+        System.out.println("Executing command " + label);
+	if (label.equals("IDC_FILE_QUIT")) {
+	    System.exit(0);
+	}
         return true;
     }
 

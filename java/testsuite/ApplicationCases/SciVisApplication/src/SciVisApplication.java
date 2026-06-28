@@ -69,7 +69,7 @@ public class SciVisApplication
         gui = null;
         mainWindowWidget = null;
         lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
-        languageGuiFile = "./etc/english.gui";
+        languageGuiFile = "./etc/english.json";
 
         createGUI();
     }

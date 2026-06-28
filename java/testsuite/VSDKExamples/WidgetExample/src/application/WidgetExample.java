@@ -44,7 +44,7 @@ public class WidgetExample {
     }
 
     public void createGUI() {
-        languageGuiFile = "./etc/english.gui";
+        languageGuiFile = "./etc/english.json";
 
         mainWindowWidget = new JFrame("VITRAL Widget Example");
 
@@ -80,7 +80,7 @@ public class WidgetExample {
         workspace.setBorder(tb2);
 
         /*
-         * Dialog english.gui file construction
+         * Dialog english.json file construction
          */
         for (int i = 0; i < gui.getDialogList().size(); i++) {
             p.add(buildDialogGui(gui.getDialogList().get(i)));

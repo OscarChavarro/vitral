@@ -1,0 +1,503 @@
+{
+  "format": "vitral-widget-gui",
+  "version": 1,
+  "menubar": {
+    "type": "menu",
+    "name": "GLOBAL",
+    "children": [
+      {
+        "type": "menu",
+        "name": "&Archivo",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Nuevo...\tCtrl+N",
+            "modifiers": [
+              "IDC_FILE_NEW"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Leer...\tCtrl+L",
+            "modifiers": [
+              "IDC_FILE_LOAD"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Grabar...\tCtrl+G",
+            "modifiers": [
+              "IDC_FILE_SAVE"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Salir",
+            "modifiers": [
+              "IDC_FILE_QUIT"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Edicion",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Seleccionar",
+            "modifiers": [
+              "IDC_EDIT_SELECT",
+              "GRAYED"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Seleccionar &Todo\tCtrl+T",
+            "modifiers": [
+              "IDC_EDIT_SELECT_ALL",
+              "GRAYED"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Cortar\tCtrl+X",
+            "modifiers": [
+              "IDC_EDIT_CUT",
+              "GRAYED"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Copiar\tCtrl+C",
+            "modifiers": [
+              "IDC_EDIT_COPY",
+              "GRAYED"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Pegar\tCtrl+V",
+            "modifiers": [
+              "IDC_EDIT_PASTE",
+              "GRAYED"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Ver",
+        "children": [
+          {
+            "type": "menu",
+            "name": "&Visualizador",
+            "children": []
+          },
+          {
+            "type": "menu",
+            "name": "&Camara",
+            "children": []
+          },
+          {
+            "type": "menu",
+            "name": "Calidad &visual",
+            "children": []
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Nueva vista",
+            "modifiers": [
+              "IDC_NEW_VIEW"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Display remoto ...",
+            "modifiers": [
+              "IDC_MESSAGE"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "!&Imprimir todo!",
+            "modifiers": [
+              "IDC_PRINT_ALL"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Simulacion",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Play/Stop",
+            "modifiers": [
+              "IDC_PLAY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Tiempo de discretizacion...",
+            "modifiers": [
+              "IDC_DELTA_T"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "aA&yuda",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Acerca de...",
+            "modifiers": [
+              "IDC_AYUDA_ACERCADE"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "popups": [
+    {
+      "type": "menu",
+      "name": "ESCENA",
+      "children": [
+        {
+          "type": "item",
+          "modifiers": [
+            "SEPARATOR"
+          ]
+        },
+        {
+          "type": "item",
+          "modifiers": [
+            "SEPARATOR"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "CAMARA",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Perspectiva",
+          "modifiers": [
+            "IDC_CAMARA_PERSPECTIVA",
+            "CHECKED"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Etiqueta",
+          "modifiers": [
+            "IDC_CAMARA_ETIQUETA",
+            "CHECKED"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Mostrar",
+          "modifiers": [
+            "IDC_CAMARA_MOSTRAR",
+            "UNCHECKED"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "VISUALIZADOR",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Zbuffer usando OpenGL",
+          "modifiers": [
+            "IDC_OPENGL_RENDER"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Raytracing criollo",
+          "modifiers": [
+            "IDC_RAYTRACING_CRIOLLO"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Raytracing usando &POVray",
+          "modifiers": [
+            "IDC_RAYTRACER_POVRAY"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "CALIDAD_VISUAL",
+      "children": [
+        {
+          "type": "menu",
+          "name": "Calidad &visual",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Wireframe",
+              "modifiers": [
+                "IDC_WIREFRAME_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Superficie",
+              "modifiers": [
+                "IDC_SURFACE_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Modelo &Phong",
+              "modifiers": [
+                "IDC_PHONG_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Textura",
+              "modifiers": [
+                "IDC_TEXTURE_RENDER",
+                "UNCHECKED"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "menu",
+          "name": "Calidad &interactiva",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Igual",
+              "modifiers": [
+                "IDC_SAME_INTER",
+                "CHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "modifiers": [
+                "SEPARATOR"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Wireframe",
+              "modifiers": [
+                "IDC_WIREFRAME_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Lineas ocultas",
+              "modifiers": [
+                "IDC_HIDDEN_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Superficie pla&na",
+              "modifiers": [
+                "IDC_FLAT_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Superficie &suave",
+              "modifiers": [
+                "IDC_SMOOTH_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Textura",
+              "modifiers": [
+                "IDC_TEXTURE_INTER",
+                "UNCHECKED",
+                "GRAYED"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "menu",
+          "name": "Calidad &espacio",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Ninguno",
+              "modifiers": [
+                "IDC_ESPACIO_NONE",
+                "CHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Marco",
+              "modifiers": [
+                "IDC_ESPACIO_MARCO",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Lineas",
+              "modifiers": [
+                "IDC_ESPACIO_LINEAS",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Superficie",
+              "modifiers": [
+                "IDC_ESPACIO_SUPERFICIE",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Piso a cuadros",
+              "modifiers": [
+                "IDC_ESPACIO_PISO",
+                "UNCHECKED",
+                "GRAYED"
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "Modelo de &iluminacion",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "Superficie pla&na",
+                  "modifiers": [
+                    "IDC_FLAT_ESPACIO",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "Superficie &suave",
+                  "modifiers": [
+                    "IDC_SMOOTH_ESPACIO",
+                    "UNCHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Textura",
+                  "modifiers": [
+                    "IDC_TEXTURE_ESPACIO",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "&Transparencia",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "Paredes &ocultas",
+                  "modifiers": [
+                    "IDC_OPAC_ESPACIO",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "Paredes &transparentes",
+                  "modifiers": [
+                    "IDC_TRANS_ESPACIO",
+                    "UNCHECKED"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "&Fondo",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "&Uniforme",
+                  "modifiers": [
+                    "IDC_FONDO_UNIFORME",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Degrade",
+                  "modifiers": [
+                    "IDC_FONDO_DEGRADE",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Color...",
+                  "modifiers": [
+                    "IDC_FONDO_COLOR",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "format": "vitral-widget-gui",
+  "version": 1,
+  "menubar": {
+    "type": "menu",
+    "name": "GLOBAL",
+    "children": [
+      {
+        "type": "menu",
+        "name": "&File",
+        "children": [
+          {
+            "type": "item",
+            "name": "&New Study",
+            "modifiers": [
+              "IDC_FILE_NEW_STUDY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Open Study",
+            "modifiers": [
+              "IDC_FILE_OPEN_STUDY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Save Study",
+            "modifiers": [
+              "IDC_FILE_SAVE_STUDY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Save Study &As",
+            "modifiers": [
+              "IDC_FILE_SAVE_AS_STUDY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Close Study",
+            "modifiers": [
+              "IDC_FILE_CLOSE_STUDY"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Exit",
+            "modifiers": [
+              "IDC_FILE_QUIT"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Tests",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Cycle slices",
+            "modifiers": [
+              "IDC_TESTS_CYCLE_SLICES"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "popups": [
+    {
+      "type": "menu",
+      "name": "POPUP_PANEL_MANAGER_BASE",
+      "children": [
+        {
+          "type": "item",
+          "name": "&New 2D panel",
+          "modifiers": [
+            "IDC_PANEL_MANAGER_NEW_AREA_2D"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&New 3D panel",
+          "modifiers": [
+            "IDC_PANEL_MANAGER_NEW_AREA_3D"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "POPUP_PANEL_MANAGER_VIEW",
+      "children": [
+        {
+          "type": "item",
+          "name": "&New 2D panel",
+          "modifiers": [
+            "IDC_PANEL_MANAGER_NEW_AREA_2D"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&New 3D panel",
+          "modifiers": [
+            "IDC_PANEL_MANAGER_NEW_AREA_3D"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Delete this panel",
+          "modifiers": [
+            "IDC_PANEL_MANAGER_DELETE_AREA"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "POPUP_PANEL_MANAGER_EMPTY",
+      "children": [
+        {
+          "type": "item",
+          "name": "&New Study",
+          "modifiers": [
+            "IDC_FILE_NEW_STUDY"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Open Study",
+          "modifiers": [
+            "IDC_FILE_OPEN_STUDY"
+          ]
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "id": "IDC_FILE_QUIT",
+      "name": "Exit",
+      "brief": "End current interactive session",
+      "help": [
+        "Quits application. MORE HELP NEED TO VE INSERTED HERE.",
+        "MORE HELP NEED TO VE INSERTED HERE."
+      ]
+    }
+  ],
+  "buttonGroups": [
+    {
+      "name": "GLOBAL",
+      "showTitle": false,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": true,
+      "showText": false,
+      "direction": "horizontal",
+      "commands": [
+        "IDC_FILE_QUIT"
+      ]
+    }
+  ],
+  "messages": {
+    "IDM_INTRO_MESSAGE": "VSDK Scientific Visualization Editor - copyright, Pontificia Universidad Javeriana, 2005-2006"
+  }
+}

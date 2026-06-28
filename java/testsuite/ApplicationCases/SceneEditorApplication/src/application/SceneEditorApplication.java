@@ -370,7 +370,7 @@ public class SceneEditorApplication {
         //lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
         lookAndFeel = "org.jvnet.substance.skin.SubstanceTwilightLookAndFeel";
         //lookAndFeel = "org.jvnet.substance.skin.SubstanceOfficeBlue2007LookAndFeel";
-        languageGuiFile = "./etc/english.gui";
+        languageGuiFile = "./etc/english.json";
 
         fullScreenGuiMode = false;
         drawingArea = null;

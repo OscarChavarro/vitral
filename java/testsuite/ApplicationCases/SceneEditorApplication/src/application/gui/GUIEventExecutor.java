@@ -571,10 +571,10 @@ public class GUIEventExecutor extends CommandListener{
             parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         }
         else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_ENGLISH") ) {
-            parent.setGuiLanguage("./etc/english.gui");
+            parent.setGuiLanguage("./etc/english.json");
         }
         else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_SPANISH") ) {
-            parent.setGuiLanguage("./etc/spanish.gui");
+            parent.setGuiLanguage("./etc/spanish.json");
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {

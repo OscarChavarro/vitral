@@ -1,0 +1,1310 @@
+{
+  "format": "vitral-widget-gui",
+  "version": 1,
+  "menubar": {
+    "type": "menu",
+    "name": "GLOBAL",
+    "children": [
+      {
+        "type": "menu",
+        "name": "&File",
+        "children": [
+          {
+            "type": "item",
+            "name": "&New...\tCtrl+N",
+            "modifiers": [
+              "IDC_FILE_NEW"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Open...\tCtrl+O",
+            "modifiers": [
+              "IDC_FILE_OPEN"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Merge...",
+            "modifiers": [
+              "IDC_FILE_MERGE"
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "Open Recent",
+            "children": []
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Save\tCtrl+S",
+            "modifiers": [
+              "IDC_FILE_SAVE"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Save &As...",
+            "modifiers": [
+              "IDC_FILE_SAVE_AS"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Save Selecte&d...",
+            "modifiers": [
+              "IDC_FILE_SAVE_SELECTED"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Import...",
+            "modifiers": [
+              "IDC_FILE_IMPORT"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Export...",
+            "modifiers": [
+              "IDC_FILE_EXPORT"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Project Propierties...",
+            "modifiers": [
+              "IDC_FILE_PROPIERTIES"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Exit",
+            "modifiers": [
+              "IDC_FILE_QUIT"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Edit",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Undo",
+            "modifiers": [
+              "IDC_EDIT_UNDO"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Redo",
+            "modifiers": [
+              "IDC_EDIT_REDO"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Delete\tDelete",
+            "modifiers": [
+              "IDC_EDIT_DELETE"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select &All\tCtrl+A",
+            "modifiers": [
+              "IDC_EDIT_SELECT_ALL"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select &None\tCtrl+D",
+            "modifiers": [
+              "IDC_EDIT_SELECT_NONE"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select &Invert \tCtrl+I",
+            "modifiers": [
+              "IDC_EDIT_SELECT_INVERT"
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "Select &By",
+            "children": [
+              {
+                "type": "item",
+                "name": "&Color",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_BYCOLOR"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "&Name",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_BYNAME"
+                ]
+              },
+              {
+                "type": "item",
+                "modifiers": [
+                  "SEPARATOR"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Rectangular Region",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_RECTANGULAR"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Circular Region",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_CIRCULAR"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Fence Region",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_FENCE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Lasso Region",
+                "modifiers": [
+                  "IDC_EDIT_SELECT_LASSO"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Cut\tCtrl+X",
+            "modifiers": [
+              "IDC_EDIT_CUT"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Copy\tCtrl+C",
+            "modifiers": [
+              "IDC_EDIT_COPY"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Paste\tCtrl+V",
+            "modifiers": [
+              "IDC_EDIT_PASTE"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Create",
+        "children": [
+          {
+            "type": "menu",
+            "name": "0D bodies",
+            "children": [
+              {
+                "type": "item",
+                "name": "Particle",
+                "modifiers": [
+                  "IDC_CREATE_PARTICLE",
+                  "GRAYED"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Particle System",
+                "modifiers": [
+                  "IDC_CREATE_PARTICLE_SYSTEM",
+                  "GRAYED"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "1D bodies",
+            "children": [
+              {
+                "type": "item",
+                "name": "Parametric Cubic Curve",
+                "modifiers": [
+                  "IDC_CREATE_PARAMETRICCUBICCURVE"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "2D bodies",
+            "children": [
+              {
+                "type": "item",
+                "name": "Parametric Bi-Cubic Patch",
+                "modifiers": [
+                  "IDC_CREATE_PARAMETRICBICUBICPATCH"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Functional Explicit Surface",
+                "modifiers": [
+                  "IDC_CREATE_FUNCTIONALEXPLICITSURFACE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Objects from file ...",
+                "modifiers": [
+                  "IDC_IMPORT_OBJECTS_FROM_FILE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Plane",
+                "modifiers": [
+                  "IDC_CREATE_PLANE"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "3D bodies",
+            "children": [
+              {
+                "type": "item",
+                "name": "Sphere",
+                "modifiers": [
+                  "IDC_CREATE_SPHERE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Cone",
+                "modifiers": [
+                  "IDC_CREATE_CONE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Cylinder",
+                "modifiers": [
+                  "IDC_CREATE_CYLINDER"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Cube",
+                "modifiers": [
+                  "IDC_CREATE_CUBE"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Box",
+                "modifiers": [
+                  "IDC_CREATE_BOX"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Torus",
+                "modifiers": [
+                  "IDC_CREATE_TORUS"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Arrow",
+                "modifiers": [
+                  "IDC_CREATE_ARROW"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Volume",
+                "modifiers": [
+                  "IDC_CREATE_VOXELSET"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "Spherical Harmonic Debug from voxel",
+                "modifiers": [
+                  "IDC_CREATE_SPHERE_HARMONIC"
+                ]
+              },
+              {
+                "type": "item",
+                "modifiers": [
+                  "SEPARATOR"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "CSG",
+                "modifiers": [
+                  "IDC_CREATE_CSG",
+                  "GRAYED"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "Lights",
+            "children": [
+              {
+                "type": "item",
+                "name": "Omni Light",
+                "modifiers": [
+                  "IDC_CREATE_OMNILIGHT"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "Cameras",
+            "children": []
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Tools",
+        "children": [
+          {
+            "type": "item",
+            "name": "&Camera Control Mode",
+            "modifiers": [
+              "IDC_TOOLS_CAMERA"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Select Mode",
+            "modifiers": [
+              "IDC_TOOLS_SELECT"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select and &Translate Mode",
+            "modifiers": [
+              "IDC_TOOLS_TRANSLATE"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select and &Rotate Mode",
+            "modifiers": [
+              "IDC_TOOLS_ROTATE"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select and S&cale Mode",
+            "modifiers": [
+              "IDC_TOOLS_SCALE"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&View",
+        "children": [
+          {
+            "type": "menu",
+            "name": "&Visualizador",
+            "children": []
+          },
+          {
+            "type": "menu",
+            "name": "&Camara",
+            "children": []
+          },
+          {
+            "type": "menu",
+            "name": "Calidad &visual",
+            "children": []
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&New View",
+            "modifiers": [
+              "IDC_NEW_VIEW"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Delete View",
+            "modifiers": [
+              "IDC_DEL_VIEW"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "&Remote Display ...",
+            "modifiers": [
+              "IDC_MESSAGE"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "!&Print all!",
+            "modifiers": [
+              "IDC_PRINT_ALL"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Rendering",
+        "children": [
+          {
+            "type": "item",
+            "name": "Render Using &Raytracing\tF9",
+            "modifiers": [
+              "IDC_RENDERING_RAYTRACING"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Render Using &ZBuffer (OpenGL/JOGL)",
+            "modifiers": [
+              "IDC_RENDERING_OBTAINZBUFFERIMAGE"
+            ]
+          },
+          {
+            "type": "item",
+            "modifiers": [
+              "SEPARATOR"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Select &Palette For Depthmap Display",
+            "modifiers": [
+              "IDC_RENDERING_SELECTPALETTEDEPTH"
+            ]
+          },
+          {
+            "type": "item",
+            "name": "Obtain &ZBuffer Depthmap Image",
+            "modifiers": [
+              "IDC_RENDERING_OBTAINZBUFFERDEPTHMAP"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Customize",
+        "children": [
+          {
+            "type": "menu",
+            "name": "&Language",
+            "children": [
+              {
+                "type": "item",
+                "name": "&English",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LANGUAGE_ENGLISH"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "&Spanish (Espa#00f1ol)",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LANGUAGE_SPANISH"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "menu",
+            "name": "Look And &Feel",
+            "children": [
+              {
+                "type": "item",
+                "name": "&Motif",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LAF_MOTIF"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "&Java metal",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LAF_JAVA"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "&Gtk+",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LAF_GTK"
+                ]
+              },
+              {
+                "type": "item",
+                "name": "&Microsoft Windows",
+                "modifiers": [
+                  "IDC_CUSTOMIZE_LAF_WINDOWS"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "menu",
+        "name": "&Help",
+        "children": [
+          {
+            "type": "item",
+            "name": "&About...",
+            "modifiers": [
+              "IDC_AYUDA_ACERCADE"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "popups": [
+    {
+      "type": "menu",
+      "name": "ESCENA",
+      "children": [
+        {
+          "type": "item",
+          "modifiers": [
+            "SEPARATOR"
+          ]
+        },
+        {
+          "type": "item",
+          "modifiers": [
+            "SEPARATOR"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "CAMARA",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Perspectiva",
+          "modifiers": [
+            "IDC_CAMARA_PERSPECTIVA",
+            "CHECKED"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Etiqueta",
+          "modifiers": [
+            "IDC_CAMARA_ETIQUETA",
+            "CHECKED"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Mostrar",
+          "modifiers": [
+            "IDC_CAMARA_MOSTRAR",
+            "UNCHECKED"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "VISUALIZADOR",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Zbuffer usando OpenGL",
+          "modifiers": [
+            "IDC_OPENGL_RENDER"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Raytracing criollo",
+          "modifiers": [
+            "IDC_RAYTRACING_CRIOLLO"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Raytracing usando &POVray",
+          "modifiers": [
+            "IDC_RAYTRACER_POVRAY"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "CALIDAD_VISUAL",
+      "children": [
+        {
+          "type": "menu",
+          "name": "Calidad &visual",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Wireframe",
+              "modifiers": [
+                "IDC_WIREFRAME_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Superficie",
+              "modifiers": [
+                "IDC_SURFACE_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Modelo &Phong",
+              "modifiers": [
+                "IDC_PHONG_RENDER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Textura",
+              "modifiers": [
+                "IDC_TEXTURE_RENDER",
+                "UNCHECKED"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "menu",
+          "name": "Calidad &interactiva",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Igual",
+              "modifiers": [
+                "IDC_SAME_INTER",
+                "CHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "modifiers": [
+                "SEPARATOR"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Wireframe",
+              "modifiers": [
+                "IDC_WIREFRAME_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Lineas ocultas",
+              "modifiers": [
+                "IDC_HIDDEN_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Superficie pla&na",
+              "modifiers": [
+                "IDC_FLAT_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "Superficie &suave",
+              "modifiers": [
+                "IDC_SMOOTH_INTER",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Textura",
+              "modifiers": [
+                "IDC_TEXTURE_INTER",
+                "UNCHECKED",
+                "GRAYED"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "menu",
+          "name": "Calidad &espacio",
+          "children": [
+            {
+              "type": "item",
+              "name": "&Ninguno",
+              "modifiers": [
+                "IDC_ESPACIO_NONE",
+                "CHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Marco",
+              "modifiers": [
+                "IDC_ESPACIO_MARCO",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Lineas",
+              "modifiers": [
+                "IDC_ESPACIO_LINEAS",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Superficie",
+              "modifiers": [
+                "IDC_ESPACIO_SUPERFICIE",
+                "UNCHECKED"
+              ]
+            },
+            {
+              "type": "item",
+              "name": "&Piso a cuadros",
+              "modifiers": [
+                "IDC_ESPACIO_PISO",
+                "UNCHECKED",
+                "GRAYED"
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "Modelo de &iluminacion",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "Superficie pla&na",
+                  "modifiers": [
+                    "IDC_FLAT_ESPACIO",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "Superficie &suave",
+                  "modifiers": [
+                    "IDC_SMOOTH_ESPACIO",
+                    "UNCHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Textura",
+                  "modifiers": [
+                    "IDC_TEXTURE_ESPACIO",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "&Transparencia",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "Paredes &ocultas",
+                  "modifiers": [
+                    "IDC_OPAC_ESPACIO",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "Paredes &transparentes",
+                  "modifiers": [
+                    "IDC_TRANS_ESPACIO",
+                    "UNCHECKED"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "menu",
+              "name": "&Fondo",
+              "children": [
+                {
+                  "type": "item",
+                  "name": "&Uniforme",
+                  "modifiers": [
+                    "IDC_FONDO_UNIFORME",
+                    "CHECKED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Degrade",
+                  "modifiers": [
+                    "IDC_FONDO_DEGRADE",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                },
+                {
+                  "type": "item",
+                  "name": "&Color...",
+                  "modifiers": [
+                    "IDC_FONDO_COLOR",
+                    "UNCHECKED",
+                    "GRAYED"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "id": "IDC_FILE_QUIT",
+      "name": "Exit",
+      "icon": "./etc/icons/f_quit.gif",
+      "brief": "End current interactive session",
+      "help": [
+        "La opcion salir termina los procesos de edicion y/o simulacion y ",
+        "da por concluida la ejecucion de la aplicacion.  Este comando ",
+        "solicita confirmacion si la sesion de edicion actual no ha sido ",
+        "guardada.  Para terminar la sesion de edicion y dejar corriendo ",
+        "una simulacion en modo batch (procesamiento por lotes), vea el ",
+        "comando <eat>."
+      ]
+    },
+    {
+      "id": "IDC_FILE_NEW",
+      "name": "New",
+      "icon": "./etc/icons/f_new.gif",
+      "brief": "Cierra la sesion actual (si la hay) y empieza una nueva",
+      "help": [
+        "El comando solicita confirmacion si la sesion actual no ha sido ",
+        "grabada. En la version profesional de Nukak puede especificarse ",
+        "la edicion distribuida."
+      ]
+    },
+    {
+      "id": "IDC_FILE_OPEN",
+      "name": "Open",
+      "icon": "./etc/icons/f_load.gif",
+      "brief": "Lee un entorno AQUYNZA previamente creado",
+      "help": [
+        "<Aun no disponible>"
+      ]
+    },
+    {
+      "id": "IDC_FILE_SAVE",
+      "name": "Save",
+      "icon": "./etc/icons/f_save.gif",
+      "brief": "Graba el entorno actual AQUYNZA",
+      "help": [
+        "<Aun no disponible>"
+      ]
+    },
+    {
+      "id": "IDC_VOICECOMMAND_CLIENT",
+      "name": "Voice recognition",
+      "brief": "Activates the networked voice recognition client",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1048.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1048Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_SELECT",
+      "name": "Select",
+      "brief": "Select objects",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1010.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1010Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_TRANSLATE",
+      "name": "Select and translate",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1020.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1020Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_ROTATE",
+      "name": "Select and rotate",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1022.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1022Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_SCALE",
+      "name": "Select and scale",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1024.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1024Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_CAMERA",
+      "name": "Camera control",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1073.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1073Mask.png"
+    },
+    {
+      "id": "IDC_TOOLS_RAY",
+      "name": "Ray control",
+      "brief": "Activates or desactivates ray debug control",
+      "icon": "./etc/icons/3dsmax7Icons/3dsmaxIcon1060.png",
+      "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
+    },
+    {
+      "id": "IDC_CREATE_SPHERE",
+      "name": "Create Sphere"
+    },
+    {
+      "id": "IDC_CREATE_TORUS",
+      "name": "Create Torus"
+    },
+    {
+      "id": "IDC_CREATE_PLANE",
+      "name": "Create Plane"
+    },
+    {
+      "id": "IDC_CREATE_CONE",
+      "name": "Create Cone"
+    },
+    {
+      "id": "IDC_CREATE_CYLINDER",
+      "name": "Create Cylinder"
+    },
+    {
+      "id": "IDC_CREATE_CUBE",
+      "name": "Create Cube"
+    },
+    {
+      "id": "IDC_CREATE_BOX",
+      "name": "Create Box"
+    },
+    {
+      "id": "IDC_CREATE_ARROW",
+      "name": "Create Arrow"
+    },
+    {
+      "id": "IDC_CREATE_VOLUME",
+      "name": "Create Volume (voxels)"
+    },
+    {
+      "id": "IDC_CREATE_SPHERE_HARMONIC",
+      "name": "Debug Spherical Harmonic Voxel"
+    },
+    {
+      "id": "IDC_CREATE_PROJECTED_VIEWS",
+      "name": "Debug Projected Object Views"
+    },
+    {
+      "id": "IDC_CREATE_BREP",
+      "name": "Create Solid (BREP)"
+    },
+    {
+      "id": "IDC_IMPORT_OBJECTS_FROM_FILE",
+      "name": "Import objects from file"
+    },
+    {
+      "id": "IDC_EXPORT_OBJECTS_TO_OBJ",
+      "name": "Export objects to obj"
+    },
+    {
+      "id": "IDC_EXPORT_OBJECTS_TO_GTS",
+      "name": "Export objects to gts"
+    },
+    {
+      "id": "IDC_EXPORT_OBJECTS_TO_VTK",
+      "name": "Export objects to VTK"
+    },
+    {
+      "id": "IDC_CREATE_PARAMETRICCUBICCURVE",
+      "name": "Create ParametricCurve"
+    },
+    {
+      "id": "IDC_CREATE_FUNCTIONALEXPLICITSURFACE",
+      "name": "Create Functional Explicit Surface"
+    },
+    {
+      "id": "IDC_CREATE_PARAMETRICBICUBICPATCH",
+      "name": "Create ParametricBiCubicPatch"
+    },
+    {
+      "id": "IDC_CREATE_OMNILIGHT",
+      "name": "Create Light"
+    },
+    {
+      "id": "IDC_CUSTOMIZE_LAF_MOTIF",
+      "name": "Motif"
+    },
+    {
+      "id": "IDC_CUSTOMIZE_LAF_JAVA",
+      "name": "Java"
+    },
+    {
+      "id": "IDC_CUSTOMIZE_LAF_WINDOWS",
+      "name": "Windows"
+    },
+    {
+      "id": "IDC_CUSTOMIZE_LAF_GTK",
+      "name": "GTK+"
+    },
+    {
+      "id": "IDC_OTHERS_CYCLE_BACKGROUND",
+      "name": "Cycle background"
+    },
+    {
+      "id": "IDC_OTHERS_TOGGLE_TEST_CORRIDOR",
+      "name": "Toggle test corridor"
+    },
+    {
+      "id": "IDC_OTHERS_TOGGLE_GRID",
+      "name": "Toggle grid"
+    },
+    {
+      "id": "IDC_OTHERS_PRINT_SCENE_ON_CONSOLE",
+      "name": "Print scene report in console"
+    },
+    {
+      "id": "IDC_RENDERING_SELECTPALETTEDEPTH",
+      "name": "Select palette for depthmap display"
+    },
+    {
+      "id": "IDC_RENDERING_OBTAINZBUFFERDEPTHMAP",
+      "name": "Obtain Zbuffer Depthmap"
+    },
+    {
+      "id": "IDC_RENDERING_OBTAINZBUFFERIMAGE",
+      "name": "Obtain Zbuffer Image"
+    },
+    {
+      "id": "IDC_RENDERING_OBTAINCONTOURNS",
+      "name": "Obtain contourns"
+    },
+    {
+      "id": "IDC_RENDERING_RAYTRACING",
+      "name": "Raytrace Scene"
+    }
+  ],
+  "buttonGroups": [
+    {
+      "name": "GLOBAL",
+      "showTitle": false,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": true,
+      "showText": false,
+      "direction": "horizontal",
+      "commands": [
+        "IDC_TOOLS_SELECT",
+        "IDC_TOOLS_TRANSLATE",
+        "IDC_TOOLS_ROTATE",
+        "IDC_TOOLS_SCALE",
+        "IDC_TOOLS_CAMERA",
+        "IDC_TOOLS_RAY",
+        "IDC_VOICECOMMAND_CLIENT"
+      ]
+    },
+    {
+      "name": "CREATION",
+      "showTitle": true,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_CREATE_SPHERE",
+        "IDC_CREATE_CONE",
+        "IDC_CREATE_CYLINDER",
+        "IDC_CREATE_CUBE",
+        "IDC_CREATE_BOX",
+        "IDC_CREATE_TORUS",
+        "IDC_CREATE_ARROW",
+        "IDC_CREATE_VOLUME",
+        "IDC_CREATE_BREP",
+        "IDC_IMPORT_OBJECTS_FROM_FILE",
+        "IDC_EXPORT_OBJECTS_TO_OBJ",
+        "IDC_EXPORT_OBJECTS_TO_GTS",
+        "IDC_EXPORT_OBJECTS_TO_VTK",
+        "IDC_CREATE_PARAMETRICCUBICCURVE",
+        "IDC_CREATE_PARAMETRICBICUBICPATCH",
+        "IDC_CREATE_PLANE",
+        "IDC_CREATE_FUNCTIONALEXPLICITSURFACE",
+        "IDC_CREATE_SPHERE_HARMONIC",
+        "IDC_CREATE_PROJECTED_VIEWS",
+        "IDC_CREATE_OMNILIGHT"
+      ]
+    },
+    {
+      "name": "GUI",
+      "showTitle": true,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_CUSTOMIZE_LAF_MOTIF",
+        "IDC_CUSTOMIZE_LAF_JAVA",
+        "IDC_CUSTOMIZE_LAF_WINDOWS",
+        "IDC_CUSTOMIZE_LAF_GTK"
+      ]
+    },
+    {
+      "name": "OTHER",
+      "showTitle": true,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_OTHERS_CYCLE_BACKGROUND",
+        "IDC_OTHERS_TOGGLE_TEST_CORRIDOR",
+        "IDC_OTHERS_TOGGLE_GRID",
+        "IDC_OTHERS_PRINT_SCENE_ON_CONSOLE"
+      ]
+    },
+    {
+      "name": "RENDER",
+      "showTitle": true,
+      "side": "1",
+      "title": "Global bar",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_RENDERING_SELECTPALETTEDEPTH",
+        "IDC_RENDERING_OBTAINZBUFFERDEPTHMAP",
+        "IDC_RENDERING_OBTAINZBUFFERIMAGE",
+        "IDC_RENDERING_OBTAINCONTOURNS",
+        "IDC_RENDERING_RAYTRACING"
+      ]
+    }
+  ],
+  "messages": {
+    "IDM_EXIT": "Close application",
+    "IDM_CREATION_TAB": "Creation",
+    "IDM_OTHERS_TAB": "Scene components",
+    "IDM_GUI_TAB": "GUI Control",
+    "IDM_RENDER_TAB": "Render",
+    "IDM_MODIFY_TAB": "Modify",
+    "IDM_PENDING_ZBUFFER_COLOR_IMAGE": "Pending to obtaining ZBuffer Color Image ...",
+    "IDM_PENDING_ZBUFFER_DEPTH": "Pending to obtaining ZBuffer Depth ...",
+    "IDM_PENDING_CONTOURNS": "Pending to calculate contourns ...",
+    "IDM_COMPUTING_RAYTRACING": "Computing raytracing, this may take some time ...",
+    "IDM_CAMERA_MODE": "Camera mode interaction - drag mouse with different buttons over the scene to change current camera.",
+    "IDM_SELECTION_MODE": "Selection mode interaction - click mouse to select objects, LEFT/RIGHT arrow keys to select sequencialy.",
+    "IDM_TRANSLATION_MODE": "Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.",
+    "IDM_ROTATION_MODE": "Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.",
+    "IDM_SCALE_MODE": "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.",
+    "IDM_VOICECOMMAND_DISABLED": "Voice recognition feature disabled.",
+    "IDM_VOICECOMMAND_ENABLED": "Voice recognition feature enabled.",
+    "IDM_VOICECOMMAND_TITLE": "Voice recognition client network connection",
+    "IDM_VOICECOMMAND_IPQUESTION": "Please specify the IP network direction or Internet machine name where the voice recognition server application is running:",
+    "IDM_VOICECOMMAND_PORTQUESTION": "Please specify the TCP PORT for network connection to the running voice recognition server application:",
+    "IDM_OPERATION_CANCELLED_BY_USER": "Operation cancelled by user.",
+    "IDM_INTRO_MESSAGE": "VSDK 3D Editor"
+  }
+}
