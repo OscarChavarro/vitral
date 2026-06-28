@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/common/statistics/SolidTextureStatistics.h"
 #include "vsdk/toolkit/media/RGBAColorPalette.h"
 #include "vsdk/toolkit/media/solidTexture/procedural/ProceduralNoise.h"
+
 class TextureUtils {
   private:
     ProceduralNoise* proceduralNoise;
@@ -21,7 +22,7 @@ class TextureUtils {
     void initialize(SolidTextureStatistics *stats);
     ProceduralNoise& getProceduralNoise();
     static double floorInline(double x);
-    static double fabsInline(double x);
+xs    static double fabsInline(double x);
     inline double *waveFrequency() { return frequencyInstance.data(); }
     inline Vector3Dd *waveSources() { return waveSourcesInstance.data(); }
     static void computeColor(ColorRgba *color, const RGBAColorPalette *colorMap, double value);
