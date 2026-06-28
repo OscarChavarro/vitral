@@ -6,6 +6,8 @@ uniform mat4 modelViewITLocal;
 uniform vec3 cameraPositionGlobal;
 uniform vec3 boundingBoxMinObject;
 uniform vec3 boundingBoxMaxObject;
+uniform int clippingPlaneEnabled;
+uniform vec4 clippingPlaneGlobal;
 
 layout(location = 0) in vec4 PObject;
 layout(location = 1) in vec3 NObject;
@@ -23,5 +25,8 @@ void main()
     N = normalize((modelViewITLocal * vec4(NObject, 0.0)).xyz);
     V = normalize(cameraPositionGlobal - PGlobal);
     textureCoordinate3D = clamp((PObject.xyz - boundingBoxMinObject) / extent, 0.0, 1.0);
+    gl_ClipDistance[0] = clippingPlaneEnabled != 0
+        ? dot(clippingPlaneGlobal, vec4(PGlobal, 1.0))
+        : 1.0;
     gl_Position = modelViewProjectionLocal * PObject;
 }

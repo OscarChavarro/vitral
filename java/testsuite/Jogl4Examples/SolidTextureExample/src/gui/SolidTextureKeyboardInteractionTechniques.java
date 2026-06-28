@@ -53,6 +53,10 @@ public class SolidTextureKeyboardInteractionTechniques {
             model.toggleAnimationEnabled();
             return true;
         }
+        if ( event.keycode == KeyEvent.KEY_h || event.keycode == KeyEvent.KEY_H ) {
+            model.toggleHudVisible();
+            return true;
+        }
         if ( event.keycode == KeyEvent.KEY_I ) {
             System.out.println(model.getQualitySelection());
             return true;

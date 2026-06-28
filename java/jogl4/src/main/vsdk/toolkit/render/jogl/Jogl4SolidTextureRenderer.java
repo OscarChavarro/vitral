@@ -14,9 +14,11 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.light.Light;
@@ -32,6 +34,9 @@ public final class Jogl4SolidTextureRenderer {
     private int solidTextureId;
     private long uploadedTextureRevision = Long.MIN_VALUE;
     private int uploadedTextureSize;
+    private ByteBuffer solidTextureUploadBuffer;
+    private FloatBuffer positionUploadBuffer;
+    private FloatBuffer normalUploadBuffer;
     private final Path shaderDirectory;
 
     public Jogl4SolidTextureRenderer(Path shaderDirectory)
@@ -47,6 +52,20 @@ public final class Jogl4SolidTextureRenderer {
         byte[] solidTextureVolumeRgb8,
         int solidTextureSize,
         long solidTextureRevision)
+    {
+        draw(gl, scene, camera, lights, solidTextureVolumeRgb8, solidTextureSize,
+            solidTextureRevision, null);
+    }
+
+    public void draw(
+        GL4 gl,
+        SimpleScene scene,
+        Camera camera,
+        List<Light> lights,
+        byte[] solidTextureVolumeRgb8,
+        int solidTextureSize,
+        long solidTextureRevision,
+        InfinitePlane clippingPlane)
     {
         if ( gl == null || scene == null || camera == null || lights == null ) {
             return;
@@ -66,6 +85,7 @@ public final class Jogl4SolidTextureRenderer {
         gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 
         gl.glUseProgram(programId);
+        configureClippingPlane(gl, clippingPlane);
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glBindTexture(GL2ES2.GL_TEXTURE_3D, solidTextureId);
         setInt(gl, programId, "sSolidTexture", 0);
@@ -88,6 +108,7 @@ public final class Jogl4SolidTextureRenderer {
 
         gl.glBindVertexArray(0);
         gl.glBindTexture(GL2ES2.GL_TEXTURE_3D, 0);
+        gl.glDisable(GL4.GL_CLIP_DISTANCE0);
         gl.glUseProgram(0);
     }
 
@@ -121,6 +142,9 @@ public final class Jogl4SolidTextureRenderer {
             gl.glDeleteProgram(programId);
             programId = 0;
         }
+        solidTextureUploadBuffer = null;
+        positionUploadBuffer = null;
+        normalUploadBuffer = null;
     }
 
     private void drawBody(GL4 gl, SimpleBody body, Camera camera)
@@ -212,13 +236,13 @@ public final class Jogl4SolidTextureRenderer {
 
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, positionVboId);
         gl.glBufferData(GL.GL_ARRAY_BUFFER, (long)frame.positions.length * Float.BYTES,
-            toBuffer(frame.positions), GL2ES2.GL_STREAM_DRAW);
+            getPositionUploadBuffer(frame.positions), GL2ES2.GL_STREAM_DRAW);
         gl.glEnableVertexAttribArray(0);
         gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, 0, 0L);
 
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, normalVboId);
         gl.glBufferData(GL.GL_ARRAY_BUFFER, (long)frame.normals.length * Float.BYTES,
-            toBuffer(frame.normals), GL2ES2.GL_STREAM_DRAW);
+            getNormalUploadBuffer(frame.normals), GL2ES2.GL_STREAM_DRAW);
         gl.glEnableVertexAttribArray(1);
         gl.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 0, 0L);
 
@@ -272,7 +296,8 @@ public final class Jogl4SolidTextureRenderer {
             solidTextureId = ids[0];
         }
 
-        ByteBuffer buffer = Buffers.newDirectByteBuffer(volume.length);
+        ByteBuffer buffer = getSolidTextureUploadBuffer(volume.length);
+        buffer.clear();
         buffer.put(volume);
         buffer.flip();
 
@@ -293,9 +318,33 @@ public final class Jogl4SolidTextureRenderer {
         uploadedTextureSize = size;
     }
 
-    private static FloatBuffer toBuffer(float[] data)
+    private ByteBuffer getSolidTextureUploadBuffer(int requiredCapacity)
     {
-        FloatBuffer buffer = Buffers.newDirectFloatBuffer(data.length);
+        if ( solidTextureUploadBuffer == null ||
+             solidTextureUploadBuffer.capacity() < requiredCapacity ) {
+            solidTextureUploadBuffer = Buffers.newDirectByteBuffer(requiredCapacity);
+        }
+        return solidTextureUploadBuffer;
+    }
+
+    private FloatBuffer getPositionUploadBuffer(float[] data)
+    {
+        positionUploadBuffer = fillUploadBuffer(positionUploadBuffer, data);
+        return positionUploadBuffer;
+    }
+
+    private FloatBuffer getNormalUploadBuffer(float[] data)
+    {
+        normalUploadBuffer = fillUploadBuffer(normalUploadBuffer, data);
+        return normalUploadBuffer;
+    }
+
+    private static FloatBuffer fillUploadBuffer(FloatBuffer buffer, float[] data)
+    {
+        if ( buffer == null || buffer.capacity() < data.length ) {
+            buffer = Buffers.newDirectFloatBuffer(data.length);
+        }
+        buffer.clear();
         buffer.put(data);
         buffer.flip();
         return buffer;
@@ -339,6 +388,32 @@ public final class Jogl4SolidTextureRenderer {
         int loc = gl.glGetUniformLocation(programId, name);
         if ( loc >= 0 ) {
             gl.glUniform1f(loc, value);
+        }
+    }
+
+    private void configureClippingPlane(GL4 gl, InfinitePlane clippingPlane)
+    {
+        if ( clippingPlane == null ) {
+            gl.glDisable(GL4.GL_CLIP_DISTANCE0);
+            setInt(gl, programId, "clippingPlaneEnabled", 0);
+            return;
+        }
+
+        gl.glEnable(GL4.GL_CLIP_DISTANCE0);
+        setInt(gl, programId, "clippingPlaneEnabled", 1);
+        setVector4(gl, programId, "clippingPlaneGlobal", new Vector4Dd(
+            clippingPlane.getA(),
+            clippingPlane.getB(),
+            clippingPlane.getC(),
+            clippingPlane.getD()));
+    }
+
+    private static void setVector4(GL4 gl, int programId, String name, Vector4Dd value)
+    {
+        int loc = gl.glGetUniformLocation(programId, name);
+        if ( loc >= 0 ) {
+            gl.glUniform4f(loc, (float)value.x(), (float)value.y(),
+                (float)value.z(), (float)value.w());
         }
     }
 

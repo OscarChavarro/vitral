@@ -32,11 +32,12 @@ public class AnimationController {
                 double elapsedSeconds = e.getT() - lastTickT;
                 lastTickT = e.getT();
 
-                boolean rayGizmoUpdated = false;
+                boolean gizmoUpdated = false;
                 if ( e.getT() - lastRayGizmoUpdateT >= 1.0 ) {
                     model.getRayGizmo().update();
+                    model.getInfinitePlaneGizmo().update();
                     lastRayGizmoUpdateT = e.getT();
-                    rayGizmoUpdated = true;
+                    gizmoUpdated = true;
                 }
 
                 if ( model.isAnimationEnabled() ) {
@@ -50,7 +51,7 @@ public class AnimationController {
                         ANGULAR_SPEED_RAD_PER_SECOND * elapsedSeconds);
                     panel.repaint();
                 }
-                else if ( rayGizmoUpdated ) {
+                else if ( gizmoUpdated ) {
                     panel.repaint();
                 }
             }

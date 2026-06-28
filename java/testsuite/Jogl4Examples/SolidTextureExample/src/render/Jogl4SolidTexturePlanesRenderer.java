@@ -1,6 +1,8 @@
 package render;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 import com.jogamp.common.nio.Buffers;
@@ -8,7 +10,9 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.linealAlgebra.Vector4Dd;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
@@ -21,14 +25,21 @@ public class Jogl4SolidTexturePlanesRenderer {
     private int positionVboId;
     private int normalVboId;
     private int uvVboId;
+    private final List<Image> uploadedImages = new ArrayList<>();
 
     public void draw(GL4 gl, List<Image> images, Camera camera)
+    {
+        draw(gl, images, camera, null);
+    }
+
+    public void draw(GL4 gl, List<Image> images, Camera camera, InfinitePlane clippingPlane)
     {
         if ( gl == null || images == null || images.isEmpty() || camera == null ) {
             return;
         }
 
         ensureBuffers(gl);
+        unloadImagesNotIn(gl, images);
 
         int planeCount = images.size();
         PlaneFrame frame = buildPlaneFrame(planeCount);
@@ -46,6 +57,7 @@ public class Jogl4SolidTexturePlanesRenderer {
         Jogl4RendererConfigurationShaderSelector.activateShader(
             gl, program, modelViewProjection, quality, 1.0f, 1.0f, 1.0f);
         configureTexturedProgram(gl, program, identity, camera);
+        configureClippingPlane(gl, program, clippingPlane);
 
         gl.glDisable(GL4.GL_CULL_FACE);
         gl.glEnable(GL4.GL_DEPTH_TEST);
@@ -65,6 +77,7 @@ public class Jogl4SolidTexturePlanesRenderer {
         }
         gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
         gl.glBindVertexArray(0);
+        gl.glDisable(GL4.GL_CLIP_DISTANCE0);
         Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
     }
 
@@ -94,6 +107,49 @@ public class Jogl4SolidTexturePlanesRenderer {
             gl.glDeleteVertexArrays(1, ids, 0);
             vaoId = 0;
         }
+        unloadAllImages(gl);
+    }
+
+    private void unloadImagesNotIn(GL4 gl, List<Image> images)
+    {
+        IdentityHashMap<Image, Boolean> currentImages = new IdentityHashMap<>();
+        for ( Image image : images ) {
+            if ( image != null ) {
+                currentImages.put(image, Boolean.TRUE);
+            }
+        }
+
+        for ( int i = uploadedImages.size() - 1; i >= 0; i-- ) {
+            Image uploaded = uploadedImages.get(i);
+            if ( !currentImages.containsKey(uploaded) ) {
+                Jogl4ImageRenderer.unload(gl, uploaded);
+                uploadedImages.remove(i);
+            }
+        }
+
+        for ( Image image : images ) {
+            if ( image != null && !containsUploadedImage(image) ) {
+                uploadedImages.add(image);
+            }
+        }
+    }
+
+    private void unloadAllImages(GL4 gl)
+    {
+        for ( Image image : uploadedImages ) {
+            Jogl4ImageRenderer.unload(gl, image);
+        }
+        uploadedImages.clear();
+    }
+
+    private boolean containsUploadedImage(Image image)
+    {
+        for ( Image uploaded : uploadedImages ) {
+            if ( uploaded == image ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void ensureBuffers(GL4 gl)
@@ -230,6 +286,15 @@ public class Jogl4SolidTexturePlanesRenderer {
         }
     }
 
+    private static void setVector4(GL4 gl, int programId, String name, Vector4Dd value)
+    {
+        int loc = gl.glGetUniformLocation(programId, name);
+        if ( loc >= 0 ) {
+            gl.glUniform4f(loc, (float)value.x(), (float)value.y(),
+                (float)value.z(), (float)value.w());
+        }
+    }
+
     private static void setInt(GL4 gl, int programId, String name, int value)
     {
         int loc = gl.glGetUniformLocation(programId, name);
@@ -244,6 +309,26 @@ public class Jogl4SolidTexturePlanesRenderer {
         if ( loc >= 0 ) {
             gl.glUniform1f(loc, value);
         }
+    }
+
+    private static void configureClippingPlane(
+        GL4 gl,
+        int programId,
+        InfinitePlane clippingPlane)
+    {
+        if ( clippingPlane == null ) {
+            gl.glDisable(GL4.GL_CLIP_DISTANCE0);
+            setInt(gl, programId, "clippingPlaneEnabled", 0);
+            return;
+        }
+
+        gl.glEnable(GL4.GL_CLIP_DISTANCE0);
+        setInt(gl, programId, "clippingPlaneEnabled", 1);
+        setVector4(gl, programId, "clippingPlaneGlobal", new Vector4Dd(
+            clippingPlane.getA(),
+            clippingPlane.getB(),
+            clippingPlane.getC(),
+            clippingPlane.getD()));
     }
 
     private record PlaneFrame(float[] positions, float[] normals, float[] uvs) {

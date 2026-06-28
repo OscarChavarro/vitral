@@ -17,6 +17,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.light.Light;
@@ -27,6 +28,7 @@ import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl4InfinitePlaneGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RayGizmoRenderer;
@@ -82,13 +84,19 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1.0f);
         gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
+        acquireGizmoSnapshots();
+
         if ( model.getOperationMode() == OperationMode.MESH_MODEL ) {
             drawMeshModel(gl);
         }
         else if ( model.getOperationMode() == OperationMode.TEXTURE_2D_STACK ) {
-            planesRenderer.draw(gl, model.getTexture2DStack(), model.getCamera());
+            planesRenderer.draw(gl, model.getTexture2DStack(), model.getCamera(),
+                activeClippingPlane());
         }
-        hudRenderer.draw(gl);
+        drawGizmos(gl);
+        if ( model.isHudVisible() ) {
+            hudRenderer.draw(gl);
+        }
     }
 
     @Override
@@ -106,6 +114,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         Jogl4RendererConfigurationShaderSelector.dispose(gl);
         Jogl4CameraRenderer.dispose(gl);
         Jogl4RayGizmoRenderer.dispose(gl);
+        Jogl4InfinitePlaneGizmoRenderer.dispose(gl);
         hudRenderer.dispose(gl);
         planesRenderer.dispose(gl);
         solidTextureRenderer.dispose(gl);
@@ -146,7 +155,8 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
             activeLights,
             model.getSolidTextureVolumeRgb8(),
             model.getSolidTextureSize(),
-            model.getSolidTextureRevision());
+            model.getSolidTextureRevision(),
+            activeClippingPlane());
 
         for ( Light light : activeLights ) {
             if ( light != null ) {
@@ -154,10 +164,29 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
             }
         }
 
-        // Apply any pending network update before drawing the ray gizmo so the
-        // body state is stable for the entire frame.
-        model.getRayGizmo().acquireSnapshot();
+    }
+
+    private void drawGizmos(GL4 gl)
+    {
+        List<Light> activeLights = model.getLights();
+
         Jogl4RayGizmoRenderer.draw(gl, model.getRayGizmo(), model.getCamera(), activeLights);
+
+        Jogl4InfinitePlaneGizmoRenderer.draw(gl, model.getInfinitePlaneGizmo(), model.getCamera());
+    }
+
+    private void acquireGizmoSnapshots()
+    {
+        model.getRayGizmo().acquireSnapshot();
+        model.getInfinitePlaneGizmo().acquireSnapshot();
+    }
+
+    private InfinitePlane activeClippingPlane()
+    {
+        if ( !model.getInfinitePlaneGizmo().isVisible() ) {
+            return null;
+        }
+        return model.getInfinitePlaneGizmo().getPlane();
     }
 
     private void drawSimpleBody(

@@ -18,6 +18,7 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
+import vsdk.toolkit.gui.gizmo.InfinitePlaneGizmo;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.IndexedColorImageHDRUncompressed;
@@ -42,6 +43,7 @@ public class SolidTextureModel {
     private final SimpleScene scene;
     private final RendererConfiguration qualitySelection;
     private final RayGizmo rayGizmo;
+    private final InfinitePlaneGizmo infinitePlaneGizmo;
     private final List<Image> texture2DStack;
     private final ColorTextureFixture colorTextureFixture;
     private final ImageTexture imageTexture;
@@ -50,6 +52,7 @@ public class SolidTextureModel {
     private long solidTextureRevision;
     private SolidTextureExampleColorNames selectedSolidTexture;
     private boolean animationEnabled;
+    private boolean hudVisible;
     private OperationMode operationMode;
     private String tangibleServiceUrl = "ws://localhost:8090/v1/values";
 
@@ -58,6 +61,7 @@ public class SolidTextureModel {
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
         rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
+        infinitePlaneGizmo = new InfinitePlaneGizmo();
         texture2DStack = new ArrayList<>();
         TextureUtils textureUtils = new TextureUtils();
         ProceduralNoise proceduralNoise = textureUtils.getProceduralNoise();
@@ -69,6 +73,7 @@ public class SolidTextureModel {
         solidTextureRevision = 0L;
         selectedSolidTexture = SolidTextureExampleColorNames.CHECKER_TEXTURE;
         animationEnabled = false;
+        hudVisible = true;
         rebuildTexture2DStack();
         operationMode = OperationMode.MESH_MODEL;
         lights = new ArrayList<>();
@@ -98,6 +103,10 @@ public class SolidTextureModel {
 
     public RayGizmo getRayGizmo() {
         return rayGizmo;
+    }
+
+    public InfinitePlaneGizmo getInfinitePlaneGizmo() {
+        return infinitePlaneGizmo;
     }
 
     public List<Image> getTexture2DStack() {
@@ -130,6 +139,14 @@ public class SolidTextureModel {
 
     public void toggleAnimationEnabled() {
         animationEnabled = !animationEnabled;
+    }
+
+    public boolean isHudVisible() {
+        return hudVisible;
+    }
+
+    public void toggleHudVisible() {
+        hudVisible = !hudVisible;
     }
 
     public void advanceObjectRotationRadians(double deltaRadians) {
