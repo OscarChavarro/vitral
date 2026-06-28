@@ -1,6 +1,7 @@
 package render;
 
 import java.nio.FloatBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RayGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.Jogl4SolidTextureRenderer;
 
 public class Jogl4DebuggerRenderer implements GLEventListener {
     private static final float SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
@@ -46,11 +48,13 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
     private int vertexCount;
     private Jogl4SolidTextureHudRenderer hudRenderer;
     private Jogl4SolidTexturePlanesRenderer planesRenderer;
+    private Jogl4SolidTextureRenderer solidTextureRenderer;
 
-    public Jogl4DebuggerRenderer(SolidTextureModel model) {
+    public Jogl4DebuggerRenderer(SolidTextureModel model, Path shaderDirectory) {
         this.model = model;
         hudRenderer = new Jogl4SolidTextureHudRenderer(model);
         planesRenderer = new Jogl4SolidTexturePlanesRenderer();
+        solidTextureRenderer = new Jogl4SolidTextureRenderer(shaderDirectory);
     }
 
     @Override
@@ -104,6 +108,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         Jogl4RayGizmoRenderer.dispose(gl);
         hudRenderer.dispose(gl);
         planesRenderer.dispose(gl);
+        solidTextureRenderer.dispose(gl);
 
         if ( positionVboId != 0 ) {
             ids[0] = positionVboId;
@@ -134,9 +139,14 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
             return;
         }
 
-        for ( SimpleBody body : model.getScene().getSimpleBodies() ) {
-            drawSimpleBody(gl, body, model.getCamera(), activeLights, model.getQualitySelection());
-        }
+        solidTextureRenderer.draw(
+            gl,
+            model.getScene(),
+            model.getCamera(),
+            activeLights,
+            model.getSolidTextureVolumeRgb8(),
+            model.getSolidTextureSize(),
+            model.getSolidTextureRevision());
 
         for ( Light light : activeLights ) {
             if ( light != null ) {

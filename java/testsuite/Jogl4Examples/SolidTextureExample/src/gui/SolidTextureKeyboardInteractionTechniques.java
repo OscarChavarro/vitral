@@ -41,6 +41,18 @@ public class SolidTextureKeyboardInteractionTechniques {
             model.increaseSolidTextureSize();
             return true;
         }
+        if ( event.keycode == KeyEvent.KEY_4 ) {
+            model.selectPreviousSolidTexture();
+            return true;
+        }
+        if ( event.keycode == KeyEvent.KEY_5 ) {
+            model.selectNextSolidTexture();
+            return true;
+        }
+        if ( event.keycode == KeyEvent.KEY_r || event.keycode == KeyEvent.KEY_R ) {
+            model.toggleAnimationEnabled();
+            return true;
+        }
         if ( event.keycode == KeyEvent.KEY_I ) {
             System.out.println(model.getQualitySelection());
             return true;
@@ -65,9 +77,6 @@ public class SolidTextureKeyboardInteractionTechniques {
         if (cameraController.processKeyReleasedEvent(event)) {
             return true;
         }
-        if (qualityController.processKeyReleasedEvent(event)) {
-            return true;
-        }
-        return false;
+        return qualityController.processKeyReleasedEvent(event);
     }
 }

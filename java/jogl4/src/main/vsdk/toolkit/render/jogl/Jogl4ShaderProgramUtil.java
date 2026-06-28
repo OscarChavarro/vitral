@@ -1,5 +1,10 @@
 package vsdk.toolkit.render.jogl;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import com.jogamp.opengl.GL4;
 
 public final class Jogl4ShaderProgramUtil {
@@ -11,6 +16,24 @@ public final class Jogl4ShaderProgramUtil {
         String vertexSource = Jogl4ShaderLoader.readShaderSource(vertexShaderFile);
         String fragmentSource = Jogl4ShaderLoader.readShaderSource(fragmentShaderFile);
 
+        return createProgramFromSources(gl, vertexSource, fragmentSource);
+    }
+
+    public static int createProgramFromPaths(GL4 gl, Path vertexShaderPath, Path fragmentShaderPath)
+    {
+        try {
+            String vertexSource = Files.readString(vertexShaderPath, StandardCharsets.UTF_8);
+            String fragmentSource = Files.readString(fragmentShaderPath, StandardCharsets.UTF_8);
+            return createProgramFromSources(gl, vertexSource, fragmentSource);
+        }
+        catch ( IOException e ) {
+            throw new IllegalStateException(
+                "Failed to read shader paths: " + vertexShaderPath + ", " + fragmentShaderPath, e);
+        }
+    }
+
+    public static int createProgramFromSources(GL4 gl, String vertexSource, String fragmentSource)
+    {
         int vertexShader = compileShader(gl, GL4.GL_VERTEX_SHADER, vertexSource);
         int fragmentShader = compileShader(gl, GL4.GL_FRAGMENT_SHADER, fragmentSource);
 

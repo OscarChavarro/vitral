@@ -12,6 +12,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
 
@@ -35,16 +36,16 @@ public class Jogl4SolidTexturePlanesRenderer {
 
         RendererConfiguration quality = new RendererConfiguration();
         quality.setShadingType(RendererConfiguration.SHADING_TYPE_FLAT);
-        quality.setTexture(false);
+        quality.setTexture(true);
         quality.setBumpMap(false);
 
         int program = Jogl4RendererConfigurationShaderSelector.selectSurfaceShaderProgram(
-            gl, quality, false, false);
+            gl, quality, true, false);
         Matrix4x4d identity = Matrix4x4d.identityMatrix();
         Matrix4x4d modelViewProjection = Jogl4CameraRenderer.activate(gl, camera);
         Jogl4RendererConfigurationShaderSelector.activateShader(
             gl, program, modelViewProjection, quality, 1.0f, 1.0f, 1.0f);
-        configureFlatWhiteProgram(gl, program, identity, camera);
+        configureTexturedProgram(gl, program, identity, camera);
 
         gl.glDisable(GL4.GL_CULL_FACE);
         gl.glEnable(GL4.GL_DEPTH_TEST);
@@ -53,8 +54,16 @@ public class Jogl4SolidTexturePlanesRenderer {
         gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
         gl.glBindVertexArray(vaoId);
         for ( int i = 0; i < frame.quadCount(); i++ ) {
+            Image image = images.get(i);
+            int textureId = image != null ? Jogl4ImageRenderer.activate(gl, image) : 0;
+            setInt(gl, program, "withTexture", textureId > 0 ? 1 : 0);
+            if ( textureId > 0 ) {
+                gl.glActiveTexture(GL4.GL_TEXTURE0);
+                gl.glBindTexture(GL4.GL_TEXTURE_2D, textureId);
+            }
             gl.glDrawArrays(GL4.GL_TRIANGLE_FAN, i * 4, 4);
         }
+        gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
         gl.glBindVertexArray(0);
         Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
     }
@@ -161,7 +170,7 @@ public class Jogl4SolidTexturePlanesRenderer {
         gl.glBindVertexArray(0);
     }
 
-    private void configureFlatWhiteProgram(
+    private void configureTexturedProgram(
         GL4 gl,
         int programId,
         Matrix4x4d identity,
@@ -176,7 +185,7 @@ public class Jogl4SolidTexturePlanesRenderer {
         setVector3(gl, programId, "diffuseColor", new Vector3Dd(1.0, 1.0, 1.0));
         setVector3(gl, programId, "specularColor", new Vector3Dd(0.0, 0.0, 0.0));
         setInt(gl, programId, "numberOfLights", 1);
-        setInt(gl, programId, "withTexture", 0);
+        setInt(gl, programId, "withTexture", 1);
         setInt(gl, programId, "withBumpMap", 0);
         setFloat(gl, programId, "phongExponent", 1.0f);
     }

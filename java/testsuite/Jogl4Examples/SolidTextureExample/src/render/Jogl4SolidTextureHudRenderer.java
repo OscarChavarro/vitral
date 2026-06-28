@@ -13,10 +13,12 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 
 public class Jogl4SolidTextureHudRenderer {
-    private static final int HUD_HEIGHT = 72;
+    private static final int HUD_HEIGHT = 122;
     private static final int HUD_LEFT = 16;
     private static final int HUD_BASELINE_1 = 28;
     private static final int HUD_BASELINE_2 = 54;
+    private static final int HUD_BASELINE_3 = 80;
+    private static final int HUD_BASELINE_4 = 106;
 
     private final SolidTextureModel model;
     private final Font hudFont;
@@ -57,6 +59,10 @@ public class Jogl4SolidTextureHudRenderer {
             HUD_LEFT, HUD_BASELINE_1);
         g.drawString("Texture side [2, 3]: " + model.getSolidTextureSize(),
             HUD_LEFT, HUD_BASELINE_2);
+        g.drawString("Selected texture [4, 5]: " + model.getSelectedSolidTexture().name(),
+            HUD_LEFT, HUD_BASELINE_3);
+        g.drawString("Animation [r]: " + (model.isAnimationEnabled() ? "PLAY" : "STOP"),
+            HUD_LEFT, HUD_BASELINE_4);
         g.dispose();
 
         for ( int y = 0; y < hudHeight; y++ ) {

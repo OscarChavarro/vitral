@@ -1,5 +1,6 @@
 // Basic java classes
 import java.io.File;
+import java.nio.file.Paths;
 
 // AWT GUI java classes
 import java.awt.BorderLayout;
@@ -101,7 +102,7 @@ public class SolidTextureExample
         keyboardInteractionTechniques =
             new SolidTextureKeyboardInteractionTechniques(model, cameraController, qualityController);
 
-        renderer = new Jogl4DebuggerRenderer(model);
+        renderer = new Jogl4DebuggerRenderer(model, Paths.get("../../../../etc/glslShaders"));
         canvas.addGLEventListener(renderer);
 
         AnimationController animationController = new AnimationController();

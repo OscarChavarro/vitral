@@ -5,7 +5,7 @@ Uncompressed HDR RGBA image storage with row-major 16-bit channels.
 This mirrors the C++ counterpart as a small data container with direct pixel
 access.
 */
-public final class RGBAImageHDRUncompressed
+public class RGBAImageHDRUncompressed
 {
     private int xSize;
     private int ySize;
