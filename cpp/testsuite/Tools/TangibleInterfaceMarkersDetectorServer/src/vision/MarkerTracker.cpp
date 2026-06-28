@@ -454,31 +454,20 @@ void MarkerTracker::runPreviewLoop() {
             cv::destroyAllWindows();
         } else if (key == ' ') {
             model_->cyclePreviewOperationMode();
-            std::printf("[preview] mode switched to %s\n",
-                        model_->getPreviewOperationMode() == SINGLE_MARKER ? "SINGLE_MARKER" : "MARKER_GROUP");
         } else if (key == '1') {
             model_->cycleYawTest();
-            std::printf("<%d, %d, %d>\n",
-                        model_->getYawTest(), model_->getPitchTest(), model_->getRollTest());
         } else if (key == '2') {
             model_->cyclePitchTest();
-            std::printf("<%d, %d, %d>\n",
-                        model_->getYawTest(), model_->getPitchTest(), model_->getRollTest());
         } else if (key == '3') {
             model_->cycleRollTest();
-            std::printf("<%d, %d, %d>\n",
-                        model_->getYawTest(), model_->getPitchTest(), model_->getRollTest());
         } else if (key == '4') {
             model_->cycleMarkerIdTest();
-            std::printf("[test] markerIdTest=%d\n", model_->getMarkerIdTest());
         }
 
         if (model_->getPreviewOperationMode() == SINGLE_MARKER && frameCount % 30 == 0 && n > 0) {
-            std::printf("[preview] frame %d: detected %d markers\n", frameCount, n);
             for (int i = 0; i < n; ++i) {
                 apriltag_detection_t* det;
                 zarray_get(dets, i, &det);
-                std::printf("  [%d] id=%d margin=%.1f\n", i, det->id, det->decision_margin);
             }
         }
 

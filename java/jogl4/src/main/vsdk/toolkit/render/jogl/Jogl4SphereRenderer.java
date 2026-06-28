@@ -1,8 +1,10 @@
 package vsdk.toolkit.render.jogl;
 
+import com.jogamp.opengl.GL2GL3;
 import java.nio.FloatBuffer;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.color.ColorRgb;
@@ -37,7 +39,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static int normalVboId;
     private static int uvVboId;
     private static int tangentVboId;
-    private static int binormalVboId;
+    private static int biNormalVboId;
     private static int vertexCount;
     private static boolean initialized;
 
@@ -151,16 +153,16 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
 
             // Pass 1: Surfaces. Push slightly backwards to avoid z-fighting
             // with overlay passes (wireframe/points).
-            gl.glEnable(GL4.GL_DEPTH_TEST);
+            gl.glEnable(GL.GL_DEPTH_TEST);
             gl.glDepthMask(true);
-            gl.glDepthFunc(GL4.GL_LESS);
-            gl.glEnable(GL4.GL_POLYGON_OFFSET_FILL);
+            gl.glDepthFunc(GL.GL_LESS);
+            gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
             gl.glPolygonOffset(SURFACE_POLYGON_OFFSET_FACTOR, SURFACE_POLYGON_OFFSET_UNITS);
-            gl.glEnable(GL4.GL_CULL_FACE);
-            gl.glCullFace(GL4.GL_BACK);
-            gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
+            gl.glEnable(GL.GL_CULL_FACE);
+            gl.glCullFace(GL.GL_BACK);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
             renderMesh(gl);
-            gl.glDisable(GL4.GL_POLYGON_OFFSET_FILL);
+            gl.glDisable(GL.GL_POLYGON_OFFSET_FILL);
 
             Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
         }
@@ -196,19 +198,19 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 0);
 
             // Pass 2: Wires. Keep depth test but bias in front of surfaces.
-            gl.glEnable(GL4.GL_DEPTH_TEST);
+            gl.glEnable(GL.GL_DEPTH_TEST);
             gl.glDepthMask(false);
-            gl.glDepthFunc(GL4.GL_LEQUAL);
-            gl.glEnable(GL4.GL_POLYGON_OFFSET_LINE);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_LINE);
             gl.glPolygonOffset(LINE_POLYGON_OFFSET_FACTOR, LINE_POLYGON_OFFSET_UNITS);
-            gl.glDisable(GL4.GL_CULL_FACE);
-            gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_LINE);
+            gl.glDisable(GL.GL_CULL_FACE);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
             gl.glLineWidth(1.0f);
             renderMesh(gl);
-            gl.glDisable(GL4.GL_POLYGON_OFFSET_LINE);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
 
             Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
-            gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
         }
 
         if ( quality.isPointsSet() ) {
@@ -243,13 +245,13 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
 
             // Pass 3: Points. Draw last with depth test against surfaces
             // (and no depth writes), so points appear above wireframe.
-            gl.glEnable(GL4.GL_DEPTH_TEST);
+            gl.glEnable(GL.GL_DEPTH_TEST);
             gl.glDepthMask(false);
-            gl.glDepthFunc(GL4.GL_LEQUAL);
-            gl.glDisable(GL4.GL_CULL_FACE);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDisable(GL.GL_CULL_FACE);
             gl.glPointSize(4.0f);
             gl.glBindVertexArray(vaoId);
-            gl.glDrawArrays(GL4.GL_POINTS, 0, vertexCount);
+            gl.glDrawArrays(GL.GL_POINTS, 0, vertexCount);
             gl.glBindVertexArray(0);
 
             Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
@@ -264,8 +266,8 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         }
 
         gl.glDepthMask(true);
-        gl.glDepthFunc(GL4.GL_LESS);
-        gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
+        gl.glDepthFunc(GL.GL_LESS);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
     }
 
     public static void dispose(GL4 gl)
@@ -292,10 +294,10 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             gl.glDeleteBuffers(1, tmp, 0);
             tangentVboId = 0;
         }
-        if ( binormalVboId != 0 ) {
-            tmp[0] = binormalVboId;
+        if ( biNormalVboId != 0 ) {
+            tmp[0] = biNormalVboId;
             gl.glDeleteBuffers(1, tmp, 0);
-            binormalVboId = 0;
+            biNormalVboId = 0;
         }
         if ( vaoId != 0 ) {
             tmp[0] = vaoId;
@@ -356,7 +358,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         setVector3(gl, programId, "specularColor", material.getSpecular());
         setVector3(gl, programId, "bumpScale", DEFAULT_BUMP_SCALE);
         setFloat(gl, programId, "phongExponent", (float)material.getPhongExponent());
-        configureMicrofacetUniforms(gl, programId, material);
+        configureMicroFacetUniforms(gl, programId, material);
         setInt(gl, programId, "withTexture", (quality.isTextureSet() && textureId > 0) ? 1 : 0);
         setInt(
             gl,
@@ -365,14 +367,14 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             (quality.isBumpMapSet() && normalMapId > 0) ? 1 : 0);
 
         if ( textureId > 0 ) {
-            gl.glActiveTexture(GL4.GL_TEXTURE0);
-            gl.glBindTexture(GL4.GL_TEXTURE_2D, textureId);
+            gl.glActiveTexture(GL.GL_TEXTURE0);
+            gl.glBindTexture(GL.GL_TEXTURE_2D, textureId);
         }
 
         if ( normalMapId > 0 ) {
-            gl.glActiveTexture(GL4.GL_TEXTURE1);
-            gl.glBindTexture(GL4.GL_TEXTURE_2D, normalMapId);
-            gl.glActiveTexture(GL4.GL_TEXTURE0);
+            gl.glActiveTexture(GL.GL_TEXTURE1);
+            gl.glBindTexture(GL.GL_TEXTURE_2D, normalMapId);
+            gl.glActiveTexture(GL.GL_TEXTURE0);
         }
     }
 
@@ -416,7 +418,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         }
     }
 
-    private static void configureMicrofacetUniforms(GL4 gl, int programId, SimpleMaterial material)
+    private static void configureMicroFacetUniforms(GL4 gl, int programId, SimpleMaterial material)
     {
         float roughness = 0.35f;
         float alpha = roughness * roughness;
@@ -457,7 +459,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
     private static void renderMesh(GL4 gl)
     {
         gl.glBindVertexArray(vaoId);
-        gl.glDrawArrays(GL4.GL_TRIANGLES, 0, vertexCount);
+        gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertexCount);
         gl.glBindVertexArray(0);
     }
 
@@ -500,7 +502,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         float[] normals = new float[vertices * 3];
         float[] uvs = new float[vertices * 2];
         float[] tangents = new float[vertices * 3];
-        float[] binormals = new float[vertices * 3];
+        float[] biNormals = new float[vertices * 3];
 
         int posIndex = 0;
         int uvIndex = 0;
@@ -517,22 +519,22 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
                 double theta0 = 2 * Math.PI * s0;
                 double theta1 = 2 * Math.PI * s1;
 
-                posIndex = addVertex(sphere, theta0, phi0, s0, t0, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta0, phi0, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s0, t0, uvs, uvIndex);
 
-                posIndex = addVertex(sphere, theta0, phi1, s0, t1, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta0, phi1, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s0, t1, uvs, uvIndex);
 
-                posIndex = addVertex(sphere, theta1, phi1, s1, t1, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta1, phi1, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s1, t1, uvs, uvIndex);
 
-                posIndex = addVertex(sphere, theta0, phi0, s0, t0, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta0, phi0, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s0, t0, uvs, uvIndex);
 
-                posIndex = addVertex(sphere, theta1, phi1, s1, t1, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta1, phi1, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s1, t1, uvs, uvIndex);
 
-                posIndex = addVertex(sphere, theta1, phi0, s1, t0, positions, normals, tangents, binormals, posIndex);
+                posIndex = addVertex(sphere, theta1, phi0, positions, normals, tangents, biNormals, posIndex);
                 uvIndex = addUv(s1, t0, uvs, uvIndex);
             }
         }
@@ -542,7 +544,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         mesh.normals = normals;
         mesh.uvs = uvs;
         mesh.tangents = tangents;
-        mesh.binormals = binormals;
+        mesh.biNormals = biNormals;
         mesh.vertexCount = vertices;
         return mesh;
     }
@@ -551,35 +553,33 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         Sphere sphere,
         double theta,
         double phi,
-        double s,
-        double t,
         float[] positions,
         float[] normals,
         float[] tangents,
-        float[] binormals,
+        float[] biNormals,
         int index)
     {
         Vector3Dd p = sphere.spherePosition(theta, phi);
         Vector3Dd n = sphere.sphereNormal(theta, phi);
         Vector3Dd tangent = sphere.sphereTangent(theta, phi);
-        Vector3Dd binormal = sphere.sphereBinormal(theta, phi);
+        Vector3Dd biNormal = sphere.sphereBinormal(theta, phi);
 
         positions[index] = (float)p.x();
         normals[index] = (float)n.x();
         tangents[index] = (float)tangent.x();
-        binormals[index] = (float)binormal.x();
+        biNormals[index] = (float)biNormal.x();
         index++;
 
         positions[index] = (float)p.y();
         normals[index] = (float)n.y();
         tangents[index] = (float)tangent.y();
-        binormals[index] = (float)binormal.y();
+        biNormals[index] = (float)biNormal.y();
         index++;
 
         positions[index] = (float)p.z();
         normals[index] = (float)n.z();
         tangents[index] = (float)tangent.z();
-        binormals[index] = (float)binormal.z();
+        biNormals[index] = (float)biNormal.z();
         index++;
 
         return index;
@@ -613,7 +613,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             tangentVboId = tmp[0];
 
             gl.glGenBuffers(1, tmp, 0);
-            binormalVboId = tmp[0];
+            biNormalVboId = tmp[0];
         }
 
         gl.glBindVertexArray(vaoId);
@@ -622,9 +622,9 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         uploadFloatBuffer(gl, normalVboId, 1, 3, mesh.normals);
         uploadFloatBuffer(gl, uvVboId, 2, 2, mesh.uvs);
         uploadFloatBuffer(gl, tangentVboId, 3, 3, mesh.tangents);
-        uploadFloatBuffer(gl, binormalVboId, 4, 3, mesh.binormals);
+        uploadFloatBuffer(gl, biNormalVboId, 4, 3, mesh.biNormals);
 
-        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
         gl.glBindVertexArray(0);
 
         vertexCount = mesh.vertexCount;
@@ -634,18 +634,18 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         GL4 gl,
         int bufferId,
         int attribIndex,
-        int coordSize,
+        int coordinatesSize,
         float[] data)
     {
         FloatBuffer direct = Buffers.newDirectFloatBuffer(data);
-        gl.glBindBuffer(GL4.GL_ARRAY_BUFFER, bufferId);
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, bufferId);
         gl.glBufferData(
-            GL4.GL_ARRAY_BUFFER,
+                GL.GL_ARRAY_BUFFER,
             (long)data.length * Float.BYTES,
             direct,
-            GL4.GL_STATIC_DRAW);
+                GL.GL_STATIC_DRAW);
         gl.glEnableVertexAttribArray(attribIndex);
-        gl.glVertexAttribPointer(attribIndex, coordSize, GL4.GL_FLOAT, false, 0, 0L);
+        gl.glVertexAttribPointer(attribIndex, coordinatesSize, GL.GL_FLOAT, false, 0, 0L);
     }
 
     private static void drawNormalOverlays(
@@ -657,10 +657,10 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             return;
         }
 
-        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthMask(false);
-        gl.glDepthFunc(GL4.GL_LEQUAL);
-        gl.glDisable(GL4.GL_CULL_FACE);
+        gl.glDepthFunc(GL.GL_LEQUAL);
+        gl.glDisable(GL.GL_CULL_FACE);
 
         if ( quality.isNormalsSet() ) {
             if ( vertexNormalLinePositions == null || vertexNormalLineColors == null ) {
@@ -817,7 +817,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         float[] normals;
         float[] uvs;
         float[] tangents;
-        float[] binormals;
+        float[] biNormals;
         int vertexCount;
     }
 }
