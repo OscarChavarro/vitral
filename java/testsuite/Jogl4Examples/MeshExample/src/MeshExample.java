@@ -29,6 +29,7 @@ import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient;
 
 // Application classes
+import animation.AnimationController;
 import awt.FileSelectorDialog;
 import gui.MeshKeyboardInteractionTechniques;
 import gui.MeshMouseInteractionTechniques;
@@ -102,6 +103,9 @@ public class MeshExample
 
         renderer = new Jogl4DebuggerRenderer(model);
         canvas.addGLEventListener(renderer);
+
+        AnimationController animationController = new AnimationController();
+        animationController.start(model, canvas);
     }
 
     public void processCommandLineArguments(String[] args) {

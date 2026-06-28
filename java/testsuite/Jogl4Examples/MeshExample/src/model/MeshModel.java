@@ -2,13 +2,18 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.element.Intersection;
+import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.LightType;
 import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
@@ -25,7 +30,7 @@ public class MeshModel {
         scene = new SimpleScene();
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
-        rayGizmo = new RayGizmo();
+        rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
         lights = new ArrayList<>();
         Light light0 = new Light(LightType.POINT, new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
         light0.setId(0);
@@ -64,6 +69,28 @@ public class MeshModel {
             return;
         }
         this.tangibleServiceUrl = tangibleServiceUrl;
+    }
+
+    /**
+     * Returns a callback that tests a world-space ray against all bodies in
+     * the scene and returns the closest intersection, or null if none.
+     */
+    private Function<Ray, Intersection> makeIntersectionCallback() {
+        return ray -> {
+            Intersection closest = null;
+            double closestT = Double.MAX_VALUE;
+            for ( SimpleBody body : scene.getSimpleBodies() ) {
+                RayHit hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL);
+                if ( body.doIntersectionFirstHit(ray, hit) && hit.hasHitDistance() ) {
+                    double t = hit.hitDistance();
+                    if ( t > 1e-6 && t < closestT ) {
+                        closestT = t;
+                        closest = new Intersection(t, hit.p, hit.n);
+                    }
+                }
+            }
+            return closest;
+        };
     }
 
     public void configureInitialViewAndLightToScene() {
