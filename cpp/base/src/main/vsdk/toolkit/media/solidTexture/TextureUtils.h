@@ -22,7 +22,7 @@ class TextureUtils {
     void initialize(SolidTextureStatistics *stats);
     ProceduralNoise& getProceduralNoise();
     static double floorInline(double x);
-xs    static double fabsInline(double x);
+    static double fabsInline(double x);
     inline double *waveFrequency() { return frequencyInstance.data(); }
     inline Vector3Dd *waveSources() { return waveSourcesInstance.data(); }
     static void computeColor(ColorRgba *color, const RGBAColorPalette *colorMap, double value);
