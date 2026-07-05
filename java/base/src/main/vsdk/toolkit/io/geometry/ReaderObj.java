@@ -476,12 +476,12 @@ public class ReaderObj extends PersistenceElement
         newTriangleArray = new Triangle[triangleDatasetsArray.size()];
         for ( i = 0; i < newTriangleArray.length; i++ ) {
             newTriangleArray[i] = new Triangle();
-            newTriangleArray[i].p0 =
-               triangleDatasetsArray.get(i)[0].vertexPositionIndex;
-            newTriangleArray[i].p1 =
-               triangleDatasetsArray.get(i)[1].vertexPositionIndex;
-            newTriangleArray[i].p2 =
-               triangleDatasetsArray.get(i)[2].vertexPositionIndex;
+            newTriangleArray[i].setPoint0(
+               triangleDatasetsArray.get(i)[0].vertexPositionIndex);
+            newTriangleArray[i].setPoint1(
+               triangleDatasetsArray.get(i)[1].vertexPositionIndex);
+            newTriangleArray[i].setPoint2(
+               triangleDatasetsArray.get(i)[2].vertexPositionIndex);
         }
         newTriangleMesh.setTriangles(newTriangleArray);
         

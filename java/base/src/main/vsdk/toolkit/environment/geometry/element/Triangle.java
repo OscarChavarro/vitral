@@ -14,11 +14,11 @@ public class Triangle extends FundamentalEntity
 {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    public int p0;
-    public int p1;
-    public int p2;
+    private int p0;
+    private int p1;
+    private int p2;
 
-    public Vector3Dd normal;
+    private Vector3Dd normal;
 
     public Triangle() {
         normal = new Vector3Dd(0, 0, 0);
@@ -76,6 +76,20 @@ public class Triangle extends FundamentalEntity
     */
     public void setPoint2(int p2) {
         this.p2 = p2;
+    }
+
+    /**
+    @return triangle normal vector
+    */
+    public Vector3Dd getNormal() {
+        return this.normal;
+    }
+
+    /**
+    @param normal
+    */
+    public void setNormal(Vector3Dd normal) {
+        this.normal = normal;
     }
 
     public static Intersection doIntersectionWithTriangle(

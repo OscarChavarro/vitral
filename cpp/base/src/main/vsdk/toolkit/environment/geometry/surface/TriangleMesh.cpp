@@ -200,13 +200,13 @@ PRE: 0 <= i < vertexPositions.length/3
 */
 void TriangleMesh::setTriangleAt(int i, const Triangle& t)
 {
-    triangleIndices[i*3] = t.p0;
-    triangleIndices[i*3+1] = t.p1;
-    triangleIndices[i*3+2] = t.p2;
+    triangleIndices[i*3] = t.getPoint0();
+    triangleIndices[i*3+1] = t.getPoint1();
+    triangleIndices[i*3+2] = t.getPoint2();
     if ((int)triangleNormals.size() >= (i+1)*3) {
-        triangleNormals[i*3] = t.normal.x();
-        triangleNormals[i*3+1] = t.normal.y();
-        triangleNormals[i*3+2] = t.normal.z();
+        triangleNormals[i*3] = t.getNormal().x();
+        triangleNormals[i*3+1] = t.getNormal().y();
+        triangleNormals[i*3+2] = t.getNormal().z();
     }
 }
 

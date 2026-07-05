@@ -7,17 +7,6 @@
 #include "vsdk/toolkit/processing/Containment.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/Triangle.h"
-Triangle::Triangle() : p0(0), p1(0), p2(0), normal(0, 0, 0) {}
-Triangle::Triangle(int inP0, int inP1, int inP2)
-    : p0(inP0), p1(inP1), p2(inP2), normal(0, 0, 0) {}
-
-int Triangle::getPoint0() const { return p0; }
-int Triangle::getPoint1() const { return p1; }
-int Triangle::getPoint2() const { return p2; }
-
-void Triangle::setPoint0(int inP0) { p0 = inP0; }
-void Triangle::setPoint1(int inP1) { p1 = inP1; }
-void Triangle::setPoint2(int inP2) { p2 = inP2; }
 
 static Vector3Dd closestPointOnTriangle(const Vector3Dd& p, const Vector3Dd& a, const Vector3Dd& b, const Vector3Dd& c)
 {
@@ -78,7 +67,7 @@ void Triangle::minMax(const Vector3Dd& p0, const Vector3Dd& p1, const Vector3Dd&
     mm[5] = java::Math::max(p0.z(), java::Math::max(p1.z(), p2.z()));
 }
 
-static java::String intToStr(int val) {
+java::String Triangle::intToStr(int val) {
     char buf[32];
     snprintf(buf, sizeof(buf), "%d", val);
     return java::String(buf);

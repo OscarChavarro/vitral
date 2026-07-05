@@ -319,9 +319,9 @@ static void addMeshToGroup(
     newTriangleArray.reserve((long int)triangleDatasetsArray.size());
     for (size_t i = 0; i < triangleDatasetsArray.size(); i++) newTriangleArray.add(Triangle());
     for (size_t i = 0; i < triangleDatasetsArray.size(); i++) {
-        newTriangleArray[(long int)i].p0 = triangleDatasetsArray[i][0].vertexPositionIndex;
-        newTriangleArray[(long int)i].p1 = triangleDatasetsArray[i][1].vertexPositionIndex;
-        newTriangleArray[(long int)i].p2 = triangleDatasetsArray[i][2].vertexPositionIndex;
+        newTriangleArray[(long int)i].setPoint0(triangleDatasetsArray[i][0].vertexPositionIndex);
+        newTriangleArray[(long int)i].setPoint1(triangleDatasetsArray[i][1].vertexPositionIndex);
+        newTriangleArray[(long int)i].setPoint2(triangleDatasetsArray[i][2].vertexPositionIndex);
     }
 
     mesh.setVertexes(newVertexArray, true, false, false, true);

@@ -413,13 +413,13 @@ public class TriangleMesh extends Surface {
         initTriangleArrays(n);
 
         for ( i = 0; i < n; i++ ) {
-            triangleIndices[3*i] = triangles[i].p0;
-            triangleIndices[3*i+1] = triangles[i].p1;
-            triangleIndices[3*i+2] = triangles[i].p2;
+            triangleIndices[3*i] = triangles[i].getPoint0();
+            triangleIndices[3*i+1] = triangles[i].getPoint1();
+            triangleIndices[3*i+2] = triangles[i].getPoint2();
             if ( triangleNormals != null ) {
-                triangleNormals[3*i] = triangles[i].normal.x();
-                triangleNormals[3*i+1] = triangles[i].normal.y();
-                triangleNormals[3*i+2] = triangles[i].normal.z();
+                triangleNormals[3*i] = triangles[i].getNormal().x();
+                triangleNormals[3*i+1] = triangles[i].getNormal().y();
+                triangleNormals[3*i+2] = triangles[i].getNormal().z();
             }
         }
     }
@@ -464,13 +464,13 @@ public class TriangleMesh extends Surface {
     @param triangle
     */
     public void setTriangleAt(int i, Triangle triangle) {
-        triangleIndices[3*i] = triangle.p0;
-        triangleIndices[3*i+1] = triangle.p1;
-        triangleIndices[3*i+2] = triangle.p2;
+        triangleIndices[3*i] = triangle.getPoint0();
+        triangleIndices[3*i+1] = triangle.getPoint1();
+        triangleIndices[3*i+2] = triangle.getPoint2();
         if ( triangleNormals != null ) {
-            triangleNormals[3*i] = triangle.normal.x();
-            triangleNormals[3*i+1] = triangle.normal.y();
-            triangleNormals[3*i+2] = triangle.normal.z();
+            triangleNormals[3*i] = triangle.getNormal().x();
+            triangleNormals[3*i+1] = triangle.getNormal().y();
+            triangleNormals[3*i+2] = triangle.getNormal().z();
         }
     }
 
