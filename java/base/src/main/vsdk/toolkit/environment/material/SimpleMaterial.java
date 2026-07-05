@@ -2,8 +2,9 @@ package vsdk.toolkit.environment.material;
 
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 
-public class SimpleMaterial extends Entity
+public class SimpleMaterial extends Entity implements Material
 {
     private final ColorRgb ambient;
     private final ColorRgb diffuse;
@@ -192,6 +193,24 @@ public class SimpleMaterial extends Entity
     public boolean isDoubleSided()
     {
         return doubleSided;
+    }
+
+    @Override
+    public Material translate(Vector3Dd vector)
+    {
+        return this;
+    }
+
+    @Override
+    public Material rotate(Vector3Dd vector)
+    {
+        return this;
+    }
+
+    @Override
+    public Material scale(Vector3Dd vector)
+    {
+        return this;
     }
 
     public SimpleMaterial withDoubleSided(boolean doubleSided)

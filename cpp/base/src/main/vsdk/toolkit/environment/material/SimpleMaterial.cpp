@@ -142,3 +142,7 @@ java::String SimpleMaterial::toString() const
         doubleSided ? "Double sided" : "Single sided");
     return java::String(buf);
 }
+
+Material *SimpleMaterial::translate(Vector3Dd *vector) { return this; }
+Material *SimpleMaterial::rotate(Vector3Dd *vector) { return this; }
+Material *SimpleMaterial::scale(Vector3Dd *vector) { return this; }

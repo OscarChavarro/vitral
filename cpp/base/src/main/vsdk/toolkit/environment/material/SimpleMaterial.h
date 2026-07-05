@@ -3,8 +3,11 @@
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
-class SimpleMaterial {
-private:
+#include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/material/Material.h"
+
+class SimpleMaterial : public Material {
+  private:
     ColorRgb ambient;
     ColorRgb diffuse;
     ColorRgb specular;
@@ -18,7 +21,7 @@ private:
     double opacity;
     double phongExponent;
 
-public:
+  public:
     SimpleMaterial();
     SimpleMaterial(const SimpleMaterial& m);
     SimpleMaterial(
@@ -82,6 +85,10 @@ public:
     double getOpacity() const;
 
     java::String toString() const;
+
+    Material *translate(Vector3Dd *vector);
+    Material *rotate(Vector3Dd *vector);
+    Material *scale(Vector3Dd *vector);
 };
 
 #endif
