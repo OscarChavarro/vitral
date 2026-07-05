@@ -1,5 +1,5 @@
-#ifndef __GRID_H__
-#define __GRID_H__
+#ifndef __GRID__
+#define __GRID__
 
 class Grid {
   public:

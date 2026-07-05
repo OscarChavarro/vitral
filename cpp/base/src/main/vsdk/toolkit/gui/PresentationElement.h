@@ -1,5 +1,5 @@
-#ifndef PRESENTATIONELEMENT_H
-#define PRESENTATIONELEMENT_H
+#ifndef __PRESENTATIONELEMENT__
+#define __PRESENTATIONELEMENT__
 
 class PresentationElement {
 public:
@@ -7,4 +7,4 @@ public:
 };
 
 
-#endif // PRESENTATIONELEMENT_H
+#endif

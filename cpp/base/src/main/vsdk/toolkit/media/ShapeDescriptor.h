@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_SHAPEDESCRIPTOR_H__
-#define __VSDK_TOOLKIT_MEDIA_SHAPEDESCRIPTOR_H__
+#ifndef __SHAPEDESCRIPTOR__
+#define __SHAPEDESCRIPTOR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
@@ -23,4 +23,4 @@ public:
     }
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_SHAPEDESCRIPTOR_H__
+#endif

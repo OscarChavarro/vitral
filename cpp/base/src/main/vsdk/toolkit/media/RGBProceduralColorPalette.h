@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_RGBPROCEDURALCOLORPALETTE_H__
-#define __VSDK_TOOLKIT_MEDIA_RGBPROCEDURALCOLORPALETTE_H__
+#ifndef __RGBPROCEDURALCOLORPALETTE__
+#define __RGBPROCEDURALCOLORPALETTE__
 
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 /**
@@ -40,4 +40,4 @@ public:
     bool isPure() const { return pure; }
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_RGBPROCEDURALCOLORPALETTE_H__
+#endif

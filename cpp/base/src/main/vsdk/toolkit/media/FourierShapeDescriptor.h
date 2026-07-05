@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
-#define __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
+#ifndef __FOURIERSHAPEDESCRIPTOR__
+#define __FOURIERSHAPEDESCRIPTOR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"
@@ -30,4 +30,4 @@ public:
     java::String* toString() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_FOURIERSHAPEDESCRIPTOR_H__
+#endif

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLELONGFORMAT_H__
-#define __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLELONGFORMAT_H__
+#ifndef __PROGRESSMONITORCONSOLELONGFORMAT__
+#define __PROGRESSMONITORCONSOLELONGFORMAT__
 
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsoleLongFormat : public ProgressMonitor {

@@ -1,5 +1,5 @@
-#ifndef MOUSEEVENT_H
-#define MOUSEEVENT_H
+#ifndef __MOUSEEVENT__
+#define __MOUSEEVENT__
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class MouseEvent : public PresentationElement {
@@ -37,4 +37,4 @@ private:
 };
 
 
-#endif // MOUSEEVENT_H
+#endif

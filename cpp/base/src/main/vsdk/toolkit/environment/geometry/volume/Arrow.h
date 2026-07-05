@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_ARROW_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_ARROW_H__
+#ifndef __ARROW__
+#define __ARROW__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Cone;

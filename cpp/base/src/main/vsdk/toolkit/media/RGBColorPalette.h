@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_RGBCOLORPALETTE_H__
-#define __VSDK_TOOLKIT_MEDIA_RGBCOLORPALETTE_H__
+#ifndef __RGBCOLORPALETTE__
+#define __RGBCOLORPALETTE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
@@ -38,4 +38,4 @@ public:
     int selectNearestIndexToRgb(const ColorRgb& c) const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_RGBCOLORPALETTE_H__
+#endif

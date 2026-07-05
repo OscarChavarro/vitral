@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLE_H__
-#define __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITORCONSOLE_H__
+#ifndef __PROGRESSMONITORCONSOLE__
+#define __PROGRESSMONITORCONSOLE__
 
 #include <pthread.h>
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"

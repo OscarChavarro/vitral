@@ -1,5 +1,5 @@
-#ifndef __LABEL_H__
-#define __LABEL_H__
+#ifndef __LABEL__
+#define __LABEL__
 
 #include <java/lang/String.h>
 class Label {

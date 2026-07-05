@@ -1,5 +1,5 @@
-#ifndef __CAIROPDFMARKERRENDERER_H__
-#define __CAIROPDFMARKERRENDERER_H__
+#ifndef __CAIROPDFMARKERRENDERER__
+#define __CAIROPDFMARKERRENDERER__
 
 #include <cairo.h>
 

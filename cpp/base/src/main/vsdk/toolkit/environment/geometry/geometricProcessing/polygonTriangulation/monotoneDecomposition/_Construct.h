@@ -1,5 +1,5 @@
-#ifndef __TRIANGULATION_CONSTRUCT__
-#define __TRIANGULATION_CONSTRUCT__
+#ifndef ___CONSTRUCT__
+#define ___CONSTRUCT__
 
 #include <cmath>
 #include <cstdio>

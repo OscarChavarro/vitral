@@ -1,5 +1,5 @@
-#ifndef SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
-#define SHADERSEXAMPLE_MODEL_SHADERSMODEL_H
+#ifndef __SHADERSMODEL__
+#define __SHADERSMODEL__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

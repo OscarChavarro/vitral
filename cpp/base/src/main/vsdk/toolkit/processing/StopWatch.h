@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_PROCESSING_STOPWATCH_H__
-#define __VSDK_TOOLKIT_PROCESSING_STOPWATCH_H__
+#ifndef __STOPWATCH__
+#define __STOPWATCH__
 
 #include <chrono>
 class StopWatch {

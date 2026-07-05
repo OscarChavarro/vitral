@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_RENDERCONTEXT_H__
-#define __VSDK_TOOLKIT_RENDER_RENDERCONTEXT_H__
+#ifndef __RENDERCONTEXT__
+#define __RENDERCONTEXT__
 
 class Shader;
 

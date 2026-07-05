@@ -1,5 +1,5 @@
-#ifndef __VSDK_PBS_NODE_EDGE_H__
-#define __VSDK_PBS_NODE_EDGE_H__
+#ifndef ___POLYHEDRALBOUNDEDSOLIDEDGE__
+#define ___POLYHEDRALBOUNDEDSOLIDEDGE__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 class _PolyhedralBoundedSolidHalfEdge;

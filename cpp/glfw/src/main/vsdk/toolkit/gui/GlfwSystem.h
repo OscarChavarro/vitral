@@ -1,5 +1,5 @@
-#ifndef GLFWSYSTEM_H
-#define GLFWSYSTEM_H
+#ifndef __GLFWSYSTEM__
+#define __GLFWSYSTEM__
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -16,4 +16,4 @@ private:
     ~GlfwSystem();
 };
 
-#endif // GLFWSYSTEM_H
+#endif

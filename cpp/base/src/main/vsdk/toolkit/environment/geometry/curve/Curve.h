@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_CURVE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_CURVE_H__
+#ifndef __CURVE__
+#define __CURVE__
 
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 class Ray;

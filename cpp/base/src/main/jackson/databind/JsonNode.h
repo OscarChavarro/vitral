@@ -1,5 +1,5 @@
-#ifndef JACKSON_DATABIND_JSON_NODE_H
-#define JACKSON_DATABIND_JSON_NODE_H
+#ifndef __JSONNODE__
+#define __JSONNODE__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

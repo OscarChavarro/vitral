@@ -1,5 +1,5 @@
-#ifndef __CAIROPDFPAGERENDERER_H__
-#define __CAIROPDFPAGERENDERER_H__
+#ifndef __CAIROPDFPAGERENDERER__
+#define __CAIROPDFPAGERENDERER__
 
 #include <java/util/ArrayList.h>
 #include "model/Marker.h"

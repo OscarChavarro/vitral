@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_LIGHTINGSHADER_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_LIGHTINGSHADER_H__
+#ifndef __LIGHTINGSHADER__
+#define __LIGHTINGSHADER__
 
 #include "vsdk/toolkit/render/shaders/Shader.h"
 class LightingShader : public Shader {

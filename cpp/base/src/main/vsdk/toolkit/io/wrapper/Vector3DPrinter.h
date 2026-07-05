@@ -1,5 +1,5 @@
-#ifndef VECTOR_3D_PRINTER__
-#define VECTOR_3D_PRINTER__
+#ifndef __VECTOR3DPRINTER__
+#define __VECTOR3DPRINTER__
 
 #include "java/io/PrintStream.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3D.h"

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_CONSTANTSHADER_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_CONSTANTSHADER_H__
+#ifndef __CONSTANTSHADER__
+#define __CONSTANTSHADER__
 #include "vsdk/toolkit/render/shaders/Shader.h"
 class ConstantShader : public Shader {
 public:

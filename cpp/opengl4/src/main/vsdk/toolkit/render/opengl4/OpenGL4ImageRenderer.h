@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
-#define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
+#ifndef __OPENGL4IMAGERENDERER__
+#define __OPENGL4IMAGERENDERER__
 
 #include <GL/glew.h>
 #include "java/lang/String.h"
@@ -67,5 +67,5 @@ private:
     static GLuint compileShader(const java::String& source, int type);
 };
 
-#endif // __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4IMAGERENDERER_H__
+#endif
 #include "java/lang/String.h"

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
-#define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
+#ifndef __MATRIXNXM__
+#define __MATRIXNXM__
 #include "java/lang/String.h"
 class MatrixNxM {
 private:
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif // __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_MATRIXNXM_H__
+#endif

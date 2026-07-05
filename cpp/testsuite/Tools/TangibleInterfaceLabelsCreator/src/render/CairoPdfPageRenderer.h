@@ -1,5 +1,5 @@
-#ifndef __CAIROPDFLABELSPAGERENDERER_H__
-#define __CAIROPDFLABELSPAGERENDERER_H__
+#ifndef __CAIROPDFPAGERENDERER__
+#define __CAIROPDFPAGERENDERER__
 
 #include <java/util/ArrayList.h>
 #include "model/Label.h"

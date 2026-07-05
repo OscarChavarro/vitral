@@ -1,5 +1,5 @@
-#ifndef PIPE_OUTPUT_STREAM__
-#define PIPE_OUTPUT_STREAM__
+#ifndef __PIPEOUTPUTSTREAM__
+#define __PIPEOUTPUTSTREAM__
 
 #include <cstdio>
 

@@ -1,5 +1,5 @@
-#ifndef __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
-#define __VSDK_PBS_GEOMETRIC_VALIDATOR_H__
+#ifndef __POLYHEDRALBOUNDEDSOLIDGEOMETRICVALIDATOR__
+#define __POLYHEDRALBOUNDEDSOLIDGEOMETRICVALIDATOR__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

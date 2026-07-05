@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_GRAYSCALEPALETTE_H__
-#define __VSDK_TOOLKIT_MEDIA_GRAYSCALEPALETTE_H__
+#ifndef __GRAYSCALEPALETTE__
+#define __GRAYSCALEPALETTE__
 
 #include "vsdk/toolkit/media/RGBProceduralColorPalette.h"
 class ColorRgb;
@@ -16,4 +16,4 @@ public:
     int selectNearestIndexToRgb(const ColorRgb& c) const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_GRAYSCALEPALETTE_H__
+#endif

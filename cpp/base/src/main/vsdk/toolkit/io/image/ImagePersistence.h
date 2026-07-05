@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_IO_IMAGE_IMAGEPERSISTENCE_H__
-#define __VSDK_TOOLKIT_IO_IMAGE_IMAGEPERSISTENCE_H__
+#ifndef __IMAGEPERSISTENCE__
+#define __IMAGEPERSISTENCE__
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -82,4 +82,4 @@ private:
     static java::String* extractExtensionFromFile(const java::File& fd);
 };
 
-#endif // __VSDK_TOOLKIT_IO_IMAGE_IMAGEPERSISTENCE_H__
+#endif

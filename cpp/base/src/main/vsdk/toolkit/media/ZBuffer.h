@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_ZBUFFER_H__
-#define __VSDK_TOOLKIT_MEDIA_ZBUFFER_H__
+#ifndef __ZBUFFER__
+#define __ZBUFFER__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
 /**
@@ -77,4 +77,4 @@ public:
     ZBuffer* clone() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_ZBUFFER_H__
+#endif

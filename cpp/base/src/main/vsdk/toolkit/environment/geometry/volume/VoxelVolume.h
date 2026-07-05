@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_VOXELVOLUME_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_VOXELVOLUME_H__
+#ifndef __VOXELVOLUME__
+#define __VOXELVOLUME__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class IndexedColorImageUncompressed;

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHTTYPE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHTTYPE_H__
+#ifndef __LIGHTTYPE__
+#define __LIGHTTYPE__
 
 class LightType {
 public:

@@ -1,5 +1,5 @@
-#ifndef __MARKERGENERATOR_H__
-#define __MARKERGENERATOR_H__
+#ifndef __MARKERGENERATOR__
+#define __MARKERGENERATOR__
 
 #include "model/Marker.h"
 #include <apriltag.h>

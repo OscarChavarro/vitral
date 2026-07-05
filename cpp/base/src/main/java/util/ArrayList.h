@@ -1,7 +1,8 @@
-#ifndef ArrayList__
-#define ArrayList__
+#ifndef __ARRAYLIST__
+#define __ARRAYLIST__
 
 #include "java/lang/Object.h"
+
 namespace java {
     template<class T>
     class ArrayList final : public Object {

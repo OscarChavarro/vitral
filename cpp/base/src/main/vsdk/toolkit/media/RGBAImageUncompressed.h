@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_RGBAIMAGEUNCOMPRESSED_H__
-#define __VSDK_TOOLKIT_MEDIA_RGBAIMAGEUNCOMPRESSED_H__
+#ifndef __RGBAIMAGEUNCOMPRESSED__
+#define __RGBAIMAGEUNCOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBAPixel;
@@ -62,4 +62,4 @@ public:
     void dispose();
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_RGBAIMAGEUNCOMPRESSED_H__
+#endif

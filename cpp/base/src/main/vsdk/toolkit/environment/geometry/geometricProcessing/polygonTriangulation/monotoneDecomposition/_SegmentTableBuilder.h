@@ -1,5 +1,5 @@
-#ifndef __TRIANGULATION_SEGMENT_TABLE_BUILDER__
-#define __TRIANGULATION_SEGMENT_TABLE_BUILDER__
+#ifndef ___SEGMENTTABLEBUILDER__
+#define ___SEGMENTTABLEBUILDER__
 
 class _SegmentTableBuilder {
   public:

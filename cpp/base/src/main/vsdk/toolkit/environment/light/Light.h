@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHT_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_LIGHT_LIGHT_H__
+#ifndef __LIGHT__
+#define __LIGHT__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

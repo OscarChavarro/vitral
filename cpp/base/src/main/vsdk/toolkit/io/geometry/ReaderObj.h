@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_IO_GEOMETRY_READEROBJ_H__
-#define __VSDK_TOOLKIT_IO_GEOMETRY_READEROBJ_H__
+#ifndef __READEROBJ__
+#define __READEROBJ__
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/io/PersistenceElement.h"

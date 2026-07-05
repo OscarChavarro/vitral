@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_BACKGROUND_BACKGROUND_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_BACKGROUND_BACKGROUND_H__
+#ifndef __BACKGROUND__
+#define __BACKGROUND__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

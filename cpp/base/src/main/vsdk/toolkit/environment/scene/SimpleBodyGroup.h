@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODYGROUP_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODYGROUP_H__
+#ifndef __SIMPLEBODYGROUP__
+#define __SIMPLEBODYGROUP__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

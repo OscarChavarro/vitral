@@ -1,5 +1,5 @@
-#ifndef GLUTSYSTEM_H
-#define GLUTSYSTEM_H
+#ifndef __GLUTSYSTEM__
+#define __GLUTSYSTEM__
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
@@ -16,4 +16,4 @@ private:
     ~GlutSystem();
 };
 
-#endif // GLUTSYSTEM_H
+#endif

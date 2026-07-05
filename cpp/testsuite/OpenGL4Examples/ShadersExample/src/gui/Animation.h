@@ -1,5 +1,5 @@
-#ifndef SHADERSEXAMPLE_GUI_ANIMATION_H
-#define SHADERSEXAMPLE_GUI_ANIMATION_H
+#ifndef __ANIMATION__
+#define __ANIMATION__
 
 class ShadersModel;
 class Light;

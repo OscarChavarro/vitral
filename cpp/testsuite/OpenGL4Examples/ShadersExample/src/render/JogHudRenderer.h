@@ -1,5 +1,5 @@
-#ifndef SHADERSEXAMPLE_JOGHUDRENDERER_H
-#define SHADERSEXAMPLE_JOGHUDRENDERER_H
+#ifndef __JOGHUDRENDERER__
+#define __JOGHUDRENDERER__
 
 #include "java/lang/String.h"
 class RGBImageUncompressed;

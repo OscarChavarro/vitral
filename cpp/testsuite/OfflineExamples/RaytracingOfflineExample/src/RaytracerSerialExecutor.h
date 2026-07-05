@@ -1,5 +1,5 @@
-#ifndef RAYTRACING_OFFLINE_RAYTRACERSERIALEXECUTOR_H
-#define RAYTRACING_OFFLINE_RAYTRACERSERIALEXECUTOR_H
+#ifndef __RAYTRACERSERIALEXECUTOR__
+#define __RAYTRACERSERIALEXECUTOR__
 
 #include "RaytracerExecutor.h"
 class RaytracerSerialExecutor : public RaytracerExecutor {

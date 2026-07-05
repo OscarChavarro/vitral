@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_INDEXEDCOLORIMAGEUNCOMPRESSED_H__
-#define __VSDK_TOOLKIT_MEDIA_INDEXEDCOLORIMAGEUNCOMPRESSED_H__
+#ifndef __INDEXEDCOLORIMAGEUNCOMPRESSED__
+#define __INDEXEDCOLORIMAGEUNCOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBColorPalette;
@@ -55,4 +55,4 @@ public:
     IndexedColorImageUncompressed* clone() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_INDEXEDCOLORIMAGEUNCOMPRESSED_H__
+#endif

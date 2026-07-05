@@ -1,5 +1,5 @@
-#ifndef POLYGONCLIPPINGHUDRENDERER_H
-#define POLYGONCLIPPINGHUDRENDERER_H
+#ifndef __POLYGONCLIPPINGHUDRENDERER__
+#define __POLYGONCLIPPINGHUDRENDERER__
 
 #include "java/lang/String.h"
 class RGBImageUncompressed;

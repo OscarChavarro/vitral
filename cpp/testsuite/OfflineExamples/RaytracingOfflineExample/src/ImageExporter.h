@@ -1,5 +1,5 @@
-#ifndef RAYTRACING_OFFLINE_IMAGEEXPORTER_H
-#define RAYTRACING_OFFLINE_IMAGEEXPORTER_H
+#ifndef __IMAGEEXPORTER__
+#define __IMAGEEXPORTER__
 
 #include "java/lang/String.h"
 

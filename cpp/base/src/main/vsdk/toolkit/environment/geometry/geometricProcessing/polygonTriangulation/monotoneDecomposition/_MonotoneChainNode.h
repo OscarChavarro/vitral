@@ -1,5 +1,5 @@
-#ifndef __MONOTONE_CHAIN_NODE__
-#define __MONOTONE_CHAIN_NODE__
+#ifndef ___MONOTONECHAINNODE__
+#define ___MONOTONECHAINNODE__
 
 class _MonotoneChainNode {
   public:

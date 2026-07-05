@@ -1,5 +1,5 @@
-#ifndef __MARKER_H__
-#define __MARKER_H__
+#ifndef __MARKER__
+#define __MARKER__
 
 #include "model/Grid.h"
 class Marker {

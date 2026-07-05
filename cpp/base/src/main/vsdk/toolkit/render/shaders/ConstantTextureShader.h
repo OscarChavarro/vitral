@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_CONSTANTTEXTURESHADER_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_CONSTANTTEXTURESHADER_H__
+#ifndef __CONSTANTTEXTURESHADER__
+#define __CONSTANTTEXTURESHADER__
 #include "vsdk/toolkit/render/shaders/Shader.h"
 class ConstantTextureShader : public Shader {
 public:

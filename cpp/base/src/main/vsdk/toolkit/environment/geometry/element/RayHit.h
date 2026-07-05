@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_RAYHIT_H__
+#ifndef __RAYHIT__
+#define __RAYHIT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"

@@ -1,5 +1,5 @@
-#ifndef JAVA_NET_SERVER_SOCKET_H__
-#define JAVA_NET_SERVER_SOCKET_H__
+#ifndef __SERVERSOCKET__
+#define __SERVERSOCKET__
 
 #include "java/net/Socket.h"
 namespace java {

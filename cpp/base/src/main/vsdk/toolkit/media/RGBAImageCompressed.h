@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_RGBAIMAGECOMPRESSED_H__
-#define __VSDK_TOOLKIT_MEDIA_RGBAIMAGECOMPRESSED_H__
+#ifndef __RGBAIMAGECOMPRESSED__
+#define __RGBAIMAGECOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;
@@ -71,4 +71,4 @@ private:
     void reportUnsupportedPixelAccess(const char* method) const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_RGBAIMAGECOMPRESSED_H__
+#endif

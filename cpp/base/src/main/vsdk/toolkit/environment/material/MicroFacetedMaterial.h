@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_MATERIAL_MICROFACETEDMATERIAL_H__
+#ifndef __MICROFACETEDMATERIAL__
+#define __MICROFACETEDMATERIAL__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"

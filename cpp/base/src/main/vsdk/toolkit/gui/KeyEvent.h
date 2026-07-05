@@ -1,5 +1,5 @@
-#ifndef KEYEVENT_H
-#define KEYEVENT_H
+#ifndef __KEYEVENT__
+#define __KEYEVENT__
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class KeyEvent : public PresentationElement {
@@ -148,4 +148,4 @@ public:
 };
 
 
-#endif // KEYEVENT_H
+#endif

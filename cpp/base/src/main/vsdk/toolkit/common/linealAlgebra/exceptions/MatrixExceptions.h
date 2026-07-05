@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_EXCEPTIONS_MATRIXEXCEPTIONS_H__
-#define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_EXCEPTIONS_MATRIXEXCEPTIONS_H__
+#ifndef __MATRIXEXCEPTIONS__
+#define __MATRIXEXCEPTIONS__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
@@ -23,4 +23,4 @@ public:
     explicit MatrixSingularException(const java::String& message) : VSDKFatalException(message) {}
 };
 
-#endif // __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_EXCEPTIONS_MATRIXEXCEPTIONS_H__
+#endif

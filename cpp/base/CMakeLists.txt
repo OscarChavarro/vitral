@@ -173,6 +173,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/shaders/CookTorranceShader.cpp
     src/main/vsdk/toolkit/render/shaders/ShaderSelector.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
+    src/main/vsdk/toolkit/io/FileLocator.cpp
     src/main/vsdk/toolkit/io/geometry/EnvironmentPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderObj.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp

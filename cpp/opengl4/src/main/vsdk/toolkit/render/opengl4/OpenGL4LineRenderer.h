@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4LINERENDERER_H__
-#define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4LINERENDERER_H__
+#ifndef __OPENGL4LINERENDERER__
+#define __OPENGL4LINERENDERER__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

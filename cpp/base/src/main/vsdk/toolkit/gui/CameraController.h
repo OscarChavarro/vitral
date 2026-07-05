@@ -1,5 +1,5 @@
-#ifndef CAMERACONTROLLER_H
-#define CAMERACONTROLLER_H
+#ifndef __CAMERACONTROLLER__
+#define __CAMERACONTROLLER__
 
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
@@ -26,4 +26,4 @@ public:
     virtual void tick(double inCurrentTime) {}
 };
 
-#endif // CAMERACONTROLLER_H
+#endif

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
-#define __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
+#ifndef __COMPLEX__
+#define __COMPLEX__
 
 #include "java/lang/String.h"
 class Complex {
@@ -26,4 +26,4 @@ public:
     java::String* toString() const;
 };
 
-#endif // __VSDK_TOOLKIT_COMMON_LINEALALGEBRA_COMPLEX_H__
+#endif

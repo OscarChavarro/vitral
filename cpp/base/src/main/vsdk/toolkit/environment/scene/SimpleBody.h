@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODY_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLEBODY_H__
+#ifndef __SIMPLEBODY__
+#define __SIMPLEBODY__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

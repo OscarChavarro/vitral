@@ -1,5 +1,5 @@
-#ifndef OPENGL4MATRIXRENDERER_H
-#define OPENGL4MATRIXRENDERER_H
+#ifndef __OPENGL4MATRIXRENDERER__
+#define __OPENGL4MATRIXRENDERER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class OpenGL4MatrixRenderer {
@@ -24,4 +24,4 @@ private:
     ~OpenGL4MatrixRenderer();
 };
 
-#endif // OPENGL4MATRIXRENDERER_H
+#endif

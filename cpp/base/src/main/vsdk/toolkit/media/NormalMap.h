@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
-#define __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
+#ifndef __NORMALMAP__
+#define __NORMALMAP__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
@@ -52,4 +52,4 @@ public:
     NormalMap* clone() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_NORMALMAP_H__
+#endif

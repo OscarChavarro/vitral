@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_LINEARALGEBRAENGINE_H__
-#define __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_LINEARALGEBRAENGINE_H__
+#ifndef __LINEARALGEBRAENGINE__
+#define __LINEARALGEBRAENGINE__
 
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 #include "vsdk/toolkit/common/linealAlgebra/processing/Strategies.h"
@@ -20,4 +20,4 @@ public:
     static MatrixNxM inverseDefault(const MatrixNxM& m);
 };
 
-#endif // __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_LINEARALGEBRAENGINE_H__
+#endif

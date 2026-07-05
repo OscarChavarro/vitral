@@ -1,5 +1,5 @@
-#ifndef SHADERSEXAMPLE_RENDER_SOFTWARERAYCASTER_H
-#define SHADERSEXAMPLE_RENDER_SOFTWARERAYCASTER_H
+#ifndef __SOFTWARERAYCASTER__
+#define __SOFTWARERAYCASTER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_HIDDENLINERENDERER_H__
-#define __VSDK_TOOLKIT_RENDER_HIDDENLINERENDERER_H__
+#ifndef __HIDDENLINERENDERER__
+#define __HIDDENLINERENDERER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderingElement.h"

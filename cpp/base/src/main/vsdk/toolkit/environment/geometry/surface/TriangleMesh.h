@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_TRIANGLEMESH_H__
+#ifndef __TRIANGLEMESH__
+#define __TRIANGLEMESH__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

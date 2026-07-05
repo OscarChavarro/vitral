@@ -1,5 +1,5 @@
-#ifndef POLYGONCLIPPING_FIXTURES_H
-#define POLYGONCLIPPING_FIXTURES_H
+#ifndef __POLYGONCLIPPINGFIXTURES__
+#define __POLYGONCLIPPINGFIXTURES__
 
 struct PolygonClippingTestCase {
     const char* name;

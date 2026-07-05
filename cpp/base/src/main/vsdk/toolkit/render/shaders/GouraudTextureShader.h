@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_GOURAUDTEXTURESHADER_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_GOURAUDTEXTURESHADER_H__
+#ifndef __GOURAUDTEXTURESHADER__
+#define __GOURAUDTEXTURESHADER__
 #include "vsdk/toolkit/render/shaders/LightingShader.h"
 class GouraudTextureShader : public LightingShader { public: explicit GouraudTextureShader(bool textureEnabled) : LightingShader(true, textureEnabled, false) {} };
 #endif

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_SHADER_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_SHADER_H__
+#ifndef __SHADER__
+#define __SHADER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

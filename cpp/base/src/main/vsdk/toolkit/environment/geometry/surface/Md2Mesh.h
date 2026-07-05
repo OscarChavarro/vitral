@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_MD2MESH_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_MD2MESH_H__
+#ifndef __MD2MESH__
+#define __MD2MESH__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

@@ -1,5 +1,5 @@
-#ifndef __LABELSMODEL_H__
-#define __LABELSMODEL_H__
+#ifndef __LABELSMODEL__
+#define __LABELSMODEL__
 
 #include <java/util/ArrayList.h>
 #include "model/Label.h"

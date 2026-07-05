@@ -1,5 +1,5 @@
-#ifndef __COMMANDLINEOPTIONS_H__
-#define __COMMANDLINEOPTIONS_H__
+#ifndef __COMMANDLINEOPTIONS__
+#define __COMMANDLINEOPTIONS__
 
 #include <string>
 class CommandLineOptions {

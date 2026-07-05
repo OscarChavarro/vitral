@@ -1,5 +1,5 @@
-#ifndef __TANGIBLEINTERFACEMARKERSCREATOR_H__
-#define __TANGIBLEINTERFACEMARKERSCREATOR_H__
+#ifndef __TANGIBLEINTERFACEMARKERSCREATOR__
+#define __TANGIBLEINTERFACEMARKERSCREATOR__
 
 #include "model/MarkersModel.h"
 #include "render/CairoPdfPageRenderer.h"

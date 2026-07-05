@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
-#define __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
+#ifndef __CALLIGRAPHIC2DBUFFER__
+#define __CALLIGRAPHIC2DBUFFER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"
@@ -56,4 +56,4 @@ public:
     void exportRgbImage(RGBImageUncompressed* inOutRasterViewport);
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_CALLIGRAPHIC2DBUFFER_H__
+#endif

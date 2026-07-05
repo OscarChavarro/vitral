@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_SPHERE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_SPHERE_H__
+#ifndef __SPHERE__
+#define __SPHERE__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;

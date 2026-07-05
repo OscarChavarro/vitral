@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_PARAMETRICCURVE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_CURVE_PARAMETRICCURVE_H__
+#ifndef __PARAMETRICCURVE__
+#define __PARAMETRICCURVE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

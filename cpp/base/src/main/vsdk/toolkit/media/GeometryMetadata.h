@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
-#define __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
+#ifndef __GEOMETRYMETADATA__
+#define __GEOMETRYMETADATA__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -58,4 +58,4 @@ public:
     java::String* toString() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_GEOMETRYMETADATA_H__
+#endif

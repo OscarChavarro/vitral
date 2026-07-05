@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITOR_H__
-#define __VSDK_TOOLKIT_GUI_FEEDBACK_PROGRESSMONITOR_H__
+#ifndef __PROGRESSMONITOR__
+#define __PROGRESSMONITOR__
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class ProgressMonitor : public PresentationElement {

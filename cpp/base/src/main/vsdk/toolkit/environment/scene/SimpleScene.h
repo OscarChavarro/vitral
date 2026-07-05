@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLESCENE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_SCENE_SIMPLESCENE_H__
+#ifndef __SIMPLESCENE__
+#define __SIMPLESCENE__
 
 #include "java/util/ArrayList.h"
 class SimpleBody;

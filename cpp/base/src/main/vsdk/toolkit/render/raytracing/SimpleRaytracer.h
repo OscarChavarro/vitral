@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
-#define __VSDK_TOOLKIT_RENDER_RAYTRACING_SIMPLERAYTRACER_H__
+#ifndef __SIMPLERAYTRACER__
+#define __SIMPLERAYTRACER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderContext.h"

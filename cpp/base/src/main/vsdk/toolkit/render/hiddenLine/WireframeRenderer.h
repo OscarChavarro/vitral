@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_WIREFRAMERENDERER_H__
-#define __VSDK_TOOLKIT_RENDER_WIREFRAMERENDERER_H__
+#ifndef __WIREFRAMERENDERER__
+#define __WIREFRAMERENDERER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/render/RenderingElement.h"

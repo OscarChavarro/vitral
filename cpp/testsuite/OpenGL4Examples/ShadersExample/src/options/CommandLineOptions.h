@@ -1,5 +1,5 @@
-#ifndef SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
-#define SHADERSEXAMPLE_OPTIONS_COMMANDLINEOPTIONS_H
+#ifndef __COMMANDLINEOPTIONS__
+#define __COMMANDLINEOPTIONS__
 
 #include "java/lang/String.h"
 #include "../model/ShaderOperationMode.h"

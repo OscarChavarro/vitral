@@ -1,5 +1,5 @@
-#ifndef JAVA_FLOAT__
-#define JAVA_FLOAT__
+#ifndef __FLOAT__
+#define __FLOAT__
 
 namespace java {
 class Float {

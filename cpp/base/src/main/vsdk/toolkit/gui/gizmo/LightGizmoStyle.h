@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_GUI_GIZMO_LIGHTGIZMOSTYLE_H__
-#define __VSDK_TOOLKIT_GUI_GIZMO_LIGHTGIZMOSTYLE_H__
+#ifndef __LIGHTGIZMOSTYLE__
+#define __LIGHTGIZMOSTYLE__
 
 enum class LightGizmoStyle {
     CROSS,

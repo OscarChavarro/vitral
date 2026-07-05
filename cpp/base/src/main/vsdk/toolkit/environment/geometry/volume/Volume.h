@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_VOLUME_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_VOLUME_H__
+#ifndef __VOLUME__
+#define __VOLUME__
 
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 class PolyhedralBoundedSolid;

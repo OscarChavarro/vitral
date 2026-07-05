@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRY_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRY_H__
+#ifndef __GEOMETRY__
+#define __GEOMETRY__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/processing/Containment.h"

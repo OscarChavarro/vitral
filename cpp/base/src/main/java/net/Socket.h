@@ -1,5 +1,5 @@
-#ifndef JAVA_NET_SOCKET_H__
-#define JAVA_NET_SOCKET_H__
+#ifndef __SOCKET__
+#define __SOCKET__
 
 #include "java/net/SocketInputStream.h"
 #include "java/net/SocketOutputStream.h"

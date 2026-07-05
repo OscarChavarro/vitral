@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4SPHERERENDERER_H__
-#define __VSDK_TOOLKIT_RENDER_OPENGL4_OPENGL4SPHERERENDERER_H__
+#ifndef __OPENGL4SPHERERENDERER__
+#define __OPENGL4SPHERERENDERER__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

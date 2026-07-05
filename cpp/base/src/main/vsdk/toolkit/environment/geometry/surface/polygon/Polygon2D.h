@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON_POLYGON2D_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON_POLYGON2D_H__
+#ifndef __POLYGON2D__
+#define __POLYGON2D__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"

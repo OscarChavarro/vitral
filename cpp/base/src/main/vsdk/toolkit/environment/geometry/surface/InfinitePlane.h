@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_INFINITEPLANE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_INFINITEPLANE_H__
+#ifndef __INFINITEPLANE__
+#define __INFINITEPLANE__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/HalfSpace.h"

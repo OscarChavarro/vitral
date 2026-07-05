@@ -1,5 +1,5 @@
-#ifndef CAMERACONTROLLERBLENDER_H
-#define CAMERACONTROLLERBLENDER_H
+#ifndef __CAMERACONTROLLERBLENDER__
+#define __CAMERACONTROLLERBLENDER__
 
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;
@@ -30,4 +30,4 @@ private:
     double diminishLogarithmic(double val, double epsilon);
 };
 
-#endif // CAMERACONTROLLERBLENDER_H
+#endif

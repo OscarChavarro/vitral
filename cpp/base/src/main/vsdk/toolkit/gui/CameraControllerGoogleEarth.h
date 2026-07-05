@@ -1,5 +1,5 @@
-#ifndef CAMERACONTROLLERGOOGLEEARTH_H
-#define CAMERACONTROLLERGOOGLEEARTH_H
+#ifndef __CAMERACONTROLLERGOOGLEEARTH__
+#define __CAMERACONTROLLERGOOGLEEARTH__
 
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;
@@ -33,4 +33,4 @@ private:
     int yOld;
 };
 
-#endif // CAMERACONTROLLERGOOGLEEARTH_H
+#endif

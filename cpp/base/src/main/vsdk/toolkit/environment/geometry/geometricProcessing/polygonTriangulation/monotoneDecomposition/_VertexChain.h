@@ -1,5 +1,5 @@
-#ifndef __VERTEX_CHAIN__
-#define __VERTEX_CHAIN__
+#ifndef ___VERTEXCHAIN__
+#define ___VERTEXCHAIN__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 class _VertexChain {

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX2D_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX2D_H__
+#ifndef __VERTEX2D__
+#define __VERTEX2D__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

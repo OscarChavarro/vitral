@@ -1,5 +1,5 @@
-#ifndef CAMERACONTROLLERORBITER_H
-#define CAMERACONTROLLERORBITER_H
+#ifndef __CAMERACONTROLLERORBITER__
+#define __CAMERACONTROLLERORBITER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/gui/CameraController.h"
@@ -41,4 +41,4 @@ private:
     bool orbitAroundPointOfInterest(double yawDelta, double pitchDelta);
 };
 
-#endif // CAMERACONTROLLERORBITER_H
+#endif

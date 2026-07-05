@@ -1,5 +1,5 @@
-#ifndef OPENGL4SIMPLECORRIDORSAMPLE_H
-#define OPENGL4SIMPLECORRIDORSAMPLE_H
+#ifndef __OPENGL4SIMPLECORRIDORSAMPLE__
+#define __OPENGL4SIMPLECORRIDORSAMPLE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -86,4 +86,4 @@ private:
     unsigned int compileShader(const java::String& source, int type);
 };
 
-#endif // OPENGL4SIMPLECORRIDORSAMPLE_H
+#endif

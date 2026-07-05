@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON__POLYGON2DCONTOUR_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_POLYGON__POLYGON2DCONTOUR_H__
+#ifndef ___POLYGON2DCONTOUR__
+#define ___POLYGON2DCONTOUR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"

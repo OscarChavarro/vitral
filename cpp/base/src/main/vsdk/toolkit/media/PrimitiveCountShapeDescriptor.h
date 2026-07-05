@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
-#define __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
+#ifndef __PRIMITIVECOUNTSHAPEDESCRIPTOR__
+#define __PRIMITIVECOUNTSHAPEDESCRIPTOR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"
@@ -26,4 +26,4 @@ public:
     java::String* toString() const;
 };
 
-#endif // __VSDK_TOOLKIT_MEDIA_PRIMITIVECOUNTSHAPEDESCRIPTOR_H__
+#endif

@@ -1,5 +1,5 @@
-#ifndef JAVA_NET_SOCKET_INPUT_STREAM_H__
-#define JAVA_NET_SOCKET_INPUT_STREAM_H__
+#ifndef __SOCKETINPUTSTREAM__
+#define __SOCKETINPUTSTREAM__
 
 #include "java/io/InputStream.h"
 namespace java {

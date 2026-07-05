@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_SURFACE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_SURFACE_SURFACE_H__
+#ifndef __SURFACE__
+#define __SURFACE__
 
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 class Surface : public Geometry {

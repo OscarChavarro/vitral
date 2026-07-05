@@ -1,5 +1,5 @@
-#ifndef __VSDK_PBS_NUMERIC_POLICY_H__
-#define __VSDK_PBS_NUMERIC_POLICY_H__
+#ifndef __POLYHEDRALBOUNDEDSOLIDNUMERICPOLICY__
+#define __POLYHEDRALBOUNDEDSOLIDNUMERICPOLICY__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;

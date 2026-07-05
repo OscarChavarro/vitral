@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
-#define __VSDK_TOOLKIT_RENDER_RASTERIZER2D_H__
+#ifndef __RASTERIZER2D__
+#define __RASTERIZER2D__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

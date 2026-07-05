@@ -1,5 +1,5 @@
-#ifndef __CONSTRUCTIVEPOLYGONGEOMETRYPROCESSOR_H__
-#define __CONSTRUCTIVEPOLYGONGEOMETRYPROCESSOR_H__
+#ifndef __CONSTRUCTIVEPOLYGONGEOMETRYPROCESSOR__
+#define __CONSTRUCTIVEPOLYGONGEOMETRYPROCESSOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

@@ -1,5 +1,5 @@
-#ifndef JAVA_NET_SOCKET_OUTPUT_STREAM_H__
-#define JAVA_NET_SOCKET_OUTPUT_STREAM_H__
+#ifndef __SOCKETOUTPUTSTREAM__
+#define __SOCKETOUTPUTSTREAM__
 
 #include "java/io/OutputStream.h"
 namespace java {

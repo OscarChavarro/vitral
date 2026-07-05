@@ -1,5 +1,5 @@
-#ifndef JAVA_INTEGER__
-#define JAVA_INTEGER__
+#ifndef __INTEGER__
+#define __INTEGER__
 
 namespace java {
 

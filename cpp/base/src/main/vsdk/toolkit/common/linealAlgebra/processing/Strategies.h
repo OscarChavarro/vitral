@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_STRATEGIES_H__
-#define __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_STRATEGIES_H__
+#ifndef __STRATEGIES__
+#define __STRATEGIES__
 
 #include "vsdk/toolkit/common/linealAlgebra/MatrixNxM.h"
 class DeterminantStrategy {
@@ -43,4 +43,4 @@ enum ComputeStrategy {
     GAUSS_CPU
 };
 
-#endif // __VSDK_TOOLKIT_PROCESSING_LINEALALGEBRA_STRATEGIES_H__
+#endif

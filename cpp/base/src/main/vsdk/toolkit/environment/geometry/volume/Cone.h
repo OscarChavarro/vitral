@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_CONE_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_VOLUME_CONE_H__
+#ifndef __CONE__
+#define __CONE__
 
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"
 class Ray;

@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_RENDER_SHADERS_SHADERSELECTOR_H__
-#define __VSDK_TOOLKIT_RENDER_SHADERS_SHADERSELECTOR_H__
+#ifndef __SHADERSELECTOR__
+#define __SHADERSELECTOR__
 
 class RendererConfiguration;
 class Shader;

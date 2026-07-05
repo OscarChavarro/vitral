@@ -1,5 +1,5 @@
-#ifndef __VSDK_PBS_NODE_FACE_H__
-#define __VSDK_PBS_NODE_FACE_H__
+#ifndef ___POLYHEDRALBOUNDEDSOLIDFACE__
+#define ___POLYHEDRALBOUNDEDSOLIDFACE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

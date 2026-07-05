@@ -1,5 +1,5 @@
-#ifndef __VSDK_PBS_NODE_HALFEDGE_H__
-#define __VSDK_PBS_NODE_HALFEDGE_H__
+#ifndef ___POLYHEDRALBOUNDEDSOLIDHALFEDGE__
+#define ___POLYHEDRALBOUNDEDSOLIDHALFEDGE__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class _PolyhedralBoundedSolidLoop;

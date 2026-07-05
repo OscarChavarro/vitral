@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_ELEMENTS_VERTEX_H__
+#ifndef __VERTEX__
+#define __VERTEX__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

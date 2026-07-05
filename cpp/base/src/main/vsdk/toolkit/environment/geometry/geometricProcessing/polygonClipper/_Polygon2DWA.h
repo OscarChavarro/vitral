@@ -1,5 +1,5 @@
-#ifndef __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_POLYGON2DWA_H__
-#define __VSDK_TOOLKIT_ENVIRONMENT_GEOMETRY_GEOMETRICPROCESSING_POLYGONCLIPPER_POLYGON2DWA_H__
+#ifndef ___POLYGON2DWA__
+#define ___POLYGON2DWA__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

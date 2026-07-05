@@ -1,5 +1,5 @@
-#ifndef POLYGONCLIPPING_OPTIONS_COMMANDLINEOPTIONS_H
-#define POLYGONCLIPPING_OPTIONS_COMMANDLINEOPTIONS_H
+#ifndef __COMMANDLINEOPTIONS__
+#define __COMMANDLINEOPTIONS__
 
 #include "model/PolygonSurfaceTessellationMode.h"
 struct CommandLineOptions {
