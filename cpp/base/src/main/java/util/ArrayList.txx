@@ -1,3 +1,6 @@
+#ifndef __ARRAY_LIST_TXX__
+#define __ARRAY_LIST_TXX__
+
 #include "java/util/ArrayList.h"
 namespace java {
 
@@ -8,14 +11,6 @@ ArrayList<T>::ArrayList() {
     maxSize = increaseChunk;
     init();
 };
-
-template <class T>
-ArrayList<T>::ArrayList(long i) {
-    currentSize = 0;
-    increaseChunk = i;
-    maxSize = increaseChunk;
-    init();
-}
 
 template <class T>
 ArrayList<T>::~ArrayList() {
@@ -91,19 +86,6 @@ ArrayList<T>::operator=(ArrayList<T>&& other) noexcept
     other.currentSize = 0;
     other.maxSize = 0;
     return *this;
-}
-
-template <class T> void
-ArrayList<T>::init() {
-    if ( maxSize > 0 ) {
-        Data = new T[maxSize];
-        if ( !Data ) {
-            maxSize = 0;
-        }
-    } else {
-        Data = nullptr;
-    }
-    currentSize = 0;
 }
 
 template <class T> bool
@@ -234,3 +216,5 @@ ArrayList<T>::clear() {
 }
 
 }
+
+#endif

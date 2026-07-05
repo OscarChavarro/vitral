@@ -11,22 +11,30 @@ namespace java {
         long int maxSize;
         T *Data;
 
-        void init();
+        void init()
+        {
+            if (maxSize > 0) {
+                Data = new T[maxSize];
+                if (!Data) {
+                    maxSize = 0;
+                }
+            } else {
+                Data = nullptr;
+            }
+            currentSize = 0;
+        }
 
     public:
         ArrayList();
-        explicit ArrayList(long i);
+        explicit ArrayList(long i)
+        {
+            currentSize = 0;
+            increaseChunk = i;
+            maxSize = increaseChunk;
+            init();
+        }
         ArrayList(const ArrayList& other);
         ArrayList& operator=(const ArrayList& other);
-        // Plain pointer/field transfer, no allocation and no per-element
-        // construction - the counterpart to init()/operator=(const&) always
-        // doing `new T[maxSize]` (every slot default-constructed, not just
-        // the populated ones). Leaves other in the same state init() would:
-        // empty, with its own (now nulled-out) backing storage already
-        // freed, so its destructor is a no-op. See doc/CSGPerformance.md
-        // (this is what lets CSGByRaySegment's RaySegments/RaySegmentCrossing
-        // stop paying a `new T[8]` + N copies on every return-by-value
-        // instead of a 3-word swap).
         ArrayList(ArrayList&& other) noexcept;
         ArrayList& operator=(ArrayList&& other) noexcept;
         ~ArrayList();
