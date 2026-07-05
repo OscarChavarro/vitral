@@ -45,6 +45,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/logging/Logger.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
     src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.cpp
+    src/main/vsdk/toolkit/common/statistics/GeometryStatistics.cpp
     src/main/vsdk/toolkit/common/color/ColorRgb.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/Complex.cpp
     src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.cpp
