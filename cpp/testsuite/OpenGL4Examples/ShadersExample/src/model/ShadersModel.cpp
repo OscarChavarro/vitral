@@ -9,7 +9,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 ShadersModel ShadersModel::createDefault() { return ShadersModel(); }
 
@@ -18,7 +18,7 @@ ShadersModel::ShadersModel()
       cameraController(0),
       qualityController(0),
       sphere(new Sphere(1.0)),
-      light(new Light(LightType::POINT, Vector3Dd(1, -3, 1), ColorRgb(1, 1, 1))),
+      light(new PointLight(Vector3Dd(1, -3, 1), ColorRgb(1, 1, 1))),
       cookTorranceMaterial(0),
       cookTorranceMaterialIndex(0),
       textureMap(0), bumpMapHeightRgb(0), bumpNormalMap(0), softwareFrameImage(0),

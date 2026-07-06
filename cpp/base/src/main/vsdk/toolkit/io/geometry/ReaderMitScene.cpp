@@ -11,8 +11,9 @@
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/background/SimpleBackground.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/light/AmbientLight.h"
+#include "vsdk/toolkit/environment/light/DirectionalLight.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
@@ -159,18 +160,18 @@ void ReaderMitScene::importEnvironment(const char* fileName, SimpleScene* outSce
             if ( sscanf(javaLine.toCString(), "%*s %lf %lf %lf %255s", &r, &g, &b, typeStr) == 4 ) {
                 java::String type(typeStr);
                 if ( type == "ambient" ) {
-                    outScene->addLight(new Light(LightType::AMBIENT, Vector3Dd(0,0,0), ColorRgb(r,g,b)));
+                    outScene->addLight(new AmbientLight(ColorRgb(r,g,b)));
                 }
                 else if ( type == "point" ) {
                     double x, y, z;
                     if ( sscanf(javaLine.toCString(), "%*s %*f %*f %*f %*s %lf %lf %lf", &x, &y, &z) == 3 ) {
-                        outScene->addLight(new Light(LightType::POINT, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+                        outScene->addLight(new PointLight(Vector3Dd(x,y,z), ColorRgb(r,g,b)));
                     }
                 }
                 else if ( type == "directional" ) {
                     double x, y, z;
                     if ( sscanf(javaLine.toCString(), "%*s %*f %*f %*f %*s %lf %lf %lf", &x, &y, &z) == 3 ) {
-                        outScene->addLight(new Light(LightType::DIRECTIONAL, Vector3Dd(x,y,z), ColorRgb(r,g,b)));
+                        outScene->addLight(new DirectionalLight(Vector3Dd(x,y,z), ColorRgb(r,g,b)));
                     }
                 }
             }

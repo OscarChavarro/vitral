@@ -21,7 +21,6 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
@@ -34,7 +33,7 @@ SimpleRaytracer::SimpleRaytracer() : workspace(MAX_RECURSION_LEVEL)
 }
 
 bool SimpleRaytracer::hasNonAmbientLights(java::ArrayList<Light*>& lights)
-{ for (long int i=0;i<lights.size();i++) if (lights.get(i) && lights.get(i)->tipo_de_luz != LightType::AMBIENT) return true; return false; }
+{ for (long int i=0;i<lights.size();i++) if (lights.get(i) && !lights.get(i)->isAmbient()) return true; return false; }
 
 bool SimpleRaytracer::isReflective(SimpleMaterial* material)
 { return material != 0 && material->getReflectionCoefficient() > 0; }

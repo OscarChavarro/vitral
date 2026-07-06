@@ -8,7 +8,6 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
@@ -84,9 +83,9 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
     for ( long int i = 0; i < lights.size(); i++ ) {
         Light* light = lights.get(i);
         if ( light == 0 ) continue;
-        const ColorRgb& lightEmission = light->getSpecularReference();
+        const ColorRgb& lightEmission = light->getEmission();
 
-        if ( light->tipo_de_luz == LightType::AMBIENT ) {
+        if ( light->isAmbient() ) {
             const ColorRgb& ambient = material->getAmbientReference();
             outR += ambient.r() * lightEmission.r();
             outG += ambient.g() * lightEmission.g();
@@ -94,37 +93,26 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
             continue;
         }
 
-        double lx = -light->lvec.x();
-        double ly = -light->lvec.y();
-        double lz = -light->lvec.z();
-        if ( light->tipo_de_luz == LightType::POINT ) {
-            lx = light->lvec.x() - info->p.x();
-            ly = light->lvec.y() - info->p.y();
-            lz = light->lvec.z() - info->p.z();
-            double d = std::sqrt(lx*lx + ly*ly + lz*lz);
-            if ( d <= VSDK::EPSILON ) continue;
-            lx /= d; ly /= d; lz /= d;
-        }
+        Vector3Dd direction;
+        double maxShadowDistance;
+        light->getDirectionAndDistance(info->p, &direction, &maxShadowDistance);
+        if ( maxShadowDistance <= VSDK::EPSILON ) continue;
+        double lx = direction.x();
+        double ly = direction.y();
+        double lz = direction.z();
+
+        Vector3Dd shadowOrigin(
+            info->p.x() + VSDK::EPSILON * lx,
+            info->p.y() + VSDK::EPSILON * ly,
+            info->p.z() + VSDK::EPSILON * lz);
+        Ray shadowRay(shadowOrigin, Vector3Dd(lx, ly, lz));
+
+        double attenuation = light->evaluateLightResponseFactor(&shadowRay);
+        if ( attenuation <= 0.0 ) continue;
 
         if ( workspace != 0 ) {
-            Vector3Dd shadowOrigin(
-                info->p.x() + VSDK::EPSILON * lx,
-                info->p.y() + VSDK::EPSILON * ly,
-                info->p.z() + VSDK::EPSILON * lz);
-            Ray shadowRay(shadowOrigin, Vector3Dd(lx, ly, lz));
             RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
             shadowCandidateHit->setStoreRay(false);
-
-            double maxShadowDistance = 1e308;
-            if ( light->tipo_de_luz == LightType::POINT ) {
-                double dx = light->lvec.x() - info->p.x();
-                double dy = light->lvec.y() - info->p.y();
-                double dz = light->lvec.z() - info->p.z();
-                maxShadowDistance = std::sqrt(dx*dx + dy*dy + dz*dz) - VSDK::EPSILON;
-                if ( maxShadowDistance <= VSDK::EPSILON ) {
-                    continue;
-                }
-            }
 
             bool shadowed = false;
             for ( long int oi = 0; oi < objects.size(); oi++ ) {
@@ -154,18 +142,18 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
             dr *= tc.r(); dg *= tc.g(); db *= tc.b();
         }
 
-        outR += lambert * dr * lightEmission.r();
-        outG += lambert * dg * lightEmission.g();
-        outB += lambert * db * lightEmission.b();
+        outR += attenuation * lambert * dr * lightEmission.r();
+        outG += attenuation * lambert * dg * lightEmission.g();
+        outB += attenuation * lambert * db * lightEmission.b();
 
         if ( specularEnabled ) {
             const ColorRgb& specular = material->getSpecularReference();
             double spec = viewX*(2*lambert*nx-lx) + viewY*(2*lambert*ny-ly) + viewZ*(2*lambert*nz-lz);
             if ( spec > 0 ) {
                 spec = ((specular.r()+specular.g()+specular.b())/3.0) * std::pow(spec, material->getPhongExponent());
-                outR += spec*lightEmission.r();
-                outG += spec*lightEmission.g();
-                outB += spec*lightEmission.b();
+                outR += attenuation * spec*lightEmission.r();
+                outG += attenuation * spec*lightEmission.g();
+                outB += attenuation * spec*lightEmission.b();
             }
         }
     }

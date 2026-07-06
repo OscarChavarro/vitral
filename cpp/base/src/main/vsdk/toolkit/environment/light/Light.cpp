@@ -1,33 +1,71 @@
-#include "java/lang/String.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
-Light::Light(int type, const Vector3Dd& pos, const ColorRgb& emission)
-    : tipo_de_luz(type), lvec(0, 0, 0), ambient(0, 0, 0), diffuse(1, 1, 1), specular(emission), id(0), name("")
+
+Light::Light(const Vector3Dd &position, const ColorRgb &emission) :
+    position(position),
+    emission(emission),
+    id(0),
+    name("")
 {
-    if ( type != LightType::AMBIENT ) {
-        lvec = Vector3Dd::copyOf(pos);
-        if ( type == LightType::DIRECTIONAL ) {
-            lvec = lvec.normalized();
-        }
-    }
 }
 
-const java::String& Light::getName() const { return name; }
-void Light::setName(const java::String& n) { name = n; }
+Light::Light(const Light &other) :
+    position(other.position),
+    emission(other.emission),
+    id(other.id),
+    name(other.name)
+{
+}
 
-int Light::getId() const { return id; }
-void Light::setId(int i) { id = i; }
+const java::String &
+Light::getName() const
+{
+    return name;
+}
 
-void Light::setAmbient(const ColorRgb& a) { ambient = ColorRgb(a); }
-void Light::setDiffuse(const ColorRgb& d) { diffuse = ColorRgb(d); }
-void Light::setSpecular(const ColorRgb& s) { specular = ColorRgb(s); }
+void
+Light::setName(const java::String &n)
+{
+    name = n;
+}
 
-Vector3Dd Light::getPosition() const { return lvec; }
-void Light::setPosition(const Vector3Dd& pos) { lvec = Vector3Dd::copyOf(pos); }
+int
+Light::getId() const
+{
+    return id;
+}
 
-ColorRgb Light::getAmbient() const { return ColorRgb(ambient); }
-ColorRgb Light::getDiffuse() const { return ColorRgb(diffuse); }
-ColorRgb Light::getSpecular() const { return ColorRgb(specular); }
-const ColorRgb& Light::getSpecularReference() const { return specular; }
+void
+Light::setId(int i)
+{
+    id = i;
+}
 
-int Light::getLightType() const { return tipo_de_luz; }
+const Vector3Dd &
+Light::getPosition() const
+{
+    return position;
+}
+
+void
+Light::setPosition(const Vector3Dd &newPosition)
+{
+    position = Vector3Dd::copyOf(newPosition);
+}
+
+const ColorRgb &
+Light::getEmission() const
+{
+    return emission;
+}
+
+void
+Light::setEmission(const ColorRgb &newEmission)
+{
+    emission = ColorRgb(newEmission);
+}
+
+bool
+Light::isAmbient() const
+{
+    return false;
+}

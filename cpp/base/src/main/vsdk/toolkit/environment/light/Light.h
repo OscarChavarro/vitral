@@ -4,41 +4,40 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-class Light {
-public:
-    int tipo_de_luz;
-    Vector3Dd lvec;
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
 
-private:
-    ColorRgb ambient;
-    ColorRgb diffuse;
-    ColorRgb specular;
+class Light {
+  private:
+    Vector3Dd position;
+    ColorRgb emission;
     int id;
     java::String name;
 
-public:
-    Light(int type, const Vector3Dd& pos, const ColorRgb& emission);
+  protected:
+    Light(const Vector3Dd &position, const ColorRgb &emission);
+    Light(const Light &other);
+
+  public:
     virtual ~Light() {}
 
-    const java::String& getName() const;
-    void setName(const java::String& n);
-
+    const java::String &getName() const;
+    void setName(const java::String &name);
     int getId() const;
-    void setId(int i);
+    void setId(int id);
 
-    void setAmbient(const ColorRgb& a);
-    void setDiffuse(const ColorRgb& d);
-    void setSpecular(const ColorRgb& s);
+    const Vector3Dd &getPosition() const;
+    void setPosition(const Vector3Dd &position);
+    const ColorRgb &getEmission() const;
+    void setEmission(const ColorRgb &emission);
 
-    Vector3Dd getPosition() const;
-    void setPosition(const Vector3Dd& pos);
+    virtual bool isAmbient() const;
 
-    ColorRgb getAmbient() const;
-    ColorRgb getDiffuse() const;
-    ColorRgb getSpecular() const;
-    const ColorRgb& getSpecularReference() const;
+    virtual void getDirectionAndDistance(const Vector3Dd &surfacePoint,
+        Vector3Dd *directionOut, double *maxShadowDistanceOut) const = 0;
 
-    int getLightType() const;
+    virtual double evaluateLightResponseFactor(const Ray *lightSourceRay) const = 0;
+
+    virtual Light *copy() const = 0;
 };
 
 #endif

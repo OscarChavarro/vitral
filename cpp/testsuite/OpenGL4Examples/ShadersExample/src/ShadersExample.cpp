@@ -19,7 +19,8 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/light/AmbientLight.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/MicroFacetedMaterial.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
@@ -217,11 +218,11 @@ public:
             sphereBody->setRotation(modelRotation);
             bodies.add(sphereBody);
 
-            Light* ambientLight = new Light(LightType::AMBIENT, Vector3Dd(0, 0, 0), ColorRgb(1, 1, 1));
+            Light* ambientLight = new AmbientLight(ColorRgb(1, 1, 1));
             ambientLight->setId(0);
             lights.add(ambientLight);
 
-            Light* pointLight = new Light(light->getLightType(), light->getPosition(), light->getSpecular());
+            Light* pointLight = light->copy();
             pointLight->setId(1);
             lights.add(pointLight);
 
@@ -399,7 +400,7 @@ public:
         qualityController = new RendererConfigurationController(&quality);
         hudRenderer = new JogHudRenderer();
         sphere = new Sphere(1.0);
-        light = new Light(LightType::POINT, Vector3Dd(1, -3, 1), ColorRgb(1, 1, 1));
+        light = new PointLight(Vector3Dd(1, -3, 1), ColorRgb(1, 1, 1));
         light->setId(0);
         applyLightRotationIfAny(options, light);
 

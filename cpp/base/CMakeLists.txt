@@ -88,6 +88,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/camera/Camera.cpp
     src/main/vsdk/toolkit/environment/background/SimpleBackground.cpp
     src/main/vsdk/toolkit/environment/light/Light.cpp
+    src/main/vsdk/toolkit/environment/light/AmbientLight.cpp
+    src/main/vsdk/toolkit/environment/light/DirectionalLight.cpp
+    src/main/vsdk/toolkit/environment/light/PointLight.cpp
+    src/main/vsdk/toolkit/environment/light/SpotLight.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleScene.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleSceneSnapshot.cpp
     src/main/vsdk/toolkit/environment/scene/SimpleBodyGroup.cpp

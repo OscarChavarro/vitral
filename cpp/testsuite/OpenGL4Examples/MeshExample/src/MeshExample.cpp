@@ -16,7 +16,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
@@ -498,7 +498,7 @@ private:
             snprintf(pName, sizeof(pName), "lightPositionsGlobal[%d]", lightCount);
             snprintf(cName, sizeof(cName), "lightColorsGlobal[%d]", lightCount);
             setUniform3f(programId, pName, light->getPosition());
-            setUniform3f(programId, cName, light->getSpecular());
+            setUniform3f(programId, cName, light->getEmission());
             lightCount++;
         }
 
@@ -527,9 +527,9 @@ class MeshModel {
 public:
     MeshModel() : scene(), camera(), qualitySelection()
     {
-        Light* light0 = new Light(LightType::POINT, Vector3Dd(10, -20, 50), ColorRgb(1, 1, 1));
+        Light* light0 = new PointLight(Vector3Dd(10, -20, 50), ColorRgb(1, 1, 1));
         light0->setId(0);
-        Light* light1 = new Light(LightType::POINT, Vector3Dd(-10, 20, 50), ColorRgb(1, 1, 1));
+        Light* light1 = new PointLight(Vector3Dd(-10, 20, 50), ColorRgb(1, 1, 1));
         light1->setId(1);
         lights.add(light0);
         lights.add(light1);

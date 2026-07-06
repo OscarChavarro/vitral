@@ -171,7 +171,7 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
 
     double halfAxisLength = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale_;
     Vector3Dd p = light->getPosition();
-    ColorRgb c = light->getSpecular();
+    ColorRgb c = light->getEmission();
 
     float px = (float)p.x();
     float py = (float)p.y();
@@ -250,7 +250,7 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
         positions.add((float)p1.z());
     }
 
-    ColorRgb c = light->getSpecular();
+    ColorRgb c = light->getEmission();
     java::ArrayList<float> colors;
     colors.reserve(positions.size());
     for (long int i = 0; i < positions.size() / 3; i++) {

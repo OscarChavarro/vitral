@@ -409,7 +409,7 @@ void OpenGL4SphereRenderer::draw(
 
     setUniform3f(programId, "cameraPositionGlobal", camera->getPosition());
     setUniform3f(programId, "lightPositionsGlobal[0]", light->getPosition());
-    setUniform3f(programId, "lightColorsGlobal[0]", light->getSpecular());
+    setUniform3f(programId, "lightColorsGlobal[0]", light->getEmission());
     setUniform1i(programId, "numberOfLights", 1);
 
     setUniform3f(programId, "ambientColor", material->getAmbient());

@@ -9,7 +9,6 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/shaders/CookTorranceShader.h"
@@ -81,27 +80,12 @@ static LightDirection resolveLightDirection(const Light* light, const RayHit* in
     *ok = false;
     LightDirection ld = {0, 0, 0, 0};
     if ( light == 0 || info == 0 ) return ld;
-    if ( light->tipo_de_luz == LightType::POINT ) {
-        double lx = light->lvec.x() - info->p.x();
-        double ly = light->lvec.y() - info->p.y();
-        double lz = light->lvec.z() - info->p.z();
-        double len2 = lx * lx + ly * ly + lz * lz;
-        if ( len2 <= VSDK::EPSILON ) return ld;
-        double len = std::sqrt(len2);
-        double inv = 1.0 / len;
-        ld.x = lx * inv; ld.y = ly * inv; ld.z = lz * inv;
-        ld.maxShadowDistance = len - VSDK::EPSILON;
-        *ok = true;
-        return ld;
-    }
-    double lx = -light->lvec.x();
-    double ly = -light->lvec.y();
-    double lz = -light->lvec.z();
-    double len2 = lx * lx + ly * ly + lz * lz;
-    if ( len2 <= EPS ) return ld;
-    double inv = 1.0 / std::sqrt(len2);
-    ld.x = lx * inv; ld.y = ly * inv; ld.z = lz * inv;
-    ld.maxShadowDistance = 1e308;
+    Vector3Dd direction;
+    double maxShadowDistance;
+    light->getDirectionAndDistance(info->p, &direction, &maxShadowDistance);
+    if ( maxShadowDistance <= VSDK::EPSILON ) return ld;
+    ld.x = direction.x(); ld.y = direction.y(); ld.z = direction.z();
+    ld.maxShadowDistance = maxShadowDistance;
     *ok = true;
     return ld;
 }
@@ -185,8 +169,8 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
     for ( long int i = 0; i < lights.size(); i++ ) {
         Light* light = lights.get(i);
         if ( light == 0 ) continue;
-        const ColorRgb& lightEmission = light->getSpecularReference();
-        if ( light->tipo_de_luz == LightType::AMBIENT ) {
+        const ColorRgb& lightEmission = light->getEmission();
+        if ( light->isAmbient() ) {
             outR += ambient.r() * lightEmission.r();
             outG += ambient.g() * lightEmission.g();
             outB += ambient.b() * lightEmission.b();
@@ -196,6 +180,10 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         bool ok = false;
         LightDirection ld = resolveLightDirection(light, info, &ok);
         if ( !ok ) continue;
+
+        Ray lightSourceRay(info->p, Vector3Dd(ld.x, ld.y, ld.z));
+        double attenuation = light->evaluateLightResponseFactor(&lightSourceRay);
+        if ( attenuation <= 0.0 ) continue;
         if ( isShadowed(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace) ) continue;
 
         double ndotL = java::Math::max(0.0, normalX * ld.x + normalY * ld.y + normalZ * ld.z);
@@ -240,9 +228,9 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         double specG = p.ks * distribution * geometry * fresnelG / denominator;
         double specB = p.ks * distribution * geometry * fresnelB / denominator;
 
-        outR += lightEmission.r() * (p.kd * diffuseR * ndotL + specR);
-        outG += lightEmission.g() * (p.kd * diffuseG * ndotL + specG);
-        outB += lightEmission.b() * (p.kd * diffuseB * ndotL + specB);
+        outR += attenuation * lightEmission.r() * (p.kd * diffuseR * ndotL + specR);
+        outG += attenuation * lightEmission.g() * (p.kd * diffuseG * ndotL + specG);
+        outB += attenuation * lightEmission.b() * (p.kd * diffuseB * ndotL + specB);
     }
 
     return LocalShadingResult(surfaceNormal, ColorRgb(outR, outG, outB));

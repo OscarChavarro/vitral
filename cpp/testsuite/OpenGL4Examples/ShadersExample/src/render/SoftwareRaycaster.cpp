@@ -20,7 +20,7 @@
 #include "vsdk/toolkit/environment/background/SimpleBackground.h"
 #include "vsdk/toolkit/environment/camera/CameraSnapshot.h"
 #include "vsdk/toolkit/environment/light/Light.h"
-#include "vsdk/toolkit/environment/light/LightType.h"
+#include "vsdk/toolkit/environment/light/AmbientLight.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
@@ -96,13 +96,10 @@ SimpleSceneSnapshot* SoftwareRaycaster::buildSceneSnapshot(
     bodies.add(sphereBody);
 
     java::ArrayList<Light*> lights;
-    Light* ambientLight = new Light(LightType::AMBIENT, Vector3Dd(0, 0, 0), ColorRgb(1, 1, 1));
+    Light* ambientLight = new AmbientLight(ColorRgb(1, 1, 1));
     ambientLight->setId(0);
     lights.add(ambientLight);
-    Light* pointLight = new Light(
-        model->light->getLightType(),
-        model->light->getPosition(),
-        model->light->getSpecular());
+    Light* pointLight = model->light->copy();
     pointLight->setId(1);
     lights.add(pointLight);
 
