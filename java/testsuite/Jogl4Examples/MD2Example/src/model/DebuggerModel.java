@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.environment.geometry.surface.Md2Mesh;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.common.color.ColorRgb;
@@ -36,15 +36,15 @@ public class DebuggerModel {
 
         lights = new ArrayList<Light>();
 
-        Light lightOne = new Light(LightType.POINT, new Vector3Dd(65, 20, 20), new ColorRgb(1, 1, 1));
+        Light lightOne = new PointLight(new Vector3Dd(65, 20, 20), new ColorRgb(1, 1, 1));
         lightOne.setId(0);
         lights.add(lightOne);
 
-        Light lightTwo = new Light(LightType.POINT, new Vector3Dd(20, 20, 10), new ColorRgb(1, 1, 1));
+        Light lightTwo = new PointLight(new Vector3Dd(20, 20, 10), new ColorRgb(1, 1, 1));
         lightTwo.setId(1);
         lights.add(lightTwo);
 
-        Light lightThree = new Light(LightType.POINT, new Vector3Dd(0, -20, 20), new ColorRgb(1, 1, 1));
+        Light lightThree = new PointLight(new Vector3Dd(0, -20, 20), new ColorRgb(1, 1, 1));
         lightThree.setId(2);
         lights.add(lightThree);
 

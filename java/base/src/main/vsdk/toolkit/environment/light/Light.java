@@ -3,22 +3,25 @@ package vsdk.toolkit.environment.light;
 import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.environment.geometry.element.Ray;
 
-// All the public variables here are ugly, but I
-// wanted Lights and Surfaces to be "friends"
-public class Light extends Entity
+public abstract class Light extends Entity
 {
-    public int tipo_de_luz;
-    public Vector3Dd lvec;             // the position of a point light or
-                                      // the direction to a directional light
-    private ColorRgb ambient;
-    private ColorRgb diffuse;
-    private ColorRgb specular;         // Emission color of the light source
+    private Vector3Dd position;
+    private ColorRgb emission;
     private int id;
 
     /// This string should be used for specific application defined
     /// functionality. Can be null.
     private String name;
+
+    protected Light(Vector3Dd position, ColorRgb emission)
+    {
+        this.position = position;
+        this.emission = emission;
+        this.id = 0;
+        this.name = "";
+    }
 
     public String getName()
     {
@@ -28,23 +31,6 @@ public class Light extends Entity
     public void setName(String n)
     {
         name = n;
-    }
-
-    public Light(int type, Vector3Dd pos, ColorRgb emission) 
-    {
-        tipo_de_luz = type;
-        lvec = new Vector3Dd();
-        if ( type != LightType.AMBIENT ) {
-            lvec = Vector3Dd.copyOf(pos);
-            if ( type == LightType.DIRECTIONAL )
-            {
-                lvec = lvec.normalized();
-            }
-        }
-        ambient=new ColorRgb(0,0,0);
-        diffuse=new ColorRgb(1,1,1);
-        specular=emission;
-        id = 0;
     }
 
     public int getId()
@@ -57,54 +43,58 @@ public class Light extends Entity
         id = i;
     }
 
-    public void setAmbient(ColorRgb a)
-    {
-        this.ambient=new ColorRgb(a);
-    }
-    
-    public void setDiffuse(ColorRgb d)
-    {
-        this.diffuse=new ColorRgb(d);
-    }
-    
-    public void setSpecular(ColorRgb s)
-    {
-        specular=new ColorRgb(s);
-    }
-
     public Vector3Dd getPosition()
     {
-        return lvec;
+        return position;
     }
 
-    public void setPosition(Vector3Dd pos)
+    public void setPosition(Vector3Dd position)
     {
-        lvec = Vector3Dd.copyOf(pos);
-    }
-    
-    public ColorRgb getAmbient()
-    {
-        return new ColorRgb(ambient);
+        this.position = position;
     }
 
-    public ColorRgb getDiffuse()
+    public ColorRgb getEmission()
     {
-        return new ColorRgb(diffuse);
+        return emission;
     }
 
-    public ColorRgb getSpecular()
+    public void setEmission(ColorRgb emission)
     {
-        return new ColorRgb(specular);
+        this.emission = emission;
     }
 
-    public ColorRgb getSpecularReference()
+    /**
+    True only for AmbientLight: shaders must add its contribution directly
+    from getEmission() and skip shadow sampling entirely.
+    @return whether this light is an ambient light
+    */
+    public boolean isAmbient()
     {
-        return specular;
+        return false;
     }
 
-    public int getLightType()
-    {
-        return tipo_de_luz;
-    }
+    /**
+    Surface point -> light direction (normalized) and the shadow ray
+    distance limit past which occluders no longer count (a large sentinel
+    for lights with no finite position, e.g. DirectionalLight).
+    @param surfacePoint point being shaded
+    @return direction toward the light and the shadow ray distance limit
+    */
+    public abstract LightDirection getDirectionAndDistance(Vector3Dd surfacePoint);
 
+    /**
+    Attenuation contract carried over from the povCpp light hierarchy:
+    lightSourceRay direction points from the surface toward the light,
+    normalized.
+    @param lightSourceRay surface-to-light ray
+    @return attenuation factor in [0, 1] to multiply into the light's
+    contribution
+    */
+    public abstract double evaluateLightResponseFactor(Ray lightSourceRay);
+
+    public abstract Light copy();
+
+    public record LightDirection(Vector3Dd direction, double maxShadowDistance)
+    {
+    }
 }

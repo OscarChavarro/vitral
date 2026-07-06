@@ -13,7 +13,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -80,7 +80,7 @@ public class ShadersModel
 
         sphere = new Sphere(1.0);
 
-        light = new Light(LightType.POINT, new Vector3Dd(1, -3, 1), new ColorRgb(1, 1, 1));
+        light = new PointLight(new Vector3Dd(1, -3, 1), new ColorRgb(1, 1, 1));
         light.setId(0);
 
         material = new SimpleMaterial();

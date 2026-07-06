@@ -287,7 +287,7 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
                 setVector3(gl, programId, "lightPositionsGlobal[" + i + "]",
                     light.getPosition());
                 setVector3(gl, programId, "lightColorsGlobal[" + i + "]",
-                    light.getSpecular());
+                    light.getEmission());
             }
         }
         setInt(gl, programId, "numberOfLights", lightCount);
@@ -701,7 +701,7 @@ public class Jogl4PolyhedralBoundedSolidRenderer extends Jogl4Renderer
                         material.getPhongExponent());
                 }
 
-                ColorRgb lightColor = light.getSpecular();
+                ColorRgb lightColor = light.getEmission();
                 r += lightColor.r() * diffuse.r() * ndotl +
                     lightColor.r() * specular.r() * spec;
                 g += lightColor.g() * diffuse.g() * ndotl +

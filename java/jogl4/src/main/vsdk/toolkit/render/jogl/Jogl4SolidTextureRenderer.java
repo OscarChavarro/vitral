@@ -96,7 +96,7 @@ public final class Jogl4SolidTextureRenderer {
             Light light = lights.get(i);
             if ( light != null ) {
                 setVector3(gl, programId, "lightPositionsGlobal[" + i + "]", light.getPosition());
-                setColor(gl, programId, "lightColorsGlobal[" + i + "]", light.getSpecular());
+                setColor(gl, programId, "lightColorsGlobal[" + i + "]", light.getEmission());
             }
         }
 

@@ -39,7 +39,7 @@ import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
 public class GUIEventExecutor extends CommandListener{
@@ -503,8 +503,7 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = new Light(LightType.POINT, new Vector3Dd(-10, -9, 8), new ColorRgb(1, 1, 1));
-            //light = new Light(vsdk.toolkit.environment.light.LightType.POINT, new Vector3Dd(0, -4, 0), new ColorRgb(1, 1, 1));
+            light = new PointLight(new Vector3Dd(-10, -9, 8), new ColorRgb(1, 1, 1));
             parent.theScene.scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------

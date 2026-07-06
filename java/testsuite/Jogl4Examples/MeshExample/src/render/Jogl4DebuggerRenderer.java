@@ -291,7 +291,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
                 continue;
             }
             setVector3(gl, programId, "lightPositionsGlobal[" + lightCount + "]", light.getPosition());
-            setVector3(gl, programId, "lightColorsGlobal[" + lightCount + "]", light.getSpecular());
+            setVector3(gl, programId, "lightColorsGlobal[" + lightCount + "]", light.getEmission());
             lightCount++;
         }
         setInt(gl, programId, "numberOfLights", lightCount);

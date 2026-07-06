@@ -13,7 +13,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polygonClipper._Polygon2DWA;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 
 public class PolygonClippingDebuggerModel
 {
@@ -63,7 +63,7 @@ public class PolygonClippingDebuggerModel
         qualityController = new RendererConfigurationController(quality);
         cameraController = new CameraControllerOrbiter(camera);
 
-        light = new Light(LightType.POINT, new Vector3Dd(10, -20, 50),
+        light = new PointLight(new Vector3Dd(10, -20, 50),
             new ColorRgb(1, 1, 1));
 
         clipPolygon = null;

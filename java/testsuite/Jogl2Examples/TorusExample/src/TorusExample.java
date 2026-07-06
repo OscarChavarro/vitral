@@ -49,7 +49,7 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.render.jogl.Jogl2TorusRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 
 /**
 This is a simple program recommended for use as a template in the development
@@ -186,9 +186,9 @@ public class TorusExample implements
         qualityController = 
             new RendererConfigurationController(qualitySelection);
         
-        light = 
-            new Light(
-                LightType.POINT, new Vector3Dd(3, 3, 5), new ColorRgb(1, 1, 1));
+        light =
+            new PointLight(
+                new Vector3Dd(3, 3, 5), new ColorRgb(1, 1, 1));
         light.setId(0);
         material = new SimpleMaterial();
         material = material.withAmbient(new ColorRgb(0.2, 0.2, 0.2));

@@ -18,7 +18,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.camera.CameraSnapshot;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.AmbientLight;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.background.SimpleBackground;
@@ -133,16 +133,10 @@ public class SoftwareRaycaster
         bodies.add(sphereBody);
 
         ArrayList<Light> lights = new ArrayList<Light>(2);
-        Light ambientLight = new Light(
-            LightType.AMBIENT,
-            new Vector3Dd(0, 0, 0),
-            new ColorRgb(1, 1, 1));
+        Light ambientLight = new AmbientLight(new ColorRgb(1, 1, 1));
         ambientLight.setId(0);
         lights.add(ambientLight);
-        Light pointLight = new Light(
-            model.getLight().getLightType(),
-            model.getLight().getPosition(),
-            model.getLight().getSpecular());
+        Light pointLight = model.getLight().copy();
         pointLight.setId(1);
         lights.add(pointLight);
 

@@ -29,7 +29,9 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.environment.camera.Camera;
-import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.AmbientLight;
+import vsdk.toolkit.environment.light.DirectionalLight;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.background.Background;
 import vsdk.toolkit.environment.background.SimpleBackground;
@@ -51,7 +53,6 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
-import vsdk.toolkit.environment.light.LightType;
 
 /**
 This class implements an scene reader based on the instructional raytracer
@@ -718,22 +719,22 @@ public class ReaderMitScene extends PersistenceElement
                   }
                   if ( st.sval.equals("ambient") ) {
                       showDebugMessage("ambient");
-                      theScene.addLight(new Light(LightType.AMBIENT, null, new ColorRgb(r,g,b)));
+                      theScene.addLight(new AmbientLight(new ColorRgb(r,g,b)));
                     }
                     else if ( st.sval.equals("directional") ) {
                       showDebugMessage("directional");
-                      Vector3Dd v = new Vector3Dd(readNumber(st), 
-                                            readNumber(st), 
+                      Vector3Dd v = new Vector3Dd(readNumber(st),
+                                            readNumber(st),
                                             readNumber(st));
-                      theScene.addLight(new Light(LightType.DIRECTIONAL, v, new ColorRgb(r,g,b)));
-                    } 
+                      theScene.addLight(new DirectionalLight(v, new ColorRgb(r,g,b)));
+                    }
                     else if ( st.sval.equals("point") ) {
                       showDebugMessage("point");
-                      Vector3Dd v = new Vector3Dd(readNumber(st), 
-                                            readNumber(st), 
+                      Vector3Dd v = new Vector3Dd(readNumber(st),
+                                            readNumber(st),
                                             readNumber(st));
-                      theScene.addLight(new Light(LightType.POINT, v, new ColorRgb(r, g, b)));
-                    } 
+                      theScene.addLight(new PointLight(v, new ColorRgb(r, g, b)));
+                    }
                     else {
                       System.err.println("ERROR: in line " + 
                                          st.lineno()+" at "+st.sval);

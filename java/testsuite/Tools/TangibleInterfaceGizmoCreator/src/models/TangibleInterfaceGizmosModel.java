@@ -12,7 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.gui.CameraController;
@@ -66,9 +66,9 @@ public class TangibleInterfaceGizmosModel
         cameraController = new CameraControllerAquynza(camera);
 
         material = defaultMaterial();
-        light1 = new Light(LightType.POINT, new Vector3Dd(3, -3, 2),
+        light1 = new PointLight(new Vector3Dd(3, -3, 2),
             new ColorRgb(1, 1, 1));
-        light2 = new Light(LightType.POINT, new Vector3Dd(-2, 5, -2),
+        light2 = new PointLight(new Vector3Dd(-2, 5, -2),
             new ColorRgb(0.9, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);

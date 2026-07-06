@@ -52,10 +52,17 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
         gl.glEnable(GL2.GL_LIGHTING);  // Is it right to have this here and re-set all the time?
         gl.glEnable(GL2.GL_LIGHT0 + lightNumber);
 
+        // Light no longer carries a per-light ambient/diffuse/specular
+        // triplet (that OpenGL fixed-function-pipeline model was dropped:
+        // it has no physical analogue and every light used to hard-code
+        // black ambient / white diffuse anyway, so only emission ever
+        // varied). Reproduce the same constants here directly.
+        float[] blackAmbient = {0, 0, 0, 1};
+        float[] whiteDiffuse = {1, 1, 1, 1};
         gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_POSITION, lightPosition, 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, l.getAmbient().exportToFloatArrayVector(), 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, l.getDiffuse().exportToFloatArrayVector(), 0);
-        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, l.getSpecular().exportToFloatArrayVector(), 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_AMBIENT, blackAmbient, 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_DIFFUSE, whiteDiffuse, 0);
+        gl.glLightfv(GL2.GL_LIGHT0 + lightNumber, GL2.GL_SPECULAR, l.getEmission().exportToFloatArrayVector(), 0);
         
 /*
         gl.glLightf(GL2.GL_LIGHT0 + lightNumber, GL2.GL_CONSTANT_ATTENUATION, constantAtenuation);
@@ -68,7 +75,7 @@ public class Jogl2LightRenderer extends Jogl2Renderer {
     public static void draw(GL2 gl, Light l)
     {
         Vector3Dd p = l.getPosition();
-        ColorRgb c = l.getSpecular();
+        ColorRgb c = l.getEmission();
         double delta = 0.1;
 
         gl.glPushMatrix();

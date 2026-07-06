@@ -15,7 +15,7 @@ import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.Light.LightDirection;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -61,9 +61,9 @@ public abstract class LightingShader extends Shader {
 
         for ( int i = 0; i < lights.size(); i++ ) {
             Light light = lights.get(i);
-            ColorRgb lightEmission = light.getSpecularReference();
+            ColorRgb lightEmission = light.getEmission();
 
-            if ( light.tipo_de_luz == LightType.AMBIENT ) {
+            if ( light.isAmbient() ) {
                 ColorRgb ambient = material.getAmbientReference();
                 outR += ambient.r()*lightEmission.r();
                 outG += ambient.g()*lightEmission.g();
@@ -71,32 +71,20 @@ public abstract class LightingShader extends Shader {
                 continue;
             }
 
-            double lx;
-            double ly;
-            double lz;
-            double maxShadowDistance = Double.POSITIVE_INFINITY;
-            if ( light.tipo_de_luz == LightType.POINT ) {
-                lx = light.lvec.x() - info.p.x();
-                ly = light.lvec.y() - info.p.y();
-                lz = light.lvec.z() - info.p.z();
-                double lightDistanceSquared = lx*lx + ly*ly + lz*lz;
-                if ( lightDistanceSquared <= VSDK.EPSILON ) {
-                    continue;
-                }
-                double lightDistance = Math.sqrt(lightDistanceSquared);
-                double invLightDistance = 1.0 / lightDistance;
-                lx *= invLightDistance;
-                ly *= invLightDistance;
-                lz *= invLightDistance;
-                maxShadowDistance = lightDistance - VSDK.EPSILON;
-                if ( maxShadowDistance <= VSDK.EPSILON ) {
-                    continue;
-                }
+            LightDirection lightDirection = light.getDirectionAndDistance(info.p);
+            double maxShadowDistance = lightDirection.maxShadowDistance();
+            if ( maxShadowDistance <= VSDK.EPSILON ) {
+                continue;
             }
-            else {
-                lx = -light.lvec.x();
-                ly = -light.lvec.y();
-                lz = -light.lvec.z();
+            double lx = lightDirection.direction().x();
+            double ly = lightDirection.direction().y();
+            double lz = lightDirection.direction().z();
+
+            Vector3Dd shadowDirection = new Vector3Dd(lx, ly, lz);
+            Ray lightSourceRay = new Ray(info.p, shadowDirection);
+            double attenuation = light.evaluateLightResponseFactor(lightSourceRay);
+            if ( attenuation <= 0.0 ) {
+                continue;
             }
 
             if ( isShadowed(
@@ -129,9 +117,9 @@ public abstract class LightingShader extends Shader {
             }
 
             if ( (diffuseR + diffuseG + diffuseB) > 0 ) {
-                outR += lambert*diffuseR*lightEmission.r();
-                outG += lambert*diffuseG*lightEmission.g();
-                outB += lambert*diffuseB*lightEmission.b();
+                outR += attenuation*lambert*diffuseR*lightEmission.r();
+                outG += attenuation*lambert*diffuseG*lightEmission.g();
+                outB += attenuation*lambert*diffuseB*lightEmission.b();
             }
             if ( !specularEnabled ) {
                 continue;
@@ -153,9 +141,9 @@ public abstract class LightingShader extends Shader {
             if ( spec > 0 ) {
                 spec = ((specular.r() + specular.g() + specular.b())/3)*(
                     Math.pow(spec, material.getPhongExponent()));
-                outR += spec*lightEmission.r();
-                outG += spec*lightEmission.g();
-                outB += spec*lightEmission.b();
+                outR += attenuation*spec*lightEmission.r();
+                outG += attenuation*spec*lightEmission.g();
+                outB += attenuation*spec*lightEmission.b();
             }
         }
 

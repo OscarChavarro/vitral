@@ -32,7 +32,7 @@ import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.io.PersistenceElement;
 import vsdk.toolkit.processing.ImageProcessing;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 
 public class JoglPreviewGenerator
 {
@@ -208,8 +208,8 @@ public class JoglPreviewGenerator
         Light light2;
         Vector3Dd p;
 
-        light1 = new Light(LightType.POINT, new Vector3Dd(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
-        light2 = new Light(LightType.POINT, new Vector3Dd(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
+        light1 = new PointLight(new Vector3Dd(-10, -9, 8), new ColorRgb(0.7, 0.7, 0.7));
+        light2 = new PointLight(new Vector3Dd(10, 9, -8), new ColorRgb(0.5, 0.5, 0.5));
         light1.setId(0);
         light2.setId(1);
         Jogl2LightRenderer.activate(gl, light1);

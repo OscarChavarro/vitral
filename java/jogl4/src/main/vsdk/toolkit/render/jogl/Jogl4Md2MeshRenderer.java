@@ -215,7 +215,7 @@ public class Jogl4Md2MeshRenderer extends Jogl4Renderer
         setMatrix(gl, program, "modelViewITLocal", modelIT);
         setVector3(gl, program, "cameraPositionGlobal", camera.getPosition());
         setVector3(gl, program, "lightPositionsGlobal[0]", light.getPosition());
-        setVector3(gl, program, "lightColorsGlobal[0]", light.getSpecular());
+        setVector3(gl, program, "lightColorsGlobal[0]", light.getEmission());
         setInt(gl, program, "numberOfLights", 1);
         setVector3(gl, program, "ambientColor", material.getAmbient());
         setVector3(gl, program, "diffuseColor", material.getDiffuse());

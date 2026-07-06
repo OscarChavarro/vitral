@@ -39,7 +39,7 @@ import vsdk.toolkit.gui.J2meSystem;                     // Controller elements
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.KeyEvent;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 
 public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
     // Platform specific elements
@@ -102,7 +102,7 @@ public class MidletCanvas extends Canvas /*implements DiscoveryListener*/ {
         background = new SimpleBackground();
         background.setColor(0.5, 0.5, 0.9);
 
-        light = new Light(LightType.POINT, new Vector3Dd(5, -5, 5), new ColorRgb(1, 1, 1));
+        light = new PointLight(new Vector3Dd(5, -5, 5), new ColorRgb(1, 1, 1));
 
         scene = new SimpleScene();
         scene.addBackground(background);

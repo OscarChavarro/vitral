@@ -12,7 +12,7 @@ import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.Light.LightDirection;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.material.MicroFacetedMaterial;
 import vsdk.toolkit.environment.geometry.element.RayHit;
@@ -67,28 +67,35 @@ public final class CookTorranceShader extends Shader {
         double outB = 0.0;
         for ( int i = 0; i < lights.size(); i++ ) {
             Light light = lights.get(i);
-            ColorRgb lightEmission = light.getSpecularReference();
+            ColorRgb lightEmission = light.getEmission();
 
-            if ( light.tipo_de_luz == LightType.AMBIENT ) {
+            if ( light.isAmbient() ) {
                 outR += ambient.r() * lightEmission.r();
                 outG += ambient.g() * lightEmission.g();
                 outB += ambient.b() * lightEmission.b();
                 continue;
             }
 
-            LightDirection lightDirection = resolveLightDirection(light, info);
-            if ( lightDirection == null ) {
+            LightDirection lightDirection = light.getDirectionAndDistance(info.p);
+            if ( lightDirection.maxShadowDistance() <= VSDK.EPSILON ) {
                 continue;
             }
-            double lightDirX = lightDirection.x;
-            double lightDirY = lightDirection.y;
-            double lightDirZ = lightDirection.z;
+            double lightDirX = lightDirection.direction().x();
+            double lightDirY = lightDirection.direction().y();
+            double lightDirZ = lightDirection.direction().z();
+
+            Ray lightSourceRay = new Ray(info.p, lightDirection.direction());
+            double attenuation = light.evaluateLightResponseFactor(lightSourceRay);
+            if ( attenuation <= 0.0 ) {
+                continue;
+            }
+
             if ( isShadowed(
                 info,
                 lightDirX,
                 lightDirY,
                 lightDirZ,
-                lightDirection.maxShadowDistance,
+                lightDirection.maxShadowDistance(),
                 objects,
                 workspace) ) {
                 continue;
@@ -149,44 +156,12 @@ public final class CookTorranceShader extends Shader {
             double specG = params.ks * distribution * geometry * fresnelG / denominator;
             double specB = params.ks * distribution * geometry * fresnelB / denominator;
 
-            outR += lightEmission.r() * (params.kd * diffuseR * ndotL + specR);
-            outG += lightEmission.g() * (params.kd * diffuseG * ndotL + specG);
-            outB += lightEmission.b() * (params.kd * diffuseB * ndotL + specB);
+            outR += attenuation * lightEmission.r() * (params.kd * diffuseR * ndotL + specR);
+            outG += attenuation * lightEmission.g() * (params.kd * diffuseG * ndotL + specG);
+            outB += attenuation * lightEmission.b() * (params.kd * diffuseB * ndotL + specB);
         }
 
         return new LocalShadingResult(surfaceNormal, new ColorRgb(outR, outG, outB));
-    }
-
-    private static LightDirection resolveLightDirection(Light light, RayHit info)
-    {
-        if ( light.tipo_de_luz == LightType.POINT ) {
-            double lx = light.lvec.x() - info.p.x();
-            double ly = light.lvec.y() - info.p.y();
-            double lz = light.lvec.z() - info.p.z();
-            double lengthSquared = lx * lx + ly * ly + lz * lz;
-            if ( lengthSquared <= VSDK.EPSILON ) {
-                return null;
-            }
-            double invLength = 1.0 / Math.sqrt(lengthSquared);
-            return new LightDirection(
-                lx * invLength,
-                ly * invLength,
-                lz * invLength,
-                Math.sqrt(lengthSquared) - VSDK.EPSILON);
-        }
-        double lx = -light.lvec.x();
-        double ly = -light.lvec.y();
-        double lz = -light.lvec.z();
-        double lengthSquared = lx * lx + ly * ly + lz * lz;
-        if ( lengthSquared <= EPS ) {
-            return null;
-        }
-        double invLength = 1.0 / Math.sqrt(lengthSquared);
-        return new LightDirection(
-            lx * invLength,
-            ly * invLength,
-            lz * invLength,
-            Double.POSITIVE_INFINITY);
     }
 
     private static MicrofacetParams resolveMicrofacetParams(SimpleMaterial material)
@@ -268,14 +243,6 @@ public final class CookTorranceShader extends Shader {
         ColorRgb fresnelF0,
         double kd,
         double ks)
-    {
-    }
-
-    private record LightDirection(
-        double x,
-        double y,
-        double z,
-        double maxShadowDistance)
     {
     }
 

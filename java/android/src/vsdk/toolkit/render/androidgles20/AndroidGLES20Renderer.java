@@ -765,7 +765,7 @@ public class AndroidGLES20Renderer extends RenderingElement
 
             array = new float[3*lights.size()];
             for ( int i = 0; i < lights.size(); i++ ) {
-                c = lights.get(i).getSpecular();
+                c = lights.get(i).getEmission();
                 array[3*i + 0] = (float)c.r;
                 array[3*i + 1] = (float)c.g;
                 array[3*i + 2] = (float)c.b;

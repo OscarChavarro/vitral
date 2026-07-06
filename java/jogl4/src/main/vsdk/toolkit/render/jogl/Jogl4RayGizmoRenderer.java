@@ -268,7 +268,7 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
             setVector3(gl, programId, "lightPositionsGlobal[" + lightCount + "]",
                     light.getPosition());
             setVector3(gl, programId, "lightColorsGlobal[" + lightCount + "]",
-                    light.getSpecular());
+                    light.getEmission());
             lightCount++;
         }
         setInt(gl, programId, "numberOfLights", lightCount);

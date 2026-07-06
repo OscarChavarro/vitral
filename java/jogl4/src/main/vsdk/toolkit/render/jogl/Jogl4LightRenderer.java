@@ -12,7 +12,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.LightType;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.gui.gizmo.LightGizmoOmniBillboard;
 import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Calligraphic2DBuffer;
@@ -28,7 +28,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         if ( light == null ) {
             return;
         }
-        ACTIVE_LIGHTS.put(light.getId(), copyLight(light));
+        ACTIVE_LIGHTS.put(light.getId(), light.copy());
     }
 
     public static void draw(GL gl, Light light)
@@ -90,7 +90,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
 
         ArrayList<Light> out = new ArrayList<Light>();
         for ( Light light : ACTIVE_LIGHTS.values() ) {
-            out.add(copyLight(light));
+            out.add(light.copy());
         }
         return out;
     }
@@ -113,7 +113,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
             viewportWidth, viewportHeight) * scale;
 
         Vector3Dd p = light.getPosition();
-        ColorRgb c = light.getSpecular();
+        ColorRgb c = light.getEmission();
 
         float px = (float)p.x();
         float py = (float)p.y();
@@ -186,7 +186,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
             positions[write++] = (float)p1.z();
         }
 
-        float[] colors = buildUniformColorArray(light.getSpecular(), positions.length / 3);
+        float[] colors = buildUniformColorArray(light.getEmission(), positions.length / 3);
         Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors, 2.0f);
     }
 
@@ -249,25 +249,11 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
     }
 
-    private static Light copyLight(Light light)
-    {
-        Light copy = new Light(light.getLightType(), light.getPosition(),
-            light.getSpecular());
-        copy.setId(light.getId());
-        copy.setAmbient(light.getAmbient());
-        copy.setDiffuse(light.getDiffuse());
-        copy.setSpecular(light.getSpecular());
-        copy.setName(light.getName());
-        return copy;
-    }
-
     private static Light defaultLight()
     {
-        Light light = new Light(LightType.POINT, new Vector3Dd(10, 10, 10),
+        Light light = new PointLight(new Vector3Dd(10, 10, 10),
             new ColorRgb(1, 1, 1));
         light.setId(0);
-        light.setAmbient(new ColorRgb(0, 0, 0));
-        light.setDiffuse(new ColorRgb(1, 1, 1));
         return light;
     }
 }

@@ -349,7 +349,7 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
         setVector3(gl, programId, "cameraPositionGlobal", camera.getPosition());
         setVector3(gl, programId, "lightPositionsGlobal[0]", light.getPosition());
 
-        ColorRgb lightColor = light.getSpecular();
+        ColorRgb lightColor = light.getEmission();
         setVector3(gl, programId, "lightColorsGlobal[0]", lightColor);
         setInt(gl, programId, "numberOfLights", 1);
 

@@ -42,7 +42,7 @@ public class AndroidGLES20LightRenderer extends AndroidGLES20Renderer
 
         //-----------------------------------------------------------------
         int index;
-        ColorRgb c = l.getSpecular();
+        ColorRgb c = l.getEmission();
         float delta = 0.1f;
         int numVertex = 6;
 
