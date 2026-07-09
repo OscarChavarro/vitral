@@ -196,6 +196,12 @@ public class SimpleMaterial extends Entity implements Material
     }
 
     @Override
+    public Material copy()
+    {
+        return new SimpleMaterial(this);
+    }
+
+    @Override
     public Material translate(Vector3Dd vector)
     {
         return this;
