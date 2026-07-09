@@ -13,7 +13,7 @@ public class FileSelectorDialog {
         jfc.removeChoosableFileFilter(jfc.getFileFilter());
         jfc.addChoosableFileFilter(new ObjectFilter("obj", "Obj Files"));
         jfc.addChoosableFileFilter(new ObjectFilter("3ds", "3ds Files"));
-        jfc.addChoosableFileFilter(new ObjectFilter("ply", "Ply Files"));
+        jfc.addChoosableFileFilter(new ObjectFilter("ply", "PLY Files"));
         jfc.addChoosableFileFilter(new ObjectFilter("wrl", "VRML Files (exported from Renderpark only)"));
         jfc.addChoosableFileFilter(new ObjectFilter("ase", "3ds Files (Ascii Scene Export)"));
         jfc.addChoosableFileFilter(new ObjectFilter("vtk", "kitware's VTK legacy binary file"));

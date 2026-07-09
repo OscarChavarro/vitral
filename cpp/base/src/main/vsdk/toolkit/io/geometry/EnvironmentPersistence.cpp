@@ -5,7 +5,10 @@
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "vsdk/toolkit/io/geometry/ReaderObj.h"
-void EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleScene* scene)
+#include "vsdk/toolkit/io/geometry/ReaderPly.h"
+
+void
+EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleScene* scene)
 {
     char* extC = extractExtensionFromFile(sceneFile);
     java::String ext = (extC != 0) ? java::String(extC) : java::String();
@@ -14,6 +17,10 @@ void EnvironmentPersistence::importEnvironment(const java::File& sceneFile, Simp
 
     if (ext == "obj") {
         ReaderObj::importEnvironment(sceneFile, scene);
+        return;
+    }
+    if (ext == "ply") {
+        ReaderPly::importEnvironment(sceneFile, scene);
         return;
     }
 

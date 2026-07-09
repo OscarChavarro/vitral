@@ -1,792 +1,577 @@
 package vsdk.toolkit.io.geometry;
 
-// Java basic classes
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-// VSDK Classes
-import vsdk.toolkit.common.dataStructures.ArrayListOfInts;
-import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.VSDK;
-import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
-import vsdk.toolkit.environment.material.SimpleMaterial;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.element.Triangle;
+import vsdk.toolkit.environment.geometry.element.Vertex;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
+import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.io.PersistenceElement;
 
-class _ReaderPlyElement extends PersistenceElement
-{
-    private static final int TYPE_SIGNED_CHARACTER = 1;
-    private static final int TYPE_UNSIGNED_CHARACTER = 2;
-    private static final int TYPE_SIGNED_SHORT_INTEGER = 3;
-    private static final int TYPE_UNSIGNED_SHORT_INTEGER = 4;
-    private static final int TYPE_SIGNED_INTEGER = 5;
-    private static final int TYPE_UNSIGNED_INTEGER = 6;
-    private static final int TYPE_FLOAT = 7;
-    private static final int TYPE_DOUBLE = 8;
-    private static final int TYPE_INVALID = 0;
+public class ReaderPly extends PersistenceElement {
+    private static final int FORMAT_ASCII = 0;
+    private static final int FORMAT_BINARY_LITTLE_ENDIAN = 1;
+    private static final int FORMAT_BINARY_BIG_ENDIAN = 2;
 
-    private String elementName;
-    private int elementCount;
-    private int elementType; // One of the "TYPE_*" constants
-    private int colorType; // One of the "TYPE_*" constants
-    private int listCountType; // One of the "TYPE_*" constants
-    private int elementFamily;
-
-    private TriangleMesh mesh;
-    private int currentPropertyIndex;
-    private int xindex;
-    private int yindex;
-    private int zindex;
-    private int rindex;
-    private int gindex;
-    private int bindex;
-    private int listindex;
-    private ArrayListOfInts skipTypes;
-
-    public _ReaderPlyElement(StringTokenizer headerLine, TriangleMesh mesh)
-    {
-        this.mesh = mesh;
-        elementName = headerLine.nextToken();
-        elementCount = Integer.parseInt(headerLine.nextToken());
-        currentPropertyIndex = 0;
-        xindex = -1;
-        yindex = -1;
-        zindex = -1;
-        rindex = -1;
-        gindex = -1;
-        bindex = -1;
-        listindex = -1;
-        skipTypes = new ArrayListOfInts(10);
-    }
-
-    private int getType(String t)
-    {
-        if ( t.equals("float32") || t.equals("float") ) {
-            return TYPE_FLOAT;
-        }
-        else if ( t.equals("uint8") || t.equals("uchar") ) {
-            return TYPE_UNSIGNED_CHARACTER;
-        }
-        else if ( t.equals("int32") || t.equals("int") ) {
-            return TYPE_SIGNED_INTEGER;
-        }
-        return TYPE_INVALID;
-    }
-
-    public boolean addProperty(StringTokenizer line)
-    {
-        String var;
+    private static class PlyProperty {
+        boolean list;
+        String name;
         String type;
-        int skiptype;
-
-        type = line.nextToken();
-        skiptype = getType(type);
-
-        if ( elementName.equals("vertex") ) {
-            var = line.nextToken();
-            if ( var.equals("x") ) {
-                elementType = skiptype;
-                xindex = currentPropertyIndex;
-            }
-            else if ( var.equals("y") ) {
-                elementType = skiptype;
-                yindex = currentPropertyIndex;
-            }
-            else if ( var.equals("z") ) {
-                elementType = skiptype;
-                zindex = currentPropertyIndex;
-            }
-            if ( var.equals("r") || var.equals("red") ) {
-                colorType = skiptype;
-                rindex = currentPropertyIndex;
-            }
-            if ( var.equals("g") || var.equals("green") ) {
-                colorType = skiptype;
-                gindex = currentPropertyIndex;
-            }
-            if ( var.equals("b") || var.equals("blue") ) {
-                colorType = skiptype;
-                bindex = currentPropertyIndex;
-            }
-        }
-        if ( elementName.equals("face") ) {
-            if ( type.equals("list") ) {
-                type = line.nextToken();
-                listCountType = getType(type);
-                type = line.nextToken();
-                elementType = getType(type);
-                listindex = currentPropertyIndex;
-            }
-        }
-        skipTypes.add(skiptype);
-
-        currentPropertyIndex++;
-        return true;
+        String countType;
+        String valueType;
     }
 
-    /**
-    This method is used to read data from file, while ignoring its unknown
-    contents.
-    */
-    private void skipRead(_ReaderPlyElementReader reader, int type) throws Exception
-    {
-        switch ( type ) {
-          case TYPE_SIGNED_CHARACTER:
-            reader.readSignedCharacterText();
-            break;
-          case TYPE_UNSIGNED_CHARACTER:
-            reader.readUnsignedCharacterText();
-            break;
-          case TYPE_SIGNED_SHORT_INTEGER:
-            reader.readSignedShortIntegerText();
-            break;
-          case TYPE_UNSIGNED_SHORT_INTEGER:
-            reader.readUnsignedShortIntegerText();
-            break;
-          case TYPE_SIGNED_INTEGER:
-            reader.readSignedIntegerText();
-            break;
-          case TYPE_UNSIGNED_INTEGER:
-            reader.readUnsignedIntegerText();
-            break;
-          case TYPE_FLOAT:
-            reader.readFloatText();
-            break;
-          case TYPE_DOUBLE:
-            reader.readDoubleText();
-            break;
+    private static class PlyElement {
+        String name;
+        int count;
+        ArrayList<PlyProperty> properties = new ArrayList<PlyProperty>();
+    }
+
+    private static class PlyHeader {
+        int format = FORMAT_ASCII;
+        ArrayList<PlyElement> elements = new ArrayList<PlyElement>();
+    }
+
+    private static class TriangleIndices {
+        int a;
+        int b;
+        int c;
+
+        TriangleIndices(int a, int b, int c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
         }
     }
 
-    private boolean readVertexData(_ReaderPlyElementReader reader, int i, double v[], double c[]) throws Exception
-    {
-        int j;
-        double val;
-
-        for ( j = 0; j < currentPropertyIndex; j++ ) {
-            if ( j == xindex || j == yindex || j == zindex ) {
-                if ( elementType == TYPE_FLOAT ) {
-                    val = reader.readFloatText();
-                    if ( j == xindex ) {
-                        v[3*i+0] = val;
-                    }
-                    else if ( j == yindex ) {
-                        v[3*i+1] = val;
-                    }
-                    else if ( j == zindex ) {
-                        v[3*i+2] = val;
-                    }
-                }
-                else {
-                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
-                    "Wrong element type!");
-                    return false;
-                }
-            }
-            else if ( j == rindex || j == gindex || j == bindex ) {
-                if ( colorType == TYPE_FLOAT ) {
-                    val = reader.readFloatText();
-                    if ( j == rindex ) {
-                        c[3*i+0] = val;
-                    }
-                    else if ( j == gindex ) {
-                        c[3*i+1] = val;
-                    }
-                    else if ( j == bindex ) {
-                        c[3*i+2] = val;
-                    }
-                }
-                if ( colorType == TYPE_UNSIGNED_CHARACTER ) {
-                    int cc = reader.readUnsignedCharacterText();
-                    val = ((double)cc) / 255.0;
-                    if ( j == rindex ) {
-                        c[3*i+0] = val;
-                    }
-                    else if ( j == gindex ) {
-                        c[3*i+1] = val;
-                    }
-                    else if ( j == bindex ) {
-                        c[3*i+2] = val;
-                    }
-                }
-                else {
-                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readVertexData",
-                    "Wrong element type!");
-                    return false;
-                }
-            }
-            else {
-                skipRead(reader, skipTypes.get(j));
-            }
-        }
-        return true;
-    }
-
-    private boolean readPolygonData(_ReaderPlyElementReader reader, int i, ArrayListOfInts triangles) throws Exception
-    {
-        int n;
-        int j;
-        int val;
-        int p0 = 0;
-        int p1 = 0;
-        int p2;
-
-        for ( j = 0; j < currentPropertyIndex; j++ ) {
-            if ( j == listindex ) {
-                if ( listCountType == TYPE_UNSIGNED_CHARACTER ) {
-                    n = reader.readUnsignedCharacterText();
-                }
-                else {
-                    Logger.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",
-                    "Wrong list count element type!");
-                    return false;
-                }
-                for ( j = 0; j < n; j++ ) {
-                    if ( elementType == TYPE_SIGNED_INTEGER ) {
-                        val = reader.readSignedIntegerText();
-    
-                        if( j == 0 ) {
-                            p0 = val;
-                        }
-                        else if( j == 1 ) {
-                            p1 = val;
-                        }
-                        else {
-                            p2 = val;
-                            // Add a triangle over <p0, p1, p2>
-                            triangles.add(p0);
-                            triangles.add(p1);
-                            triangles.add(p2);
-                            //
-                            p1 = val;
-                        }
-                    }
-                    else {
-                        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readPolygonData",  
-                            "Wrong list element type!");
-                        return false;
-                    }
-                }
-            }
-            else {
-                skipRead(reader, skipTypes.get(j));
-            }
-        }
-        return true;
-    }
-
-    public boolean processInput(_ReaderPlyElementReader reader) throws Exception
-    {
-        //-----------------------------------------------------------------
-        int i;
-
-        if ( elementName.equals("vertex") ) {
-            mesh.initVertexPositionsArray(elementCount);
-            double v[];
-            v = mesh.getVertexPositions();
-            double c[] = null;
-
-            if ( rindex != -1 && gindex != -1 && bindex != -1 ) {
-                mesh.initVertexColorsArray();
-                c = mesh.getVertexColors();
-            }
-            else {
-                rindex = -1;
-                gindex = -1;
-                bindex = -1;
-            }
-
-            for ( i = 0; i < elementCount; i++ ) {
-                if ( !readVertexData(reader, i, v, c) ) {
-                    return false;
-                }
-            }
-
-        }
-        //-----------------------------------------------------------------
-        else if ( elementName.equals("face") ) {
-            ArrayListOfInts triangles;
-            triangles = new ArrayListOfInts(2000000);
-
-            for ( i = 0; i < elementCount; i++ ) {
-                if ( !readPolygonData(reader, i, triangles) ) {
-                    return false;
-                }
-            }
-
-            //-----------------------------------------------------------------
-            int t[];
-
-            mesh.initTriangleArrays(triangles.size()/3);
-            t = mesh.getTriangleIndexes();
-
-            for ( i = 0; i < triangles.size(); i++ ) {
-                t[i] = triangles.get(i);
-            }
-            //triangles.array = null;
-        }
-
-        return true;
-    }
-}
-
-abstract class _ReaderPlyElementReader extends PersistenceElement
-{
-    protected InputStream parentInputStream;
-    public _ReaderPlyElementReader(InputStream is)
-    {
-        parentInputStream = is;
-    }
-    public abstract int readSignedCharacterText() throws Exception;
-    public abstract int readUnsignedCharacterText() throws Exception;
-    public abstract int readSignedShortIntegerText() throws Exception;
-    public abstract int readUnsignedShortIntegerText() throws Exception;
-    public abstract int readSignedIntegerText() throws Exception;
-    public abstract int readUnsignedIntegerText() throws Exception;
-    public abstract float readFloatText() throws Exception;
-    public abstract float readDoubleText() throws Exception;
-}
-
-class _ReaderPlyElementReaderAscii extends _ReaderPlyElementReader
-{
-    private static String separators;
-
-    public _ReaderPlyElementReaderAscii(InputStream is)
-    {
-        super(is);
-        separators = " \t\n\r";
-    }
-
-    @Override
-    public int readSignedCharacterText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readUnsignedCharacterText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Integer.parseInt(token);
-    }
-
-    @Override
-    public int readSignedShortIntegerText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Integer.parseInt(token);
-    }
-
-    @Override
-    public int readUnsignedShortIntegerText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Integer.parseInt(token);
-    }
-
-    @Override
-    public int readSignedIntegerText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Integer.parseInt(token);
-    }
-
-    @Override
-    public int readUnsignedIntegerText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Integer.parseInt(token);
-    }
-
-    @Override
-    public float readFloatText() throws Exception
-    {
-        String token;
-        do {
-            token = readAsciiToken(parentInputStream, separators.getBytes());
-        } while( token == null || token.length() < 1 );
-        return Float.parseFloat(token);
-    }
-
-    @Override
-    public float readDoubleText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
-            "Operation not implemented!");
-        return 0;
-    }
-}
-
-class _ReaderPlyElementReaderBinaryBigEndian extends _ReaderPlyElementReader
-{
-    public _ReaderPlyElementReaderBinaryBigEndian(InputStream is)
-    {
-        super(is);
-    }
-
-    @Override
-    public int readSignedCharacterText() throws Exception
-    {
-        byte arr[] = new byte[1];
-        readBytes(parentInputStream, arr);
-        return (int)arr[0];
-    }
-
-    @Override
-    public int readUnsignedCharacterText() throws Exception
-    {
-        byte arr[] = new byte[1];
-        readBytes(parentInputStream, arr);
-        return VSDK.signedByte2unsignedInteger(arr[0]);
-    }
-
-    @Override
-    public int readSignedShortIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readUnsignedShortIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readSignedIntegerText() throws Exception
-    {
-        return (int)readLongBE(parentInputStream);
-    }
-
-    @Override
-    public int readUnsignedIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public float readFloatText() throws Exception
-    {
-        return readFloatBE(parentInputStream);
-    }
-
-    @Override
-    public float readDoubleText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
-            "Operation not implemented!");
-        return 0;
-    }
-}
-
-class _ReaderPlyElementReaderBinaryLittleEndian extends _ReaderPlyElementReader
-{
-    public _ReaderPlyElementReaderBinaryLittleEndian(InputStream is)
-    {
-        super(is);
-    }
-
-    @Override
-    public int readSignedCharacterText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedCharacter",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readUnsignedCharacterText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedCharacter",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readSignedShortIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedShortInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readUnsignedShortIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedShortInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readSignedIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readSignedInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public int readUnsignedIntegerText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readUnsignedInteger",
-            "Operation not implemented!");
-        return 0;
-    }
-
-    @Override
-    public float readFloatText() throws Exception
-    {
-        return readFloatLE(parentInputStream);
-    }
-
-    @Override
-    public float readDoubleText() throws Exception
-    {
-        Logger.reportMessage(this, VSDK.FATAL_ERROR, "readDouble",
-            "Operation not implemented!");
-        return 0;
-    }
-}
-
-/**
-Warning: this class is using operations which could be replaced with already
-existing methods on PersistenceElement class.
- */
-public class ReaderPly extends PersistenceElement
-{
-    private static _ReaderPlyElementReader elementReader = null;
-    private static ArrayList<_ReaderPlyElement> elements = null;
-
-    private static SimpleMaterial defaultMaterial()
-    {
+    private static SimpleMaterial defaultMaterial() {
         SimpleMaterial m = new SimpleMaterial();
-
-        m = m.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
-        m = m.withDiffuse(new ColorRgb(0.5, 0.9, 0.5));
-        m = m.withSpecular(new ColorRgb(1, 1, 1));
-        m = m.withDoubleSided(true);
+        m = m.withAmbient(new ColorRgb(0.18, 0.18, 0.18));
+        m = m.withDiffuse(new ColorRgb(0.72, 0.76, 0.70));
+        m = m.withSpecular(new ColorRgb(0.2, 0.2, 0.2));
+        m = m.withDoubleSided(false);
         return m;
     }
 
-    private static SimpleBody addThing(Geometry g,
-        ArrayList<SimpleBody> inoutSimpleBodiesArray)
+    private static SimpleBody addThing(
+        Geometry geometry,
+        ArrayList<SimpleBody> bodies)
     {
-        if ( inoutSimpleBodiesArray == null ) return null;
+        if ( geometry == null || bodies == null ) {
+            return null;
+        }
 
-        SimpleBody thing;
-
-        thing = new SimpleBody();
-        thing.setGeometry(g);
+        SimpleBody thing = new SimpleBody();
+        thing.setGeometry(geometry);
         thing.setPosition(new Vector3Dd());
         thing.setRotation(new Matrix4x4d());
         thing.setRotationInverse(new Matrix4x4d());
         thing.setMaterial(defaultMaterial());
-        inoutSimpleBodiesArray.add(thing);
+        bodies.add(thing);
         return thing;
     }
 
-    private static boolean processHeader(InputStream is, TriangleMesh internalGeometry) throws Exception
-    {
-        String line, token;
-        StringTokenizer auxStringTokenizer;
+    private static String readPlyAsciiLine(InputStream is) throws Exception {
+        StringBuilder out = new StringBuilder();
+        while ( true ) {
+            int value = is.read();
+            if ( value < 0 ) {
+                break;
+            }
+            if ( value == '\n' ) {
+                break;
+            }
+            if ( value != '\r' ) {
+                out.append((char)value);
+            }
+        }
+        return out.toString();
+    }
 
-        //-----------------------------------------------------------------
-        line = readAsciiLine(is).toLowerCase();
+    private static ArrayList<String> splitWhitespace(String line) {
+        ArrayList<String> tokens = new ArrayList<String>();
+        StringTokenizer tokenizer = new StringTokenizer(line);
+        while ( tokenizer.hasMoreTokens() ) {
+            tokens.add(tokenizer.nextToken());
+        }
+        return tokens;
+    }
 
-        if ( !line.equals("ply") ) {
-            Logger.reportMessage(null, VSDK.ERROR,
-                "ReaderPly.processHeader",
-                "Invalid PLY header: wrong magic line. Should be \"ply\".");
-            return false;
+    private static PlyHeader readHeader(InputStream is) throws Exception {
+        PlyHeader header = new PlyHeader();
+        String line = readPlyAsciiLine(is);
+        if ( !line.trim().equals("ply") ) {
+            throw new IllegalArgumentException("input is not a PLY stream");
         }
 
-        //-----------------------------------------------------------------
-        boolean headerDone = false;
-        _ReaderPlyElement currentElement = null;
+        PlyElement currentElement = null;
+        while ( true ) {
+            line = readPlyAsciiLine(is);
+            ArrayList<String> tokens = splitWhitespace(line);
+            if ( tokens.isEmpty() ) {
+                continue;
+            }
 
-        elements = new ArrayList<_ReaderPlyElement>();
-
-        do {
-            line = readAsciiLine(is);
-
-            auxStringTokenizer = new StringTokenizer(line, " \t");
-            token = auxStringTokenizer.nextToken().toLowerCase();
-
-            if ( token.equals("format") ) {
-                token = auxStringTokenizer.nextToken().toLowerCase();
-    
-                if ( token.equals("ascii") ) {
-                    elementReader = new _ReaderPlyElementReaderAscii(is);
+            String tag = tokens.get(0).toLowerCase();
+            if ( tag.equals("end_header") ) {
+                return header;
+            }
+            if ( tag.equals("comment") || tag.equals("obj_info") ) {
+                continue;
+            }
+            if ( tag.equals("format") && tokens.size() >= 2 ) {
+                String format = tokens.get(1).toLowerCase();
+                if ( format.equals("ascii") ) {
+                    header.format = FORMAT_ASCII;
                 }
-                else if ( token.equals("binary_big_endian") ) {
-                    elementReader = new _ReaderPlyElementReaderBinaryBigEndian(is);
+                else if ( format.equals("binary_little_endian") ) {
+                    header.format = FORMAT_BINARY_LITTLE_ENDIAN;
                 }
-                else if ( token.equals("binary_little_endian") ) {
-                    elementReader = new _ReaderPlyElementReaderBinaryLittleEndian(is);
+                else if ( format.equals("binary_big_endian") ) {
+                    header.format = FORMAT_BINARY_BIG_ENDIAN;
                 }
                 else {
-                    Logger.reportMessage(null, VSDK.ERROR,
-                        "ReaderPly.processHeader",
-                        "Invalid PLY header: unsupported PLY subformat \"" + token + "\".");
-                    return false;
+                    throw new IllegalArgumentException("unsupported PLY format: " + format);
                 }
-
-                double version;
-                version = Double.parseDouble(auxStringTokenizer.nextToken());
-                if ( version > 1.0 + VSDK.EPSILON ) {
-                    Logger.reportMessage(null, VSDK.WARNING,
-                        "ReaderPly.processHeader",
-                                       "Untested PLY file version " + VSDK.formatDouble(version) + ", reading could fail.");
+                continue;
+            }
+            if ( tag.equals("element") && tokens.size() >= 3 ) {
+                currentElement = new PlyElement();
+                currentElement.name = tokens.get(1);
+                currentElement.count = Integer.parseInt(tokens.get(2));
+                header.elements.add(currentElement);
+                continue;
+            }
+            if ( tag.equals("property") && currentElement != null ) {
+                PlyProperty property = new PlyProperty();
+                if ( tokens.size() >= 5 && tokens.get(1).equals("list") ) {
+                    property.list = true;
+                    property.countType = tokens.get(2);
+                    property.valueType = tokens.get(3);
+                    property.name = tokens.get(4);
                 }
+                else if ( tokens.size() >= 3 ) {
+                    property.list = false;
+                    property.type = tokens.get(1);
+                    property.name = tokens.get(2);
+                }
+                currentElement.properties.add(property);
+            }
+        }
+    }
 
+    private static int plyTypeSize(String type) {
+        if ( type.equals("char") || type.equals("int8") ||
+             type.equals("uchar") || type.equals("uint8") ) {
+            return 1;
+        }
+        if ( type.equals("short") || type.equals("int16") ||
+             type.equals("ushort") || type.equals("uint16") ) {
+            return 2;
+        }
+        if ( type.equals("int") || type.equals("int32") ||
+             type.equals("uint") || type.equals("uint32") ||
+             type.equals("float") || type.equals("float32") ) {
+            return 4;
+        }
+        if ( type.equals("double") || type.equals("float64") ) {
+            return 8;
+        }
+        return 0;
+    }
+
+    private static boolean isSignedIntegerType(String type) {
+        return type.equals("char") || type.equals("int8") ||
+               type.equals("short") || type.equals("int16") ||
+               type.equals("int") || type.equals("int32");
+    }
+
+    private static boolean isFloatType(String type) {
+        return type.equals("float") || type.equals("float32") ||
+               type.equals("double") || type.equals("float64");
+    }
+
+    private static long unsignedToSigned(long value, int bytes) {
+        if ( bytes == 1 && value >= 128L ) {
+            return value - 256L;
+        }
+        if ( bytes == 2 && value >= 32768L ) {
+            return value - 65536L;
+        }
+        if ( bytes == 4 && value >= 2147483648L ) {
+            return value - 4294967296L;
+        }
+        return value;
+    }
+
+    private static long readUnsignedIntegerBytes(
+        InputStream is,
+        int bytes,
+        boolean bigEndian) throws Exception
+    {
+        byte[] buffer = new byte[bytes];
+        readBytes(is, buffer);
+
+        long value = 0;
+        if ( bigEndian ) {
+            for ( int i = 0; i < bytes; i++ ) {
+                value = (value << 8) | (buffer[i] & 0xffL);
             }
-            else if ( token.equals("comment") || token.equals("obj_info") ) {
-                // Skip line
+        }
+        else {
+            for ( int i = bytes - 1; i >= 0; i-- ) {
+                value = (value << 8) | (buffer[i] & 0xffL);
             }
-            else if ( token.equals("end_header") ) {
-                headerDone = true;
+        }
+        return value;
+    }
+
+    private static double readBinaryScalarAsDouble(
+        InputStream is,
+        String type,
+        boolean bigEndian) throws Exception
+    {
+        int bytes = plyTypeSize(type);
+        if ( bytes <= 0 ) {
+            return 0.0;
+        }
+
+        long raw = readUnsignedIntegerBytes(is, bytes, bigEndian);
+        if ( isFloatType(type) ) {
+            if ( bytes == 4 ) {
+                return Float.intBitsToFloat((int)raw);
             }
-            else if ( token.equals("element") ) {
-                currentElement = new _ReaderPlyElement(auxStringTokenizer, internalGeometry);
-                elements.add(currentElement);
+            return Double.longBitsToDouble(raw);
+        }
+        if ( isSignedIntegerType(type) ) {
+            return (double)unsignedToSigned(raw, bytes);
+        }
+        return (double)raw;
+    }
+
+    private static int readBinaryScalarAsInt(
+        InputStream is,
+        String type,
+        boolean bigEndian) throws Exception
+    {
+        return (int)readBinaryScalarAsDouble(is, type, bigEndian);
+    }
+
+    private static void skipBinaryScalar(InputStream is, String type) throws Exception {
+        int bytes = plyTypeSize(type);
+        if ( bytes > 0 ) {
+            byte[] buffer = new byte[bytes];
+            readBytes(is, buffer);
+        }
+    }
+
+    private static boolean isFaceIndexProperty(String name) {
+        return name.equals("vertex_indices") || name.equals("vertex_index");
+    }
+
+    private static void addFaceTriangles(
+        List<Integer> indices,
+        ArrayList<TriangleIndices> triangles)
+    {
+        if ( indices.size() < 3 ) {
+            return;
+        }
+        for ( int i = 2; i < indices.size(); i++ ) {
+            triangles.add(new TriangleIndices(
+                indices.get(0),
+                indices.get(i - 1),
+                indices.get(i)));
+        }
+    }
+
+    private static void readVertexAscii(
+        PlyElement element,
+        String line,
+        ArrayList<Vector3Dd> vertices)
+    {
+        ArrayList<String> tokens = splitWhitespace(line);
+        int tokenIndex = 0;
+        double x = 0.0;
+        double y = 0.0;
+        double z = 0.0;
+
+        for ( PlyProperty property : element.properties ) {
+            if ( tokenIndex >= tokens.size() ) {
+                break;
             }
-            else if ( token.equals("property") ) {
-                if ( currentElement != null ) {
-                    if ( !currentElement.addProperty(auxStringTokenizer) ) {
-                        return false;
+            if ( property.list ) {
+                int count = Integer.parseInt(tokens.get(tokenIndex++));
+                tokenIndex += count;
+                continue;
+            }
+
+            double value = Double.parseDouble(tokens.get(tokenIndex++));
+            if ( property.name.equals("x") ) {
+                x = value;
+            }
+            else if ( property.name.equals("y") ) {
+                y = value;
+            }
+            else if ( property.name.equals("z") ) {
+                z = value;
+            }
+        }
+        vertices.add(new Vector3Dd(x, y, z));
+    }
+
+    private static void readFaceAscii(
+        PlyElement element,
+        String line,
+        ArrayList<TriangleIndices> triangles)
+    {
+        ArrayList<String> tokens = splitWhitespace(line);
+        int tokenIndex = 0;
+
+        for ( PlyProperty property : element.properties ) {
+            if ( tokenIndex >= tokens.size() ) {
+                break;
+            }
+            if ( property.list ) {
+                int count = Integer.parseInt(tokens.get(tokenIndex++));
+                ArrayList<Integer> indices = new ArrayList<Integer>();
+                for ( int j = 0; j < count && tokenIndex < tokens.size(); j++ ) {
+                    int index = Integer.parseInt(tokens.get(tokenIndex++));
+                    if ( isFaceIndexProperty(property.name) ) {
+                        indices.add(index);
                     }
+                }
+                if ( isFaceIndexProperty(property.name) ) {
+                    addFaceTriangles(indices, triangles);
                 }
             }
             else {
-                Logger.reportMessage(null, VSDK.WARNING,
-                    "ReaderPly.processHeader",
-                    "Unknown header line \"" + token + "\", ignoring.");
+                tokenIndex++;
             }
-        } while( !headerDone );
-        //-----------------------------------------------------------------
-        return true;
+        }
     }
 
-    public static int compareValue(double a, double b, double tolerance)
+    private static void readVertexBinary(
+        InputStream is,
+        PlyElement element,
+        boolean bigEndian,
+        ArrayList<Vector3Dd> vertices) throws Exception
     {
-        double delta;
+        double x = 0.0;
+        double y = 0.0;
+        double z = 0.0;
 
-        delta = Math.abs(a - b);
-        if ( delta < tolerance ) {
-            return 0;
+        for ( PlyProperty property : element.properties ) {
+            if ( property.list ) {
+                int count = readBinaryScalarAsInt(is, property.countType, bigEndian);
+                for ( int j = 0; j < count; j++ ) {
+                    skipBinaryScalar(is, property.valueType);
+                }
+                continue;
+            }
+
+            double value = readBinaryScalarAsDouble(is, property.type, bigEndian);
+            if ( property.name.equals("x") ) {
+                x = value;
+            }
+            else if ( property.name.equals("y") ) {
+                y = value;
+            }
+            else if ( property.name.equals("z") ) {
+                z = value;
+            }
         }
-        else if ( a > b ) {
-            return 1;
-        }
-        return -1;
+        vertices.add(new Vector3Dd(x, y, z));
     }
 
-    public static void
-    importEnvironment(File inSceneFileFd, SimpleScene inoutSimpleScene)
-        throws Exception
+    private static void readFaceBinary(
+        InputStream is,
+        PlyElement element,
+        boolean bigEndian,
+        ArrayList<TriangleIndices> triangles) throws Exception
     {
-        //-----------------------------------------------------------------
-        TriangleMesh internalGeometry;
-        internalGeometry = new TriangleMesh();
+        for ( PlyProperty property : element.properties ) {
+            if ( property.list ) {
+                int count = readBinaryScalarAsInt(is, property.countType, bigEndian);
+                ArrayList<Integer> indices = new ArrayList<Integer>();
+                for ( int j = 0; j < count; j++ ) {
+                    int index = readBinaryScalarAsInt(is, property.valueType, bigEndian);
+                    if ( isFaceIndexProperty(property.name) ) {
+                        indices.add(index);
+                    }
+                }
+                if ( isFaceIndexProperty(property.name) ) {
+                    addFaceTriangles(indices, triangles);
+                }
+            }
+            else {
+                skipBinaryScalar(is, property.type);
+            }
+        }
+    }
 
-        FileInputStream fis;
-        BufferedInputStream bis;
+    private static void skipBinaryElementRecord(
+        InputStream is,
+        PlyElement element,
+        boolean bigEndian) throws Exception
+    {
+        for ( PlyProperty property : element.properties ) {
+            if ( property.list ) {
+                int count = readBinaryScalarAsInt(is, property.countType, bigEndian);
+                for ( int j = 0; j < count; j++ ) {
+                    skipBinaryScalar(is, property.valueType);
+                }
+            }
+            else {
+                skipBinaryScalar(is, property.type);
+            }
+        }
+    }
 
-        fis = new FileInputStream(inSceneFileFd);
-        bis = new BufferedInputStream(fis);
+    private static TriangleMesh buildTriangleMesh(
+        ArrayList<Vector3Dd> vertices,
+        ArrayList<TriangleIndices> triangles) throws Exception
+    {
+        if ( vertices.isEmpty() || triangles.isEmpty() ) {
+            return null;
+        }
 
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        Future<Vertex[]> vertexFuture = executorService.submit(new Callable<Vertex[]>() {
+            public Vertex[] call() {
+                Vertex[] out = new Vertex[vertices.size()];
+                for ( int i = 0; i < vertices.size(); i++ ) {
+                    out[i] = new Vertex(vertices.get(i));
+                }
+                return out;
+            }
+        });
+        Future<Triangle[]> triangleFuture = executorService.submit(new Callable<Triangle[]>() {
+            public Triangle[] call() {
+                ArrayList<Triangle> out = new ArrayList<Triangle>(triangles.size());
+                int vertexCount = vertices.size();
+                for ( TriangleIndices t : triangles ) {
+                    if ( t.a >= 0 && t.a < vertexCount &&
+                         t.b >= 0 && t.b < vertexCount &&
+                         t.c >= 0 && t.c < vertexCount ) {
+                        out.add(new Triangle(t.a, t.b, t.c));
+                    }
+                }
+                return out.toArray(new Triangle[out.size()]);
+            }
+        });
+
+        Vertex[] meshVertices = vertexFuture.get();
+        Triangle[] meshTriangles = triangleFuture.get();
+        executorService.shutdownNow();
+
+        if ( meshTriangles.length == 0 ) {
+            return null;
+        }
+
+        TriangleMesh mesh = new TriangleMesh();
+        mesh.setName("PLY mesh");
+        mesh.setVertexes(meshVertices, false, false, false, false);
+        mesh.setTriangles(meshTriangles);
+        mesh.calculateNormals();
+        mesh.setMaterials(new SimpleMaterial[] { defaultMaterial() });
+        mesh.setMaterialRanges(new int[][] { { 0, 0 } });
+        return mesh;
+    }
+
+    private static void rotateLikeObj(ArrayList<Vector3Dd> vertices) {
+        Matrix4x4d rotation =
+            new Matrix4x4d().axisRotation(Math.PI / 2.0, new Vector3Dd(1, 0, 0));
+
+        for ( int i = 0; i < vertices.size(); i++ ) {
+            vertices.set(i, rotation.multiply(vertices.get(i)));
+        }
+    }
+
+    public static ReaderPlyResult importGeometry(File inSceneFileFd) throws Exception {
+        FileInputStream fis = new FileInputStream(inSceneFileFd);
+        BufferedInputStream bis = new BufferedInputStream(fis);
         try {
-            if ( !processHeader(bis, internalGeometry) ) {
-                Logger.reportMessage(null, VSDK.ERROR,
-                    "ReaderPly.importEnvironment", "Invalid PLY header!");
+            return importGeometry(bis);
+        }
+        finally {
+            bis.close();
+            fis.close();
+        }
+    }
+
+    public static ReaderPlyResult importGeometry(InputStream is) throws Exception {
+        PlyHeader header = readHeader(is);
+        ArrayList<Vector3Dd> vertices = new ArrayList<Vector3Dd>();
+        ArrayList<TriangleIndices> triangles = new ArrayList<TriangleIndices>();
+        boolean binary = header.format != FORMAT_ASCII;
+        boolean bigEndian = header.format == FORMAT_BINARY_BIG_ENDIAN;
+
+        for ( PlyElement element : header.elements ) {
+            if ( element.name.equals("vertex") ) {
+                vertices.ensureCapacity(element.count);
             }
-            int i;
-            for ( i = 0; i < elements.size(); i++ ) {
-                if ( !elements.get(i).processInput(elementReader) ) {
-                    return;
+
+            for ( int i = 0; i < element.count; i++ ) {
+                if ( binary ) {
+                    if ( element.name.equals("vertex") ) {
+                        readVertexBinary(is, element, bigEndian, vertices);
+                    }
+                    else if ( element.name.equals("face") ) {
+                        readFaceBinary(is, element, bigEndian, triangles);
+                    }
+                    else {
+                        skipBinaryElementRecord(is, element, bigEndian);
+                    }
+                }
+                else {
+                    String line = readPlyAsciiLine(is);
+                    if ( element.name.equals("vertex") ) {
+                        readVertexAscii(element, line, vertices);
+                    }
+                    else if ( element.name.equals("face") ) {
+                        readFaceAscii(element, line, triangles);
+                    }
                 }
             }
         }
-        catch ( Exception e ) {
-            Logger.reportMessage(null, VSDK.ERROR,
-                               "ReaderPly.importEnvironment", "Error reading PLY data!" + e);
+
+        rotateLikeObj(vertices);
+
+        ReaderPlyResult result = new ReaderPlyResult();
+        result.pointCloud = vertices;
+        result.triangleMesh = buildTriangleMesh(vertices, triangles);
+        return result;
+    }
+
+    public static void importEnvironment(
+        File inSceneFileFd,
+        SimpleScene inoutSimpleScene) throws Exception
+    {
+        ReaderPlyResult result = importGeometry(inSceneFileFd);
+        if ( result.triangleMesh == null ) {
+            Logger.reportMessage(null, VSDK.WARNING,
+                "ReaderPly.importEnvironment",
+                "PLY file contains no triangle mesh");
+            return;
         }
-
-        //-----------------------------------------------------------------
-        bis.close();
-        fis.close();
-
-        //-----------------------------------------------------------------
-        double c[];
-        c = internalGeometry.getVertexColors();
-        boolean allColorsAreTheSame = true;
-        double r = 1.0, g = 1.0, b = 1.0;
-
-        if ( c != null ) {
-            int i;
-
-            r = c[0];
-            g = c[1];
-            b = c[2];
-
-            for ( i = 1; i < c.length/3; i++ ) {
-                if ( compareValue(r, c[3*i+0], VSDK.EPSILON) != 0 ||
-                     compareValue(g, c[3*i+1], VSDK.EPSILON) != 0 ||
-                     compareValue(b, c[3*i+2], VSDK.EPSILON) != 0 ) {
-                    allColorsAreTheSame = false;
-                    break;
-                }
-            }
-        }
-
-        if ( allColorsAreTheSame ) {
-            internalGeometry.detachColors();
-        }
-        c = internalGeometry.getVertexColors();
-
-        //-----------------------------------------------------------------
-        SimpleBody thing;
-
-        if ( c == null ) {
-            internalGeometry.calculateNormals();
-        }
-        thing = addThing(internalGeometry, inoutSimpleScene.getSimpleBodies());
-
-        if ( allColorsAreTheSame && thing != null ) {
-            thing.setMaterial(thing.getMaterial().withDiffuse(new ColorRgb(r, g, b)));
-        }
+        addThing(result.triangleMesh, inoutSimpleScene.getSimpleBodies());
     }
 }

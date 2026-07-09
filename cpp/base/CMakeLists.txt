@@ -191,6 +191,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/io/FileLocator.cpp
     src/main/vsdk/toolkit/io/geometry/EnvironmentPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderObj.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderPly.cpp
+    src/main/vsdk/toolkit/io/geometry/ReaderPlyResult.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderMitScene.cpp
     src/main/vsdk/toolkit/io/image/ImagePersistence.cpp
     src/main/java/io/BufferedOutputStream.cpp
