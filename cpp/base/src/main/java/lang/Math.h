@@ -1,5 +1,5 @@
-#ifndef __MATH__
-#define __MATH__
+#ifndef VITRAL_JAVA_LANG_MATH_H
+#define VITRAL_JAVA_LANG_MATH_H
 
 #include <cmath>
 namespace java {

@@ -87,9 +87,9 @@ class SimpleMaterial : public Material {
     java::String toString() const;
 
     Material *copy() const override;
-    Material *translate(Vector3Dd *vector);
-    Material *rotate(Vector3Dd *vector);
-    Material *scale(Vector3Dd *vector);
+    Material *translate(Vector3Dd *vector) override;
+    Material *rotate(Vector3Dd *vector) override;
+    Material *scale(Vector3Dd *vector) override;
 };
 
 #endif

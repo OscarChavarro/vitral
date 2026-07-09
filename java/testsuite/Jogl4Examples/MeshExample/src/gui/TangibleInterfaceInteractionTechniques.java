@@ -6,7 +6,7 @@ import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceListener;
 import model.MeshModel;
 
 public class TangibleInterfaceInteractionTechniques implements TangibleInterfaceListener {
-    private static final String RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube";
+    private static final String RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube1";
 
     private final MeshModel model;
     private final Runnable repaintCallback;
