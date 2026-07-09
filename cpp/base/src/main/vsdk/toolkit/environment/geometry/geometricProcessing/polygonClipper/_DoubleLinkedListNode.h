@@ -1,5 +1,5 @@
-#ifndef ___DOUBLELINKEDLISTNODE__
-#define ___DOUBLELINKEDLISTNODE__
+#ifndef __DOUBLE_LINKED_LIST_NODE__
+#define __DOUBLE_LINKED_LIST_NODE__
 
 template <class E>
 class _DoubleLinkedListNode {

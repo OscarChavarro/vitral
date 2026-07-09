@@ -1,5 +1,5 @@
-#ifndef MARKER_GROUP_PERSISTENCE_HPP
-#define MARKER_GROUP_PERSISTENCE_HPP
+#ifndef __MARKER_GROUP_PERSISTENCE__
+#define __MARKER_GROUP_PERSISTENCE__
 
 #include "java/lang/String.h"
 #include "model/MarkerGroup.hpp"

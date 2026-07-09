@@ -1,5 +1,5 @@
-#ifndef ___INSERTIONBATCHSCHEDULE__
-#define ___INSERTIONBATCHSCHEDULE__
+#ifndef __INSERTION_BATCH_SCHEDULE__
+#define __INSERTION_BATCH_SCHEDULE__
 
 class _InsertionBatchSchedule {
   private:

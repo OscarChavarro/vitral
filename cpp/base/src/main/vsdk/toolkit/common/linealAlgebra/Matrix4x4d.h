@@ -1,5 +1,5 @@
-#ifndef __MATRIX4X4D__
-#define __MATRIX4X4D__
+#ifndef __MATRIX_4_X_4_D__
+#define __MATRIX_4_X_4_D__
 
 
 #include <cmath>

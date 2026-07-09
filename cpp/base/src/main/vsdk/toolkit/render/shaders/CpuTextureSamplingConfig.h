@@ -1,5 +1,5 @@
-#ifndef __CPUTEXTURESAMPLINGCONFIG__
-#define __CPUTEXTURESAMPLINGCONFIG__
+#ifndef __CPU_TEXTURE_SAMPLING_CONFIG__
+#define __CPU_TEXTURE_SAMPLING_CONFIG__
 
 class ColorRgb;
 class Vector3Dd;

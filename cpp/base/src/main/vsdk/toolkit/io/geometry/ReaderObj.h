@@ -1,5 +1,5 @@
-#ifndef __READEROBJ__
-#define __READEROBJ__
+#ifndef __READER_OBJ__
+#define __READER_OBJ__
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/io/PersistenceElement.h"

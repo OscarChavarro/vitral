@@ -1,5 +1,5 @@
-#ifndef __SHADINGTYPE__
-#define __SHADINGTYPE__
+#ifndef __SHADING_TYPE__
+#define __SHADING_TYPE__
 
 enum ShadingType {
     SHADING_NOLIGHT = 0,

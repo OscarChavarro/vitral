@@ -1,5 +1,5 @@
-#ifndef ___SEGMENTTABLEBUILDER__
-#define ___SEGMENTTABLEBUILDER__
+#ifndef __SEGMENT_TABLE_BUILDER__
+#define __SEGMENT_TABLE_BUILDER__
 
 class _SegmentTableBuilder {
   public:

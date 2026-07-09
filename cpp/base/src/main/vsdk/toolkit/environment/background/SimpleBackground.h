@@ -1,5 +1,5 @@
-#ifndef __SIMPLEBACKGROUND__
-#define __SIMPLEBACKGROUND__
+#ifndef __SIMPLE_BACKGROUND__
+#define __SIMPLE_BACKGROUND__
 
 #include "vsdk/toolkit/environment/background/Background.h"
 class SimpleBackground : public Background {

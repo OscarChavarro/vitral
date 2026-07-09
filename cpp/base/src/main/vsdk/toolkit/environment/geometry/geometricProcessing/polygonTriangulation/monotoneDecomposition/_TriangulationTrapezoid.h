@@ -1,5 +1,5 @@
-#ifndef ___TRIANGULATIONTRAPEZOID__
-#define ___TRIANGULATIONTRAPEZOID__
+#ifndef __TRIANGULATION_TRAPEZOID__
+#define __TRIANGULATION_TRAPEZOID__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 class _TriangulationTrapezoidQueryNode;

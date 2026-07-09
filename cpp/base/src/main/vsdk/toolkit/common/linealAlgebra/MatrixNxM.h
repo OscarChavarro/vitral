@@ -1,5 +1,5 @@
-#ifndef __MATRIXNXM__
-#define __MATRIXNXM__
+#ifndef __MATRIX_NX_M__
+#define __MATRIX_NX_M__
 #include "java/lang/String.h"
 class MatrixNxM {
 private:

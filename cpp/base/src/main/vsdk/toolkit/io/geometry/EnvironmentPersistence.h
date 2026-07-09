@@ -1,5 +1,5 @@
-#ifndef __ENVIRONMENTPERSISTENCE__
-#define __ENVIRONMENTPERSISTENCE__
+#ifndef __ENVIRONMENT_PERSISTENCE__
+#define __ENVIRONMENT_PERSISTENCE__
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/io/PersistenceElement.h"

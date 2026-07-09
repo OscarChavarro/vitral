@@ -1,5 +1,5 @@
-#ifndef __GLUTSYSTEM__
-#define __GLUTSYSTEM__
+#ifndef __GLUT_SYSTEM__
+#define __GLUT_SYSTEM__
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"

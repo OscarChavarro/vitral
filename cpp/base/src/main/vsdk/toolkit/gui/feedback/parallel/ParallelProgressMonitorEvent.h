@@ -1,5 +1,5 @@
-#ifndef __PARALLELPROGRESSMONITOREVENT__
-#define __PARALLELPROGRESSMONITOREVENT__
+#ifndef __PARALLEL_PROGRESS_MONITOR_EVENT__
+#define __PARALLEL_PROGRESS_MONITOR_EVENT__
 
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorCommand.h"
 class ParallelProgressMonitorEvent {

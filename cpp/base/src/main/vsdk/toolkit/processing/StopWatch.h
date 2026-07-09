@@ -1,5 +1,5 @@
-#ifndef __STOPWATCH__
-#define __STOPWATCH__
+#ifndef __STOP_WATCH__
+#define __STOP_WATCH__
 
 #include <chrono>
 class StopWatch {

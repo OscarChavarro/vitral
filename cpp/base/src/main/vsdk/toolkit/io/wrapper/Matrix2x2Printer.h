@@ -1,5 +1,5 @@
-#ifndef __MATRIX2X2PRINTER__
-#define __MATRIX2X2PRINTER__
+#ifndef __MATRIX_2_X_2_PRINTER__
+#define __MATRIX_2_X_2_PRINTER__
 
 #include "java/io/PrintStream.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix2x2.h"

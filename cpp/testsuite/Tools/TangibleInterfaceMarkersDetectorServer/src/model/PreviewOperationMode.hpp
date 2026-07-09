@@ -1,5 +1,5 @@
-#ifndef PREVIEW_OPERATION_MODE_HPP
-#define PREVIEW_OPERATION_MODE_HPP
+#ifndef __PREVIEW_OPERATION_MODE__
+#define __PREVIEW_OPERATION_MODE__
 
 enum PreviewOperationMode {
     SINGLE_MARKER,

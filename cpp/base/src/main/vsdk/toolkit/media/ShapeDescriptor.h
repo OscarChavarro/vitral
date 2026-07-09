@@ -1,5 +1,5 @@
-#ifndef __SHAPEDESCRIPTOR__
-#define __SHAPEDESCRIPTOR__
+#ifndef __SHAPE_DESCRIPTOR__
+#define __SHAPE_DESCRIPTOR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/MediaEntity.h"

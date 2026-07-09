@@ -1,5 +1,5 @@
-#ifndef __MARKERSMODEL__
-#define __MARKERSMODEL__
+#ifndef __MARKERS_MODEL__
+#define __MARKERS_MODEL__
 
 #include <java/util/ArrayList.h>
 #include "model/Marker.h"

@@ -74,11 +74,22 @@ set(VITRAL_BASE_SOURCES
     src/main/java/io/BufferedInputStream.cpp
     src/main/java/io/BufferedOutputStream.cpp
     src/main/java/io/PrintStream.cpp
+    src/main/java/net/ServerSocket.cpp
+    src/main/java/net/SocketInputStream.cpp
+    src/main/java/net/SocketOutputStream.cpp
+    src/main/java/net/Socket.cpp
+    src/main/java/net/WebSocket.cpp
     src/main/java/util/Formatter.cpp
     src/main/java/util/StringTokenizer.cpp
     src/main/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.cpp
+    src/main/vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/RayGizmo.cpp
+    src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.cpp
+    src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2InfinitePlaneGizmoMapper.cpp
+    src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.cpp
+    src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.cpp
     src/main/vsdk/toolkit/gui/RendererConfigurationController.cpp
     src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.cpp
     src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.cpp

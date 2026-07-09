@@ -1,5 +1,5 @@
-#ifndef __MONOTONEDECOMPOSITIONTRIANGULATOR__
-#define __MONOTONEDECOMPOSITIONTRIANGULATOR__
+#ifndef __MONOTONE_DECOMPOSITION_TRIANGULATOR__
+#define __MONOTONE_DECOMPOSITION_TRIANGULATOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

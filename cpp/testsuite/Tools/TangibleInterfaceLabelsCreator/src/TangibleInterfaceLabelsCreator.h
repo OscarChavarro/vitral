@@ -1,5 +1,5 @@
-#ifndef __TANGIBLEINTERFACELABELSCREATOR__
-#define __TANGIBLEINTERFACELABELSCREATOR__
+#ifndef __TANGIBLE_INTERFACE_LABELS_CREATOR__
+#define __TANGIBLE_INTERFACE_LABELS_CREATOR__
 
 #include "model/LabelsModel.h"
 #include "render/CairoPdfPageRenderer.h"

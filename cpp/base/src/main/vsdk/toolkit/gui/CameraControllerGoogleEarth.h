@@ -1,5 +1,5 @@
-#ifndef __CAMERACONTROLLERGOOGLEEARTH__
-#define __CAMERACONTROLLERGOOGLEEARTH__
+#ifndef __CAMERA_CONTROLLER_GOOGLE_EARTH__
+#define __CAMERA_CONTROLLER_GOOGLE_EARTH__
 
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;

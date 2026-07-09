@@ -1,5 +1,5 @@
-#ifndef INTERACTIVE_MARKERS_HPP
-#define INTERACTIVE_MARKERS_HPP
+#ifndef __INTERACTIVE_MARKERS__
+#define __INTERACTIVE_MARKERS__
 
 class MarkersModel;
 class MarkerTracker;

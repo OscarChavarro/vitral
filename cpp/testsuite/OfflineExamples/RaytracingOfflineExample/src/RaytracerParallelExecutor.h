@@ -1,5 +1,5 @@
-#ifndef __RAYTRACERPARALLELEXECUTOR__
-#define __RAYTRACERPARALLELEXECUTOR__
+#ifndef __RAYTRACER_PARALLEL_EXECUTOR__
+#define __RAYTRACER_PARALLEL_EXECUTOR__
 
 #include "java/util/ArrayList.h"
 #include "RaytracerExecutor.h"

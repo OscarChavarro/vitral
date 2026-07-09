@@ -1,5 +1,5 @@
-#ifndef __CAMERACONTROLLERAQUYNZA__
-#define __CAMERACONTROLLERAQUYNZA__
+#ifndef __CAMERA_CONTROLLER_AQUYNZA__
+#define __CAMERA_CONTROLLER_AQUYNZA__
 
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;

@@ -1,5 +1,5 @@
-#ifndef __SIMPLEMATERIAL__
-#define __SIMPLEMATERIAL__
+#ifndef __SIMPLE_MATERIAL__
+#define __SIMPLE_MATERIAL__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

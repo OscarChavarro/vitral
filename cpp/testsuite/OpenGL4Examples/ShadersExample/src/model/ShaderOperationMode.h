@@ -1,5 +1,5 @@
-#ifndef __SHADEROPERATIONMODE__
-#define __SHADEROPERATIONMODE__
+#ifndef __SHADER_OPERATION_MODE__
+#define __SHADER_OPERATION_MODE__
 
 enum class ShaderOperationMode {
     OPENGL_4_1,

@@ -1,5 +1,5 @@
-#ifndef __RAYTRACERSERIALEXECUTOR__
-#define __RAYTRACERSERIALEXECUTOR__
+#ifndef __RAYTRACER_SERIAL_EXECUTOR__
+#define __RAYTRACER_SERIAL_EXECUTOR__
 
 #include "RaytracerExecutor.h"
 class RaytracerSerialExecutor : public RaytracerExecutor {

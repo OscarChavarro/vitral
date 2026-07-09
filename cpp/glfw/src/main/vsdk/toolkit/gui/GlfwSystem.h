@@ -1,5 +1,5 @@
-#ifndef __GLFWSYSTEM__
-#define __GLFWSYSTEM__
+#ifndef __GLFW_SYSTEM__
+#define __GLFW_SYSTEM__
 
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"

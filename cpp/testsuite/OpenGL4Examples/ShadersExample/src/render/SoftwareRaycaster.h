@@ -1,5 +1,5 @@
-#ifndef __SOFTWARERAYCASTER__
-#define __SOFTWARERAYCASTER__
+#ifndef __SOFTWARE_RAYCASTER__
+#define __SOFTWARE_RAYCASTER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"

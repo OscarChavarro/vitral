@@ -1,5 +1,5 @@
-#ifndef __PARAMETRICBICUBICPATCH__
-#define __PARAMETRICBICUBICPATCH__
+#ifndef __PARAMETRIC_BI_CUBIC_PATCH__
+#define __PARAMETRIC_BI_CUBIC_PATCH__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

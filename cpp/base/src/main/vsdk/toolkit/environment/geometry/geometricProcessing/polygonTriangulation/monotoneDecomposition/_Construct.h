@@ -1,5 +1,5 @@
-#ifndef ___CONSTRUCT__
-#define ___CONSTRUCT__
+#ifndef __CONSTRUCT__
+#define __CONSTRUCT__
 
 #include <cmath>
 #include <cstdio>

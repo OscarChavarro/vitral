@@ -1,5 +1,5 @@
-#ifndef __BUFFEREDINPUTSTREAM__
-#define __BUFFEREDINPUTSTREAM__
+#ifndef __BUFFERED_INPUT_STREAM__
+#define __BUFFERED_INPUT_STREAM__
 
 #include "java/io/File.h"
 #include "java/io/InputStream.h"

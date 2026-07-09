@@ -1,5 +1,5 @@
-#ifndef __SIMPLEBODYGROUP__
-#define __SIMPLEBODYGROUP__
+#ifndef __SIMPLE_BODY_GROUP__
+#define __SIMPLE_BODY_GROUP__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

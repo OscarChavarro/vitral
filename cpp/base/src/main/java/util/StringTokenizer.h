@@ -1,5 +1,5 @@
-#ifndef __STRINGTOKENIZER__
-#define __STRINGTOKENIZER__
+#ifndef __STRING_TOKENIZER__
+#define __STRING_TOKENIZER__
 
 #include "java/lang/String.h"
 namespace java {

@@ -1,5 +1,5 @@
-#ifndef __GEOMETRYTRIANGULATOR__
-#define __GEOMETRYTRIANGULATOR__
+#ifndef __GEOMETRY_TRIANGULATOR__
+#define __GEOMETRY_TRIANGULATOR__
 
 class Geometry;
 class TriangleMeshGroup;

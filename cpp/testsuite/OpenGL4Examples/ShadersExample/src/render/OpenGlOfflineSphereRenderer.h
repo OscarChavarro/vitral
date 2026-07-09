@@ -1,5 +1,5 @@
-#ifndef __OPENGLOFFLINESPHERERENDERER__
-#define __OPENGLOFFLINESPHERERENDERER__
+#ifndef __OPEN_GL_OFFLINE_SPHERE_RENDERER__
+#define __OPEN_GL_OFFLINE_SPHERE_RENDERER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 class RGBImageUncompressed;

@@ -1,5 +1,5 @@
-#ifndef __MATRIXEXCEPTIONS__
-#define __MATRIXEXCEPTIONS__
+#ifndef __MATRIX_EXCEPTIONS__
+#define __MATRIX_EXCEPTIONS__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"

@@ -1,5 +1,5 @@
-#ifndef ___MONOTONE__
-#define ___MONOTONE__
+#ifndef __MONOTONE__
+#define __MONOTONE__
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_Construct.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_MonotoneChainNode.h"

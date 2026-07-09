@@ -1,5 +1,5 @@
-#ifndef CONFIGURATION_HPP
-#define CONFIGURATION_HPP
+#ifndef __CONFIGURATION__
+#define __CONFIGURATION__
 
 #include "vision/MarkerTracker.hpp"
 #include "webservice/WebServiceServer.hpp"

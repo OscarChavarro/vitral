@@ -1,5 +1,5 @@
-#ifndef __OFFLINECONTROL__
-#define __OFFLINECONTROL__
+#ifndef __OFFLINE_CONTROL__
+#define __OFFLINE_CONTROL__
 
 class CommandLineOptions;
 

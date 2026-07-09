@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRALBOUNDEDSOLIDLOOP__
-#define ___POLYHEDRALBOUNDEDSOLIDLOOP__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_LOOP__
+#define __POLYHEDRAL_BOUNDED_SOLID_LOOP__
 
 #include "java/util/ArrayList.h"
 class _PolyhedralBoundedSolidFace;

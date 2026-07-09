@@ -1,5 +1,5 @@
-#ifndef __EXECUTORSERVICE__
-#define __EXECUTORSERVICE__
+#ifndef __EXECUTOR_SERVICE__
+#define __EXECUTOR_SERVICE__
 
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/Future.h"

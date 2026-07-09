@@ -1,5 +1,5 @@
-#ifndef __COMPUTATIONALGEOMETRY__
-#define __COMPUTATIONALGEOMETRY__
+#ifndef __COMPUTATIONAL_GEOMETRY__
+#define __COMPUTATIONAL_GEOMETRY__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class ComputationalGeometry {

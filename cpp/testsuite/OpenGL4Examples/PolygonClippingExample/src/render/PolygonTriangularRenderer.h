@@ -1,5 +1,5 @@
-#ifndef __POLYGONTRIANGULARRENDERER__
-#define __POLYGONTRIANGULARRENDERER__
+#ifndef __POLYGON_TRIANGULAR_RENDERER__
+#define __POLYGON_TRIANGULAR_RENDERER__
 
 #include <GL/glew.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRALBOUNDEDSOLIDFACE__
-#define ___POLYHEDRALBOUNDEDSOLIDFACE__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_FACE__
+#define __POLYHEDRAL_BOUNDED_SOLID_FACE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

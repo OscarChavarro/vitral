@@ -1,5 +1,5 @@
-#ifndef __RAYTRACEREXECUTOR__
-#define __RAYTRACEREXECUTOR__
+#ifndef __RAYTRACER_EXECUTOR__
+#define __RAYTRACER_EXECUTOR__
 
 class SimpleRaytracer;
 class RGBImageUncompressed;

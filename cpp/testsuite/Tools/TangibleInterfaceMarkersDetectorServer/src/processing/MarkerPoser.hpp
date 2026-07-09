@@ -1,5 +1,5 @@
-#ifndef MARKER_POSER_HPP
-#define MARKER_POSER_HPP
+#ifndef __MARKER_POSER__
+#define __MARKER_POSER__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

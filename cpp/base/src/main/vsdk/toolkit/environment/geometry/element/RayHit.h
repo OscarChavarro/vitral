@@ -1,5 +1,5 @@
-#ifndef __RAYHIT__
-#define __RAYHIT__
+#ifndef __RAY_HIT__
+#define __RAY_HIT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"

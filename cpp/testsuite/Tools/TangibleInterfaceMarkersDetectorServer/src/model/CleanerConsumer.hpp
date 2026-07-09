@@ -1,5 +1,5 @@
-#ifndef CLEANER_CONSUMER_HPP
-#define CLEANER_CONSUMER_HPP
+#ifndef __CLEANER_CONSUMER__
+#define __CLEANER_CONSUMER__
 
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/Void.h"

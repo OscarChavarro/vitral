@@ -1,5 +1,5 @@
-#ifndef __PARAMETRICCURVE__
-#define __PARAMETRICCURVE__
+#ifndef __PARAMETRIC_CURVE__
+#define __PARAMETRIC_CURVE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

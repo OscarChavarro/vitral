@@ -1,5 +1,5 @@
-#ifndef __TRACEWORKSPACE__
-#define __TRACEWORKSPACE__
+#ifndef __TRACE_WORKSPACE__
+#define __TRACE_WORKSPACE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

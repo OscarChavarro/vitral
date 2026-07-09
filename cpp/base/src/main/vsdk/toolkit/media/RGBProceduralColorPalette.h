@@ -1,5 +1,5 @@
-#ifndef __RGBPROCEDURALCOLORPALETTE__
-#define __RGBPROCEDURALCOLORPALETTE__
+#ifndef __RGB_PROCEDURAL_COLOR_PALETTE__
+#define __RGB_PROCEDURAL_COLOR_PALETTE__
 
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 /**

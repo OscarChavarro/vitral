@@ -1,5 +1,5 @@
-#ifndef PROTOCOL_HPP
-#define PROTOCOL_HPP
+#ifndef __PROTOCOL__
+#define __PROTOCOL__
 
 #include <cstdint>
 

@@ -1,5 +1,5 @@
-#ifndef __MEDIAENTITY__
-#define __MEDIAENTITY__
+#ifndef __MEDIA_ENTITY__
+#define __MEDIA_ENTITY__
 
 /**
 A `MediaEntity` in VitralSDK is a software element with data

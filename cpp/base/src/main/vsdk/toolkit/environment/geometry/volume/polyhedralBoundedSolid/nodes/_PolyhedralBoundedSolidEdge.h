@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRALBOUNDEDSOLIDEDGE__
-#define ___POLYHEDRALBOUNDEDSOLIDEDGE__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_EDGE__
+#define __POLYHEDRAL_BOUNDED_SOLID_EDGE__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 class _PolyhedralBoundedSolidHalfEdge;

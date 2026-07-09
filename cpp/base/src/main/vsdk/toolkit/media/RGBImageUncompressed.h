@@ -1,5 +1,5 @@
-#ifndef __RGBIMAGEUNCOMPRESSED__
-#define __RGBIMAGEUNCOMPRESSED__
+#ifndef __RGB_IMAGE_UNCOMPRESSED__
+#define __RGB_IMAGE_UNCOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBPixel;

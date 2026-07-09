@@ -1,5 +1,5 @@
-#ifndef __OPENGL4LIGHTRENDERER__
-#define __OPENGL4LIGHTRENDERER__
+#ifndef __OPEN_GL_4_LIGHT_RENDERER__
+#define __OPEN_GL_4_LIGHT_RENDERER__
 
 class Light;
 class Camera;

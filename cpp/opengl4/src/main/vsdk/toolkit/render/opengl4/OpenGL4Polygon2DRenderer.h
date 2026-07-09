@@ -1,5 +1,5 @@
-#ifndef __OPENGL4POLYGON2DRENDERER__
-#define __OPENGL4POLYGON2DRENDERER__
+#ifndef __OPEN_GL_4_POLYGON_2_D_RENDERER__
+#define __OPEN_GL_4_POLYGON_2_D_RENDERER__
 
 #include "java/util/ArrayList.h"
 #include <GL/glew.h>

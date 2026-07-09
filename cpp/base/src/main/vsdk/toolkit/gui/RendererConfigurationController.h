@@ -1,5 +1,5 @@
-#ifndef __RENDERERCONFIGURATIONCONTROLLER__
-#define __RENDERERCONFIGURATIONCONTROLLER__
+#ifndef __RENDERER_CONFIGURATION_CONTROLLER__
+#define __RENDERER_CONFIGURATION_CONTROLLER__
 
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"

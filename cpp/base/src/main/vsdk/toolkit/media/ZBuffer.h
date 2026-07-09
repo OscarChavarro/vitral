@@ -1,5 +1,5 @@
-#ifndef __ZBUFFER__
-#define __ZBUFFER__
+#ifndef __Z_BUFFER__
+#define __Z_BUFFER__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
 /**

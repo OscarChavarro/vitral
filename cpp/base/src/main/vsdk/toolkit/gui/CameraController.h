@@ -1,5 +1,5 @@
-#ifndef __CAMERACONTROLLER__
-#define __CAMERACONTROLLER__
+#ifndef __CAMERA_CONTROLLER__
+#define __CAMERA_CONTROLLER__
 
 #include "vsdk/toolkit/gui/Controller.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"

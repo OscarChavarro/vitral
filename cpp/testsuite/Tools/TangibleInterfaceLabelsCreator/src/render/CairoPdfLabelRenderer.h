@@ -1,5 +1,5 @@
-#ifndef __CAIROPDFLABELRENDERER__
-#define __CAIROPDFLABELRENDERER__
+#ifndef __CAIRO_PDF_LABEL_RENDERER__
+#define __CAIRO_PDF_LABEL_RENDERER__
 
 #include <cairo.h>
 

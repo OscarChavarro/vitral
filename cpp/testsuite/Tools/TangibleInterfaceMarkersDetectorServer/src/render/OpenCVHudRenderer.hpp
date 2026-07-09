@@ -1,5 +1,5 @@
-#ifndef OPENCV_HUD_RENDERER_HPP
-#define OPENCV_HUD_RENDERER_HPP
+#ifndef __OPEN_CV_HUD_RENDERER__
+#define __OPEN_CV_HUD_RENDERER__
 
 #include <opencv2/core.hpp>
 #include "java/util/ArrayList.h"

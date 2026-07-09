@@ -1,5 +1,5 @@
-#ifndef __GRAYSCALEPALETTE__
-#define __GRAYSCALEPALETTE__
+#ifndef __GRAY_SCALE_PALETTE__
+#define __GRAY_SCALE_PALETTE__
 
 #include "vsdk/toolkit/media/RGBProceduralColorPalette.h"
 class ColorRgb;

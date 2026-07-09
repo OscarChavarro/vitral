@@ -1,5 +1,5 @@
-#ifndef ___CIRCULARDOUBLELINKEDLIST__
-#define ___CIRCULARDOUBLELINKEDLIST__
+#ifndef __CIRCULAR_DOUBLE_LINKED_LIST__
+#define __CIRCULAR_DOUBLE_LINKED_LIST__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDK.h"

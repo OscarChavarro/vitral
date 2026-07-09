@@ -1,5 +1,5 @@
-#ifndef __READERMITSCENE__
-#define __READERMITSCENE__
+#ifndef __READER_MIT_SCENE__
+#define __READER_MIT_SCENE__
 
 class SimpleScene;
 

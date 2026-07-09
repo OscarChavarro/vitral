@@ -1,5 +1,5 @@
-#ifndef __POLYGONPROCESSOR__
-#define __POLYGONPROCESSOR__
+#ifndef __POLYGON_PROCESSOR__
+#define __POLYGON_PROCESSOR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

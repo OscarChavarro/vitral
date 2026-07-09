@@ -1,5 +1,5 @@
-#ifndef ___POLYGON2DWA__
-#define ___POLYGON2DWA__
+#ifndef __POLYGON_2_DWA__
+#define __POLYGON_2_DWA__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

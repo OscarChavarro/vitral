@@ -1,5 +1,5 @@
-#ifndef __KEYEVENT__
-#define __KEYEVENT__
+#ifndef __KEY_EVENT__
+#define __KEY_EVENT__
 
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class KeyEvent : public PresentationElement {

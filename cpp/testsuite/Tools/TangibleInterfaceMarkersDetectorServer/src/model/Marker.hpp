@@ -1,5 +1,5 @@
-#ifndef MARKER_HPP
-#define MARKER_HPP
+#ifndef __MARKER__
+#define __MARKER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"

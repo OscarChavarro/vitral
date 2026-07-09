@@ -1,5 +1,5 @@
-#ifndef __MD2MESH__
-#define __MD2MESH__
+#ifndef __MD_2_MESH__
+#define __MD_2_MESH__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

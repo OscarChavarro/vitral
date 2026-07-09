@@ -1,5 +1,5 @@
-#ifndef __WEILERATHERTONPOLYGONCLIPPER__
-#define __WEILERATHERTONPOLYGONCLIPPER__
+#ifndef __WEILER_ATHERTON_POLYGON_CLIPPER__
+#define __WEILER_ATHERTON_POLYGON_CLIPPER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

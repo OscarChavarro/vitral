@@ -1,5 +1,5 @@
-#ifndef __SOCKETOUTPUTSTREAM__
-#define __SOCKETOUTPUTSTREAM__
+#ifndef __SOCKET_OUTPUT_STREAM__
+#define __SOCKET_OUTPUT_STREAM__
 
 #include "java/io/OutputStream.h"
 namespace java {

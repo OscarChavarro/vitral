@@ -1,5 +1,5 @@
-#ifndef __STRINGBUILDER__
-#define __STRINGBUILDER__
+#ifndef __STRING_BUILDER__
+#define __STRING_BUILDER__
 
 #include "java/lang/String.h"
 namespace java {

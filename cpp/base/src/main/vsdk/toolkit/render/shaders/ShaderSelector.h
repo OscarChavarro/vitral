@@ -1,5 +1,5 @@
-#ifndef __SHADERSELECTOR__
-#define __SHADERSELECTOR__
+#ifndef __SHADER_SELECTOR__
+#define __SHADER_SELECTOR__
 
 class RendererConfiguration;
 class Shader;

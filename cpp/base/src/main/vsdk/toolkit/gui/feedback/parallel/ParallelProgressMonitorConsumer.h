@@ -1,5 +1,5 @@
-#ifndef __PARALLELPROGRESSMONITORCONSUMER__
-#define __PARALLELPROGRESSMONITORCONSUMER__
+#ifndef __PARALLEL_PROGRESS_MONITOR_CONSUMER__
+#define __PARALLEL_PROGRESS_MONITOR_CONSUMER__
 
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.h"

@@ -1,5 +1,5 @@
-#ifndef __RENDERINGELEMENT__
-#define __RENDERINGELEMENT__
+#ifndef __RENDERING_ELEMENT__
+#define __RENDERING_ELEMENT__
 
 class RenderingElement {
 public:

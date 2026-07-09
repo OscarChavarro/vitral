@@ -1,5 +1,5 @@
-#ifndef MARKER_EVENT_BUS_HPP
-#define MARKER_EVENT_BUS_HPP
+#ifndef __MARKER_EVENT_BUS__
+#define __MARKER_EVENT_BUS__
 
 #include "java/util/ArrayList.h"
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"

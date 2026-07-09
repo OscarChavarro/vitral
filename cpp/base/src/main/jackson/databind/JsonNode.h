@@ -1,5 +1,5 @@
-#ifndef __JSONNODE__
-#define __JSONNODE__
+#ifndef __JSON_NODE__
+#define __JSON_NODE__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

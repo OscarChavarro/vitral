@@ -1,5 +1,5 @@
-#ifndef WEBSOCKET_PROTOCOL_HPP
-#define WEBSOCKET_PROTOCOL_HPP
+#ifndef __WEB_SOCKET_PROTOCOL__
+#define __WEB_SOCKET_PROTOCOL__
 
 #include <cstdint>
 #include <cstddef>

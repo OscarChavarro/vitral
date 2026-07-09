@@ -1,5 +1,5 @@
-#ifndef __RENDERCONTEXT__
-#define __RENDERCONTEXT__
+#ifndef __RENDER_CONTEXT__
+#define __RENDER_CONTEXT__
 
 class Shader;
 

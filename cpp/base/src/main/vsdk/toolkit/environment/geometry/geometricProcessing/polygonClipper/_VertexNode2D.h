@@ -1,5 +1,5 @@
-#ifndef ___VERTEXNODE2D__
-#define ___VERTEXNODE2D__
+#ifndef __VERTEX_NODE_2_D__
+#define __VERTEX_NODE_2_D__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 template <class E> class _DoubleLinkedListNode;

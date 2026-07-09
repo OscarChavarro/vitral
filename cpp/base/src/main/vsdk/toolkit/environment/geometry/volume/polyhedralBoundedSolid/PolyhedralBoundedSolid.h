@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRALBOUNDEDSOLID__
-#define __POLYHEDRALBOUNDEDSOLID__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID__
+#define __POLYHEDRAL_BOUNDED_SOLID__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/volume/Solid.h"

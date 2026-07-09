@@ -1,5 +1,5 @@
-#ifndef __CAMERACONTROLLERBLENDER__
-#define __CAMERACONTROLLERBLENDER__
+#ifndef __CAMERA_CONTROLLER_BLENDER__
+#define __CAMERA_CONTROLLER_BLENDER__
 
 #include "vsdk/toolkit/gui/CameraController.h"
 class Camera;

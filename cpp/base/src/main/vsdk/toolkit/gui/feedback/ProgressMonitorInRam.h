@@ -1,5 +1,5 @@
-#ifndef __PROGRESSMONITORINRAM__
-#define __PROGRESSMONITORINRAM__
+#ifndef __PROGRESS_MONITOR_IN_RAM__
+#define __PROGRESS_MONITOR_IN_RAM__
 
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorInRam : public ProgressMonitor {

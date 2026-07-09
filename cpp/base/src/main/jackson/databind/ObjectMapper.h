@@ -1,5 +1,5 @@
-#ifndef __OBJECTMAPPER__
-#define __OBJECTMAPPER__
+#ifndef __OBJECT_MAPPER__
+#define __OBJECT_MAPPER__
 
 #include "java/lang/String.h"
 #include "jackson/databind/JsonNode.h"

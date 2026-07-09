@@ -1,5 +1,5 @@
-#ifndef __SHADERSMOUSEINTERACTIONTECHNIQUES__
-#define __SHADERSMOUSEINTERACTIONTECHNIQUES__
+#ifndef __SHADERS_MOUSE_INTERACTION_TECHNIQUES__
+#define __SHADERS_MOUSE_INTERACTION_TECHNIQUES__
 
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"

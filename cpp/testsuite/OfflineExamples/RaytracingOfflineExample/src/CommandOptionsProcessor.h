@@ -1,5 +1,5 @@
-#ifndef __COMMANDOPTIONSPROCESSOR__
-#define __COMMANDOPTIONSPROCESSOR__
+#ifndef __COMMAND_OPTIONS_PROCESSOR__
+#define __COMMAND_OPTIONS_PROCESSOR__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

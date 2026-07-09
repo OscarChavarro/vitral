@@ -1,5 +1,5 @@
-#ifndef __SIMPLEBODY__
-#define __SIMPLEBODY__
+#ifndef __SIMPLE_BODY__
+#define __SIMPLE_BODY__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

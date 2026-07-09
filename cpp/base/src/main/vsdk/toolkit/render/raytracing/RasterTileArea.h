@@ -1,5 +1,5 @@
-#ifndef __RASTERTILEAREA__
-#define __RASTERTILEAREA__
+#ifndef __RASTER_TILE_AREA__
+#define __RASTER_TILE_AREA__
 
 class Image;
 

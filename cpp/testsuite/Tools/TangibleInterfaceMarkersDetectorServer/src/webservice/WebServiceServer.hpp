@@ -1,5 +1,5 @@
-#ifndef WEBSERVICE_SERVER_HPP
-#define WEBSERVICE_SERVER_HPP
+#ifndef __WEB_SERVICE_SERVER__
+#define __WEB_SERVICE_SERVER__
 
 #include <atomic>
 #include <pthread.h>

@@ -1,5 +1,5 @@
-#ifndef __RGBCOLORPALETTE__
-#define __RGBCOLORPALETTE__
+#ifndef __RGB_COLOR_PALETTE__
+#define __RGB_COLOR_PALETTE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"

@@ -1,5 +1,5 @@
-#ifndef __JOGHUDRENDERER__
-#define __JOGHUDRENDERER__
+#ifndef __JOG_HUD_RENDERER__
+#define __JOG_HUD_RENDERER__
 
 #include "java/lang/String.h"
 class RGBImageUncompressed;

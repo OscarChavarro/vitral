@@ -1,5 +1,5 @@
-#ifndef __FOURIERSHAPEDESCRIPTOR__
-#define __FOURIERSHAPEDESCRIPTOR__
+#ifndef __FOURIER_SHAPE_DESCRIPTOR__
+#define __FOURIER_SHAPE_DESCRIPTOR__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"

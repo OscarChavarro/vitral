@@ -1,5 +1,5 @@
-#ifndef __QUADMESH__
-#define __QUADMESH__
+#ifndef __QUAD_MESH__
+#define __QUAD_MESH__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

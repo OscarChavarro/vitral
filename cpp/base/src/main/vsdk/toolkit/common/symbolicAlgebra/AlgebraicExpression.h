@@ -1,5 +1,5 @@
-#ifndef __ALGEBRAICEXPRESSION__
-#define __ALGEBRAICEXPRESSION__
+#ifndef __ALGEBRAIC_EXPRESSION__
+#define __ALGEBRAIC_EXPRESSION__
 
 #include "java/lang/String.h"
 #include "java/util/HashMap.h"

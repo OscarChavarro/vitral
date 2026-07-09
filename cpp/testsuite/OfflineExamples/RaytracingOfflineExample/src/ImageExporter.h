@@ -1,5 +1,5 @@
-#ifndef __IMAGEEXPORTER__
-#define __IMAGEEXPORTER__
+#ifndef __IMAGE_EXPORTER__
+#define __IMAGE_EXPORTER__
 
 #include "java/lang/String.h"
 

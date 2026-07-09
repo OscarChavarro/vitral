@@ -1,5 +1,5 @@
-#ifndef __CAMERASNAPSHOT__
-#define __CAMERASNAPSHOT__
+#ifndef __CAMERA_SNAPSHOT__
+#define __CAMERA_SNAPSHOT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class CameraSnapshot {

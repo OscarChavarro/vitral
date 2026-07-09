@@ -1,5 +1,5 @@
-#ifndef __COOKTORRANCESHADER__
-#define __COOKTORRANCESHADER__
+#ifndef __COOK_TORRANCE_SHADER__
+#define __COOK_TORRANCE_SHADER__
 
 #include "vsdk/toolkit/render/shaders/Shader.h"
 class CookTorranceShader : public Shader {

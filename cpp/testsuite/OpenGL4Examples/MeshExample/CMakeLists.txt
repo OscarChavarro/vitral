@@ -15,6 +15,7 @@ set(VITRAL_GLFW_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../glfw")
 set(VITRAL_OPENGL4_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4")
 
 if(NOT TARGET vitral_base)
+    set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
     set(WITH_JPEG ON CACHE BOOL "Enable JPEG image format support" FORCE)
     set(WITH_PNG ON CACHE BOOL "Enable PNG image format support" FORCE)
     add_subdirectory("${VITRAL_BASE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_base")
@@ -28,9 +29,17 @@ endif()
 
 add_executable(MeshExample
     src/MeshExample.cpp
+    src/animation/AnimationController.cpp
+    src/gui/MeshKeyboardInteractionTechniques.cpp
+    src/gui/MeshMouseInteractionTechniques.cpp
+    src/gui/TangibleInterfaceInteractionTechniques.cpp
+    src/model/MeshModel.cpp
+    src/options/CommandLineOptions.cpp
+    src/render/Jogl4DebuggerRenderer.cpp
 )
 
 target_include_directories(MeshExample PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src"
     "${VITRAL_BASE_DIR}/src/main"
     "${VITRAL_GLFW_DIR}/src/main"
     "${VITRAL_OPENGL4_DIR}/src/main"

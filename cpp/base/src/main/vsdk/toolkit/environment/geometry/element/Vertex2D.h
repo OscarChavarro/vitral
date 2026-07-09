@@ -1,5 +1,5 @@
-#ifndef __VERTEX2D__
-#define __VERTEX2D__
+#ifndef __VERTEX_2_D__
+#define __VERTEX_2_D__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"

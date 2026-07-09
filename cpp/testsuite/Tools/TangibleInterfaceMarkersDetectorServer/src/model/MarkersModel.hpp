@@ -1,5 +1,5 @@
-#ifndef MARKERS_MODEL_HPP
-#define MARKERS_MODEL_HPP
+#ifndef __MARKERS_MODEL__
+#define __MARKERS_MODEL__
 
 #include "java/util/ArrayList.h"
 #include "model/MarkerGroup.hpp"

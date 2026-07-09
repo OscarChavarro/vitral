@@ -1,5 +1,5 @@
-#ifndef __CALLIGRAPHIC2DBUFFER__
-#define __CALLIGRAPHIC2DBUFFER__
+#ifndef __CALLIGRAPHIC_2_D_BUFFER__
+#define __CALLIGRAPHIC_2_D_BUFFER__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"

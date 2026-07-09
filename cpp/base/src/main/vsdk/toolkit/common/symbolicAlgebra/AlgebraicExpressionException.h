@@ -1,5 +1,5 @@
-#ifndef __ALGEBRAICEXPRESSIONEXCEPTION__
-#define __ALGEBRAICEXPRESSIONEXCEPTION__
+#ifndef __ALGEBRAIC_EXPRESSION_EXCEPTION__
+#define __ALGEBRAIC_EXPRESSION_EXCEPTION__
 
 #include "java/lang/String.h"
 #include <exception>

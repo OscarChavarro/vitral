@@ -1,5 +1,5 @@
-#ifndef ___TRIANGULATIONSEGMENT__
-#define ___TRIANGULATIONSEGMENT__
+#ifndef __TRIANGULATION_SEGMENT__
+#define __TRIANGULATION_SEGMENT__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationTrapezoidQueryNode.h"

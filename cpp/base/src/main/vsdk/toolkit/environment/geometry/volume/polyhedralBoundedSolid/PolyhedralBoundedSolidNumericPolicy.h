@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRALBOUNDEDSOLIDNUMERICPOLICY__
-#define __POLYHEDRALBOUNDEDSOLIDNUMERICPOLICY__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
+#define __POLYHEDRAL_BOUNDED_SOLID_NUMERIC_POLICY__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;

@@ -1,5 +1,5 @@
-#ifndef __RGBAIMAGEUNCOMPRESSED__
-#define __RGBAIMAGEUNCOMPRESSED__
+#ifndef __RGBA_IMAGE_UNCOMPRESSED__
+#define __RGBA_IMAGE_UNCOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBAPixel;

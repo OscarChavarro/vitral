@@ -1,5 +1,5 @@
-#ifndef __STYLEDCALLIGRAPHIC2DBUFFER__
-#define __STYLEDCALLIGRAPHIC2DBUFFER__
+#ifndef __STYLED_CALLIGRAPHIC_2_D_BUFFER__
+#define __STYLED_CALLIGRAPHIC_2_D_BUFFER__
 
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 class StyledCalligraphic2DBuffer : public Calligraphic2DBuffer {

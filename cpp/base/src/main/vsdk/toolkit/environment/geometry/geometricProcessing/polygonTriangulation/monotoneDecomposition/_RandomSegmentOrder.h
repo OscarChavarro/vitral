@@ -1,5 +1,5 @@
-#ifndef ___RANDOMSEGMENTORDER__
-#define ___RANDOMSEGMENTORDER__
+#ifndef __RANDOM_SEGMENT_ORDER__
+#define __RANDOM_SEGMENT_ORDER__
 
 #include <cstdlib>
 

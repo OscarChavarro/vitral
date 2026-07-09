@@ -90,10 +90,6 @@ if(BUILD_TANGIBLE_INTERFACE_SERVER)
   src/webservice/WebSocketProtocol.cpp
   src/webservice/WebServiceServer.cpp
   src/webservice/WebServiceClient.cpp
-  ../../../base/src/main/java/net/ServerSocket.cpp
-  ../../../base/src/main/java/net/Socket.cpp
-  ../../../base/src/main/java/net/SocketInputStream.cpp
-  ../../../base/src/main/java/net/SocketOutputStream.cpp
   ../../../base/src/main/jackson/databind/JsonNode.cpp
   ../../../base/src/main/jackson/databind/ObjectMapper.cpp
 )

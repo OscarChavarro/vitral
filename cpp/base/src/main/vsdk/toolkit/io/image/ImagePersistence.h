@@ -1,5 +1,5 @@
-#ifndef __IMAGEPERSISTENCE__
-#define __IMAGEPERSISTENCE__
+#ifndef __IMAGE_PERSISTENCE__
+#define __IMAGE_PERSISTENCE__
 
 #include "java/io/File.h"
 #include "java/lang/String.h"

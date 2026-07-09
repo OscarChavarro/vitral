@@ -1,5 +1,5 @@
-#ifndef __NORMALMAP__
-#define __NORMALMAP__
+#ifndef __NORMAL_MAP__
+#define __NORMAL_MAP__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/media/MediaEntity.h"

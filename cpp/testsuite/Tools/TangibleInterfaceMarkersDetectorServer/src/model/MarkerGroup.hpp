@@ -1,5 +1,5 @@
-#ifndef MARKER_GROUP_HPP
-#define MARKER_GROUP_HPP
+#ifndef __MARKER_GROUP__
+#define __MARKER_GROUP__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

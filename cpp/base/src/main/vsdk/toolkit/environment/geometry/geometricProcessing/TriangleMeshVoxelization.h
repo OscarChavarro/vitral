@@ -1,5 +1,5 @@
-#ifndef __TRIANGLEMESHVOXELIZATION__
-#define __TRIANGLEMESHVOXELIZATION__
+#ifndef __TRIANGLE_MESH_VOXELIZATION__
+#define __TRIANGLE_MESH_VOXELIZATION__
 
 class TriangleMesh;
 class VoxelVolume;

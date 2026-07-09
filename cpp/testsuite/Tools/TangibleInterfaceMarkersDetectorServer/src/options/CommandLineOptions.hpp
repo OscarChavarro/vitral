@@ -1,5 +1,5 @@
-#ifndef COMMAND_LINE_OPTIONS_HPP
-#define COMMAND_LINE_OPTIONS_HPP
+#ifndef __COMMAND_LINE_OPTIONS__
+#define __COMMAND_LINE_OPTIONS__
 
 #include "java/lang/String.h"
 

@@ -1,5 +1,5 @@
-#ifndef __POLYGONTOPOLOGICALMERGER__
-#define __POLYGONTOPOLOGICALMERGER__
+#ifndef __POLYGON_TOPOLOGICAL_MERGER__
+#define __POLYGON_TOPOLOGICAL_MERGER__
 
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 class PolygonTopologicalMerger {

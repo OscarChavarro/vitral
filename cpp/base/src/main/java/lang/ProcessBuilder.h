@@ -1,5 +1,5 @@
-#ifndef __PROCESSBUILDER__
-#define __PROCESSBUILDER__
+#ifndef __PROCESS_BUILDER__
+#define __PROCESS_BUILDER__
 
 namespace java {
 

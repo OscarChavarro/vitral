@@ -1,5 +1,5 @@
-#ifndef __RASTERIZER2D__
-#define __RASTERIZER2D__
+#ifndef __RASTERIZER_2_D__
+#define __RASTERIZER_2_D__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

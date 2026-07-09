@@ -1,5 +1,5 @@
-#ifndef WEBSERVICE_CLIENT_HPP
-#define WEBSERVICE_CLIENT_HPP
+#ifndef __WEB_SERVICE_CLIENT__
+#define __WEB_SERVICE_CLIENT__
 
 #include <chrono>
 

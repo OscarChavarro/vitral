@@ -1,5 +1,5 @@
-#ifndef __FUNCTIONALEXPLICITSURFACE__
-#define __FUNCTIONALEXPLICITSURFACE__
+#ifndef __FUNCTIONAL_EXPLICIT_SURFACE__
+#define __FUNCTIONAL_EXPLICIT_SURFACE__
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"

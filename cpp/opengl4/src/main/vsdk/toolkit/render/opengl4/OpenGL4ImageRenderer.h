@@ -1,5 +1,5 @@
-#ifndef __OPENGL4IMAGERENDERER__
-#define __OPENGL4IMAGERENDERER__
+#ifndef __OPEN_GL_4_IMAGE_RENDERER__
+#define __OPEN_GL_4_IMAGE_RENDERER__
 
 #include <GL/glew.h>
 #include "java/lang/String.h"

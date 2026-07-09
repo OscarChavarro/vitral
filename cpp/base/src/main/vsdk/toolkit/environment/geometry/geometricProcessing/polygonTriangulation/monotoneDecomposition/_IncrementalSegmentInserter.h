@@ -1,5 +1,5 @@
-#ifndef ___INCREMENTALSEGMENTINSERTER__
-#define ___INCREMENTALSEGMENTINSERTER__
+#ifndef __INCREMENTAL_SEGMENT_INSERTER__
+#define __INCREMENTAL_SEGMENT_INSERTER__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_TriangulationSegment.h"

@@ -1,5 +1,5 @@
-#ifndef __POLYGON2D__
-#define __POLYGON2D__
+#ifndef __POLYGON_2_D__
+#define __POLYGON_2_D__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"

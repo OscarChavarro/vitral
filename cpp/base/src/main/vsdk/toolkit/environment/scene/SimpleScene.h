@@ -1,5 +1,5 @@
-#ifndef __SIMPLESCENE__
-#define __SIMPLESCENE__
+#ifndef __SIMPLE_SCENE__
+#define __SIMPLE_SCENE__
 
 #include "java/util/ArrayList.h"
 class SimpleBody;

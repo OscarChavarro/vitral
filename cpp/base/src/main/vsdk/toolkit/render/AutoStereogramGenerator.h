@@ -1,5 +1,5 @@
-#ifndef __AUTOSTEREOGRAMGENERATOR__
-#define __AUTOSTEREOGRAMGENERATOR__
+#ifndef __AUTO_STEREOGRAM_GENERATOR__
+#define __AUTO_STEREOGRAM_GENERATOR__
 
 #include "vsdk/toolkit/render/RenderingElement.h"
 class RGBImageUncompressed;

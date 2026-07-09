@@ -1,5 +1,5 @@
-#ifndef __BUFFEREDOUTPUTSTREAM__
-#define __BUFFEREDOUTPUTSTREAM__
+#ifndef __BUFFERED_OUTPUT_STREAM__
+#define __BUFFERED_OUTPUT_STREAM__
 
 #include "java/io/File.h"
 #include "java/io/OutputStream.h"

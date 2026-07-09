@@ -1,5 +1,5 @@
-#ifndef __EXECUTIONEXCEPTION__
-#define __EXECUTIONEXCEPTION__
+#ifndef __EXECUTION_EXCEPTION__
+#define __EXECUTION_EXCEPTION__
 
 #include "java/lang/String.h"
 #include "java/lang/System.h"

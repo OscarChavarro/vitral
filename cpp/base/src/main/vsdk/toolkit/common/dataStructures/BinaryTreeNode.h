@@ -1,5 +1,5 @@
-#ifndef __BINARYTREENODE__
-#define __BINARYTREENODE__
+#ifndef __BINARY_TREE_NODE__
+#define __BINARY_TREE_NODE__
 
 /**
 @param <T>

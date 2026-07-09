@@ -1,5 +1,5 @@
-#ifndef __ATOMICLONG__
-#define __ATOMICLONG__
+#ifndef __ATOMIC_LONG__
+#define __ATOMIC_LONG__
 
 #include <atomic>
 namespace java {

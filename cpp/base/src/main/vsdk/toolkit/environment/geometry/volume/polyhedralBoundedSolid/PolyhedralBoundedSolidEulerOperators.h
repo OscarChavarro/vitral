@@ -1,5 +1,5 @@
-#ifndef __POLYHEDRALBOUNDEDSOLIDEULEROPERATORS__
-#define __POLYHEDRALBOUNDEDSOLIDEULEROPERATORS__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
+#define __POLYHEDRAL_BOUNDED_SOLID_EULER_OPERATORS__
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;

@@ -1,5 +1,5 @@
-#ifndef __SURFACERAYINTERSECTION__
-#define __SURFACERAYINTERSECTION__
+#ifndef __SURFACE_RAY_INTERSECTION__
+#define __SURFACE_RAY_INTERSECTION__
 
 class Geometry;
 class Ray;

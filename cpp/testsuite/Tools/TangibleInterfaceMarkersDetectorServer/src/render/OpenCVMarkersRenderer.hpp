@@ -1,5 +1,5 @@
-#ifndef OPENCV_MARKERS_RENDERER_HPP
-#define OPENCV_MARKERS_RENDERER_HPP
+#ifndef __OPEN_CV_MARKERS_RENDERER__
+#define __OPEN_CV_MARKERS_RENDERER__
 
 #include <opencv2/core.hpp>
 

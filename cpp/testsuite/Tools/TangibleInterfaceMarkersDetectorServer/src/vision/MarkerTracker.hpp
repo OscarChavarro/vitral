@@ -1,5 +1,5 @@
-#ifndef MARKER_TRACKER_HPP
-#define MARKER_TRACKER_HPP
+#ifndef __MARKER_TRACKER__
+#define __MARKER_TRACKER__
 
 #include <pthread.h>
 #include "java/lang/String.h"

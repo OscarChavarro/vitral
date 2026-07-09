@@ -1,5 +1,5 @@
-#ifndef ___POLYGON2DCONTOUR__
-#define ___POLYGON2DCONTOUR__
+#ifndef __POLYGON_2_D_CONTOUR__
+#define __POLYGON_2_D_CONTOUR__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"

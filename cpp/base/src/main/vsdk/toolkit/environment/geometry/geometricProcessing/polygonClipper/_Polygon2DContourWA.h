@@ -1,5 +1,5 @@
-#ifndef ___POLYGON2DCONTOURWA__
-#define ___POLYGON2DCONTOURWA__
+#ifndef __POLYGON_2_D_CONTOUR_WA__
+#define __POLYGON_2_D_CONTOUR_WA__
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_CircularDoubleLinkedList.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/_VertexNode2D.h"

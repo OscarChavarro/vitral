@@ -1,5 +1,5 @@
-#ifndef __TRIANGLEMESHGROUP__
-#define __TRIANGLEMESHGROUP__
+#ifndef __TRIANGLE_MESH_GROUP__
+#define __TRIANGLE_MESH_GROUP__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

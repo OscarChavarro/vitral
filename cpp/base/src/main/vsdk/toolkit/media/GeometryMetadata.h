@@ -1,5 +1,5 @@
-#ifndef __GEOMETRYMETADATA__
-#define __GEOMETRYMETADATA__
+#ifndef __GEOMETRY_METADATA__
+#define __GEOMETRY_METADATA__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

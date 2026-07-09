@@ -1,5 +1,5 @@
-#ifndef __ICONGENERATOR__
-#define __ICONGENERATOR__
+#ifndef __ICON_GENERATOR__
+#define __ICON_GENERATOR__
 
 #include <java/lang/String.h>
 class Calligraphic2DBuffer;

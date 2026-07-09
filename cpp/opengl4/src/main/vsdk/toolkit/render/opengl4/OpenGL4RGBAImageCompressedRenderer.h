@@ -1,5 +1,5 @@
-#ifndef __OPENGL4RGBAIMAGECOMPRESSEDRENDERER__
-#define __OPENGL4RGBAIMAGECOMPRESSEDRENDERER__
+#ifndef __OPEN_GL_4_RGBA_IMAGE_COMPRESSED_RENDERER__
+#define __OPEN_GL_4_RGBA_IMAGE_COMPRESSED_RENDERER__
 
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"

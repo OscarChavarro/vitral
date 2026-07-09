@@ -1,5 +1,5 @@
-#ifndef __INDEXEDCOLORIMAGEUNCOMPRESSED__
-#define __INDEXEDCOLORIMAGEUNCOMPRESSED__
+#ifndef __INDEXED_COLOR_IMAGE_UNCOMPRESSED__
+#define __INDEXED_COLOR_IMAGE_UNCOMPRESSED__
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBColorPalette;

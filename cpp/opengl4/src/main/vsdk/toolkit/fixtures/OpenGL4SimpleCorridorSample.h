@@ -1,5 +1,5 @@
-#ifndef __OPENGL4SIMPLECORRIDORSAMPLE__
-#define __OPENGL4SIMPLECORRIDORSAMPLE__
+#ifndef __OPEN_GL_4_SIMPLE_CORRIDOR_SAMPLE__
+#define __OPEN_GL_4_SIMPLE_CORRIDOR_SAMPLE__
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

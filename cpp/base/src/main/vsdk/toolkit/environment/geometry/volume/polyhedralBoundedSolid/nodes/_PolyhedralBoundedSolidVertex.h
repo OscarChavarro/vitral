@@ -1,5 +1,5 @@
-#ifndef ___POLYHEDRALBOUNDEDSOLIDVERTEX__
-#define ___POLYHEDRALBOUNDEDSOLIDVERTEX__
+#ifndef __POLYHEDRAL_BOUNDED_SOLID_VERTEX__
+#define __POLYHEDRAL_BOUNDED_SOLID_VERTEX__
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"

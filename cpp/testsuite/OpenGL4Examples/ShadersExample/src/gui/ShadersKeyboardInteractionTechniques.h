@@ -1,5 +1,5 @@
-#ifndef __SHADERSKEYBOARDINTERACTIONTECHNIQUES__
-#define __SHADERSKEYBOARDINTERACTIONTECHNIQUES__
+#ifndef __SHADERS_KEYBOARD_INTERACTION_TECHNIQUES__
+#define __SHADERS_KEYBOARD_INTERACTION_TECHNIQUES__
 
 #include "../model/ShaderOperationMode.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"

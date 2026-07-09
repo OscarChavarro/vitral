@@ -1,5 +1,5 @@
-#ifndef __OPENGL4LINERENDERER__
-#define __OPENGL4LINERENDERER__
+#ifndef __OPEN_GL_4_LINE_RENDERER__
+#define __OPEN_GL_4_LINE_RENDERER__
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

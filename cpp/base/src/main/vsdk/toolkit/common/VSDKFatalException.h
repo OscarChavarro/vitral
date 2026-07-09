@@ -1,5 +1,5 @@
-#ifndef __VSDKFATALEXCEPTION__
-#define __VSDKFATALEXCEPTION__
+#ifndef __VSDK_FATAL_EXCEPTION__
+#define __VSDK_FATAL_EXCEPTION__
 
 
 #include "java/lang/String.h"

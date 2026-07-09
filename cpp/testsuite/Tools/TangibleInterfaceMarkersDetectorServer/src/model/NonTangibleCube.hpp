@@ -1,5 +1,5 @@
-#ifndef NONTANGIBLE_CUBE_HPP
-#define NONTANGIBLE_CUBE_HPP
+#ifndef __NON_TANGIBLE_CUBE__
+#define __NON_TANGIBLE_CUBE__
 
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"
