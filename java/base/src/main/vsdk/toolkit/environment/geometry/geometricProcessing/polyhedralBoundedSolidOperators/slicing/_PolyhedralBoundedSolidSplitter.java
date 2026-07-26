@@ -288,7 +288,7 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
             c.position = new Vector3Dd((he.next()).startingVertex.position);
             c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.UNDEFINED;
             neighborSectorsInfo.add(c);
-            if ( checkWideness(he) ) {
+            if ( checkSplitterSectorWideness(he) ) {
                 bisect = bisector(he);
                 c.situation = _PolyhedralBoundedSolidSplitterSectorClassification.CROSSING_EDGE;
 
@@ -316,6 +316,51 @@ public class _PolyhedralBoundedSolidSplitter extends _PolyhedralBoundedSolidOper
         }
 
         return neighborSectorsInfo;
+    }
+
+    /**
+    The splitter needs the oriented interior angle from [MANT1988].14.5.2.
+    Boolean set operations intentionally use the legacy cross-product
+    predicate inherited from `_PolyhedralBoundedSolidOperator`; that
+    predicate treats degenerate/straight sectors as wide and is not
+    interchangeable with the splitter classification.
+    */
+    private static boolean checkSplitterSectorWideness(
+        _PolyhedralBoundedSolidHalfEdge he)
+    {
+        if ( he == null || he.parentLoop == null ||
+             he.parentLoop.parentFace == null ||
+             he.parentLoop.parentFace.getContainingPlane() == null ||
+             he.previous() == null || he.next() == null ) {
+            return true;
+        }
+
+        Vector3Dd vertex = he.startingVertex.position;
+        Vector3Dd incoming = vertex.subtract(
+            he.previous().startingVertex.position);
+        Vector3Dd outgoing = he.next().startingVertex.position.subtract(vertex);
+        Vector3Dd faceNormal =
+            he.parentLoop.parentFace.getContainingPlane().getNormal();
+
+        if ( incoming.length() <= numericContext.unitVectorTolerance() ||
+             outgoing.length() <= numericContext.unitVectorTolerance() ||
+             faceNormal.length() <= numericContext.unitVectorTolerance() ) {
+            return true;
+        }
+
+        incoming = incoming.normalized();
+        outgoing = outgoing.normalized();
+        faceNormal = faceNormal.normalized();
+
+        double signedTurn = Math.atan2(
+            faceNormal.dotProduct(incoming.crossProduct(outgoing)),
+            incoming.dotProduct(outgoing));
+        double interiorAngle = signedTurn < 0.0
+            ? 2.0 * Math.PI + signedTurn
+            : signedTurn;
+
+        return interiorAngle >
+            Math.PI + numericContext.angleTolerance();
     }
 
     private static boolean inplaneEdgesOn(
