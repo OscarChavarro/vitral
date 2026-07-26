@@ -521,19 +521,19 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
 
     /**
     Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`.
+    Strict result validation is enabled by default.
     */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
-        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op);
+        return setOp(inSolidA, inSolidB, op, false, true, true);
     }
 
     /**
     Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`
-    including debug mode.
+    including debug mode. Strict result validation is enabled by default.
     */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
@@ -541,14 +541,13 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         int op,
         boolean withDebug)
     {
-        PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
-        return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
-            withDebug);
+        return setOp(inSolidA, inSolidB, op, withDebug, true, true);
     }
 
     /**
     Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp`
-    including debug mode and optional final face maximization.
+    including debug mode and optional final face maximization. Strict result
+    validation is enabled by default.
     */
     public static PolyhedralBoundedSolid setOp(
         PolyhedralBoundedSolid inSolidA,
@@ -557,8 +556,32 @@ public class PolyhedralBoundedSolidModeler extends ProcessingElement
         boolean withDebug,
         boolean maximizeResultFaces)
     {
+        return setOp(inSolidA, inSolidB, op, withDebug,
+            maximizeResultFaces, true);
+    }
+
+    /**
+    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator.setOp` with
+    configurable strict result validation.
+
+    <p>Strict validation performs global shell/Euler analysis and an
+    all-face-pairs intersection scan. It is enabled by default by the shorter
+    overloads; callers can pass {@code false} here for an explicit
+    performance/legacy-compatibility opt-out.</p>
+
+    @throws IllegalStateException when a completed boolean result fails the
+        strict B-Rep postcondition
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces,
+        boolean doStrictValidation)
+    {
         PolyhedralBoundedSolidStatistics.recordSetOpCall(op);
         return _PolyhedralBoundedSolidSetOperator.setOp(inSolidA, inSolidB, op,
-            withDebug, maximizeResultFaces);
+            withDebug, maximizeResultFaces, doStrictValidation);
     }
 }

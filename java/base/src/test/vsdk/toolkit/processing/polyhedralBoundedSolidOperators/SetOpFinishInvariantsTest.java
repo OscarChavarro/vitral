@@ -34,7 +34,8 @@ class SetOpFinishInvariantsTest
         PolyhedralBoundedSolid solidB,
         int op)
     {
-        PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false);
+        PolyhedralBoundedSolidModeler.setOp(
+            solidA, solidB, op, false, true, false);
 
         assertThat(_PolyhedralBoundedSolidSetFinisher.getLastLegacyFallbackCount())
             .as("[%s] sanitizePairedFaces must not use legacy ordering fallback", label)
@@ -49,7 +50,8 @@ class SetOpFinishInvariantsTest
         PolyhedralBoundedSolid solidB,
         int op)
     {
-        PolyhedralBoundedSolidModeler.setOp(solidA, solidB, op, false);
+        PolyhedralBoundedSolidModeler.setOp(
+            solidA, solidB, op, false, true, false);
 
         assertThat(_PolyhedralBoundedSolidSetFinisher.getLastTriangulatedFaceCount())
             .as("[%s] triangulateNonPlanarFaces must split 0 faces in clean baseline", label)

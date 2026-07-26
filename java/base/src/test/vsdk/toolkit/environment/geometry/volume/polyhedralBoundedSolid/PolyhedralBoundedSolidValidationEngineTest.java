@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidHalfEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidLoop;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,5 +69,34 @@ class PolyhedralBoundedSolidValidationEngineTest
         // Assert
         assertThat(result).isFalse();
         assertThat(solid.isValid()).isFalse();
+    }
+
+    @Test
+    void given_twoEdgeWireLoop_when_validateStrict_then_rejectsMalformedLoop()
+    {
+        PolyhedralBoundedSolid solid =
+            PolyhedralBoundedSolidTestFixtures.createBoxSolid(
+                1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+        _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(0);
+        _PolyhedralBoundedSolidLoop malformed =
+            new _PolyhedralBoundedSolidLoop(face);
+        _PolyhedralBoundedSolidHalfEdge first =
+            new _PolyhedralBoundedSolidHalfEdge(
+                solid.getVerticesList().get(0), malformed, solid);
+        _PolyhedralBoundedSolidHalfEdge second =
+            new _PolyhedralBoundedSolidHalfEdge(
+                solid.getVerticesList().get(1), malformed, solid);
+        malformed.halfEdgesList.add(first);
+        malformed.halfEdgesList.add(second);
+        malformed.boundaryStartHalfEdge = first;
+        StringBuilder message = new StringBuilder();
+
+        boolean result = new _GeometricStrictLoopsStrategy().validate(
+            solid, PolyhedralBoundedSolidNumericPolicy.forSolid(solid),
+            message);
+
+        assertThat(result).isFalse();
+        assertThat(message.toString())
+            .contains("loop with fewer than 3 edges");
     }
 }

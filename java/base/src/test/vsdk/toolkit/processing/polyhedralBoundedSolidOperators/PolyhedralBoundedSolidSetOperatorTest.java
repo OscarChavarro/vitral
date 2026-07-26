@@ -60,7 +60,7 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(solidA, solidB,
-            op, false);
+            op, false, true, false);
 
         // Assert
         assertThat(result).isNotNull();
@@ -199,7 +199,7 @@ class PolyhedralBoundedSolidSetOperatorTest
 
         // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
-            solidA, solidB, op, false);
+            solidA, solidB, op, false, true, false);
 
         // Assert
         assertThat(result).isNotNull();
@@ -222,7 +222,7 @@ class PolyhedralBoundedSolidSetOperatorTest
         // Action
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
             solidA, solidB, PolyhedralBoundedSolidModeler.INTERSECTION, false,
-            true);
+            true, false);
 
         // Assert
         assertThat(result).isNotNull();
@@ -323,10 +323,12 @@ class PolyhedralBoundedSolidSetOperatorTest
         // Action
         PolyhedralBoundedSolid withMax = PolyhedralBoundedSolidModeler.setOp(
             operandsWithMax[0], operandsWithMax[1],
-            PolyhedralBoundedSolidModeler.INTERSECTION, false, true);
+            PolyhedralBoundedSolidModeler.INTERSECTION,
+            false, true, false);
         PolyhedralBoundedSolid withoutMax = PolyhedralBoundedSolidModeler.setOp(
             operandsWithoutMax[0], operandsWithoutMax[1],
-            PolyhedralBoundedSolidModeler.INTERSECTION, false, false);
+            PolyhedralBoundedSolidModeler.INTERSECTION,
+            false, false, false);
 
         // Assert
         assertThat(PolyhedralBoundedSolidValidationEngine

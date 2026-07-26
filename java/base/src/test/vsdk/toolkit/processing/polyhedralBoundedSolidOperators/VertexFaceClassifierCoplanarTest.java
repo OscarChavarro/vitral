@@ -97,7 +97,8 @@ class VertexFaceClassifierCoplanarTest
             PolyhedralBoundedSolidTestFixtures.createTouchingBoxPair();
 
         PolyhedralBoundedSolid result = PolyhedralBoundedSolidModeler.setOp(
-            pair[0], pair[1], PolyhedralBoundedSolidModeler.UNION, false);
+            pair[0], pair[1], PolyhedralBoundedSolidModeler.UNION,
+            false, true, false);
 
         assertThat(PolyhedralBoundedSolidValidationEngine
             .validateIntermediate(result)).isTrue();

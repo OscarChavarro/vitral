@@ -126,7 +126,9 @@ class CsgMoonCylinderDifferenceDegeneracyTest
         translation = translation.translation(MOON_OFFSET);
         PolyhedralBoundedSolidModeler.applyTransformation(b, translation);
         return PolyhedralBoundedSolidModeler.setOp(
-            a, b, PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            a, b, PolyhedralBoundedSolidModeler.SUBTRACT,
+            false, true,
+            Boolean.getBoolean("vsdk.strictValidationBenchmark"));
     }
 
     private static PolyhedralBoundedSolid createCylinder(

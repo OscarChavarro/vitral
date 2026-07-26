@@ -36,6 +36,7 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologySummary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
@@ -748,7 +749,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
-        return setOp(inSolidA, inSolidB, op, false, true);
+        return setOp(inSolidA, inSolidB, op, false, true, true);
     }
 
     private static void debugSolid(PolyhedralBoundedSolid solid, String pattern)
@@ -787,6 +788,68 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             PolyhedralBoundedSolidTopologyEditing.compactIds(res);
         }
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+    }
+
+    private static PolyhedralBoundedSolid completeSetOpResult(
+        PolyhedralBoundedSolid result,
+        String operandADiagnostics,
+        String operandBDiagnostics,
+        int op,
+        String resultPath,
+        boolean maximizeResultFaces,
+        boolean doStrictValidation)
+    {
+        if ( result == null ) {
+            throw new IllegalStateException(
+                "Boolean operation returned null: op=" +
+                operationName(op) + ", path=" + resultPath);
+        }
+        if ( result.getPolygonsList().size() > 0 ) {
+            postProcessResult(result, maximizeResultFaces);
+        }
+        if ( doStrictValidation ) {
+            StringBuilder strictMessage = new StringBuilder();
+            if ( !PolyhedralBoundedSolidValidationEngine.validateStrict(
+                    result, strictMessage) ) {
+                PolyhedralBoundedSolidTopologySummary topology =
+                    PolyhedralBoundedSolidTopologySummary.from(result);
+                throw new IllegalStateException(
+                    "Strict boolean result validation failed: op=" +
+                    operationName(op) + ", path=" + resultPath +
+                    ", operandA=" + operandADiagnostics +
+                    ", operandB=" + operandBDiagnostics +
+                    ", result=" + cardinalitiesAndBounds(result) +
+                    ", " + topology + "\n" + strictMessage);
+            }
+        }
+        return result;
+    }
+
+    private static String operationName(int op)
+    {
+        if ( op == UNION ) {
+            return "UNION";
+        }
+        if ( op == INTERSECTION ) {
+            return "INTERSECTION";
+        }
+        if ( op == SUBTRACT ) {
+            return "SUBTRACT";
+        }
+        return "UNKNOWN(" + op + ")";
+    }
+
+    private static String cardinalitiesAndBounds(
+        PolyhedralBoundedSolid solid)
+    {
+        if ( solid == null ) {
+            return "null";
+        }
+        return "{faces=" + solid.getPolygonsList().size() +
+            ", edges=" + solid.getEdgesList().size() +
+            ", vertices=" + solid.getVerticesList().size() +
+            ", bounds=" + java.util.Arrays.toString(solid.getMinMax()) +
+            "}";
     }
 
     private static PolyhedralBoundedSolid deepCloneSolid(
@@ -930,7 +993,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolid inSolidB,
         int op, boolean withDebug)
     {
-        return setOp(inSolidA, inSolidB, op, withDebug, true);
+        return setOp(inSolidA, inSolidB, op, withDebug, true, true);
     }
 
     /**
@@ -942,6 +1005,25 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         int op,
         boolean withDebug,
         boolean maximizeResultFaces)
+    {
+        return setOp(inSolidA, inSolidB, op, withDebug,
+            maximizeResultFaces, true);
+    }
+
+    /**
+    Runs a boolean operation with configurable strict B-Rep validation as a
+    final result postcondition. Shorter overloads enable it by default.
+    *
+    * @throws IllegalStateException when {@code doStrictValidation} is true
+    *     and the completed result fails strict validation
+    */
+    public static PolyhedralBoundedSolid setOp(
+        PolyhedralBoundedSolid inSolidA,
+        PolyhedralBoundedSolid inSolidB,
+        int op,
+        boolean withDebug,
+        boolean maximizeResultFaces,
+        boolean doStrictValidation)
     {
         setNumericContext(
             PolyhedralBoundedSolidNumericPolicy.forSolids(inSolidA, inSolidB));
@@ -984,12 +1066,18 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         PolyhedralBoundedSolid axisAlignedCellBooleanFallback;
         PolyhedralBoundedSolid orthogonalProfileBooleanFallback;
         boolean fallbackProvidedResult;
+        String resultPath;
+        String operandADiagnostics;
+        String operandBDiagnostics;
 
         _SetOperationContext ctx = new _SetOperationContext();
         ctx.sonea = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         ctx.soneb = new ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge>();
         offsetCylinderDifferenceFallback = null;
         fallbackProvidedResult = false;
+        resultPath = "normal-pipeline";
+        operandADiagnostics = cardinalitiesAndBounds(inSolidA);
+        operandBDiagnostics = cardinalitiesAndBounds(inSolidB);
 
         //-----------------------------------------------------------------
         if ( withDebug ) {
@@ -1054,19 +1142,19 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                     preflightCache);
         if ( coplanarAreaContactResult != null ) {
             res = coplanarAreaContactResult;
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
+            return completeSetOpResult(res, operandADiagnostics,
+                operandBDiagnostics, op,
+                "partial-coplanar-area-preflight", maximizeResultFaces,
+                doStrictValidation);
         }
 
         if ( isTouchingOnlyPreflightCase(inSolidA, inSolidB, preflightCache) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
+            return completeSetOpResult(res, operandADiagnostics,
+                operandBDiagnostics, op,
+                "touching-only-preflight", maximizeResultFaces,
+                doStrictValidation);
         }
 
         // §7.3.1.A — Degenerate identity preflight (algebraic identity
@@ -1090,10 +1178,10 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             }
             // SUBTRACT case: A − A = ∅; res remains the empty PolyhedralBoundedSolid
             // already initialised at function entry.
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
+            return completeSetOpResult(res, operandADiagnostics,
+                operandBDiagnostics, op,
+                "geometric-identity-preflight", maximizeResultFaces,
+                doStrictValidation);
         }
 
         // §7.3.1.D — Containment-only preflight: when one solid is
@@ -1106,10 +1194,10 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                 preflightCache) ) {
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op,
                 preflightCache);
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
+            return completeSetOpResult(res, operandADiagnostics,
+                operandBDiagnostics, op,
+                "containment-only-preflight", maximizeResultFaces,
+                doStrictValidation);
         }
 
         setOpGenerate(ctx, inSolidA, inSolidB);
@@ -1137,10 +1225,10 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
         if ( ctx.sonea.isEmpty() && ctx.sonvv.isEmpty() ) {
             // No intersections found
             res = setOpNoIntersectionCase(inSolidA, inSolidB, res, op);
-            if ( res.getPolygonsList().size() > 0 ) {
-                postProcessResult(res, maximizeResultFaces);
-            }
-            return res;
+            return completeSetOpResult(res, operandADiagnostics,
+                operandBDiagnostics, op,
+                "no-intersection-after-classify", maximizeResultFaces,
+                doStrictValidation);
         }
 
         if ( withDebug ) {
@@ -1167,6 +1255,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                 res = offsetCylinderDifferenceFallback;
                 offsetCylinderDifferenceFallback = null;
                 fallbackProvidedResult = true;
+                resultPath = "offset-cylinder-fallback-incomplete-connect";
             }
         }
 
@@ -1181,6 +1270,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             res = axisAlignedCellBooleanFallback;
             axisAlignedCellBooleanFallback = null;
             fallbackProvidedResult = true;
+            resultPath = "axis-aligned-cell-fallback-incomplete-connect";
         }
         else if ( !fallbackProvidedResult &&
                   orthogonalProfileBooleanFallback != null &&
@@ -1193,6 +1283,7 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             res = orthogonalProfileBooleanFallback;
             orthogonalProfileBooleanFallback = null;
             fallbackProvidedResult = true;
+            resultPath = "orthogonal-profile-fallback-incomplete-connect";
         }
         if ( !fallbackProvidedResult ) {
             try {
@@ -1211,6 +1302,8 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                     res = offsetCylinderExceptionFallback;
                     axisAlignedCellBooleanFallback = null;
                     orthogonalProfileBooleanFallback = null;
+                    resultPath =
+                        "offset-cylinder-fallback-finish-exception";
                 }
                 else if ( axisAlignedCellBooleanFallback == null &&
                      orthogonalProfileBooleanFallback == null ) {
@@ -1222,6 +1315,8 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                         e.getClass().getSimpleName());
                     res = axisAlignedCellBooleanFallback;
                     axisAlignedCellBooleanFallback = null;
+                    resultPath =
+                        "axis-aligned-cell-fallback-finish-exception";
                 }
                 else {
                     tracePipelineSummary(
@@ -1229,6 +1324,8 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
                         e.getClass().getSimpleName());
                     res = orthogonalProfileBooleanFallback;
                     orthogonalProfileBooleanFallback = null;
+                    resultPath =
+                        "orthogonal-profile-fallback-finish-exception";
                 }
             }
         }
@@ -1244,18 +1341,27 @@ public class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             tracePipelineSummary(
                 "axis-aligned cell fallback replacing incomplete result");
             res = axisAlignedCellBooleanFallback;
+            resultPath = "axis-aligned-cell-fallback-incomplete-result";
         }
         if ( shouldUseAxisAlignedCellBooleanFallback(
                  orthogonalProfileBooleanFallback, res) ) {
             tracePipelineSummary(
                 "orthogonal profile fallback replacing incomplete result");
             res = orthogonalProfileBooleanFallback;
+            resultPath = "orthogonal-profile-fallback-incomplete-result";
         }
 
+        PolyhedralBoundedSolid resultBeforeProfileFallback = res;
         res = _PolyhedralBoundedSolidProfileDifferenceFallback
             .applyProfileDifferenceFallbackIfNeeded(
             profileDifferenceFallback, res);
-        postProcessResult(res, maximizeResultFaces);
+        if ( res != resultBeforeProfileFallback ) {
+            resultPath = "profile-difference-fallback";
+        }
+
+        res = completeSetOpResult(res, operandADiagnostics,
+            operandBDiagnostics, op, resultPath, maximizeResultFaces,
+            doStrictValidation);
 
         if ( withDebug ) {
             debugSolid(res, "outputR_stage07");

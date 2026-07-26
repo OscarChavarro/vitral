@@ -17,6 +17,11 @@ tasks.named('test') {
     // Keep base tests in serial mode by default.
     maxParallelForks = 1
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+    // Stage 10 A/B harness: keeps the existing moon-cylinder unit-test
+    // fixtures/assertions unchanged while selecting the new setOp flag.
+    systemProperty 'vsdk.strictValidationBenchmark',
+        (project.findProperty('strictValidationBenchmark') ?: 'false')
+            .toString()
     // Opt-in: '-Pjfr' attaches Java Flight Recorder for CSG boolean profiling.
     // Writes base/build/profiling/test.jfr (settings=profile, dumponexit=true).
     if ( project.hasProperty('jfr') ) {

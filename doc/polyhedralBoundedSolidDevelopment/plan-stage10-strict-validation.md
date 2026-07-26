@@ -1,9 +1,9 @@
-# Stage 10 — Opt-in Strict Validation for CSG Boolean Operations
+# Stage 10 — Default Strict Validation for CSG Boolean Operations
 
 **Date:** 2026-07-26  
-**Status:** Proposed  
-**Primary goal:** Add an opt-in `doStrictValidation` postcondition to every
-public and internal CSG boolean entry point, defaulting to `false`, and turn the
+**Status:** Implementation complete; manual visual smoke check pending
+**Primary goal:** Add a configurable `doStrictValidation` postcondition to
+every public and internal CSG boolean entry point, defaulting to `true`, and turn the
 `STEPER_MOTOR_GUIDE` failure discovered in
 `TangibleInterfaceGizmoCreator` into a kernel regression fixture.
 
@@ -61,10 +61,10 @@ representing a closed solid with a blind stepped pocket.
 
 This incident demonstrates two separate needs:
 
-- Boolean callers need an inexpensive default path that preserves current
-  behavior.
-- Tests and diagnostic callers need an explicit way to reject a boolean result
-  that fails strict B-Rep validation before it contaminates the next operation.
+- Boolean callers need fail-fast rejection of invalid B-Reps before a bad
+  result contaminates the next operation.
+- Performance-sensitive or legacy diagnostic callers need an explicit opt-out
+  whose cost and behavior remain measurable.
 
 ---
 
@@ -74,7 +74,7 @@ This incident demonstrates two separate needs:
 
 - Add `boolean doStrictValidation` to the complete `setOp` call chain.
 - Preserve all existing overloads and make them delegate with
-  `doStrictValidation = false`.
+  `doStrictValidation = true`.
 - Strictly validate every successful result path when the flag is `true`,
   including preflight, fallback, recovery, identity, non-intersection, and
   normal Mantyla-pipeline results.
@@ -86,7 +86,7 @@ This incident demonstrates two separate needs:
 
 ### Non-goals
 
-- Do not enable strict validation by default.
+- Do not remove the explicit `doStrictValidation=false` opt-out.
 - Do not change the result produced when `doStrictValidation` is `false`.
 - Do not silently repair or replace an invalid boolean result under the strict
   flag.
@@ -117,13 +117,13 @@ Preserve source compatibility by delegating existing overloads as follows:
 
 ```java
 setOp(a, b, op)
-    -> setOp(a, b, op, false, true, false)
+    -> setOp(a, b, op, false, true, true)
 
 setOp(a, b, op, withDebug)
-    -> setOp(a, b, op, withDebug, true, false)
+    -> setOp(a, b, op, withDebug, true, true)
 
 setOp(a, b, op, withDebug, maximizeResultFaces)
-    -> setOp(a, b, op, withDebug, maximizeResultFaces, false)
+    -> setOp(a, b, op, withDebug, maximizeResultFaces, true)
 ```
 
 The same six-argument overload and delegation rules must exist in
@@ -134,7 +134,8 @@ of the existing `withDebug` and `maximizeResultFaces` arguments.
 
 ### 3.2 Semantics
 
-`doStrictValidation` is a result postcondition:
+`doStrictValidation` is a result postcondition and defaults to `true` through
+the shorter overloads:
 
 - `false`: retain current validation, performance, and return behavior.
 - `true`: run the existing intermediate checks as usual, finish and normalize
@@ -351,6 +352,17 @@ directly.
 
 ## 8. Execution Sequence
 
+| Phase | Status | Outcome |
+|---|---|---|
+| S10.0 — Freeze evidence | Complete | Legacy defect captured at the first invalid `B union C`. |
+| S10.1 — Topology summary | Complete | Shared shell/adjusted-Euler implementation and focused tests. |
+| S10.2 — API plumbing | Complete | Six-argument public/internal overload; shorter calls validate strictly. |
+| S10.3 — Result paths | Complete | All successful exits use one strict-validation gateway. |
+| S10.4 — Stepper regression | Complete | Legacy rejection and corrected `chi=0`/`chi=2` cases covered. |
+| S10.5 — Finisher hardening | Complete (diagnosis) | Unsafe repair rejected; fail-fast guard retained. |
+| S10.6/S10.6A — Performance/docs | Complete | A/B overhead measured; Javadoc and benchmark log added. |
+| Manual application inspection | Pending | Compile smoke passes; interactive cavity inspection remains. |
+
 ### S10.0 — Freeze evidence
 
 - Add the stepper fixture and topology-summary assertions before changing the
@@ -372,8 +384,9 @@ directly.
 
 - Add the six-argument overload to `PolyhedralBoundedSolidModeler`.
 - Add the matching overload to `_PolyhedralBoundedSolidSetOperator`.
-- Delegate all existing overloads with `doStrictValidation=false`.
-- Add API tests proving old overloads and explicit `false` are equivalent.
+- Delegate all existing overloads with `doStrictValidation=true`.
+- Add API tests proving default overloads and explicit `true` are equivalent,
+  while explicit `false` remains available for legacy compatibility.
 
 ### S10.3 — Cover every result path
 
@@ -396,10 +409,86 @@ directly.
 ### S10.6 — Performance and documentation gate
 
 - Benchmark representative booleans with strict validation on and off.
-- Verify the default path has no strict face-pair scan and no topology-summary
-  allocation.
+- Verify the explicit opt-out path has no strict face-pair scan and no
+  topology-summary allocation.
 - Add Javadoc describing cost and exception semantics.
 - Update the CSG development notes with the new overload.
+
+### S10.6A — A/B timing of the pre-existing unit-test corpus
+
+- Freeze a Stage 9 wall-clock baseline before changing the boolean call chain,
+  using `:base:test --no-build-cache --rerun-tasks` with the suite's existing
+  serial execution policy.
+- Select the pre-existing boolean unit tests whose current results already pass
+  `validateStrict`; keep the tests that intentionally document
+  pseudomanifolds in the `false` corpus only.
+- Run that unchanged fixture/assertion corpus through the six-argument overload
+  twice: once with `doStrictValidation=false`, and once with
+  `doStrictValidation=true`.
+- Warm up each mode, then run at least five alternating measured forks
+  (`false`, `true`, `true`, `false`, ...) so JVM/Gradle warm-up and machine
+  drift do not systematically favour one mode.
+- Record wall-clock duration, median, p95, absolute delta, and percentage
+  overhead. Keep compilation and JaCoCo generation outside the timed interval
+  when comparing the flag itself.
+- Also time the complete pre-existing `:base:test` suite with the default
+  overloads to quantify the now-default strict path, while retaining the
+  explicit-false measurement as the opt-out baseline.
+- Store the command, JVM/Gradle version, host summary, raw samples, and result
+  table under `doc/polyhedralBoundedSolidDevelopment/benchmarks/`; do not turn
+  noisy wall-clock thresholds into required unit-test assertions.
+
+### Execution log
+
+- **2026-07-26 — S10.0/S10.4:** Added the self-contained stepper fixture with
+  the planned 5.05 mm / 4.6 mm D profile, 9.02 mm sleeve cavity, 1.6 mm wall,
+  8.06 mm sleeve height, 4.2 mm transition, and 0.1 mm cutter overlap. The
+  coincident legacy `B union C` first fails strict validation in
+  `path=normal-pipeline`, at face 4, with a loop containing fewer than three
+  edges. The same call with strict validation disabled preserves the existing
+  result and incurs zero strict-validation invocations.
+- **2026-07-26 — S10.1:** Connected-shell calculation in
+  `BooleansFromReferenceObjectPairsTest` now delegates to the shared topology
+  summary instead of maintaining a second disjoint-set implementation.
+- **2026-07-26 — S10.4:** The corrected partial stepped tube passes every
+  strict boolean and has one shell with adjusted `chi=0`. The final guide has
+  one shell with adjusted `chi=2`; material probes verify the upper circular
+  cavity, lower D restriction, open pocket above the base, and solid material
+  below its floor.
+- **2026-07-26 — S10.5 diagnosis:** Instrumented Finish and face maximization
+  temporarily. Finish, `lkfmrh`, `loopGlue`, cleanup, and triangulation all
+  retained zero sub-three-edge loops. `maximizeFaces` created the defect in
+  its `remove-dangling-edge` case, reducing the outer loop of face 4 to two
+  edges and then one. Disabling final face maximization makes the same legacy
+  boolean strictly valid. A proposed guard avoided the short loop but left a
+  self-intersecting boundary, so it was rejected and not retained. Strict
+  validation remains the safe fail-fast behavior; a separate malformed-loop
+  fixture covers rejection.
+- **2026-07-26 — S10.6A:** Reused the 20 pre-existing moon/cylinder
+  difference cases for an alternating five-fork A/B comparison. All cases
+  passed in both modes. Median wall time was 3.7247 s with strict validation
+  disabled and 3.8147 s with it enabled: +0.0900 s, or +2.42%. The five-sample
+  nearest-rank p95 increased from 3.7694 s to 3.9337 s (+4.36%). Raw samples
+  and commands are recorded in
+  `benchmarks/stage10-strict-validation-baseline.md`.
+- **2026-07-26 — S10.6 initial policy:** The opt-out-default suite executed 420 tests
+  with zero failures/errors (35 skipped) and completed in Gradle's reported
+  1 min 28 s, versus the frozen 91.66 s external wall-clock baseline. No
+  opt-out-path regression was visible. The public overload documents that
+  strict mode adds global topology and all-face-pair work and can throw
+  `IllegalStateException`. `_GeometricFaceOrientationStrategy` remains
+  excluded: it deliberately uses a neighbour-normal heuristic with documented
+  false negatives and is not a universal B-Rep postcondition.
+- **2026-07-26 — default policy revision:** Based on the measured +2.42%
+  median overhead and the fail-fast robustness benefit, all shorter public and
+  internal overloads now delegate with `doStrictValidation=true`. Explicit
+  `false` remains the compatibility/performance escape hatch. The first full
+  suite run exposed 12 invocations in tests intentionally documenting
+  intermediate-only, coincident-contact, or pseudomanifold legacy results;
+  those fixtures now opt out explicitly. The final suite passed 420 tests.
+  Its 2 min 44 s elapsed time versus 1 min 28 s with the prior default is an
+  +86.4% whole-suite increase, showing that the +2.42% focused result does not
+  generalize to every workload.
 
 ---
 
@@ -438,7 +527,7 @@ Then launch `TangibleInterfaceGizmoCreator`, select
 Stage 10 is complete when:
 
 - Every existing `setOp` overload preserves its API and defaults to
-  `doStrictValidation=false`.
+  `doStrictValidation=true`.
 - The new strict overload is available through
   `PolyhedralBoundedSolidModeler`.
 - Strict validation executes for every boolean result path when requested.
@@ -452,5 +541,5 @@ Stage 10 is complete when:
 - The corrected final guide has one shell and `chi=2`, with a blind D-profile
   pocket of the specified dimensions.
 - The complete `:base:test` suite passes.
-- Default boolean performance remains within measurement noise of the Stage 9
-  baseline; strict-validation cost is paid only when explicitly enabled.
+- Default strict-validation overhead is documented; callers that explicitly
+  opt out retain the measured lower-cost legacy path.

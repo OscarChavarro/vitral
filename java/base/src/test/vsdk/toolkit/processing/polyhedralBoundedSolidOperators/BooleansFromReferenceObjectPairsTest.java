@@ -18,8 +18,8 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologySummary;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
@@ -159,20 +159,21 @@ class BooleansFromReferenceObjectPairsTest
             case UNION:
                 return PolyhedralBoundedSolidModeler.setOp(
                     operandA, operandB, PolyhedralBoundedSolidModeler.UNION,
-                    false);
+                    false, true, false);
             case INTERSECTION:
                 return PolyhedralBoundedSolidModeler.setOp(
                     operandA, operandB,
-                    PolyhedralBoundedSolidModeler.INTERSECTION, false);
+                    PolyhedralBoundedSolidModeler.INTERSECTION,
+                    false, true, false);
             case DIFFERENCE_A_MINUS_B:
                 return PolyhedralBoundedSolidModeler.setOp(
                     operandA, operandB, PolyhedralBoundedSolidModeler.SUBTRACT,
-                    false);
+                    false, true, false);
             case DIFFERENCE_B_MINUS_A:
             default:
                 return PolyhedralBoundedSolidModeler.setOp(
                     operandB, operandA, PolyhedralBoundedSolidModeler.SUBTRACT,
-                    false);
+                    false, true, false);
         }
     }
 
@@ -602,59 +603,16 @@ class BooleansFromReferenceObjectPairsTest
 
         private static int[] computeShellFaceCounts(PolyhedralBoundedSolid solid)
         {
-            int faceCount = solid.getPolygonsList().size();
-            if ( faceCount == 0 ) {
-                return new int[0];
-            }
-
-            DisjointSet dsu = new DisjointSet(faceCount);
-            int i;
-            for ( i = 0; i < solid.getEdgesList().size(); i++ ) {
-                _PolyhedralBoundedSolidEdge edge = solid.getEdgesList().get(i);
-                if ( edge.leftHalf == null || edge.rightHalf == null ) {
-                    continue;
-                }
-                _PolyhedralBoundedSolidFace faceA =
-                    edge.leftHalf.parentLoop.parentFace;
-                _PolyhedralBoundedSolidFace faceB =
-                    edge.rightHalf.parentLoop.parentFace;
-                if ( faceA == null || faceB == null ) {
-                    continue;
-                }
-                int indexA = faceIndexOf(solid, faceA);
-                int indexB = faceIndexOf(solid, faceB);
-                if ( indexA >= 0 && indexB >= 0 ) {
-                    dsu.union(indexA, indexB);
-                }
-            }
-
+            PolyhedralBoundedSolidTopologySummary sharedSummary =
+                PolyhedralBoundedSolidTopologySummary.from(solid);
             ArrayList<Integer> componentSizes = new ArrayList<Integer>();
-            boolean[] rootSeen = new boolean[faceCount];
-            int[] rootCounts = new int[faceCount];
-            for ( i = 0; i < faceCount; i++ ) {
-                int root = dsu.find(i);
-                rootCounts[root]++;
-            }
-            for ( i = 0; i < faceCount; i++ ) {
-                if ( rootCounts[i] > 0 && !rootSeen[i] ) {
-                    componentSizes.add(Integer.valueOf(rootCounts[i]));
-                    rootSeen[i] = true;
-                }
+            for ( int i = 0;
+                  i < sharedSummary.getShells().size(); i++ ) {
+                componentSizes.add(Integer.valueOf(
+                    sharedSummary.getShells().get(i).getFaceCount()));
             }
             Collections.sort(componentSizes);
             return toIntArray(componentSizes);
-        }
-
-        private static int faceIndexOf(PolyhedralBoundedSolid solid,
-                                       _PolyhedralBoundedSolidFace face)
-        {
-            int i;
-            for ( i = 0; i < solid.getPolygonsList().size(); i++ ) {
-                if ( solid.getPolygonsList().get(i) == face ) {
-                    return i;
-                }
-            }
-            return -1;
         }
 
         @Override
@@ -730,50 +688,6 @@ class BooleansFromReferenceObjectPairsTest
                 ", verticesPerLoopSorted=" + Arrays.toString(verticesPerLoopSorted) +
                 ", minMaxMicrounits=" + Arrays.toString(minMaxMicrounits) +
                 '}';
-        }
-    }
-
-    private static final class DisjointSet
-    {
-        private final int[] parent;
-        private final int[] rank;
-
-        private DisjointSet(int size)
-        {
-            parent = new int[size];
-            rank = new int[size];
-            int i;
-            for ( i = 0; i < size; i++ ) {
-                parent[i] = i;
-                rank[i] = 0;
-            }
-        }
-
-        private int find(int x)
-        {
-            if ( parent[x] != x ) {
-                parent[x] = find(parent[x]);
-            }
-            return parent[x];
-        }
-
-        private void union(int a, int b)
-        {
-            int rootA = find(a);
-            int rootB = find(b);
-            if ( rootA == rootB ) {
-                return;
-            }
-            if ( rank[rootA] < rank[rootB] ) {
-                parent[rootA] = rootB;
-            }
-            else if ( rank[rootA] > rank[rootB] ) {
-                parent[rootB] = rootA;
-            }
-            else {
-                parent[rootB] = rootA;
-                rank[rootA]++;
-            }
         }
     }
 

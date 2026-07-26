@@ -95,16 +95,16 @@ class AlgebraicIdentityRegressionTest
 
         PolyhedralBoundedSolid abFirst = PolyhedralBoundedSolidModeler.setOp(
             pairA[0], pairA[1],
-            PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            PolyhedralBoundedSolidModeler.SUBTRACT, false, true, false);
         PolyhedralBoundedSolid abSecond = PolyhedralBoundedSolidModeler.setOp(
             pairB[0], pairB[1],
-            PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            PolyhedralBoundedSolidModeler.SUBTRACT, false, true, false);
         PolyhedralBoundedSolid baFirst = PolyhedralBoundedSolidModeler.setOp(
             pairC[1], pairC[0],
-            PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            PolyhedralBoundedSolidModeler.SUBTRACT, false, true, false);
         PolyhedralBoundedSolid baSecond = PolyhedralBoundedSolidModeler.setOp(
             pairD[1], pairD[0],
-            PolyhedralBoundedSolidModeler.SUBTRACT, false);
+            PolyhedralBoundedSolidModeler.SUBTRACT, false, true, false);
 
         assertThat(abFirst.getPolygonsList().size())
             .isEqualTo(abSecond.getPolygonsList().size());

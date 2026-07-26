@@ -5,6 +5,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
@@ -16,6 +17,9 @@ Orchestrates validation passes that preserve the half-edge representation of
 */
 public class PolyhedralBoundedSolidValidationEngine
 {
+    private static final AtomicLong strictValidationInvocationCount =
+        new AtomicLong();
+
     private PolyhedralBoundedSolidValidationEngine()
     {
     }
@@ -44,7 +48,6 @@ public class PolyhedralBoundedSolidValidationEngine
                 break;
             }
         }
-
         solid.setValidationState(ok);
         if ( !ok ) {
             Logger.reportMessage(solid, VSDK.WARNING, "validateIntermediate",
@@ -144,6 +147,20 @@ public class PolyhedralBoundedSolidValidationEngine
     public static boolean validateStrict(PolyhedralBoundedSolid solid)
     {
         StringBuilder msg = new StringBuilder();
+        return validateStrict(solid, msg);
+    }
+
+    /**
+    Runs strict validation and appends actionable failure detail to
+    {@code msg}. This overload is intended for callers that must turn strict
+    validation into a postcondition exception instead of relying on log
+    output.
+    */
+    public static boolean validateStrict(
+        PolyhedralBoundedSolid solid,
+        StringBuilder msg)
+    {
+        strictValidationInvocationCount.incrementAndGet();
         boolean ok = true;
         PolyhedralBoundedSolidNumericPolicy.ToleranceContext numericContext =
             PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
@@ -162,6 +179,15 @@ public class PolyhedralBoundedSolidValidationEngine
                 break;
             }
         }
+        if ( ok ) {
+            PolyhedralBoundedSolidTopologySummary topology =
+                PolyhedralBoundedSolidTopologySummary.from(solid);
+            if ( topology.hasUniversalContradiction() ) {
+                msg.append("  - Global topology contradiction: ")
+                    .append(topology).append('\n');
+                ok = false;
+            }
+        }
 
         solid.setValidationState(ok);
         if ( !ok ) {
@@ -169,6 +195,23 @@ public class PolyhedralBoundedSolidValidationEngine
                 "Solid validation test failed!:\n" + msg.toString());
         }
         return ok;
+    }
+
+    /**
+    Diagnostic counter used to verify that default boolean calls do not enter
+    the strict face-pair scan or allocate its topology summary.
+    */
+    public static long getStrictValidationInvocationCount()
+    {
+        return strictValidationInvocationCount.get();
+    }
+
+    /**
+    Resets the strict-validation diagnostic counter.
+    */
+    public static void resetStrictValidationInvocationCount()
+    {
+        strictValidationInvocationCount.set(0L);
     }
 
     /**
