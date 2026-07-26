@@ -9,7 +9,8 @@ public enum GizmoNames
     CUBE_PART_5(5),
     CUBE_PART_6(6),
     CUBE_STICK_BASE(7),
-    CUBE_STICK_HOLED(8);
+    CUBE_STICK_HOLED(8),
+    STEPER_MOTOR_GUIDE(9);
 
     private final int id;
 

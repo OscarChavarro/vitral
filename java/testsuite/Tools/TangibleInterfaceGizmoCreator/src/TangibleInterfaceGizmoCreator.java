@@ -9,7 +9,7 @@ import vsdk.toolkit.io.geometry.stl.StlWriter;
 
 public class TangibleInterfaceGizmoCreator
 {
-    private static final double STL_EXPORT_SCALE_FACTOR = 1.0 / 100.0;
+    private static final double STL_EXPORT_SCALE_FACTOR = 100.0;
 
     public static void main(String[] args)
     {

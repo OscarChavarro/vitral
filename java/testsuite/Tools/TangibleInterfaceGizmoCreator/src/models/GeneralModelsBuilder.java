@@ -22,6 +22,8 @@ public final class GeneralModelsBuilder
                 model.getInnerRadius(), model.getOuterRadius(), model.getBaseHeight());
             case CUBE_STICK_HOLED -> cubeFixture.buildGizmoModel(6,
                 model.getInnerRadius(), model.getOuterRadius(), model.getBaseHeight());
+            case STEPER_MOTOR_GUIDE -> cubeFixture.buildGizmoModel(8,
+                model.getInnerRadius(), model.getOuterRadius(), model.getBaseHeight());
         };
     }
 }

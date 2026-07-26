@@ -62,7 +62,7 @@ public class InteractiveModelPreviewer extends JFrame implements
     {
         Jogl4Renderer.verifyOpenGLAvailability();
         InteractiveModelPreviewer instance = new InteractiveModelPreviewer(model);
-        instance.exportCurrentModelStlIfMissing();
+        instance.exportCurrentModelStl();
         instance.createMainWindow(false);
     }
 
@@ -123,7 +123,7 @@ public class InteractiveModelPreviewer extends JFrame implements
         }
     }
 
-    private void exportCurrentModelStlIfMissing()
+    private void exportCurrentModelStl()
     {
         if ( model.getSolid() == null || model.isErrorState() ) {
             return;
@@ -131,10 +131,6 @@ public class InteractiveModelPreviewer extends JFrame implements
 
         int modelIndex = model.getSolidModelName().getDisplayIndex();
         File outputFile = new File("output" + modelIndex + ".stl");
-        if ( outputFile.isFile() && outputFile.length() > 0 ) {
-            return;
-        }
-
         ensureParentFolder(outputFile);
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             StlWriter.exportSolid(model.getSolid(), outputStream,
@@ -481,9 +477,9 @@ public class InteractiveModelPreviewer extends JFrame implements
                      }
 
                      @Override
-                     public void exportCurrentModelStlIfMissing()
+                     public void exportCurrentModelStl()
                      {
-                         InteractiveModelPreviewer.this.exportCurrentModelStlIfMissing();
+                         InteractiveModelPreviewer.this.exportCurrentModelStl();
                      }
 
                      @Override

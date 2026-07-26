@@ -1,8 +1,11 @@
 package models;
 
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -14,6 +17,8 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidNumericPolicy;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidTopologyEditing;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidEdge;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes._PolyhedralBoundedSolidFace;
 import vsdk.toolkit.render.awt.AwtFontReader;
 
 public class TangibleInterfaceCubeFixture {
@@ -28,10 +33,26 @@ public class TangibleInterfaceCubeFixture {
     private static final int BASE_ONLY_STICK = 5;
     private static final int BASE_ONLY_STICK_HOLED = 6;
     private static final int GLYPH_MODEL_PART_6 = 7;
+    private static final int BASE_ONLY_STEPER_MOTOR_GUIDE = 8;
     private static final int BASE_PATH_INDEX_PART_5 = 4;
     private static final int BASE_PATH_INDEX_PART_6 = 5;
+    private static final int BASE_PATH_INDEX_STEPER_MOTOR_GUIDE = 6;
     private static final int BASE_CYLINDER_SIDES = 32;
     private static final int BASE_CYLINDER_HEIGHT_DIVISIONS = 1;
+    private static final double MILLIMETERS_TO_MODEL_UNITS = 0.01;
+    private static final double STEPER_MOTOR_GUIDE_BASE_SIZE = 0.4;
+    private static final double STEPER_MOTOR_GUIDE_SHAFT_DIAMETER_MM = 5.00;
+    private static final double STEPER_MOTOR_GUIDE_SHAFT_FLAT_AXIS_MM = 4.51;
+    private static final double STEPER_MOTOR_GUIDE_HOLE_DEPTH_MM = 4.2;
+    private static final double STEPER_MOTOR_GUIDE_OUTER_DIAMETER_MM = 9.02;
+    private static final double STEPER_MOTOR_GUIDE_CORE_OUTER_DIAMETER_MM = 10.02;
+    private static final double STEPER_MOTOR_GUIDE_SLEEVE_INNER_DIAMETER_MM = 9.02;
+    private static final double STEPER_MOTOR_GUIDE_SLEEVE_WALL_THICKNESS_MM = 1.6;
+    private static final double STEPER_MOTOR_GUIDE_SLEEVE_BURY_DEPTH_MM = 1.0;
+    private static final double STEPER_MOTOR_GUIDE_SLEEVE_PROTRUSION_MM = 7.06;
+    private static final double STEPER_MOTOR_GUIDE_BOOLEAN_AXIAL_OFFSET_MM = 0.1;
+    private static final double STEPER_MOTOR_GUIDE_DEFAULT_WALL_THICKNESS_MM = 1.6;
+    private static final int STEPER_MOTOR_GUIDE_D_PROFILE_SIDES = 64;
     private static final double GLYPH_TEXT_EXTRUSION_HEIGHT = 0.027;
     private static final double GLYPH_TEXT_TARGET_EXTENT = 0.144;
     private static final double GLYPH_TEXT_Z_OFFSET = 0.01;
@@ -49,6 +70,7 @@ public class TangibleInterfaceCubeFixture {
         "M 3 37 v -4 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 6 v 4 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -6 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 Z",
         "M 33 40 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v -4 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 7 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -7 Z",
         "M 37 40 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -3 v -3 h -3 v 3 h -4 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -3 h 3 v -3 h -3 v -4 h 3 v -3 h 4 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 3 v 3 h 3 v -3 h 6 v 3 h -3 v 4 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 3 h 3 v 3 h -3 v 6 Z",
+        "M 0 0 h 40 v 15 h 5 l 10 5 l -10 5 h -5 v 15 h -40 Z"
     };
 
     public PolyhedralBoundedSolid buildGizmoModel(int index) {
@@ -71,6 +93,9 @@ public class TangibleInterfaceCubeFixture {
                 baseBuildStickModel(innerRadius/100, outer/100, baseHeight/10);
             case BASE_ONLY_STICK_HOLED ->
                 baseBuildStickHoledModel(innerRadius/100);
+            case BASE_ONLY_STEPER_MOTOR_GUIDE ->
+                baseBuildSteperMotorGuideModel(
+                    innerRadius/100, outer/100, baseHeight/10);
             default -> throw new IllegalArgumentException(
                 "Unsupported gizmo model index: " + index);
         };
@@ -108,6 +133,95 @@ public class TangibleInterfaceCubeFixture {
             baseSolid, tubeSolid, PolyhedralBoundedSolidModeler.UNION, false);
         PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
         return result;
+    }
+
+    private PolyhedralBoundedSolid baseBuildSteperMotorGuideModel(
+        double innerRadius,
+        double outterRadius,
+        double baseHeight)
+    {
+        PolyhedralBoundedSolid baseSolid = baseCreatePart(
+            BASE_PATH_INDEX_STEPER_MOTOR_GUIDE, BASE_DEFAULT_EXTRUSION_HEIGHT);
+        Vector3Dd baseCenter = new Vector3Dd(
+            STEPER_MOTOR_GUIDE_BASE_SIZE * 0.5,
+            STEPER_MOTOR_GUIDE_BASE_SIZE * 0.5,
+            0.0);
+
+        PolyhedralBoundedSolid result =
+            baseCreateSteperMotorGuideFinalSolid(baseSolid, baseCenter);
+        baseValidateSteperMotorGuideSolidStrict(
+            "(B union C) union A", result, 2);
+        return result;
+    }
+
+    private void baseValidateSteperMotorGuideSolidStrict(
+        String label,
+        PolyhedralBoundedSolid solid,
+        int expectedEulerCharacteristic)
+    {
+        if ( !PolyhedralBoundedSolidValidationEngine.validateStrict(solid) ) {
+            throw new IllegalStateException(
+                "Strict validation failed for STEPER_MOTOR_GUIDE " + label);
+        }
+        int shellCount = baseCountFaceComponents(solid);
+        int faceEulerContribution = 0;
+        for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            faceEulerContribution +=
+                2 - solid.getPolygonsList().get(i).boundariesList.size();
+        }
+        int eulerCharacteristic =
+            solid.getVerticesList().size()
+            - solid.getEdgesList().size()
+            + faceEulerContribution;
+        if ( shellCount != 1
+             || eulerCharacteristic != expectedEulerCharacteristic ) {
+            throw new IllegalStateException(
+                "Invalid STEPER_MOTOR_GUIDE topology for " + label
+                + ": expected one shell and V-E+F="
+                + expectedEulerCharacteristic);
+        }
+    }
+
+    private int baseCountFaceComponents(PolyhedralBoundedSolid solid)
+    {
+        Set<_PolyhedralBoundedSolidFace> pending =
+            new HashSet<_PolyhedralBoundedSolidFace>();
+        for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            pending.add(solid.getPolygonsList().get(i));
+        }
+
+        int components = 0;
+        ArrayDeque<_PolyhedralBoundedSolidFace> queue =
+            new ArrayDeque<_PolyhedralBoundedSolidFace>();
+        while ( !pending.isEmpty() ) {
+            _PolyhedralBoundedSolidFace seed = pending.iterator().next();
+            pending.remove(seed);
+            queue.add(seed);
+            components++;
+
+            while ( !queue.isEmpty() ) {
+                _PolyhedralBoundedSolidFace current = queue.remove();
+                for ( int i = 0; i < solid.getEdgesList().size(); i++ ) {
+                    _PolyhedralBoundedSolidEdge edge =
+                        solid.getEdgesList().get(i);
+                    _PolyhedralBoundedSolidFace right =
+                        edge.rightHalf.parentLoop.parentFace;
+                    _PolyhedralBoundedSolidFace left =
+                        edge.leftHalf.parentLoop.parentFace;
+                    _PolyhedralBoundedSolidFace adjacent = null;
+                    if ( right == current ) {
+                        adjacent = left;
+                    }
+                    else if ( left == current ) {
+                        adjacent = right;
+                    }
+                    if ( adjacent != null && pending.remove(adjacent) ) {
+                        queue.add(adjacent);
+                    }
+                }
+            }
+        }
+        return components;
     }
 
     private PolyhedralBoundedSolid baseBuildStickHoledModel(double innerRadius)
@@ -202,6 +316,112 @@ public class TangibleInterfaceCubeFixture {
         return tube;
     }
 
+    private PolyhedralBoundedSolid baseCreateSteperMotorGuideTube(
+        double innerRadius,
+        double outterRadius,
+        double baseHeight,
+        Vector3Dd baseCenter)
+    {
+        double resolvedBaseHeight =
+            baseMillimetersToModelUnits(STEPER_MOTOR_GUIDE_HOLE_DEPTH_MM);
+        double resolvedOuterRadius = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_CORE_OUTER_DIAMETER_MM) * 0.5;
+        double sleeveBaseZ = BASE_DEFAULT_EXTRUSION_HEIGHT
+            - baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_SLEEVE_BURY_DEPTH_MM);
+        double cylinderBaseZ = sleeveBaseZ
+            + baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_BOOLEAN_AXIAL_OFFSET_MM);
+        double cylinderTopZ =
+            BASE_DEFAULT_EXTRUSION_HEIGHT + resolvedBaseHeight;
+
+        PolyhedralBoundedSolid cylinderA = baseCreateCylinder(
+            resolvedOuterRadius,
+            cylinderTopZ - cylinderBaseZ,
+            new Vector3Dd(
+                baseCenter.x(),
+                baseCenter.y(),
+                cylinderBaseZ));
+
+        double cutterMargin = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_BURY_DEPTH_MM);
+        double innerCylinderBaseZ = cylinderBaseZ - cutterMargin;
+        double innerCylinderHeight =
+            cylinderTopZ - cylinderBaseZ + 2.0 * cutterMargin;
+        PolyhedralBoundedSolid tube = PolyhedralBoundedSolidModeler.setOp(
+            cylinderA,
+            baseCreateSteperMotorGuideDShaftHole(
+                baseCenter, innerCylinderHeight, innerCylinderBaseZ),
+            PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(tube);
+
+        return tube;
+    }
+
+    private PolyhedralBoundedSolid baseCreateSteperMotorGuideFinalSolid(
+        PolyhedralBoundedSolid baseSolid,
+        Vector3Dd baseCenter)
+    {
+        double sleeveInnerRadius = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_INNER_DIAMETER_MM) * 0.5;
+        double sleeveOuterRadius = sleeveInnerRadius
+            + baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_SLEEVE_WALL_THICKNESS_MM);
+        double sleeveBaseZ = BASE_DEFAULT_EXTRUSION_HEIGHT
+            - baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_SLEEVE_BURY_DEPTH_MM);
+        double sleeveTopZ = BASE_DEFAULT_EXTRUSION_HEIGHT
+            + baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_SLEEVE_PROTRUSION_MM);
+        double transitionZ = BASE_DEFAULT_EXTRUSION_HEIGHT
+            + baseMillimetersToModelUnits(
+                STEPER_MOTOR_GUIDE_HOLE_DEPTH_MM);
+        double cutterOverlap = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_BOOLEAN_AXIAL_OFFSET_MM);
+
+        PolyhedralBoundedSolid outerSolid = baseCreateCylinder(
+            sleeveOuterRadius,
+            sleeveTopZ - sleeveBaseZ,
+            new Vector3Dd(baseCenter.x(), baseCenter.y(), sleeveBaseZ));
+        PolyhedralBoundedSolid baseWithOuter =
+            PolyhedralBoundedSolidModeler.setOp(
+                baseSolid,
+                outerSolid,
+                PolyhedralBoundedSolidModeler.UNION,
+                false);
+        baseValidateSteperMotorGuideSolidStrict(
+            "A union solid exterior", baseWithOuter, 2);
+
+        PolyhedralBoundedSolid upperHole =
+            baseCreateSteperMotorGuideSleeveInnerHole(
+                baseCenter,
+                sleeveTopZ - transitionZ + cutterOverlap,
+                transitionZ);
+        PolyhedralBoundedSolid withUpperHole =
+            PolyhedralBoundedSolidModeler.setOp(
+                baseWithOuter,
+                upperHole,
+                PolyhedralBoundedSolidModeler.SUBTRACT,
+                false);
+        baseValidateSteperMotorGuideSolidStrict(
+            "A union exterior minus upper circular cavity",
+            withUpperHole,
+            2);
+
+        PolyhedralBoundedSolid lowerHole =
+            baseCreateSteperMotorGuideDShaftHole(
+                baseCenter,
+                transitionZ + cutterOverlap
+                    - BASE_DEFAULT_EXTRUSION_HEIGHT,
+                BASE_DEFAULT_EXTRUSION_HEIGHT);
+        return PolyhedralBoundedSolidModeler.setOp(
+            withUpperHole,
+            lowerHole,
+            PolyhedralBoundedSolidModeler.SUBTRACT,
+            false);
+    }
+
     private PolyhedralBoundedSolid baseCreateCylinder(
         double radius,
         double height,
@@ -217,12 +437,236 @@ public class TangibleInterfaceCubeFixture {
         return solid;
     }
 
+    private PolyhedralBoundedSolid baseCreateSteperMotorGuideSleeveInnerHole(
+        Vector3Dd baseCenter,
+        double height,
+        double baseZ)
+    {
+        double diameter = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_INNER_DIAMETER_MM);
+        PolyhedralBoundedSolid hole = baseCreateCylinder(
+            diameter * 0.5,
+            height,
+            new Vector3Dd(baseCenter.x(), baseCenter.y(), baseZ));
+        baseValidateSteperMotorGuideCircularDiameter(
+            hole, baseCenter, diameter);
+        return hole;
+    }
+
+    private void baseValidateSteperMotorGuideCircularDiameter(
+        PolyhedralBoundedSolid solid,
+        Vector3Dd center,
+        double expectedDiameter)
+    {
+        double[] minMax = solid.getMinMax();
+        double diameterX = minMax[3] - minMax[0];
+        double diameterY = minMax[4] - minMax[1];
+        double centerX = (minMax[0] + minMax[3]) * 0.5;
+        double centerY = (minMax[1] + minMax[4]) * 0.5;
+        if ( Math.abs(diameterX - expectedDiameter)
+                > BASE_POSITION_TOLERANCE
+             || Math.abs(diameterY - expectedDiameter)
+                > BASE_POSITION_TOLERANCE
+             || Math.abs(centerX - center.x()) > BASE_POSITION_TOLERANCE
+             || Math.abs(centerY - center.y()) > BASE_POSITION_TOLERANCE ) {
+            throw new IllegalStateException(
+                "STEPER_MOTOR_GUIDE sleeve inner diameter changed during "
+                + "construction: diameterX="
+                + diameterX / MILLIMETERS_TO_MODEL_UNITS
+                + " mm, diameterY="
+                + diameterY / MILLIMETERS_TO_MODEL_UNITS + " mm");
+        }
+    }
+
+    private PolyhedralBoundedSolid baseCreateSteperMotorGuideBearingSleeve(
+        Vector3Dd baseCenter)
+    {
+        double innerRadius = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_INNER_DIAMETER_MM) * 0.5;
+        double outerRadius = innerRadius + baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_WALL_THICKNESS_MM);
+        double buryDepth = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_BURY_DEPTH_MM);
+        double protrusion = baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_SLEEVE_PROTRUSION_MM);
+        double baseTopZ = BASE_DEFAULT_EXTRUSION_HEIGHT;
+        double sleeveBaseZ = baseTopZ - buryDepth;
+        double sleeveHeight = buryDepth + protrusion;
+
+        PolyhedralBoundedSolid outerCylinder = baseCreateCylinder(
+            outerRadius,
+            sleeveHeight,
+            new Vector3Dd(baseCenter.x(), baseCenter.y(), sleeveBaseZ));
+        PolyhedralBoundedSolid innerCylinder =
+            baseCreateSteperMotorGuideSleeveInnerHole(
+                baseCenter,
+                sleeveHeight + 2.0 * BASE_DEFAULT_EXTRUSION_HEIGHT,
+                sleeveBaseZ - BASE_DEFAULT_EXTRUSION_HEIGHT);
+
+        PolyhedralBoundedSolid sleeve = PolyhedralBoundedSolidModeler.setOp(
+            outerCylinder, innerCylinder, PolyhedralBoundedSolidModeler.SUBTRACT, false);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(sleeve);
+        return sleeve;
+    }
+
+    private PolyhedralBoundedSolid baseCreateSteperMotorGuideDShaftHole(
+        Vector3Dd baseCenter,
+        double shaftHeight,
+        double shaftBaseZ)
+    {
+        double shaftDiameter =
+            baseMillimetersToModelUnits(STEPER_MOTOR_GUIDE_SHAFT_DIAMETER_MM);
+        double shaftRadius = shaftDiameter * 0.5;
+        double flatAxisLength =
+            baseMillimetersToModelUnits(STEPER_MOTOR_GUIDE_SHAFT_FLAT_AXIS_MM);
+        double flatPlaneLocalX = flatAxisLength - shaftRadius;
+        if ( flatPlaneLocalX <= -shaftRadius || flatPlaneLocalX >= shaftRadius ) {
+            throw new IllegalArgumentException(
+                "Invalid D shaft flat axis length: "
+                + STEPER_MOTOR_GUIDE_SHAFT_FLAT_AXIS_MM);
+        }
+        List<Vector3Dd> polygon = new ArrayList<Vector3Dd>();
+
+        for ( int i = 0; i < STEPER_MOTOR_GUIDE_D_PROFILE_SIDES; i++ ) {
+            double angleA = 2.0 * Math.PI * i / STEPER_MOTOR_GUIDE_D_PROFILE_SIDES;
+            double angleB =
+                2.0 * Math.PI * (i + 1) / STEPER_MOTOR_GUIDE_D_PROFILE_SIDES;
+            Vector3Dd pointA = new Vector3Dd(
+                shaftRadius * Math.cos(angleA),
+                shaftRadius * Math.sin(angleA),
+                0.0);
+            Vector3Dd pointB = new Vector3Dd(
+                shaftRadius * Math.cos(angleB),
+                shaftRadius * Math.sin(angleB),
+                0.0);
+            boolean pointAInside = pointA.x() <= flatPlaneLocalX + BASE_POSITION_TOLERANCE;
+            boolean pointBInside = pointB.x() <= flatPlaneLocalX + BASE_POSITION_TOLERANCE;
+
+            if ( pointAInside ) {
+                baseAppendUniquePolygonPoint(
+                    polygon,
+                    new Vector3Dd(
+                        baseCenter.x() + pointA.x(),
+                        baseCenter.y() + pointA.y(),
+                        shaftBaseZ));
+            }
+
+            if ( pointAInside != pointBInside ) {
+                double factor =
+                    (flatPlaneLocalX - pointA.x()) / (pointB.x() - pointA.x());
+                double intersectionY =
+                    pointA.y() + factor * (pointB.y() - pointA.y());
+                baseAppendUniquePolygonPoint(
+                    polygon,
+                    new Vector3Dd(
+                        baseCenter.x() + flatPlaneLocalX,
+                        baseCenter.y() + intersectionY,
+                        shaftBaseZ));
+            }
+        }
+
+        baseValidateSteperMotorGuideDProfileDimensions(
+            polygon, baseCenter, shaftDiameter, flatAxisLength);
+        PolyhedralBoundedSolid solid = baseCreateExtrudedPolygon(polygon, shaftHeight);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+        return solid;
+    }
+
+    private void baseValidateSteperMotorGuideDProfileDimensions(
+        List<Vector3Dd> polygon,
+        Vector3Dd baseCenter,
+        double expectedDiameter,
+        double expectedFlatAxisLength)
+    {
+        double minX = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        for ( int i = 0; i < polygon.size(); i++ ) {
+            Vector3Dd point = polygon.get(i);
+            minX = Math.min(minX, point.x() - baseCenter.x());
+            maxX = Math.max(maxX, point.x() - baseCenter.x());
+            minY = Math.min(minY, point.y() - baseCenter.y());
+            maxY = Math.max(maxY, point.y() - baseCenter.y());
+        }
+
+        double diameter = maxY - minY;
+        double flatAxisLength = maxX - minX;
+        if ( Math.abs(diameter - expectedDiameter) > BASE_POSITION_TOLERANCE
+             || Math.abs(flatAxisLength - expectedFlatAxisLength)
+                > BASE_POSITION_TOLERANCE ) {
+            throw new IllegalStateException(
+                "STEPER_MOTOR_GUIDE D profile dimensions changed during "
+                + "construction: diameter="
+                + diameter / MILLIMETERS_TO_MODEL_UNITS
+                + " mm, flat axis="
+                + flatAxisLength / MILLIMETERS_TO_MODEL_UNITS + " mm");
+        }
+    }
+
+    private PolyhedralBoundedSolid baseCreateExtrudedPolygon(
+        List<Vector3Dd> polygon,
+        double extrusionHeight)
+    {
+        if ( polygon.size() < 3 ) {
+            throw new IllegalArgumentException("Polygon does not define a valid profile");
+        }
+
+        PolyhedralBoundedSolid solid = new PolyhedralBoundedSolid();
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, polygon.get(0), 1, 1);
+
+        for ( int i = 1; i < polygon.size(); i++ ) {
+            PolyhedralBoundedSolidEulerOperators.smev(
+                solid, 1, i, i + 1, polygon.get(i));
+        }
+        PolyhedralBoundedSolidEulerOperators.smef(
+            solid, 1, polygon.size(), 1, 2);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+
+        Matrix4x4d sweep = new Matrix4x4d();
+        sweep = sweep.translation(0.0, 0.0, extrusionHeight);
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), sweep);
+        PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+        return solid;
+    }
+
+    private void baseAppendUniquePolygonPoint(
+        List<Vector3Dd> polygon,
+        Vector3Dd candidate)
+    {
+        if ( polygon.isEmpty() ) {
+            polygon.add(candidate);
+            return;
+        }
+
+        Vector3Dd last = polygon.get(polygon.size() - 1);
+        if ( last.subtract(candidate).length() > BASE_POSITION_TOLERANCE ) {
+            polygon.add(candidate);
+        }
+    }
+
     private double baseResolveOuterRadius(double outterRadius)
     {
         if ( outterRadius > 0.0 ) {
             return outterRadius;
         }
         return 0.45;
+    }
+
+    private double baseResolveCurrentWallThickness(
+        double innerRadius,
+        double outterRadius)
+    {
+        double resolvedOuterRadius = baseResolveOuterRadius(outterRadius);
+        double resolvedInnerRadius = baseResolveInnerRadius(
+            innerRadius, resolvedOuterRadius);
+        double wallThickness = resolvedOuterRadius - resolvedInnerRadius;
+        if ( wallThickness > BASE_POSITION_TOLERANCE ) {
+            return wallThickness;
+        }
+        return baseMillimetersToModelUnits(
+            STEPER_MOTOR_GUIDE_DEFAULT_WALL_THICKNESS_MM);
     }
 
     private double baseResolveInnerRadius(
@@ -233,6 +677,11 @@ public class TangibleInterfaceCubeFixture {
             return Math.min(innerRadius, outterRadius);
         }
         return outterRadius * 0.75;
+    }
+
+    private double baseMillimetersToModelUnits(double millimeters)
+    {
+        return millimeters * MILLIMETERS_TO_MODEL_UNITS;
     }
 
     private String glyphForIndex(int index)
@@ -387,16 +836,31 @@ public class TangibleInterfaceCubeFixture {
             if ( "Z".equals(command) ) {
                 break;
             }
-            if ( i >= tokens.length ) {
-                throw new IllegalArgumentException("Missing operand for SVG command " + command);
-            }
-
-            double delta = baseParseScaledCoordinate(tokens[i++]);
             if ( "h".equals(command) ) {
+                if ( i >= tokens.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing operand for SVG command " + command);
+                }
+                double delta = baseParseScaledCoordinate(tokens[i++]);
                 x += delta;
             }
             else if ( "v".equals(command) ) {
+                if ( i >= tokens.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing operand for SVG command " + command);
+                }
+                double delta = baseParseScaledCoordinate(tokens[i++]);
                 y += delta;
+            }
+            else if ( "l".equals(command) ) {
+                if ( i + 1 >= tokens.length ) {
+                    throw new IllegalArgumentException(
+                        "Missing operands for SVG command " + command);
+                }
+                double deltaX = baseParseScaledCoordinate(tokens[i++]);
+                double deltaY = baseParseScaledCoordinate(tokens[i++]);
+                x += deltaX;
+                y += deltaY;
             }
             else {
                 throw new IllegalArgumentException("Unsupported SVG command: " + command);

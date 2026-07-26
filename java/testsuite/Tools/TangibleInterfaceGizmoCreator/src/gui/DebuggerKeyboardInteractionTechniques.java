@@ -20,7 +20,7 @@ public class DebuggerKeyboardInteractionTechniques
     {
         void requestExit();
         void rebuildSolid();
-        void exportCurrentModelStlIfMissing();
+        void exportCurrentModelStl();
         void toggleFullscreen();
         void requestScreenshot();
         void requestStlExport();
@@ -94,13 +94,13 @@ public class DebuggerKeyboardInteractionTechniques
           case KeyEvent.KEY_3:
             model.setSolidModelName(model.getSolidModelName().previousClamped());
             actions.rebuildSolid();
-            actions.exportCurrentModelStlIfMissing();
+            actions.exportCurrentModelStl();
             handled = true;
             break;
           case KeyEvent.KEY_4:
             model.setSolidModelName(model.getSolidModelName().nextClamped());
             actions.rebuildSolid();
-            actions.exportCurrentModelStlIfMissing();
+            actions.exportCurrentModelStl();
             handled = true;
             break;
           case KeyEvent.KEY_5:
