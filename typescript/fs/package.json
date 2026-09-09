@@ -1,0 +1,25 @@
+{
+  "name": "@vitral/fs",
+  "version": "1.3.0",
+  "description": "Node/server-side filesystem adapters for Vitral",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "dependencies": {
+    "@vitral/base": "1.3.0"
+  },
+  "scripts": {
+    "build": "tsc --build ./tsconfig.json",
+    "pack": "mkdir -p ../artifacts && npm_config_cache=${TMPDIR:-/tmp}/vitral-npm-cache npm pack --pack-destination ../artifacts"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

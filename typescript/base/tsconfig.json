@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "rootDir": "src/main",
+    "outDir": "dist",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitOnError": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "incremental": true,
+    "composite": true,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "types": []
+  },
+  "include": [
+    "src/main/index.ts",
+    "src/main/java/**/*.ts",
+    "src/main/org/**/*.ts"
+  ],
+  "exclude": [
+    "src/main/java/io/PrintStream.ts",
+    "src/main/java/lang/ProcessBuilder.ts",
+    "src/main/java/lang/System.ts",
+    "src/main/java/util/Formatter.ts"
+  ]
+}
