@@ -170,6 +170,28 @@ export { SimpleMaterial } from "./vsdk/toolkit/environment/material/SimpleMateri
 export { MicroFacetedMaterial, MicrofacetConfig } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
 export { RendererConfiguration } from "./vsdk/toolkit/environment/material/RendererConfiguration.js";
 export { ShadingType } from "./vsdk/toolkit/environment/material/ShadingType.js";
+export { Geometry, type GeometryRay, type GeometryRayHit } from "./vsdk/toolkit/environment/geometry/Geometry.js";
+export { Curve } from "./vsdk/toolkit/environment/geometry/curve/Curve.js";
+export { ParametricCurve } from "./vsdk/toolkit/environment/geometry/curve/ParametricCurve.js";
+export { Intersection } from "./vsdk/toolkit/environment/geometry/element/Intersection.js";
+export { Ray } from "./vsdk/toolkit/environment/geometry/element/Ray.js";
+export { RayHit } from "./vsdk/toolkit/environment/geometry/element/RayHit.js";
+export { Triangle } from "./vsdk/toolkit/environment/geometry/element/Triangle.js";
+export { Vertex } from "./vsdk/toolkit/environment/geometry/element/Vertex.js";
+export { Vertex2D } from "./vsdk/toolkit/environment/geometry/element/Vertex2D.js";
+export { Surface } from "./vsdk/toolkit/environment/geometry/surface/Surface.js";
+export { HalfSpace } from "./vsdk/toolkit/environment/geometry/surface/HalfSpace.js";
+export { InfinitePlane } from "./vsdk/toolkit/environment/geometry/surface/InfinitePlane.js";
+export { ParametricBiCubicPatch } from "./vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.js";
+export { QuadMesh } from "./vsdk/toolkit/environment/geometry/surface/QuadMesh.js";
+export { TriangleMesh } from "./vsdk/toolkit/environment/geometry/surface/TriangleMesh.js";
+export { FunctionalExplicitSurface } from "./vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.js";
+export { Md2Mesh } from "./vsdk/toolkit/environment/geometry/surface/Md2Mesh.js";
+export { TriangleStripMesh } from "./vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.js";
+export { _AnimationInfo } from "./vsdk/toolkit/environment/geometry/surface/_AnimationInfo.js";
+export { TriangleMeshGroup, type TriangleMeshLike } from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
+export { _Polygon2DContour } from "./vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.js";
+export { Polygon2D } from "./vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
 import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
   workerError,

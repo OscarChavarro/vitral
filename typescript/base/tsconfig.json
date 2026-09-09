@@ -76,6 +76,22 @@
     ,"src/main/vsdk/toolkit/media/**/*.ts"
     ,"src/main/vsdk/toolkit/processing/**/*.ts"
     ,"src/main/vsdk/toolkit/environment/material/**/*.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/Geometry.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/curve/**/*.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/element/**/*.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/Surface.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/HalfSpace.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/InfinitePlane.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/Md2Mesh.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/_AnimationInfo.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.ts"
+    ,"src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.ts"
   ],
   "exclude": [
     "src/main/java/io/PrintStream.ts",

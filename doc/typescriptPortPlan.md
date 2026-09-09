@@ -28,7 +28,12 @@ Phases 1 through 14 are complete and their available gates were verified on 2026
 | 14 — Media and image buffers | Complete | 20 / 20 inventory entries | — | — |
 | 15 — General processing | In progress | 6 / 22 inventory entries | Core geometry, signal, image, and timing processing | 16 symbols and standard phase gate |
 | 16 — Materials | Complete | 5 / 5 inventory entries | — | — |
-| 17–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 17 — Geometry base | Complete | 1 / 1 inventory entries | — | — |
+| 18 — Curves | Complete | 2 / 2 inventory entries | — | — |
+| 19 — Geometry elements | Complete | 6 / 6 inventory entries | — | — |
+| 20 — Concrete geometry elements | Complete | 0 / 0 applicable entries | Graph contains six obsolete duplicate package names | — |
+| 21 — Surfaces | Complete | 13 / 13 inventory entries | Surface hierarchy, plane, contour, polygon, bicubic and functional patches, quad and triangle meshes, mesh group, strip mesh, and MD2 animation metadata | Standard phase gate |
+| 22–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -59,6 +64,14 @@ Phase 13 gate record: `npm run verify` completed successfully. All four inventor
 Phase 14 gate record: `npm run verify` completed successfully. All twenty media contracts are exported through `@vitral/base`; image data uses typed byte, float, and unsigned-16-bit buffers while preserving Java row orientation and signed-byte pixel semantics. No Java test source has a production dependency closure limited to this phase.
 
 Phase 16 gate record: `npm run verify` completed successfully. All five material inventory entries and the supporting `Material` contract are exported; CSV loading is isolated to the server-only `@vitral/fs` package. No dedicated Java material test source exists. This phase was closed at user direction while Phase 15 remains in progress.
+
+Phase 17 gate record: `npm run verify` completed successfully. The Geometry root contract is exported with its containment constants, local bounding-volume contract, visibility default, and structural ray/hit contracts to be implemented by Phase 19. No Java test source has a dependency closure limited to this root contract. This phase was completed out of normal order while Phase 15 remains in progress.
+
+Phase 18 gate record: `npm run verify` completed successfully. Both curve contracts are exported, including parametric linear, quadratic, Hermite, Bézier and uniform B-spline evaluation, sampling, approximate bounds, and containment. The only related Java test depends on later polyhedral-solid production classes. This phase was completed out of normal order while Phase 15 remains in progress.
+
+Phase 19 gate record: `npm run verify` completed successfully. All six geometry elements are exported, including immutable rays, configurable ray-hit records, triangle intersection and containment, and vertex data contracts. No Java test source has a dependency closure limited to these elements. This phase was completed out of normal order while Phase 15 remains in progress.
+
+Phase 20 gate record: the six `vsdk.toolkit.environment.geometry.elements.*` graph entries have no Java source mapping in the current source of record; their singular-package counterparts were completed in Phase 19. No duplicate compatibility aliases were added. `npm run verify` completed successfully.
 
 ## Analyzed State
 
@@ -1462,11 +1475,11 @@ The port is complete only when all of the following are true:
 | 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed |
 | 15 | General processing | In progress — 6 / 22 symbols |
 | 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order |
-| 17 | Geometry base | Pending |
-| 18 | Curves | Pending |
-| 19 | Geometry elements | Pending |
-| 20 | Concrete geometry elements | Pending |
-| 21 | Surfaces | Pending |
+| 17 | Geometry base | Complete — 1 / 1 symbol; gate passed out of normal phase order |
+| 18 | Curves | Complete — 2 / 2 symbols; gate passed out of normal phase order |
+| 19 | Geometry elements | Complete — 6 / 6 symbols; gate passed out of normal phase order |
+| 20 | Concrete geometry elements | Complete — empty applicable source group; gate passed |
+| 21 | Surfaces | Complete — 13 / 13 symbols |
 | 22 | Volumes and boundary representation | Pending |
 | 23 | Backgrounds | Pending |
 | 24 | Cameras | Pending |
