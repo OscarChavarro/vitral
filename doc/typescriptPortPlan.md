@@ -8,7 +8,7 @@ No phase may use placeholders, empty method bodies, unconditional dummy returns,
 
 ## Current Status
 
-Phases 1 through 12 are complete and their available gates were verified on 2026-09-09. Phase 13 is the active phase.
+Phases 1 through 14 are complete and their available gates were verified on 2026-09-09. Phase 15 is the active phase.
 
 | Phase | Status | Completed | In progress | Remaining |
 |---|---|---:|---|---|
@@ -24,8 +24,11 @@ Phases 1 through 12 are complete and their available gates were verified on 2026
 | 10 — Statistics | Complete | 3 / 3 inventory entries; 2 / 2 supplemental complete-common entries; 3 / 3 TypeScript parity tests | — | — |
 | 11 — Command-line options checkpoint | Complete | 0 / 0 inventory entries | — | — |
 | 12 — GUI progress-monitor contracts | Complete | 4 / 4 inventory entries; 3 / 3 TypeScript parity tests | — | — |
-| 13 — Tangible-interface contracts | In progress | 0 / 4 inventory entries | Class inventory and dependency analysis | 4 symbols and standard phase gate |
-| 14–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 13 — Tangible-interface contracts | Complete | 4 / 4 inventory entries; 3 / 3 TypeScript parity tests | — | — |
+| 14 — Media and image buffers | Complete | 20 / 20 inventory entries | — | — |
+| 15 — General processing | In progress | 6 / 22 inventory entries | Core geometry, signal, image, and timing processing | 16 symbols and standard phase gate |
+| 16 — Materials | Complete | 5 / 5 inventory entries | — | — |
+| 17–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -50,6 +53,12 @@ Phase 10 gate record: `npm run verify` completed successfully. All three invento
 Phase 11 gate record: the authoritative group contains only its header. The production-source audit found no command-line-options parser to port; references to command lines or arguments were unrelated to this group, and no placeholder parser was added. `npm run verify` completed successfully.
 
 Phase 12 gate record: `npm run verify` completed successfully. All four progress-monitor contracts are exported through `@vitral/base`; three deterministic TypeScript parity tests cover in-memory progress, compact console milestones, and long-format console progress. No dedicated Java test source exists for this phase.
+
+Phase 13 gate record: `npm run verify` completed successfully. All four inventory symbols are exported through `@vitral/base`; three deterministic TypeScript parity tests cover pose-event accessors, WebSocket-frame parsing, listener subscription/removal, notification order, malformed-frame handling, and the nested `FrameListener` contract. The tangible-event-to-gizmo mappers are outside this inventory and depend on later camera and gizmo production classes.
+
+Phase 14 gate record: `npm run verify` completed successfully. All twenty media contracts are exported through `@vitral/base`; image data uses typed byte, float, and unsigned-16-bit buffers while preserving Java row orientation and signed-byte pixel semantics. No Java test source has a production dependency closure limited to this phase.
+
+Phase 16 gate record: `npm run verify` completed successfully. All five material inventory entries and the supporting `Material` contract are exported; CSV loading is isolated to the server-only `@vitral/fs` package. No dedicated Java material test source exists. This phase was closed at user direction while Phase 15 remains in progress.
 
 ## Analyzed State
 
@@ -1449,10 +1458,10 @@ The port is complete only when all of the following are true:
 | 10 | Statistics | Complete — 3 / 3 inventory symbols; 2 / 2 supplemental symbols; 3 / 3 parity tests; gate passed |
 | 11 | Command-line options checkpoint | Complete — empty authoritative group; gate passed |
 | 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
-| 13 | Tangible-interface contracts | In progress — 0 / 4 symbols |
-| 14 | Media and image buffers | Pending |
-| 15 | General processing | Pending |
-| 16 | Materials | Pending |
+| 13 | Tangible-interface contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
+| 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed |
+| 15 | General processing | In progress — 6 / 22 symbols |
+| 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order |
 | 17 | Geometry base | Pending |
 | 18 | Curves | Pending |
 | 19 | Geometry elements | Pending |

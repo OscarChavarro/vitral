@@ -70,6 +70,12 @@
     ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.ts"
     ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.ts"
     ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.ts"
+    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.ts"
+    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.ts"
+    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.ts"
+    ,"src/main/vsdk/toolkit/media/**/*.ts"
+    ,"src/main/vsdk/toolkit/processing/**/*.ts"
+    ,"src/main/vsdk/toolkit/environment/material/**/*.ts"
   ],
   "exclude": [
     "src/main/java/io/PrintStream.ts",

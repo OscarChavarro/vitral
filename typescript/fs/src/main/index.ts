@@ -7,3 +7,4 @@ export { FileInputStream } from "./java/io/FileInputStream.js";
 export { FileOutputStream } from "./java/io/FileOutputStream.js";
 export { FileReader } from "./java/io/FileReader.js";
 export { RandomAccessFile } from "./java/io/RandomAccessFile.js";
+export { MicrofacetCsvLoader } from "./vsdk/toolkit/environment/material/MicrofacetCsvLoader.js";

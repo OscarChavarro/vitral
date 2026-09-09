@@ -47,5 +47,5 @@ export class Entity implements ModelElement {
   }
 
   /** Mirrors the current Java implementation, whose clone contract returns null. */
-  public clone(): null { return null; }
+  public clone(): unknown { return null; }
 }

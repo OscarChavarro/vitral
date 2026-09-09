@@ -136,6 +136,41 @@ export { ProgressMonitor } from "./vsdk/toolkit/gui/feedback/ProgressMonitor.js"
 export { ProgressMonitorConsole } from "./vsdk/toolkit/gui/feedback/ProgressMonitorConsole.js";
 export { ProgressMonitorConsoleLongFormat } from "./vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.js";
 export { ProgressMonitorInRam } from "./vsdk/toolkit/gui/feedback/ProgressMonitorInRam.js";
+export { TangibleInterfaceEvent } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.js";
+export type { TangibleInterfaceListener } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.js";
+export { TangibleInterfaceNetworkClient, FrameListener as TangibleInterfaceNetworkClientFrameListener } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.js";
+export { MediaEntity } from "./vsdk/toolkit/media/MediaEntity.js";
+export { Calligraphic2DBuffer } from "./vsdk/toolkit/media/Calligraphic2DBuffer.js";
+export { FourierShapeDescriptor } from "./vsdk/toolkit/media/FourierShapeDescriptor.js";
+export { GeometryMetadata } from "./vsdk/toolkit/media/GeometryMetadata.js";
+export { GrayScalePalette } from "./vsdk/toolkit/media/GrayScalePalette.js";
+export { Image } from "./vsdk/toolkit/media/Image.js";
+export { IndexedColorImageUncompressed } from "./vsdk/toolkit/media/IndexedColorImageUncompressed.js";
+export { NormalMap } from "./vsdk/toolkit/media/NormalMap.js";
+export { PrimitiveCountShapeDescriptor } from "./vsdk/toolkit/media/PrimitiveCountShapeDescriptor.js";
+export { RGBAImageCompressed } from "./vsdk/toolkit/media/RGBAImageCompressed.js";
+export { RGBAImageUncompressed } from "./vsdk/toolkit/media/RGBAImageUncompressed.js";
+export { RGBAPixel } from "./vsdk/toolkit/media/RGBAPixel.js";
+export { RGBColorPalette } from "./vsdk/toolkit/media/RGBColorPalette.js";
+export { RGBImageUncompressed } from "./vsdk/toolkit/media/RGBImageUncompressed.js";
+export { RGBPixel } from "./vsdk/toolkit/media/RGBPixel.js";
+export { RGBProceduralColorPalette } from "./vsdk/toolkit/media/RGBProceduralColorPalette.js";
+export { ShapeDescriptor } from "./vsdk/toolkit/media/ShapeDescriptor.js";
+export { ZBuffer } from "./vsdk/toolkit/media/ZBuffer.js";
+export { RGBAImageHDRUncompressed } from "./vsdk/toolkit/media/RGBAImageHDRUncompressed.js";
+export { RGBAPixelHDR } from "./vsdk/toolkit/media/RGBAPixelHDR.js";
+export { ProcessingElement } from "./vsdk/toolkit/processing/ProcessingElement.js";
+export { Containment } from "./vsdk/toolkit/processing/Containment.js";
+export { StopWatch } from "./vsdk/toolkit/processing/StopWatch.js";
+export { SignalProcessing } from "./vsdk/toolkit/processing/SignalProcessing.js";
+export { ComputationalGeometry, ClippedLine2DResult } from "./vsdk/toolkit/processing/ComputationalGeometry.js";
+export { ImageProcessing } from "./vsdk/toolkit/processing/ImageProcessing.js";
+export type { Material } from "./vsdk/toolkit/environment/material/Material.js";
+export { SimpleMaterial } from "./vsdk/toolkit/environment/material/SimpleMaterial.js";
+export { MicroFacetedMaterial, MicrofacetConfig } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
+export { RendererConfiguration } from "./vsdk/toolkit/environment/material/RendererConfiguration.js";
+export { ShadingType } from "./vsdk/toolkit/environment/material/ShadingType.js";
+import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
   workerError,
   createWorkerMessageHandler,
