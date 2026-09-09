@@ -1,68 +1,8 @@
-import { Vector3Dd } from "./Vector3Dd.js";
-
-type Matrix4d = [
-  [number, number, number, number],
-  [number, number, number, number],
-  [number, number, number, number],
-  [number, number, number, number]
-];
-
-export class Matrix4x4d {
-  public m: Matrix4d;
-
-  public constructor() {
-    this.m = [
-      [1.0, 0.0, 0.0, 0.0],
-      [0.0, 1.0, 0.0, 0.0],
-      [0.0, 0.0, 1.0, 0.0],
-      [0.0, 0.0, 0.0, 1.0]
-    ];
-  }
-
-  public multiply(v3a: Vector3Dd, v3b: Vector3Dd): void {
-    const tmp = new Matrix4x4d();
-
-    tmp.m[0][0] = v3b.x * this.m[0][0] + v3b.y * this.m[1][0] + v3b.z * this.m[2][0];
-    tmp.m[0][1] = v3b.x * this.m[0][1] + v3b.y * this.m[1][1] + v3b.z * this.m[2][1];
-    tmp.m[0][2] = v3b.x * this.m[0][2] + v3b.y * this.m[1][2] + v3b.z * this.m[2][2];
-
-    v3a.x = tmp.m[0][0]!;
-    v3a.y = tmp.m[0][1]!;
-    v3a.z = tmp.m[0][2]!;
-  }
-
-  public multiplyWithTranslation(p3a: Vector3Dd, p3b: Vector3Dd): void {
-    this.multiply(p3a, p3b);
-    p3a.x += this.m[3][0]!;
-    p3a.y += this.m[3][1]!;
-    p3a.z += this.m[3][2]!;
-  }
-
-  public copy(source: Matrix4x4d): void {
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        this.m[i]![j] = source.m[i]![j]!;
-      }
-    }
-  }
-
-  public identity(): void {
-    const tmp = new Matrix4x4d();
-    this.copy(tmp);
-  }
-
-  public static multiplyMatrix4(m4a: Matrix4x4d, m4b: Matrix4x4d, m4c: Matrix4x4d): void {
-    const tmp = new Matrix4x4d();
-    for (let i = 3; i >= 0; i--) {
-      for (let j = 3; j >= 0; j--) {
-        tmp.m[i]![j] =
-          m4b.m[i]![0]! * m4c.m[0]![j]! +
-          m4b.m[i]![1]! * m4c.m[1]![j]! +
-          m4b.m[i]![2]! * m4c.m[2]![j]! +
-          m4b.m[i]![3]! * m4c.m[3]![j]!;
-      }
-    }
-
-    m4a.copy(tmp);
-  }
-}
+import { FundamentalEntity } from "../FundamentalEntity.js";import { VSDK } from "../VSDK.js";import { Vector3Dd } from "./Vector3Dd.js";import { Vector4Dd } from "./Vector4Dd.js";import { Quaterniond } from "./Quaterniond.js";
+export class Matrix4x4d extends FundamentalEntity {private readonly m:number[][];
+ public constructor();public constructor(o:Matrix4x4d|number[][]);public constructor(o:Matrix4x4d|number[][]=Matrix4x4d.unit()){super();const a=o instanceof Matrix4x4d?o.m:o;if(a.length!==4||a.some(r=>r.length!==4))throw new RangeError("Matrix must have 4 rows and 4 columns");this.m=a.map(r=>r.slice());}private static unit():number[][]{return [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]];}public static copyOf(o:Matrix4x4d|number[][]):Matrix4x4d{return new Matrix4x4d(o);}public static identityMatrix():Matrix4x4d{return new Matrix4x4d();}public identity():Matrix4x4d{return new Matrix4x4d();}public get(r:number,c:number):number{this.pos(r,c);return this.m[r]![c]!;}public withVal(r:number,c:number,v:number):Matrix4x4d{this.pos(r,c);const a=this.toArrayCopy();a[r]![c]=v;return new Matrix4x4d(a);}public toArrayCopy():number[][]{return this.m.map(r=>r.slice());}
+ public withoutTranslation():Matrix4x4d{let a=this.withVal(0,3,0).withVal(1,3,0).withVal(2,3,0);return a.withVal(3,0,0).withVal(3,1,0).withVal(3,2,0).withVal(3,3,1);}public extractTranslation():Vector3Dd{return new Vector3Dd(this.get(0,3),this.get(1,3),this.get(2,3));}public withTranslation(t:Vector3Dd):Matrix4x4d{return this.withVal(0,3,t.x()).withVal(1,3,t.y()).withVal(2,3,t.z());}
+ public translation(x:number|Vector3Dd,y?:number,z?:number):Matrix4x4d{if(x instanceof Vector3Dd)return this.translation(x.x(),x.y(),x.z());return new Matrix4x4d([[1,0,0,x],[0,1,0,y!],[0,0,1,z!],[0,0,0,1]]);}public scale(x:number|Vector3Dd,y?:number,z?:number):Matrix4x4d{if(x instanceof Vector3Dd)return this.scale(x.x(),x.y(),x.z());return new Matrix4x4d([[x,0,0,0],[0,y!,0,0],[0,0,z!,0],[0,0,0,1]]);}public axisRotation(angle:number,axis:Vector3Dd):Matrix4x4d;public axisRotation(angle:number,x:number,y:number,z:number):Matrix4x4d;public axisRotation(a:number,x:number|Vector3Dd,y?:number,z?:number):Matrix4x4d{let X:number,Y:number,Z:number;if(x instanceof Vector3Dd){X=x.x();Y=x.y();Z=x.z();}else{X=x;Y=y!;Z=z!;}const m=Math.hypot(X,Y,Z);if(m===0)return this.identity();X/=m;Y/=m;Z/=m;const s=Math.sin(a),c=Math.cos(a),q=1-c;return new Matrix4x4d([[q*X*X+c,q*X*Y-Z*s,q*Z*X+Y*s,0],[q*X*Y+Z*s,q*Y*Y+c,q*Y*Z-X*s,0],[q*Z*X-Y*s,q*Y*Z+X*s,q*Z*Z+c,0],[0,0,0,1]]);}
+ public multiply(o:number):Matrix4x4d;public multiply(o:Matrix4x4d):Matrix4x4d;public multiply(o:Vector3Dd):Vector3Dd;public multiply(o:Vector4Dd):Vector4Dd;public multiply(o:number|Matrix4x4d|Vector3Dd|Vector4Dd):Matrix4x4d|Vector3Dd|Vector4Dd{if(typeof o==="number")return new Matrix4x4d(this.m.map(r=>r.map(v=>v*o)));if(o instanceof Matrix4x4d){const a=Matrix4x4d.unit().map(r=>r.map(()=>0));for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)a[i]![j]!+=this.m[i]![k]!*o.m[k]![j]!;return new Matrix4x4d(a);}const x=o.x(),y=o.y(),z=o.z(),w=o instanceof Vector4Dd?o.w():1;const v=[0,0,0,0].map((_,i)=>this.m[i]![0]!*x+this.m[i]![1]!*y+this.m[i]![2]!*z+this.m[i]![3]!*w);return o instanceof Vector4Dd?new Vector4Dd(v[0]!,v[1]!,v[2]!,v[3]!):new Vector3Dd(v[0]!,v[1]!,v[2]!);}
+ public transpose():Matrix4x4d{return new Matrix4x4d(this.m[0]!.map((_,j)=>this.m.map(r=>r[j]!)));}public determinant():number{const a=this.m.map(r=>r.slice());let d=1,s=1;for(let c=0;c<4;c++){let p=c;for(let r=c+1;r<4;r++)if(Math.abs(a[r]![c]!)>Math.abs(a[p]![c]!))p=r;if(a[p]![c]===0)return 0;if(p!==c){[a[p],a[c]]=[a[c]!,a[p]!];s=-s;}d*=a[c]![c]!;for(let r=c+1;r<4;r++){const q=a[r]![c]!/a[c]![c]!;for(let j=c+1;j<4;j++)a[r]![j]!-=q*a[c]![j]!;}}return d*s;}public invert():Matrix4x4d{const a=this.m.map((r,i)=>[...r,...Matrix4x4d.unit()[i]!]);for(let c=0;c<4;c++){let p=c;for(let r=c+1;r<4;r++)if(Math.abs(a[r]![c]!)>Math.abs(a[p]![c]!))p=r;if(Math.abs(a[p]![c]!)<=VSDK.EPSILON)throw new RangeError("Matrix is singular");[a[p],a[c]]=[a[c]!,a[p]!];const d=a[c]![c]!;for(let j=0;j<8;j++)a[c]![j]!/=d;for(let r=0;r<4;r++)if(r!==c){const q=a[r]![c]!;for(let j=0;j<8;j++)a[r]![j]!-=q*a[c]![j]!;}}return new Matrix4x4d(a.map(r=>r.slice(4)));}public inverse():Matrix4x4d{return this.invert();}
+ public exportToQuaternion():Quaterniond{const t=this.m[0]![0]!+this.m[1]![1]!+this.m[2]![2]!;if(t>0){const s=Math.sqrt(t+1)*2;return new Quaterniond(new Vector3Dd((this.m[2]![1]!-this.m[1]![2]!)/s,(this.m[0]![2]!-this.m[2]![0]!)/s,(this.m[1]![0]!-this.m[0]![1]!)/s),s/4);}return new Quaterniond();}public importFromQuaternion(q:Quaterniond):Matrix4x4d{const x=q.direction().x(),y=q.direction().y(),z=q.direction().z(),w=q.magnitude();return new Matrix4x4d([[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w),0],[2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w),0],[2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y),0],[0,0,0,1]]);}public epsilonEquals(o:Matrix4x4d|null,e=VSDK.EPSILON):boolean{if(o===null)return false;if(e<0)throw new RangeError("epsilon must be >= 0");return this.m.every((r,i)=>r.every((v,j)=>Math.abs(v-o.m[i]![j]!)<=e));}private pos(r:number,c:number):void{if(r<0||r>3||c<0||c>3)throw new RangeError(`Matrix position out of bounds: (${r}, ${c})`);}}

@@ -6,6 +6,51 @@ Build a complete, mechanically traceable TypeScript port of the current Java Vit
 
 No phase may use placeholders, empty method bodies, unconditional dummy returns, "not implemented" exceptions, fake renderers, or compile-only stubs. Existing TypeScript files are candidate implementations, not proof of parity: each one must be compared method by method with the current Java source.
 
+## Current Status
+
+Phases 1 through 12 are complete and their available gates were verified on 2026-09-09. Phase 13 is the active phase.
+
+| Phase | Status | Completed | In progress | Remaining |
+|---|---|---:|---|---|
+| 1 — Java runtime compatibility | Complete | 86 / 86 inventory entries | — | — |
+| 2 — Common entity foundation | Complete | 7 / 7 applicable inventory entries | — | `VSDKJ2ME` excluded by Web-target decision |
+| 3 — Linear algebra | Complete | 16 / 16 inventory entries; 11 / 11 tests | — | — |
+| 4 — Symbolic algebra | Complete | 7 / 7 inventory entries | — | The only related Java test depends on later polyhedral-solid production classes |
+| 5 — Color | Complete | 2 / 2 applicable inventory entries | — | — |
+| 6 — Logging | Complete | 1 / 1 inventory entries | — | — |
+| 7 — Memory management checkpoint | Complete | 0 / 0 inventory entries | — | — |
+| 8 — Quasi-Monte Carlo checkpoint | Complete | 0 / 0 inventory entries | — | — |
+| 9 — Data structures | Complete | 12 / 12 inventory entries; 6 / 6 TypeScript parity tests | — | — |
+| 10 — Statistics | Complete | 3 / 3 inventory entries; 2 / 2 supplemental complete-common entries; 3 / 3 TypeScript parity tests | — | — |
+| 11 — Command-line options checkpoint | Complete | 0 / 0 inventory entries | — | — |
+| 12 — GUI progress-monitor contracts | Complete | 4 / 4 inventory entries; 3 / 3 TypeScript parity tests | — | — |
+| 13 — Tangible-interface contracts | In progress | 0 / 4 inventory entries | Class inventory and dependency analysis | 4 symbols and standard phase gate |
+| 14–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+
+Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
+
+Phase 2 gate record: `npm run verify` completed successfully. The seven applicable public contracts are emitted through `@vitral/base`; `VSDKJ2ME` is intentionally excluded because it targets obsolete Java ME devices and does not apply to the Web port. `VSDK` fatal-report configuration is kept in a platform-neutral internal contract which the phase-6 `Logger` implementation will use. This avoids a Node-only logging dependency in the browser-facing base package.
+
+Phase 3 gate record: `npm run verify` completed successfully. All sixteen inventory symbols are exported through `@vitral/base`; the eleven Java linear-algebra test-source contracts are represented by eleven deterministic Vitest cases, all passing. The package tarball and declaration-consumer validation also passed.
+
+Phase 4 gate record: `npm run verify` completed successfully. No Java symbolic-algebra test source has a production dependency closure at this phase. The only related source, `AlgebraicIdentityRegressionTest`, depends on later polyhedral-solid production classes and remains pending under the test-port rule.
+
+Phase 5 gate record: `npm run verify` completed successfully. No dedicated Java color test source is eligible at this dependency stage.
+
+Phase 6 gate record: `npm run verify` completed successfully. Logger reporting is platform-neutral and throws `VSDKFatalException` for fatal reports, rather than importing Node process APIs into `@vitral/base`.
+
+Phase 7 gate record: the authoritative group contains only its header. The import and generated-dependency audit found no memory-management symbol to port; no compatibility stub was added. `npm run verify` completed successfully.
+
+Phase 8 gate record: the authoritative group contains only its header. The Java and TypeScript production-source audit found no Quasi-Monte Carlo implementation to port; no placeholder was added. `npm run verify` completed successfully.
+
+Phase 9 gate record: `npm run verify` completed successfully. All twelve inventory symbols are exported through `@vitral/base`; six deterministic TypeScript parity tests cover primitive numeric storage and sorting, circular-list mutation and cursor behavior, and N-ary/binary tree topology. No Java test source has a production dependency closure limited to this phase.
+
+Phase 10 gate record: `npm run verify` completed successfully. All three inventory symbols and the two supplemental current-Java statistics symbols are exported through `@vitral/base`; three deterministic TypeScript parity tests cover aggregation, reset behavior, exact long counters, and browser-safe optional instrumentation. The complete current Java `vsdk.toolkit.common` package is now available in TypeScript except the intentionally excluded Web-inapplicable `VSDKJ2ME`. The eleven Java tests located under `common/linealAlgebra` remain represented by passing TypeScript tests. `LinearAlgebraStrategiesConsistencyTest` is a `processing.linealAlgebra` test whose dependency closure requires later strategy-engine production classes, so its translation remains deferred to that phase.
+
+Phase 11 gate record: the authoritative group contains only its header. The production-source audit found no command-line-options parser to port; references to command lines or arguments were unrelated to this group, and no placeholder parser was added. `npm run verify` completed successfully.
+
+Phase 12 gate record: `npm run verify` completed successfully. All four progress-monitor contracts are exported through `@vitral/base`; three deterministic TypeScript parity tests cover in-memory progress, compact console milestones, and long-format console progress. No dedicated Java test source exists for this phase.
+
 ## Analyzed State
 
 - Java production source of record: `java/base/src/main`; the repository also separates desktop and GPU integrations into `java/awt`, `java/jogl2`, and `java/jogl4`.
@@ -383,7 +428,7 @@ Source group: `17_statistics.txt` (3 class entries).
 
 Work: Port the listed counters and reports, plus GeometryStatistics and SolidTextureStatistics because they exist in the current Java common package but are absent from the graph inventory. This closes the complete-common milestone.
 Supplemental current-Java classes required for complete `common`: `vsdk.toolkit.common.statistics.GeometryStatistics` and `vsdk.toolkit.common.statistics.SolidTextureStatistics`.
-Milestone gate: phases 1 through 10 plus the three supplemental classes must provide the entire current Java `vsdk.toolkit.common` package, and all 12 existing Java test sources that exercise common/linear algebra must have passing TypeScript translations.
+Milestone gate: phases 1 through 10 plus the two supplemental classes provide the entire current Java `vsdk.toolkit.common` package except the intentionally excluded Web-inapplicable `VSDKJ2ME`. All eleven Java tests located under `common/linealAlgebra` have passing TypeScript translations. `LinearAlgebraStrategiesConsistencyTest` belongs to `processing.linealAlgebra` and remains deferred until its strategy-engine production dependencies are ported.
 
 Class inventory:
 
@@ -1095,7 +1140,7 @@ Exit: satisfy the standard phase gate before starting Phase 38.
 
 Source group: `61_gui.txt` (47 class entries).
 
-Work: Deferred platform-sensitive phase. Before implementation, obtain the user's UI target decision. Then port the platform-neutral GUI model/controllers and implement the chosen HTML5/CSS3 event/view bindings completely; do not emulate Swing with empty adapters.
+Work: Deferred platform-sensitive phase. Before implementation, obtain the user's UI target decision. Then port the platform-neutral GUI model/controllers and implement the chosen HTML5/CSS3 event/view bindings completely; do not emulate Swing with empty adapters. For the `ParallelProgressMonitor` symbols, support server runtime mode only. Browser-worker mode is explicitly unsupported until a complete design is selected; do not provide a compatibility stub.
 
 Class inventory:
 
@@ -1392,77 +1437,74 @@ The port is complete only when all of the following are true:
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| 1 | Java runtime compatibility | En curso |
-| 2 | Common entity foundation | Pendiente |
-| 3 | Linear algebra | Pendiente |
-| 4 | Symbolic algebra | Pendiente |
-| 5 | Color | Pendiente |
-| 6 | Logging | Pendiente |
-| 7 | Memory management checkpoint | Pendiente |
-| 8 | Quasi-Monte Carlo checkpoint | Pendiente |
-| 9 | Data structures | Pendiente |
-| 10 | Statistics | Pendiente |
-| 11 | Command-line options checkpoint | Pendiente |
-| 12 | GUI progress-monitor contracts | Pendiente |
-| 13 | Tangible-interface contracts | Pendiente |
-| 14 | Media and image buffers | Pendiente |
-| 15 | General processing | Pendiente |
-| 16 | Materials | Pendiente |
-| 17 | Geometry base | Pendiente |
-| 18 | Curves | Pendiente |
-| 19 | Geometry elements | Pendiente |
-| 20 | Concrete geometry elements | Pendiente |
-| 21 | Surfaces | Pendiente |
-| 22 | Volumes and boundary representation | Pendiente |
-| 23 | Backgrounds | Pendiente |
-| 24 | Cameras | Pendiente |
-| 25 | Geometric processing | Pendiente |
-| 26 | Lights | Pendiente |
-| 27 | Tone-mapping checkpoint | Pendiente |
-| 28 | Scene model | Pendiente |
-| 29 | Numerical-analysis checkpoint | Pendiente |
-| 30 | I/O wrappers | Pendiente |
-| 31 | I/O context checkpoint | Pendiente |
-| 32 | Binary I/O checkpoint | Pendiente |
-| 33 | Image I/O | Pendiente |
-| 34 | XML I/O | Pendiente |
-| 35 | VRML I/O checkpoint | Pendiente |
-| 36 | Geometry I/O | Pendiente |
-| 37 | SGL checkpoint | Pendiente |
-| 38 | GUI model and controllers | Pendiente |
-| 39 | Software shaders | Pendiente |
-| 40 | CPU rendering | Pendiente |
-| 41 | GPU rendering architecture checkpoint | Pendiente |
-| 42 | Animation | Pendiente |
-| 43 | Application framework | Pendiente |
-| 44 | GUI persistence | Pendiente |
-| 45 | Orphan-inventory closure | Pendiente |
+| 1 | Java runtime compatibility | Complete |
+| 2 | Common entity foundation | Complete (`VSDKJ2ME` excluded for the Web target) |
+| 3 | Linear algebra | Complete |
+| 4 | Symbolic algebra | Complete — 7 / 7 symbols; gate passed |
+| 5 | Color | Complete — 2 / 2 applicable symbols; gate passed |
+| 6 | Logging | Complete — 1 / 1 symbol; gate passed |
+| 7 | Memory management checkpoint | Complete — empty authoritative group; gate passed |
+| 8 | Quasi-Monte Carlo checkpoint | Complete — empty authoritative group; gate passed |
+| 9 | Data structures | Complete — 12 / 12 symbols; 6 / 6 parity tests; gate passed |
+| 10 | Statistics | Complete — 3 / 3 inventory symbols; 2 / 2 supplemental symbols; 3 / 3 parity tests; gate passed |
+| 11 | Command-line options checkpoint | Complete — empty authoritative group; gate passed |
+| 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
+| 13 | Tangible-interface contracts | In progress — 0 / 4 symbols |
+| 14 | Media and image buffers | Pending |
+| 15 | General processing | Pending |
+| 16 | Materials | Pending |
+| 17 | Geometry base | Pending |
+| 18 | Curves | Pending |
+| 19 | Geometry elements | Pending |
+| 20 | Concrete geometry elements | Pending |
+| 21 | Surfaces | Pending |
+| 22 | Volumes and boundary representation | Pending |
+| 23 | Backgrounds | Pending |
+| 24 | Cameras | Pending |
+| 25 | Geometric processing | Pending |
+| 26 | Lights | Pending |
+| 27 | Tone-mapping checkpoint | Pending |
+| 28 | Scene model | Pending |
+| 29 | Numerical-analysis checkpoint | Pending |
+| 30 | I/O wrappers | Pending |
+| 31 | I/O context checkpoint | Pending |
+| 32 | Binary I/O checkpoint | Pending |
+| 33 | Image I/O | Pending |
+| 34 | XML I/O | Pending |
+| 35 | VRML I/O checkpoint | Pending |
+| 36 | Geometry I/O | Pending |
+| 37 | SGL checkpoint | Pending |
+| 38 | GUI model and controllers | Pending |
+| 39 | Software shaders | Pending |
+| 40 | CPU rendering | Pending |
+| 41 | GPU rendering architecture checkpoint | Pending |
+| 42 | Animation | Pending |
+| 43 | Application framework | Pending |
+| 44 | GUI persistence | Pending |
+| 45 | Orphan-inventory closure | Pending |
 
-### Fase 1 — punto de control (2026-09-09)
+### Phase 1 Checkpoint — 2026-09-09
 
-El fundamento de paquetes y compilación está operativo con Node.js 22+, una
-lockfile fijada, compilación estricta, artefacto versionado y una comprobación
-en un consumidor temporal que instala el `.tgz` y compila un import público.
-`@vitral/base` continúa sin APIs de filesystem; `@vitral/fs` conserva los
-adaptadores locales del lado servidor.
+The package and build foundation is operational with Node.js 22+, a pinned
+lockfile, strict compilation, a versioned artifact, and a temporary-consumer
+check that installs the `.tgz` and compiles a public import. `@vitral/base`
+remains free of filesystem APIs; `@vitral/fs` retains server-side local adapters.
 
-Se completaron adaptadores de fecha y formato (`Date`, `SimpleDateFormat`,
-`DecimalFormat`), lectura/escritura binaria y de caracteres, colecciones
-ordenadas y las utilidades atómicas/cola. La concurrencia usa un contrato de
-Web Worker con mensajes estructuralmente clonables, cancelación cooperativa,
-errores propagados y terminación idempotente; no se añadió ejecución de carga
-de trabajo en el hilo principal como sustituto de un worker.
+Date and formatting adapters (`Date`, `SimpleDateFormat`, `DecimalFormat`),
+binary and character I/O, ordered collections, and atomic/queue utilities are
+complete. Concurrency uses a Web Worker contract with structured-cloneable
+messages, cooperative cancellation, propagated errors, and idempotent
+termination; no main-thread workload execution was added as a worker substitute.
 
-El inventario mecánico es 86 de 86 símbolos. Los adaptadores locales
-(`FileReader` y `RandomAccessFile`) se publican únicamente desde `@vitral/fs`.
-Los contratos DOM son aliases de las APIs DOM nativas; HTTP/WebSocket y gzip
-usan APIs web. La Fase 1 solo puede cerrarse tras registrar el resultado del
-gate completo y revisar semánticamente los adaptadores de serialización antes
-de que alguna clase Vitral dependa de ellos.
+The mechanical inventory is 86 of 86 symbols. Local adapters (`FileReader` and
+`RandomAccessFile`) are exported only from `@vitral/fs`. DOM contracts alias
+native DOM APIs, while HTTP/WebSocket and gzip use Web APIs. Phase 1 could close
+only after recording the full gate result and reviewing serialization-adapter
+semantics before any Vitral class depended on them.
 
-Gate ejecutado el 2026-09-09: `npm run verify` pasó (compilación estricta de
-`@vitral/base` y `@vitral/fs`, empaquetado, inspección seca e importación desde
-un consumidor temporal). Vitest se ejecutó serialmente y reportó 0 archivos de
-prueba: no existe aún ningún test Java permitido cuya clausura de producción
-pertenezca a esta fase. El escaneo de fuentes no encontró `TODO`, `FIXME`,
-`@ts-ignore`, `@ts-nocheck`, pruebas focalizadas ni pruebas omitidas.
+Gate run on 2026-09-09: `npm run verify` passed (strict compilation of
+`@vitral/base` and `@vitral/fs`, packaging, dry-run inspection, and import from
+a temporary consumer). Vitest ran serially and reported zero test files: no
+allowed Java test yet had a production closure contained in that phase. The
+source scan found no `TODO`, `FIXME`, `@ts-ignore`, `@ts-nocheck`, focused tests,
+or skipped tests.

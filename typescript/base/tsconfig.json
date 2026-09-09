@@ -23,7 +23,53 @@
   "include": [
     "src/main/index.ts",
     "src/main/java/**/*.ts",
-    "src/main/org/**/*.ts"
+    "src/main/org/**/*.ts",
+    "src/main/vsdk/toolkit/common/Entity.ts",
+    "src/main/vsdk/toolkit/common/FundamentalEntity.ts",
+    "src/main/vsdk/toolkit/common/ModelElement.ts",
+    "src/main/vsdk/toolkit/common/VSDK.ts",
+    "src/main/vsdk/toolkit/common/VSDKException.ts",
+    "src/main/vsdk/toolkit/common/VSDKFatalException.ts",
+    "src/main/vsdk/toolkit/common/VSDKRuntimeSettings.ts",
+    "src/main/vsdk/toolkit/gui/PresentationElement.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Complex.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Dd.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Df.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Dd.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Df.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Dd.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Df.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Quaterniond.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Quaternionf.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.ts",
+    "src/main/vsdk/toolkit/common/linealAlgebra/exceptions/**/*.ts"
+    ,"src/main/vsdk/toolkit/common/symbolicAlgebra/**/*.ts"
+    ,"src/main/vsdk/toolkit/common/color/ColorRgb.ts"
+    ,"src/main/vsdk/toolkit/common/color/ColorRgba.ts"
+    ,"src/main/vsdk/toolkit/common/logging/Logger.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfBytes.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfDoubles.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfInts.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfLongs.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/_CircularDoubleLinkedListNode.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeNode.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeIntermediateNode.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeLeafNode.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/BinaryTreeNode.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/NAryTree.ts"
+    ,"src/main/vsdk/toolkit/common/dataStructures/NAryTreeTraverser.ts"
+    ,"src/main/vsdk/toolkit/common/statistics/GeometryStatistics.ts"
+    ,"src/main/vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.ts"
+    ,"src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.ts"
+    ,"src/main/vsdk/toolkit/common/statistics/RenderingStatistics.ts"
+    ,"src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.ts"
+    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitor.ts"
+    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.ts"
+    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.ts"
+    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.ts"
   ],
   "exclude": [
     "src/main/java/io/PrintStream.ts",
