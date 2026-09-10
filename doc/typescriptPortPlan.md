@@ -76,6 +76,10 @@ Phase 20 gate record: the six `vsdk.toolkit.environment.geometry.elements.*` gra
 
 Phase 22 gate record: `npm run verify` completed successfully on 2026-09-10. All thirty inventory entries are exported through `@vitral/base`; the Java B-rep reference suite compiled and passed. Fifty-eight deterministic TypeScript tests in forty-three modules pass, including primitive B-rep exports, numeric/strict/topological validation, point-in-solid and quantitative-invisibility edge cases, topology editing, node ownership, and the Euler inverse and wrapper contracts (`mvfs`/`kvfs`, `lmev`/`lkev`, `lmef`/`lkef`, `lkemr`/`lmekr`, `lringmv`, and `lkimrh`/`lmikrh`). The face-plane corner fallback preserves the Java behavior for open-wire `lmef`/`lkef` inverse sequences. This phase was completed out of normal order while Phase 15 remains in progress.
 
+Phase 23 gate record: `npm run verify` completed successfully on 2026-09-10. All four background models are exported through `@vitral/base`; deterministic tests cover uniform colours, the Java-compatible unfinished fixed background, cubemap face selection, image replacement, and camera ownership.
+
+Phase 24 gate record: the standard gate completed successfully on 2026-09-10: clean build, lint, seventy deterministic tests in forty-seven modules, package creation, and a temporary-consumer import all pass. Both camera symbols are exported through `@vitral/base`. Tests cover snapshots, perspective and orthogonal ray generation, reference-frame orthogonality, modification versioning, projection, world and canonical clipping, view-volume matrices, and viewport conversion. Since `Vector3Dd` is immutable in both ports, Java's ineffective output-vector signatures remain boolean compatibility methods while explicit `*Result` variants return usable projected or clipped vectors.
+
 ## Analyzed State
 
 - Java production source of record: `java/base/src/main`; the repository also separates desktop and GPU integrations into `java/awt`, `java/jogl2`, and `java/jogl4`.
@@ -1484,8 +1488,8 @@ The port is complete only when all of the following are true:
 | 20 | Concrete geometry elements | Complete — empty applicable source group; gate passed |
 | 21 | Surfaces | Complete — 13 / 13 symbols |
 | 22 | Volumes and boundary representation | Complete — 30 / 30 symbols; Java B-rep parity review and standard gate passed |
-| 23 | Backgrounds | Pending |
-| 24 | Cameras | Pending |
+| 23 | Backgrounds | Complete — 4 / 4 symbols; standard gate passed |
+| 24 | Cameras | Complete — 2 / 2 symbols; parity review and standard gate passed |
 | 25 | Geometric processing | Pending |
 | 26 | Lights | Pending |
 | 27 | Tone-mapping checkpoint | Pending |

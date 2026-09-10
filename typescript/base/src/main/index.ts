@@ -114,6 +114,12 @@ export { _AlgebraicExpressionBinaryOperatorNode } from "./vsdk/toolkit/common/sy
 export { _AlgebraicExpressionUnaryOperatorNode } from "./vsdk/toolkit/common/symbolicAlgebra/_AlgebraicExpressionUnaryOperatorNode.js";
 export { ColorRgb } from "./vsdk/toolkit/common/color/ColorRgb.js";
 export { ColorRgba } from "./vsdk/toolkit/common/color/ColorRgba.js";
+export { Background } from "./vsdk/toolkit/environment/background/Background.js";
+export { CubemapBackground } from "./vsdk/toolkit/environment/background/CubemapBackground.js";
+export { FixedBackground } from "./vsdk/toolkit/environment/background/FixedBackground.js";
+export { SimpleBackground } from "./vsdk/toolkit/environment/background/SimpleBackground.js";
+export { Camera } from "./vsdk/toolkit/environment/camera/Camera.js";
+export { CameraSnapshot } from "./vsdk/toolkit/environment/camera/CameraSnapshot.js";
 export { Logger } from "./vsdk/toolkit/common/logging/Logger.js";
 export { ArrayListOfBytes } from "./vsdk/toolkit/common/dataStructures/ArrayListOfBytes.js";
 export { ArrayListOfDoubles } from "./vsdk/toolkit/common/dataStructures/ArrayListOfDoubles.js";
