@@ -1,6 +1,8 @@
 import { Image } from "./Image.js";
 import { RGBPixel } from "./RGBPixel.js";
 import { byte } from "./_pixel.js";
+import { RGBAImageUncompressed } from "./RGBAImageUncompressed.js";
+import { RGBAPixel } from "./RGBAPixel.js";
 export class RGBImageUncompressed extends Image {
     private data: Uint8Array | null = null;
     private xSize = 0;
@@ -79,6 +81,9 @@ export class RGBImageUncompressed extends Image {
     public getRawImage(): Int8Array {
         return new Int8Array(this.data!.buffer, this.data!.byteOffset, this.data!.length);
     }
+    public getRawImageDirectBuffer(): Uint8Array {
+        return this.data!;
+    }
     public setRawImage(w: number, h: number, data: Int8Array | Uint8Array): void {
         this.xSize = w;
         this.ySize = h;
@@ -91,4 +96,20 @@ export class RGBImageUncompressed extends Image {
         c.data!.set(this.data!);
         return c;
     }
+    public cloneToRgba(): RGBAImageUncompressed {
+        const copy = new RGBAImageUncompressed();
+        copy.init(this.xSize, this.ySize);
+        const target = new RGBAPixel();
+        for (let x = 0; x < this.xSize; x++)
+            for (let y = 0; y < this.ySize; y++) {
+                const source = this.getPixel(x, y);
+                target.r = source.r;
+                target.g = source.g;
+                target.b = source.b;
+                copy.putPixel(x, y, target);
+            }
+        return copy;
+    }
+    /** Java's current direct-buffer disposal implementation is intentionally a no-op. */
+    public dispose(): void {}
 }

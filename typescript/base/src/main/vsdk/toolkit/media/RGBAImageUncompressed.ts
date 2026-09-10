@@ -98,6 +98,9 @@ export class RGBAImageUncompressed extends Image {
     public getRawImage(): Int8Array {
         return new Int8Array(this.data!.buffer, this.data!.byteOffset, this.data!.length);
     }
+    public getRawImageDirectBuffer(): Uint8Array {
+        return this.data!;
+    }
     public setRawImage(w: number, h: number, data: Int8Array | Uint8Array): void {
         this.xSize = w;
         this.ySize = h;

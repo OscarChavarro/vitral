@@ -2,6 +2,9 @@ import { RGBColorPalette } from "./RGBColorPalette.js";
 import { ColorRgb } from "../common/color/ColorRgb.js";
 export abstract class RGBProceduralColorPalette extends RGBColorPalette {
     protected pure = true;
+    public override selectNearestIndexToRgb(color: ColorRgb): number {
+        return super.selectNearestIndexToRgb(color);
+    }
     public override setColorAt(i: number, c: ColorRgb): void;
     public override setColorAt(i: number, r: number, g: number, b: number): void;
     public override setColorAt(i: number, a: ColorRgb | number, b?: number, c?: number): void {

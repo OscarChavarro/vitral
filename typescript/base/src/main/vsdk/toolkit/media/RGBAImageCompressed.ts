@@ -27,9 +27,23 @@ export class RGBAImageCompressed extends Image {
         return this.init(w, h);
     }
     public initCompressed(w: number, h: number, format: number, data: Int8Array | Uint8Array | null): boolean {
-        if (w <= 0 || h <= 0 || data === null) return false;
+        if (w <= 0 || h <= 0 || data === null) {
+            this.dettach();
+            this.xSize = 0;
+            this.ySize = 0;
+            this.format = 0;
+            this.compressedSize = 0;
+            return false;
+        }
         const size = RGBAImageCompressed.calculateTopLevelDataSize(w, h, format);
-        if (data.length < size) return false;
+        if (data.length < size) {
+            this.dettach();
+            this.xSize = 0;
+            this.ySize = 0;
+            this.format = 0;
+            this.compressedSize = 0;
+            return false;
+        }
         this.xSize = w;
         this.ySize = h;
         this.format = format;
@@ -77,6 +91,14 @@ export class RGBAImageCompressed extends Image {
     public getPixelRgb(_x: number, _y: number, _p: RGBPixel): void;
     public getPixelRgb(_x: number, _y: number, _p?: RGBPixel): RGBPixel | void {
         return this.unsupported();
+    }
+    public getPixelRgba(_x: number, _y: number, _pixel: RGBAPixel): void {
+        this.unsupported();
+    }
+    public override clone(): RGBAImageCompressed {
+        const copy = new RGBAImageCompressed();
+        if (this.data !== null) copy.initCompressed(this.xSize, this.ySize, this.format, this.data);
+        return copy;
     }
     public static calculateTopLevelDataSize(w: number, h: number, f: number): number {
         const blocks = Math.ceil(w / 4) * Math.ceil(h / 4);

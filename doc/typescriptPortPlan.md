@@ -6,15 +6,25 @@ Build a complete, mechanically traceable TypeScript port of the current Java Vit
 
 No phase may use placeholders, empty method bodies, unconditional dummy returns, "not implemented" exceptions, fake renderers, or compile-only stubs. Existing TypeScript files are candidate implementations, not proof of parity: each one must be compared method by method with the current Java source.
 
+## Mandatory migration discipline
+
+Every production migration must preserve the Java implementation textually and behaviorally: control flow, numeric tolerances, mutation order, diagnostics, comments that describe invariants, and deterministic ordering are ported 1:1 unless a runtime boundary makes that impossible. Such a boundary must be documented beside the code and verified by a dedicated parity test; replacing a complex Java algorithm with a simpler or merely equivalent-looking algorithm is prohibited.
+
+For a complex algorithm, first map and migrate its complete private dependency graph (state types, predicates, allocators, ordering helpers, topology utilities, and nested result/specification types). Only then migrate its public entry points textually, followed by Java-derived regression and degeneracy tests. This rule applies to every phase, including already-completed phases when parity is re-audited.
+
 ## Current Status
 
-Phases 1 through 14 are complete and their available gates were verified on 2026-09-09. Phase 15 is the active phase.
+Phases 1 through 14 have recorded gates. A literal-parity re-audit on
+2026-09-11 found that green gates had not proved source parity; see
+`doc/typescriptParityAudit.md`. Phases 3, 15, 21, 22, 23--24, and 25 have open
+parity findings, and no later phase may be treated as a 1:1 baseline until
+those findings are closed.
 
 | Phase | Status | Completed | In progress | Remaining |
 |---|---|---:|---|---|
 | 1 — Java runtime compatibility | Complete | 86 / 86 inventory entries | — | — |
 | 2 — Common entity foundation | Complete | 7 / 7 applicable inventory entries | — | `VSDKJ2ME` excluded by Web-target decision |
-| 3 — Linear algebra | Complete | 16 / 16 inventory entries; 11 / 11 tests | — | — |
+| 3 — Linear algebra | Inventory complete, parity open | 16 / 16 inventory entries; 11 / 11 tests | `Matrix4x4f` literal completion | Audit gate |
 | 4 — Symbolic algebra | Complete | 7 / 7 inventory entries | — | The only related Java test depends on later polyhedral-solid production classes |
 | 5 — Color | Complete | 2 / 2 applicable inventory entries | — | — |
 | 6 — Logging | Complete | 1 / 1 inventory entries | — | — |
@@ -26,15 +36,17 @@ Phases 1 through 14 are complete and their available gates were verified on 2026
 | 12 — GUI progress-monitor contracts | Complete | 4 / 4 inventory entries; 3 / 3 TypeScript parity tests | — | — |
 | 13 — Tangible-interface contracts | Complete | 4 / 4 inventory entries; 3 / 3 TypeScript parity tests | — | — |
 | 14 — Media and image buffers | Complete | 20 / 20 inventory entries | — | — |
-| 15 — General processing | In progress | 6 / 22 inventory entries | Core geometry, signal, image, and timing processing | 16 symbols and standard phase gate |
+| 15 — General processing | In progress | 20 / 22 inventory entries | Native-runtime adaptations for LZW and SpharmonicKit | 2 symbols and literal-parity gate |
 | 16 — Materials | Complete | 5 / 5 inventory entries | — | — |
 | 17 — Geometry base | Complete | 1 / 1 inventory entries | — | — |
 | 18 — Curves | Complete | 2 / 2 inventory entries | — | — |
 | 19 — Geometry elements | Complete | 6 / 6 inventory entries | — | — |
 | 20 — Concrete geometry elements | Complete | 0 / 0 applicable entries | Graph contains six obsolete duplicate package names | — |
-| 21 — Surfaces | Complete | 13 / 13 inventory entries | Surface hierarchy, plane, contour, polygon, bicubic and functional patches, quad and triangle meshes, mesh group, strip mesh, and MD2 animation metadata | Standard phase gate |
-| 22 — Volumes and boundary representation | Complete | 30 / 30 inventory entries | Volume primitives plus B-rep topology, validation, visibility predicates, cone/frustum, torus, arrow, Euler operators, topology editing, and strict geometric strategies | Standard phase gate passed on 2026-09-10 |
-| 23–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 21 — Surfaces | Inventory complete, parity open | 13 / 13 inventory entries | `ParametricBiCubicPatch` and `TriangleMesh.slice` literal completion | Audit gate |
+| 22 — Volumes and boundary representation | Inventory complete, parity open | 30 / 30 inventory entries | Java primitive/Euler B-rep construction and complete topology/validation decision graphs | Audit gate |
+| 23–24 | Complete, parity audit open | 6 / 6 inventory entries | Source-level parity corrections | Audit gate |
+| 25 — Geometric processing | In progress | Polygon clipping, voxelization, and monotone triangulation blocks only | Full B-rep/CSG operator block | 32 current-Java source files plus tests and standard gate |
+| 26–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -777,6 +789,44 @@ Source group: `23_geometric_processing.txt` (148 class entries).
 
 Work: Port the full geometric-processing and CSG inventory in listed order, including all nested result/specification classes. Preserve tolerances, topology mutations, diagnostic behavior, and deterministic ordering.
 
+For the Weiler--Atherton and B-rep/CSG algorithms, do not implement public boolean operations until all original private dependencies have been migrated textually and tested. In particular, migrate the clipping graph node insertion/order, cut classification, contour/hole classification, traversal, and all coincident/parallel-edge branches before `clipPolygons` or `unionPolygons`; migrate each CSG subsystem's predicates and topology helpers before its set-operation entry point.
+
+### Phase 25.2 completion record — 2026-09-10
+
+The Weiler--Atherton sub-block is closed. The TypeScript port follows the original Java source at `java/base/src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/WeilerAthertonPolygonClipper.java`: its 2D predicates and ordered insertion, `updatePolygonsAndListsWithCuts`, complete `makeCut` endpoint/parallel decision tree, contour and hole classification, inner/outer graph traversals, `clipPolygons`, and `unionPolygons` are implemented without substituting a different clipping algorithm.
+
+Eight deterministic tests cover proper and vertical crossings, all four endpoint-coincidence orientations, collinear overlap, disjoint polygons, containment in both directions, holes, intersecting non-convex contours, exterior/difference loops, union, and duplicate/internal-edge cleanup. A compiled Java reference driver confirmed the exact output contour and vertex ordering for crossing, hole, non-convex, and union cases. The focused geometric-processing suite passed 15 tests in 5 modules; the full suite passed 85 tests in 52 modules. `npm run lint-fix`, clean strict compilation, `git diff --check`, package creation, declaration consumption from a temporary project, and the final `npm run verify` all passed. The package gate also caught and eliminated internal `vsdk/*` aliases from emitted declarations; geometric-processing production imports now remain consumable relative paths.
+
+### Phase 25.3 completion record — 2026-09-10
+
+The independent surface-processing block is closed: `GeometryTriangulator`, `SurfaceRayIntersection`, `TriangleMeshVoxelization`, `TriangleMeshGroupVoxelization`, `FunctionalExplicitSurfaceVoxelization`, and `Voxelization` follow their Java counterparts. The dispatch order for mesh, group, and functional surfaces; inverse-transform mesh rasterization; voxel tolerance `2 / xSize`; containment fallback; signed-byte occupancy (`-1`/`255`); and bounding-box ray rejection are preserved.
+
+The deterministic `Voxelization` suite now verifies generic containment, mesh-space rasterization (including the legacy independently-clamped barycentric behaviour), mesh dispatch, triangulator identity/conversion rules, and accepted/rejected bounded mesh-ray hits. The focused geometric-processing suite passed 18 tests in 5 modules. `npm run lint-fix`, the complete 88-test suite, strict build, `git diff --check`, and the package/consumer gate in `npm run verify` all passed. The next sub-block is monotone polygon triangulation; port its missing dependency graph before exposing `MonotoneDecompositionTriangulator`.
+
+### Phase 25.4 completion record — 2026-09-10
+
+The deterministic data and scheduling layer for monotone decomposition is closed: `_TriangulationSegment`, `_VertexChain`, `_MonotoneChainNode`, `_ContourData`, `_IndexedVertex`, `_InsertionBatchSchedule`, and `_RandomSegmentOrder`. Regressions lock the Java Park--Miller permutation, log-star batching arithmetic, and the zero-index-compatible default segment state. Phase 25.5 may now port the trapezoid query graph and incremental insertion. Do not begin `_Monotone`, `_ContourAwarePolygonTriangulator`, or `MonotoneDecompositionTriangulator` until that graph is complete.
+
+### Phase 25.5 continuation — 2026-09-10
+
+Port only the trapezoidal-map construction layer: `_TriangulationTrapezoid`, `_TriangulationTrapezoidQueryNode`, `_SegmentTableBuilder`, `_Construct`, and `_IncrementalSegmentInserter`. Preserve query-node routing, allocated-table bounds, segment endpoint swapping, neighbor relinking, invalid-trapezoid marking, and all Java degeneracy branches. Add graph-level deterministic tests and run the phase gate. Stop after a successful 25.5 gate: 25.6 owns contour-aware extraction, `_Monotone`, and the public triangulator.
+
+Completion: the 1-based storage, numeric predicates, circular segment-table construction, X/Y/SINK query-node routing, trapezoid representation, four-cell bootstrap DAG, and complete incremental insertion are ported. `_IncrementalSegmentInserter.addSegment` preserves Java's endpoint normalization, endpoint splitting, every lower-neighbour relinking branch, X-node/sink ownership, traversal, merging, and invalidation. `_Construct.constructTrapezoids` preserves Java's randomized log-star batch schedule and query-root refresh pass. Direct tests cover standalone `addSegment` and complete scheduled map construction.
+
+Literal-parity audit (2026-09-11): `_Construct` and `_IncrementalSegmentInserter` now have one-for-one Java method inventories, including the complete `constructTrapezoids` and `addSegment` entry points. The temporary TypeScript-only `splitCellBySegment` helper was removed. Phase 25.5 is closed.
+
+The Java and C++ repositories contain the future public-oracle examples at `java/testsuite/OfflineExamples/PolygonTriangulation` and `cpp/testsuite/OfflineExamples/PolygonTriangulation` (the latter includes numbered rendered outputs). Do not copy them into TypeScript during 25.5: use them in 25.6 only, after the extraction layer and public `MonotoneDecompositionTriangulator` are ready to receive polygon-with-hole regressions.
+
+Phase 25.6 completion: `MonotoneDecompositionTriangulator` has the public contour path with flattened original indices, contour nesting/orientation, visible-bridge selection, and ear clipping. Bridge selection follows the Java checks against the outer boundary, the active hole, remaining holes, and midpoint containment. Its four private Java stages (`stage1PrepareAndOrder`, `stage2BootStrap`, `stage3IncrementalBatchedInsertion`, and `stage4FinalizeAndExtractTriangles`) are ported and connected to the completed 25.5 backend. A direct regression bypasses the contour-aware result and verifies the full Seidel construction and monotone extraction path on a convex polygon.
+
+Literal-parity audit (2026-09-11): `_ContourAwarePolygonTriangulator` has the same 26 methods as Java; `_Monotone` has the same 11 methods, including every `SP_*` branch and both extraction methods; and `MonotoneDecompositionTriangulator` has the same four private stages plus `triangulate`. Deterministic regressions cover a convex contour, one annular hole (with exact Java triangle ordering), two disjoint holes, an island nested inside a hole, a degenerate contour, and a concave outer contour with a hole. The broader 60-file Java/C++ testsuite fixture replication remains intentionally deferred, as requested, and is not part of the 25.6 implementation gate. Phase 25.6 is closed.
+
+Final 25.5/25.6 gate (2026-09-11): `npm run verify` completed successfully, including clean builds of `@vitral/base` and `@vitral/fs`, all 106 tests in 55 modules, package creation, and the downstream compile/package-consumption checks. `git diff --check` is clean. Phase 25.7 remains explicitly unstarted.
+
+### Phase 25.7 hold — 2026-09-10
+
+Do not begin the B-rep/CSG operator sub-block in this session. The active scope ends after successful gates for 25.5 (trapezoidal map) and 25.6 (monotone extraction, public triangulator, and Java/C++ polygon-with-hole parity regressions).
+
 Class inventory:
 
 ```text
@@ -1451,7 +1501,7 @@ For the complete-common milestone at Phase 10, migrate the eleven tests under `j
 
 The port is complete only when all of the following are true:
 
-- All 45 phases are closed in the prescribed order.
+- All 46 phases are closed in the prescribed order.
 - All 580 unique graph entries are fully implemented or mapped to a verified native semantic equivalent; the three supplemental current-common classes are also fully implemented.
 - Every current Java `vsdk.toolkit.common` production file has a behaviorally equivalent TypeScript implementation.
 - No placeholder/stub patterns or unexplained inventory gaps remain.
@@ -1511,6 +1561,7 @@ The port is complete only when all of the following are true:
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |
 | 45 | Orphan-inventory closure | Pending |
+| 46 | Textual-parity and dependency-closure audit | Pending |
 
 ### Phase 1 Checkpoint — 2026-09-09
 

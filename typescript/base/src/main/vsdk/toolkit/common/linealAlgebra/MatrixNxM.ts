@@ -4,6 +4,7 @@ import { MatrixDimensionMismatchException } from "./exceptions/MatrixDimensionMi
 import { MatrixIndexOutOfBoundsException } from "./exceptions/MatrixIndexOutOfBoundsException.js";
 import { MatrixNotSquareException } from "./exceptions/MatrixNotSquareException.js";
 import { MatrixSingularException } from "./exceptions/MatrixSingularException.js";
+import { Double } from "../../../../java/lang/Double.js";
 
 /** Immutable general matrix.  Elimination is local to keep this phase independent. */
 export class MatrixNxM extends FundamentalEntity {
@@ -138,7 +139,21 @@ export class MatrixNxM extends FundamentalEntity {
         return this.values.every((r, i) => r.every((x, j) => Math.abs(x - other.values[i]![j]!) <= epsilon));
     }
     public equals(other: unknown): boolean {
-        return other instanceof MatrixNxM && this.epsilonEquals(other, 0);
+        return (
+            other instanceof MatrixNxM &&
+            this.rows === other.rows &&
+            this.columns === other.columns &&
+            this.values.every((row, i) => row.every((value, j) => Double.compare(value, other.values[i]![j]!) === 0))
+        );
+    }
+    public hashCode(): number {
+        let result = (Math.imul(31, this.rows) + this.columns) | 0;
+        for (const row of this.values) {
+            let rowHash = 1;
+            for (const value of row) rowHash = (Math.imul(31, rowHash) + Double.hashCode(value)) | 0;
+            result = (Math.imul(31, result) + rowHash) | 0;
+        }
+        return result;
     }
     public override toString(): string {
         return `\n------------------------------\n  - Matrix of ${this.rows} rows by ${this.columns} columns\n${this.values.map((r) => r.map((x) => VSDK.formatDouble(x)).join(" ") + " ").join("\n")}\n------------------------------\n`;

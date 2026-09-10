@@ -1,5 +1,6 @@
 import { FundamentalEntity } from "../FundamentalEntity.js";
 import { VSDK } from "../VSDK.js";
+import { Double } from "../../../../java/lang/Double.js";
 export class ColorRgb extends FundamentalEntity {
     private readonly rv: number;
     private readonly gv: number;
@@ -56,6 +57,12 @@ export class ColorRgb extends FundamentalEntity {
         return (
             o instanceof ColorRgb && Object.is(this.rv, o.rv) && Object.is(this.gv, o.gv) && Object.is(this.bv, o.bv)
         );
+    }
+    public hashCode(): number {
+        let hash = 5;
+        hash = (Math.imul(59, hash) + Double.hashCode(this.rv)) | 0;
+        hash = (Math.imul(59, hash) + Double.hashCode(this.gv)) | 0;
+        return (Math.imul(59, hash) + Double.hashCode(this.bv)) | 0;
     }
     public override toString(): string {
         return `<${VSDK.formatDouble(this.rv)}, ${VSDK.formatDouble(this.gv)}, ${VSDK.formatDouble(this.bv)}>`;

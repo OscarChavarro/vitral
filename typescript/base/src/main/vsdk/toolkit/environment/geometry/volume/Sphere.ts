@@ -82,6 +82,26 @@ export class Sphere extends Solid {
     public override doCenterOfMass(): Vector3Dd {
         return new Vector3Dd();
     }
+    public spherePosition(theta: number, phi: number): Vector3Dd {
+        return new Vector3Dd(
+            Math.cos(phi) * Math.cos(theta) * this.radius,
+            -Math.cos(phi) * Math.sin(theta) * this.radius,
+            Math.sin(phi) * this.radius,
+        );
+    }
+    public sphereNormal(theta: number, phi: number): Vector3Dd {
+        return new Vector3Dd(Math.cos(phi) * Math.cos(theta), -Math.cos(phi) * Math.sin(theta), Math.sin(phi));
+    }
+    public sphereTangent(theta: number, _phi: number): Vector3Dd {
+        return new Vector3Dd(Math.sin(theta), Math.cos(theta), 0);
+    }
+    public sphereBinormal(theta: number, phi: number): Vector3Dd {
+        return new Vector3Dd(
+            -Math.sin(phi) * Math.cos(theta),
+            Math.sin(phi) * Math.sin(theta),
+            Math.cos(phi) * Math.cos(theta) * Math.cos(theta) + Math.cos(phi) * Math.sin(theta) * Math.sin(theta),
+        );
+    }
     public override exportToPolyhedralBoundedSolid(): PolyhedralBoundedSolid;
     public override exportToPolyhedralBoundedSolid(meridians: number, parallels?: number): PolyhedralBoundedSolid;
     /** Closed latitude/longitude approximation; poles are shared vertices, never degenerate rings. */

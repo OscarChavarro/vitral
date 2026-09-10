@@ -1,5 +1,6 @@
 import { FundamentalEntity } from "../FundamentalEntity.js";
 import { VSDK } from "../VSDK.js";
+import { Double } from "../../../../java/lang/Double.js";
 import { Vector3Dd } from "./Vector3Dd.js";
 export class Vector4Dd extends FundamentalEntity {
     private readonly xv: number;
@@ -74,6 +75,21 @@ export class Vector4Dd extends FundamentalEntity {
             Math.abs(this.zv - o.zv) <= e &&
             Math.abs(this.wv - o.wv) <= e
         );
+    }
+    public equals(other: unknown): boolean {
+        return (
+            other instanceof Vector4Dd &&
+            Double.compare(this.xv, other.xv) === 0 &&
+            Double.compare(this.yv, other.yv) === 0 &&
+            Double.compare(this.zv, other.zv) === 0 &&
+            Double.compare(this.wv, other.wv) === 0
+        );
+    }
+    public hashCode(): number {
+        let result = Double.hashCode(this.xv);
+        result = (Math.imul(31, result) + Double.hashCode(this.yv)) | 0;
+        result = (Math.imul(31, result) + Double.hashCode(this.zv)) | 0;
+        return (Math.imul(31, result) + Double.hashCode(this.wv)) | 0;
     }
     public override toString(): string {
         return `<${VSDK.formatDouble(this.xv)}, ${VSDK.formatDouble(this.yv)}, ${VSDK.formatDouble(this.zv)}, ${VSDK.formatDouble(this.wv)}>`;

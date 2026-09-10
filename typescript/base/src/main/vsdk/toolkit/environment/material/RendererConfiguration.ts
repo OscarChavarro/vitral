@@ -22,6 +22,23 @@ export class RendererConfiguration extends FundamentalEntity {
     private wireColor = new ColorRgb(1, 1, 1);
     private boundingColor = new ColorRgb(1, 1, 0);
     private lodHint = 0;
+    public compareTo(other: RendererConfiguration): number {
+        const value = (configuration: RendererConfiguration): number =>
+            (configuration.surfaces ? 0x0001 : 0) +
+            (configuration.wires ? 0x0002 : 0) +
+            (configuration.boundingVolume ? 0x0004 : 0) +
+            (configuration.selectionCorners ? 0x0008 : 0) +
+            (configuration.texture ? 0x0010 : 0) +
+            (configuration.bumpMap ? 0x0020 : 0) +
+            (configuration.points ? 0x0040 : 0) +
+            (configuration.normals ? 0x0080 : 0) +
+            (configuration.trianglesNormals ? 0x0100 : 0) +
+            configuration.shading * 0x1000 +
+            Math.round(configuration.threshold) * 0x100000;
+        const thisValue = value(this),
+            otherValue = value(other);
+        return thisValue > otherValue ? 1 : thisValue < otherValue ? -1 : 0;
+    }
     public override clone(o?: RendererConfiguration): RendererConfiguration | void {
         if (o === undefined) {
             const c = new RendererConfiguration();
@@ -52,8 +69,8 @@ export class RendererConfiguration extends FundamentalEntity {
     public getBoundingVolumeColor() {
         return this.boundingColor;
     }
-    public setShadingType(s: number | ShadingType) {
-        this.shading = typeof s === "number" ? s : s;
+    public setShadingType(s: number | ShadingType | null) {
+        this.shading = s === null ? RendererConfiguration.SHADING_TYPE_GOURAUD : s;
     }
     public getShadingType() {
         return this.shading;
@@ -150,5 +167,26 @@ export class RendererConfiguration extends FundamentalEntity {
     }
     public changeShadingType() {
         this.shading = ShadingType.next(this.getShadingTypeEnum());
+    }
+    public getUseVertexColors(): boolean {
+        return this.useVertexColors;
+    }
+    public setUseVertexColors(useVertexColors: boolean): void {
+        this.useVertexColors = useVertexColors;
+    }
+    public override toString(): string {
+        const names = ["LIGHTING DISABLED (ONLY AMBIENT COLOR)", "FLAT", "GOURAUD", "PHONG", "COOK-TERRANCE"];
+        let message = `<RendererConfiguration>:\n  - Shading type: ${names[this.shading] ?? "INVALID!"}\n`;
+        message += `  - Draw points: ${this.points ? "ON" : "OFF"}\n`;
+        message += `  - Draw wires: ${this.wires ? "ON" : "OFF"}\n`;
+        message += `  - Draw surfaces: ${this.surfaces ? "ON" : "OFF"}\n`;
+        message += `  - Draw bounding volume: ${this.boundingVolume ? "ON" : "OFF"}\n`;
+        message += `  - Draw selection corners: ${this.selectionCorners ? "ON" : "OFF"}\n`;
+        message += `  - Draw normals: ${this.normals ? "ON" : "OFF"}\n`;
+        message += `  - Draw triangles normals: ${this.trianglesNormals ? "ON" : "OFF"}\n`;
+        message += `  - With texture: ${this.texture ? "ON" : "OFF"}\n`;
+        message += `  - With bump map: ${this.bumpMap ? "ON" : "OFF"}\n`;
+        message += `  - Vertex normal smoothing threshold: ${this.threshold} deg\n`;
+        return message;
     }
 }

@@ -70,6 +70,10 @@ export class Cone extends Solid {
         if (hit.needsNormal()) hit.n = best.n;
         return true;
     }
+    public override doExtraInformation(ray: Ray, _distance: number, outData: RayHit): void {
+        const hit = new RayHit();
+        if (this.doIntersectionFirstHit(ray.withT(Number.MAX_VALUE), hit)) outData.clone(hit);
+    }
     public getMinMax(): Float64Array {
         const radius = Math.max(this.r1, this.r2);
         return new Float64Array([-radius, -radius, 0, radius, radius, this.h]);

@@ -71,6 +71,10 @@ export class Arrow extends Solid {
         hit.setRay(ray.withT(tb));
         return true;
     }
+    public override doExtraInformation(ray: Ray, distance: number, outData: RayHit): void {
+        const hit = new RayHit();
+        if (this.doIntersectionFirstHit(ray.withT(distance), hit)) outData.clone(hit);
+    }
     public getMinMax(): Float64Array {
         const radius = Math.max(this.baseRadius, this.headRadius);
         return new Float64Array([-radius, -radius, 0, radius, radius, this.baseLength + this.headLength]);

@@ -3,6 +3,7 @@ import { VSDK } from "../VSDK.js";
 import { Vector3Dd } from "./Vector3Dd.js";
 import { Vector4Dd } from "./Vector4Dd.js";
 import { Quaterniond } from "./Quaterniond.js";
+import { Double } from "../../../../java/lang/Double.js";
 export class Matrix4x4d extends FundamentalEntity {
     private readonly m: number[][];
     public constructor();
@@ -54,6 +55,51 @@ export class Matrix4x4d extends FundamentalEntity {
     public withTranslation(t: Vector3Dd): Matrix4x4d {
         return this.withVal(0, 3, t.x()).withVal(1, 3, t.y()).withVal(2, 3, t.z());
     }
+    public orthogonalProjection(
+        left: number,
+        right: number,
+        down: number,
+        up: number,
+        near: number,
+        far: number,
+    ): Matrix4x4d {
+        const tx = -((right + left) / (right - left));
+        const ty = -((up + down) / (up - down));
+        const tz = -((far + near) / (far - near));
+        return new Matrix4x4d([
+            [2 / (right - left), 0, 0, tx],
+            [0, 2 / (up - down), 0, ty],
+            [0, 0, -2 / (far - near), tz],
+            [0, 0, 0, 1],
+        ]);
+    }
+    public canonicalPerspectiveProjection(): Matrix4x4d {
+        return new Matrix4x4d([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, -1, 1],
+        ]);
+    }
+    public frustumProjection(
+        left: number,
+        right: number,
+        down: number,
+        up: number,
+        near: number,
+        far: number,
+    ): Matrix4x4d {
+        const a = (right + left) / (right - left),
+            b = (up + down) / (up - down);
+        const c = -((far + near) / (far - near)),
+            d = -((2 * far * near) / (far - near));
+        return new Matrix4x4d([
+            [(2 * near) / (right - left), 0, a, 0],
+            [0, (2 * near) / (up - down), b, 0],
+            [0, 0, c, d],
+            [0, 0, -1, 0],
+        ]);
+    }
     public translation(x: number | Vector3Dd, y?: number, z?: number): Matrix4x4d {
         if (x instanceof Vector3Dd) return this.translation(x.x(), x.y(), x.z());
         return new Matrix4x4d([
@@ -100,6 +146,12 @@ export class Matrix4x4d extends FundamentalEntity {
             [0, 0, 0, 1],
         ]);
     }
+    public eulerAnglesRotation(yaw: number, pitch: number, roll: number): Matrix4x4d {
+        const r1 = new Matrix4x4d().axisRotation(roll, 1, 0, 0);
+        const r2 = new Matrix4x4d().axisRotation(pitch, 0, -1, 0);
+        const r3 = new Matrix4x4d().axisRotation(yaw, 0, 0, 1);
+        return r3.multiply(r2.multiply(r1));
+    }
     public multiply(o: number): Matrix4x4d;
     public multiply(o: Matrix4x4d): Matrix4x4d;
     public multiply(o: Vector3Dd): Vector3Dd;
@@ -124,42 +176,34 @@ export class Matrix4x4d extends FundamentalEntity {
     public transpose(): Matrix4x4d {
         return new Matrix4x4d(this.m[0]!.map((_, j) => this.m.map((r) => r[j]!)));
     }
+    public cofactors(): Matrix4x4d {
+        const result = Array.from({ length: 4 }, () => new Array<number>(4));
+        for (let row = 0; row < 4; row++)
+            for (let column = 0; column < 4; column++) {
+                const minor: number[] = [];
+                for (let i = 0; i < 4; i++)
+                    for (let j = 0; j < 4; j++) if (i !== row && j !== column) minor.push(this.m[i]![j]!);
+                const determinant =
+                    minor[0]! * minor[4]! * minor[8]! +
+                    minor[3]! * minor[7]! * minor[2]! +
+                    minor[6]! * minor[1]! * minor[5]! -
+                    minor[2]! * minor[4]! * minor[6]! -
+                    minor[5]! * minor[7]! * minor[0]! -
+                    minor[8]! * minor[1]! * minor[3]!;
+                result[row]![column] = (row + column) % 2 === 0 ? determinant : -determinant;
+            }
+        return new Matrix4x4d(result);
+    }
     public determinant(): number {
-        const a = this.m.map((r) => r.slice());
-        let d = 1,
-            s = 1;
-        for (let c = 0; c < 4; c++) {
-            let p = c;
-            for (let r = c + 1; r < 4; r++) if (Math.abs(a[r]![c]!) > Math.abs(a[p]![c]!)) p = r;
-            if (a[p]![c] === 0) return 0;
-            if (p !== c) {
-                [a[p], a[c]] = [a[c]!, a[p]!];
-                s = -s;
-            }
-            d *= a[c]![c]!;
-            for (let r = c + 1; r < 4; r++) {
-                const q = a[r]![c]! / a[c]![c]!;
-                for (let j = c + 1; j < 4; j++) a[r]![j]! -= q * a[c]![j]!;
-            }
-        }
-        return d * s;
+        const cofactors = this.cofactors();
+        let result = 0;
+        for (let column = 0; column < 4; column++) result += cofactors.m[0]![column]! * this.m[0]![column]!;
+        return result;
     }
     public invert(): Matrix4x4d {
-        const a = this.m.map((r, i) => [...r, ...Matrix4x4d.unit()[i]!]);
-        for (let c = 0; c < 4; c++) {
-            let p = c;
-            for (let r = c + 1; r < 4; r++) if (Math.abs(a[r]![c]!) > Math.abs(a[p]![c]!)) p = r;
-            if (Math.abs(a[p]![c]!) <= VSDK.EPSILON) throw new RangeError("Matrix is singular");
-            [a[p], a[c]] = [a[c]!, a[p]!];
-            const d = a[c]![c]!;
-            for (let j = 0; j < 8; j++) a[c]![j]! /= d;
-            for (let r = 0; r < 4; r++)
-                if (r !== c) {
-                    const q = a[r]![c]!;
-                    for (let j = 0; j < 8; j++) a[r]![j]! -= q * a[c]![j]!;
-                }
-        }
-        return new Matrix4x4d(a.map((r) => r.slice(4)));
+        return this.cofactors()
+            .transpose()
+            .multiply(1 / this.determinant());
     }
     public inverse(): Matrix4x4d {
         return this.invert();
@@ -190,6 +234,57 @@ export class Matrix4x4d extends FundamentalEntity {
             [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y), 0],
             [0, 0, 0, 1],
         ]);
+    }
+    public obtainEulerYawAngle(): number {
+        const pitch = this.obtainEulerPitchAngle(),
+            epsilon = 0.0004;
+        let direction = this.multiply(new Vector3Dd(1, 0, 0)).withZ(0) as Vector3Dd;
+        if (Math.abs(Math.PI / 2 - pitch) < epsilon) direction = this.multiply(new Vector3Dd(0, 0, -1)) as Vector3Dd;
+        if (Math.abs(-Math.PI / 2 - pitch) < epsilon) direction = this.multiply(new Vector3Dd(0, 0, 1)) as Vector3Dd;
+        direction = direction.normalized();
+        return direction.y() <= 0 ? Math.asin(direction.x()) - Math.PI / 2 : Math.PI / 2 - Math.asin(direction.x());
+    }
+    public obtainEulerPitchAngle(): number {
+        return Math.PI / 2 - Math.acos((this.multiply(new Vector3Dd(1, 0, 0)) as Vector3Dd).normalized().z());
+    }
+    public obtainEulerRollAngle(): number {
+        const pitch = this.obtainEulerPitchAngle(),
+            yaw = this.obtainEulerYawAngle();
+        const r3 = new Matrix4x4d().axisRotation(yaw, 0, 0, 1).invert();
+        const r2 = new Matrix4x4d().axisRotation(pitch, 0, -1, 0).invert();
+        let r1 = r2.multiply(r3.multiply(this));
+        r1 = r1.importFromQuaternion(r1.exportToQuaternion().normalized());
+        return r1.get(2, 1) >= 0 ? Math.acos(r1.get(1, 1)) : -Math.acos(r1.get(1, 1));
+    }
+    public exportToDoubleArrayRowOrder(): Float64Array {
+        return new Float64Array(this.m.flat());
+    }
+    public exportToFloatArrayRowOrder(): Float32Array {
+        return new Float32Array(this.m.flat());
+    }
+    public exportToDoubleArrayColumnOrder(): Float64Array {
+        return new Float64Array(this.m[0]!.map((_, column) => this.m.map((row) => row[column]!)).flat());
+    }
+    public exportToFloatArrayColumnOrder(): Float32Array {
+        return new Float32Array(this.exportToDoubleArrayColumnOrder());
+    }
+    public equals(other: unknown): boolean {
+        return (
+            other instanceof Matrix4x4d &&
+            this.m.every((row, i) => row.every((value, j) => Double.compare(value, other.m[i]![j]!) === 0))
+        );
+    }
+    public hashCode(): number {
+        let result = 1;
+        for (const row of this.m) {
+            let rowHash = 1;
+            for (const value of row) rowHash = (Math.imul(31, rowHash) + Double.hashCode(value)) | 0;
+            result = (Math.imul(31, result) + rowHash) | 0;
+        }
+        return result;
+    }
+    public override toString(): string {
+        return `\n------------------------------\n${this.m.map((row) => `${row.map((value) => VSDK.formatDouble(value)).join(" ")} `).join("\n")}\n------------------------------\n`;
     }
     public epsilonEquals(o: Matrix4x4d | null, e = VSDK.EPSILON): boolean {
         if (o === null) return false;
