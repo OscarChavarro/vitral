@@ -1,1 +1,3 @@
-export interface Runnable { run(): void; }
+export interface Runnable {
+    run(): void;
+}

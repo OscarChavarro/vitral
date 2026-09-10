@@ -1,1 +1,4 @@
-export interface Deprecated { readonly since?: string; readonly forRemoval?: boolean; }
+export interface Deprecated {
+    readonly since?: string;
+    readonly forRemoval?: boolean;
+}

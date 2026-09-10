@@ -2,7 +2,15 @@
 let withSystemExit = true;
 let withFatalExceptions = true;
 
-export function setWithSystemExit(value: boolean): void { withSystemExit = value; }
-export function setWithFatalExceptions(value: boolean): void { withFatalExceptions = value; }
-export function getWithSystemExit(): boolean { return withSystemExit; }
-export function getWithFatalExceptions(): boolean { return withFatalExceptions; }
+export function setWithSystemExit(value: boolean): void {
+    withSystemExit = value;
+}
+export function setWithFatalExceptions(value: boolean): void {
+    withFatalExceptions = value;
+}
+export function getWithSystemExit(): boolean {
+    return withSystemExit;
+}
+export function getWithFatalExceptions(): boolean {
+    return withFatalExceptions;
+}

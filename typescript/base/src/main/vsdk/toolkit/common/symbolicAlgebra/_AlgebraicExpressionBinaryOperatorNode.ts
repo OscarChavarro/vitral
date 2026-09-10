@@ -1,2 +1,40 @@
-import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
-export class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpressionNode {private left?:_AlgebraicExpressionNode;private right?:_AlgebraicExpressionNode;public constructor(_parent:unknown,private readonly operator:string){super();}public setLeftOperand(v:_AlgebraicExpressionNode):void{this.left=v;}public setRightOperand(v:_AlgebraicExpressionNode):void{this.right=v;}public eval():number{if(!this.left||!this.right)throw new AlgebraicExpressionException("Binary operator has no operands");const l=this.left.eval(),r=this.right.eval();switch(this.operator){case "+":return l+r;case "-":return l-r;case "*":return l*r;case "/":return l/r;case "^":return Math.pow(l,r);default:throw new AlgebraicExpressionException(`Unknown binary operator "${this.operator}"`);}}public override toString():string{return `(${this.left}) ${this.operator} (${this.right})`;}}
+import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";
+import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
+export class _AlgebraicExpressionBinaryOperatorNode extends _AlgebraicExpressionNode {
+    private left?: _AlgebraicExpressionNode;
+    private right?: _AlgebraicExpressionNode;
+    public constructor(
+        _parent: unknown,
+        private readonly operator: string,
+    ) {
+        super();
+    }
+    public setLeftOperand(v: _AlgebraicExpressionNode): void {
+        this.left = v;
+    }
+    public setRightOperand(v: _AlgebraicExpressionNode): void {
+        this.right = v;
+    }
+    public eval(): number {
+        if (!this.left || !this.right) throw new AlgebraicExpressionException("Binary operator has no operands");
+        const l = this.left.eval(),
+            r = this.right.eval();
+        switch (this.operator) {
+            case "+":
+                return l + r;
+            case "-":
+                return l - r;
+            case "*":
+                return l * r;
+            case "/":
+                return l / r;
+            case "^":
+                return Math.pow(l, r);
+            default:
+                throw new AlgebraicExpressionException(`Unknown binary operator "${this.operator}"`);
+        }
+    }
+    public override toString(): string {
+        return `(${this.left}) ${this.operator} (${this.right})`;
+    }
+}

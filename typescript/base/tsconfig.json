@@ -1,102 +1,131 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM"],
-    "rootDir": "src/main",
-    "outDir": "dist",
-    "strict": true,
-    "noImplicitOverride": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "noEmitOnError": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "incremental": true,
-    "composite": true,
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "types": []
-  },
-  "include": [
-    "src/main/index.ts",
-    "src/main/java/**/*.ts",
-    "src/main/org/**/*.ts",
-    "src/main/vsdk/toolkit/common/Entity.ts",
-    "src/main/vsdk/toolkit/common/FundamentalEntity.ts",
-    "src/main/vsdk/toolkit/common/ModelElement.ts",
-    "src/main/vsdk/toolkit/common/VSDK.ts",
-    "src/main/vsdk/toolkit/common/VSDKException.ts",
-    "src/main/vsdk/toolkit/common/VSDKFatalException.ts",
-    "src/main/vsdk/toolkit/common/VSDKRuntimeSettings.ts",
-    "src/main/vsdk/toolkit/gui/PresentationElement.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Complex.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Dd.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Df.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Dd.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Df.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Dd.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Df.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Quaterniond.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Quaternionf.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.ts",
-    "src/main/vsdk/toolkit/common/linealAlgebra/exceptions/**/*.ts"
-    ,"src/main/vsdk/toolkit/common/symbolicAlgebra/**/*.ts"
-    ,"src/main/vsdk/toolkit/common/color/ColorRgb.ts"
-    ,"src/main/vsdk/toolkit/common/color/ColorRgba.ts"
-    ,"src/main/vsdk/toolkit/common/logging/Logger.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfBytes.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfDoubles.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfInts.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/ArrayListOfLongs.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/_CircularDoubleLinkedListNode.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeNode.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeIntermediateNode.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/_NAryTreeLeafNode.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/BinaryTreeNode.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/NAryTree.ts"
-    ,"src/main/vsdk/toolkit/common/dataStructures/NAryTreeTraverser.ts"
-    ,"src/main/vsdk/toolkit/common/statistics/GeometryStatistics.ts"
-    ,"src/main/vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.ts"
-    ,"src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.ts"
-    ,"src/main/vsdk/toolkit/common/statistics/RenderingStatistics.ts"
-    ,"src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.ts"
-    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitor.ts"
-    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.ts"
-    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.ts"
-    ,"src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.ts"
-    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.ts"
-    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.ts"
-    ,"src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.ts"
-    ,"src/main/vsdk/toolkit/media/**/*.ts"
-    ,"src/main/vsdk/toolkit/processing/**/*.ts"
-    ,"src/main/vsdk/toolkit/environment/material/**/*.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/Geometry.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/curve/**/*.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/element/**/*.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/Surface.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/HalfSpace.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/InfinitePlane.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/Md2Mesh.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/_AnimationInfo.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.ts"
-    ,"src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.ts"
-  ],
-  "exclude": [
-    "src/main/java/io/PrintStream.ts",
-    "src/main/java/lang/ProcessBuilder.ts",
-    "src/main/java/lang/System.ts",
-    "src/main/java/util/Formatter.ts"
-  ]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "lib": ["ES2022", "DOM"],
+        "rootDir": "src/main",
+        "outDir": "dist",
+        "strict": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noFallthroughCasesInSwitch": true,
+        "noEmitOnError": true,
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "incremental": true,
+        "composite": true,
+        "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+        "types": []
+    },
+    "include": [
+        "src/main/index.ts",
+        "src/main/java/**/*.ts",
+        "src/main/org/**/*.ts",
+        "src/main/vsdk/toolkit/common/Entity.ts",
+        "src/main/vsdk/toolkit/common/FundamentalEntity.ts",
+        "src/main/vsdk/toolkit/common/ModelElement.ts",
+        "src/main/vsdk/toolkit/common/VSDK.ts",
+        "src/main/vsdk/toolkit/common/VSDKException.ts",
+        "src/main/vsdk/toolkit/common/VSDKFatalException.ts",
+        "src/main/vsdk/toolkit/common/VSDKRuntimeSettings.ts",
+        "src/main/vsdk/toolkit/gui/PresentationElement.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Complex.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Dd.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector2Df.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Dd.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector3Df.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Dd.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Vector4Df.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Quaterniond.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Quaternionf.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/MatrixNxM.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4d.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/Matrix4x4f.ts",
+        "src/main/vsdk/toolkit/common/linealAlgebra/exceptions/**/*.ts",
+        "src/main/vsdk/toolkit/common/symbolicAlgebra/**/*.ts",
+        "src/main/vsdk/toolkit/common/color/ColorRgb.ts",
+        "src/main/vsdk/toolkit/common/color/ColorRgba.ts",
+        "src/main/vsdk/toolkit/common/logging/Logger.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/ArrayListOfBytes.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/ArrayListOfDoubles.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/ArrayListOfInts.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/ArrayListOfLongs.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/_CircularDoubleLinkedListNode.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/CircularDoubleLinkedList.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/_NAryTreeNode.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/_NAryTreeIntermediateNode.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/_NAryTreeLeafNode.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/BinaryTreeNode.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/NAryTree.ts",
+        "src/main/vsdk/toolkit/common/dataStructures/NAryTreeTraverser.ts",
+        "src/main/vsdk/toolkit/common/statistics/GeometryStatistics.ts",
+        "src/main/vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.ts",
+        "src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.ts",
+        "src/main/vsdk/toolkit/common/statistics/RenderingStatistics.ts",
+        "src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.ts",
+        "src/main/vsdk/toolkit/gui/feedback/ProgressMonitor.ts",
+        "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.ts",
+        "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.ts",
+        "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.ts",
+        "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.ts",
+        "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.ts",
+        "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.ts",
+        "src/main/vsdk/toolkit/media/**/*.ts",
+        "src/main/vsdk/toolkit/processing/**/*.ts",
+        "src/main/vsdk/toolkit/environment/material/**/*.ts",
+        "src/main/vsdk/toolkit/environment/geometry/Geometry.ts",
+        "src/main/vsdk/toolkit/environment/geometry/curve/**/*.ts",
+        "src/main/vsdk/toolkit/environment/geometry/element/**/*.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/Surface.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/HalfSpace.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/InfinitePlane.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/Md2Mesh.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Volume.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Solid.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Sphere.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Box.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/VoxelVolume.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Cone.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Torus.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/Arrow.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidBuilder.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_TopologicalIntegrityStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricPlanarityStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricFaceOrientationStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictLoopsStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictFaceIntersectionsStrategy.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.ts",
+        "src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidPredicates.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/_AnimationInfo.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.ts",
+        "src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.ts"
+    ],
+    "exclude": [
+        "src/main/java/io/PrintStream.ts",
+        "src/main/java/lang/ProcessBuilder.ts",
+        "src/main/java/lang/System.ts",
+        "src/main/java/util/Formatter.ts"
+    ]
 }

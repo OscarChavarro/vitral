@@ -33,7 +33,8 @@ Phases 1 through 14 are complete and their available gates were verified on 2026
 | 19 — Geometry elements | Complete | 6 / 6 inventory entries | — | — |
 | 20 — Concrete geometry elements | Complete | 0 / 0 applicable entries | Graph contains six obsolete duplicate package names | — |
 | 21 — Surfaces | Complete | 13 / 13 inventory entries | Surface hierarchy, plane, contour, polygon, bicubic and functional patches, quad and triangle meshes, mesh group, strip mesh, and MD2 animation metadata | Standard phase gate |
-| 22–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 22 — Volumes and boundary representation | Complete | 30 / 30 inventory entries | Volume primitives plus B-rep topology, validation, visibility predicates, cone/frustum, torus, arrow, Euler operators, topology editing, and strict geometric strategies | Standard phase gate passed on 2026-09-10 |
+| 23–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -72,6 +73,8 @@ Phase 18 gate record: `npm run verify` completed successfully. Both curve contra
 Phase 19 gate record: `npm run verify` completed successfully. All six geometry elements are exported, including immutable rays, configurable ray-hit records, triangle intersection and containment, and vertex data contracts. No Java test source has a dependency closure limited to these elements. This phase was completed out of normal order while Phase 15 remains in progress.
 
 Phase 20 gate record: the six `vsdk.toolkit.environment.geometry.elements.*` graph entries have no Java source mapping in the current source of record; their singular-package counterparts were completed in Phase 19. No duplicate compatibility aliases were added. `npm run verify` completed successfully.
+
+Phase 22 gate record: `npm run verify` completed successfully on 2026-09-10. All thirty inventory entries are exported through `@vitral/base`; the Java B-rep reference suite compiled and passed. Fifty-eight deterministic TypeScript tests in forty-three modules pass, including primitive B-rep exports, numeric/strict/topological validation, point-in-solid and quantitative-invisibility edge cases, topology editing, node ownership, and the Euler inverse and wrapper contracts (`mvfs`/`kvfs`, `lmev`/`lkev`, `lmef`/`lkef`, `lkemr`/`lmekr`, `lringmv`, and `lkimrh`/`lmikrh`). The face-plane corner fallback preserves the Java behavior for open-wire `lmef`/`lkef` inverse sequences. This phase was completed out of normal order while Phase 15 remains in progress.
 
 ## Analyzed State
 
@@ -1480,7 +1483,7 @@ The port is complete only when all of the following are true:
 | 19 | Geometry elements | Complete — 6 / 6 symbols; gate passed out of normal phase order |
 | 20 | Concrete geometry elements | Complete — empty applicable source group; gate passed |
 | 21 | Surfaces | Complete — 13 / 13 symbols |
-| 22 | Volumes and boundary representation | Pending |
+| 22 | Volumes and boundary representation | Complete — 30 / 30 symbols; Java B-rep parity review and standard gate passed |
 | 23 | Backgrounds | Pending |
 | 24 | Cameras | Pending |
 | 25 | Geometric processing | Pending |

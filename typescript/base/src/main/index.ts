@@ -138,7 +138,10 @@ export { ProgressMonitorConsoleLongFormat } from "./vsdk/toolkit/gui/feedback/Pr
 export { ProgressMonitorInRam } from "./vsdk/toolkit/gui/feedback/ProgressMonitorInRam.js";
 export { TangibleInterfaceEvent } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.js";
 export type { TangibleInterfaceListener } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.js";
-export { TangibleInterfaceNetworkClient, FrameListener as TangibleInterfaceNetworkClientFrameListener } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.js";
+export {
+    TangibleInterfaceNetworkClient,
+    FrameListener as TangibleInterfaceNetworkClientFrameListener,
+} from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.js";
 export { MediaEntity } from "./vsdk/toolkit/media/MediaEntity.js";
 export { Calligraphic2DBuffer } from "./vsdk/toolkit/media/Calligraphic2DBuffer.js";
 export { FourierShapeDescriptor } from "./vsdk/toolkit/media/FourierShapeDescriptor.js";
@@ -187,20 +190,57 @@ export { QuadMesh } from "./vsdk/toolkit/environment/geometry/surface/QuadMesh.j
 export { TriangleMesh } from "./vsdk/toolkit/environment/geometry/surface/TriangleMesh.js";
 export { FunctionalExplicitSurface } from "./vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.js";
 export { Md2Mesh } from "./vsdk/toolkit/environment/geometry/surface/Md2Mesh.js";
+export { Volume } from "./vsdk/toolkit/environment/geometry/volume/Volume.js";
+export { Solid } from "./vsdk/toolkit/environment/geometry/volume/Solid.js";
+export { Sphere } from "./vsdk/toolkit/environment/geometry/volume/Sphere.js";
+export { Box } from "./vsdk/toolkit/environment/geometry/volume/Box.js";
+export { VoxelVolume } from "./vsdk/toolkit/environment/geometry/volume/VoxelVolume.js";
+export { Cone } from "./vsdk/toolkit/environment/geometry/volume/Cone.js";
+export { Torus } from "./vsdk/toolkit/environment/geometry/volume/Torus.js";
+export { Arrow } from "./vsdk/toolkit/environment/geometry/volume/Arrow.js";
+export {
+    PolyhedralBoundedSolidNumericPolicy,
+    ToleranceContext,
+} from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
+export type { _PolyhedralBoundedSolidValidationStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategy.js";
+export { _PolyhedralBoundedSolidVertex } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.js";
+export { _PolyhedralBoundedSolidEdge } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.js";
+export { _PolyhedralBoundedSolidLoop } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.js";
+export { _PolyhedralBoundedSolidHalfEdge } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.js";
+export {
+    _PolyhedralBoundedSolidFace,
+    PointInsideResult,
+} from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
+export { PolyhedralBoundedSolid } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.js";
+export { PolyhedralBoundedSolidEulerOperators } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.js";
+export { PolyhedralBoundedSolidTopologyEditing } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.js";
+export { _TopologicalIntegrityStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_TopologicalIntegrityStrategy.js";
+export { PolyhedralBoundedSolidGeometricValidator } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
+export { _GeometricPlanarityStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricPlanarityStrategy.js";
+export { _GeometricFaceOrientationStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricFaceOrientationStrategy.js";
+export { _GeometricStrictLoopsStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictLoopsStrategy.js";
+export { _GeometricStrictFaceIntersectionsStrategy } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_GeometricStrictFaceIntersectionsStrategy.js";
+export { _PolyhedralBoundedSolidTopologicalValidator } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.js";
+export { _PolyhedralBoundedSolidBooleanTopologyPredicates } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.js";
+export { PolyhedralBoundedSolidValidationEngine } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.js";
+export { PolyhedralBoundedSolidPredicates } from "./vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidPredicates.js";
 export { TriangleStripMesh } from "./vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.js";
 export { _AnimationInfo } from "./vsdk/toolkit/environment/geometry/surface/_AnimationInfo.js";
-export { TriangleMeshGroup, type TriangleMeshLike } from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
+export {
+    TriangleMeshGroup,
+    type TriangleMeshLike,
+} from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
 export { _Polygon2DContour } from "./vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.js";
 export { Polygon2D } from "./vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
 import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
-  workerError,
-  createWorkerMessageHandler,
-  type WorkerExecutionOptions,
-  type WorkerExecutor,
-  type WorkerFailure,
-  type WorkerRequest,
-  type WorkerResponse,
-  type WorkerSuccess,
-  type WorkerTransferValue
+    workerError,
+    createWorkerMessageHandler,
+    type WorkerExecutionOptions,
+    type WorkerExecutor,
+    type WorkerFailure,
+    type WorkerRequest,
+    type WorkerResponse,
+    type WorkerSuccess,
+    type WorkerTransferValue,
 } from "./java/concurrent/WorkerProtocol.js";

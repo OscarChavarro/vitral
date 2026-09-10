@@ -1,2 +1,47 @@
-import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
-export class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionNode {private operand?:_AlgebraicExpressionNode;public constructor(_parent:unknown,private readonly name:string){super();}public setOperand(v:_AlgebraicExpressionNode):void{this.operand=v;}public eval():number{if(!this.operand)throw new AlgebraicExpressionException("Unary operator has no operand");const x=this.operand.eval();const f:Record<string,(v:number)=>number>={sin:Math.sin,cos:Math.cos,tan:Math.tan,asin:Math.asin,acos:Math.acos,atan:Math.atan,abs:Math.abs,cbrt:v=>Math.pow(v,1/3),ceil:Math.ceil,sinh:Math.sinh,cosh:Math.cosh,tanh:Math.tanh,toDegrees:v=>v*180/Math.PI,toRadians:v=>v*Math.PI/180,exp:Math.exp,floor:Math.floor,log:Math.log,ln:Math.log,log10:Math.log10,sqrt:Math.sqrt,"-":v=>-v};const op=f[this.name];if(!op)throw new AlgebraicExpressionException(`Unknown unary operator or function "${this.name}"`);return op(x);}public override toString():string{return `${this.name}(${this.operand})`;}}
+import { AlgebraicExpressionException } from "./AlgebraicExpressionException.js";
+import { _AlgebraicExpressionNode } from "./_AlgebraicExpressionNode.js";
+export class _AlgebraicExpressionUnaryOperatorNode extends _AlgebraicExpressionNode {
+    private operand?: _AlgebraicExpressionNode;
+    public constructor(
+        _parent: unknown,
+        private readonly name: string,
+    ) {
+        super();
+    }
+    public setOperand(v: _AlgebraicExpressionNode): void {
+        this.operand = v;
+    }
+    public eval(): number {
+        if (!this.operand) throw new AlgebraicExpressionException("Unary operator has no operand");
+        const x = this.operand.eval();
+        const f: Record<string, (v: number) => number> = {
+            sin: Math.sin,
+            cos: Math.cos,
+            tan: Math.tan,
+            asin: Math.asin,
+            acos: Math.acos,
+            atan: Math.atan,
+            abs: Math.abs,
+            cbrt: (v) => Math.pow(v, 1 / 3),
+            ceil: Math.ceil,
+            sinh: Math.sinh,
+            cosh: Math.cosh,
+            tanh: Math.tanh,
+            toDegrees: (v) => (v * 180) / Math.PI,
+            toRadians: (v) => (v * Math.PI) / 180,
+            exp: Math.exp,
+            floor: Math.floor,
+            log: Math.log,
+            ln: Math.log,
+            log10: Math.log10,
+            sqrt: Math.sqrt,
+            "-": (v) => -v,
+        };
+        const op = f[this.name];
+        if (!op) throw new AlgebraicExpressionException(`Unknown unary operator or function "${this.name}"`);
+        return op(x);
+    }
+    public override toString(): string {
+        return `${this.name}(${this.operand})`;
+    }
+}

@@ -1,2 +1,163 @@
-import { Curve } from "./Curve.js";import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";import { VSDK } from "../../../common/VSDK.js";import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
-export class ParametricCurve extends Curve {public static readonly BREAK=1;public static readonly CORNER=2;public static readonly QUAD=3;public static readonly HERMITE=4;public static readonly BEZIER=5;public static readonly UNRBSPLINE=6;public static readonly NUNRBSPLINE=7;public static readonly CATMULLROM=8;public static readonly LINEAR_MATRIX=Matrix4x4d.copyOf([[0,0,0,1],[0,0,1,1],[-1,1,0,0],[1,0,0,0]]);public static readonly HERMITE_MATRIX=Matrix4x4d.copyOf([[2,-2,1,1],[-3,3,-2,-1],[0,0,1,0],[1,0,0,0]]);public static readonly BEZIER_MATRIX=Matrix4x4d.copyOf([[-1,3,-3,1],[3,-6,3,0],[-3,3,0,0],[1,0,0,0]]);public static readonly UNRBSPLINE_MATRIX=Matrix4x4d.copyOf([[-1,3,-3,1],[3,-6,3,0],[-3,0,3,0],[1,4,1,0]]);public static readonly CATMULL_ROM_MATRIX=Matrix4x4d.copyOf([[-.5,1.5,-1.5,.5],[1,-2.5,2,-.5],[-.5,0,.5,0],[0,1,0,0]]);public points:(Vector3Dd[]|null)[]=[];public types:number[]=[];private approximationSteps=50;public getApproximationSteps(){return this.approximationSteps;}public setApproximationSteps(n:number){this.approximationSteps=n;}public addPoint(p:Vector3Dd[]|null,type:number):void{if(type===1&&this.points.length<1)return;if(type!==1&&p?.[0]!==undefined&&this.points.length>0&&this.types[this.types.length-1]!==1){const q=this.points[this.points.length-1];if(q?.[0]!==undefined&&Vector3Dd.distance(q[0],p[0])<VSDK.EPSILON)return;}this.points.push(p);this.types.push(type);}public getNumPieces(){return 1+this.types.slice(1).filter(x=>x===1).length;}public addPointAt(p:Vector3Dd[]|null,t:number,pos:number){if(t===1&&pos<1)return;this.points.splice(pos,0,p);this.types.splice(pos,0,t);}public getPoint(pos:number){return this.points[pos]!;}public getPointSize(){return this.points.length;}public removePoint(pos:number){this.points.splice(pos,1);this.types.splice(pos,1);}public setPointAt(p:Vector3Dd[]|null,pos:number){this.points[pos]=p;}private basis(m:Matrix4x4d,col:number,t:number){let v=0;for(let i=0;i<4;i++)v+=m.get(i,col)*Math.pow(t,3-i);return v;}private evalControls(n:number,t:number,m:Matrix4x4d,c:Vector3Dd[]):Vector3Dd{let out=new Vector3Dd();for(let i=0;i<4;i++)out=out.add(c[i]!.multiply(this.basis(m,i,t)));return out;}public evaluate(n:number,t:number):Vector3Dd|null{const type=this.types[n]!,a=this.points[n-1]!,b=this.points[n]!;if(a===null||b===null)return null;if(type===2)return this.evalControls(n,t,ParametricCurve.LINEAR_MATRIX,[a[0]!,b[0]!,new Vector3Dd(),new Vector3Dd()]);if(type===3){const q=a[0]!,h=b[1]!,z=b[0]!;return this.evalControls(n,t,ParametricCurve.BEZIER_MATRIX,[q,q.add(h.subtract(q).multiply(2/3)),h.add(z.subtract(q).multiply(1/3)),z]);}if(type===4)return this.evalControls(n,t,ParametricCurve.HERMITE_MATRIX,[a[0]!,b[0]!,a[2]!,b[1]!]);if(type===5)return this.evalControls(n,t,ParametricCurve.BEZIER_MATRIX,[a[0]!,a[2]!,b[1]!,b[0]!]);if(type===6){if(this.points.length<4)return null;let o=new Vector3Dd();for(let i=0;i<4;i++)o=o.add(this.points[n-i]![0]!.multiply(this.basis(ParametricCurve.UNRBSPLINE_MATRIX,i,t)/6));return o;}return null;}private relative(n:number){let p=0;for(let i=0;i<n;i++)p=this.types[i]===1?-1:p+1;return p;}public calculatePoints(n:number,broken:boolean):Vector3Dd[]{const r=this.relative(n),t=this.types[n];if((r<=2&&t===6)||r<0)return[];if((t===2&&!broken)||r<=0||(t===6&&r<3))return[this.points[n-1]![0]!,this.points[n]![0]!];const out:Vector3Dd[]=[];for(let i=0;i<=this.approximationSteps;i++){const q=this.evaluate(n,i/this.approximationSteps);if(q!==null)out.push(q);}return out;}public getMinMax():Float64Array{const a=new Float64Array([Infinity,Infinity,Infinity,-Infinity,-Infinity,-Infinity]);for(let i=1;i<this.types.length;i++)for(const p of this.calculatePoints(i,false)){a[0]=Math.min(a[0]!,p.x());a[1]=Math.min(a[1]!,p.y());a[2]=Math.min(a[2]!,p.z());a[3]=Math.max(a[3]!,p.x());a[4]=Math.max(a[4]!,p.y());a[5]=Math.max(a[5]!,p.z());}return a;}public override doContainmentTest(p:Vector3Dd,t:number):number{for(let i=1;i<this.types.length;i++)for(const q of this.calculatePoints(i,false))if(Vector3Dd.distance(q,p)<t)return ParametricCurve.LIMIT;return ParametricCurve.OUTSIDE;} }
+import { Curve } from "./Curve.js";
+import { Vector3Dd } from "../../../common/linealAlgebra/Vector3Dd.js";
+import { VSDK } from "../../../common/VSDK.js";
+import { Matrix4x4d } from "../../../common/linealAlgebra/Matrix4x4d.js";
+export class ParametricCurve extends Curve {
+    public static readonly BREAK = 1;
+    public static readonly CORNER = 2;
+    public static readonly QUAD = 3;
+    public static readonly HERMITE = 4;
+    public static readonly BEZIER = 5;
+    public static readonly UNRBSPLINE = 6;
+    public static readonly NUNRBSPLINE = 7;
+    public static readonly CATMULLROM = 8;
+    public static readonly LINEAR_MATRIX = Matrix4x4d.copyOf([
+        [0, 0, 0, 1],
+        [0, 0, 1, 1],
+        [-1, 1, 0, 0],
+        [1, 0, 0, 0],
+    ]);
+    public static readonly HERMITE_MATRIX = Matrix4x4d.copyOf([
+        [2, -2, 1, 1],
+        [-3, 3, -2, -1],
+        [0, 0, 1, 0],
+        [1, 0, 0, 0],
+    ]);
+    public static readonly BEZIER_MATRIX = Matrix4x4d.copyOf([
+        [-1, 3, -3, 1],
+        [3, -6, 3, 0],
+        [-3, 3, 0, 0],
+        [1, 0, 0, 0],
+    ]);
+    public static readonly UNRBSPLINE_MATRIX = Matrix4x4d.copyOf([
+        [-1, 3, -3, 1],
+        [3, -6, 3, 0],
+        [-3, 0, 3, 0],
+        [1, 4, 1, 0],
+    ]);
+    public static readonly CATMULL_ROM_MATRIX = Matrix4x4d.copyOf([
+        [-0.5, 1.5, -1.5, 0.5],
+        [1, -2.5, 2, -0.5],
+        [-0.5, 0, 0.5, 0],
+        [0, 1, 0, 0],
+    ]);
+    public points: (Vector3Dd[] | null)[] = [];
+    public types: number[] = [];
+    private approximationSteps = 50;
+    public getApproximationSteps() {
+        return this.approximationSteps;
+    }
+    public setApproximationSteps(n: number) {
+        this.approximationSteps = n;
+    }
+    public addPoint(p: Vector3Dd[] | null, type: number): void {
+        if (type === 1 && this.points.length < 1) return;
+        if (type !== 1 && p?.[0] !== undefined && this.points.length > 0 && this.types[this.types.length - 1] !== 1) {
+            const q = this.points[this.points.length - 1];
+            if (q?.[0] !== undefined && Vector3Dd.distance(q[0], p[0]) < VSDK.EPSILON) return;
+        }
+        this.points.push(p);
+        this.types.push(type);
+    }
+    public getNumPieces() {
+        return 1 + this.types.slice(1).filter((x) => x === 1).length;
+    }
+    public addPointAt(p: Vector3Dd[] | null, t: number, pos: number) {
+        if (t === 1 && pos < 1) return;
+        this.points.splice(pos, 0, p);
+        this.types.splice(pos, 0, t);
+    }
+    public getPoint(pos: number) {
+        return this.points[pos]!;
+    }
+    public getPointSize() {
+        return this.points.length;
+    }
+    public removePoint(pos: number) {
+        this.points.splice(pos, 1);
+        this.types.splice(pos, 1);
+    }
+    public setPointAt(p: Vector3Dd[] | null, pos: number) {
+        this.points[pos] = p;
+    }
+    private basis(m: Matrix4x4d, col: number, t: number) {
+        let v = 0;
+        for (let i = 0; i < 4; i++) v += m.get(i, col) * Math.pow(t, 3 - i);
+        return v;
+    }
+    private evalControls(n: number, t: number, m: Matrix4x4d, c: Vector3Dd[]): Vector3Dd {
+        let out = new Vector3Dd();
+        for (let i = 0; i < 4; i++) out = out.add(c[i]!.multiply(this.basis(m, i, t)));
+        return out;
+    }
+    public evaluate(n: number, t: number): Vector3Dd | null {
+        const type = this.types[n]!,
+            a = this.points[n - 1]!,
+            b = this.points[n]!;
+        if (a === null || b === null) return null;
+        if (type === 2)
+            return this.evalControls(n, t, ParametricCurve.LINEAR_MATRIX, [
+                a[0]!,
+                b[0]!,
+                new Vector3Dd(),
+                new Vector3Dd(),
+            ]);
+        if (type === 3) {
+            const q = a[0]!,
+                h = b[1]!,
+                z = b[0]!;
+            return this.evalControls(n, t, ParametricCurve.BEZIER_MATRIX, [
+                q,
+                q.add(h.subtract(q).multiply(2 / 3)),
+                h.add(z.subtract(q).multiply(1 / 3)),
+                z,
+            ]);
+        }
+        if (type === 4) return this.evalControls(n, t, ParametricCurve.HERMITE_MATRIX, [a[0]!, b[0]!, a[2]!, b[1]!]);
+        if (type === 5) return this.evalControls(n, t, ParametricCurve.BEZIER_MATRIX, [a[0]!, a[2]!, b[1]!, b[0]!]);
+        if (type === 6) {
+            if (this.points.length < 4) return null;
+            let o = new Vector3Dd();
+            for (let i = 0; i < 4; i++)
+                o = o.add(this.points[n - i]![0]!.multiply(this.basis(ParametricCurve.UNRBSPLINE_MATRIX, i, t) / 6));
+            return o;
+        }
+        return null;
+    }
+    private relative(n: number) {
+        let p = 0;
+        for (let i = 0; i < n; i++) p = this.types[i] === 1 ? -1 : p + 1;
+        return p;
+    }
+    public calculatePoints(n: number, broken: boolean): Vector3Dd[] {
+        const r = this.relative(n),
+            t = this.types[n];
+        if ((r <= 2 && t === 6) || r < 0) return [];
+        if ((t === 2 && !broken) || r <= 0 || (t === 6 && r < 3)) return [this.points[n - 1]![0]!, this.points[n]![0]!];
+        const out: Vector3Dd[] = [];
+        for (let i = 0; i <= this.approximationSteps; i++) {
+            const q = this.evaluate(n, i / this.approximationSteps);
+            if (q !== null) out.push(q);
+        }
+        return out;
+    }
+    public getMinMax(): Float64Array {
+        const a = new Float64Array([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
+        for (let i = 1; i < this.types.length; i++)
+            for (const p of this.calculatePoints(i, false)) {
+                a[0] = Math.min(a[0]!, p.x());
+                a[1] = Math.min(a[1]!, p.y());
+                a[2] = Math.min(a[2]!, p.z());
+                a[3] = Math.max(a[3]!, p.x());
+                a[4] = Math.max(a[4]!, p.y());
+                a[5] = Math.max(a[5]!, p.z());
+            }
+        return a;
+    }
+    public override doContainmentTest(p: Vector3Dd, t: number): number {
+        for (let i = 1; i < this.types.length; i++)
+            for (const q of this.calculatePoints(i, false))
+                if (Vector3Dd.distance(q, p) < t) return ParametricCurve.LIMIT;
+        return ParametricCurve.OUTSIDE;
+    }
+}

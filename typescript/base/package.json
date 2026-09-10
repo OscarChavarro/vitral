@@ -1,22 +1,22 @@
 {
-  "name": "@vitral/base",
-  "version": "1.3.0",
-  "description": "Vitral platform-neutral TypeScript base library",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "name": "@vitral/base",
+    "version": "1.3.0",
+    "description": "Vitral platform-neutral TypeScript base library",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc --build ./tsconfig.json",
+        "test": "vitest run --config vitest.config.ts --maxWorkers=1 --minWorkers=1 --passWithNoTests",
+        "pack": "mkdir -p ../artifacts && npm_config_cache=${TMPDIR:-/tmp}/vitral-npm-cache npm pack --pack-destination ../artifacts"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc --build ./tsconfig.json",
-    "test": "vitest run --maxWorkers=1 --minWorkers=1 --passWithNoTests",
-    "pack": "mkdir -p ../artifacts && npm_config_cache=${TMPDIR:-/tmp}/vitral-npm-cache npm pack --pack-destination ../artifacts"
-  }
 }

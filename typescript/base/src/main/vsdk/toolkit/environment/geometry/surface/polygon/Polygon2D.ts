@@ -1,2 +1,56 @@
-import { Surface } from "../Surface.js";import { _Polygon2DContour } from "./_Polygon2DContour.js";import { BinaryTreeNode } from "../../../../common/dataStructures/BinaryTreeNode.js";import { Ray } from "../../element/Ray.js";import { RayHit } from "../../element/RayHit.js";
-export class Polygon2D extends Surface<Ray,RayHit> {public loops:_Polygon2DContour[]=[];private currentLoop:_Polygon2DContour;private headNode:BinaryTreeNode<_Polygon2DContour>|null=null;public constructor(){super();this.currentLoop=new _Polygon2DContour();this.loops.push(this.currentLoop);}public addVertex(x:number,y:number,r?:number,g?:number,b?:number){this.currentLoop.addVertex(x,y,r,g,b);}public pushVertex(x:number,y:number){this.currentLoop.pushVertex(x,y);}public nextLoop(){this.currentLoop=new _Polygon2DContour();this.loops.push(this.currentLoop);}public eraseLastLoop(){if(this.loops.length<=1)return;const last=this.loops[this.loops.length-1]!;this.loops=this.loops.filter(x=>x!==last&&x.getExteriorContour()!==last);if(this.loops.length===0)this.nextLoop();else this.currentLoop=this.loops[this.loops.length-1]!;}public invert(){for(const loop of this.loops)loop.vertices.reverse();}public getMinMax(){const m=new Float64Array([Infinity,Infinity,0,-Infinity,-Infinity,0]);for(const loop of this.loops)for(const v of loop.vertices.slice(0,-1)){m[0]=Math.min(m[0]!,v.x);m[1]=Math.min(m[1]!,v.y);m[3]=Math.max(m[3]!,v.x);m[4]=Math.max(m[4]!,v.y);}return m;}public doIntersectionFirstHit(_ray:Ray,_out:RayHit){return false;}public override doExtraInformation(_ray:Ray,_t:number,_out:RayHit):void{}public getHeadNode(){return this.headNode;}public setHeadNode(x:BinaryTreeNode<_Polygon2DContour>|null){this.headNode=x;}}
+import { Surface } from "../Surface.js";
+import { _Polygon2DContour } from "./_Polygon2DContour.js";
+import { BinaryTreeNode } from "../../../../common/dataStructures/BinaryTreeNode.js";
+import { Ray } from "../../element/Ray.js";
+import { RayHit } from "../../element/RayHit.js";
+export class Polygon2D extends Surface<Ray, RayHit> {
+    public loops: _Polygon2DContour[] = [];
+    private currentLoop: _Polygon2DContour;
+    private headNode: BinaryTreeNode<_Polygon2DContour> | null = null;
+    public constructor() {
+        super();
+        this.currentLoop = new _Polygon2DContour();
+        this.loops.push(this.currentLoop);
+    }
+    public addVertex(x: number, y: number, r?: number, g?: number, b?: number) {
+        this.currentLoop.addVertex(x, y, r, g, b);
+    }
+    public pushVertex(x: number, y: number) {
+        this.currentLoop.pushVertex(x, y);
+    }
+    public nextLoop() {
+        this.currentLoop = new _Polygon2DContour();
+        this.loops.push(this.currentLoop);
+    }
+    public eraseLastLoop() {
+        if (this.loops.length <= 1) return;
+        const last = this.loops[this.loops.length - 1]!;
+        this.loops = this.loops.filter((x) => x !== last && x.getExteriorContour() !== last);
+        if (this.loops.length === 0) this.nextLoop();
+        else this.currentLoop = this.loops[this.loops.length - 1]!;
+    }
+    public invert() {
+        for (const loop of this.loops) loop.vertices.reverse();
+    }
+    public getMinMax() {
+        const m = new Float64Array([Infinity, Infinity, 0, -Infinity, -Infinity, 0]);
+        for (const loop of this.loops)
+            for (const v of loop.vertices.slice(0, -1)) {
+                m[0] = Math.min(m[0]!, v.x);
+                m[1] = Math.min(m[1]!, v.y);
+                m[3] = Math.max(m[3]!, v.x);
+                m[4] = Math.max(m[4]!, v.y);
+            }
+        return m;
+    }
+    public doIntersectionFirstHit(_ray: Ray, _out: RayHit) {
+        return false;
+    }
+    public override doExtraInformation(_ray: Ray, _t: number, _out: RayHit): void {}
+    public getHeadNode() {
+        return this.headNode;
+    }
+    public setHeadNode(x: BinaryTreeNode<_Polygon2DContour> | null) {
+        this.headNode = x;
+    }
+}

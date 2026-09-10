@@ -1,1 +1,3 @@
-export interface SuppressWarnings { readonly value: readonly string[]; }
+export interface SuppressWarnings {
+    readonly value: readonly string[];
+}

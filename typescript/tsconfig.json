@@ -1,7 +1,4 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./base" },
-    { "path": "./fs" }
-  ]
+    "files": [],
+    "references": [{ "path": "./base" }, { "path": "./fs" }]
 }

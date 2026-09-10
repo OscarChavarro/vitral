@@ -1,1 +1,4 @@
-export interface Entry<K, V> { readonly key: K; value: V; }
+export interface Entry<K, V> {
+    readonly key: K;
+    value: V;
+}
