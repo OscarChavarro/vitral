@@ -46,8 +46,9 @@ those findings are closed.
 | 22 — Volumes and boundary representation | Inventory complete, parity open | 30 / 30 inventory entries | Java primitive/Euler B-rep construction and complete topology/validation decision graphs | Audit gate |
 | 23–24 | Complete, parity audit open | 6 / 6 inventory entries | Source-level parity corrections | Audit gate |
 | 25 — Geometric processing | In progress | Polygon clipping, voxelization, and monotone triangulation blocks only | Full B-rep/CSG operator block | 32 current-Java source files plus tests and standard gate |
-| 26 — Lights | Inventory port complete, parity gate open | 5 / 5 symbols | Java-derived light tests and API audit | Standard phase gate |
-| 27–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 26 — Lights | Complete | 6 / 6 current-Java symbols | — | `LightType` has no source mapping in the current Java base |
+| 27 — Tone-mapping checkpoint | Complete, harness exit open | 0 / 0 inventory entries | — | Eleven unlisted `media`/`solidTexture` orphans recorded for Phase 45; vitest worker-RPC budget still makes `verify` exit 1 |
+| 28–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -92,6 +93,62 @@ Phase 22 gate record: `npm run verify` completed successfully on 2026-09-10. All
 Phase 23 gate record: `npm run verify` completed successfully on 2026-09-10. All four background models are exported through `@vitral/base`; deterministic tests cover uniform colours, the Java-compatible unfinished fixed background, cubemap face selection, image replacement, and camera ownership.
 
 Phase 24 gate record: the standard gate completed successfully on 2026-09-10: clean build, lint, seventy deterministic tests in forty-seven modules, package creation, and a temporary-consumer import all pass. Both camera symbols are exported through `@vitral/base`. Tests cover snapshots, perspective and orthogonal ray generation, reference-frame orthogonality, modification versioning, projection, world and canonical clipping, view-volume matrices, and viewport conversion. Since `Vector3Dd` is immutable in both ports, Java's ineffective output-vector signatures remain boolean compatibility methods while explicit `*Result` variants return usable projected or clipped vectors.
+
+Phase 26 gate record: `npm run verify` completed successfully on 2026-09-12
+(exit 0), with clean strict builds, 382 passing and 7 skipped tests in 75
+modules, zero unhandled errors, and the package creation and downstream
+consumption checks passing.
+Parity was established by diffing a Java reference driver against its TypeScript
+twin: 428 identical lines covering, for eleven light configurations, the raw
+IEEE-754 bits of every position, emission, direction, shadow-distance limit and
+attenuation factor, the copy contracts, and the nested record's accessors,
+equality, hash, and text. Three source-level divergences were corrected: `Light`
+extended `FundamentalEntity` instead of Java's `Entity`; `Light.LightDirection`
+lacked the `equals`, `hashCode`, and `toString` contracts that a Java record
+declaration generates; and the base `VSDK.formatDouble` and `Double.toString`
+helpers that the record's text contract depends on did not reproduce Java's
+`DecimalFormat` and `Double.toString` output. No Java test source exists for
+this package, so no test was eligible for migration and none was invented.
+
+Phase 27 gate record, 2026-09-12: every gate check passes on its own merits —
+clean strict builds, 382 passing and 7 skipped tests in 75 modules with no
+failing test, and the package creation and downstream consumption checks — but
+`npm run verify` exits 1 because vitest reports an unhandled
+`[vitest-worker]: Timeout calling "onTaskUpdate"`. This is the documented
+worker-RPC budget of the Phase 25.7 accommodation, not a regression of this
+phase: the same run on the preceding commit, before any change recorded here,
+produced two such errors, and across four runs the count was 2, 0, 1, and 1
+while the slowest spec stayed at 481 s, 516 s and 481 s. The specs that raise it
+never reference the modules changed here. Raising the budget or widening the
+`yieldToEventLoop()` coverage belongs to the Phase 25.7 harness accommodation
+and is left open.
+
+The authoritative group is empty and no placeholder was created. Verifying the blocks that do represent tone mapping exposed three
+byte-level defects in already-closed phases, all confirmed against Java
+reference drivers and fixed here: `ImageProcessing.gammaCorrection` bound the
+clamping `putPixel(int)` overload where Java binds `putPixel(byte)`, so every
+indexed pixel whose corrected value exceeded 127 became zero; and
+`RGBImageUncompressed.putPixel` and `RGBAImageUncompressed.putPixel` re-applied
+the unsigned-to-signed conversion to arguments that Java declares as already
+signed bytes, zeroing every channel above 127 and turning the `-1` alpha into
+`0`. Two drivers now match Java exactly: 208 lines over eight gamma values on
+indexed and RGB images, and 63 lines over the four `NormalMap` exports and the
+three `ZBuffer` exports, which contain 676 negative channel values that the
+TypeScript port previously returned as zero.
+
+Phase 27 also found production files in the current Java base that no phase
+inventory lists and that have no TypeScript counterpart: the nine files of
+`vsdk.toolkit.media.solidTexture` (`TextureUtils`, `ProceduralNoise`,
+`BumpTextureFixture`, `ColorTextureFixture`, `ImageTexture`,
+`SolidTextureCoordinateMapper`, `ControlledRGBAImageHDRUncompressed`,
+`ImageToSolidTextureInterpolationTypes`, and
+`ImageToSolidTextureProjectionMethods`) plus
+`vsdk.toolkit.media.IndexedColorImageHDRUncompressed` and
+`vsdk.toolkit.media.RGBAColorPalette`, which the last two depend on. The
+exhaustiveness check in Analyzed State covered only `vsdk.toolkit.common`, so
+these eleven files are orphans of the 580-entry graph rather than a missed
+obligation of Phase 14. They are recorded here as the first named input to
+Phase 45, and no placeholder was created for them.
 
 ## Analyzed State
 
@@ -1075,7 +1132,15 @@ vsdk.toolkit.environment.light.Light
 vsdk.toolkit.environment.light.LightType
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 27.
+Inventory drift: `LightType` has no source mapping in the current Java source of
+record. The only remaining references are in `java/jogl2`, whose module is
+deferred with the rest of the UI and render decision. No compatibility enum was
+invented for it. The same package instead contains the abstract `Light`, its
+nested `LightDirection` record, and four concrete subclasses (`AmbientLight`,
+`DirectionalLight`, `PointLight`, and `SpotLight`), so the phase is accounted as
+six ported symbols against the two listed entries.
+
+Exit: satisfied on 2026-09-12. See the Phase 26 gate record.
 
 ### Phase 27: Tone-mapping checkpoint
 
@@ -1089,7 +1154,17 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 28.
+Audit result: the current Java base has no tone-mapping class. A
+case-insensitive scan for `tonemap`, `tone_map`, `toneMapping`, and
+`tone mapping` over `java/base/src`, `java/awt`, `java/jogl2`, and `java/jogl4`
+returns nothing, and the same scan over the TypeScript tree confirms that no
+placeholder was ever created. The functionality the group name refers to is
+represented by two already-ported blocks: the gamma transfer functions in
+`vsdk.toolkit.processing.ImageProcessing` (Phase 15) and the high-dynamic-range
+buffers `RGBAImageHDRUncompressed` and `RGBAPixelHDR` (Phase 14). No
+compatibility symbol was added.
+
+Exit: satisfied on 2026-09-12. See the Phase 27 gate record.
 
 ### Phase 28: Scene model
 
@@ -1621,8 +1696,8 @@ The port is complete only when all of the following are true:
 | 23 | Backgrounds | Complete — 4 / 4 symbols; standard gate passed |
 | 24 | Cameras | Complete — 2 / 2 symbols; parity review and standard gate passed |
 | 25 | Geometric processing | Complete — phases 25.2–25.7 closed with parity gates passed. The full Java CSG operator inventory (splitter, operator base, predicate processor, intersector, curve builder, vertex/vertex and vertex/face classifiers, set/non-intersecting classifiers, null-edges connector, finisher, structural fallbacks, set operator, modeler wrappers and fixtures) is ported and byte-identical to the Java reference driver on the MANT1986/MANT1988/APPE1967 dumps. The 24 Java CSG test sources plus the ten B-rep volume test sources are migrated. |
-| 26 | Lights | Pending |
-| 27 | Tone-mapping checkpoint | Pending |
+| 26 | Lights | Complete — `Light` with its nested `LightDirection` record and the `AmbientLight`, `DirectionalLight`, `PointLight`, and `SpotLight` subclasses are bit-identical to the Java reference driver over direction, distance-limit, attenuation, copy, equality, hash, and text output. `LightType` has no source mapping in the current Java base and was not invented. No Java test source exists for this package. |
+| 27 | Tone-mapping checkpoint | Complete — the group is empty, the current Java base has no tone-mapping class, and no placeholder exists. The represented blocks (gamma transfer functions and the HDR buffers) were verified against Java drivers, which exposed and closed three byte-level defects in Phases 14 and 15. Eleven unlisted `media`/`solidTexture` production files were recorded as Phase 45 orphans. |
 | 28 | Scene model | Pending |
 | 29 | Numerical-analysis checkpoint | Pending |
 | 30 | I/O wrappers | Pending |

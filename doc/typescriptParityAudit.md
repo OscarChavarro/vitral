@@ -34,8 +34,78 @@ this audit began.
 ## Confirmed missing production blocks
 
 This audit was extended to phases 1--26 on 2026-09-11. Phase 26's five Java
-light classes were absent from the TypeScript source tree and are now present;
-their dedicated parity tests and final API gate remain pending.
+light classes were absent from the TypeScript source tree and are now present.
+
+### Phase 26
+
+Closed on 2026-09-12 with a Java-versus-TypeScript reference-driver diff of 428
+identical lines, comparing raw IEEE-754 bits rather than formatted decimals.
+The audit corrected `Light`'s base class, which was `FundamentalEntity` instead
+of Java's `Entity`, and added the `equals`, `hashCode`, and `toString`
+contracts that the `Light.LightDirection` record declaration generates in Java.
+
+Reaching text parity for that record exposed two defects in base helpers used
+across the port:
+
+- `VSDK.formatDouble` delegated to `toFixed`, which rounds half away from zero,
+  drops the sign of a negative zero, and switches to exponent notation above
+  1e21. Java's `DecimalFormat` takes the digits from `Double.toString`, breaks
+  half-way cases against the exact binary value, falls back to half-to-even,
+  keeps the sign, and prints `NaN`, `∞`, and `-∞`. It is now computed with
+  exact integer arithmetic, behind a fast path for the values where `toFixed`
+  provably agrees, and verified against Java over a 39-value table at zero to
+  four decimals and over 20000 pseudo-random doubles at zero to six decimals.
+- `Double.toString` delegated to `String(value)`, which drops the trailing
+  `.0`, uses a lower-case `e`, and keeps plain notation up to 1e21. Java's
+  layout rules are now implemented and verified against the same table.
+
+One residual difference is recorded rather than emulated: JDK 17 still uses the
+pre-19 `FloatingDecimal`, which emits more digits than the shortest
+representation that round-trips for a small set of values, `Double.MIN_VALUE`
+(`4.9E-324` in Java, `5.0E-324` here) among them. Both helpers take their
+digits from that converter, so both inherit the difference: 11 of the 20000
+fuzzed values differ, against 3143 for the previous `toFixed` implementation.
+Ten of the eleven have a magnitude above 2^53. Closing the remaining gap
+requires porting `FloatingDecimal` itself.
+
+No Java test source exists for the light package, so none was eligible for
+migration and none was invented.
+
+### Phase 27
+
+Closed on 2026-09-12. The group is empty, the current Java base declares no
+tone-mapping class, and no placeholder was ever created in TypeScript. The
+represented blocks are the gamma transfer functions of `ImageProcessing`
+(Phase 15) and the HDR buffers `RGBAImageHDRUncompressed` and `RGBAPixelHDR`
+(Phase 14). Verifying them against Java reference drivers exposed three
+byte-level defects, all now fixed:
+
+- `ImageProcessing.gammaCorrection` called the TypeScript `putPixel`, which
+  represents Java's clamping `putPixel(int)` overload, where Java binds
+  `putPixel(byte)` because `VSDK.unsigned8BitInteger2signedByte` returns a
+  `byte`. Every indexed pixel whose corrected value exceeded 127 was clamped to
+  zero. It now calls `putPixelByte`.
+- `RGBImageUncompressed.putPixel` and `RGBAImageUncompressed.putPixel`
+  re-applied the unsigned-to-signed conversion to their numeric arguments. Java
+  declares only `byte` overloads there and stores the value as given, so every
+  channel above 127 became zero and the `(byte) -1` alpha became `0`. They now
+  store the argument unchanged, and the three-argument RGBA form fills alpha
+  with `-1` as Java does.
+
+Both fixes are confirmed by driver diffs against Java: 208 identical lines over
+eight gamma values on indexed and RGB images, and 63 identical lines over the
+four `NormalMap` exports and the three `ZBuffer` exports. That second dump
+contains 676 negative channel values, every one of which the TypeScript port
+returned as zero before the fix.
+
+This phase also found eleven current-Java production files that no phase
+inventory lists and that have no TypeScript counterpart: the nine files of
+`vsdk.toolkit.media.solidTexture`, plus `IndexedColorImageHDRUncompressed` and
+`RGBAColorPalette`. The Analyzed State exhaustiveness check covered only
+`vsdk.toolkit.common`, so they are orphans of the 580-entry graph and are
+recorded as the first named input to Phase 45. A residual style divergence is
+left open for Phase 15: Java declares two `gammaCorrection` overloads, while
+TypeScript merges them into one union-typed method with equivalent behavior.
 
 ### Phase 15
 

@@ -12,7 +12,9 @@ export abstract class ImageProcessing extends ProcessingElement {
         for (let x = 0; x < img.getXSize(); x++)
             for (let y = 0; y < img.getYSize(); y++) {
                 if (img instanceof IndexedColorImageUncompressed)
-                    img.putPixel(
+                    // Java binds the `byte` overload here, which stores the
+                    // signed byte as given instead of clamping it to 0..255.
+                    img.putPixelByte(
                         x,
                         y,
                         VSDK.unsigned8BitInteger2signedByte(this.gammaCorrection8bits(img.getPixel(x, y), g)),

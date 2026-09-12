@@ -43,9 +43,11 @@ export class RGBImageUncompressed extends Image {
             d[i + 1] = r.g;
             d[i + 2] = r.b;
         } else {
-            d[i] = byte(r);
-            d[i + 1] = byte(g!);
-            d[i + 2] = byte(b!);
+            // Java only declares the `byte` overload here, which stores the
+            // signed byte as given; the unsigned backing array wraps it back.
+            d[i] = r;
+            d[i + 1] = g!;
+            d[i + 2] = b!;
         }
     }
     public override putPixelRgb(x: number, y: number, p: RGBPixel): void {

@@ -42,10 +42,13 @@ export class RGBAImageUncompressed extends Image {
             d[i + 2] = r.b;
             d[i + 3] = r.a;
         } else {
-            d[i] = byte(r);
-            d[i + 1] = byte(g!);
-            d[i + 2] = byte(b!);
-            d[i + 3] = a === undefined ? 255 : byte(a);
+            // Java only declares the `byte` overloads here, which store the
+            // signed bytes as given; the three-argument one fills the alpha
+            // channel with `(byte) -1`.
+            d[i] = r;
+            d[i + 1] = g!;
+            d[i + 2] = b!;
+            d[i + 3] = a === undefined ? -1 : a;
         }
     }
     public override putPixelRgb(x: number, y: number, p: RGBPixel): void {

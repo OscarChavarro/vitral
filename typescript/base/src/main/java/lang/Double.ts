@@ -61,13 +61,40 @@ export class Double {
         const bits = BigInt.asUintN(64, Double.doubleToLongBits(value));
         return Number((bits ^ (bits >> 32n)) & 0xffff_ffffn) | 0;
     }
+    /**
+     * Java's `Double.toString` layout: a plain decimal with at least one
+     * fraction digit when the magnitude is in [1e-3, 1e7), and the
+     * `<digit>.<digits>E<exponent>` computerized scientific form otherwise.
+     * JavaScript instead drops the trailing `.0`, writes `1e-7` in lower case,
+     * and keeps plain notation up to 1e21.
+     *
+     * The significant digits are the shortest ones that round-trip, which is
+     * what both runtimes compute; the pre-19 Java implementation emits one
+     * extra digit for a small set of values, and that residual difference is
+     * not reproduced here.
+     */
     public static toString(value: number): string {
-        return Number.isNaN(value)
-            ? "NaN"
-            : value === Infinity
-              ? "Infinity"
-              : value === -Infinity
-                ? "-Infinity"
-                : String(value);
+        if (Number.isNaN(value)) return "NaN";
+        if (value === Infinity) return "Infinity";
+        if (value === -Infinity) return "-Infinity";
+        if (value === 0) return Object.is(value, -0) ? "-0.0" : "0.0";
+
+        const sign = value < 0 ? "-" : "";
+        const magnitude = Math.abs(value);
+        const exponential = magnitude.toExponential();
+        const [mantissa, exponentText] = exponential.split("e");
+        const exponent = Number(exponentText);
+        const digits = mantissa!.replace(".", "");
+
+        if (magnitude >= 1e-3 && magnitude < 1e7) {
+            if (exponent >= 0) {
+                const integerPart = digits.slice(0, exponent + 1).padEnd(exponent + 1, "0");
+                const fractionPart = digits.slice(exponent + 1);
+                return `${sign}${integerPart}.${fractionPart === "" ? "0" : fractionPart}`;
+            }
+            return `${sign}0.${"0".repeat(-exponent - 1)}${digits}`;
+        }
+        const fractionPart = digits.slice(1);
+        return `${sign}${digits.charAt(0)}.${fractionPart === "" ? "0" : fractionPart}E${exponent}`;
     }
 }
