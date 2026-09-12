@@ -209,29 +209,63 @@ export class Matrix4x4d extends FundamentalEntity {
         return this.invert();
     }
     public exportToQuaternion(): Quaterniond {
-        const t = this.m[0]![0]! + this.m[1]![1]! + this.m[2]![2]!;
-        if (t > 0) {
-            const s = Math.sqrt(t + 1) * 2;
-            return new Quaterniond(
-                new Vector3Dd(
-                    (this.m[2]![1]! - this.m[1]![2]!) / s,
-                    (this.m[0]![2]! - this.m[2]![0]!) / s,
-                    (this.m[1]![0]! - this.m[0]![1]!) / s,
-                ),
-                s / 4,
-            );
+        const tr = this.m[0]![0]! + this.m[1]![1]! + this.m[2]![2]!;
+        const q = [0, 0, 0, 0];
+        let qx: number;
+        let qy: number;
+        let qz: number;
+        let qw: number;
+        const nxt = [1, 2, 0];
+
+        if (tr > 0.0) {
+            let s = Math.sqrt(tr + 1.0);
+            qw = s / 2.0;
+            s = 0.5 / s;
+            qx = (this.m[2]![1]! - this.m[1]![2]!) * s;
+            qy = (this.m[0]![2]! - this.m[2]![0]!) * s;
+            qz = (this.m[1]![0]! - this.m[0]![1]!) * s;
+        } else {
+            let i = 0;
+            if (this.m[1]![1]! > this.m[0]![0]!) i = 1;
+            if (this.m[2]![2]! > this.m[i]![i]!) i = 2;
+            const j = nxt[i]!;
+            const k = nxt[j]!;
+
+            let s = this.m[i]![i]! - (this.m[j]![j]! + this.m[k]![k]!) + 1.0;
+            s = Math.sqrt(s);
+            q[i] = s * 0.5;
+            if (s !== 0.0) s = 0.5 / s;
+
+            q[3] = (this.m[k]![j]! - this.m[j]![k]!) * s;
+            q[j] = (this.m[j]![i]! + this.m[i]![j]!) * s;
+            q[k] = (this.m[k]![i]! + this.m[i]![k]!) * s;
+
+            qx = q[0]!;
+            qy = q[1]!;
+            qz = q[2]!;
+            qw = q[3]!;
         }
-        return new Quaterniond();
+
+        return new Quaterniond(new Vector3Dd(qx, qy, qz), qw);
     }
-    public importFromQuaternion(q: Quaterniond): Matrix4x4d {
-        const x = q.direction().x(),
-            y = q.direction().y(),
-            z = q.direction().z(),
-            w = q.magnitude();
+    public importFromQuaternion(a: Quaterniond): Matrix4x4d {
+        const x2 = a.direction().x() + a.direction().x();
+        const y2 = a.direction().y() + a.direction().y();
+        const z2 = a.direction().z() + a.direction().z();
+        const xx = a.direction().x() * x2;
+        const xy = a.direction().x() * y2;
+        const xz = a.direction().x() * z2;
+        const yy = a.direction().y() * y2;
+        const yz = a.direction().y() * z2;
+        const zz = a.direction().z() * z2;
+        const sx = a.magnitude() * x2;
+        const sy = a.magnitude() * y2;
+        const sz = a.magnitude() * z2;
+
         return new Matrix4x4d([
-            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w), 0],
-            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w), 0],
-            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y), 0],
+            [1 - (yy + zz), xy - sz, xz + sy, 0],
+            [xy + sz, 1 - (xx + zz), yz - sx, 0],
+            [xz - sy, yz + sx, 1 - (xx + yy), 0],
             [0, 0, 0, 1],
         ]);
     }

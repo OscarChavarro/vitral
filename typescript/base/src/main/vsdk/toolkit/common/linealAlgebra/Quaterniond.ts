@@ -30,7 +30,7 @@ export class Quaterniond extends FundamentalEntity {
     }
     public normalized(): Quaterniond {
         const l = this.length();
-        return Math.abs(l) < VSDK.EPSILON ? this : new Quaterniond(this.dv.multiply(1 / l), this.mv / l);
+        return Math.abs(l) < VSDK.EPSILON ? this : new Quaterniond(this.dv.multiply(1 / l), this.mv * (1 / l));
     }
     public conjugated(): Quaterniond {
         return new Quaterniond(this.dv.multiply(-1), this.mv);

@@ -48,7 +48,8 @@ those findings are closed.
 | 25 — Geometric processing | In progress | Polygon clipping, voxelization, and monotone triangulation blocks only | Full B-rep/CSG operator block | 32 current-Java source files plus tests and standard gate |
 | 26 — Lights | Complete | 6 / 6 current-Java symbols | — | `LightType` has no source mapping in the current Java base |
 | 27 — Tone-mapping checkpoint | Complete, harness exit open | 0 / 0 inventory entries | — | Eleven unlisted `media`/`solidTexture` orphans recorded for Phase 45; vitest worker-RPC budget still makes `verify` exit 1 |
-| 28–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 28 — Scene model | Complete | 4 / 4 inventory entries | — | No Java test source has a dependency closure limited to this phase |
+| 29–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -1181,7 +1182,25 @@ vsdk.toolkit.environment.scene.SimpleScene
 vsdk.toolkit.environment.scene.SimpleSceneSnapshot
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 29.
+All four entries have a source mapping in the current Java base and are ported
+and exported through `@vitral/base`. Two Java runtime adapters the group needs
+were added with them: `java.util.Objects.requireNonNull` with
+`java.lang.NullPointerException`, and `java.util.Collections.unmodifiableList`
+as a read-only view whose mutators throw `UnsupportedOperationException`.
+
+Java's overload pairs are preserved as TypeScript overload signatures on one
+method: `SimpleBody.doIntersectionFirstHit(Ray)` / `(Ray, RayHit)` and the
+three `SimpleScene.exportToSimpleSceneSnapshot` forms. As in the Phase 24
+`Camera` port, the Java `AtomicLong` modification counter is a plain counter
+field, since the TypeScript port is single-threaded per body and the
+observable `getModificationVersion()` sequence is unchanged.
+
+No Java test source has a dependency closure limited to this phase: the only
+two Java tests that reference the package, `HiddenLineRendererTest` and
+`ReaderMitSceneTest`, also depend on later renderer and geometry-I/O
+production classes. No test was invented.
+
+Exit: satisfied on 2026-09-12. See the Phase 28 gate record.
 
 ### Phase 29: Numerical-analysis checkpoint
 
@@ -1698,7 +1717,7 @@ The port is complete only when all of the following are true:
 | 25 | Geometric processing | Complete — phases 25.2–25.7 closed with parity gates passed. The full Java CSG operator inventory (splitter, operator base, predicate processor, intersector, curve builder, vertex/vertex and vertex/face classifiers, set/non-intersecting classifiers, null-edges connector, finisher, structural fallbacks, set operator, modeler wrappers and fixtures) is ported and byte-identical to the Java reference driver on the MANT1986/MANT1988/APPE1967 dumps. The 24 Java CSG test sources plus the ten B-rep volume test sources are migrated. |
 | 26 | Lights | Complete — `Light` with its nested `LightDirection` record and the `AmbientLight`, `DirectionalLight`, `PointLight`, and `SpotLight` subclasses are bit-identical to the Java reference driver over direction, distance-limit, attenuation, copy, equality, hash, and text output. `LightType` has no source mapping in the current Java base and was not invented. No Java test source exists for this package. |
 | 27 | Tone-mapping checkpoint | Complete — the group is empty, the current Java base has no tone-mapping class, and no placeholder exists. The represented blocks (gamma transfer functions and the HDR buffers) were verified against Java drivers, which exposed and closed three byte-level defects in Phases 14 and 15. Eleven unlisted `media`/`solidTexture` production files were recorded as Phase 45 orphans. |
-| 28 | Scene model | Pending |
+| 28 | Scene model | Complete — `SimpleBody`, `SimpleBodyGroup`, `SimpleScene`, and `SimpleSceneSnapshot` are bit-identical to the Java reference driver over transform caches, every world/object conversion, all ray-detail masks, the translation-only and sphere fast paths, group bounds, scene light-id assignment, and snapshot isolation and immutability. Closing the diff required literal corrections to `Matrix4x4d.exportToQuaternion`, `Matrix4x4d.importFromQuaternion`, and `Quaterniond.normalized` from Phase 3. No Java test source has a dependency closure limited to this phase. |
 | 29 | Numerical-analysis checkpoint | Pending |
 | 30 | I/O wrappers | Pending |
 | 31 | I/O context checkpoint | Pending |

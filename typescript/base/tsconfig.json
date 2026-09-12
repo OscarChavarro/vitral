@@ -78,6 +78,7 @@
         "src/main/vsdk/toolkit/environment/material/**/*.ts",
         "src/main/vsdk/toolkit/environment/background/**/*.ts",
         "src/main/vsdk/toolkit/environment/light/**/*.ts",
+        "src/main/vsdk/toolkit/environment/scene/**/*.ts",
         "src/main/vsdk/toolkit/environment/camera/**/*.ts",
         "src/main/vsdk/toolkit/environment/geometry/Geometry.ts",
         "src/main/vsdk/toolkit/environment/geometry/curve/**/*.ts",

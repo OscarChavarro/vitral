@@ -272,6 +272,10 @@ export { AmbientLight } from "./vsdk/toolkit/environment/light/AmbientLight.js";
 export { DirectionalLight } from "./vsdk/toolkit/environment/light/DirectionalLight.js";
 export { PointLight } from "./vsdk/toolkit/environment/light/PointLight.js";
 export { SpotLight } from "./vsdk/toolkit/environment/light/SpotLight.js";
+export { SimpleBody } from "./vsdk/toolkit/environment/scene/SimpleBody.js";
+export { SimpleBodyGroup } from "./vsdk/toolkit/environment/scene/SimpleBodyGroup.js";
+export { SimpleScene } from "./vsdk/toolkit/environment/scene/SimpleScene.js";
+export { SimpleSceneSnapshot } from "./vsdk/toolkit/environment/scene/SimpleSceneSnapshot.js";
 import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
     workerError,
