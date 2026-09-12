@@ -196,6 +196,118 @@ Migrated so far:
     the Java way, and the `(byte)` palette literals go through
     `VSDK.unsigned8BitInteger2signedByte`.
 
+## WebGL Example Programs
+
+The Java interactive examples under `java/testsuite/Jogl4Examples` are migrated
+into the single Angular frontend application
+`typescript/testsuite/VitralWebTestsuiteContainer`: one Angular module per Java
+project, under `src/WebGLExamples/<JavaProjectName>/`, reached from the
+container's explorer tree. This is the strategy of record for that directory,
+and it differs from the one-project-per-example shape used for the offline
+console examples, for three reasons:
+
+  - A Java example is a `JFrame` that owns a JOGL `GLCanvas`; a browser has no
+    windows to own. The container application is the window manager, its
+    explorer tree is the program launcher, and each module owns one `<canvas>`.
+  - Every example needs the same served `etc/` tree (GLSL shaders, images,
+    textures, models). The container publishes it once, through
+    `scripts/sync-etc.sh` into `public/etc`, and every module reaches those
+    resources by URL where Java reaches them by relative file path.
+  - A browser reaches shaders and image resources over `fetch`, so GPU resource
+    setup is asynchronous. Sharing one application shell keeps that
+    asynchronous boundary in one place instead of repeating a build per
+    example.
+
+Mapping rules, applied to every module:
+
+  - The `GLEventListener` callbacks map onto the Angular lifecycle: `init` onto
+    `ngAfterViewInit`, `reshape` onto a `ResizeObserver`, `display` onto the
+    module's frame method, and `dispose` onto `ngOnDestroy`. Closing the Java
+    `JFrame` (and its `System.exit(0)`) maps onto a `deactivate` output that
+    returns the container to its explorer, which is also what `KEY_ESC` does.
+  - AWT mouse, wheel and key events reach the Vitral event shape through
+    `vsdk.toolkit.gui.WebSystem`, the Web counterpart of `AwtSystem`.
+  - Rendering goes exclusively through the `vsdk.toolkit.render.webgl`
+    counterparts of the `vsdk.toolkit.render.jogl` classes the Java example
+    uses. A Java example that reaches a JOGL renderer with no WebGL counterpart
+    yet is blocked on porting that renderer, never on an inline substitute
+    inside the module.
+  - A frame must not `await` a network read. A WebGL drawing buffer is
+    presented and cleared at a browser task boundary unless
+    `preserveDrawingBuffer` is set, so a frame that compiled a shader on demand
+    would lose everything drawn before the boundary. Each renderer that needs a
+    GLSL source therefore exposes an asynchronous `prepare(gl)`, which the
+    module calls where a JOGL program does its `init(GLAutoDrawable)` work, and
+    the frames that follow are free of real awaits. This cost the first
+    `ImageExample` frame its corridor and matrix gizmo until `prepare` was
+    added, and it retroactively fixed the same latent defect in
+    `CameraExample`.
+  - The Java examples delegate camera interaction to a
+    `vsdk.toolkit.gui.CameraController` (`CameraControllerAquynza` in every
+    example migrated so far). That family belongs to the decision-gated Phase
+    38 and is not ported, so the modules share
+    `src/WebGLExamples/_shared/example-camera-interaction.ts`, which keeps the
+    `processX(...)`-answers-whether-to-repaint shape of the Java
+    `CameraController` contract. It is the one recorded behavioral divergence
+    of every module: the initial camera pose and the drag/zoom mapping are not
+    `CameraControllerAquynza`'s. Replacing it with the ported controller must
+    be a change of construction only.
+
+Migrated so far:
+
+  - `CameraExample` — the first module, and the one that established the
+    container, `@vitral/webgl`, and the mapping rules above. See the Phase 41
+    partial advance.
+  - `ImageExample` — 2026-09-12. This is the first example to exercise image
+    handling, and specifically compressed images: it draws
+    `etc/images/render.jpg`, decoded by the platform's own JPEG decoder into an
+    `RGBImageUncompressed`, and `etc/textures/earth.dds`, read as DXT1 blocks
+    that stay compressed all the way to the GPU, each of them twice — as a
+    depth-biased quad in the world and as a HUD overlay. It required the
+    out-of-phase advances recorded under Phases 33 and 41.
+
+    Verified on 2026-09-12 against the Java program, built from `java/base` +
+    `java/jogl4` and run under Xvfb with software Mesa: both programs draw the
+    same corridor, the same two world quads and the same two HUD overlays, with
+    the same images, the same image orientation, the same sizes in pixels
+    (320x240 and 256x256), the same lower-left and upper-left HUD placement,
+    and the same black letterboxing inside the 256x256 DXT1 earth texture. The
+    camera pose differs, which is the recorded `CameraController` divergence
+    above.
+
+    The compressed path was verified byte for byte rather than visually. A Java
+    reference driver reads a DDS file through `ImagePersistence.importRGB` and
+    invokes `Jogl4RGBAImageCompressedRenderer.decompressToRGBA` reflectively;
+    its TypeScript twin does the same through
+    `WebGLRGBAImageCompressedRenderer`. Over four inputs the two agree on every
+    line: `etc/textures/earth.dds` (256x256 DXT1, 16389 identical lines
+    covering the header values and all 262144 decoded RGBA bytes) and three
+    synthetic 64x64 DDS files carrying deterministic pseudo-random blocks with
+    the `DXT1`, `DXT3` and `DXT5` FourCCs (1029 identical lines each), which is
+    what exercises the DXT1 `c0 > c1` and transparent-black rules, the DXT3
+    4-bit alpha nibbles, and the DXT5 interpolated alpha table and its 48-bit
+    index word.
+
+    Both GPU paths of the compressed renderer were exercised in a real
+    browser, headless Chrome 147 over software Mesa: the `WEBGL_compressed_
+    texture_s3tc` path, where the DXT1 blocks reach the GPU untouched, and the
+    CPU decompression fallback, forced by hiding that extension from the page,
+    which emits the Java warning and draws the same image. The one visible
+    difference between them is mipmapping, which is the documented WebGL
+    boundary: a compressed texture cannot have mipmaps generated for it, so
+    that path minifies with `LINEAR` while the decoded fallback keeps Java's
+    `LINEAR_MIPMAP_LINEAR`.
+
+    One parity boundary remains open and is not claimable: `render.jpg` is
+    decoded by the browser's JPEG decoder where Java uses `javax.imageio`, so
+    byte-exact agreement on that image is not expected and was not measured.
+    The transfer of the decoded samples into the Vitral image is a port of
+    `AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage`, traversal
+    order and byte masking included; only the decoder differs.
+
+Not migrated: `MD2Example`, `MeshExample`, `PolygonClippingExample`,
+`PolyhedralBoundedSolidExample`, `ShadersExample`, `SolidTextureExample`.
+
 ## Analyzed State
 
 - Java production source of record: `java/base/src/main`; the repository also separates desktop and GPU integrations into `java/awt`, `java/jogl2`, and `java/jogl4`.
@@ -1360,6 +1472,35 @@ design of record for image formats:
 These export classes are therefore explicitly exempt from the 1:1 textual
 requirement; the rasterization and geometry code they serve is not.
 
+Partial advance — 2026-09-12 (out of phase order, to unblock
+`testsuite/VitralWebTestsuiteContainer/src/WebGLExamples/ImageExample`): the
+first importer is ported, `ImagePersistence.importDDSCompressed`, which reads a
+DXT-compressed DDS file and keeps its blocks compressed. It is a literal port of
+the Java private method, including the 128-byte minimum, the `DDS ` signature,
+the 124-byte header size, the little-endian header reads, the FourCC-flag check
+and the `DXT1`/`DXT3`/`DXT5` mapping; only its input differs, because reading
+the bytes is the one file-system-bound step in Java and DDS parsing itself is
+pure byte arithmetic. It therefore receives the already-read bytes plus the
+resource name used in `ImageNotRecognizedException`, and each runtime supplies
+its own reading step. The SGI, Targa and native readers, and the remaining
+importers of `importRGB` / `importRGBA` / `importIndexedColor`, are still
+unported, so the phase stays Pending and its gate has not been run.
+
+The browser's reading step and extension dispatch live in `@vitral/webgl` as
+`vsdk.toolkit.io.image.WebImagePersistence`, which is to that package what the
+`ImagePersistence` subclass in `@vitral/fs` is to Node: it ports Java's
+`importRGB(File)` / `importRGBA(File)` dispatch with a URL in place of a
+`java.io.File`, sends `dds` to the reader above, and sends every other format
+to the platform's own decoder through `createImageBitmap`. That decoder is the
+browser's counterpart of the AWT `ImagePersistenceHelper`
+(`ImagePersistenceAwt`, which reaches `javax.imageio`), and the transfer of the
+decoded samples into a Vitral image is a port of
+`AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage` and its RGBA twin,
+traversal order and byte masking included. As recorded above for the export
+path, a format handed to an external codec is functionally equivalent to Java
+rather than textually 1:1; no third-party codec was introduced in either
+package.
+
 Deferred with the phase: `ImagePersistence` does not yet extend
 `PersistenceElement` (Phase 30), which remains unported.
 
@@ -1532,6 +1673,13 @@ vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable
 vsdk.toolkit.gui.visualAnalytics.VisualVariableSet
 ```
 
+Open dependency — 2026-09-12: the WebGL testsuite modules that port
+`java/testsuite/Jogl4Examples` need `CameraController` and
+`CameraControllerAquynza`, and until this phase ports them they share an
+adapter inside the container application. See WebGL Example Programs; that
+adapter is the one recorded behavioral divergence of every such module, and
+closing this phase is what removes it.
+
 Exit: satisfy the standard phase gate before starting Phase 39.
 
 ### Phase 39: Software shaders
@@ -1659,6 +1807,35 @@ To support the browser event boundary selected for this runtime,
 `vsdk.toolkit.gui.WebSystem` was also added in `@vitral/webgl` as the Web
 counterpart to the AWT/GLFW event adapters; Phase 38 camera controllers remain
 unported.
+
+Partial advance — 2026-09-12 (out of phase order, to unblock the `ImageExample`
+module of the WebGL testsuite container): the image-texture renderer family and
+the shader plumbing it needs are ported from
+`java/jogl4/src/main/vsdk/toolkit/render/jogl/` to
+`vsdk.toolkit.render.webgl`, namely `WebGLImageRenderer`,
+`WebGLRGBImageUncompressedRenderer`, `WebGLRGBAImageUncompressedRenderer`,
+`WebGLRGBAImageCompressedRenderer`,
+`WebGLRendererConfigurationShaderSelector`, `WebGLShaderProgramUtil` and
+`WebGLShaderLoader`. The selection rules, the nine-program set and its GLSL
+file pairs, the uniform activation sequence, the textured-quad vertex
+submission at attribute locations 0 and 2, the lower-left overlay geometry, and
+the DXT1/DXT3/DXT5 CPU decompressor are the Java ones; the DXT parity evidence
+is recorded under WebGL Example Programs. The recurring runtime boundaries,
+each documented beside the code, are: a texture is an object rather than an
+`int`, so Java's `textureId <= 0` failure sentinel is `null`; per-process
+static GL state is held per `WebGL2RenderingContext` in a `WeakMap`, because a
+page can own several contexts; a GLSL source arrives over `fetch`, so program
+creation is asynchronous and the nine programs compile on first selection
+instead of all at once; WebGL has no `glPolygonMode` and no
+`glBindFragDataLocation`, and cannot generate mipmaps for a compressed texture,
+which is why the compressed path uploads level 0 with a non-mipmapped
+minification filter. `WebGLSimpleCorridorSample` and `WebGLImageRenderer` also
+gained an asynchronous `prepare(gl)`, which has no Java counterpart and exists
+for the drawing-buffer rule recorded under WebGL Example Programs. The broader
+JOGL4 renderer family — arrows, lights, lines, MD2 meshes, min/max, 2D
+polygons, ray and plane gizmos, solid textures and spheres — is still unported,
+the source group remains an empty checkpoint, and the phase gate has not been
+run.
 
 Exit: satisfy the standard phase gate before starting Phase 42.
 

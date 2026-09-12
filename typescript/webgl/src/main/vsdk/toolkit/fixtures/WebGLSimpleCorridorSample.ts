@@ -23,6 +23,25 @@ export class WebGLSimpleCorridorSample {
     private diffuseColorLoc: WebGLUniformLocation | null = null;
     private vertexCount = 0;
 
+    /**
+    Builds this fixture's geometry and shader program without drawing.
+
+    Java has no counterpart: `Jogl4SimpleCorridorSample.drawGL` compiles on
+    first use, and reading a GLSL file there is synchronous. Here a shader
+    source arrives over `fetch`, so a first frame that compiled on demand would
+    span a browser task boundary, and a WebGL drawing buffer is presented and
+    cleared at such a boundary unless `preserveDrawingBuffer` is set: whatever
+    was drawn before the boundary would be lost. Callers therefore prepare
+    their resources once, which is what a JOGL program does in
+    `init(GLAutoDrawable)`, and only then draw frames that never await a
+    network read.
+    */
+    public async prepare(gl: WebGL2RenderingContext): Promise<void> {
+        if (!this.initialized) {
+            await this.initialize(gl);
+        }
+    }
+
     public async drawGL(gl: WebGL2RenderingContext, modelViewProjection: Matrix4x4d): Promise<void> {
         if (!this.initialized) {
             await this.initialize(gl);

@@ -4,6 +4,8 @@ import { VSDK } from "../../common/VSDK.js";
 import { Logger } from "../../common/logging/Logger.js";
 import { Image } from "../../media/Image.js";
 import { RGBPixel } from "../../media/RGBPixel.js";
+import { RGBAImageCompressed } from "../../media/RGBAImageCompressed.js";
+import { ImageNotRecognizedException } from "./ImageNotRecognizedException.js";
 import { ImagePersistenceHelper } from "./ImagePersistenceHelper.js";
 import { ImagePersistencePng } from "./ImagePersistencePng.js";
 
@@ -150,5 +152,91 @@ export class ImagePersistence {
         const os = new ByteArrayOutputStream();
         ImagePersistence.exportPPM(os, img);
         return os.toByteArray();
+    }
+
+    /**
+    Reads a DXT-compressed DDS file and keeps its blocks compressed, exactly as
+    `ImagePersistence.importDDSCompressed(File)` does in Java. The compressed
+    blocks are never decoded here: they travel to the GPU as they are.
+
+    Port note: Java receives a `java.io.File`, reads it with
+    `Files.readAllBytes`, and reports the offending file inside
+    `ImageNotRecognizedException`. Reading the bytes is the only
+    file-system-bound step, and DDS parsing itself is pure byte arithmetic, so
+    this flavor receives the already-read bytes plus the resource name used for
+    the diagnostics. `@vitral/fs` and the browser adapter each supply the
+    reading step for their own runtime.
+
+    @param fileData The complete contents of the DDS file
+    @param sourceName The name of the read resource, for diagnostics
+    @return An RGBAImageCompressed entity holding the compressed blocks
+    */
+    public static importDDSCompressed(fileData: Uint8Array, sourceName: string | null): RGBAImageCompressed {
+        if (fileData.length < 128) {
+            throw new ImageNotRecognizedException("DDS file too short", sourceName);
+        }
+        if (
+            fileData[0] !== 0x44 /* 'D' */ ||
+            fileData[1] !== 0x44 /* 'D' */ ||
+            fileData[2] !== 0x53 /* 'S' */ ||
+            fileData[3] !== 0x20 /* ' ' */
+        ) {
+            throw new ImageNotRecognizedException("DDS signature not recognized", sourceName);
+        }
+
+        const headerSize = ImagePersistence.readIntLE(fileData, 4);
+        if (headerSize !== 124) {
+            throw new ImageNotRecognizedException("DDS header size not recognized", sourceName);
+        }
+
+        const height = ImagePersistence.readIntLE(fileData, 12);
+        const width = ImagePersistence.readIntLE(fileData, 16);
+        const pixelFormatFlags = ImagePersistence.readIntLE(fileData, 80);
+        let fourCC: string;
+        fourCC = String.fromCharCode(fileData[84]!, fileData[85]!, fileData[86]!, fileData[87]!);
+
+        if ((pixelFormatFlags & 0x04) === 0) {
+            throw new ImageNotRecognizedException("DDS file does not use a FourCC compressed format", sourceName);
+        }
+
+        const compressionFormat = ImagePersistence.ddsFourCCToCompressionFormat(fourCC);
+        if (compressionFormat === RGBAImageCompressed.COMPRESSION_UNKNOWN) {
+            throw new ImageNotRecognizedException("DDS compressed format not supported: " + fourCC, sourceName);
+        }
+
+        const dataOffset = 128;
+        const dataSize = fileData.length - dataOffset;
+        let compressedData: Uint8Array;
+        compressedData = new Uint8Array(dataSize);
+        compressedData.set(fileData.subarray(dataOffset, dataOffset + dataSize), 0);
+
+        let image: RGBAImageCompressed;
+        image = new RGBAImageCompressed();
+        if (!image.initCompressed(width, height, compressionFormat, compressedData)) {
+            throw new ImageNotRecognizedException("Could not initialize compressed DDS image", sourceName);
+        }
+        return image;
+    }
+
+    private static ddsFourCCToCompressionFormat(fourCC: string): number {
+        if (fourCC === "DXT1") {
+            return RGBAImageCompressed.COMPRESSION_DXT1;
+        }
+        if (fourCC === "DXT3") {
+            return RGBAImageCompressed.COMPRESSION_DXT3;
+        }
+        if (fourCC === "DXT5") {
+            return RGBAImageCompressed.COMPRESSION_DXT5;
+        }
+        return RGBAImageCompressed.COMPRESSION_UNKNOWN;
+    }
+
+    private static readIntLE(data: Uint8Array, offset: number): number {
+        return (
+            (data[offset]! & 0xff) |
+            ((data[offset + 1]! & 0xff) << 8) |
+            ((data[offset + 2]! & 0xff) << 16) |
+            ((data[offset + 3]! & 0xff) << 24)
+        );
     }
 }

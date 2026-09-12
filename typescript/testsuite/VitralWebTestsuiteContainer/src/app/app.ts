@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Vector3Dd } from '@vitral/base';
 import { WebGLHelloWorld } from '../_APITests/_WebGLHelloWorld/webgl-hello-world';
 import { CameraExample } from '../WebGLExamples/CameraExample/camera-example';
+import { ImageExample } from '../WebGLExamples/ImageExample/image-example';
 
 type ExplorerItem =
   | {
@@ -12,12 +13,12 @@ type ExplorerItem =
   | {
       kind: 'file';
       label: string;
-      exampleId: '_WebGLHelloWorld' | 'CameraExample';
+      exampleId: '_WebGLHelloWorld' | 'CameraExample' | 'ImageExample';
     };
 
 @Component({
   selector: 'app-root',
-  imports: [WebGLHelloWorld, CameraExample],
+  imports: [WebGLHelloWorld, CameraExample, ImageExample],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,11 @@ export class App {
           kind: 'file',
           label: 'CameraExample',
           exampleId: 'CameraExample',
+        },
+        {
+          kind: 'file',
+          label: 'ImageExample',
+          exampleId: 'ImageExample',
         },
       ],
     },

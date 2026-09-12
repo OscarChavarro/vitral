@@ -3,3 +3,11 @@ export { WebSystem, type WebKeyEvent, type WebMouseEvent } from "./vsdk/toolkit/
 export { WebGLCameraRenderer } from "./vsdk/toolkit/render/webgl/WebGLCameraRenderer.js";
 export { WebGLMatrixRenderer } from "./vsdk/toolkit/render/webgl/WebGLMatrixRenderer.js";
 export { WebGLSimpleCorridorSample } from "./vsdk/toolkit/fixtures/WebGLSimpleCorridorSample.js";
+export { WebGLShaderLoader } from "./vsdk/toolkit/render/webgl/WebGLShaderLoader.js";
+export { WebGLShaderProgramUtil } from "./vsdk/toolkit/render/webgl/WebGLShaderProgramUtil.js";
+export { WebGLRendererConfigurationShaderSelector } from "./vsdk/toolkit/render/webgl/WebGLRendererConfigurationShaderSelector.js";
+export { WebGLImageRenderer, TextureFilterMode } from "./vsdk/toolkit/render/webgl/WebGLImageRenderer.js";
+export { WebGLRGBImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBImageUncompressedRenderer.js";
+export { WebGLRGBAImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageUncompressedRenderer.js";
+export { WebGLRGBAImageCompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageCompressedRenderer.js";
+export { WebImagePersistence } from "./vsdk/toolkit/io/image/WebImagePersistence.js";

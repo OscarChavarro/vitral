@@ -68,6 +68,9 @@
       @if (selectedItem() === 'CameraExample') {
         <app-camera-example (deactivate)="clearSelection()" />
       }
+      @if (selectedItem() === 'ImageExample') {
+        <app-image-example (deactivate)="clearSelection()" />
+      }
     </div>
   </section>
 </main>
