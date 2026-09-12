@@ -1,156 +1,345 @@
-import { VSDK } from "../../../../common/VSDK.js";
-import { Vector2Dd } from "../../../../common/linealAlgebra/Vector2Dd.js";
-import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
-import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
-import type { _PolyhedralBoundedSolidFace } from "./nodes/_PolyhedralBoundedSolidFace.js";
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
 
-/**
- * Numerical tolerances for geometric predicates used to implement the face
- * equations and intersection predicates of chapter [MANT1988].13 and the robust
- * case distinctions required by chapter [MANT1988].15.
- */
-export class PolyhedralBoundedSolidNumericPolicy {
-    public static readonly BREP_EPSILON = VSDK.EPSILON;
-    public static readonly BREP_BIG_EPSILON = 10 * VSDK.EPSILON;
-    public static defaultContext(): ToleranceContext {
-        return PolyhedralBoundedSolidNumericPolicy.fromScale(1);
+import { VSDK } from "../../../../common/VSDK.js";
+import type { Vector2Dd } from "../../../../common/linealAlgebra/Vector2Dd.js";
+import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
+import type { _PolyhedralBoundedSolidFace } from "./nodes/_PolyhedralBoundedSolidFace.js";
+import { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
+
+export class ToleranceContext {
+    private readonly modelScaleValue: number;
+    private readonly epsilonValue: number;
+    private readonly bigEpsilonValue: number;
+    private readonly unitVectorToleranceValue: number;
+    private readonly angleToleranceValue: number;
+    private readonly coplanarDotToleranceValue: number;
+    private readonly unitIntervalToleranceValue: number;
+
+    public constructor(
+        modelScale: number,
+        epsilon: number,
+        bigEpsilon: number,
+        unitVectorTolerance: number,
+        angleTolerance: number,
+        coplanarDotTolerance: number,
+        unitIntervalTolerance: number,
+    ) {
+        this.modelScaleValue = modelScale;
+        this.epsilonValue = epsilon;
+        this.bigEpsilonValue = bigEpsilon;
+        this.unitVectorToleranceValue = unitVectorTolerance;
+        this.angleToleranceValue = angleTolerance;
+        this.coplanarDotToleranceValue = coplanarDotTolerance;
+        this.unitIntervalToleranceValue = unitIntervalTolerance;
     }
-    public static fromScale(scale: number): ToleranceContext {
-        const s = Number.isFinite(scale) && scale >= 1 ? scale : 1,
-            epsilon = this.BREP_EPSILON * s,
-            bigEpsilon = this.BREP_BIG_EPSILON * s;
-        return new ToleranceContext(
-            s,
-            epsilon,
-            bigEpsilon,
-            this.BREP_BIG_EPSILON,
-            this.BREP_BIG_EPSILON,
-            10 * this.BREP_BIG_EPSILON,
-            Math.min(1e-3, Math.max(this.BREP_BIG_EPSILON, bigEpsilon / s)),
-        );
+
+    public modelScale(): number {
+        return this.modelScaleValue;
     }
-    public static forPoints(points: readonly Vector3Dd[]): ToleranceContext {
-        if (points.length < 2) return this.defaultContext();
-        let minx = Infinity,
-            miny = Infinity,
-            minz = Infinity,
-            maxx = -Infinity,
-            maxy = -Infinity,
-            maxz = -Infinity;
-        for (const p of points) {
-            minx = Math.min(minx, p.x());
-            miny = Math.min(miny, p.y());
-            minz = Math.min(minz, p.z());
-            maxx = Math.max(maxx, p.x());
-            maxy = Math.max(maxy, p.y());
-            maxz = Math.max(maxz, p.z());
-        }
-        return this.fromScale(Math.hypot(maxx - minx, maxy - miny, maxz - minz));
+
+    public epsilon(): number {
+        return this.epsilonValue;
     }
-    public static forSolid(solid: PolyhedralBoundedSolid | null): ToleranceContext {
-        return solid === null
-            ? this.defaultContext()
-            : this.forPoints(solid.getVerticesList().map((vertex) => vertex.position));
+
+    public bigEpsilon(): number {
+        return this.bigEpsilonValue;
     }
-    public static forSolids(
-        first: PolyhedralBoundedSolid | null,
-        second: PolyhedralBoundedSolid | null,
-    ): ToleranceContext {
-        return this.fromScale(Math.max(this.forSolid(first).modelScale(), this.forSolid(second).modelScale()));
+
+    public unitVectorTolerance(): number {
+        return this.unitVectorToleranceValue;
     }
-    public static forFace(face: _PolyhedralBoundedSolidFace | null): ToleranceContext {
-        if (face === null) return this.defaultContext();
-        const points: Vector3Dd[] = [];
-        for (const loop of face.boundariesList)
-            for (let i = 0; i < loop.halfEdgesList.size(); i++)
-                points.push(loop.halfEdgesList.get(i)!.startingVertex.position);
-        return this.forPoints(points);
+
+    public angleTolerance(): number {
+        return this.angleToleranceValue;
     }
-    public static compare(a: number, b: number, tolerance: number | ToleranceContext): number {
-        const t = typeof tolerance === "number" ? tolerance : tolerance.epsilon();
-        return a < b - t ? -1 : a > b + t ? 1 : 0;
+
+    public coplanarDotTolerance(): number {
+        return this.coplanarDotToleranceValue;
     }
-    public static compareToZero(value: number, c: ToleranceContext): number {
-        return this.compare(value, 0, c.epsilon());
-    }
-    public static compareToZeroBig(value: number, c: ToleranceContext): number {
-        return this.compare(value, 0, c.bigEpsilon());
-    }
-    public static isZero(value: number, c: ToleranceContext): boolean {
-        return Math.abs(value) <= c.epsilon();
-    }
-    public static isZeroBig(value: number, c: ToleranceContext): boolean {
-        return Math.abs(value) <= c.bigEpsilon();
-    }
-    public static pointsCoincident(a: Vector3Dd, b: Vector3Dd, c: ToleranceContext): boolean {
-        return Vector3Dd.distance(a, b) <= c.bigEpsilon();
-    }
-    public static pointsSeparated(a: Vector3Dd, b: Vector3Dd, c: ToleranceContext): boolean {
-        return !this.pointsCoincident(a, b, c);
-    }
-    public static testPointInside(face: _PolyhedralBoundedSolidFace, point: Vector3Dd, c: ToleranceContext): number {
-        return face.testPointInside(point, c.bigEpsilon());
-    }
-    public static vectorsColinear(a: Vector3Dd, b: Vector3Dd, c: ToleranceContext): boolean {
-        return a.crossProduct(b).length() <= c.bigEpsilon() * Math.max(1, a.length(), b.length());
-    }
-    public static unitVectorsParallel(a: Vector3Dd, b: Vector3Dd, c: ToleranceContext): boolean {
-        return a.crossProduct(b).length() <= c.unitVectorTolerance();
-    }
-    public static angleIntervalsOverlap(upper: number, lower: number, c: ToleranceContext): boolean {
-        return upper + c.angleTolerance() > lower - c.angleTolerance();
-    }
-    public static unitIntervalContainsStrictly(t: number, c: ToleranceContext): boolean {
-        return t > c.unitIntervalTolerance() && t < 1 - c.unitIntervalTolerance();
-    }
-    public static orientationTolerance2D(a: Vector2Dd, b: Vector2Dd, c: Vector2Dd, context: ToleranceContext): number {
-        const span = Math.max(
-            1,
-            Math.abs(a.x - b.x),
-            Math.abs(a.x - c.x),
-            Math.abs(b.x - c.x),
-            Math.abs(a.y - b.y),
-            Math.abs(a.y - c.y),
-            Math.abs(b.y - c.y),
-        );
-        return context.bigEpsilon() * span;
-    }
-    public static linearTolerance2D(c: ToleranceContext): number {
-        return c.bigEpsilon();
-    }
-    public static areaTolerance2D(c: ToleranceContext): number {
-        return c.bigEpsilon() ** 2;
+
+    public unitIntervalTolerance(): number {
+        return this.unitIntervalToleranceValue;
     }
 }
-export class ToleranceContext {
-    public constructor(
-        private readonly scale: number,
-        private readonly eps: number,
-        private readonly bigEps: number,
-        private readonly unitTol: number,
-        private readonly angleTol: number,
-        private readonly coplanarTol: number,
-        private readonly intervalTol: number,
-    ) {}
-    public modelScale(): number {
-        return this.scale;
+
+type _ToleranceContext = ToleranceContext;
+
+/**
+Numerical tolerances for geometric predicates used to implement the face
+equations and intersection predicates of chapter [MANT1988].13 and the robust
+case distinctions required by chapter [MANT1988].15.
+*/
+export class PolyhedralBoundedSolidNumericPolicy {
+    public static readonly BREP_EPSILON = VSDK.EPSILON;
+    public static readonly BREP_BIG_EPSILON = 10.0 * PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON;
+
+    private static readonly MIN_SCALE = 1.0;
+    private static readonly MAX_UNIT_INTERVAL_TOLERANCE = 1.0e-3;
+    private static readonly DEFAULT_CONTEXT = PolyhedralBoundedSolidNumericPolicy.fromScale(
+        PolyhedralBoundedSolidNumericPolicy.MIN_SCALE,
+    );
+
+    private constructor() {}
+
+    public static defaultContext(): ToleranceContext {
+        return PolyhedralBoundedSolidNumericPolicy.DEFAULT_CONTEXT;
     }
-    public epsilon(): number {
-        return this.eps;
+
+    public static fromScale(modelScale: number): ToleranceContext {
+        const safeScale = PolyhedralBoundedSolidNumericPolicy.sanitizeScale(modelScale);
+        const eps = PolyhedralBoundedSolidNumericPolicy.BREP_EPSILON * safeScale;
+        const bigEps = PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON * safeScale;
+        const unitTol = PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON;
+        const angleTol = PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON;
+        const coplanarDotTol = 10.0 * PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON;
+        const unitIntervalTol = PolyhedralBoundedSolidNumericPolicy.clamp(
+            bigEps / safeScale,
+            PolyhedralBoundedSolidNumericPolicy.BREP_BIG_EPSILON,
+            PolyhedralBoundedSolidNumericPolicy.MAX_UNIT_INTERVAL_TOLERANCE,
+        );
+        return new ToleranceContext(safeScale, eps, bigEps, unitTol, angleTol, coplanarDotTol, unitIntervalTol);
     }
-    public bigEpsilon(): number {
-        return this.bigEps;
+
+    public static forSolid(solid: PolyhedralBoundedSolid | null): ToleranceContext {
+        return PolyhedralBoundedSolidNumericPolicy.fromScale(
+            PolyhedralBoundedSolidNumericPolicy.estimateSolidScale(solid),
+        );
     }
-    public unitVectorTolerance(): number {
-        return this.unitTol;
+
+    public static forSolids(a: PolyhedralBoundedSolid | null, b: PolyhedralBoundedSolid | null): ToleranceContext {
+        return PolyhedralBoundedSolidNumericPolicy.fromScale(
+            Math.max(
+                PolyhedralBoundedSolidNumericPolicy.estimateSolidScale(a),
+                PolyhedralBoundedSolidNumericPolicy.estimateSolidScale(b),
+            ),
+        );
     }
-    public angleTolerance(): number {
-        return this.angleTol;
+
+    public static forFace(face: _PolyhedralBoundedSolidFace | null): ToleranceContext {
+        return PolyhedralBoundedSolidNumericPolicy.fromScale(
+            PolyhedralBoundedSolidNumericPolicy.estimateFaceScale(face),
+        );
     }
-    public coplanarDotTolerance(): number {
-        return this.coplanarTol;
+
+    public static forPoints(points: readonly (Vector3Dd | null)[] | null): ToleranceContext {
+        return PolyhedralBoundedSolidNumericPolicy.fromScale(
+            PolyhedralBoundedSolidNumericPolicy.estimatePointsScale(points),
+        );
     }
-    public unitIntervalTolerance(): number {
-        return this.intervalTol;
+
+    private static sanitizeScale(scale: number): number {
+        if (!Number.isFinite(scale)) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+        if (scale < PolyhedralBoundedSolidNumericPolicy.MIN_SCALE) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+        return scale;
     }
+
+    private static estimateSolidScale(solid: PolyhedralBoundedSolid | null): number {
+        if (solid === null) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+
+        const minMax = solid.getMinMax();
+        if (minMax === null || minMax.length < 6) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+        return PolyhedralBoundedSolidNumericPolicy.diagonalSize(
+            minMax[0]!,
+            minMax[1]!,
+            minMax[2]!,
+            minMax[3]!,
+            minMax[4]!,
+            minMax[5]!,
+        );
+    }
+
+    private static estimateFaceScale(face: _PolyhedralBoundedSolidFace | null): number {
+        if (face === null || face.boundariesList === null) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let minZ = Number.POSITIVE_INFINITY;
+        let maxX = -Number.POSITIVE_INFINITY;
+        let maxY = -Number.POSITIVE_INFINITY;
+        let maxZ = -Number.POSITIVE_INFINITY;
+        let found = false;
+
+        let i: number;
+        let j: number;
+        for (i = 0; i < face.boundariesList.size(); i++) {
+            const loop = face.boundariesList.get(i);
+            if (loop === null) {
+                continue;
+            }
+            for (j = 0; j < loop.halfEdgesList.size(); j++) {
+                const he = loop.halfEdgesList.get(j);
+                if (he === null || he.startingVertex === null) {
+                    continue;
+                }
+                const p = he.startingVertex.position;
+                if (p === null) {
+                    continue;
+                }
+                found = true;
+                if (p.x() < minX) minX = p.x();
+                if (p.y() < minY) minY = p.y();
+                if (p.z() < minZ) minZ = p.z();
+                if (p.x() > maxX) maxX = p.x();
+                if (p.y() > maxY) maxY = p.y();
+                if (p.z() > maxZ) maxZ = p.z();
+            }
+        }
+
+        if (!found) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+        return PolyhedralBoundedSolidNumericPolicy.diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    private static estimatePointsScale(points: readonly (Vector3Dd | null)[] | null): number {
+        if (points === null || points.length < 2) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+
+        let minX = Number.POSITIVE_INFINITY;
+        let minY = Number.POSITIVE_INFINITY;
+        let minZ = Number.POSITIVE_INFINITY;
+        let maxX = -Number.POSITIVE_INFINITY;
+        let maxY = -Number.POSITIVE_INFINITY;
+        let maxZ = -Number.POSITIVE_INFINITY;
+        let found = false;
+
+        let i: number;
+        for (i = 0; i < points.length; i++) {
+            const p = points[i]!;
+            if (p === null) {
+                continue;
+            }
+            found = true;
+            if (p.x() < minX) minX = p.x();
+            if (p.y() < minY) minY = p.y();
+            if (p.z() < minZ) minZ = p.z();
+            if (p.x() > maxX) maxX = p.x();
+            if (p.y() > maxY) maxY = p.y();
+            if (p.z() > maxZ) maxZ = p.z();
+        }
+
+        if (!found) {
+            return PolyhedralBoundedSolidNumericPolicy.MIN_SCALE;
+        }
+        return PolyhedralBoundedSolidNumericPolicy.diagonalSize(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    private static diagonalSize(
+        minX: number,
+        minY: number,
+        minZ: number,
+        maxX: number,
+        maxY: number,
+        maxZ: number,
+    ): number {
+        const dx = maxX - minX;
+        const dy = maxY - minY;
+        const dz = maxZ - minZ;
+        const diag = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return PolyhedralBoundedSolidNumericPolicy.sanitizeScale(diag);
+    }
+
+    /**
+    Java overloads `compare(double, double, double)` and
+    `compare(double, double, ToleranceContext)`.
+    */
+    public static compare(a: number, b: number, tolerance: number | ToleranceContext): number {
+        if (typeof tolerance !== "number") {
+            return PolyhedralBoundedSolidNumericPolicy.compare(a, b, tolerance.epsilon());
+        }
+        return PolyhedralBoundedSolid.compareValue(a, b, tolerance);
+    }
+
+    public static compareToZero(value: number, context: ToleranceContext): number {
+        return PolyhedralBoundedSolidNumericPolicy.compare(value, 0.0, context.epsilon());
+    }
+
+    public static compareToZeroBig(value: number, context: ToleranceContext): number {
+        return PolyhedralBoundedSolidNumericPolicy.compare(value, 0.0, context.bigEpsilon());
+    }
+
+    public static isZero(value: number, context: ToleranceContext): boolean {
+        return Math.abs(value) <= context.epsilon();
+    }
+
+    public static isZeroBig(value: number, context: ToleranceContext): boolean {
+        return Math.abs(value) <= context.bigEpsilon();
+    }
+
+    public static pointsCoincident(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
+        return Vector3Dd.distance(a, b) <= context.bigEpsilon();
+    }
+
+    public static pointsSeparated(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
+        return Vector3Dd.distance(a, b) > context.bigEpsilon();
+    }
+
+    public static testPointInside(
+        face: _PolyhedralBoundedSolidFace,
+        point: Vector3Dd,
+        context: ToleranceContext,
+    ): number {
+        return face.testPointInside(point, context.bigEpsilon());
+    }
+
+    public static vectorsColinear(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
+        const scale = Math.max(1.0, Math.max(a.length(), b.length()));
+        return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
+    }
+
+    public static unitVectorsParallel(a: Vector3Dd, b: Vector3Dd, context: ToleranceContext): boolean {
+        return a.crossProduct(b).length() <= context.unitVectorTolerance();
+    }
+
+    public static angleIntervalsOverlap(upperA: number, lowerB: number, context: ToleranceContext): boolean {
+        const tolerance = context.angleTolerance();
+        return upperA + tolerance > lowerB - tolerance;
+    }
+
+    public static unitIntervalContainsStrictly(t: number, context: ToleranceContext): boolean {
+        return t > context.unitIntervalTolerance() && t < 1.0 - context.unitIntervalTolerance();
+    }
+
+    public static orientationTolerance2D(a: Vector2Dd, b: Vector2Dd, c: Vector2Dd, context: ToleranceContext): number {
+        const lx = Math.max(Math.max(Math.abs(a.x - b.x), Math.abs(a.x - c.x)), Math.abs(b.x - c.x));
+        const ly = Math.max(Math.max(Math.abs(a.y - b.y), Math.abs(a.y - c.y)), Math.abs(b.y - c.y));
+        const span = Math.max(1.0, Math.max(lx, ly));
+        return context.bigEpsilon() * span;
+    }
+
+    public static linearTolerance2D(context: ToleranceContext): number {
+        return context.bigEpsilon();
+    }
+
+    public static areaTolerance2D(context: ToleranceContext): number {
+        const linearTolerance = context.bigEpsilon();
+        return linearTolerance * linearTolerance;
+    }
+
+    private static clamp(value: number, min: number, max: number): number {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
+    }
+}
+
+export namespace PolyhedralBoundedSolidNumericPolicy {
+    export type ToleranceContext = _ToleranceContext;
 }

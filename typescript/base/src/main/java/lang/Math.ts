@@ -10,8 +10,23 @@ export class Math {
         return globalThis.Math.ceil(a);
     }
 
+    /**
+    `Math.round(double)`: the closest integer, with ties rounding towards
+    positive infinity (so `round(-2.5)` is `-2`, not `-3`), `0` for NaN, and
+    saturation at the `long` range. JavaScript's `Math.round` already uses the
+    same tie rule and handles `0.49999999999999994` the way the JDK does.
+    */
     public static round(a: number): number {
-        return a >= 0.0 ? globalThis.Math.floor(a + 0.5) : globalThis.Math.ceil(a - 0.5);
+        if (globalThis.Number.isNaN(a)) {
+            return 0;
+        }
+        if (a <= -9223372036854775808) {
+            return -9223372036854775808;
+        }
+        if (a >= 9223372036854775807) {
+            return 9223372036854775807;
+        }
+        return globalThis.Math.round(a) + 0;
     }
 
     public static log(a: number): number {
@@ -60,6 +75,26 @@ export class Math {
 
     public static max(a: number, b: number): number {
         return a > b ? a : b;
+    }
+
+    /** `Math.toRadians(double)`: `angdeg / 180.0 * PI`. */
+    public static toRadians(angdeg: number): number {
+        return (angdeg / 180.0) * Math.PI;
+    }
+
+    /** `Math.toDegrees(double)`: `angrad * 180.0 / PI`. */
+    public static toDegrees(angrad: number): number {
+        return (angrad * 180.0) / Math.PI;
+    }
+
+    /** `Math.floorDiv(int, int)`. */
+    public static floorDiv(x: number, y: number): number {
+        return globalThis.Math.floor(x / y);
+    }
+
+    /** `Math.floorMod(int, int)`: `x - floorDiv(x, y) * y`. */
+    public static floorMod(x: number, y: number): number {
+        return x - Math.floorDiv(x, y) * y;
     }
 
     public static sqrt(a: number): number {

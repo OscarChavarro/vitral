@@ -5,6 +5,7 @@ import { Vector3Df } from "./Vector3Df.js";
 import { Vector4Df } from "./Vector4Df.js";
 import { Vector3Dd } from "./Vector3Dd.js";
 import { Vector4Dd } from "./Vector4Dd.js";
+import { Quaterniond } from "./Quaterniond.js";
 const f = Math.fround;
 export class Matrix4x4f extends FundamentalEntity {
     private readonly d: Matrix4x4d;
@@ -52,6 +53,15 @@ export class Matrix4x4f extends FundamentalEntity {
     public withTranslation(v: Vector3Df): Matrix4x4f {
         return Matrix4x4f.fromD(this.d.withTranslation(new Vector3Dd(v.x(), v.y(), v.z())));
     }
+    public orthogonalProjection(l: number, r: number, d: number, u: number, n: number, far: number): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.orthogonalProjection(l, r, d, u, n, far));
+    }
+    public canonicalPerspectiveProjection(): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.canonicalPerspectiveProjection());
+    }
+    public frustumProjection(l: number, r: number, d: number, u: number, n: number, far: number): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.frustumProjection(l, r, d, u, n, far));
+    }
     public translation(x: number | Vector3Df, y?: number, z?: number): Matrix4x4f {
         if (x instanceof Vector3Df) return this.translation(x.x(), x.y(), x.z());
         return Matrix4x4f.fromD(this.d.translation(f(x), f(y!), f(z!)));
@@ -66,6 +76,9 @@ export class Matrix4x4f extends FundamentalEntity {
         return x instanceof Vector3Df
             ? Matrix4x4f.fromD(this.d.axisRotation(f(a), new Vector3Dd(x.x(), x.y(), x.z())))
             : Matrix4x4f.fromD(this.d.axisRotation(f(a), f(x), f(y!), f(z!)));
+    }
+    public eulerAnglesRotation(yaw: number, pitch: number, roll: number): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.eulerAnglesRotation(f(yaw), f(pitch), f(roll)));
     }
     public multiply(o: number): Matrix4x4f;
     public multiply(o: Matrix4x4f): Matrix4x4f;
@@ -86,6 +99,45 @@ export class Matrix4x4f extends FundamentalEntity {
     }
     public determinant(): number {
         return f(this.d.determinant());
+    }
+    public cofactors(): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.cofactors());
+    }
+    public exportToDoubleArrayRowOrder(): Float64Array {
+        return this.d.exportToDoubleArrayRowOrder();
+    }
+    public exportToFloatArrayRowOrder(): Float32Array {
+        return this.d.exportToFloatArrayRowOrder();
+    }
+    public exportToDoubleArrayColumnOrder(): Float64Array {
+        return this.d.exportToDoubleArrayColumnOrder();
+    }
+    public exportToFloatArrayColumnOrder(): Float32Array {
+        return this.d.exportToFloatArrayColumnOrder();
+    }
+    public exportToQuaternion(): Quaterniond {
+        return this.d.exportToQuaternion();
+    }
+    public importFromQuaternion(q: Quaterniond): Matrix4x4f {
+        return Matrix4x4f.fromD(this.d.importFromQuaternion(q));
+    }
+    public obtainEulerYawAngle(): number {
+        return f(this.d.obtainEulerYawAngle());
+    }
+    public obtainEulerPitchAngle(): number {
+        return f(this.d.obtainEulerPitchAngle());
+    }
+    public obtainEulerRollAngle(): number {
+        return f(this.d.obtainEulerRollAngle());
+    }
+    public override toString(): string {
+        return this.d.toString();
+    }
+    public equals(other: unknown): boolean {
+        return other instanceof Matrix4x4f && this.d.equals(other.d);
+    }
+    public hashCode(): number {
+        return this.d.hashCode();
     }
     public invert(): Matrix4x4f {
         return Matrix4x4f.fromD(this.d.invert());

@@ -175,6 +175,7 @@ export { SignalProcessing } from "./vsdk/toolkit/processing/SignalProcessing.js"
 export { ComputationalGeometry, ClippedLine2DResult } from "./vsdk/toolkit/processing/ComputationalGeometry.js";
 export { ImageProcessing } from "./vsdk/toolkit/processing/ImageProcessing.js";
 export { SolverPolynomialQuarticBairstow } from "./vsdk/toolkit/processing/SolverPolynomialQuarticBairstow.js";
+export { CurveModeler } from "./vsdk/toolkit/processing/CurveModeler.js";
 export type { DeterminantStrategy } from "./vsdk/toolkit/processing/linealAlgebra/DeterminantStrategy.js";
 export type { InverseStrategy } from "./vsdk/toolkit/processing/linealAlgebra/InverseStrategy.js";
 export type { LinearAlgebraBackend } from "./vsdk/toolkit/processing/linealAlgebra/LinearAlgebraBackend.js";
@@ -199,6 +200,9 @@ export { TriangleMeshGroupVoxelization } from "./vsdk/toolkit/environment/geomet
 export { FunctionalExplicitSurfaceVoxelization } from "./vsdk/toolkit/environment/geometry/geometricProcessing/FunctionalExplicitSurfaceVoxelization.js";
 export { Voxelization } from "./vsdk/toolkit/environment/geometry/geometricProcessing/Voxelization.js";
 export { MonotoneDecompositionTriangulator } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.js";
+export { PolyhedralBoundedSolidModeler } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
+export { SimpleTestGeometryLibrary } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
+export { CsgKurlanderBowlFixture } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/CsgKurlanderBowlFixture.js";
 export type { Material } from "./vsdk/toolkit/environment/material/Material.js";
 export { SimpleMaterial } from "./vsdk/toolkit/environment/material/SimpleMaterial.js";
 export { MicroFacetedMaterial, MicrofacetConfig } from "./vsdk/toolkit/environment/material/MicroFacetedMaterial.js";
@@ -263,6 +267,11 @@ export {
 } from "./vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.js";
 export { _Polygon2DContour } from "./vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.js";
 export { Polygon2D } from "./vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.js";
+export { Light } from "./vsdk/toolkit/environment/light/Light.js";
+export { AmbientLight } from "./vsdk/toolkit/environment/light/AmbientLight.js";
+export { DirectionalLight } from "./vsdk/toolkit/environment/light/DirectionalLight.js";
+export { PointLight } from "./vsdk/toolkit/environment/light/PointLight.js";
+export { SpotLight } from "./vsdk/toolkit/environment/light/SpotLight.js";
 import "./vsdk/toolkit/environment/material/RendererConfigurationBehavior.js";
 export {
     workerError,

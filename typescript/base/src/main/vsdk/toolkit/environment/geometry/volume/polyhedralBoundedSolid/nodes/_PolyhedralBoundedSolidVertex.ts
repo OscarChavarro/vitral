@@ -1,27 +1,52 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
-import { ColorRgb } from "../../../../../common/color/ColorRgb.js";
 import { Vector3Dd } from "../../../../../common/linealAlgebra/Vector3Dd.js";
-/** Minimal owner contract used while the complete solid topology is assembled. */
-export interface PolyhedralBoundedSolidVertexOwner {
-    getVerticesList(): _PolyhedralBoundedSolidVertex[];
-}
+import { ColorRgb } from "../../../../../common/color/ColorRgb.js";
+import type { PolyhedralBoundedSolid } from "../PolyhedralBoundedSolid.js";
+import type { _PolyhedralBoundedSolidHalfEdge } from "./_PolyhedralBoundedSolidHalfEdge.js";
+
 /**
- * As noted in [MANT1988].10.2.2, a vertex contains its geometric position
- * and a reference to one half-edge emanating from it.
- */
+As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidVertex` contains
+a vertex position for the geometric information of the boundary model,
+and a reference to one of the half-edges emanating from it.
+*/
 export class _PolyhedralBoundedSolidVertex extends FundamentalEntity {
-    public emanatingHalfEdge: { id: number } | null = null;
-    public debugColor = new ColorRgb(1, 0, 0);
-    public constructor(
-        public readonly parentSolid: PolyhedralBoundedSolidVertexOwner,
-        public position: Vector3Dd,
-        public id: number,
-    ) {
+    /// Defined as presented in [MANT1988].10.2.1
+    public id!: number;
+
+    /// Defined as presented in [MANT1988].10.2.1
+    public position!: Vector3Dd;
+
+    /// Defined as presented in [MANT1988].10.2.2
+    public emanatingHalfEdge!: _PolyhedralBoundedSolidHalfEdge | null;
+
+    public debugColor!: ColorRgb;
+
+    //=================================================================
+    public constructor(parentSolid: PolyhedralBoundedSolid, position: Vector3Dd, id: number) {
         super();
-        this.position = new Vector3Dd(position);
-        parentSolid.getVerticesList().push(this);
+        this.init(parentSolid, position, id);
     }
+
+    private init(parentSolid: PolyhedralBoundedSolid, position: Vector3Dd, id: number): void {
+        this.id = id;
+        this.emanatingHalfEdge = null;
+        this.position = new Vector3Dd(position);
+        parentSolid.getVerticesList().add(this);
+        this.debugColor = new ColorRgb(1, 0, 0);
+    }
+
     public override toString(): string {
-        return `vertex id ${this.id}. Position ${this.position}. ${this.emanatingHalfEdge === null ? "No associated half-edge." : `H.E. ${this.emanatingHalfEdge.id}`}`;
+        let msg: string;
+        msg = "vertex id " + this.id + ". Position " + this.position + ". ";
+        if (this.emanatingHalfEdge === null) {
+            msg = msg + "No associated half-edge.";
+        } else {
+            msg = msg + "H.E. " + this.emanatingHalfEdge.id;
+        }
+        return msg;
     }
 }

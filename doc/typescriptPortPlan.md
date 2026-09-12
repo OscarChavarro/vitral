@@ -42,11 +42,12 @@ those findings are closed.
 | 18 — Curves | Complete | 2 / 2 inventory entries | — | — |
 | 19 — Geometry elements | Complete | 6 / 6 inventory entries | — | — |
 | 20 — Concrete geometry elements | Complete | 0 / 0 applicable entries | Graph contains six obsolete duplicate package names | — |
-| 21 — Surfaces | Inventory complete, parity open | 13 / 13 inventory entries | `ParametricBiCubicPatch` and `TriangleMesh.slice` literal completion | Audit gate |
+| 21 — Surfaces | Inventory complete, parity open | 13 / 13 inventory entries | Java-derived `TriangleMesh.slice` regression and remaining bicubic audit | Audit gate |
 | 22 — Volumes and boundary representation | Inventory complete, parity open | 30 / 30 inventory entries | Java primitive/Euler B-rep construction and complete topology/validation decision graphs | Audit gate |
 | 23–24 | Complete, parity audit open | 6 / 6 inventory entries | Source-level parity corrections | Audit gate |
 | 25 — Geometric processing | In progress | Polygon clipping, voxelization, and monotone triangulation blocks only | Full B-rep/CSG operator block | 32 current-Java source files plus tests and standard gate |
-| 26–45 | Pending | 0 | — | All planned inventory entries and decision gates |
+| 26 — Lights | Inventory port complete, parity gate open | 5 / 5 symbols | Java-derived light tests and API audit | Standard phase gate |
+| 27–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
 Phase 1 gate record: `npm run verify` completed successfully after `npm ci`; TypeScript compile, packaging, tarball declaration-consumer validation, and the current test command passed. The current TypeScript test suite contains zero migrated test files and reports zero skipped tests. No Java test source has a dependency closure limited to Phase 2, so no test is eligible to migrate in this phase.
 
@@ -821,11 +822,15 @@ Phase 25.6 completion: `MonotoneDecompositionTriangulator` has the public contou
 
 Literal-parity audit (2026-09-11): `_ContourAwarePolygonTriangulator` has the same 26 methods as Java; `_Monotone` has the same 11 methods, including every `SP_*` branch and both extraction methods; and `MonotoneDecompositionTriangulator` has the same four private stages plus `triangulate`. Deterministic regressions cover a convex contour, one annular hole (with exact Java triangle ordering), two disjoint holes, an island nested inside a hole, a degenerate contour, and a concave outer contour with a hole. The broader 60-file Java/C++ testsuite fixture replication remains intentionally deferred, as requested, and is not part of the 25.6 implementation gate. Phase 25.6 is closed.
 
-Final 25.5/25.6 gate (2026-09-11): `npm run verify` completed successfully, including clean builds of `@vitral/base` and `@vitral/fs`, all 106 tests in 55 modules, package creation, and the downstream compile/package-consumption checks. `git diff --check` is clean. Phase 25.7 remains explicitly unstarted.
+Final 25.5/25.6 gate (2026-09-11): `npm run verify` completed successfully, including clean builds of `@vitral/base` and `@vitral/fs`, all 106 tests in 55 modules, package creation, and the downstream compile/package-consumption checks. `git diff --check` is clean. Phase 25.7 is active. The shared operator now has Java's complete method inventory; the Mantyla splitter (including its two Java-named helper classes), modeler wrapper, sector/sector and sector/face records, and profile-difference fallback are ported. Sixteen Java production source files remain absent, concentrated in the boolean classification/intersection/connect/finish pipeline, the remaining structural fallbacks, and fixtures.
 
-### Phase 25.7 hold — 2026-09-10
+### Phase 25.7 execution start — 2026-09-11
 
-Do not begin the B-rep/CSG operator sub-block in this session. The active scope ends after successful gates for 25.5 (trapezoidal map) and 25.6 (monotone extraction, public triangulator, and Java/C++ polygon-with-hole parity regressions).
+The B-rep/CSG operator sub-block is now active. Migration proceeds from the
+dependency leaves upward: the curve-build state and profile-difference
+fallback specification are ported first; the operator base and its complete
+topology services must precede boolean classifiers, intersectors, finishers,
+and public set operations. No placeholder base class is allowed.
 
 Class inventory:
 
@@ -980,7 +985,82 @@ vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOper
 vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators._SetOperationTrace
 ```
 
-Exit: satisfy the standard phase gate before starting Phase 26.
+### Phase 25.7 closure — 2026-09-12
+
+Every Java class of the inventory above is ported. The migration order was:
+sector-classification records, geometric predicate processor, intersector and
+intersection-curve builder, vertex/vertex and vertex/face classifiers, set
+classifier, non-intersecting classifier (with `_PreflightCache`), null-edges
+connector (with `ConnectResult` and `NullEdgePair`), finisher, offset-cylinder
+fallback, `_PolyhedralBoundedSolidSetOperator` (with `DebugSolidExporter` and
+`SeparateEdgeSequenceResult`), the `PolyhedralBoundedSolidModeler.setOp`
+wrappers (recording `PolyhedralBoundedSolidStatistics.recordSetOpCall`),
+`vsdk.toolkit.processing.CurveModeler`, `SimpleTestGeometryLibrary` and
+`CsgKurlanderBowlFixture`.
+
+Two earlier-phase classes were re-ported to literal form because the boolean
+pipeline depends on them: `InfinitePlane` (Java's one-argument
+`doIntersectionFirstHit(Ray)` and the negated-`t` `doIntersectionWithNegative`)
+and the sector/sector and sector/face classification records. The
+`java.lang.Math.round` port was corrected to Java's tie-towards-positive-infinity
+contract.
+
+Runtime boundaries introduced here are documented in
+`doc/typescriptParityAudit.md`: no JVM system properties (`System.getProperty`
+and the base `_PlatformProperties` adapter answer `null`), no Java
+serialization (a node-by-node `deepCloneSolid` adapter), no
+`System.identityHashCode` (a `WeakMap` identity table), and no filesystem in
+the base package (`debugSolid` delegates to the `DebugSolidExporter`).
+
+Parity verification: a Java reference driver and its Node twin print the full
+`PolyhedralBoundedSolid.toString()` dumps for MANT1986_2, MANT1988_15_1 and
+MANT1988_3 under UNION/INTERSECTION/SUBTRACT plus APPE1967_1; the 1,388-line
+outputs are byte-identical.
+
+Test migration (rule 9: only Java sources, once their production dependencies
+exist). All 24 Java CSG test sources were translated in this phase:
+`IntersectorWeldTest`, `IntersectorParametricOrderingTest`,
+`IntersectionCurveBuilderTest`, `VertexVertexEndpointRecoveryTest`,
+`PolyhedralBoundedSolidPreflightTest`, `SetOpConnectScanJoinTest`,
+`SetOpConnectNoLooseInvariantTest`, `SetOpFinishInvariantsTest`,
+`PolyhedralBoundedSolidStrictSetOpTest`, `VertexFaceClassifierCoplanarTest`,
+`SectoroverlapTraceDiagnosticTest`,
+`PolyhedralBoundedSolidSetOperatorCoplanarPredicateTest`,
+`PolyhedralBoundedSolidSetOperatorTest`,
+`PolyhedralBoundedSolidSplitterMantylaRegressionTest`,
+`AlgebraicIdentityRegressionTest`, `Stage6FaceSubdivisionDiagnosticTest`,
+`KurlanderBowlStarInvariantTest`, `KurlanderBowlMotifSweepRegressionTest`,
+`CsgKurlanderBowlFirstStarRegressionTest`,
+`CsgKurlanderBowlAllMotifsRegressionTest`,
+`CsgMoonCylinderDifferenceDegeneracyTest`,
+`BooleansFromReferenceObjectPairsTest`, `KurlanderMotif4OperationMatrixTest` and
+`StepperMotorGuideStrictValidationTest`, together with the Java test fixtures
+`PolyhedralBoundedSolidTestFixtures`, `CsgSampleCorpus`,
+`CsgSampleCorpusFixtures` and `StepperMotorGuideCsgFixture`. The ten Java
+tests of `environment/geometry/volume/polyhedralBoundedSolid` (Euler operators,
+validators, predicates, numeric policy, topology summary, kimrh/mikrh,
+quantitative invisibility and the QI scan) were migrated in the same pass.
+`Mant1988Section15_2UnionDiagnostic` is deliberately not migrated: it has zero
+`@Test` methods and, run against the current Java kernel, fails with
+`NoSuchMethodException` on members deleted by Stage 7 R5.
+
+Java `@Disabled` tests are preserved as skipped tests with the Java rationale
+quoted, and Java's own baselines (reference matrix, motif summaries, sweep
+counts, curve reports) are asserted unchanged.
+
+Phase 25.7 gate record: `npm run verify` completed successfully on 2026-09-12
+(exit 0), with clean strict builds of `@vitral/base` and `@vitral/fs`, 382
+passing and 7 skipped tests in 75 modules, zero unhandled errors, and the
+package creation and downstream consumption checks passing. The seven skipped
+cases correspond one-to-one to the six Java `@Disabled` annotations after
+parameter expansion. Reaching zero unhandled errors required inserting the
+documented `yieldToEventLoop()` harness accommodation in the five spec files
+whose total run time approaches vitest's fixed 60 s worker-RPC budget
+(`KurlanderMotif4OperationMatrixTest`, `KurlanderBowlMotifSweepRegressionTest`,
+`KurlanderBowlStarInvariantTest`, `Stage6FaceSubdivisionDiagnosticTest`,
+`PredicatesQiScanTest`); the budget is per spec file, not per test.
+
+Exit: satisfied. Phase 26 may start.
 
 ### Phase 26: Lights
 
@@ -1540,7 +1620,7 @@ The port is complete only when all of the following are true:
 | 22 | Volumes and boundary representation | Complete — 30 / 30 symbols; Java B-rep parity review and standard gate passed |
 | 23 | Backgrounds | Complete — 4 / 4 symbols; standard gate passed |
 | 24 | Cameras | Complete — 2 / 2 symbols; parity review and standard gate passed |
-| 25 | Geometric processing | Pending |
+| 25 | Geometric processing | Complete — phases 25.2–25.7 closed with parity gates passed. The full Java CSG operator inventory (splitter, operator base, predicate processor, intersector, curve builder, vertex/vertex and vertex/face classifiers, set/non-intersecting classifiers, null-edges connector, finisher, structural fallbacks, set operator, modeler wrappers and fixtures) is ported and byte-identical to the Java reference driver on the MANT1986/MANT1988/APPE1967 dumps. The 24 Java CSG test sources plus the ten B-rep volume test sources are migrated. |
 | 26 | Lights | Pending |
 | 27 | Tone-mapping checkpoint | Pending |
 | 28 | Scene model | Pending |

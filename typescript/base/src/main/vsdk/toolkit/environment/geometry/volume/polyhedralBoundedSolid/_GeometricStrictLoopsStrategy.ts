@@ -1,32 +1,25 @@
-import { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
+import type { StringBuilder } from "../../../../../../java/lang/StringBuilder.js";
+import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
+import { PolyhedralBoundedSolidGeometricValidator } from "./PolyhedralBoundedSolidGeometricValidator.js";
 import type { ToleranceContext } from "./PolyhedralBoundedSolidNumericPolicy.js";
 import type { _PolyhedralBoundedSolidValidationStrategy } from "./_PolyhedralBoundedSolidValidationStrategy.js";
-/** Enforces non-degenerate, planar loop boundaries required by [MANT1988].10.2.1 and chapter 13 predicates. */ export class _GeometricStrictLoopsStrategy implements _PolyhedralBoundedSolidValidationStrategy<PolyhedralBoundedSolid> {
-    public validate(s: PolyhedralBoundedSolid, c: ToleranceContext, m: string[]): boolean {
-        for (const face of s.getPolygonsList()) {
-            if (face.getContainingPlane() === null) {
-                m.push(`Face [${face.id}] has no containing plane.`);
-                return false;
-            }
-            for (const loop of face.boundariesList) {
-                if (loop.halfEdgesList.size() < 3) {
-                    m.push(`Face [${face.id}] has a degenerate loop.`);
-                    return false;
-                }
-                for (let i = 0; i < loop.halfEdgesList.size(); i++)
-                    if (
-                        loop.halfEdgesList
-                            .get(i)!
-                            .startingVertex.position.subtract(
-                                loop.halfEdgesList.get((i + 1) % loop.halfEdgesList.size())!.startingVertex.position,
-                            )
-                            .length() <= c.bigEpsilon()
-                    ) {
-                        m.push(`Face [${face.id}] has a zero-length loop edge.`);
-                        return false;
-                    }
-            }
-        }
-        return true;
+
+/**
+Checks loop geometry against the planar-loop expectations of the half-edge
+representation from [MANT1988].10.2.1 and the planar polygon predicates of
+chapter [MANT1988].13.
+*/
+export class _GeometricStrictLoopsStrategy implements _PolyhedralBoundedSolidValidationStrategy {
+    /**
+    Validates that loop boundaries behave as planar polygonal contours, in the
+    sense required by [MANT1988].10.2.1 for faces and by chapter [MANT1988].13
+    for geometric point-in-polygon style tests.
+    */
+    public validate(solid: PolyhedralBoundedSolid, numericContext: ToleranceContext, msg: StringBuilder): boolean {
+        return PolyhedralBoundedSolidGeometricValidator.validateLoopsStrict(solid, numericContext, msg);
     }
 }

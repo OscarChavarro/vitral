@@ -13,6 +13,10 @@ export default tseslint.config(
         rules: {
             "max-len": ["error", { code: 200, tabWidth: 4, ignoreUrls: true }],
             "no-tabs": "error",
+            // The Java->TypeScript ports keep Java's "declare at the top of
+            // the method, assign later" idiom, so single-assignment locals
+            // are intentionally `let`.
+            "prefer-const": "off",
             "no-loss-of-precision": "off",
             "no-useless-escape": "off",
             "@typescript-eslint/no-empty-object-type": "off",

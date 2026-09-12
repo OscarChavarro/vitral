@@ -328,6 +328,176 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         );
         this.calculateNormals();
     }
+
+    /** Retains the Java clipping algorithm and its original case ordering. */
+    public slice(plane: import("./InfinitePlane.js").InfinitePlane): void {
+        if (this.vertexPositions === null || this.triangleIndices === null) return;
+        const extraVertices: number[] = [],
+            extraTriangles: number[] = [],
+            nv = this.getNumVertices();
+        for (let i = 0; i < this.triangleIndices.length / 3; i++) {
+            const i0 = this.triangleIndices[3 * i]!,
+                i1 = this.triangleIndices[3 * i + 1]!,
+                i2 = this.triangleIndices[3 * i + 2]!;
+            const p1 = new Vector3Dd(
+                this.vertexPositions[3 * i0]!,
+                this.vertexPositions[3 * i0 + 1]!,
+                this.vertexPositions[3 * i0 + 2]!,
+            );
+            const p2 = new Vector3Dd(
+                this.vertexPositions[3 * i1]!,
+                this.vertexPositions[3 * i1 + 1]!,
+                this.vertexPositions[3 * i1 + 2]!,
+            );
+            const p3 = new Vector3Dd(
+                this.vertexPositions[3 * i2]!,
+                this.vertexPositions[3 * i2 + 1]!,
+                this.vertexPositions[3 * i2 + 2]!,
+            );
+            const t1 = plane.doContainmentTestHalfSpace(p1, 1e-6),
+                t2 = plane.doContainmentTestHalfSpace(p2, 1e-6),
+                t3 = plane.doContainmentTestHalfSpace(p3, 1e-6);
+            const outside = Containment.OUTSIDE,
+                limit = Containment.LIMIT,
+                inside = Containment.INSIDE;
+            if (
+                (t1 === outside && t2 === outside && t3 === outside) ||
+                (t1 === limit && t2 === outside && t3 === outside) ||
+                (t1 === outside && t2 === limit && t3 === outside) ||
+                (t1 === outside && t2 === outside && t3 === limit) ||
+                (t1 === limit && t2 === limit && t3 === outside) ||
+                (t1 === limit && t2 === outside && t3 === limit) ||
+                (t1 === outside && t2 === limit && t3 === limit)
+            )
+                this.triangleIndices.set([-1, -1, -1], 3 * i);
+            else if (t1 === limit && t2 === limit && t3 === limit) {
+                if (p2.subtract(p1).crossProduct(p3.subtract(p1)).dotProduct(plane.getNormal()) > 0)
+                    this.triangleIndices.set([-1, -1, -1], 3 * i);
+            } else if (
+                (t1 === limit && t2 === inside && t3 === inside) ||
+                (t1 === inside && t2 === limit && t3 === inside) ||
+                (t1 === inside && t2 === inside && t3 === limit) ||
+                (t1 === limit && t2 === limit && t3 === inside) ||
+                (t1 === limit && t2 === inside && t3 === limit) ||
+                (t1 === inside && t2 === limit && t3 === limit) ||
+                (t1 === inside && t2 === inside && t3 === inside)
+            ) {
+                continue;
+            } else if (t1 === inside && t2 === outside && t3 === outside)
+                this.simpleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, p1, p2, p3);
+            else if (t2 === inside && t1 === outside && t3 === outside)
+                this.simpleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, p2, p1, p3);
+            else if (t3 === inside && t1 === outside && t2 === outside)
+                this.simpleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, p3, p1, p2);
+            else if (t1 === inside && t2 === inside && t3 === outside)
+                this.doubleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i1, p1, p2, p3);
+            else if (t1 === inside && t3 === inside && t2 === outside)
+                this.doubleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i2, p1, p3, p2);
+            else if (t2 === inside && t3 === inside && t1 === outside)
+                this.doubleTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i1, 3 * i2, p2, p3, p1);
+            else if (t1 === inside && t2 === limit && t3 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i1, p2, p1, p3);
+            else if (t2 === inside && t1 === limit && t3 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i0, p1, p2, p3);
+            else if (t2 === inside && t3 === limit && t1 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i2, p3, p2, p1);
+            else if (t3 === inside && t2 === limit && t1 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i1, p2, p3, p1);
+            else if (t3 === inside && t1 === limit && t2 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i0, p1, p3, p2);
+            else if (t1 === inside && t3 === limit && t2 === outside)
+                this.halfTriangleCut(plane, extraVertices, extraTriangles, nv, 3 * i0, 3 * i2, p3, p1, p2);
+        }
+        this.appendSliceVertices(extraVertices);
+        this.appendSliceTriangles(extraTriangles);
+        this.compact();
+        this.calculateNormals();
+    }
+    private appendSliceVertices(values: number[]): void {
+        if (this.vertexPositions !== null) {
+            const out = new Float64Array(this.vertexPositions.length + values.length);
+            out.set(this.vertexPositions);
+            out.set(values, this.vertexPositions.length);
+            this.vertexPositions = out;
+        }
+    }
+    private appendSliceTriangles(values: number[]): void {
+        if (this.triangleIndices !== null) {
+            const out = new Int32Array(this.triangleIndices.length + values.length);
+            out.set(this.triangleIndices);
+            out.set(values, this.triangleIndices.length);
+            this.triangleIndices = out;
+        }
+    }
+    private intersectionVertex(
+        plane: import("./InfinitePlane.js").InfinitePlane,
+        origin: Vector3Dd,
+        toward: Vector3Dd,
+    ): Vector3Dd | null {
+        const direction = toward.subtract(origin).normalized(),
+            hit = plane.doIntersectionWithNegative(new Ray(origin, direction));
+        if (hit === null) return null;
+        const out = new RayHit();
+        return plane.doIntersectionFirstHit(hit, out) ? out.p : null;
+    }
+    private simpleTriangleCut(
+        plane: import("./InfinitePlane.js").InfinitePlane,
+        ev: number[],
+        et: number[],
+        nv: number,
+        index: number,
+        p1: Vector3Dd,
+        p2: Vector3Dd,
+        p3: Vector3Dd,
+    ): void {
+        const a = this.intersectionVertex(plane, p1, p2),
+            b = this.intersectionVertex(plane, p1, p3);
+        et.push(index, ev.length / 3 + nv);
+        if (a === null || b === null) return;
+        ev.push(a.x(), a.y(), a.z());
+        et.push(ev.length / 3 + nv);
+        ev.push(b.x(), b.y(), b.z());
+        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+    }
+    private halfTriangleCut(
+        plane: import("./InfinitePlane.js").InfinitePlane,
+        ev: number[],
+        et: number[],
+        nv: number,
+        index: number,
+        second: number,
+        p1: Vector3Dd,
+        p2: Vector3Dd,
+        p3: Vector3Dd,
+    ): void {
+        const a = this.intersectionVertex(plane, p2, p3);
+        et.push(index, ev.length / 3 + nv);
+        if (a === null) return;
+        ev.push(a.x(), a.y(), a.z());
+        et.push(second);
+        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+    }
+    private doubleTriangleCut(
+        plane: import("./InfinitePlane.js").InfinitePlane,
+        ev: number[],
+        et: number[],
+        nv: number,
+        index: number,
+        second: number,
+        p1: Vector3Dd,
+        p2: Vector3Dd,
+        p3: Vector3Dd,
+    ): void {
+        const a = this.intersectionVertex(plane, p3, p1),
+            b = this.intersectionVertex(plane, p3, p2);
+        et.push(this.triangleIndices![3 * index]!, ev.length / 3 + nv);
+        if (a === null || b === null) return;
+        ev.push(a.x(), a.y(), a.z());
+        et.push(ev.length / 3 + nv);
+        ev.push(b.x(), b.y(), b.z());
+        et.push(index, ev.length / 3 + nv, second);
+        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+    }
     public removeSelectedVertices(): void {
         if (this.vertexSelections === null || this.triangleIndices === null) return;
         for (let i = 0; i < this.getNumTriangles(); i++) {

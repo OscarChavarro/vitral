@@ -40,8 +40,18 @@ export class IndexedColorImageUncompressed extends Image {
     public getRawImage(): Int8Array {
         return this.data!;
     }
+    /** Java overload `putPixel(int x, int y, int val)`: clamps `val` to 0..255. */
     public putPixel(x: number, y: number, v: number): void {
         this.data![this.xSize * y + x] = byte(v);
+    }
+    /**
+    Java overload `putPixel(int x, int y, byte val)`: stores the signed byte
+    as is. TypeScript numbers cannot select an overload by the Java `byte`
+    type, so this overload has its own name.
+    */
+    public putPixelByte(x: number, y: number, v: number): void {
+        const index = this.xSize * y + x;
+        this.data![index] = v;
     }
     public override getPixel8bitGrayScale(x: number, y: number): number {
         return this.data![this.xSize * y + x]!;

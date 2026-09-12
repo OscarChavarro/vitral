@@ -50,40 +50,49 @@ export class InfinitePlane extends HalfSpace<Ray, RayHit> {
         this.c = other.c;
         this.d = other.d;
     }
-    public intersectRay(ray: Ray) {
-        const den = this.a * ray.getDirection().x() + this.b * ray.getDirection().y() + this.c * ray.getDirection().z();
-        const r =
-            Math.abs(den) < VSDK.EPSILON
-                ? null
-                : ray.withT(
-                      -(
-                          this.a * ray.getOrigin().x() +
-                          this.b * ray.getOrigin().y() +
-                          this.c * ray.getOrigin().z() +
-                          this.d
-                      ) / den,
-                  );
-        return r !== null && r.getT() >= 0 ? r : null;
-    }
-    public doIntersectionFirstHit(ray: Ray, hit: RayHit): boolean {
-        const r = this.intersectRay(ray);
-        if (r === null) return false;
-        hit.setRay(r);
-        this.doExtraInformation(r, r.getT(), hit);
+    public doIntersectionFirstHit(ray: Ray): Ray | null;
+    public doIntersectionFirstHit(ray: Ray, hit: RayHit): boolean;
+    public doIntersectionFirstHit(ray: Ray, hit?: RayHit): Ray | null | boolean {
+        if (hit === undefined) {
+            const denominator =
+                this.a * ray.getDirection().x() + this.b * ray.getDirection().y() + this.c * ray.getDirection().z();
+            if (Math.abs(denominator) < VSDK.EPSILON) return null;
+            const t =
+                -(this.a * ray.getOrigin().x() + this.b * ray.getOrigin().y() + this.c * ray.getOrigin().z() + this.d) /
+                denominator;
+
+            if (t < 0) return null;
+
+            return ray.withT(t);
+        }
+
+        const r = this.doIntersectionFirstHit(ray);
+        if (r === null) {
+            return false;
+        }
+        if (hit !== null) {
+            hit.setRay(r);
+            this.doExtraInformation(r, r.getT(), hit);
+        }
         return true;
     }
     public doIntersectionWithNegative(ray: Ray): Ray | null {
-        const den = this.a * ray.getDirection().x() + this.b * ray.getDirection().y() + this.c * ray.getDirection().z();
-        return Math.abs(den) < VSDK.EPSILON
-            ? (this.intersectRay(new Ray(ray.getOrigin(), ray.getDirection().multiply(-1))) as Ray | null)
-            : ray.withT(
-                  -(
-                      this.a * ray.getOrigin().x() +
-                      this.b * ray.getOrigin().y() +
-                      this.c * ray.getOrigin().z() +
-                      this.d
-                  ) / den,
-              );
+        const denominator =
+            this.a * ray.getDirection().x() + this.b * ray.getDirection().y() + this.c * ray.getDirection().z();
+        if (Math.abs(denominator) < VSDK.EPSILON) {
+            const r = new Ray(ray.getOrigin(), ray.getDirection().multiply(-1));
+            const hit = this.doIntersectionFirstHit(r);
+            if (hit !== null) {
+                return ray.withT(-hit.getT());
+            } else {
+                return null;
+            }
+        }
+        const t =
+            -(this.a * ray.getOrigin().x() + this.b * ray.getOrigin().y() + this.c * ray.getOrigin().z() + this.d) /
+            denominator;
+
+        return ray.withT(t);
     }
     public doContainmentTestHalfSpace(p: Vector3Dd, t: number) {
         const q = this.pointDistance(p);

@@ -4,6 +4,7 @@ import { ParametricCurve } from "../curve/ParametricCurve.js";
 import { Ray } from "../element/Ray.js";
 import { RayHit } from "../element/RayHit.js";
 import { Surface } from "./Surface.js";
+import { VSDK } from "../../../common/VSDK.js";
 
 /** Tensor-product cubic patch using the Vitral curve blending matrices. */
 export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
@@ -45,6 +46,21 @@ export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
     }
     public setType(type: number): void {
         this.type = type;
+    }
+
+    /** Prints the three geometry matrices in Java's row-oriented diagnostic format. */
+    public printGeometryMatrices(): void {
+        const x = this.Gx_MATRIX.toArrayCopy(),
+            y = this.Gy_MATRIX.toArrayCopy(),
+            z = this.Gz_MATRIX.toArrayCopy();
+        for (let row = 0; row < 4; row++) {
+            const values: string[] = [];
+            for (let column = 0; column < 4; column++)
+                values.push(
+                    `<${VSDK.formatDouble(x[row]![column]!)}, ${VSDK.formatDouble(y[row]![column]!)}, ${VSDK.formatDouble(z[row]![column]!)}>`,
+                );
+            console.log(`[ ${values.join(" | ")} ]`);
+        }
     }
 
     public evaluate(s: number, t: number): Vector3Dd;

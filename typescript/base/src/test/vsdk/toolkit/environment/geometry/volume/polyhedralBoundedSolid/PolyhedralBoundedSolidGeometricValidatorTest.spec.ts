@@ -1,38 +1,84 @@
 import { describe, expect, it } from "vitest";
+
+import { ArrayList } from "java/util/ArrayList.js";
 import { Vector3Dd } from "vsdk/toolkit/common/linealAlgebra/Vector3Dd.js";
-import { Box } from "vsdk/toolkit/environment/geometry/volume/Box.js";
 import { PolyhedralBoundedSolidGeometricValidator } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.js";
 import { PolyhedralBoundedSolidNumericPolicy } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.js";
+import type { _PolyhedralBoundedSolidFace } from "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.js";
+import { PolyhedralBoundedSolidTestFixtures } from "./PolyhedralBoundedSolidTestFixtures.js";
 
+/**
+Exercises face-planarity predicates used by the B-Rep validation layer.
+
+<p>Traceability: [MANT1988] Ch. 13.1, face equations and plane
+consistency for polyhedral faces.</p>
+ */
 describe("PolyhedralBoundedSolidGeometricValidatorTest", () => {
-    it("classifies coplanar, non-coplanar, and tolerance-close point sets", () => {
-        const coplanar = [
-                new Vector3Dd(0, 0, 0),
-                new Vector3Dd(1, 0, 0),
-                new Vector3Dd(1, 1, 0),
-                new Vector3Dd(0, 1, 0),
-            ],
-            nonCoplanar = [new Vector3Dd(), new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0), new Vector3Dd(0, 0, 1)],
-            almostCoplanar = [
-                new Vector3Dd(),
-                new Vector3Dd(2, 0, 0),
-                new Vector3Dd(2, 2, 1e-12),
-                new Vector3Dd(0, 2, 0),
-            ];
-        expect(PolyhedralBoundedSolidGeometricValidator.validateFacePointsAreCoplanar(coplanar)).toBe(true);
-        expect(PolyhedralBoundedSolidGeometricValidator.validateFacePointsAreCoplanar(nonCoplanar)).toBe(false);
-        expect(PolyhedralBoundedSolidGeometricValidator.validateFacePointsAreCoplanar(almostCoplanar)).toBe(true);
-    });
+    function coplanaritySamples(): [ArrayList<Vector3Dd>, boolean][] {
+        const coplanarSquare = new ArrayList<Vector3Dd>();
+        coplanarSquare.add(new Vector3Dd(0.0, 0.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(1.0, 0.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(1.0, 1.0, 0.0));
+        coplanarSquare.add(new Vector3Dd(0.0, 1.0, 0.0));
 
-    it("validates each box face through the public strict contracts", () => {
-        const solid = new Box(2, 2, 2).exportToPolyhedralBoundedSolid(),
-            context = PolyhedralBoundedSolidNumericPolicy.forSolid(solid);
-        expect(
-            solid
-                .getPolygonsList()
-                .every((face) => PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(face, context)),
-        ).toBe(true);
-        expect(PolyhedralBoundedSolidGeometricValidator.validateLoopsStrict(solid, context)).toBe(true);
-        expect(PolyhedralBoundedSolidGeometricValidator.validateFaceIntersectionsStrict(solid, context)).toBe(true);
-    });
+        const nonCoplanar = new ArrayList<Vector3Dd>();
+        nonCoplanar.add(new Vector3Dd(0.0, 0.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(1.0, 0.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(0.0, 1.0, 0.0));
+        nonCoplanar.add(new Vector3Dd(0.0, 0.0, 1.0));
+
+        const almostCoplanar = new ArrayList<Vector3Dd>();
+        almostCoplanar.add(new Vector3Dd(0.0, 0.0, 0.0));
+        almostCoplanar.add(new Vector3Dd(2.0, 0.0, 0.0));
+        almostCoplanar.add(new Vector3Dd(2.0, 2.0, 1.0e-12));
+        almostCoplanar.add(new Vector3Dd(0.0, 2.0, 0.0));
+
+        return [
+            [coplanarSquare, true],
+            [nonCoplanar, false],
+            [almostCoplanar, true],
+        ];
+    }
+
+    function fixtureFaces(): _PolyhedralBoundedSolidFace[] {
+        const solid = PolyhedralBoundedSolidTestFixtures.createBoxSolid(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+
+        const faces: _PolyhedralBoundedSolidFace[] = [];
+        let i: number;
+        for (i = 0; i < solid.getPolygonsList().size(); i++) {
+            faces.push(solid.getPolygonsList().get(i)!);
+        }
+        return faces;
+    }
+
+    it.each(coplanaritySamples())(
+        "given_pointsSet_when_validateFacePointsAreCoplanar_then_matchesExpected",
+        (points: ArrayList<Vector3Dd>, expected: boolean) => {
+            // Arrange
+            const numericContext = PolyhedralBoundedSolidNumericPolicy.forPoints(points.toArray());
+
+            // Action
+            const result = PolyhedralBoundedSolidGeometricValidator.validateFacePointsAreCoplanar(
+                points.toArray(),
+                numericContext,
+            );
+
+            // Assert
+            expect(result).toBe(expected);
+        },
+    );
+
+    it.each(fixtureFaces())(
+        "given_fixtureFace_when_validateFaceIsPlanar_then_returnsTrue",
+        (face: _PolyhedralBoundedSolidFace) => {
+            // Arrange
+            const numericContext = PolyhedralBoundedSolidNumericPolicy.forFace(face);
+
+            // Action
+            const result = PolyhedralBoundedSolidGeometricValidator.validateFaceIsPlanar(face, numericContext);
+
+            // Assert
+            expect(result).toBe(true);
+        },
+    );
 });

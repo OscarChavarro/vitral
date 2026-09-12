@@ -450,7 +450,7 @@ export class Camera extends Entity {
             );
         }
         const ray = new Ray(this.eyePosition, inPoint.subtract(this.eyePosition));
-        const hit = viewPlane.intersectRay(ray);
+        const hit = viewPlane.doIntersectionFirstHit(ray);
         if (hit === null || ray.getDirection().length() === 0) return null;
         projected = hit.getOrigin().add(hit.getDirection().multiply(hit.getT())).subtract(center);
         const aspect = this.viewportXSize / this.viewportYSize;

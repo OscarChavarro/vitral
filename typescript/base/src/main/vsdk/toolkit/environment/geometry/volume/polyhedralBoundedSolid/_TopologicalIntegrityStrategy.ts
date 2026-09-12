@@ -1,31 +1,28 @@
-import { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
+import type { StringBuilder } from "../../../../../../java/lang/StringBuilder.js";
+import type { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
 import type { ToleranceContext } from "./PolyhedralBoundedSolidNumericPolicy.js";
 import type { _PolyhedralBoundedSolidValidationStrategy } from "./_PolyhedralBoundedSolidValidationStrategy.js";
-/** Applies the half-edge incidence and circular-cycle checks of [MANT1988].10.2.1–10.2.2. */
-export class _TopologicalIntegrityStrategy implements _PolyhedralBoundedSolidValidationStrategy<PolyhedralBoundedSolid> {
-    public validate(solid: PolyhedralBoundedSolid, _context: ToleranceContext, message: string[]): boolean {
-        for (const face of solid.getPolygonsList())
-            for (const loop of face.boundariesList) {
-                if (loop.halfEdgesList.size() === 0 || loop.boundaryStartHalfEdge === null) {
-                    message.push("Topological integrity test failed: empty loop.");
-                    return false;
-                }
-                for (let i = 0; i < loop.halfEdgesList.size(); i++) {
-                    const edge = loop.halfEdgesList.get(i)!;
-                    if (edge.parentLoop !== loop || edge.next() === null || edge.previous() === null) {
-                        message.push("Topological integrity test failed: broken half-edge cycle.");
-                        return false;
-                    }
-                    if (
-                        edge.parentEdge !== null &&
-                        edge.parentEdge.leftHalf !== edge &&
-                        edge.parentEdge.rightHalf !== edge
-                    ) {
-                        message.push("Topological integrity test failed: edge incidence mismatch.");
-                        return false;
-                    }
-                }
-            }
+import { _PolyhedralBoundedSolidTopologicalValidator } from "./_PolyhedralBoundedSolidTopologicalValidator.js";
+
+/**
+Applies topological consistency checks for the half-edge data structure of
+[MANT1988].10.2.1 and [MANT1988].10.2.2.
+*/
+export class _TopologicalIntegrityStrategy implements _PolyhedralBoundedSolidValidationStrategy {
+    /**
+    Validates the basic incidence and cycle properties assumed by the half-edge
+    representation in [MANT1988].10.2.1 and [MANT1988].10.2.2.
+    */
+    public validate(solid: PolyhedralBoundedSolid, _numericContext: ToleranceContext, msg: StringBuilder): boolean {
+        _PolyhedralBoundedSolidTopologicalValidator.remakeEmanatingHalfedgesReferences(solid);
+        if (!_PolyhedralBoundedSolidTopologicalValidator.validateTopologicalIntegrity(solid)) {
+            msg.append("  - Topological integrity test failed.\n");
+            return false;
+        }
         return true;
     }
 }

@@ -1,28 +1,87 @@
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+
 import { FundamentalEntity } from "../../../../../common/FundamentalEntity.js";
 import { ColorRgb } from "../../../../../common/color/ColorRgb.js";
+import type { PolyhedralBoundedSolid } from "../PolyhedralBoundedSolid.js";
 import type { _PolyhedralBoundedSolidHalfEdge } from "./_PolyhedralBoundedSolidHalfEdge.js";
-/** Owner protocol retained to avoid creating topology nodes outside their solid. */
-export interface PolyhedralBoundedSolidEdgeOwner {
-    getEdgesList(): _PolyhedralBoundedSolidEdge[];
-}
-/** Face-to-face identification of the two half-edge representations of a line segment ([MANT1988].10.2.2). */
+
+/**
+As noted in [MANT1988].10.2.2, a `_PolyhedralBoundedSolidEdge` makes a
+face-to-face relationship representing the identification of the line
+segments between faces.
+
+Note that in the sake of simplify and efficiency current programming
+implementation this class exhibit public access attributes. It is important
+to note that those attributes will only be accessed directly from related
+classes in the same package
+(vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.nodes) and
+from methods in the `PolyhedralBoundedSolid` class, and that they should
+not be used from outer classes.
+*/
 export class _PolyhedralBoundedSolidEdge extends FundamentalEntity {
+    /// Reference to `right` half edge, as defined in [MANT1988].10.2.2.
+    /// Note that half edge in this side is considered positively oriented.
+    public rightHalf!: _PolyhedralBoundedSolidHalfEdge | null;
+
+    /// Reference to `right` half edge, as defined in [MANT1988].10.2.2.
+    /// Note that half edge in this side is considered negatively oriented.
+    public leftHalf!: _PolyhedralBoundedSolidHalfEdge | null;
+
+    //
+    public id!: number;
+    public debugColor!: ColorRgb;
     private static currentId = 1;
-    public rightHalf: _PolyhedralBoundedSolidHalfEdge | null = null;
-    public leftHalf: _PolyhedralBoundedSolidHalfEdge | null = null;
-    public id = _PolyhedralBoundedSolidEdge.currentId++;
-    public debugColor = new ColorRgb(1, 1, 1);
-    public constructor(parentSolid: PolyhedralBoundedSolidEdgeOwner) {
+
+    //=================================================================
+    public constructor(parentSolid: PolyhedralBoundedSolid) {
         super();
-        parentSolid.getEdgesList().push(this);
+        this.init(parentSolid);
     }
+
+    private init(parentSolid: PolyhedralBoundedSolid): void {
+        parentSolid.getEdgesList().add(this);
+        this.rightHalf = null;
+        this.leftHalf = null;
+
+        this.id = _PolyhedralBoundedSolidEdge.currentId;
+        _PolyhedralBoundedSolidEdge.currentId++;
+
+        this.debugColor = new ColorRgb(1, 1, 1);
+    }
+
     public getEndingVertexId(): number {
-        return this.leftHalf?.startingVertex.id ?? -1;
+        if (this.leftHalf === null) {
+            return -1;
+        }
+        return this.leftHalf.startingVertex.id;
     }
+
     public getStartingVertexId(): number {
-        return this.rightHalf?.startingVertex.id ?? -1;
+        if (this.rightHalf === null) {
+            return -1;
+        }
+        return this.rightHalf.startingVertex.id;
     }
+
     public override toString(): string {
-        return `Edge id ${this.id}. Half1: ${this.leftHalf === null ? "null." : `vertex ${this.leftHalf.startingVertex.id}`} / Half2: ${this.rightHalf === null ? "null." : `vertex ${this.rightHalf.startingVertex.id}`}`;
+        let msg: string;
+        msg = "Edge id " + this.id + ". Half1: ";
+        if (this.leftHalf === null) {
+            msg = msg + "null. ";
+        } else {
+            msg = msg + "vertex " + this.leftHalf.startingVertex.id;
+        }
+
+        msg = msg + " / Half2: ";
+
+        if (this.rightHalf === null) {
+            msg = msg + "null. ";
+        } else {
+            msg = msg + "vertex " + this.rightHalf.startingVertex.id;
+        }
+
+        return msg;
     }
 }

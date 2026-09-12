@@ -1,4 +1,14 @@
-import { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
+//= References:                                                             =
+//= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
+//=     Computer Science Press, 1988.                                       =
+//= [.wMANT2008] Mantyla Martti. "Personal Home Page", <<shar>> archive     =
+//=     containing the C programs from [MANT1988]. Available at             =
+//=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
+
+import { PolyhedralBoundedSolidStatistics } from "../../../../common/statistics/PolyhedralBoundedSolidStatistics.js";
+import { VSDK } from "../../../../common/VSDK.js";
+import { Logger } from "../../../../common/logging/Logger.js";
+import type { Vector3Dd } from "../../../../common/linealAlgebra/Vector3Dd.js";
 import { PolyhedralBoundedSolid } from "./PolyhedralBoundedSolid.js";
 import { _PolyhedralBoundedSolidEdge } from "./nodes/_PolyhedralBoundedSolidEdge.js";
 import { _PolyhedralBoundedSolidFace } from "./nodes/_PolyhedralBoundedSolidFace.js";
@@ -7,361 +17,1080 @@ import { _PolyhedralBoundedSolidLoop } from "./nodes/_PolyhedralBoundedSolidLoop
 import { _PolyhedralBoundedSolidVertex } from "./nodes/_PolyhedralBoundedSolidVertex.js";
 
 /**
- * Foundational Euler operators for `PolyhedralBoundedSolid`, following
- * [MANT1988] chapters 9 and 11.  They preserve the circular half-edge-list
- * invariant, so higher-level topology editing can compose them safely.
- */
+Contains the implementation of Euler operators for
+`PolyhedralBoundedSolid`, following [MANT1988] chapters 9 and 11.
+*/
 export class PolyhedralBoundedSolidEulerOperators {
+    private static readonly FACE_MESSAGE = "Face ";
+    private static readonly EDGE_MESSAGE = "Edge ";
+    private static readonly NOT_FOUND_MESSAGE = " not found.";
+    private static readonly EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE = " - * not found in face ";
+    private static readonly EDGE_NOT_FOUND_IN_FACE_MESSAGE = " not found in face ";
+    private static readonly LRINGMV_MESSAGE = "lringmv";
+    private static readonly ADDHE_MESSAGE = "addhe";
+    private static readonly DOT = ".";
+
     private constructor() {}
 
-    /** Make the one-vertex/one-face skeletal model (§9.2.2). */
-    public static mvfs(solid: PolyhedralBoundedSolid, point: Vector3Dd, vertexId: number, faceId: number): void {
-        if (
-            solid.getPolygonsList().length !== 0 ||
-            solid.getEdgesList().length !== 0 ||
-            solid.getVerticesList().length !== 0
-        )
-            throw new Error("mvfs requires an empty solid");
-        solid.setMaxVertexId(Math.max(solid.getMaxVertexId(), vertexId));
-        solid.setMaxFaceId(Math.max(solid.getMaxFaceId(), faceId));
-        const face = new _PolyhedralBoundedSolidFace(solid, faceId);
-        const loop = new _PolyhedralBoundedSolidLoop(face);
-        const vertex = new _PolyhedralBoundedSolidVertex(solid, point, vertexId);
-        const halfEdge = new _PolyhedralBoundedSolidHalfEdge(vertex, loop);
-        loop.halfEdgesList.add(halfEdge);
-        loop.boundaryStartHalfEdge = halfEdge;
-        vertex.emanatingHalfEdge = halfEdge;
-    }
-
-    /** Inverse of `mvfs`; only the skeletal model may be destroyed. */
-    public static kvfs(solid: PolyhedralBoundedSolid): void {
-        if (
-            solid.getPolygonsList().length !== 1 ||
-            solid.getEdgesList().length !== 0 ||
-            solid.getVerticesList().length !== 1
-        )
-            throw new Error("kvfs requires a skeletal solid");
-        solid.setPolygonsList([]);
-        solid.setVerticesList([]);
-        solid.setMaxVertexId(-1);
-        solid.setMaxFaceId(-1);
-    }
-
-    private static addHalfEdge(
-        edge: _PolyhedralBoundedSolidEdge,
-        vertex: _PolyhedralBoundedSolidVertex,
-        before: _PolyhedralBoundedSolidHalfEdge,
-        side: number,
-    ): _PolyhedralBoundedSolidHalfEdge {
-        const halfEdge =
-            before.parentEdge === null ? before : new _PolyhedralBoundedSolidHalfEdge(vertex, before.parentLoop);
-        if (halfEdge !== before) before.parentLoop.halfEdgesList.insertBefore(halfEdge, before);
-        halfEdge.startingVertex = vertex;
-        halfEdge.parentEdge = edge;
-        if (side === PolyhedralBoundedSolid.PLUS) edge.leftHalf = halfEdge;
-        else edge.rightHalf = halfEdge;
-        return halfEdge;
-    }
-
-    /** Low-level make-edge-vertex (§9.2.3). */
-    public static lmev(
+    private static addhe(
         solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-        vertexId: number,
-        point: Vector3Dd,
-    ): void {
-        if (first === null || second === null || first.startingVertex !== second.startingVertex)
-            throw new Error("lmev requires two half-edges starting at the same vertex");
-        solid.setMaxVertexId(Math.max(solid.getMaxVertexId(), vertexId));
-        const edge = new _PolyhedralBoundedSolidEdge(solid);
-        const oldVertex = first.startingVertex;
-        const newVertex = new _PolyhedralBoundedSolidVertex(solid, point, vertexId);
-        if (first === second) {
-            const oldHalf = this.addHalfEdge(edge, oldVertex, first, PolyhedralBoundedSolid.PLUS);
-            const newHalf = this.addHalfEdge(edge, newVertex, first, PolyhedralBoundedSolid.MINUS);
-            oldVertex.emanatingHalfEdge = oldHalf;
-            newVertex.emanatingHalfEdge = newHalf;
-            first.parentLoop.boundaryStartHalfEdge ??= first;
+        e: _PolyhedralBoundedSolidEdge | null,
+        v: _PolyhedralBoundedSolidVertex,
+        where: _PolyhedralBoundedSolidHalfEdge | null,
+        sign: number,
+    ): _PolyhedralBoundedSolidHalfEdge | null {
+        let he: _PolyhedralBoundedSolidHalfEdge;
+
+        if (where === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                PolyhedralBoundedSolidEulerOperators.ADDHE_MESSAGE,
+                "Cannot create a half-edge because the reference half-edge is null.",
+            );
+            return null;
+        }
+        if (where.parentLoop === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                PolyhedralBoundedSolidEulerOperators.ADDHE_MESSAGE,
+                "Cannot create a half-edge because the reference half-edge has no parent loop.",
+            );
+            return null;
+        }
+        if (where.parentLoop.halfEdgesList === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                PolyhedralBoundedSolidEulerOperators.ADDHE_MESSAGE,
+                "Cannot create a half-edge because the parent loop half-edge list is null.",
+            );
+            return null;
+        }
+        if (e === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                PolyhedralBoundedSolidEulerOperators.ADDHE_MESSAGE,
+                "Cannot create a half-edge because the target edge is null.",
+            );
+            return null;
+        }
+
+        if (where !== null && where.parentEdge === null) {
+            he = where;
+        } else {
+            he = new _PolyhedralBoundedSolidHalfEdge(v, where.parentLoop, solid);
+            where.parentLoop.halfEdgesList.insertBefore(he, where);
+            he.startingVertex = v;
+        }
+        he.parentEdge = e;
+        he.parentLoop = where.parentLoop;
+
+        if (sign === PolyhedralBoundedSolid.PLUS) {
+            e.leftHalf = he;
+        } else {
+            e.rightHalf = he;
+        }
+
+        return he;
+    }
+
+    //= LOW LEVEL EULER OPERATIONS ====================================
+
+    /**
+    mvfs: MakeVertexFaceSolid.
+    Operator mvfs creates a new solid representation that consist of
+    one face and one vertex with coordinates specified in `p`. This
+    operator has one single level of implementation (no "low level"
+    or "high level versions") as other operator has.
+
+    As described in sections [MANT1988].9.2.2, [MANT1988].11.3.1 and
+    [MANT1988].11.5.1; and following the structure of sample program
+    [MANT1988].11.5, this method should be used as part of every
+    PolyhedralBoundedSolid constructor process, to yield to an empty
+    skeletal boundary representation solid.
+
+    Note that all correctly built solids are the result of a series of
+    Euler operations over this generated skeleton, the "single skeletal
+    plane model" ([MANT1988].9.2.2). The "solid" created here may not
+    satisfy the intuitive notion of a solid object. Nevertheless, it is
+    useful as the initial state of creating a boundary model with a sequence
+    of Euler operations.
+    @param solid target skeletal solid to clear.
+    @param p position for the initial vertex.
+    @param vertexId id assigned to the initial vertex.
+    @param faceId id assigned to the initial face.
+    */
+    public static mvfs(solid: PolyhedralBoundedSolid, p: Vector3Dd, vertexId: number, faceId: number): void {
+        if (vertexId > solid.getMaxVertexId()) solid.setMaxVertexId(vertexId);
+        if (faceId > solid.getMaxFaceId()) solid.setMaxFaceId(faceId);
+
+        const newFace = new _PolyhedralBoundedSolidFace(solid, faceId);
+        const newLoop = new _PolyhedralBoundedSolidLoop(newFace);
+        const newVertex = new _PolyhedralBoundedSolidVertex(solid, p, vertexId);
+        const newHalfEdge = new _PolyhedralBoundedSolidHalfEdge(newVertex, newLoop, solid);
+        newLoop.halfEdgesList.add(newHalfEdge);
+        newLoop.boundaryStartHalfEdge = newHalfEdge;
+    }
+
+    /**
+    kvfs: KillVertexFaceSolid.
+    Operator kvfs is the inverse of mvfs, and removes the contents of
+    current solid, given that it is the skeletal solid. The solid must
+    consist of a single face and vertex only.
+
+    As described in sections [MANT1988].9.2.2 and [MANT1988].11.5.1 method
+    can be used as part of final PolyhedralBoundedSolid destructor process,
+    starting from an empty skeletal boundary representation solid.
+
+    Note that all correctly built solids can be destroyed with a series of
+    Euler operations over yielding to the "single skeletal plane model"
+    [MANT1988].9.2.2.
+    */
+    public static kvfs(solid: PolyhedralBoundedSolid): void {
+        if (solid.getPolygonsList().size() !== 1) {
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs", "Not skeletal solid, not having exactly one loop!");
             return;
         }
-        let cursor: _PolyhedralBoundedSolidHalfEdge | null = first;
-        const visited = new Set<_PolyhedralBoundedSolidHalfEdge>();
-        while (cursor !== null && cursor !== second && !visited.has(cursor)) {
-            visited.add(cursor);
-            cursor.startingVertex = newVertex;
-            cursor = cursor.mirrorHalfEdge()?.next() ?? null;
+        if (solid.getEdgesList().size() !== 0) {
+            Logger.reportMessage(solid, VSDK.FATAL_ERROR, "kvfs", "Not skeletal solid, having some edges!");
+            return;
         }
-        if (cursor !== second) throw new Error("lmev could not traverse the vertex neighbourhood");
-        const plus = this.addHalfEdge(edge, newVertex, second, PolyhedralBoundedSolid.PLUS);
-        const minus = this.addHalfEdge(edge, oldVertex, first, PolyhedralBoundedSolid.MINUS);
-        newVertex.emanatingHalfEdge = plus;
-        oldVertex.emanatingHalfEdge = minus;
-    }
-
-    /** Low-level kill-edge-vertex (§9.2.3), the inverse of `lmev`. */
-    public static lkev(
-        solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-    ): void {
-        if (
-            first === null ||
-            second === null ||
-            first === second ||
-            first.parentEdge === null ||
-            first.parentEdge !== second.parentEdge
-        )
-            throw new Error("lkev requires distinct mates of the same edge");
-        const edge = first.parentEdge,
-            removed = first.startingVertex,
-            survivor = second.startingVertex;
-        for (const face of solid.getPolygonsList())
-            for (const loop of face.boundariesList)
-                for (let index = 0; index < loop.halfEdgesList.size(); index++) {
-                    const halfEdge = loop.halfEdgesList.get(index)!;
-                    if (halfEdge.startingVertex === removed) halfEdge.startingVertex = survivor;
-                }
-        const firstLoop = first.parentLoop,
-            secondLoop = second.parentLoop;
-        firstLoop.unlistHalfEdge(first);
-        secondLoop.unlistHalfEdge(second);
-        solid.setEdgesList(solid.getEdgesList().filter((candidate) => candidate !== edge));
-        solid.setVerticesList(solid.getVerticesList().filter((vertex) => vertex !== removed));
-        if (secondLoop.halfEdgesList.size() === 0) {
-            second.parentEdge = null;
-            second.parentLoop = secondLoop;
-            secondLoop.halfEdgesList.add(second);
-            secondLoop.boundaryStartHalfEdge = second;
-        }
-        survivor.emanatingHalfEdge = secondLoop.boundaryStartHalfEdge;
-    }
-
-    /** Low-level kill-edge-face: merge the two faces separated by an edge. */
-    public static lkef(
-        solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-    ): void {
-        if (first === null || second === null || first.parentEdge === null || first.parentEdge !== second.parentEdge)
-            throw new Error("lkef requires mates of one edge");
-        if (first.parentLoop.parentFace === second.parentLoop.parentFace)
-            throw new Error("lkef requires half-edges in different faces");
-        const edge = first.parentEdge,
-            retainedLoop = first.parentLoop,
-            killedLoop = second.parentLoop,
-            killedFace = killedLoop.parentFace as _PolyhedralBoundedSolidFace,
-            pivot = first.next();
-        if (pivot === null) throw new Error("lkef found a broken retained loop");
-        const migrated = this.cycleFrom(second).slice(1);
-        retainedLoop.unlistHalfEdge(first);
-        killedLoop.unlistHalfEdge(second);
-        solid.setEdgesList(solid.getEdgesList().filter((candidate) => candidate !== edge));
-        const faceIndex = solid.getPolygonsList().indexOf(killedFace);
-        if (faceIndex >= 0) solid.getPolygonsList().splice(faceIndex, 1);
-        const loopIndex = killedFace.boundariesList.indexOf(killedLoop);
-        if (loopIndex >= 0) killedFace.boundariesList.splice(loopIndex, 1);
-        let insertionPivot = pivot;
-        for (let index = migrated.length - 1; index >= 0; index--) {
-            const halfEdge = migrated[index]!;
-            if (halfEdge === second) continue;
-            killedLoop.unlistHalfEdge(halfEdge);
-            halfEdge.parentLoop = retainedLoop;
-            retainedLoop.halfEdgesList.insertBefore(halfEdge, insertionPivot);
-            insertionPivot = halfEdge;
-        }
-        for (const loop of [...killedFace.boundariesList]) {
-            const index = killedFace.boundariesList.indexOf(loop);
-            if (index >= 0) killedFace.boundariesList.splice(index, 1);
-            loop.parentFace = retainedLoop.parentFace;
-            retainedLoop.parentFace.boundariesList.push(loop);
-        }
-        retainedLoop.boundaryStartHalfEdge = retainedLoop.halfEdgesList.get(0);
-    }
-
-    /** Low-level kill-edge-make-ring: split a loop into its two components. */
-    public static lkemr(
-        solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-    ): void {
-        if (
-            first === null ||
-            second === null ||
-            first.parentEdge === null ||
-            first.parentEdge !== second.parentEdge ||
-            first.parentLoop !== second.parentLoop
-        )
-            throw new Error("lkemr requires mates in one loop");
-        const oldLoop = first.parentLoop,
-            edge = first.parentEdge,
-            newLoop = new _PolyhedralBoundedSolidLoop(oldLoop.parentFace);
-        const migrated = this.cycleAfter(first, second);
-        for (const halfEdge of migrated) {
-            oldLoop.unlistHalfEdge(halfEdge);
-            halfEdge.parentLoop = newLoop;
-            newLoop.halfEdgesList.add(halfEdge);
-        }
-        oldLoop.unlistHalfEdge(first);
-        newLoop.unlistHalfEdge(second);
-        solid.setEdgesList(solid.getEdgesList().filter((candidate) => candidate !== edge));
-        this.ensureDegenerateLoopAnchor(oldLoop);
-        this.ensureDegenerateLoopAnchor(newLoop);
-    }
-
-    /** Low-level make-edge-kill-ring: bridge two loops belonging to one face. */
-    public static lmekr(
-        solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-    ): void {
-        if (
-            first === null ||
-            second === null ||
-            first.parentLoop === second.parentLoop ||
-            first.parentLoop.parentFace !== second.parentLoop.parentFace
-        )
-            throw new Error("lmekr requires distinct loops on one face");
-        const retained = first.parentLoop,
-            killed = second.parentLoop,
-            edge = new _PolyhedralBoundedSolidEdge(solid),
-            migrated = this.cycleFrom(second);
-        const bridgeIntoSecond = new _PolyhedralBoundedSolidHalfEdge(first.startingVertex, retained);
-        const bridgeIntoFirst = new _PolyhedralBoundedSolidHalfEdge(second.startingVertex, retained);
-        bridgeIntoSecond.parentEdge = edge;
-        bridgeIntoFirst.parentEdge = edge;
-        edge.rightHalf = bridgeIntoSecond;
-        edge.leftHalf = bridgeIntoFirst;
-        retained.halfEdgesList.insertBefore(bridgeIntoSecond, first);
-        for (const halfEdge of migrated) {
-            killed.unlistHalfEdge(halfEdge);
-            halfEdge.parentLoop = retained;
-            retained.halfEdgesList.insertBefore(halfEdge, first);
-        }
-        retained.halfEdgesList.insertBefore(bridgeIntoFirst, first);
-        const index = retained.parentFace.boundariesList.indexOf(killed);
-        if (index >= 0) retained.parentFace.boundariesList.splice(index, 1);
-        retained.boundaryStartHalfEdge = retained.halfEdgesList.get(0);
-    }
-
-    /** Move/reorder a ring while maintaining outer-loop-at-index-zero convention. */
-    public static lringmv(
-        _solid: PolyhedralBoundedSolid,
-        loop: _PolyhedralBoundedSolidLoop,
-        destination: _PolyhedralBoundedSolidFace,
-        setAsOuterLoop: boolean,
-    ): boolean {
-        if (loop === null || destination === null || loop.parentFace === null) return false;
-        const source = loop.parentFace;
-        if (source === destination) {
-            const index = destination.boundariesList.indexOf(loop);
-            if (index < 0 || (!setAsOuterLoop && destination.boundariesList.length <= 1)) return false;
-            destination.boundariesList.splice(index, 1);
-            destination.boundariesList.splice(
-                setAsOuterLoop ? 0 : Math.min(1, destination.boundariesList.length),
-                0,
-                loop,
+        if (solid.getVerticesList().size() !== 1) {
+            Logger.reportMessage(
+                solid,
+                VSDK.FATAL_ERROR,
+                "kvfs",
+                "Not skeletal solid, not having exactly one vertex !",
             );
-            return true;
+            return;
         }
-        if (source.boundariesList.length <= 1 || (!setAsOuterLoop && destination.boundariesList.length === 0))
-            return false;
-        const index = source.boundariesList.indexOf(loop);
-        if (index < 0) return false;
-        source.boundariesList.splice(index, 1);
-        loop.parentFace = destination;
-        destination.boundariesList.splice(setAsOuterLoop ? 0 : destination.boundariesList.length, 0, loop);
-        return true;
+        solid.getPolygonsList().remove(0);
+        solid.getVerticesList().remove(0);
     }
 
-    public static lkfmrh(
+    /**
+    lmev: low level make edge vertex (vertex splitting operation).
+    Operator lmev "splits" the vertex pointed at by `he1` and `he2`,
+    and adds a new vertex and new edge between the resulting two vertices.
+    The coordinates specified by `p` are assigned to the new vertex position.
+    If `he1` and `he2` are the same half-edge, the operation creates the
+    practical line-drawing strut needed for empty-loop construction, sweeps,
+    and zero-length null edges.
+
+    As described in sections [MANT1988].9.2.3, [MANT1988].11.3.2 and
+    [MANT1988].11.5.1; and following the structure of sample program
+    [MANT1988].11.6, this method has the effect of adding one new vertex
+    and one new edge to the solid model.
+    @param solid target solid instance.
+    @param he1 first incident half-edge at the split vertex.
+    @param he2 second incident half-edge at the split vertex.
+    @param vertexId id assigned to the created vertex.
+    @param p position for the created vertex.
+    */
+    public static lmev(
         solid: PolyhedralBoundedSolid,
-        destination: _PolyhedralBoundedSolidFace,
-        source: _PolyhedralBoundedSolidFace,
+        he1: _PolyhedralBoundedSolidHalfEdge | null,
+        he2: _PolyhedralBoundedSolidHalfEdge | null,
+        vertexId: number,
+        p: Vector3Dd,
     ): void {
-        if (source.boundariesList.length !== 1) throw new Error("lkfmrh source must have one loop");
-        const loop = source.boundariesList[0]!;
-        source.boundariesList.splice(0, 1);
-        loop.parentFace = destination;
-        destination.boundariesList.push(loop);
-        solid.setPolygonsList(solid.getPolygonsList().filter((face) => face !== source));
-    }
-    public static lkimrh(
-        solid: PolyhedralBoundedSolid,
-        destination: _PolyhedralBoundedSolidFace,
-        source: _PolyhedralBoundedSolidFace,
-    ): void {
-        this.lkfmrh(solid, destination, source);
-    }
-    public static lmfkrh(
-        solid: PolyhedralBoundedSolid,
-        loop: _PolyhedralBoundedSolidLoop,
-        faceId: number,
-    ): _PolyhedralBoundedSolidFace {
-        const old = loop.parentFace,
-            index = old.boundariesList.indexOf(loop);
-        if (index < 0) throw new Error("lmfkrh loop is not owned by its face");
-        old.boundariesList.splice(index, 1);
-        const face = new _PolyhedralBoundedSolidFace(solid, faceId);
-        loop.parentFace = face;
-        face.boundariesList.push(loop);
-        solid.setMaxFaceId(Math.max(solid.getMaxFaceId(), faceId));
-        return face;
-    }
-    public static lmikrh(
-        solid: PolyhedralBoundedSolid,
-        loop: _PolyhedralBoundedSolidLoop,
-        faceId: number,
-    ): _PolyhedralBoundedSolidFace {
-        return this.lmfkrh(solid, loop, faceId);
+        PolyhedralBoundedSolidStatistics.recordLmevCall();
+        if (he1 === null || he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lmev", "Calling with empty half-edge!");
+            return;
+        }
+        if (he1.startingVertex !== he2.startingVertex) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.FATAL_ERROR,
+                "lmev",
+                "Half-edges not starting at the same vertex. Not supported case!",
+            );
+            return;
+        }
+        if (he1 === he2) {
+            PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
+            PolyhedralBoundedSolidEulerOperators.insertLineDrawingEdge(solid, he1, vertexId, p);
+            return;
+        }
+        PolyhedralBoundedSolidEulerOperators.splitVertexNeighborhood(solid, he1, he2, vertexId, p);
     }
 
-    /** Low-level make-edge-face (§9.2.3): split a loop and its face in two. */
-    public static lmef(
+    private static splitVertexNeighborhood(
         solid: PolyhedralBoundedSolid,
-        first: _PolyhedralBoundedSolidHalfEdge,
-        second: _PolyhedralBoundedSolidHalfEdge,
-        faceId: number,
-    ): _PolyhedralBoundedSolidFace {
-        if (first === null || second === null || first.parentLoop !== second.parentLoop)
-            throw new Error("lmef requires half-edges in the same loop");
-        solid.setMaxFaceId(Math.max(solid.getMaxFaceId(), faceId));
-        const oldLoop = first.parentLoop;
-        const face = new _PolyhedralBoundedSolidFace(solid, faceId);
-        const loop = new _PolyhedralBoundedSolidLoop(face);
-        for (let cursor: _PolyhedralBoundedSolidHalfEdge | null = first; cursor !== second;) {
-            if (cursor === null) throw new Error("lmef found a broken loop");
-            const next = cursor.next();
-            oldLoop.unlistHalfEdge(cursor);
-            cursor.parentLoop = loop;
-            loop.halfEdgesList.add(cursor);
-            cursor = next;
+        he1: _PolyhedralBoundedSolidHalfEdge,
+        he2: _PolyhedralBoundedSolidHalfEdge,
+        vertexId: number,
+        p: Vector3Dd,
+    ): void {
+        let he: _PolyhedralBoundedSolidHalfEdge;
+
+        if (vertexId > solid.getMaxVertexId()) solid.setMaxVertexId(vertexId);
+
+        const newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
+        const newVertex = new _PolyhedralBoundedSolidVertex(he1.parentLoop.parentFace.parentSolid, p, vertexId);
+
+        //-----------------------------------------------------------------
+        he = he1;
+        while (he !== he2) {
+            he.startingVertex = newVertex;
+            he = he.mirrorHalfEdge()!.next()!;
         }
-        const edge = new _PolyhedralBoundedSolidEdge(solid);
-        const intoNew = this.addHalfEdge(
-            edge,
-            second.startingVertex,
-            loop.halfEdgesList.get(0) ?? second,
+
+        //-----------------------------------------------------------------
+        PolyhedralBoundedSolidEulerOperators.addhe(solid, newEdge, newVertex, he2, PolyhedralBoundedSolid.PLUS);
+        PolyhedralBoundedSolidEulerOperators.addhe(
+            solid,
+            newEdge,
+            he2.startingVertex,
+            he1,
             PolyhedralBoundedSolid.MINUS,
         );
-        const intoOld = this.addHalfEdge(edge, first.startingVertex, second, PolyhedralBoundedSolid.PLUS);
-        loop.boundaryStartHalfEdge = intoNew;
-        oldLoop.boundaryStartHalfEdge = intoOld;
-        return face;
+
+        //-----------------------------------------------------------------
+        newVertex.emanatingHalfEdge = he2.previous();
+        he2.startingVertex.emanatingHalfEdge = he2;
     }
 
-    public static smev(
+    private static insertLineDrawingEdge(
         solid: PolyhedralBoundedSolid,
-        faceId: number,
+        he: _PolyhedralBoundedSolidHalfEdge,
         vertexId: number,
-        newVertexId: number,
-        point: Vector3Dd,
+        p: Vector3Dd,
+    ): void {
+        if (vertexId > solid.getMaxVertexId()) solid.setMaxVertexId(vertexId);
+
+        const newEdge = new _PolyhedralBoundedSolidEdge(he.parentLoop.parentFace.parentSolid);
+        const newVertex = new _PolyhedralBoundedSolidVertex(he.parentLoop.parentFace.parentSolid, p, vertexId);
+        const oldVertex = he.startingVertex;
+
+        PolyhedralBoundedSolidEulerOperators.addhe(solid, newEdge, oldVertex, he, PolyhedralBoundedSolid.PLUS);
+        PolyhedralBoundedSolidEulerOperators.addhe(solid, newEdge, newVertex, he, PolyhedralBoundedSolid.MINUS);
+
+        newVertex.emanatingHalfEdge = he.previous();
+        oldVertex.emanatingHalfEdge = he;
+    }
+
+    /**
+    lkev: low level kill edge vertex (vertex joining operation).
+    Operator lkev is the inverse of lmev. It removes the edge pointed at
+    by `he1` and `he2`, and "joins" the two vertices `he1.startingVertex`
+    and `he2.startingVertex` which must be distinct (but can, of course,
+    correspond with geometrically identical points). Vertex
+    `he1->startingVertex` is removed.
+
+    As described in sections [MANT1988].9.2.3, [MANT1988].11.3.4 and
+    [MANT1988].11.5.1 this method has the effect of removing one vertex
+    and one edge from the solid model.
+
+    Current implementation is not explained on [MANT1988], but leaved as
+    problem [MANT1988].11.3.
+    @param solid target solid instance.
+    @param he1 first half-edge of the edge to remove.
+    @param he2 opposite half-edge of the edge to remove.
+    */
+    public static lkev(
+        solid: PolyhedralBoundedSolid,
+        he1: _PolyhedralBoundedSolidHalfEdge | null,
+        he2: _PolyhedralBoundedSolidHalfEdge | null,
+    ): void {
+        PolyhedralBoundedSolidStatistics.recordLkevCall();
+        //-----------------------------------------------------------------
+        if (he1 === null || he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lkev",
+                "Two half-edges are needed for this Euler operator two work!",
+            );
+            return;
+        }
+
+        if (he1.parentEdge !== he2.parentEdge) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lkev", "Given half-edges must lie over the same edge!");
+            return;
+        }
+
+        if (he1 === he2) {
+            PolyhedralBoundedSolidStatistics.recordHe1EqualsHe2Case();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lkev", "Given half-edges must be different!");
+            return;
+        }
+
+        //-----------------------------------------------------------------
+        // Answer borrowed from [.wMANT2008]
+        let he: _PolyhedralBoundedSolidHalfEdge;
+
+        he = he2.next()!;
+        while (he !== he1) {
+            he.startingVertex = he2.startingVertex;
+            he = he.mirrorHalfEdge()!.next()!;
+        }
+
+        const he2next = he2.next();
+        he1.parentLoop.unlistHalfEdge(he1);
+        he2.parentLoop.unlistHalfEdge(he2);
+        he2.startingVertex.emanatingHalfEdge = he2next;
+        if (he2.parentLoop.halfEdgesList.size() < 1) {
+            he2.startingVertex.emanatingHalfEdge = null;
+        }
+
+        solid.getEdgesList().locateWindowAtElem(he1.parentEdge!);
+        solid.getEdgesList().removeElemAtWindow();
+        solid.getVerticesList().locateWindowAtElem(he1.startingVertex);
+        solid.getVerticesList().removeElemAtWindow();
+
+        if (he2.parentLoop.halfEdgesList.size() <= 0) {
+            he2.parentEdge = null;
+            he2.parentLoop.halfEdgesList.add(he2);
+            he2.parentLoop.boundaryStartHalfEdge = he2;
+        }
+    }
+
+    /**
+    lkef: Low Level Kill Edge Face
+    Operator `lkef` is the inverse of `lmef`. It removes the edge of
+    `he1` and `he2`, and "joins" the two adjacent faces by merging
+    their loops. The face `he2.parentLoop.parentFace` is removed.
+    `lkef` is applicable to the halves of an edge that occurs in two
+    distinct faces. That is, it is assumed that:
+      - `he1.parentEdge` == `he2.parentEdge`
+      - `he1.parentLoop.parentFace` != `he2.parentLoop.parentFace`
+    @param solid target solid instance.
+    @param he1 first half-edge of the edge to remove.
+    @param he2 opposite half-edge of the edge to remove.
+    */
+    public static lkef(
+        solid: PolyhedralBoundedSolid,
+        he1: _PolyhedralBoundedSolidHalfEdge,
+        he2: _PolyhedralBoundedSolidHalfEdge,
+    ): void {
+        PolyhedralBoundedSolidStatistics.recordLkefCall();
+        if (he1.parentEdge !== he2.parentEdge) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.FATAL_ERROR,
+                "lkef",
+                "Given half-edges must lie over the same edge. Operation aborted.",
+            );
+            return;
+        }
+        if (he1.parentLoop.parentFace === he2.parentLoop.parentFace) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.FATAL_ERROR,
+                "lkef",
+                "Given half-edges must belong to different faces. Operation aborted.",
+            );
+            return;
+        }
+
+        let halfEdgePivot: _PolyhedralBoundedSolidHalfEdge | null;
+
+        halfEdgePivot = he1.next();
+        const edgeToBeKilled = he1.parentEdge;
+        const loopToBeKilled = he2.parentLoop;
+        const faceToBeKilled = loopToBeKilled.parentFace;
+
+        const migratedHalfEdges: _PolyhedralBoundedSolidHalfEdge[] = [];
+
+        let he: _PolyhedralBoundedSolidHalfEdge | null;
+        he = he2.next();
+        const maxTraversal = he2.parentLoop.halfEdgesList.size() + 1;
+        let traversed = 0;
+        while (he !== he2) {
+            if (he === null || traversed > maxTraversal) {
+                PolyhedralBoundedSolidStatistics.recordConsistencyWarningCase();
+                Logger.reportMessage(
+                    solid,
+                    VSDK.WARNING,
+                    "lkef",
+                    "Detected inconsistent next-chain; falling back to halfEdgesList order.",
+                );
+                migratedHalfEdges.length = 0;
+                let idx: number;
+                for (idx = 0; idx < he2.parentLoop.halfEdgesList.size(); idx++) {
+                    const candidate = he2.parentLoop.halfEdgesList.get(idx)!;
+                    if (candidate !== he2) {
+                        migratedHalfEdges.push(candidate);
+                    }
+                }
+                break;
+            }
+            migratedHalfEdges.push(he);
+            he = he.next();
+            traversed++;
+        }
+
+        he1.parentLoop.unlistHalfEdge(he1);
+        he2.parentLoop.unlistHalfEdge(he2);
+        solid.getEdgesList().locateWindowAtElem(edgeToBeKilled!);
+        solid.getEdgesList().removeElemAtWindow();
+
+        faceToBeKilled.boundariesList.locateWindowAtElem(loopToBeKilled);
+        faceToBeKilled.boundariesList.removeElemAtWindow();
+        solid.getPolygonsList().locateWindowAtElem(faceToBeKilled);
+        solid.getPolygonsList().removeElemAtWindow();
+
+        let i: number;
+        for (i = migratedHalfEdges.length - 1; i >= 0; i--) {
+            he = migratedHalfEdges[i]!;
+            he.parentLoop = he1.parentLoop;
+            he1.parentLoop.halfEdgesList.insertBefore(he, halfEdgePivot!);
+            halfEdgePivot = he;
+        }
+
+        // If the killed face had additional loops (inner rings), transfer them
+        // to the surviving face so their half-edges remain reachable.
+        while (faceToBeKilled.boundariesList.size() > 0) {
+            const orphanedLoop = faceToBeKilled.boundariesList.get(0)!;
+            orphanedLoop.parentFace = he1.parentLoop.parentFace;
+            faceToBeKilled.boundariesList.remove(0);
+            he1.parentLoop.parentFace.boundariesList.add(orphanedLoop);
+        }
+    }
+
+    /**
+    lmef: low level make edge face (face splitting operator).
+    Operator lmef adds a new edge between `he1.startingVertex` and
+    `he2.startingVertex`, and "splits" their common face into two faces
+    such that `he1` will occur in the new face `newFaceId`, and `he2`
+    remains in the old face. The new edge is oriented from
+    `he1.startingVertex` to `he2.startingVertex`.
+    Half-edges `he1` and `he2` must belong to the same loop (i.e.
+    he1.parentLoop == he2.parentLoop ). They may be equal, in which case
+    a "circular" face with just one edge is created. A pointer to the new
+    face is returned.
+
+    As described in sections [MANT1988].9.2.3, [MANT1988].11.3.3 and
+    [MANT1988].11.5.1; and following the structure of sample program
+    [MANT1988].11.7, this method is the dual to lmev. Note that creates
+    the half-edges as usual, and then swaps them.
+    @param solid target solid instance.
+    @param he1 first half-edge used to split the loop.
+    @param he2 second half-edge used to split the loop.
+    @param newFaceId id assigned to the created face.
+    @return created face after the split.
+    */
+    public static lmef(
+        solid: PolyhedralBoundedSolid,
+        he1: _PolyhedralBoundedSolidHalfEdge | null,
+        he2: _PolyhedralBoundedSolidHalfEdge | null,
+        newFaceId: number,
+    ): _PolyhedralBoundedSolidFace | null {
+        PolyhedralBoundedSolidStatistics.recordLmefCall();
+        let he: _PolyhedralBoundedSolidHalfEdge;
+
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef", "Cannot split face because first half-edge is null.");
+            return null;
+        }
+        if (he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordInvalidHalfEdgeInputCase();
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(solid, VSDK.WARNING, "lmef", "Cannot split face because second half-edge is null.");
+            return null;
+        }
+        if (he1.parentLoop === null || he2.parentLoop === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lmef",
+                "Cannot split face because one input half-edge has no parent loop.",
+            );
+            return null;
+        }
+        if (he1.startingVertex === null || he2.startingVertex === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lmef",
+                "Cannot split face because one input half-edge has null starting vertex.",
+            );
+            return null;
+        }
+
+        if (newFaceId > solid.getMaxFaceId()) solid.setMaxFaceId(newFaceId);
+
+        const newFace = new _PolyhedralBoundedSolidFace(he1.parentLoop.parentFace.parentSolid, newFaceId);
+        const oldLoop = he1.parentLoop;
+        const newLoop = new _PolyhedralBoundedSolidLoop(newFace);
+        const newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
+
+        const migratedHalfEdges: _PolyhedralBoundedSolidHalfEdge[] = [];
+
+        he = he1;
+        while (he !== he2) {
+            migratedHalfEdges.push(he);
+            he = he.next()!;
+            if (he === he1) break;
+        }
+
+        let i: number;
+        for (i = 0; i < migratedHalfEdges.length; i++) {
+            he = migratedHalfEdges[i]!;
+            he.parentLoop = newLoop;
+            oldLoop.unlistHalfEdge(he);
+            newLoop.halfEdgesList.add(he);
+        }
+
+        const nhe1 = PolyhedralBoundedSolidEulerOperators.addhe(
+            solid,
+            newEdge,
+            he2.startingVertex,
+            he1,
+            PolyhedralBoundedSolid.MINUS,
+        );
+        const nhe2 = PolyhedralBoundedSolidEulerOperators.addhe(
+            solid,
+            newEdge,
+            he1.startingVertex,
+            he2,
+            PolyhedralBoundedSolid.PLUS,
+        );
+        if (nhe1 === null || nhe2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lmef",
+                "Cannot split face because one generated half-edge is null.",
+            );
+            return null;
+        }
+
+        newLoop.boundaryStartHalfEdge = nhe1;
+        he2.parentLoop.boundaryStartHalfEdge = nhe2;
+
+        return newFace;
+    }
+
+    /**
+    lkemr: low level kill edge make ring (loop splitting operator).
+    Operator lkemr removes the edge of `he1` and `he2`, and divides their
+    common loop into two components (i.e., it creates a new "ring").  If
+    the original loop was "outer", the component of `he1.startingVertex`
+    becomes the new "outer" loop. (If this default is inappropriate, you
+    can simply swap the arguments of lkemr, or use lringmv to make the
+    desired loop "outer").  It is assumed that
+    he1.parentEdge == he2.parentEdge and
+    he1.parentLoop == he2.parentLoop.
+
+    As described in section [MANT1988].9.2.3, the operator splits a loop
+    into two new ones by removing and edge that appears twice in it. Hence,
+    the operator divides a connected bounding curve of a face into two
+    bounding curves, and has the net effect of removing one edge and adding
+    one ring to the PolyhedralBoundedSolid data structure. The special
+    cases that one or both of the resulting loops are empty are also
+    included. Note that current code follows section [MANT1988].11.3.4
+    and the structure of sample program [MANT1988].11.8.
+    @param solid target solid instance.
+    @param he1 first half-edge of the bridge edge.
+    @param he2 opposite half-edge of the bridge edge.
+    */
+    public static lkemr(
+        solid: PolyhedralBoundedSolid,
+        he1: _PolyhedralBoundedSolidHalfEdge,
+        he2: _PolyhedralBoundedSolidHalfEdge,
+    ): void {
+        PolyhedralBoundedSolidStatistics.recordLkemrCall();
+        //-----------------------------------------------------------------
+        let he3: _PolyhedralBoundedSolidHalfEdge;
+        let he4: _PolyhedralBoundedSolidHalfEdge;
+
+        const oldLoop = he1.parentLoop;
+        const newLoop = new _PolyhedralBoundedSolidLoop(oldLoop.parentFace);
+        const killedEdge = he1.parentEdge;
+
+        //-----------------------------------------------------------------
+        const migratedHalfEdges: _PolyhedralBoundedSolidHalfEdge[] = [];
+
+        he4 = he1.next()!;
+        do {
+            migratedHalfEdges.push(he4);
+            if (he4 === he2) break;
+        } while ((he4 = he4.next()!) !== he2);
+
+        //-----------------------------------------------------------------
+        let i: number;
+
+        for (i = 0; i < migratedHalfEdges.length; i++) {
+            he3 = migratedHalfEdges[i]!;
+            oldLoop.halfEdgesList.locateWindowAtElem(he3);
+            oldLoop.halfEdgesList.removeElemAtWindow();
+            newLoop.halfEdgesList.add(he3);
+            he3.parentLoop = newLoop;
+        }
+        newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
+
+        //-----------------------------------------------------------------
+        oldLoop.delhe(he1);
+        oldLoop.delhe(he2);
+
+        if (newLoop.halfEdgesList.size() <= 1) {
+            newLoop.boundaryStartHalfEdge!.parentEdge = null;
+            if (newLoop.halfEdgesList.size() <= 0) {
+                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr", "Case A Should not happen!");
+            }
+            newLoop.halfEdgesList.get(0)!.startingVertex.emanatingHalfEdge = null;
+        }
+
+        if (oldLoop.halfEdgesList.size() <= 1) {
+            oldLoop.boundaryStartHalfEdge!.parentEdge = null;
+            if (oldLoop.halfEdgesList.size() <= 0) {
+                Logger.reportMessage(solid, VSDK.FATAL_ERROR, "lkemr", "Case B Should not happen!");
+            }
+            oldLoop.halfEdgesList.get(0)!.startingVertex.emanatingHalfEdge = null;
+        }
+
+        solid.getEdgesList().locateWindowAtElem(killedEdge!);
+        solid.getEdgesList().removeElemAtWindow();
+    }
+
+    /**
+    lkfmrh: low level kill face make ring hole in same shell.
+    Operator `lkfmrh` merges two faces `face1` and `face2` by making
+    the loop of the latter a ring into the former. Face `face2` is hence
+    removed.
+    PRE: It is assumed that `face2` is simple, i.e., has just one loop.
+    This method implements the low-level operator family from exercise
+    [MANT1988].11.5, following the functional definition of section
+    [MANT1988].11.5.1 for the same-shell case.
+    @param solid target solid instance.
+    @param face1 destination face that receives the ring.
+    @param face2 source face whose loop becomes a ring.
+    */
+    public static lkfmrh(
+        solid: PolyhedralBoundedSolid,
+        face1: _PolyhedralBoundedSolidFace,
+        face2: _PolyhedralBoundedSolidFace,
+    ): void {
+        if (face2.boundariesList.size() > 1) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lkfmrh",
+                "Internal face to form new loop must have just one boundary!",
+            );
+            return;
+        }
+
+        let he: _PolyhedralBoundedSolidHalfEdge;
+        let i: number;
+
+        const oldLoop = face2.boundariesList.get(0)!;
+        const newLoop = new _PolyhedralBoundedSolidLoop(face1);
+
+        for (i = 0; i < oldLoop.halfEdgesList.size(); i++) {
+            he = oldLoop.halfEdgesList.get(i)!;
+            he.parentLoop = newLoop;
+            newLoop.halfEdgesList.add(he);
+        }
+        newLoop.boundaryStartHalfEdge = newLoop.halfEdgesList.get(0);
+
+        solid.getPolygonsList().locateWindowAtElem(face2);
+        solid.getPolygonsList().removeElemAtWindow();
+    }
+
+    /**
+    lmfkrh: low level make face kill ring hole.
+    Operator `lmfkrh` is the inverse of `lkfmrh`. It makes the loop `l`
+    the outer loop of a new face `newFaceId`. It is assumed that `l` is an
+    inner loop of its parent face.
+    This method implements the inverse operator of the low-level family from
+    exercise [MANT1988].11.5, following section [MANT1988].11.5.1.
+    @param solid target solid instance.
+    @param l inner loop to promote as outer loop of a new face.
+    @param newFaceId id assigned to the created face.
+    @return created face containing the promoted loop.
+    */
+    public static lmfkrh(
+        solid: PolyhedralBoundedSolid,
+        l: _PolyhedralBoundedSolidLoop,
+        newFaceId: number,
+    ): _PolyhedralBoundedSolidFace {
+        const newFace = new _PolyhedralBoundedSolidFace(solid, newFaceId);
+
+        if (newFaceId > solid.getMaxFaceId()) solid.setMaxFaceId(newFaceId);
+
+        l.parentFace.boundariesList.locateWindowAtElem(l);
+        l.parentFace.boundariesList.removeElemAtWindow();
+        l.parentFace = newFace;
+        newFace.boundariesList.add(l);
+
+        return newFace;
+    }
+
+    /**
+    lkimrh: low level kill inner make ring hole.
+    Naming alias for the [MANT1988].11.5 low-level operator family.
+    Current Vitral codebase uses the `lkfmrh` name for the same semantics.
+    @param solid target solid instance.
+    @param face1 destination face that receives the ring.
+    @param face2 source face whose loop becomes a ring.
+    */
+    public static lkimrh(
+        solid: PolyhedralBoundedSolid,
+        face1: _PolyhedralBoundedSolidFace,
+        face2: _PolyhedralBoundedSolidFace,
+    ): void {
+        PolyhedralBoundedSolidEulerOperators.lkfmrh(solid, face1, face2);
+    }
+
+    /**
+    lmikrh: low level make inner kill ring hole.
+    Naming alias for the [MANT1988].11.5 low-level inverse operator family.
+    Current Vitral codebase uses the `lmfkrh` name for the same semantics.
+    @param solid target solid instance.
+    @param l inner loop to promote as outer loop of a new face.
+    @param newFaceId id assigned to the created face.
+    @return created face containing the promoted loop.
+    */
+    public static lmikrh(
+        solid: PolyhedralBoundedSolid,
+        l: _PolyhedralBoundedSolidLoop,
+        newFaceId: number,
+    ): _PolyhedralBoundedSolidFace {
+        return PolyhedralBoundedSolidEulerOperators.lmfkrh(solid, l, newFaceId);
+    }
+
+    private static failLringmv(solid: PolyhedralBoundedSolid, message: string): boolean {
+        PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+        Logger.reportMessage(solid, VSDK.WARNING, PolyhedralBoundedSolidEulerOperators.LRINGMV_MESSAGE, message);
+        return false;
+    }
+
+    private static validateLringmvInput(
+        solid: PolyhedralBoundedSolid,
+        loop: _PolyhedralBoundedSolidLoop | null,
+        destinationFace: _PolyhedralBoundedSolidFace | null,
+    ): _PolyhedralBoundedSolidFace | null {
+        if (loop === null || destinationFace === null) {
+            PolyhedralBoundedSolidEulerOperators.failLringmv(solid, "Null input loop or destination face.");
+            return null;
+        }
+
+        const sourceFace = loop.parentFace;
+        if (sourceFace === null) {
+            PolyhedralBoundedSolidEulerOperators.failLringmv(solid, "Given loop does not have a parent face.");
+            return null;
+        }
+        if (sourceFace.parentSolid !== destinationFace.parentSolid) {
+            PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Loop move across different solids is not supported.",
+            );
+            return null;
+        }
+        return sourceFace;
+    }
+
+    private static reorderLoopInSameFace(
+        solid: PolyhedralBoundedSolid,
+        loop: _PolyhedralBoundedSolidLoop,
+        face: _PolyhedralBoundedSolidFace,
+        setAsOuterLoop: boolean,
     ): boolean {
-        const halfEdge = solid.findFace(faceId)?.findHalfEdge(vertexId);
-        if (halfEdge === null || halfEdge === undefined) return false;
-        this.lmev(solid, halfEdge, halfEdge, newVertexId, point);
+        if (!face.boundariesList.locateWindowAtElem(loop)) {
+            return PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Given loop was not found in its parent face boundaries.",
+            );
+        }
+        if (setAsOuterLoop) {
+            PolyhedralBoundedSolidEulerOperators.promoteLoopAsOuter(face, loop);
+            return true;
+        }
+        return PolyhedralBoundedSolidEulerOperators.demoteLoopAsInner(solid, face, loop);
+    }
+
+    private static promoteLoopAsOuter(face: _PolyhedralBoundedSolidFace, loop: _PolyhedralBoundedSolidLoop): void {
+        const numberOfLoops = face.boundariesList.size();
+        if (numberOfLoops <= 0 || face.boundariesList.get(0) === loop) {
+            return;
+        }
+        face.boundariesList.swapElements(loop, face.boundariesList.get(0)!);
+    }
+
+    private static demoteLoopAsInner(
+        solid: PolyhedralBoundedSolid,
+        face: _PolyhedralBoundedSolidFace,
+        loop: _PolyhedralBoundedSolidLoop,
+    ): boolean {
+        const numberOfLoops = face.boundariesList.size();
+        if (numberOfLoops <= 1) {
+            return PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Cannot mark the only boundary loop as inner.",
+            );
+        }
+        if (face.boundariesList.get(0) !== loop) {
+            return true;
+        }
+        face.boundariesList.swapElements(loop, face.boundariesList.get(1)!);
         return true;
     }
+
+    private static moveLoopAcrossFaces(
+        solid: PolyhedralBoundedSolid,
+        loop: _PolyhedralBoundedSolidLoop,
+        sourceFace: _PolyhedralBoundedSolidFace,
+        destinationFace: _PolyhedralBoundedSolidFace,
+        setAsOuterLoop: boolean,
+    ): boolean {
+        if (sourceFace.boundariesList.size() <= 1) {
+            return PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Cannot move the only boundary loop of a face.",
+            );
+        }
+        if (!setAsOuterLoop && destinationFace.boundariesList.size() <= 0) {
+            return PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Cannot insert an inner loop into a face without outer loop.",
+            );
+        }
+        if (!sourceFace.boundariesList.locateWindowAtElem(loop)) {
+            return PolyhedralBoundedSolidEulerOperators.failLringmv(
+                solid,
+                "Given loop was not found in source face boundaries.",
+            );
+        }
+
+        sourceFace.boundariesList.removeElemAtWindow();
+        loop.parentFace = destinationFace;
+
+        if (setAsOuterLoop) {
+            destinationFace.boundariesList.push(loop);
+        } else {
+            destinationFace.boundariesList.add(loop);
+        }
+        return true;
+    }
+
+    /**
+    Method `lringmv` moves the loop `l` from its parent face to face `toFace`.
+    If `setAsOuterLoop` is false, `l` becomes an "inner" loop of `toFace`.
+    Otherwise, `l` is positioned as the outer loop (first boundary) of
+    `toFace`.
+
+    If `l.parentFace` == `toFace`, no topological move is performed; only loop
+    ordering is adjusted to satisfy the requested inner/outer role.
+
+    Current implementation validates non-null arguments, same-solid movement,
+    source face non-emptiness after move, and that an inner loop is not added
+    to a face without an outer loop.
+
+    Note that `lringmv` is an addendum to `lmef`, and not an Euler operator.
+    It is part of the practical support required by the operator family of
+    exercise [MANT1988].11.5, and follows section [MANT1988].11.5.1.
+    @param solid target solid instance.
+    @param l loop to move or reorder.
+    @param toFace destination face.
+    @param setAsOuterLoop true to place `l` as outer loop; false for inner loop.
+    @return true if the move/reorder succeeds; false otherwise.
+    */
+    public static lringmv(
+        solid: PolyhedralBoundedSolid,
+        l: _PolyhedralBoundedSolidLoop | null,
+        toFace: _PolyhedralBoundedSolidFace | null,
+        setAsOuterLoop: boolean,
+    ): boolean {
+        PolyhedralBoundedSolidStatistics.recordLringmvCall();
+        const fromFace = PolyhedralBoundedSolidEulerOperators.validateLringmvInput(solid, l, toFace);
+        if (fromFace === null) {
+            return false;
+        }
+        if (fromFace === toFace) {
+            return PolyhedralBoundedSolidEulerOperators.reorderLoopInSameFace(solid, l!, toFace, setAsOuterLoop);
+        }
+        return PolyhedralBoundedSolidEulerOperators.moveLoopAcrossFaces(solid, l!, fromFace, toFace!, setAsOuterLoop);
+    }
+
+    /**
+    lmekr: low level make edge kill ring.
+    Operator `lmekr` is the inverse of `lkemr`. It inserts a new edge
+    between the starting vertices of `he1` and `he2`, and merges the
+    corresponding loops into one loop (i.e. removes a ring). The
+    operator assumes that:
+      - `he1.parentLoop` and `he2.parentLoop` are different, i.e.
+        `he1` and `he2` belong to two distinct loops.
+      - `he1.parentLoop.parentFace` and `he2.parentLoop.parentFace`
+        are equal, i.e. they occur in a single face.
+    Current implementation was programmed as an answer to exercise
+    [MANT1988].11.4, and follows the signature from section
+    [MANT1988].11.5.1.
+    @param solid target solid instance.
+    @param he1 half-edge on the loop to merge.
+    @param he2 half-edge on the ring to merge.
+    */
+    public static lmekr(
+        solid: PolyhedralBoundedSolid,
+        he1: _PolyhedralBoundedSolidHalfEdge,
+        he2: _PolyhedralBoundedSolidHalfEdge,
+    ): void {
+        PolyhedralBoundedSolidStatistics.recordLmekrCall();
+        //-----------------------------------------------------------------
+        if (he1.parentLoop === he2.parentLoop) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lmekr",
+                "Given half-edges are on the same loop. Operation aborted.",
+            );
+            return;
+        }
+        if (he1.parentLoop.parentFace !== he2.parentLoop.parentFace) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "lmekr",
+                "Given half-edges are not on the same face. Operation aborted.",
+            );
+            return;
+        }
+
+        //-----------------------------------------------------------------
+        let he: _PolyhedralBoundedSolidHalfEdge;
+
+        const migratedHalfEdges: _PolyhedralBoundedSolidHalfEdge[] = [];
+        const ringToKill = he2.parentLoop;
+
+        he = he2;
+        do {
+            migratedHalfEdges.push(he);
+            he = he.next()!;
+        } while (he !== he2);
+
+        //-----------------------------------------------------------------
+        let i: number;
+
+        for (i = 0; i < ringToKill.halfEdgesList.size(); i++) {
+            ringToKill.halfEdgesList.remove(i);
+        }
+        ringToKill.parentFace.boundariesList.locateWindowAtElem(ringToKill);
+        ringToKill.parentFace.boundariesList.removeElemAtWindow();
+
+        //-----------------------------------------------------------------
+        const v1 = he1.startingVertex;
+        const v2 = he2.startingVertex;
+
+        const newEdge = new _PolyhedralBoundedSolidEdge(he1.parentLoop.parentFace.parentSolid);
+
+        const heLast = PolyhedralBoundedSolidEulerOperators.addhe(
+            solid,
+            newEdge,
+            v2,
+            he1,
+            PolyhedralBoundedSolid.MINUS,
+        );
+        newEdge.rightHalf = PolyhedralBoundedSolidEulerOperators.addhe(
+            solid,
+            newEdge,
+            v1,
+            heLast,
+            PolyhedralBoundedSolid.MINUS,
+        );
+        newEdge.leftHalf = heLast;
+
+        // Alas! This rare condition of not adding a migrated half edges
+        // list of size 1 is to avoid adding an 0-length half-edge with no
+        // parent edge and no mirror edge when loop is of size 1 vertex.
+        for (i = 0; i < migratedHalfEdges.length && migratedHalfEdges.length > 1; i++) {
+            he = migratedHalfEdges[i]!;
+            he.parentLoop = he1.parentLoop;
+            he1.parentLoop.halfEdgesList.insertBefore(he, heLast!);
+        }
+    }
+
+    //= HIGH LEVEL EULER OPERATIONS ===================================
+
+    /**
+    smev: "Strut" or line-drawing "Simplified" version of mev operator.
+    See mev method for a complete description.
+    @param solid target solid instance.
+    @param f1 face id where the strut is created.
+    @param v1 start vertex id for the new strut.
+    @param v4 id assigned to the created vertex.
+    @param p position for the created vertex.
+    @return true if the operation succeeds; false otherwise.
+    */
+    public static smev(solid: PolyhedralBoundedSolid, f1: number, v1: number, v4: number, p: Vector3Dd): boolean {
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const he1 = oldFace1.findHalfEdge(v1);
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he1, he1, v4, p);
+        return true;
+    }
+
+    /**
+    mev: (high level version) make edge vertex (vertex splitting operation).
+    Operator `mev` divides the cycle of edges around the vertex `v1` so
+    that all edges from `v1` -> `v2` (inclusive) to `v1` -> `v3` (exclusive)
+    will become adjacent to a new vertex `v4`.  The vertices `v1` and `v4`
+    are joined with a new edge.  Coordinates defined in `p` are assigned
+    to `v4`.
+    Similarly to the corresponding low level operator `lmev`, various
+    special cases are possible.  Of particular use is the "line-drawing"
+    case that `f1` = `f2` and `v2` = `v3`.  In this case, a new edge to a
+    new vertex will be added within the face. We shall call such "dangling"
+    edges <I>struts</I>.  This case occurs so frequently that it is included
+    a "convenience" procedure `smev` that performs this operation.  The
+    procedure assumes that `v1` appears just once in `f1`; hence, the
+    argument `v2` can be left out.
+    @param solid target solid instance.
+    @param f1 first face id used to locate `v1 -> v2`.
+    @param f2 second face id used to locate `v1 -> v3`.
+    @param v1 shared source vertex id.
+    @param v2 target vertex id for the first half-edge.
+    @param v3 target vertex id for the second half-edge.
+    @param v4 id assigned to the created vertex.
+    @param p position for the created vertex.
+    @return true if the operation succeeds; false otherwise.
+    */
     public static mev(
         solid: PolyhedralBoundedSolid,
         f1: number,
@@ -370,28 +1099,149 @@ export class PolyhedralBoundedSolidEulerOperators {
         v2: number,
         v3: number,
         v4: number,
-        point: Vector3Dd,
+        p: Vector3Dd,
     ): boolean {
-        const first = solid.findFace(f1)?.findHalfEdge(v1, v2),
-            second = solid.findFace(f2)?.findHalfEdge(v1, v3);
-        if (first === null || first === undefined || second === null || second === undefined) return false;
-        this.lmev(solid, first, second, v4, point);
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const oldFace2 = solid.findFace(f2);
+        if (oldFace2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const he1 = oldFace1.findHalfEdge(v1, v2);
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    " - " +
+                    v2 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        const he2 = oldFace2.findHalfEdge(v1, v3);
+        if (he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mev",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    " - " +
+                    v3 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        PolyhedralBoundedSolidEulerOperators.lmev(solid, he1, he2, v4, p);
         return true;
     }
-    public static smef(
-        solid: PolyhedralBoundedSolid,
-        faceId: number,
-        firstVertex: number,
-        secondVertex: number,
-        newFaceId: number,
-    ): boolean {
-        const face = solid.findFace(faceId),
-            first = face?.findHalfEdge(firstVertex),
-            second = face?.findHalfEdge(secondVertex);
-        if (first === null || first === undefined || second === null || second === undefined) return false;
-        this.lmef(solid, first, second, newFaceId);
+
+    /**
+    smef: simplified version of mef operator.
+    See mef method for a complete description.
+    @param solid target solid instance.
+    @param f1 face id that contains both reference vertices.
+    @param v1 first vertex id used to find the first half-edge.
+    @param v3 second vertex id used to find the second half-edge.
+    @param newFaceId id assigned to the created face.
+    @return true if the operation succeeds; false otherwise.
+    */
+    public static smef(solid: PolyhedralBoundedSolid, f1: number, v1: number, v3: number, newFaceId: number): boolean {
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "smef",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const he1 = oldFace1.findHalfEdge(v1);
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "smef",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        const he2 = oldFace1.findHalfEdge(v3);
+        if (he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "smef",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v3 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_WILDCARD_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        PolyhedralBoundedSolidEulerOperators.lmef(solid, he1, he2, newFaceId);
         return true;
     }
+
+    /**
+    mef: (high level version) make edge face (face splitting operation).
+    Operator `mef` connects the vertices `v1` and `v3` of face `f1` with
+    a new edge, and creates a new face `f2`. Similarly to method `smev`,
+    there is included a convenience procedure `smef` that leaves the arguments
+    `v1` and `v4` out; that method should be applied only if `v1` and `v3`
+    are known to occur just once in the face.
+    Executes a `lmef` in half-edges v1-v2, v3-v4 in respective faces `f1`
+    and `f2`, and assigns to the new face the `newFaceId`.
+    @param solid target solid instance.
+    @param f1 first face id used to locate `v1 -> v2`.
+    @param f2 second face id used to locate `v3 -> v4`.
+    @param v1 first edge source vertex id.
+    @param v2 first edge target vertex id.
+    @param v3 second edge source vertex id.
+    @param v4 second edge target vertex id.
+    @param newFaceId id assigned to the created face.
+    @return true if the operation succeeds; false otherwise.
+    */
     public static mef(
         solid: PolyhedralBoundedSolid,
         f1: number,
@@ -402,12 +1252,83 @@ export class PolyhedralBoundedSolidEulerOperators {
         v4: number,
         newFaceId: number,
     ): boolean {
-        const first = solid.findFace(f1)?.findHalfEdge(v1, v2),
-            second = solid.findFace(f2)?.findHalfEdge(v3, v4);
-        if (first === null || first === undefined || second === null || second === undefined) return false;
-        this.lmef(solid, first, second, newFaceId);
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mef",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const oldFace2 = solid.findFace(f2);
+        if (oldFace2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mef",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const he1 = oldFace1.findHalfEdge(v1, v2);
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mef",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    " - " +
+                    v2 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        const he2 = oldFace2.findHalfEdge(v3, v4);
+        if (he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "mef",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v3 +
+                    " - " +
+                    v4 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        PolyhedralBoundedSolidEulerOperators.lmef(solid, he1, he2, newFaceId);
         return true;
     }
+
+    /**
+    kemr: (high level version) kill edge make ring (loop splitting operation).
+    Executes a `lkemr` in half-edges v1-v2, v3-v4 in respective faces `f1`
+    and `f2`.
+    @param solid target solid instance.
+    @param f1 first face id used to locate `v1 -> v2`.
+    @param f2 second face id used to locate `v3 -> v4`.
+    @param v1 first edge source vertex id.
+    @param v2 first edge target vertex id.
+    @param v3 second edge source vertex id.
+    @param v4 second edge target vertex id.
+    @return true if the operation succeeds; false otherwise.
+    */
     public static kemr(
         solid: PolyhedralBoundedSolid,
         f1: number,
@@ -417,52 +1338,113 @@ export class PolyhedralBoundedSolidEulerOperators {
         v3: number,
         v4: number,
     ): boolean {
-        const first = solid.findFace(f1)?.findHalfEdge(v1, v2),
-            second = solid.findFace(f2)?.findHalfEdge(v3, v4);
-        if (first === null || first === undefined || second === null || second === undefined) return false;
-        this.lkemr(solid, first, second);
-        return true;
-    }
-    public static kfmrh(solid: PolyhedralBoundedSolid, destinationFaceId: number, sourceFaceId: number): boolean {
-        const destination = solid.findFace(destinationFaceId),
-            source = solid.findFace(sourceFaceId);
-        if (destination === null || source === null) return false;
-        this.lkfmrh(solid, destination, source);
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kemr",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const oldFace2 = solid.findFace(f2);
+        if (oldFace2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kemr",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
+        }
+        const he1 = oldFace1.findHalfEdge(v1, v2);
+        if (he1 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kemr",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v1 +
+                    " - " +
+                    v2 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        const he2 = oldFace2.findHalfEdge(v3, v4);
+        if (he2 === null) {
+            PolyhedralBoundedSolidStatistics.recordOperationFailureCase();
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kemr",
+                PolyhedralBoundedSolidEulerOperators.EDGE_MESSAGE +
+                    v3 +
+                    " - " +
+                    v4 +
+                    PolyhedralBoundedSolidEulerOperators.EDGE_NOT_FOUND_IN_FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.DOT,
+            );
+            return false;
+        }
+        PolyhedralBoundedSolidEulerOperators.lkemr(solid, he1, he2);
         return true;
     }
 
-    private static cycleFrom(start: _PolyhedralBoundedSolidHalfEdge): _PolyhedralBoundedSolidHalfEdge[] {
-        const result: _PolyhedralBoundedSolidHalfEdge[] = [];
-        let cursor: _PolyhedralBoundedSolidHalfEdge | null = start;
-        do {
-            if (cursor === null || result.includes(cursor)) throw new Error("Broken circular half-edge list");
-            result.push(cursor);
-            cursor = cursor.next();
-        } while (cursor !== start);
-        return result;
-    }
-    private static cycleAfter(
-        start: _PolyhedralBoundedSolidHalfEdge,
-        until: _PolyhedralBoundedSolidHalfEdge,
-    ): _PolyhedralBoundedSolidHalfEdge[] {
-        const result: _PolyhedralBoundedSolidHalfEdge[] = [];
-        let cursor = start.next();
-        while (cursor !== null) {
-            result.push(cursor);
-            if (cursor === until) return result;
-            cursor = cursor.next();
-            if (cursor === start) break;
+    /**
+    kfmrh: (high level version) KillFaceMakeRingHole
+    (connected sum topological operation, global manipulation).
+    Operator `kfmrhSameShell` "merges" two faces `f1` and `f2` by making
+    the latter an interior loop of the former. Face `f2` is removed.
+    As noted in section [MANT1988].9.2.4, the name `kfmrh` is actually a
+    misnomer, because the operator does not necessarily create a "hole".
+    Actually, `kfmrh` creates a hole only if the two argument faces belong
+    to the same shell.  This method implements that case, taking `this`
+    solid as the only shell.
+    This method is the high-level counterpart used in the [MANT1988].11.5
+    operator family implementation for the same-shell case.
+    @param solid target solid instance.
+    @param f1 destination face id.
+    @param f2 source face id to be merged as ring.
+    @return true if the operation succeeds; false otherwise.
+    */
+    public static kfmrh(solid: PolyhedralBoundedSolid, f1: number, f2: number): boolean {
+        const oldFace1 = solid.findFace(f1);
+        if (oldFace1 === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kfmrh",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f1 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
         }
-        if (result[result.length - 1] !== until) throw new Error("Half-edge is not reachable in its loop");
-        return result;
-    }
-    private static ensureDegenerateLoopAnchor(loop: _PolyhedralBoundedSolidLoop): void {
-        if (loop.halfEdgesList.size() === 0) throw new Error("Euler operation produced an empty loop");
-        loop.boundaryStartHalfEdge = loop.halfEdgesList.get(0);
-        if (loop.halfEdgesList.size() === 1) {
-            const halfEdge = loop.boundaryStartHalfEdge!;
-            halfEdge.parentEdge = null;
-            halfEdge.startingVertex.emanatingHalfEdge = null;
+        const oldFace2 = solid.findFace(f2);
+        if (oldFace2 === null) {
+            Logger.reportMessage(
+                solid,
+                VSDK.WARNING,
+                "kfmrh",
+                PolyhedralBoundedSolidEulerOperators.FACE_MESSAGE +
+                    f2 +
+                    PolyhedralBoundedSolidEulerOperators.NOT_FOUND_MESSAGE,
+            );
+            return false;
         }
+        PolyhedralBoundedSolidEulerOperators.lkfmrh(solid, oldFace1, oldFace2);
+        return true;
     }
 }
