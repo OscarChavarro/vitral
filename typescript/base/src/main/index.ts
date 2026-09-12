@@ -140,8 +140,13 @@ export { RaytraceStatistics } from "./vsdk/toolkit/common/statistics/RaytraceSta
 export { RenderingStatistics } from "./vsdk/toolkit/common/statistics/RenderingStatistics.js";
 export { SolidTextureStatistics } from "./vsdk/toolkit/common/statistics/SolidTextureStatistics.js";
 export { ProgressMonitor } from "./vsdk/toolkit/gui/feedback/ProgressMonitor.js";
+export { platformPrint, platformPrintln } from "./java/lang/_PlatformConsole.js";
 export { ProgressMonitorConsole } from "./vsdk/toolkit/gui/feedback/ProgressMonitorConsole.js";
 export { ProgressMonitorConsoleLongFormat } from "./vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.js";
+export { ParallelProgressMonitorCommand } from "./vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorCommand.js";
+export { ParallelProgressMonitorEvent } from "./vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.js";
+export { ParallelProgressMonitorProducer } from "./vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.js";
+export { ParallelProgressMonitorConsumer } from "./vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorConsumer.js";
 export { ProgressMonitorInRam } from "./vsdk/toolkit/gui/feedback/ProgressMonitorInRam.js";
 export { TangibleInterfaceEvent } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.js";
 export type { TangibleInterfaceListener } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.js";
@@ -287,12 +292,32 @@ export {
     type WorkerRequest,
     type WorkerResponse,
     type WorkerSuccess,
+    type WorkerNotice,
     type WorkerTransferValue,
 } from "./java/concurrent/WorkerProtocol.js";
 
 export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
 export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
 export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
+export { TraceWorkspace } from "./vsdk/toolkit/render/TraceWorkspace.js";
+export { Shader } from "./vsdk/toolkit/render/shaders/Shader.js";
+export { CpuTextureSamplingConfig } from "./vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.js";
+export { LightingShader } from "./vsdk/toolkit/render/shaders/LightingShader.js";
+export { ConstantShader } from "./vsdk/toolkit/render/shaders/ConstantShader.js";
+export { ConstantTextureShader } from "./vsdk/toolkit/render/shaders/ConstantTextureShader.js";
+export { FlatShader } from "./vsdk/toolkit/render/shaders/FlatShader.js";
+export { FlatTexturedShader } from "./vsdk/toolkit/render/shaders/FlatTexturedShader.js";
+export { GouraudTextureShader } from "./vsdk/toolkit/render/shaders/GouraudTextureShader.js";
+export { PhongShader } from "./vsdk/toolkit/render/shaders/PhongShader.js";
+export { PhongBumpShader } from "./vsdk/toolkit/render/shaders/PhongBumpShader.js";
+export { PhongTextureShader } from "./vsdk/toolkit/render/shaders/PhongTextureShader.js";
+export { PhongTextureBumpShader } from "./vsdk/toolkit/render/shaders/PhongTextureBumpShader.js";
+export { CookTorranceShader } from "./vsdk/toolkit/render/shaders/CookTorranceShader.js";
+export { ShaderSelector } from "./vsdk/toolkit/render/shaders/ShaderSelector.js";
+export { RasterTileArea } from "./vsdk/toolkit/render/raytracing/RasterTileArea.js";
+export { RasterTileGenerationStrategy } from "./vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.js";
+export { RasterTileGenerator } from "./vsdk/toolkit/render/raytracing/RasterTileGenerator.js";
+export { SimpleRaytracer } from "./vsdk/toolkit/render/raytracing/SimpleRaytracer.js";
 export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
 export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRecognizedException.js";
 export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";

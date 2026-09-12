@@ -1,3 +1,4 @@
+import { platformPrint, platformPrintln } from "../../../../java/lang/_PlatformConsole.js";
 import { VSDK } from "../../common/VSDK.js";
 import { ProgressMonitor } from "./ProgressMonitor.js";
 
@@ -13,7 +14,7 @@ export class ProgressMonitorConsole extends ProgressMonitor {
         this.write("[ 0% ");
     }
     public end(): void {
-        this.write(" 100% ]");
+        this.writeLine(" 100% ]");
     }
     public update(minValue: number, maxValue: number, currentValue: number): void {
         if (maxValue - minValue < VSDK.EPSILON) return;
@@ -38,7 +39,17 @@ export class ProgressMonitorConsole extends ProgressMonitor {
         }
         return false;
     }
+    /**
+    `System.out.print`: Java writes the bar without a line terminator, so the
+    whole bar lands on a single console line. `console.log` would terminate
+    every fragment; `platformPrint` keeps Java's layout wherever the runtime
+    exposes a standard output stream.
+    */
     private write(text: string): void {
-        console.log(text);
+        platformPrint(text);
+    }
+    /** `System.out.println`. */
+    private writeLine(text: string): void {
+        platformPrintln(text);
     }
 }

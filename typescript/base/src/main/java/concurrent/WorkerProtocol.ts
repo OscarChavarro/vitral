@@ -31,11 +31,23 @@ export interface WorkerFailure {
     };
 }
 
-export type WorkerResponse<TResult extends WorkerTransferValue> = WorkerSuccess<TResult> | WorkerFailure;
+/**
+ * An intermediate message a running computation sends back before it finishes,
+ * used for progress reporting. Notices never settle the request.
+ */
+export interface WorkerNotice {
+    readonly id: string;
+    readonly ok: "notice";
+    readonly value: WorkerTransferValue;
+}
+
+export type WorkerResponse<TResult extends WorkerTransferValue> = WorkerSuccess<TResult> | WorkerFailure | WorkerNotice;
 
 export interface WorkerExecutionOptions {
     readonly transfer?: readonly Transferable[];
     readonly signal?: AbortSignal;
+    /** Called for every notice the computation emits while the request runs. */
+    readonly onNotice?: (notice: WorkerTransferValue) => void;
 }
 
 export interface WorkerExecutor<TInput extends WorkerTransferValue, TResult extends WorkerTransferValue> {
@@ -50,7 +62,11 @@ export interface WorkerExecutor<TInput extends WorkerTransferValue, TResult exte
  * `self.addEventListener("message", handler)` in a Web Worker entry module.
  */
 export function createWorkerMessageHandler<TInput extends WorkerTransferValue, TResult extends WorkerTransferValue>(
-    run: (input: TInput, signal: AbortSignal) => Promise<TResult> | TResult,
+    run: (
+        input: TInput,
+        signal: AbortSignal,
+        notify: (value: WorkerTransferValue) => void,
+    ) => Promise<TResult> | TResult,
     post: (response: WorkerResponse<TResult>) => void,
 ): (event: MessageEvent<WorkerRequest<TInput>>) => void {
     const controllers = new Map<string, AbortController>();
@@ -66,7 +82,10 @@ export function createWorkerMessageHandler<TInput extends WorkerTransferValue, T
         }
         const controller = new AbortController();
         controllers.set(request.id, controller);
-        void Promise.resolve(run(request.payload, controller.signal))
+        const notify = (value: WorkerTransferValue): void => {
+            if (!controller.signal.aborted) post({ id: request.id, ok: "notice", value });
+        };
+        void Promise.resolve(run(request.payload, controller.signal, notify))
             .then(
                 (value) => {
                     if (!controller.signal.aborted) post({ id: request.id, ok: true, value });

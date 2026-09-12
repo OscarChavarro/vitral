@@ -70,6 +70,7 @@
         "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsole.ts",
         "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorConsoleLongFormat.ts",
         "src/main/vsdk/toolkit/gui/feedback/ProgressMonitorInRam.ts",
+        "src/main/vsdk/toolkit/gui/feedback/parallel/**/*.ts",
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.ts",
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.ts",
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.ts",
@@ -129,6 +130,9 @@
         "src/main/vsdk/toolkit/render/RenderingElement.ts",
         "src/main/vsdk/toolkit/render/raster/Rasterizer2D.ts",
         "src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.ts",
+        "src/main/vsdk/toolkit/render/TraceWorkspace.ts",
+        "src/main/vsdk/toolkit/render/shaders/**/*.ts",
+        "src/main/vsdk/toolkit/render/raytracing/**/*.ts",
         "src/main/vsdk/toolkit/io/PersistenceElement.ts",
         "src/main/vsdk/toolkit/io/image/**/*.ts"
     ],

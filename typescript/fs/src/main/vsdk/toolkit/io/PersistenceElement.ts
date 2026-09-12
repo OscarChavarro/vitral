@@ -1,5 +1,12 @@
+/*
+Deep module specifiers rather than the `@vitral/base` barrel: this module is on
+the import path of the raytracing worker thread, and the barrel makes every
+worker compile the whole library (measured: 19.7 s versus 1.3 s to boot 72
+workers on a 72-core host).
+*/
 import * as fs from "node:fs";
-import { PersistenceElement as PersistenceElementBase, StringTokenizer } from "@vitral/base";
+import { PersistenceElement as PersistenceElementBase } from "@vitral/base/vsdk/toolkit/io/PersistenceElement";
+import { StringTokenizer } from "@vitral/base/java/util/StringTokenizer";
 import { File } from "../../../java/io/File.js";
 
 /**

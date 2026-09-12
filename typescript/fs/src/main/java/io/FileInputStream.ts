@@ -1,5 +1,11 @@
+/*
+Deep module specifiers rather than the `@vitral/base` barrel: this module is on
+the import path of the raytracing worker thread, and the barrel makes every
+worker compile the whole library (measured: 19.7 s versus 1.3 s to boot 72
+workers on a 72-core host).
+*/
 import * as fs from "node:fs";
-import { InputStream } from "@vitral/base";
+import { InputStream } from "@vitral/base/java/io/InputStream";
 import { File } from "./File.js";
 
 /** Node-only synchronous local-file input stream. */

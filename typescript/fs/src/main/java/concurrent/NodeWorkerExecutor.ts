@@ -1,18 +1,31 @@
+/*
+Deep module specifiers rather than the `@vitral/base` barrel: this module is on
+the import path of the raytracing worker thread, and the barrel makes every
+worker compile the whole library (measured: 19.7 s versus 1.3 s to boot 72
+workers on a 72-core host).
+*/
+import { Worker } from "node:worker_threads";
+
 import {
     type WorkerExecutionOptions,
     type WorkerExecutor,
     type WorkerRequest,
     type WorkerResponse,
     type WorkerTransferValue,
-} from "./WorkerProtocol.js";
+} from "@vitral/base/java/concurrent/WorkerProtocol";
 
 /**
- * A one-request-at-a-time executor over a browser Web Worker.  It deliberately
- * communicates only structured-clone values so the same request protocol can
- * be implemented by a standalone runtime without exposing browser state to
- * computation code.
- */
-export class BrowserWorkerExecutor<
+Node counterpart of `BrowserWorkerExecutor`: a one-request-at-a-time executor
+over a `node:worker_threads` worker, speaking the very same Vitral worker
+request/response protocol.
+
+Having both means a computation module written against the protocol runs
+unchanged in a browser frontend and in a standalone Node backend; only the
+executor that owns the thread differs. As in the browser version, only
+structured-clone values cross the boundary, so no runtime state leaks into the
+computation code.
+*/
+export class NodeWorkerExecutor<
     TInput extends WorkerTransferValue,
     TResult extends WorkerTransferValue,
 > implements WorkerExecutor<TInput, TResult> {
@@ -28,11 +41,16 @@ export class BrowserWorkerExecutor<
           }
         | undefined;
     private terminated = false;
+    private readonly worker: Worker;
 
-    public constructor(private readonly worker: Worker) {
-        worker.addEventListener("message", this.onMessage);
-        worker.addEventListener("error", this.onError);
-        worker.addEventListener("messageerror", this.onMessageError);
+    /**
+    @param moduleUrl the worker entry module, as a `file:` URL or absolute path.
+    */
+    public constructor(moduleUrl: string | URL) {
+        this.worker = new Worker(moduleUrl);
+        this.worker.on("message", this.onMessage);
+        this.worker.on("error", this.onError);
+        this.worker.on("messageerror", this.onMessageError);
     }
 
     public execute(input: TInput, options?: WorkerExecutionOptions): Promise<TResult> {
@@ -41,14 +59,14 @@ export class BrowserWorkerExecutor<
             return Promise.reject(new Error("This worker executor already has an active request"));
         }
         if (options?.signal?.aborted === true) {
-            return Promise.reject(new DOMException("The operation was aborted", "AbortError"));
+            return Promise.reject(new Error("The operation was aborted"));
         }
 
-        const id = globalThis.String(this.nextRequestId++);
+        const id = String(this.nextRequestId++);
         return new Promise<TResult>((resolve, reject) => {
             const abortListener = (): void => {
                 this.post({ id, kind: "cancel" });
-                this.finish(id, reject, new DOMException("The operation was aborted", "AbortError"));
+                this.finish(id, reject, new Error("The operation was aborted"));
             };
             this.activeRequest = {
                 id,
@@ -58,7 +76,7 @@ export class BrowserWorkerExecutor<
                 ...(options?.onNotice === undefined ? {} : { onNotice: options.onNotice }),
             };
             options?.signal?.addEventListener("abort", abortListener, { once: true });
-            this.post({ id, kind: "run", payload: input }, options?.transfer);
+            this.post({ id, kind: "run", payload: input });
         });
     }
 
@@ -69,14 +87,13 @@ export class BrowserWorkerExecutor<
         if (active !== undefined) {
             this.finish(active.id, active.reject, new Error("Worker terminated"));
         }
-        this.worker.removeEventListener("message", this.onMessage);
-        this.worker.removeEventListener("error", this.onError);
-        this.worker.removeEventListener("messageerror", this.onMessageError);
-        this.worker.terminate();
+        this.worker.off("message", this.onMessage);
+        this.worker.off("error", this.onError);
+        this.worker.off("messageerror", this.onMessageError);
+        void this.worker.terminate();
     }
 
-    private readonly onMessage = (event: MessageEvent<WorkerResponse<TResult>>): void => {
-        const response = event.data;
+    private readonly onMessage = (response: WorkerResponse<TResult>): void => {
         const active = this.activeRequest;
         if (active === undefined || response === null || response.id !== active.id) {
             return;
@@ -97,10 +114,10 @@ export class BrowserWorkerExecutor<
         this.finish(active.id, active.reject, error);
     };
 
-    private readonly onError = (event: ErrorEvent): void => {
+    private readonly onError = (error: Error): void => {
         const active = this.activeRequest;
         if (active !== undefined) {
-            this.finish(active.id, active.reject, event.error ?? new Error(event.message));
+            this.finish(active.id, active.reject, error);
         }
     };
 
@@ -115,12 +132,8 @@ export class BrowserWorkerExecutor<
         }
     };
 
-    private post(request: WorkerRequest<TInput>, transfer?: readonly Transferable[]): void {
-        if (transfer === undefined) {
-            this.worker.postMessage(request);
-            return;
-        }
-        this.worker.postMessage(request, [...transfer]);
+    private post(request: WorkerRequest<TInput>): void {
+        this.worker.postMessage(request);
     }
 
     private finish<T>(id: string, complete: (value: T) => void, value: T): void {

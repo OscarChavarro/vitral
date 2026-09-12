@@ -1,6 +1,12 @@
+/*
+Deep module specifiers rather than the `@vitral/base` barrel: this module is on
+the import path of the raytracing worker thread, and the barrel makes every
+worker compile the whole library (measured: 19.7 s versus 1.3 s to boot 72
+workers on a 72-core host).
+*/
 import * as fs from "node:fs";
 import * as pathModule from "node:path";
-import { JavaString } from "@vitral/base";
+import { String as JavaString } from "@vitral/base/java/lang/String";
 
 /** Node-only implementation of the local-filesystem subset of java.io.File. */
 export class File {

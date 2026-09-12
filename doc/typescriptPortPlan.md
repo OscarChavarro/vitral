@@ -195,6 +195,20 @@ Migrated so far:
     `Integer.parseInt` and `Double.parseDouble` so that malformed input fails
     the Java way, and the `(byte)` palette literals go through
     `VSDK.unsigned8BitInteger2signedByte`.
+  - `RaytracingOfflineExample` — 2026-09-12. Full 1:1 port of the Java
+    project (`RaytracerSimple`, `CommandOptionsProcessor`, `ImageExporter`,
+    `RaytracerExecutor`, `RaytracerSerialExecutor`, `RaytracerParallelExecutor`)
+    plus `run.sh`. For `etc/geometry/mitscenes/balls.ray` at 1920x1080 the
+    TypeScript program writes a PPM that is byte-for-byte identical to the Java
+    one, and prints byte-for-byte identical console output, in both the
+    single-threaded and the parallel mode; the Java serial, Java parallel,
+    TypeScript serial and TypeScript parallel images are all the same file. It
+    required the out-of-phase advances recorded under Phases 1, 12, 36, 39 and
+    40. Three Java branches are unported because raster image *import* does not
+    exist in TypeScript yet: the scene reader's `texture`, `bumpmap` and
+    `backgroundcubemap` commands, and `ImageExporter`'s `.jpg` output; each
+    raises a message naming the missing capability instead of degrading
+    silently.
 
 ## WebGL Example Programs
 
@@ -337,6 +351,39 @@ Not migrated: `MD2Example`, `MeshExample`, `PolygonClippingExample`,
 ## Concurrency and Browser Workers
 
 Do not translate Java multithreading directly to Node-only threads or to synchronous main-thread code. Any ported feature that uses concurrent execution must define a worker-compatible implementation that can run in a browser frontend using Web Workers. Keep the worker protocol and computational payloads platform-neutral, use message passing for inputs/results/errors and cancellation, and ensure that browser-visible state (DOM, UI, and other main-thread-only APIs) remains outside worker code. A backend or standalone runtime may provide an adapter for its own worker facility, but it must preserve the same worker contract rather than becoming the only implementation.
+
+Implemented — 2026-09-12. The contract lives in
+`@vitral/base` `java/concurrent/WorkerProtocol.ts` and has two executors that
+speak it: `BrowserWorkerExecutor` over a Web Worker, and `NodeWorkerExecutor`
+in `@vitral/fs` over `node:worker_threads`, with `installNodeWorkerRuntime` as
+the worker-side half (Node workers receive the bare message value where a
+browser worker receives a `MessageEvent`, so the state machine of
+`createWorkerMessageHandler` is installed over `parentPort` instead). The
+protocol gained one addition, an optional notice channel: a running computation
+may emit intermediate values through a `notify` callback and the owner observes
+them through `WorkerExecutionOptions.onNotice`, which is what carries per-row
+progress out of a render worker without settling its request. Computation
+payloads remain structured-clone values, so the same worker module runs in both
+runtimes.
+
+One packaging rule came out of measuring it: **a module that a worker loads must
+not import a package barrel**. Every worker compiles its whole module graph on
+its own. Booting one worker per core on a 72-core host took 19.7 s through the
+`@vitral/base` barrel and 1.3 s through deep module specifiers, which turned the
+parallel raytracer from three times slower than serial into four times faster.
+`@vitral/base` and `@vitral/fs` therefore publish a `"./*"` subpath export
+alongside the barrel, and the modules on a worker's import path use it; each
+such file says so at the top.
+
+Java's `ThreadLocal`, `Thread` and `ExecutorService` idioms map onto this as
+follows: a `ThreadLocal` scratch buffer becomes a per-worker module-level value,
+a `Thread` that a JVM program joins becomes an awaited promise, and a fixed
+thread pool draining a shared queue becomes the queue owner handing each
+executor its next unit of work (the queue cannot live in the worker, because
+there is no shared heap). `CooperativeFiberScheduler` is not part of this: it
+multiplexes work onto one event loop to keep a browser frame responsive and
+cannot use more than one core, so it is never the answer to a parallel-compute
+requirement.
 
 ## PersistenceElement Runtime Architecture
 
@@ -524,6 +571,22 @@ java.util.LinkedHashSet
 java.util.regex.Matcher
 java.util.regex.Pattern
 ```
+
+Literal-parity finding — 2026-09-12. `java.io.StreamTokenizer` was not a port:
+it was a 50-line regular-expression splitter with no character-type table, no
+`commentChar`, `quoteChar`, `ordinaryChar`, `wordChars`, `parseNumbers`,
+`eolIsSignificant`, `lowerCaseMode`, `slashSlash`/`slashStarComments` or
+`lineno()`, and a default syntax unrelated to the JDK's. No TypeScript module
+consumed it, so nothing depended on the approximation, but the three Java
+readers that need it (`ReaderMitScene`, `ReaderAse`, `ReaderVrml`) and
+`AlgebraicExpression` could not be ported against it. It is now a literal port
+of the JDK algorithm, character-type table, octal escapes, `peekc`/`SKIP_LF`
+lookahead and `toString` form included; only the deprecated
+`StreamTokenizer(InputStream)` constructor is left out, since the ported
+`Reader` hierarchy is the supported input. This also removes the stated cause
+of the `AlgebraicExpressionExample` divergence recorded under Offline Example
+Programs, though rewriting `AlgebraicExpression.ts` against it remains open as
+a Phase 4 finding.
 
 Exit: satisfy the standard phase gate before starting Phase 2.
 
@@ -725,6 +788,29 @@ vsdk.toolkit.gui.feedback.ProgressMonitorConsole
 vsdk.toolkit.gui.feedback.ProgressMonitorConsoleLongFormat
 vsdk.toolkit.gui.feedback.ProgressMonitorInRam
 ```
+
+Re-audit and advance — 2026-09-12. Two literal-parity defects were found and
+fixed in the already-closed console monitors: both wrote every fragment through
+`console.log`, which terminates the line, where Java uses `System.out.print`
+and deliberately builds one long bar on a single line, and
+`ProgressMonitorConsoleLongFormat.end()` dropped the trailing `\n` of the Java
+format. Both now go through `_PlatformConsole`'s `platformPrint`, which keeps
+Java's layout on any runtime that exposes a standard output stream and falls
+back to `console.log` in a browser. Verified against Java: the progress bars of
+`testsuite/OfflineExamples/RaytracingOfflineExample` are byte-for-byte
+identical to the Java program's, in both the compact and the long format.
+
+This phase's inventory is also incomplete against the current Java base, like
+the Phase 27 orphans: `vsdk.toolkit.gui.feedback.parallel` contains four
+production files that no phase lists —
+`ParallelProgressMonitorCommand`, `ParallelProgressMonitorEvent`,
+`ParallelProgressMonitorProducer` and `ParallelProgressMonitorConsumer`. All
+four are now ported 1:1 and exported through `@vitral/base`. One runtime
+boundary: Java runs the consumer on a dedicated `Thread` and blocks it with
+`Thread.sleep(50)` when the queue runs dry; JavaScript has no blocking sleep on
+its single event loop, so `run()` is `async` and awaits a 50 ms timer, and the
+owner awaits the returned promise where Java would `join()`. Event ordering and
+console output are unchanged.
 
 Exit: satisfy the standard phase gate before starting Phase 13.
 
@@ -1599,6 +1685,20 @@ vsdk.toolkit.io.geometry.stl._StlSolidValidator
 vsdk.toolkit.io.geometry.stl.StlWriter
 ```
 
+Partial advance — 2026-09-12 (out of phase order, to unblock the offline
+examples): `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and
+now `ReaderMitScene` with its `ImportContext` are ported 1:1 into `@vitral/fs`,
+which is where they belong because they resolve `java.io.File` paths.
+`EnvironmentPersistence` dispatches only its `obj` branch; the other seven
+extensions fall through and leave the scene untouched, which is what Java does
+for an extension it does not recognize, and each gets its branch back as its
+reader is ported. `ReaderMitScene`'s `texture`, `bumpmap` and
+`backgroundcubemap` commands raise a message naming the missing capability,
+because they need raster image *import*, which Phase 33 has not reached;
+`ReaderObj.obtainTextureFromFile` is the same gap and currently always takes
+Java's failure branch. The remaining 46 entries are not ported, the phase stays
+Pending, and its gate has not been run.
+
 Exit: satisfy the standard phase gate before starting Phase 37.
 
 ### Phase 37: SGL checkpoint
@@ -1711,6 +1811,21 @@ vsdk.toolkit.render.shaders.ShaderSelector
 vsdk.toolkit.render.TraceWorkspace
 ```
 
+Completed — 2026-09-12 (out of phase order, to unblock
+`testsuite/OfflineExamples/RaytracingOfflineExample`). All eighteen entries are
+ported 1:1 and exported through `@vitral/base`. `Shader.LocalShadingResult` and
+`CookTorranceShader.MicrofacetParams` are Java records, so they carry their
+generated accessors; the record's `equals`/`toString` are reproduced for
+`LocalShadingResult` and left off the module-private `_MicrofacetParams`, which
+nothing outside the shader observes. The inventory's
+`CookTorranceShader.LightDirection` has no Java source of its own: the shader
+imports `Light.LightDirection`, which Phase 26 ported. `CookTorranceShader`
+also guards on `info.t == null`, which cannot happen in the port because
+`RayHit.t` is a non-nullable field; the unreachable half is documented in
+place. The parity evidence is the example above, whose rendered image exercises
+`GouraudTextureShader` (through `LightingShader`) with ambient and point
+lights, shadow rays, and the specular term, and matches Java byte for byte.
+
 Exit: satisfy the standard phase gate before starting Phase 40.
 
 ### Phase 40: CPU rendering
@@ -1775,6 +1890,31 @@ Verified against the Java reference on 2026-09-12: the three
 `Rasterizer2DExample` programs produce images whose decoded pixels are
 identical to those of the Java build (`base` + `awt`), 0 differing pixels in
 640x480 for all three.
+
+Second partial advance — 2026-09-12 (out of phase order, to unblock
+`testsuite/OfflineExamples/RaytracingOfflineExample`): the whole ray-tracing
+family is ported 1:1 and exported through `@vitral/base` —
+`vsdk.toolkit.render.raytracing.RasterTileArea`,
+`RasterTileGenerationStrategy`, `RasterTileGenerator`, `RenderContext`,
+`SimpleRaytracer`, and the latter's `SceneObjectRenderData` and
+`SceneRenderCache`. Java's `(byte)` narrowing of the shaded colour is
+reproduced explicitly (`Math.trunc` then the low eight bits, signed) rather
+than through the clamping `VSDK.unsigned8BitInteger2signedByte`, because Java
+narrows rather than clamps; the `ThreadLocal<TraceWorkspace>` maps onto the
+ported `java.lang.ThreadLocal`, which is per-runtime and therefore per worker,
+exactly the reentrancy property the Java field provides per thread.
+`RasterTileGenerationStrategy` is a string enum so a strategy survives a
+structured-clone hop to a worker. Parity: the 1920x1080 render of
+`etc/geometry/mitscenes/balls.ray` is byte-identical to Java's, serial and
+parallel.
+
+Still not ported after this advance: `AutoStereogramGenerator`,
+`PolyhedralBoundedSolidDebugger`, the hidden-line family
+(`_AppelEdgeCache`, `_AppelEdgeSegment`, `HiddenLineRenderer` and its four
+dump records) beyond `WireframeRenderer`, and the stale
+`vsdk.toolkit.render.*` duplicates of classes that now live under
+`raster/`, `raytracing/` and `hiddenLine/`. The phase stays Pending and its
+gate has not been run.
 
 Exit: satisfy the standard phase gate before starting Phase 41.
 
@@ -1987,7 +2127,7 @@ The port is complete only when all of the following are true:
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| 1 | Java runtime compatibility | Complete |
+| 1 | Java runtime compatibility | Complete — re-audited 2026-09-12: `java.io.StreamTokenizer` was a regular-expression approximation and is now a literal JDK port; see the Phase 1 record |
 | 2 | Common entity foundation | Complete (`VSDKJ2ME` excluded for the Web target) |
 | 3 | Linear algebra | Complete |
 | 4 | Symbolic algebra | Complete — 7 / 7 symbols; gate passed |
@@ -1998,7 +2138,7 @@ The port is complete only when all of the following are true:
 | 9 | Data structures | Complete — 12 / 12 symbols; 6 / 6 parity tests; gate passed |
 | 10 | Statistics | Complete — 3 / 3 inventory symbols; 2 / 2 supplemental symbols; 3 / 3 parity tests; gate passed |
 | 11 | Command-line options checkpoint | Complete — empty authoritative group; gate passed |
-| 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
+| 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed. Re-audited 2026-09-12: two console-layout defects fixed, and the four unlisted `gui.feedback.parallel` files ported; see the Phase 12 record |
 | 13 | Tangible-interface contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
 | 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed |
 | 15 | General processing | In progress — 6 / 22 symbols |
@@ -2022,11 +2162,11 @@ The port is complete only when all of the following are true:
 | 33 | Image I/O | Pending — partial advance: export path only (3 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
-| 36 | Geometry I/O | Pending |
+| 36 | Geometry I/O | Pending — partial advance: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and `ReaderMitScene` with `ImportContext` (5 / 51 entries); see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
 | 38 | GUI model and controllers | Pending |
-| 39 | Software shaders | Pending |
-| 40 | CPU rendering | Pending — partial advance: `RenderingElement` and `render.raster.Rasterizer2D` (3 / 35 entries); see the Phase 40 record |
+| 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
+| 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); see the Phase 40 record |
 | 41 | GPU rendering architecture checkpoint | Pending |
 | 42 | Animation | Pending |
 | 43 | Application framework | Pending |

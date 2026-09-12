@@ -1,3 +1,4 @@
+import { platformPrint } from "../../../../java/lang/_PlatformConsole.js";
 import { VSDK } from "../../common/VSDK.js";
 import { ProgressMonitor } from "./ProgressMonitor.js";
 
@@ -14,7 +15,9 @@ export class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
     }
     public end(): void {
         this.currentPercent = 100;
-        this.write(`${" ".repeat(Math.max(0, 55 - this.charactersPrintedInLastLine))} - [100% / Operation finished!]`);
+        this.write(
+            `${" ".repeat(Math.max(0, 55 - this.charactersPrintedInLastLine))} - [100% / Operation finished!] \n`,
+        );
     }
     public update(minValue: number, maxValue: number, currentValue: number): void {
         if (Math.abs(maxValue - minValue) < VSDK.EPSILON) return;
@@ -35,7 +38,12 @@ export class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
     public getCurrentPercent(): number {
         return this.currentPercent;
     }
+    /**
+    `System.out.print`: Java emits the dotted bar without line terminators, so
+    the terminators the format itself contains are the only ones. `console.log`
+    would break every fragment onto its own line.
+    */
     private write(text: string): void {
-        console.log(text);
+        platformPrint(text);
     }
 }
