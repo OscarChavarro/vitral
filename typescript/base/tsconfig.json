@@ -74,6 +74,8 @@
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.ts",
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.ts",
         "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.ts",
+        "src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.ts",
+        "src/main/vsdk/toolkit/gui/gizmo/**/*.ts",
         "src/main/vsdk/toolkit/media/**/*.ts",
         "src/main/vsdk/toolkit/processing/**/*.ts",
         "src/main/vsdk/toolkit/environment/material/**/*.ts",
@@ -134,7 +136,8 @@
         "src/main/vsdk/toolkit/render/shaders/**/*.ts",
         "src/main/vsdk/toolkit/render/raytracing/**/*.ts",
         "src/main/vsdk/toolkit/io/PersistenceElement.ts",
-        "src/main/vsdk/toolkit/io/image/**/*.ts"
+        "src/main/vsdk/toolkit/io/image/**/*.ts",
+        "src/main/vsdk/toolkit/io/geometry/**/*.ts"
     ],
     "exclude": [
         "src/main/java/io/PrintStream.ts",

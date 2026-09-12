@@ -22,6 +22,7 @@
               [class.selected]="isSelected(item)"
               [attr.aria-selected]="isSelected(item)"
               (click)="selectItem(item)"
+              (contextmenu)="onItemContextMenu($event, item)"
             >
               @if (item.kind === 'folder') {
                 <span class="folder-icon" aria-hidden="true"></span>
@@ -41,6 +42,7 @@
                     [class.selected]="isSelected(child)"
                     [attr.aria-selected]="isSelected(child)"
                     (click)="selectItem(child)"
+                    (contextmenu)="onItemContextMenu($event, child)"
                   >
                     <span class="file-icon" aria-hidden="true"></span>
                     <span>{{ child.label }}</span>
@@ -71,6 +73,24 @@
       @if (selectedItem() === 'ImageExample') {
         <app-image-example (deactivate)="clearSelection()" />
       }
+      @if (selectedItem() === 'MeshExample') {
+        <app-mesh-example
+          [meshUrl]="meshUrl()"
+          [tangibleServiceUrl]="tangibleServiceUrl()"
+          [tangibleEnabled]="tangibleEnabled()"
+          (deactivate)="clearSelection()"
+        />
+      }
     </div>
   </section>
+
+  @if (meshUrlDialogOpen()) {
+    <app-mesh-url-dialog
+      [initialUrl]="meshUrl()"
+      [initialTangibleServiceUrl]="tangibleServiceUrl()"
+      [initialTangibleEnabled]="tangibleEnabled()"
+      (accept)="acceptMeshUrl($event)"
+      (cancel)="cancelMeshUrl()"
+    />
+  }
 </main>

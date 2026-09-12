@@ -11,3 +11,10 @@ export { WebGLRGBImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/W
 export { WebGLRGBAImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageUncompressedRenderer.js";
 export { WebGLRGBAImageCompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageCompressedRenderer.js";
 export { WebImagePersistence } from "./vsdk/toolkit/io/image/WebImagePersistence.js";
+export { WebGLLineRenderer } from "./vsdk/toolkit/render/webgl/WebGLLineRenderer.js";
+export { WebGLLightRenderer } from "./vsdk/toolkit/render/webgl/WebGLLightRenderer.js";
+export { WebEnvironmentPersistence } from "./vsdk/toolkit/io/geometry/WebEnvironmentPersistence.js";
+export { WebGLMinMaxRenderer } from "./vsdk/toolkit/render/webgl/WebGLMinMaxRenderer.js";
+export { WebGLArrowRenderer } from "./vsdk/toolkit/render/webgl/WebGLArrowRenderer.js";
+export { WebGLSphereRenderer } from "./vsdk/toolkit/render/webgl/WebGLSphereRenderer.js";
+export { WebGLRayGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLRayGizmoRenderer.js";

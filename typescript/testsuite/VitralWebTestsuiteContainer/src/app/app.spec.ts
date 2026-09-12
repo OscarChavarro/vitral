@@ -35,6 +35,8 @@ describe('App', () => {
       '_WebGLHelloWorld',
       'WebGLExamples',
       'CameraExample',
+      'ImageExample',
+      'MeshExample',
       'WebGPUExamples',
       'Tools',
       'ApplicationCases',

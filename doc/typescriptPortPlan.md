@@ -319,7 +319,83 @@ Migrated so far:
     `AwtRGBImageUncompressedRenderer.importFromAwtBufferedImage`, traversal
     order and byte masking included; only the decoder differs.
 
-Not migrated: `MD2Example`, `MeshExample`, `PolygonClippingExample`,
+  - `MeshExample` — 2026-09-12. The first module whose scene is not a fixture
+    compiled into the program: it reads a mesh the user names, which is what
+    makes it the module that settles how a browser program reaches geometry.
+
+    Java's `MeshExample(String fileName)` takes the name from the command line
+    and, when none was given, from `awt.FileSelectorDialog`, a `JFileChooser`
+    over `etc/geometry` narrowed by one `awt.ObjectFilter` per format. A
+    browser has neither a command line nor a file system, so the resource is
+    always named by URL and the chooser is a modal dialog in the container,
+    reached by right-clicking `MeshExample` in the explorer tree — and by
+    left-clicking it the first time, which is Java's "no file named yet"
+    branch. The dialog lists the same six formats in the same order with the
+    same descriptions, marking `obj` as the one with a reader, and carries a
+    second section for the tangible-interface service described below. The
+    selection reaches the module as inputs, and entering another mesh URL
+    reloads the scene, which is what re-running the Java program with another
+    file does.
+
+    Reading it is `WebEnvironmentPersistence` in `@vitral/webgl`, the URL
+    counterpart of `EnvironmentPersistence` in `@vitral/fs`, over the one
+    `ReaderObj`; see the Phase 36 record for the relocation and the seam that
+    made a single reader serve both runtimes. Evidence: `cow.obj`,
+    `dumptruck.obj` and `skull.obj` imported through the URL path and through
+    the `java.io.File` path produce identical scenes — same body count, same
+    per-mesh vertex and index counts, same coordinate sums.
+
+    `render.Jogl4DebuggerRenderer` is ported as the module's
+    `WebGLDebuggerRenderer`, drawing through `WebGLRendererConfigurationShader
+    Selector`, `WebGLImageRenderer`, `WebGLCameraRenderer` and the new
+    `WebGLLightRenderer` and `WebGLRayGizmoRenderer`. `model.MeshModel`,
+    `gui.MeshMouseInteractionTechniques`, `gui.MeshKeyboardInteractionTechniques`,
+    `gui.TangibleInterfaceInteractionTechniques` and
+    `animation.AnimationController` are ported beside it;
+    `options.CommandLineOptions` has no counterpart as a class, because a page
+    has no command line; what it reads from `-tangibleServer` is asked for in
+    the same explorer dialog, which therefore carries both of the Java
+    program's startup inputs. That section adds one control Java has no
+    counterpart for, a connect checkbox that starts **unchecked**: Java's
+    `main` always builds a `TangibleInterfaceNetworkClient` and calls `run()`,
+    which costs nothing when no server answers because the attempt happens on
+    its own thread, whereas a browser `WebSocket` to an absent server logs a
+    failed-connection error on the page's console every time the module starts.
+    Unchecking the box on a live module closes the connection and a new URL
+    replaces it, which is what makes the dialog reopenable rather than
+    startup-only.
+
+    Two recorded divergences, each marked at the code:
+
+      - WebGL has no `glPolygonMode`, so the wireframe pass draws the three
+        edges of every triangle as `LINES` over the geometry the surface pass
+        filled, instead of asking the rasterizer to outline a filled
+        primitive; `POLYGON_OFFSET_LINE` is equally absent, and the pass keeps
+        the depth-func and depth-mask state Java also sets for it.
+      - WebGL has no `glPointSize`: in GLSL ES the vertex shader must write
+        `gl_PointSize` itself. `WebGLShaderPreprocessor` now adds that write
+        and a `pointSizeLocal` uniform to every vertex shader that does not
+        have one, falling back to OpenGL's own default of 1.0 when the uniform
+        is unset, and the points pass sets it where Java calls `glPointSize`.
+
+    Java's `AnimationEventGenerator` thread becomes the page's own timer at
+    the same one-second period the Java listener filters down to; the
+    animation package itself (Phase 42) is still unported.
+
+    The ray gizmo is drawn: `display` acquires the snapshot and then calls
+    `WebGLRayGizmoRenderer`, exactly as Java does, over the arrow, sphere and
+    min/max renderers added in the Phase 41 fourth partial advance. It shows
+    nothing while no tangible-interface server is publishing, which is Java's
+    behavior too: `RayGizmo.update()` hides the gizmo after
+    `DEFAULT_DISABLE_TIME` (2 s) without data, and the animation tick calls it
+    once a second.
+
+    Rendering evidence covers the mesh, the quality toggles and the light
+    gizmo, all captured in headless Chrome over software Mesa; the ray-gizmo
+    path is built and type-checked but its rendering has not been measured,
+    since exercising it needs a live `TangibleInterfaceMarkersDetectorServer`.
+
+Not migrated: `MD2Example`, `PolygonClippingExample`,
 `PolyhedralBoundedSolidExample`, `ShadersExample`, `SolidTextureExample`.
 
 ## Analyzed State
@@ -1699,6 +1775,31 @@ because they need raster image *import*, which Phase 33 has not reached;
 Java's failure branch. The remaining 46 entries are not ported, the phase stays
 Pending, and its gate has not been run.
 
+Second partial advance — 2026-09-12 (to unblock the `MeshExample` module of the
+WebGL testsuite container): `ReaderObj` and `_ReaderObjVertex` moved from
+`@vitral/fs` to `@vitral/base`, under the Java package they have in
+`java/base`, and took an `ObjResourceProvider` for the two `java.io`
+operations they perform: `new FileReader(name)` and `new File(name).
+getParentFile()`. That is the reader's own recorded `\todo` — "should not
+recieve a filename, but a previously opened stream, to make it independent of
+filesystems, and generalize it to URLs or whatever other connection" — and it
+is what lets one 1:1 port of the Java parser serve both runtimes: `@vitral/fs`
+keeps a `ReaderObj` facade with the `java.io.File` signature over a
+`FileObjResourceProvider`, and `@vitral/webgl` gains
+`WebEnvironmentPersistence` over a provider that replays text it has already
+fetched. The parse text itself is untouched; only those three call sites moved
+behind the seam.
+
+The provider answers synchronously, as Java does, so the browser side fetches
+the `.obj` and every `.mtl` its `mtllib` lines name *before* the parse begins.
+That pre-pass is the only addition to the Java control flow. Evidence that the
+relocation changed nothing: `WireframeOfflineExample` re-rendered to a
+byte-identical `output.png`, and the browser path and the `java.io.File` path
+produce identical scenes for `cow.obj`, `dumptruck.obj` and `skull.obj`. The
+phase inventory is unchanged and the phase stays Pending; `EnvironmentPersistence`
+stays in `@vitral/fs`, since it is the `File` dispatcher, and the URL dispatcher
+beside it is `WebEnvironmentPersistence`.
+
 Exit: satisfy the standard phase gate before starting Phase 37.
 
 ### Phase 37: SGL checkpoint
@@ -1772,6 +1873,39 @@ vsdk.toolkit.gui.visualAnalytics.PercentageWheelWidgetController
 vsdk.toolkit.gui.visualAnalytics.VisualDoubleVariable
 vsdk.toolkit.gui.visualAnalytics.VisualVariableSet
 ```
+
+Partial advance — 2026-09-12 (out of phase order, to unblock the `MeshExample`
+module of the WebGL testsuite container, and *without* the UI target decision
+this phase is gated on, because none of the three entries touches the Swing
+question): `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` are ported
+1:1 into `@vitral/base`. They live in `vsdk.toolkit.gui.gizmo` in the current
+Java source, one package deeper than the inventory above records, which was
+captured before that move; the inventory names are left as they are.
+`LightGizmoStyle` is a string enum so that a style survives a structured clone,
+which is what the rest of the TypeScript edition does for a Java enum that can
+cross a worker boundary.
+
+Two classes of the same family are **orphans**: `vsdk.toolkit.gui.gizmo.RayGizmo`
+with its `RaySnapshot` record, and
+`vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceEvent2RayGizmoMapper`.
+Neither appears in any authoritative source group, as with the
+`ParallelProgressMonitor` family recorded under Phase 12; both are ported into
+`@vitral/base` under their Java packages. `RayGizmo` holds its pending snapshot
+in a plain field rather than an `AtomicReference`: a page runs producer and
+consumer on one event loop, where a plain field already has the get-and-set
+semantics the class's documented thread-safety contract asks for, and the
+contract itself is unchanged.
+
+`RendererConfigurationController` is **not** ported, because it extends
+`vsdk.toolkit.gui.Controller` and takes a `vsdk.toolkit.gui.KeyEvent`, both of
+which are this phase's gated work. Its F1..F9 bindings and shading-type cycle
+live meanwhile in the container's
+`src/WebGLExamples/_shared/example-renderer-configuration-interaction.ts`,
+beside `example-camera-interaction.ts` and for the same reason, and over the
+browser `WebKeyEvent`, whose `keycode` already carries the `KEY_F1`..`KEY_F9`
+names the Java constants have. The remaining entries are not ported, the phase
+stays Deferred, its UI target decision has not been taken, and its gate has not
+been run.
 
 Open dependency — 2026-09-12: the WebGL testsuite modules that port
 `java/testsuite/Jogl4Examples` need `CameraController` and
@@ -1977,6 +2111,64 @@ polygons, ray and plane gizmos, solid textures and spheres — is still unported
 the source group remains an empty checkpoint, and the phase gate has not been
 run.
 
+Third partial advance — 2026-09-12 (out of phase order, to unblock the
+`MeshExample` module of the WebGL testsuite container): `Jogl4LineRenderer` and
+`Jogl4LightRenderer` are ported to `vsdk.toolkit.render.webgl` as
+`WebGLLineRenderer` and `WebGLLightRenderer`. Both drawing paths of the line
+renderer are the Java ones — `LINES` for a line one pixel wide or thinner, and
+the host-side expansion into screen-space quads for a thicker one, with its
+six-plane clip-volume test and pixel-space perpendicular offset unchanged — and
+both light gizmo styles are the Java ones, including the orthogonal and
+perspective branches of the screen-size calculation. The recurring boundaries
+are the ones already recorded for this phase: per-process static GL state held
+per context in a `WeakMap`, a shader source reached over `fetch` so drawing is
+asynchronous, and `glGetUniformLocation`'s negative-int sentinel becoming
+`null`. Two more are specific to these two classes: `gl.lineWidth` exists in
+WebGL2 but every engine in practice supports only 1.0, which is why the thick
+path is what actually delivers a wide line; and Java's overload that takes the
+loose `GL` interface and checks `gl.isGL4()` has no counterpart, since
+`WebGL2RenderingContext` is already the narrowed type.
+
+`WebGLShaderPreprocessor` also gained a `gl_PointSize` write and its
+`pointSizeLocal` uniform, for the reason recorded under `MeshExample`: OpenGL
+sizes a point with the client-side `glPointSize`, which WebGL does not have,
+so in GLSL ES the vertex shader must write the size itself, and no VitralSDK
+shader does because none has to under OpenGL 4.
+
+Fourth partial advance — 2026-09-12 (completing the gizmo chain the previous
+advance left open): `Jogl4ArrowRenderer`, `Jogl4SphereRenderer`,
+`Jogl4MinMaxRenderer` and `Jogl4RayGizmoRenderer` are ported to
+`vsdk.toolkit.render.webgl` as `WebGLArrowRenderer`, `WebGLSphereRenderer`,
+`WebGLMinMaxRenderer` and `WebGLRayGizmoRenderer`. The procedurally tessellated
+meshes are the Java ones vertex for vertex — the arrow's shaft side, shaft
+bottom cap, annular head cap and cone side with its slant normals, at sixteen
+slices; the sphere's `(stacks - 1) * slices * 2` triangles built from the
+`Sphere`'s own `spherePosition` / `sphereNormal` / `sphereTangent` /
+`sphereBinormal` with the `1 - s` texture-coordinate flip; the min/max box's
+twelve axis-aligned edges; and the ray gizmo's indicator fin. So are the four
+sphere passes and their materials, the microfacet uniform block with its
+non-microfacet defaults, the normal-overlay line construction, the
+`ensureMesh` rebuild condition, and the gizmo's per-body dispatch over the
+scene `RayGizmo.buildScene()` answers.
+
+The boundaries crossed are this phase's recurring ones — per-context `WeakMap`
+state instead of static fields, `fetch`-borne GLSL making every drawing entry
+point asynchronous, a texture object instead of an `int` so `textureId > 0`
+becomes `!== null`, and `glGetUniformLocation`'s negative sentinel becoming
+`null` — plus the two already recorded for `MeshExample`: no `glPolygonMode`,
+so the sphere's wires pass draws triangle edges as indexed `LINES`, and no
+`glPointSize`, so its points pass sets the `pointSizeLocal` uniform. One Java
+behavior is kept deliberately rather than corrected: `Jogl4ArrowRenderer.
+ensureMesh` builds its mesh once and ignores the `Arrow` of every later call,
+which is sound because the gizmo that drives it builds all of its arrows from
+one `Arrow` instance.
+
+With this the `MeshExample` module draws its ray gizmo, and the divergence
+recorded for it under WebGL Example Programs is closed. Of the JOGL4 renderer
+family, MD2 meshes, 2D polygons, plane gizmos and solid textures remain
+unported. The source group remains an empty checkpoint and the phase gate has
+not been run.
+
 Exit: satisfy the standard phase gate before starting Phase 42.
 
 ### Phase 42: Animation
@@ -2162,12 +2354,12 @@ The port is complete only when all of the following are true:
 | 33 | Image I/O | Pending — partial advance: export path only (3 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
-| 36 | Geometry I/O | Pending — partial advance: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and `ReaderMitScene` with `ImportContext` (5 / 51 entries); see the Phase 36 record |
+| 36 | Geometry I/O | Pending — partial advance: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and `ReaderMitScene` with `ImportContext` (5 / 51 entries); second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser; see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
-| 38 | GUI model and controllers | Pending |
+| 38 | GUI model and controllers | Deferred — partial advance 2026-09-12: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo` and `TangibleInterfaceEvent2RayGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
 | 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending |
+| 41 | GPU rendering architecture checkpoint | Pending — third and fourth partial advances 2026-09-12: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer` and `WebGLRayGizmoRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support; MD2, 2D-polygon, plane-gizmo and solid-texture renderers are still unported; see the Phase 41 record |
 | 42 | Animation | Pending |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |

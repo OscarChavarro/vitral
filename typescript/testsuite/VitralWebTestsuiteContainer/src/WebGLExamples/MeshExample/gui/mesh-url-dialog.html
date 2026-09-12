@@ -1,0 +1,70 @@
+<div class="dialog-backdrop" (click)="onCancel()"></div>
+
+<div
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="mesh-url-dialog-title"
+  (keydown)="onKeyDown($event)"
+>
+  <h2 class="dialog-title" id="mesh-url-dialog-title">Open geometry from URL</h2>
+
+  <form (submit)="onSubmit($event)">
+    <label class="dialog-label" for="mesh-url-input">Mesh URL</label>
+    <input
+      class="dialog-input"
+      id="mesh-url-input"
+      name="meshUrl"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+      [value]="url()"
+      (input)="onUrlInput($event)"
+    />
+
+    <ul class="dialog-hints">
+      @for (hint of suffixHints; track hint) {
+        <li>{{ hint }}</li>
+      }
+    </ul>
+
+    <fieldset class="dialog-section">
+      <legend class="dialog-legend">Tangible interface</legend>
+
+      <label class="dialog-check">
+        <input
+          id="tangible-enabled-input"
+          name="tangibleEnabled"
+          type="checkbox"
+          [checked]="tangibleEnabled()"
+          (change)="onTangibleEnabledChange($event)"
+        />
+        <span>Connect to the tangible interface service</span>
+      </label>
+
+      <label class="dialog-label" for="tangible-url-input">Service WebSocket URL</label>
+      <input
+        class="dialog-input"
+        id="tangible-url-input"
+        name="tangibleServiceUrl"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        [value]="tangibleServiceUrl()"
+        [disabled]="!tangibleEnabled()"
+        (input)="onTangibleServiceUrlInput($event)"
+      />
+
+      <p class="dialog-note">
+        The ray gizmo is driven by this stream. With no server publishing it stays hidden, as it
+        does in the Java program.
+      </p>
+    </fieldset>
+
+    <div class="dialog-actions">
+      <button class="dialog-button" type="button" (click)="onCancel()">Cancel</button>
+      <button class="dialog-button primary" type="submit">Open</button>
+    </div>
+  </form>
+</div>

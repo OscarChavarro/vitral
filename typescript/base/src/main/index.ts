@@ -154,6 +154,11 @@ export {
     TangibleInterfaceNetworkClient,
     FrameListener as TangibleInterfaceNetworkClientFrameListener,
 } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.js";
+export { TangibleInterfaceEvent2RayGizmoMapper } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.js";
+export { Gizmo } from "./vsdk/toolkit/gui/gizmo/Gizmo.js";
+export { LightGizmoStyle } from "./vsdk/toolkit/gui/gizmo/LightGizmoStyle.js";
+export { LightGizmoOmniBillboard } from "./vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.js";
+export { RayGizmo, RaySnapshot } from "./vsdk/toolkit/gui/gizmo/RayGizmo.js";
 export { MediaEntity } from "./vsdk/toolkit/media/MediaEntity.js";
 export { Calligraphic2DBuffer } from "./vsdk/toolkit/media/Calligraphic2DBuffer.js";
 export { FourierShapeDescriptor } from "./vsdk/toolkit/media/FourierShapeDescriptor.js";
@@ -323,3 +328,5 @@ export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRec
 export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";
 export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image/ImagePersistencePng.js";
 export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
+export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";
+export type { ObjResourceProvider } from "./vsdk/toolkit/io/geometry/ObjResourceProvider.js";

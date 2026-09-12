@@ -20,11 +20,40 @@ export class ExampleCameraInteraction {
   private orbitAzimuth = 0;
   private orbitElevation = 0.2;
   private orbitRadius = 5.5;
+  private minOrbitRadius = 2.0;
+  private maxOrbitRadius = 30.0;
   private focus = new Vector3Dd(0, 0, 1.2);
   private readonly deltaMovement = 0.25;
 
   constructor(private readonly camera: Camera) {
     this.updateCamera();
+  }
+
+  /**
+   * Takes the camera's current position and focus as the orbit state, instead
+   * of overwriting them on the next interaction.
+   *
+   * The examples whose scene is a fixture compiled into the program start from
+   * this adapter's own default view, which is why the constructor imposes one.
+   * A program that frames its own scene first — `MeshExample`, which calls
+   * `MeshModel.configureInitialViewAndLightToScene()` after reading a mesh —
+   * needs the opposite, and this is where the two meet. The zoom limits move
+   * with the adopted distance, since a fixed 2..30 range means nothing for a
+   * mesh of arbitrary size.
+   */
+  adoptCameraState(): void {
+    this.focus = this.camera.getFocusedPosition();
+    const offset = this.camera.getPosition().subtract(this.focus);
+    this.orbitRadius = offset.length();
+    if (this.orbitRadius < 1e-6) {
+      this.orbitRadius = 1.0;
+    }
+    this.minOrbitRadius = this.orbitRadius / 100.0;
+    this.maxOrbitRadius = this.orbitRadius * 100.0;
+
+    const horizontalRadius = Math.hypot(offset.x(), offset.y());
+    this.orbitElevation = Math.atan2(offset.z(), horizontalRadius);
+    this.orbitAzimuth = Math.atan2(offset.x(), -offset.y());
   }
 
   processPointerDown(event: PointerEvent, canvas: HTMLCanvasElement): boolean {
@@ -55,7 +84,11 @@ export class ExampleCameraInteraction {
 
   processWheel(event: WheelEvent, canvas: HTMLCanvasElement): boolean {
     const vitralEvent: WebMouseEvent = WebSystem.web2vsdkWheelEvent(event, canvas);
-    this.orbitRadius = this.clamp(this.orbitRadius * (1 + vitralEvent.clicks * 0.001), 2.0, 30.0);
+    this.orbitRadius = this.clamp(
+      this.orbitRadius * (1 + vitralEvent.clicks * 0.001),
+      this.minOrbitRadius,
+      this.maxOrbitRadius,
+    );
     this.updateCamera();
     return true;
   }

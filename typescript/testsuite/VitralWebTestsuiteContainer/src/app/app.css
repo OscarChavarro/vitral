@@ -156,7 +156,8 @@
 
 .workspace app-webgl-hello-world,
 .workspace app-camera-example,
-.workspace app-image-example {
+.workspace app-image-example,
+.workspace app-mesh-example {
   min-height: calc(100dvh - 24px);
 }
 
