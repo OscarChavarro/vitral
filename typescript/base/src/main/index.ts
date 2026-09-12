@@ -29,6 +29,7 @@ export { type Iterator } from "./java/util/Iterator.js";
 export { HashMap } from "./java/util/HashMap.js";
 export { type MapEntry } from "./java/util/HashMap.js";
 export { StringTokenizer } from "./java/util/StringTokenizer.js";
+export { NoSuchElementException } from "./java/util/NoSuchElementException.js";
 export { Date as JavaDate } from "./java/util/Date.js";
 export { HashSet } from "./java/util/HashSet.js";
 export { LinkedHashSet } from "./java/util/LinkedHashSet.js";
@@ -291,6 +292,8 @@ export {
 
 export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
 export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
+export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
+export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
 export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRecognizedException.js";
 export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";
 export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image/ImagePersistencePng.js";

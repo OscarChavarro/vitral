@@ -1,12 +1,13 @@
 import { String as JavaString } from "../lang/String.js";
+import { NoSuchElementException } from "./NoSuchElementException.js";
 
 export class StringTokenizer {
     private readonly text: string;
     private readonly delimiters: string;
     private cursor: number;
 
-    public constructor(text: JavaString, delimiters = " \t\n\r\f") {
-        this.text = text.toCString();
+    public constructor(text: JavaString | string, delimiters = " \t\n\r\f") {
+        this.text = typeof text === "string" ? text : text.toCString();
         this.delimiters = delimiters ?? " \t\n\r\f";
         this.cursor = 0;
     }
@@ -41,6 +42,27 @@ export class StringTokenizer {
         return index;
     }
 
+    /**
+    Java's `countTokens` reports how many tokens remain, without consuming
+    them.
+    */
+    public countTokens(): number {
+        let count = 0;
+        let index = this.cursor;
+        for (;;) {
+            const tokenStart = this.findTokenStart(index);
+            if (tokenStart < 0) {
+                return count;
+            }
+            count++;
+            const tokenEnd = this.findTokenEnd(tokenStart);
+            if (tokenEnd < 0) {
+                return count;
+            }
+            index = tokenEnd + 1;
+        }
+    }
+
     public hasMoreTokens(): boolean {
         return this.findTokenStart(this.cursor) >= 0;
     }
@@ -48,7 +70,7 @@ export class StringTokenizer {
     public nextToken(): JavaString {
         const tokenStart = this.findTokenStart(this.cursor);
         if (tokenStart < 0) {
-            return new JavaString();
+            throw new NoSuchElementException();
         }
 
         const tokenEnd = this.findTokenEnd(tokenStart);

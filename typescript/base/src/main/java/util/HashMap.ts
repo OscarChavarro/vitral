@@ -5,9 +5,29 @@ export interface MapEntry<K, V> {
     value: V;
 }
 
+interface HashMapSlot<K, V> extends MapEntry<K, V> {
+    /**
+    The key's `hashCode()` as it stood when the slot was created, mirroring
+    the `hash` field a `java.util.HashMap.Node` caches at insertion time.
+    `undefined` marks a key that exposes no `hashCode()`, which is matched by
+    `equals` alone. Caching matters for keys that callers mutate after
+    insertion: Java then keeps the slot reachable only under its original
+    hash, so a lookup by an equal-but-differently-hashed key misses, and so
+    must this map.
+    */
+    readonly hash: number | undefined;
+}
+
 /** Java Map semantics with Java-style equals dispatch for object keys. */
 export class HashMap<K, V> implements Iterable<MapEntry<K, V>> {
-    private readonly entriesArray: MapEntry<K, V>[] = [];
+    private readonly entriesArray: HashMapSlot<K, V>[] = [];
+    /**
+    Slots grouped by their cached hash, playing the role of a
+    `java.util.HashMap` bucket table: a lookup only ever compares against the
+    slots that hashed the same way. Keys with no `hashCode()` are absent here
+    and fall back to a scan of `entriesArray`.
+    */
+    private readonly buckets = new Map<number, HashMapSlot<K, V>[]>();
     private modificationCount = 0;
 
     public constructor(initial?: Iterable<readonly [K, V]>) {
@@ -20,36 +40,41 @@ export class HashMap<K, V> implements Iterable<MapEntry<K, V>> {
         return this.entriesArray.length === 0;
     }
     public containsKey(key: K): boolean {
-        return this.findIndex(key) >= 0;
+        return this.findSlot(key) !== undefined;
     }
     public containsValue(value: V): boolean {
         return this.entriesArray.some((entry) => HashMap.javaEquals(entry.value, value));
     }
     public get(key: K): V | undefined {
-        const entry = this.entriesArray[this.findIndex(key)];
-        return entry?.value;
+        return this.findSlot(key)?.value;
     }
     public getOrDefault(key: K, defaultValue: V): V {
-        const index = this.findIndex(key);
-        return index < 0 ? defaultValue : (this.entriesArray[index] as MapEntry<K, V>).value;
+        const slot = this.findSlot(key);
+        return slot === undefined ? defaultValue : slot.value;
     }
     public tryGet(key: K, valueOut?: { value: V }): boolean {
-        const index = this.findIndex(key);
-        if (index < 0) return false;
-        if (valueOut !== undefined) valueOut.value = (this.entriesArray[index] as MapEntry<K, V>).value;
+        const slot = this.findSlot(key);
+        if (slot === undefined) return false;
+        if (valueOut !== undefined) valueOut.value = slot.value;
         return true;
     }
 
     /** Java Map.put: returns the prior value, or undefined for Java null/absent. */
     public put(key: K, value: V): V | undefined {
-        const index = this.findIndex(key);
-        if (index >= 0) {
-            const entry = this.entriesArray[index] as MapEntry<K, V>;
-            const previous = entry.value;
-            entry.value = value;
+        const existing = this.findSlot(key);
+        if (existing !== undefined) {
+            const previous = existing.value;
+            existing.value = value;
             return previous;
         }
-        this.entriesArray.push({ key, value });
+        const hash = HashMap.javaHashCode(key);
+        const slot: HashMapSlot<K, V> = { key, value, hash };
+        this.entriesArray.push(slot);
+        if (hash !== undefined) {
+            const bucket = this.buckets.get(hash);
+            if (bucket === undefined) this.buckets.set(hash, [slot]);
+            else bucket.push(slot);
+        }
         this.modificationCount++;
         return undefined;
     }
@@ -59,15 +84,23 @@ export class HashMap<K, V> implements Iterable<MapEntry<K, V>> {
     }
     /** Java Map.remove: returns the prior value, or undefined for Java null/absent. */
     public remove(key: K): V | undefined {
-        const index = this.findIndex(key);
-        if (index < 0) return undefined;
-        const value = (this.entriesArray.splice(index, 1)[0] as MapEntry<K, V>).value;
+        const slot = this.findSlot(key);
+        if (slot === undefined) return undefined;
+        this.entriesArray.splice(this.entriesArray.indexOf(slot), 1);
+        if (slot.hash !== undefined) {
+            const bucket = this.buckets.get(slot.hash);
+            if (bucket !== undefined) {
+                bucket.splice(bucket.indexOf(slot), 1);
+                if (bucket.length === 0) this.buckets.delete(slot.hash);
+            }
+        }
         this.modificationCount++;
-        return value;
+        return slot.value;
     }
     public clear(): void {
         if (this.entriesArray.length > 0) {
             this.entriesArray.length = 0;
+            this.buckets.clear();
             this.modificationCount++;
         }
     }
@@ -90,8 +123,22 @@ export class HashMap<K, V> implements Iterable<MapEntry<K, V>> {
         }
     }
 
-    private findIndex(key: K): number {
-        return this.entriesArray.findIndex((entry) => HashMap.javaEquals(entry.key, key));
+    private findSlot(key: K): HashMapSlot<K, V> | undefined {
+        const hash = HashMap.javaHashCode(key);
+        if (hash === undefined) {
+            return this.entriesArray.find((entry) => entry.hash === undefined && HashMap.javaEquals(entry.key, key));
+        }
+        return this.buckets.get(hash)?.find((entry) => HashMap.javaEquals(entry.key, key));
+    }
+    private static javaHashCode(key: unknown): number | undefined {
+        if (
+            key !== null &&
+            typeof key === "object" &&
+            "hashCode" in key &&
+            typeof (key as { hashCode?: unknown }).hashCode === "function"
+        )
+            return (key as { hashCode(): number }).hashCode();
+        return undefined;
     }
     private static javaEquals(left: unknown, right: unknown): boolean {
         if (

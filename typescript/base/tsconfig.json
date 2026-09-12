@@ -128,6 +128,8 @@
         "src/main/vsdk/toolkit/environment/geometry/geometricProcessing/**/*.ts",
         "src/main/vsdk/toolkit/render/RenderingElement.ts",
         "src/main/vsdk/toolkit/render/raster/Rasterizer2D.ts",
+        "src/main/vsdk/toolkit/render/hiddenLine/WireframeRenderer.ts",
+        "src/main/vsdk/toolkit/io/PersistenceElement.ts",
         "src/main/vsdk/toolkit/io/image/**/*.ts"
     ],
     "exclude": [

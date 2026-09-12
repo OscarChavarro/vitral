@@ -131,18 +131,33 @@ export class Matrix4x4d extends FundamentalEntity {
             Y = y!;
             Z = z!;
         }
-        const m = Math.hypot(X, Y, Z);
-        if (m === 0) return this.identity();
-        X /= m;
-        Y /= m;
-        Z /= m;
-        const s = Math.sin(a),
-            c = Math.cos(a),
-            q = 1 - c;
+        const s = Math.sin(a);
+        const c = Math.cos(a);
+
+        const mag = Math.sqrt(X * X + Y * Y + Z * Z);
+        if (mag === 0.0) {
+            return this.identity();
+        }
+
+        X /= mag;
+        Y /= mag;
+        Z /= mag;
+
+        const xx = X * X;
+        const yy = Y * Y;
+        const zz = Z * Z;
+        const xy = X * Y;
+        const yz = Y * Z;
+        const zx = Z * X;
+        const xs = X * s;
+        const ys = Y * s;
+        const zs = Z * s;
+        const oneC = 1 - c;
+
         return new Matrix4x4d([
-            [q * X * X + c, q * X * Y - Z * s, q * Z * X + Y * s, 0],
-            [q * X * Y + Z * s, q * Y * Y + c, q * Y * Z - X * s, 0],
-            [q * Z * X - Y * s, q * Y * Z + X * s, q * Z * Z + c, 0],
+            [oneC * xx + c, oneC * xy - zs, oneC * zx + ys, 0],
+            [oneC * xy + zs, oneC * yy + c, oneC * yz - xs, 0],
+            [oneC * zx - ys, oneC * yz + xs, oneC * zz + c, 0],
             [0, 0, 0, 1],
         ]);
     }

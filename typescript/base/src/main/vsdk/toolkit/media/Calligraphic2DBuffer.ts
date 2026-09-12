@@ -2,6 +2,7 @@ import { MediaEntity } from "./MediaEntity.js";
 import { Vector3Dd } from "../common/linealAlgebra/Vector3Dd.js";
 import { RGBImageUncompressed } from "./RGBImageUncompressed.js";
 import { RGBPixel } from "./RGBPixel.js";
+import { Rasterizer2D } from "../render/raster/Rasterizer2D.js";
 export class Calligraphic2DBuffer extends MediaEntity {
     private lines: number[] = [];
     public init(): void {
@@ -26,36 +27,28 @@ export class Calligraphic2DBuffer extends MediaEntity {
     public getNumLines(): number {
         return this.lines.length / 8;
     }
-    public exportRgbImage(out: RGBImageUncompressed): void {
-        const p = new RGBPixel();
-        p.r = p.g = p.b = -1;
-        for (let n = 0; n < this.getNumLines(); n++) {
-            const [a, b] = this.get2DLine(n);
-            this.draw(
-                out,
-                Math.trunc(((out.getXSize() - 1) * (a.x() + 1)) / 2),
-                Math.trunc((out.getYSize() - 1) * (1 - (a.y() + 1) / 2)),
-                Math.trunc(((out.getXSize() - 1) * (b.x() + 1)) / 2),
-                Math.trunc((out.getYSize() - 1) * (1 - (b.y() + 1) / 2)),
-                p,
-            );
-        }
-    }
-    private draw(o: RGBImageUncompressed, x0: number, y0: number, x1: number, y1: number, p: RGBPixel): void {
-        const dx = Math.abs(x1 - x0),
-            sx = x0 < x1 ? 1 : -1,
-            dy = -Math.abs(y1 - y0),
-            sy = y0 < y1 ? 1 : -1;
-        for (;;) {
-            if (x0 >= 0 && y0 >= 0 && x0 < o.getXSize() && y0 < o.getYSize()) o.putPixel(x0, y0, p);
-            if (x0 === x1 && y0 === y1) break;
-            const e = 2 * (dx + dy);
-            if (e >= dy) {
-                x0 += sx;
-            }
-            if (e <= dx) {
-                y0 += sy;
-            }
+    public exportRgbImage(inOutRasterViewport: RGBImageUncompressed): void {
+        const xt: number = inOutRasterViewport.getXSize();
+        const yt: number = inOutRasterViewport.getYSize();
+
+        let e0: Vector3Dd;
+        let e1: Vector3Dd;
+        let x0: number, y0: number, x1: number, y1: number;
+        const pixel: RGBPixel = new RGBPixel();
+
+        pixel.r = -1;
+        pixel.g = -1;
+        pixel.b = -1;
+
+        for (let j = 0; j < this.getNumLines(); j++) {
+            const segment: [Vector3Dd, Vector3Dd] = this.get2DLine(j);
+            e0 = segment[0];
+            e1 = segment[1];
+            x0 = Math.trunc((xt - 1) * ((e0.x() + 1) / 2));
+            y0 = Math.trunc((yt - 1) * (1 - (e0.y() + 1) / 2));
+            x1 = Math.trunc((xt - 1) * ((e1.x() + 1) / 2));
+            y1 = Math.trunc((yt - 1) * (1 - (e1.y() + 1) / 2));
+            Rasterizer2D.drawLine(inOutRasterViewport, x0, y0, x1, y1, pixel);
         }
     }
 }

@@ -4,6 +4,11 @@ import { JavaString } from "@vitral/base";
 
 /** Node-only implementation of the local-filesystem subset of java.io.File. */
 export class File {
+    /** Java's `File.separator`: the local name-separator character. */
+    public static readonly separator: string = pathModule.sep;
+    /** Java's `File.pathSeparator`: the local path-list separator character. */
+    public static readonly pathSeparator: string = pathModule.delimiter;
+
     private readonly path: JavaString;
 
     public constructor(path?: string | JavaString) {
@@ -15,6 +20,28 @@ export class File {
     }
     public getPath(): JavaString {
         return new JavaString(this.path);
+    }
+    public getAbsolutePath(): JavaString {
+        return new JavaString(pathModule.resolve(this.path.toCString()));
+    }
+    public getAbsoluteFile(): File {
+        return new File(this.getAbsolutePath());
+    }
+    /**
+    Java returns null when the pathname names no parent directory. Node's
+    `dirname` answers the path itself at the filesystem root and "." for a
+    bare name, so both of those are mapped back to Java's null.
+    */
+    public getParentFile(): File | null {
+        const here = this.path.toCString();
+        const parent = pathModule.dirname(here);
+        if (parent === here || (parent === "." && !here.startsWith("."))) {
+            return null;
+        }
+        return new File(parent);
+    }
+    public toString(): string {
+        return this.path.toCString();
     }
     public exists(): boolean {
         return this.path.toCString().length > 0 && fs.existsSync(this.path.toCString());

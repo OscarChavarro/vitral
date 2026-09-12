@@ -9,3 +9,6 @@ export { FileReader } from "./java/io/FileReader.js";
 export { RandomAccessFile } from "./java/io/RandomAccessFile.js";
 export { MicrofacetCsvLoader } from "./vsdk/toolkit/environment/material/MicrofacetCsvLoader.js";
 export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
+export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
+export { EnvironmentPersistence } from "./vsdk/toolkit/io/geometry/EnvironmentPersistence.js";
+export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";

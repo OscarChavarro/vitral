@@ -1,3 +1,4 @@
+import { Math as JavaMath } from "../../../../java/lang/Math.js";
 import { Entity } from "../../common/Entity.js";
 import { Matrix4x4d } from "../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
@@ -184,22 +185,69 @@ export class Camera extends Entity {
         this.up = this.up.normalized();
         this.left = this.left.normalized();
         this.front = this.front.normalized();
-        const aspect = this.viewportXSize / this.viewportYSize;
-        const tangent = Math.tan((this.fov * Math.PI) / 360);
+
+        const fovFactor: number = this.viewportXSize / this.viewportYSize;
         this.dir = this.front.multiply(0.5);
-        this.upWithScale = this.up.multiply(tangent);
-        this.rightWithScale = this.left.multiply(-aspect * tangent);
-        const vrp = this.eyePosition.add(this.front.multiply(this.nearPlaneDistance));
-        const translateToVrp = new Matrix4x4d().translation(vrp.multiply(-1));
-        const r1 = this.getRotation().invert();
-        const r2 = new Matrix4x4d()
-            .axisRotation(Math.PI / 2, 0, 0, 1)
-            .multiply(new Matrix4x4d().axisRotation(-Math.PI / 2, 0, -1, 0));
-        const translateNear = new Matrix4x4d().translation(0, 0, -this.nearPlaneDistance);
-        const scale = new Matrix4x4d().scale(this.rightWithScale.length(), this.upWithScale.length(), 1).invert();
-        this.normalizingTransformation = scale.multiply(
-            translateNear.multiply(r2.multiply(r1.multiply(translateToVrp))),
-        );
+        this.upWithScale = this.up.multiply(Math.tan(JavaMath.toRadians(this.fov / 2)));
+        this.rightWithScale = this.left.multiply(-fovFactor * Math.tan(JavaMath.toRadians(this.fov / 2)));
+
+        //-----------------------------------------------------------------
+        /*
+        The normalizing transformation of current camera is such that transforms
+        points in space to make it lie in the canonical view volume space,
+        and it is calculated following the mechanism described on sections
+        [FOLE1992].6.5.1 and [FOLE1992].6.5.2.
+        */
+        this.normalizingTransformation = new Matrix4x4d();
+        // 1. Translate the "VRP" point to the origin
+        let VRP: Vector3Dd;
+        let T1: Matrix4x4d = new Matrix4x4d();
+
+        // Warning: near plane clipping
+        VRP = this.eyePosition.add(this.front.multiply(this.nearPlaneDistance));
+        T1 = T1.translation(VRP.multiply(-1));
+
+        // 2. Rotate the "VRC" coordinate system such as the front axis
+        //    become the -z axis
+        let R1: Matrix4x4d;
+        R1 = this.getRotation();
+        R1 = R1.invert();
+
+        let R2: Matrix4x4d = new Matrix4x4d();
+        R2 = R2.eulerAnglesRotation(JavaMath.toRadians(90), JavaMath.toRadians(-90), 0);
+        const RTOTAL: Matrix4x4d = R2.multiply(R1);
+
+        // 3. Translate such that the center of projection is at the origin
+        let T2: Matrix4x4d = new Matrix4x4d();
+        T2 = T2.translation(0, 0, -this.nearPlaneDistance);
+
+        // 4. Shear such that the center line of the view volume becomes the
+        //    z axis
+
+        // 5. Scale such that the view volume becomes the canonical perspective
+        //    view volume
+        let S1: Matrix4x4d = new Matrix4x4d();
+        const S2: Matrix4x4d = new Matrix4x4d();
+        let ddx: number, ddy: number;
+
+        // 5.1. Non proportional scaling to adjust the slopes of the piramid
+        // planes to fix 45 degrees in u and v directions
+        ddx = this.rightWithScale.length();
+        ddy = this.upWithScale.length();
+        S1 = S1.scale(ddx, ddy, 1);
+        S1 = S1.invert();
+
+        // 5.2. Proportional scaling to adjust near / far clipping planes
+        // maintaining the piramid form
+        //ddz = 2.0/(farPlaneDistance - nearPlaneDistance);
+        //S2 = S2.scale(1, 1, ddz);
+        //S2 = S2.invert();
+
+        // Compose final transformation
+        const T3: Matrix4x4d = new Matrix4x4d();
+        //T3 = T3.translation(0, 0, nearPlaneDistance);
+
+        this.normalizingTransformation = T3.multiply(S2.multiply(S1.multiply(T2.multiply(RTOTAL.multiply(T1)))));
     }
     public exportToCameraSnapshot(width = this.viewportXSize, height = this.viewportYSize): CameraSnapshot {
         this.updateViewportResize(width, height);
