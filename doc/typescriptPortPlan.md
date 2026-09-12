@@ -47,7 +47,7 @@ those findings are closed.
 | 23–24 | Complete, parity audit open | 6 / 6 inventory entries | Source-level parity corrections | Audit gate |
 | 25 — Geometric processing | In progress | Polygon clipping, voxelization, and monotone triangulation blocks only | Full B-rep/CSG operator block | 32 current-Java source files plus tests and standard gate |
 | 26 — Lights | Complete | 6 / 6 current-Java symbols | — | `LightType` has no source mapping in the current Java base |
-| 27 — Tone-mapping checkpoint | Complete, harness exit open | 0 / 0 inventory entries | — | Eleven unlisted `media`/`solidTexture` orphans recorded for Phase 45; vitest worker-RPC budget still makes `verify` exit 1 |
+| 27 — Tone-mapping checkpoint | Complete, harness exit open | 0 / 0 inventory entries | — | Eleven unlisted `media`/`solidTexture` orphans recorded for Phase 45, all ported 2026-09-13 under Phase 14; vitest worker-RPC budget still makes `verify` exit 1 |
 | 28 — Scene model | Complete | 4 / 4 inventory entries | — | No Java test source has a dependency closure limited to this phase |
 | 29–45 | Pending | 0 | — | All planned inventory entries and decision gates |
 
@@ -148,8 +148,10 @@ inventory lists and that have no TypeScript counterpart: the nine files of
 `vsdk.toolkit.media.RGBAColorPalette`, which the last two depend on. The
 exhaustiveness check in Analyzed State covered only `vsdk.toolkit.common`, so
 these eleven files are orphans of the 580-entry graph rather than a missed
-obligation of Phase 14. They are recorded here as the first named input to
-Phase 45, and no placeholder was created for them.
+obligation of Phase 14. They were recorded here as the first named input to
+Phase 45, and no placeholder was created for them. All eleven were ported on
+2026-09-13, to unblock the `SolidTextureExample` module; see the Phase 14
+record for the advance and its parity evidence.
 
 ## Offline Example Programs
 
@@ -395,8 +397,96 @@ Migrated so far:
     path is built and type-checked but its rendering has not been measured,
     since exercising it needs a live `TangibleInterfaceMarkersDetectorServer`.
 
+  - `SolidTextureExample` — 2026-09-13. The module that exercises 3D textures
+    and Perlin noise, and the first with a heads-up display. The mesh it reads
+    is only the shape a procedurally generated volume is carved into: a cube of
+    `size^3` RGB samples uploaded as a `TEXTURE_3D`, with the body's own
+    bounding box normalizing each object-space position into a texture
+    coordinate, so the texture looks carved rather than wrapped. `[4]` and `[5]`
+    step through the sixteen textures, `[2]` and `[3]` halve and double the
+    side, `[1]` switches to showing the volume's slices as a stack of quads,
+    `[r]` runs the rotation animation and `[h]` hides the HUD.
+
+    It reaches its geometry the way `MeshExample` does and for the same reason,
+    through its own copy of the chooser — Java duplicates
+    `awt.FileSelectorDialog` and `options.CommandLineOptions` into this project
+    with one string changed, and the container duplicates the Angular dialog to
+    match, one module per Java project. Both of the Java program's startup
+    inputs are in it: the mesh URL and the `-tangibleServer` value with its
+    connect checkbox, which starts unchecked for the reason recorded under
+    `MeshExample`. This program listens for two markers rather than one:
+    `rayCube1` drives the ray gizmo and `cuttingPlane1` drives an infinite-plane
+    gizmo that clips both drawing paths.
+
+    `model.SolidTextureModel`, `model.OperationMode`,
+    `model.SolidTextureExampleColorNames`, `gui.SolidTextureMouseInteraction
+    Techniques`, `gui.SolidTextureKeyboardInteractionTechniques`,
+    `gui.TangibleInterfaceInteractionTechniques`, `animation.AnimationController`
+    and the three `render` classes are ported. The renderers draw through the
+    new `WebGLSolidTextureRenderer` and `WebGLInfinitePlaneGizmoRenderer` of the
+    Phase 41 fifth partial advance, over the solid-texture library of the Phase
+    14, 29 and 38 advances recorded below.
+
+    Parity evidence is byte-level, not visual, and covers the whole generation
+    chain. A Java reference driver builds `model.SolidTextureModel` against
+    `java/base`, steps through all sixteen textures at side 16 and prints the
+    length, the byte sum and an FNV-1a digest of `getSolidTextureVolumeRgb8()`;
+    its TypeScript twin does the same over the ported model. The two agree on
+    every one of the sixteen lines, which exercises `ProceduralNoise` and its
+    permutation table, `TextureUtils`, every `ColorTextureFixture` function,
+    `ImageTexture` with its planar mapping and both interpolation modes,
+    `RGBAColorPalette`, `IndexedColorImageHDRUncompressed`, and the 16-bit to
+    8-bit channel reduction.
+
+    Rendering was then exercised in headless Chrome over software Mesa: the cow
+    carved out of the checker volume with the HUD showing its four lines, `[5]`
+    switching to the noise-driven `CHECKER_TEXTURE_TEXTURE`, `[1]` switching to
+    the slice stack, `[h]` hiding the HUD, and `[3]` rebuilding the volume at
+    side 64 with visibly finer detail. The gizmo paths are built and
+    type-checked but their rendering has not been measured, since exercising
+    them needs a live `TangibleInterfaceMarkersDetectorServer`.
+
+    Four divergences are recorded, each marked at the code:
+
+      - GLSL ES 3.00 has no `gl_ClipDistance` and WebGL has no
+        `GL_CLIP_DISTANCE0` enable, so `WebGLShaderPreprocessor` carries the
+        clip distance across as an ordinary varying and discards on its sign in
+        the fragment shader. The result is per-fragment rather than
+        per-primitive clipping, which for a plane cut through a solid is the
+        same image; what it costs is early-depth rejection. The translation is
+        unconditional on both stages, because a shader is preprocessed without
+        knowing what it will be linked against and a fragment `in` with no
+        matching vertex `out` is a link error.
+      - GLSL ES 3.00 gives `sampler2D` a default precision but gives
+        `sampler3D` none, so `solidTexturePixelShader.glsl` fails to compile
+        with "No precision specified" as it stands. The preprocessor now states
+        `precision highp sampler3D;` in both stage headers. OpenGL 4.1 core has
+        no precision qualifiers at all, which is why no VitralSDK shader carries
+        this.
+      - `Graphics2D` on a `BufferedImage` becomes a 2D canvas context: the HUD's
+        `fillRect` and `fillText` calls sit on the Java baselines with the same
+        bold 18-pixel sans-serif face, and one `getImageData` replaces the
+        `getRGB` loop. Text metrics are the platform's in both cases, so the
+        glyphs are the host's, not Java's.
+      - `render.Jogl4DebuggerRenderer` carries a private `drawSimpleBody` path,
+        with its uniform, material and mesh-upload helpers and the vertex array
+        and three buffers `init` creates for them, that nothing calls: the file
+        was derived from `MeshExample`'s renderer and kept that path while
+        `display` goes through `Jogl4SolidTextureRenderer` instead. It is not
+        carried over. It has no behavior to preserve, and porting it would mean
+        inventing WebGL substitutes for `glPolygonMode` and `glPointSize` in a
+        path that never runs; the live counterpart of those passes is
+        `MeshExample`'s own `WebGLDebuggerRenderer`.
+
+    Java's twenty-four-tick-a-second `AnimationEventGenerator` thread becomes
+    the page's own timer at the same rate; the animation package itself (Phase
+    42) is still unported. One cost of the port is Java's too and not a defect:
+    rebuilding the volume is O(size^3) evaluations of multi-octave noise, and a
+    browser runs it on the one thread it draws on, so the page stops responding
+    for the duration where the Java program's window merely stops redrawing.
+
 Not migrated: `MD2Example`, `PolygonClippingExample`,
-`PolyhedralBoundedSolidExample`, `ShadersExample`, `SolidTextureExample`.
+`PolyhedralBoundedSolidExample`, `ShadersExample`.
 
 ## Analyzed State
 
@@ -937,6 +1027,49 @@ vsdk.toolkit.media.ZBuffer
 vsdk.toolkit.media.RGBAImageHDRUncompressed
 vsdk.toolkit.media.RGBAPixelHDR
 ```
+
+Partial advance — 2026-09-13 (out of phase order, to unblock the
+`SolidTextureExample` module of the WebGL testsuite container): the eleven
+unlisted `media` / `media.solidTexture` files that Phase 27 recorded as the
+first named input to Phase 45 are now ported, and that orphan set is closed.
+They are `vsdk.toolkit.media.RGBAColorPalette`,
+`vsdk.toolkit.media.IndexedColorImageHDRUncompressed`, and the nine files of
+`vsdk.toolkit.media.solidTexture`: `TextureUtils`, `ProceduralNoise`,
+`ColorTextureFixture`, `BumpTextureFixture`, `ImageTexture`,
+`SolidTextureCoordinateMapper`, `ControlledRGBAImageHDRUncompressed`,
+`ImageToSolidTextureProjectionMethods` and
+`ImageToSolidTextureInterpolationTypes`. None of them belongs to this phase's
+twenty-entry inventory, which is unchanged and stays complete; they are
+recorded here because this is where the `media` package lives.
+
+Three spellings differ from Java and are documented beside the code:
+
+  - `ProceduralNoise` and `TextureUtils` each declare a private nested
+    `CRandom`, the C library linear congruential generator that makes the
+    permutation table reproducible across languages. Java evaluates
+    `state * 1103515245L + 12345L` in 64-bit arithmetic, and with a state below
+    2^31 that product reaches about 2^61 — past the 2^53 a TypeScript `number`
+    represents exactly. The multiplication is split at 2^16, the high half
+    contributing only through its low 15 bits since everything above bit 30 is
+    masked away, so both partial products stay inside the exact range and the
+    sequence is Java's term for term. Java duplicates the nested class in both
+    files and so does this port.
+  - `ProceduralNoise.rTable` is seeded by a CRC-16 over the little-endian bytes
+    of three doubles, which is why `checksumVector` builds a `DataView` rather
+    than doing arithmetic.
+  - The two enums are string enums, as the rest of the TypeScript edition
+    spells a Java enum that can cross a structured clone; their Java integer
+    codes survive as the `value` and `fromInt` functions beside them. The
+    `double[]` and `int[]` out parameters of `SolidTextureCoordinateMapper` and
+    `ImageTexture` become the mutable `SolidTextureCoordinate` and index
+    holders, which keeps the read-modify-write sequences of `bumpMap` intact.
+    The four `Vector3Dd[]` out-parameter overloads of `ProceduralNoise` and
+    `BumpTextureFixture` are not ported, since each already has a returning
+    flavor that is.
+
+Parity evidence is the sixteen-line byte-level agreement recorded for
+`SolidTextureExample` under WebGL Example Programs, which drives every one of
+these files. No Java test source exists for them.
 
 Exit: satisfy the standard phase gate before starting Phase 15.
 
@@ -1535,6 +1668,21 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
+Partial advance — 2026-09-13 (out of phase order, to unblock the
+`SolidTextureExample` module of the WebGL testsuite container): the audit this
+phase calls for found two production files in
+`vsdk.toolkit.numericalAnalysis.lookUpTables` that no phase inventory lists,
+`LookUpTableSine` and `LookUpTableChecksum16`, both reached by
+`ProceduralNoise`. They are **orphans** of the 580-entry graph, as with the
+`media`/`solidTexture` set recorded under Phase 14, and both are ported 1:1
+into `@vitral/base` under their Java package. `LookUpTableSine`'s two
+constructors become one optional parameter, and `LookUpTableChecksum16.eval`'s
+buffer overload is named `evalBuffer`, since TypeScript cannot overload on the
+argument list alone; its buffer is a `Uint8Array` where Java reads signed
+`byte`s, which changes nothing because Java masks the exclusive-or with
+`0xff`. No placeholder was created, the source group remains an empty
+checkpoint, and the phase gate has not been run.
+
 Exit: satisfy the standard phase gate before starting Phase 30.
 
 ### Phase 30: I/O wrappers
@@ -1896,6 +2044,20 @@ consumer on one event loop, where a plain field already has the get-and-set
 semantics the class's documented thread-safety contract asks for, and the
 contract itself is unchanged.
 
+Second partial advance — 2026-09-13 (same gating reading, to unblock the
+`SolidTextureExample` module): two more **orphans** of the same family are
+ported into `@vitral/base` under their Java packages —
+`vsdk.toolkit.gui.gizmo.InfinitePlaneGizmo` with its `PlaneSnapshot` record,
+and `vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceEvent2InfinitePlane
+GizmoMapper`. Neither appears in any authoritative source group, as with the
+`RayGizmo` pair above, and neither touches the Swing question. The gizmo holds
+its pending snapshot in a plain field rather than an `AtomicReference` for the
+reading already recorded for `RayGizmo`: a page runs producer and consumer on
+one event loop, where a plain field already has the get-and-set semantics the
+documented contract asks for. Java's two `setPlane` overloads become one
+signature pair over an optional first argument. The remaining inventory entries
+are still not ported, the phase stays Deferred, and its gate has not been run.
+
 `RendererConfigurationController` is **not** ported, because it extends
 `vsdk.toolkit.gui.Controller` and takes a `vsdk.toolkit.gui.KeyEvent`, both of
 which are this phase's gated work. Its F1..F9 bindings and shading-type cycle
@@ -2169,6 +2331,34 @@ family, MD2 meshes, 2D polygons, plane gizmos and solid textures remain
 unported. The source group remains an empty checkpoint and the phase gate has
 not been run.
 
+Fifth partial advance — 2026-09-13 (out of phase order, to unblock the
+`SolidTextureExample` module of the WebGL testsuite container):
+`Jogl4SolidTextureRenderer` and `Jogl4InfinitePlaneGizmoRenderer` are ported to
+`vsdk.toolkit.render.webgl` as `WebGLSolidTextureRenderer` and
+`WebGLInfinitePlaneGizmoRenderer`. The volume upload keyed on its revision, the
+per-body bounding-box uniforms that normalize an object-space position into a
+texture coordinate, the eight-light uniform sequence, the plane gizmo's tangent
+frame and its area-fraction sizing with both projection branches, and the
+shaders themselves — `solidTextureVertexShader.glsl` and
+`solidTexturePixelShader.glsl` unchanged — are the Java ones.
+
+Beyond this phase's recurring boundaries, three are specific to these two
+classes and are described in full under `SolidTextureExample`: GLSL ES has no
+`gl_ClipDistance` and WebGL no `GL_CLIP_DISTANCE0`, so `WebGLShaderPreprocessor`
+gained a clip-distance-to-varying translation with a matching fragment discard,
+applied unconditionally on both stages so that any shader pair still links; GLSL
+ES gives `sampler3D` no default precision, so the preprocessor now states
+`precision highp sampler3D;` in both stage headers, without which
+`solidTexturePixelShader.glsl` does not compile; and Java's constructor takes
+the `Path` of the shader directory, which has no counterpart because
+`WebGLShaderLoader` owns the served base URL, so the renderer takes no
+constructor argument.
+
+With this the `SolidTextureExample` module draws both of its operation modes and
+its cutting plane. Of the JOGL4 renderer family, MD2 meshes and 2D polygons
+remain unported. The source group remains an empty checkpoint and the phase gate
+has not been run.
+
 Exit: satisfy the standard phase gate before starting Phase 42.
 
 ### Phase 42: Animation
@@ -2332,7 +2522,7 @@ The port is complete only when all of the following are true:
 | 11 | Command-line options checkpoint | Complete — empty authoritative group; gate passed |
 | 12 | GUI progress-monitor contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed. Re-audited 2026-09-12: two console-layout defects fixed, and the four unlisted `gui.feedback.parallel` files ported; see the Phase 12 record |
 | 13 | Tangible-interface contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
-| 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed |
+| 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed. Partial advance 2026-09-13: the eleven unlisted `media` / `media.solidTexture` orphans Phase 27 recorded for Phase 45 are ported, closing that orphan set; see the Phase 14 record |
 | 15 | General processing | In progress — 6 / 22 symbols |
 | 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order |
 | 17 | Geometry base | Complete — 1 / 1 symbol; gate passed out of normal phase order |
@@ -2347,7 +2537,7 @@ The port is complete only when all of the following are true:
 | 26 | Lights | Complete — `Light` with its nested `LightDirection` record and the `AmbientLight`, `DirectionalLight`, `PointLight`, and `SpotLight` subclasses are bit-identical to the Java reference driver over direction, distance-limit, attenuation, copy, equality, hash, and text output. `LightType` has no source mapping in the current Java base and was not invented. No Java test source exists for this package. |
 | 27 | Tone-mapping checkpoint | Complete — the group is empty, the current Java base has no tone-mapping class, and no placeholder exists. The represented blocks (gamma transfer functions and the HDR buffers) were verified against Java drivers, which exposed and closed three byte-level defects in Phases 14 and 15. Eleven unlisted `media`/`solidTexture` production files were recorded as Phase 45 orphans. |
 | 28 | Scene model | Complete — `SimpleBody`, `SimpleBodyGroup`, `SimpleScene`, and `SimpleSceneSnapshot` are bit-identical to the Java reference driver over transform caches, every world/object conversion, all ray-detail masks, the translation-only and sphere fast paths, group bounds, scene light-id assignment, and snapshot isolation and immutability. Closing the diff required literal corrections to `Matrix4x4d.exportToQuaternion`, `Matrix4x4d.importFromQuaternion`, and `Quaterniond.normalized` from Phase 3. No Java test source has a dependency closure limited to this phase. |
-| 29 | Numerical-analysis checkpoint | Pending |
+| 29 | Numerical-analysis checkpoint | Pending — partial advance 2026-09-13: the audit found `LookUpTableSine` and `LookUpTableChecksum16` as unlisted orphans and both are ported; the group is still an empty checkpoint; see the Phase 29 record |
 | 30 | I/O wrappers | Pending |
 | 31 | I/O context checkpoint | Pending |
 | 32 | Binary I/O checkpoint | Pending |
@@ -2356,14 +2546,14 @@ The port is complete only when all of the following are true:
 | 35 | VRML I/O checkpoint | Pending |
 | 36 | Geometry I/O | Pending — partial advance: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and `ReaderMitScene` with `ImportContext` (5 / 51 entries); second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser; see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
-| 38 | GUI model and controllers | Deferred — partial advance 2026-09-12: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo` and `TangibleInterfaceEvent2RayGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
+| 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
 | 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — third and fourth partial advances 2026-09-12: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer` and `WebGLRayGizmoRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support; MD2, 2D-polygon, plane-gizmo and solid-texture renderers are still unported; see the Phase 41 record |
+| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer` and `WebGLSolidTextureRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; MD2 and 2D-polygon renderers are still unported; see the Phase 41 record |
 | 42 | Animation | Pending |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |
-| 45 | Orphan-inventory closure | Pending |
+| 45 | Orphan-inventory closure | Pending — the eleven `media` / `solidTexture` orphans recorded by Phase 27 are ported and closed under Phase 14; four gizmo/tangible-interface orphans are closed under Phase 38 and two `lookUpTables` orphans under Phase 29; the inventory comparison has not been re-run |
 | 46 | Textual-parity and dependency-closure audit | Pending |
 
 ### Phase 1 Checkpoint — 2026-09-09

@@ -159,6 +159,32 @@ export { Gizmo } from "./vsdk/toolkit/gui/gizmo/Gizmo.js";
 export { LightGizmoStyle } from "./vsdk/toolkit/gui/gizmo/LightGizmoStyle.js";
 export { LightGizmoOmniBillboard } from "./vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.js";
 export { RayGizmo, RaySnapshot } from "./vsdk/toolkit/gui/gizmo/RayGizmo.js";
+export { InfinitePlaneGizmo, PlaneSnapshot } from "./vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.js";
+export { TangibleInterfaceEvent2InfinitePlaneGizmoMapper } from "./vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2InfinitePlaneGizmoMapper.js";
+export { LookUpTableSine } from "./vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableSine.js";
+export { LookUpTableChecksum16 } from "./vsdk/toolkit/numericalAnalysis/lookUpTables/LookUpTableChecksum16.js";
+export { RGBAColorPalette } from "./vsdk/toolkit/media/RGBAColorPalette.js";
+export { IndexedColorImageHDRUncompressed } from "./vsdk/toolkit/media/IndexedColorImageHDRUncompressed.js";
+export { TextureUtils } from "./vsdk/toolkit/media/solidTexture/TextureUtils.js";
+export { ProceduralNoise } from "./vsdk/toolkit/media/solidTexture/procedural/ProceduralNoise.js";
+export { ColorTextureFixture } from "./vsdk/toolkit/media/solidTexture/procedural/ColorTextureFixture.js";
+export { BumpTextureFixture } from "./vsdk/toolkit/media/solidTexture/procedural/BumpTextureFixture.js";
+export {
+    ImageToSolidTextureProjectionMethods,
+    imageToSolidTextureProjectionMethodValue,
+    imageToSolidTextureProjectionMethodFromInt,
+} from "./vsdk/toolkit/media/solidTexture/from2d/ImageToSolidTextureProjectionMethods.js";
+export {
+    ImageToSolidTextureInterpolationTypes,
+    imageToSolidTextureInterpolationTypeValue,
+    imageToSolidTextureInterpolationTypeFromInt,
+} from "./vsdk/toolkit/media/solidTexture/from2d/ImageToSolidTextureInterpolationTypes.js";
+export { ControlledRGBAImageHDRUncompressed } from "./vsdk/toolkit/media/solidTexture/from2d/ControlledRGBAImageHDRUncompressed.js";
+export {
+    SolidTextureCoordinate,
+    SolidTextureCoordinateMapper,
+} from "./vsdk/toolkit/media/solidTexture/from2d/SolidTextureCoordinateMapper.js";
+export { ImageTexture } from "./vsdk/toolkit/media/solidTexture/from2d/ImageTexture.js";
 export { MediaEntity } from "./vsdk/toolkit/media/MediaEntity.js";
 export { Calligraphic2DBuffer } from "./vsdk/toolkit/media/Calligraphic2DBuffer.js";
 export { FourierShapeDescriptor } from "./vsdk/toolkit/media/FourierShapeDescriptor.js";

@@ -8,6 +8,11 @@ import {
   MeshUrlDialog,
   type MeshSelection,
 } from '../WebGLExamples/MeshExample/gui/mesh-url-dialog';
+import { SolidTextureExample } from '../WebGLExamples/SolidTextureExample/solid-texture-example';
+import {
+  SolidTextureUrlDialog,
+  type SolidTextureSelection,
+} from '../WebGLExamples/SolidTextureExample/gui/solid-texture-url-dialog';
 
 type ExplorerItem =
   | {
@@ -18,12 +23,25 @@ type ExplorerItem =
   | {
       kind: 'file';
       label: string;
-      exampleId: '_WebGLHelloWorld' | 'CameraExample' | 'ImageExample' | 'MeshExample';
+      exampleId:
+        | '_WebGLHelloWorld'
+        | 'CameraExample'
+        | 'ImageExample'
+        | 'MeshExample'
+        | 'SolidTextureExample';
     };
 
 @Component({
   selector: 'app-root',
-  imports: [WebGLHelloWorld, CameraExample, ImageExample, MeshExample, MeshUrlDialog],
+  imports: [
+    WebGLHelloWorld,
+    CameraExample,
+    ImageExample,
+    MeshExample,
+    MeshUrlDialog,
+    SolidTextureExample,
+    SolidTextureUrlDialog,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,6 +78,11 @@ export class App {
           label: 'MeshExample',
           exampleId: 'MeshExample',
         },
+        {
+          kind: 'file',
+          label: 'SolidTextureExample',
+          exampleId: 'SolidTextureExample',
+        },
       ],
     },
     { kind: 'folder', label: 'WebGPUExamples' },
@@ -87,26 +110,53 @@ export class App {
   protected readonly tangibleServiceUrl = signal<string | null>(null);
   protected readonly tangibleEnabled = signal<boolean>(false);
 
+  /**
+   * `SolidTextureExample` names its geometry the same way and for the same
+   * reason, and carries its own copy of the chooser, as the two Java projects
+   * each carry their own `awt.FileSelectorDialog`. Its selection is kept apart
+   * from `MeshExample`'s so that pointing one module at another mesh leaves the
+   * other module where it was.
+   */
+  protected readonly solidTextureMeshUrl = signal<string | null>(null);
+  protected readonly solidTextureUrlDialogOpen = signal<boolean>(false);
+  protected readonly solidTextureTangibleServiceUrl = signal<string | null>(null);
+  protected readonly solidTextureTangibleEnabled = signal<boolean>(false);
+
   protected selectItem(item: ExplorerItem): void {
     if (item.kind === 'file' && item.exampleId === 'MeshExample' && this.meshUrl() === null) {
       // Java runs `FileSelectorDialog` when the command line named no file.
       this.openMeshUrlDialog();
       return;
     }
+    if (
+      item.kind === 'file' &&
+      item.exampleId === 'SolidTextureExample' &&
+      this.solidTextureMeshUrl() === null
+    ) {
+      this.openSolidTextureUrlDialog();
+      return;
+    }
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
   }
 
   /**
-   * Right-clicking `MeshExample` reopens the chooser, which is how a running
-   * module is pointed at another mesh; every other tree item keeps the
-   * browser's own context menu.
+   * Right-clicking `MeshExample` or `SolidTextureExample` reopens that
+   * module's own chooser, which is how a running module is pointed at another
+   * mesh; every other tree item keeps the browser's own context menu.
    */
   protected onItemContextMenu(event: MouseEvent, item: ExplorerItem): void {
-    if (item.kind !== 'file' || item.exampleId !== 'MeshExample') {
+    if (item.kind !== 'file') {
       return;
     }
-    event.preventDefault();
-    this.openMeshUrlDialog();
+    if (item.exampleId === 'MeshExample') {
+      event.preventDefault();
+      this.openMeshUrlDialog();
+      return;
+    }
+    if (item.exampleId === 'SolidTextureExample') {
+      event.preventDefault();
+      this.openSolidTextureUrlDialog();
+    }
   }
 
   protected acceptMeshUrl(selection: MeshSelection): void {
@@ -127,6 +177,26 @@ export class App {
 
   private openMeshUrlDialog(): void {
     this.meshUrlDialogOpen.set(true);
+  }
+
+  protected acceptSolidTextureUrl(selection: SolidTextureSelection): void {
+    this.solidTextureUrlDialogOpen.set(false);
+    this.solidTextureTangibleServiceUrl.set(selection.tangibleServiceUrl);
+    this.solidTextureTangibleEnabled.set(selection.tangibleEnabled);
+    this.solidTextureMeshUrl.set(selection.meshUrl);
+    this.selectedItem.set('SolidTextureExample');
+  }
+
+  protected cancelSolidTextureUrl(): void {
+    this.solidTextureUrlDialogOpen.set(false);
+    if (this.solidTextureMeshUrl() === null) {
+      // Java answers a null file and the program reports "File not specified".
+      console.error('File not specified');
+    }
+  }
+
+  private openSolidTextureUrlDialog(): void {
+    this.solidTextureUrlDialogOpen.set(true);
   }
 
   protected clearSelection(): void {

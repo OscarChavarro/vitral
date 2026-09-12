@@ -81,6 +81,14 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'SolidTextureExample') {
+        <app-solid-texture-example
+          [meshUrl]="solidTextureMeshUrl()"
+          [tangibleServiceUrl]="solidTextureTangibleServiceUrl()"
+          [tangibleEnabled]="solidTextureTangibleEnabled()"
+          (deactivate)="clearSelection()"
+        />
+      }
     </div>
   </section>
 
@@ -91,6 +99,16 @@
       [initialTangibleEnabled]="tangibleEnabled()"
       (accept)="acceptMeshUrl($event)"
       (cancel)="cancelMeshUrl()"
+    />
+  }
+
+  @if (solidTextureUrlDialogOpen()) {
+    <app-solid-texture-url-dialog
+      [initialUrl]="solidTextureMeshUrl()"
+      [initialTangibleServiceUrl]="solidTextureTangibleServiceUrl()"
+      [initialTangibleEnabled]="solidTextureTangibleEnabled()"
+      (accept)="acceptSolidTextureUrl($event)"
+      (cancel)="cancelSolidTextureUrl()"
     />
   }
 </main>

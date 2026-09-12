@@ -18,3 +18,5 @@ export { WebGLMinMaxRenderer } from "./vsdk/toolkit/render/webgl/WebGLMinMaxRend
 export { WebGLArrowRenderer } from "./vsdk/toolkit/render/webgl/WebGLArrowRenderer.js";
 export { WebGLSphereRenderer } from "./vsdk/toolkit/render/webgl/WebGLSphereRenderer.js";
 export { WebGLRayGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLRayGizmoRenderer.js";
+export { WebGLInfinitePlaneGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLInfinitePlaneGizmoRenderer.js";
+export { WebGLSolidTextureRenderer } from "./vsdk/toolkit/render/webgl/WebGLSolidTextureRenderer.js";
