@@ -15,6 +15,7 @@
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 static const float IMAGE_DEPTH_BIAS_FACTOR = -1.0f;
@@ -358,7 +359,8 @@ public:
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float* mvp = camera->calculateProjectionMatrix().exportToFloatArrayColumnOrder();
+        Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
+        float* mvp = projection.exportToFloatArrayColumnOrder();
         Matrix4x4d identity = Matrix4x4d::identityMatrix();
 
         corridor->drawGL(mvp, identity);
@@ -394,6 +396,7 @@ public:
             earthImage = nullptr;
         }
 
+        OpenGL4CameraRenderer::dispose();
         OpenGL4ImageRenderer::dispose();
         OpenGL4MatrixRenderer::release();
 

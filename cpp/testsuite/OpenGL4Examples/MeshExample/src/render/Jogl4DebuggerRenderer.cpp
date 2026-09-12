@@ -13,6 +13,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
 #include "vsdk/toolkit/media/Image.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RayGizmoRenderer.h"
@@ -217,6 +218,7 @@ void Jogl4DebuggerRenderer::dispose()
     for ( size_t i = 0; i < sizeof(programs) / sizeof(programs[0]); i++ ) {
         if ( programs[i] != 0 ) glDeleteProgram(programs[i]);
     }
+    OpenGL4CameraRenderer::dispose();
     OpenGL4RayGizmoRenderer::dispose();
     OpenGL4LightRenderer::dispose();
     OpenGL4ImageRenderer::dispose();
@@ -244,7 +246,7 @@ void Jogl4DebuggerRenderer::drawSimpleBody(SimpleBody* body, Camera* camera, con
     }
 
     Matrix4x4d modelMatrix = body->getTransformationMatrix();
-    Matrix4x4d projection = camera->calculateProjectionMatrix();
+    Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
     Matrix4x4d modelViewProjection = projection.multiply(modelMatrix);
     Matrix4x4d modelIt = modelMatrix.invert().transpose();
 

@@ -12,6 +12,7 @@ find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
 add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.cpp

@@ -38,6 +38,7 @@
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 #include "vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
@@ -364,6 +365,7 @@ public:
         delete camera;
         OpenGL4SphereRenderer::dispose();
         OpenGL4ImageRenderer::dispose();
+        OpenGL4CameraRenderer::dispose();
         OpenGL4MatrixRenderer::release();
         if (window) glfwDestroyWindow(window);
         glfwTerminate();

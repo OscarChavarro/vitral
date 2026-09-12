@@ -13,6 +13,7 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 GLFWwindow* window = nullptr;
 Camera* camera = nullptr;
@@ -156,7 +157,8 @@ int main(int argc, char** argv) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float* mvp = camera->calculateProjectionMatrix().exportToFloatArrayColumnOrder();
+        Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
+        float* mvp = projection.exportToFloatArrayColumnOrder();
         Matrix4x4d identity = Matrix4x4d::identityMatrix();
 
         corridor->drawGL(mvp, identity);
@@ -174,6 +176,7 @@ int main(int argc, char** argv) {
         delete corridor;
         corridor = nullptr;
     }
+    OpenGL4CameraRenderer::dispose();
     if (controller) {
         delete controller;
         controller = nullptr;

@@ -16,6 +16,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RayGizmoRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 
@@ -44,7 +45,7 @@ void OpenGL4RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::
 
     RendererConfiguration quality = buildSurfaceQuality();
     Matrix4x4d primaryModelMatrix = gizmo->getBody()->getTransformationMatrix();
-    Matrix4x4d projection = camera->calculateProjectionMatrix();
+    Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
     SimpleScene* scene = gizmo->buildScene();
 
     java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();

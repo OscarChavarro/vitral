@@ -25,6 +25,7 @@
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.h"
 #include "model/PolygonClippingFixtures.h"
 #include "model/PolygonSurfaceTessellationMode.h"
@@ -550,6 +551,8 @@ static void releaseGlResources(App& app)
     if (app.vao)  { glDeleteVertexArrays(1, &app.vao); app.vao = 0; }
     if (app.lineProg)     { glDeleteProgram(app.lineProg); app.lineProg = 0; }
     if (app.constantProg) { glDeleteProgram(app.constantProg); app.constantProg = 0; }
+
+    OpenGL4CameraRenderer::dispose();
 }
 
 static int runOffline(const CommandLineOptions& options)
@@ -577,7 +580,7 @@ static int runOffline(const CommandLineOptions& options)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Matrix4x4d mvp = app.camera.calculateProjectionMatrix();
+    Matrix4x4d mvp = OpenGL4CameraRenderer::activate(&app.camera);
     RendererConfiguration polygonQuality = app.quality.clone();
     polygonQuality.setSurfaces(polygonQuality.isSurfacesSet() && app.showFilled);
 
@@ -662,7 +665,7 @@ int main(int argc, char** argv)
         int fbh = 900;
         glfwGetFramebufferSize(w, &fbw, &fbh);
         app.camera.updateViewportResize(fbw, fbh);
-        Matrix4x4d mvp = app.camera.calculateProjectionMatrix();
+        Matrix4x4d mvp = OpenGL4CameraRenderer::activate(&app.camera);
         RendererConfiguration polygonQuality = app.quality.clone();
         polygonQuality.setSurfaces(polygonQuality.isSurfacesSet() && app.showFilled);
 

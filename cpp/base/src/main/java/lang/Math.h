@@ -42,9 +42,21 @@ class Math {
     static double sqrt(double a);
     static int getExponent(double a);
     static int getExponent(float a);
+    static double toRadians(double angdeg);
+    static double toDegrees(double angrad);
     static double scalb(double a, int scaleFactor);
     static float scalb(float a, int scaleFactor);
 };
+
+inline double
+Math::toRadians(double angdeg) {
+    return angdeg / 180.0 * PI;
+}
+
+inline double
+Math::toDegrees(double angrad) {
+    return angrad * 180.0 / PI;
+}
 
 inline double
 Math::ceil(double a) {
