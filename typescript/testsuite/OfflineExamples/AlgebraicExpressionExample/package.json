@@ -1,0 +1,17 @@
+{
+    "name": "@vitral/offline-example-algebraic-expression",
+    "version": "1.3.0",
+    "private": true,
+    "description": "Console counterpart of java/testsuite/OfflineExamples/AlgebraicExpressionExample",
+    "type": "module",
+    "dependencies": {
+        "@vitral/base": "1.3.0"
+    },
+    "scripts": {
+        "build": "tsc --build ./tsconfig.json",
+        "start": "node ./dist/AlgebraicExpressionExample.js"
+    },
+    "engines": {
+        "node": ">=22"
+    }
+}

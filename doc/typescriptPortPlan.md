@@ -151,6 +151,35 @@ these eleven files are orphans of the 580-entry graph rather than a missed
 obligation of Phase 14. They are recorded here as the first named input to
 Phase 45, and no placeholder was created for them.
 
+## Offline Example Programs
+
+The Java offline examples under `java/testsuite/OfflineExamples` are migrated to
+`typescript/testsuite/OfflineExamples` as minimal Node console projects, one
+directory per Java project, each depending on `@vitral/base` and `@vitral/fs`
+as packages and carrying the same `run*.sh` entry points as its Java
+counterpart. They are consumers, not workspaces: the root build does not
+include them, and each is built by its own `run*.sh`.
+
+Their purpose is executable parity evidence. Each example must produce, for the
+same arguments, the same output as the Java program built from `java/base`
+(plus `java/awt` where the Java testsuite classpath includes it).
+
+Migrated so far:
+
+  - `AlgebraicExpressionExample` — 2026-09-12. Console output matches Java for
+    no-argument, multi-argument, right-associative power, and named-constant
+    cases. Two divergences remain, both inside the already-ported
+    `AlgebraicExpression` and not in the example: Java folds a negative literal
+    into a constant (`(-4.00)`) where the port emits a unary node
+    (`(-(4.00))`), and parse errors carry different exception text. The cause is
+    that `AlgebraicExpression.ts` (86 lines) is a regex plus precedence-climbing
+    rewrite rather than a port of the Java `StreamTokenizer` recursive-descent
+    parser (308 lines); it is recorded here as a Phase 4 literal-parity finding.
+  - `Rasterizer2DExample` — 2026-09-12. `LineTest`, `PolygonTest`, and
+    `SmoothPolygonTest` write 640x480 PNG files whose decoded pixels are
+    identical to the Java reference, 0 differing pixels each. It required the
+    out-of-phase advances recorded under Phases 33 and 40.
+
 ## Analyzed State
 
 - Java production source of record: `java/base/src/main`; the repository also separates desktop and GPU integrations into `java/awt`, `java/jogl2`, and `java/jogl4`.
@@ -1278,6 +1307,44 @@ vsdk.toolkit.io.image.NativeImageReaderWrapper
 vsdk.toolkit.io.image.RGBColorPalettePersistence
 ```
 
+Partial advance — 2026-09-12 (out of phase order, to unblock
+`testsuite/OfflineExamples/Rasterizer2DExample`): the image-export path is
+ported, the importers and the SGI/Targa/native readers are not. Three of the
+eight entries are touched: `ImageNotRecognizedException` and
+`ImagePersistenceHelper` in full, and `ImagePersistence` restricted to its
+export surface (`exportPNG`, `exportPNG_24bitRgb`, `exportPPM`, the helper
+registry). The phase stays Pending until the remaining entries and the
+importers land, and its gate has not been run.
+
+The architecture departs from Java deliberately, and the departure is the
+design of record for image formats:
+
+  - Encoding is platform-neutral and lives in `@vitral/base`, so a browser
+    frontend can build image bytes in memory and ship them to a remote service.
+    `ImagePersistence.exportPNGToByteArray` and `exportPPMToByteArray` are the
+    in-memory entry points; they have no Java counterpart because the JVM
+    always had a file system.
+  - PPM is hand-written and dependency-free, as in the Java and C++ ports.
+  - PNG is written by `ImagePersistencePng`, a Vitral-owned encoder with no
+    Java counterpart: Java reaches PNG through `javax.imageio` and C++ through
+    `libpng`, and neither exists in a browser. Its `IDAT` payload comes from a
+    replaceable `ImageDeflater`; the built-in default emits stored DEFLATE
+    blocks and needs no dependency, and `@vitral/fs` swaps in `node:zlib` for
+    real compression. Both produce standard PNG files.
+  - `java.io.File` never appears in `@vitral/base`. The file-bound flavors are
+    a `@vitral/fs` subclass of `ImagePersistence`, consistent with the
+    PersistenceElement Runtime Architecture section.
+  - Formats that warrant a third-party codec (JPEG, for one) are to be added as
+    NPM dependencies of `@vitral/fs`, never of `@vitral/base`. For those, and
+    for any format handed to an external codec, the port is functionally
+    equivalent to Java rather than textually 1:1.
+
+These export classes are therefore explicitly exempt from the 1:1 textual
+requirement; the rasterization and geometry code they serve is not.
+
+Deferred with the phase: `ImagePersistence` does not yet extend
+`PersistenceElement` (Phase 30), which remains unported.
+
 Exit: satisfy the standard phase gate before starting Phase 34.
 
 ### Phase 34: XML I/O
@@ -1526,6 +1593,23 @@ vsdk.toolkit.render.raytracing.SimpleRaytracer.SceneObjectRenderData
 vsdk.toolkit.render.raytracing.SimpleRaytracer.SceneRenderCache
 ```
 
+Partial advance — 2026-09-12 (out of phase order, to unblock
+`testsuite/OfflineExamples/Rasterizer2DExample`): `RenderingElement` and
+`vsdk.toolkit.render.raster.Rasterizer2D` (with its `FillEdge` and
+`SpanShader` members) are ported 1:1 and exported through `@vitral/base`.
+Java's `Collections.sort` over the active-edge table maps onto the ported
+`java.util.Collections.sort`, so the TimSort comparison sequence and the
+`Double.compare` / `Integer.compare` tie-breaks are preserved; every `(int)`
+cast is `Math.trunc`. The remaining 32 entries, including the second
+`vsdk.toolkit.render.Rasterizer2D` copy, the hidden-line and ray-tracing
+families, are not ported, the phase stays Pending, and its gate has not been
+run.
+
+Verified against the Java reference on 2026-09-12: the three
+`Rasterizer2DExample` programs produce images whose decoded pixels are
+identical to those of the Java build (`base` + `awt`), 0 differing pixels in
+640x480 for all three.
+
 Exit: satisfy the standard phase gate before starting Phase 41.
 
 ### Phase 41: GPU rendering architecture checkpoint
@@ -1722,14 +1806,14 @@ The port is complete only when all of the following are true:
 | 30 | I/O wrappers | Pending |
 | 31 | I/O context checkpoint | Pending |
 | 32 | Binary I/O checkpoint | Pending |
-| 33 | Image I/O | Pending |
+| 33 | Image I/O | Pending — partial advance: export path only (3 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
 | 36 | Geometry I/O | Pending |
 | 37 | SGL checkpoint | Pending |
 | 38 | GUI model and controllers | Pending |
 | 39 | Software shaders | Pending |
-| 40 | CPU rendering | Pending |
+| 40 | CPU rendering | Pending — partial advance: `RenderingElement` and `render.raster.Rasterizer2D` (3 / 35 entries); see the Phase 40 record |
 | 41 | GPU rendering architecture checkpoint | Pending |
 | 42 | Animation | Pending |
 | 43 | Application framework | Pending |

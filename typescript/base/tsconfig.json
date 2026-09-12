@@ -125,7 +125,10 @@
         "src/main/vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.ts",
         "src/main/vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.ts",
         "src/main/vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.ts",
-        "src/main/vsdk/toolkit/environment/geometry/geometricProcessing/**/*.ts"
+        "src/main/vsdk/toolkit/environment/geometry/geometricProcessing/**/*.ts",
+        "src/main/vsdk/toolkit/render/RenderingElement.ts",
+        "src/main/vsdk/toolkit/render/raster/Rasterizer2D.ts",
+        "src/main/vsdk/toolkit/io/image/**/*.ts"
     ],
     "exclude": [
         "src/main/java/io/PrintStream.ts",

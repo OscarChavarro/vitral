@@ -8,3 +8,4 @@ export { FileOutputStream } from "./java/io/FileOutputStream.js";
 export { FileReader } from "./java/io/FileReader.js";
 export { RandomAccessFile } from "./java/io/RandomAccessFile.js";
 export { MicrofacetCsvLoader } from "./vsdk/toolkit/environment/material/MicrofacetCsvLoader.js";
+export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";

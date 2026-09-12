@@ -288,3 +288,10 @@ export {
     type WorkerSuccess,
     type WorkerTransferValue,
 } from "./java/concurrent/WorkerProtocol.js";
+
+export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
+export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
+export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRecognizedException.js";
+export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";
+export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image/ImagePersistencePng.js";
+export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
