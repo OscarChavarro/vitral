@@ -179,6 +179,22 @@ Migrated so far:
     `SmoothPolygonTest` write 640x480 PNG files whose decoded pixels are
     identical to the Java reference, 0 differing pixels each. It required the
     out-of-phase advances recorded under Phases 33 and 40.
+  - `PolygonTriangulation` — 2026-09-12. Full 1:1 port of the Java project,
+    including its `io`, `model`, `options`, and `render` application packages
+    and both `run.sh` and `runAll.sh` entry points. It is the public oracle for
+    the monotone decomposition triangulator: run over all 60 fixtures in
+    `etc/polygons`, the TypeScript program produces byte-for-byte identical
+    console output (triangle count, indices, and order) and 1024x512 PNG panels
+    whose decoded pixels match the Java reference exactly, 0 differing pixels in
+    all 60 cases. No change to `MonotoneDecompositionTriangulator` or its
+    `monotoneDecomposition` backend was needed. Three JDK facilities with no
+    Vitral counterpart are mapped to their Node equivalents, as the Java program
+    itself uses the JDK directly: `Files.readAllLines` to `node:fs`
+    `readFileSync`, `Path.of(...).getFileName()` to `node:path` `basename`, and
+    `java.util.regex` to a `RegExp`. Numeric parsing goes through the ported
+    `Integer.parseInt` and `Double.parseDouble` so that malformed input fails
+    the Java way, and the `(byte)` palette literals go through
+    `VSDK.unsigned8BitInteger2signedByte`.
 
 ## Analyzed State
 
@@ -908,6 +924,8 @@ The Java and C++ repositories contain the future public-oracle examples at `java
 Phase 25.6 completion: `MonotoneDecompositionTriangulator` has the public contour path with flattened original indices, contour nesting/orientation, visible-bridge selection, and ear clipping. Bridge selection follows the Java checks against the outer boundary, the active hole, remaining holes, and midpoint containment. Its four private Java stages (`stage1PrepareAndOrder`, `stage2BootStrap`, `stage3IncrementalBatchedInsertion`, and `stage4FinalizeAndExtractTriangles`) are ported and connected to the completed 25.5 backend. A direct regression bypasses the contour-aware result and verifies the full Seidel construction and monotone extraction path on a convex polygon.
 
 Literal-parity audit (2026-09-11): `_ContourAwarePolygonTriangulator` has the same 26 methods as Java; `_Monotone` has the same 11 methods, including every `SP_*` branch and both extraction methods; and `MonotoneDecompositionTriangulator` has the same four private stages plus `triangulate`. Deterministic regressions cover a convex contour, one annular hole (with exact Java triangle ordering), two disjoint holes, an island nested inside a hole, a degenerate contour, and a concave outer contour with a hole. The broader 60-file Java/C++ testsuite fixture replication remains intentionally deferred, as requested, and is not part of the 25.6 implementation gate. Phase 25.6 is closed.
+
+Public-oracle validation (2026-09-12): the deferred 60-fixture replication is now covered outside the test suite by the migrated `PolygonTriangulation` offline example, which runs the public triangulator over every file in `etc/polygons` and matches the Java reference exactly in both triangle lists and rendered output. See the Offline Example Programs section. The triangulator required no correction.
 
 Final 25.5/25.6 gate (2026-09-11): `npm run verify` completed successfully, including clean builds of `@vitral/base` and `@vitral/fs`, all 106 tests in 55 modules, package creation, and the downstream compile/package-consumption checks. `git diff --check` is clean. Phase 25.7 is active. The shared operator now has Java's complete method inventory; the Mantyla splitter (including its two Java-named helper classes), modeler wrapper, sector/sector and sector/face records, and profile-difference fallback are ported. Sixteen Java production source files remain absent, concentrated in the boolean classification/intersection/connect/finish pipeline, the remaining structural fallbacks, and fixtures.
 

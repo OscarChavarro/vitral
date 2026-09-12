@@ -1,4 +1,4 @@
 {
     "files": [],
-    "references": [{ "path": "./base" }, { "path": "./fs" }]
+    "references": [{ "path": "./base" }, { "path": "./fs" }, { "path": "./webgl" }]
 }

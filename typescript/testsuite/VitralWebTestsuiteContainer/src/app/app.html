@@ -1,0 +1,70 @@
+<main class="application-shell">
+  <aside class="explorer" aria-label="Explorador de ejemplos">
+    <div class="explorer-title">EXPLORER</div>
+
+    <nav class="tree" aria-label="Árbol de elementos">
+      <div role="tree">
+        <div class="tree-item root-item" role="treeitem" aria-expanded="true">
+          <span class="chevron" aria-hidden="true"></span>
+          <span class="folder-icon open" aria-hidden="true"></span>
+          <span>Vitral</span>
+        </div>
+
+        <div class="tree-children" role="group">
+          @for (item of treeItems; track item.label) {
+            <button
+              class="tree-item"
+              [class.folder-item]="item.kind === 'folder'"
+              [class.file-item]="item.kind === 'file'"
+              type="button"
+              role="treeitem"
+              [attr.aria-expanded]="item.kind === 'folder' && item.children ? 'true' : null"
+              [class.selected]="isSelected(item)"
+              [attr.aria-selected]="isSelected(item)"
+              (click)="selectItem(item)"
+            >
+              @if (item.kind === 'folder') {
+                <span class="folder-icon" aria-hidden="true"></span>
+              } @else {
+                <span class="file-icon" aria-hidden="true"></span>
+              }
+              <span>{{ item.label }}</span>
+            </button>
+
+            @if (item.kind === 'folder' && item.children?.length) {
+              <div class="tree-children nested" role="group">
+                @for (child of item.children; track child.label) {
+                  <button
+                    class="tree-item file-item child-item"
+                    type="button"
+                    role="treeitem"
+                    [class.selected]="isSelected(child)"
+                    [attr.aria-selected]="isSelected(child)"
+                    (click)="selectItem(child)"
+                  >
+                    <span class="file-icon" aria-hidden="true"></span>
+                    <span>{{ child.label }}</span>
+                  </button>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <section class="workspace-pane" aria-label="Área de trabajo">
+    <div
+      #workspace
+      class="workspace"
+      id="workspace"
+      [attr.data-selection]="selectedItem()"
+      [attr.data-origin]="workspaceOrigin.toString()"
+    >
+      @if (selectedItem() === '_WebGLHelloWorld') {
+        <app-webgl-hello-world />
+      }
+    </div>
+  </section>
+</main>

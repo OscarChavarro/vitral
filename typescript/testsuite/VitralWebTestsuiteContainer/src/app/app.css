@@ -1,0 +1,165 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.application-shell {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  min-height: 100dvh;
+  background: #f7f8fa;
+  color: #26313d;
+}
+
+.explorer {
+  min-width: 0;
+  border-right: 1px solid #d8dee6;
+  background: #f1f3f6;
+}
+
+.explorer-title {
+  padding: 14px 16px 10px;
+  color: #66717e;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.tree {
+  padding: 2px 8px;
+  font-size: 0.84rem;
+}
+
+.tree-item {
+  display: flex;
+  width: 100%;
+  min-height: 30px;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.root-item {
+  font-weight: 600;
+}
+
+.folder-item {
+  padding: 0 8px 0 31px;
+  cursor: pointer;
+}
+
+.file-item {
+  padding: 0 8px 0 31px;
+  cursor: pointer;
+}
+
+.child-item {
+  padding-left: 49px;
+}
+
+.folder-item:hover,
+.file-item:hover {
+  background: #e3e7ec;
+}
+
+.folder-item.selected,
+.file-item.selected {
+  background: #d7e5f5;
+  color: #174d7d;
+}
+
+.tree-children {
+  position: relative;
+}
+
+.tree-children::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15px;
+  width: 1px;
+  background: #ccd3dc;
+  content: '';
+}
+
+.chevron {
+  width: 7px;
+  height: 7px;
+  margin-left: 5px;
+  border-right: 1.5px solid #687481;
+  border-bottom: 1.5px solid #687481;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.folder-icon {
+  position: relative;
+  width: 15px;
+  height: 11px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: #d7a928;
+}
+
+.folder-icon::before {
+  position: absolute;
+  top: -3px;
+  left: 1px;
+  width: 7px;
+  height: 4px;
+  border-radius: 2px 2px 0 0;
+  background: inherit;
+  content: '';
+}
+
+.folder-icon.open {
+  background: #c8951c;
+}
+
+.file-icon {
+  position: relative;
+  width: 12px;
+  height: 15px;
+  flex: 0 0 auto;
+  border: 1px solid #8e98a5;
+  border-radius: 2px;
+  background: #ffffff;
+}
+
+.file-icon::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 5px;
+  height: 1px;
+  background: #8e98a5;
+  box-shadow: 0 4px 0 #8e98a5;
+  content: '';
+}
+
+.workspace-pane {
+  min-width: 0;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.workspace {
+  width: 100%;
+  height: 100%;
+  min-height: calc(100dvh - 24px);
+}
+
+.workspace app-webgl-hello-world {
+  min-height: calc(100dvh - 24px);
+}
+
+@media (max-width: 640px) {
+  .application-shell {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+}

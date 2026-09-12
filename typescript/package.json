@@ -4,11 +4,12 @@
     "private": true,
     "workspaces": [
         "base",
-        "fs"
+        "fs",
+        "webgl"
     ],
     "scripts": {
         "clean": "./scripts/clean.sh",
-        "build": "npm run --workspace @vitral/base build && npm run --workspace @vitral/fs build",
+        "build": "npm run --workspace @vitral/base build && npm run --workspace @vitral/fs build && npm run --workspace @vitral/webgl build",
         "build:fs": "npm run build && npm run --workspace @vitral/fs build",
         "api-test:concurrency": "npm run build && npm run build --prefix testsuite/_APITests/ConcurrencyWorkersForBrowsers && npm run build --prefix testsuite/_APITests/ConcurrencyFibers",
         "test": "npm run --workspace @vitral/base test",
