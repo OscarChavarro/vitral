@@ -154,7 +154,8 @@
   min-height: calc(100dvh - 24px);
 }
 
-.workspace app-webgl-hello-world {
+.workspace app-webgl-hello-world,
+.workspace app-camera-example {
   min-height: calc(100dvh - 24px);
 }
 

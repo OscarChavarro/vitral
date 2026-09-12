@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Vector3Dd } from '@vitral/base';
 import { WebGLHelloWorld } from '../_APITests/_WebGLHelloWorld/webgl-hello-world';
+import { CameraExample } from '../WebGLExamples/CameraExample/camera-example';
 
 type ExplorerItem =
   | {
@@ -11,12 +12,12 @@ type ExplorerItem =
   | {
       kind: 'file';
       label: string;
-      exampleId: '_WebGLHelloWorld';
+      exampleId: '_WebGLHelloWorld' | 'CameraExample';
     };
 
 @Component({
   selector: 'app-root',
-  imports: [WebGLHelloWorld],
+  imports: [WebGLHelloWorld, CameraExample],
   templateUrl: './app.html',
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,7 +35,17 @@ export class App {
         },
       ],
     },
-    { kind: 'folder', label: 'WebGLExamples' },
+    {
+      kind: 'folder',
+      label: 'WebGLExamples',
+      children: [
+        {
+          kind: 'file',
+          label: 'CameraExample',
+          exampleId: 'CameraExample',
+        },
+      ],
+    },
     { kind: 'folder', label: 'WebGPUExamples' },
     { kind: 'folder', label: 'Tools' },
     { kind: 'folder', label: 'ApplicationCases' },
@@ -45,6 +56,10 @@ export class App {
 
   protected selectItem(item: ExplorerItem): void {
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
+  }
+
+  protected clearSelection(): void {
+    this.selectedItem.set(null);
   }
 
   protected isSelected(item: ExplorerItem): boolean {

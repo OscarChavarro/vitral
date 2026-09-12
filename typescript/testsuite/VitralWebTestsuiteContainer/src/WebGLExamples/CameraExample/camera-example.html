@@ -1,0 +1,16 @@
+<canvas
+  #canvas
+  class="camera-canvas"
+  tabindex="0"
+  aria-label="WebGL Camera Example"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointerleave)="onPointerUp($event)"
+  (wheel)="onWheel($event)"
+  (keydown)="onKeyDown($event)"
+></canvas>
+
+@if (statusMessage()) {
+  <div class="status-message" role="status">{{ statusMessage() }}</div>
+}

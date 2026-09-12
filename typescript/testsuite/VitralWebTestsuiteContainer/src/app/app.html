@@ -65,6 +65,9 @@
       @if (selectedItem() === '_WebGLHelloWorld') {
         <app-webgl-hello-world />
       }
+      @if (selectedItem() === 'CameraExample') {
+        <app-camera-example (deactivate)="clearSelection()" />
+      }
     </div>
   </section>
 </main>

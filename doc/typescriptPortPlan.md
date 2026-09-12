@@ -1642,6 +1642,24 @@ Class inventory:
 (no class entries; the file contains only its group header)
 ```
 
+Partial advance — 2026-09-12 (selected browser/WebGL runtime): created the
+`@vitral/webgl` workspace as the browser GPU integration package and added
+`vsdk.toolkit.render.webgl.WebGLCameraRenderer`,
+`vsdk.toolkit.render.webgl.WebGLMatrixRenderer`, and
+`vsdk.toolkit.fixtures.WebGLSimpleCorridorSample`. The camera renderer ports
+the activation and camera-volume/frustum line generation pattern from
+`java/jogl4/src/main/vsdk/toolkit/render/jogl/Jogl4CameraRenderer.java` to
+WebGL2, and the corridor fixture ports the generated quad corridor used by
+`java/jogl4/src/main/vsdk/toolkit/fixtures/Jogl4SimpleCorridorSample.java`.
+Both use `@vitral/base` math/camera models and upload geometry through reusable
+WebGL resources. This is a partial GPU-backend advance only: the source group
+remains an empty checkpoint, the broader JOGL4 renderer family is not declared
+complete, and the phase gate has not been run.
+To support the browser event boundary selected for this runtime,
+`vsdk.toolkit.gui.WebSystem` was also added in `@vitral/webgl` as the Web
+counterpart to the AWT/GLFW event adapters; Phase 38 camera controllers remain
+unported.
+
 Exit: satisfy the standard phase gate before starting Phase 42.
 
 ### Phase 42: Animation

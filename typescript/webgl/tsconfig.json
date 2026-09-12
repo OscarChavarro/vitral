@@ -20,5 +20,6 @@
         "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
         "types": []
     },
+    "references": [{ "path": "../base" }],
     "include": ["src/main/**/*.ts"]
 }

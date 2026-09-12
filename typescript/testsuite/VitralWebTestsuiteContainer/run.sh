@@ -9,6 +9,12 @@ if [[ ! -d node_modules ]]; then
     npm install
 fi
 
+# Angular/Vite caches optimized linked dependencies under .angular/cache.  The
+# local @vitral/webgl package is a symlinked file dependency, so after adding
+# new exports the dev server can keep serving a stale optimized bundle and fail
+# before Angular bootstraps.
+rm -rf "$SCRIPT_DIR/.angular/cache"
+
 exec npm start -- \
     --host 0.0.0.0 \
     --allowed-hosts true \
