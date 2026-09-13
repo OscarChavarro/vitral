@@ -8,6 +8,8 @@ import {
   MeshUrlDialog,
   type MeshSelection,
 } from '../WebGLExamples/MeshExample/gui/mesh-url-dialog';
+import { MD2Example } from '../WebGLExamples/MD2Example/md2-example';
+import { Md2UrlDialog, type Md2Selection } from '../WebGLExamples/MD2Example/gui/md2-url-dialog';
 import { SolidTextureExample } from '../WebGLExamples/SolidTextureExample/solid-texture-example';
 import {
   SolidTextureUrlDialog,
@@ -28,7 +30,8 @@ type ExplorerItem =
         | 'CameraExample'
         | 'ImageExample'
         | 'MeshExample'
-        | 'SolidTextureExample';
+        | 'SolidTextureExample'
+        | 'MD2Example';
     };
 
 @Component({
@@ -41,6 +44,8 @@ type ExplorerItem =
     MeshUrlDialog,
     SolidTextureExample,
     SolidTextureUrlDialog,
+    MD2Example,
+    Md2UrlDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -83,6 +88,11 @@ export class App {
           label: 'SolidTextureExample',
           exampleId: 'SolidTextureExample',
         },
+        {
+          kind: 'file',
+          label: 'MD2Example',
+          exampleId: 'MD2Example',
+        },
       ],
     },
     { kind: 'folder', label: 'WebGPUExamples' },
@@ -122,6 +132,16 @@ export class App {
   protected readonly solidTextureTangibleServiceUrl = signal<string | null>(null);
   protected readonly solidTextureTangibleEnabled = signal<boolean>(false);
 
+  /**
+   * `MD2Example` names no file on its command line: `Md2MeshExample.init()`
+   * hard-codes the model and the skin it reads, relative to the program's own
+   * directory. A browser has no such directory, so both are named by URL here,
+   * with the Java paths as the defaults.
+   */
+  protected readonly md2Url = signal<string | null>(null);
+  protected readonly md2TextureUrl = signal<string | null>(null);
+  protected readonly md2UrlDialogOpen = signal<boolean>(false);
+
   protected selectItem(item: ExplorerItem): void {
     if (item.kind === 'file' && item.exampleId === 'MeshExample' && this.meshUrl() === null) {
       // Java runs `FileSelectorDialog` when the command line named no file.
@@ -136,12 +156,16 @@ export class App {
       this.openSolidTextureUrlDialog();
       return;
     }
+    if (item.kind === 'file' && item.exampleId === 'MD2Example' && this.md2Url() === null) {
+      this.openMd2UrlDialog();
+      return;
+    }
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
   }
 
   /**
-   * Right-clicking `MeshExample` or `SolidTextureExample` reopens that
-   * module's own chooser, which is how a running module is pointed at another
+   * Right-clicking `MeshExample`, `SolidTextureExample` or `MD2Example`
+   * reopens that module's own chooser, which is how a running module is pointed at another
    * mesh; every other tree item keeps the browser's own context menu.
    */
   protected onItemContextMenu(event: MouseEvent, item: ExplorerItem): void {
@@ -156,6 +180,11 @@ export class App {
     if (item.exampleId === 'SolidTextureExample') {
       event.preventDefault();
       this.openSolidTextureUrlDialog();
+      return;
+    }
+    if (item.exampleId === 'MD2Example') {
+      event.preventDefault();
+      this.openMd2UrlDialog();
     }
   }
 
@@ -197,6 +226,24 @@ export class App {
 
   private openSolidTextureUrlDialog(): void {
     this.solidTextureUrlDialogOpen.set(true);
+  }
+
+  protected acceptMd2Url(selection: Md2Selection): void {
+    this.md2UrlDialogOpen.set(false);
+    this.md2TextureUrl.set(selection.textureUrl);
+    this.md2Url.set(selection.md2Url);
+    this.selectedItem.set('MD2Example');
+  }
+
+  protected cancelMd2Url(): void {
+    this.md2UrlDialogOpen.set(false);
+    if (this.md2Url() === null) {
+      console.error('File not specified');
+    }
+  }
+
+  private openMd2UrlDialog(): void {
+    this.md2UrlDialogOpen.set(true);
   }
 
   protected clearSelection(): void {

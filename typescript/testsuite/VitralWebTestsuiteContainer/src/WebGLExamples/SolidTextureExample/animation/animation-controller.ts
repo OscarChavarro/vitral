@@ -12,10 +12,12 @@ import type { SolidTextureModel } from '../model/solid-texture-model';
  * by the elapsed time when the animation is running. It repaints when the
  * rotation moved or when a gizmo was aged, and not otherwise.
  *
- * That animation package has no TypeScript port yet (Phase 42), and a browser
- * page has no thread to give it: the tick source here is the page's own timer
- * at the same twenty-four ticks a second, and the listener body is the Java
- * one, its `e.getT()` becoming the seconds since {@link start} was called. A
+ * That animation package is now ported (Phase 42), but a browser page still has
+ * no thread to give it, and what this Java listener drives is the scene
+ * rotation and gizmo aging rather than a mesh, so the tick source here stays
+ * the page's own timer at the same twenty-four ticks a second, and the listener
+ * body is the Java one, its `e.getT()` becoming the seconds since
+ * {@link start} was called. A
  * `requestAnimationFrame` loop would have been the other candidate, and was not
  * chosen because it ties the tick rate to the display refresh, whereas the
  * gizmo aging this tick also performs is a wall-clock concern.

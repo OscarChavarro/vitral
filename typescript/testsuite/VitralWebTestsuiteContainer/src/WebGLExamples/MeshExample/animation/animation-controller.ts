@@ -7,10 +7,11 @@ import type { MeshModel } from '../model/mesh-model';
  * Java starts a daemon `Thread` running a `vsdk.toolkit.animation.
  * AnimationEventGenerator` and, on every tick at least one second after the
  * last one, updates the ray gizmo and repaints the canvas. That animation
- * package has no TypeScript port yet, and a browser page has no thread to give
- * it: the tick source here is the page's own timer, at the same one-second
- * period the Java listener filters down to, and the callbacks it fires are the
- * Java ones.
+ * package is now ported (Phase 42), but a browser page still has no thread to
+ * give it, and what this Java listener drives is repaints and gizmo aging
+ * rather than a mesh, so the tick source here stays the page's own timer, at
+ * the same one-second period the Java listener filters down to, and the
+ * callbacks it fires are the Java ones.
  */
 export class AnimationController {
   private static readonly TICK_PERIOD_MILLISECONDS = 1000;

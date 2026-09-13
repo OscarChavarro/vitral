@@ -20,3 +20,5 @@ export { WebGLSphereRenderer } from "./vsdk/toolkit/render/webgl/WebGLSphereRend
 export { WebGLRayGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLRayGizmoRenderer.js";
 export { WebGLInfinitePlaneGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLInfinitePlaneGizmoRenderer.js";
 export { WebGLSolidTextureRenderer } from "./vsdk/toolkit/render/webgl/WebGLSolidTextureRenderer.js";
+export { WebGLMd2MeshRenderer } from "./vsdk/toolkit/render/webgl/WebGLMd2MeshRenderer.js";
+export { WebMd2Persistence } from "./vsdk/toolkit/io/geometry/WebMd2Persistence.js";

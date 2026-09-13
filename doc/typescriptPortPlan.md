@@ -382,7 +382,9 @@ Migrated so far:
 
     Java's `AnimationEventGenerator` thread becomes the page's own timer at
     the same one-second period the Java listener filters down to; the
-    animation package itself (Phase 42) is still unported.
+    animation package itself was ported later the same day, under Phase 42,
+    and this module was not rewritten on top of it, for the reason recorded
+    under `SolidTextureExample`.
 
     The ray gizmo is drawn: `display` acquires the snapshot and then calls
     `WebGLRayGizmoRenderer`, exactly as Java does, over the arrow, sphere and
@@ -479,14 +481,98 @@ Migrated so far:
         `MeshExample`'s own `WebGLDebuggerRenderer`.
 
     Java's twenty-four-tick-a-second `AnimationEventGenerator` thread becomes
-    the page's own timer at the same rate; the animation package itself (Phase
-    42) is still unported. One cost of the port is Java's too and not a defect:
+    the page's own timer at the same rate; the animation package itself was
+    ported later the same day, under Phase 42, and this module was not
+    rewritten on top of it because its Java listener drives repaints and gizmo
+    aging rather than a mesh. One cost of the port is Java's too and not a defect:
     rebuilding the volume is O(size^3) evaluations of multi-octave noise, and a
     browser runs it on the one thread it draws on, so the page stops responding
     for the duration where the Java program's window merely stops redrawing.
 
-Not migrated: `MD2Example`, `PolygonClippingExample`,
-`PolyhedralBoundedSolidExample`, `ShadersExample`.
+  - `MD2Example` — 2026-09-13. The module that exercises Quake II MD2 reading
+    and playback (`Md2MeshExample`). An MD2 resource is a stack of vertex
+    frames grouped into named animations plus an OpenGL command list of
+    triangle strips and fans that index into them; every frame the renderer
+    interpolates between the current vertex frame and the next by the fraction
+    of a frame period the mesh's elapsed time has reached. `[1]` and `[2]` step
+    back and forward through the model's sixteen animations, `[3]` and `[4]`
+    choose whether the XYZ keys move the camera or one of the three lights, and
+    the HUD names both.
+
+    `model.DebuggerModel`, `io.DebuggerReader`, `gui.KeyboardInteraction
+    Techniques`, `gui.MouseInteractionTechniques`,
+    `animation.DebuggerAnimationController` and both `render` classes are
+    ported. This is the first module whose animation is the Java one rather
+    than a stand-in: Phase 42 is closed by this work, so
+    `animation.DebuggerAnimationController` builds a real
+    `AnimationEventGenerator` with a real `Md2AnimationListener` on it, as Java
+    does. It draws through the new `WebGLMd2MeshRenderer` of the Phase 41 sixth
+    partial advance, over the `Md2Persistence` and `WebMd2Persistence` of the
+    Phase 36 third advance.
+
+    Java's `Md2MeshExample.init()` hard-codes `etc/md2/samourai.md2` and
+    `etc/md2/samourai.jpg` relative to the program's own directory, and the
+    file name its constructor takes from the command line is ignored, so this
+    project has no `awt.FileSelectorDialog` of its own. A browser has no `etc`
+    directory beside the program, so both resources are named by URL, and the
+    modal dialog reached by right-clicking `MD2Example` in the explorer tree is
+    where they are given, with the two Java paths as its defaults. It has no
+    tangible-interface section, because this program opens no such connection.
+
+    Parity evidence is byte-level and covers the whole reader. A Java reference
+    driver reads `samourai.md2` through `Md2Persistence` against `java/base`
+    and prints the sixteen header words, the skin names, the frame names, the
+    per-animation ranges and an FNV-1a digest of the texture coordinates, the
+    triangle table, all 198 vertex frames, all 198 normal-index frames and the
+    four OpenGL command tables; its TypeScript twin does the same over the
+    ported reader. The two agree on every line. Closing that diff needed one
+    literal correction: Java evaluates `coord * scale[k] + translate[k]` in
+    `float`, rounding after every operation, and TypeScript's only number is a
+    `double`, so `Math.fround` puts the intermediate rounding back — without
+    it the frame vertices differ from Java's in their last bits.
+
+    Rendering was then exercised in headless Chrome over software SwiftShader:
+    the textured samurai in its STAND animation with the HUD reading
+    `1/16 STAND` and the three light billboards, `[2]` twice and `[1]` once
+    walking the animation list with the HUD following, `[4]` moving the XYZ
+    selection to `Light 1`, `F2` drawing the wireframe pass over the animated
+    mesh, and a reopened dialog pointed at a missing skin producing Java's
+    64x64 test pattern on the model.
+
+    Three divergences are recorded, each marked at the code:
+
+      - `Md2Persistence` walks a `RandomAccessFile` with `seek` and `read`. A
+        browser has no file system, so the reader is split the way the `.obj`
+        reader already is: the parser is platform-neutral in `@vitral/base` and
+        takes the resource's bytes, over a cursor that plays the part of the
+        file pointer, and `WebMd2Persistence` in `@vitral/webgl` fetches the
+        model and decodes the skin. Java's `loadImagefile` goes to the browser
+        half, because only that half knows the resource name: an unnamed skin
+        answers null and leaves the mesh's skin slot empty, and a named one
+        that cannot be read prints to the console and answers the test pattern.
+      - `glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)`, `POLYGON_OFFSET_LINE` and
+        `glPointSize` have no WebGL counterpart, so the wireframe pass draws
+        every triangle's three edges as `LINES` over a second buffer set with
+        the depth state Java also sets for that pass, and the point size
+        travels as the `pointSizeLocal` uniform. This is the substitution
+        `MeshExample`'s renderer already makes.
+      - `Graphics2D` on a `BufferedImage` becomes a 2D canvas context, as in
+        `SolidTextureExample`: `fillText` on the Java baseline with the same
+        bold 20-pixel sans-serif face, `measureText` for the right-aligned
+        second line, and one `getImageData` replacing the `getRGB` loop.
+
+    One browser-only step has no Java counterpart and is marked in
+    `model.DebuggerModel`: the container's shared `ExampleCameraInteraction`,
+    which stands in for `CameraControllerOrbiter` until Phase 38 ports the
+    controller family, imposes its own default view when it is constructed,
+    where Java's controller leaves the camera it is given alone. Java's two
+    camera lines therefore live in a method that is applied again once the
+    adapter exists, and `adoptCameraState()` then takes that view as the orbit
+    state. Java's `cameraController.setDeltaMovement(10)` has no counterpart
+    either, for the same Phase 38 reason.
+
+Not migrated: `PolygonClippingExample`, `PolyhedralBoundedSolidExample`,
+`ShadersExample`.
 
 ## Analyzed State
 
@@ -1948,6 +2034,31 @@ phase inventory is unchanged and the phase stays Pending; `EnvironmentPersistenc
 stays in `@vitral/fs`, since it is the `File` dispatcher, and the URL dispatcher
 beside it is `WebEnvironmentPersistence`.
 
+Third partial advance, 2026-09-13 (to unblock the `MD2Example` module):
+`Md2Persistence` is ported, bringing the phase to 6 / 51 entries. It follows the
+seam the second advance established. The parser lives in `@vitral/base` under
+its Java package and takes the MD2 resource's bytes, walked by a cursor that
+plays the part of Java's `RandomAccessFile` pointer — on a local file the two
+are the same thing, since `RandomAccessFile` is random access over exactly those
+bytes. `WebMd2Persistence` in `@vitral/webgl` is the URL dispatcher beside it,
+fetching the model and decoding the skin through `WebImagePersistence`, and it
+carries Java's `loadImagefile` in full, because only the half that knows the
+resource name can tell an unnamed skin from one that could not be read.
+
+Everything between those two boundaries is Java's: the sixteen-word header and
+its `844121161` / version 8 check, the unsigned-short masking, the
+`triangles[i * 2]` / `triangles[i * 2 + 1]` interleaving of vertex and texture
+indices, the per-frame scale and translate, the sign of the OpenGL command count
+telling a strip from a fan, and the gamma correction of the four-argument
+`read`. Two details are spelled out rather than inherited, both marked at the
+code: `Math.fround` restores the `float` rounding Java performs after every
+operation of `coord * scale[k] + translate[k]` and `coord / skinWidth`, and
+Java's `String.trim()`, which strips every character at or below the space and
+so removes the NUL padding of the MD2 name fields, is written out because
+JavaScript's own `trim` strips Unicode whitespace, which NUL is not. The parity
+evidence is the byte-identical reference-driver diff recorded under
+`MD2Example`. The phase inventory is unchanged and the phase stays Pending.
+
 Exit: satisfy the standard phase gate before starting Phase 37.
 
 ### Phase 37: SGL checkpoint
@@ -2355,9 +2466,25 @@ the `Path` of the shader directory, which has no counterpart because
 constructor argument.
 
 With this the `SolidTextureExample` module draws both of its operation modes and
-its cutting plane. Of the JOGL4 renderer family, MD2 meshes and 2D polygons
-remain unported. The source group remains an empty checkpoint and the phase gate
-has not been run.
+its cutting plane.
+
+Sixth partial advance, 2026-09-13 (to unblock the `MD2Example` module):
+`WebGLMd2MeshRenderer` is added, the port of
+`vsdk.toolkit.render.jogl.Jogl4Md2MeshRenderer`. The frame interpolation, the
+strip and fan expansion with its even/odd winding correction, the `1.0 - v`
+texture-coordinate flip, the three passes with their materials and depth state,
+and the uniform sequence are the Java ones. Beyond this phase's recurring
+boundaries — static GL state held per context in a `WeakMap`, `fetch`-borne GLSL
+making the draw asynchronous, a texture object instead of an `int`, and
+`getUniformLocation` answering `null` instead of a negative int — it makes the
+same two substitutions `MeshExample`'s renderer makes, for `glPolygonMode(...,
+GL_LINE)` with `POLYGON_OFFSET_LINE` and for `glPointSize`; both are described
+under `MD2Example`. It also gained an asynchronous `prepare(gl)`, which has no
+Java counterpart and exists for the drawing-buffer rule recorded under WebGL
+Example Programs.
+
+Of the JOGL4 renderer family, 2D polygons remain unported. The source group
+remains an empty checkpoint and the phase gate has not been run.
 
 Exit: satisfy the standard phase gate before starting Phase 42.
 
@@ -2375,6 +2502,33 @@ vsdk.toolkit.animation.AnimationEventGenerator
 vsdk.toolkit.animation.AnimationListener
 vsdk.toolkit.animation.Md2AnimationListener
 ```
+
+Ported 2026-09-13, 4 / 4 entries, out of normal phase order, to give
+`MD2Example` the animation its Java program runs on. `AnimationEvent`,
+`AnimationListener` and `Md2AnimationListener` are literal: the single elapsed-
+seconds field with its accessors, the abstract `tick` beside the two
+do-nothing pause methods, and the listener that copies the event's time into
+the mesh, comment lines included.
+
+`AnimationEventGenerator` crosses one boundary, and it is the class's whole
+reason for existing in Java. It `implements Runnable`, and its `run()` is an
+unbounded `while ( true )` with a `Thread.sleep(1000/fps)` in it, which a caller
+hands to a `Thread` for the life of the JVM. A browser has one thread and a task
+that never yields freezes the page, so `run()` arms the host's own interval timer
+at the same twenty-four ticks a second and returns. The loop is rotated around
+the wait, which is what a timer callback is: Java reads the elapsed time *before*
+the sleep and dispatches *after* it, so the event a listener sees carries the
+time of one period earlier, and that ordering is preserved. A `stop()` is added,
+which Java needs no counterpart for because its thread is a daemon that dies with
+the process, while a module inside the container is torn down while the page
+lives on. The single reused `AnimationEvent` object and the registration-order
+dispatch are Java's.
+
+The two example modules that predate this phase keep their own timers:
+`MeshExample` and `SolidTextureExample` each carry an `animation.Animation
+Controller` whose Java original drives repaints and gizmo aging rather than a
+mesh, and neither is rewritten on top of the generator here. The source group's
+four entries are complete; the standard phase gate has not been run.
 
 Exit: satisfy the standard phase gate before starting Phase 43.
 
@@ -2544,13 +2698,13 @@ The port is complete only when all of the following are true:
 | 33 | Image I/O | Pending — partial advance: export path only (3 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
-| 36 | Geometry I/O | Pending — partial advance: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, and `ReaderMitScene` with `ImportContext` (5 / 51 entries); second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser; see the Phase 36 record |
+| 36 | Geometry I/O | Pending — partial advances: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, `ReaderMitScene` with `ImportContext`, and `Md2Persistence` (6 / 51 entries); the second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser, and the third 2026-09-13 split `Md2Persistence` the same way, with `WebMd2Persistence` as its URL dispatcher; see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
 | 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
 | 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer` and `WebGLSolidTextureRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; MD2 and 2D-polygon renderers are still unported; see the Phase 41 record |
-| 42 | Animation | Pending |
+| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; the 2D-polygon renderer is still unported; see the Phase 41 record |
+| 42 | Animation | Complete — 4 / 4 symbols ported 2026-09-13 out of normal phase order, to give `MD2Example` its animation; `AnimationEventGenerator.run()` arms the host timer instead of blocking a thread, keeping Java's tick ordering; the standard gate has not been run; see the Phase 42 record |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |
 | 45 | Orphan-inventory closure | Pending — the eleven `media` / `solidTexture` orphans recorded by Phase 27 are ported and closed under Phase 14; four gizmo/tangible-interface orphans are closed under Phase 38 and two `lookUpTables` orphans under Phase 29; the inventory comparison has not been re-run |

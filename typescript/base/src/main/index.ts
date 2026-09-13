@@ -356,3 +356,8 @@ export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image
 export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
 export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";
 export type { ObjResourceProvider } from "./vsdk/toolkit/io/geometry/ObjResourceProvider.js";
+export { Md2Persistence, _Md2ByteCursor } from "./vsdk/toolkit/io/geometry/Md2Persistence.js";
+export { AnimationEvent } from "./vsdk/toolkit/animation/AnimationEvent.js";
+export { AnimationListener } from "./vsdk/toolkit/animation/AnimationListener.js";
+export { AnimationEventGenerator } from "./vsdk/toolkit/animation/AnimationEventGenerator.js";
+export { Md2AnimationListener } from "./vsdk/toolkit/animation/Md2AnimationListener.js";

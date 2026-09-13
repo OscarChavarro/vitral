@@ -1,0 +1,49 @@
+<div class="dialog-backdrop" (click)="onCancel()"></div>
+
+<div
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="md2-url-dialog-title"
+  (keydown)="onKeyDown($event)"
+>
+  <h2 class="dialog-title" id="md2-url-dialog-title">Open a Quake II MD2 model</h2>
+
+  <form (submit)="onSubmit($event)">
+    <label class="dialog-label" for="md2-url-input">Model URL</label>
+    <input
+      class="dialog-input"
+      id="md2-url-input"
+      name="md2Url"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+      [value]="md2Url()"
+      (input)="onMd2UrlInput($event)"
+    />
+
+    <label class="dialog-label" for="md2-texture-url-input">Skin URL</label>
+    <input
+      class="dialog-input"
+      id="md2-texture-url-input"
+      name="textureUrl"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      [value]="textureUrl()"
+      (input)="onTextureUrlInput($event)"
+    />
+
+    <p class="dialog-note">
+      The MD2 format carries the animation frames; a skin that cannot be read is replaced by a
+      64&times;64 test pattern, as in the Java program. Use <code>[1]</code> and <code>[2]</code> to
+      step through the model’s animations.
+    </p>
+
+    <div class="dialog-actions">
+      <button class="dialog-button" type="button" (click)="onCancel()">Cancel</button>
+      <button class="dialog-button primary" type="submit">Open</button>
+    </div>
+  </form>
+</div>

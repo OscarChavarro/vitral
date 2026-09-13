@@ -139,7 +139,8 @@
         "src/main/vsdk/toolkit/render/raytracing/**/*.ts",
         "src/main/vsdk/toolkit/io/PersistenceElement.ts",
         "src/main/vsdk/toolkit/io/image/**/*.ts",
-        "src/main/vsdk/toolkit/io/geometry/**/*.ts"
+        "src/main/vsdk/toolkit/io/geometry/**/*.ts",
+        "src/main/vsdk/toolkit/animation/**/*.ts"
     ],
     "exclude": [
         "src/main/java/io/PrintStream.ts",

@@ -81,6 +81,13 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'MD2Example') {
+        <app-md2-example
+          [md2Url]="md2Url()"
+          [textureUrl]="md2TextureUrl()"
+          (deactivate)="clearSelection()"
+        />
+      }
       @if (selectedItem() === 'SolidTextureExample') {
         <app-solid-texture-example
           [meshUrl]="solidTextureMeshUrl()"
@@ -99,6 +106,15 @@
       [initialTangibleEnabled]="tangibleEnabled()"
       (accept)="acceptMeshUrl($event)"
       (cancel)="cancelMeshUrl()"
+    />
+  }
+
+  @if (md2UrlDialogOpen()) {
+    <app-md2-url-dialog
+      [initialMd2Url]="md2Url()"
+      [initialTextureUrl]="md2TextureUrl()"
+      (accept)="acceptMd2Url($event)"
+      (cancel)="cancelMd2Url()"
     />
   }
 

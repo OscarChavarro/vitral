@@ -158,7 +158,8 @@
 .workspace app-camera-example,
 .workspace app-image-example,
 .workspace app-mesh-example,
-.workspace app-solid-texture-example {
+.workspace app-solid-texture-example,
+.workspace app-md2-example {
   min-height: calc(100dvh - 24px);
 }
 

@@ -1,0 +1,17 @@
+<canvas
+  #canvas
+  class="md2-canvas"
+  tabindex="0"
+  aria-label="WebGL MD2 Example"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+  (pointerleave)="onPointerUp($event)"
+  (wheel)="onWheel($event)"
+  (keydown)="onKeyDown($event)"
+  (keyup)="onKeyUp($event)"
+></canvas>
+
+@if (statusMessage()) {
+  <div class="status-message" role="status">{{ statusMessage() }}</div>
+}
