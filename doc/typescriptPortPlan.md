@@ -571,8 +571,113 @@ Migrated so far:
     state. Java's `cameraController.setDeltaMovement(10)` has no counterpart
     either, for the same Phase 38 reason.
 
-Not migrated: `PolygonClippingExample`, `PolyhedralBoundedSolidExample`,
-`ShadersExample`.
+- `ShadersExample` — `typescript/testsuite/VitralWebTestsuiteContainer/src/
+    WebGLExamples/ShadersExample`, ported 2026-09-13.
+
+    The module that exercises the shader library in full and puts the GPU path
+    beside the CPU raytracer on one scene. A unit sphere carrying the
+    `miniearth` texture and the `earth.bw` bump map is drawn either by the
+    GLSL programs of `WebGLSphereRenderer` or by `SimpleRaytracer`, and `[.]`
+    switches between them. Every shading model the shader selector can reach is
+    reachable from the keyboard: `[g]`, `[p]` and `[n]` name Gouraud, Phong and
+    no-lighting directly, `[F7]` walks the whole cycle including
+    Cook-Torrance, `[t]` and `[b]` toggle the texture and the bump map, `[m]`
+    walks the microfacet material list, `[q]`/`[Q]`/`[w]`/`[W]` change the mesh
+    resolution, `[l]`/`[k]`/`[j]`/`[u]`/`[9]`/`[0]` move the light, `[r]` and
+    the space bar start the sphere and light animations, and `[h]` shows or
+    hides the HUD.
+
+    `model.ShadersModel`, `model.ShaderOperationMode`, `gui.Animation`,
+    `gui.ShadersKeyboardInteractionTechniques`,
+    `gui.ShadersMouseInteractionTechniques`, `render.JogHudRenderer` and
+    `render.SoftwareRaycaster` are ported. `options.CommandLineOptions`,
+    `OfflineControl` and `render.OpenGlOfflineSphereRenderer` are not: they are
+    the offline batch path, which the interactive `main` never reaches — it
+    ignores its command line entirely — and which has no place in a module
+    inside the container. It draws through the existing `WebGLSphereRenderer`
+    and `WebGLRendererConfigurationShaderSelector`; no new GPU renderer was
+    needed. It did need three library advances: `ImagePersistenceSGI` and
+    `ImagePersistence.importIndexedColor` under Phase 33,
+    `MicroFacetedMaterial.fromCsvText` under Phase 16, and the first browser
+    use of the Phase 40 `render.raytracing` family.
+
+    Java's `ShadersModel.initializeDefaults` hard-codes three paths relative to
+    the program's own directory — `etc/textures/miniearth.png`,
+    `etc/bumpmaps/earth.bw` and `etc/materials/microFacetMAterials.csv` — and
+    this project has no file selector of its own. A browser has no `etc`
+    directory beside the program, so all three are named by URL, and the modal
+    dialog reached by right-clicking `ShadersExample` in the explorer tree is
+    where they are given, with the three Java paths as its defaults.
+
+    The shader question this module was ported to answer was checked first and
+    directly: all twenty GLSL files of `etc/glslShaders` were put through
+    `WebGLShaderPreprocessor` and compiled in a real WebGL2 context, and all
+    eleven programs the library builds from them — the nine of the shader
+    selector plus the line and solid-texture pairs — were linked. Twenty of
+    twenty compile and eleven of eleven link under GLSL ES 3.00, with the
+    microfacet uniforms (`cookRoughness`, `cookAlpha`, `cookKd`, `cookKs`,
+    `cookF0`) live in the linked Cook-Torrance programs. No OpenGL 4.1 shader
+    of this tree needed rewriting, and the preprocessor needed no new rule.
+
+    Parity evidence is byte-level and covers the whole CPU chain. A Java
+    reference driver builds, against `java/base`, exactly what `ShadersModel`
+    and `SoftwareRaycaster.buildSceneSnapshot` build — the same camera, sphere,
+    light, materials, texture and normal map, with the `--rotation 35
+    --light-rotation 20` of `runOffline.sh` — and prints the SGI bump map's
+    size, digest and diagonal sample, the normal map's digest, every field of
+    three microfacet materials, the texture's digest, and an FNV-1a digest of
+    the raytraced frame under both Phong-textured-bump and Cook-Torrance
+    shading. The TypeScript twin agrees on all twelve lines.
+
+    Rendering was then exercised in headless Chrome over software SwiftShader:
+    the textured, bump-mapped sphere under Phong with the HUD reading Java's
+    `Number of meridians: 100 Number of parallels: 50 Number of triangles:
+    9800` and `Mode [.]: GPU`; `[g]` and `[n]` changing the shading; `[F7]`
+    reaching Cook-Torrance with the HUD adding `SimpleMaterial [m]: Copper`
+    and `[m]` walking on to `Iron`; shifted `[Q]` and `[W]` raising the counts
+    to 103 and 53 with the triangle count following Java's
+    `(parallels - 1) * meridians * 2`; and `[.]` producing the raytraced sphere
+    with the HUD reading `Raytracing` and `Mode [.]: CPU`, framed identically
+    to the GPU one.
+
+    Three divergences are recorded, each marked at the code:
+
+      - Java's `SoftwareRaycaster` runs one JVM thread per processor over a
+        shared `RGBImageUncompressed`, each thread polling a
+        `ConcurrentLinkedQueue` of tiles. A browser has no threads and its Web
+        Workers share no heap, so the workers are `BrowserWorkerExecutor`s
+        handed the next tile by the owner — the queue is the same, the polling
+        has moved to the side that can see all the workers — and each returns
+        the bytes of its band, which the owner splices in. The pixels are
+        identical, by the same property that lets Java's threads share the
+        image: a tile only reads the scene and only writes its own rows. The
+        pool is also capped at eight, because a Web Worker is a module
+        instantiation as well as a thread; the host this was verified on
+        reports 72 processors, and 72 workers never produced a frame. The
+        number decides only how `RasterTileGenerator` bands the frame, so no
+        pixel depends on it.
+      - `ImagePersistenceSGI` and the microfacet CSV both read files. Both are
+        split at the same seam the other readers use: the parse is
+        platform-neutral in `@vitral/base` and takes the resource's bytes or
+        text, and the fetch is the browser's half. See the Phase 33 and Phase
+        16 records.
+      - `Graphics2D` on a `BufferedImage` becomes a 2D canvas context, as in
+        `SolidTextureExample` and `MD2Example`: `fillText` on Java's two
+        baselines with the same monospaced 16-point face, `measureText` for the
+        two right-aligned strings, and one `getImageData` replacing the
+        `getRGB` loop.
+
+    Two browser-only steps have no Java counterpart. The container's shared
+    `ExampleCameraInteraction`, standing in for `CameraControllerOrbiter` until
+    Phase 38, imposes its own default view when constructed, so Java's three
+    camera lines live in `ShadersModel.configureInitialView()` and are applied
+    again once the adapter exists — the same note `MD2Example` carries. And
+    Java drives both animations from one `javax.swing.Timer`, whose repaint
+    coalescing the component's own repaint flag already provides; the host
+    timer takes its place at the same 30-frames-a-second period, with the same
+    `Animation.tick` and the same elapsed-time light step.
+
+Not migrated: `PolygonClippingExample`, `PolyhedralBoundedSolidExample`.
 
 ## Analyzed State
 
@@ -1209,6 +1314,30 @@ vsdk.toolkit.environment.material.RendererConfiguration
 vsdk.toolkit.environment.material.ShadingType
 vsdk.toolkit.environment.material.SimpleMaterial
 ```
+
+Completion of a deferred constructor — 2026-09-13 (needed by
+`testsuite/VitralWebTestsuiteContainer/src/WebGLExamples/ShadersExample`):
+`MicroFacetedMaterial(String csvFileName, String materialName)` was the one
+part of the group left unported, because it reads a file. It is split the way
+the readers are: the parse is `MicroFacetedMaterial.fromCsvText` in
+`@vitral/base` and is literal — the header row naming the columns, the
+case-insensitive match on `material_name`, every per-field default including
+`alpha` falling back to `roughness * roughness`, the unit-interval clamps, and
+the `readAsciiLine` behavior that never sees a final line without a
+terminating newline. Java's `resolveCsvFile`, which tries the name as given and
+then under `etc/materials`, is the file-system half and stays with the caller;
+a URL is already resolved, so the browser's half is a fetch.
+
+One divergence is marked at the code: Java's `cycleCookTorranceMaterial`
+constructs `new MicroFacetedMaterial(csvPath, name)` on every `[m]`, re-reading
+the file each time. The text is read once and kept, and the same parse runs
+against it, since re-fetching a static resource on every keypress would only
+add latency to an identical answer.
+
+Parity evidence: a Java reference driver loads `Copper`, `Aluminium` and `Gold`
+from `etc/materials/microFacetMAterials.csv` against `java/base` and prints
+every field of each resulting material; the TypeScript twin agrees on all three
+lines.
 
 Exit: satisfy the standard phase gate before starting Phase 17.
 
@@ -1897,6 +2026,45 @@ path, a format handed to an external codec is functionally equivalent to Java
 rather than textually 1:1; no third-party codec was introduced in either
 package.
 
+Partial advance — 2026-09-13 (out of phase order, to unblock
+`testsuite/VitralWebTestsuiteContainer/src/WebGLExamples/ShadersExample`):
+`ImagePersistenceSGI` is ported, together with the `importIndexedColor`
+half of `ImagePersistence` that reaches it. Five of the eight entries are
+now touched.
+
+The reader is literal, limits included: the 512-byte header with its magic
+number 474, the channel count choosing between an indexed-color, an RGB and an
+RGBA image, the RLE offset and length tables, the high bit of a run byte
+selecting a literal copy over a repeat, the `ySize - y - 1` vertical flip, the
+refusal of a colormap or a non-RLE storage format, the scan-line loop that
+casts every image to `IndexedColorImageUncompressed` and so reads only the
+grayscale subformat, and the catch-all that logs the failure and answers
+whatever was built.
+
+One boundary is crossed, the one `Md2Persistence` already crosses. Java opens a
+`RandomAccessFile` and builds a `FileInputStream` from the very same file
+descriptor, so `fd.seek` and the stream reads share one file pointer; the port
+takes the resource's bytes and a cursor plays the part of that single pointer.
+`ImagePersistence.importIndexedColor` therefore takes bytes and a resource
+name, as `importDDSCompressed` already does, and `extractExtensionFromName`
+reproduces `PersistenceElement.extractExtensionFromFile` over that name —
+`StringTokenizer` semantics and all, so a name with no dot answers the whole
+name and the case is left as found. Java's helper round is the `java.io.File`
+flavor, which this platform-neutral class does not declare, so it stays with
+the `@vitral/fs` subclass. `WebImagePersistence.importIndexedColor` adds the
+browser's fetch.
+
+Parity evidence: a Java reference driver reads `etc/bumpmaps/earth.bw` through
+`ImagePersistence.importIndexedColor` against `java/base` and prints its size,
+an FNV-1a digest of the whole 1024x1024 index buffer and a sixteen-point
+diagonal sample; the TypeScript twin over the ported reader agrees on every
+line. The same driver carries the `NormalMap` built from it, so the digest of
+`exportToRgbImage()` is compared too, and agrees.
+
+The Targa and native readers, and the remaining importers of `importRGB` /
+`importRGBA`, are still unported, so the phase stays Pending and its gate has
+not been run.
+
 Deferred with the phase: `ImagePersistence` does not yet extend
 `PersistenceElement` (Phase 30), which remains unported.
 
@@ -2486,6 +2654,20 @@ Example Programs.
 Of the JOGL4 renderer family, 2D polygons remain unported. The source group
 remains an empty checkpoint and the phase gate has not been run.
 
+Shader-compatibility evidence — 2026-09-13 (gathered for
+`testsuite/VitralWebTestsuiteContainer/src/WebGLExamples/ShadersExample`, which
+reaches every program the selector can build): all twenty GLSL files of
+`etc/glslShaders` were put through `WebGLShaderPreprocessor` and compiled in a
+real WebGL2 context, and all eleven programs built from them were linked —
+the nine of `WebGLRendererConfigurationShaderSelector` plus the line and
+solid-texture pairs. Twenty of twenty compile and eleven of eleven link under
+GLSL ES 3.00, with every microfacet uniform live in the linked Cook-Torrance
+programs. No OpenGL 4.1 shader of this tree needs rewriting to run under WebGL2,
+and the three translations the preprocessor already performs — the
+`layout(location = N) out` rewrite, the `gl_PointSize` injection, the
+clip-distance-to-varying pair and the `sampler3D` precision default — are
+sufficient for the whole set.
+
 Exit: satisfy the standard phase gate before starting Phase 42.
 
 ### Phase 42: Animation
@@ -2678,7 +2860,7 @@ The port is complete only when all of the following are true:
 | 13 | Tangible-interface contracts | Complete — 4 / 4 symbols; 3 / 3 parity tests; gate passed |
 | 14 | Media and image buffers | Complete — 20 / 20 symbols; gate passed. Partial advance 2026-09-13: the eleven unlisted `media` / `media.solidTexture` orphans Phase 27 recorded for Phase 45 are ported, closing that orphan set; see the Phase 14 record |
 | 15 | General processing | In progress — 6 / 22 symbols |
-| 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order |
+| 16 | Materials | Complete — 5 / 5 symbols; gate passed out of normal phase order. The deferred `MicroFacetedMaterial(csvFileName, materialName)` constructor was completed 2026-09-13 as `fromCsvText`; see the Phase 16 record |
 | 17 | Geometry base | Complete — 1 / 1 symbol; gate passed out of normal phase order |
 | 18 | Curves | Complete — 2 / 2 symbols; gate passed out of normal phase order |
 | 19 | Geometry elements | Complete — 6 / 6 symbols; gate passed out of normal phase order |
@@ -2695,15 +2877,15 @@ The port is complete only when all of the following are true:
 | 30 | I/O wrappers | Pending |
 | 31 | I/O context checkpoint | Pending |
 | 32 | Binary I/O checkpoint | Pending |
-| 33 | Image I/O | Pending — partial advance: export path only (3 / 8 entries); see the Phase 33 record |
+| 33 | Image I/O | Pending — partial advances: the export path, `importDDSCompressed`, and `ImagePersistenceSGI` with the `importIndexedColor` that reaches it (5 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
 | 36 | Geometry I/O | Pending — partial advances: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, `ReaderMitScene` with `ImportContext`, and `Md2Persistence` (6 / 51 entries); the second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser, and the third 2026-09-13 split `Md2Persistence` the same way, with `WebMd2Persistence` as its URL dispatcher; see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
 | 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
-| 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; the 2D-polygon renderer is still unported; see the Phase 41 record |
+| 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); first exercised in a browser 2026-09-13 by `ShadersExample`, over Web Workers; see the Phase 40 record |
+| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; all 20 GLSL files compile and all 11 programs link under GLSL ES 3.00, so no shader needs rewriting; the 2D-polygon renderer is still unported; see the Phase 41 record |
 | 42 | Animation | Complete — 4 / 4 symbols ported 2026-09-13 out of normal phase order, to give `MD2Example` its animation; `AnimationEventGenerator.run()` arms the host timer instead of blocking a thread, keeping Java's tick ordering; the standard gate has not been run; see the Phase 42 record |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |

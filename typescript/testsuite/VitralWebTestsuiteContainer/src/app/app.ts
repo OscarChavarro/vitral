@@ -10,6 +10,11 @@ import {
 } from '../WebGLExamples/MeshExample/gui/mesh-url-dialog';
 import { MD2Example } from '../WebGLExamples/MD2Example/md2-example';
 import { Md2UrlDialog, type Md2Selection } from '../WebGLExamples/MD2Example/gui/md2-url-dialog';
+import { ShadersExample } from '../WebGLExamples/ShadersExample/shaders-example';
+import {
+  ShadersUrlDialog,
+  type ShadersSelection,
+} from '../WebGLExamples/ShadersExample/gui/shaders-url-dialog';
 import { SolidTextureExample } from '../WebGLExamples/SolidTextureExample/solid-texture-example';
 import {
   SolidTextureUrlDialog,
@@ -31,7 +36,8 @@ type ExplorerItem =
         | 'ImageExample'
         | 'MeshExample'
         | 'SolidTextureExample'
-        | 'MD2Example';
+        | 'MD2Example'
+        | 'ShadersExample';
     };
 
 @Component({
@@ -46,6 +52,8 @@ type ExplorerItem =
     SolidTextureUrlDialog,
     MD2Example,
     Md2UrlDialog,
+    ShadersExample,
+    ShadersUrlDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -92,6 +100,11 @@ export class App {
           kind: 'file',
           label: 'MD2Example',
           exampleId: 'MD2Example',
+        },
+        {
+          kind: 'file',
+          label: 'ShadersExample',
+          exampleId: 'ShadersExample',
         },
       ],
     },
@@ -142,6 +155,18 @@ export class App {
   protected readonly md2TextureUrl = signal<string | null>(null);
   protected readonly md2UrlDialogOpen = signal<boolean>(false);
 
+  /**
+   * `ShadersExample` names no file on its command line either: its interactive
+   * `main` ignores `options.CommandLineOptions` altogether, and
+   * `ShadersModel.initializeDefaults` hard-codes the texture, the bump map and
+   * the microfacet CSV it reads. All three are named by URL here, with the
+   * Java paths as the defaults.
+   */
+  protected readonly shadersTextureUrl = signal<string | null>(null);
+  protected readonly shadersBumpMapUrl = signal<string | null>(null);
+  protected readonly shadersMicroFacetCsvUrl = signal<string | null>(null);
+  protected readonly shadersUrlDialogOpen = signal<boolean>(false);
+
   protected selectItem(item: ExplorerItem): void {
     if (item.kind === 'file' && item.exampleId === 'MeshExample' && this.meshUrl() === null) {
       // Java runs `FileSelectorDialog` when the command line named no file.
@@ -160,11 +185,20 @@ export class App {
       this.openMd2UrlDialog();
       return;
     }
+    if (
+      item.kind === 'file' &&
+      item.exampleId === 'ShadersExample' &&
+      this.shadersTextureUrl() === null
+    ) {
+      this.openShadersUrlDialog();
+      return;
+    }
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
   }
 
   /**
-   * Right-clicking `MeshExample`, `SolidTextureExample` or `MD2Example`
+   * Right-clicking `MeshExample`, `SolidTextureExample`, `MD2Example` or
+   * `ShadersExample`
    * reopens that module's own chooser, which is how a running module is pointed at another
    * mesh; every other tree item keeps the browser's own context menu.
    */
@@ -185,6 +219,11 @@ export class App {
     if (item.exampleId === 'MD2Example') {
       event.preventDefault();
       this.openMd2UrlDialog();
+      return;
+    }
+    if (item.exampleId === 'ShadersExample') {
+      event.preventDefault();
+      this.openShadersUrlDialog();
     }
   }
 
@@ -244,6 +283,22 @@ export class App {
 
   private openMd2UrlDialog(): void {
     this.md2UrlDialogOpen.set(true);
+  }
+
+  protected acceptShadersUrls(selection: ShadersSelection): void {
+    this.shadersUrlDialogOpen.set(false);
+    this.shadersBumpMapUrl.set(selection.bumpMapUrl);
+    this.shadersMicroFacetCsvUrl.set(selection.microFacetCsvUrl);
+    this.shadersTextureUrl.set(selection.textureUrl);
+    this.selectedItem.set('ShadersExample');
+  }
+
+  protected cancelShadersUrls(): void {
+    this.shadersUrlDialogOpen.set(false);
+  }
+
+  private openShadersUrlDialog(): void {
+    this.shadersUrlDialogOpen.set(true);
   }
 
   protected clearSelection(): void {

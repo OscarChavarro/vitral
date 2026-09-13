@@ -1,6 +1,7 @@
 import {
     ImageNotRecognizedException,
     ImagePersistence,
+    IndexedColorImageUncompressed,
     Logger,
     RGBAImageCompressed,
     RGBAImageUncompressed,
@@ -85,6 +86,22 @@ export class WebImagePersistence {
         } finally {
             bitmap.close();
         }
+    }
+
+    /**
+    Java's `ImagePersistence.importIndexedColor(File)`, over a URL.
+
+    Java recognizes the format from the file name and reads a `bw` resource
+    with `ImagePersistenceSGI`. The recognition and the parse both live in
+    `@vitral/base`; what this flavor adds is the fetch, which is the only
+    file-system-bound step and the reason it is asynchronous.
+
+    @param imageUrl The URL of the resource containing the image
+    @return An IndexedColorImageUncompressed entity with the loaded image
+    */
+    public static async importIndexedColor(imageUrl: string): Promise<IndexedColorImageUncompressed> {
+        const fileData = await WebImagePersistence.readAllBytes(imageUrl);
+        return ImagePersistence.importIndexedColor(fileData, imageUrl);
     }
 
     private static async importDDSCompressed(imageUrl: string): Promise<RGBAImageCompressed> {

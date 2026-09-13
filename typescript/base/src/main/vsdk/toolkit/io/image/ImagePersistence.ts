@@ -8,6 +8,8 @@ import { RGBAImageCompressed } from "../../media/RGBAImageCompressed.js";
 import { ImageNotRecognizedException } from "./ImageNotRecognizedException.js";
 import { ImagePersistenceHelper } from "./ImagePersistenceHelper.js";
 import { ImagePersistencePng } from "./ImagePersistencePng.js";
+import { ImagePersistenceSGI } from "./ImagePersistenceSGI.js";
+import { IndexedColorImageUncompressed } from "../../media/IndexedColorImageUncompressed.js";
 
 /**
 Platform-neutral half of `vsdk.toolkit.io.image.ImagePersistence`: the
@@ -171,6 +173,55 @@ export class ImagePersistence {
     @param sourceName The name of the read resource, for diagnostics
     @return An RGBAImageCompressed entity holding the compressed blocks
     */
+    /**
+    Java's `importIndexedColor(File)`, over the bytes of the resource.
+
+    Java first offers the file to every registered helper that claims the
+    extension, and then handles `bw` itself through `ImagePersistenceSGI`. The
+    helper flavor it offers is the `java.io.File` one, which this
+    platform-neutral class does not declare — its helpers speak streams — so
+    the helper round belongs to the `@vitral/fs` subclass that owns a file
+    system, and what is left here is the `bw` branch itself, which is pure byte
+    arithmetic. The extension is taken from `sourceName`, which plays the part
+    of Java's `extractExtensionFromFile`.
+
+    @param fileContent The complete contents of the image file
+    @param sourceName The name of the read resource, for its extension and for
+           diagnostics
+    @return An IndexedColorImageUncompressed entity with the read image
+    */
+    public static importIndexedColor(fileContent: Uint8Array, sourceName: string): IndexedColorImageUncompressed {
+        const type: string = ImagePersistence.extractExtensionFromName(sourceName);
+        let retImage: IndexedColorImageUncompressed;
+        let img: Image | null;
+
+        if (type === "bw") {
+            img = ImagePersistenceSGI.readImageSGI(fileContent, sourceName);
+            if (img instanceof IndexedColorImageUncompressed) {
+                retImage = img;
+            } else {
+                throw new ImageNotRecognizedException("Convertion needed", sourceName);
+            }
+            return retImage;
+        }
+        throw new ImageNotRecognizedException("Image not recognized", sourceName);
+    }
+
+    /**
+    Java's `PersistenceElement.extractExtensionFromFile`, reading the name it
+    is given rather than a `java.io.File`. Java tokenizes on `.` with a
+    `StringTokenizer` and answers the last token, which is why a name carrying
+    no dot answers the whole name and why empty tokens are skipped; the case is
+    left as it was found, exactly as Java leaves it.
+    */
+    public static extractExtensionFromName(sourceName: string): string {
+        const tokens: string[] = sourceName.split(".").filter((token) => token.length > 0);
+        if (tokens.length < 1) {
+            throw new Error("No such element");
+        }
+        return tokens[tokens.length - 1]!;
+    }
+
     public static importDDSCompressed(fileData: Uint8Array, sourceName: string | null): RGBAImageCompressed {
         if (fileData.length < 128) {
             throw new ImageNotRecognizedException("DDS file too short", sourceName);

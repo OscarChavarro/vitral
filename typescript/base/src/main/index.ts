@@ -354,6 +354,7 @@ export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRec
 export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";
 export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image/ImagePersistencePng.js";
 export { ImagePersistence } from "./vsdk/toolkit/io/image/ImagePersistence.js";
+export { ImagePersistenceSGI, _SgiByteCursor } from "./vsdk/toolkit/io/image/ImagePersistenceSGI.js";
 export { ReaderObj } from "./vsdk/toolkit/io/geometry/ReaderObj.js";
 export type { ObjResourceProvider } from "./vsdk/toolkit/io/geometry/ObjResourceProvider.js";
 export { Md2Persistence, _Md2ByteCursor } from "./vsdk/toolkit/io/geometry/Md2Persistence.js";

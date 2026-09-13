@@ -159,7 +159,8 @@
 .workspace app-image-example,
 .workspace app-mesh-example,
 .workspace app-solid-texture-example,
-.workspace app-md2-example {
+.workspace app-md2-example,
+.workspace app-shaders-example {
   min-height: calc(100dvh - 24px);
 }
 

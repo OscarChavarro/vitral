@@ -96,6 +96,14 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'ShadersExample') {
+        <app-shaders-example
+          [textureUrl]="shadersTextureUrl()"
+          [bumpMapUrl]="shadersBumpMapUrl()"
+          [microFacetCsvUrl]="shadersMicroFacetCsvUrl()"
+          (deactivate)="clearSelection()"
+        />
+      }
     </div>
   </section>
 
@@ -125,6 +133,16 @@
       [initialTangibleEnabled]="solidTextureTangibleEnabled()"
       (accept)="acceptSolidTextureUrl($event)"
       (cancel)="cancelSolidTextureUrl()"
+    />
+  }
+
+  @if (shadersUrlDialogOpen()) {
+    <app-shaders-url-dialog
+      [initialTextureUrl]="shadersTextureUrl()"
+      [initialBumpMapUrl]="shadersBumpMapUrl()"
+      [initialMicroFacetCsvUrl]="shadersMicroFacetCsvUrl()"
+      (accept)="acceptShadersUrls($event)"
+      (cancel)="cancelShadersUrls()"
     />
   }
 </main>
