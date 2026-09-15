@@ -4,10 +4,10 @@ import {
   RasterTileGenerationStrategy,
   RasterTileGenerator,
   RendererConfiguration,
+  RGBImageUncompressed,
   type Camera,
   type Matrix4x4d,
   type RasterTileArea,
-  type RGBImageUncompressed,
 } from '@vitral/base';
 import type { ShadersModel } from '../model/shaders-model';
 import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster-protocol';
@@ -44,6 +44,15 @@ import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster
  * Java's `render` returns when every tile is done, because `Future.get()`
  * blocks. Nothing blocks in a page, so this one is asynchronous; the component
  * treats a frame as finished when it resolves.
+ *
+ * That asynchrony is also why this class keeps a back buffer Java does not
+ * need. Java raytraces inside `display`, so the drawable swaps only once the
+ * frame is whole and the window keeps showing the previous one meanwhile. A
+ * page yields to the browser while the workers run, and the model's image is
+ * the one the component draws, so the workers write into a private image of
+ * the same size instead, and only a finished frame is copied into the model's
+ * image — the front buffer. A frame the user never sees half-built, and an
+ * earlier frame on screen while the next one is traced.
  */
 export class SoftwareRaycaster {
   private static readonly MAX_WORKERS = 8;
@@ -51,6 +60,7 @@ export class SoftwareRaycaster {
   private readonly numberOfThreads: number;
   private readonly workers: BrowserWorkerExecutor<ShadersTileRequest, ShadersTileResult>[] = [];
   private generation = 0;
+  private backBuffer: RGBImageUncompressed | null = null;
   private resources: {
     textureWidth: number;
     textureHeight: number;
@@ -117,18 +127,24 @@ export class SoftwareRaycaster {
     // interactive OpenGL path.
   }
 
+  /**
+   * Traces a frame into the back buffer and, once every tile is in, presents
+   * it by copying it into the model's software frame image. Answers whether a
+   * frame was presented, which it is not when there is nothing to render yet.
+   */
   async render(
     model: ShadersModel,
     activeCamera: Camera,
     modelRotation: Matrix4x4d,
-  ): Promise<void> {
-    const outputImage: RGBImageUncompressed | null = model.getSoftwareFrameImage();
-    if (outputImage === null || this.resources === null) {
-      return;
+  ): Promise<boolean> {
+    const frontImage: RGBImageUncompressed | null = model.getSoftwareFrameImage();
+    if (frontImage === null || this.resources === null) {
+      return false;
     }
 
-    const width: number = outputImage.getXSize();
-    const height: number = outputImage.getYSize();
+    const width: number = frontImage.getXSize();
+    const height: number = frontImage.getYSize();
+    const outputImage: RGBImageUncompressed = this.ensureBackBuffer(width, height);
     const tileGenerator = new RasterTileGenerator(
       RasterTileGenerationStrategy.LINEAR,
       outputImage,
@@ -172,6 +188,9 @@ export class SoftwareRaycaster {
     }
 
     await Promise.all(runners);
+
+    frontImage.getRawImageDirectBuffer().set(raw);
+    return true;
   }
 
   /**
@@ -184,6 +203,23 @@ export class SoftwareRaycaster {
       worker.terminate();
     }
     this.workers.length = 0;
+    this.backBuffer = null;
+  }
+
+  private ensureBackBuffer(width: number, height: number): RGBImageUncompressed {
+    if (
+      this.backBuffer !== null &&
+      this.backBuffer.getXSize() === width &&
+      this.backBuffer.getYSize() === height
+    ) {
+      return this.backBuffer;
+    }
+    const image = new RGBImageUncompressed();
+    if (!image.init(width, height)) {
+      throw new Error('Could not allocate software back buffer ' + width + 'x' + height);
+    }
+    this.backBuffer = image;
+    return image;
   }
 
   private ensureWorkers(): void {

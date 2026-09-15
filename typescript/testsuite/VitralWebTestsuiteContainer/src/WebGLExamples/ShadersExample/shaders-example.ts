@@ -57,6 +57,18 @@ import { SoftwareRaycaster } from './render/software-raycaster';
  * texture every time, because the CPU raytracer rewrites the buffer underneath
  * it. That is kept; what changes is that the raytracing itself no longer
  * blocks, since `render.SoftwareRaycaster` runs it on Web Workers.
+ *
+ * Not blocking has a cost Java never pays. Java clears and raytraces inside one
+ * `display`, and the drawable swaps when it returns, so the window shows the
+ * previous frame until the next one is whole. A WebGL canvas is presented
+ * whenever its task yields to the browser, and waiting for the workers yields:
+ * clearing before that wait would put a black canvas on screen for as long as
+ * the raytrace takes, which with an animation running is every frame. So the
+ * CPU path waits first — `SoftwareRaycaster` traces into its back buffer and
+ * only then copies the finished frame into the model's image — and touches the
+ * canvas afterwards, clearing and drawing in one stretch with nothing to yield
+ * on. Until then the canvas keeps the last frame it presented, which is the
+ * double buffer Java gets from its drawable.
  */
 @Component({
   selector: 'app-shaders-example',
@@ -109,6 +121,8 @@ export class ShadersExample implements OnChanges, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private animationTimerId: ReturnType<typeof setInterval> | null = null;
   private lastRenderingMode = this.model.getRenderingMode();
+  /** The software frame image holding a finished raytraced frame, if any. */
+  private presentedSoftwareImage: RGBImageUncompressed | null = null;
   private lightAnimationAngleRadians = 0.0;
   private lastLightTickMillis = -1;
   private rendering = false;
@@ -399,25 +413,38 @@ export class ShadersExample implements OnChanges, OnDestroy {
     const canvas = this.canvasRef.nativeElement;
     const width = Math.max(1, Math.floor(canvas.clientWidth * window.devicePixelRatio));
     const height = Math.max(1, Math.floor(canvas.clientHeight * window.devicePixelRatio));
+    let resized = false;
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
+      resized = true;
     }
     gl.viewport(0, 0, width, height);
 
     const previousSoftwareImage: RGBImageUncompressed | null = this.model.getSoftwareFrameImage();
     this.model.updateSoftwareViewportAndCamera(width, height);
     this.softwareRaycaster.invalidateSnapshot();
+
+    // Resizing the canvas has just erased it. On the CPU path the next frame is
+    // a raytrace away, so the last finished one is drawn again, stretched over
+    // the new viewport, before the image that holds it is released.
+    if (
+      resized &&
+      this.model.getRenderingMode() === 'SOFTWARE' &&
+      previousSoftwareImage !== null &&
+      previousSoftwareImage === this.presentedSoftwareImage
+    ) {
+      await this.presentSoftwareFrame(gl, previousSoftwareImage);
+    }
     if (
       previousSoftwareImage !== null &&
       previousSoftwareImage !== this.model.getSoftwareFrameImage()
     ) {
       WebGLImageRenderer.unload(gl, previousSoftwareImage);
+      if (this.presentedSoftwareImage === previousSoftwareImage) {
+        this.presentedSoftwareImage = null;
+      }
     }
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const modelRotation: Matrix4x4d = new Matrix4x4d().axisRotation(
       this.model.getSphereRotationAngleRadians(),
@@ -438,13 +465,32 @@ export class ShadersExample implements OnChanges, OnDestroy {
       // thread and can raytrace ahead of the next repaint. Here the timer asks
       // for a repaint and this method is the only place a frame is produced,
       // so the two cases meet in one call with the same arguments.
-      await this.softwareRaycaster.render(this.model, this.model.getCamera(), modelRotation);
-      await this.drawSoftwareHud(gl, this.model.getSoftwareFrameImage());
-      await this.hudRenderer.draw(gl, this.model);
+      //
+      // The canvas is not touched until the raytrace is done; see the class
+      // comment on the double buffer.
+      const frameImage: RGBImageUncompressed | null = this.model.getSoftwareFrameImage();
+      const presented: boolean = await this.softwareRaycaster.render(
+        this.model,
+        this.model.getCamera(),
+        modelRotation,
+      );
+      if (presented) {
+        this.presentedSoftwareImage = frameImage;
+      }
+      if (this.model.getRenderingMode() !== 'SOFTWARE') {
+        // `[.]` was pressed while the workers ran, and asked for the repaint
+        // that will draw the GPU frame instead of this one.
+        return;
+      }
+      await this.presentSoftwareFrame(gl, frameImage);
       this.lastRenderingMode = 'SOFTWARE';
       return;
     }
     this.lastRenderingMode = 'OPENGL_4_1';
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     await WebGLSphereRenderer.draw(
       gl,
@@ -459,6 +505,23 @@ export class ShadersExample implements OnChanges, OnDestroy {
       this.model.getSphereMeridians(),
       this.model.getSphereParallels(),
     );
+    await this.hudRenderer.draw(gl, this.model);
+  }
+
+  /**
+   * The canvas half of Java's software `display`: clear, draw the raytraced
+   * frame and the HUD. Every program it uses was compiled by
+   * `WebGLHudRenderer.prepare`, so nothing in here waits on the browser and the
+   * canvas cannot be presented half drawn.
+   */
+  private async presentSoftwareFrame(
+    gl: WebGL2RenderingContext,
+    image: RGBImageUncompressed | null,
+  ): Promise<void> {
+    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    await this.drawSoftwareHud(gl, image);
     await this.hudRenderer.draw(gl, this.model);
   }
 
