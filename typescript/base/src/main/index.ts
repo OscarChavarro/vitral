@@ -34,6 +34,7 @@ export { Date as JavaDate } from "./java/util/Date.js";
 export { HashSet } from "./java/util/HashSet.js";
 export { LinkedHashSet } from "./java/util/LinkedHashSet.js";
 export { LinkedHashMap } from "./java/util/LinkedHashMap.js";
+export { IntegerKeyHashMap } from "./java/util/IntegerKeyHashMap.js";
 export { Stack } from "./java/util/Stack.js";
 export { AtomicLong } from "./java/util/concurrent/atomic/AtomicLong.js";
 export { LongAdder } from "./java/util/concurrent/atomic/LongAdder.js";
@@ -238,6 +239,7 @@ export { FunctionalExplicitSurfaceVoxelization } from "./vsdk/toolkit/environmen
 export { Voxelization } from "./vsdk/toolkit/environment/geometry/geometricProcessing/Voxelization.js";
 export { MonotoneDecompositionTriangulator } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.js";
 export { PolyhedralBoundedSolidModeler } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.js";
+export { _PolyhedralBoundedSolidFaceValidator } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/validation/_PolyhedralBoundedSolidFaceValidator.js";
 export { SimpleTestGeometryLibrary } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.js";
 export { CsgKurlanderBowlFixture } from "./vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/CsgKurlanderBowlFixture.js";
 export type { Material } from "./vsdk/toolkit/environment/material/Material.js";
@@ -330,6 +332,7 @@ export {
 export { RenderingElement } from "./vsdk/toolkit/render/RenderingElement.js";
 export { Rasterizer2D } from "./vsdk/toolkit/render/raster/Rasterizer2D.js";
 export { WireframeRenderer } from "./vsdk/toolkit/render/hiddenLine/WireframeRenderer.js";
+export { HiddenLineRenderer } from "./vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.js";
 export { TraceWorkspace } from "./vsdk/toolkit/render/TraceWorkspace.js";
 export { Shader } from "./vsdk/toolkit/render/shaders/Shader.js";
 export { CpuTextureSamplingConfig } from "./vsdk/toolkit/render/shaders/CpuTextureSamplingConfig.js";
@@ -350,6 +353,10 @@ export { RasterTileGenerationStrategy } from "./vsdk/toolkit/render/raytracing/R
 export { RasterTileGenerator } from "./vsdk/toolkit/render/raytracing/RasterTileGenerator.js";
 export { SimpleRaytracer } from "./vsdk/toolkit/render/raytracing/SimpleRaytracer.js";
 export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
+export { FontReader } from "./vsdk/toolkit/io/geometry/FontReader.js";
+export { StepLengthUnit } from "./vsdk/toolkit/io/geometry/stepCad/StepLengthUnit.js";
+export { StepReader } from "./vsdk/toolkit/io/geometry/stepCad/reader/StepReader.js";
+export { StlWriter } from "./vsdk/toolkit/io/geometry/stl/StlWriter.js";
 export { ImageNotRecognizedException } from "./vsdk/toolkit/io/image/ImageNotRecognizedException.js";
 export { ImagePersistenceHelper } from "./vsdk/toolkit/io/image/ImagePersistenceHelper.js";
 export { ImagePersistencePng, type ImageDeflater } from "./vsdk/toolkit/io/image/ImagePersistencePng.js";

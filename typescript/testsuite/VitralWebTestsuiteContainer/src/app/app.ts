@@ -20,6 +20,11 @@ import {
   PolygonClippingUrlDialog,
   type PolygonClippingSelection,
 } from '../WebGLExamples/PolygonClippingExample/gui/polygon-clipping-url-dialog';
+import { PolyhedralBoundedSolidExample } from '../WebGLExamples/PolyhedralBoundedSolidExample/polyhedral-bounded-solid-example';
+import {
+  PolyhedralBoundedSolidUrlDialog,
+  type PolyhedralBoundedSolidSelection,
+} from '../WebGLExamples/PolyhedralBoundedSolidExample/gui/polyhedral-bounded-solid-url-dialog';
 import { SolidTextureExample } from '../WebGLExamples/SolidTextureExample/solid-texture-example';
 import {
   SolidTextureUrlDialog,
@@ -43,7 +48,8 @@ type ExplorerItem =
         | 'SolidTextureExample'
         | 'MD2Example'
         | 'ShadersExample'
-        | 'PolygonClippingExample';
+        | 'PolygonClippingExample'
+        | 'PolyhedralBoundedSolidExample';
     };
 
 @Component({
@@ -62,6 +68,8 @@ type ExplorerItem =
     ShadersUrlDialog,
     PolygonClippingExample,
     PolygonClippingUrlDialog,
+    PolyhedralBoundedSolidExample,
+    PolyhedralBoundedSolidUrlDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -118,6 +126,11 @@ export class App {
           kind: 'file',
           label: 'PolygonClippingExample',
           exampleId: 'PolygonClippingExample',
+        },
+        {
+          kind: 'file',
+          label: 'PolyhedralBoundedSolidExample',
+          exampleId: 'PolyhedralBoundedSolidExample',
         },
       ],
     },
@@ -190,6 +203,16 @@ export class App {
   protected readonly polygonClippingBaseUrl = signal<string | null>(null);
   protected readonly polygonClippingUrlDialogOpen = signal<boolean>(false);
 
+  /**
+   * `PolyhedralBoundedSolidExample` names no file on its command line for the
+   * interactive program: `models.GeneralModelsBuilder` hard-codes the STEP
+   * solid its default model imports and the font its glyph model extrudes.
+   * Both are named by URL here, with the Java paths as the defaults.
+   */
+  protected readonly polyhedralStepFileUrl = signal<string | null>(null);
+  protected readonly polyhedralFontFileUrl = signal<string | null>(null);
+  protected readonly polyhedralUrlDialogOpen = signal<boolean>(false);
+
   protected selectItem(item: ExplorerItem): void {
     if (item.kind === 'file' && item.exampleId === 'MeshExample' && this.meshUrl() === null) {
       // Java runs `FileSelectorDialog` when the command line named no file.
@@ -222,6 +245,14 @@ export class App {
       this.polygonClippingBaseUrl() === null
     ) {
       this.openPolygonClippingUrlDialog();
+      return;
+    }
+    if (
+      item.kind === 'file' &&
+      item.exampleId === 'PolyhedralBoundedSolidExample' &&
+      this.polyhedralStepFileUrl() === null
+    ) {
+      this.openPolyhedralUrlDialog();
       return;
     }
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
@@ -260,6 +291,11 @@ export class App {
     if (item.exampleId === 'PolygonClippingExample') {
       event.preventDefault();
       this.openPolygonClippingUrlDialog();
+      return;
+    }
+    if (item.exampleId === 'PolyhedralBoundedSolidExample') {
+      event.preventDefault();
+      this.openPolyhedralUrlDialog();
     }
   }
 
@@ -349,6 +385,21 @@ export class App {
 
   private openPolygonClippingUrlDialog(): void {
     this.polygonClippingUrlDialogOpen.set(true);
+  }
+
+  protected acceptPolyhedralUrls(selection: PolyhedralBoundedSolidSelection): void {
+    this.polyhedralUrlDialogOpen.set(false);
+    this.polyhedralFontFileUrl.set(selection.fontFileUrl);
+    this.polyhedralStepFileUrl.set(selection.stepFileUrl);
+    this.selectedItem.set('PolyhedralBoundedSolidExample');
+  }
+
+  protected cancelPolyhedralUrls(): void {
+    this.polyhedralUrlDialogOpen.set(false);
+  }
+
+  private openPolyhedralUrlDialog(): void {
+    this.polyhedralUrlDialogOpen.set(true);
   }
 
   protected clearSelection(): void {

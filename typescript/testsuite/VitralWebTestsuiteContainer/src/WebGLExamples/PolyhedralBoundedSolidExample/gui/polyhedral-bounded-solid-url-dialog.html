@@ -1,0 +1,52 @@
+<div class="dialog-backdrop" (click)="onCancel()"></div>
+
+<div
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="polyhedral-bounded-solid-url-dialog-title"
+  (keydown)="onKeyDown($event)"
+>
+  <h2 class="dialog-title" id="polyhedral-bounded-solid-url-dialog-title">
+    Open the solid modeling resources
+  </h2>
+
+  <form (submit)="onSubmit($event)">
+    <label class="dialog-label" for="polyhedral-step-url-input">STEP file URL</label>
+    <input
+      class="dialog-input"
+      id="polyhedral-step-url-input"
+      name="stepFileUrl"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+      [value]="stepFileUrl()"
+      (input)="onStepFileUrlInput($event)"
+    />
+
+    <label class="dialog-label" for="polyhedral-font-url-input">TrueType font URL</label>
+    <input
+      class="dialog-input"
+      id="polyhedral-font-url-input"
+      name="fontFileUrl"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      [value]="fontFileUrl()"
+      (input)="onFontFileUrlInput($event)"
+    />
+
+    <p class="dialog-note">
+      The STEP solid is the model shown first, and the font's <code>A</code> is extruded by the
+      <code>FONT_BLOCK</code> model. Press <code>[3]</code> and <code>[4]</code> to walk the models,
+      <code>[1]</code> and <code>[2]</code> to select a face, <code>[v]</code> to show the vertex
+      numbers and <code>[8]</code> to cycle the hidden-line display.
+    </p>
+
+    <div class="dialog-actions">
+      <button class="dialog-button" type="button" (click)="onCancel()">Cancel</button>
+      <button class="dialog-button primary" type="submit">Open</button>
+    </div>
+  </form>
+</div>

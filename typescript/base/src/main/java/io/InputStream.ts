@@ -33,6 +33,29 @@ export abstract class InputStream {
         return skipped;
     }
 
+    /**
+    `InputStream.readAllBytes()` (Java 9): every remaining byte, up to the end
+    of the stream, in one array.
+    */
+    public readAllBytes(): Uint8Array {
+        const chunks: Uint8Array[] = [];
+        let total = 0;
+        for (;;) {
+            const chunk = new Uint8Array(8_192);
+            const read = this.readBytes(chunk, 0, chunk.length);
+            if (read < 0) break;
+            chunks.push(read === chunk.length ? chunk : chunk.subarray(0, read));
+            total += read;
+        }
+        const out = new Uint8Array(total);
+        let offset = 0;
+        for (const chunk of chunks) {
+            out.set(chunk, offset);
+            offset += chunk.length;
+        }
+        return out;
+    }
+
     public available(): number {
         return 0;
     }

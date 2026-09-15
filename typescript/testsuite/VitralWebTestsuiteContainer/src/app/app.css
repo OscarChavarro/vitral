@@ -161,7 +161,8 @@
 .workspace app-solid-texture-example,
 .workspace app-md2-example,
 .workspace app-shaders-example,
-.workspace app-polygon-clipping-example {
+.workspace app-polygon-clipping-example,
+.workspace app-polyhedral-bounded-solid-example {
   min-height: calc(100dvh - 24px);
 }
 

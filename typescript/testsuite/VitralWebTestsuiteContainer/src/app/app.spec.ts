@@ -41,6 +41,7 @@ describe('App', () => {
       'MD2Example',
       'ShadersExample',
       'PolygonClippingExample',
+      'PolyhedralBoundedSolidExample',
       'WebGPUExamples',
       'Tools',
       'ApplicationCases',

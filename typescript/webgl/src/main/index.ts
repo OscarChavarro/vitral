@@ -27,3 +27,8 @@ export { WebGLInfinitePlaneGizmoRenderer } from "./vsdk/toolkit/render/webgl/Web
 export { WebGLSolidTextureRenderer } from "./vsdk/toolkit/render/webgl/WebGLSolidTextureRenderer.js";
 export { WebGLMd2MeshRenderer } from "./vsdk/toolkit/render/webgl/WebGLMd2MeshRenderer.js";
 export { WebMd2Persistence } from "./vsdk/toolkit/io/geometry/WebMd2Persistence.js";
+export { WebGLSimpleMaterialRenderer } from "./vsdk/toolkit/render/webgl/WebGLSimpleMaterialRenderer.js";
+export { WebGLPolyhedralBoundedSolidRenderer } from "./vsdk/toolkit/render/webgl/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidRenderer.js";
+export { WebGLPolyhedralBoundedSolidDebugRenderer } from "./vsdk/toolkit/render/webgl/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidDebugRenderer.js";
+export { WebGLPolyhedralBoundedSolidDebugHUDRenderer } from "./vsdk/toolkit/render/webgl/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidDebugHUDRenderer.js";
+export { WebFontReader } from "./vsdk/toolkit/io/geometry/WebFontReader.js";

@@ -765,7 +765,119 @@ Migrated so far:
     polygons; the largest disagreement is 0.12 %, which is the grid's own
     boundary-cell error.
 
-Not migrated: `PolyhedralBoundedSolidExample`.
+- `PolyhedralBoundedSolidExample` — `typescript/testsuite/VitralWebTestsuiteContainer/src/
+    WebGLExamples/PolyhedralBoundedSolidExample`, first stage ported
+    2026-09-15.
+
+    The half-edge solid debugger. The selected model is built with the Euler
+    operators, the primitives, the sweeps, the gluing of [MANT1988].12.4, an
+    extruded glyph or a STEP import. It is shown with:
+
+      - its faces shaded under the configured shading type;
+      - its edges, points, normals and bounds on the quality keys;
+      - its two lights as billboards;
+      - the boundary loops of the selected face (or of all of them, `[1]`/`[2]`)
+        as curved arrows, with the face filled in red;
+      - the vertex ids on `[v]`;
+      - the edge-visibility debug view on `[0]`/`[9]`;
+      - the Appel hidden-line result on `[8]`.
+
+    `[c]` frames the selected face, `[3]`/`[4]` walk the models,
+    `[q]`/`[Q]`/`[w]`/`[W]` change the subdivisions, `[r]` turns the solid,
+    `[I]` prints the face and its neighbours, `[m]` exports STL, `[.]` takes a
+    screenshot, `[g]` goes fullscreen and `[h]` hides the HUD.
+
+    **First stage.** The models built by boolean set operations
+    (`HOLLOW_BOX`, `CSG_LAMP_SHELL`, `CSG_DIRECT`, `CSG_OPERAND1_PARTIAL`,
+    `CSG_OPERAND2_PARTIAL`) and by splitting (`SPLIT_TEST_PART_1` to `_3`) are
+    left out of the model sequence, so the HUD counts 20 models where Java
+    counts 28. `SolidModelNames` keeps every Java constant and id, and
+    `GeneralModelsBuilder` reports those names through the build-error path
+    instead of building them. Their builders (`createHollowBox`,
+    `createCsgLampShell`, `splitTest`, the CSG operand and `csgTest` block) are
+    not ported yet; the second stage brings them, verified against the Java
+    kernel on their own.
+
+    Ported: `models.*` (except the CSG builders above),
+    `gui.CameraFaceFocusInteraction`, `gui.DebuggerKeyboardInteractionTechniques`,
+    `gui.DebuggerMouseInteractionTechniques`,
+    `animation.SolidAnimationController`, `render.Jogl4DebuggerRenderer`,
+    `render.Jogl4DebuggerHudRenderer`, `PolyhedralBoundedSolidModelingTools`,
+    and the interactive half of `PolyhedralBoundedSolidExample` with
+    `InteractiveDebugger`. Not ported: `options.CommandLineOptions`,
+    `render.Jogl4HeadlessRenderer` and `main`'s offline, motif-sweep and
+    Appel-dump paths, for the reason `ShadersExample` records; and
+    `render.Jogl4HudOperandsRenderer`, which nothing in the Java program
+    constructs.
+
+    It needed library advances recorded under Phases 36, 40 and 41: the STEP
+    reader, the STL writer and `FontReader`; `HiddenLineRenderer`; and the
+    WebGL polyhedral-solid renderer family with `WebGLSimpleMaterialRenderer`
+    and `WebFontReader`. Two Java runtime adapters came with them:
+    `java.util.IntegerKeyHashMap`, a `HashMap<Integer, V>` that iterates in the
+    JVM's order, resize splits and tree bins included, because the STEP builder
+    numbers vertices and orders edges by walking such maps; and
+    `InputStream.readAllBytes`.
+
+    Browser boundaries, each marked at the code:
+
+      - Java tessellates faces with the GLU tessellator. The solid renderer
+        needs triangles made of the face's own vertices, because smoothed
+        normals are looked up by exact vertex position, so it triangulates with
+        the ported `MonotoneDecompositionTriangulator` (odd-depth fill, like
+        `GLU_TESS_WINDING_ODD`) in the face plane and winds every triangle with
+        the face normal. The triangles differ from GLU's; the covered region,
+        the vertices and the winding match.
+      - AWT gives Java the glyph outline, from FreeType on this host.
+        `WebFontReader` reads the TrueType tables and reproduces FreeType's
+        unhinted 26.6 scaling and `FT_Outline_Decompose`, then runs
+        `AwtFontReader.extractGlyph` statement by statement.
+      - The STEP file and the font are fetched once when the module opens,
+        from URLs chosen in the explorer dialog (defaults: the two Java paths),
+        so the builder stays synchronous. `IMPORT_OR_FEATURED_OBJECT` always
+        builds the featured object, because a page has no `/tmp/solid.bin`.
+      - The two `HashMap`s keyed by half-edge in `_StepSolidBuilder` iterate by
+        identity hash on a JVM, so their order is not fixed there; they keep
+        insertion order.
+      - Screenshots and STL files are handed to the browser as downloads named
+        `screenshot.png` and `output.stl`. The PNG is encoded by the ported
+        `ImagePersistence.exportPNG`, from pixels read as RGBA because that is
+        the only format WebGL2 guarantees.
+      - Every program a frame can reach is compiled in `init`, per the
+        drawing-buffer rule. Before that change, the first frames lost their
+        grey background.
+      - The camera stand-in and the fullscreen request are handled as in the
+        other modules. `recenterOrbiterAfterModelChange` and `[c]` hand the new
+        focus to `adoptCameraState()`.
+
+    Parity was checked byte for byte with a reference driver. It compiles the
+    Java example's `models` and `gui` classes and the three JOGL4 polyhedral
+    renderers against `java/base`, and runs them next to an esbuild bundle of
+    the TypeScript module over `base/dist` and `webgl/dist`. For each of the 19
+    models the module builds, it prints:
+
+      - the solid's full `toString`, with vertex, edge, face and half-edge ids;
+      - `validateIntermediate`, and every vertex position as raw bits;
+      - digests of the debug renderer's line buffers: edges, normals,
+        degenerate faces, face arrows (all faces and face 2), and edge debug
+        (all edges and edge 0);
+      - the vertex-label groups and their visibility;
+      - the Appel contour, visible and hidden lines under a 30-degree model
+        rotation;
+      - the STL bytes, or the rejection message;
+      - the camera after `[c]` on face 2, and the `[I]` dump of that face.
+
+    Both outputs are identical over 29,415 lines, including the 2,186 vertices
+    and 3,396 edges of `kurlanderBowl.step`. Both kernels print the same four
+    validation reports for `GLUED_CYLINDERS`. The glyph reader was also diffed
+    against `AwtFontReader` over printable ASCII plus accented and Cyrillic
+    letters, in `cyrvetic.ttf` and `notoSansLight.ttf`, with no differences.
+
+    In headless Chrome over SwiftShader, every model of the sequence renders,
+    along with the HUD, the face arrows, the vertex ids, the three hidden-line
+    modes on the holed box and on the STEP bowl, the debug edges with their
+    face normals and QI samples, the five shading types, the animation, the STL
+    export and the screenshot.
 
 ## Analyzed State
 
@@ -2315,6 +2427,21 @@ JavaScript's own `trim` strips Unicode whitespace, which NUL is not. The parity
 evidence is the byte-identical reference-driver diff recorded under
 `MD2Example`. The phase inventory is unchanged and the phase stays Pending.
 
+Fourth partial advance — 2026-09-15 (out of phase order, to unblock the first
+stage of `PolyhedralBoundedSolidExample`): the STEP reader
+(`stepCad.reader._StepEntity`, `_StepTokenizer`, `_StepSolidBuilder`,
+`StepReader`) and `stepCad.StepLengthUnit`, the STL writer
+(`stl._StlFacetEmitter` with `Facet`, `_StlFaceTriangulator` with `FaceBasis`
+and `ProjectedVertex`, `_StlSolidValidator`, `StlWriter`), and the abstract
+`FontReader` are ported 1:1 into `@vitral/base` (13 entries, 19 / 51).
+`StepReader` carries only the stream overload, because the `File` overload only
+opens a stream. The builder's integer-keyed maps are
+`java.util.IntegerKeyHashMap`, so vertex ids and edge order follow the JVM's
+`HashMap` iteration. The concrete font factory is `WebFontReader` in
+`@vitral/webgl`, recorded under Phase 41. Parity is the reference-driver diff
+recorded under `PolyhedralBoundedSolidExample`. The StepWriter family and the
+other readers are not ported; the phase stays Pending.
+
 Exit: satisfy the standard phase gate before starting Phase 37.
 
 ### Phase 37: SGL checkpoint
@@ -2579,6 +2706,17 @@ dump records) beyond `WireframeRenderer`, and the stale
 `raster/`, `raytracing/` and `hiddenLine/`. The phase stays Pending and its
 gate has not been run.
 
+Third partial advance — 2026-09-15 (out of phase order, to unblock the first
+stage of `PolyhedralBoundedSolidExample`): `render.hiddenLine.HiddenLineRenderer`
+is ported 1:1 with its package-private `_AppelEdgeCache` and `_AppelEdgeSegment`
+and its four dump records (`AppelAlgorithmDump`, `AppelEdgeDump`,
+`AppelSegmentDump`, `AppelEventDump`), as members of the `HiddenLineRenderer`
+namespace (7 entries, 19 / 35). The diagnostic trace's `String.format("%.5f")`
+becomes `toFixed(5)`. The contour, visible and hidden line buffers are
+byte-identical to Java's for every model of the module; see the
+reference-driver record under `PolyhedralBoundedSolidExample`. The phase stays
+Pending.
+
 Exit: satisfy the standard phase gate before starting Phase 41.
 
 ### Phase 41: GPU rendering architecture checkpoint
@@ -2781,6 +2919,24 @@ and the three translations the preprocessor already performs — the
 `layout(location = N) out` rewrite, the `gl_PointSize` injection, the
 clip-distance-to-varying pair and the `sampler3D` precision default — are
 sufficient for the whole set.
+
+Seventh partial advance — 2026-09-15 (for `PolyhedralBoundedSolidExample`):
+the JOGL4 polyhedral-solid family is added to `@vitral/webgl` as
+`render.webgl.polyhedralBoundedSolid.WebGLPolyhedralBoundedSolidRenderer`,
+`WebGLPolyhedralBoundedSolidDebugRenderer` and
+`WebGLPolyhedralBoundedSolidDebugHUDRenderer`, the last drawing into a 2D canvas
+context where Java draws into a `Graphics2D`. It comes with
+`WebGLSimpleMaterialRenderer`, the active material per context, and with
+`io.geometry.WebFontReader`, the browser's `FontReader`.
+
+`WebFontReader` reproduces FreeType's unhinted outline as AWT reports it and
+matches `AwtFontReader` exactly on the two fonts of `etc/fonts`. The solid
+renderer replaces the GLU face tessellator with
+`MonotoneDecompositionTriangulator`, keeping the face's own vertices and the
+contour winding, for the reason recorded under the module.
+`WebGLLineRenderer.prepare` and `WebGLPolyhedralBoundedSolidRenderer.prepare`
+compile their programs ahead of the first frame. `_PolyhedralBoundedSolidFaceValidator`
+is now exported from the `@vitral/base` barrel.
 
 Exit: satisfy the standard phase gate before starting Phase 42.
 
@@ -2994,12 +3150,12 @@ The port is complete only when all of the following are true:
 | 33 | Image I/O | Pending — partial advances: the export path, `importDDSCompressed`, and `ImagePersistenceSGI` with the `importIndexedColor` that reaches it (5 / 8 entries); see the Phase 33 record |
 | 34 | XML I/O | Pending |
 | 35 | VRML I/O checkpoint | Pending |
-| 36 | Geometry I/O | Pending — partial advances: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, `ReaderMitScene` with `ImportContext`, and `Md2Persistence` (6 / 51 entries); the second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser, and the third 2026-09-13 split `Md2Persistence` the same way, with `WebMd2Persistence` as its URL dispatcher; see the Phase 36 record |
+| 36 | Geometry I/O | Pending — partial advances: `EnvironmentPersistence`, `ReaderObj` with `_ReaderObjVertex`, `ReaderMitScene` with `ImportContext`, `Md2Persistence` (6 / 51 entries), and on 2026-09-15 the STEP reader, the STL writer and `FontReader` (19 / 51); the second advance 2026-09-12 relocated `ReaderObj` to `@vitral/base` behind an `ObjResourceProvider` seam so Node and the browser share one parser, and the third 2026-09-13 split `Md2Persistence` the same way, with `WebMd2Persistence` as its URL dispatcher; see the Phase 36 record |
 | 37 | SGL checkpoint | Pending |
 | 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
-| 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); first exercised in a browser 2026-09-13 by `ShadersExample`, over Web Workers; see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; all 20 GLSL files compile and all 11 programs link under GLSL ES 3.00, so no shader needs rewriting; sixth partial advance 2026-09-15: `WebGLPolygon2DRenderer` with `_Polygon2DOddWindingTessellator` standing in for the absent GLU tessellator, completing the JOGL4 renderer family; see the Phase 41 record |
+| 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries), and on 2026-09-15 `render.hiddenLine.HiddenLineRenderer` with its cache, segment and dump records (19 / 35); first exercised in a browser 2026-09-13 by `ShadersExample`, over Web Workers; see the Phase 40 record |
+| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; all 20 GLSL files compile and all 11 programs link under GLSL ES 3.00, so no shader needs rewriting; sixth partial advance 2026-09-15: `WebGLPolygon2DRenderer` with `_Polygon2DOddWindingTessellator` standing in for the absent GLU tessellator, completing the JOGL4 renderer family; seventh partial advance 2026-09-15: the polyhedral-solid renderer family, `WebGLSimpleMaterialRenderer` and `WebFontReader`; see the Phase 41 record |
 | 42 | Animation | Complete — 4 / 4 symbols ported 2026-09-13 out of normal phase order, to give `MD2Example` its animation; `AnimationEventGenerator.run()` arms the host timer instead of blocking a thread, keeping Java's tick ordering; the standard gate has not been run; see the Phase 42 record |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |

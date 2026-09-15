@@ -102,6 +102,13 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'PolyhedralBoundedSolidExample') {
+        <app-polyhedral-bounded-solid-example
+          [stepFileUrl]="polyhedralStepFileUrl()"
+          [fontFileUrl]="polyhedralFontFileUrl()"
+          (deactivate)="clearSelection()"
+        />
+      }
       @if (selectedItem() === 'ShadersExample') {
         <app-shaders-example
           [textureUrl]="shadersTextureUrl()"
@@ -147,6 +154,15 @@
       [initialPolygonsBaseUrl]="polygonClippingBaseUrl()"
       (accept)="acceptPolygonClippingUrl($event)"
       (cancel)="cancelPolygonClippingUrl()"
+    />
+  }
+
+  @if (polyhedralUrlDialogOpen()) {
+    <app-polyhedral-bounded-solid-url-dialog
+      [initialStepFileUrl]="polyhedralStepFileUrl()"
+      [initialFontFileUrl]="polyhedralFontFileUrl()"
+      (accept)="acceptPolyhedralUrls($event)"
+      (cancel)="cancelPolyhedralUrls()"
     />
   }
 

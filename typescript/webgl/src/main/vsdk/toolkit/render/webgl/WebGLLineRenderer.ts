@@ -54,6 +54,15 @@ export class WebGLLineRenderer {
 
     private constructor() {}
 
+    /**
+    Compiles the line program ahead of the first frame, which Java does lazily
+    inside `ensureInitialized`; see the drawing-buffer rule recorded for the
+    WebGL example programs, which is why a frame must not be the first to ask.
+    */
+    public static async prepare(gl: WebGL2RenderingContext): Promise<void> {
+        await WebGLLineRenderer.ensureInitialized(gl);
+    }
+
     public static async drawLines(
         gl: WebGL2RenderingContext,
         modelViewProjection: Matrix4x4d,
