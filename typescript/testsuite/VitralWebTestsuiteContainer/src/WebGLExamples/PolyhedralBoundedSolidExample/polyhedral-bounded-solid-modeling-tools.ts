@@ -4,6 +4,8 @@
 
 import type { PolyhedralBoundedSolid, Vector3Dd } from '@vitral/base';
 import type { WebFontReader } from '@vitral/webgl';
+import type { CsgOperationNames } from './models/csg-operation-names';
+import type { CsgSampleNames } from './models/csg-sample-names';
 import type { DebuggerModel } from './models/debugger-model';
 import { GeneralModelsBuilder, type GeneralModelsResources } from './models/general-models-builder';
 
@@ -14,9 +16,7 @@ import { GeneralModelsBuilder, type GeneralModelsResources } from './models/gene
  * builder.
  *
  * `buildSolid` and `createFontBlock` also carry the fetched resources the
- * browser builder needs, for the reason `GeneralModelsBuilder` records. The
- * four delegates whose builders this first stage leaves out — `createHollowBox`,
- * `createCsgLampShell`, `splitTest` and `csgTest` — are left out with them.
+ * browser builder needs, for the reason `GeneralModelsBuilder` records.
  */
 export class PolyhedralBoundedSolidModelingTools {
   private constructor() {}
@@ -44,6 +44,13 @@ export class PolyhedralBoundedSolidModelingTools {
     return GeneralModelsBuilder.createCylinder(r, h);
   }
 
+  static createCsgLampShell(
+    subdivisionCircunference: number,
+    subdivisionHeight: number,
+  ): PolyhedralBoundedSolid {
+    return GeneralModelsBuilder.createCsgLampShell(subdivisionCircunference, subdivisionHeight);
+  }
+
   static createArrow(p1: number, p2: number, p3: number, p4: number): PolyhedralBoundedSolid {
     return GeneralModelsBuilder.createArrow(p1, p2, p3, p4);
   }
@@ -54,6 +61,10 @@ export class PolyhedralBoundedSolidModelingTools {
 
   static createHoledBox(): PolyhedralBoundedSolid {
     return GeneralModelsBuilder.createHoledBox();
+  }
+
+  static createHollowBox(): PolyhedralBoundedSolid {
+    return GeneralModelsBuilder.createHollowBox();
   }
 
   static createLaminaWithTwoShells(): PolyhedralBoundedSolid {
@@ -82,6 +93,19 @@ export class PolyhedralBoundedSolidModelingTools {
 
   static rotationalSweepTest(): PolyhedralBoundedSolid {
     return GeneralModelsBuilder.rotationalSweepTest();
+  }
+
+  static splitTest(part: number): PolyhedralBoundedSolid {
+    return GeneralModelsBuilder.splitTest(part);
+  }
+
+  static csgTest(
+    part: number,
+    op: CsgOperationNames,
+    sample: CsgSampleNames,
+    withDebug: boolean,
+  ): PolyhedralBoundedSolid {
+    return GeneralModelsBuilder.csgTest(part, op, sample, withDebug);
   }
 
   static featuredObject(): PolyhedralBoundedSolid {

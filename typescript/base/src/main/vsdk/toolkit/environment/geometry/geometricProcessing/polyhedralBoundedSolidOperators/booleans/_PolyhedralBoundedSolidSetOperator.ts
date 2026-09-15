@@ -9,6 +9,7 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 // Java classes
+import { Double } from "../../../../../../../java/lang/Double.js";
 import { IllegalStateException } from "../../../../../../../java/lang/IllegalStateException.js";
 import { StringBuilder } from "../../../../../../../java/lang/StringBuilder.js";
 import { ArrayList } from "../../../../../../../java/util/ArrayList.js";
@@ -921,8 +922,10 @@ export class _PolyhedralBoundedSolidSetOperator extends _PolyhedralBoundedSolidO
             ", vertices=" +
             solid.getVerticesList().size() +
             ", bounds=" +
+            // Java's `Arrays.toString(double[])`, whose elements go through
+            // `String.valueOf(double)`.
             "[" +
-            Array.from(solid.getMinMax()).join(", ") +
+            Array.from(solid.getMinMax(), (value) => Double.toString(value)).join(", ") +
             "]" +
             "}"
         );

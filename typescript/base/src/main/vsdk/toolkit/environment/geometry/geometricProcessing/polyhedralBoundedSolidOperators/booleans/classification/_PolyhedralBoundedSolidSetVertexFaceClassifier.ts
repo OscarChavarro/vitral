@@ -3,7 +3,7 @@
 //=     Computer Science Press, 1988.                                       =
 
 import { Boolean as JavaBoolean } from "../../../../../../../../java/lang/Boolean.js";
-import { platformPrint } from "../../../../../../../../java/lang/_PlatformConsole.js";
+import { platformPrint, platformPrintln } from "../../../../../../../../java/lang/_PlatformConsole.js";
 import { ArrayList } from "../../../../../../../../java/util/ArrayList.js";
 import { Collections } from "../../../../../../../../java/util/Collections.js";
 import { Vector3Dd } from "../../../../../../common/linealAlgebra/Vector3Dd.js";
@@ -451,7 +451,7 @@ export class _PolyhedralBoundedSolidSetVertexFaceClassifier extends _PolyhedralB
             } else {
                 platformPrint("  - ");
             }
-            console.log("Vertex/face pair V[" + v.id + "] / f[" + f.id + "]");
+            platformPrintln("Vertex/face pair V[" + v.id + "] / f[" + f.id + "]");
         }
 
         const nbr = _PolyhedralBoundedSolidSetVertexFaceClassifier.vertexFaceGetNeighborhood(

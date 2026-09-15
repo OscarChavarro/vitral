@@ -30,9 +30,9 @@ import { PolyhedralBoundedSolidModelingTools } from './polyhedral-bounded-solid-
 import { WebGLDebuggerRenderer } from './render/webgl-debugger-renderer';
 
 /**
- * TypeScript/WebGL port of `java/testsuite/Jogl4Examples/PolyhedralBoundedSolidExample`,
- * in its first stage: every model and every view of the Java debugger except
- * the ones built by boolean set operations and by splitting.
+ * TypeScript/WebGL port of `java/testsuite/Jogl4Examples/PolyhedralBoundedSolidExample`:
+ * every model and every view of the interactive Java debugger, including the
+ * models built by boolean set operations and by plane splitting.
  *
  * The Java program is `PolyhedralBoundedSolidExample.main`, which builds the
  * model and hands it to `InteractiveDebugger`, a `JFrame` owning a JOGL
@@ -48,8 +48,8 @@ import { WebGLDebuggerRenderer } from './render/webgl-debugger-renderer';
  * Java's window close and `System.exit(0)` become the `deactivate` output.
  *
  * What the program shows is the half-edge solid of the selected model — built
- * with Euler operators, primitives, sweeps, gluing, a glyph or a STEP import
- * — with its faces shaded, its edges, points, normals and bounds switched from
+ * with Euler operators, primitives, sweeps, gluing, set operations, a plane
+ * split, a glyph or a STEP import — with its faces shaded, its edges, points, normals and bounds switched from
  * the quality keys, its lights as billboards, the boundary loops of the
  * selected face (or of all of them) as curved arrows with the face filled in
  * red, the edge-visibility debug view, the Appel hidden-line result, and a HUD
@@ -65,10 +65,8 @@ import { WebGLDebuggerRenderer } from './render/webgl-debugger-renderer';
  * program constructs it, `Jogl4DebuggerRenderer` carrying its own copy of the
  * inset drawing, which is ported there.
  *
- * Six boundaries are specific to this program:
+ * Five boundaries are specific to this program:
  *
- *   - The model sequence leaves out, for this stage, the models built by
- *     `setOp` and `split`; see `SolidModelNames`.
  *   - `GeneralModelsBuilder` reads a STEP file and a font while it builds. A
  *     build must not wait on a network read, so `io.PolyhedralBoundedSolidReader`
  *     fetches both once, when the module opens, and the builder stays

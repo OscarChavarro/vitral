@@ -766,12 +766,13 @@ Migrated so far:
     boundary-cell error.
 
 - `PolyhedralBoundedSolidExample` — `typescript/testsuite/VitralWebTestsuiteContainer/src/
-    WebGLExamples/PolyhedralBoundedSolidExample`, first stage ported
-    2026-09-15.
+    WebGLExamples/PolyhedralBoundedSolidExample`, ported 2026-09-15 in two
+    stages.
 
     The half-edge solid debugger. The selected model is built with the Euler
-    operators, the primitives, the sweeps, the gluing of [MANT1988].12.4, an
-    extruded glyph or a STEP import. It is shown with:
+    operators, the primitives, the sweeps, the gluing of [MANT1988].12.4, the
+    boolean set operations, the plane split, an extruded glyph or a STEP
+    import. It is shown with:
 
       - its faces shaded under the configured shading type;
       - its edges, points, normals and bounds on the quality keys;
@@ -787,18 +788,30 @@ Migrated so far:
     `[I]` prints the face and its neighbours, `[m]` exports STL, `[.]` takes a
     screenshot, `[g]` goes fullscreen and `[h]` hides the HUD.
 
-    **First stage.** The models built by boolean set operations
-    (`HOLLOW_BOX`, `CSG_LAMP_SHELL`, `CSG_DIRECT`, `CSG_OPERAND1_PARTIAL`,
-    `CSG_OPERAND2_PARTIAL`) and by splitting (`SPLIT_TEST_PART_1` to `_3`) are
-    left out of the model sequence, so the HUD counts 20 models where Java
-    counts 28. `SolidModelNames` keeps every Java constant and id, and
-    `GeneralModelsBuilder` reports those names through the build-error path
-    instead of building them. Their builders (`createHollowBox`,
-    `createCsgLampShell`, `splitTest`, the CSG operand and `csgTest` block) are
-    not ported yet; the second stage brings them, verified against the Java
-    kernel on their own.
+    The CSG models (`CSG_DIRECT`, `CSG_OPERAND1_PARTIAL`,
+    `CSG_OPERAND2_PARTIAL`, and `CSG_MOON_BLOCK`, which is outside the
+    sequence) also take `[5]` for the operation, `[6]` for the sample pair,
+    `[d]` for a traced run of `setOp`, and `[e]`/`[E]` for the Kurlander bowl
+    motif; their two operands are drawn as insets in the lower corners, and
+    the set-operation statistics issues are printed above the build error.
 
-    Ported: `models.*` (except the CSG builders above),
+    **Stages.** The first stage left the models built by set operations
+    (`HOLLOW_BOX`, `CSG_LAMP_SHELL`, `CSG_MOON_BLOCK`, `CSG_DIRECT`,
+    `CSG_OPERAND1_PARTIAL`, `CSG_OPERAND2_PARTIAL`) and by splitting
+    (`SPLIT_TEST_PART_1` to `_3`) out of the model sequence. The second stage
+    ports their builders over the `geometricProcessing` operators of Phase 25
+    (`PolyhedralBoundedSolidModeler.setOp` and `split`,
+    `SimpleTestGeometryLibrary`, `CsgKurlanderBowlFixture`):
+    `createHollowBox`, `buildCsgMoonBlock`, `createCsgLampShell`, `splitTest`,
+    `buildCsgTest2`, `buildCsgTest4`, `buildCsgTest5`, `csgTest`,
+    `createCsgOperands`, `createCsgHudPreviewOperands` and the progress
+    messages, and restores Java's 28-entry sequence together with the four
+    `PolyhedralBoundedSolidModelingTools` delegates. Java's overloads with a
+    trailing motif index are one method with that index defaulting to 0, and
+    `splitTest` hands the splitter the plain arrays its port takes where Java
+    passes `ArrayList`s.
+
+    Ported: `models.*`,
     `gui.CameraFaceFocusInteraction`, `gui.DebuggerKeyboardInteractionTechniques`,
     `gui.DebuggerMouseInteractionTechniques`,
     `animation.SolidAnimationController`, `render.Jogl4DebuggerRenderer`,
@@ -878,6 +891,41 @@ Migrated so far:
     modes on the holed box and on the STEP bowl, the debug edges with their
     face normals and QI samples, the five shading types, the animation, the STL
     export and the screenshot.
+
+    The second stage has its own driver pair. It runs 81 builds through
+    `buildSolid`: `HOLLOW_BOX`, `CSG_MOON_BLOCK`, `CSG_LAMP_SHELL` at the
+    default and at 24×12 subdivisions, the three split parts, `CSG_DIRECT`
+    for each of the twelve samples under each of the four operations,
+    `CSG_OPERAND1_PARTIAL` and `_2` for each sample, a traced (`[d]`) union,
+    and the bowl at motif 3; then the walk of `[3]`/`[4]` across the whole
+    sequence. For each build it prints the statistics counters, both preview
+    operands and the result (full `toString` and every vertex as raw bits),
+    `validateIntermediate`, the Appel lines, the STL bytes, and everything
+    the kernel writes to standard output and error. Nine builds end in a strict
+    validation rejection, and both kernels reject the same nine with the same
+    topology summary.
+
+    Against a JVM run with `-XX:+UnlockDiagnosticVMOptions
+    -XX:-UseLibmIntrinsic` both outputs match over 77,625 lines except for the
+    class name in the `Logger` header, which the bundler renames in
+    TypeScript. With the default HotSpot intrinsics, 17 vertices of the 24×12
+    lamp shell and that build's Appel digests differ by 1 ulp, from the
+    `Math.sin`/`Math.cos` difference recorded in Phase 25. The driver also
+    found two base defects, both fixed: `_PolyhedralBoundedSolidSetOperator`
+    printed the bounds in its strict-validation message with JavaScript number
+    text (`0`, `1`) where Java's `Arrays.toString(double[])` prints `0.0`,
+    `1.0`; and `_PolyhedralBoundedSolidSetVertexFaceClassifier` wrote the
+    second half of a traced line through `console.log` after writing its
+    `  * ` prefix through `platformPrint`, so the two halves could land on
+    different channels. The 24 Phase 25 operator test files (245 tests) pass
+    after both fixes.
+
+    In headless Chrome over SwiftShader, the bowl difference with its operand
+    insets and motif line, the `MANT1986_2` pair under two operations, the
+    moon-block union, the three split parts, the lamp shell and the hollow
+    box, with its inner box in the hidden-line view, all render. The browser
+    builds as synchronously as Java's event thread does, so a bowl build
+    holds the page for a few seconds.
 
 ## Analyzed State
 

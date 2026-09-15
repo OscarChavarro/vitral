@@ -7,9 +7,7 @@ import type { CsgOperationNames } from './csg-operation-names';
  * The twelve constants with their display ids, the wrapping `nextCircular()`,
  * and the operation each sample forces. Java's commented-out
  * `KURLANDER_BOWL_ALL_MOTIFS(13)` stays out, as it is out there. The samples
- * are only built by the CSG models, which this first stage of the port leaves
- * out of the model sequence (see `SolidModelNames`); the model still carries
- * the sample and `[6]` still walks it, as in Java.
+ * are built by `GeneralModelsBuilder.createCsgOperands` for the CSG models.
  */
 export type CsgSampleNames =
   | 'MANT1986_2'

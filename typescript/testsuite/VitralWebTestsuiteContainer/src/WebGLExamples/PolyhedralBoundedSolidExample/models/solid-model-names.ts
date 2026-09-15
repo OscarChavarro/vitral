@@ -8,17 +8,8 @@
  * first argument.
  *
  * `MAIN_SEQUENCE` — the walk `[3]` and `[4]` step through, and whose length and
- * positions the HUD prints — is Java's without seven entries, and that is the
- * one deliberate difference of this first stage of the port: `HOLLOW_BOX`,
- * `CSG_LAMP_SHELL`, `CSG_DIRECT`, `CSG_OPERAND1_PARTIAL` and
- * `CSG_OPERAND2_PARTIAL` are built by the set operations of
- * `PolyhedralBoundedSolidModeler.setOp`, and `SPLIT_TEST_PART_1` to `_3` by the
- * splitter, `PolyhedralBoundedSolidModeler.split` — the first of the three
- * shows the solid before the split, but belongs to the same test. Both
- * families are left for the second stage of this migration, where they will
- * be verified against the Java kernel on their own, and they return to the
- * sequence then, in their Java places. `CSG_MOON_BLOCK` is not in Java's
- * sequence either.
+ * positions the HUD prints — is Java's, all 28 entries; `CSG_MOON_BLOCK` is
+ * not in it, as it is not in Java's.
  */
 export type SolidModelNames =
   | 'MVFS_SMEV_SAMPLE'
@@ -92,6 +83,7 @@ const MAIN_SEQUENCE: readonly SolidModelNames[] = [
   'MVFS_SMEV_SAMPLE',
   'BOX',
   'HOLED_BOX',
+  'HOLLOW_BOX',
   'ARC_SAMPLE',
   'CIRCULAR_LAMINA',
   'TRANSLATIONAL_SWEEP_EXTRUDE_FACE_PLANAR_ARC',
@@ -99,6 +91,7 @@ const MAIN_SEQUENCE: readonly SolidModelNames[] = [
   'SPHERE',
   'CONE',
   'CYLINDER',
+  'CSG_LAMP_SHELL',
   'ARROW',
   'LAMINA_WITH_TWO_SHELLS',
   'LAMINA_WITH_HOLE',
@@ -106,6 +99,12 @@ const MAIN_SEQUENCE: readonly SolidModelNames[] = [
   'GLUED_CYLINDERS',
   'EULER_OPERATORS_TEST',
   'ROTATIONAL_SWEEP',
+  'SPLIT_TEST_PART_1',
+  'SPLIT_TEST_PART_2',
+  'SPLIT_TEST_PART_3',
+  'CSG_DIRECT',
+  'CSG_OPERAND1_PARTIAL',
+  'CSG_OPERAND2_PARTIAL',
   'FEATURED_OBJECT',
   'IMPORT_OR_FEATURED_OBJECT',
   'STEP_IMPORT',

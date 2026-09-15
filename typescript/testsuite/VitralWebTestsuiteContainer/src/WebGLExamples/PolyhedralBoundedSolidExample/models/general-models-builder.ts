@@ -7,12 +7,15 @@ import {
   Box,
   ByteArrayInputStream,
   Cone,
+  CsgKurlanderBowlFixture,
+  InfinitePlane,
   JavaMath,
   Logger,
   Matrix4x4d,
   PolyhedralBoundedSolid,
   PolyhedralBoundedSolidEulerOperators,
   PolyhedralBoundedSolidModeler,
+  PolyhedralBoundedSolidStatistics,
   PolyhedralBoundedSolidTopologyEditing,
   PolyhedralBoundedSolidValidationEngine,
   SimpleTestGeometryLibrary,
@@ -25,6 +28,8 @@ import {
   type _PolyhedralBoundedSolidHalfEdge,
 } from '@vitral/base';
 import type { WebFontReader } from '@vitral/webgl';
+import { csgOperationLabel, type CsgOperationNames } from './csg-operation-names';
+import { csgSampleLabel, type CsgSampleNames } from './csg-sample-names';
 import type { DebuggerModel } from './debugger-model';
 
 /**
@@ -40,26 +45,28 @@ export interface GeneralModelsResources {
 /**
  * Port of
  * `java/testsuite/Jogl4Examples/PolyhedralBoundedSolidExample/src/models/GeneralModelsBuilder.java`,
- * for every model this first stage of the port shows.
+ * for every model of the Java program.
  *
- * `buildSolid` is Java's switch, and every builder it reaches from the model
- * sequence is Java's, statement by statement, over the ported kernel: the
+ * `buildSolid` is Java's switch, and every builder it reaches is Java's,
+ * statement by statement, over the ported kernel: the
  * `mvfs`/`smev` wire, the box, the holed box of [MANT1988].9.3 built with
  * `smev`/`kemr`/`mef`/`kfmrh`, the arc and the circular lamina, the two
  * translational sweeps, the sphere, cone and cylinder with the current
  * subdivisions, the arrow, the two laminas with an inner loop, the extruded
  * glyph, the glued cylinders of [MANT1988].12.4, the Euler operator wire, the
  * torus of the rotational sweep of [MANT1988].12.5, the featured object of
- * [APPE1967], and the imported STEP solid.
+ * [APPE1967], and the imported STEP solid; and the models of the boolean set
+ * operations and the plane split: `createHollowBox` of [MANT1988].15.1,
+ * `createCsgLampShell`, `splitTest` over `PolyhedralBoundedSolidModeler.split`,
+ * and the CSG block — `buildCsgMoonBlock`, `buildCsgTest2`, `buildCsgTest4`,
+ * `buildCsgTest5`, `csgTest`, `createCsgOperands`,
+ * `createCsgHudPreviewOperands` and their progress messages — over
+ * `PolyhedralBoundedSolidModeler.setOp`.
  *
- * What is not here is what the model sequence leaves out, for the reason
- * recorded on `SolidModelNames`: `createHollowBox` and `createCsgLampShell`,
- * which call `PolyhedralBoundedSolidModeler.setOp`; `splitTest`, which calls
- * `split`; and the whole CSG block — `buildCsgMoonBlock`, `buildCsgTest2`,
- * `buildCsgTest4`, `buildCsgTest5`, `csgTest`, `createCsgOperands`,
- * `createCsgHudPreviewOperands` and their progress messages. Their switch
- * cases report that they belong to the set-operations stage instead of
- * building, through the same error path a failed build takes.
+ * Java's overloads with a trailing motif index (`csgTest`,
+ * `createCsgOperands`, `createCsgHudPreviewOperands`) are one method whose
+ * index defaults to the 0 the shorter overload passes. `System.out` and
+ * `System.err` are `console.log` and `console.error`.
  *
  * Three runtime boundaries:
  *
@@ -89,6 +96,7 @@ export class GeneralModelsBuilder {
     resources: GeneralModelsResources,
   ): PolyhedralBoundedSolid | null {
     let mySolid: PolyhedralBoundedSolid | null;
+    let csgPreviewOperands: PolyhedralBoundedSolid[];
     let translationMatrix: Matrix4x4d;
     let rotationMatrix: Matrix4x4d;
     let scaleMatrix: Matrix4x4d;
@@ -210,6 +218,24 @@ export class GeneralModelsBuilder {
           model.getSubdivisionHeight(),
         );
         break;
+      case 'CSG_MOON_BLOCK':
+        csgPreviewOperands = GeneralModelsBuilder.createCsgHudPreviewOperands('MOON_BLOCK');
+        model.setCsgPreviewOperandA(csgPreviewOperands[0]!);
+        model.setCsgPreviewOperandB(csgPreviewOperands[1]!);
+        mySolid = GeneralModelsBuilder.csgTest(
+          1,
+          'DIFFERENCE_A_MINUS_B',
+          'MOON_BLOCK',
+          model.isDebugCsg(),
+        );
+        model.setDebugCsg(false);
+        break;
+      case 'CSG_LAMP_SHELL':
+        mySolid = GeneralModelsBuilder.createCsgLampShell(
+          model.getSubdivisionCircumference(),
+          model.getSubdivisionHeight(),
+        );
+        break;
       case 'ARROW':
         mySolid = GeneralModelsBuilder.createArrow(0.7, 0.3, 0.05, 0.1);
         break;
@@ -245,6 +271,66 @@ export class GeneralModelsBuilder {
       case 'ROTATIONAL_SWEEP':
         mySolid = GeneralModelsBuilder.rotationalSweepTest();
         break;
+      case 'SPLIT_TEST_PART_1':
+        mySolid = GeneralModelsBuilder.splitTest(1);
+        break;
+      case 'SPLIT_TEST_PART_2':
+        mySolid = GeneralModelsBuilder.splitTest(2);
+        break;
+      case 'SPLIT_TEST_PART_3':
+        mySolid = GeneralModelsBuilder.splitTest(3);
+        break;
+      case 'CSG_DIRECT':
+        GeneralModelsBuilder.printKurlanderAllMotifsProgressHint(model.getCsgSample(), 1);
+        csgPreviewOperands = GeneralModelsBuilder.createCsgHudPreviewOperands(
+          model.getCsgSample(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setCsgPreviewOperandA(csgPreviewOperands[0]!);
+        model.setCsgPreviewOperandB(csgPreviewOperands[1]!);
+        mySolid = GeneralModelsBuilder.csgTest(
+          1,
+          model.getCsgOperation(),
+          model.getCsgSample(),
+          model.isDebugCsg(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setDebugCsg(false);
+        break;
+      case 'CSG_OPERAND1_PARTIAL':
+        GeneralModelsBuilder.printKurlanderAllMotifsProgressHint(model.getCsgSample(), 2);
+        csgPreviewOperands = GeneralModelsBuilder.createCsgHudPreviewOperands(
+          model.getCsgSample(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setCsgPreviewOperandA(csgPreviewOperands[0]!);
+        model.setCsgPreviewOperandB(csgPreviewOperands[1]!);
+        mySolid = GeneralModelsBuilder.csgTest(
+          2,
+          model.getCsgOperation(),
+          model.getCsgSample(),
+          model.isDebugCsg(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setDebugCsg(false);
+        break;
+      case 'CSG_OPERAND2_PARTIAL':
+        GeneralModelsBuilder.printKurlanderAllMotifsProgressHint(model.getCsgSample(), 3);
+        csgPreviewOperands = GeneralModelsBuilder.createCsgHudPreviewOperands(
+          model.getCsgSample(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setCsgPreviewOperandA(csgPreviewOperands[0]!);
+        model.setCsgPreviewOperandB(csgPreviewOperands[1]!);
+        mySolid = GeneralModelsBuilder.csgTest(
+          3,
+          model.getCsgOperation(),
+          model.getCsgSample(),
+          model.isDebugCsg(),
+          model.getKurlanderBowlSingleMotifIndex(),
+        );
+        model.setDebugCsg(false);
+        break;
       case 'FEATURED_OBJECT':
         mySolid = GeneralModelsBuilder.featuredObject();
         break;
@@ -260,18 +346,8 @@ export class GeneralModelsBuilder {
         );
         break;
       case 'HOLLOW_BOX':
-      case 'CSG_MOON_BLOCK':
-      case 'CSG_LAMP_SHELL':
-      case 'SPLIT_TEST_PART_1':
-      case 'SPLIT_TEST_PART_2':
-      case 'SPLIT_TEST_PART_3':
-      case 'CSG_DIRECT':
-      case 'CSG_OPERAND1_PARTIAL':
-      case 'CSG_OPERAND2_PARTIAL':
-        throw new Error(
-          model.getSolidModelName() +
-            ' is built by set operations or splitting, which the second stage of this port brings',
-        );
+        mySolid = GeneralModelsBuilder.createHollowBox();
+        break;
       case 'HOLED_BOX':
       default:
         mySolid = GeneralModelsBuilder.createHoledBox();
@@ -279,6 +355,24 @@ export class GeneralModelsBuilder {
     }
 
     return mySolid;
+  }
+
+  private static printKurlanderAllMotifsProgressHint(sample: CsgSampleNames, part: number): void {
+    if (part !== 1) {
+      GeneralModelsBuilder.printProgressMessage(
+        'KURLANDER_BOWL_ALL_MOTIFS selected as operand preview; ' +
+          'full motif processing only runs in CSG_DIRECT.',
+      );
+      return;
+    }
+    GeneralModelsBuilder.printProgressMessage(
+      'KURLANDER_BOWL_ALL_MOTIFS selected; full motif processing will start.',
+    );
+  }
+
+  private static printProgressMessage(message: string): void {
+    console.log(message);
+    console.error(message);
   }
 
   private static importFromStepFile(
@@ -386,6 +480,68 @@ export class GeneralModelsBuilder {
     return solid;
   }
 
+  private static buildCsgMoonBlock(): PolyhedralBoundedSolid[] {
+    const cylinderA: PolyhedralBoundedSolid = GeneralModelsBuilder.createCylinder(0.5, 1.0);
+    const cylinderB: PolyhedralBoundedSolid = GeneralModelsBuilder.createCylinder(0.5, 2);
+
+    let T = new Matrix4x4d();
+    T = T.translation(0.275, 0.0, -0.5);
+    PolyhedralBoundedSolidModeler.applyTransformation(cylinderB, T);
+
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderA);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(cylinderB);
+
+    const operands: PolyhedralBoundedSolid[] = new Array<PolyhedralBoundedSolid>(2);
+    operands[0] = cylinderA;
+    operands[1] = cylinderB;
+    return operands;
+  }
+
+  static createCsgLampShell(
+    subdivisionCircunference: number,
+    subdivisionHeight: number,
+  ): PolyhedralBoundedSolid {
+    const outerRadius = 0.5;
+    const innerRadius = 0.45;
+
+    const outerSphere: PolyhedralBoundedSolid = GeneralModelsBuilder.createSphere(
+      outerRadius,
+      subdivisionCircunference,
+      subdivisionHeight,
+    );
+    const innerSphere: PolyhedralBoundedSolid = GeneralModelsBuilder.createSphere(
+      innerRadius,
+      subdivisionCircunference,
+      subdivisionHeight,
+    );
+
+    PolyhedralBoundedSolidStatistics.reset();
+    const sphericalShell: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      outerSphere,
+      innerSphere,
+      PolyhedralBoundedSolidModeler.SUBTRACT,
+      false,
+    );
+
+    // Cube fully contains shell in X/Y, starts below it in Z and stops at
+    // ~80% of shell height to mimic the unperforated lamp bowl profile.
+    const clipCubeGeometry = new Box(new Vector3Dd(1.4, 1.4, 1.05));
+    const clipCube: PolyhedralBoundedSolid = clipCubeGeometry.exportToPolyhedralBoundedSolid();
+    let cubeMove = new Matrix4x4d();
+    cubeMove = cubeMove.translation(0.55, 0.55, 0.325);
+    PolyhedralBoundedSolidModeler.applyTransformation(clipCube, cubeMove);
+
+    PolyhedralBoundedSolidStatistics.reset();
+    const result: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      sphericalShell,
+      clipCube,
+      PolyhedralBoundedSolidModeler.INTERSECTION,
+      false,
+    );
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(result);
+    return result;
+  }
+
   static createArrow(p1: number, p2: number, p3: number, p4: number): PolyhedralBoundedSolid {
     let R = new Matrix4x4d();
     R = R.translation(0.55, 0.55, 0.05);
@@ -438,6 +594,31 @@ export class GeneralModelsBuilder {
     PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
     return solid;
+  }
+
+  /**
+   * This method is a test for the solution to problem [MANT1988].15.1 on case of one solid
+   * fully inside another.
+   */
+  static createHollowBox(): PolyhedralBoundedSolid {
+    // Outer box.
+    const solidA: PolyhedralBoundedSolid = GeneralModelsBuilder.createBox(
+      new Vector3Dd(0.9, 0.9, 0.9),
+    );
+
+    // Inner box at 80% size, centered at the same position as solidA.
+    const solidB: PolyhedralBoundedSolid = GeneralModelsBuilder.createBox(
+      new Vector3Dd(0.72, 0.72, 0.72),
+    );
+
+    // Hollow box = outer box minus inner box.
+    const result: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      solidA,
+      solidB,
+      PolyhedralBoundedSolidModeler.SUBTRACT,
+    );
+
+    return result;
   }
 
   static createLaminaWithTwoShells(): PolyhedralBoundedSolid {
@@ -917,6 +1098,407 @@ export class GeneralModelsBuilder {
     PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
 
     return solid;
+  }
+
+  static splitTest(part: number): PolyhedralBoundedSolid {
+    //- Basic lamina --------------------------------------------------
+    //PolyhedralBoundedSolid solid = createHoledBox();
+    //PolyhedralBoundedSolid solid = createBox(new Vector3Dd(0.9, 0.9, 0.9));
+
+    let solid: PolyhedralBoundedSolid = SimpleTestGeometryLibrary.createTestObjectMANT1986_1();
+
+    /*
+        Matrix4x4d R = new Matrix4x4d();
+        PolyhedralBoundedSolid solid;
+        R = R.translation(0.55, 0.55, 0.55);
+        solid = new PolyhedralBoundedSolid();
+        PolyhedralBoundedSolidEulerOperators.mvfs(solid, new Vector3Dd(0.00+0.05, 0.00+0.05, 0), 1, 1);
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 2, new Vector3Dd(0.94+0.05, 0.00+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 2, 3, new Vector3Dd(0.94+0.05, 0.46+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 4, new Vector3Dd(0.00+0.05, 0.30+0.05, 0));
+        PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 4, 3, 1, 2, 2);
+        Matrix4x4d T = new Matrix4x4d();
+        T = T.translation(0, 0, 0.4);
+        PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(
+            solid, solid.findFace(1), T);
+*/
+
+    //-----------------------------------------------------------------
+    // Java's `ArrayList`s: the ported splitter takes plain arrays.
+    const solidsAbove: PolyhedralBoundedSolid[] = [];
+    const solidsBelow: PolyhedralBoundedSolid[] = [];
+
+    const sp = new InfinitePlane(new Vector3Dd(0, 0, 1) /*n*/, new Vector3Dd(0, 0, 0.3) /*p*/);
+
+    //        sp = new InfinitePlane(new Vector3Dd(0, 0, 1) /*n*/,
+    //                               new Vector3Dd(0, 0, 0.5) /*p*/);
+
+    //-----------------------------------------------------------------
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+
+    if (part === 1) {
+      return solid;
+    }
+
+    PolyhedralBoundedSolidModeler.split(solid, sp, solidsAbove, solidsBelow);
+
+    //-----------------------------------------------------------------
+    if (part === 3) {
+      solid = GeneralModelsBuilder.listGet(solidsBelow, 0);
+    } else {
+      solid = GeneralModelsBuilder.listGet(solidsAbove, 0);
+    }
+
+    PolyhedralBoundedSolidTopologyEditing.maximizeFaces(solid);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(solid);
+
+    return solid;
+  }
+
+  /** Java's `ArrayList.get(int)`, which throws on an index out of range. */
+  private static listGet(list: PolyhedralBoundedSolid[], index: number): PolyhedralBoundedSolid {
+    if (index < 0 || index >= list.length) {
+      throw new RangeError('Index ' + index + ' out of bounds for length ' + list.length);
+    }
+    return list[index]!;
+  }
+
+  /**
+   * This method builds a test sample pair of solids for evaluating
+   * the set operations algorithm in a controlled way.
+   * This set correspond to a simple cases for CSG operations test: two
+   * blocks without intersecting vertex pairs (only edge/face
+   * intersections are present). The resulting gluing face can be a variation
+   * of the method `createTestObjectsPairMANT1986_2`, if blocks are translated
+   * so their parallel faces don't touch; or can be one simple test case for
+   * the complex sector intersection.
+   */
+  private static buildCsgTest2(): PolyhedralBoundedSolid[] {
+    const operands: PolyhedralBoundedSolid[] = new Array<PolyhedralBoundedSolid>(2);
+
+    //-----------------------------------------------------------------
+    let R = new Matrix4x4d();
+    R = R.translation(0.5, 0.5, 0.15);
+
+    let box = new Box(new Vector3Dd(1, 0.5, 0.3));
+    const a: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(a, R);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
+
+    //-----------------------------------------------------------------
+    R = new Matrix4x4d();
+    R = R.translation(0.5, 0.5, 0.15 + 0.3);
+
+    box = new Box(new Vector3Dd(0.5, 1, 0.3));
+    const b: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(b, R);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
+
+    //-----------------------------------------------------------------
+    operands[0] = a;
+    operands[1] = b;
+
+    return operands;
+  }
+
+  /**
+   * Makes a hollowed brick from two L-shaped boxes. Note that on UNION
+   * operation this object leads to an interesting topological problem for
+   * PolyhedralBoundedSolid.maximizeFaces operation.
+   */
+  private static buildCsgTest4(): PolyhedralBoundedSolid[] {
+    const operands: PolyhedralBoundedSolid[] = new Array<PolyhedralBoundedSolid>(2);
+
+    let T: Matrix4x4d;
+    let box: Box;
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.5, 0.1, 0.1);
+    box = new Box(new Vector3Dd(1, 0.2, 0.2));
+    const a: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(a, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.5, 0.9, 0.1);
+    box = new Box(new Vector3Dd(1, 0.2, 0.2));
+    const b: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(b, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.5, 0.1);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const c: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(c, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.9, 0.5, 0.1);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const d: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(d, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
+
+    //-----------------------------------------------------------------
+    const x: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      b,
+      c,
+      PolyhedralBoundedSolidModeler.UNION,
+    );
+    const y: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      a,
+      d,
+      PolyhedralBoundedSolidModeler.UNION,
+    );
+
+    operands[0] = x;
+    operands[1] = y;
+    return operands;
+  }
+
+  private static buildCsgTest5(): PolyhedralBoundedSolid[] {
+    const operands: PolyhedralBoundedSolid[] = new Array<PolyhedralBoundedSolid>(2);
+
+    let T: Matrix4x4d;
+    let box: Box;
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.5, 0.1, 0.1);
+    box = new Box(new Vector3Dd(1, 0.2, 0.2));
+    const a: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(a, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(a);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.5, 0.9, 0.1);
+    box = new Box(new Vector3Dd(1, 0.2, 0.2));
+    const b: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(b, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(b);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.5, 0.1);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const c: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(c, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(c);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.9, 0.5, 0.1);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const d: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(d, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(d);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.5, 0.1);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const e: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(e, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(e);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.5, 0.9);
+    box = new Box(new Vector3Dd(0.2, 1, 0.2));
+    const f: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(f, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(f);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.1, 0.5);
+    box = new Box(new Vector3Dd(0.2, 0.2, 1));
+    const g: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(g, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(g);
+
+    //-----------------------------------------------------------------
+    T = new Matrix4x4d();
+    T = T.translation(0.1, 0.9, 0.5);
+    box = new Box(new Vector3Dd(0.2, 0.2, 1));
+    const h: PolyhedralBoundedSolid = box.exportToPolyhedralBoundedSolid();
+    PolyhedralBoundedSolidModeler.applyTransformation(h, T);
+    PolyhedralBoundedSolidValidationEngine.validateIntermediate(h);
+
+    //-----------------------------------------------------------------
+    /*
+        ac = PolyhedralBoundedSolidModeler.setOp(a, c, PolyhedralBoundedSolidModeler.UNION);
+        bd = PolyhedralBoundedSolidModeler.setOp(b, d, PolyhedralBoundedSolidModeler.UNION);
+        abcd = PolyhedralBoundedSolidModeler.setOp(bd, ac, PolyhedralBoundedSolidModeler.UNION);
+        eg = PolyhedralBoundedSolidModeler.setOp(e, g, PolyhedralBoundedSolidModeler.UNION);
+        fh = PolyhedralBoundedSolidModeler.setOp(f, h, PolyhedralBoundedSolidModeler.UNION);
+        efgh = PolyhedralBoundedSolidModeler.setOp(eg, fh, PolyhedralBoundedSolidModeler.UNION);
+        total = PolyhedralBoundedSolidModeler.setOp(abcd, efgh, PolyhedralBoundedSolidModeler.UNION);
+*/
+    const ac: PolyhedralBoundedSolid = PolyhedralBoundedSolidModeler.setOp(
+      a,
+      c,
+      PolyhedralBoundedSolidModeler.UNION,
+    );
+
+    operands[0] = ac;
+    operands[1] = g;
+    return operands;
+  }
+
+  /** Java's `csgTest(int, CsgOperationNames, CsgSampleNames, boolean[, int])`. */
+  static csgTest(
+    part: number,
+    op: CsgOperationNames,
+    sample: CsgSampleNames,
+    withDebug: boolean,
+    kurlanderSingleMotifIndex = 0,
+  ): PolyhedralBoundedSolid {
+    let res: PolyhedralBoundedSolid | null = null;
+
+    console.log(
+      'Creating C.S.G. test object with parts ' +
+        part +
+        ', ' +
+        'operation ' +
+        csgOperationLabel(op) +
+        ', and sample pair ' +
+        csgSampleLabel(sample),
+    );
+
+    const operands: PolyhedralBoundedSolid[] = GeneralModelsBuilder.createCsgOperands(
+      sample,
+      kurlanderSingleMotifIndex,
+    );
+    PolyhedralBoundedSolidStatistics.reset();
+
+    //-----------------------------------------------------------------
+    if (op === 'UNION') {
+      res = PolyhedralBoundedSolidModeler.setOp(
+        operands[0]!,
+        operands[1]!,
+        PolyhedralBoundedSolidModeler.UNION,
+        withDebug,
+      );
+    } else if (op === 'INTERSECTION') {
+      res = PolyhedralBoundedSolidModeler.setOp(
+        operands[0]!,
+        operands[1]!,
+        PolyhedralBoundedSolidModeler.INTERSECTION,
+        withDebug,
+      );
+    } else if (op === 'DIFFERENCE_A_MINUS_B') {
+      res = PolyhedralBoundedSolidModeler.setOp(
+        operands[0]!,
+        operands[1]!,
+        PolyhedralBoundedSolidModeler.SUBTRACT,
+        withDebug,
+      );
+    } else {
+      res = PolyhedralBoundedSolidModeler.setOp(
+        operands[1]!,
+        operands[0]!,
+        PolyhedralBoundedSolidModeler.SUBTRACT,
+        withDebug,
+      );
+    }
+
+    //-----------------------------------------------------------------
+    //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[0]);
+    //PolyhedralBoundedSolidValidationEngine.validateIntermediate(operands[1]);
+    //PolyhedralBoundedSolidValidationEngine.validateIntermediate(res);
+
+    if (part === 2) {
+      return operands[0]!;
+    }
+    if (part === 3) {
+      return operands[1]!;
+    }
+    return res;
+  }
+
+  /** Java's `createCsgOperands(CsgSampleNames[, int])`. */
+  private static createCsgOperands(
+    sample: CsgSampleNames,
+    kurlanderSingleMotifIndex = 0,
+  ): PolyhedralBoundedSolid[] {
+    let operands: PolyhedralBoundedSolid[];
+
+    switch (sample) {
+      case 'MANT1986_2':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
+        break;
+      case 'STACKED_BLOCKS':
+        operands = GeneralModelsBuilder.buildCsgTest2();
+        break;
+      case 'MANT1988_3':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_3();
+        break;
+      case 'HOLLOW_BRICK':
+        operands = GeneralModelsBuilder.buildCsgTest4();
+        break;
+      case 'CROSS_PAIR':
+        operands = GeneralModelsBuilder.buildCsgTest5();
+        break;
+      case 'MOON_BLOCK':
+        operands = GeneralModelsBuilder.buildCsgMoonBlock();
+        break;
+      case 'MANT1988_15_2_HOLED':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+        break;
+      case 'MANT1988_15_2_LIMIT_DIFFERENCE':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(0);
+        break;
+      case 'MANT1988_15_2_OPEN_DIFFERENCE':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(1);
+        break;
+      case 'MANT1988_6_13':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
+        break;
+      case 'MANT1988_15_1':
+        operands = SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+        break;
+      case 'KURLANDER_BOWL_SINGLE_MOTIF':
+      default:
+        operands =
+          CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(kurlanderSingleMotifIndex);
+        break;
+    }
+
+    return operands;
+  }
+
+  /** Java's `createCsgHudPreviewOperands(CsgSampleNames[, int])`. */
+  private static createCsgHudPreviewOperands(
+    sample: CsgSampleNames,
+    kurlanderSingleMotifIndex = 0,
+  ): PolyhedralBoundedSolid[] {
+    switch (sample) {
+      case 'MANT1986_2':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1986_2();
+      case 'MANT1988_3':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_3();
+      case 'MANT1988_15_2_HOLED':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(-1);
+      case 'MANT1988_15_2_LIMIT_DIFFERENCE':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(0);
+      case 'MANT1988_15_2_OPEN_DIFFERENCE':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_2(1);
+      case 'MANT1988_6_13':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_6_13();
+      case 'MANT1988_15_1':
+        return SimpleTestGeometryLibrary.createTestObjectPairMANT1988_15_1();
+      case 'KURLANDER_BOWL_SINGLE_MOTIF':
+        return CsgKurlanderBowlFixture.createBowlAndFirstStarOperands(kurlanderSingleMotifIndex);
+      default:
+        return GeneralModelsBuilder.createCsgOperands(sample, kurlanderSingleMotifIndex);
+    }
   }
 
   static featuredObject(): PolyhedralBoundedSolid {
