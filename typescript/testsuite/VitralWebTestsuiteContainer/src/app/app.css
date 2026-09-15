@@ -160,7 +160,8 @@
 .workspace app-mesh-example,
 .workspace app-solid-texture-example,
 .workspace app-md2-example,
-.workspace app-shaders-example {
+.workspace app-shaders-example,
+.workspace app-polygon-clipping-example {
   min-height: calc(100dvh - 24px);
 }
 

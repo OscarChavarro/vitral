@@ -677,7 +677,95 @@ Migrated so far:
     timer takes its place at the same 30-frames-a-second period, with the same
     `Animation.tick` and the same elapsed-time light step.
 
-Not migrated: `PolygonClippingExample`, `PolyhedralBoundedSolidExample`.
+- `PolygonClippingExample` — `typescript/testsuite/VitralWebTestsuiteContainer/src/
+    WebGLExamples/PolygonClippingExample`, ported 2026-09-15.
+
+    The module that exercises the Weiler--Atherton clipper. Forty-three
+    fixtures, each naming two contour files of `etc/polygons`, are walked with
+    `[1]` and `[2]`; `[3]` cycles the four boolean operations; and the result
+    is laid out on three panels — the two annotated input polygons in place,
+    the primary result on a panel translated in -Z and the secondary one on a
+    panel translated in +X — with the vertices the clipper paired drawn in
+    their own colour. `[C]`, `[S]`, `[I]`, `[O]` and `[P]` switch the four
+    polygons and the intersection points, `[G]` fills or unfills, `[T]` swaps
+    the surface tessellation, the space bar shows or hides the reference frame,
+    `[F]` goes fullscreen and `[H]` takes a snapshot.
+
+    `model.PolygonClippingDebuggerModel`, `model.PolygonClippingFixtures`,
+    `model.PolygonClippingTestCase`, `model.PolygonClippingOperation`,
+    `model.PolygonSurfaceTessellationMode`,
+    `model.PolygonClippingModelingTools`,
+    `gui.PolygonClippingKeyboardInteractionTechniques`,
+    `gui.PolygonClippingMouseInteractionTechniques`,
+    `render.JoglPolygonClippingRenderer`,
+    `render.JoglPolygonClippingHudRenderer` and `render.JoglTriangularRenderer`
+    are ported. `options.CommandLineOptions` and
+    `render.JoglPolygonClippingOfflineRenderer` are not, for the reason
+    `ShadersExample` records: they are the offline batch path, and the
+    interactive `main` ignores its command line entirely.
+
+    It needed one library advance, recorded under Phase 41:
+    `WebGLPolygon2DRenderer`, the counterpart of
+    `vsdk.toolkit.render.jogl.Jogl4Polygon2DRenderer`. That is also where this
+    program's one real incompatibility lies, and it is the only one the
+    migration has met so far that could not be answered by a translation:
+
+      - Java fills a polygon surface with the GLU tessellator,
+        `GLU.gluNewTess()`. GLU is a companion library of desktop OpenGL and a
+        browser has neither it nor any way to reach one. What
+        `Jogl4Polygon2DRenderer` asks of it, though, is narrow: it sets no
+        winding rule, so the tessellator runs under its default,
+        `GLU_TESS_WINDING_ODD`, and it keeps nothing but the triangle
+        coordinates — no vertex identity survives the callback. So
+        `_Polygon2DOddWindingTessellator` computes that region directly and
+        exactly: every pair of crossing edges is split at the crossing, the
+        distinct endpoint ordinates become the bands of a sweep, and inside a
+        band the crossings are paired two by two, which is the odd rule. The
+        triangles are not GLU's triangles — a sweep that cuts on every ordinate
+        makes more, and thinner, ones — but the filled region is the same
+        region, which is all this pass can show: it is drawn flat in one
+        colour, and the mode that reveals a triangulation is
+        `render.JoglTriangularRenderer`'s monotone decomposition, ported as it
+        stands.
+      - No shader needed rewriting. The two programs this module links,
+        `line` and `constant`, are the ones the Phase 41 record already reports
+        compiling and linking under `WebGL GLSL ES 3.00`, and the eight-pixel
+        point size reaches the vertex shader through the `pointSizeLocal`
+        uniform `WebGLShaderPreprocessor` injects, as in every other module
+        that draws points.
+
+    Three browser-only steps have no Java counterpart.
+    `PolygonClippingModelingTools.rebuildScene` reads its two contour files
+    every time it runs, which is at startup and on every `[1]`, `[2]` and `[3]`
+    keystroke; a frame must not wait on a network read, so `io.
+    PolygonClippingReader` fetches each of the fifty-eight files the fixture
+    table names once, when the module opens, and `rebuildScene` then stays
+    synchronous, as Java's is. `toggleFullscreenMode`, which in Java disposes
+    the `JFrame` and rebuilds it undecorated on the default screen device with
+    a separate path for macOS, asks the browser for its fullscreen element
+    instead, which is why the three window fields of the Java model have no
+    counterpart. And the `[H]` snapshot, which Java writes beside the program
+    with `ImagePersistence.exportPNG`, is handed to the browser as a download
+    under the same `frameNNNN.png` name; its `readPixels` is issued where Java
+    issues it, inside the frame, because a drawing buffer is cleared at the end
+    of the task that drew it.
+
+    Verified against the Java program on the same host: the offline renderer of
+    the Java project and the module were put side by side on
+    `WINDOW_WITH_ISLANDS` and `SUBJECT_WITH_BANDS`, and the HUD lines, the loop
+    counts, the intersection count and the geometry agree. A parity driver over
+    `java/base` and `typescript/base/dist` was also run on five fixtures,
+    printing every vertex of both results of `clipPolygons`; the two outputs
+    are identical. One difference is visible and is the Java side's: on
+    `WINDOW_WITH_ISLANDS` the GLU fill bridges the first two contours of the
+    secondary result into one blob, where the wires of that same result — and
+    the port — show the two separate triangles the clipper actually produced.
+    The tessellator was checked independently as well, by comparing the area of
+    the triangles it emits against an odd-rule ray-casting grid over thirty-two
+    polygons; the largest disagreement is 0.12 %, which is the grid's own
+    boundary-cell error.
+
+Not migrated: `PolyhedralBoundedSolidExample`.
 
 ## Analyzed State
 
@@ -2651,8 +2739,34 @@ under `MD2Example`. It also gained an asynchronous `prepare(gl)`, which has no
 Java counterpart and exists for the drawing-buffer rule recorded under WebGL
 Example Programs.
 
-Of the JOGL4 renderer family, 2D polygons remain unported. The source group
-remains an empty checkpoint and the phase gate has not been run.
+Sixth partial advance — 2026-09-15 (out of phase order, to unblock the
+`PolygonClippingExample` module of the WebGL testsuite container):
+`Jogl4Polygon2DRenderer` is ported to `vsdk.toolkit.render.webgl` as
+`WebGLPolygon2DRenderer`. The three passes are the Java ones and run in the
+Java order — the filled surface, then one wire loop per contour, then every
+contour vertex as a point, each behind its `RendererConfiguration` flag — and
+the uniform names, the two-pixel line width, the eight-pixel point size and the
+two attribute layouts are unchanged. Java's five `int` object names travel
+together as one record, because a WebGL name is an object; the caller still
+creates and owns them in its own `init`, as `JoglPolygonClippingRenderer` does.
+
+This is the one place in the migration so far where a Java dependency has no
+browser counterpart at all, rather than a different spelling. Java fills a
+surface with `GLU.gluNewTess()`, and GLU is a companion library of desktop
+OpenGL that a page cannot reach. What `Jogl4Polygon2DRenderer` asks of it is
+narrow — it sets no winding rule, so the tessellator runs under its default,
+`GLU_TESS_WINDING_ODD`, and the collector keeps nothing but the triangle
+coordinates — so `_Polygon2DOddWindingTessellator` computes that region
+directly: crossing edges are split at their crossings, the distinct endpoint
+ordinates become the bands of a sweep, and the crossings inside a band are
+paired two by two, which is the odd rule. The region is exact; the particular
+triangles are not GLU's, and nothing downstream can tell, because the surface
+pass is drawn flat in one colour and the mode that reveals a triangulation is
+the monotone decomposition `JoglTriangularRenderer` already carries. The
+evidence is recorded with the program under WebGL Example Programs.
+
+With this the JOGL4 renderer family is fully ported. The source group remains an
+empty checkpoint and the phase gate has not been run.
 
 Shader-compatibility evidence — 2026-09-13 (gathered for
 `testsuite/VitralWebTestsuiteContainer/src/WebGLExamples/ShadersExample`, which
@@ -2885,7 +2999,7 @@ The port is complete only when all of the following are true:
 | 38 | GUI model and controllers | Deferred — partial advances 2026-09-12 and 2026-09-13: `Gizmo`, `LightGizmoStyle` and `LightGizmoOmniBillboard` ported (3 / 47 entries), plus the `RayGizmo`, `TangibleInterfaceEvent2RayGizmoMapper`, `InfinitePlaneGizmo` and `TangibleInterfaceEvent2InfinitePlaneGizmoMapper` orphans; the UI target decision is still not taken; see the Phase 38 record |
 | 39 | Software shaders | Complete — 17 / 18 entries ported out of normal phase order; the eighteenth, `CookTorranceShader.LightDirection`, has no Java source of its own (it is `Light.LightDirection` from Phase 26). Parity evidence is the byte-identical `RaytracingOfflineExample` render; the standard gate has not been run |
 | 40 | CPU rendering | Pending — partial advances: `RenderingElement`, `render.raster.Rasterizer2D`, `render.hiddenLine.WireframeRenderer`, and the whole `render.raytracing` family with `TraceWorkspace` (12 / 35 entries); first exercised in a browser 2026-09-13 by `ShadersExample`, over Web Workers; see the Phase 40 record |
-| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; all 20 GLSL files compile and all 11 programs link under GLSL ES 3.00, so no shader needs rewriting; the 2D-polygon renderer is still unported; see the Phase 41 record |
+| 41 | GPU rendering architecture checkpoint | Pending — third to fifth partial advances 2026-09-12 and 2026-09-13: `WebGLLineRenderer`, `WebGLLightRenderer`, `WebGLArrowRenderer`, `WebGLSphereRenderer`, `WebGLMinMaxRenderer`, `WebGLRayGizmoRenderer`, `WebGLInfinitePlaneGizmoRenderer`, `WebGLSolidTextureRenderer` and `WebGLMd2MeshRenderer` added, and `WebGLShaderPreprocessor` gained `gl_PointSize` support, a clip-distance-to-varying translation and a `sampler3D` precision default; all 20 GLSL files compile and all 11 programs link under GLSL ES 3.00, so no shader needs rewriting; sixth partial advance 2026-09-15: `WebGLPolygon2DRenderer` with `_Polygon2DOddWindingTessellator` standing in for the absent GLU tessellator, completing the JOGL4 renderer family; see the Phase 41 record |
 | 42 | Animation | Complete — 4 / 4 symbols ported 2026-09-13 out of normal phase order, to give `MD2Example` its animation; `AnimationEventGenerator.run()` arms the host timer instead of blocking a thread, keeping Java's tick ordering; the standard gate has not been run; see the Phase 42 record |
 | 43 | Application framework | Pending |
 | 44 | GUI persistence | Pending |

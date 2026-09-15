@@ -96,6 +96,12 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'PolygonClippingExample') {
+        <app-polygon-clipping-example
+          [polygonsBaseUrl]="polygonClippingBaseUrl()"
+          (deactivate)="clearSelection()"
+        />
+      }
       @if (selectedItem() === 'ShadersExample') {
         <app-shaders-example
           [textureUrl]="shadersTextureUrl()"
@@ -133,6 +139,14 @@
       [initialTangibleEnabled]="solidTextureTangibleEnabled()"
       (accept)="acceptSolidTextureUrl($event)"
       (cancel)="cancelSolidTextureUrl()"
+    />
+  }
+
+  @if (polygonClippingUrlDialogOpen()) {
+    <app-polygon-clipping-url-dialog
+      [initialPolygonsBaseUrl]="polygonClippingBaseUrl()"
+      (accept)="acceptPolygonClippingUrl($event)"
+      (cancel)="cancelPolygonClippingUrl()"
     />
   }
 

@@ -40,6 +40,7 @@ describe('App', () => {
       'SolidTextureExample',
       'MD2Example',
       'ShadersExample',
+      'PolygonClippingExample',
       'WebGPUExamples',
       'Tools',
       'ApplicationCases',

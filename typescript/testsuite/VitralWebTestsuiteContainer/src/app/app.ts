@@ -15,6 +15,11 @@ import {
   ShadersUrlDialog,
   type ShadersSelection,
 } from '../WebGLExamples/ShadersExample/gui/shaders-url-dialog';
+import { PolygonClippingExample } from '../WebGLExamples/PolygonClippingExample/polygon-clipping-example';
+import {
+  PolygonClippingUrlDialog,
+  type PolygonClippingSelection,
+} from '../WebGLExamples/PolygonClippingExample/gui/polygon-clipping-url-dialog';
 import { SolidTextureExample } from '../WebGLExamples/SolidTextureExample/solid-texture-example';
 import {
   SolidTextureUrlDialog,
@@ -37,7 +42,8 @@ type ExplorerItem =
         | 'MeshExample'
         | 'SolidTextureExample'
         | 'MD2Example'
-        | 'ShadersExample';
+        | 'ShadersExample'
+        | 'PolygonClippingExample';
     };
 
 @Component({
@@ -54,6 +60,8 @@ type ExplorerItem =
     Md2UrlDialog,
     ShadersExample,
     ShadersUrlDialog,
+    PolygonClippingExample,
+    PolygonClippingUrlDialog,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -105,6 +113,11 @@ export class App {
           kind: 'file',
           label: 'ShadersExample',
           exampleId: 'ShadersExample',
+        },
+        {
+          kind: 'file',
+          label: 'PolygonClippingExample',
+          exampleId: 'PolygonClippingExample',
         },
       ],
     },
@@ -167,6 +180,16 @@ export class App {
   protected readonly shadersMicroFacetCsvUrl = signal<string | null>(null);
   protected readonly shadersUrlDialogOpen = signal<boolean>(false);
 
+  /**
+   * `PolygonClippingExample` names no file on its command line either: its
+   * interactive `main` ignores `options.CommandLineOptions`, and
+   * `PolygonClippingModelingTools.POLYGONS_PATH` hard-codes the directory its
+   * forty-three compiled-in fixtures are read from. That directory is named by
+   * URL here, with the Java path as the default.
+   */
+  protected readonly polygonClippingBaseUrl = signal<string | null>(null);
+  protected readonly polygonClippingUrlDialogOpen = signal<boolean>(false);
+
   protected selectItem(item: ExplorerItem): void {
     if (item.kind === 'file' && item.exampleId === 'MeshExample' && this.meshUrl() === null) {
       // Java runs `FileSelectorDialog` when the command line named no file.
@@ -191,6 +214,14 @@ export class App {
       this.shadersTextureUrl() === null
     ) {
       this.openShadersUrlDialog();
+      return;
+    }
+    if (
+      item.kind === 'file' &&
+      item.exampleId === 'PolygonClippingExample' &&
+      this.polygonClippingBaseUrl() === null
+    ) {
+      this.openPolygonClippingUrlDialog();
       return;
     }
     this.selectedItem.set(item.kind === 'file' ? item.exampleId : item.label);
@@ -224,6 +255,11 @@ export class App {
     if (item.exampleId === 'ShadersExample') {
       event.preventDefault();
       this.openShadersUrlDialog();
+      return;
+    }
+    if (item.exampleId === 'PolygonClippingExample') {
+      event.preventDefault();
+      this.openPolygonClippingUrlDialog();
     }
   }
 
@@ -299,6 +335,20 @@ export class App {
 
   private openShadersUrlDialog(): void {
     this.shadersUrlDialogOpen.set(true);
+  }
+
+  protected acceptPolygonClippingUrl(selection: PolygonClippingSelection): void {
+    this.polygonClippingUrlDialogOpen.set(false);
+    this.polygonClippingBaseUrl.set(selection.polygonsBaseUrl);
+    this.selectedItem.set('PolygonClippingExample');
+  }
+
+  protected cancelPolygonClippingUrl(): void {
+    this.polygonClippingUrlDialogOpen.set(false);
+  }
+
+  private openPolygonClippingUrlDialog(): void {
+    this.polygonClippingUrlDialogOpen.set(true);
   }
 
   protected clearSelection(): void {

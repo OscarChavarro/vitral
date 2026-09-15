@@ -1,0 +1,39 @@
+<div class="dialog-backdrop" (click)="onCancel()"></div>
+
+<div
+  class="dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="polygon-clipping-url-dialog-title"
+  (keydown)="onKeyDown($event)"
+>
+  <h2 class="dialog-title" id="polygon-clipping-url-dialog-title">Open the polygon fixtures</h2>
+
+  <form (submit)="onSubmit($event)">
+    <label class="dialog-label" for="polygon-clipping-url-input">Polygon directory URL</label>
+    <input
+      class="dialog-input"
+      id="polygon-clipping-url-input"
+      name="polygonsBaseUrl"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      autofocus
+      [value]="polygonsBaseUrl()"
+      (input)="onPolygonsBaseUrlInput($event)"
+    />
+
+    <p class="dialog-note">
+      The forty-three fixtures compiled into the program read
+      {{ referencedFileCount }} contour files from this directory. Press <code>[1]</code> and
+      <code>[2]</code> to walk them, <code>[3]</code> to cycle the boolean operation,
+      <code>[T]</code> to switch the surface tessellation and <code>[G]</code> to fill or unfill the
+      results.
+    </p>
+
+    <div class="dialog-actions">
+      <button class="dialog-button" type="button" (click)="onCancel()">Cancel</button>
+      <button class="dialog-button primary" type="submit">Open</button>
+    </div>
+  </form>
+</div>

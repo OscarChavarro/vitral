@@ -12,6 +12,11 @@ export { WebGLRGBAImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/
 export { WebGLRGBAImageCompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageCompressedRenderer.js";
 export { WebImagePersistence } from "./vsdk/toolkit/io/image/WebImagePersistence.js";
 export { WebGLLineRenderer } from "./vsdk/toolkit/render/webgl/WebGLLineRenderer.js";
+export {
+    WebGLPolygon2DRenderer,
+    type WebGLPolygon2DRendererResources,
+} from "./vsdk/toolkit/render/webgl/WebGLPolygon2DRenderer.js";
+export { _Polygon2DOddWindingTessellator } from "./vsdk/toolkit/render/webgl/_Polygon2DOddWindingTessellator.js";
 export { WebGLLightRenderer } from "./vsdk/toolkit/render/webgl/WebGLLightRenderer.js";
 export { WebEnvironmentPersistence } from "./vsdk/toolkit/io/geometry/WebEnvironmentPersistence.js";
 export { WebGLMinMaxRenderer } from "./vsdk/toolkit/render/webgl/WebGLMinMaxRenderer.js";
