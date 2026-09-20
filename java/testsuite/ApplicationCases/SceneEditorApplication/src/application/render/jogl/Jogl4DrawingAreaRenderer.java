@@ -69,16 +69,20 @@ import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
-import vsdk.toolkit.gui.ViewportWindow;
-import vsdk.toolkit.gui.ViewportWindowSetManager;
 
 // Application classes
 import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
-import application.gui.ViewportInteractionTechniques;
 import application.model.ApplicationModel;
+import framework.gui.ViewportInteractionTechniques;
+import framework.gui.ViewportSetInteractionTechniques;
+import framework.model.Viewport;
+import framework.model.ViewportSet;
+import framework.render.jogl4.Jogl4LabelImageProvider;
+import framework.render.jogl4.Jogl4ViewportWindow;
+import framework.render.jogl4.JoglViewportSetRenderer;
 import java.awt.event.MouseEvent;
 
 public class Jogl4DrawingAreaRenderer implements 
@@ -133,8 +137,9 @@ public class Jogl4DrawingAreaRenderer implements
     private int awtViewportHeight;
 
     //=================================================================
-    public ViewportWindowSetManager viewOrganizer;
-    private Jogl4ViewportRenderer viewportRenderer;
+    private final ViewportSet viewportSet;
+    private final ViewportSetInteractionTechniques viewportSetTechniques;
+    private final JoglViewportSetRenderer viewportSetRenderer;
 
     //=================================================================
 
@@ -193,38 +198,27 @@ public class Jogl4DrawingAreaRenderer implements
         }
 
         //-----------------------------------------------------------------
-        Jogl4AwtViewportWindow view;
-        int i;
-
-        viewOrganizer = new ViewportWindowSetManager();
-
-        viewOrganizer.setSelectedViewIndex(1);
-
-        for ( i = 0; i < 4; i++ ) {
-            view = new Jogl4AwtViewportWindow();
-            view.hintConfig(4, i);
-            viewOrganizer.getViews().add(view);
-            if ( i == viewOrganizer.getSelectedViewIndex() ) {
-                view.setSelected(true);
-            }
-            else {
-                view.setSelected(false);
-            }
-        }
-
-        viewOrganizer.updateLayout();
-        viewportRenderer = new Jogl4ViewportRenderer(
-            viewOrganizer,
-            new Jogl4ViewportRenderer.ViewRenderer() {
+        // This drawing area presents the viewport set of the active display
+        viewportSet = model.getActiveViewportSet();
+        viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
+        viewportSetRenderer = new JoglViewportSetRenderer(
+            viewportSet,
+            new Jogl4LabelImageProvider() {
                 @Override
-                public void configureView(Jogl4AwtViewportWindow view) {
+                public RGBAImageUncompressed createLabelImage(String text, ColorRgb color) {
+                    return AwtSystem.calculateLabelImage(text, color);
+                }
+            },
+            new JoglViewportSetRenderer.ViewRenderer() {
+                @Override
+                public void configureView(Jogl4ViewportWindow view) {
                     interactionTechniques.setCamera(view.getCamera());
                     interactionTechniques.setRendererConfiguration(view.getRendererConfiguration());
                     qualitySelection = view.getRendererConfiguration();
                 }
 
                 @Override
-                public void drawView(GL2 gl, Jogl4AwtViewportWindow view) {
+                public void drawView(GL2 gl, Jogl4ViewportWindow view) {
                     theScene.activeCamera = view.getCamera();
                     theScene.qualityTemplate = view.getRendererConfiguration();
                     Jogl4DrawingAreaRenderer.this.drawView(gl, view);
@@ -243,44 +237,54 @@ public class Jogl4DrawingAreaRenderer implements
             awtViewportHeight = canvas.getHeight();
         }
 
-        if ( surfaceWidth == viewOrganizer.getGlobalViewportXSize() &&
-             surfaceHeight == viewOrganizer.getGlobalViewportYSize() ) {
+        if ( surfaceWidth == viewportSet.getSizeXInPixels() &&
+             surfaceHeight == viewportSet.getSizeYInPixels() ) {
             return;
         }
 
-        viewOrganizer.setGlobalViewportXSize(surfaceWidth);
-        viewOrganizer.setGlobalViewportYSize(surfaceHeight);
-
-        int i;
-        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            ((Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i))
-                .updateViewportConfiguration(surfaceWidth, surfaceHeight);
-        }
+        viewportSet.resize(surfaceWidth, surfaceHeight);
     }
 
     private int scaleXToSurface(int x)
     {
-        if ( awtViewportWidth <= 0 || viewOrganizer.getGlobalViewportXSize() <= 0 ) {
+        if ( awtViewportWidth <= 0 || viewportSet.getSizeXInPixels() <= 0 ) {
             return x;
         }
-        return (int)Math.round(((double)x * (double)viewOrganizer.getGlobalViewportXSize()) /
+        return (int)Math.round(((double)x * (double)viewportSet.getSizeXInPixels()) /
             (double)awtViewportWidth);
     }
 
     private int scaleYToSurface(int y)
     {
-        if ( awtViewportHeight <= 0 || viewOrganizer.getGlobalViewportYSize() <= 0 ) {
+        if ( awtViewportHeight <= 0 || viewportSet.getSizeYInPixels() <= 0 ) {
             return y;
         }
-        return (int)Math.round(((double)y * (double)viewOrganizer.getGlobalViewportYSize()) /
+        return (int)Math.round(((double)y * (double)viewportSet.getSizeYInPixels()) /
             (double)awtViewportHeight);
     }
 
-    private void convertMouseEventToSurface(java.awt.event.MouseEvent e)
+    /**
+    Converts an AWT mouse event to a vitral one, with coordinates expressed in
+    pixels of the drawing surface (which can differ from canvas' ones in
+    high density displays).
+    */
+    private vsdk.toolkit.gui.MouseEvent toSurfaceEvent(java.awt.event.MouseEvent e)
     {
-        int scaledX = scaleXToSurface(e.getX());
-        int scaledY = scaleYToSurface(e.getY());
-        e.translatePoint(scaledX - e.getX(), scaledY - e.getY());
+        vsdk.toolkit.gui.MouseEvent surfaceEvent = AwtSystem.awt2vsdkEvent(e);
+
+        surfaceEvent.setX(scaleXToSurface(surfaceEvent.getX()));
+        surfaceEvent.setY(scaleYToSurface(surfaceEvent.getY()));
+        return surfaceEvent;
+    }
+
+    /**
+    Converts an AWT mouse event to a vitral one, with coordinates relative to
+    the given viewport.
+    */
+    private vsdk.toolkit.gui.MouseEvent toViewportEvent(java.awt.event.MouseEvent e,
+                                                        Jogl4ViewportWindow view)
+    {
+        return viewportSetTechniques.toViewportEvent(toSurfaceEvent(e), view.getViewport());
     }
 
     private void createCursors()
@@ -802,15 +806,13 @@ public class Jogl4DrawingAreaRenderer implements
             return;
         }
 
-        int width = viewOrganizer.getGlobalViewportXSize();
-        int height = viewOrganizer.getGlobalViewportYSize();
+        int width = viewportSet.getSizeXInPixels();
+        int height = viewportSet.getSizeYInPixels();
         gl.glViewport(0, 0, width, height);
         RGBImageUncompressed workspace = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
 
         if ( pendingViewportExportFile != null ) {
-            int selectedIndex = viewOrganizer.getSelectedViewIndex();
-            Jogl4AwtViewportWindow selected =
-                (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(selectedIndex);
+            Jogl4ViewportWindow selected = viewportSetRenderer.getSelectedWindow();
             RGBImageUncompressed viewport = cropImage(workspace,
                 selected.getViewportStartX(), selected.getViewportStartY(),
                 selected.getViewportSizeX(), selected.getViewportSizeY());
@@ -864,16 +866,20 @@ public class Jogl4DrawingAreaRenderer implements
 
     public void toggleGrid()
     {
-        ((Jogl4AwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
+        Viewport selected = viewportSet.getSelectedViewport();
+
+        if ( selected != null ) {
+            selected.toggleGrid();
+        }
     }
 
-    private void drawView(GL2 gl, Jogl4AwtViewportWindow view)
+    private void drawView(GL2 gl, Jogl4ViewportWindow view)
     {
         if ( !view.isActive() ) {
             return;
         }
 
-        if ( view.getRenderMode() == Jogl4AwtViewportWindow.RENDER_MODE_ZBUFFER ) {
+        if ( view.getRenderMode() == Jogl4ViewportWindow.RENDER_MODE_ZBUFFER ) {
             Jogl4SceneRenderer.draw(gl, theScene, parent);
         }
         else {
@@ -943,7 +949,7 @@ public class Jogl4DrawingAreaRenderer implements
             drawable.getSurfaceHeight());
 
         //-----------------------------------------------------------------
-        gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+        gl.glViewport(0, 0, viewportSet.getSizeXInPixels(), viewportSet.getSizeYInPixels());
         gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
         gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
@@ -953,7 +959,7 @@ public class Jogl4DrawingAreaRenderer implements
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        viewportRenderer.draw(gl, parent.getAwtModel().isFullScreenGuiMode());
+        viewportSetRenderer.draw(gl, parent.getAwtModel().isFullScreenGuiMode());
 
         exportPendingFrame(gl);
     }
@@ -1139,15 +1145,18 @@ public class Jogl4DrawingAreaRenderer implements
         //System.out.println("Mouse exited");
     }
 
-    private ViewportWindow getSelectedViewFromPointerPosition(java.awt.event.MouseEvent e, boolean changeSelection)
+    /**
+    @return the window of the viewport under the pointer, or null if none
+    */
+    private Jogl4ViewportWindow getViewFromPointerPosition(java.awt.event.MouseEvent e)
     {
         syncViewportStateFromCanvas();
-        if ( viewOrganizer.getGlobalViewportXSize() <= 0 ||
-             viewOrganizer.getGlobalViewportYSize() <= 0 ) {
+        Viewport viewport = viewportSetTechniques.findViewportAt(toSurfaceEvent(e));
+
+        if ( viewport == null ) {
             return null;
         }
-        return viewOrganizer.getSelectedViewFromPointerPosition(
-            scaleXToSurface(e.getX()), scaleYToSurface(e.getY()), changeSelection);
+        return viewportSetRenderer.getWindow(viewport);
     }
 
     private void syncViewportStateFromCanvas()
@@ -1163,21 +1172,15 @@ public class Jogl4DrawingAreaRenderer implements
         awtViewportHeight = height;
     }
 
-    private void activateInteractionView(Jogl4AwtViewportWindow view)
+    /**
+    Makes the camera controllers work over the camera and configuration of
+    the given view. Viewport selection is processed by the viewport set
+    interaction techniques.
+    */
+    private void activateInteractionView(Jogl4ViewportWindow view)
     {
         if ( view == null ) {
             return;
-        }
-
-        int i;
-        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            Jogl4AwtViewportWindow currentView =
-                (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i);
-            boolean selected = currentView == view;
-            currentView.setSelected(selected);
-            if ( selected ) {
-                viewOrganizer.setSelectedViewIndex(i);
-            }
         }
 
         interactionTechniques.setCamera(view.getCamera());
@@ -1188,11 +1191,12 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mousePressed(java.awt.event.MouseEvent e)
     {
-        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
+        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView == null ) {
             return;
         }
+        viewportSetTechniques.processMousePressedEvent(toSurfaceEvent(e));
         activateInteractionView(mouseView);
 
         //-----------------------------------------------------------------
@@ -1233,12 +1237,11 @@ public class Jogl4DrawingAreaRenderer implements
                 composite = true;
             }
             int oldThingSelected = theScene.selectedThings.firstSelected();
-            convertMouseEventToSurface(e);
-            mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
+            vsdk.toolkit.gui.MouseEvent viewportEvent = toViewportEvent(e, mouseView);
 
             theScene.activeCamera = mouseView.getCamera();
             model.setVisualDebugRay(theScene.selectObjectWithMouse(
-                e.getX(), e.getY(), composite, model.getVisualDebugRay()));
+                viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
 
             int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -1266,7 +1269,7 @@ public class Jogl4DrawingAreaRenderer implements
 
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
-                vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+                vitralMouseEvent = viewportEvent;
                 interactionTechniques.processTranslationMousePressedEvent(vitralMouseEvent);
                 //------------------------------------------------------------
             }
@@ -1279,8 +1282,11 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseReleased(java.awt.event.MouseEvent e)
     {
-        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
+        if ( mouseView != null ) {
+            viewportSetTechniques.processMouseReleasedEvent(toSurfaceEvent(e));
+        }
         activateInteractionView(mouseView);
 
         // WARNING / TODO
@@ -1323,9 +1329,7 @@ public class Jogl4DrawingAreaRenderer implements
             }
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
-            convertMouseEventToSurface(e);
-            mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseReleasedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
@@ -1344,10 +1348,12 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseClicked(java.awt.event.MouseEvent e)
     {
-        Jogl4AwtViewportWindow view = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
-        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
-        activateInteractionView(view);
+        if ( mouseView != null ) {
+            viewportSetTechniques.processMouseClickedEvent(toSurfaceEvent(e));
+        }
+        activateInteractionView(mouseView);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -1372,11 +1378,12 @@ public class Jogl4DrawingAreaRenderer implements
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
 
+            if ( mouseView == null ) {
+                return;
+            }
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
-            convertMouseEventToSurface(e);
-            mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseClickedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
@@ -1395,7 +1402,7 @@ public class Jogl4DrawingAreaRenderer implements
     public void mouseMoved(java.awt.event.MouseEvent e)
     {
         //-----------------------------------------------------------------
-        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView != null ) {
             interactionTechniques.setCamera(mouseView.getCamera());
@@ -1425,11 +1432,12 @@ public class Jogl4DrawingAreaRenderer implements
             composed = composed.withVal(1, 3, position.y());
             composed = composed.withVal(2, 3, position.z());
 
+            if ( mouseView == null ) {
+                return;
+            }
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
-            convertMouseEventToSurface(e);
-            mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseMovedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
@@ -1447,8 +1455,11 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseDragged(java.awt.event.MouseEvent e)
     {
-        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
+        if ( mouseView != null ) {
+            viewportSetTechniques.processMouseDraggedEvent(toSurfaceEvent(e));
+        }
         activateInteractionView(mouseView);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
@@ -1479,9 +1490,7 @@ public class Jogl4DrawingAreaRenderer implements
             }
             translationGizmo.setCamera(mouseView.getCamera());
             translationGizmo.setTransformationMatrix(composed);
-            convertMouseEventToSurface(e);
-            mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseDraggedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
@@ -1681,14 +1690,13 @@ public class Jogl4DrawingAreaRenderer implements
             parent.getAwtModel().getImageControlWindow().redrawImage();
         }
 
-        // In view command propagation
+        // Viewport set commands (selection, layout, per-viewport display)
         if ( !skipKey ) {
-            ((Jogl4AwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
+            viewportSetTechniques.processKeyPressedEvent(vitralKeyEvent);
         }
 
         double theta;
         double phi;
-        int val;
 
         if ( ((e.getModifiersEx()) & KeyEvent.SHIFT_DOWN_MASK) != 0x0 &&
              ((e.getModifiersEx()) & KeyEvent.CTRL_DOWN_MASK) != 0x0 ) {
@@ -1704,26 +1712,6 @@ public class Jogl4DrawingAreaRenderer implements
         if ( unicode_id != KeyEvent.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
 
-                //- Multiple views control -----------------------------------
-              case '.':
-                val = viewOrganizer.getSelectedViewIndex();
-                viewOrganizer.getViews().get(val).setSelected(false);
-                val ++;
-                if ( val >= viewOrganizer.getViews().size() ) {
-                    val = 0;
-                }
-                viewOrganizer.getViews().get(val).setSelected(true);
-
-                viewOrganizer.setSelectedViewIndex(val);
-                viewOrganizer.updateLayout();
-                break;
-
-              case ',':
-                val = viewOrganizer.getViewOrderStyle();
-                val++;
-                viewOrganizer.setViewOrderStyle(val);
-                viewOrganizer.updateLayout();
-                break;
                 //- Visual debug ray control ---------------------------------
               case '4': // Numpad 4
                 if ( model.isWithVisualDebugRay() ) {
@@ -1920,11 +1908,8 @@ public class Jogl4DrawingAreaRenderer implements
                 break;
 
               case 'w':
-                if ( ((e.getModifiersEx()) & KeyEvent.ALT_DOWN_MASK) != 0x0 ) {
-                    viewOrganizer.toogleFullViewportScreen();
-                    viewOrganizer.updateLayout();
-                }
-                else {
+                // Alt+w (maximize viewport) is a viewport set command
+                if ( (vitralKeyEvent.modifierMask & vsdk.toolkit.gui.KeyEvent.MASK_ALT) == 0 ) {
                     statusMessage.setText("Translation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to move it.");
                     lastInteractionMode = interactionMode;
                     interactionMode = TRANSLATE_INTERACTION_MODE;
@@ -1989,16 +1974,14 @@ public class Jogl4DrawingAreaRenderer implements
 
     public void newView()
     {
-        viewOrganizer.getViews().add(new Jogl4AwtViewportWindow());
-        viewOrganizer.updateLayout();
+        viewportSet.addViewport(new Viewport());
     }
 
     public void delView()
     {
-        if ( viewOrganizer.getViews().size() > 1 ) {
-            viewOrganizer.getViews().remove(viewOrganizer.getViews().size()-1);
+        if ( viewportSet.getViewportCount() > 1 ) {
+            viewportSet.removeViewport(viewportSet.getViewportCount() - 1);
         }
-        viewOrganizer.updateLayout();
     }
 
     private void reportObjectSelection()

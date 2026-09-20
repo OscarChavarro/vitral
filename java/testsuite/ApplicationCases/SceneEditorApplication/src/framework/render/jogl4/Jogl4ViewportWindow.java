@@ -1,14 +1,9 @@
 //=   previous "JoglView" class at SceneEditorApplication example).         =
 
-package application.render.jogl;
+package framework.render.jogl4;
 
 // Java basic classes
 import java.util.ArrayList;
-
-// AWT/Swing classes
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
@@ -26,120 +21,63 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
-import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
-import vsdk.toolkit.gui.ViewportWindow;
-import application.model.Viewport;
 
-public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListener
+// Framework classes
+import framework.model.Viewport;
+import framework.model.ViewportSet;
+
+/**
+JOGL presentation of one `Viewport` of a `ViewportSet`: grid, reference base,
+title and gizmo labels. It holds the JOGL/image resources needed for that
+drawing, and reads everything else (cameras, areas, selection) from the
+injected model. It does not depend on AWT/Swing: user interaction is processed
+in the `application.gui` package, and label images are provided by the
+injected `Jogl4LabelImageProvider`.
+*/
+public class Jogl4ViewportWindow
 {
-    // Current configuration, available only after a call to activateViewportGL
-    private int viewportStartX;
-    private int viewportStartY;
-    private int viewportSizeX;
-    private int viewportSizeY;
+    private static final ColorRgb TITLE_COLOR = new ColorRgb(0.76, 0.76, 0.76);
 
-    // A Jogl4AwtViewportWindow can request an specific size in pixels. If this size gets
-    // smaller than percent-based area, the viewport is assigned to match the
-    // requested size. If a requested size dimension in pixels is greater
-    // than the percent-based area, the requested size is ignored and the
-    // viewport will get the percent-based size. The smaller requested size
-    // viewport will always be centered inside the given percent-based area.
-    // A requested size of 0 means the requested size match the percent-based
-    // size. This is usefull in applications willing to use just a subset of
-    // the area, for example when previewing slow raytracing visualizations.
+    private final ViewportSet viewportSet;
     private final Viewport viewport;
+    private final Jogl4LabelImageProvider labelImageProvider;
 
-    //
     private String title;
     private RGBAImageUncompressed titleImage;
-    private RGBAImageUncompressed xLabelImage;
-    private RGBAImageUncompressed yLabelImage;
-    private RGBAImageUncompressed zLabelImage;
-    private RGBAImageUncompressed xLabelImageSelected;
-    private RGBAImageUncompressed yLabelImageSelected;
-    private RGBAImageUncompressed zLabelImageSelected;
+    private final RGBAImageUncompressed xLabelImage;
+    private final RGBAImageUncompressed yLabelImage;
+    private final RGBAImageUncompressed zLabelImage;
+    private final RGBAImageUncompressed xLabelImageSelected;
+    private final RGBAImageUncompressed yLabelImageSelected;
+    private final RGBAImageUncompressed zLabelImageSelected;
 
-    // Each Jogl4AwtViewportWindow can call a different visualization algorithm
-    public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_ZBUFFER;
+    // Each Jogl4ViewportWindow can call a different visualization algorithm
+    public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_Z_BUFFER;
     public static final int RENDER_MODE_RAYTRACING = Viewport.RENDER_MODE_RAYTRACING;
 
-    public Jogl4AwtViewportWindow()
+    public Jogl4ViewportWindow(ViewportSet viewportSet,
+                               Viewport viewport,
+                               Jogl4LabelImageProvider labelImageProvider)
     {
-        //-----------------------------------------------------------------
-        super();
-        viewport = new Viewport();
+        this.viewportSet = viewportSet;
+        this.viewport = viewport;
+        this.labelImageProvider = labelImageProvider;
 
-        setTitle(viewport.getTitle());
-        xLabelImage = AwtSystem.calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
-        yLabelImage = AwtSystem.calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
-        zLabelImage = AwtSystem.calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
+        xLabelImage = labelImageProvider.createLabelImage("X", new ColorRgb(0.78, 0, 0));
+        yLabelImage = labelImageProvider.createLabelImage("Y", new ColorRgb(0, 0.61, 0));
+        zLabelImage = labelImageProvider.createLabelImage("Z", new ColorRgb(0, 0, 0.76));
 
-        xLabelImageSelected = AwtSystem.calculateLabelImage("X", new ColorRgb(1, 1, 0));
-        yLabelImageSelected = AwtSystem.calculateLabelImage("Y", new ColorRgb(1, 1, 0));
-        zLabelImageSelected = AwtSystem.calculateLabelImage("Z", new ColorRgb(1, 1, 0));
+        xLabelImageSelected = labelImageProvider.createLabelImage("X", new ColorRgb(1, 1, 0));
+        yLabelImageSelected = labelImageProvider.createLabelImage("Y", new ColorRgb(1, 1, 0));
+        zLabelImageSelected = labelImageProvider.createLabelImage("Z", new ColorRgb(1, 1, 0));
 
+        updateTitleImage();
     }
 
-    /**
-    Do NOT call your controller from the `keyTyped` method, or the controller
-    will be invoked twice for each key. Call it only from the `keyPressed` and
-    `keyReleased` method.
-    */
-    @Override
-    public void keyTyped(KeyEvent e) {
-        ;
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        int keycode;
-        char unicode_id;
-        boolean skipKey = false;
-
-        keycode = e.getKeyCode();
-        unicode_id = e.getKeyChar();
-
-        if ( keycode == KeyEvent.VK_9 ) {
-            // Alphanumeric 0
-            skipKey = true;
-            viewport.toggleRenderMode();
-        }
-
-        if ( unicode_id != KeyEvent.CHAR_UNDEFINED && !skipKey ) {
-            switch ( unicode_id ) {
-              case 'g':
-                viewport.toggleGrid();
-                break;
-              case 't':
-                viewport.setActiveCamera(viewport.getTopCamera());
-                setTitle(viewport.getTitle());
-                break;
-              case 'l':
-                viewport.setActiveCamera(viewport.getLeftCamera());
-                setTitle(viewport.getTitle());
-                break;
-              case 'f':
-                viewport.setActiveCamera(viewport.getFrontCamera());
-                setTitle(viewport.getTitle());
-                break;
-              case 'b':
-                viewport.setActiveCamera(viewport.getBottomCamera());
-                setTitle(viewport.getTitle());
-                break;
-              case 'p':
-                viewport.setActiveCamera(viewport.getPerspectiveCamera());
-                setTitle(viewport.getTitle());
-                break;
-              case '0':
-                viewport.cycleRequestedSize();
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
+    public Viewport getViewport()
+    {
+        return viewport;
     }
 
     public int getRenderMode()
@@ -147,62 +85,35 @@ public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListene
         return viewport.getRenderMode();
     }
 
-    public int getViewportRequestedSizeXInPixels()
-    {
-        return viewport.getRequestedSizeXInPixels();
-    }
-
-    public int getViewportRequestedSizeYInPixels()
-    {
-        return viewport.getRequestedSizeYInPixels();
-    }
-
-    public void setViewportRequestedSizeXInPixels(int requestedSizeXInPixels)
-    {
-        viewport.setRequestedSizeXInPixels(requestedSizeXInPixels);
-    }
-
-    public void setViewportRequestedSizeYInPixels(int requestedSizeYInPixels)
-    {
-        viewport.setRequestedSizeYInPixels(requestedSizeYInPixels);
-    }
-
     public int getViewportStartX()
     {
-        return viewportStartX;
+        return viewport.getPixelStartX();
     }
 
     public int getViewportStartY()
     {
-        return viewportStartY;
+        return viewport.getPixelStartY();
     }
 
     public int getViewportSizeX()
     {
-        return viewportSizeX;
+        return viewport.getPixelSizeX();
     }
 
     public int getViewportSizeY()
     {
-        return viewportSizeY;
+        return viewport.getPixelSizeY();
     }
 
     public boolean isSelected()
     {
-        return selected;
+        return viewportSet.isSelected(viewport);
     }
 
-    public boolean useFullContainerViewportArea()
+    public boolean isActive()
     {
-        int x, y;
-        x = getViewportRequestedSizeXInPixels();
-        y = getViewportRequestedSizeYInPixels();
-
-        if ( x != 0 && y != 0 ) {
-            return false;
-        }
-        return true;
-    }    
+        return viewport.isActive();
+    }
 
     public Camera getCamera()
     {
@@ -214,115 +125,6 @@ public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListene
         return viewport.getRendererConfiguration();
     }
 
-    /**
-    A given container canvas has valid pixel coordinates from (0, 0) to
-    (canvasXSize-1, canvasYSize-1). Current Jogl4AwtViewportWindow is defined inside that
-    area in terms of a start point (upper left corner) and size given in
-    area percentages.
-    This method calculates the (viewportStartX, viewportStartY,
-    viewportSizeX, viewportSizeY) variables that defines current Jogl4AwtViewportWindow
-    viewport in container canvas' integer pixel coordinates.
-    */
-    public void updateViewportConfiguration(int canvasXSize, int canvasYSize)
-    {
-        int w, h;
-        int subCanvasXSize;
-        int subCanvasYSize;
-
-        viewportStartX = (int)(viewportStartXPercent*((double)canvasXSize))+viewportBorder+1;
-        viewportStartY = (int)(viewportStartYPercent*((double)canvasYSize))+viewportBorder+1;
-        subCanvasXSize = (int)(viewportSizeXPercent*((double)canvasXSize))-2*viewportBorder-2;
-        subCanvasYSize = (int)(viewportSizeYPercent*((double)canvasYSize))-2*viewportBorder-2;
-        if ( useFullContainerViewportArea() ) {
-            viewportSizeX = subCanvasXSize;
-            viewportSizeY = subCanvasYSize;
-        }
-        else {
-            if ( viewport.getRequestedSizeXInPixels() < subCanvasXSize ) {
-                w = viewport.getRequestedSizeXInPixels();
-            }
-            else {
-                w = subCanvasXSize;
-            }
-            if ( viewport.getRequestedSizeYInPixels() < subCanvasYSize ) {
-                h = viewport.getRequestedSizeYInPixels();
-            }
-            else {
-                h = subCanvasYSize;
-            }
-            viewportStartX += (subCanvasXSize - w) / 2;
-            viewportStartY += (subCanvasYSize - h) / 2;
-            viewportSizeX = w;
-            viewportSizeY = h;
-        }
-        viewport.updateCameraViewports(viewportSizeX, viewportSizeY);
-    }
-
-    public void activateViewportGL(GL2 gl, int canvasXSize, int canvasYSize)
-    {
-        if ( !active ) {
-            return;
-        }
-        updateViewportConfiguration(canvasXSize, canvasYSize);
-        gl.glViewport(viewportStartX, viewportStartY, viewportSizeX, viewportSizeY);
-    }
-
-    /**
-    PRE: glViewport is set to full canvas area, and projection and modelview
-    matrices are set to identity.
-    */
-    public void drawBorderGL(GL2 gl, int viewportXsize, int viewportYsize)
-    {
-        if ( !active || viewportBorder <= 0 ) {
-            return;
-        }
-        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
-        gl.glPushAttrib(GL2.GL_TEXTURE_2D);
-        gl.glPushAttrib(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glDisable(GL2.GL_DEPTH_TEST);
-
-        double x1, y1, x2, y2;
-        double epsilonx = 2.0 / ((double)viewportXsize);
-        double epsilony = 2.0 / ((double)viewportYsize);
-        double dx = (viewportBorder) * epsilonx;
-        double dy = (viewportBorder) * epsilony;
-
-        x1 = viewportStartXPercent*2 - 1;
-        y1 = viewportStartYPercent*2 - 1;
-        x2 = x1 + viewportSizeXPercent*2;
-        y2 = y1 + viewportSizeYPercent*2;
-
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-        gl.glBegin(GL2.GL_QUADS);
-            if ( selected ) {
-                gl.glColor3d(1, 0.96, 0);
-            }
-            else {
-                gl.glColor3d(0.21, 0.25, 0.29);
-            }
-            gl.glVertex3d(x1, y1, 0);
-            gl.glVertex3d(x2, y1, 0);
-            gl.glVertex3d(x2, y2, 0);
-            gl.glVertex3d(x1, y2, 0);
-            gl.glColor3d(0, 0, 0);
-            gl.glVertex3d(x1+2*dx, y1+2*dy, 0);
-            gl.glVertex3d(x2-2*dx, y1+2*dy, 0);
-            gl.glVertex3d(x2-2*dx, y2-2*dy, 0);
-            gl.glVertex3d(x1+2*dx, y2-2*dy, 0);
-        gl.glEnd();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
-    }
-
-    public final void setTitle(String name)
-    {
-        title = name;
-        titleImage = AwtSystem.calculateLabelImage(title, new ColorRgb(0.76, 0.76, 0.76));
-    }
-
     public void drawReferenceBase(GL2 gl)
     {
         //-----------------------------------------------------------------
@@ -331,7 +133,7 @@ public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListene
         gl.glPushAttrib(GL2.GL_DEPTH_TEST);
         gl.glPushAttrib(GL2.GL_TEXTURE_2D);
         gl.glPushAttrib(GL2.GL_LIGHTING);
-        gl.glViewport(viewportStartX, viewportStartY, basesize, basesize);
+        gl.glViewport(viewport.getPixelStartX(), viewport.getPixelStartY(), basesize, basesize);
 
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
@@ -466,8 +268,8 @@ public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListene
         double dx;
         double dy;
 
-        dx = ((double)(2*x)) / ((double)viewportSizeX);
-        dy = ((double)(2*(viewportSizeY - y))) / ((double)viewportSizeY);
+        dx = ((double)(2*x)) / ((double)viewport.getPixelSizeX());
+        dy = ((double)(2*(viewport.getPixelSizeY() - y))) / ((double)viewport.getPixelSizeY());
 
         gl.glMatrixMode(GL2.GL_PROJECTION);
         gl.glPushMatrix();
@@ -522,39 +324,22 @@ public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListene
     {
         int borderx = 4;
         int bordery = 1;
+
+        updateTitleImage();
         drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
 
-    public void updateMouseEvent(MouseEvent e, int globalViewportXSize, int globalViewportYSize)
+    /**
+    The title is owned by the model viewport (it follows the active camera),
+    so the image is regenerated whenever it changes.
+    */
+    private void updateTitleImage()
     {
-          e.translatePoint(-getViewportStartX(),
-            getViewportSizeY() - (globalViewportYSize-getViewportStartY()));
-    }
+        String currentTitle = viewport.getTitle();
 
-    public void hintConfig(int numViews, int id)
-    {
-        if ( numViews >= 4 ) {
-            switch ( id ) {
-              case 0:
-                viewport.setActiveCamera(viewport.getLeftCamera());
-                viewport.getRendererConfiguration().setSurfaces(false);
-                viewport.getRendererConfiguration().setWires(true);
-                break;
-              case 1:
-                viewport.setActiveCamera(viewport.getPerspectiveCamera());
-                break;
-              case 2:
-                viewport.setActiveCamera(viewport.getTopCamera());
-                viewport.getRendererConfiguration().setSurfaces(false);
-                viewport.getRendererConfiguration().setWires(true);
-                break;
-              case 3: default:
-                viewport.setActiveCamera(viewport.getFrontCamera());
-                viewport.getRendererConfiguration().setSurfaces(false);
-                viewport.getRendererConfiguration().setWires(true);
-                break;
-            }
-            setTitle(viewport.getTitle());
+        if ( titleImage == null || !currentTitle.equals(title) ) {
+            title = currentTitle;
+            titleImage = labelImageProvider.createLabelImage(title, TITLE_COLOR);
         }
     }
 

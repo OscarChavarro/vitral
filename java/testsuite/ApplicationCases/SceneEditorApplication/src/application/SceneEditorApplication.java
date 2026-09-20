@@ -67,7 +67,7 @@ public class SceneEditorApplication {
         applicationModel.setWithVisualDebugRay(false);
         jogl4Controller = new Jogl4ApplicationController(applicationModel);
         awtModel = new AwtApplicationModel();
-        awtModel.setLookAndFeel("org.jvnet.substance.skin.SubstanceTwilightLookAndFeel");
+        awtModel.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
         awtModel.setLanguageGuiFile("./etc/english.json");
         awtModel.setFullScreenGuiMode(false);
         awtGuiController = new AwtGuiController(this, awtModel, jogl4Controller);

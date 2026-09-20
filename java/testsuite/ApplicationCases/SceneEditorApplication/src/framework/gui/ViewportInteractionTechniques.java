@@ -1,4 +1,4 @@
-package application.gui;
+package framework.gui;
 
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.RendererConfiguration;
