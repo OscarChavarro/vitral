@@ -52,16 +52,16 @@ class VitralEditorServerProtocol implements Runnable
         Quaterniond q;
         Matrix4x4d R;
         Camera camera;
-        int firstThingSelected = parent.theScene.selectedThings.firstSelected();
+        int firstThingSelected = parent.getApplicationModel().getScene().selectedThings.firstSelected();
 
         if ( firstThingSelected >= 0 && 
-             firstThingSelected < parent.theScene.scene.getSimpleBodies().size() ) 
+             firstThingSelected < parent.getApplicationModel().getScene().scene.getSimpleBodies().size() ) 
         {
-            pos = parent.theScene.scene.getSimpleBodies().get(firstThingSelected).getPosition();
-            R = parent.theScene.scene.getSimpleBodies().get(firstThingSelected).getRotation();
+            pos = parent.getApplicationModel().getScene().scene.getSimpleBodies().get(firstThingSelected).getPosition();
+            R = parent.getApplicationModel().getScene().scene.getSimpleBodies().get(firstThingSelected).getRotation();
         }
         else {
-            camera = ((JoglAwtViewportWindow)(parent.drawingArea.viewOrganizer.getViews().get(parent.drawingArea.viewOrganizer.getSelectedViewIndex()))).getCamera();
+            camera = ((JoglAwtViewportWindow)(parent.getJogl4Controller().getDrawingArea().viewOrganizer.getViews().get(parent.getJogl4Controller().getDrawingArea().viewOrganizer.getSelectedViewIndex()))).getCamera();
             pos = camera.getPosition();
             R = camera.getRotation();
         }

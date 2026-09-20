@@ -2,6 +2,7 @@ package application.framework;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -193,7 +194,7 @@ public class Scene
     {
         int i;
         double nearestDistance = Float.MAX_VALUE;
-        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        List<SimpleBody> things = scene.getSimpleBodies();
         boolean intersected = false;
         SimpleBody gi;
         RayHit ii = new RayHit();
@@ -232,7 +233,7 @@ public class Scene
         if ( !composite ) {
             selectedThings.unselectAll();
         }
-        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        List<SimpleBody> things = scene.getSimpleBodies();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
             Ray hit = gi.doIntersectionFirstHit(r);
@@ -290,7 +291,7 @@ public class Scene
 
     public void print()
     {
-        ArrayList<SimpleBody> things = scene.getSimpleBodies();
+        List<SimpleBody> things = scene.getSimpleBodies();
         int i;
 
         System.out.println("= SCENE REPORT ============================================================");

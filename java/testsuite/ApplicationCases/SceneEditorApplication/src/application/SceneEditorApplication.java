@@ -1,6 +1,3 @@
-//= This is the main class for a simple 3D editor application, and serves   =
-//= as the main testbed integration for functionalities in the VSDK toolkit =
-
 package application;
 
 // Java basic classes
@@ -12,6 +9,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 import javax.swing.BorderFactory; 
 import javax.swing.BoxLayout;
@@ -33,17 +31,15 @@ import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
-
-// Internal classes
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
+import application.model.ApplicationModel;
 import application.gui.ModifyPanel;
 import application.gui.ButtonsPanel;
 import application.gui.GUIEventExecutor;
@@ -52,25 +48,14 @@ import application.gui.SwingSelectorDialog;
 import application.gui.SwingImageControlWindow;
 import application.net.VitralEditorServer;
 import application.net.VitralCommandClient;
-import application.render.jogl.JoglDrawingArea;
 import javax.swing.SwingUtilities;
-
 
 public class SceneEditorApplication {
     // Application model
-    public Scene theScene;
-    public RGBImageUncompressed raytracedImage;
-    public RGBImageUncompressed zbufferImage;
-    public int raytracedImageWidth;
-    public int raytracedImageHeight;
-    public RGBColorPalette palette;
-    public boolean withVisualDebugRay;
-    public Ray visualDebugRay;
-    public int visualDebugRayLevels;
+    private ApplicationModel applicationModel;
 
     // Application GUI
     public Widget gui;
-    public JoglDrawingArea drawingArea;
     public JLabel statusMessage;
     public JPanel statusBarPanel;
     public SwingImageControlWindow imageControlWindow;
@@ -84,6 +69,7 @@ public class SceneEditorApplication {
     public boolean modifyPanelSelected;
     public boolean fullScreenGuiMode;
     private GUIEventExecutor guiEventExecutor;
+    private Jogl4ApplicationController jogl4Controller;
 
     // Networking
     private VitralEditorServer networkServer;
@@ -95,23 +81,8 @@ public class SceneEditorApplication {
     {
         this.lookAndFeel = lookAndFeel;
 
-        // Method 1
         destroyGUI();
         createGUI();
-
-        // Method 2: It doesn't work well when the window decoration style
-        // has to change in the main JFrame
-        /*
-        try {
-            UIManager.setLookAndFeel(lookAndFeel);
-          }
-          catch (Exception e) {
-            System.err.println("Warning: Can not set " +
-              lookAndFeel + "look and feel");
-        }
-        SwingUtilities.updateComponentTreeUI(mainWindowWidget);
-        mainWindowWidget.pack();
-        */
     }
 
     /**
@@ -128,24 +99,28 @@ public class SceneEditorApplication {
     private void createModel()
     {
         //-----------------------------------------------------------------
-        theScene = new Scene();
+        applicationModel = new ApplicationModel();
+        applicationModel.setScene(new Scene());
 
-        raytracedImage = new RGBImageUncompressed();
-        raytracedImageWidth = 320;
-        raytracedImageHeight = 240;
+        applicationModel.setRaytracedImage(new RGBImageUncompressed());
+        applicationModel.setRaytracedImageWidth(320);
+        applicationModel.setRaytracedImageHeight(240);
 
-        palette = null;
+        applicationModel.setPalette(null);
         try {
-            palette = RGBColorPalettePersistence.importGimpPalette(new java.io.FileReader("../../../../etc/palettes/Cranes.gpl"));
+            applicationModel.setPalette(
+                RGBColorPalettePersistence.importGimpPalette(
+                    new java.io.FileReader("../../../../etc/palettes/Cranes.gpl")));
         }
         catch ( Exception e ) {
             System.err.println(e);
             System.exit(0);
         }
 
-        visualDebugRay = new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0));
-        visualDebugRayLevels = 2;
-        withVisualDebugRay = false;
+        applicationModel.setVisualDebugRay(new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0)));
+        applicationModel.setVisualDebugRayLevels(2);
+        applicationModel.setWithVisualDebugRay(false);
+        jogl4Controller = new Jogl4ApplicationController(applicationModel);
 
         networkServer = null;
         networkCommandClient = null;
@@ -234,15 +209,13 @@ public class SceneEditorApplication {
             System.exit(0);
         }
 
-        if ( drawingArea == null ) {
-            drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
-        }
-
-        mainWindowWidget.add(drawingArea.getCanvas(), BorderLayout.CENTER);
+        mainWindowWidget.add(
+            jogl4Controller.getCanvas(statusMessage, this),
+            BorderLayout.CENTER);
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
         mainWindowWidget.setVisible(true);
-        drawingArea.getCanvas().requestFocusInWindow();
+        jogl4Controller.requestFocusInWindow();
 
         //-----------------------------------------------------------------
         imageControlWindow = null;
@@ -265,7 +238,7 @@ public class SceneEditorApplication {
         //- Configure this JFrame -----------------------------------------
         mainWindowWidget = new JFrame("VITRAL Scene Editor");
         mainWindowWidget.setUndecorated(false);
-        mainWindowWidget.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainWindowWidget.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Toolkit tk = mainWindowWidget.getToolkit();
         Dimension d = tk.getScreenSize();
 
@@ -278,36 +251,30 @@ public class SceneEditorApplication {
             System.err.println("Fatal error: can not open GUI file");
             System.exit(0);
         }
-        //System.out.println(gui);
 
         //-----------------------------------------------------------------
         executor = new GUIEventExecutor(this);
+        guiEventExecutor = executor;
         executorPanel = new ButtonsPanel(this, 101, executor);
 
         //-----------------------------------------------------------------
-        JMenuBar menubar;
-
-        menubar = SwingGuiRenderer.buildMenubar(gui, null, executorPanel);
+        JMenuBar menuBar = SwingGuiRenderer.buildMenubar(gui, null, executorPanel);
 
         //-----------------------------------------------------------------
         JSplitPane splitPane;
         statusBarPanel = createStatusBar();
 
-        if ( drawingArea == null ) {
-            drawingArea = new JoglDrawingArea(theScene, statusMessage, this);
-        }
-
-        Component left = drawingArea.getCanvas();
+        Component left = jogl4Controller.getCanvas(statusMessage, this);
         Component right = createPanel();
-        Dimension minleft = new Dimension(160, 120);
-        Dimension minright = new Dimension(320, 120);
+        Dimension minLeft = new Dimension(160, 120);
+        Dimension minRight = new Dimension(320, 120);
         JPanel iconsAndWorkAreasPanel;
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
                                    left,
                                    right);
-        left.setMinimumSize(minleft);
-        right.setMinimumSize(minright);
+        left.setMinimumSize(minLeft);
+        right.setMinimumSize(minRight);
         splitPane.setResizeWeight(1.0);
 
         Dimension dd = splitPane.getMaximumSize();
@@ -324,22 +291,17 @@ public class SceneEditorApplication {
 
         mainWindowWidget.add(iconsAndWorkAreasPanel, BorderLayout.CENTER);
         mainWindowWidget.add(statusBarPanel, BorderLayout.SOUTH);
-        mainWindowWidget.setJMenuBar(menubar);
+        mainWindowWidget.setJMenuBar(menuBar);
 
         //-----------------------------------------------------------------
-        int ancho_panel;
+        int panelWidth = d.width - 320;
 
-        //if ( d.width < 640 ) {
-        //    ancho_panel = 320;
-        //}
-        ancho_panel = d.width - 320;
-
-        splitPane.setDividerLocation(ancho_panel);
+        splitPane.setDividerLocation(panelWidth);
 
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
         mainWindowWidget.setVisible(true);
-        drawingArea.getCanvas().requestFocusInWindow();
+        jogl4Controller.requestFocusInWindow();
 
         //-----------------------------------------------------------------
         imageControlWindow = null;
@@ -367,13 +329,10 @@ public class SceneEditorApplication {
     }
 
     public SceneEditorApplication(String[] args) {
-        //lookAndFeel = "javax.swing.plaf.metal.MetalLookAndFeel";
         lookAndFeel = "org.jvnet.substance.skin.SubstanceTwilightLookAndFeel";
-        //lookAndFeel = "org.jvnet.substance.skin.SubstanceOfficeBlue2007LookAndFeel";
         languageGuiFile = "./etc/english.json";
 
         fullScreenGuiMode = false;
-        drawingArea = null;
 
         createModel();
         createGUI();
@@ -388,11 +347,15 @@ public class SceneEditorApplication {
 
     public void doRaytracedImage()
     {
-        raytracedImage.init(raytracedImageWidth, raytracedImageHeight);
-        if ( theScene.selectedBackground == 1 ) {
-            ImageProcessing.resize(theScene.fixedBackground.getImage(), raytracedImage);
+        applicationModel.getRaytracedImage().init(
+            applicationModel.getRaytracedImageWidth(),
+            applicationModel.getRaytracedImageHeight());
+        if ( applicationModel.getScene().selectedBackground == 1 ) {
+            ImageProcessing.resize(
+                applicationModel.getScene().fixedBackground.getImage(),
+                applicationModel.getRaytracedImage());
         }
-        theScene.raytrace(raytracedImage);
+        applicationModel.getScene().raytrace(applicationModel.getRaytracedImage());
     }
 
     public void switchVoiceCommandClient()
@@ -460,10 +423,18 @@ public class SceneEditorApplication {
         boolean b = guiEventExecutor.executeCommand(label);
     }
 
+    public ApplicationModel getApplicationModel()
+    {
+        return applicationModel;
+    }
+
+    public Jogl4ApplicationController getJogl4Controller()
+    {
+        return jogl4Controller;
+    }
+
     public static void main(String[] args) {
-        // Note that this is a thread-safe invocation of the GUI
         MainThread mt = new MainThread(args);
         SwingUtilities.invokeLater(mt);
     }
-
 }

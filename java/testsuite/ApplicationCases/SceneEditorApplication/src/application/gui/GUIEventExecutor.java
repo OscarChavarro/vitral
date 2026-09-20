@@ -6,6 +6,7 @@ package application.gui;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 
 import application.SceneEditorApplication;
+import application.framework.Scene;
 import application.render.jogl.JoglDrawingArea;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,6 +50,11 @@ public class GUIEventExecutor extends CommandListener{
     public GUIEventExecutor(SceneEditorApplication parent) {
         this.parent = parent;
     }
+
+    private Scene scene() {
+        return parent.getApplicationModel().getScene();
+    }
+
     public boolean executeCommand(String label,String currentFilePathForReading, 
             String currentFilePathForWriting, JFrame mainWindowWidget) {
 
@@ -61,49 +67,49 @@ public class GUIEventExecutor extends CommandListener{
         //- EDIT ----------------------------------------------------------
         //- CREATE --------------------------------------------------------
         else if ( label.equals("IDC_CREATE_SPHERE") ) {
-            parent.theScene.addThing(new Sphere(1.0));
+            scene().addThing(new Sphere(1.0));
         }
         else if ( label.equals("IDC_CREATE_CONE") ) {
-            parent.theScene.addThing(new Cone(1, 0, 2));
+            scene().addThing(new Cone(1, 0, 2));
         }
         else if ( label.equals("IDC_CREATE_CYLINDER") ) {
-            parent.theScene.addThing(new Cone(1, 1, 2));
+            scene().addThing(new Cone(1, 1, 2));
         }
         else if ( label.equals("IDC_CREATE_CUBE") ) {
-            parent.theScene.addThing(new Box(1, 1, 1));
+            scene().addThing(new Box(1, 1, 1));
         }
         else if ( label.equals("IDC_CREATE_BOX") ) {
-            parent.theScene.addThing(new Box(1, 3, 2));
+            scene().addThing(new Box(1, 3, 2));
         }
         else if ( label.equals("IDC_CREATE_ARROW") ) {
-            parent.theScene.addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
+            scene().addThing(new Arrow(0.7, 0.3, 0.05, 0.1));
         }
         else if ( label.equals("IDC_CREATE_TORUS") ) {
-            parent.theScene.addThing(new Torus(2, 1));
+            scene().addThing(new Torus(2, 1));
         }
         else if ( label.equals("IDC_CREATE_PLANE") ) {
             InfinitePlane plane;
             plane = new InfinitePlane(new Vector3Dd(-0.2, 0, 1), new Vector3Dd(0, 0, -1));
             System.out.println(plane);
-            parent.theScene.addThing(plane);
+            scene().addThing(plane);
 
 /*
-            parent.theScene.activeCamera.updateVectors();
+            scene().activeCamera.updateVectors();
             InfinitePlane planes[];
-            planes = parent.theScene.activeCamera.getBoundingPlanes();
+            planes = scene().activeCamera.getBoundingPlanes();
             for ( int i = 0; i < 6; i++ ) {
-                parent.theScene.addThing(planes[i]);
+                scene().addThing(planes[i]);
             }
 */
         }
         else if ( label.equals("IDC_CREATE_SPHERE_HARMONIC") ) {
             SimpleBody voxelBody = null;
-            int selectedThing = parent.theScene.selectedThings.firstSelected();
+            int selectedThing = scene().selectedThings.firstSelected();
 
             Geometry referenceGeometry = null;
 
             if ( selectedThing >= 0 ) {
-                voxelBody = parent.theScene.scene.getSimpleBodies().get(selectedThing);
+                voxelBody = scene().scene.getSimpleBodies().get(selectedThing);
                 referenceGeometry = voxelBody.getGeometry();
             }
 
@@ -145,18 +151,18 @@ public class GUIEventExecutor extends CommandListener{
                     body = addDebugSphere(voxelBody, i, cm, averageDistance);
                     group.getBodies().add(body);
                 }
-                parent.theScene.debugThingGroups.add(group);
+                scene().debugThingGroups.add(group);
                 // Subspheres account for translation & scale
                 group.setRotation(voxelBody.getRotation());
             }
 
         }
         else if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
-            parent.drawingArea.wantToDebugProjectedViews = true;
+            parent.getJogl4Controller().getDrawingArea().wantToDebugProjectedViews = true;
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -
-            int selectedThing = parent.theScene.selectedThings.firstSelected();
+            int selectedThing = scene().selectedThings.firstSelected();
             Geometry referenceGeometry;
             SimpleBody thing = null;
 
@@ -164,7 +170,7 @@ public class GUIEventExecutor extends CommandListener{
                 referenceGeometry = new Sphere(0.5);
             }
             else {
-                thing = parent.theScene.scene.getSimpleBodies().get(selectedThing);
+                thing = scene().scene.getSimpleBodies().get(selectedThing);
                 referenceGeometry = thing.getGeometry();
             }
 
@@ -185,7 +191,7 @@ public class GUIEventExecutor extends CommandListener{
             Voxelization.doVoxelization(referenceGeometry, vv, M, reporter);
 
             //- Append newly created volume to scene, matching reference form -
-            SimpleBody newThing = parent.theScene.addThing(vv);
+            SimpleBody newThing = scene().addThing(vv);
             Vector3Dd pos = M.extractTranslation();
             if ( thing != null ) {
                 pos = pos.add(thing.getPosition());
@@ -232,7 +238,7 @@ public class GUIEventExecutor extends CommandListener{
 
             //
             PolyhedralBoundedSolidValidationEngine.validateIntermediate(brep);
-            parent.theScene.addThing(brep);
+            scene().addThing(brep);
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICCUBICCURVE") ) {
             ParametricCurve curve;
@@ -262,7 +268,7 @@ public class GUIEventExecutor extends CommandListener{
             pointParameters[2] = new Vector3Dd(0, 0, 0); // Not used
             curve.addPoint(pointParameters, ParametricCurve.BEZIER);
 
-            parent.theScene.addThing(curve);
+            scene().addThing(curve);
 
 /*
             try {
@@ -277,7 +283,7 @@ public class GUIEventExecutor extends CommandListener{
             try {
                 curve = (ParametricCurve)XmlManager.importXml(
                           "curveTest.xml");
-                parent.theScene.addThing(curve);
+                scene().addThing(curve);
               }
               catch (XmlException ex1) {
                 System.out.println("IMPORT:XmlException:" + ex1);
@@ -290,7 +296,7 @@ public class GUIEventExecutor extends CommandListener{
             functionalSurface = new FunctionalExplicitSurface("cos((PI*x)/2)");
             functionalSurface.setBounds(-10, -10, -10, 10, 10, 10);
             functionalSurface.setTesselationHint(100, 100);
-            newThing = parent.theScene.addThing(functionalSurface);
+            newThing = scene().addThing(functionalSurface);
             newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
         }
         else if ( label.equals("IDC_CREATE_PARAMETRICBICUBICPATCH") ) {
@@ -332,9 +338,9 @@ public class GUIEventExecutor extends CommandListener{
             patch = new ParametricBiCubicPatch();
             patch.buildFergusonPatch(contourHermiteLine);
             patch.setApproximationSteps(20);
-            //parent.theScene.addThing(contourHermiteLine);
+            //scene().addThing(contourHermiteLine);
             SimpleBody newThing;
-            newThing = parent.theScene.addThing(patch);
+            newThing = scene().addThing(patch);
             newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
             //-----------------------------------------------------------------
 
@@ -361,7 +367,7 @@ public class GUIEventExecutor extends CommandListener{
             patch.buildBezierPatch(cp);
             patch.setApproximationSteps(20);
             SimpleBody newThing;
-            newThing = parent.theScene.addThing(patch);
+            newThing = scene().addThing(patch);
             newThing.setMaterial(newThing.getMaterial().withDoubleSided(true));
             //-----------------------------------------------------------------
 */
@@ -383,7 +389,7 @@ public class GUIEventExecutor extends CommandListener{
             try {
                 patch = (ParametricBiCubicPatch) XmlManager.importXml(
                          "patchTest.xml");
-                parent.theScene.addThing(patch);
+                scene().addThing(patch);
               }
               catch (XmlException ex1) {
                 System.out.println("IMPORT:XmlException:" +ex1);
@@ -407,7 +413,7 @@ public class GUIEventExecutor extends CommandListener{
                     File file = jfc.getSelectedFile();
 
                     EnvironmentPersistence.importEnvironment(file,
-                        parent.theScene.scene);
+                        scene().scene);
 
                     currentFilePathForReading = file.getParentFile().getAbsolutePath();
 
@@ -433,7 +439,7 @@ public class GUIEventExecutor extends CommandListener{
                     fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentObj(fos,
-                        parent.theScene.scene);
+                        scene().scene);
 
                     fos.close();
 
@@ -461,7 +467,7 @@ public class GUIEventExecutor extends CommandListener{
                     fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentGts(fos,
-                        parent.theScene.scene);
+                        scene().scene);
 
                     fos.close();
 
@@ -488,7 +494,7 @@ public class GUIEventExecutor extends CommandListener{
                     fos = new FileOutputStream(file);
 
                     EnvironmentPersistence.exportEnvironmentVtk(fos,
-                        parent.theScene.scene);
+                        scene().scene);
 
                     fos.close();
 
@@ -504,7 +510,7 @@ public class GUIEventExecutor extends CommandListener{
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
             light = new PointLight(new Vector3Dd(-10, -9, 8), new ColorRgb(1, 1, 1));
-            parent.theScene.scene.getLights().add(light);
+            scene().scene.getLights().add(light);
         }
         //- RENDERING -----------------------------------------------------
         else if ( label.equals("Select palette for depthmap display") ||
@@ -517,9 +523,9 @@ public class GUIEventExecutor extends CommandListener{
             if (opc == JFileChooser.APPROVE_OPTION) {
                 try {
                     File file = jfc.getSelectedFile();
-                    parent.palette = 
+                    parent.getApplicationModel().setPalette(
                         RGBColorPalettePersistence.importGimpPalette(
-                            new java.io.FileReader(file.getAbsolutePath()));
+                            new java.io.FileReader(file.getAbsolutePath())));
                     parent.mainWindowWidget.repaint();
                 }
                 catch (Exception ex) {
@@ -531,28 +537,32 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
-            parent.drawingArea.wantToGetColor = true;
+            parent.getJogl4Controller().getDrawingArea().wantToGetColor = true;
         }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
-            parent.drawingArea.wantToGetDepth = true;
+            parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
         }
         else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_PENDING_CONTOURNS"));
-            parent.drawingArea.wantToGetDepth = true;
-            parent.drawingArea.wantToGetContourns = true;
+            parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
+            parent.getJogl4Controller().getDrawingArea().wantToGetContourns = true;
         }
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
             parent.doRaytracedImage();
             if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(parent.raytracedImage, parent.gui, parent.executorPanel);
+                parent.imageControlWindow = new SwingImageControlWindow(
+                    parent.getApplicationModel().getRaytracedImage(),
+                    parent.gui,
+                    parent.executorPanel);
             }
             else {
-                parent.imageControlWindow.setImage(parent.raytracedImage);
+                parent.imageControlWindow.setImage(
+                    parent.getApplicationModel().getRaytracedImage());
             }
             parent.imageControlWindow.redrawImage();
         }
@@ -577,73 +587,69 @@ public class GUIEventExecutor extends CommandListener{
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {
-            parent.drawingArea.rotateBackground();
+            parent.getJogl4Controller().getDrawingArea().rotateBackground();
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_TEST_CORRIDOR") ) {
-            if ( parent.theScene.showCorridor == true ) {
-                parent.theScene.showCorridor = false;
+            if ( scene().showCorridor == true ) {
+                scene().showCorridor = false;
             }
             else {
-                parent.theScene.showCorridor = true;
+                scene().showCorridor = true;
             }
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_GRID") ) {
-            parent.drawingArea.toggleGrid();
+            parent.getJogl4Controller().getDrawingArea().toggleGrid();
         }
         else if ( label.equals("IDC_OTHERS_PRINT_SCENE_ON_CONSOLE") ) {
-            parent.theScene.print();
+            scene().print();
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_TOOLS_CAMERA") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_CAMERA_MODE"));
-            parent.drawingArea.interactionMode = 
+            parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 JoglDrawingArea.CAMERA_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SELECTION_MODE"));
-            parent.drawingArea.interactionMode = 
+            parent.getJogl4Controller().getDrawingArea().interactionMode = 
             JoglDrawingArea.SELECT_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_TRANSLATION_MODE"));
-            parent.drawingArea.interactionMode = 
+            parent.getJogl4Controller().getDrawingArea().interactionMode = 
             JoglDrawingArea.TRANSLATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_ROTATION_MODE"));
-            parent.drawingArea.interactionMode = 
+            parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 JoglDrawingArea.ROTATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SCALE_MODE"));
-            parent.drawingArea.interactionMode = 
+            parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 JoglDrawingArea.SCALE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_RAY") ) {
-            if ( parent.withVisualDebugRay ) {
-                parent.withVisualDebugRay = false;
-            }
-            else {
-                parent.withVisualDebugRay = true;
-            }
+            parent.getApplicationModel().setWithVisualDebugRay(
+                !parent.getApplicationModel().isWithVisualDebugRay());
         }
         else if ( label.equals("IDC_VOICECOMMAND_CLIENT") ) {
             parent.switchVoiceCommandClient();
         }
         else if ( label.equals("IDC_NEW_VIEW") ) {
-            parent.drawingArea.newView();
+            parent.getJogl4Controller().getDrawingArea().newView();
         }
         else if ( label.equals("IDC_DEL_VIEW") ) {
-            parent.drawingArea.delView();
+            parent.getJogl4Controller().getDrawingArea().delView();
         }
 
         //-----------------------------------------------------------------
-        parent.drawingArea.canvas.repaint();
+        parent.getJogl4Controller().getDrawingArea().canvas.repaint();
         return true;
     }
     
@@ -666,7 +672,7 @@ public class GUIEventExecutor extends CommandListener{
         sphere = new Sphere(r);
         body = new SimpleBody();
         body.setGeometry(sphere);
-        body.setMaterial(parent.theScene.defaultMaterial());
+        body.setMaterial(scene().defaultMaterial());
         body.setMaterial(body.getMaterial().withDoubleSided(true));
         scale = voxelBody.getScale();
         S = S.scale(scale.x(), scale.y(), scale.z());
