@@ -46,7 +46,7 @@ import application.gui.GUIEventExecutor;
 import application.gui.MyChangeListener;
 import application.gui.SwingSelectorDialog;
 import application.gui.SwingImageControlWindow;
-import application.net.VitralEditorServer;
+import application.net.VitralEditorMCP;
 import application.net.VitralCommandClient;
 import javax.swing.SwingUtilities;
 
@@ -72,7 +72,7 @@ public class SceneEditorApplication {
     private Jogl4ApplicationController jogl4Controller;
 
     // Networking
-    private VitralEditorServer networkServer;
+    private VitralEditorMCP networkServer;
     private VitralCommandClient networkCommandClient;
     private String currentNetworkCommandClientIp;
     private String currentNetworkCommandClientPort;
@@ -340,7 +340,7 @@ public class SceneEditorApplication {
         int i;
         for ( i = 0; i < args.length; i++ ) {
             if ( args[i].equals("-s") ) {
-                networkServer = new VitralEditorServer(this);
+                networkServer = new VitralEditorMCP(this);
             }
         }
     }

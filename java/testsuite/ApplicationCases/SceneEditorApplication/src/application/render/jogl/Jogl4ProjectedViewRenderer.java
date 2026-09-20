@@ -22,7 +22,7 @@ import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 
-public class JoglProjectedViewRenderer {
+public class Jogl4ProjectedViewRenderer {
     public Image image;
     private SimpleBodyGroup bodies;
     private RendererConfiguration quality;
@@ -32,7 +32,7 @@ public class JoglProjectedViewRenderer {
     private int xSize;
     private int ySize;
 
-    public JoglProjectedViewRenderer(int xSize, int ySize, boolean transparent) {
+    public Jogl4ProjectedViewRenderer(int xSize, int ySize, boolean transparent) {
         bodies = null;
         quality = new RendererConfiguration();
         quality.setWires(false);

@@ -20,45 +20,47 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     /**
     \todo  check this method for efficiency improvement
     */
-    private static void
-    spherePosition(Vector3Dd p, double theta, double phi, double r)
+    private static Vector3Dd
+    spherePosition(double theta, double phi, double r)
     {
-        p = p.withX(Math.cos(phi) * Math.cos(theta) * r);
-        p = p.withY(-Math.cos(phi) * Math.sin(theta) * r);
-        p = p.withZ(Math.sin(phi) * r);
+        return new Vector3Dd(
+            Math.cos(phi) * Math.cos(theta) * r,
+            -Math.cos(phi) * Math.sin(theta) * r,
+            Math.sin(phi) * r);
     }
 
     /**
     \todo  check this method for efficiency improvement
     */
-    private static void
-    sphereNormal(Vector3Dd n, double theta, double phi)
+    private static Vector3Dd
+    sphereNormal(double theta, double phi)
     {
-        n = n.withX(Math.cos(phi) * Math.cos(theta));
-        n = n.withY(-Math.cos(phi) * Math.sin(theta));
-        n = n.withZ(Math.sin(phi));
+        return new Vector3Dd(
+            Math.cos(phi) * Math.cos(theta),
+            -Math.cos(phi) * Math.sin(theta),
+            Math.sin(phi));
     }
 
     /**
     \todo  check this method for efficiency improvement
     */
-    private static void
-    sphereTangent(Vector3Dd t, double theta, double phi)
+    private static Vector3Dd
+    sphereTangent(double theta, double phi)
     {
-        t = t.withX(Math.sin(theta));
-        t = t.withY(Math.cos(theta));
-        t = t.withZ(0);
+        return new Vector3Dd(Math.sin(theta), Math.cos(theta), 0);
     }
 
     /**
     \todo  check this method for efficiency improvement
     */
-    private static void
-    sphereBinormal(Vector3Dd b, double theta, double phi)
+    private static Vector3Dd
+    sphereBinormal(double theta, double phi)
     {
-        b = b.withX(-Math.sin(phi)*Math.cos(theta));
-        b = b.withY(Math.sin(phi)*Math.sin(theta));
-        b = b.withZ(Math.cos(phi)*Math.cos(theta)*Math.cos(theta) + Math.cos(phi)*Math.sin(theta)*Math.sin(theta));
+        return new Vector3Dd(
+            -Math.sin(phi) * Math.cos(theta),
+            Math.sin(phi) * Math.sin(theta),
+            Math.cos(phi) * Math.cos(theta) * Math.cos(theta)
+                + Math.cos(phi) * Math.sin(theta) * Math.sin(theta));
     }
 
     /**
@@ -71,11 +73,6 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         gl.glLineWidth(1.0f);
 
 
-        Vector3Dd n = new Vector3Dd();
-        Vector3Dd p = new Vector3Dd();
-        Vector3Dd T = new Vector3Dd();
-        Vector3Dd b = new Vector3Dd();
-
         gl.glBegin(GL.GL_LINES);
         for( int i = 0; i < stacks; i++ ) {
             double t1 = i/(stacks-1.f);
@@ -85,10 +82,10 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
 
-                sphereNormal(n, theta, phi1);
-                spherePosition(p, theta, phi1, r);
-                sphereTangent(T, theta, phi1);
-                sphereBinormal(b, theta, phi1);
+                Vector3Dd n = sphereNormal(theta, phi1);
+                Vector3Dd p = spherePosition(theta, phi1, r);
+                Vector3Dd T = sphereTangent(theta, phi1);
+                Vector3Dd b = sphereBinormal(theta, phi1);
 
                 gl.glColor3d(1, 1, 0);
                 gl.glVertex3d(p.x(), p.y(), p.z());
@@ -112,8 +109,6 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         gl.glColor3d(1, 0, 0);
         gl.glPointSize(6.0f);
 
-        Vector3Dd p = new Vector3Dd();
-
         gl.glBegin(GL.GL_POINTS);
         for( int i = 0; i < stacks; i++ ) {
             double t1 = i/(stacks-1.f);
@@ -122,7 +117,7 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
             for( int j = 0; j < slices; j++ ) {
                 double s = j/(slices-1.f);
                 double theta = 2*Math.PI*s;
-                spherePosition(p, theta, phi1, r);
+                Vector3Dd p = spherePosition(theta, phi1, r);
                 gl.glVertex3d(p.x(), p.y(), p.z());
             }
         }
@@ -134,15 +129,15 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
     */
     private static void
     drawVertex(GL2 gl, double theta, double phi, double s, double t,
-               Vector3Dd P, Vector3Dd N, Vector3Dd T, Vector3Dd B, double r)
+               double r)
     {
         //- Pass standard vertex parameters to OpenGL ---------------------
-        sphereNormal(N, theta, phi);
+        Vector3Dd N = sphereNormal(theta, phi);
         gl.glTexCoord2d(1.0-s, t);
         gl.glNormal3d(N.x(), N.y(), N.z());
 
         //- Execute vertex -----------------------------------------------
-        spherePosition(P, theta, phi, r);
+        Vector3Dd P = spherePosition(theta, phi, r);
         gl.glVertex3d(P.x(), P.y(), P.z());
     }
 
@@ -153,11 +148,6 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         RenderingStatistics.accumulatePrimitiveCount(VSDK.QUAD_STRIP, stacks);
 
         //-----------------------------------------------------------------
-        Vector3Dd P = new Vector3Dd(); // Vertex position
-        Vector3Dd N = new Vector3Dd(); // Vertex normal
-        Vector3Dd T = new Vector3Dd(); // Vertex tangent
-        Vector3Dd B = new Vector3Dd(); // Vertex binormal
-
         int i;
         int j;
         double t1;
@@ -178,8 +168,8 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
             for( j = 0; j < slices; j++ ) {
                 s = j/(slices-1.f);
                 theta = 2*Math.PI*s;
-                drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
-                drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
+                drawVertex(gl, theta, phi1, s, t1, r);
+                drawVertex(gl, theta, phi2, s, t2, r);
             }
             gl.glEnd();
         }
@@ -196,8 +186,8 @@ public class Jogl2SphereRenderer extends Jogl2Renderer {
         for( j = slices-1; j >= 0; j-- ) {
             s = j/(slices-1.f);
             theta = 2*Math.PI*s;
-            drawVertex(gl, theta, phi2, s, t2, P, N, T, B, r);
-            drawVertex(gl, theta, phi1, s, t1, P, N, T, B, r);
+            drawVertex(gl, theta, phi2, s, t2, r);
+            drawVertex(gl, theta, phi1, s, t1, r);
         }
         gl.glEnd();
 

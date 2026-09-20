@@ -1,0 +1,357 @@
+package application.net;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.SwingUtilities;
+
+import application.SceneEditorApplication;
+import application.framework.Scene;
+import application.render.jogl.Jogl4DrawingAreaRenderer;
+import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.PointLight;
+import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.io.image.ImagePersistence;
+
+class VitralEditorMCPProtocol implements Runnable
+{
+    private final SceneEditorApplication parent;
+    private final Socket socket;
+
+    public VitralEditorMCPProtocol(SceneEditorApplication parent, Socket socket)
+    {
+        this.parent = parent;
+        this.socket = socket;
+    }
+
+    @Override
+    public void run()
+    {
+        try (
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                socket.getInputStream(), StandardCharsets.UTF_8));
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(
+                socket.getOutputStream(), StandardCharsets.UTF_8), true)
+        ) {
+            String line;
+            while ( (line = in.readLine()) != null ) {
+                out.println(handle(line));
+            }
+        }
+        catch ( Exception e ) {
+            System.err.println("Error on VitralEditorMCPProtocol!");
+            System.err.println(e);
+        }
+    }
+
+    private String handle(String request)
+    {
+        String id = idProperty(request);
+        String method = stringProperty(request, "method", "");
+
+        try {
+            if ( "initialize".equals(method) ) {
+                return result(id,
+                    "{\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"VitralEditorMCP\",\"version\":\"0.1\"},\"capabilities\":{\"tools\":{}}}");
+            }
+            if ( "tools/list".equals(method) ) {
+                return result(id, toolsJson());
+            }
+            if ( "tools/call".equals(method) ) {
+                String tool = nestedStringProperty(request, "name", "");
+                return result(id, callTool(tool, request));
+            }
+            return error(id, -32601, "Unknown method: " + method);
+        }
+        catch ( Exception e ) {
+            return error(id, -32000, e.getMessage());
+        }
+    }
+
+    private String callTool(String tool, String request) throws Exception
+    {
+        final String[] result = new String[1];
+        Runnable command = () -> {
+            try {
+                result[0] = executeTool(tool, request);
+            }
+            catch ( Exception e ) {
+                result[0] = "{\"error\":\"" + escape(e.getMessage()) + "\"}";
+            }
+        };
+
+        if ( SwingUtilities.isEventDispatchThread() ) {
+            command.run();
+        }
+        else {
+            SwingUtilities.invokeAndWait(command);
+        }
+
+        return content(result[0]);
+    }
+
+    private String executeTool(String tool, String request) throws Exception
+    {
+        if ( "scene.describe".equals(tool) ) {
+            return describeScene();
+        }
+        if ( "scene.clear".equals(tool) ) {
+            clearScene();
+            return "{\"ok\":true}";
+        }
+        if ( "scene.add_point_light".equals(tool) ) {
+            addPointLight(request);
+            return describeScene();
+        }
+        if ( "scene.add_sphere".equals(tool) ) {
+            addSphere(request);
+            return describeScene();
+        }
+        if ( "render.raytrace_png".equals(tool) ) {
+            return raytracePng(request);
+        }
+        if ( "viewport.export_png".equals(tool) ) {
+            return viewportPng(request);
+        }
+        throw new IllegalArgumentException("Unknown tool: " + tool);
+    }
+
+    private void clearScene()
+    {
+        Scene scene = parent.getApplicationModel().getScene();
+        scene.scene.getSimpleBodies().clear();
+        scene.scene.getLights().clear();
+        scene.debugThingGroups.clear();
+    }
+
+    private void addPointLight(String request)
+    {
+        double x = numberProperty(request, "x", -10.0);
+        double y = numberProperty(request, "y", -9.0);
+        double z = numberProperty(request, "z", 8.0);
+        double r = numberProperty(request, "r", 1.0);
+        double g = numberProperty(request, "g", 1.0);
+        double b = numberProperty(request, "b", 1.0);
+        Scene scene = parent.getApplicationModel().getScene();
+        scene.scene.addLight(new PointLight(new Vector3Dd(x, y, z),
+            new ColorRgb(r, g, b)));
+    }
+
+    private void addSphere(String request)
+    {
+        double radius = numberProperty(request, "radius", 1.0);
+        double x = numberProperty(request, "x", 0.0);
+        double y = numberProperty(request, "y", 0.0);
+        double z = numberProperty(request, "z", 0.0);
+        SimpleBody body = parent.getApplicationModel().getScene()
+            .addThing(new Sphere(radius));
+        body.setPosition(new Vector3Dd(x, y, z));
+    }
+
+    private String raytracePng(String request)
+    {
+        String path = stringProperty(request, "path", "./mcp-raytrace.png");
+        int width = (int)numberProperty(request, "width", 640);
+        int height = (int)numberProperty(request, "height", 480);
+        parent.getApplicationModel().setRaytracedImageWidth(width);
+        parent.getApplicationModel().setRaytracedImageHeight(height);
+        parent.doRaytracedImage();
+        File out = new File(path);
+        ImagePersistence.exportPNG(out, parent.getApplicationModel().getRaytracedImage());
+        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
+    }
+
+    private String viewportPng(String request)
+    {
+        String path = stringProperty(request, "path", "./mcp-viewport.png");
+        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        if ( drawingArea == null ) {
+            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
+        }
+        File out = new File(path);
+        drawingArea.exportViewportPng(out);
+        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
+    }
+
+    private String describeScene()
+    {
+        Scene scene = parent.getApplicationModel().getScene();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"bodies\":[");
+        ArrayList<SimpleBody> bodies = scene.scene.getSimpleBodies();
+        for ( int i = 0; i < bodies.size(); i++ ) {
+            if ( i > 0 ) {
+                sb.append(',');
+            }
+            SimpleBody body = bodies.get(i);
+            Geometry geometry = body.getGeometry();
+            Vector3Dd position = body.getPosition();
+            Vector3Dd scale = body.getScale();
+            sb.append("{\"index\":").append(i)
+                .append(",\"name\":\"").append(escape(body.getName())).append('"')
+                .append(",\"geometry\":\"").append(geometry.getClass().getSimpleName()).append('"')
+                .append(",\"position\":").append(vector(position))
+                .append(",\"scale\":").append(vector(scale));
+            if ( geometry instanceof Sphere ) {
+                sb.append(",\"radius\":").append(((Sphere)geometry).getRadius());
+            }
+            sb.append('}');
+        }
+        sb.append("],\"lights\":[");
+        ArrayList<Light> lights = scene.scene.getLights();
+        for ( int i = 0; i < lights.size(); i++ ) {
+            if ( i > 0 ) {
+                sb.append(',');
+            }
+            Light light = lights.get(i);
+            sb.append("{\"index\":").append(i)
+                .append(",\"type\":\"").append(light.getClass().getSimpleName()).append('"')
+                .append(",\"position\":").append(vector(light.getPosition()))
+                .append(",\"emission\":").append(color(light.getEmission()))
+                .append('}');
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private static String toolsJson()
+    {
+        return "{\"tools\":["
+            + tool("scene.describe", "Return bodies, lights and core transforms as JSON.")
+            + "," + tool("scene.clear", "Remove all bodies, lights and debug groups.")
+            + "," + tool("scene.add_point_light", "Create a point light. Arguments: x,y,z,r,g,b.")
+            + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
+            + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
+            + "," + tool("viewport.export_png", "Export the current Jogl viewport to PNG. Arguments: path.")
+            + "]}";
+    }
+
+    private static String tool(String name, String description)
+    {
+        return "{\"name\":\"" + name + "\",\"description\":\""
+            + escape(description)
+            + "\",\"inputSchema\":{\"type\":\"object\",\"additionalProperties\":true}}";
+    }
+
+    private static String content(String json)
+    {
+        return "{\"content\":[{\"type\":\"text\",\"text\":\""
+            + escape(json) + "\"}],\"isError\":false}";
+    }
+
+    private static String result(String id, String json)
+    {
+        return "{\"jsonrpc\":\"2.0\",\"id\":" + id + ",\"result\":" + json + "}";
+    }
+
+    private static String error(String id, int code, String message)
+    {
+        return "{\"jsonrpc\":\"2.0\",\"id\":" + id
+            + ",\"error\":{\"code\":" + code + ",\"message\":\""
+            + escape(message) + "\"}}";
+    }
+
+    private static String vector(Vector3Dd v)
+    {
+        return "{\"x\":" + v.x() + ",\"y\":" + v.y() + ",\"z\":" + v.z() + "}";
+    }
+
+    private static String color(ColorRgb c)
+    {
+        return "{\"r\":" + c.r() + ",\"g\":" + c.g() + ",\"b\":" + c.b() + "}";
+    }
+
+    private static String stringProperty(String json, String key, String defaultValue)
+    {
+        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
+            + "\"\\s*:\\s*\"((?:\\\\.|[^\"])*)\"");
+        Matcher matcher = pattern.matcher(json);
+        if ( !matcher.find() ) {
+            return defaultValue;
+        }
+        return matcher.group(1);
+    }
+
+    private static String nestedStringProperty(String json, String key, String defaultValue)
+    {
+        return stringProperty(json, key, defaultValue);
+    }
+
+    private static String idProperty(String json)
+    {
+        Pattern pattern = Pattern.compile("\"id\"\\s*:\\s*(\"((?:\\\\.|[^\"])*)\"|[-0-9]+|null)");
+        Matcher matcher = pattern.matcher(json);
+        if ( !matcher.find() ) {
+            return "null";
+        }
+        return matcher.group(1);
+    }
+
+    private static double numberProperty(String json, String key, double defaultValue)
+    {
+        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
+            + "\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)");
+        Matcher matcher = pattern.matcher(json);
+        if ( !matcher.find() ) {
+            return defaultValue;
+        }
+        return Double.parseDouble(matcher.group(1));
+    }
+
+    private static String escape(String in)
+    {
+        if ( in == null ) {
+            return "";
+        }
+        return in.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+}
+
+public class VitralEditorMCP implements Runnable
+{
+    private final SceneEditorApplication parent;
+    private final int tcpPort;
+
+    public VitralEditorMCP(SceneEditorApplication parent)
+    {
+        this.parent = parent;
+        tcpPort = 1234;
+        Thread networkThread = new Thread(this);
+        networkThread.setName("VitralEditorMCP");
+        networkThread.start();
+    }
+
+    @Override
+    public void run()
+    {
+        System.out.println("Waiting for MCP connections on TCP port " + tcpPort);
+
+        try ( ServerSocket serverSocket = new ServerSocket(tcpPort) ) {
+            while ( true ) {
+                Socket clientSocket = serverSocket.accept();
+                VitralEditorMCPProtocol listener =
+                    new VitralEditorMCPProtocol(parent, clientSocket);
+                Thread listenerThread = new Thread(listener);
+                listenerThread.setName("VitralEditorMCPClient");
+                listenerThread.start();
+            }
+        }
+        catch ( Exception e ) {
+            System.err.println("Error in VitralEditorMCP communications!");
+            System.err.println(e);
+        }
+    }
+}

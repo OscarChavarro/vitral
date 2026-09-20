@@ -7,8 +7,8 @@ public class Jogl4ViewportRenderer
 {
     public interface ViewRenderer
     {
-        void configureView(JoglAwtViewportWindow view);
-        void drawView(GL2 gl, JoglAwtViewportWindow view);
+        void configureView(Jogl4AwtViewportWindow view);
+        void drawView(GL2 gl, Jogl4AwtViewportWindow view);
     }
 
     private final ViewportWindowSetManager viewOrganizer;
@@ -35,16 +35,16 @@ public class Jogl4ViewportRenderer
 
     private void drawMultipleViews(GL2 gl)
     {
-        JoglAwtViewportWindow view;
+        Jogl4AwtViewportWindow view;
         int i;
 
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
+            view = (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i);
             view.drawBorderGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
         }
 
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
+            view = (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i);
 
             if ( !view.isActive() ) {
                 continue;
@@ -61,11 +61,11 @@ public class Jogl4ViewportRenderer
 
     private void drawSelectedViewFullScreen(GL2 gl)
     {
-        JoglAwtViewportWindow view;
+        Jogl4AwtViewportWindow view;
         int i;
 
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
+            view = (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i);
 
             if ( !view.isActive() || !view.isSelected() ) {
                 continue;

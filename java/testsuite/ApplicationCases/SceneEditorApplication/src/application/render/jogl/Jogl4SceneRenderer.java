@@ -4,25 +4,30 @@ package application.render.jogl;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 // VSDK classes
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl2BackgroundRenderer;
 import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.ModifyPanel;
 
-public class JoglSceneRenderer
+public class Jogl4SceneRenderer
 {
     /**
     Follows similar strategy to general Jogl2SimpleSceneRenderer, except that
@@ -83,12 +88,49 @@ public class JoglSceneRenderer
             gi = s.scene.getSimpleBodies().get(i);
 
             if ( modifyPanel == null || modifyPanel.getTarget() != gi ) {
-                Jogl2SimpleBodyRenderer.draw(gl, gi, s.activeCamera, quality);
+                drawSimpleBody(gl, gi, s, quality);
             }
             else {
                 modifyPanel.draw(gl, s.activeCamera, quality);
             }
         }
+    }
+
+    private static void drawSimpleBody(GL2 gl, SimpleBody body, Scene s,
+                                       RendererConfiguration quality)
+    {
+        Geometry geometry = body.getGeometry();
+        if ( geometry instanceof Sphere && gl.isGL4() ) {
+            drawSphere(gl.getGL4(), (Sphere)geometry, body, s, quality);
+        }
+        else {
+            Jogl2SimpleBodyRenderer.draw(gl, body, s.activeCamera, quality);
+        }
+    }
+
+    private static void drawSphere(GL4 gl, Sphere sphere, SimpleBody body,
+                                   Scene s, RendererConfiguration quality)
+    {
+        Light light = s.scene.getLights().isEmpty()
+            ? null
+            : s.scene.getLights().get(0);
+        Image texture = body.getTexture();
+        RGBImageUncompressed textureMap = texture instanceof RGBImageUncompressed
+            ? (RGBImageUncompressed)texture
+            : null;
+
+        Jogl4SphereRenderer.draw(
+            gl,
+            sphere,
+            s.activeCamera,
+            light,
+            body.getMaterial(),
+            quality,
+            textureMap,
+            body.getNormalMapRgb(),
+            body.getTransformationMatrix(),
+            32,
+            16);
     }
 
     public static void draw(GL2 gl, Scene s, SceneEditorApplication parent)

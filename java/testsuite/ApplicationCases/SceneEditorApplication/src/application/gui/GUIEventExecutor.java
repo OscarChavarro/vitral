@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import application.SceneEditorApplication;
 import application.framework.Scene;
-import application.render.jogl.JoglDrawingArea;
+import application.render.jogl.Jogl4DrawingAreaRenderer;
 import java.io.File;
 import java.io.FileOutputStream;
 import javax.swing.JFileChooser;
@@ -608,31 +608,31 @@ public class GUIEventExecutor extends CommandListener{
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_CAMERA_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                JoglDrawingArea.CAMERA_INTERACTION_MODE;
+                Jogl4DrawingAreaRenderer.CAMERA_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SELECTION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
-            JoglDrawingArea.SELECT_INTERACTION_MODE;
+            Jogl4DrawingAreaRenderer.SELECT_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_TRANSLATION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
-            JoglDrawingArea.TRANSLATE_INTERACTION_MODE;
+            Jogl4DrawingAreaRenderer.TRANSLATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_ROTATION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                JoglDrawingArea.ROTATE_INTERACTION_MODE;
+                Jogl4DrawingAreaRenderer.ROTATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
             parent.statusMessage.setText(
                 parent.gui.getMessage("IDM_SCALE_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                JoglDrawingArea.SCALE_INTERACTION_MODE;
+                Jogl4DrawingAreaRenderer.SCALE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_RAY") ) {
             parent.getApplicationModel().setWithVisualDebugRay(

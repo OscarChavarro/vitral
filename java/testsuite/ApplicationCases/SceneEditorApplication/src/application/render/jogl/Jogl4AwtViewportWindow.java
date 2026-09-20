@@ -31,7 +31,7 @@ import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
 import application.model.Viewport;
 
-public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
+public class Jogl4AwtViewportWindow extends ViewportWindow implements KeyListener
 {
     // Current configuration, available only after a call to activateViewportGL
     private int viewportStartX;
@@ -39,7 +39,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     private int viewportSizeX;
     private int viewportSizeY;
 
-    // A JoglAwtViewportWindow can request an specific size in pixels. If this size gets
+    // A Jogl4AwtViewportWindow can request an specific size in pixels. If this size gets
     // smaller than percent-based area, the viewport is assigned to match the
     // requested size. If a requested size dimension in pixels is greater
     // than the percent-based area, the requested size is ignored and the
@@ -60,11 +60,11 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     private RGBAImageUncompressed yLabelImageSelected;
     private RGBAImageUncompressed zLabelImageSelected;
 
-    // Each JoglAwtViewportWindow can call a different visualization algorithm
+    // Each Jogl4AwtViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_ZBUFFER;
     public static final int RENDER_MODE_RAYTRACING = Viewport.RENDER_MODE_RAYTRACING;
 
-    public JoglAwtViewportWindow()
+    public Jogl4AwtViewportWindow()
     {
         //-----------------------------------------------------------------
         super();
@@ -216,11 +216,11 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
     /**
     A given container canvas has valid pixel coordinates from (0, 0) to
-    (canvasXSize-1, canvasYSize-1). Current JoglAwtViewportWindow is defined inside that
+    (canvasXSize-1, canvasYSize-1). Current Jogl4AwtViewportWindow is defined inside that
     area in terms of a start point (upper left corner) and size given in
     area percentages.
     This method calculates the (viewportStartX, viewportStartY,
-    viewportSizeX, viewportSizeY) variables that defines current JoglAwtViewportWindow
+    viewportSizeX, viewportSizeY) variables that defines current Jogl4AwtViewportWindow
     viewport in container canvas' integer pixel coordinates.
     */
     public void updateViewportConfiguration(int canvasXSize, int canvasYSize)

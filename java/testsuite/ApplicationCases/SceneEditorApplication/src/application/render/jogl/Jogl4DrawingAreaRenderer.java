@@ -21,6 +21,8 @@ import javax.swing.JLabel;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -77,7 +79,7 @@ import application.gui.ViewportInteractionTechniques;
 import application.model.ApplicationModel;
 import java.awt.event.MouseEvent;
 
-public class JoglDrawingArea implements 
+public class Jogl4DrawingAreaRenderer implements 
     GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener,
     KeyListener
 {
@@ -110,7 +112,7 @@ public class JoglDrawingArea implements
     public boolean wantToGetContourns;
     public boolean wantToDebugProjectedViews;
 
-    private final JoglProjectedViewRenderer projectedViewRenderer;
+    private final Jogl4ProjectedViewRenderer projectedViewRenderer;
 
     private Cursor camrotateCursor;
     private Cursor camtranslateCursor;
@@ -130,7 +132,7 @@ public class JoglDrawingArea implements
 
     //=================================================================
 
-    public JoglDrawingArea(ApplicationModel model, JLabel statusMessage, SceneEditorApplication parent)
+    public Jogl4DrawingAreaRenderer(ApplicationModel model, JLabel statusMessage, SceneEditorApplication parent)
     {
         this.parent = parent;
         this.model = model;
@@ -155,7 +157,10 @@ public class JoglDrawingArea implements
 
         visualDebugMaterial = theScene.defaultMaterial();
 
-        canvas = new GLCanvas();
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLCapabilities capabilities = new GLCapabilities(profile);
+        capabilities.setDepthBits(32);
+        canvas = new GLCanvas(capabilities);
 
         Dimension minimumSize = new Dimension(8, 8);
         canvas.setMinimumSize(minimumSize);
@@ -175,14 +180,14 @@ public class JoglDrawingArea implements
         distanceFieldSide = 320;
 
         if ( doDistanceField ) {
-            projectedViewRenderer = new JoglProjectedViewRenderer(distanceFieldSide, distanceFieldSide, true);
+            projectedViewRenderer = new Jogl4ProjectedViewRenderer(distanceFieldSide, distanceFieldSide, true);
         }
         else {
-            projectedViewRenderer = new JoglProjectedViewRenderer(640, 640, true);
+            projectedViewRenderer = new Jogl4ProjectedViewRenderer(640, 640, true);
         }
 
         //-----------------------------------------------------------------
-        JoglAwtViewportWindow view;
+        Jogl4AwtViewportWindow view;
         int i;
 
         viewOrganizer = new ViewportWindowSetManager();
@@ -190,7 +195,7 @@ public class JoglDrawingArea implements
         viewOrganizer.setSelectedViewIndex(1);
 
         for ( i = 0; i < 4; i++ ) {
-            view = new JoglAwtViewportWindow();
+            view = new Jogl4AwtViewportWindow();
             view.hintConfig(4, i);
             viewOrganizer.getViews().add(view);
             if ( i == viewOrganizer.getSelectedViewIndex() ) {
@@ -206,17 +211,17 @@ public class JoglDrawingArea implements
             viewOrganizer,
             new Jogl4ViewportRenderer.ViewRenderer() {
                 @Override
-                public void configureView(JoglAwtViewportWindow view) {
+                public void configureView(Jogl4AwtViewportWindow view) {
                     interactionTechniques.setCamera(view.getCamera());
                     interactionTechniques.setRendererConfiguration(view.getRendererConfiguration());
                     qualitySelection = view.getRendererConfiguration();
                 }
 
                 @Override
-                public void drawView(GL2 gl, JoglAwtViewportWindow view) {
+                public void drawView(GL2 gl, Jogl4AwtViewportWindow view) {
                     theScene.activeCamera = view.getCamera();
                     theScene.qualityTemplate = view.getRendererConfiguration();
-                    JoglDrawingArea.this.drawView(gl, view);
+                    Jogl4DrawingAreaRenderer.this.drawView(gl, view);
                 }
             });
     }
@@ -242,7 +247,7 @@ public class JoglDrawingArea implements
 
         int i;
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            ((JoglAwtViewportWindow)viewOrganizer.getViews().get(i))
+            ((Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i))
                 .updateViewportConfiguration(surfaceWidth, surfaceHeight);
         }
     }
@@ -720,16 +725,33 @@ public class JoglDrawingArea implements
     private void copyColorBufferIfNeeded(GL2 gl)
     {
         if ( wantToGetColor ) {
-            model.setZbufferImage(Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl));
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(model.getZbufferImage(), parent.gui, parent.executorPanel);
-            }
-            else {
-                parent.imageControlWindow.setImage(model.getZbufferImage());
-            }
-            parent.imageControlWindow.redrawImage();
+            captureColorBuffer(gl, true);
             parent.statusMessage.setText("ZBuffer Color Image obtained!");
             wantToGetColor = false;
+        }
+    }
+
+    private void captureColorBuffer(GL2 gl, boolean reportToImageWindow)
+    {
+        model.setZbufferImage(Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl));
+        if ( !reportToImageWindow ) {
+            return;
+        }
+        if ( parent.imageControlWindow == null ) {
+            parent.imageControlWindow = new SwingImageControlWindow(model.getZbufferImage(), parent.gui, parent.executorPanel);
+        }
+        else {
+            parent.imageControlWindow.setImage(model.getZbufferImage());
+        }
+        parent.imageControlWindow.redrawImage();
+    }
+
+    public void exportViewportPng(File file)
+    {
+        wantToGetColor = true;
+        canvas.display();
+        if ( model.getZbufferImage() != null ) {
+            ImagePersistence.exportPNG(file, model.getZbufferImage());
         }
     }
 
@@ -765,17 +787,17 @@ public class JoglDrawingArea implements
 
     public void toggleGrid()
     {
-        ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
+        ((Jogl4AwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).toggleGrid();
     }
 
-    private void drawView(GL2 gl, JoglAwtViewportWindow view)
+    private void drawView(GL2 gl, Jogl4AwtViewportWindow view)
     {
         if ( !view.isActive() ) {
             return;
         }
 
-        if ( view.getRenderMode() == JoglAwtViewportWindow.RENDER_MODE_ZBUFFER ) {
-            JoglSceneRenderer.draw(gl, theScene, parent);
+        if ( view.getRenderMode() == Jogl4AwtViewportWindow.RENDER_MODE_ZBUFFER ) {
+            Jogl4SceneRenderer.draw(gl, theScene, parent);
         }
         else {
             theScene.activateSelectedBackground();
@@ -1062,7 +1084,7 @@ public class JoglDrawingArea implements
         awtViewportHeight = height;
     }
 
-    private void activateInteractionView(JoglAwtViewportWindow view)
+    private void activateInteractionView(Jogl4AwtViewportWindow view)
     {
         if ( view == null ) {
             return;
@@ -1070,8 +1092,8 @@ public class JoglDrawingArea implements
 
         int i;
         for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            JoglAwtViewportWindow currentView =
-                (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
+            Jogl4AwtViewportWindow currentView =
+                (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(i);
             boolean selected = currentView == view;
             currentView.setSelected(selected);
             if ( selected ) {
@@ -1087,7 +1109,7 @@ public class JoglDrawingArea implements
     @Override
     public void mousePressed(java.awt.event.MouseEvent e)
     {
-        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
+        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
 
         if ( mouseView == null ) {
             return;
@@ -1178,7 +1200,7 @@ public class JoglDrawingArea implements
     @Override
     public void mouseReleased(java.awt.event.MouseEvent e)
     {
-        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         activateInteractionView(mouseView);
 
@@ -1243,8 +1265,8 @@ public class JoglDrawingArea implements
     @Override
     public void mouseClicked(java.awt.event.MouseEvent e)
     {
-        JoglAwtViewportWindow view = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
-        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4AwtViewportWindow view = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, true);
+        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         activateInteractionView(view);
 
@@ -1294,7 +1316,7 @@ public class JoglDrawingArea implements
     public void mouseMoved(java.awt.event.MouseEvent e)
     {
         //-----------------------------------------------------------------
-        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         if ( mouseView != null ) {
             interactionTechniques.setCamera(mouseView.getCamera());
@@ -1346,7 +1368,7 @@ public class JoglDrawingArea implements
     @Override
     public void mouseDragged(java.awt.event.MouseEvent e)
     {
-        JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
+        Jogl4AwtViewportWindow mouseView = (Jogl4AwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         activateInteractionView(mouseView);
 
@@ -1579,7 +1601,7 @@ public class JoglDrawingArea implements
 
         // In view command propagation
         if ( !skipKey ) {
-            ((JoglAwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
+            ((Jogl4AwtViewportWindow)(viewOrganizer.getViews().get(viewOrganizer.getSelectedViewIndex()))).keyPressed(e);
         }
 
         double theta;
@@ -1885,7 +1907,7 @@ public class JoglDrawingArea implements
 
     public void newView()
     {
-        viewOrganizer.getViews().add(new JoglAwtViewportWindow());
+        viewOrganizer.getViews().add(new Jogl4AwtViewportWindow());
         viewOrganizer.updateLayout();
     }
 

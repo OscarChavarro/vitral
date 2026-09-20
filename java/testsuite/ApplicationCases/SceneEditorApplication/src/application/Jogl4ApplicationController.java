@@ -5,28 +5,28 @@ import java.awt.Component;
 import javax.swing.JLabel;
 
 import application.model.ApplicationModel;
-import application.render.jogl.JoglDrawingArea;
+import application.render.jogl.Jogl4DrawingAreaRenderer;
 
 public class Jogl4ApplicationController
 {
     private final ApplicationModel model;
-    private JoglDrawingArea drawingArea;
+    private Jogl4DrawingAreaRenderer drawingArea;
 
     public Jogl4ApplicationController(ApplicationModel model)
     {
         this.model = model;
     }
 
-    public JoglDrawingArea getDrawingArea()
+    public Jogl4DrawingAreaRenderer getDrawingArea()
     {
         return drawingArea;
     }
 
-    public JoglDrawingArea getOrCreateDrawingArea(JLabel statusMessage,
+    public Jogl4DrawingAreaRenderer getOrCreateDrawingArea(JLabel statusMessage,
                                                   SceneEditorApplication application)
     {
         if ( drawingArea == null ) {
-            drawingArea = new JoglDrawingArea(model, statusMessage, application);
+            drawingArea = new Jogl4DrawingAreaRenderer(model, statusMessage, application);
         }
         return drawingArea;
     }

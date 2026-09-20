@@ -13,13 +13,13 @@ import com.jogamp.opengl.GLDrawableFactory;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 
-public class JoglOfflineRenderer implements GLEventListener {
+public class Jogl4OfflineRenderer implements GLEventListener {
     private GLOffscreenAutoDrawable pbuffer;
     private boolean ready;
-    private JoglProjectedViewRenderer renderer;
+    private Jogl4ProjectedViewRenderer renderer;
     private boolean pbufferSupported;
 
-    public JoglOfflineRenderer(int imageWidth, int imageHeight, JoglProjectedViewRenderer renderer) {
+    public Jogl4OfflineRenderer(int imageWidth, int imageHeight, Jogl4ProjectedViewRenderer renderer) {
 
         this.renderer = renderer;
         ready = false;
@@ -45,7 +45,7 @@ public class JoglOfflineRenderer implements GLEventListener {
             pbuffer.addGLEventListener(this);
           }
           catch ( Exception e ) {
-              Logger.reportMessage(this, VSDK.WARNING, "JoglOfflineRenderer", "Error creating OpenGL Pbuffer. This program requires a 3D accelerator card." + e);
+              Logger.reportMessage(this, VSDK.WARNING, "Jogl4OfflineRenderer", "Error creating OpenGL Pbuffer. This program requires a 3D accelerator card." + e);
               pbuffer = null;
               pbufferSupported = false;
         }
