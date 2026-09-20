@@ -187,6 +187,20 @@ The following are source-reviewed findings, not line-count guesses:
 - The source tree contains legacy TypeScript seed classes with no current Java
   counterpart. They are not public exports, but they must be removed or
   explicitly classified before an exhaustive source-tree parity claim.
+  **Classified on 2026-09-16, not removed.** A reachability analysis rooted at
+  the package indexes, the specs and the test-suite programs identified them
+  exactly: 45 `src/main` files that nothing reaches, of which 29 have no Java
+  class at their own path (the `common/linealAlgebra` and `common/dataStructures`
+  seed clusters, `color/Cie`, `Random48`, three `package-info` modules and
+  `RendererConfigurationBehavior`) and 16 are the `java.*` compatibility
+  surface. They were deleted and restored the same day: the user's decision of
+  record is that all 45 stay, as part of the `vitral` package for completeness
+  and for future applications. They remain bound by the literal-parity rule and
+  carry no tests, so any parity claim about them must come from a source
+  comparison or a reference driver. See
+  `Base and WebGL parity sweep — 2026-09-16` in the plan for the full listing
+  and each file's parity anchor. This finding is therefore closed as classified,
+  and no later audit may propose deleting them.
 
 ## Corrections made during this audit
 
