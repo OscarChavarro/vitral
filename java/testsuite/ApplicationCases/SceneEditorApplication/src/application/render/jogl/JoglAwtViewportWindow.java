@@ -29,6 +29,7 @@ import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.ViewportWindow;
+import application.model.Viewport;
 
 public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 {
@@ -47,17 +48,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     // A requested size of 0 means the requested size match the percent-based
     // size. This is usefull in applications willing to use just a subset of
     // the area, for example when previewing slow raytracing visualizations.
-    private int viewportRequestedSizeXInPixels;
-    private int viewportRequestedSizeYInPixels;
-
-    // Every JoglAwtViewportWindow has an internal camera and renderer configuration
-    private Camera camera;
-    private Camera cameraPerspective;
-    private Camera cameraTop;
-    private Camera cameraBottom;
-    private Camera cameraLeft;
-    private Camera cameraFront;
-    private RendererConfiguration quality;
+    private final Viewport viewport;
 
     //
     private String title;
@@ -70,71 +61,16 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
     private RGBAImageUncompressed zLabelImageSelected;
 
     // Each JoglAwtViewportWindow can call a different visualization algorithm
-    public static final int RENDER_MODE_ZBUFFER = 1;
-    public static final int RENDER_MODE_RAYTRACING = 2;
-    private int renderMode;
-
-    public boolean showGrid;
+    public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_ZBUFFER;
+    public static final int RENDER_MODE_RAYTRACING = Viewport.RENDER_MODE_RAYTRACING;
 
     public JoglAwtViewportWindow()
     {
         //-----------------------------------------------------------------
         super();
-        viewportRequestedSizeXInPixels = 0;
-        viewportRequestedSizeYInPixels = 0;
+        viewport = new Viewport();
 
-        //-----------------------------------------------------------------
-        Matrix4x4d R = new Matrix4x4d();
-
-        cameraPerspective = new Camera();
-
-        cameraPerspective.setPosition(new Vector3Dd(-5, -5, 5));
-        R = R.eulerAnglesRotation(Math.toRadians(45), Math.toRadians(-35), 0);
-
-        //cameraPerspective.setPosition(new Vector3Dd(0, -4, 0));
-        //R = R.eulerAnglesRotation(Math.toRadians(90.0), 0.0, 0.0);
-
-        cameraPerspective.setRotation(R);
-        cameraPerspective.setName("Perspective");
-
-        cameraTop = new Camera();
-        cameraTop.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraTop.setPosition(new Vector3Dd(0, 0, 5));
-        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(-90), 0);
-        cameraTop.setRotation(R);
-        cameraTop.setOrthogonalZoom(0.25);
-        cameraTop.setName("Top");
-
-        cameraBottom = new Camera();
-        cameraBottom.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraBottom.setPosition(new Vector3Dd(0, 0, -5));
-        R = R.eulerAnglesRotation(Math.toRadians(90), Math.toRadians(90), 0);
-        cameraBottom.setRotation(R);
-        cameraBottom.setOrthogonalZoom(0.25);
-        cameraBottom.setName("Bottom");
-
-        cameraLeft = new Camera();
-        cameraLeft.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraLeft.setPosition(new Vector3Dd(-5, 0, 0));
-        R = R.identity();
-        cameraLeft.setRotation(R);
-        cameraLeft.setOrthogonalZoom(0.25);
-        cameraLeft.setName("Left");
-
-        cameraFront = new Camera();
-        cameraFront.setProjectionMode(Camera.PROJECTION_MODE_ORTHOGONAL);
-        cameraFront.setPosition(new Vector3Dd(0, -5, 0));
-        R = R.eulerAnglesRotation(Math.toRadians(90), 0, 0);
-        cameraFront.setRotation(R);
-        cameraFront.setOrthogonalZoom(0.25);
-        cameraFront.setName("Front");
-
-        camera = cameraPerspective;
-
-        //-----------------------------------------------------------------
-        quality = new RendererConfiguration();
-
-        setTitle(camera.getName());
+        setTitle(viewport.getTitle());
         xLabelImage = AwtSystem.calculateLabelImage("X", new ColorRgb(0.78, 0, 0));
         yLabelImage = AwtSystem.calculateLabelImage("Y", new ColorRgb(0, 0.61, 0));
         zLabelImage = AwtSystem.calculateLabelImage("Z", new ColorRgb(0, 0, 0.76));
@@ -143,9 +79,6 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         yLabelImageSelected = AwtSystem.calculateLabelImage("Y", new ColorRgb(1, 1, 0));
         zLabelImageSelected = AwtSystem.calculateLabelImage("Z", new ColorRgb(1, 1, 0));
 
-        this.renderMode = RENDER_MODE_ZBUFFER;
-
-        showGrid = true;
     }
 
     /**
@@ -170,65 +103,36 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         if ( keycode == KeyEvent.VK_9 ) {
             // Alphanumeric 0
             skipKey = true;
-            switch ( renderMode ) {
-              case RENDER_MODE_ZBUFFER:
-                renderMode = RENDER_MODE_RAYTRACING;
-                break;
-              default:
-                renderMode = RENDER_MODE_ZBUFFER;
-                break;
-            }
+            viewport.toggleRenderMode();
         }
 
         if ( unicode_id != KeyEvent.CHAR_UNDEFINED && !skipKey ) {
             switch ( unicode_id ) {
               case 'g':
-                if ( showGrid == true ) {
-                    showGrid = false;
-                }
-                else {
-                    showGrid = true;
-                }
+                viewport.toggleGrid();
                 break;
               case 't':
-                camera = cameraTop;
-                setTitle(camera.getName());
+                viewport.setActiveCamera(viewport.getTopCamera());
+                setTitle(viewport.getTitle());
                 break;
               case 'l':
-                camera = cameraLeft;
-                setTitle(camera.getName());
+                viewport.setActiveCamera(viewport.getLeftCamera());
+                setTitle(viewport.getTitle());
                 break;
               case 'f':
-                camera = cameraFront;
-                setTitle(camera.getName());
+                viewport.setActiveCamera(viewport.getFrontCamera());
+                setTitle(viewport.getTitle());
                 break;
               case 'b':
-                camera = cameraBottom;
-                setTitle(camera.getName());
+                viewport.setActiveCamera(viewport.getBottomCamera());
+                setTitle(viewport.getTitle());
                 break;
               case 'p':
-                camera = cameraPerspective;
-                setTitle(camera.getName());
+                viewport.setActiveCamera(viewport.getPerspectiveCamera());
+                setTitle(viewport.getTitle());
                 break;
               case '0':
-                switch ( getViewportRequestedSizeXInPixels() ) {
-                  case 0:
-                    setViewportRequestedSizeXInPixels(320);
-                    setViewportRequestedSizeYInPixels(240);
-                    break;
-                  case 320:
-                    setViewportRequestedSizeXInPixels(640);
-                    setViewportRequestedSizeYInPixels(480);
-                    break;
-                  case 640:
-                    setViewportRequestedSizeXInPixels(800);
-                    setViewportRequestedSizeYInPixels(600);
-                    break;
-                  case 800:
-                    setViewportRequestedSizeXInPixels(0);
-                    setViewportRequestedSizeYInPixels(0);
-                    break;
-                }
+                viewport.cycleRequestedSize();
                 break;
             }
         }
@@ -240,27 +144,27 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
     public int getRenderMode()
     {
-        return renderMode;
+        return viewport.getRenderMode();
     }
 
     public int getViewportRequestedSizeXInPixels()
     {
-        return viewportRequestedSizeXInPixels;
+        return viewport.getRequestedSizeXInPixels();
     }
 
     public int getViewportRequestedSizeYInPixels()
     {
-        return viewportRequestedSizeYInPixels;
+        return viewport.getRequestedSizeYInPixels();
     }
 
-    public void setViewportRequestedSizeXInPixels(int viewportRequestedSizeXInPixels)
+    public void setViewportRequestedSizeXInPixels(int requestedSizeXInPixels)
     {
-        this.viewportRequestedSizeXInPixels = viewportRequestedSizeXInPixels;
+        viewport.setRequestedSizeXInPixels(requestedSizeXInPixels);
     }
 
-    public void setViewportRequestedSizeYInPixels(int viewportRequestedSizeYInPixels)
+    public void setViewportRequestedSizeYInPixels(int requestedSizeYInPixels)
     {
-        this.viewportRequestedSizeYInPixels = viewportRequestedSizeYInPixels;
+        viewport.setRequestedSizeYInPixels(requestedSizeYInPixels);
     }
 
     public int getViewportStartX()
@@ -302,12 +206,12 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
     public Camera getCamera()
     {
-        return camera;
+        return viewport.getActiveCamera();
     }
 
     public RendererConfiguration getRendererConfiguration()
     {
-        return quality;
+        return viewport.getRendererConfiguration();
     }
 
     /**
@@ -334,14 +238,14 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
             viewportSizeY = subCanvasYSize;
         }
         else {
-            if ( viewportRequestedSizeXInPixels < subCanvasXSize ) {
-                w = viewportRequestedSizeXInPixels;
+            if ( viewport.getRequestedSizeXInPixels() < subCanvasXSize ) {
+                w = viewport.getRequestedSizeXInPixels();
             }
             else {
                 w = subCanvasXSize;
             }
-            if ( viewportRequestedSizeYInPixels < subCanvasYSize ) {
-                h = viewportRequestedSizeYInPixels;
+            if ( viewport.getRequestedSizeYInPixels() < subCanvasYSize ) {
+                h = viewport.getRequestedSizeYInPixels();
             }
             else {
                 h = subCanvasYSize;
@@ -351,11 +255,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
             viewportSizeX = w;
             viewportSizeY = h;
         }
-        cameraPerspective.updateViewportResize(viewportSizeX, viewportSizeY);
-        cameraTop.updateViewportResize(viewportSizeX, viewportSizeY);
-        cameraBottom.updateViewportResize(viewportSizeX, viewportSizeY);
-        cameraLeft.updateViewportResize(viewportSizeX, viewportSizeY);
-        cameraFront.updateViewportResize(viewportSizeX, viewportSizeY);
+        viewport.updateCameraViewports(viewportSizeX, viewportSizeY);
     }
 
     public void activateViewportGL(GL2 gl, int canvasXSize, int canvasYSize)
@@ -444,7 +344,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         gl.glDisable(GL2.GL_DEPTH_TEST);
 
         //-----------------------------------------------------------------
-        Matrix4x4d R = camera.getRotation();
+        Matrix4x4d R = viewport.getActiveCamera().getRotation();
 
         gl.glLoadIdentity();
         R = R.invert();
@@ -499,11 +399,11 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         Matrix4x4d R;
         double yaw, pitch;
 
-        R = camera.getRotation();
+        R = viewport.getActiveCamera().getRotation();
         yaw = Math.toDegrees(R.obtainEulerYawAngle());
         pitch = Math.toDegrees(R.obtainEulerPitchAngle());
 
-        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL &&
+        if ( viewport.getActiveCamera().getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL &&
               (pitch > -45 && pitch < 45) ) {
             if ( (yaw > 45 && yaw < 135) ||
                  (yaw < -45 && yaw > -135) ) {
@@ -552,18 +452,13 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
 
     public void toggleGrid()
     {
-        if ( showGrid ) {
-            showGrid = false;
-        }
-        else {
-            showGrid = true;
-        }
+        viewport.toggleGrid();
     }
 
     public void drawGrid(GL2 gl)
     {
         //- Draw reference grid plane -------------------------------------
-        if ( showGrid ) drawGridRectangle(gl);
+        if ( viewport.isShowGrid() ) drawGridRectangle(gl);
     }
 
     public void drawTextureString2D(GL2 gl, int x, int y, RGBAImageUncompressed i)
@@ -641,25 +536,25 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
         if ( numViews >= 4 ) {
             switch ( id ) {
               case 0:
-                camera = cameraLeft;
-                quality.setSurfaces(false);
-                quality.setWires(true);
+                viewport.setActiveCamera(viewport.getLeftCamera());
+                viewport.getRendererConfiguration().setSurfaces(false);
+                viewport.getRendererConfiguration().setWires(true);
                 break;
               case 1:
-                camera = cameraPerspective;
+                viewport.setActiveCamera(viewport.getPerspectiveCamera());
                 break;
               case 2:
-                camera = cameraTop;
-                quality.setSurfaces(false);
-                quality.setWires(true);
+                viewport.setActiveCamera(viewport.getTopCamera());
+                viewport.getRendererConfiguration().setSurfaces(false);
+                viewport.getRendererConfiguration().setWires(true);
                 break;
               case 3: default:
-                camera = cameraFront;
-                quality.setSurfaces(false);
-                quality.setWires(true);
+                viewport.setActiveCamera(viewport.getFrontCamera());
+                viewport.getRendererConfiguration().setSurfaces(false);
+                viewport.getRendererConfiguration().setWires(true);
                 break;
             }
-            setTitle(camera.getName());
+            setTitle(viewport.getTitle());
         }
     }
 
@@ -696,7 +591,7 @@ public class JoglAwtViewportWindow extends ViewportWindow implements KeyListener
                 R = R.translation(r.getPosition());
                 R = R.multiply(r.getRotation());
                 p = R.multiply(lv);
-                camera.projectPoint(p, tp);
+                viewport.getActiveCamera().projectPoint(p, tp);
 
                 //---------------------------------------------
                 yellow = false;

@@ -29,7 +29,7 @@ import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 
 // Application classes
-import application.render.jogl.SimpleCorridor;
+import vsdk.toolkit.fixtures.Jogl2SimpleCorridorSample;
 
 public class Scene
 {
@@ -46,7 +46,7 @@ public class Scene
     public int selectedBackground;
 
     //- 4. Objects ---------------------------------------------------------
-    public SimpleCorridor corridor;
+    public Jogl2SimpleCorridorSample corridor;
     public boolean showCorridor;
     public ArrayList<SimpleBodyGroup> debugThingGroups;
 
@@ -85,7 +85,7 @@ public class Scene
         selectedBackground = 0;
 
         //-----------------------------------------------------------------
-        corridor = new SimpleCorridor();
+        corridor = new Jogl2SimpleCorridorSample();
         showCorridor = false;
 
         qualityTemplate = new RendererConfiguration();

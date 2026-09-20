@@ -60,9 +60,6 @@ import vsdk.toolkit.render.jogl.Jogl2ScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
 import vsdk.toolkit.gui.AwtSystem;
-import vsdk.toolkit.gui.CameraController;
-import vsdk.toolkit.gui.CameraControllerAquynza;
-import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
@@ -76,6 +73,7 @@ import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
+import application.gui.ViewportInteractionTechniques;
 import application.model.ApplicationModel;
 import java.awt.event.MouseEvent;
 
@@ -93,12 +91,11 @@ public class JoglDrawingArea implements
 
     private RendererConfiguration qualitySelection;
     private final RendererConfiguration qualitySelectionVisualDebug;
-    private final CameraController cameraController;
-    private final RendererConfigurationController qualityController;
     private final TranslateGizmo translationGizmo;
     private final RotateGizmo rotateGizmo;
     private final ScaleGizmo scaleGizmo;
     private final SimpleMaterial visualDebugMaterial;
+    private final ViewportInteractionTechniques interactionTechniques;
 
     private final Scene theScene;
     private final ApplicationModel model;
@@ -129,6 +126,7 @@ public class JoglDrawingArea implements
 
     //=================================================================
     public ViewportWindowSetManager viewOrganizer;
+    private Jogl4ViewportRenderer viewportRenderer;
 
     //=================================================================
 
@@ -146,17 +144,14 @@ public class JoglDrawingArea implements
         awtViewportHeight = 0;
         createCursors();
 
-        //cameraController = new CameraControllerBlender(theScene.camera);
-        cameraController = new CameraControllerAquynza(theScene.camera);
-        translationGizmo = new TranslateGizmo(theScene.camera);
-
         qualitySelection = theScene.qualityTemplate;
-        qualityController = new RendererConfigurationController(qualitySelection);
+        interactionTechniques = new ViewportInteractionTechniques(theScene.camera, qualitySelection);
+        translationGizmo = interactionTechniques.getTranslationGizmo();
         qualitySelectionVisualDebug = new RendererConfiguration();
         qualitySelectionVisualDebug.setShadingType(
             RendererConfiguration.SHADING_TYPE_GOURAUD);
-        rotateGizmo = new RotateGizmo();
-        scaleGizmo = new ScaleGizmo();
+        rotateGizmo = interactionTechniques.getRotateGizmo();
+        scaleGizmo = interactionTechniques.getScaleGizmo();
 
         visualDebugMaterial = theScene.defaultMaterial();
 
@@ -207,6 +202,23 @@ public class JoglDrawingArea implements
         }
 
         viewOrganizer.updateLayout();
+        viewportRenderer = new Jogl4ViewportRenderer(
+            viewOrganizer,
+            new Jogl4ViewportRenderer.ViewRenderer() {
+                @Override
+                public void configureView(JoglAwtViewportWindow view) {
+                    interactionTechniques.setCamera(view.getCamera());
+                    interactionTechniques.setRendererConfiguration(view.getRendererConfiguration());
+                    qualitySelection = view.getRendererConfiguration();
+                }
+
+                @Override
+                public void drawView(GL2 gl, JoglAwtViewportWindow view) {
+                    theScene.activeCamera = view.getCamera();
+                    theScene.qualityTemplate = view.getRendererConfiguration();
+                    JoglDrawingArea.this.drawView(gl, view);
+                }
+            });
     }
 
     private void syncViewportStateFromSurface(int surfaceWidth, int surfaceHeight)
@@ -819,68 +831,6 @@ public class JoglDrawingArea implements
         }
     }
 
-    private void drawMultipleViews(GL2 gl)
-    {
-        JoglAwtViewportWindow view;
-        int i;
-
-        //-----------------------------------------------------------------
-        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
-            view.drawBorderGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-        }
-
-        //-----------------------------------------------------------------
-        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
-
-            if ( !view.isActive() ) {
-                continue;
-            }
-            //
-            view.activateViewportGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( view.isSelected() ) {
-                cameraController.setCamera(view.getCamera());
-                qualityController.setRendererConfiguration(view.getRendererConfiguration());
-                qualitySelection = view.getRendererConfiguration();
-            }
-            theScene.activeCamera = view.getCamera();
-
-            //
-            theScene.qualityTemplate = view.getRendererConfiguration();
-            drawView(gl, view);
-            view.drawTitle(gl);
-        }
-    }
-
-    private void drawSelectedViewFullScreen(GL2 gl)
-    {
-        JoglAwtViewportWindow view;
-        int i;
-
-        //-----------------------------------------------------------------
-        for ( i = 0; i < viewOrganizer.getViews().size(); i++ ) {
-            view = (JoglAwtViewportWindow)viewOrganizer.getViews().get(i);
-
-            if ( !view.isActive() || !view.isSelected() ) {
-                continue;
-            }
-            
-            view.activateViewportGL(gl, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            gl.glViewport(0, 0, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            cameraController.setCamera(view.getCamera());
-            qualityController.setRendererConfiguration(view.getRendererConfiguration());
-            qualitySelection = view.getRendererConfiguration();
-            theScene.activeCamera = view.getCamera();
-
-            //
-            theScene.qualityTemplate = view.getRendererConfiguration();
-            drawView(gl, view);
-            view.drawTitle(gl);
-        }
-
-    }
-
     /** Called by drawable to initiate drawing
      * @param drawable */
     @Override
@@ -904,14 +854,7 @@ public class JoglDrawingArea implements
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        int n = viewOrganizer.countActiveViews();
-
-        if ( n == 1 && parent.fullScreenGuiMode ) {
-            drawSelectedViewFullScreen(gl);
-        }
-        else {
-            drawMultipleViews(gl);
-        }
+        viewportRenderer.draw(gl, parent.fullScreenGuiMode);
     }
 
     private void drawVisualRayDebugSegment(GL2 gl, Vector3Dd start, Vector3Dd end, boolean follow, double w, double tip,
@@ -1136,8 +1079,8 @@ public class JoglDrawingArea implements
             }
         }
 
-        cameraController.setCamera(view.getCamera());
-        qualityController.setRendererConfiguration(view.getRendererConfiguration());
+        interactionTechniques.setCamera(view.getCamera());
+        interactionTechniques.setRendererConfiguration(view.getRendererConfiguration());
         qualitySelection = view.getRendererConfiguration();
     }
 
@@ -1174,8 +1117,9 @@ public class JoglDrawingArea implements
             canvas.setCursor(selectCursor);
         }
 
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMousePressedEvent(vitralMouseEvent) ) {
             
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ||
@@ -1221,7 +1165,8 @@ public class JoglDrawingArea implements
 
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
-                translationGizmo.processMousePressedEvent(AwtSystem.awt2vsdkEvent(e));
+                vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+                interactionTechniques.processTranslationMousePressedEvent(vitralMouseEvent);
                 //------------------------------------------------------------
             }
 
@@ -1251,8 +1196,9 @@ public class JoglDrawingArea implements
             canvas.setCursor(selectCursor);
         }
 
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMouseReleasedEvent(vitralMouseEvent) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1278,7 +1224,8 @@ public class JoglDrawingArea implements
             translationGizmo.setTransformationMatrix(composed);
             convertMouseEventToSurface(e);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            if ( interactionTechniques.processTranslationMouseReleasedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
                 position = position.withY(composed.get(1, 3));
@@ -1303,8 +1250,9 @@ public class JoglDrawingArea implements
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMouseClickedEvent(vitralMouseEvent) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1327,7 +1275,8 @@ public class JoglDrawingArea implements
             translationGizmo.setTransformationMatrix(composed);
             convertMouseEventToSurface(e);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseClickedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            if ( interactionTechniques.processTranslationMouseClickedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
                 position = position.withY(composed.get(1, 3));
@@ -1348,14 +1297,15 @@ public class JoglDrawingArea implements
         JoglAwtViewportWindow mouseView = (JoglAwtViewportWindow)getSelectedViewFromPointerPosition(e, false);
 
         if ( mouseView != null ) {
-            cameraController.setCamera(mouseView.getCamera());
+            interactionTechniques.setCamera(mouseView.getCamera());
         }
 
         //-----------------------------------------------------------------
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMouseMovedEvent(vitralMouseEvent) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1378,7 +1328,8 @@ public class JoglDrawingArea implements
             translationGizmo.setTransformationMatrix(composed);
             convertMouseEventToSurface(e);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseMovedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            if ( interactionTechniques.processTranslationMouseMovedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
                 position = position.withY(composed.get(1, 3));
@@ -1401,8 +1352,9 @@ public class JoglDrawingArea implements
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMouseDraggedEvent(vitralMouseEvent) ) {
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
@@ -1428,7 +1380,8 @@ public class JoglDrawingArea implements
             translationGizmo.setTransformationMatrix(composed);
             convertMouseEventToSurface(e);
             mouseView.updateMouseEvent(e, viewOrganizer.getGlobalViewportXSize(), viewOrganizer.getGlobalViewportYSize());
-            if ( translationGizmo.processMouseDraggedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+            vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
+            if ( interactionTechniques.processTranslationMouseDraggedEvent(vitralMouseEvent) ) {
                 composed = translationGizmo.getTransformationMatrix();
                 position = position.withX(composed.get(0, 3));
                 position = position.withY(composed.get(1, 3));
@@ -1449,8 +1402,9 @@ public class JoglDrawingArea implements
     public void mouseWheelMoved(MouseWheelEvent e)
     {
         System.out.println(".");
+        vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processMouseWheelEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraMouseWheelEvent(vitralMouseEvent) ) {
             canvas.repaint();
         }
     }
@@ -1464,11 +1418,12 @@ public class JoglDrawingArea implements
 
         unicode_id = e.getKeyChar();
         keycode = e.getKeyCode();
+        vsdk.toolkit.gui.KeyEvent vitralKeyEvent = AwtSystem.awt2vsdkEvent(e);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraKeyPressedEvent(vitralKeyEvent) ) {
             
         }
         else if ( interactionMode == SELECT_INTERACTION_MODE ) {
@@ -1511,7 +1466,7 @@ public class JoglDrawingArea implements
                 composed = composed.withVal(2, 3, position.z());
 
                 translationGizmo.setTransformationMatrix(composed);
-                if ( translationGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+                if ( interactionTechniques.processTranslationKeyPressedEvent(vitralKeyEvent) ) {
                     composed = translationGizmo.getTransformationMatrix();
                     position = position.withX(composed.get(0, 3));
                     position = position.withY(composed.get(1, 3));
@@ -1532,7 +1487,7 @@ public class JoglDrawingArea implements
 
                 rotateGizmo.setTransformationMatrix(R);
 
-                if ( rotateGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+                if ( interactionTechniques.processRotateKeyPressedEvent(vitralKeyEvent) ) {
                     R = rotateGizmo.getTransformationMatrix();
                     gi.setRotation(R);
                     Matrix4x4d Ri = new Matrix4x4d(R);
@@ -1554,7 +1509,7 @@ public class JoglDrawingArea implements
 
                 scaleGizmo.setTransformationMatrix(S);
 
-                if ( scaleGizmo.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+                if ( interactionTechniques.processScaleKeyPressedEvent(vitralKeyEvent) ) {
                     S = scaleGizmo.getTransformationMatrix();
                     s = new Vector3Dd(S.get(0, 0), S.get(1, 1), S.get(2, 2));
                     gi.setScale(s);
@@ -1584,7 +1539,7 @@ public class JoglDrawingArea implements
             break;
         }
 
-        if ( qualityController.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+        if ( interactionTechniques.processQualityKeyPressedEvent(vitralKeyEvent) ) {
             System.out.println(qualitySelection);
         }
 
@@ -2000,8 +1955,9 @@ public class JoglDrawingArea implements
     @Override
     public void keyReleased(KeyEvent e) 
     {
+        vsdk.toolkit.gui.KeyEvent vitralKeyEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
-             cameraController.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e)) ) {
+             interactionTechniques.processCameraKeyReleasedEvent(vitralKeyEvent) ) {
             canvas.repaint();
         }
     }
