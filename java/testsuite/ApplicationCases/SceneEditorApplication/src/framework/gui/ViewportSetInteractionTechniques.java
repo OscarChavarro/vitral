@@ -15,8 +15,9 @@ Mouse events must have coordinates in pixels of the `ViewportSet` area, with
 origin at its upper left corner.
 
 Keyboard commands:
-  - `.` selects the next viewport, `,` selects the next layout style and
-    Alt+`w` maximizes / restores the selected viewport.
+  - `.` selects the next viewport, `,` selects the next layout style (the
+    last one shows only the selected viewport) and Alt+`w` maximizes /
+    restores the selected viewport.
   - Over the selected viewport: `g` toggles the grid, `t`, `l`, `f`, `b` and
     `p` select the Top, Left, Front, Bottom and Perspective cameras, `9`
     toggles the render mode and `0` cycles the requested size.

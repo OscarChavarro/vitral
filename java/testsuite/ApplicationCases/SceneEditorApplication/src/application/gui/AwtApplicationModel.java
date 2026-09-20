@@ -17,6 +17,9 @@ public class AwtApplicationModel
     private ButtonsPanel executorPanel;
     private JFrame mainWindowWidget;
     private String lookAndFeel;
+    /** Folder with the I18N files (one JSON file per language) used to build the GUI. */
+    public static final String GUI_LANGUAGE_FOLDER = "./etc/gui/";
+
     private String languageGuiFile;
     private ModifyPanel modifyPanel;
     private boolean modifyPanelSelected;

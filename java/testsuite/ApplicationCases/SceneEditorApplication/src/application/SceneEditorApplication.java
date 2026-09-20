@@ -68,7 +68,7 @@ public class SceneEditorApplication {
         jogl4Controller = new Jogl4ApplicationController(applicationModel);
         awtModel = new AwtApplicationModel();
         awtModel.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-        awtModel.setLanguageGuiFile("./etc/english.json");
+        awtModel.setLanguageGuiFile(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "english.json");
         awtModel.setFullScreenGuiMode(false);
         awtGuiController = new AwtGuiController(this, awtModel, jogl4Controller);
 

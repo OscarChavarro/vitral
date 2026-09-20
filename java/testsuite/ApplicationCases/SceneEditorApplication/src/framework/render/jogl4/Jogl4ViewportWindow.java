@@ -4,6 +4,9 @@ package framework.render.jogl4;
 
 // Java basic classes
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
@@ -19,11 +22,11 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 
 // Framework classes
+import framework.model.TextScalerForScreen;
 import framework.model.Viewport;
 import framework.model.ViewportSet;
 
@@ -37,14 +40,24 @@ injected `Jogl4LabelImageProvider`.
 */
 public class Jogl4ViewportWindow
 {
-    private static final ColorRgb TITLE_COLOR = new ColorRgb(0.76, 0.76, 0.76);
+    // Sizes, in pixels, designed for legacy resolutions; they are enlarged
+    // for bigger screens by the text scaler of the viewport set
+    private static final int BASE_TITLE_FONT_SIZE = 14;
+    private static final int BASE_TITLE_BORDER_X = 4;
+    private static final int BASE_TITLE_BORDER_Y = 1;
 
     private final ViewportSet viewportSet;
     private final Viewport viewport;
     private final Jogl4LabelImageProvider labelImageProvider;
 
     private String title;
+    private ColorRgb titleColor;
+    private int titleFontSize;
     private RGBAImageUncompressed titleImage;
+    private final Map<RGBAImageUncompressed, Integer> labelTextures =
+        new IdentityHashMap<RGBAImageUncompressed, Integer>();
+    private final List<RGBAImageUncompressed> discardedLabelImages =
+        new ArrayList<RGBAImageUncompressed>();
     private final RGBAImageUncompressed xLabelImage;
     private final RGBAImageUncompressed yLabelImage;
     private final RGBAImageUncompressed zLabelImage;
@@ -287,59 +300,159 @@ public class Jogl4ViewportWindow
         gl.glMatrixMode(GL2.GL_MODELVIEW);
     }
 
+    /**
+    Draws a label image at the current modelview origin. The image is drawn
+    with `glDrawPixels`, so its colors come only from the image data: texturing
+    is explicitly disabled, otherwise the fragments would be modified by
+    whatever texture (and texture environment) was left bound by previous
+    drawing, making the label color depend on the OpenGL state.
+    */
+    /**
+    Draws a label image with its lower left corner at the projection of the
+    point (-1, -1, 0) of the current modelview / projection matrices.
+
+    The image is uploaded to a texture owned by this window and drawn as a
+    textured quad in window coordinates, over the whole surface of the
+    viewport set (labels are not clipped by the current GL viewport, as they
+    were not when drawn with `glDrawPixels`), with an explicitly configured state
+    (replace texture environment, alpha blending, no lighting nor depth test).
+    Both the color and the transparency of the label come only from the image,
+    so the result does not depend on whatever OpenGL state was left by
+    previous drawing, and all OpenGL state changed here is restored.
+    */
     private void drawTextureString3D(GL2 gl, RGBAImageUncompressed i)
     {
-        gl.glPushAttrib(GL2.GL_ENABLE_BIT);
+        float[] rasterPosition = new float[4];
+        int[] currentViewport = new int[4];
+
         gl.glRasterPos3d(-1, -1, 0);
-        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glGetFloatv(GL2.GL_CURRENT_RASTER_POSITION, rasterPosition, 0);
+        gl.glGetIntegerv(GL2.GL_VIEWPORT, currentViewport, 0);
+
+        int surfaceWidth = viewportSet.getSizeXInPixels();
+        int surfaceHeight = viewportSet.getSizeYInPixels();
+        if ( surfaceWidth <= 0 || surfaceHeight <= 0 ) {
+            surfaceWidth = currentViewport[0] + currentViewport[2];
+            surfaceHeight = currentViewport[1] + currentViewport[3];
+        }
+
+        int texture = obtainLabelTexture(gl, i);
+        double x0 = Math.round(rasterPosition[0]);
+        double y0 = Math.round(rasterPosition[1]);
+        double x1 = x0 + i.getXSize();
+        double y1 = y0 + i.getYSize();
+
+        gl.glPushAttrib(GL2.GL_ENABLE_BIT | GL2.GL_COLOR_BUFFER_BIT |
+            GL2.GL_TEXTURE_BIT | GL2.GL_CURRENT_BIT | GL2.GL_VIEWPORT_BIT);
+        gl.glViewport(0, 0, surfaceWidth, surfaceHeight);
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        gl.glOrtho(0, surfaceWidth, 0, surfaceHeight, -1, 1);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+
         gl.glDisable(GL2.GL_LIGHTING);
+        gl.glDisable(GL2.GL_DEPTH_TEST);
+        gl.glDisable(GL2.GL_ALPHA_TEST);
         gl.glEnable(GL2.GL_BLEND);
         gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
+        gl.glBindTexture(GL2.GL_TEXTURE_2D, texture);
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
 
-        // Set texture parameters
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP,
-            GL2.GL_TRUE);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
-            GL2.GL_NEAREST);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
-            GL2.GL_NEAREST);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S,
-            GL2.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T,
-            GL2.GL_CLAMP_TO_EDGE);
+        gl.glBegin(GL2.GL_QUADS);
+            gl.glTexCoord2d(0, 0);
+            gl.glVertex2d(x0, y0);
+            gl.glTexCoord2d(1, 0);
+            gl.glVertex2d(x1, y0);
+            gl.glTexCoord2d(1, 1);
+            gl.glVertex2d(x1, y1);
+            gl.glTexCoord2d(0, 1);
+            gl.glVertex2d(x0, y1);
+        gl.glEnd();
 
-        // Calling this configuration with GL_BLEND here generates an error on
-        // some Windows Vista machines with Intel graphics, as such on
-        // Dell Inspiron 1525 laptop with Mobile Intel 965 (BIOS 1566).
-        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
-
-        //float c[] = {1f, 1f, 1f, 1f};
-        //gl.glTexEnvfv(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_COLOR, c, 0);
-
-        Jogl2ImageRenderer.draw(gl, i);
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL2.GL_PROJECTION);
+        gl.glPopMatrix();
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glPopAttrib();
+    }
+
+    /**
+    @return the texture holding the given label image, uploading it the first
+    time it is used; also releases the textures of discarded label images
+    */
+    private int obtainLabelTexture(GL2 gl, RGBAImageUncompressed image)
+    {
+        int[] id = new int[1];
+
+        for ( RGBAImageUncompressed discarded : discardedLabelImages ) {
+            Integer oldTexture = labelTextures.remove(discarded);
+            if ( oldTexture != null ) {
+                id[0] = oldTexture;
+                gl.glDeleteTextures(1, id, 0);
+            }
+        }
+        discardedLabelImages.clear();
+
+        Integer texture = labelTextures.get(image);
+        if ( texture != null ) {
+            return texture;
+        }
+
+        gl.glGenTextures(1, id, 0);
+        gl.glPushAttrib(GL2.GL_TEXTURE_BIT);
+        gl.glBindTexture(GL2.GL_TEXTURE_2D, id[0]);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+        gl.glPixelStorei(GL2.GL_UNPACK_ALIGNMENT, 1);
+        gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA8,
+            image.getXSize(), image.getYSize(), 0,
+            GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, image.getRawImageDirectBuffer());
+        gl.glPopAttrib();
+
+        labelTextures.put(image, id[0]);
+        return id[0];
     }
 
     public void drawTitle(GL2 gl)
     {
-        int borderx = 4;
-        int bordery = 1;
-
         updateTitleImage();
+
+        TextScalerForScreen textScaler = viewportSet.getTextScaler();
+        int borderx = textScaler.scaleSize(BASE_TITLE_BORDER_X);
+        int bordery = textScaler.scaleSize(BASE_TITLE_BORDER_Y);
+
         drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
 
     /**
     The title is owned by the model viewport (it follows the active camera),
-    so the image is regenerated whenever it changes.
+    its color is configured in the viewport set (it depends on whether the
+    viewport is selected) and its size depends on the screen resolution (see
+    `TextScalerForScreen`), so the image is regenerated whenever any of them
+    changes.
     */
     private void updateTitleImage()
     {
         String currentTitle = viewport.getTitle();
+        ColorRgb currentColor = viewportSet.getTitleColorFor(viewport);
+        int currentFontSize = viewportSet.getTextScaler().scaleSize(BASE_TITLE_FONT_SIZE);
 
-        if ( titleImage == null || !currentTitle.equals(title) ) {
+        if ( titleImage == null || !currentTitle.equals(title) ||
+             !currentColor.equals(titleColor) ||
+             currentFontSize != titleFontSize ) {
             title = currentTitle;
-            titleImage = labelImageProvider.createLabelImage(title, TITLE_COLOR);
+            titleColor = currentColor;
+            titleFontSize = currentFontSize;
+            if ( titleImage != null ) {
+                discardedLabelImages.add(titleImage);
+            }
+            titleImage = labelImageProvider.createLabelImage(title, titleColor, titleFontSize);
         }
     }
 

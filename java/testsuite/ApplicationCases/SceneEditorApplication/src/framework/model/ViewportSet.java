@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import vsdk.toolkit.common.color.ColorRgb;
+
 /**
 A `ViewportSet` models one rectangular drawing area of the application (for
 example one canvas / one display / one screen) that is partitioned in one or
@@ -18,9 +20,10 @@ This class is a plain model object: it depends only on JDK and vitral-base
 classes, and knows nothing about the GUI or rendering technology used to
 present it.
 
-The layout arrangements are the ones defined for 2, 3 and 4 viewports; the
-percent-based area of each viewport has its origin at the lower left corner of
-the set area. If the set has more viewports than the supported layouts, only
+The layout arrangements are the ones defined for 2, 3 and 4 viewports, plus a
+last one for each of them where only the selected viewport is visible (see
+`getLayoutStyleCount`); the percent-based area of each viewport has its origin
+at the lower left corner of the set area. If the set has more viewports than the supported layouts, only
 the first one is shown, maximized.
 */
 public class ViewportSet
@@ -59,6 +62,9 @@ public class ViewportSet
     private boolean fullViewport;
     private int sizeXInPixels;
     private int sizeYInPixels;
+    private ColorRgb titleColor;
+    private ColorRgb selectedTitleColor;
+    private TextScalerForScreen textScaler;
 
     public ViewportSet()
     {
@@ -69,6 +75,9 @@ public class ViewportSet
         fullViewport = false;
         sizeXInPixels = 0;
         sizeYInPixels = 0;
+        titleColor = new ColorRgb(1, 1, 1);
+        selectedTitleColor = new ColorRgb(1, 1, 0);
+        textScaler = new TextScalerForScreen();
     }
 
     /**
@@ -217,7 +226,27 @@ public class ViewportSet
     }
 
     /**
+    @return the number of layout styles available for the current number of
+    viewports: the defined arrangements plus the one showing only the selected
+    viewport (a set with a single viewport has just one)
+    */
+    public int getLayoutStyleCount()
+    {
+        switch ( viewports.size() ) {
+          case 2:
+            return LAYOUTS_2.length + 1;
+          case 3:
+            return LAYOUTS_3.length + 1;
+          case 4:
+            return LAYOUTS_4.length + 1;
+          default:
+            return 1;
+        }
+    }
+
+    /**
     Selects the next arrangement of the viewports and updates the layout.
+    The last arrangement shows only the selected viewport.
     */
     public void selectNextLayoutStyle()
     {
@@ -246,6 +275,79 @@ public class ViewportSet
     {
         fullViewport = !fullViewport;
         updateLayout();
+    }
+
+    /**
+    @return the color used to draw the name of the viewports that are not
+    selected (white by default)
+    */
+    public ColorRgb getTitleColor()
+    {
+        return titleColor;
+    }
+
+    /**
+    @param titleColor the color for the names of non selected viewports; a
+    null value is ignored
+    */
+    public void setTitleColor(ColorRgb titleColor)
+    {
+        if ( titleColor != null ) {
+            this.titleColor = titleColor;
+        }
+    }
+
+    /**
+    @return the color used to draw the name of the selected viewport (yellow
+    by default)
+    */
+    public ColorRgb getSelectedTitleColor()
+    {
+        return selectedTitleColor;
+    }
+
+    /**
+    @param selectedTitleColor the color for the name of the selected viewport;
+    a null value is ignored
+    */
+    public void setSelectedTitleColor(ColorRgb selectedTitleColor)
+    {
+        if ( selectedTitleColor != null ) {
+            this.selectedTitleColor = selectedTitleColor;
+        }
+    }
+
+    /**
+    @return the scaler that gives the size of the texts of this set for the
+    resolution of the screen where the set is presented
+    */
+    public TextScalerForScreen getTextScaler()
+    {
+        return textScaler;
+    }
+
+    /**
+    @param textScaler the scaler for the texts of this set; a null value is
+    ignored
+    */
+    public void setTextScaler(TextScalerForScreen textScaler)
+    {
+        if ( textScaler != null ) {
+            this.textScaler = textScaler;
+        }
+    }
+
+    /**
+    @param viewport a viewport of this set
+    @return the color to draw the name of the given viewport, depending on
+    whether it is the selected one
+    */
+    public ColorRgb getTitleColorFor(Viewport viewport)
+    {
+        if ( isSelected(viewport) ) {
+            return selectedTitleColor;
+        }
+        return titleColor;
     }
 
     public int getSizeXInPixels()
@@ -370,13 +472,7 @@ public class ViewportSet
         }
 
         if ( fullViewport ) {
-            for ( i = 0; i < n; i++ ) {
-                Viewport viewport = viewports.get(i);
-                viewport.setActive(i == selectedViewportIndex);
-                if ( i == selectedViewportIndex ) {
-                    viewport.setPercentArea(0, 0, 1, 1);
-                }
-            }
+            showOnlySelectedViewport();
             return;
         }
 
@@ -386,13 +482,13 @@ public class ViewportSet
             viewports.get(0).setPercentArea(0, 0, 1, 1);
             break;
           case 2:
-            applyLayout(LAYOUTS_2[layoutStyle % LAYOUTS_2.length]);
+            applyLayout(LAYOUTS_2);
             break;
           case 3:
-            applyLayout(LAYOUTS_3[layoutStyle % LAYOUTS_3.length]);
+            applyLayout(LAYOUTS_3);
             break;
           case 4:
-            applyLayout(LAYOUTS_4[layoutStyle % LAYOUTS_4.length]);
+            applyLayout(LAYOUTS_4);
             break;
           default:
             // Not supported layout: first viewport is shown maximized
@@ -402,6 +498,39 @@ public class ViewportSet
             }
             viewports.get(0).setPercentArea(0, 0, 1, 1);
             break;
+        }
+    }
+
+    /**
+    Applies the layout selected by `layoutStyle` among the given ones. After
+    the last defined layout there is one more style, where only the selected
+    viewport is visible.
+    */
+    private void applyLayout(double[][][] layouts)
+    {
+        int style = layoutStyle % (layouts.length + 1);
+
+        if ( style == layouts.length ) {
+            showOnlySelectedViewport();
+        }
+        else {
+            applyLayout(layouts[style]);
+        }
+    }
+
+    /**
+    Shows the selected viewport using all the area, hiding the others.
+    */
+    private void showOnlySelectedViewport()
+    {
+        int i;
+
+        for ( i = 0; i < viewports.size(); i++ ) {
+            Viewport viewport = viewports.get(i);
+            viewport.setActive(i == selectedViewportIndex);
+            if ( i == selectedViewportIndex ) {
+                viewport.setPercentArea(0, 0, 1, 1);
+            }
         }
     }
 

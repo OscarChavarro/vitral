@@ -76,6 +76,7 @@ import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
 import application.model.ApplicationModel;
+import framework.gui.AwtTextScalerForScreen;
 import framework.gui.ViewportInteractionTechniques;
 import framework.gui.ViewportSetInteractionTechniques;
 import framework.model.Viewport;
@@ -140,6 +141,7 @@ public class Jogl4DrawingAreaRenderer implements
     private final ViewportSet viewportSet;
     private final ViewportSetInteractionTechniques viewportSetTechniques;
     private final JoglViewportSetRenderer viewportSetRenderer;
+    private final AwtTextScalerForScreen textScalerForScreen;
 
     //=================================================================
 
@@ -201,12 +203,14 @@ public class Jogl4DrawingAreaRenderer implements
         // This drawing area presents the viewport set of the active display
         viewportSet = model.getActiveViewportSet();
         viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
+        textScalerForScreen = new AwtTextScalerForScreen(viewportSet.getTextScaler());
+        textScalerForScreen.updateFromDefaultScreen();
         viewportSetRenderer = new JoglViewportSetRenderer(
             viewportSet,
             new Jogl4LabelImageProvider() {
                 @Override
-                public RGBAImageUncompressed createLabelImage(String text, ColorRgb color) {
-                    return AwtSystem.calculateLabelImage(text, color);
+                public RGBAImageUncompressed createLabelImage(String text, ColorRgb color, int fontSize) {
+                    return AwtSystem.calculateLabelImage(text, color, fontSize);
                 }
             },
             new JoglViewportSetRenderer.ViewRenderer() {
@@ -944,6 +948,8 @@ public class Jogl4DrawingAreaRenderer implements
         GL2 gl = drawable.getGL().getGL2();
 
         debugProjectedViewsIfNeeded(gl);
+        // Text size follows the resolution of the screen showing the canvas
+        textScalerForScreen.updateFromComponent(canvas);
         syncViewportStateFromCanvas();
         syncViewportStateFromSurface(drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());

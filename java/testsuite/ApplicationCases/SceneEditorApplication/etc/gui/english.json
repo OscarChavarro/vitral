@@ -480,17 +480,17 @@
         "children": [
           {
             "type": "menu",
-            "name": "&Visualizador",
+            "name": "&Visualizer",
             "children": []
           },
           {
             "type": "menu",
-            "name": "&Camara",
+            "name": "&Camera",
             "children": []
           },
           {
             "type": "menu",
-            "name": "Calidad &visual",
+            "name": "Visual &quality",
             "children": []
           },
           {
