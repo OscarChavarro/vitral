@@ -38,7 +38,8 @@ For tool calls, send:
 - `scene.add_point_light`: creates a point light. Arguments: `x`, `y`, `z`, `r`, `g`, `b`.
 - `scene.add_sphere`: creates a sphere. Arguments: `radius`, `x`, `y`, `z`.
 - `render.raytrace_png`: raytraces the current scene and exports a PNG. Arguments: `path`, `width`, `height`.
-- `viewport.export_png`: exports the current JOGL viewport color buffer as a PNG. Arguments: `path`.
+- `viewport.export_jpg`: exports the selected JOGL4 viewport as a JPG. Arguments: `path`.
+- `workspace.export_jpg`: exports the complete JOGL4 workspace area, including all viewports, as a JPG. Arguments: `path`.
 
 ## Example Agent Session
 
@@ -49,17 +50,19 @@ printf '%s\n' \
 '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"scene.add_sphere","arguments":{"radius":1,"x":0,"y":0,"z":0}}}' \
 '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"scene.describe","arguments":{}}}' \
 '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"render.raytrace_png","arguments":{"path":"/tmp/vitral-raytrace.png","width":640,"height":480}}}' \
-'{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"viewport.export_png","arguments":{"path":"/tmp/vitral-viewport.png"}}}' \
+'{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"viewport.export_jpg","arguments":{"path":"/tmp/vitral-selected-viewport.jpg"}}}' \
+'{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"workspace.export_jpg","arguments":{"path":"./outputViewport.jpg"}}}' \
 | nc 127.0.0.1 1234
 ```
 
 This sequence clears the scene, adds a light and a sphere, inspects the scene,
-exports a raytraced PNG, and exports the current JOGL viewport PNG.
+exports a raytraced PNG, exports the selected JOGL4 viewport as a JPG, and exports
+the complete JOGL4 workspace as `outputViewport.jpg`.
 
 ## Notes For Agents
 
 - Use `scene.describe` before and after mutating the scene to verify state.
-- Use `render.raytrace_png` and `viewport.export_png` together when debugging
+- Use `render.raytrace_png` and `viewport.export_jpg` together when debugging
   mismatches between the raytracer and the JOGL renderer.
 - The TCP service is intentionally line-oriented; keep each JSON-RPC request on
   a single line.

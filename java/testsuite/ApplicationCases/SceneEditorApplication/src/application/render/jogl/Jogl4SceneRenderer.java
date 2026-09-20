@@ -141,7 +141,7 @@ public class Jogl4SceneRenderer
 
         s.activateSelectedBackground();
 
-        drawBase(gl, s, parent.modifyPanel);
+        drawBase(gl, s, parent.getAwtModel().getModifyPanel());
 
         //- Draw 3D Gizmos ------------------------------------------------
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {

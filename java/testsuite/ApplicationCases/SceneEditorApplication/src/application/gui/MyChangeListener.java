@@ -21,11 +21,11 @@ public class MyChangeListener implements ChangeListener
     {
         SingleSelectionModel sm = (SingleSelectionModel)e.getSource();
         if ( sm.getSelectedIndex() == 1 ) {
-            parent.modifyPanelSelected = true;
+            parent.getAwtModel().setModifyPanelSelected(true);
             parent.getJogl4Controller().getDrawingArea().reportTargetToModifyPanel();
         }
         else {
-            parent.modifyPanelSelected = false;
+            parent.getAwtModel().setModifyPanelSelected(false);
         }
     }
 }

@@ -59,23 +59,23 @@ public class ButtonsPanel extends JPanel implements ActionListener
         switch ( group ) {
           case 1:
             internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.gui, "CREATION", this);
+            SwingGuiRenderer.buildButtonGroup(parent.getAwtModel().getGui(), "CREATION", this);
             break;
           case 2:
             internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.gui, "GUI", this);
+            SwingGuiRenderer.buildButtonGroup(parent.getAwtModel().getGui(), "GUI", this);
             break;
           case 3:
             internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.gui, "OTHER", this);
+            SwingGuiRenderer.buildButtonGroup(parent.getAwtModel().getGui(), "OTHER", this);
             break;
           case 4:
             internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.gui, "RENDER", this);
+            SwingGuiRenderer.buildButtonGroup(parent.getAwtModel().getGui(), "RENDER", this);
             break;
           case 101:
             internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.gui, "GLOBAL", this);
+            SwingGuiRenderer.buildButtonGroup(parent.getAwtModel().getGui(), "GLOBAL", this);
             break;
         }
 
@@ -135,7 +135,7 @@ public class ButtonsPanel extends JPanel implements ActionListener
             label = origin.getName();
         }
         guiEventExecutor.executeCommand(label, currentFilePathForReading, 
-                currentFilePathForWriting, parent.mainWindowWidget);
+                currentFilePathForWriting, parent.getAwtModel().getMainWindowWidget());
     }
 
     

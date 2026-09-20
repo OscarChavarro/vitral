@@ -1,53 +1,18 @@
 package application;
 
-// Java basic classes
-import java.io.FileInputStream;
-
-// Java GUI classes
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import javax.swing.WindowConstants;
-import javax.swing.border.Border;
-import javax.swing.BorderFactory; 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
 // VSDK Classes
-import vsdk.toolkit.common.VSDK; 
-import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
-import vsdk.toolkit.gui.widget.Widget;
-import vsdk.toolkit.io.gui.GuiPersistence;
-import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
 import application.framework.Scene;
 import application.model.ApplicationModel;
-import application.gui.ModifyPanel;
-import application.gui.ButtonsPanel;
-import application.gui.GUIEventExecutor;
-import application.gui.MyChangeListener;
-import application.gui.SwingSelectorDialog;
-import application.gui.SwingImageControlWindow;
+import application.gui.AwtApplicationModel;
+import application.gui.AwtGuiController;
 import application.net.VitralEditorMCP;
-import application.net.VitralCommandClient;
 import javax.swing.SwingUtilities;
 
 public class SceneEditorApplication {
@@ -55,34 +20,16 @@ public class SceneEditorApplication {
     private ApplicationModel applicationModel;
 
     // Application GUI
-    public Widget gui;
-    public JLabel statusMessage;
-    public JPanel statusBarPanel;
-    public SwingImageControlWindow imageControlWindow;
-    public SwingSelectorDialog selectorDialog;
-    GUIEventExecutor executor;
-    public ButtonsPanel executorPanel;
-    public JFrame mainWindowWidget;
-    private String lookAndFeel;
-    public String languageGuiFile;
-    public ModifyPanel modifyPanel;
-    public boolean modifyPanelSelected;
-    public boolean fullScreenGuiMode;
-    private GUIEventExecutor guiEventExecutor;
+    private AwtApplicationModel awtModel;
+    private AwtGuiController awtGuiController;
     private Jogl4ApplicationController jogl4Controller;
 
     // Networking
     private VitralEditorMCP networkServer;
-    private VitralCommandClient networkCommandClient;
-    private String currentNetworkCommandClientIp;
-    private String currentNetworkCommandClientPort;
 
     public void setLookAndFeel(String lookAndFeel)
     {
-        this.lookAndFeel = lookAndFeel;
-
-        destroyGUI();
-        createGUI();
+        awtGuiController.setLookAndFeel(lookAndFeel);
     }
 
     /**
@@ -91,9 +38,7 @@ public class SceneEditorApplication {
     */
     public void setGuiLanguage(String lang)
     {
-        this.languageGuiFile = lang;
-        destroyGUI();
-        createGUI();
+        awtGuiController.setGuiLanguage(lang);
     }
 
     private void createModel()
@@ -121,219 +66,26 @@ public class SceneEditorApplication {
         applicationModel.setVisualDebugRayLevels(2);
         applicationModel.setWithVisualDebugRay(false);
         jogl4Controller = new Jogl4ApplicationController(applicationModel);
+        awtModel = new AwtApplicationModel();
+        awtModel.setLookAndFeel("org.jvnet.substance.skin.SubstanceTwilightLookAndFeel");
+        awtModel.setLanguageGuiFile("./etc/english.json");
+        awtModel.setFullScreenGuiMode(false);
+        awtGuiController = new AwtGuiController(this, awtModel, jogl4Controller);
 
         networkServer = null;
-        networkCommandClient = null;
-        currentNetworkCommandClientIp = "127.0.0.1";
-        currentNetworkCommandClientPort = "1235";
-    }
-
-    private JPanel createStatusBar()
-    {
-        JPanel newStatusBarPanel;
-
-        statusMessage = new JLabel(gui.getMessage("IDM_INTRO_MESSAGE"));
-        Border border = BorderFactory.createLoweredBevelBorder();
-        statusMessage.setBorder(border);
-
-        newStatusBarPanel = new JPanel();
-        newStatusBarPanel.setLayout(new GridLayout());
-
-        border = BorderFactory.createEmptyBorder(3, 3, 3, 3);
-        newStatusBarPanel.setBorder(border);
-        newStatusBarPanel.add(statusMessage);
-
-        return newStatusBarPanel;
-    }
-
-    private JTabbedPane createPanel()
-    {
-        JTabbedPane container;
-        JPanel panel;
-        JButton button;
-        JScrollPane sp;
-
-        container = new JTabbedPane();
-        container.getModel().addChangeListener(new MyChangeListener(this));
-
-        //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 1, executor);
-        sp = new JScrollPane(panel);
-        container.addTab(gui.getMessage("IDM_CREATION_TAB"), 
-            null, sp, "Object creation operations");
-
-        //-----------------------------------------------------------------
-        modifyPanel = new ModifyPanel(this);
-        sp = new JScrollPane(modifyPanel);
-        container.addTab(gui.getMessage("IDM_MODIFY_TAB"), 
-            null, sp, "Modify selected body");
-
-        //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 2, executor);
-        sp = new JScrollPane(panel);
-        container.addTab(gui.getMessage("IDM_GUI_TAB"), 
-            null, sp, "GUI Control");
-
-        //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 3, executor);
-        sp = new JScrollPane(panel);
-        container.addTab(gui.getMessage("IDM_OTHERS_TAB"), 
-            null, sp, "Control the scene components");
-
-        //-----------------------------------------------------------------
-        panel = new ButtonsPanel(this, 4, executor);
-        sp = new JScrollPane(panel);
-        container.addTab(gui.getMessage("IDM_RENDER_TAB"), 
-            null, sp, "Control the scene components");
-        //-----------------------------------------------------------------
-
-        return container;
-    }
-
-    private void createGUIFullScreen()
-    {
-        mainWindowWidget = new JFrame("VITRAL Scene Editor");
-
-        mainWindowWidget.setUndecorated(true);
-
-        Toolkit tk = mainWindowWidget.getToolkit();
-        Dimension d = tk.getScreenSize();
-
-        //-----------------------------------------------------------------
-        try {
-            gui = GuiPersistence.importAquynzaGui(
-		new FileInputStream(languageGuiFile), ".");
-        }
-        catch ( Exception e ) {
-            System.err.println("Fatal error: can not open GUI file");
-            System.exit(0);
-        }
-
-        mainWindowWidget.add(
-            jogl4Controller.getCanvas(statusMessage, this),
-            BorderLayout.CENTER);
-        mainWindowWidget.setPreferredSize(d);
-        mainWindowWidget.pack();
-        mainWindowWidget.setVisible(true);
-        jogl4Controller.requestFocusInWindow();
-
-        //-----------------------------------------------------------------
-        imageControlWindow = null;
-        selectorDialog = null;
-        modifyPanelSelected = false;
-    }
-
-    private void createGUIWindowed()
-    {
-        //- Configure the application Look & feel -------------------------
-        try {
-            UIManager.setLookAndFeel(lookAndFeel);
-          }
-          catch ( ClassNotFoundException | InstantiationException | 
-                  IllegalAccessException | UnsupportedLookAndFeelException e ) {
-            Logger.reportMessage(this, VSDK.WARNING, "createGUIWindowed", 
-                "Warning: Can not set " + lookAndFeel + " look and feel\n" + e);
-        }
-
-        //- Configure this JFrame -----------------------------------------
-        mainWindowWidget = new JFrame("VITRAL Scene Editor");
-        mainWindowWidget.setUndecorated(false);
-        mainWindowWidget.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        Toolkit tk = mainWindowWidget.getToolkit();
-        Dimension d = tk.getScreenSize();
-
-        //-----------------------------------------------------------------
-        try {
-            gui = GuiPersistence.importAquynzaGui(
-                new FileInputStream(languageGuiFile), ".");
-        }
-        catch ( Exception e ) {
-            System.err.println("Fatal error: can not open GUI file");
-            System.exit(0);
-        }
-
-        //-----------------------------------------------------------------
-        executor = new GUIEventExecutor(this);
-        guiEventExecutor = executor;
-        executorPanel = new ButtonsPanel(this, 101, executor);
-
-        //-----------------------------------------------------------------
-        JMenuBar menuBar = SwingGuiRenderer.buildMenubar(gui, null, executorPanel);
-
-        //-----------------------------------------------------------------
-        JSplitPane splitPane;
-        statusBarPanel = createStatusBar();
-
-        Component left = jogl4Controller.getCanvas(statusMessage, this);
-        Component right = createPanel();
-        Dimension minLeft = new Dimension(160, 120);
-        Dimension minRight = new Dimension(320, 120);
-        JPanel iconsAndWorkAreasPanel;
-
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, 
-                                   left,
-                                   right);
-        left.setMinimumSize(minLeft);
-        right.setMinimumSize(minRight);
-        splitPane.setResizeWeight(1.0);
-
-        Dimension dd = splitPane.getMaximumSize();
-
-        dd.width = Short.MAX_VALUE;
-        splitPane.setAlignmentX(0.5f);
-        splitPane.setMaximumSize(dd);
-
-        iconsAndWorkAreasPanel = new JPanel();
-        iconsAndWorkAreasPanel.setLayout(
-            new BoxLayout(iconsAndWorkAreasPanel, BoxLayout.Y_AXIS));
-        iconsAndWorkAreasPanel.add(executorPanel);
-        iconsAndWorkAreasPanel.add(splitPane);
-
-        mainWindowWidget.add(iconsAndWorkAreasPanel, BorderLayout.CENTER);
-        mainWindowWidget.add(statusBarPanel, BorderLayout.SOUTH);
-        mainWindowWidget.setJMenuBar(menuBar);
-
-        //-----------------------------------------------------------------
-        int panelWidth = d.width - 320;
-
-        splitPane.setDividerLocation(panelWidth);
-
-        mainWindowWidget.setPreferredSize(d);
-        mainWindowWidget.pack();
-        mainWindowWidget.setVisible(true);
-        jogl4Controller.requestFocusInWindow();
-
-        //-----------------------------------------------------------------
-        imageControlWindow = null;
-        selectorDialog = null;
-        modifyPanelSelected = false;
     }
 
     public final void createGUI()
     {
-        if ( fullScreenGuiMode ) {
-            createGUIFullScreen();
-        }
-        else {
-            createGUIWindowed();
-        }
+        awtGuiController.createGUI();
     }
 
     public void destroyGUI()
     {
-        mainWindowWidget.setVisible(false);
-        mainWindowWidget.dispose();
-        System.gc();
-        mainWindowWidget = null;
-        System.gc();
+        awtGuiController.destroyGUI();
     }
 
     public SceneEditorApplication(String[] args) {
-        lookAndFeel = "org.jvnet.substance.skin.SubstanceTwilightLookAndFeel";
-        languageGuiFile = "./etc/english.json";
-
-        fullScreenGuiMode = false;
-
         createModel();
         createGUI();
 
@@ -360,67 +112,18 @@ public class SceneEditorApplication {
 
     public void switchVoiceCommandClient()
     {
-        String ip, port;
-        if ( networkCommandClient == null ) {
-            ip = (String)JOptionPane.showInputDialog(
-                mainWindowWidget, // Component parentComponent
-                gui.getMessage("IDM_VOICECOMMAND_IPQUESTION"), // Object message
-                gui.getMessage("IDM_VOICECOMMAND_TITLE"), // String title
-                JOptionPane.QUESTION_MESSAGE, // int messageType
-                null, // Icon icon
-                null, // Object[] selectionValues
-                currentNetworkCommandClientIp // Object initialSelectionValue
-            );
-            if ( ip == null ) {
-                statusMessage.setText(
-                    gui.getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
-                    gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
-                return;
-            }
-            currentNetworkCommandClientIp = ip;
-            port = (String)JOptionPane.showInputDialog(
-                mainWindowWidget, // Component parentComponent
-                gui.getMessage("IDM_VOICECOMMAND_PORTQUESTION"), // Object message
-                gui.getMessage("IDM_VOICECOMMAND_TITLE"), // String title
-                JOptionPane.QUESTION_MESSAGE, // int messageType
-                null, // Icon icon
-                null, // Object[] selectionValues
-                currentNetworkCommandClientPort // Object initialSelectionValue
-            );
-            if ( port == null ) {
-                statusMessage.setText(
-                    gui.getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
-                    gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
-                return;
-            }
-            currentNetworkCommandClientPort = port;
-            networkCommandClient = new VitralCommandClient(this,
-                currentNetworkCommandClientIp,
-                Integer.parseInt(currentNetworkCommandClientPort));
-            Thread ct = new Thread(networkCommandClient);
-            ct.start();
-            statusMessage.setText(
-                gui.getMessage("IDM_VOICECOMMAND_ENABLED"));
-        }
-        else {
-            networkCommandClient.running = false;
-            statusMessage.setText(
-                gui.getMessage("IDM_VOICECOMMAND_DISABLED"));
-            networkCommandClient = null;
-        }
+        awtGuiController.switchVoiceCommandClient();
     }
 
     public void closeApplication()
     {
-        if ( networkCommandClient != null ) {
-            networkCommandClient.end();
-        }
+        awtGuiController.closeApplication();
         System.exit(0);
     }
 
     public void externalCommand(String label)
     {
-        boolean b = guiEventExecutor.executeCommand(label);
+        boolean b = awtModel.getGuiEventExecutor().executeCommand(label);
     }
 
     public ApplicationModel getApplicationModel()
@@ -431,6 +134,16 @@ public class SceneEditorApplication {
     public Jogl4ApplicationController getJogl4Controller()
     {
         return jogl4Controller;
+    }
+
+    public AwtApplicationModel getAwtModel()
+    {
+        return awtModel;
+    }
+
+    public AwtGuiController getAwtGuiController()
+    {
+        return awtGuiController;
     }
 
     public static void main(String[] args) {

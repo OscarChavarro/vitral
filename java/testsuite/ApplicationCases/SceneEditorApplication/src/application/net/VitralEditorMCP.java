@@ -123,8 +123,11 @@ class VitralEditorMCPProtocol implements Runnable
         if ( "render.raytrace_png".equals(tool) ) {
             return raytracePng(request);
         }
-        if ( "viewport.export_png".equals(tool) ) {
-            return viewportPng(request);
+        if ( "viewport.export_jpg".equals(tool) ) {
+            return viewportJpg(request);
+        }
+        if ( "workspace.export_jpg".equals(tool) ) {
+            return workspaceJpg(request);
         }
         throw new IllegalArgumentException("Unknown tool: " + tool);
     }
@@ -174,15 +177,27 @@ class VitralEditorMCPProtocol implements Runnable
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
     }
 
-    private String viewportPng(String request)
+    private String viewportJpg(String request)
     {
-        String path = stringProperty(request, "path", "./mcp-viewport.png");
+        String path = stringProperty(request, "path", "./outputSelectedViewport.jpg");
         Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
         if ( drawingArea == null ) {
             throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
         }
         File out = new File(path);
-        drawingArea.exportViewportPng(out);
+        drawingArea.exportViewportJpg(out);
+        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
+    }
+
+    private String workspaceJpg(String request)
+    {
+        String path = stringProperty(request, "path", "./outputViewport.jpg");
+        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        if ( drawingArea == null ) {
+            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
+        }
+        File out = new File(path);
+        drawingArea.exportWorkspaceJpg(out);
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
     }
 
@@ -235,7 +250,8 @@ class VitralEditorMCPProtocol implements Runnable
             + "," + tool("scene.add_point_light", "Create a point light. Arguments: x,y,z,r,g,b.")
             + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
             + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
-            + "," + tool("viewport.export_png", "Export the current Jogl viewport to PNG. Arguments: path.")
+            + "," + tool("viewport.export_jpg", "Export the selected JOGL4 viewport to JPG. Arguments: path.")
+            + "," + tool("workspace.export_jpg", "Export the complete JOGL4 workspace area, including all viewports, to JPG. Arguments: path.")
             + "]}";
     }
 

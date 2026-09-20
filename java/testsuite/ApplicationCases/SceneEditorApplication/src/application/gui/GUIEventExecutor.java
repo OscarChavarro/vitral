@@ -115,7 +115,7 @@ public class GUIEventExecutor extends CommandListener{
 
             if ( referenceGeometry == null ||
                  !(referenceGeometry instanceof VoxelVolume) ) {
-                parent.statusMessage.setText("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
+                parent.getAwtModel().getStatusMessage().setText("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
             }
             else {
                 //- Calculate the VoxelVolume's center of mass ---------------
@@ -417,7 +417,7 @@ public class GUIEventExecutor extends CommandListener{
 
                     currentFilePathForReading = file.getParentFile().getAbsolutePath();
 
-                    parent.mainWindowWidget.repaint();
+                    parent.getAwtModel().getMainWindowWidget().repaint();
                 }
                 catch ( Exception ex ) {
                     Logger.reportMessage(this, VSDK.WARNING, "executeCommand", "Failed to read file...\n" + ex);
@@ -473,7 +473,7 @@ public class GUIEventExecutor extends CommandListener{
 
                     currentFilePathForWriting = file.getParentFile().getAbsolutePath();
 
-                    parent.mainWindowWidget.repaint();
+                    parent.getAwtModel().getMainWindowWidget().repaint();
                 }
                 catch (Exception ex) {
                     Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
@@ -500,7 +500,7 @@ public class GUIEventExecutor extends CommandListener{
 
                     currentFilePathForWriting = file.getParentFile().getAbsolutePath();
 
-                    parent.mainWindowWidget.repaint();
+                    parent.getAwtModel().getMainWindowWidget().repaint();
                 }
                 catch (Exception ex) {
                     Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
@@ -526,7 +526,7 @@ public class GUIEventExecutor extends CommandListener{
                     parent.getApplicationModel().setPalette(
                         RGBColorPalettePersistence.importGimpPalette(
                             new java.io.FileReader(file.getAbsolutePath())));
-                    parent.mainWindowWidget.repaint();
+                    parent.getAwtModel().getMainWindowWidget().repaint();
                 }
                 catch (Exception ex) {
                     System.out.println("Failed to read file");
@@ -535,36 +535,36 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
             parent.getJogl4Controller().getDrawingArea().wantToGetColor = true;
         }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
             parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
         }
         else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_PENDING_CONTOURNS"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_PENDING_CONTOURNS"));
             parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
             parent.getJogl4Controller().getDrawingArea().wantToGetContourns = true;
         }
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
             parent.doRaytracedImage();
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(
+            if ( parent.getAwtModel().getImageControlWindow() == null ) {
+                parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
                     parent.getApplicationModel().getRaytracedImage(),
-                    parent.gui,
-                    parent.executorPanel);
+                    parent.getAwtModel().getGui(),
+                    parent.getAwtModel().getExecutorPanel()));
             }
             else {
-                parent.imageControlWindow.setImage(
+                parent.getAwtModel().getImageControlWindow().setImage(
                     parent.getApplicationModel().getRaytracedImage());
             }
-            parent.imageControlWindow.redrawImage();
+            parent.getAwtModel().getImageControlWindow().redrawImage();
         }
         //- CUSTOMIZE -----------------------------------------------------
         else if ( label.equals("IDC_CUSTOMIZE_LAF_MOTIF") ) {
@@ -605,32 +605,32 @@ public class GUIEventExecutor extends CommandListener{
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_TOOLS_CAMERA") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_CAMERA_MODE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_CAMERA_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 Jogl4DrawingAreaRenderer.CAMERA_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_SELECTION_MODE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_SELECTION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
             Jogl4DrawingAreaRenderer.SELECT_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_TRANSLATION_MODE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_TRANSLATION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
             Jogl4DrawingAreaRenderer.TRANSLATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_ROTATION_MODE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_ROTATION_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 Jogl4DrawingAreaRenderer.ROTATE_INTERACTION_MODE;
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_SCALE_MODE"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_SCALE_MODE"));
             parent.getJogl4Controller().getDrawingArea().interactionMode = 
                 Jogl4DrawingAreaRenderer.SCALE_INTERACTION_MODE;
         }

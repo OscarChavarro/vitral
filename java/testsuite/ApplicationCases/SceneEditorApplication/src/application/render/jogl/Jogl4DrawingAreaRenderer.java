@@ -39,6 +39,8 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.element.Triangle;
 import vsdk.toolkit.environment.geometry.element.Vertex;
 import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.RGBPixel;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
@@ -111,6 +113,10 @@ public class Jogl4DrawingAreaRenderer implements
     public boolean wantToGetDepth;
     public boolean wantToGetContourns;
     public boolean wantToDebugProjectedViews;
+
+    private File pendingViewportExportFile;
+    private boolean pendingViewportExportJpg;
+    private File pendingWorkspaceExportFile;
 
     private final Jogl4ProjectedViewRenderer projectedViewRenderer;
 
@@ -697,7 +703,7 @@ public class Jogl4DrawingAreaRenderer implements
         }
 
         if ( referenceBody == null ) {
-            parent.statusMessage.setText("ERROR: An object must be selected for projected views debugging to be created");
+            parent.getAwtModel().getStatusMessage().setText("ERROR: An object must be selected for projected views debugging to be created");
         }
         else {
             SimpleBodyGroup group;
@@ -717,16 +723,16 @@ public class Jogl4DrawingAreaRenderer implements
                 theScene.debugThingGroups.add(group);
             }
             else {
-                parent.statusMessage.setText("ERROR: cannot create Pbuffer, you need recent 3D hardware acceleration for this function");
+                parent.getAwtModel().getStatusMessage().setText("ERROR: cannot create Pbuffer, you need recent 3D hardware acceleration for this function");
             }
         }
     }
 
-    private void copyColorBufferIfNeeded(GL2 gl)
+    private void copyColorBufferIfNeeded(GL2 gl, boolean selectedView)
     {
-        if ( wantToGetColor ) {
+        if ( wantToGetColor && selectedView ) {
             captureColorBuffer(gl, true);
-            parent.statusMessage.setText("ZBuffer Color Image obtained!");
+            parent.getAwtModel().getStatusMessage().setText("ZBuffer Color Image obtained!");
             wantToGetColor = false;
         }
     }
@@ -737,21 +743,89 @@ public class Jogl4DrawingAreaRenderer implements
         if ( !reportToImageWindow ) {
             return;
         }
-        if ( parent.imageControlWindow == null ) {
-            parent.imageControlWindow = new SwingImageControlWindow(model.getZbufferImage(), parent.gui, parent.executorPanel);
+        if ( parent.getAwtModel().getImageControlWindow() == null ) {
+            parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
+                model.getZbufferImage(),
+                parent.getAwtModel().getGui(),
+                parent.getAwtModel().getExecutorPanel()));
         }
         else {
-            parent.imageControlWindow.setImage(model.getZbufferImage());
+            parent.getAwtModel().getImageControlWindow().setImage(model.getZbufferImage());
         }
-        parent.imageControlWindow.redrawImage();
+        parent.getAwtModel().getImageControlWindow().redrawImage();
     }
 
     public void exportViewportPng(File file)
     {
-        wantToGetColor = true;
+        pendingViewportExportFile = file;
+        pendingViewportExportJpg = false;
         canvas.display();
-        if ( model.getZbufferImage() != null ) {
-            ImagePersistence.exportPNG(file, model.getZbufferImage());
+    }
+
+    public void exportViewportJpg(File file)
+    {
+        pendingViewportExportFile = file;
+        pendingViewportExportJpg = true;
+        canvas.display();
+    }
+
+    public void exportWorkspaceJpg(File file)
+    {
+        pendingWorkspaceExportFile = file;
+        canvas.display();
+    }
+
+    private RGBImageUncompressed cropImage(RGBImageUncompressed source,
+                                           int startX, int startY,
+                                           int width, int height)
+    {
+        int sourceWidth = source.getXSize();
+        int sourceHeight = source.getYSize();
+        int x0 = Math.max(0, startX);
+        int y0 = Math.max(0, startY);
+        int x1 = Math.min(sourceWidth, startX + width);
+        int y1 = Math.min(sourceHeight, startY + height);
+        RGBImageUncompressed result = new RGBImageUncompressed();
+        result.init(Math.max(0, x1 - x0), Math.max(0, y1 - y0));
+        for ( int y = y0; y < y1; y++ ) {
+            for ( int x = x0; x < x1; x++ ) {
+                RGBPixel pixel = source.getPixel(x, y);
+                result.putPixel(x - x0, y - y0, pixel);
+            }
+        }
+        return result;
+    }
+
+    private void exportPendingFrame(GL2 gl)
+    {
+        if ( pendingViewportExportFile == null && pendingWorkspaceExportFile == null ) {
+            return;
+        }
+
+        int width = viewOrganizer.getGlobalViewportXSize();
+        int height = viewOrganizer.getGlobalViewportYSize();
+        gl.glViewport(0, 0, width, height);
+        RGBImageUncompressed workspace = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
+
+        if ( pendingViewportExportFile != null ) {
+            int selectedIndex = viewOrganizer.getSelectedViewIndex();
+            Jogl4AwtViewportWindow selected =
+                (Jogl4AwtViewportWindow)viewOrganizer.getViews().get(selectedIndex);
+            RGBImageUncompressed viewport = cropImage(workspace,
+                selected.getViewportStartX(), selected.getViewportStartY(),
+                selected.getViewportSizeX(), selected.getViewportSizeY());
+            if ( pendingViewportExportJpg ) {
+                ImagePersistence.exportJPG(pendingViewportExportFile, viewport);
+            }
+            else {
+                ImagePersistence.exportPNG(pendingViewportExportFile, viewport);
+            }
+            pendingViewportExportFile = null;
+        }
+
+        if ( pendingWorkspaceExportFile != null ) {
+            ImagePersistence.exportJPG(pendingWorkspaceExportFile, workspace);
+            pendingWorkspaceExportFile = null;
         }
     }
 
@@ -772,14 +846,17 @@ public class Jogl4DrawingAreaRenderer implements
                         model.getPalette()));
             }
 
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(model.getZbufferImage(), parent.gui, parent.executorPanel);
+            if ( parent.getAwtModel().getImageControlWindow() == null ) {
+                parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
+                    model.getZbufferImage(),
+                    parent.getAwtModel().getGui(),
+                    parent.getAwtModel().getExecutorPanel()));
             }
             else {
-                parent.imageControlWindow.setImage(model.getZbufferImage());
+                parent.getAwtModel().getImageControlWindow().setImage(model.getZbufferImage());
             }
-            parent.imageControlWindow.redrawImage();
-            parent.statusMessage.setText("ZBuffer depth map obtained!");
+            parent.getAwtModel().getImageControlWindow().redrawImage();
+            parent.getAwtModel().getStatusMessage().setText("ZBuffer depth map obtained!");
             wantToGetDepth = false;
             wantToGetContourns = false;
         }
@@ -845,7 +922,7 @@ public class Jogl4DrawingAreaRenderer implements
         // Must be the last to draw
         drawGizmos(gl);
 
-        copyColorBufferIfNeeded(gl);
+        copyColorBufferIfNeeded(gl, view.isSelected());
 
         view.drawReferenceBase(gl);
         if ( translationGizmoDrawn ) {
@@ -876,7 +953,9 @@ public class Jogl4DrawingAreaRenderer implements
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        viewportRenderer.draw(gl, parent.fullScreenGuiMode);
+        viewportRenderer.draw(gl, parent.getAwtModel().isFullScreenGuiMode());
+
+        exportPendingFrame(gl);
     }
 
     private void drawVisualRayDebugSegment(GL2 gl, Vector3Dd start, Vector3Dd end, boolean follow, double w, double tip,
@@ -1586,17 +1665,20 @@ public class Jogl4DrawingAreaRenderer implements
         }
 
         if ( keycode == KeyEvent.VK_F10 ) {
-            parent.statusMessage.setText(
-                parent.gui.getMessage("IDM_COMPUTING_RAYTRACING"));
+            parent.getAwtModel().getStatusMessage().setText(
+                parent.getAwtModel().getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
             parent.doRaytracedImage();
   
-            if ( parent.imageControlWindow == null ) {
-                parent.imageControlWindow = new SwingImageControlWindow(model.getRaytracedImage(), parent.gui, parent.executorPanel);
+            if ( parent.getAwtModel().getImageControlWindow() == null ) {
+                parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
+                    model.getRaytracedImage(),
+                    parent.getAwtModel().getGui(),
+                    parent.getAwtModel().getExecutorPanel()));
             }
             else {
-                parent.imageControlWindow.setImage(model.getRaytracedImage());
+                parent.getAwtModel().getImageControlWindow().setImage(model.getRaytracedImage());
             }
-            parent.imageControlWindow.redrawImage();
+            parent.getAwtModel().getImageControlWindow().redrawImage();
         }
 
         // In view command propagation
@@ -1612,7 +1694,7 @@ public class Jogl4DrawingAreaRenderer implements
              ((e.getModifiersEx()) & KeyEvent.CTRL_DOWN_MASK) != 0x0 ) {
             switch ( keycode ) {
               case KeyEvent.VK_F:
-                parent.fullScreenGuiMode = !parent.fullScreenGuiMode;
+                parent.getAwtModel().toggleFullScreenGuiMode();
                 parent.destroyGUI();
                 parent.createGUI();
                 break;
@@ -1793,11 +1875,11 @@ public class Jogl4DrawingAreaRenderer implements
                 break;
               case 'h':
                 //-------------------------------------------------------------
-                if ( parent.selectorDialog == null ) {
-                    parent.selectorDialog = new SwingSelectorDialog();
+                if ( parent.getAwtModel().getSelectorDialog() == null ) {
+                    parent.getAwtModel().setSelectorDialog(new SwingSelectorDialog());
                 }
-                parent.selectorDialog.setVisible(true);
-                parent.selectorDialog.repaint();
+                parent.getAwtModel().getSelectorDialog().setVisible(true);
+                parent.getAwtModel().getSelectorDialog().repaint();
                 //-------------------------------------------------------------
 
                 SimpleBody o;
@@ -1964,13 +2046,13 @@ public class Jogl4DrawingAreaRenderer implements
     public void reportTargetToModifyPanel()
     {
         int firstThingSelected = theScene.selectedThings.firstSelected();
-        if ( parent.modifyPanelSelected && firstThingSelected >= 0 ) {
-            parent.modifyPanel.notifyTargetBeginEdit(
+        if ( parent.getAwtModel().isModifyPanelSelected() && firstThingSelected >= 0 ) {
+            parent.getAwtModel().getModifyPanel().notifyTargetBeginEdit(
                 theScene.scene.getSimpleBodies().get(firstThingSelected)
             );
         }
         else {
-            parent.modifyPanel.notifyTargetEndEdit();
+            parent.getAwtModel().getModifyPanel().notifyTargetEndEdit();
         }
     }
 
