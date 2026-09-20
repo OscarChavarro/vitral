@@ -962,6 +962,47 @@
           ]
         }
       ]
+    },
+    {
+      "type": "menu",
+      "name": "VIEWPORT_SET_PROJECTION_LOCATION",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Perspective",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_PERSPECTIVE"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Top",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_TOP"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Bottom",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_BOTTOM"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Left",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_LEFT"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Front",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_FRONT"
+          ]
+        }
+      ]
     }
   ],
   "commands": [
@@ -1184,6 +1225,31 @@
     {
       "id": "IDC_RENDERING_RAYTRACING",
       "name": "Raytrace Scene"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_PERSPECTIVE",
+      "name": "Perspective",
+      "brief": "Project the scene from the perspective camera"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_TOP",
+      "name": "Top",
+      "brief": "Project the scene from above"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_BOTTOM",
+      "name": "Bottom",
+      "brief": "Project the scene from below"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_LEFT",
+      "name": "Left",
+      "brief": "Project the scene from the left side"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_FRONT",
+      "name": "Front",
+      "brief": "Project the scene from the front"
     }
   ],
   "buttonGroups": [

@@ -10,6 +10,7 @@ import java.util.Map;
 
 // JOGL classes
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -58,6 +59,8 @@ public class Jogl4ViewportWindow
         new IdentityHashMap<RGBAImageUncompressed, Integer>();
     private final List<RGBAImageUncompressed> discardedLabelImages =
         new ArrayList<RGBAImageUncompressed>();
+    // OpenGL context owning the textures in `labelTextures`
+    private GLContext labelTexturesContext;
     private final RGBAImageUncompressed xLabelImage;
     private final RGBAImageUncompressed yLabelImage;
     private final RGBAImageUncompressed zLabelImage;
@@ -388,6 +391,15 @@ public class Jogl4ViewportWindow
     {
         int[] id = new int[1];
 
+        // Textures belong to the OpenGL context that created them: if it is
+        // not the current one (i.e. the GUI was rebuilt, destroying the
+        // canvas), their ids are meaningless and the images must be uploaded
+        // again
+        if ( labelTexturesContext != gl.getContext() ) {
+            invalidateGlResources();
+            labelTexturesContext = gl.getContext();
+        }
+
         for ( RGBAImageUncompressed discarded : discardedLabelImages ) {
             Integer oldTexture = labelTextures.remove(discarded);
             if ( oldTexture != null ) {
@@ -419,6 +431,38 @@ public class Jogl4ViewportWindow
         return id[0];
     }
 
+    /**
+    Deletes the OpenGL resources (label textures) of this window.
+    PRE: the OpenGL context that created them is current, i.e. when it is
+    about to be destroyed.
+    @param gl
+    */
+    public void disposeGlResources(GL2 gl)
+    {
+        int[] id = new int[1];
+
+        if ( labelTexturesContext == gl.getContext() ) {
+            for ( Integer texture : labelTextures.values() ) {
+                id[0] = texture;
+                gl.glDeleteTextures(1, id, 0);
+            }
+        }
+        invalidateGlResources();
+    }
+
+    /**
+    Forgets the OpenGL resources (label textures) of this window without
+    releasing them, because the context that owned them is already gone (or
+    is not the current one). They are created again when needed. The label
+    images themselves are kept.
+    */
+    public void invalidateGlResources()
+    {
+        labelTextures.clear();
+        discardedLabelImages.clear();
+        labelTexturesContext = null;
+    }
+
     public void drawTitle(GL2 gl)
     {
         updateTitleImage();
@@ -427,19 +471,24 @@ public class Jogl4ViewportWindow
         int borderx = textScaler.scaleSize(BASE_TITLE_BORDER_X);
         int bordery = textScaler.scaleSize(BASE_TITLE_BORDER_Y);
 
+        // The area of the title (its border included, so it can be easily
+        // pointed) is informed to the model, for interaction
+        viewport.setTitleArea(0, 0,
+            titleImage.getXSize() + 2*borderx, titleImage.getYSize() + 2*bordery);
+
         drawTextureString2D(gl, borderx, titleImage.getYSize() + bordery, titleImage);
     }
 
     /**
-    The title is owned by the model viewport (it follows the active camera),
-    its color is configured in the viewport set (it depends on whether the
-    viewport is selected) and its size depends on the screen resolution (see
-    `TextScalerForScreen`), so the image is regenerated whenever any of them
-    changes.
+    The title is given by the viewport set (it follows the active camera and
+    the language selected by the user), its color is configured in the viewport
+    set (it depends on whether the viewport is selected) and its size depends
+    on the screen resolution (see `TextScalerForScreen`), so the image is
+    regenerated whenever any of them changes.
     */
     private void updateTitleImage()
     {
-        String currentTitle = viewport.getTitle();
+        String currentTitle = viewportSet.getTitleFor(viewport);
         ColorRgb currentColor = viewportSet.getTitleColorFor(viewport);
         int currentFontSize = viewportSet.getTextScaler().scaleSize(BASE_TITLE_FONT_SIZE);
 

@@ -5,6 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.gui.widget.Widget;
+import vsdk.toolkit.gui.widget.WidgetCommand;
+import vsdk.toolkit.gui.widget.WidgetMenu;
+import vsdk.toolkit.gui.widget.WidgetMenuElement;
+import vsdk.toolkit.gui.widget.WidgetMenuItem;
 
 /**
 A `ViewportSet` models one rectangular drawing area of the application (for
@@ -65,6 +70,7 @@ public class ViewportSet
     private ColorRgb titleColor;
     private ColorRgb selectedTitleColor;
     private TextScalerForScreen textScaler;
+    private Widget i18nContext;
 
     public ViewportSet()
     {
@@ -78,6 +84,7 @@ public class ViewportSet
         titleColor = new ColorRgb(1, 1, 1);
         selectedTitleColor = new ColorRgb(1, 1, 0);
         textScaler = new TextScalerForScreen();
+        i18nContext = null;
     }
 
     /**
@@ -315,6 +322,74 @@ public class ViewportSet
         if ( selectedTitleColor != null ) {
             this.selectedTitleColor = selectedTitleColor;
         }
+    }
+
+    /**
+    @return the I18N context (the GUI definition, in the language currently
+    selected by the user) used to present the texts of this set, or null if
+    there is none
+    */
+    public Widget getI18nContext()
+    {
+        return i18nContext;
+    }
+
+    /**
+    Sets the I18N context used to present the texts of this set. It must be
+    updated whenever the user changes the language, so the set is presented
+    with the messages of the new one. With a null context the default texts
+    are used.
+    @param i18nContext
+    */
+    public void setI18nContext(Widget i18nContext)
+    {
+        this.i18nContext = i18nContext;
+    }
+
+    /**
+    @param viewport a viewport of this set
+    @return the name to present for the viewport: the text of its projection
+    location in the `VIEWPORT_SET_PROJECTION_LOCATION` popup of the I18N
+    context (falling back to the text of the command, and to the default name
+    of the camera if the context does not define them)
+    */
+    public String getTitleFor(Viewport viewport)
+    {
+        String command = viewport.getProjectionLocationCommand();
+        String name = findMenuItemName(ViewportSetCommands.POPUP_PROJECTION_LOCATION, command);
+
+        if ( name == null && i18nContext != null ) {
+            WidgetCommand widgetCommand = i18nContext.getCommandByName(command);
+            if ( widgetCommand != null ) {
+                name = widgetCommand.getName();
+            }
+        }
+        if ( name == null || name.length() == 0 ) {
+            return viewport.getTitle();
+        }
+        return name;
+    }
+
+    private String findMenuItemName(String popupName, String command)
+    {
+        if ( i18nContext == null ) {
+            return null;
+        }
+
+        WidgetMenu popup = i18nContext.getPopup(popupName);
+        if ( popup == null ) {
+            return null;
+        }
+
+        for ( WidgetMenuElement element : popup.getChildren() ) {
+            if ( element instanceof WidgetMenuItem ) {
+                WidgetMenuItem item = (WidgetMenuItem)element;
+                if ( !item.isSeparator() && command.equals(item.getCommandName()) ) {
+                    return item.getName();
+                }
+            }
+        }
+        return null;
     }
 
     /**

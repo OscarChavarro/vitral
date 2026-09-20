@@ -13,6 +13,10 @@ import application.model.ApplicationModel;
 import application.gui.AwtApplicationModel;
 import application.gui.AwtGuiController;
 import application.net.VitralEditorMCP;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.SwingUtilities;
 
 public class SceneEditorApplication {
@@ -39,6 +43,55 @@ public class SceneEditorApplication {
     public void setGuiLanguage(String lang)
     {
         awtGuiController.setGuiLanguage(lang);
+    }
+
+    /**
+    @return the identifiers of the languages available for the GUI, sorted:
+    the names (without extension) of the JSON files in the GUI language folder
+    */
+    public List<String> getGuiLanguages()
+    {
+        List<String> languages = new ArrayList<String>();
+        File[] files = new File(AwtApplicationModel.GUI_LANGUAGE_FOLDER).listFiles();
+
+        if ( files != null ) {
+            for ( File file : files ) {
+                String name = file.getName();
+                if ( file.isFile() && name.endsWith(".json") ) {
+                    languages.add(name.substring(0, name.length() - ".json".length()));
+                }
+            }
+        }
+        Collections.sort(languages);
+        return languages;
+    }
+
+    /**
+    @return the identifier of the language currently used by the GUI
+    */
+    public String getCurrentGuiLanguage()
+    {
+        String name = new File(awtModel.getLanguageGuiFile()).getName();
+
+        if ( name.endsWith(".json") ) {
+            name = name.substring(0, name.length() - ".json".length());
+        }
+        return name;
+    }
+
+    /**
+    Changes the language of the GUI, rebuilding it (and so, propagating the new
+    messages to the application model).
+    @param language one of the identifiers given by `getGuiLanguages`
+    @return true if the language exists and was selected
+    */
+    public boolean setGuiLanguageById(String language)
+    {
+        if ( language == null || !getGuiLanguages().contains(language) ) {
+            return false;
+        }
+        setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + language + ".json");
+        return true;
     }
 
     private void createModel()

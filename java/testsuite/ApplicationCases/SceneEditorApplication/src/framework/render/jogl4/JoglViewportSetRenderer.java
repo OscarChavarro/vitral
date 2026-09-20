@@ -93,6 +93,32 @@ public class JoglViewportSetRenderer
         }
     }
 
+    /**
+    Releases the OpenGL resources of all the windows.
+    PRE: the OpenGL context is current and about to be destroyed (i.e. from
+    `GLEventListener.dispose`).
+    @param gl
+    */
+    public void disposeGlResources(GL2 gl)
+    {
+        for ( Jogl4ViewportWindow window : windows.values() ) {
+            window.disposeGlResources(gl);
+        }
+    }
+
+    /**
+    Forgets the OpenGL resources of all the windows, because the context that
+    owned them no longer exists (i.e. from `GLEventListener.init` of a new
+    context, as happens when the GUI is rebuilt). They are created again when
+    needed.
+    */
+    public void invalidateGlResources()
+    {
+        for ( Jogl4ViewportWindow window : windows.values() ) {
+            window.invalidateGlResources();
+        }
+    }
+
     private void forgetRemovedViewports()
     {
         if ( windows.size() > viewportSet.getViewportCount() ) {

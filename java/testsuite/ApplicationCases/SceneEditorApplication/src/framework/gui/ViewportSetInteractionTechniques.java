@@ -14,6 +14,10 @@ in use (i.e. with `AwtSystem`) before calling it.
 Mouse events must have coordinates in pixels of the `ViewportSet` area, with
 origin at its upper left corner.
 
+Mouse: pressing over a viewport selects it. If it was already selected,
+pressing and releasing over its title requests the menu to change its
+projection location, through the `ViewportSetInteractionListener`.
+
 Keyboard commands:
   - `.` selects the next viewport, `,` selects the next layout style (the
     last one shows only the selected viewport) and Alt+`w` maximizes /
@@ -25,15 +29,55 @@ Keyboard commands:
 public class ViewportSetInteractionTechniques
 {
     private final ViewportSet viewportSet;
+    private ViewportSetInteractionListener listener;
+    private boolean titlePressArmed;
 
     public ViewportSetInteractionTechniques(ViewportSet viewportSet)
     {
         this.viewportSet = viewportSet;
+        this.listener = null;
+        this.titlePressArmed = false;
+    }
+
+    /**
+    @param listener who receives the requests derived from interaction, or
+    null for none
+    */
+    public void setListener(ViewportSetInteractionListener listener)
+    {
+        this.listener = listener;
     }
 
     public ViewportSet getViewportSet()
     {
         return viewportSet;
+    }
+
+    /**
+    Processes one of the standard commands of the viewport set (see
+    `ViewportSetCommands`), i.e. from its popup menus, over the selected
+    viewport.
+    @param command the id of the command, starting with `IDV_`
+    @return true if the command was a viewport set one and was processed
+    */
+    public boolean processCommand(String command)
+    {
+        return processCommand(command, viewportSet.getSelectedViewport());
+    }
+
+    /**
+    Processes one of the standard commands of the viewport set over the given
+    viewport.
+    @param command the id of the command, starting with `IDV_`
+    @param viewport
+    @return true if the command was a viewport set one and was processed
+    */
+    public boolean processCommand(String command, Viewport viewport)
+    {
+        if ( viewport == null ) {
+            return false;
+        }
+        return viewport.selectProjectionLocation(command);
     }
 
     /**
@@ -118,22 +162,58 @@ public class ViewportSetInteractionTechniques
     }
 
     /**
-    Selects the viewport under the pointer.
+    Selects the viewport under the pointer. If it was already the selected
+    one and the press is over its title, the following click over the title
+    will request the projection location menu.
     @param event
     @return true if there is a viewport under the pointer
     */
     public boolean processMousePressedEvent(MouseEvent event)
     {
+        Viewport viewport = findViewportAt(event);
+
+        // Must be evaluated before the selection changes
+        titlePressArmed = viewport != null &&
+            event.getButton() == MouseEvent.BUTTON1 &&
+            viewportSet.isSelected(viewport) &&
+            isOverTitle(event, viewport);
+
         return selectViewportUnderPointer(event);
     }
 
+    /**
+    Selects the viewport under the pointer. If the press was over the title
+    of the already selected viewport and the button is released over it too,
+    the projection location menu is requested. (It is done on the release, and
+    not on the click event, because GUI technologies do not generate clicks if
+    the pointer moves slightly between the press and the release.)
+    @param event
+    @return true if there is a viewport under the pointer
+    */
     public boolean processMouseReleasedEvent(MouseEvent event)
     {
-        return selectViewportUnderPointer(event);
+        boolean titleClick = titlePressArmed;
+        Viewport viewport = findViewportAt(event);
+
+        titlePressArmed = false;
+        boolean selected = selectViewportUnderPointer(event);
+
+        if ( titleClick && viewport != null && listener != null &&
+             viewportSet.isSelected(viewport) && isOverTitle(event, viewport) ) {
+            // Just below the title, aligned with it
+            int x = viewport.getPixelStartX() + viewport.getTitleAreaStartX();
+            int viewportTop = viewportSet.getSizeYInPixels() -
+                (viewport.getPixelStartY() + viewport.getPixelSizeY());
+            int y = viewportTop + viewport.getTitleAreaStartY() +
+                viewport.getTitleAreaSizeY();
+            listener.projectionLocationMenuRequested(viewport, x, y);
+        }
+        return selected;
     }
 
     public boolean processMouseClickedEvent(MouseEvent event)
     {
+        titlePressArmed = false;
         return selectViewportUnderPointer(event);
     }
 
@@ -150,6 +230,13 @@ public class ViewportSetInteractionTechniques
             return false;
         }
         return viewportSet.selectViewport(viewport);
+    }
+
+    private boolean isOverTitle(MouseEvent event, Viewport viewport)
+    {
+        return viewport.isOverTitle(
+            viewportSet.toViewportX(viewport, event.getX()),
+            viewportSet.toViewportY(viewport, event.getY()));
     }
 
     /**

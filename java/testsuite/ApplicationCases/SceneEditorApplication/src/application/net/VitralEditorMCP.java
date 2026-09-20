@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import application.SceneEditorApplication;
 import application.framework.Scene;
@@ -129,7 +130,59 @@ class VitralEditorMCPProtocol implements Runnable
         if ( "workspace.export_jpg".equals(tool) ) {
             return workspaceJpg(request);
         }
+        if ( "gui.list_languages".equals(tool) ) {
+            return listLanguages();
+        }
+        if ( "gui.set_language".equals(tool) ) {
+            return setLanguage(request);
+        }
+        if ( "app.exit".equals(tool) ) {
+            return exitApplication();
+        }
         throw new IllegalArgumentException("Unknown tool: " + tool);
+    }
+
+    private String listLanguages()
+    {
+        StringBuilder sb = new StringBuilder();
+        String current = parent.getCurrentGuiLanguage();
+        boolean first = true;
+
+        sb.append("{\"current\":\"").append(escape(current)).append("\",\"languages\":[");
+        for ( String language : parent.getGuiLanguages() ) {
+            if ( !first ) {
+                sb.append(',');
+            }
+            first = false;
+            sb.append("{\"id\":\"").append(escape(language)).append('"')
+                .append(",\"current\":").append(language.equals(current)).append('}');
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private String setLanguage(String request)
+    {
+        String language = stringProperty(request, "language", "");
+
+        if ( !parent.setGuiLanguageById(language) ) {
+            throw new IllegalArgumentException("Unknown language \"" + language +
+                "\". Available languages: " + parent.getGuiLanguages());
+        }
+        return "{\"ok\":true,\"language\":\"" + escape(language) + "\"}";
+    }
+
+    /**
+    The exit is deferred a short time, so the response of this call can be
+    sent to the client before the process ends.
+    */
+    private String exitApplication()
+    {
+        Timer timer = new Timer(300, e -> parent.closeApplication());
+
+        timer.setRepeats(false);
+        timer.start();
+        return "{\"ok\":true,\"message\":\"The application is closing\"}";
     }
 
     private void clearScene()
@@ -252,6 +305,9 @@ class VitralEditorMCPProtocol implements Runnable
             + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
             + "," + tool("viewport.export_jpg", "Export the selected JOGL4 viewport to JPG. Arguments: path.")
             + "," + tool("workspace.export_jpg", "Export the complete JOGL4 workspace area, including all viewports, to JPG. Arguments: path.")
+            + "," + tool("gui.list_languages", "List the languages available for the GUI (I18N files in etc/gui), marking the current one.")
+            + "," + tool("gui.set_language", "Change the GUI language, rebuilding the GUI. Arguments: language (an id given by gui.list_languages).")
+            + "," + tool("app.exit", "Close the application (after answering this call).")
             + "]}";
     }
 

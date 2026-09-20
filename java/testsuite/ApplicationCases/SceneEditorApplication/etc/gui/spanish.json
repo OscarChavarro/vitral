@@ -565,6 +565,47 @@
           ]
         }
       ]
+    },
+    {
+      "type": "menu",
+      "name": "VIEWPORT_SET_PROJECTION_LOCATION",
+      "children": [
+        {
+          "type": "item",
+          "name": "&Perspectiva",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_PERSPECTIVE"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Superior",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_TOP"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "I&nferior",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_BOTTOM"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Izquierda",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_LEFT"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "&Frontal",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_PROJECTION_LOCATION_FRONT"
+          ]
+        }
+      ]
     }
   ],
   "commands": [
@@ -783,6 +824,31 @@
     {
       "id": "IDC_RENDERING_RAYTRACING",
       "name": "Visualizar usando trazado de rayos (Raytracing)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_PERSPECTIVE",
+      "name": "Perspectiva",
+      "brief": "Proyectar la escena desde la cámara en perspectiva"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_TOP",
+      "name": "Superior",
+      "brief": "Proyectar la escena desde arriba"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_BOTTOM",
+      "name": "Inferior",
+      "brief": "Proyectar la escena desde abajo"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_LEFT",
+      "name": "Izquierda",
+      "brief": "Proyectar la escena desde el lado izquierdo"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_FRONT",
+      "name": "Frontal",
+      "brief": "Proyectar la escena desde el frente"
     }
   ],
   "buttonGroups": [

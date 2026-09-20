@@ -125,6 +125,8 @@ public class AwtGuiController
         try {
             model.setGui(GuiPersistence.importAquynzaGui(
                 new FileInputStream(model.getLanguageGuiFile()), "."));
+            // The presentation of the viewport sets follows the language
+            parent.getApplicationModel().setI18nContext(model.getGui());
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
@@ -166,6 +168,7 @@ public class AwtGuiController
             Logger.reportMessage(this, VSDK.WARNING, "createGUIWindowed",
                 "Warning: Can not set " + model.getLookAndFeel() + " look and feel\n" + e);
         }
+        LookAndFeelTuner.apply();
 
         JFrame mainWindowWidget = new JFrame("VITRAL Scene Editor");
         model.setMainWindowWidget(mainWindowWidget);
@@ -187,7 +190,14 @@ public class AwtGuiController
         JSplitPane splitPane;
         model.setStatusBarPanel(createStatusBar());
 
-        Component left = jogl4Controller.getCanvas(model.getStatusMessage(), parent);
+        // The OpenGL canvas is a heavyweight component. If it is a direct child
+        // of the split pane, dragging the divider makes Swing remove and add
+        // it again (`BasicSplitPaneUI.addHeavyweightDivider`), destroying its
+        // native peer and OpenGL context, which freezes the GUI on macOS.
+        // Inside a lightweight container the split pane just resizes it.
+        Component canvas = jogl4Controller.getCanvas(model.getStatusMessage(), parent);
+        JPanel left = new JPanel(new BorderLayout());
+        left.add(canvas, BorderLayout.CENTER);
         Component right = createPanel();
         Dimension minLeft = new Dimension(160, 120);
         Dimension minRight = new Dimension(320, 120);
@@ -197,6 +207,9 @@ public class AwtGuiController
         left.setMinimumSize(minLeft);
         right.setMinimumSize(minRight);
         splitPane.setResizeWeight(1.0);
+        // Live resize: the outline of the non continuous mode would be hidden
+        // behind the heavyweight canvas
+        splitPane.setContinuousLayout(true);
 
         Dimension dd = splitPane.getMaximumSize();
         dd.width = Short.MAX_VALUE;

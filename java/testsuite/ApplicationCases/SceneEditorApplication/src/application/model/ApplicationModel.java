@@ -6,6 +6,7 @@ import java.util.List;
 
 import application.framework.Scene;
 import framework.model.ViewportSet;
+import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.light.Light;
@@ -26,6 +27,7 @@ public class ApplicationModel
     private int visualDebugRayLevels;
     private final List<ViewportSet> viewportSets;
     private int activeViewportSetIndex;
+    private Widget i18nContext;
 
     /**
     Creates the model with one standard `ViewportSet`. More sets can be added
@@ -49,7 +51,31 @@ public class ApplicationModel
     public void addViewportSet(ViewportSet viewportSet)
     {
         if ( viewportSet != null ) {
+            viewportSet.setI18nContext(i18nContext);
             viewportSets.add(viewportSet);
+        }
+    }
+
+    /**
+    @return the I18N context (GUI definition in the current language) shared by
+    the viewport sets, or null if there is none yet
+    */
+    public Widget getI18nContext()
+    {
+        return i18nContext;
+    }
+
+    /**
+    Sets the I18N context and propagates it to every viewport set, so they are
+    presented with the messages of the language currently selected by the
+    user. It must be called each time the GUI definition is loaded.
+    @param i18nContext
+    */
+    public void setI18nContext(Widget i18nContext)
+    {
+        this.i18nContext = i18nContext;
+        for ( ViewportSet viewportSet : viewportSets ) {
+            viewportSet.setI18nContext(i18nContext);
         }
     }
 

@@ -163,6 +163,13 @@ subprojects { subproject ->
         standardInput = System.in
         mainClass.set(providers.gradleProperty('runMainClass').orElse(''))
 
+        // JOGL (AppContextInfo) reflectively uses sun.awt.AppContext, which
+        // the java.desktop module does not export since JDK 16. Without this
+        // it reports "Caught AppContextInfo(Bug 1004)" on every canvas creation.
+        if (JavaVersion.current().isJava9Compatible()) {
+            jvmArgs('--add-exports=java.desktop/sun.awt=ALL-UNNAMED')
+        }
+
         def rawJvmArgs = project.findProperty('runJvmArgs')?.toString()
         if (rawJvmArgs) {
             def parsedJvmArgs = rawJvmArgs.split('\\|').findAll { !it.isBlank() }

@@ -54,6 +54,11 @@ public class Viewport
     private int pixelSizeX;
     private int pixelSizeY;
 
+    private int titleAreaStartX;
+    private int titleAreaStartY;
+    private int titleAreaSizeX;
+    private int titleAreaSizeY;
+
     public Viewport()
     {
         Matrix4x4d r = new Matrix4x4d();
@@ -116,6 +121,11 @@ public class Viewport
         pixelStartY = 0;
         pixelSizeX = 0;
         pixelSizeY = 0;
+
+        titleAreaStartX = 0;
+        titleAreaStartY = 0;
+        titleAreaSizeX = 0;
+        titleAreaSizeY = 0;
     }
 
     public int getRequestedSizeXInPixels()
@@ -340,6 +350,58 @@ public class Viewport
     }
 
     /**
+    Informs the area, in pixels, where the title of this viewport is presented.
+    Only who presents the title knows its real size, so it must be informed
+    each time the title is drawn. Coordinates are relative to the viewport,
+    with origin at its upper left corner. An empty area (the initial value)
+    means the title has not been presented.
+    @param startX
+    @param startY
+    @param sizeX
+    @param sizeY
+    */
+    public void setTitleArea(int startX, int startY, int sizeX, int sizeY)
+    {
+        titleAreaStartX = startX;
+        titleAreaStartY = startY;
+        titleAreaSizeX = sizeX;
+        titleAreaSizeY = sizeY;
+    }
+
+    public int getTitleAreaStartX()
+    {
+        return titleAreaStartX;
+    }
+
+    public int getTitleAreaStartY()
+    {
+        return titleAreaStartY;
+    }
+
+    public int getTitleAreaSizeX()
+    {
+        return titleAreaSizeX;
+    }
+
+    public int getTitleAreaSizeY()
+    {
+        return titleAreaSizeY;
+    }
+
+    /**
+    @param x coordinate relative to the viewport, origin at its upper left
+    corner
+    @param y coordinate relative to the viewport, origin at its upper left
+    corner
+    @return true if the point is over the area where the title is presented
+    */
+    public boolean isOverTitle(int x, int y)
+    {
+        return x >= titleAreaStartX && x < titleAreaStartX + titleAreaSizeX &&
+               y >= titleAreaStartY && y < titleAreaStartY + titleAreaSizeY;
+    }
+
+    /**
     Assigns the percent-based area of this viewport inside its container.
     @param startXPercent
     @param startYPercent
@@ -419,6 +481,59 @@ public class Viewport
             pixelSizeY = h;
         }
         updateCameraViewports(pixelSizeX, pixelSizeY);
+    }
+
+    /**
+    @return the standard command (see `ViewportSetCommands`) that selects the
+    projection location currently used by this viewport
+    */
+    public String getProjectionLocationCommand()
+    {
+        if ( activeCamera == topCamera ) {
+            return ViewportSetCommands.IDV_PROJECTION_LOCATION_TOP;
+        }
+        else if ( activeCamera == bottomCamera ) {
+            return ViewportSetCommands.IDV_PROJECTION_LOCATION_BOTTOM;
+        }
+        else if ( activeCamera == leftCamera ) {
+            return ViewportSetCommands.IDV_PROJECTION_LOCATION_LEFT;
+        }
+        else if ( activeCamera == frontCamera ) {
+            return ViewportSetCommands.IDV_PROJECTION_LOCATION_FRONT;
+        }
+        return ViewportSetCommands.IDV_PROJECTION_LOCATION_PERSPECTIVE;
+    }
+
+    /**
+    Selects the projection location given by one of the standard commands of
+    the projection location popup (see `ViewportSetCommands`).
+    @param command
+    @return true if the command was a projection location one and was applied
+    */
+    public boolean selectProjectionLocation(String command)
+    {
+        if ( command == null ) {
+            return false;
+        }
+        switch ( command ) {
+          case ViewportSetCommands.IDV_PROJECTION_LOCATION_PERSPECTIVE:
+            setActiveCamera(perspectiveCamera);
+            return true;
+          case ViewportSetCommands.IDV_PROJECTION_LOCATION_TOP:
+            setActiveCamera(topCamera);
+            return true;
+          case ViewportSetCommands.IDV_PROJECTION_LOCATION_BOTTOM:
+            setActiveCamera(bottomCamera);
+            return true;
+          case ViewportSetCommands.IDV_PROJECTION_LOCATION_LEFT:
+            setActiveCamera(leftCamera);
+            return true;
+          case ViewportSetCommands.IDV_PROJECTION_LOCATION_FRONT:
+            setActiveCamera(frontCamera);
+            return true;
+          default:
+            return false;
+        }
     }
 
     /**

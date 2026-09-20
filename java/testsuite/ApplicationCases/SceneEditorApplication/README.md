@@ -14,6 +14,12 @@ Run the application with the `-s` argument:
   -PrunArgs='-s'
 ```
 
+`runMain` already adds the JVM option `--add-exports=java.desktop/sun.awt=ALL-UNNAMED`
+(see the root `build.gradle`). JOGL needs it on JDK 16+, otherwise it prints
+`Caught AppContextInfo(Bug 1004) InaccessibleObjectException...` with a stack
+trace each time the OpenGL canvas is created. If you launch the application
+some other way (i.e. from an IDE), add that option to the JVM arguments.
+
 The server listens on TCP port `1234` on localhost. Each request is one JSON-RPC
 message per line, and each response is returned as one JSON line.
 
@@ -40,6 +46,9 @@ For tool calls, send:
 - `render.raytrace_png`: raytraces the current scene and exports a PNG. Arguments: `path`, `width`, `height`.
 - `viewport.export_jpg`: exports the selected JOGL4 viewport as a JPG. Arguments: `path`.
 - `workspace.export_jpg`: exports the complete JOGL4 workspace area, including all viewports, as a JPG. Arguments: `path`.
+- `gui.list_languages`: lists the languages available for the GUI (the I18N JSON files in `etc/gui`) and marks the current one.
+- `gui.set_language`: changes the GUI language, rebuilding the GUI. Arguments: `language` (an id returned by `gui.list_languages`, i.e. `spanish`).
+- `app.exit`: closes the application (the response is sent before it ends).
 
 ## Example Agent Session
 
@@ -68,3 +77,15 @@ the complete JOGL4 workspace as `outputViewport.jpg`.
   a single line.
 - If the local shell blocks TCP access from a sandbox, run the client command
   with the required local-network permission.
+
+## I18N And Standard Viewport Set Popups
+
+GUI texts come from the JSON files in `etc/gui` (one per language). Besides the
+application `IDC_` commands, the framework defines standard commands starting
+with `IDV_` and popup menus that are not part of the main menubar. The first one
+is the `VIEWPORT_SET_PROJECTION_LOCATION` popup (see
+`framework.model.ViewportSetCommands`), with the commands
+`IDV_VIEWPORT_SET_PROJECTION_LOCATION_{PERSPECTIVE,TOP,BOTTOM,LEFT,FRONT}`. The
+`ViewportSet` uses the item texts of that popup as the names of its viewports,
+and the application injects the GUI definition (`ApplicationModel.setI18nContext`)
+each time it is loaded, so names follow the language selected by the user.

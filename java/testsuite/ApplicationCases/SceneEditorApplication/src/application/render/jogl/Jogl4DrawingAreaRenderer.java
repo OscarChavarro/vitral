@@ -76,7 +76,9 @@ import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
 import application.model.ApplicationModel;
+import framework.gui.AwtProjectionLocationPopup;
 import framework.gui.AwtTextScalerForScreen;
+import framework.gui.ViewportSetInteractionListener;
 import framework.gui.ViewportInteractionTechniques;
 import framework.gui.ViewportSetInteractionTechniques;
 import framework.model.Viewport;
@@ -142,6 +144,7 @@ public class Jogl4DrawingAreaRenderer implements
     private final ViewportSetInteractionTechniques viewportSetTechniques;
     private final JoglViewportSetRenderer viewportSetRenderer;
     private final AwtTextScalerForScreen textScalerForScreen;
+    private final AwtProjectionLocationPopup projectionLocationPopup;
 
     //=================================================================
 
@@ -203,6 +206,15 @@ public class Jogl4DrawingAreaRenderer implements
         // This drawing area presents the viewport set of the active display
         viewportSet = model.getActiveViewportSet();
         viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
+        projectionLocationPopup = new AwtProjectionLocationPopup(
+            viewportSet, viewportSetTechniques, canvas);
+        viewportSetTechniques.setListener(new ViewportSetInteractionListener() {
+            @Override
+            public void projectionLocationMenuRequested(Viewport viewport, int x, int y) {
+                projectionLocationPopup.show(viewport,
+                    scaleXToCanvas(x), scaleYToCanvas(y));
+            }
+        });
         textScalerForScreen = new AwtTextScalerForScreen(viewportSet.getTextScaler());
         textScalerForScreen.updateFromDefaultScreen();
         viewportSetRenderer = new JoglViewportSetRenderer(
@@ -265,6 +277,24 @@ public class Jogl4DrawingAreaRenderer implements
         }
         return (int)Math.round(((double)y * (double)viewportSet.getSizeYInPixels()) /
             (double)awtViewportHeight);
+    }
+
+    private int scaleXToCanvas(int x)
+    {
+        if ( awtViewportWidth <= 0 || viewportSet.getSizeXInPixels() <= 0 ) {
+            return x;
+        }
+        return (int)Math.round(((double)x * (double)awtViewportWidth) /
+            (double)viewportSet.getSizeXInPixels());
+    }
+
+    private int scaleYToCanvas(int y)
+    {
+        if ( awtViewportHeight <= 0 || viewportSet.getSizeYInPixels() <= 0 ) {
+            return y;
+        }
+        return (int)Math.round(((double)y * (double)awtViewportHeight) /
+            (double)viewportSet.getSizeYInPixels());
     }
 
     /**
@@ -1091,14 +1121,20 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void init(GLAutoDrawable drawable)
     {
-        
+        // A new OpenGL context (i.e. the GUI was rebuilt when changing the
+        // language) does not have the textures created by the previous one
+        if ( viewportSetRenderer != null ) {
+            viewportSetRenderer.invalidateGlResources();
+        }
     }
 
     /** Not used method, but needed to instanciate GLEventListener
      * @param drawable */
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        
+        if ( viewportSetRenderer != null ) {
+            viewportSetRenderer.disposeGlResources(drawable.getGL().getGL2());
+        }
     }
 
     /** Not used method, but needed to instanciate GLEventListener
@@ -1131,7 +1167,10 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseEntered(java.awt.event.MouseEvent e)
     {
-        canvas.requestFocusInWindow();
+        // While the projection location menu is open, it has the keyboard focus
+        if ( !projectionLocationPopup.isVisible() ) {
+            canvas.requestFocusInWindow();
+        }
 
         // WARNING / TODO
         // There should be a cameraController.getFutureAction(e) that calculates
@@ -1197,6 +1236,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mousePressed(java.awt.event.MouseEvent e)
     {
+        if ( projectionLocationPopup.consumesMouseEvent(e) ) {
+            return;
+        }
         Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView == null ) {
@@ -1288,6 +1330,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseReleased(java.awt.event.MouseEvent e)
     {
+        if ( projectionLocationPopup.consumesMouseEvent(e) ) {
+            return;
+        }
         Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView != null ) {
@@ -1354,6 +1399,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseClicked(java.awt.event.MouseEvent e)
     {
+        if ( projectionLocationPopup.consumesMouseEvent(e) ) {
+            return;
+        }
         Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView != null ) {
@@ -1461,6 +1509,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseDragged(java.awt.event.MouseEvent e)
     {
+        if ( projectionLocationPopup.consumesMouseEvent(e) ) {
+            return;
+        }
         Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
         if ( mouseView != null ) {
