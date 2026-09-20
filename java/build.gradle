@@ -203,12 +203,6 @@ tasks.register('publishToMavenLocal') {
 }
 
 
-project(':testsuite:ApplicationCases:CommandServer') {
-    dependencies {
-        implementation project(':base')
-    }
-}
-
 project(':testsuite:ApplicationCases:SearchEngineFor3DModels') {
     dependencies {
         compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
@@ -254,8 +248,7 @@ project(':testsuite:Tools:TangibleInterfaceGizmoCreator') {
 
 configure(subprojects.findAll {
     it.path.startsWith(':testsuite:') &&
-    it.buildFile.exists() &&
-    it.path != ':testsuite:ApplicationCases:CommandServer'
+    it.buildFile.exists()
 }) {
     dependencies {
         implementation project(':base')
@@ -279,7 +272,6 @@ configure(subprojects.findAll {
 configure(subprojects.findAll {
     it.path.startsWith(':testsuite:') &&
     it.buildFile.exists() &&
-    it.path != ':testsuite:ApplicationCases:CommandServer' &&
     it.path != ':testsuite:_APITests:_JOGL2HelloWorld' &&
     it.path != ':testsuite:_APITests:_JOGL4HelloWorld' &&
     it.path != ':testsuite:_APITests:_JOGL4PbufferExample' &&

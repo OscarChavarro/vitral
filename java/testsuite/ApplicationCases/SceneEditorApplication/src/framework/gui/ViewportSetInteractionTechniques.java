@@ -162,6 +162,18 @@ public class ViewportSetInteractionTechniques
     }
 
     /**
+    @param event pointer position, in the `ViewportSet` area
+    @return true if the pointer is over the title (HUD) of a viewport, that
+    is, over an area where clicking has an effect
+    */
+    public boolean isPointerOverTitle(MouseEvent event)
+    {
+        Viewport viewport = findViewportAt(event);
+
+        return viewport != null && isOverTitle(event, viewport);
+    }
+
+    /**
     Selects the viewport under the pointer. If it was already the selected
     one and the press is over its title, the following click over the title
     will request the projection location menu.

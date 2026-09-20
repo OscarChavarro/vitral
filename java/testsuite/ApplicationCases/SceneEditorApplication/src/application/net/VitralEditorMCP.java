@@ -224,7 +224,7 @@ class VitralEditorMCPProtocol implements Runnable
         int height = (int)numberProperty(request, "height", 480);
         parent.getApplicationModel().setRaytracedImageWidth(width);
         parent.getApplicationModel().setRaytracedImageHeight(height);
-        parent.doRaytracedImage();
+        parent.doRaytracingImage();
         File out = new File(path);
         ImagePersistence.exportPNG(out, parent.getApplicationModel().getRaytracedImage());
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";

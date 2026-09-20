@@ -131,6 +131,7 @@ public class Jogl4DrawingAreaRenderer implements
     private Cursor camtranslateCursor;
     private Cursor camadvanceCursor;
     private Cursor selectCursor;
+    private Cursor titleCursor;
 
     SceneEditorApplication parent;
 
@@ -321,6 +322,31 @@ public class Jogl4DrawingAreaRenderer implements
         return viewportSetTechniques.toViewportEvent(toSurfaceEvent(e), view.getViewport());
     }
 
+    /**
+    Sets the cursor for the pointer position: a normal pointer over the title
+    of a viewport (feedback that it can be clicked), the given one elsewhere.
+    */
+    private void setCursorForPointer(java.awt.event.MouseEvent e, Cursor cursor)
+    {
+        syncViewportStateFromCanvas();
+        Cursor wanted = cursor;
+
+        if ( viewportSetTechniques.isPointerOverTitle(toSurfaceEvent(e)) ) {
+            wanted = titleCursor;
+        }
+        if ( canvas.getCursor() != wanted ) {
+            canvas.setCursor(wanted);
+        }
+    }
+
+    private Cursor getModeCursor()
+    {
+        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
+            return camrotateCursor;
+        }
+        return selectCursor;
+    }
+
     private void createCursors()
     {
         Toolkit awtToolkit = Toolkit.getDefaultToolkit();
@@ -336,6 +362,7 @@ public class Jogl4DrawingAreaRenderer implements
         camadvanceCursor = awtToolkit.createCustomCursor(i, new Point(16, 16), "CameraAdvance");
 
         selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+        titleCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
     }
 
@@ -922,7 +949,7 @@ public class Jogl4DrawingAreaRenderer implements
             theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
             model.setRaytracedImageWidth(view.getViewportSizeX());
             model.setRaytracedImageHeight(view.getViewportSizeY());
-            parent.doRaytracedImage();
+            parent.doRaytracingImage();
             gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glPushMatrix();
             gl.glLoadIdentity();
@@ -1176,12 +1203,7 @@ public class Jogl4DrawingAreaRenderer implements
         // There should be a cameraController.getFutureAction(e) that calculates
         // the proper icon for display ... here an Aquynza operation is
         // assumed and hard-coded
-        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-            canvas.setCursor(camrotateCursor);
-        }
-        else {
-            canvas.setCursor(selectCursor);
-        }
+        setCursorForPointer(e, getModeCursor());
     }
 
     @Override
@@ -1269,6 +1291,7 @@ public class Jogl4DrawingAreaRenderer implements
         else {
             canvas.setCursor(selectCursor);
         }
+        setCursorForPointer(e, canvas.getCursor());
 
         vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1347,12 +1370,7 @@ public class Jogl4DrawingAreaRenderer implements
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
-        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-            canvas.setCursor(camrotateCursor);
-        }
-        else {
-            canvas.setCursor(selectCursor);
-        }
+        setCursorForPointer(e, getModeCursor());
 
         vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1455,6 +1473,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void mouseMoved(java.awt.event.MouseEvent e)
     {
+        if ( !projectionLocationPopup.isVisible() ) {
+            setCursorForPointer(e, getModeCursor());
+        }
         //-----------------------------------------------------------------
         Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
 
@@ -1733,7 +1754,7 @@ public class Jogl4DrawingAreaRenderer implements
         if ( keycode == KeyEvent.VK_F10 ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.doRaytracedImage();
+            parent.doRaytracingImage();
   
             if ( parent.getAwtModel().getImageControlWindow() == null ) {
                 parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(

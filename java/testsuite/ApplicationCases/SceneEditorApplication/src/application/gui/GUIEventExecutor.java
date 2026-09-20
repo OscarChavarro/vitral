@@ -553,7 +553,7 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.doRaytracedImage();
+            parent.doRaytracingImage();
             if ( parent.getAwtModel().getImageControlWindow() == null ) {
                 parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
                     parent.getApplicationModel().getRaytracedImage(),
@@ -637,9 +637,6 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_TOOLS_RAY") ) {
             parent.getApplicationModel().setWithVisualDebugRay(
                 !parent.getApplicationModel().isWithVisualDebugRay());
-        }
-        else if ( label.equals("IDC_VOICECOMMAND_CLIENT") ) {
-            parent.switchVoiceCommandClient();
         }
         else if ( label.equals("IDC_NEW_VIEW") ) {
             parent.getJogl4Controller().getDrawingArea().newView();

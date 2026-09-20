@@ -28,9 +28,6 @@ public class SceneEditorApplication {
     private AwtGuiController awtGuiController;
     private Jogl4ApplicationController jogl4Controller;
 
-    // Networking
-    private VitralEditorMCP networkServer;
-
     public void setLookAndFeel(String lookAndFeel)
     {
         awtGuiController.setLookAndFeel(lookAndFeel);
@@ -51,14 +48,14 @@ public class SceneEditorApplication {
     */
     public List<String> getGuiLanguages()
     {
-        List<String> languages = new ArrayList<String>();
+        List<String> languages = new ArrayList<>();
         File[] files = new File(AwtApplicationModel.GUI_LANGUAGE_FOLDER).listFiles();
 
         if ( files != null ) {
             for ( File file : files ) {
                 String name = file.getName();
-                if ( file.isFile() && name.endsWith(".json") ) {
-                    languages.add(name.substring(0, name.length() - ".json".length()));
+                if ( file.isFile() && name.endsWith(AwtApplicationModel.JSON_EXTENSION) ) {
+                    languages.add(name.substring(0, name.length() - AwtApplicationModel.JSON_EXTENSION.length()));
                 }
             }
         }
@@ -73,8 +70,8 @@ public class SceneEditorApplication {
     {
         String name = new File(awtModel.getLanguageGuiFile()).getName();
 
-        if ( name.endsWith(".json") ) {
-            name = name.substring(0, name.length() - ".json".length());
+        if ( name.endsWith(AwtApplicationModel.JSON_EXTENSION) ) {
+            name = name.substring(0, name.length() - AwtApplicationModel.JSON_EXTENSION.length());
         }
         return name;
     }
@@ -90,7 +87,7 @@ public class SceneEditorApplication {
         if ( language == null || !getGuiLanguages().contains(language) ) {
             return false;
         }
-        setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + language + ".json");
+        setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + language + AwtApplicationModel.JSON_EXTENSION);
         return true;
     }
 
@@ -121,11 +118,9 @@ public class SceneEditorApplication {
         jogl4Controller = new Jogl4ApplicationController(applicationModel);
         awtModel = new AwtApplicationModel();
         awtModel.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-        awtModel.setLanguageGuiFile(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "english.json");
+        awtModel.setLanguageGuiFile(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "english" + AwtApplicationModel.JSON_EXTENSION);
         awtModel.setFullScreenGuiMode(false);
         awtGuiController = new AwtGuiController(this, awtModel, jogl4Controller);
-
-        networkServer = null;
     }
 
     public final void createGUI()
@@ -145,12 +140,13 @@ public class SceneEditorApplication {
         int i;
         for ( i = 0; i < args.length; i++ ) {
             if ( args[i].equals("-s") ) {
-                networkServer = new VitralEditorMCP(this);
+                // Starts its own listener thread, which keeps it alive
+                new VitralEditorMCP(this);
             }
         }
     }
 
-    public void doRaytracedImage()
+    public void doRaytracingImage()
     {
         applicationModel.getRaytracedImage().init(
             applicationModel.getRaytracedImageWidth(),
@@ -163,20 +159,9 @@ public class SceneEditorApplication {
         applicationModel.getScene().raytrace(applicationModel.getRaytracedImage());
     }
 
-    public void switchVoiceCommandClient()
-    {
-        awtGuiController.switchVoiceCommandClient();
-    }
-
     public void closeApplication()
     {
-        awtGuiController.closeApplication();
         System.exit(0);
-    }
-
-    public void externalCommand(String label)
-    {
-        boolean b = awtModel.getGuiEventExecutor().executeCommand(label);
     }
 
     public ApplicationModel getApplicationModel()
@@ -192,11 +177,6 @@ public class SceneEditorApplication {
     public AwtApplicationModel getAwtModel()
     {
         return awtModel;
-    }
-
-    public AwtGuiController getAwtGuiController()
-    {
-        return awtGuiController;
     }
 
     public static void main(String[] args) {

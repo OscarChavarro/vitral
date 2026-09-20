@@ -19,6 +19,7 @@ public class AwtApplicationModel
     private String lookAndFeel;
     /** Folder with the I18N files (one JSON file per language) used to build the GUI. */
     public static final String GUI_LANGUAGE_FOLDER = "./etc/gui/";
+    public static final String JSON_EXTENSION = ".json";
 
     private String languageGuiFile;
     private ModifyPanel modifyPanel;

@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -25,7 +24,6 @@ import javax.swing.border.Border;
 
 import application.Jogl4ApplicationController;
 import application.SceneEditorApplication;
-import application.net.VitralCommandClient;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.gui.GuiPersistence;
@@ -36,9 +34,6 @@ public class AwtGuiController
     private final SceneEditorApplication parent;
     private final AwtApplicationModel model;
     private final Jogl4ApplicationController jogl4Controller;
-    private VitralCommandClient networkCommandClient;
-    private String currentNetworkCommandClientIp;
-    private String currentNetworkCommandClientPort;
 
     public AwtGuiController(SceneEditorApplication parent,
                             AwtApplicationModel model,
@@ -47,8 +42,6 @@ public class AwtGuiController
         this.parent = parent;
         this.model = model;
         this.jogl4Controller = jogl4Controller;
-        currentNetworkCommandClientIp = "127.0.0.1";
-        currentNetworkCommandClientPort = "1235";
     }
 
     public void setLookAndFeel(String lookAndFeel)
@@ -259,62 +252,5 @@ public class AwtGuiController
         System.gc();
         model.setMainWindowWidget(null);
         System.gc();
-    }
-
-    public void switchVoiceCommandClient()
-    {
-        String ip, port;
-        if ( networkCommandClient == null ) {
-            ip = (String)JOptionPane.showInputDialog(
-                model.getMainWindowWidget(),
-                model.getGui().getMessage("IDM_VOICECOMMAND_IPQUESTION"),
-                model.getGui().getMessage("IDM_VOICECOMMAND_TITLE"),
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                null,
-                currentNetworkCommandClientIp);
-            if ( ip == null ) {
-                model.getStatusMessage().setText(
-                    model.getGui().getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
-                    model.getGui().getMessage("IDM_VOICECOMMAND_DISABLED"));
-                return;
-            }
-            currentNetworkCommandClientIp = ip;
-            port = (String)JOptionPane.showInputDialog(
-                model.getMainWindowWidget(),
-                model.getGui().getMessage("IDM_VOICECOMMAND_PORTQUESTION"),
-                model.getGui().getMessage("IDM_VOICECOMMAND_TITLE"),
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                null,
-                currentNetworkCommandClientPort);
-            if ( port == null ) {
-                model.getStatusMessage().setText(
-                    model.getGui().getMessage("IDM_OPERATION_CANCELLED_BY_USER") + " - " +
-                    model.getGui().getMessage("IDM_VOICECOMMAND_DISABLED"));
-                return;
-            }
-            currentNetworkCommandClientPort = port;
-            networkCommandClient = new VitralCommandClient(parent,
-                currentNetworkCommandClientIp,
-                Integer.parseInt(currentNetworkCommandClientPort));
-            Thread ct = new Thread(networkCommandClient);
-            ct.start();
-            model.getStatusMessage().setText(
-                model.getGui().getMessage("IDM_VOICECOMMAND_ENABLED"));
-        }
-        else {
-            networkCommandClient.running = false;
-            model.getStatusMessage().setText(
-                model.getGui().getMessage("IDM_VOICECOMMAND_DISABLED"));
-            networkCommandClient = null;
-        }
-    }
-
-    public void closeApplication()
-    {
-        if ( networkCommandClient != null ) {
-            networkCommandClient.end();
-        }
     }
 }
