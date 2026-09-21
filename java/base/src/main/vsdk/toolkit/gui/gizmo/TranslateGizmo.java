@@ -21,6 +21,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.processing.CurveModeler;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.MouseEvent;
+import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state
@@ -68,7 +69,16 @@ public class TranslateGizmo extends Gizmo {
     private static final double BOX_HEIGHT = 0.01;
     private static final double ARROW_LENGHT = 1.0;
 
+    /// Size and line width designed for legacy resolutions
+    public static final int DEFAULT_APARENT_SIZE_IN_PIXELS = 100;
+    public static final double DEFAULT_LINE_WIDTH = 1.0;
+
+    /// Apparent size (in legacy resolution pixels) the user has chosen
+    private int baseAparentSizeInPixels;
+    /// Apparent size in pixels of the screen currently in use
     private int aparentSizeInPixels;
+    /// Width, in pixels, of the lines of the gizmo
+    private double lineWidth;
 
     /// Interaction state
     private int persistentSelection;
@@ -86,7 +96,9 @@ public class TranslateGizmo extends Gizmo {
 
     public TranslateGizmo(Camera cam)
     {
-        aparentSizeInPixels = 100;
+        baseAparentSizeInPixels = DEFAULT_APARENT_SIZE_IN_PIXELS;
+        aparentSizeInPixels = DEFAULT_APARENT_SIZE_IN_PIXELS;
+        lineWidth = DEFAULT_LINE_WIDTH;
         persistentSelection = X_AXIS_GROUP;
         volatileSelection = NULL_GROUP;
 
@@ -127,6 +139,203 @@ public class TranslateGizmo extends Gizmo {
     public void setAparentSizeInPixels(int du)
     {
         aparentSizeInPixels = du;
+    }
+
+    /**
+    @return the apparent size the gizmo is designed to have in legacy
+    resolutions, in pixels; it is the size chosen by the user, before scaling
+    it for the resolution of the screen
+    */
+    public int getBaseAparentSizeInPixels()
+    {
+        return baseAparentSizeInPixels;
+    }
+
+    /**
+    @param size apparent size of the gizmo in legacy resolutions, in pixels;
+    not positive values are ignored. It is used the next time `applyScale`
+    is called
+    */
+    public void setBaseAparentSizeInPixels(int size)
+    {
+        if ( size > 0 ) {
+            baseAparentSizeInPixels = size;
+        }
+    }
+
+    /**
+    @return the width, in pixels, of the lines that draw the gizmo
+    */
+    public double getLineWidth()
+    {
+        return lineWidth;
+    }
+
+    /**
+    @param lineWidth width, in pixels, of the lines that draw the gizmo; not
+    positive values are ignored
+    */
+    public void setLineWidth(double lineWidth)
+    {
+        if ( lineWidth > 0.0 ) {
+            this.lineWidth = lineWidth;
+        }
+    }
+
+    /**
+    Sets the apparent size and the line width of the gizmo to the values
+    that make it look proportional to the screen resolution: the base values
+    (designed for legacy resolutions) multiplied by the scale of the given
+    scaler. The new size is used by the gizmo the next time its
+    transformation is set.
+
+    @param scaler scaler informed of the resolution of the screen
+    */
+    public void applyScale(ViewportElementScaler scaler)
+    {
+        if ( scaler == null ) {
+            return;
+        }
+        setAparentSizeInPixels(scaler.scaleSize(baseAparentSizeInPixels));
+        setLineWidth(scaler.scaleLength(DEFAULT_LINE_WIDTH));
+    }
+
+    /**
+    @return the width of the lines of the gizmo, converted from pixels to
+    world units, as seen from its camera at its current apparent size
+    */
+    public double getLineWidthInWorldUnits()
+    {
+        return lineWidth * currentScale / aparentSizeInPixels;
+    }
+
+    /**
+    A straight line of the gizmo, in world space.
+    */
+    public static final class LineSegment {
+        private final Vector3Dd start;
+        private final Vector3Dd end;
+        private final ColorRgb color;
+
+        public LineSegment(Vector3Dd start, Vector3Dd end, ColorRgb color)
+        {
+            this.start = start;
+            this.end = end;
+            this.color = color;
+        }
+
+        public Vector3Dd getStart()
+        {
+            return start;
+        }
+
+        public Vector3Dd getEnd()
+        {
+            return end;
+        }
+
+        public ColorRgb getColor()
+        {
+            return color;
+        }
+    }
+
+    /**
+    Gives the straight lines drawn by the gizmo: the shaft of each axis arrow
+    (from the gap around the origin up to the base of its head) and the
+    segments that delimit the plane handles. Lines hidden because they point
+    to the viewer of an orthogonal camera are not included, and the color of
+    the lines of the selected group is yellow.
+    PRE: the transformation matrix of the gizmo has been set.
+
+    @return the lines of the gizmo, in world space
+    */
+    public ArrayList<LineSegment> getLineSegments()
+    {
+        ArrayList<LineSegment> segments = new ArrayList<LineSegment>();
+        Vector3Dd zAxis = new Vector3Dd(0, 0, 1);
+
+        for ( SimpleBody element : elementInstances ) {
+            Geometry g = element.getGeometry();
+            double length;
+
+            if ( g == arrowModel ) {
+                length = currentScale*0.5*ARROW_LENGHT;
+            }
+            else if ( g == cylinderModel ) {
+                length = currentScale*SEGMENT_LENGHT;
+            }
+            else {
+                continue;
+            }
+
+            Vector3Dd start = element.getPosition();
+            Vector3Dd end = start.add(element.getRotation().multiply(zAxis).multiply(length));
+
+            segments.add(new LineSegment(start, end, element.getMaterial().getDiffuse()));
+        }
+        return segments;
+    }
+
+    /**
+    Builds the geometry to draw a line of the gizmo as a line with thickness
+    seen from the camera of the gizmo: a triangle strip (a rectangle of 4
+    vertices, in strip order) in world space, facing the camera. Its width is
+    `getLineWidth()` pixels, and it is extended half of that width at both
+    ends (square caps), so lines that meet at a corner have no gaps.
+
+    @param segment line to draw, as given by `getLineSegments()`
+    @return the 4 vertices of the triangle strip, or null if the line has no
+    length
+    */
+    public Vector3Dd[] buildLineStrip(LineSegment segment)
+    {
+        Vector3Dd direction = segment.getEnd().subtract(segment.getStart());
+        double length = direction.length();
+
+        if ( length < VSDK.EPSILON ) {
+            return null;
+        }
+        direction = direction.multiply(1/length);
+
+        // Direction from the eye to the line, to face the camera
+        Vector3Dd view;
+
+        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
+            view = camera.getFront();
+        }
+        else {
+            view = segment.getStart().add(segment.getEnd()).multiply(0.5).subtract(camera.getPosition());
+        }
+
+        Vector3Dd side = direction.crossProduct(view);
+
+        if ( side.length() < VSDK.EPSILON ) {
+            // Line pointing to the viewer: any direction in screen is valid
+            side = camera.getUp();
+        }
+
+        double halfWidth = getLineWidthInWorldUnits()/2;
+        side = side.normalized().multiply(halfWidth);
+
+        Vector3Dd start = segment.getStart().subtract(direction.multiply(halfWidth));
+        Vector3Dd end = segment.getEnd().add(direction.multiply(halfWidth));
+
+        return new Vector3Dd[] {
+            start.add(side),
+            start.subtract(side),
+            end.add(side),
+            end.subtract(side)
+        };
+    }
+
+    /**
+    @return the factor applied to the gizmo geometry so it keeps its apparent
+    size in pixels, as seen from its camera
+    */
+    public double getCurrentScale()
+    {
+        return currentScale;
     }
 
     public final void setCamera(Camera cam)
@@ -309,16 +518,21 @@ public class TranslateGizmo extends Gizmo {
         camera.updateVectors();
 
         if ( selectedResizing ) {
-            Vector3Dd a = new Vector3Dd();
-            Vector3Dd b = new Vector3Dd();
             Vector3Dd p = getPosition();
             Vector3Dd right = camera.getLeft().multiply(-1);
 
             right = right.normalized();
-            camera.projectPointUsingRayMethod(p, a);
-            camera.projectPointUsingRayMethod(p.add(right), b);
-            double factor = Vector3Dd.distance(a, b);
-            currentScale = ((double)initialdu)/factor;
+            Vector3Dd a = camera.projectPointUsingRayMethod(p);
+            Vector3Dd b = camera.projectPointUsingRayMethod(p.add(right));
+
+            // Keeps the last scale if the size in pixels can not be measured
+            if ( a != null && b != null ) {
+                double factor = Vector3Dd.distance(a, b);
+
+                if ( factor > VSDK.EPSILON ) {
+                    currentScale = ((double)initialdu)/factor;
+                }
+            }
         }
         double scale = currentScale;
 
@@ -1129,10 +1343,8 @@ public class TranslateGizmo extends Gizmo {
                 awtRobot = new Robot();
             }
 
-            Vector3Dd pp = new Vector3Dd();
             Vector3Dd base = p.add(deltapos);
-
-            camera.projectPointUsingRayMethod(base, pp);
+            Vector3Dd pp = camera.projectPointUsingRayMethod(base);
 
             Point global = e.getComponent().getLocationOnScreen();
             //awtRobot.mouseMove((int)pp.x+global.x, (int)pp.y+global.y);

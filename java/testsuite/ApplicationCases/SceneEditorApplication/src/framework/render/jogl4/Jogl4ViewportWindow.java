@@ -49,6 +49,11 @@ public class Jogl4ViewportWindow
     private static final int BASE_TITLE_BORDER_Y = 1;
     // A bit smaller than the titles
     private static final int BASE_REFERENCE_FRAME_LABEL_FONT_SIZE = 12;
+    private static final int BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE = Jogl4LabelImageProvider.DEFAULT_FONT_SIZE;
+    // Position of the labels of the translate gizmo, with respect to the tip
+    // of its arrows
+    private static final int BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X = -3;
+    private static final int BASE_TRANSLATE_GIZMO_LABEL_OFFSET_Y = 12;
 
     private final ViewportSet viewportSet;
     private final Viewport viewport;
@@ -67,12 +72,10 @@ public class Jogl4ViewportWindow
     private final ReferenceFrameGizmo referenceFrameGizmo = new ReferenceFrameGizmo();
     private RGBAImageUncompressed[] referenceFrameLabelImages;
     private int referenceFrameLabelFontSize;
-    private final RGBAImageUncompressed xLabelImage;
-    private final RGBAImageUncompressed yLabelImage;
-    private final RGBAImageUncompressed zLabelImage;
-    private final RGBAImageUncompressed xLabelImageSelected;
-    private final RGBAImageUncompressed yLabelImageSelected;
-    private final RGBAImageUncompressed zLabelImageSelected;
+    // Labels of the translate gizmo, by axis, normal and selected (yellow)
+    private RGBAImageUncompressed[] translateGizmoLabelImages;
+    private RGBAImageUncompressed[] translateGizmoSelectedLabelImages;
+    private int translateGizmoLabelFontSize;
 
     // Each Jogl4ViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_Z_BUFFER;
@@ -86,21 +89,7 @@ public class Jogl4ViewportWindow
         this.viewport = viewport;
         this.labelImageProvider = labelImageProvider;
 
-        xLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_X);
-        yLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_Y);
-        zLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_Z);
-
-        xLabelImageSelected = labelImageProvider.createLabelImage("X", new ColorRgb(1, 1, 0));
-        yLabelImageSelected = labelImageProvider.createLabelImage("Y", new ColorRgb(1, 1, 0));
-        zLabelImageSelected = labelImageProvider.createLabelImage("Z", new ColorRgb(1, 1, 0));
-
         updateTitleImage();
-    }
-
-    private RGBAImageUncompressed createAxisLabelImage(int axis)
-    {
-        return labelImageProvider.createLabelImage(
-            referenceFrameGizmo.getAxisLabel(axis), referenceFrameGizmo.getAxisColor(axis));
     }
 
     public Viewport getViewport()
@@ -199,6 +188,39 @@ public class Jogl4ViewportWindow
             referenceFrameLabelImages[axis] = labelImageProvider.createLabelImage(
                 referenceFrameGizmo.getAxisLabel(axis),
                 referenceFrameGizmo.getAxisColor(axis),
+                currentFontSize);
+        }
+    }
+
+    /**
+    The label images of the translate gizmo depend on the screen resolution,
+    so they are regenerated when the font size they need changes.
+    */
+    private void updateTranslateGizmoLabelImages(ViewportElementScaler elementScaler)
+    {
+        int currentFontSize = elementScaler.scaleSize(BASE_TRANSLATE_GIZMO_LABEL_FONT_SIZE);
+
+        if ( translateGizmoLabelImages != null &&
+             currentFontSize == translateGizmoLabelFontSize ) {
+            return;
+        }
+        if ( translateGizmoLabelImages != null ) {
+            for ( int axis = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++ ) {
+                discardedLabelImages.add(translateGizmoLabelImages[axis]);
+                discardedLabelImages.add(translateGizmoSelectedLabelImages[axis]);
+            }
+        }
+        translateGizmoLabelFontSize = currentFontSize;
+        translateGizmoLabelImages = new RGBAImageUncompressed[ReferenceFrameGizmo.NUMBER_OF_AXES];
+        translateGizmoSelectedLabelImages = new RGBAImageUncompressed[ReferenceFrameGizmo.NUMBER_OF_AXES];
+        for ( int axis = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++ ) {
+            translateGizmoLabelImages[axis] = labelImageProvider.createLabelImage(
+                referenceFrameGizmo.getAxisLabel(axis),
+                referenceFrameGizmo.getAxisColor(axis),
+                currentFontSize);
+            translateGizmoSelectedLabelImages[axis] = labelImageProvider.createLabelImage(
+                referenceFrameGizmo.getAxisLabel(axis),
+                new ColorRgb(1, 1, 0),
                 currentFontSize);
         }
     }
@@ -500,11 +522,17 @@ public class Jogl4ViewportWindow
 
     public void drawLabelsForTranslateGizmo(GL2 gl, TranslateGizmo gizmo)
     {
+        ViewportElementScaler elementScaler = viewportSet.getElementScaler();
+        int offsetX = (int)Math.round(elementScaler.scaleLength(BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X));
+        int offsetY = (int)Math.round(elementScaler.scaleLength(BASE_TRANSLATE_GIZMO_LABEL_OFFSET_Y));
+
+        updateTranslateGizmoLabelImages(elementScaler);
+
         ArrayList<SimpleBody> things = gizmo.getElements();
         int i;
         Vector3Dd lv = new Vector3Dd();
         Vector3Dd p;
-        Vector3Dd tp = new Vector3Dd();
+        Vector3Dd tp;
         Matrix4x4d R;
         boolean yellow;
         ColorRgb c = new ColorRgb(1, 1, 0);
@@ -531,47 +559,16 @@ public class Jogl4ViewportWindow
                 R = R.translation(r.getPosition());
                 R = R.multiply(r.getRotation());
                 p = R.multiply(lv);
-                viewport.getActiveCamera().projectPoint(p, tp);
+                tp = viewport.getActiveCamera().projectPointUsingRayMethod(p);
 
-                //---------------------------------------------
-                yellow = false;
-                if ( ColorRgb.distance(c, r.getMaterial().getDiffuse()) <
-                     VSDK.EPSILON ) {
-                yellow = true;
-                }
+                if ( tp != null ) {
+                    yellow = ColorRgb.distance(c, r.getMaterial().getDiffuse()) <
+                        VSDK.EPSILON;
 
-                //---------------------------------------------
-                switch ( i ) {
-                  case 0:
-                    if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            xLabelImageSelected);
-                    }
-                    else {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            xLabelImage);
-                    }
-                    break;
-                  case 1:
-                    if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            yLabelImageSelected);
-                    }
-                    else {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            yLabelImage);
-                    }
-                    break;
-                  case 2:
-                    if ( yellow ) {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            zLabelImageSelected);
-                    }
-                    else {
-                        drawTextureString2D(gl, (int)tp.x()-3, (int)tp.y()+12,
-                            zLabelImage);
-                    }
-                    break;
+                    drawTextureString2D(gl,
+                        (int)tp.x() + offsetX,
+                        (int)tp.y() + offsetY,
+                        yellow ? translateGizmoSelectedLabelImages[i] : translateGizmoLabelImages[i]);
                 }
                 gl.glPopMatrix();
             }

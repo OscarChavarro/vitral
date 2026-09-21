@@ -1362,11 +1362,11 @@ public class Camera extends Entity
     }
 
     /**
-    @param worldPosition
-    @param projectedPosition
-    @return 
+    @param worldPosition point to project, in world coordinates
+    @return the projected point in viewport pixel coordinates (z is 0), or
+    null if it lies outside the viewport
     */
-    public boolean projectPoint(Vector3Dd worldPosition, Vector3Dd projectedPosition) {
+    public Vector3Dd projectPoint(Vector3Dd worldPosition) {
         Matrix4x4d NT = getNormalizingTransformation();
         Vector3Dd p = NT.multiply(worldPosition);
         p = new Vector3Dd(
@@ -1376,13 +1376,13 @@ public class Camera extends Entity
         );
 
         if ( p.x() < -1.0 || p.x() > 1.0 || p.y() < -1.0 || p.y() > 1.0 ) {
-            return false;
+            return null;
         }
-        
-        projectedPosition = projectedPosition.withX(((p.x() + 1.0)/2.0 * getViewportXSize()));
-        projectedPosition = projectedPosition.withY((getViewportYSize() - (p.y() + 1.0)/2.0 * getViewportYSize()));
 
-        return true;
+        return new Vector3Dd(
+            (p.x() + 1.0)/2.0 * getViewportXSize(),
+            getViewportYSize() - (p.y() + 1.0)/2.0 * getViewportYSize(),
+            0.0);
     }
 
     /**
@@ -1410,11 +1410,11 @@ public class Camera extends Entity
     TODO: Current implementation is suspicious. It should use a simple
     multiplication of point with projection matrix... but this idea is not
     working.
-    @param inPoint
-    @param outProjected
-    @return true if the pixel lies inside the viewport, false otherwise.
+    @param inPoint point to project, in world coordinates
+    @return the projected point in viewport pixel coordinates (z is 0), or
+    null if the point can not be projected or lies outside the viewport
     */
-    public boolean projectPointUsingRayMethod(Vector3Dd inPoint, Vector3Dd outProjected)
+    public Vector3Dd projectPointUsingRayMethod(Vector3Dd inPoint)
     {
         // 1. Calculate vectors
         Vector3Dd upCopy = null;
@@ -1461,28 +1461,30 @@ public class Camera extends Entity
             Ray hit = viewPlane.doIntersectionFirstHit(r);
             if ( hit == null ||
                  r.getDirection().length() < VSDK.EPSILON ) {
-                return false;
+                return null;
             }
             projected = hit.getOrigin().add(hit.getDirection().multiply(hit.getT())).subtract(center);
             // 3.4. Clip projected point in viewport
             if ( projected.x() < -1 || projected.x() > 1 ||
                  projected.y() < -1 || projected.y() > 1 ) {
-                return false;
+                return null;
             }
         }
 
         // 4. Scale point to viewport
+        double x;
+        double y;
+
         if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
-            outProjected = outProjected.withX(viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize);
-            outProjected = outProjected.withY((((projected.dotProduct(up)*-1)+1)/2)*viewportYSize);
+            x = viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize;
+            y = (((projected.dotProduct(up)*-1)+1)/2)*viewportYSize;
         }
         else {
-            outProjected = outProjected.withX((projected.dotProduct(rightCopy)/2+0.5)*viewportXSize);
-            outProjected = outProjected.withY((1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize);
+            x = (projected.dotProduct(rightCopy)/2+0.5)*viewportXSize;
+            y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize;
         }
-        outProjected = outProjected.withZ(0.0);
 
-        return true;
+        return new Vector3Dd(x, y, 0.0);
     }
 
     /**

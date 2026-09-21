@@ -58,7 +58,7 @@ import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
 import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
-import vsdk.toolkit.render.jogl.Jogl2TranslateGizmoRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4TranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2RotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2ScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
@@ -344,6 +344,9 @@ public class Jogl4DrawingAreaRenderer implements
         if ( interactionMode == CAMERA_INTERACTION_MODE ) {
             return camrotateCursor;
         }
+        if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
+            return camtranslateCursor;
+        }
         return selectCursor;
     }
 
@@ -393,6 +396,8 @@ public class Jogl4DrawingAreaRenderer implements
         translationGizmoDrawn = false;
 
         translationGizmo.setCamera(theScene.activeCamera);
+        // Size and line width follow the resolution of the screen
+        translationGizmo.applyScale(viewportSet.getElementScaler());
 
         gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
@@ -415,7 +420,7 @@ public class Jogl4DrawingAreaRenderer implements
                 composed = composed.withVal(2, 3, position.z());
                 translationGizmo.setTransformationMatrix(composed);
 
-                Jogl2TranslateGizmoRenderer.draw(gl, translationGizmo);
+                Jogl4TranslateGizmoRenderer.draw(gl, translationGizmo);
                 translationGizmoDrawn = true;
             }
         }
@@ -970,9 +975,9 @@ public class Jogl4DrawingAreaRenderer implements
 /*
         gl.glPushAttrib(gl.GL_DEPTH_TEST);
         gl.glDisable(gl.GL_DEPTH_TEST);
-        Vector3Dd projected = new Vector3Dd();
-        if ( view.getCamera().projectPoint(
-             model.getVisualDebugRay().origin, projected) ) {
+        Vector3Dd projected = view.getCamera().projectPoint(
+             model.getVisualDebugRay().origin);
+        if ( projected != null ) {
             view.drawTextureString2D(gl,
                 (int)projected.x()-3, (int)projected.y()+10, view.xLabelImage);
         }
@@ -1289,7 +1294,7 @@ public class Jogl4DrawingAreaRenderer implements
             canvas.setCursor(camadvanceCursor);
         }
         else {
-            canvas.setCursor(selectCursor);
+            canvas.setCursor(getModeCursor());
         }
         setCursorForPointer(e, canvas.getCursor());
 
@@ -1713,17 +1718,17 @@ public class Jogl4DrawingAreaRenderer implements
             break;
           case KeyEvent.VK_EQUALS:
             // Alphanumeric =
-            asp = translationGizmo.getAparentSizeInPixels();
+            asp = translationGizmo.getBaseAparentSizeInPixels();
             asp += 10;
             if ( asp > 300 ) asp = 300;
-            translationGizmo.setAparentSizeInPixels(asp);
+            translationGizmo.setBaseAparentSizeInPixels(asp);
             break;
           case KeyEvent.VK_MINUS:
             // Alphanumeric -
-            asp = translationGizmo.getAparentSizeInPixels();
+            asp = translationGizmo.getBaseAparentSizeInPixels();
             asp -= 20;
             if ( asp < 20 ) asp = 20;
-            translationGizmo.setAparentSizeInPixels(asp);
+            translationGizmo.setBaseAparentSizeInPixels(asp);
             break;
         }
 
@@ -2008,12 +2013,7 @@ public class Jogl4DrawingAreaRenderer implements
             }
         }
 
-        if ( interactionMode == CAMERA_INTERACTION_MODE ) {
-            canvas.setCursor(camrotateCursor);
-        }
-        else {
-            canvas.setCursor(selectCursor);
-        }
+        canvas.setCursor(getModeCursor());
         canvas.repaint();
     }
 
