@@ -1,139 +1,152 @@
 package application.render.jogl;
 
-// Java basic classes
-
 // JOGL classes
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL4;
 
 // VSDK classes
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.render.jogl.Jogl2BackgroundRenderer;
-import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
-import vsdk.toolkit.render.jogl.Jogl2LightRenderer;
-import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer;
-import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
-import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
+import vsdk.toolkit.render.jogl.Jogl4BackgroundRenderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.ModifyPanel;
 
+/**
+Draws the scene of the editor into the current viewport with the GL4 core
+pipeline: every geometry goes through `Jogl4GeometryRenderer`, so all of them
+honor the same bits of the `RendererConfiguration` of the viewport.
+*/
 public class Jogl4SceneRenderer
 {
     /**
-    Follows similar strategy to general Jogl2SimpleSceneRenderer, except that
-    incorporates draw controlled under interface editor.
+    Draws the background, the lights and the bodies of the scene.
     */
-    private static void drawBase(GL2 gl, Scene s, ModifyPanel modifyPanel)
+    private static void drawBase(GL4 gl, Scene s, ModifyPanel modifyPanel)
     {
         //- Draw scene background -----------------------------------------
-        Jogl2BackgroundRenderer.draw(gl,
+        Jogl4BackgroundRenderer.draw(gl,
             s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
 
-        //- Activate camera -----------------------------------------------
-        Jogl2CameraRenderer.activate(gl, s.activeCamera);
-
-        gl.glEnable(GL2.GL_DEPTH_TEST);
-        gl.glLoadIdentity();
-
-        if ( s.showCorridor ) {
-            s.corridor.drawGL(gl);
-        }
-
-        //- Activate lights -----------------------------------------------
-        int i;
-
-        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
-            Light l = s.scene.getLights().get(i);
-            Jogl2LightRenderer.activate(gl, l);
-        }
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthMask(true);
 
         //- Draw scene bodies ---------------------------------------------
+        Light light = s.scene.getLights().isEmpty()
+            ? null
+            : s.scene.getLights().get(0);
         SimpleBody gi;
         RendererConfiguration quality;
-
-        if ( s.scene.getLights().size() > 0 ) {
-            gl.glEnable(GL2.GL_LIGHTING);
-        }
-        else {
-            gl.glDisable(GL2.GL_LIGHTING);
-        }
-
-        // Not working for NvidiaGPU!
-        //Jogl2SimpleBodyRenderer.setAutomaticDisplayListManagement(true);
+        int i;
 
         for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
             try {
                 quality = s.qualityTemplate.clone();
-	    }
-	    catch ( CloneNotSupportedException e ) {
+            }
+            catch ( CloneNotSupportedException e ) {
                 break;
-	    }
+            }
 
-            if ( s.selectedThings.isSelected(i) ) {
-                quality.setSelectionCorners(true);
-            }
-            else {
-                quality.setSelectionCorners(false);
-            }
+            quality.setSelectionCorners(s.selectedThings.isSelected(i));
             gi = s.scene.getSimpleBodies().get(i);
 
             if ( modifyPanel == null || modifyPanel.getTarget() != gi ) {
-                drawSimpleBody(gl, gi, s, quality);
+                drawBody(gl, gi, s.activeCamera, light, quality);
             }
             else {
-                modifyPanel.draw(gl, s.activeCamera, quality);
+                modifyPanel.draw(gl, s.activeCamera, light, quality);
             }
         }
     }
 
-    private static void drawSimpleBody(GL2 gl, SimpleBody body, Scene s,
-                                       RendererConfiguration quality)
+    /**
+    Draws one body of the scene.
+
+    @param gl OpenGL context
+    @param body body to draw
+    @param camera camera that views the body
+    @param light light of the scene, or null for a light at the camera
+    @param quality bits of rendering configuration
+    */
+    public static void drawBody(GL4 gl, SimpleBody body, Camera camera, Light light,
+                                RendererConfiguration quality)
     {
-        Geometry geometry = body.getGeometry();
-        if ( geometry instanceof Sphere && gl.isGL4() ) {
-            drawSphere(gl.getGL4(), (Sphere)geometry, body, s, quality);
+        drawBody(gl, body, Matrix4x4d.identityMatrix(), camera, light, quality);
+    }
+
+    /**
+    Draws all the bodies of a group, with the transformation of the group. The
+    bounding volume and the selection corners are drawn once around the whole
+    group, not around each body.
+
+    @param gl OpenGL context
+    @param group group to draw
+    @param camera camera that views the group
+    @param light light of the scene, or null for a light at the camera
+    @param quality bits of rendering configuration
+    */
+    public static void drawBodyGroup(GL4 gl, SimpleBodyGroup group, Camera camera,
+                                     Light light, RendererConfiguration quality)
+    {
+        RendererConfiguration memberQuality;
+
+        try {
+            memberQuality = quality.clone();
         }
-        else {
-            Jogl2SimpleBodyRenderer.draw(gl, body, s.activeCamera, quality);
+        catch ( CloneNotSupportedException e ) {
+            return;
+        }
+        memberQuality.setSelectionCorners(false);
+        memberQuality.setBoundingVolume(false);
+
+        for ( SimpleBody body : group.getBodies() ) {
+            drawBody(gl, body, group.getTransformationMatrix(), camera, light, memberQuality);
+        }
+        if ( quality.isBoundingVolumeSet() ) {
+            Jogl4MinMaxRenderer.draw(gl, group.getMinMax(), camera, group.getTransformationMatrix());
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, group.getMinMax(), camera,
+                group.getTransformationMatrix());
         }
     }
 
-    private static void drawSphere(GL4 gl, Sphere sphere, SimpleBody body,
-                                   Scene s, RendererConfiguration quality)
+    private static void drawBody(GL4 gl, SimpleBody body, Matrix4x4d parentTransform,
+                                 Camera camera, Light light, RendererConfiguration quality)
     {
-        Light light = s.scene.getLights().isEmpty()
-            ? null
-            : s.scene.getLights().get(0);
+        Matrix4x4d transform = parentTransform.multiply(body.getTransformationMatrix());
+        Geometry geometry = body.getGeometry();
         Image texture = body.getTexture();
         RGBImageUncompressed textureMap = texture instanceof RGBImageUncompressed
             ? (RGBImageUncompressed)texture
             : null;
 
-        Jogl4SphereRenderer.draw(
+        Jogl4GeometryRenderer.draw(
             gl,
-            sphere,
-            s.activeCamera,
+            geometry,
+            camera,
             light,
             body.getMaterial(),
             quality,
             textureMap,
             body.getNormalMapRgb(),
-            body.getTransformationMatrix(),
-            32,
-            16);
+            transform);
     }
 
-    public static void draw(GL2 gl, Scene s, SceneEditorApplication parent)
+    public static void draw(GL4 gl, Scene s, SceneEditorApplication parent)
     {
         RendererConfiguration quality;
         SimpleBodyGroup ggi;
@@ -145,31 +158,30 @@ public class Jogl4SceneRenderer
 
         //- Draw 3D Gizmos ------------------------------------------------
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
-            Jogl2LightRenderer.draw(gl, s.scene.getLights().get(i));
+            Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera);
         }
 
         //- Draw visual debug entities (usually transparent) --------------
+        Light light = s.scene.getLights().isEmpty()
+            ? null
+            : s.scene.getLights().get(0);
+
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
             try {
                 quality = s.qualityTemplate.clone();
-	    }
-	    catch ( CloneNotSupportedException e ) {
+            }
+            catch ( CloneNotSupportedException e ) {
                 break;
-	    }
+            }
 
             quality.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
-            if ( s.selectedDebugThingGroups.isSelected(i) ) {
-                quality.setSelectionCorners(true);
-            }
-            else {
-                quality.setSelectionCorners(false);
-            }
+            quality.setSelectionCorners(s.selectedDebugThingGroups.isSelected(i));
             ggi = s.debugThingGroups.get(i);
             if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
-                gl.glDisable(GL2.GL_DEPTH_TEST);
+                gl.glDisable(GL4.GL_DEPTH_TEST);
             }
-            Jogl2SimpleBodyGroupRenderer.draw(gl, ggi, s.activeCamera, quality);
-            gl.glEnable(GL2.GL_DEPTH_TEST);
+            drawBodyGroup(gl, ggi, s.activeCamera, light, quality);
+            gl.glEnable(GL4.GL_DEPTH_TEST);
         }
     }
 

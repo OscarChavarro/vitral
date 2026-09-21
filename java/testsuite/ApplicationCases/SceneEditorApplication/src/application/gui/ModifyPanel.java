@@ -6,14 +6,15 @@ import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 // VSDK classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.render.jogl.Jogl2SimpleBodyRenderer;
+import vsdk.toolkit.environment.light.Light;
+import application.render.jogl.Jogl4SceneRenderer;
 
 // Application classes
 import application.SceneEditorApplication;
@@ -65,9 +66,9 @@ public class ModifyPanel extends JPanel
         target = null;
     }
 
-    public void draw(GL2 gl, Camera camera, RendererConfiguration quality)
+    public void draw(GL4 gl, Camera camera, Light light, RendererConfiguration quality)
     {
-        Jogl2SimpleBodyRenderer.draw(gl, target, camera, quality);
+        Jogl4SceneRenderer.drawBody(gl, target, camera, light, quality);
     }
 
 }

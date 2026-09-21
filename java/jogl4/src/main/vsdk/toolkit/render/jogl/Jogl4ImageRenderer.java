@@ -223,8 +223,16 @@ public class Jogl4ImageRenderer extends Jogl4Renderer {
             1.0f);
     }
 
+    /**
+    Releases the textures of all the images, the shader programs and the
+    buffers of this renderer. PRE: the OpenGL context is current.
+    @param gl OpenGL context
+    */
     public static void dispose(GL4 gl)
     {
+        Jogl4RGBAImageUncompressedRenderer.unloadAll(gl);
+        Jogl4RGBImageUncompressedRenderer.unloadAll(gl);
+        Jogl4RGBAImageCompressedRenderer.unloadAll(gl);
         Jogl4RendererConfigurationShaderSelector.dispose(gl);
 
         int[] tmp = new int[1];

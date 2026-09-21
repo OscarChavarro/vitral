@@ -2,23 +2,24 @@ package vsdk.toolkit.render.jogl.gizmo;
 
 import java.util.ArrayList;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.render.jogl.Jogl4ColoredPrimitiveRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
 /**
-Renders a {@link TranslateGizmo} with the fixed function pipeline of an
-OpenGL compatibility context, without depending on GLU nor on the JOGL2
-renderers.
+Renders a {@link TranslateGizmo} with the GL4 core pipeline (see
+{@link Jogl4ColoredPrimitiveRenderer}), without depending on GLU nor on the
+JOGL2 renderers.
 
 - The lines of the gizmo (axis shafts and plane handle segments) are drawn as
   colored triangle strips facing the camera, so they can have the width given
@@ -26,14 +27,13 @@ renderers.
 - The heads of the axes are drawn as cones, with a darker base.
 - The plane handle selected is drawn as a translucent quad.
 
-The view transformation is expected to be already active in the projection
-matrix, as done by the camera renderers of the applications: every element
-is drawn in world space with an identity modelview matrix.
+Every element is generated in world space and drawn with the projection
+matrix of the camera that views the gizmo.
 
 Usage (render thread, once per frame, after the transformation matrix of the
 gizmo has been set):
 <pre>
-    Jogl4TranslateGizmoRenderer.draw(gl, gizmo);
+    Jogl4TranslateGizmoRenderer.draw(gl, gizmo, camera);
 </pre>
 */
 public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
@@ -53,62 +53,55 @@ public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
     }
 
     /**
-    Draws the gizmo over the current contents of the surface. All the OpenGL
-    state changed is restored.
+    Draws the gizmo over the current contents of the surface. The blending and
+    depth mask states changed are restored.
 
     @param gl OpenGL context
     @param gizmo gizmo to draw; its transformation matrix must be set
+    @param camera camera that views the gizmo
     */
-    public static void draw(GL2 gl, TranslateGizmo gizmo)
+    public static void draw(GL4 gl, TranslateGizmo gizmo, Camera camera)
     {
-        if ( gl == null || gizmo == null ) {
+        if ( gl == null || gizmo == null || camera == null ) {
             return;
         }
 
         ArrayList<SimpleBody> elements = gizmo.getElements3dsmax();
+        Matrix4x4d mvp = camera.calculateProjectionMatrix();
 
-        //-----------------------------------------------------------------
-        gl.glPushAttrib(GL2.GL_ENABLE_BIT | GL2.GL_CURRENT_BIT |
-            GL2.GL_POLYGON_BIT | GL2.GL_COLOR_BUFFER_BIT |
-            GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_LIGHTING_BIT);
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glDisable(GL2.GL_CULL_FACE);
-        gl.glEnable(GL2.GL_DEPTH_TEST);
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        gl.glDisable(GL4.GL_CULL_FACE);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthMask(true);
+        gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
 
         //- Opaque elements -----------------------------------------------
-        drawLines(gl, gizmo);
+        drawLines(gl, gizmo, mvp);
         for ( SimpleBody element : elements ) {
             Geometry g = element.getGeometry();
 
             if ( g instanceof Cone ) {
-                drawCone(gl, element, (Cone)g);
+                drawCone(gl, mvp, element, (Cone)g);
             }
         }
 
         //- Translucent elements, over the opaque ones --------------------
-        gl.glEnable(GL2.GL_BLEND);
-        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glEnable(GL4.GL_BLEND);
+        gl.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
         gl.glDepthMask(false);
         for ( SimpleBody element : elements ) {
             Geometry g = element.getGeometry();
 
             if ( g instanceof Box ) {
-                drawPlaneHandle(gl, element, (Box)g);
+                drawPlaneHandle(gl, mvp, element, (Box)g);
             }
         }
 
         //-----------------------------------------------------------------
-        gl.glPopMatrix();
-        gl.glPopAttrib();
+        gl.glDepthMask(true);
+        gl.glDisable(GL4.GL_BLEND);
     }
 
-    private static void drawLines(GL2 gl, TranslateGizmo gizmo)
+    private static void drawLines(GL4 gl, TranslateGizmo gizmo, Matrix4x4d mvp)
     {
         for ( TranslateGizmo.LineSegment segment : gizmo.getLineSegments() ) {
             Vector3Dd[] strip = gizmo.buildLineStrip(segment);
@@ -117,13 +110,15 @@ public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
                 continue;
             }
             ColorRgb c = segment.getColor();
+            float[] positions = new float[strip.length * 3];
+            float[] colors = new float[strip.length * 4];
 
-            gl.glColor3d(c.r(), c.g(), c.b());
-            gl.glBegin(GL.GL_TRIANGLE_STRIP);
-            for ( Vector3Dd v : strip ) {
-                gl.glVertex3d(v.x(), v.y(), v.z());
+            for ( int i = 0; i < strip.length; i++ ) {
+                putVertex(positions, i, strip[i]);
+                putColor(colors, i, c, 1.0);
             }
-            gl.glEnd();
+            Jogl4ColoredPrimitiveRenderer.draw(gl, mvp, GL4.GL_TRIANGLE_STRIP,
+                positions, colors);
         }
     }
 
@@ -131,77 +126,84 @@ public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
     Draws a cone whose base is at the position of the element, pointing to the
     local +Z direction of the element.
     */
-    private static void drawCone(GL2 gl, SimpleBody element, Cone cone)
+    private static void drawCone(GL4 gl, Matrix4x4d mvp, SimpleBody element, Cone cone)
     {
         double radius = cone.getBaseRadius();
         double height = cone.getHeight();
         ColorRgb c = element.getMaterial().getDiffuse();
+        Matrix4x4d local = localTransform(element);
 
-        gl.glPushMatrix();
-        translateAndRotate(gl, element);
+        // Side: apex and base ring
+        float[] positions = new float[(CONE_SLICES + 2) * 3];
+        float[] colors = new float[(CONE_SLICES + 2) * 4];
 
-        gl.glColor3d(c.r(), c.g(), c.b());
-        gl.glBegin(GL.GL_TRIANGLE_FAN);
-        gl.glVertex3d(0, 0, height);
+        putVertex(positions, 0, local.multiply(new Vector3Dd(0, 0, height)));
+        putColor(colors, 0, c, 1.0);
         for ( int i = 0; i <= CONE_SLICES; i++ ) {
-            gl.glVertex3d(radius*SLICE_COS[i], radius*SLICE_SIN[i], 0);
+            putVertex(positions, i + 1,
+                local.multiply(new Vector3Dd(radius*SLICE_COS[i], radius*SLICE_SIN[i], 0)));
+            putColor(colors, i + 1, c, 1.0);
         }
-        gl.glEnd();
+        Jogl4ColoredPrimitiveRenderer.draw(gl, mvp, GL4.GL_TRIANGLE_FAN, positions, colors);
 
-        gl.glColor3d(c.r()*CONE_BASE_SHADE, c.g()*CONE_BASE_SHADE,
+        // Base, darker
+        ColorRgb dark = new ColorRgb(c.r()*CONE_BASE_SHADE, c.g()*CONE_BASE_SHADE,
             c.b()*CONE_BASE_SHADE);
-        gl.glBegin(GL.GL_TRIANGLE_FAN);
-        gl.glVertex3d(0, 0, 0);
-        for ( int i = CONE_SLICES; i >= 0; i-- ) {
-            gl.glVertex3d(radius*SLICE_COS[i], radius*SLICE_SIN[i], 0);
-        }
-        gl.glEnd();
 
-        gl.glPopMatrix();
+        putVertex(positions, 0, local.multiply(new Vector3Dd(0, 0, 0)));
+        putColor(colors, 0, dark, 1.0);
+        for ( int i = 0; i <= CONE_SLICES; i++ ) {
+            int k = CONE_SLICES - i;
+
+            putVertex(positions, i + 1,
+                local.multiply(new Vector3Dd(radius*SLICE_COS[k], radius*SLICE_SIN[k], 0)));
+            putColor(colors, i + 1, dark, 1.0);
+        }
+        Jogl4ColoredPrimitiveRenderer.draw(gl, mvp, GL4.GL_TRIANGLE_FAN, positions, colors);
     }
 
     /**
     Draws the translucent square that shows a selected plane handle, centered
     at the position of the element and over its local XY plane.
     */
-    private static void drawPlaneHandle(GL2 gl, SimpleBody element, Box box)
+    private static void drawPlaneHandle(GL4 gl, Matrix4x4d mvp, SimpleBody element, Box box)
     {
         double hx = box.getSize().x()/2;
         double hy = box.getSize().y()/2;
         ColorRgb c = element.getMaterial().getDiffuse();
+        Matrix4x4d local = localTransform(element);
+        float[] positions = new float[4 * 3];
+        float[] colors = new float[4 * 4];
 
-        gl.glPushMatrix();
-        translateAndRotate(gl, element);
-
-        gl.glColor4d(c.r(), c.g(), c.b(), element.getMaterial().getOpacity());
-        gl.glBegin(GL2.GL_TRIANGLE_STRIP);
-        gl.glVertex3d(-hx, -hy, 0);
-        gl.glVertex3d(hx, -hy, 0);
-        gl.glVertex3d(-hx, hy, 0);
-        gl.glVertex3d(hx, hy, 0);
-        gl.glEnd();
-
-        gl.glPopMatrix();
+        putVertex(positions, 0, local.multiply(new Vector3Dd(-hx, -hy, 0)));
+        putVertex(positions, 1, local.multiply(new Vector3Dd(hx, -hy, 0)));
+        putVertex(positions, 2, local.multiply(new Vector3Dd(-hx, hy, 0)));
+        putVertex(positions, 3, local.multiply(new Vector3Dd(hx, hy, 0)));
+        for ( int i = 0; i < 4; i++ ) {
+            putColor(colors, i, c, element.getMaterial().getOpacity());
+        }
+        Jogl4ColoredPrimitiveRenderer.draw(gl, mvp, GL4.GL_TRIANGLE_STRIP, positions, colors);
     }
 
-    private static void translateAndRotate(GL2 gl, SimpleBody element)
+    private static Matrix4x4d localTransform(SimpleBody element)
     {
         Vector3Dd position = element.getPosition();
 
-        gl.glTranslated(position.x(), position.y(), position.z());
-        multiplyMatrix(gl, element.getRotation());
+        return new Matrix4x4d().translation(position).multiply(element.getRotation());
     }
 
-    private static void multiplyMatrix(GL2 gl, Matrix4x4d matrix)
+    private static void putVertex(float[] positions, int index, Vector3Dd v)
     {
-        double[] columnMajor = new double[16];
-        int pos = 0;
+        positions[3*index] = (float)v.x();
+        positions[3*index + 1] = (float)v.y();
+        positions[3*index + 2] = (float)v.z();
+    }
 
-        for ( int column = 0; column < 4; column++ ) {
-            for ( int row = 0; row < 4; row++ ) {
-                columnMajor[pos++] = matrix.get(row, column);
-            }
-        }
-        gl.glMultMatrixd(columnMajor, 0);
+    private static void putColor(float[] colors, int index, ColorRgb c, double alpha)
+    {
+        colors[4*index] = (float)c.r();
+        colors[4*index + 1] = (float)c.g();
+        colors[4*index + 2] = (float)c.b();
+        colors[4*index + 3] = (float)alpha;
     }
 }

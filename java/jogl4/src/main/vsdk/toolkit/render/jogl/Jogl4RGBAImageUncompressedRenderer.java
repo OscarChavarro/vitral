@@ -34,6 +34,15 @@ public class Jogl4RGBAImageUncompressedRenderer extends Jogl4Renderer {
         }
     }
 
+    static void unloadAll(GL4 gl)
+    {
+        for ( Integer textureId : COMPILED_IMAGES.values() ) {
+            int[] tmp = new int[] { textureId };
+            gl.glDeleteTextures(1, tmp, 0);
+        }
+        COMPILED_IMAGES.clear();
+    }
+
     public static void unload(GL4 gl, RGBAImageUncompressed img)
     {
         Integer textureId = COMPILED_IMAGES.remove(img);

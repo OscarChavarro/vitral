@@ -3,8 +3,10 @@ package framework.render.jogl4;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.render.jogl.Jogl4ColoredPrimitiveRenderer;
 import framework.model.Viewport;
 import framework.model.ViewportSet;
 
@@ -24,7 +26,7 @@ public class JoglViewportSetRenderer
     public interface ViewRenderer
     {
         void configureView(Jogl4ViewportWindow view);
-        void drawView(GL2 gl, Jogl4ViewportWindow view);
+        void drawView(GL4 gl, Jogl4ViewportWindow view);
     }
 
     private final ViewportSet viewportSet;
@@ -76,12 +78,11 @@ public class JoglViewportSetRenderer
     }
 
     /**
-    PRE: glViewport is set to the full set area, and projection and modelview
-    matrices are set to identity.
+    PRE: glViewport is set to the full set area.
     @param gl
     @param fullScreenGuiMode true if the GUI is in full screen mode
     */
-    public void draw(GL2 gl, boolean fullScreenGuiMode)
+    public void draw(GL4 gl, boolean fullScreenGuiMode)
     {
         forgetRemovedViewports();
 
@@ -99,7 +100,7 @@ public class JoglViewportSetRenderer
     `GLEventListener.dispose`).
     @param gl
     */
-    public void disposeGlResources(GL2 gl)
+    public void disposeGlResources(GL4 gl)
     {
         for ( Jogl4ViewportWindow window : windows.values() ) {
             window.disposeGlResources(gl);
@@ -126,7 +127,7 @@ public class JoglViewportSetRenderer
         }
     }
 
-    private void drawMultipleViews(GL2 gl)
+    private void drawMultipleViews(GL4 gl)
     {
         for ( Viewport viewport : viewportSet.getViewports() ) {
             drawBorder(gl, viewport);
@@ -147,7 +148,7 @@ public class JoglViewportSetRenderer
         }
     }
 
-    private void drawSelectedViewFullScreen(GL2 gl)
+    private void drawSelectedViewFullScreen(GL4 gl)
     {
         for ( Viewport viewport : viewportSet.getViewports() ) {
             if ( !viewport.isActive() || !viewportSet.isSelected(viewport) ) {
@@ -163,7 +164,7 @@ public class JoglViewportSetRenderer
         }
     }
 
-    private void activateViewport(GL2 gl, Viewport viewport)
+    private void activateViewport(GL4 gl, Viewport viewport)
     {
         viewport.updatePixelArea(viewportSet.getSizeXInPixels(), viewportSet.getSizeYInPixels());
         gl.glViewport(viewport.getPixelStartX(), viewport.getPixelStartY(),
@@ -173,55 +174,52 @@ public class JoglViewportSetRenderer
     /**
     Draws the line bordering a viewport, in a highlight color if the viewport
     is the selected one.
-    PRE: glViewport is set to the full set area, and projection and modelview
-    matrices are set to identity.
+    PRE: glViewport is set to the full set area.
     */
-    private void drawBorder(GL2 gl, Viewport viewport)
+    private void drawBorder(GL4 gl, Viewport viewport)
     {
         if ( !viewport.isActive() || viewport.getBorder() <= 0 ) {
             return;
         }
-        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
-        gl.glPushAttrib(GL2.GL_TEXTURE_2D);
-        gl.glPushAttrib(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glDisable(GL2.GL_DEPTH_TEST);
-
-        double x1;
-        double y1;
-        double x2;
-        double y2;
         double epsilonx = 2.0 / ((double)viewportSet.getSizeXInPixels());
         double epsilony = 2.0 / ((double)viewportSet.getSizeYInPixels());
         double dx = viewport.getBorder() * epsilonx;
         double dy = viewport.getBorder() * epsilony;
+        double x1 = viewport.getStartXPercent()*2 - 1;
+        double y1 = viewport.getStartYPercent()*2 - 1;
+        double x2 = x1 + viewport.getSizeXPercent()*2;
+        double y2 = y1 + viewport.getSizeYPercent()*2;
+        float[] outer = viewportSet.isSelected(viewport)
+            ? new float[] {1.0f, 0.96f, 0.0f}
+            : new float[] {0.21f, 0.25f, 0.29f};
+        float[] positions = new float[] {
+            (float)x1, (float)y1, 0,
+            (float)x2, (float)y1, 0,
+            (float)x2, (float)y2, 0,
+            (float)x1, (float)y1, 0,
+            (float)x2, (float)y2, 0,
+            (float)x1, (float)y2, 0,
+            (float)(x1+2*dx), (float)(y1+2*dy), 0,
+            (float)(x2-2*dx), (float)(y1+2*dy), 0,
+            (float)(x2-2*dx), (float)(y2-2*dy), 0,
+            (float)(x1+2*dx), (float)(y1+2*dy), 0,
+            (float)(x2-2*dx), (float)(y2-2*dy), 0,
+            (float)(x1+2*dx), (float)(y2-2*dy), 0
+        };
+        float[] colors = new float[12 * 4];
 
-        x1 = viewport.getStartXPercent()*2 - 1;
-        y1 = viewport.getStartYPercent()*2 - 1;
-        x2 = x1 + viewport.getSizeXPercent()*2;
-        y2 = y1 + viewport.getSizeYPercent()*2;
-
-        gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-        gl.glBegin(GL2.GL_QUADS);
-            if ( viewportSet.isSelected(viewport) ) {
-                gl.glColor3d(1, 0.96, 0);
-            }
-            else {
-                gl.glColor3d(0.21, 0.25, 0.29);
-            }
-            gl.glVertex3d(x1, y1, 0);
-            gl.glVertex3d(x2, y1, 0);
-            gl.glVertex3d(x2, y2, 0);
-            gl.glVertex3d(x1, y2, 0);
-            gl.glColor3d(0, 0, 0);
-            gl.glVertex3d(x1+2*dx, y1+2*dy, 0);
-            gl.glVertex3d(x2-2*dx, y1+2*dy, 0);
-            gl.glVertex3d(x2-2*dx, y2-2*dy, 0);
-            gl.glVertex3d(x1+2*dx, y2-2*dy, 0);
-        gl.glEnd();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
+        for ( int i = 0; i < 12; i++ ) {
+            float[] c = i < 6 ? outer : new float[] {0, 0, 0};
+            colors[4*i] = c[0];
+            colors[4*i + 1] = c[1];
+            colors[4*i + 2] = c[2];
+            colors[4*i + 3] = 1.0f;
+        }
+        gl.glDisable(GL4.GL_DEPTH_TEST);
+        gl.glDisable(GL4.GL_CULL_FACE);
+        gl.glPolygonMode(GL4.GL_FRONT_AND_BACK, GL4.GL_FILL);
+        Jogl4ColoredPrimitiveRenderer.draw(gl, Matrix4x4d.identityMatrix(),
+            GL4.GL_TRIANGLES, positions, colors);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
     }
 }

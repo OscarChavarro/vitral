@@ -20,7 +20,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JLabel;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -48,21 +48,20 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.Jogl2BackgroundRenderer;
-import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
-import vsdk.toolkit.render.jogl.Jogl2SimpleMaterialRenderer;
-import vsdk.toolkit.render.jogl.Jogl2ImageRenderer;
-import vsdk.toolkit.render.jogl.Jogl2GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4BackgroundRenderer;
+import vsdk.toolkit.render.jogl.Jogl4FrameBufferReader;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4TranslateGizmoRenderer;
-import vsdk.toolkit.render.jogl.Jogl2RotateGizmoRenderer;
-import vsdk.toolkit.render.jogl.Jogl2ScaleGizmoRenderer;
-import vsdk.toolkit.render.jogl.Jogl2RGBImageUncompressedRenderer;
-import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4RotateGizmoRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4ScaleGizmoRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
@@ -156,8 +155,9 @@ public class Jogl4DrawingAreaRenderer implements
         this.theScene = model.getScene();
         this.statusMessage = statusMessage;
 
-        interactionMode = CAMERA_INTERACTION_MODE;
-        lastInteractionMode = CAMERA_INTERACTION_MODE;
+        // As in 3ds Max, the application starts in selection mode
+        interactionMode = SELECT_INTERACTION_MODE;
+        lastInteractionMode = SELECT_INTERACTION_MODE;
         translationGizmoDrawn = false;
         awtViewportWidth = 0;
         awtViewportHeight = 0;
@@ -174,7 +174,7 @@ public class Jogl4DrawingAreaRenderer implements
 
         visualDebugMaterial = theScene.defaultMaterial();
 
-        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        GLProfile profile = GLProfile.get(GLProfile.GL4);
         GLCapabilities capabilities = new GLCapabilities(profile);
         capabilities.setDepthBits(32);
         canvas = new GLCanvas(capabilities);
@@ -235,7 +235,7 @@ public class Jogl4DrawingAreaRenderer implements
                 }
 
                 @Override
-                public void drawView(GL2 gl, Jogl4ViewportWindow view) {
+                public void drawView(GL4 gl, Jogl4ViewportWindow view) {
                     theScene.activeCamera = view.getCamera();
                     theScene.qualityTemplate = view.getRendererConfiguration();
                     Jogl4DrawingAreaRenderer.this.drawView(gl, view);
@@ -384,13 +384,14 @@ public class Jogl4DrawingAreaRenderer implements
 
     private boolean shouldDrawTranslationGizmo()
     {
-        return interactionMode == SELECT_INTERACTION_MODE ||
-            interactionMode == TRANSLATE_INTERACTION_MODE ||
+        // The selection mode (as in 3ds Max) only marks the selected objects
+        // with the selection corners: it shows no gizmo
+        return interactionMode == TRANSLATE_INTERACTION_MODE ||
             (interactionMode == CAMERA_INTERACTION_MODE &&
              lastInteractionMode == TRANSLATE_INTERACTION_MODE);
     }
 
-    private void drawGizmos(GL2 gl)
+    private void drawGizmos(GL4 gl)
     {
         // Pending: Turn off scene light and turn on gizmo specific lighting
         translationGizmoDrawn = false;
@@ -399,7 +400,7 @@ public class Jogl4DrawingAreaRenderer implements
         // Size and line width follow the resolution of the screen
         translationGizmo.applyScale(viewportSet.getElementScaler());
 
-        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL4.GL_DEPTH_BUFFER_BIT);
 
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
@@ -420,7 +421,7 @@ public class Jogl4DrawingAreaRenderer implements
                 composed = composed.withVal(2, 3, position.z());
                 translationGizmo.setTransformationMatrix(composed);
 
-                Jogl4TranslateGizmoRenderer.draw(gl, translationGizmo);
+                Jogl4TranslateGizmoRenderer.draw(gl, translationGizmo, theScene.activeCamera);
                 translationGizmoDrawn = true;
             }
         }
@@ -433,7 +434,7 @@ public class Jogl4DrawingAreaRenderer implements
 
                 position = gi.getPosition();
                 rotateGizmo.setTransformationMatrix(gi.getRotation());
-                Jogl2RotateGizmoRenderer.draw(gl, rotateGizmo, position);
+                Jogl4RotateGizmoRenderer.draw(gl, rotateGizmo, position, theScene.activeCamera);
             }
         }
         else if ( interactionMode == SCALE_INTERACTION_MODE ) {
@@ -445,13 +446,13 @@ public class Jogl4DrawingAreaRenderer implements
 
                 position = gi.getPosition();
                 scaleGizmo.setTransformationMatrix(gi.getRotation());
-                Jogl2ScaleGizmoRenderer.draw(gl, scaleGizmo, position);
+                Jogl4ScaleGizmoRenderer.draw(gl, scaleGizmo, position, theScene.activeCamera);
             }
         }
-        gl.glEnable(GL2.GL_DEPTH_TEST);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
     }
 
-    private Image createProjectedView(GL2 gl, SimpleBodyGroup referenceBodies, int cam)
+    private Image createProjectedView(GL4 gl, SimpleBodyGroup referenceBodies, int cam)
     {
         //- Will render a normalized body inside the unit cube ------------
         double minmax[];
@@ -567,7 +568,7 @@ public class Jogl4DrawingAreaRenderer implements
     }
 
     private SimpleBodyGroup
-    addDebugProjectedView(GL2 gl, SimpleBodyGroup referenceBodies)
+    addDebugProjectedView(GL4 gl, SimpleBodyGroup referenceBodies)
     {
         SimpleBody boxBody;
         Image texture;
@@ -755,7 +756,7 @@ public class Jogl4DrawingAreaRenderer implements
         return group;
     }
 
-    private void debugProjectedViewsIfNeeded(GL2 glAppContext)
+    private void debugProjectedViewsIfNeeded(GL4 glAppContext)
     {
         //-----------------------------------------------------------------
         if ( wantToDebugProjectedViews == false ) {
@@ -798,7 +799,7 @@ public class Jogl4DrawingAreaRenderer implements
         }
     }
 
-    private void copyColorBufferIfNeeded(GL2 gl, boolean selectedView)
+    private void copyColorBufferIfNeeded(GL4 gl, boolean selectedView)
     {
         if ( wantToGetColor && selectedView ) {
             captureColorBuffer(gl, true);
@@ -807,9 +808,9 @@ public class Jogl4DrawingAreaRenderer implements
         }
     }
 
-    private void captureColorBuffer(GL2 gl, boolean reportToImageWindow)
+    private void captureColorBuffer(GL4 gl, boolean reportToImageWindow)
     {
-        model.setZbufferImage(Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl));
+        model.setZbufferImage(Jogl4FrameBufferReader.readColor(gl));
         if ( !reportToImageWindow ) {
             return;
         }
@@ -866,7 +867,7 @@ public class Jogl4DrawingAreaRenderer implements
         return result;
     }
 
-    private void exportPendingFrame(GL2 gl)
+    private void exportPendingFrame(GL4 gl)
     {
         if ( pendingViewportExportFile == null && pendingWorkspaceExportFile == null ) {
             return;
@@ -875,7 +876,7 @@ public class Jogl4DrawingAreaRenderer implements
         int width = viewportSet.getSizeXInPixels();
         int height = viewportSet.getSizeYInPixels();
         gl.glViewport(0, 0, width, height);
-        RGBImageUncompressed workspace = Jogl2RGBImageUncompressedRenderer.getImageJOGL(gl);
+        RGBImageUncompressed workspace = Jogl4FrameBufferReader.readColor(gl);
 
         if ( pendingViewportExportFile != null ) {
             Jogl4ViewportWindow selected = viewportSetRenderer.getSelectedWindow();
@@ -897,20 +898,20 @@ public class Jogl4DrawingAreaRenderer implements
         }
     }
 
-    private void copyZBufferIfNeeded(GL2 gl)
+    private void copyZBufferIfNeeded(GL4 gl)
     {
         if ( wantToGetDepth ) {
             if ( wantToGetContourns ) {
                 IndexedColorImageUncompressed zbuffer;
                 NormalMap nm;
-                zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+                zbuffer = Jogl4FrameBufferReader.readDepth(gl).exportIndexedColorImage();
                 nm = new NormalMap();
                 nm.importBumpMap(zbuffer, new Vector3Dd(1, 1, 0.1));
                 model.setZbufferImage(nm.exportToRgbImageGradient());
             }
             else {
                 model.setZbufferImage(
-                    Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportRGBImage(
+                    Jogl4FrameBufferReader.readDepth(gl).exportRGBImage(
                         model.getPalette()));
             }
 
@@ -939,7 +940,7 @@ public class Jogl4DrawingAreaRenderer implements
         }
     }
 
-    private void drawView(GL2 gl, Jogl4ViewportWindow view)
+    private void drawView(GL4 gl, Jogl4ViewportWindow view)
     {
         if ( !view.isActive() ) {
             return;
@@ -950,22 +951,15 @@ public class Jogl4DrawingAreaRenderer implements
         }
         else {
             theScene.activateSelectedBackground();
-            Jogl2BackgroundRenderer.draw(gl,
-            theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
+            Jogl4BackgroundRenderer.draw(gl,
+                theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
             model.setRaytracedImageWidth(view.getViewportSizeX());
             model.setRaytracedImageHeight(view.getViewportSizeY());
             parent.doRaytracingImage();
-            gl.glMatrixMode(GL2.GL_PROJECTION);
-            gl.glPushMatrix();
-            gl.glLoadIdentity();
-            gl.glMatrixMode(GL2.GL_MODELVIEW);
-            gl.glPushMatrix();
-            gl.glLoadIdentity();
-            Jogl2ImageRenderer.draw(gl, model.getRaytracedImage());
-            gl.glPopMatrix();
-            gl.glMatrixMode(GL2.GL_PROJECTION);
-            gl.glPopMatrix();
-            gl.glMatrixMode(GL2.GL_MODELVIEW);
+            // The raytraced image changes on each frame: its texture is
+            // created again
+            Jogl4ImageRenderer.unload(gl, model.getRaytracedImage());
+            Jogl4ImageRenderer.draw(gl, model.getRaytracedImage());
         }
 
         //-----------------------------------------------------------------
@@ -1007,7 +1001,7 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void display(GLAutoDrawable drawable)
     {
-        GL2 gl = drawable.getGL().getGL2();
+        GL4 gl = drawable.getGL().getGL4();
 
         debugProjectedViewsIfNeeded(gl);
         // Text size follows the resolution of the screen showing the canvas
@@ -1019,28 +1013,20 @@ public class Jogl4DrawingAreaRenderer implements
         //-----------------------------------------------------------------
         gl.glViewport(0, 0, viewportSet.getSizeXInPixels(), viewportSet.getSizeYInPixels());
         gl.glClearColor(0.77f, 0.77f, 0.77f, 1.0f);
-        gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
-
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glLoadIdentity();
+        gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
 
         viewportSetRenderer.draw(gl, parent.getAwtModel().isFullScreenGuiMode());
 
         exportPendingFrame(gl);
     }
 
-    private void drawVisualRayDebugSegment(GL2 gl, Vector3Dd start, Vector3Dd end, boolean follow, double w, double tip,
+    private void drawVisualRayDebugSegment(GL4 gl, Vector3Dd start, Vector3Dd end, boolean follow, double w, double tip,
         SimpleMaterial segmentMaterial)
     {
         double l;
         Vector3Dd diff = end.subtract(start);
         l = diff.length();
-
-        gl.glEnable(GL2.GL_LIGHTING);
-        Jogl2SimpleMaterialRenderer.activate(gl, segmentMaterial);
 
         //-----------------------------------------------------------------
         Geometry a;
@@ -1057,11 +1043,7 @@ public class Jogl4DrawingAreaRenderer implements
         pitch = diff.obtainSphericalPhiAngle();
         R = R.eulerAnglesRotation(Math.toRadians(180)+yaw, pitch, 0);
 
-        gl.glPushMatrix();
-        gl.glTranslated(start.x(), start.y(), start.z());
-        Jogl2MatrixRenderer.activate(gl, R);
-        Jogl2GeometryRenderer.draw(gl, a, theScene.camera, qualitySelectionVisualDebug);
-        gl.glPopMatrix();
+        drawVisualDebugGeometry(gl, a, new Matrix4x4d().translation(start).multiply(R), segmentMaterial);
 
         //-----------------------------------------------------------------
         if ( follow ) {
@@ -1072,22 +1054,27 @@ public class Jogl4DrawingAreaRenderer implements
             diff = diff.normalized();
             for ( i = 0; i < 3; i++, offset += 0.1 ) {
                 p = end.add(diff.multiply(offset));
-                gl.glPushMatrix();
-                gl.glTranslated(p.x(), p.y(), p.z());
-                Jogl2GeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
-                gl.glPopMatrix();
+                drawVisualDebugGeometry(gl, s, new Matrix4x4d().translation(p), segmentMaterial);
             }
         }
     }
 
-    private void drawVisualRayDebug(GL2 gl, Ray ray, int level)
+    private void drawVisualDebugGeometry(GL4 gl, Geometry geometry, Matrix4x4d transform,
+        SimpleMaterial material)
+    {
+        Light light = theScene.scene.getLights().isEmpty()
+            ? null
+            : theScene.scene.getLights().get(0);
+
+        Jogl4GeometryRenderer.draw(gl, geometry, theScene.camera, light, material,
+            qualitySelectionVisualDebug, null, null, transform);
+    }
+
+    private void drawVisualRayDebug(GL4 gl, Ray ray, int level)
     {
         if ( level < 0 ) {
             return;
         }
-
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
 
         //-----------------------------------------------------------------
         Vector3Dd p;
@@ -1099,12 +1086,8 @@ public class Jogl4DrawingAreaRenderer implements
 
         //-----------------------------------------------------------------
         SimpleMaterial rayOriginMaterial = visualDebugMaterial.withDiffuse(new ColorRgb(0.9, 0.5, 0.0));
-        Jogl2SimpleMaterialRenderer.activate(gl, rayOriginMaterial);
-        Sphere s = new Sphere(0.05);
-        gl.glPushMatrix();
-        gl.glTranslated(ray.getOrigin().x(), ray.getOrigin().y(), ray.getOrigin().z());
-        Jogl2GeometryRenderer.draw(gl, s, theScene.camera, qualitySelectionVisualDebug);
-        gl.glPopMatrix();
+        drawVisualDebugGeometry(gl, new Sphere(0.05),
+            new Matrix4x4d().translation(ray.getOrigin()), rayOriginMaterial);
 
         //-----------------------------------------------------------------
         if ( theScene.doIntersectionFirstHit(ray, info) ) {
@@ -1131,10 +1114,9 @@ public class Jogl4DrawingAreaRenderer implements
             p = ray.getOrigin().add(d);
             drawVisualRayDebugSegment(gl, ray.getOrigin(), p, true, 0.07, 0.4, rayOriginMaterial);
         }
-        gl.glPopMatrix();
     }
 
-    private void drawVisualRayDebug(GL2 gl)
+    private void drawVisualRayDebug(GL4 gl)
     {
         //-----------------------------------------------------------------
         if ( !model.isWithVisualDebugRay() ) {
@@ -1142,7 +1124,6 @@ public class Jogl4DrawingAreaRenderer implements
         }
 
         //-----------------------------------------------------------------
-        gl.glEnable(GL2.GL_LIGHTING);
         drawVisualRayDebug(gl, model.getVisualDebugRay(), model.getVisualDebugRayLevels());
         //-----------------------------------------------------------------
     }
@@ -1165,8 +1146,9 @@ public class Jogl4DrawingAreaRenderer implements
     @Override
     public void dispose(GLAutoDrawable drawable) {
         if ( viewportSetRenderer != null ) {
-            viewportSetRenderer.disposeGlResources(drawable.getGL().getGL2());
+            viewportSetRenderer.disposeGlResources(drawable.getGL().getGL4());
         }
+        Jogl4Renderer.disposeAll(drawable.getGL().getGL4());
     }
 
     /** Not used method, but needed to instanciate GLEventListener
@@ -1346,7 +1328,9 @@ public class Jogl4DrawingAreaRenderer implements
                 translationGizmo.setCamera(mouseView.getCamera());
                 translationGizmo.setTransformationMatrix(composed);
                 vitralMouseEvent = viewportEvent;
-                interactionTechniques.processTranslationMousePressedEvent(vitralMouseEvent);
+                if ( interactionMode != SELECT_INTERACTION_MODE ) {
+                    interactionTechniques.processTranslationMousePressedEvent(vitralMouseEvent);
+                }
                 //------------------------------------------------------------
             }
 

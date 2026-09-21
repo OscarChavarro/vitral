@@ -7,7 +7,7 @@
 package application.render.jogl;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL4;
 
 // VSDK Classes
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -18,9 +18,7 @@ import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
-import vsdk.toolkit.render.jogl.Jogl2ZBufferRenderer;
-import vsdk.toolkit.render.jogl.Jogl2SimpleBodyGroupRenderer;
-import vsdk.toolkit.render.jogl.Jogl2CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4FrameBufferReader;
 
 public class Jogl4ProjectedViewRenderer {
     public Image image;
@@ -157,36 +155,25 @@ public class Jogl4ProjectedViewRenderer {
         camera.setRotation(R);
     }
 
-    public void draw(GL2 gl) {
+    public void draw(GL4 gl) {
         gl.glViewport(0, 0, xSize, ySize);
 
         //-----------------------------------------------------------------
         gl.glClearColor(0.5f, 0.5f, 0.9f, 1);
-        gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-        gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthMask(true);
 
-        gl.glEnable(GL2.GL_DEPTH_TEST);
-        Jogl2CameraRenderer.activate(gl, camera);
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glLoadIdentity();
+        if ( bodies != null ) {
+            Jogl4SceneRenderer.drawBodyGroup(gl, bodies, camera, null, quality);
+        }
 
-        if ( bodies == null ) {
-            gl.glColor3d(1, 1, 1); 
-            gl.glBegin(GL2.GL_LINES);
-                gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(0.5, 0.5, 0);
-            gl.glEnd();
-        }
-        else {
-            Jogl2SimpleBodyGroupRenderer.draw(gl, bodies, camera, quality);
-        }
-        
         gl.glFlush();
 
         //- Obtain ZBuffer ------------------------------------------------
         IndexedColorImageUncompressed zbuffer;
         NormalMap nm;
-        zbuffer = Jogl2ZBufferRenderer.importJOGLZBuffer(gl).exportIndexedColorImage();
+        zbuffer = Jogl4FrameBufferReader.readDepth(gl).exportIndexedColorImage();
 
         //- Erase internal details: keep just the depth frontier border ---
         int x, y;

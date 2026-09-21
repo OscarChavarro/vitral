@@ -4,13 +4,10 @@ package framework.render.jogl4;
 
 // Java basic classes
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 
 // JOGL classes
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GL4;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -25,6 +22,8 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ReferenceFrameGizmoRenderer;
 
 // Framework classes
@@ -63,12 +62,9 @@ public class Jogl4ViewportWindow
     private ColorRgb titleColor;
     private int titleFontSize;
     private RGBAImageUncompressed titleImage;
-    private final Map<RGBAImageUncompressed, Integer> labelTextures =
-        new IdentityHashMap<RGBAImageUncompressed, Integer>();
+    // Label images no longer used, whose textures must be released
     private final List<RGBAImageUncompressed> discardedLabelImages =
         new ArrayList<RGBAImageUncompressed>();
-    // OpenGL context owning the textures in `labelTextures`
-    private GLContext labelTexturesContext;
     private final ReferenceFrameGizmo referenceFrameGizmo = new ReferenceFrameGizmo();
     private RGBAImageUncompressed[] referenceFrameLabelImages;
     private int referenceFrameLabelFontSize;
@@ -147,7 +143,7 @@ public class Jogl4ViewportWindow
     Its size, line width and labels follow the screen resolution (see
     `ViewportElementScaler`), so it keeps a similar apparent size.
     */
-    public void drawReferenceBase(GL2 gl)
+    public void drawReferenceBase(GL4 gl)
     {
         ViewportElementScaler elementScaler = viewportSet.getElementScaler();
 
@@ -157,12 +153,9 @@ public class Jogl4ViewportWindow
         Jogl4ReferenceFrameGizmoRenderer.draw(gl, referenceFrameGizmo,
             viewport.getActiveCamera().getRotation(),
             viewport.getPixelStartX(), viewport.getPixelStartY(),
-            (glContext, axis, label) -> {
-                // Label images are drawn at (-1, -1, 0) from the modelview
-                // origin (see `drawTextureString3D`)
-                glContext.glTranslated(1, 1, 0);
-                drawTextureString3D(glContext, referenceFrameLabelImages[axis]);
-            });
+            (glContext, axis, label, windowX, windowY) ->
+                drawLabelImage(glContext, referenceFrameLabelImages[axis],
+                    windowX, windowY));
     }
 
     /**
@@ -225,12 +218,11 @@ public class Jogl4ViewportWindow
         }
     }
 
-    private void drawGridRectangle(GL2 gl)
+    private void drawGridRectangle(GL4 gl)
     {
-        gl.glPushMatrix();
-
         Matrix4x4d R;
         double yaw, pitch;
+        Matrix4x4d gridTransform = new Matrix4x4d();
 
         R = viewport.getActiveCamera().getRotation();
         yaw = Math.toDegrees(R.obtainEulerYawAngle());
@@ -240,13 +232,13 @@ public class Jogl4ViewportWindow
               (pitch > -45 && pitch < 45) ) {
             if ( (yaw > 45 && yaw < 135) ||
                  (yaw < -45 && yaw > -135) ) {
-                gl.glRotated(90, 1, 0, 0);
+                gridTransform = new Matrix4x4d().axisRotation(Math.toRadians(90), 1, 0, 0);
             }
             else {
-                gl.glRotated(90, 0, 1, 0);
+                gridTransform = new Matrix4x4d().axisRotation(Math.toRadians(90), 0, 1, 0);
             }
         }
-        
+
         //-----------------------------------------------------------------
         int nx = 14; // Must be an even number
         int ny = 14; // Must be an even number
@@ -258,29 +250,41 @@ public class Jogl4ViewportWindow
         double miny = -(((double)ny)/2) * dy;
         double maxy = (((double)ny)/2) * dy;
 
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glLineWidth(1.0f);
-        gl.glBegin(GL2.GL_LINES);
-        gl.glColor3d(0.37, 0.37, 0.37);
+        ArrayList<Float> p = new ArrayList<Float>();
+        ArrayList<Float> c = new ArrayList<Float>();
+
         for ( x = 0; x <= nx; x++ ) {
             if ( x == nx/2 ) continue;
-            gl.glVertex3d(minx + ((double)x)*dx, miny, 0);
-            gl.glVertex3d(minx + ((double)x)*dx, maxy, 0);
+            addGridLine(p, c, minx + ((double)x)*dx, miny, minx + ((double)x)*dx, maxy, 0.37f);
         }
         for ( y = 0; y <= ny; y++ ) {
             if ( y == ny/2 ) continue;
-            gl.glVertex3d(minx, minx + ((double)y)*dy, 0);
-            gl.glVertex3d(maxx, minx + ((double)y)*dy, 0);
+            addGridLine(p, c, minx, minx + ((double)y)*dy, maxx, minx + ((double)y)*dy, 0.37f);
         }
-        gl.glColor3d(0, 0, 0);
-        gl.glVertex3d(minx + ((double)(nx/2))*dx, miny, 0);
-        gl.glVertex3d(minx + ((double)(nx/2))*dx, maxy, 0);
-        gl.glVertex3d(minx, minx + ((double)(ny/2))*dy, 0);
-        gl.glVertex3d(maxx, minx + ((double)(ny/2))*dy, 0);
+        addGridLine(p, c, minx + ((double)(nx/2))*dx, miny, minx + ((double)(nx/2))*dx, maxy, 0.0f);
+        addGridLine(p, c, minx, minx + ((double)(ny/2))*dy, maxx, minx + ((double)(ny/2))*dy, 0.0f);
 
-        gl.glEnd();
-        gl.glPopMatrix();
+        float[] positions = new float[p.size()];
+        float[] colors = new float[c.size()];
+        for ( int i = 0; i < positions.length; i++ ) {
+            positions[i] = p.get(i);
+            colors[i] = c.get(i);
+        }
+
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        Jogl4LineRenderer.drawLines(gl,
+            viewport.getActiveCamera().calculateProjectionMatrix().multiply(gridTransform),
+            positions, colors, 1.0f);
+    }
+
+    private static void addGridLine(ArrayList<Float> p, ArrayList<Float> c,
+        double x0, double y0, double x1, double y1, float gray)
+    {
+        p.add((float)x0); p.add((float)y0); p.add(0.0f);
+        p.add((float)x1); p.add((float)y1); p.add(0.0f);
+        for ( int i = 0; i < 2; i++ ) {
+            c.add(gray); c.add(gray); c.add(gray);
+        }
     }
 
     public void toggleGrid()
@@ -288,64 +292,44 @@ public class Jogl4ViewportWindow
         viewport.toggleGrid();
     }
 
-    public void drawGrid(GL2 gl)
+    public void drawGrid(GL4 gl)
     {
         //- Draw reference grid plane -------------------------------------
         if ( viewport.isShowGrid() ) drawGridRectangle(gl);
     }
 
-    public void drawTextureString2D(GL2 gl, int x, int y, RGBAImageUncompressed i)
+    /**
+    Draws a label image with its upper left corner at a position of the
+    viewport, measured in pixels from its upper left corner.
+    */
+    public void drawTextureString2D(GL4 gl, int x, int y, RGBAImageUncompressed i)
     {
-        double dx;
-        double dy;
-
-        dx = ((double)(2*x)) / ((double)viewport.getPixelSizeX());
-        dy = ((double)(2*(viewport.getPixelSizeY() - y))) / ((double)viewport.getPixelSizeY());
-
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        gl.glTranslated(dx, dy, 0);
-
-        drawTextureString3D(gl, i);
-
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
+        drawLabelImage(gl, i,
+            viewport.getPixelStartX() + x,
+            viewport.getPixelStartY() + (viewport.getPixelSizeY() - y));
     }
 
     /**
-    Draws a label image at the current modelview origin. The image is drawn
-    with `glDrawPixels`, so its colors come only from the image data: texturing
-    is explicitly disabled, otherwise the fragments would be modified by
-    whatever texture (and texture environment) was left bound by previous
-    drawing, making the label color depend on the OpenGL state.
-    */
-    /**
-    Draws a label image with its lower left corner at the projection of the
-    point (-1, -1, 0) of the current modelview / projection matrices.
+    Draws a label image with its lower left corner at a position of the
+    surface, in window coordinates.
 
-    The image is uploaded to a texture owned by this window and drawn as a
+    The image is uploaded to a texture the first time it is used and drawn as a
     textured quad in window coordinates, over the whole surface of the
-    viewport set (labels are not clipped by the current GL viewport, as they
-    were not when drawn with `glDrawPixels`), with an explicitly configured state
-    (replace texture environment, alpha blending, no lighting nor depth test).
-    Both the color and the transparency of the label come only from the image,
-    so the result does not depend on whatever OpenGL state was left by
-    previous drawing, and all OpenGL state changed here is restored.
+    viewport set (labels are not clipped by the current GL viewport), with an
+    explicitly configured state (alpha blending, no depth test). Both the
+    color and the transparency of the label come only from the image. The
+    state changed is restored.
+
+    @param gl OpenGL context
+    @param image label image
+    @param windowX horizontal position of the lower left corner
+    @param windowY vertical position of the lower left corner, from the bottom
     */
-    private void drawTextureString3D(GL2 gl, RGBAImageUncompressed i)
+    private void drawLabelImage(GL4 gl, RGBAImageUncompressed image, double windowX, double windowY)
     {
-        float[] rasterPosition = new float[4];
         int[] currentViewport = new int[4];
 
-        gl.glRasterPos3d(-1, -1, 0);
-        gl.glGetFloatv(GL2.GL_CURRENT_RASTER_POSITION, rasterPosition, 0);
-        gl.glGetIntegerv(GL2.GL_VIEWPORT, currentViewport, 0);
+        gl.glGetIntegerv(GL4.GL_VIEWPORT, currentViewport, 0);
 
         int surfaceWidth = viewportSet.getSizeXInPixels();
         int surfaceHeight = viewportSet.getSizeYInPixels();
@@ -354,131 +338,90 @@ public class Jogl4ViewportWindow
             surfaceHeight = currentViewport[1] + currentViewport[3];
         }
 
-        int texture = obtainLabelTexture(gl, i);
-        double x0 = Math.round(rasterPosition[0]);
-        double y0 = Math.round(rasterPosition[1]);
-        double x1 = x0 + i.getXSize();
-        double y1 = y0 + i.getYSize();
+        releaseDiscardedLabelTextures(gl);
+        int texture = Jogl4ImageRenderer.activate(gl, image);
+        double x0 = Math.round(windowX);
+        double y0 = Math.round(windowY);
+        double x1 = x0 + image.getXSize();
+        double y1 = y0 + image.getYSize();
 
-        gl.glPushAttrib(GL2.GL_ENABLE_BIT | GL2.GL_COLOR_BUFFER_BIT |
-            GL2.GL_TEXTURE_BIT | GL2.GL_CURRENT_BIT | GL2.GL_VIEWPORT_BIT);
+        // Window coordinates to clip space
+        Matrix4x4d toClip = Matrix4x4d.identityMatrix()
+            .withVal(0, 0, 2.0 / surfaceWidth).withVal(0, 3, -1.0)
+            .withVal(1, 1, 2.0 / surfaceHeight).withVal(1, 3, -1.0);
+        float[] positions = new float[] {
+            (float)x0, (float)y0, 0,
+            (float)x1, (float)y0, 0,
+            (float)x1, (float)y1, 0,
+            (float)x0, (float)y0, 0,
+            (float)x1, (float)y1, 0,
+            (float)x0, (float)y1, 0
+        };
+        float[] uvs = new float[] {
+            0, 0,  1, 0,  1, 1,
+            0, 0,  1, 1,  0, 1
+        };
+
         gl.glViewport(0, 0, surfaceWidth, surfaceHeight);
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        gl.glOrtho(0, surfaceWidth, 0, surfaceHeight, -1, 1);
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
+        gl.glDisable(GL4.GL_DEPTH_TEST);
+        gl.glDisable(GL4.GL_CULL_FACE);
+        gl.glEnable(GL4.GL_BLEND);
+        gl.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
 
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_DEPTH_TEST);
-        gl.glDisable(GL2.GL_ALPHA_TEST);
-        gl.glEnable(GL2.GL_BLEND);
-        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-        gl.glEnable(GL2.GL_TEXTURE_2D);
-        gl.glBindTexture(GL2.GL_TEXTURE_2D, texture);
-        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE);
+        Jogl4ImageRenderer.drawTexturedQuad(gl, texture, toClip, positions, uvs, 1.0f, 1.0f, 1.0f);
 
-        gl.glBegin(GL2.GL_QUADS);
-            gl.glTexCoord2d(0, 0);
-            gl.glVertex2d(x0, y0);
-            gl.glTexCoord2d(1, 0);
-            gl.glVertex2d(x1, y0);
-            gl.glTexCoord2d(1, 1);
-            gl.glVertex2d(x1, y1);
-            gl.glTexCoord2d(0, 1);
-            gl.glVertex2d(x0, y1);
-        gl.glEnd();
-
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glPopAttrib();
+        gl.glDisable(GL4.GL_BLEND);
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glViewport(currentViewport[0], currentViewport[1], currentViewport[2], currentViewport[3]);
     }
 
     /**
-    @return the texture holding the given label image, uploading it the first
-    time it is used; also releases the textures of discarded label images
+    Releases the textures of the label images that are no longer used.
     */
-    private int obtainLabelTexture(GL2 gl, RGBAImageUncompressed image)
+    private void releaseDiscardedLabelTextures(GL4 gl)
     {
-        int[] id = new int[1];
-
-        // Textures belong to the OpenGL context that created them: if it is
-        // not the current one (i.e. the GUI was rebuilt, destroying the
-        // canvas), their ids are meaningless and the images must be uploaded
-        // again
-        if ( labelTexturesContext != gl.getContext() ) {
-            invalidateGlResources();
-            labelTexturesContext = gl.getContext();
-        }
-
         for ( RGBAImageUncompressed discarded : discardedLabelImages ) {
-            Integer oldTexture = labelTextures.remove(discarded);
-            if ( oldTexture != null ) {
-                id[0] = oldTexture;
-                gl.glDeleteTextures(1, id, 0);
-            }
+            Jogl4ImageRenderer.unload(gl, discarded);
         }
         discardedLabelImages.clear();
-
-        Integer texture = labelTextures.get(image);
-        if ( texture != null ) {
-            return texture;
-        }
-
-        gl.glGenTextures(1, id, 0);
-        gl.glPushAttrib(GL2.GL_TEXTURE_BIT);
-        gl.glBindTexture(GL2.GL_TEXTURE_2D, id[0]);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
-        gl.glPixelStorei(GL2.GL_UNPACK_ALIGNMENT, 1);
-        gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA8,
-            image.getXSize(), image.getYSize(), 0,
-            GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, image.getRawImageDirectBuffer());
-        gl.glPopAttrib();
-
-        labelTextures.put(image, id[0]);
-        return id[0];
     }
 
     /**
     Deletes the OpenGL resources (label textures) of this window.
     PRE: the OpenGL context that created them is current, i.e. when it is
     about to be destroyed.
-    @param gl
+    @param gl OpenGL context
     */
-    public void disposeGlResources(GL2 gl)
+    public void disposeGlResources(GL4 gl)
     {
-        int[] id = new int[1];
-
-        if ( labelTexturesContext == gl.getContext() ) {
-            for ( Integer texture : labelTextures.values() ) {
-                id[0] = texture;
-                gl.glDeleteTextures(1, id, 0);
+        releaseDiscardedLabelTextures(gl);
+        if ( titleImage != null ) {
+            Jogl4ImageRenderer.unload(gl, titleImage);
+        }
+        if ( referenceFrameLabelImages != null ) {
+            for ( RGBAImageUncompressed image : referenceFrameLabelImages ) {
+                Jogl4ImageRenderer.unload(gl, image);
             }
         }
-        invalidateGlResources();
+        if ( translateGizmoLabelImages != null ) {
+            for ( int axis = 0; axis < translateGizmoLabelImages.length; axis++ ) {
+                Jogl4ImageRenderer.unload(gl, translateGizmoLabelImages[axis]);
+                Jogl4ImageRenderer.unload(gl, translateGizmoSelectedLabelImages[axis]);
+            }
+        }
     }
 
     /**
-    Forgets the OpenGL resources (label textures) of this window without
-    releasing them, because the context that owned them is already gone (or
-    is not the current one). They are created again when needed. The label
-    images themselves are kept.
+    Forgets the pending release of label textures, because the context that
+    owned them is gone. The label images themselves are kept, and their
+    textures are created again when needed.
     */
     public void invalidateGlResources()
     {
-        labelTextures.clear();
         discardedLabelImages.clear();
-        labelTexturesContext = null;
     }
 
-    public void drawTitle(GL2 gl)
+    public void drawTitle(GL4 gl)
     {
         updateTitleImage();
 
@@ -520,7 +463,7 @@ public class Jogl4ViewportWindow
         }
     }
 
-    public void drawLabelsForTranslateGizmo(GL2 gl, TranslateGizmo gizmo)
+    public void drawLabelsForTranslateGizmo(GL4 gl, TranslateGizmo gizmo)
     {
         ViewportElementScaler elementScaler = viewportSet.getElementScaler();
         int offsetX = (int)Math.round(elementScaler.scaleLength(BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X));
@@ -543,9 +486,6 @@ public class Jogl4ViewportWindow
             Vector3Dd position;
 
             if ( g != null ) {
-                gl.glPushMatrix();
-                gl.glLoadIdentity();
-
                 lv = new Vector3Dd(0, 0, lv.z());
                 if ( g instanceof Arrow ) {
                     Arrow a = ((Arrow)g);
@@ -570,7 +510,6 @@ public class Jogl4ViewportWindow
                         (int)tp.y() + offsetY,
                         yellow ? translateGizmoSelectedLabelImages[i] : translateGizmoLabelImages[i]);
                 }
-                gl.glPopMatrix();
             }
         }
     }

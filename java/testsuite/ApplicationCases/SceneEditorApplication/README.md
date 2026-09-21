@@ -43,6 +43,13 @@ For tool calls, send:
 - `scene.clear`: removes all bodies, lights and debug groups.
 - `scene.add_point_light`: creates a point light. Arguments: `x`, `y`, `z`, `r`, `g`, `b`.
 - `scene.add_sphere`: creates a sphere. Arguments: `radius`, `x`, `y`, `z`.
+- `scene.add_cone`: creates a cone or truncated cone. Arguments: `baseRadius`, `topRadius`, `height`, `x`, `y`, `z`.
+- `scene.add_cylinder`: creates a cylinder. Arguments: `radius`, `height`, `x`, `y`, `z`.
+- `scene.move_body`: sets the position of a body (default: the last one); missing coordinates are kept. Arguments: `index`, `x`, `y`, `z`.
+- `scene.select_body`: selects one body (a negative `index` clears the selection). Arguments: `index`.
+- `gui.set_mode`: sets the interaction mode. Arguments: `mode` (`camera`, `select`, `translate`, `rotate` or `scale`).
+- `render.get_configuration`: returns the `RendererConfiguration` flags of the viewports. Arguments: `viewport` (index; default all).
+- `render.set_configuration`: sets the `RendererConfiguration` flags bit by bit. Arguments: `viewport` (index; default all) and any of the booleans `points`, `wires`, `surfaces`, `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`, `selectionCorners`, and `shading` (`nolight`, `flat`, `gouraud`, `phong`, `cook_terrance`).
 - `render.raytrace_png`: raytraces the current scene and exports a PNG. Arguments: `path`, `width`, `height`.
 - `viewport.export_jpg`: exports the selected JOGL4 viewport as a JPG. Arguments: `path`.
 - `workspace.export_jpg`: exports the complete JOGL4 workspace area, including all viewports, as a JPG. Arguments: `path`.

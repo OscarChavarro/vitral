@@ -18,12 +18,17 @@ import javax.swing.Timer;
 import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.render.jogl.Jogl4DrawingAreaRenderer;
+import framework.model.Viewport;
+import framework.model.ViewportSet;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.PointLight;
+import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.environment.material.ShadingType;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.image.ImagePersistence;
 
@@ -121,6 +126,32 @@ class VitralEditorMCPProtocol implements Runnable
             addSphere(request);
             return describeScene();
         }
+        if ( "scene.add_cone".equals(tool) ) {
+            addCone(request);
+            return describeScene();
+        }
+        if ( "scene.add_cylinder".equals(tool) ) {
+            addCylinder(request);
+            return describeScene();
+        }
+        if ( "scene.move_body".equals(tool) ) {
+            moveBody(request);
+            return describeScene();
+        }
+        if ( "scene.select_body".equals(tool) ) {
+            selectBody(request);
+            return describeScene();
+        }
+        if ( "gui.set_mode".equals(tool) ) {
+            return setInteractionMode(request);
+        }
+        if ( "render.get_configuration".equals(tool) ) {
+            return describeRendererConfigurations(request);
+        }
+        if ( "render.set_configuration".equals(tool) ) {
+            setRendererConfiguration(request);
+            return describeRendererConfigurations(request);
+        }
         if ( "render.raytrace_png".equals(tool) ) {
             return raytracePng(request);
         }
@@ -217,6 +248,167 @@ class VitralEditorMCPProtocol implements Runnable
         body.setPosition(new Vector3Dd(x, y, z));
     }
 
+    private void addCone(String request)
+    {
+        double baseRadius = numberProperty(request, "baseRadius", 1.0);
+        double topRadius = numberProperty(request, "topRadius", 0.0);
+        double height = numberProperty(request, "height", 2.0);
+        placeNewBody(new Cone(baseRadius, topRadius, height), request);
+    }
+
+    private void addCylinder(String request)
+    {
+        double radius = numberProperty(request, "radius", 1.0);
+        double height = numberProperty(request, "height", 2.0);
+        placeNewBody(new Cone(radius, radius, height), request);
+    }
+
+    private void placeNewBody(Geometry geometry, String request)
+    {
+        SimpleBody body = parent.getApplicationModel().getScene().addThing(geometry);
+        body.setPosition(new Vector3Dd(
+            numberProperty(request, "x", 0.0),
+            numberProperty(request, "y", 0.0),
+            numberProperty(request, "z", 0.0)));
+    }
+
+    private void moveBody(String request)
+    {
+        ArrayList<SimpleBody> bodies =
+            parent.getApplicationModel().getScene().scene.getSimpleBodies();
+        int index = (int)numberProperty(request, "index", bodies.size() - 1);
+
+        if ( index < 0 || index >= bodies.size() ) {
+            throw new IllegalArgumentException("Body index out of range: " + index);
+        }
+        SimpleBody body = bodies.get(index);
+        Vector3Dd p = body.getPosition();
+
+        body.setPosition(new Vector3Dd(
+            numberProperty(request, "x", p.x()),
+            numberProperty(request, "y", p.y()),
+            numberProperty(request, "z", p.z())));
+    }
+
+    private String setInteractionMode(String request)
+    {
+        String mode = stringProperty(request, "mode", "");
+        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        int value;
+
+        if ( drawingArea == null ) {
+            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
+        }
+        switch ( mode ) {
+            case "camera" -> value = Jogl4DrawingAreaRenderer.CAMERA_INTERACTION_MODE;
+            case "select" -> value = Jogl4DrawingAreaRenderer.SELECT_INTERACTION_MODE;
+            case "translate" -> value = Jogl4DrawingAreaRenderer.TRANSLATE_INTERACTION_MODE;
+            case "rotate" -> value = Jogl4DrawingAreaRenderer.ROTATE_INTERACTION_MODE;
+            case "scale" -> value = Jogl4DrawingAreaRenderer.SCALE_INTERACTION_MODE;
+            default -> throw new IllegalArgumentException("Unknown mode \"" + mode +
+                "\". Use camera, select, translate, rotate or scale");
+        }
+        drawingArea.interactionMode = value;
+        return "{\"ok\":true,\"mode\":\"" + mode + "\"}";
+    }
+
+    private void selectBody(String request)
+    {
+        Scene scene = parent.getApplicationModel().getScene();
+        int index = (int)numberProperty(request, "index", -1);
+
+        scene.selectedThings.unselectAll();
+        if ( index >= 0 ) {
+            if ( index >= scene.scene.getSimpleBodies().size() ) {
+                throw new IllegalArgumentException("Body index out of range: " + index);
+            }
+            scene.selectedThings.select(index);
+        }
+    }
+
+    /**
+    @return the viewports selected by the "viewport" argument: an index, or
+    all of them when it is missing
+    */
+    private ArrayList<Viewport> selectedViewports(String request)
+    {
+        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
+        ArrayList<Viewport> out = new ArrayList<>();
+        double index = numberProperty(request, "viewport", -1);
+
+        if ( index < 0 ) {
+            out.addAll(set.getViewports());
+        }
+        else if ( index < set.getViewportCount() ) {
+            out.add(set.getViewport((int)index));
+        }
+        else {
+            throw new IllegalArgumentException("Viewport index out of range: " + (int)index);
+        }
+        return out;
+    }
+
+    private void setRendererConfiguration(String request)
+    {
+        for ( Viewport viewport : selectedViewports(request) ) {
+            RendererConfiguration q = viewport.getRendererConfiguration();
+            Boolean value;
+
+            value = booleanProperty(request, "points");
+            if ( value != null ) q.setPoints(value);
+            value = booleanProperty(request, "wires");
+            if ( value != null ) q.setWires(value);
+            value = booleanProperty(request, "surfaces");
+            if ( value != null ) q.setSurfaces(value);
+            value = booleanProperty(request, "texture");
+            if ( value != null ) q.setTexture(value);
+            value = booleanProperty(request, "bumpMap");
+            if ( value != null ) q.setBumpMap(value);
+            value = booleanProperty(request, "boundingVolume");
+            if ( value != null ) q.setBoundingVolume(value);
+            value = booleanProperty(request, "normals");
+            if ( value != null ) q.setNormals(value);
+            value = booleanProperty(request, "trianglesNormals");
+            if ( value != null ) q.setTrianglesNormals(value);
+            value = booleanProperty(request, "selectionCorners");
+            if ( value != null ) q.setSelectionCorners(value);
+
+            String shading = stringProperty(request, "shading", "");
+            if ( !shading.isEmpty() ) {
+                q.setShadingType(ShadingType.valueOf(shading.toUpperCase()));
+            }
+        }
+    }
+
+    private String describeRendererConfigurations(String request)
+    {
+        StringBuilder sb = new StringBuilder("{\"viewports\":[");
+        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
+        boolean first = true;
+
+        for ( Viewport viewport : selectedViewports(request) ) {
+            RendererConfiguration q = viewport.getRendererConfiguration();
+
+            if ( !first ) {
+                sb.append(',');
+            }
+            first = false;
+            sb.append("{\"index\":").append(set.getViewports().indexOf(viewport))
+                .append(",\"title\":\"").append(escape(viewport.getTitle())).append('"')
+                .append(",\"points\":").append(q.isPointsSet())
+                .append(",\"wires\":").append(q.isWiresSet())
+                .append(",\"surfaces\":").append(q.isSurfacesSet())
+                .append(",\"texture\":").append(q.isTextureSet())
+                .append(",\"bumpMap\":").append(q.isBumpMapSet())
+                .append(",\"boundingVolume\":").append(q.isBoundingVolumeSet())
+                .append(",\"normals\":").append(q.isNormalsSet())
+                .append(",\"trianglesNormals\":").append(q.isTrianglesNormalsSet())
+                .append(",\"selectionCorners\":").append(q.isSelectionCornersSet())
+                .append(",\"shading\":\"").append(q.getShadingTypeEnum()).append("\"}");
+        }
+        return sb.append("]}").toString();
+    }
+
     private String raytracePng(String request)
     {
         String path = stringProperty(request, "path", "./mcp-raytrace.png");
@@ -302,6 +494,13 @@ class VitralEditorMCPProtocol implements Runnable
             + "," + tool("scene.clear", "Remove all bodies, lights and debug groups.")
             + "," + tool("scene.add_point_light", "Create a point light. Arguments: x,y,z,r,g,b.")
             + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
+            + "," + tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
+            + "," + tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")
+            + "," + tool("scene.move_body", "Set the position of a body (default: the last one). Arguments: index,x,y,z (missing coordinates are kept).")
+            + "," + tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
+            + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
+            + "," + tool("render.get_configuration", "Return the RendererConfiguration flags of the viewports. Arguments: viewport (index; default all).")
+            + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners, and shading (nolight|flat|gouraud|phong|cook_terrance).")
             + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
             + "," + tool("viewport.export_jpg", "Export the selected JOGL4 viewport to JPG. Arguments: path.")
             + "," + tool("workspace.export_jpg", "Export the complete JOGL4 workspace area, including all viewports, to JPG. Arguments: path.")
@@ -381,6 +580,17 @@ class VitralEditorMCPProtocol implements Runnable
             return defaultValue;
         }
         return Double.parseDouble(matcher.group(1));
+    }
+
+    private static Boolean booleanProperty(String json, String key)
+    {
+        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
+            + "\"\\s*:\\s*(true|false)");
+        Matcher matcher = pattern.matcher(json);
+        if ( !matcher.find() ) {
+            return null;
+        }
+        return Boolean.valueOf(matcher.group(1));
     }
 
     private static String escape(String in)
