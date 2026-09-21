@@ -1,4 +1,4 @@
-package framework.model;
+package vsdk.toolkit.gui.viewport;
 
 /**
 Names of the standard GUI elements the `ViewportSet` model uses from the I18N

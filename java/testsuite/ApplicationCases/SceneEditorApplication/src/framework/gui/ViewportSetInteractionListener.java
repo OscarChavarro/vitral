@@ -1,6 +1,6 @@
 package framework.gui;
 
-import framework.model.Viewport;
+import vsdk.toolkit.gui.viewport.Viewport;
 
 /**
 Receives the requests that `ViewportSetInteractionTechniques` derives from

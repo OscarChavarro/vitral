@@ -14,9 +14,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import framework.model.Viewport;
-import framework.model.ViewportSet;
-import framework.model.ViewportSetCommands;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
+import vsdk.toolkit.gui.viewport.ViewportSetCommands;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.gui.widget.WidgetMenu;
 import vsdk.toolkit.gui.widget.WidgetMenuElement;

@@ -1,6 +1,8 @@
 package application.gui;
 
 // Java GUI classes
+import java.util.List;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
@@ -66,9 +68,9 @@ public class ModifyPanel extends JPanel
         target = null;
     }
 
-    public void draw(GL4 gl, Camera camera, Light light, RendererConfiguration quality)
+    public void draw(GL4 gl, Camera camera, List<Light> lights, RendererConfiguration quality)
     {
-        Jogl4SceneRenderer.drawBody(gl, target, camera, light, quality);
+        Jogl4SceneRenderer.drawBody(gl, target, camera, lights, quality);
     }
 
 }

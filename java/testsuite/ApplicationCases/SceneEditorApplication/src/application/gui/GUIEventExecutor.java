@@ -509,8 +509,11 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = new PointLight(new Vector3Dd(-10, -9, 8), new ColorRgb(1, 1, 1));
-            scene().scene.getLights().add(light);
+            light = parent.getApplicationModel().addNewLight();
+            if ( light == null ) {
+                Logger.reportMessage(this, VSDK.WARNING, "execute", "No visible viewport where to create the light");
+                return false;
+            }
         }
         //- RENDERING -----------------------------------------------------
         else if ( label.equals("Select palette for depthmap display") ||

@@ -1,4 +1,4 @@
-package framework.model;
+package vsdk.toolkit.gui.viewport;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -106,6 +106,9 @@ public class Viewport
 
         activeCamera = perspectiveCamera;
         rendererConfiguration = new RendererConfiguration();
+        // A new viewport starts with the perspective camera, whose surfaces
+        // are shaded with Phong instead of the Gouraud default
+        rendererConfiguration.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
         title = activeCamera.getName();
         renderMode = RENDER_MODE_Z_BUFFER;
         showGrid = true;

@@ -21,6 +21,9 @@ public class Jogl4LightRenderer extends Jogl4Renderer
 {
     private static final LinkedHashMap<Integer, Light> ACTIVE_LIGHTS =
         new LinkedHashMap<Integer, Light>();
+    private static final ColorRgb SELECTED_COLOR = new ColorRgb(1, 1, 0);
+    private static final float LINE_WIDTH = 2.0f;
+    private static final float SELECTED_LINE_WIDTH = 4.0f;
     private static double scale = 1.0;
 
     public static void activate(GL gl, Light light)
@@ -58,16 +61,31 @@ public class Jogl4LightRenderer extends Jogl4Renderer
     public static void draw(GL4 gl, Light light, Camera camera,
                             LightGizmoStyle lightGizmoStyle)
     {
+        draw(gl, light, camera, lightGizmoStyle, false);
+    }
+
+    /**
+    Draws the gizmo of a light. A selected light is drawn in the selection
+    color and with thicker lines, instead of with its own emission color.
+    @param gl OpenGL context
+    @param light light to draw
+    @param camera camera that views the light
+    @param lightGizmoStyle shape of the gizmo
+    @param selected true if the light is selected
+    */
+    public static void draw(GL4 gl, Light light, Camera camera,
+                            LightGizmoStyle lightGizmoStyle, boolean selected)
+    {
         if ( gl == null || light == null ) {
             return;
         }
 
         if ( lightGizmoStyle == LightGizmoStyle.OMNI_BILLBOARD ) {
-            drawOmniBillboard(gl, light, camera);
+            drawOmniBillboard(gl, light, camera, selected);
             return;
         }
 
-        drawCross(gl, light, camera);
+        drawCross(gl, light, camera, selected);
     }
 
     public static double getScale()
@@ -95,7 +113,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         return out;
     }
 
-    private static void drawCross(GL4 gl, Light light, Camera camera)
+    private static void drawCross(GL4 gl, Light light, Camera camera, boolean selected)
     {
         int[] viewport = new int[4];
         gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
@@ -113,7 +131,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
             viewportWidth, viewportHeight) * scale;
 
         Vector3Dd p = light.getPosition();
-        ColorRgb c = light.getEmission();
+        ColorRgb c = selected ? SELECTED_COLOR : light.getEmission();
 
         float px = (float)p.x();
         float py = (float)p.y();
@@ -134,10 +152,10 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         float[] colors = buildUniformColorArray(c, positions.length / 3);
 
         Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors,
-            2.0f);
+            selected ? SELECTED_LINE_WIDTH : LINE_WIDTH);
     }
 
-    private static void drawOmniBillboard(GL4 gl, Light light, Camera camera)
+    private static void drawOmniBillboard(GL4 gl, Light light, Camera camera, boolean selected)
     {
         int[] viewport = new int[4];
         gl.glGetIntegerv(GL4.GL_VIEWPORT, viewport, 0);
@@ -146,7 +164,7 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         int viewportHeight = Math.max(viewport[3], 1);
 
         if ( camera == null ) {
-            drawCross(gl, light, null);
+            drawCross(gl, light, null, selected);
             return;
         }
 
@@ -186,8 +204,10 @@ public class Jogl4LightRenderer extends Jogl4Renderer
             positions[write++] = (float)p1.z();
         }
 
-        float[] colors = buildUniformColorArray(light.getEmission(), positions.length / 3);
-        Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors, 2.0f);
+        float[] colors = buildUniformColorArray(
+            selected ? SELECTED_COLOR : light.getEmission(), positions.length / 3);
+        Jogl4LineRenderer.drawLines(gl, modelViewProjection, positions, colors,
+            selected ? SELECTED_LINE_WIDTH : LINE_WIDTH);
     }
 
     private static Vector3Dd mapPatternPointToWorld(Vector3Dd point,
@@ -225,28 +245,8 @@ public class Jogl4LightRenderer extends Jogl4Renderer
                                                    int viewportWidth,
                                                    int viewportHeight)
     {
-        final double viewportFraction = 0.05;
-        final double targetPixels = viewportFraction
-            * Math.min(viewportWidth, viewportHeight);
-
-        if ( camera == null ) {
-            return Math.max(0.05, targetPixels / Math.max(viewportHeight, 1));
-        }
-
-        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            double worldViewHeight = 2.0 / camera.getOrthogonalZoom();
-            double worldPerPixel = worldViewHeight / Math.max(viewportHeight, 1);
-            return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
-        }
-
-        Vector3Dd toLight = light.getPosition().subtract(camera.getPosition());
-        double depth = Math.abs(toLight.dotProduct(camera.getFront()));
-        depth = Math.max(depth, camera.getNearPlaneDistance());
-
-        double fovRadians = Math.toRadians(camera.getFov());
-        double worldViewHeightAtDepth = 2.0 * depth * Math.tan(fovRadians / 2.0);
-        double worldPerPixel = worldViewHeightAtDepth / Math.max(viewportHeight, 1);
-        return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
+        return LightGizmoOmniBillboard.calculateWorldHalfSize(camera,
+            light.getPosition(), viewportWidth, viewportHeight);
     }
 
     private static Light defaultLight()

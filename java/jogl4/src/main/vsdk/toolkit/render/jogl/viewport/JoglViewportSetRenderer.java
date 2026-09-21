@@ -1,4 +1,4 @@
-package framework.render.jogl4;
+package vsdk.toolkit.render.jogl.viewport;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -7,8 +7,8 @@ import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.render.jogl.Jogl4ColoredPrimitiveRenderer;
-import framework.model.Viewport;
-import framework.model.ViewportSet;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 
 /**
 JOGL presentation of a `ViewportSet`: it activates the GL viewport of each

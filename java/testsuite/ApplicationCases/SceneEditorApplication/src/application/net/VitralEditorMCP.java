@@ -18,13 +18,14 @@ import javax.swing.Timer;
 import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.render.jogl.Jogl4DrawingAreaRenderer;
-import framework.model.Viewport;
-import framework.model.ViewportSet;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
+import application.model.SceneLightFactory;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -232,15 +233,33 @@ class VitralEditorMCPProtocol implements Runnable
 
     private void addPointLight(String request)
     {
-        double x = numberProperty(request, "x", -10.0);
-        double y = numberProperty(request, "y", -9.0);
-        double z = numberProperty(request, "z", 8.0);
+        boolean explicitPosition = hasProperty(request, "x") ||
+            hasProperty(request, "y") || hasProperty(request, "z");
+        boolean explicitColor = hasProperty(request, "r") ||
+            hasProperty(request, "g") || hasProperty(request, "b");
+
+        if ( !explicitPosition && !explicitColor ) {
+            parent.getApplicationModel().addNewLight();
+            return;
+        }
+        // Missing values follow the default policy of the first light
+        PointLight defaults = new SceneLightFactory().createLight(
+            new ArrayList<Light>(), parent.getApplicationModel().getActiveViewportSet());
+        Vector3Dd p = defaults == null ? new Vector3Dd() : defaults.getPosition();
+        double x = numberProperty(request, "x", p.x());
+        double y = numberProperty(request, "y", p.y());
+        double z = numberProperty(request, "z", p.z());
         double r = numberProperty(request, "r", 1.0);
         double g = numberProperty(request, "g", 1.0);
         double b = numberProperty(request, "b", 1.0);
         Scene scene = parent.getApplicationModel().getScene();
         scene.scene.addLight(new PointLight(new Vector3Dd(x, y, z),
             new ColorRgb(r, g, b)));
+    }
+
+    private static boolean hasProperty(String json, String key)
+    {
+        return Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:").matcher(json).find();
     }
 
     private void addSphere(String request)
@@ -552,7 +571,7 @@ class VitralEditorMCPProtocol implements Runnable
         return "{\"tools\":["
             + tool("scene.describe", "Return bodies, lights and core transforms as JSON.")
             + "," + tool("scene.clear", "Remove all bodies, lights and debug groups.")
-            + "," + tool("scene.add_point_light", "Create a point light. Arguments: x,y,z,r,g,b.")
+            + "," + tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
             + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
             + "," + tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
             + "," + tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")

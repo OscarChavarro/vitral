@@ -65,6 +65,7 @@ import vsdk.toolkit.render.jogl.gizmo.Jogl4RotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ScaleGizmoRenderer;
 import vsdk.toolkit.gui.AwtSystem;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -76,16 +77,17 @@ import application.framework.Scene;
 import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
 import application.model.ApplicationModel;
+import framework.gui.AwtCursorWarper;
 import framework.gui.AwtProjectionLocationPopup;
 import framework.gui.AwtViewportElementScaler;
 import framework.gui.ViewportSetInteractionListener;
 import framework.gui.ViewportInteractionTechniques;
 import framework.gui.ViewportSetInteractionTechniques;
-import framework.model.Viewport;
-import framework.model.ViewportSet;
-import framework.render.jogl4.Jogl4LabelImageProvider;
-import framework.render.jogl4.Jogl4ViewportWindow;
-import framework.render.jogl4.JoglViewportSetRenderer;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
+import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
+import vsdk.toolkit.render.jogl.viewport.Jogl4ViewportWindow;
+import vsdk.toolkit.render.jogl.viewport.JoglViewportSetRenderer;
 import java.awt.event.MouseEvent;
 
 public class Jogl4DrawingAreaRenderer implements 
@@ -107,6 +109,7 @@ public class Jogl4DrawingAreaRenderer implements
     private final ScaleGizmo scaleGizmo;
     private final SimpleMaterial visualDebugMaterial;
     private final ViewportInteractionTechniques interactionTechniques;
+    private final AwtCursorWarper cursorWarper = new AwtCursorWarper();
 
     private final Scene theScene;
     private final ApplicationModel model;
@@ -167,6 +170,8 @@ public class Jogl4DrawingAreaRenderer implements
         qualitySelection = theScene.qualityTemplate;
         interactionTechniques = new ViewportInteractionTechniques(theScene.camera, qualitySelection);
         translationGizmo = interactionTechniques.getTranslationGizmo();
+        // While dragging the gizmo, the cursor wraps around its viewport
+        interactionTechniques.setTranslationCursorWrapEnabled(cursorWarper.isAvailable());
         qualitySelectionVisualDebug = new RendererConfiguration();
         qualitySelectionVisualDebug.setShadingType(
             RendererConfiguration.SHADING_TYPE_GOURAUD);
@@ -479,21 +484,10 @@ public class Jogl4DrawingAreaRenderer implements
         int firstThingSelected = theScene.selectedThings.firstSelected();
 
         if ( shouldDrawTranslationGizmo() ) {
-            if ( firstThingSelected >= 0 ) {
-                Vector3Dd position;
-                SimpleBody gi;
+            Vector3Dd centroid = computeSelectionCentroid();
 
-                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-                Matrix4x4d composed;
-
-                position = gi.getPosition();
-                //composed = new Matrix4x4d(gi.getRotation());
-                composed = new Matrix4x4d();
-                composed = composed.withVal(0, 3, position.x());
-                composed = composed.withVal(1, 3, position.y());
-                composed = composed.withVal(2, 3, position.z());
-                translationGizmo.setTransformationMatrix(composed);
+            if ( centroid != null ) {
+                translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
 
                 Jogl4TranslateGizmoRenderer.draw(gl, translationGizmo, theScene.activeCamera);
                 translationGizmoDrawn = true;
@@ -1136,11 +1130,8 @@ public class Jogl4DrawingAreaRenderer implements
     private void drawVisualDebugGeometry(GL4 gl, Geometry geometry, Matrix4x4d transform,
         SimpleMaterial material)
     {
-        Light light = theScene.scene.getLights().isEmpty()
-            ? null
-            : theScene.scene.getLights().get(0);
-
-        Jogl4GeometryRenderer.draw(gl, geometry, theScene.camera, light, material,
+        Jogl4GeometryRenderer.draw(gl, geometry, theScene.camera,
+            theScene.scene.getLights(), material,
             qualitySelectionVisualDebug, null, null, transform);
     }
 
@@ -1287,6 +1278,42 @@ public class Jogl4DrawingAreaRenderer implements
         return viewportSetRenderer.getWindow(viewport);
     }
 
+    /**
+    A translation gesture (drag of the gizmo) belongs to the viewport where it
+    started, even if the cursor goes over another one.
+    @return the window of the viewport where the gesture in course started,
+    or the one under the pointer if there is no gesture
+    */
+    private Jogl4ViewportWindow getInteractionViewFromPointerPosition(java.awt.event.MouseEvent e)
+    {
+        Viewport dragViewport = interactionTechniques.getTranslationDragViewport();
+
+        if ( dragViewport != null ) {
+            return viewportSetRenderer.getWindow(dragViewport);
+        }
+        return getViewFromPointerPosition(e);
+    }
+
+    /**
+    Places the pointer as requested by the translation technique when the
+    cursor leaves the viewport of the gesture (infinite drag).
+    @param view window of the viewport of the gesture
+    */
+    private void wrapCursorIfRequested(Jogl4ViewportWindow view)
+    {
+        TranslateGizmoInteractionTechnique.CursorWarp warp =
+            interactionTechniques.consumeTranslationCursorWarp();
+
+        if ( warp == null || view == null ) {
+            return;
+        }
+        Viewport viewport = view.getViewport();
+        int canvasX = scaleXToCanvas(viewportSet.toSetX(viewport, warp.x()));
+        int canvasY = scaleYToCanvas(viewportSet.toSetY(viewport, warp.y()));
+
+        cursorWarper.warp(canvas, canvasX, canvasY);
+    }
+
     private void syncViewportStateFromCanvas()
     {
         int width = canvas.getWidth();
@@ -1368,44 +1395,32 @@ public class Jogl4DrawingAreaRenderer implements
             if ( ((e.getModifiersEx()) & MouseEvent.CTRL_DOWN_MASK) != 0x0 ) {
                 composite = true;
             }
-            int oldThingSelected = theScene.selectedThings.firstSelected();
             vsdk.toolkit.gui.MouseEvent viewportEvent = toViewportEvent(e, mouseView);
 
             theScene.activeCamera = mouseView.getCamera();
-            model.setVisualDebugRay(theScene.selectObjectWithMouse(
-                viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
 
-            int firstThingSelected = theScene.selectedThings.firstSelected();
+            // A press over a gizmo handle grabs the gizmo: the ray selection
+            // is skipped, so the whole selected group is kept
+            boolean gizmoGrabbed =
+                interactionMode == TRANSLATE_INTERACTION_MODE &&
+                interactionTechniques.getTranslationTechnique().isActive() &&
+                computeSelectionCentroid() != null;
 
-            if ( oldThingSelected >= 0 && firstThingSelected < 0 &&
-                 interactionMode == TRANSLATE_INTERACTION_MODE &&
-                 interactionTechniques.getTranslationTechnique().isActive() ) {
-                theScene.selectedThings.select(oldThingSelected);
-                firstThingSelected = theScene.selectedThings.firstSelected();
+            if ( !gizmoGrabbed ) {
+                model.setVisualDebugRay(theScene.selectObjectWithMouse(
+                    viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
             }
 
-            if ( firstThingSelected >= 0 ) {
-                //------------------------------------------------------------
-                Vector3Dd position;
-                SimpleBody gi;
-                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
+            Vector3Dd centroid = computeSelectionCentroid();
 
-                Matrix4x4d composed;
-
-                position = gi.getPosition();
-                //composed = new Matrix4x4d(gi.getRotation());
-                composed = new Matrix4x4d();
-                composed = composed.withVal(0, 3, position.x());
-                composed = composed.withVal(1, 3, position.y());
-                composed = composed.withVal(2, 3, position.z());
-
+            if ( centroid != null ) {
                 translationGizmo.setCamera(mouseView.getCamera());
-                translationGizmo.setTransformationMatrix(composed);
+                translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
                 vitralMouseEvent = viewportEvent;
                 if ( interactionMode != SELECT_INTERACTION_MODE ) {
-                    interactionTechniques.processTranslationMousePressedEvent(vitralMouseEvent);
+                    interactionTechniques.processTranslationMousePressedEvent(
+                        vitralMouseEvent, mouseView.getViewport());
                 }
-                //------------------------------------------------------------
             }
 
             reportObjectSelection();
@@ -1419,9 +1434,10 @@ public class Jogl4DrawingAreaRenderer implements
         if ( projectionLocationPopup.consumesMouseEvent(e) ) {
             return;
         }
-        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
+        Jogl4ViewportWindow mouseView = getInteractionViewFromPointerPosition(e);
+        boolean confinedGesture = interactionTechniques.getTranslationDragViewport() != null;
 
-        if ( mouseView != null ) {
+        if ( mouseView != null && !confinedGesture ) {
             viewportSetTechniques.processMouseReleasedEvent(toSurfaceEvent(e));
         }
         activateInteractionView(mouseView);
@@ -1431,7 +1447,7 @@ public class Jogl4DrawingAreaRenderer implements
         // the proper icon for display ... here an Aquynza operation is
         // assumed and hard-coded
 
-        int firstThingSelected = theScene.selectedThings.firstSelected();
+        Vector3Dd centroid = computeSelectionCentroid();
 
         setCursorForPointer(e, getModeCursor());
 
@@ -1441,36 +1457,15 @@ public class Jogl4DrawingAreaRenderer implements
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                  firstThingSelected >= 0 ) {
-            Vector3Dd position;
-            SimpleBody gi;
-
-            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-            Matrix4x4d composed;
-
-            position = gi.getPosition();
-            //composed = new Matrix4x4d(gi.getRotation());
-            composed = new Matrix4x4d();
-            composed = composed.withVal(0, 3, position.x());
-            composed = composed.withVal(1, 3, position.y());
-            composed = composed.withVal(2, 3, position.z());
-
+                  centroid != null ) {
             if ( mouseView == null ) {
                 return;
             }
             translationGizmo.setCamera(mouseView.getCamera());
-            translationGizmo.setTransformationMatrix(composed);
+            translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
             vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseReleasedEvent(vitralMouseEvent) ) {
-                composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.get(0, 3));
-                position = position.withY(composed.get(1, 3));
-                position = position.withZ(composed.get(2, 3));
-                composed = composed.withVal(0, 3, 0);
-                composed = composed.withVal(1, 3, 0);
-                composed = composed.withVal(2, 3, 0);
-                applyTranslationToSelectedObjects(position);
+                applyTranslationToSelectedObjects(centroid, translationGizmo.getPosition());
                 canvas.repaint();
             }
         }
@@ -1490,7 +1485,7 @@ public class Jogl4DrawingAreaRenderer implements
         }
         activateInteractionView(mouseView);
 
-        int firstThingSelected = theScene.selectedThings.firstSelected();
+        Vector3Dd centroid = computeSelectionCentroid();
 
         vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1498,36 +1493,15 @@ public class Jogl4DrawingAreaRenderer implements
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                  firstThingSelected >= 0 ) {
-            Vector3Dd position;
-            SimpleBody gi;
-
-            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-            Matrix4x4d composed;
-
-            position = gi.getPosition();
-            //composed = new Matrix4x4d(gi.getRotation());
-            composed = new Matrix4x4d();
-            composed = composed.withVal(0, 3, position.x());
-            composed = composed.withVal(1, 3, position.y());
-            composed = composed.withVal(2, 3, position.z());
-
+                  centroid != null ) {
             if ( mouseView == null ) {
                 return;
             }
             translationGizmo.setCamera(mouseView.getCamera());
-            translationGizmo.setTransformationMatrix(composed);
+            translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
             vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseClickedEvent(vitralMouseEvent) ) {
-                composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.get(0, 3));
-                position = position.withY(composed.get(1, 3));
-                position = position.withZ(composed.get(2, 3));
-                composed = composed.withVal(0, 3, 0);
-                composed = composed.withVal(1, 3, 0);
-                composed = composed.withVal(2, 3, 0);
-                applyTranslationToSelectedObjects(position);
+                applyTranslationToSelectedObjects(centroid, translationGizmo.getPosition());
                 canvas.repaint();
             }
         }
@@ -1540,14 +1514,17 @@ public class Jogl4DrawingAreaRenderer implements
             setCursorForPointer(e, getModeCursor());
         }
         //-----------------------------------------------------------------
-        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
+        Jogl4ViewportWindow mouseView = getInteractionViewFromPointerPosition(e);
+        boolean confinedGesture = interactionTechniques.getTranslationDragViewport() != null;
 
-        if ( mouseView != null ) {
+        // Moved events can come while dragging the gizmo (i.e. when the cursor
+        // is wrapped): the viewport of the gesture keeps on being the one used
+        if ( mouseView != null && !confinedGesture ) {
             interactionTechniques.setCamera(mouseView.getCamera());
         }
 
         //-----------------------------------------------------------------
-        int firstThingSelected = theScene.selectedThings.firstSelected();
+        Vector3Dd centroid = computeSelectionCentroid();
 
         vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1555,36 +1532,15 @@ public class Jogl4DrawingAreaRenderer implements
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                  firstThingSelected >= 0 ) {
-            Vector3Dd position;
-            SimpleBody gi;
-
-            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-            Matrix4x4d composed;
-
-            position = gi.getPosition();
-            //composed = new Matrix4x4d(gi.getRotation());
-            composed = new Matrix4x4d();
-            composed = composed.withVal(0, 3, position.x());
-            composed = composed.withVal(1, 3, position.y());
-            composed = composed.withVal(2, 3, position.z());
-
+                  centroid != null ) {
             if ( mouseView == null ) {
                 return;
             }
             translationGizmo.setCamera(mouseView.getCamera());
-            translationGizmo.setTransformationMatrix(composed);
+            translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
             vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseMovedEvent(vitralMouseEvent) ) {
-                composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.get(0, 3));
-                position = position.withY(composed.get(1, 3));
-                position = position.withZ(composed.get(2, 3));
-                composed = composed.withVal(0, 3, 0);
-                composed = composed.withVal(1, 3, 0);
-                composed = composed.withVal(2, 3, 0);
-                applyTranslationToSelectedObjects(position);
+                applyTranslationToSelectedObjects(centroid, translationGizmo.getPosition());
                 canvas.repaint();
             }
         }
@@ -1596,14 +1552,17 @@ public class Jogl4DrawingAreaRenderer implements
         if ( projectionLocationPopup.consumesMouseEvent(e) ) {
             return;
         }
-        Jogl4ViewportWindow mouseView = getViewFromPointerPosition(e);
+        Jogl4ViewportWindow mouseView = getInteractionViewFromPointerPosition(e);
+        boolean confinedGesture = interactionTechniques.getTranslationDragViewport() != null;
 
-        if ( mouseView != null ) {
+        // While dragging the gizmo, the pointer over other viewport does not
+        // select it
+        if ( mouseView != null && !confinedGesture ) {
             viewportSetTechniques.processMouseDraggedEvent(toSurfaceEvent(e));
         }
         activateInteractionView(mouseView);
 
-        int firstThingSelected = theScene.selectedThings.firstSelected();
+        Vector3Dd centroid = computeSelectionCentroid();
 
         vsdk.toolkit.gui.MouseEvent vitralMouseEvent = AwtSystem.awt2vsdkEvent(e);
         if ( interactionMode == CAMERA_INTERACTION_MODE && 
@@ -1611,38 +1570,18 @@ public class Jogl4DrawingAreaRenderer implements
             canvas.repaint();
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE &&
-                  firstThingSelected >= 0 ) {
-            Vector3Dd position;
-            SimpleBody gi;
-
-            gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-            Matrix4x4d composed;
-
-            position = gi.getPosition();
-            //composed = new Matrix4x4d(gi.getRotation());
-            composed = new Matrix4x4d();
-            composed = composed.withVal(0, 3, position.x());
-            composed = composed.withVal(1, 3, position.y());
-            composed = composed.withVal(2, 3, position.z());
-
+                  centroid != null ) {
             if ( mouseView == null ) {
                 return;
             }
             translationGizmo.setCamera(mouseView.getCamera());
-            translationGizmo.setTransformationMatrix(composed);
+            translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
             vitralMouseEvent = toViewportEvent(e, mouseView);
             if ( interactionTechniques.processTranslationMouseDraggedEvent(vitralMouseEvent) ) {
-                composed = translationGizmo.getTransformationMatrix();
-                position = position.withX(composed.get(0, 3));
-                position = position.withY(composed.get(1, 3));
-                position = position.withZ(composed.get(2, 3));
-                composed = composed.withVal(0, 3, 0);
-                composed = composed.withVal(1, 3, 0);
-                composed = composed.withVal(2, 3, 0);
-                applyTranslationToSelectedObjects(position);
+                applyTranslationToSelectedObjects(centroid, translationGizmo.getPosition());
                 canvas.repaint();
             }
+            wrapCursorIfRequested(mouseView);
         }
     }
 
@@ -1681,6 +1620,7 @@ public class Jogl4DrawingAreaRenderer implements
             if ( unicode_id == KeyEvent.CHAR_UNDEFINED ) {
                 switch ( keycode ) {
                   case KeyEvent.VK_LEFT:
+                    theScene.selectedLights.unselectAll();
                     if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
                         theScene.selectedThings.selectPrevious();
                     }
@@ -1690,6 +1630,7 @@ public class Jogl4DrawingAreaRenderer implements
                     reportObjectSelection();
                     break;
                   case KeyEvent.VK_RIGHT:
+                    theScene.selectedLights.unselectAll();
                     if ( theScene.selectedDebugThingGroups.numberOfSelections() < 1 ) {
                         theScene.selectedThings.selectNext();
                     }
@@ -1702,30 +1643,12 @@ public class Jogl4DrawingAreaRenderer implements
             }
         }
         else if ( interactionMode == TRANSLATE_INTERACTION_MODE ) {
-            if ( firstThingSelected >= 0 ) {
-                Matrix4x4d composed;
-                Vector3Dd position;
-                SimpleBody gi;
+            Vector3Dd centroid = computeSelectionCentroid();
 
-                gi = theScene.scene.getSimpleBodies().get(firstThingSelected);
-
-                position = gi.getPosition();
-                //composed = new Matrix4x4d(gi.getRotation());
-                composed = new Matrix4x4d();
-                composed = composed.withVal(0, 3, position.x());
-                composed = composed.withVal(1, 3, position.y());
-                composed = composed.withVal(2, 3, position.z());
-
-                translationGizmo.setTransformationMatrix(composed);
+            if ( centroid != null ) {
+                translationGizmo.setTransformationMatrix(createTranslationGizmoMatrix(centroid));
                 if ( interactionTechniques.processTranslationKeyPressedEvent(vitralKeyEvent) ) {
-                    composed = translationGizmo.getTransformationMatrix();
-                    position = position.withX(composed.get(0, 3));
-                    position = position.withY(composed.get(1, 3));
-                    position = position.withZ(composed.get(2, 3));
-                    composed = composed.withVal(0, 3, 0);
-                    composed = composed.withVal(1, 3, 0);
-                    composed = composed.withVal(2, 3, 0);
-                    applyTranslationToSelectedObjects(position);
+                    applyTranslationToSelectedObjects(centroid, translationGizmo.getPosition());
                 }
             }
         }
@@ -1798,12 +1721,8 @@ public class Jogl4DrawingAreaRenderer implements
             int  i;
 
             //-----------------------------------------------------------------
-            for ( i = theScene.scene.getSimpleBodies().size()-1; i >= 0; i-- ) {
-                if ( theScene.selectedThings.isSelected(i) ) {
-                    theScene.scene.getSimpleBodies().remove(i);
-                }
-            }
-            theScene.selectedThings.sync();
+            theScene.selectedThings.removeSelected();
+            theScene.selectedLights.removeSelected();
             //-----------------------------------------------------------------
             for ( i = theScene.debugThingGroups.size()-1; i >= 0; i-- ) {
                 if ( theScene.selectedDebugThingGroups.isSelected(i) ) {
@@ -2094,17 +2013,75 @@ public class Jogl4DrawingAreaRenderer implements
         }
     }
 
-    private void applyTranslationToSelectedObjects(Vector3Dd position)
+    /**
+    Calculates the centroid of the group of selected things (bodies and
+    lights), as the mean of their positions. With a single selected thing this
+    is its position.
+    @return the centroid, or null if no thing is selected
+    */
+    private Vector3Dd computeSelectionCentroid()
+    {
+        Vector3Dd sum = new Vector3Dd();
+        int count = 0;
+        int i;
+
+        theScene.selectedThings.sync();
+        for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
+            if ( !theScene.selectedThings.isSelected(i) ) continue;
+            sum = sum.add(theScene.scene.getSimpleBodies().get(i).getPosition());
+            count++;
+        }
+        theScene.selectedLights.sync();
+        for ( i = 0; i < theScene.selectedLights.size(); i++ ) {
+            if ( !theScene.selectedLights.isSelected(i) ) continue;
+            sum = sum.add(theScene.scene.getLights().get(i).getPosition());
+            count++;
+        }
+        if ( count == 0 ) {
+            return null;
+        }
+        return sum.multiply(1.0 / count);
+    }
+
+    /**
+    @param position where the translation gizmo is to be placed
+    @return a pure translation matrix for the translation gizmo
+    */
+    private Matrix4x4d createTranslationGizmoMatrix(Vector3Dd position)
+    {
+        Matrix4x4d composed = new Matrix4x4d();
+
+        composed = composed.withVal(0, 3, position.x());
+        composed = composed.withVal(1, 3, position.y());
+        composed = composed.withVal(2, 3, position.z());
+        return composed;
+    }
+
+    /**
+    Moves rigidly the group of selected things (bodies and lights), so that the group centroid
+    goes from oldCentroid to newCentroid. Relative positions are preserved.
+    @param oldCentroid centroid of the group before the movement
+    @param newCentroid centroid of the group after the movement
+    */
+    private void applyTranslationToSelectedObjects(Vector3Dd oldCentroid,
+                                                   Vector3Dd newCentroid)
     {
         SimpleBody gi;
-        int firstThingSelected = theScene.selectedThings.firstSelected();
+        Light light;
+        Vector3Dd delta = newCentroid.subtract(oldCentroid);
         int i;
 
         for ( i = 0; i < theScene.selectedThings.size(); i++ ) {
             if ( !theScene.selectedThings.isSelected(i) ) continue;
             gi = theScene.scene.getSimpleBodies().get(i);
 
-            gi.setPosition(position);
+            gi.setPosition(gi.getPosition().add(delta));
+        }
+        for ( i = 0; i < theScene.selectedLights.size(); i++ ) {
+            if ( !theScene.selectedLights.isSelected(i) ) continue;
+            light = theScene.scene.getLights().get(i);
+
+            light.setPosition(light.getPosition().add(delta));
         }
     }
 
@@ -2139,6 +2116,16 @@ public class Jogl4DrawingAreaRenderer implements
         }
         else {
             msg += "" + n + " things selected";
+        }
+
+        //-----------------------------------------------------------------
+        theScene.selectedLights.sync();
+        n = theScene.selectedLights.numberOfSelections();
+        if ( n == 1 ) {
+            msg += "; Light [" + theScene.selectedLights.firstSelected() + "] selected";
+        }
+        else if ( n > 1 ) {
+            msg += "; " + n + " lights selected";
         }
 
         //-----------------------------------------------------------------

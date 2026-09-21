@@ -91,7 +91,7 @@ GUI texts come from the JSON files in `etc/gui` (one per language). Besides the
 application `IDC_` commands, the framework defines standard commands starting
 with `IDV_` and popup menus that are not part of the main menubar. The first one
 is the `VIEWPORT_SET_PROJECTION_LOCATION` popup (see
-`framework.model.ViewportSetCommands`), with the commands
+`vsdk.toolkit.gui.viewport.ViewportSetCommands`), with the commands
 `IDV_VIEWPORT_SET_PROJECTION_LOCATION_{PERSPECTIVE,TOP,BOTTOM,LEFT,FRONT}`. The
 `ViewportSet` uses the item texts of that popup as the names of its viewports,
 and the application injects the GUI definition (`ApplicationModel.setI18nContext`)

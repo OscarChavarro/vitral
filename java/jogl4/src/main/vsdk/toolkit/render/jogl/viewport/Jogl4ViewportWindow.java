@@ -1,6 +1,6 @@
 //=   previous "JoglView" class at SceneEditorApplication example).         =
 
-package framework.render.jogl4;
+package vsdk.toolkit.render.jogl.viewport;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -28,8 +28,8 @@ import vsdk.toolkit.render.jogl.gizmo.Jogl4ReferenceFrameGizmoRenderer;
 
 // Framework classes
 import vsdk.toolkit.gui.viewport.ViewportElementScaler;
-import framework.model.Viewport;
-import framework.model.ViewportSet;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 
 /**
 JOGL presentation of one `Viewport` of a `ViewportSet`: grid, reference base,

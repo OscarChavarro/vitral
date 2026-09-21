@@ -11,6 +11,7 @@ import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
+import vsdk.toolkit.gui.viewport.Viewport;
 
 public class ViewportInteractionTechniques
 {
@@ -125,6 +126,44 @@ public class ViewportInteractionTechniques
     public boolean processTranslationMousePressedEvent(MouseEvent event)
     {
         return translationTechnique.processMousePressedEvent(event);
+    }
+
+    /**
+    Processes the press of a mouse button over a viewport, starting a
+    translation gesture confined to it (see `getTranslationDragViewport`).
+    @param event event with coordinates relative to the viewport
+    @param viewport viewport where the button was pressed
+    @return false (a press never changes the gizmo)
+    */
+    public boolean processTranslationMousePressedEvent(MouseEvent event, Viewport viewport)
+    {
+        return translationTechnique.processMousePressedEvent(event, viewport);
+    }
+
+    /**
+    @return the viewport where the translation gesture in course started, or
+    null if there is none
+    */
+    public Viewport getTranslationDragViewport()
+    {
+        return translationTechnique.getDragViewport();
+    }
+
+    /**
+    @param enabled true if the caller is able to place the cursor when the
+    translation technique requests it
+    */
+    public void setTranslationCursorWrapEnabled(boolean enabled)
+    {
+        translationTechnique.setCursorWrapEnabled(enabled);
+    }
+
+    /**
+    @return the pending request to place the cursor while dragging, or null
+    */
+    public TranslateGizmoInteractionTechnique.CursorWarp consumeTranslationCursorWarp()
+    {
+        return translationTechnique.consumeCursorWarp();
     }
 
     public boolean processTranslationMouseReleasedEvent(MouseEvent event)

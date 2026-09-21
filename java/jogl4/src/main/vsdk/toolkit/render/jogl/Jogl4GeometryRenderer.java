@@ -1,7 +1,9 @@
 package vsdk.toolkit.render.jogl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +60,8 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     }
 
     /**
-    Draws a geometry.
+    Draws a geometry lit by a single light.
+    See the overload taking a list of lights.
 
     @param gl OpenGL context
     @param geometry geometry to draw
@@ -81,11 +84,45 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         RGBImageUncompressed normalMap,
         Matrix4x4d localTransform)
     {
+        List<Light> lights = null;
+
+        if ( light != null ) {
+            lights = new ArrayList<Light>();
+            lights.add(light);
+        }
+        draw(gl, geometry, camera, lights, material, quality, textureMap,
+            normalMap, localTransform);
+    }
+
+    /**
+    Draws a geometry.
+
+    @param gl OpenGL context
+    @param geometry geometry to draw
+    @param camera camera that views the geometry
+    @param lights lights of the scene, or null or empty to use a light at the camera
+    @param material material of the geometry
+    @param quality bits of rendering configuration
+    @param textureMap texture, or null
+    @param normalMap normal (bump) map, or null
+    @param localTransform transformation from geometry space to world space
+    */
+    public static void draw(
+        GL4 gl,
+        Geometry geometry,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d localTransform)
+    {
         if ( geometry == null ) {
             return;
         }
         if ( geometry instanceof Sphere sphere ) {
-            Jogl4SphereRenderer.draw(gl, sphere, camera, light, material, quality,
+            Jogl4SphereRenderer.draw(gl, sphere, camera, lights, material, quality,
                 textureMap, normalMap, localTransform, SLICES, SLICES / 2);
             return;
         }
@@ -93,7 +130,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( mesh == null ) {
             return;
         }
-        Jogl4MeshRenderer.draw(gl, mesh, geometry, camera, light, material, quality,
+        Jogl4MeshRenderer.draw(gl, mesh, geometry, camera, lights, material, quality,
             textureMap, normalMap, localTransform);
     }
 

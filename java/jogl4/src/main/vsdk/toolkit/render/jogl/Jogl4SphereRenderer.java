@@ -1,6 +1,8 @@
 package vsdk.toolkit.render.jogl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.jogamp.opengl.GL4;
@@ -90,12 +92,49 @@ public class Jogl4SphereRenderer extends Jogl4Renderer {
             return;
         }
 
+        List<Light> lights = null;
+
+        if ( light != null ) {
+            lights = new ArrayList<Light>();
+            lights.add(light);
+        }
+        draw(
+            gl,
+            sphere,
+            camera,
+            lights,
+            material,
+            quality,
+            textureMap,
+            normalMap,
+            modelViewLocal,
+            slices,
+            stacks);
+    }
+
+    public static void draw(
+        GL4 gl,
+        Sphere sphere,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d modelViewLocal,
+        int slices,
+        int stacks)
+    {
+        if ( sphere == null || camera == null || material == null || quality == null ) {
+            return;
+        }
+
         Jogl4MeshRenderer.draw(
             gl,
             obtainMesh(sphere, slices, stacks),
             sphere,
             camera,
-            light,
+            lights,
             material,
             quality,
             textureMap,

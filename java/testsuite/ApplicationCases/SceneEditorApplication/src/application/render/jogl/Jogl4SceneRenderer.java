@@ -1,6 +1,8 @@
 package application.render.jogl;
 
 // JOGL classes
+import java.util.List;
+
 import com.jogamp.opengl.GL4;
 
 // VSDK classes
@@ -46,9 +48,7 @@ public class Jogl4SceneRenderer
         gl.glDepthMask(true);
 
         //- Draw scene bodies ---------------------------------------------
-        Light light = s.scene.getLights().isEmpty()
-            ? null
-            : s.scene.getLights().get(0);
+        List<Light> lights = s.scene.getLights();
         SimpleBody gi;
         RendererConfiguration quality;
         int i;
@@ -65,10 +65,10 @@ public class Jogl4SceneRenderer
             gi = s.scene.getSimpleBodies().get(i);
 
             if ( modifyPanel == null || modifyPanel.getTarget() != gi ) {
-                drawBody(gl, gi, s.activeCamera, light, quality);
+                drawBody(gl, gi, s.activeCamera, lights, quality);
             }
             else {
-                modifyPanel.draw(gl, s.activeCamera, light, quality);
+                modifyPanel.draw(gl, s.activeCamera, lights, quality);
             }
         }
     }
@@ -79,13 +79,13 @@ public class Jogl4SceneRenderer
     @param gl OpenGL context
     @param body body to draw
     @param camera camera that views the body
-    @param light light of the scene, or null for a light at the camera
+    @param lights lights of the scene, or null or empty for a light at the camera
     @param quality bits of rendering configuration
     */
-    public static void drawBody(GL4 gl, SimpleBody body, Camera camera, Light light,
+    public static void drawBody(GL4 gl, SimpleBody body, Camera camera, List<Light> lights,
                                 RendererConfiguration quality)
     {
-        drawBody(gl, body, Matrix4x4d.identityMatrix(), camera, light, quality);
+        drawBody(gl, body, Matrix4x4d.identityMatrix(), camera, lights, quality);
     }
 
     /**
@@ -96,11 +96,11 @@ public class Jogl4SceneRenderer
     @param gl OpenGL context
     @param group group to draw
     @param camera camera that views the group
-    @param light light of the scene, or null for a light at the camera
+    @param lights lights of the scene, or null or empty for a light at the camera
     @param quality bits of rendering configuration
     */
     public static void drawBodyGroup(GL4 gl, SimpleBodyGroup group, Camera camera,
-                                     Light light, RendererConfiguration quality)
+                                     List<Light> lights, RendererConfiguration quality)
     {
         RendererConfiguration memberQuality;
 
@@ -114,7 +114,7 @@ public class Jogl4SceneRenderer
         memberQuality.setBoundingVolume(false);
 
         for ( SimpleBody body : group.getBodies() ) {
-            drawBody(gl, body, group.getTransformationMatrix(), camera, light, memberQuality);
+            drawBody(gl, body, group.getTransformationMatrix(), camera, lights, memberQuality);
         }
         if ( quality.isBoundingVolumeSet() ) {
             Jogl4MinMaxRenderer.draw(gl, group.getMinMax(), camera, group.getTransformationMatrix());
@@ -126,7 +126,7 @@ public class Jogl4SceneRenderer
     }
 
     private static void drawBody(GL4 gl, SimpleBody body, Matrix4x4d parentTransform,
-                                 Camera camera, Light light, RendererConfiguration quality)
+                                 Camera camera, List<Light> lights, RendererConfiguration quality)
     {
         Matrix4x4d transform = parentTransform.multiply(body.getTransformationMatrix());
         Geometry geometry = body.getGeometry();
@@ -139,7 +139,7 @@ public class Jogl4SceneRenderer
             gl,
             geometry,
             camera,
-            light,
+            lights,
             body.getMaterial(),
             quality,
             textureMap,
@@ -158,15 +158,14 @@ public class Jogl4SceneRenderer
         drawBase(gl, s, parent.getAwtModel().getModifyPanel());
 
         //- Draw 3D Gizmos ------------------------------------------------
+        s.selectedLights.sync();
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera,
-                LightGizmoStyle.OMNI_BILLBOARD);
+                LightGizmoStyle.OMNI_BILLBOARD, s.selectedLights.isSelected(i));
         }
 
         //- Draw visual debug entities (usually transparent) --------------
-        Light light = s.scene.getLights().isEmpty()
-            ? null
-            : s.scene.getLights().get(0);
+        List<Light> lights = s.scene.getLights();
 
         for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
             try {
@@ -182,7 +181,7 @@ public class Jogl4SceneRenderer
             if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
                 gl.glDisable(GL4.GL_DEPTH_TEST);
             }
-            drawBodyGroup(gl, ggi, s.activeCamera, light, quality);
+            drawBodyGroup(gl, ggi, s.activeCamera, lights, quality);
             gl.glEnable(GL4.GL_DEPTH_TEST);
         }
     }

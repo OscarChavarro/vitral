@@ -152,6 +152,21 @@ public class SelectionSet
         select(f);
     }
 
+    /**
+    Removes from the external list the selected elements, keeping the
+    selection of the remaining ones.
+    */
+    public void removeSelected()
+    {
+        sync();
+        for ( int i = selection.size() - 1; i >= 0; i-- ) {
+            if ( selection.get(i).booleanValue() ) {
+                elements.remove(i);
+                selection.remove(i);
+            }
+        }
+    }
+
     public int numberOfSelections()
     {
         int i;

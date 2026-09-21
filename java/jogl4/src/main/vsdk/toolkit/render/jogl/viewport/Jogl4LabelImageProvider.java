@@ -1,4 +1,4 @@
-package framework.render.jogl4;
+package vsdk.toolkit.render.jogl.viewport;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.media.RGBAImageUncompressed;

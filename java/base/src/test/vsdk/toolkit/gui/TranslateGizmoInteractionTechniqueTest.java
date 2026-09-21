@@ -7,6 +7,7 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
+import vsdk.toolkit.gui.viewport.Viewport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
@@ -53,6 +54,31 @@ class TranslateGizmoInteractionTechniqueTest
         Vector3Dd pixel = camera.projectPointUsingRayMethod(point);
 
         return mouseEvent((int)Math.round(pixel.x()), (int)Math.round(pixel.y()));
+    }
+
+
+    private static Viewport createViewport()
+    {
+        Viewport viewport = new Viewport();
+
+        // Borders take 6 pixels of the container: viewport of 400 x 400
+        viewport.updatePixelArea(406, 406);
+        return viewport;
+    }
+
+    /**
+    Creates a technique with the Y axis handle of the gizmo selected, so a
+    drag over it moves the gizmo.
+    */
+    private static TranslateGizmoInteractionTechnique createTechniqueWithYAxisSelected(
+        Camera camera, TranslateGizmo gizmo)
+    {
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+        Vector3Dd onYAxis = new Vector3Dd(0, gizmo.getCurrentScale()*0.55, 0);
+
+        technique.processMouseClickedEvent(mouseEventAt(camera, onYAxis));
+        return technique;
     }
 
     private static KeyEvent keyEvent(char unicode)
@@ -225,5 +251,258 @@ class TranslateGizmoInteractionTechniqueTest
         // Assert
         assertThat(changed).isTrue();
         assertThat(gizmo.isSelectedResizing()).isTrue();
+    }
+
+    @Test
+    void given_handleSelected_when_pressedInViewport_then_gestureBelongsToThatViewport()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        Viewport viewport = createViewport();
+
+        // Act
+        technique.processMousePressedEvent(mouseEvent(200, 200), viewport);
+
+        // Assert
+        assertThat(technique.getDragViewport()).isSameAs(viewport);
+    }
+
+    @Test
+    void given_noHandleSelected_when_pressedInViewport_then_thereIsNoGesture()
+    {
+        // Arrange (a new gizmo has the X axis persistently selected)
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        gizmo.setPersistentSelection(TranslateGizmo.NULL_GROUP);
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        // Act
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        // Assert
+        assertThat(technique.getDragViewport()).isNull();
+    }
+
+    @Test
+    void given_gesture_when_released_then_gestureEnds()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        // Act
+        technique.processMouseReleasedEvent(mouseEvent(200, 200));
+
+        // Assert
+        assertThat(technique.getDragViewport()).isNull();
+    }
+
+    @Test
+    void given_wrapEnabled_when_cursorLeavesThroughTop_then_warpsToBottomSide()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        // Act
+        technique.processMouseDraggedEvent(mouseEvent(200, -10));
+
+        // Assert
+        assertThat(technique.consumeCursorWarp())
+            .isEqualTo(new TranslateGizmoInteractionTechnique.CursorWarp(200, 390));
+        assertThat(technique.consumeCursorWarp()).isNull();
+    }
+
+    @Test
+    void given_wrapEnabled_when_cursorLeavesThroughRightAndBottom_then_warpsAroundBothAxes()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        // Act
+        technique.processMouseDraggedEvent(mouseEvent(410, 450));
+
+        // Assert
+        assertThat(technique.consumeCursorWarp())
+            .isEqualTo(new TranslateGizmoInteractionTechnique.CursorWarp(10, 50));
+    }
+
+    @Test
+    void given_wrapDisabled_when_cursorLeavesViewport_then_noWarpIsRequested()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        // Act
+        technique.processMouseDraggedEvent(mouseEvent(200, -50));
+
+        // Assert
+        assertThat(technique.consumeCursorWarp()).isNull();
+    }
+
+    @Test
+    void given_cursorWrapped_when_itArrivesAtNewPlace_then_movementIsContinuous()
+    {
+        // Arrange: the reference is a drag without confinement, so the cursor
+        // just goes out of the viewport
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+
+        TranslateGizmo referenceGizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique reference =
+            createTechniqueWithYAxisSelected(camera, referenceGizmo);
+        reference.processMousePressedEvent(mouseEvent(200, 200));
+
+        // Act
+        technique.processMouseDraggedEvent(mouseEvent(200, -5));
+        technique.processMouseDraggedEvent(mouseEvent(200, 395));
+        technique.processMouseDraggedEvent(mouseEvent(200, 385));
+        reference.processMouseDraggedEvent(mouseEvent(200, -15));
+
+        // Assert
+        assertThat(gizmo.getPosition().x()).isCloseTo(referenceGizmo.getPosition().x(), offset(EPS));
+        assertThat(gizmo.getPosition().y()).isCloseTo(referenceGizmo.getPosition().y(), offset(EPS));
+        assertThat(gizmo.getPosition().z()).isCloseTo(referenceGizmo.getPosition().z(), offset(EPS));
+    }
+
+    @Test
+    void given_warpRequested_when_oldEventsArrive_then_theyAreIgnoredAndNoSecondWarpHappens()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+        technique.processMouseDraggedEvent(mouseEvent(200, -5));
+        technique.consumeCursorWarp();
+        Vector3Dd positionBefore = gizmo.getPosition();
+
+        // Act: events sent by the system before the cursor is placed
+        boolean changed = technique.processMouseDraggedEvent(mouseEvent(200, -30));
+
+        // Assert
+        assertThat(changed).isFalse();
+        assertThat(technique.consumeCursorWarp()).isNull();
+        assertThat(gizmo.getPosition()).isEqualTo(positionBefore);
+    }
+
+    @Test
+    void given_warpNeverHappens_when_manyOldEventsArrive_then_gestureContinuesWithoutWrapping()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+        technique.processMouseDraggedEvent(mouseEvent(200, -5));
+        technique.consumeCursorWarp();
+        Vector3Dd positionAtExit = gizmo.getPosition();
+
+        // Act: the cursor stays out of the viewport (no one placed it)
+        for ( int i = 0; i < 25; i++ ) {
+            technique.processMouseDraggedEvent(mouseEvent(200, -5));
+        }
+
+        // Assert: no jump, and no more requests
+        assertThat(gizmo.getPosition().y()).isCloseTo(positionAtExit.y(), offset(EPS));
+        assertThat(technique.consumeCursorWarp()).isNull();
+        technique.processMouseDraggedEvent(mouseEvent(200, -25));
+        assertThat(technique.consumeCursorWarp()).isNull();
+    }
+
+    @Test
+    void given_gestureOverYAxis_when_cursorMovesOverXAxis_then_dragKeepsMovingOnlyAlongY()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        MouseEvent onYAxis = mouseEventAt(camera, new Vector3Dd(0, gizmo.getCurrentScale()*0.55, 0));
+        MouseEvent onXAxis = mouseEventAt(camera, new Vector3Dd(gizmo.getCurrentScale()*0.55, 0, 0));
+        technique.processMousePressedEvent(onYAxis, createViewport());
+
+        // Act: a hover over other handle, as can be sent while dragging
+        boolean changed = technique.processMouseMovedEvent(onXAxis);
+        technique.processMouseDraggedEvent(mouseEvent(onYAxis.getX(), onYAxis.getY() - 20));
+
+        // Assert
+        assertThat(changed).isFalse();
+        assertThat(gizmo.getCurrentSelection()).isEqualTo(TranslateGizmo.Y_AXIS_GROUP);
+        assertThat(gizmo.getPosition().y()).isNotCloseTo(0.0, offset(EPS));
+        assertThat(gizmo.getPosition().x()).isCloseTo(0.0, offset(EPS));
+        assertThat(gizmo.getPosition().z()).isCloseTo(0.0, offset(EPS));
+    }
+
+    @Test
+    void given_gestureOverYAxis_when_cursorMovesOverNothing_then_dragDoesNotFallBackToPersistentSelection()
+    {
+        // Arrange: the persistent selection is other axis than the dragged one
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        MouseEvent onYAxis = mouseEventAt(camera, new Vector3Dd(0, gizmo.getCurrentScale()*0.55, 0));
+        gizmo.setPersistentSelection(TranslateGizmo.Z_AXIS_GROUP);
+        gizmo.setVolatileSelection(TranslateGizmo.Y_AXIS_GROUP);
+        technique.processMousePressedEvent(onYAxis, createViewport());
+
+        // Act: the volatile selection is lost, i.e. the cursor is over nothing
+        gizmo.setVolatileSelection(TranslateGizmo.NULL_GROUP);
+        technique.processMouseMovedEvent(mouseEvent(1, 1));
+        technique.processMouseDraggedEvent(mouseEvent(onYAxis.getX(), onYAxis.getY() - 20));
+
+        // Assert
+        assertThat(gizmo.getPosition().y()).isNotCloseTo(0.0, offset(EPS));
+        assertThat(gizmo.getPosition().x()).isCloseTo(0.0, offset(EPS));
+        assertThat(gizmo.getPosition().z()).isCloseTo(0.0, offset(EPS));
+    }
+
+    @Test
+    void given_warpRequested_when_movedEventArrivesAtTarget_then_nextDragIsNotIgnored()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            createTechniqueWithYAxisSelected(camera, gizmo);
+        technique.setCursorWrapEnabled(true);
+        technique.processMousePressedEvent(mouseEvent(200, 200), createViewport());
+        technique.processMouseDraggedEvent(mouseEvent(200, -5));
+        technique.consumeCursorWarp();
+
+        // Act: some systems inform the placement of the cursor as a moved event
+        technique.processMouseMovedEvent(mouseEvent(200, 395));
+        boolean changed = technique.processMouseDraggedEvent(mouseEvent(200, 385));
+
+        // Assert
+        assertThat(changed).isTrue();
     }
 }

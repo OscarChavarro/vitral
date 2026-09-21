@@ -2,12 +2,16 @@ package vsdk.toolkit.render.jogl;
 
 import com.jogamp.opengl.GL2GL3;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -48,7 +52,21 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
     private static final float[] VERTEX_NORMAL_COLOR = new float[] { 1.0f, 1.0f, 0.0f };
     private static final float[] TRIANGLE_NORMAL_COLOR = new float[] { 0.0f, 1.0f, 1.0f };
 
+    /// Size of the light arrays of the GLSL programs
+    public static final int MAX_LIGHTS = 8;
+    private static boolean tooManyLightsReported = false;
+
     private Jogl4MeshRenderer() {
+    }
+
+    private static void reportTooManyLights(int count)
+    {
+        if ( tooManyLightsReported ) {
+            return;
+        }
+        tooManyLightsReported = true;
+        Logger.reportMessage(null, VSDK.WARNING, "Jogl4MeshRenderer",
+            "Scene has " + count + " lights, but shaders use only the first " + MAX_LIGHTS);
     }
 
     /**
@@ -105,7 +123,8 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
     }
 
     /**
-    Draws a mesh, with the passes selected by the configuration.
+    Draws a mesh lit by a single light.
+    See the overload taking a list of lights.
 
     @param gl OpenGL context
     @param mesh mesh to draw
@@ -130,11 +149,49 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         RGBImageUncompressed normalMap,
         Matrix4x4d localTransform)
     {
+        List<Light> lights = null;
+
+        if ( light != null ) {
+            lights = new ArrayList<Light>();
+            lights.add(light);
+        }
+        draw(gl, mesh, geometry, camera, lights, material, quality, textureMap,
+            normalMap, localTransform);
+    }
+
+    /**
+    Draws a mesh, with the passes selected by the configuration.
+
+    @param gl OpenGL context
+    @param mesh mesh to draw
+    @param geometry geometry the mesh comes from, used for the bounding volume
+    @param camera camera that views the mesh
+    @param lights lights of the scene (at most `MAX_LIGHTS` are used), or null
+    or empty to use a light at the camera
+    @param material material of the surfaces
+    @param quality bits of rendering configuration
+    @param textureMap texture of the surfaces, or null
+    @param normalMap normal (bump) map of the surfaces, or null
+    @param localTransform transformation from the mesh space to world space
+    */
+    public static void draw(
+        GL4 gl,
+        Mesh mesh,
+        Geometry geometry,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d localTransform)
+    {
         if ( mesh == null || camera == null || material == null || quality == null ) {
             return;
         }
-        if ( light == null ) {
-            light = new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1));
+        if ( lights == null || lights.isEmpty() ) {
+            lights = new ArrayList<Light>();
+            lights.add(new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1)));
         }
 
         upload(gl, mesh);
@@ -147,7 +204,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         Matrix4x4d localTransformNotNull = (localTransform != null)
             ? localTransform
             : Matrix4x4d.identityMatrix();
-        drawPasses(gl, mesh, geometry, camera, light, material, quality,
+        drawPasses(gl, mesh, geometry, camera, lights, material, quality,
             textureId, normalMapId, hasTexture, localTransformNotNull);
     }
 
@@ -156,7 +213,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         Mesh mesh,
         Geometry geometry,
         Camera camera,
-        Light light,
+        List<Light> lights,
         SimpleMaterial material,
         RendererConfiguration quality,
         int textureId,
@@ -180,7 +237,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
                 localTransform,
                 modelViewITLocal,
                 camera,
-                light,
+                lights,
                 material,
                 quality,
                 textureId,
@@ -226,7 +283,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
                 localTransform,
                 modelViewITLocal,
                 camera,
-                light,
+                lights,
                 wireMaterial,
                 wireQuality,
                 0,
@@ -272,7 +329,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
                 localTransform,
                 modelViewITLocal,
                 camera,
-                light,
+                lights,
                 pointMaterial,
                 pointQuality,
                 0,
@@ -349,7 +406,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         Matrix4x4d modelViewLocal,
         Matrix4x4d modelViewITLocal,
         Camera camera,
-        Light light,
+        List<Light> lights,
         SimpleMaterial material,
         RendererConfiguration quality,
         int textureId,
@@ -369,11 +426,22 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         setMatrix(gl, programId, "modelViewITLocal", modelViewITLocal);
 
         setVector3(gl, programId, "cameraPositionGlobal", camera.getPosition());
-        setVector3(gl, programId, "lightPositionsGlobal[0]", light.getPosition());
-
-        ColorRgb lightColor = light.getEmission();
-        setVector3(gl, programId, "lightColorsGlobal[0]", lightColor);
-        setInt(gl, programId, "numberOfLights", 1);
+        int lightCount = 0;
+        for ( Light light : lights ) {
+            if ( light == null ) {
+                continue;
+            }
+            if ( lightCount >= MAX_LIGHTS ) {
+                reportTooManyLights(lights.size());
+                break;
+            }
+            setVector3(gl, programId, "lightPositionsGlobal[" + lightCount + "]",
+                light.getPosition());
+            setVector3(gl, programId, "lightColorsGlobal[" + lightCount + "]",
+                light.getEmission());
+            lightCount++;
+        }
+        setInt(gl, programId, "numberOfLights", lightCount);
 
         setVector3(gl, programId, "ambientColor", material.getAmbient());
         setVector3(gl, programId, "diffuseColor", material.getDiffuse());

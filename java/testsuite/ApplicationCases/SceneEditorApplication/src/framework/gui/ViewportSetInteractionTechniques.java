@@ -1,7 +1,7 @@
 package framework.gui;
 
-import framework.model.Viewport;
-import framework.model.ViewportSet;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.MouseEvent;
 

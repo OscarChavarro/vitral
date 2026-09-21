@@ -5,11 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import application.framework.Scene;
-import framework.model.ViewportSet;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBImageUncompressed;
@@ -28,6 +29,7 @@ public class ApplicationModel
     private final List<ViewportSet> viewportSets;
     private int activeViewportSetIndex;
     private Widget i18nContext;
+    private final SceneLightFactory lightFactory = new SceneLightFactory();
 
     /**
     Creates the model with one standard `ViewportSet`. More sets can be added
@@ -127,6 +129,21 @@ public class ApplicationModel
     public List<Light> getLights()
     {
         return scene.scene.getLights();
+    }
+
+    /**
+    Adds a new point light to the scene, placed inside the view volume of a
+    camera of the active viewport set (see `SceneLightFactory`).
+    @return the added light, or null if no viewport is visible
+    */
+    public PointLight addNewLight()
+    {
+        PointLight light = lightFactory.createLight(getLights(), getActiveViewportSet());
+
+        if ( light != null ) {
+            getLights().add(light);
+        }
+        return light;
     }
 
     public List<SimpleBody> getSimpleBodies()

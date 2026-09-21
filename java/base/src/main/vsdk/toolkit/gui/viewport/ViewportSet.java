@@ -1,4 +1,4 @@
-package framework.model;
+package vsdk.toolkit.gui.viewport;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -530,6 +530,32 @@ public class ViewportSet
     public int toViewportY(Viewport viewport, int y)
     {
         return y + viewport.getPixelSizeY() -
+            (sizeYInPixels - viewport.getPixelStartY());
+    }
+
+    /**
+    Translates a x coordinate given in pixels of the given viewport to pixels
+    of the set area. It is the inverse of `toViewportX`.
+    @param viewport
+    @param x x relative to the left of the viewport
+    @return x in the set area
+    */
+    public int toSetX(Viewport viewport, int x)
+    {
+        return x + viewport.getPixelStartX();
+    }
+
+    /**
+    Translates a y coordinate given in pixels of the given viewport (origin
+    at its upper left corner) to pixels of the set area (same convention). It
+    is the inverse of `toViewportY`.
+    @param viewport
+    @param y y relative to the top of the viewport
+    @return y in the set area
+    */
+    public int toSetY(Viewport viewport, int y)
+    {
+        return y - viewport.getPixelSizeY() +
             (sizeYInPixels - viewport.getPixelStartY());
     }
 
