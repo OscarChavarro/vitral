@@ -315,10 +315,12 @@ public class Jogl4ViewportWindow
 
     The image is uploaded to a texture the first time it is used and drawn as a
     textured quad in window coordinates, over the whole surface of the
-    viewport set (labels are not clipped by the current GL viewport), with an
-    explicitly configured state (alpha blending, no depth test). Both the
-    color and the transparency of the label come only from the image. The
-    state changed is restored.
+    viewport set, with an explicitly configured state (alpha blending, no
+    depth test). Both the color and the transparency of the label come only
+    from the image. The GL viewport does not clip 2D quads drawn over the whole
+    surface, so the label is clipped to the area of this viewport with the
+    scissor test, and the parts that fall outside are not drawn over its
+    neighbors. The state changed is restored.
 
     @param gl OpenGL context
     @param image label image
@@ -362,7 +364,15 @@ public class Jogl4ViewportWindow
             0, 0,  1, 1,  0, 1
         };
 
+        boolean scissorWasEnabled = gl.glIsEnabled(GL4.GL_SCISSOR_TEST);
+        int[] previousScissor = new int[4];
+
+        gl.glGetIntegerv(GL4.GL_SCISSOR_BOX, previousScissor, 0);
+
         gl.glViewport(0, 0, surfaceWidth, surfaceHeight);
+        gl.glEnable(GL4.GL_SCISSOR_TEST);
+        gl.glScissor(viewport.getPixelStartX(), viewport.getPixelStartY(),
+            viewport.getPixelSizeX(), viewport.getPixelSizeY());
         gl.glDisable(GL4.GL_DEPTH_TEST);
         gl.glDisable(GL4.GL_CULL_FACE);
         gl.glEnable(GL4.GL_BLEND);
@@ -372,6 +382,10 @@ public class Jogl4ViewportWindow
 
         gl.glDisable(GL4.GL_BLEND);
         gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glScissor(previousScissor[0], previousScissor[1], previousScissor[2], previousScissor[3]);
+        if ( !scissorWasEnabled ) {
+            gl.glDisable(GL4.GL_SCISSOR_TEST);
+        }
         gl.glViewport(currentViewport[0], currentViewport[1], currentViewport[2], currentViewport[3]);
     }
 

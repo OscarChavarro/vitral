@@ -1305,7 +1305,7 @@ public class Jogl4DrawingAreaRenderer implements
 
             if ( oldThingSelected >= 0 && firstThingSelected < 0 &&
                  interactionMode == TRANSLATE_INTERACTION_MODE &&
-                 translationGizmo.isActive() ) {
+                 interactionTechniques.getTranslationTechnique().isActive() ) {
                 theScene.selectedThings.select(oldThingSelected);
                 firstThingSelected = theScene.selectedThings.firstSelected();
             }
@@ -1702,17 +1702,17 @@ public class Jogl4DrawingAreaRenderer implements
             break;
           case KeyEvent.VK_EQUALS:
             // Alphanumeric =
-            asp = translationGizmo.getBaseAparentSizeInPixels();
+            asp = translationGizmo.getBaseApparentSizeInPixels();
             asp += 10;
             if ( asp > 300 ) asp = 300;
-            translationGizmo.setBaseAparentSizeInPixels(asp);
+            translationGizmo.setBaseApparentSizeInPixels(asp);
             break;
           case KeyEvent.VK_MINUS:
             // Alphanumeric -
-            asp = translationGizmo.getBaseAparentSizeInPixels();
+            asp = translationGizmo.getBaseApparentSizeInPixels();
             asp -= 20;
             if ( asp < 20 ) asp = 20;
-            translationGizmo.setBaseAparentSizeInPixels(asp);
+            translationGizmo.setBaseApparentSizeInPixels(asp);
             break;
         }
 

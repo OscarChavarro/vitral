@@ -12,6 +12,7 @@ import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4BackgroundRenderer;
@@ -158,7 +159,8 @@ public class Jogl4SceneRenderer
 
         //- Draw 3D Gizmos ------------------------------------------------
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
-            Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera);
+            Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera,
+                LightGizmoStyle.OMNI_BILLBOARD);
         }
 
         //- Draw visual debug entities (usually transparent) --------------

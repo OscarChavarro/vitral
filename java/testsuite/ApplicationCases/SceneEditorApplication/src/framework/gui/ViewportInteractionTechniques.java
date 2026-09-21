@@ -10,12 +10,14 @@ import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
 
 public class ViewportInteractionTechniques
 {
     private final CameraController cameraController;
     private final RendererConfigurationController qualityController;
     private final TranslateGizmo translationGizmo;
+    private final TranslateGizmoInteractionTechnique translationTechnique;
     private final RotateGizmo rotateGizmo;
     private final ScaleGizmo scaleGizmo;
 
@@ -25,6 +27,7 @@ public class ViewportInteractionTechniques
         cameraController = new CameraControllerAquynza(camera);
         qualityController = new RendererConfigurationController(rendererConfiguration);
         translationGizmo = new TranslateGizmo(camera);
+        translationTechnique = new TranslateGizmoInteractionTechnique(translationGizmo);
         rotateGizmo = new RotateGizmo();
         scaleGizmo = new ScaleGizmo();
     }
@@ -42,6 +45,11 @@ public class ViewportInteractionTechniques
     public TranslateGizmo getTranslationGizmo()
     {
         return translationGizmo;
+    }
+
+    public TranslateGizmoInteractionTechnique getTranslationTechnique()
+    {
+        return translationTechnique;
     }
 
     public RotateGizmo getRotateGizmo()
@@ -111,32 +119,32 @@ public class ViewportInteractionTechniques
 
     public boolean processTranslationKeyPressedEvent(KeyEvent event)
     {
-        return translationGizmo.processKeyPressedEvent(event);
+        return translationTechnique.processKeyPressedEvent(event);
     }
 
     public boolean processTranslationMousePressedEvent(MouseEvent event)
     {
-        return translationGizmo.processMousePressedEvent(event);
+        return translationTechnique.processMousePressedEvent(event);
     }
 
     public boolean processTranslationMouseReleasedEvent(MouseEvent event)
     {
-        return translationGizmo.processMouseReleasedEvent(event);
+        return translationTechnique.processMouseReleasedEvent(event);
     }
 
     public boolean processTranslationMouseClickedEvent(MouseEvent event)
     {
-        return translationGizmo.processMouseClickedEvent(event);
+        return translationTechnique.processMouseClickedEvent(event);
     }
 
     public boolean processTranslationMouseMovedEvent(MouseEvent event)
     {
-        return translationGizmo.processMouseMovedEvent(event);
+        return translationTechnique.processMouseMovedEvent(event);
     }
 
     public boolean processTranslationMouseDraggedEvent(MouseEvent event)
     {
-        return translationGizmo.processMouseDraggedEvent(event);
+        return translationTechnique.processMouseDraggedEvent(event);
     }
 
     public boolean processRotateKeyPressedEvent(KeyEvent event)

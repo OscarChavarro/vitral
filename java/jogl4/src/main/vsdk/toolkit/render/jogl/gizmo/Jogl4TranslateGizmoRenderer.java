@@ -13,6 +13,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmoLineSegment;
 import vsdk.toolkit.render.jogl.Jogl4ColoredPrimitiveRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
@@ -103,13 +104,13 @@ public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
 
     private static void drawLines(GL4 gl, TranslateGizmo gizmo, Matrix4x4d mvp)
     {
-        for ( TranslateGizmo.LineSegment segment : gizmo.getLineSegments() ) {
+        for ( TranslateGizmoLineSegment segment : gizmo.getLineSegments() ) {
             Vector3Dd[] strip = gizmo.buildLineStrip(segment);
 
             if ( strip == null ) {
                 continue;
             }
-            ColorRgb c = segment.getColor();
+            ColorRgb c = segment.color();
             float[] positions = new float[strip.length * 3];
             float[] colors = new float[strip.length * 4];
 

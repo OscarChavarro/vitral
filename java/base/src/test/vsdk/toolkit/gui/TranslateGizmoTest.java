@@ -8,6 +8,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.gui.gizmo.TranslateGizmoLineSegment;
 import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +52,7 @@ class TranslateGizmoTest
         gizmo.applyScale(createScaler(1024, 768));
 
         // Assert
-        assertThat(gizmo.getAparentSizeInPixels()).isEqualTo(100);
+        assertThat(gizmo.getApparentSizeInPixels()).isEqualTo(100);
         assertThat(gizmo.getLineWidth()).isCloseTo(1.0, offset(EPS));
     }
 
@@ -65,7 +66,7 @@ class TranslateGizmoTest
         gizmo.applyScale(createScaler(2560, 1600));
 
         // Assert
-        assertThat(gizmo.getAparentSizeInPixels()).isEqualTo(200);
+        assertThat(gizmo.getApparentSizeInPixels()).isEqualTo(200);
         assertThat(gizmo.getLineWidth()).isCloseTo(2.0, offset(EPS));
     }
 
@@ -77,13 +78,13 @@ class TranslateGizmoTest
         ViewportElementScaler scaler = createScaler(2560, 1600);
 
         // Act
-        gizmo.setBaseAparentSizeInPixels(150);
+        gizmo.setBaseApparentSizeInPixels(150);
         gizmo.applyScale(scaler);
         gizmo.applyScale(scaler);
 
         // Assert
-        assertThat(gizmo.getBaseAparentSizeInPixels()).isEqualTo(150);
-        assertThat(gizmo.getAparentSizeInPixels()).isEqualTo(300);
+        assertThat(gizmo.getBaseApparentSizeInPixels()).isEqualTo(150);
+        assertThat(gizmo.getApparentSizeInPixels()).isEqualTo(300);
     }
 
     @Test
@@ -95,11 +96,11 @@ class TranslateGizmoTest
         // Act
         gizmo.setLineWidth(0);
         gizmo.setLineWidth(-1);
-        gizmo.setBaseAparentSizeInPixels(0);
+        gizmo.setBaseApparentSizeInPixels(0);
 
         // Assert
         assertThat(gizmo.getLineWidth()).isCloseTo(1.0, offset(EPS));
-        assertThat(gizmo.getBaseAparentSizeInPixels()).isEqualTo(100);
+        assertThat(gizmo.getBaseApparentSizeInPixels()).isEqualTo(100);
     }
 
     @Test
@@ -111,12 +112,12 @@ class TranslateGizmoTest
 
         // Act
         gizmo.setTransformationMatrix(new Matrix4x4d());
-        ArrayList<TranslateGizmo.LineSegment> lines = gizmo.getLineSegments();
+        ArrayList<TranslateGizmoLineSegment> lines = gizmo.getLineSegments();
 
         // Assert: 3 axis shafts and 6 plane handle segments
         assertThat(lines).hasSize(9);
-        for ( TranslateGizmo.LineSegment line : lines ) {
-            assertThat(Vector3Dd.distance(line.getStart(), line.getEnd())).isGreaterThan(0.0);
+        for ( TranslateGizmoLineSegment line : lines ) {
+            assertThat(Vector3Dd.distance(line.start(), line.end())).isGreaterThan(0.0);
         }
     }
 
@@ -129,16 +130,16 @@ class TranslateGizmoTest
 
         gizmo.applyScale(createScaler(2560, 1600));
         gizmo.setTransformationMatrix(new Matrix4x4d());
-        TranslateGizmo.LineSegment line = gizmo.getLineSegments().get(0);
+        TranslateGizmoLineSegment line = gizmo.getLineSegments().get(0);
 
         // Act
         Vector3Dd[] strip = gizmo.buildLineStrip(line);
 
         // Assert
         Vector3Dd across = strip[0].subtract(strip[1]);
-        Vector3Dd along = line.getEnd().subtract(line.getStart()).normalized();
-        double pixelsPerUnit = gizmo.getAparentSizeInPixels() / gizmo.getCurrentScale();
-        Vector3Dd toEye = camera.getPosition().subtract(line.getStart());
+        Vector3Dd along = line.end().subtract(line.start()).normalized();
+        double pixelsPerUnit = gizmo.getApparentSizeInPixels() / gizmo.getCurrentScale();
+        Vector3Dd toEye = camera.getPosition().subtract(line.start());
 
         assertThat(strip).hasSize(4);
         assertThat(across.length() * pixelsPerUnit).isCloseTo(gizmo.getLineWidth(), offset(EPS));
@@ -152,11 +153,11 @@ class TranslateGizmoTest
         // Arrange
         TranslateGizmo gizmo = new TranslateGizmo(createPerspectiveCamera());
         gizmo.setTransformationMatrix(new Matrix4x4d());
-        TranslateGizmo.LineSegment line = gizmo.getLineSegments().get(0);
+        TranslateGizmoLineSegment line = gizmo.getLineSegments().get(0);
 
         // Act
-        TranslateGizmo.LineSegment degenerate =
-            new TranslateGizmo.LineSegment(line.getStart(), line.getStart(), line.getColor());
+        TranslateGizmoLineSegment degenerate =
+            new TranslateGizmoLineSegment(line.start(), line.start(), line.color());
         Vector3Dd[] strip = gizmo.buildLineStrip(degenerate);
 
         // Assert

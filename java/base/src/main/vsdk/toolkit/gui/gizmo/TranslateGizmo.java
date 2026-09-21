@@ -8,25 +8,20 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.processing.CurveModeler;
-import vsdk.toolkit.gui.KeyEvent;
-import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state
     private Matrix4x4d T;
-
     private Camera camera;
 
     /// Geometric model based in primitive instancing: primitive concretions
@@ -63,20 +58,20 @@ public class TranslateGizmo extends Gizmo {
     public static final int YZ_PLANE_GROUP = 5;
     public static final int XZ_PLANE_GROUP = 6;
 
-    private static final double SEGMENT_LENGHT = 0.32;
+    private static final double SEGMENT_LENGTH = 0.32;
     private static final double SEGMENT_WIDTH = 0.02;
     private static final double BOX_SIDE = 0.3;
     private static final double BOX_HEIGHT = 0.01;
-    private static final double ARROW_LENGHT = 1.0;
+    private static final double ARROW_LENGTH = 1.0;
 
     /// Size and line width designed for legacy resolutions
-    public static final int DEFAULT_APARENT_SIZE_IN_PIXELS = 100;
+    public static final int DEFAULT_APPARENT_SIZE_IN_PIXELS = 100;
     public static final double DEFAULT_LINE_WIDTH = 1.0;
 
     /// Apparent size (in legacy resolution pixels) the user has chosen
-    private int baseAparentSizeInPixels;
+    private int baseApparentSizeInPixels;
     /// Apparent size in pixels of the screen currently in use
-    private int aparentSizeInPixels;
+    private int apparentSizeInPixels;
     /// Width, in pixels, of the lines of the gizmo
     private double lineWidth;
 
@@ -84,61 +79,48 @@ public class TranslateGizmo extends Gizmo {
     private int persistentSelection;
     private int volatileSelection;
 
-    //private Robot awtRobot;
-    //private boolean skipRobot;
-    private int oldmousex;
-    private int oldmousey;
-    private Vector3Dd lastDeltaPosition;
     private boolean selectedResizing;
     private double currentScale;
 
-    private boolean active;
-
     public TranslateGizmo(Camera cam)
     {
-        baseAparentSizeInPixels = DEFAULT_APARENT_SIZE_IN_PIXELS;
-        aparentSizeInPixels = DEFAULT_APARENT_SIZE_IN_PIXELS;
+        baseApparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
+        apparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         lineWidth = DEFAULT_LINE_WIDTH;
         persistentSelection = X_AXIS_GROUP;
         volatileSelection = NULL_GROUP;
 
-        // Total arrow lenght = 0.2 empty + 0.5 base + 0.3 head
-        arrowModel = new Arrow(0.5*ARROW_LENGHT, 0.3*ARROW_LENGHT, 0.025, 0.05);
-        cylinderModel = new Cone(SEGMENT_WIDTH, SEGMENT_WIDTH, SEGMENT_LENGHT);
+        // Total arrow length = 0.2 empty + 0.5 base + 0.3 head
+        arrowModel = new Arrow(0.5* ARROW_LENGTH, 0.3* ARROW_LENGTH, 0.025, 0.05);
+        cylinderModel = new Cone(SEGMENT_WIDTH, SEGMENT_WIDTH, SEGMENT_LENGTH);
         boxModel = new Box(BOX_SIDE, BOX_SIDE, BOX_HEIGHT);
-        coneModel = new Cone(0.05, 0, 0.3*ARROW_LENGHT);
+        coneModel = new Cone(0.05, 0, 0.3* ARROW_LENGTH);
 
-        elementInstances = new ArrayList<SimpleBody>();
+        elementInstances = new ArrayList<>();
         for ( int i = 0; i < 12; i++ ) {
             SimpleBody r = new SimpleBody();
             elementInstances.add(r);
         }
 
-        elementInstances3dsmax = new ArrayList<SimpleBody>();
+        elementInstances3dsmax = new ArrayList<>();
         for ( int i = 0; i < 15; i++ ) {
             SimpleBody r = new SimpleBody();
             elementInstances3dsmax.add(r);
         }
 
         setCamera(cam);
-        //awtRobot = null;
-        //skipRobot = false;
-        oldmousex = 0;
-        oldmousey = 0;
         selectedResizing = true;
         currentScale = 1.0;
-        active = false;
-        lastDeltaPosition = new Vector3Dd();
     }
 
-    public int getAparentSizeInPixels()
+    public int getApparentSizeInPixels()
     {
-        return aparentSizeInPixels;
+        return apparentSizeInPixels;
     }
 
-    public void setAparentSizeInPixels(int du)
+    public void setApparentSizeInPixels(int du)
     {
-        aparentSizeInPixels = du;
+        apparentSizeInPixels = du;
     }
 
     /**
@@ -146,9 +128,9 @@ public class TranslateGizmo extends Gizmo {
     resolutions, in pixels; it is the size chosen by the user, before scaling
     it for the resolution of the screen
     */
-    public int getBaseAparentSizeInPixels()
+    public int getBaseApparentSizeInPixels()
     {
-        return baseAparentSizeInPixels;
+        return baseApparentSizeInPixels;
     }
 
     /**
@@ -156,10 +138,10 @@ public class TranslateGizmo extends Gizmo {
     not positive values are ignored. It is used the next time `applyScale`
     is called
     */
-    public void setBaseAparentSizeInPixels(int size)
+    public void setBaseApparentSizeInPixels(int size)
     {
         if ( size > 0 ) {
-            baseAparentSizeInPixels = size;
+            baseApparentSizeInPixels = size;
         }
     }
 
@@ -196,7 +178,7 @@ public class TranslateGizmo extends Gizmo {
         if ( scaler == null ) {
             return;
         }
-        setAparentSizeInPixels(scaler.scaleSize(baseAparentSizeInPixels));
+        setApparentSizeInPixels(scaler.scaleSize(baseApparentSizeInPixels));
         setLineWidth(scaler.scaleLength(DEFAULT_LINE_WIDTH));
     }
 
@@ -206,38 +188,7 @@ public class TranslateGizmo extends Gizmo {
     */
     public double getLineWidthInWorldUnits()
     {
-        return lineWidth * currentScale / aparentSizeInPixels;
-    }
-
-    /**
-    A straight line of the gizmo, in world space.
-    */
-    public static final class LineSegment {
-        private final Vector3Dd start;
-        private final Vector3Dd end;
-        private final ColorRgb color;
-
-        public LineSegment(Vector3Dd start, Vector3Dd end, ColorRgb color)
-        {
-            this.start = start;
-            this.end = end;
-            this.color = color;
-        }
-
-        public Vector3Dd getStart()
-        {
-            return start;
-        }
-
-        public Vector3Dd getEnd()
-        {
-            return end;
-        }
-
-        public ColorRgb getColor()
-        {
-            return color;
-        }
+        return lineWidth * currentScale / apparentSizeInPixels;
     }
 
     /**
@@ -250,9 +201,9 @@ public class TranslateGizmo extends Gizmo {
 
     @return the lines of the gizmo, in world space
     */
-    public ArrayList<LineSegment> getLineSegments()
+    public ArrayList<TranslateGizmoLineSegment> getLineSegments()
     {
-        ArrayList<LineSegment> segments = new ArrayList<LineSegment>();
+        ArrayList<TranslateGizmoLineSegment> segments = new ArrayList<TranslateGizmoLineSegment>();
         Vector3Dd zAxis = new Vector3Dd(0, 0, 1);
 
         for ( SimpleBody element : elementInstances ) {
@@ -260,10 +211,10 @@ public class TranslateGizmo extends Gizmo {
             double length;
 
             if ( g == arrowModel ) {
-                length = currentScale*0.5*ARROW_LENGHT;
+                length = currentScale*0.5* ARROW_LENGTH;
             }
             else if ( g == cylinderModel ) {
-                length = currentScale*SEGMENT_LENGHT;
+                length = currentScale* SEGMENT_LENGTH;
             }
             else {
                 continue;
@@ -272,7 +223,7 @@ public class TranslateGizmo extends Gizmo {
             Vector3Dd start = element.getPosition();
             Vector3Dd end = start.add(element.getRotation().multiply(zAxis).multiply(length));
 
-            segments.add(new LineSegment(start, end, element.getMaterial().getDiffuse()));
+            segments.add(new TranslateGizmoLineSegment(start, end, element.getMaterial().getDiffuse()));
         }
         return segments;
     }
@@ -288,9 +239,9 @@ public class TranslateGizmo extends Gizmo {
     @return the 4 vertices of the triangle strip, or null if the line has no
     length
     */
-    public Vector3Dd[] buildLineStrip(LineSegment segment)
+    public Vector3Dd[] buildLineStrip(TranslateGizmoLineSegment segment)
     {
-        Vector3Dd direction = segment.getEnd().subtract(segment.getStart());
+        Vector3Dd direction = segment.end().subtract(segment.start());
         double length = direction.length();
 
         if ( length < VSDK.EPSILON ) {
@@ -305,7 +256,7 @@ public class TranslateGizmo extends Gizmo {
             view = camera.getFront();
         }
         else {
-            view = segment.getStart().add(segment.getEnd()).multiply(0.5).subtract(camera.getPosition());
+            view = segment.start().add(segment.end()).multiply(0.5).subtract(camera.getPosition());
         }
 
         Vector3Dd side = direction.crossProduct(view);
@@ -318,8 +269,8 @@ public class TranslateGizmo extends Gizmo {
         double halfWidth = getLineWidthInWorldUnits()/2;
         side = side.normalized().multiply(halfWidth);
 
-        Vector3Dd start = segment.getStart().subtract(direction.multiply(halfWidth));
-        Vector3Dd end = segment.getEnd().add(direction.multiply(halfWidth));
+        Vector3Dd start = segment.start().subtract(direction.multiply(halfWidth));
+        Vector3Dd end = segment.end().add(direction.multiply(halfWidth));
 
         return new Vector3Dd[] {
             start.add(side),
@@ -369,7 +320,7 @@ public class TranslateGizmo extends Gizmo {
         Vector3Dd eleP;
 
         coneModel.setBaseRadius(currentScale*0.05);
-        coneModel.setHeight(currentScale*0.3*ARROW_LENGHT);
+        coneModel.setHeight(currentScale*0.3* ARROW_LENGTH);
         boxModel.setSize(currentScale*(BOX_SIDE+0.025), currentScale*(BOX_SIDE+0.025), currentScale*BOX_HEIGHT);
 
         //-----------------------------------------------------------------
@@ -380,7 +331,7 @@ public class TranslateGizmo extends Gizmo {
             0, 0, currentScale*0.7);
 
         segmentModel = CurveModeler.createLine(0, 0, 0,
-            0, 0, currentScale*SEGMENT_LENGHT);
+            0, 0, currentScale* SEGMENT_LENGTH);
 
         //-----------------------------------------------------------------
         for ( i = 0; i < elementInstances.size(); i++ ) {
@@ -404,7 +355,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, currentScale*0.7* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                     r.setMaterial(red); 
@@ -418,7 +369,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, currentScale*0.7* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                     r.setMaterial(green); 
@@ -432,7 +383,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, currentScale*0.7*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, currentScale*0.7* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                     r.setMaterial(blue); 
@@ -536,13 +487,13 @@ public class TranslateGizmo extends Gizmo {
         }
         double scale = currentScale;
 
-        arrowModel.setBaseLength(scale*0.5*ARROW_LENGHT);
-        arrowModel.setHeadLength(scale*0.3*ARROW_LENGHT);
+        arrowModel.setBaseLength(scale*0.5* ARROW_LENGTH);
+        arrowModel.setHeadLength(scale*0.3* ARROW_LENGTH);
         arrowModel.setBaseRadius(scale*0.025);
         arrowModel.setHeadRadius(scale*0.05);
         cylinderModel.setBaseRadius(scale*SEGMENT_WIDTH);
         cylinderModel.setTopRadius(scale*SEGMENT_WIDTH);
-        cylinderModel.setHeight(scale*SEGMENT_LENGHT);
+        cylinderModel.setHeight(scale* SEGMENT_LENGTH);
         boxModel.setSize(scale*BOX_SIDE, scale*BOX_SIDE, scale*BOX_HEIGHT);
 
         //-----------------------------------------------------------------
@@ -587,7 +538,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -612,7 +563,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -637,7 +588,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, scale*0.2*ARROW_LENGHT);
+                    subP = new Vector3Dd(0, 0, scale*0.2* ARROW_LENGTH);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -661,7 +612,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, scale*SEGMENT_LENGHT, 0);
+                    subP = new Vector3Dd(0, scale* SEGMENT_LENGTH, 0);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -685,7 +636,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(scale*SEGMENT_LENGHT, 0, 0);
+                    subP = new Vector3Dd(scale* SEGMENT_LENGTH, 0, 0);
                     eleP = eleR.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -709,7 +660,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, scale*SEGMENT_LENGHT);
+                    subP = new Vector3Dd(0, 0, scale* SEGMENT_LENGTH);
                     eleP = R.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -732,7 +683,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, scale*SEGMENT_LENGHT, 0);
+                    subP = new Vector3Dd(0, scale* SEGMENT_LENGTH, 0);
                     eleP = R.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -756,7 +707,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(0, 0, scale*SEGMENT_LENGHT);
+                    subP = new Vector3Dd(0, 0, scale* SEGMENT_LENGTH);
                     eleP = R.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -779,7 +730,7 @@ public class TranslateGizmo extends Gizmo {
                     eleRi = eleRi.invert();
                     r.setRotationInverse(eleRi);
                     // Translation
-                    subP = new Vector3Dd(scale*SEGMENT_LENGHT, 0, 0);
+                    subP = new Vector3Dd(scale* SEGMENT_LENGTH, 0, 0);
                     eleP = R.multiply(subP).add(getPosition());
                     r.setPosition(eleP);
                 }
@@ -872,7 +823,7 @@ public class TranslateGizmo extends Gizmo {
 
         Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
         calculateGeometryState(getPosition(), 
-                               R, selectedResizing, aparentSizeInPixels,
+                               R, selectedResizing, apparentSizeInPixels,
                                camera);
     }
 
@@ -881,485 +832,83 @@ public class TranslateGizmo extends Gizmo {
         return T;
     }
 
-    public boolean processMouseEvent(MouseEvent mouseEvent)
+    /**
+    Recalculates the geometry of the elements of the gizmo from its current
+    transformation, apparent size, resizing state, selection and camera.
+    PRE: the transformation matrix of the gizmo has been set.
+    */
+    public void updateGeometryState()
     {
-        oldmousex = mouseEvent.getX();
-        oldmousey = mouseEvent.getY();
-        return false;
-    }
-
-    public boolean processKeyPressedEvent(KeyEvent keyEvent)
-    {
-        char unicode_id;
-        int keycode;
-        double deltaMov = 0.1;
-        boolean updateNeeded = false;
-
-        unicode_id = keyEvent.unicode_id;
-        keycode = keyEvent.keycode;
-
         Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
 
-        selectedResizing = true;
-        calculateGeometryState(T.extractTranslation(), 
-                               R, selectedResizing, aparentSizeInPixels, 
-                               camera);
-
-        if ( unicode_id != KeyEvent.KEY_NONE ) {
-            switch ( unicode_id ) {
-              // Position
-              case 'x':
-                T = T.withVal(0, 3, T.get(0, 3) - deltaMov);
-                updateNeeded = true;
-                break;
-              case 'X':
-                T = T.withVal(0, 3, T.get(0, 3) + deltaMov);
-                updateNeeded = true;
-                break;
-              case 'y':
-                T = T.withVal(1, 3, T.get(1, 3) - deltaMov);
-                updateNeeded = true;
-                break;
-              case 'Y':
-                T = T.withVal(1, 3, T.get(1, 3) + deltaMov);
-                updateNeeded = true;
-                break;
-              case 'z':
-                T = T.withVal(2, 3, T.get(2, 3) - deltaMov);
-                updateNeeded = true;
-                break;
-              case 'Z':
-                T = T.withVal(2, 3, T.get(2, 3) + deltaMov);
-                updateNeeded = true;
-                break; 
-            }
-        }
-
-        return updateNeeded;
-    }
-
-    public boolean processKeyReleasedEvent(KeyEvent keyEvent)
-    {
-        return false;
-    }
-
-    public boolean processMousePressedEvent(MouseEvent e)
-    {
-        lastDeltaPosition = new Vector3Dd();
-        //lastDeltaPosition = calculateDeltaPosition(mouseEvent);
-        //Vector3Dd p = calculateInteractionPosition(e); // Not working!
-        //* HOW TO REFACTOR FROM HERE *************************************
-
-        //- Configure sub-interaction technique from active element -------
-        int currentSelection;
-        if ( volatileSelection == NULL_GROUP ) {
-            currentSelection = persistentSelection;
-        }
-        else {
-            currentSelection = volatileSelection;
-        }
-
-        Vector3Dd v = null;
-        int interactionTechnique = 0;
-
-        switch ( currentSelection ) {
-          case X_AXIS_GROUP: 
-            v = new Vector3Dd(1, 0, 0);
-            interactionTechnique = 1; // Vector
-            break;
-          case Y_AXIS_GROUP: 
-            v = new Vector3Dd(0, 1, 0);
-            interactionTechnique = 1; // Vector
-            break;
-          case Z_AXIS_GROUP: 
-            v = new Vector3Dd(0, 0, 1);
-            interactionTechnique = 1; // Vector
-            break;
-          case XY_PLANE_GROUP: 
-            v = new Vector3Dd(0, 0, 1);
-            interactionTechnique = 2; // Plane
-            break;
-          case YZ_PLANE_GROUP: 
-            v = new Vector3Dd(1, 0, 0);
-            interactionTechnique = 2; // Plane
-            break;
-          case XZ_PLANE_GROUP: 
-            v = new Vector3Dd(0, 1, 0);
-            interactionTechnique = 2; // Plane
-            break;
-        }
-
-        if ( v == null ) {
-            oldmousex = e.getX();
-            oldmousey = e.getY();
-            return false;
-        }
-
-        //- Implement interaction technique for selected element ----------
-        Vector3Dd o = getPosition();
-        Vector3Dd p = new Vector3Dd(0, 0, 0);
-        Ray r;
-        InfinitePlane plane;
-        int mousex = e.getX();
-        int mousey = e.getY();
-        Vector3Dd deltapos = new Vector3Dd();
-
-        camera.updateVectors();
-
-        if ( interactionTechnique == 2 ) {
-            r = camera.generateRay(mousex, mousey);
-            if ( r.getDirection().dotProduct(v) > 0 ) {
-                v = v.multiply(-1);
-            }
-            plane = new InfinitePlane(v, o);
-            Ray hit = plane.doIntersectionFirstHit(r);
-            if ( hit == null ) {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                p = o;
-            }
-            else {
-                p = hit.getDirection().multiply(hit.getT()).add(hit.getOrigin());
-            }
-        }
-        else if ( interactionTechnique == 1 ) {
-            boolean accountForU = false;
-            boolean accountForV = false;
-            Vector3Dd left, up;
-
-            left = camera.getLeft();
-            up = camera.getUp();
-
-            v = v.normalized();
-            left = left.normalized();
-            up = up.normalized();
-
-            if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
-                accountForU = true;
-            }
-            if ( Math.abs(v.dotProduct(up)) > Math.cos(Math.toRadians(80.0)) ) {
-                accountForV = true;
-            }
-
-            if ( accountForU && !accountForV ) {
-                plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-            }
-            else if ( accountForV && !accountForU ) {
-                plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-            }
-            else if ( accountForU && accountForV ) {
-                if ( (mousex-oldmousex) > (mousey-oldmousey) ) {
-                    plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-                }
-                else {
-                    plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-                }
-            }
-            else {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                return false;
-            }
-
-            r = new Ray(o, v);
-            Ray r2 = new Ray(o, v);
-            Ray hit = plane.doIntersectionWithNegative(r);
-            if ( hit == null ) {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                return false;
-            }
-            p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
-        }
-        oldmousex = e.getX();
-        oldmousey = e.getY();
-        //* HOW TO REFACTOR TO HERE ***************************************
-        lastDeltaPosition = p.subtract(getPosition());
-
-        return false;
-    }
-
-    public boolean processMouseReleasedEvent(MouseEvent e)
-    {
-        selectedResizing = true;
-        calculateGeometryState(getPosition(), T, selectedResizing, 
-                               aparentSizeInPixels, camera);
-        return true;
-    }
-
-    public boolean processMouseClickedEvent(MouseEvent e)
-    {
-        selectedResizing = true;
-        calculateGeometryState(getPosition(), T, selectedResizing, 
-                               aparentSizeInPixels, camera);
-        int previousSelection = volatileSelection;
-
-        if ( volatileSelection == NULL_GROUP ) {
-            previousSelection = persistentSelection;
-        }
-
-        persistentSelection = calculateSelection(e.getX(), e.getY());
-
-        if ( persistentSelection == NULL_GROUP ) {
-            persistentSelection = previousSelection;
-        }
-
-        if ( persistentSelection != previousSelection ) {
-            return true;
-        }
-
-        return false;
+        calculateGeometryState(getPosition(), R, selectedResizing,
+            apparentSizeInPixels, camera);
     }
 
     /**
-    Given a pixel coordinate, this method traces a ray from current camera
-    to gizmo's geometry and determines the constituent element selected.
+    @return the selected group (one of the `*_GROUP` constants) chosen by the
+    user with a click, or `NULL_GROUP`
     */
-    private int calculateSelection(int x, int y)
+    public int getPersistentSelection()
     {
-        camera.updateVectors();
-        Ray r = camera.generateRay(x, y);
-        double nearestDistance = Double.MAX_VALUE;
-        int nearestElement = -1;
-        int index = 1, i;
-
-        /* Note that box elements are only for display, they do not affect
-           gravity selections */
-        for ( i = 0; index <= 9 && i < elementInstances.size(); index++, i++ ) {
-            r = r.withT(Double.MAX_VALUE);
-            SimpleBody gi = elementInstances.get(i);
-
-            Ray hit = gi.getGeometry() != null ? gi.doIntersectionFirstHit(r) : null;
-            if ( hit != null && hit.getT() < nearestDistance ) {
-                nearestDistance = hit.getT();
-                nearestElement = index;
-            }
-        }
-
-        int selection = NULL_GROUP;
-
-        switch ( nearestElement ) {
-          case X_AXIS_ELEMENT: selection = X_AXIS_GROUP; break;
-          case Y_AXIS_ELEMENT: selection = Y_AXIS_GROUP; break;
-          case Z_AXIS_ELEMENT: selection = Z_AXIS_GROUP; break;
-          case XYY_SEGMENT_ELEMENT: selection = XY_PLANE_GROUP; break;
-          case XYX_SEGMENT_ELEMENT: selection = XY_PLANE_GROUP; break;
-          case YZZ_SEGMENT_ELEMENT: selection = YZ_PLANE_GROUP; break;
-          case YZY_SEGMENT_ELEMENT: selection = YZ_PLANE_GROUP; break;
-          case XZZ_SEGMENT_ELEMENT: selection = XZ_PLANE_GROUP; break;
-          case XZX_SEGMENT_ELEMENT: selection = XZ_PLANE_GROUP; break;
-        }
-
-        active = false;
-        if ( selection != NULL_GROUP ) {
-            active = true;
-        }
-
-        return selection;
+        return persistentSelection;
     }
 
-    public boolean isActive()
+    /**
+    @param selection group (one of the `*_GROUP` constants) chosen by the user
+    with a click
+    */
+    public void setPersistentSelection(int selection)
     {
-        return active;
+        persistentSelection = selection;
     }
 
-    public boolean processMouseMovedEvent(MouseEvent e)
+    /**
+    @return the group (one of the `*_GROUP` constants) currently under the
+    cursor, or `NULL_GROUP`
+    */
+    public int getVolatileSelection()
     {
-        oldmousex = e.getX();
-        oldmousey = e.getY();
+        return volatileSelection;
+    }
 
-        selectedResizing = true;
-        calculateGeometryState(getPosition(), T, selectedResizing, 
-                               aparentSizeInPixels, camera);
-        int previousSelection = volatileSelection;
+    /**
+    @param selection group (one of the `*_GROUP` constants) currently under
+    the cursor
+    */
+    public void setVolatileSelection(int selection)
+    {
+        volatileSelection = selection;
+    }
 
+    /**
+    @return the group (one of the `*_GROUP` constants) that is highlighted and
+    manipulated: the one under the cursor, or the chosen one if the cursor is
+    not over any group
+    */
+    public int getCurrentSelection()
+    {
         if ( volatileSelection == NULL_GROUP ) {
-            previousSelection = persistentSelection;
+            return persistentSelection;
         }
-
-        volatileSelection = calculateSelection(e.getX(), e.getY());
-
-        if ( volatileSelection != previousSelection ) {
-            return true;
-        }
-
-        return false;
+        return volatileSelection;
     }
 
-    /* TO REFACTOR CODE! */
-    private Vector3Dd calculateInteractionPosition(MouseEvent e)
+    /**
+    @return true if the size of the gizmo is recalculated to keep its apparent
+    size in pixels, false if it is kept while it is being dragged
+    */
+    public boolean isSelectedResizing()
     {
-        return null;
+        return selectedResizing;
     }
 
-    public boolean processMouseDraggedEvent(MouseEvent e)
+    /**
+    @param selectedResizing true if the size of the gizmo must be recalculated
+    to keep its apparent size in pixels
+    */
+    public void setSelectedResizing(boolean selectedResizing)
     {
-        //- If it is called as an automatic reposition, do nothing --------
-/*
-        if ( skipRobot ) {
-            skipRobot = false;
-            oldmousex = e.getX();
-            oldmousey = e.getY();
-            return false;
-        }
-*/
-
-        //Vector3Dd p = calculateInteractionPosition(e); // Not working!
-        //* HOW TO REFACTOR FROM HERE *************************************
-
-        //- Configure sub-interaction technique from active element -------
-        int currentSelection;
-        if ( volatileSelection == NULL_GROUP ) {
-            currentSelection = persistentSelection;
-        }
-        else {
-            currentSelection = volatileSelection;
-        }
-
-        Vector3Dd v = null;
-        int interactionTechnique = 0;
-
-        switch ( currentSelection ) {
-          case X_AXIS_GROUP: 
-            v = new Vector3Dd(1, 0, 0);
-            interactionTechnique = 1; // Vector
-            break;
-          case Y_AXIS_GROUP: 
-            v = new Vector3Dd(0, 1, 0);
-            interactionTechnique = 1; // Vector
-            break;
-          case Z_AXIS_GROUP: 
-            v = new Vector3Dd(0, 0, 1);
-            interactionTechnique = 1; // Vector
-            break;
-          case XY_PLANE_GROUP: 
-            v = new Vector3Dd(0, 0, 1);
-            interactionTechnique = 2; // Plane
-            break;
-          case YZ_PLANE_GROUP: 
-            v = new Vector3Dd(1, 0, 0);
-            interactionTechnique = 2; // Plane
-            break;
-          case XZ_PLANE_GROUP: 
-            v = new Vector3Dd(0, 1, 0);
-            interactionTechnique = 2; // Plane
-            break;
-        }
-
-        if ( v == null ) {
-            oldmousex = e.getX();
-            oldmousey = e.getY();
-            return false;
-        }
-
-        //- Implement interaction technique for selected element ----------
-        Vector3Dd o = getPosition();
-        Vector3Dd p = new Vector3Dd(0, 0, 0);
-        Ray r;
-        InfinitePlane plane;
-        int mousex = e.getX();
-        int mousey = e.getY();
-        Vector3Dd deltapos = new Vector3Dd();
-
-        camera.updateVectors();
-
-        if ( interactionTechnique == 2 ) {
-            r = camera.generateRay(mousex, mousey);
-            if ( r.getDirection().dotProduct(v) > 0 ) {
-                v = v.multiply(-1);
-            }
-            plane = new InfinitePlane(v, o);
-            Ray hit = plane.doIntersectionFirstHit(r);
-            if ( hit == null ) {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                p = o;
-            }
-            else {
-                p = hit.getDirection().multiply(hit.getT()).add(hit.getOrigin());
-            }
-        }
-        else if ( interactionTechnique == 1 ) {
-            boolean accountForU = false;
-            boolean accountForV = false;
-            Vector3Dd left, up;
-
-            left = camera.getLeft();
-            up = camera.getUp();
-
-            v = v.normalized();
-            left = left.normalized();
-            up = up.normalized();
-
-            if ( Math.abs(v.dotProduct(left)) > Math.cos(Math.toRadians(80.0)) ) {
-                accountForU = true;
-            }
-            if ( Math.abs(v.dotProduct(up)) > Math.cos(Math.toRadians(80.0)) ) {
-                accountForV = true;
-            }
-
-            if ( accountForU && !accountForV ) {
-                plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-            }
-            else if ( accountForV && !accountForU ) {
-                plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-            }
-            else if ( accountForU && accountForV ) {
-                if ( (mousex-oldmousex) > (mousey-oldmousey) ) {
-                    plane = camera.calculateUPlaneAtPixel(mousex, mousey);
-                }
-                else {
-                    plane = camera.calculateVPlaneAtPixel(mousex, mousey);
-                }
-            }
-            else {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                return false;
-            }
-
-            r = new Ray(o, v);
-            Ray r2 = new Ray(o, v);
-            Ray hit = plane.doIntersectionWithNegative(r);
-            if ( hit == null ) {
-                oldmousex = e.getX();
-                oldmousey = e.getY();
-                return false;
-            }
-            p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
-        }
-        oldmousex = e.getX();
-        oldmousey = e.getY();
-        //* HOW TO REFACTOR TO HERE ***************************************
-
-        setPosition(p.subtract(lastDeltaPosition));
-        selectedResizing = false;
-
-        //- Automatic cursor repositioning constrain ----------------------
-        // THIS IS NOT WORKING NICELY!
-/*
-        try {
-            if ( awtRobot == null ) {
-                awtRobot = new Robot();
-            }
-
-            Vector3Dd base = p.add(deltapos);
-            Vector3Dd pp = camera.projectPointUsingRayMethod(base);
-
-            Point global = e.getComponent().getLocationOnScreen();
-            //awtRobot.mouseMove((int)pp.x+global.x, (int)pp.y+global.y);
-            skipRobot = true;
-        }
-        catch ( Exception ex ) {
-            System.err.println(ex);
-        }
-*/
-
-        return true;
-    }
-
-    public boolean processMouseWheelEvent(MouseEvent e)
-    {
-        return false;
+        this.selectedResizing = selectedResizing;
     }
 }
