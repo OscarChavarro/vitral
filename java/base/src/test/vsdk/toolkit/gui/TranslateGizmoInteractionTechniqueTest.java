@@ -173,6 +173,43 @@ class TranslateGizmoInteractionTechniqueTest
     }
 
     @Test
+    void given_xAxisDrag_when_cursorSweepsHorizontallyWithRepeatedSamples_then_movementIsSmooth()
+    {
+        // Arrange: regression of the plane flip-flop that depended on the
+        // last cursor delta (repeated samples or leftward moves jumped)
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+        Vector3Dd start = new Vector3Dd(0.5, 0, 0);
+        MouseEvent startEvent = mouseEventAt(camera, start);
+        int[] sweep = {0, 1, 1, 0, 2, 0, 0, 1, -1, -1, 0, -2, 1, 1, 0, 3, 3, 0};
+
+        technique.processMousePressedEvent(startEvent);
+
+        // Act
+        int x = startEvent.getX();
+        double previousX = gizmo.getPosition().x();
+        double maxStep = 0;
+
+        for ( int delta : sweep ) {
+            x += delta;
+            technique.processMouseDraggedEvent(mouseEvent(x, startEvent.getY()));
+            double currentX = gizmo.getPosition().x();
+
+            assertThat(Double.isNaN(currentX)).isFalse();
+            if ( delta == 0 ) {
+                assertThat(currentX).isCloseTo(previousX, offset(EPS));
+            }
+            maxStep = Math.max(maxStep, Math.abs(currentX - previousX));
+            previousX = currentX;
+        }
+
+        // Assert: a step of at most 3 pixels is a small displacement
+        assertThat(maxStep).isLessThan(0.2);
+    }
+
+    @Test
     void given_mouseReleased_when_processed_then_resizingIsRestored()
     {
         // Arrange

@@ -13,14 +13,16 @@ import vsdk.toolkit.gui.MouseEvent;
 public class TranslateGizmoInteractionTechnique {
     private static final double KEY_MOVEMENT_STEP = 0.1;
 
+    /// sin^2 of the minimum angle (10 degrees) between an axis and the view ray
+    private static final double AXIS_PARALLEL_TO_RAY_LIMIT =
+        Math.pow(Math.sin(Math.toRadians(10.0)), 2);
+
     /// Interaction techniques used to move the gizmo depending on the group
     private static final int MOVE_ALONG_AXIS = 1;
     private static final int MOVE_OVER_PLANE = 2;
 
     private final TranslateGizmo gizmo;
 
-    private int oldMouseX;
-    private int oldMouseY;
     private Vector3Dd lastDeltaPosition;
     private boolean active;
 
@@ -30,8 +32,6 @@ public class TranslateGizmoInteractionTechnique {
     public TranslateGizmoInteractionTechnique(TranslateGizmo gizmo)
     {
         this.gizmo = gizmo;
-        oldMouseX = 0;
-        oldMouseY = 0;
         lastDeltaPosition = new Vector3Dd();
         active = false;
     }
@@ -55,8 +55,6 @@ public class TranslateGizmoInteractionTechnique {
 
     public boolean processMouseEvent(MouseEvent mouseEvent)
     {
-        oldMouseX = mouseEvent.getX();
-        oldMouseY = mouseEvent.getY();
         return false;
     }
 
@@ -112,8 +110,6 @@ public class TranslateGizmoInteractionTechnique {
     {
         Vector3Dd p = calculateInteractionPoint(e);
 
-        oldMouseX = e.getX();
-        oldMouseY = e.getY();
         if ( p == null ) {
             lastDeltaPosition = new Vector3Dd();
         }
@@ -148,8 +144,6 @@ public class TranslateGizmoInteractionTechnique {
 
     public boolean processMouseMovedEvent(MouseEvent e)
     {
-        oldMouseX = e.getX();
-        oldMouseY = e.getY();
 
         gizmo.setSelectedResizing(true);
         gizmo.updateGeometryState();
@@ -166,8 +160,6 @@ public class TranslateGizmoInteractionTechnique {
     {
         Vector3Dd p = calculateInteractionPoint(e);
 
-        oldMouseX = e.getX();
-        oldMouseY = e.getY();
         if ( p == null ) {
             return false;
         }
@@ -296,45 +288,24 @@ public class TranslateGizmoInteractionTechnique {
             return hit.getDirection().multiply(hit.getT()).add(hit.getOrigin());
         }
 
-        // Move along an axis: intersect the axis with a plane facing the camera
-        boolean accountForU = false;
-        boolean accountForV = false;
-        InfinitePlane plane;
-        Vector3Dd left = camera.getLeft().normalized();
-        Vector3Dd up = camera.getUp().normalized();
-        double limit = Math.cos(Math.toRadians(80.0));
+        // Move along an axis: closest point of the axis line to the cursor's
+        // projector ray. It depends only on the cursor position (never on its
+        // last movement), so it is continuous for perspective and orthogonal
+        // cameras alike.
+        Ray r = camera.generateRay(mouseX, mouseY);
+        Vector3Dd axis = v.normalized();
+        Vector3Dd rayDirection = r.getDirection().normalized();
+        Vector3Dd w0 = o.subtract(r.getOrigin());
+        double b = axis.dotProduct(rayDirection);
+        double denominator = 1.0 - b * b;
 
-        v = v.normalized();
-        if ( Math.abs(v.dotProduct(left)) > limit ) {
-            accountForU = true;
-        }
-        if ( Math.abs(v.dotProduct(up)) > limit ) {
-            accountForV = true;
-        }
-
-        if ( accountForU && !accountForV ) {
-            plane = camera.calculateUPlaneAtPixel(mouseX, mouseY);
-        }
-        else if ( accountForV && !accountForU ) {
-            plane = camera.calculateVPlaneAtPixel(mouseX, mouseY);
-        }
-        else if ( accountForU && accountForV ) {
-            if ( (mouseX - oldMouseX) > (mouseY - oldMouseY) ) {
-                plane = camera.calculateUPlaneAtPixel(mouseX, mouseY);
-            }
-            else {
-                plane = camera.calculateVPlaneAtPixel(mouseX, mouseY);
-            }
-        }
-        else {
+        if ( denominator < AXIS_PARALLEL_TO_RAY_LIMIT ) {
+            // Looking (almost) along the axis: cursor does not define a point
             return null;
         }
 
-        Ray hit = plane.doIntersectionWithNegative(new Ray(o, v));
+        double s = (b * rayDirection.dotProduct(w0) - axis.dotProduct(w0)) / denominator;
 
-        if ( hit == null ) {
-            return null;
-        }
-        return hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
+        return o.add(axis.multiply(s));
     }
 }

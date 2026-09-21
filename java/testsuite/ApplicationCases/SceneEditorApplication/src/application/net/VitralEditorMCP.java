@@ -145,6 +145,12 @@ class VitralEditorMCPProtocol implements Runnable
         if ( "gui.set_mode".equals(tool) ) {
             return setInteractionMode(request);
         }
+        if ( "gui.mouse".equals(tool) ) {
+            return injectMouse(request);
+        }
+        if ( "viewport.project".equals(tool) ) {
+            return projectSelectedBody(request);
+        }
         if ( "render.get_configuration".equals(tool) ) {
             return describeRendererConfigurations(request);
         }
@@ -310,6 +316,60 @@ class VitralEditorMCPProtocol implements Runnable
         }
         drawingArea.interactionMode = value;
         return "{\"ok\":true,\"mode\":\"" + mode + "\"}";
+    }
+
+    private String injectMouse(String request)
+    {
+        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        String type = stringProperty(request, "type", "move");
+        int x = (int)Math.round(numberProperty(request, "x", 0));
+        int y = (int)Math.round(numberProperty(request, "y", 0));
+        int button = (int)numberProperty(request, "button", 1);
+
+        if ( drawingArea == null ) {
+            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
+        }
+        drawingArea.injectMouseEvent(type, x, y, button);
+        return describeScene();
+    }
+
+    /**
+    Reports the canvas pixel of the first selected body and of the tips of its
+    three axes (one unit long), as seen by a viewport.
+    */
+    private String projectSelectedBody(String request)
+    {
+        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        Scene scene = parent.getApplicationModel().getScene();
+        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
+        int viewportIndex = (int)numberProperty(request, "viewport", 0);
+        int selected = scene.selectedThings.firstSelected();
+
+        if ( drawingArea == null ) {
+            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
+        }
+        if ( selected < 0 ) {
+            throw new IllegalStateException("No body is selected");
+        }
+        Viewport viewport = set.getViewport(viewportIndex);
+        Vector3Dd p = scene.scene.getSimpleBodies().get(selected).getPosition();
+        String[] names = {"origin", "x", "y", "z"};
+        Vector3Dd[] points = {
+            p,
+            p.add(new Vector3Dd(1, 0, 0)),
+            p.add(new Vector3Dd(0, 1, 0)),
+            p.add(new Vector3Dd(0, 0, 1))
+        };
+        StringBuilder sb = new StringBuilder("{\"viewport\":\"" + escape(viewport.getTitle()) + "\"");
+
+        for ( int i = 0; i < names.length; i++ ) {
+            double[] pixel = drawingArea.projectToCanvas(viewport, points[i]);
+
+            sb.append(",\"").append(names[i]).append("\":");
+            sb.append(pixel == null ? "null" : "[" + pixel[0] + "," + pixel[1] + "]");
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     private void selectBody(String request)
@@ -499,6 +559,8 @@ class VitralEditorMCPProtocol implements Runnable
             + "," + tool("scene.move_body", "Set the position of a body (default: the last one). Arguments: index,x,y,z (missing coordinates are kept).")
             + "," + tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
             + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
+            + "," + tool("gui.mouse", "Inject a mouse event into the canvas. Arguments: type (move|press|drag|release), x, y (canvas pixels), button (default 1). Returns the scene state.")
+            + "," + tool("viewport.project", "Canvas pixels of the selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
             + "," + tool("render.get_configuration", "Return the RendererConfiguration flags of the viewports. Arguments: viewport (index; default all).")
             + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners, and shading (nolight|flat|gouraud|phong|cook_terrance).")
             + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")

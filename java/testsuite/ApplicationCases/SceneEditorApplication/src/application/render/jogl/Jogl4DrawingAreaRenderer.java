@@ -34,6 +34,7 @@ import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Quaterniond;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.geometry.element.Triangle;
@@ -380,6 +381,79 @@ public class Jogl4DrawingAreaRenderer implements
     public GLCanvas getCanvas()
     {
         return canvas;
+    }
+
+    /**
+    Delivers a synthetic mouse event to the canvas, as if it came from the
+    user's pointer. Intended for automated agents (see `VitralEditorMCP`).
+    Must be called from the event dispatch thread.
+    @param type one of "move", "press", "drag", "release"
+    @param x canvas (AWT) x coordinate
+    @param y canvas (AWT) y coordinate
+    @param button AWT button number (1 = left)
+    */
+    public void injectMouseEvent(String type, int x, int y, int button)
+    {
+        int id;
+        int modifiers = 0;
+        int buttonMask = java.awt.event.MouseEvent.getMaskForButton(button);
+
+        switch ( type ) {
+            case "move" -> id = java.awt.event.MouseEvent.MOUSE_MOVED;
+            case "press" -> {
+                id = java.awt.event.MouseEvent.MOUSE_PRESSED;
+                modifiers = buttonMask;
+            }
+            case "drag" -> {
+                id = java.awt.event.MouseEvent.MOUSE_DRAGGED;
+                modifiers = buttonMask;
+            }
+            case "release" -> id = java.awt.event.MouseEvent.MOUSE_RELEASED;
+            default -> throw new IllegalArgumentException("Unknown mouse event type \"" +
+                type + "\". Use move, press, drag or release");
+        }
+        java.awt.event.MouseEvent event = new java.awt.event.MouseEvent(
+            canvas, id, System.currentTimeMillis(), modifiers, x, y, 1, false,
+            type.equals("move") ? java.awt.event.MouseEvent.NOBUTTON : button);
+
+        canvas.dispatchEvent(event);
+    }
+
+    /**
+    Projects a point of the scene to canvas (AWT) pixel coordinates using the
+    active camera of a viewport.
+    @param viewport viewport whose camera is used
+    @param point point in world coordinates
+    @return {x, y} in canvas pixels, or null if the point is behind the camera
+    */
+    public double[] projectToCanvas(Viewport viewport, Vector3Dd point)
+    {
+        syncViewportStateFromCanvas();
+        Camera camera = viewport.getActiveCamera();
+        camera.updateVectors();
+
+        Vector3Dd d = point.subtract(camera.getPosition());
+        Vector3Dd front = camera.getFront().normalized();
+        Vector3Dd right = camera.getLeft().normalized().multiply(-1);
+        Vector3Dd up = camera.getUp().normalized();
+        double depth = d.dotProduct(front);
+
+        if ( depth <= 0 ) {
+            return null;
+        }
+        double u = d.dotProduct(right) / depth * 0.5 /
+            camera.getRightWithScale().length();
+        double v = d.dotProduct(up) / depth * 0.5 /
+            camera.getUpWithScale().length();
+        double w = camera.getViewportXSize();
+        double h = camera.getViewportYSize();
+        double surfaceX = viewport.getPixelStartX() + u * w + w / 2.0;
+        double surfaceY = viewport.getPixelStartY() + h / 2.0 - 1 - v * h;
+
+        return new double[] {
+            surfaceX * awtViewportWidth / viewportSet.getSizeXInPixels(),
+            surfaceY * awtViewportHeight / viewportSet.getSizeYInPixels()
+        };
     }
 
     private boolean shouldDrawTranslationGizmo()
