@@ -20,10 +20,12 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
+import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4InputGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ReferenceFrameGizmoRenderer;
 
 // Framework classes
@@ -72,6 +74,7 @@ public class Jogl4ViewportWindow
     private RGBAImageUncompressed[] translateGizmoLabelImages;
     private RGBAImageUncompressed[] translateGizmoSelectedLabelImages;
     private int translateGizmoLabelFontSize;
+    private final Jogl4InputGizmoRenderer inputGizmoRenderer;
 
     // Each Jogl4ViewportWindow can call a different visualization algorithm
     public static final int RENDER_MODE_ZBUFFER = Viewport.RENDER_MODE_Z_BUFFER;
@@ -84,6 +87,23 @@ public class Jogl4ViewportWindow
         this.viewportSet = viewportSet;
         this.viewport = viewport;
         this.labelImageProvider = labelImageProvider;
+        this.inputGizmoRenderer = new Jogl4InputGizmoRenderer(
+            new Jogl4InputGizmoRenderer.Host() {
+                @Override
+                public RGBAImageUncompressed createLabelImage(String text, ColorRgb color, int fontSize) {
+                    return Jogl4ViewportWindow.this.labelImageProvider.createLabelImage(text, color, fontSize);
+                }
+
+                @Override
+                public void drawLabelImage(GL4 gl, RGBAImageUncompressed image, int x, int y) {
+                    drawLabelImageInViewport(gl, image, x, y);
+                }
+
+                @Override
+                public void discardLabelImage(RGBAImageUncompressed image) {
+                    discardedLabelImages.add(image);
+                }
+            }, viewportSet, viewport);
 
         updateTitleImage();
     }
@@ -390,6 +410,15 @@ public class Jogl4ViewportWindow
     }
 
     /**
+    Draws a label image with its lower left corner at a position of the
+    viewport, measured in pixels from its lower left corner.
+    */
+    private void drawLabelImageInViewport(GL4 gl, RGBAImageUncompressed image, int x, int y)
+    {
+        drawLabelImage(gl, image, viewport.getPixelStartX() + x, viewport.getPixelStartY() + y);
+    }
+
+    /**
     Releases the textures of the label images that are no longer used.
     */
     private void releaseDiscardedLabelTextures(GL4 gl)
@@ -409,6 +438,7 @@ public class Jogl4ViewportWindow
     public void disposeGlResources(GL4 gl)
     {
         releaseDiscardedLabelTextures(gl);
+        inputGizmoRenderer.disposeGlResources(gl);
         if ( titleImage != null ) {
             Jogl4ImageRenderer.unload(gl, titleImage);
         }
@@ -526,5 +556,16 @@ public class Jogl4ViewportWindow
                 }
             }
         }
+    }
+
+    /**
+    Draws an input gizmo (numeric boxes the user can edit) at the lower right
+    corner of the viewport.
+    @param gl OpenGL context
+    @param gizmo the gizmo
+    */
+    public void drawInputGizmo(GL4 gl, InputGizmo gizmo)
+    {
+        inputGizmoRenderer.draw(gl, gizmo);
     }
 }

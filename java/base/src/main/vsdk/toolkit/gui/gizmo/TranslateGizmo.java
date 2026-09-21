@@ -76,6 +76,7 @@ public class TranslateGizmo extends Gizmo {
     private double lineWidth;
 
     /// Interaction state
+    private final InputGizmo inputGizmo;
     private int persistentSelection;
     private int volatileSelection;
 
@@ -87,6 +88,13 @@ public class TranslateGizmo extends Gizmo {
         baseApparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         apparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         lineWidth = DEFAULT_LINE_WIDTH;
+        inputGizmo = new InputGizmo(3);
+
+        ReferenceFrameGizmo axisColors = new ReferenceFrameGizmo();
+
+        for ( int axis = 0; axis < 3; axis++ ) {
+            inputGizmo.setFieldColor(axis, axisColors.getAxisColor(axis));
+        }
         persistentSelection = X_AXIS_GROUP;
         volatileSelection = NULL_GROUP;
 
@@ -892,6 +900,50 @@ public class TranslateGizmo extends Gizmo {
             return persistentSelection;
         }
         return volatileSelection;
+    }
+
+    /**
+    @return the input gizmo that shows (and lets the user type) the
+    coordinates of this gizmo, updated with its current position and highlighted
+    axes
+    */
+    public InputGizmo getInputGizmo()
+    {
+        if ( T != null ) {
+            Vector3Dd position = getPosition();
+
+            inputGizmo.setValue(0, position.x());
+            inputGizmo.setValue(1, position.y());
+            inputGizmo.setValue(2, position.z());
+        }
+        for ( int axis = 0; axis < 3; axis++ ) {
+            inputGizmo.setFieldHighlighted(axis, isAxisHighlighted(axis));
+        }
+        return inputGizmo;
+    }
+
+    /**
+    @param axis 0, 1 or 2 for the X, Y or Z axis
+    @return true if the axis is highlighted (drawn yellow) because the group
+    currently selected moves along it: the axis itself, or a plane that
+    contains it
+    */
+    public boolean isAxisHighlighted(int axis)
+    {
+        int currentSelection = getCurrentSelection();
+
+        return switch ( axis ) {
+            case 0 -> currentSelection == X_AXIS_GROUP ||
+                currentSelection == XY_PLANE_GROUP ||
+                currentSelection == XZ_PLANE_GROUP;
+            case 1 -> currentSelection == Y_AXIS_GROUP ||
+                currentSelection == XY_PLANE_GROUP ||
+                currentSelection == YZ_PLANE_GROUP;
+            case 2 -> currentSelection == Z_AXIS_GROUP ||
+                currentSelection == YZ_PLANE_GROUP ||
+                currentSelection == XZ_PLANE_GROUP;
+            default -> false;
+        };
     }
 
     /**

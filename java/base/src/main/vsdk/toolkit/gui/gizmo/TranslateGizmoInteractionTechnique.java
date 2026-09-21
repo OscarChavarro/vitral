@@ -29,6 +29,12 @@ around) so the movement is continuous, and, if cursor wrapping is enabled,
 requests to place the cursor at the opposite side of the viewport (see
 `consumeCursorWarp`). Cursors are placed by the caller, as this technique knows
 nothing about the GUI technology in use.
+
+Numeric input: the technique also feeds the keyboard to the `InputGizmo` of the
+gizmo, that shows (and lets the user type) its coordinates. Typing a
+number and pressing ENTER moves the gizmo (so the caller, that applies its
+movement to the things it manipulates, moves them precisely there); moving the
+gizmo any other way discards what was typed.
 */
 public class TranslateGizmoInteractionTechnique {
     private static final double KEY_MOVEMENT_STEP = 0.1;
@@ -99,6 +105,17 @@ public class TranslateGizmoInteractionTechnique {
     }
 
     /**
+    @param keyEvent key press
+    @return true if the input gizmo uses the key (digits, `-`, decimal point,
+    TAB, BACKSPACE, and ENTER and ESC while editing), so the caller must
+    not process it as any other command
+    */
+    public boolean isInputGizmoKey(KeyEvent keyEvent)
+    {
+        return gizmo.getInputGizmo().consumesKey(keyEvent);
+    }
+
+    /**
     @return true if the last cursor position was over an axis or plane handle
     of the gizmo
     */
@@ -161,8 +178,26 @@ public class TranslateGizmoInteractionTechnique {
         gizmo.setSelectedResizing(true);
         gizmo.updateGeometryState();
 
+        InputGizmo inputGizmo = gizmo.getInputGizmo();
+
+        if ( inputGizmo.processKeyPressedEvent(keyEvent) ) {
+            if ( inputGizmo.consumeCommit() ) {
+                double[] target = inputGizmo.getValuesWithEdits();
+
+                inputGizmo.cancelEditing();
+                gizmo.setPosition(new Vector3Dd(target[0], target[1], target[2]));
+                return true;
+            }
+            return false;
+        }
+
         if ( keyEvent.unicode_id != KeyEvent.KEY_NONE ) {
             Vector3Dd p = gizmo.getPosition();
+            boolean isMovementKey = "xXyYzZ".indexOf(keyEvent.unicode_id) >= 0;
+
+            if ( isMovementKey ) {
+                gizmo.getInputGizmo().cancelEditing();
+            }
 
             switch ( keyEvent.unicode_id ) {
               case 'x':
@@ -306,6 +341,7 @@ public class TranslateGizmoInteractionTechnique {
             return false;
         }
 
+        gizmo.getInputGizmo().cancelEditing();
         gizmo.setPosition(p.subtract(lastDeltaPosition));
         gizmo.setSelectedResizing(false);
         return true;

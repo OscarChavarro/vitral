@@ -7,6 +7,7 @@ import vsdk.toolkit.gui.CameraControllerAquynza;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
@@ -116,6 +117,24 @@ public class ViewportInteractionTechniques
     public boolean processQualityKeyPressedEvent(KeyEvent event)
     {
         return qualityController.processKeyPressedEvent(event);
+    }
+
+    /**
+    @return the input gizmo that shows and edits the coordinates of the
+    translation gizmo
+    */
+    public InputGizmo getTranslationInputGizmo()
+    {
+        return translationGizmo.getInputGizmo();
+    }
+
+    /**
+    @param event key press
+    @return true if the input gizmo of the translation gizmo uses the key
+    */
+    public boolean isTranslationInputGizmoKey(KeyEvent event)
+    {
+        return translationTechnique.isInputGizmoKey(event);
     }
 
     public boolean processTranslationKeyPressedEvent(KeyEvent event)

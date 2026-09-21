@@ -505,4 +505,163 @@ class TranslateGizmoInteractionTechniqueTest
         // Assert
         assertThat(changed).isTrue();
     }
+
+    private static KeyEvent keyCode(int keycode)
+    {
+        KeyEvent event = new KeyEvent();
+
+        event.keycode = keycode;
+        return event;
+    }
+
+    @Test
+    void given_typedCoordinates_when_enterPressed_then_gizmoMovesExactlyThere()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        gizmo.setPosition(new Vector3Dd(1, 2, 3));
+
+        // Act
+        boolean typed = technique.processKeyPressedEvent(keyEvent('4'));
+        technique.processKeyPressedEvent(keyEvent('.'));
+        technique.processKeyPressedEvent(keyEvent('2'));
+        technique.processKeyPressedEvent(keyEvent('5'));
+        technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_TAB));
+        technique.processKeyPressedEvent(keyEvent('7'));
+        boolean moved = technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_ENTER));
+
+        // Assert
+        assertThat(typed).isFalse();
+        assertThat(moved).isTrue();
+        assertThat(gizmo.getPosition().x()).isCloseTo(4.25, offset(EPS));
+        assertThat(gizmo.getPosition().y()).isCloseTo(7.0, offset(EPS));
+        assertThat(gizmo.getPosition().z()).isCloseTo(3.0, offset(EPS));
+        assertThat(gizmo.getInputGizmo().isEditing()).isFalse();
+    }
+
+    @Test
+    void given_typedCoordinates_when_gizmoDragged_then_editionIsDiscarded()
+    {
+        // Arrange
+        Camera camera = createCamera();
+        TranslateGizmo gizmo = createGizmo(camera);
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        technique.processKeyPressedEvent(keyEvent('9'));
+        assertThat(gizmo.getInputGizmo().isEditing()).isTrue();
+
+        // Act
+        technique.processMousePressedEvent(mouseEventAt(camera, new Vector3Dd(0.5, 0, 0)));
+        technique.processMouseDraggedEvent(mouseEventAt(camera, new Vector3Dd(1.5, 0, 0)));
+
+        // Assert
+        assertThat(gizmo.getInputGizmo().isEditing()).isFalse();
+    }
+
+    @Test
+    void given_typedCoordinates_when_movementKeyPressed_then_editionIsDiscarded()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        technique.processKeyPressedEvent(keyEvent('9'));
+
+        // Act
+        technique.processKeyPressedEvent(keyEvent('X'));
+
+        // Assert
+        assertThat(gizmo.getInputGizmo().isEditing()).isFalse();
+        assertThat(gizmo.getPosition().x()).isCloseTo(0.1, offset(EPS));
+    }
+
+    @Test
+    void given_fieldKeys_when_asked_then_techniqueReportsThemAsConsumed()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        // Act & Assert
+        assertThat(technique.isInputGizmoKey(keyEvent('5'))).isTrue();
+        assertThat(technique.isInputGizmoKey(keyCode(KeyEvent.KEY_TAB))).isTrue();
+        assertThat(technique.isInputGizmoKey(keyEvent('x'))).isFalse();
+    }
+
+    @Test
+    void given_gizmoGroups_when_axisHighlightAsked_then_planesHighlightTheirTwoAxes()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+
+        // Act & Assert
+        gizmo.setPersistentSelection(TranslateGizmo.Y_AXIS_GROUP);
+        assertThat(gizmo.isAxisHighlighted(0)).isFalse();
+        assertThat(gizmo.isAxisHighlighted(1)).isTrue();
+        assertThat(gizmo.isAxisHighlighted(2)).isFalse();
+        gizmo.setPersistentSelection(TranslateGizmo.XZ_PLANE_GROUP);
+        assertThat(gizmo.isAxisHighlighted(0)).isTrue();
+        assertThat(gizmo.isAxisHighlighted(1)).isFalse();
+        assertThat(gizmo.isAxisHighlighted(2)).isTrue();
+    }
+
+    @Test
+    void given_gizmoWithoutTransformation_when_inputGizmoAsked_then_doesNotFail()
+    {
+        // Arrange
+        TranslateGizmo gizmo = new TranslateGizmo(createCamera());
+
+        // Act & Assert
+        assertThat(gizmo.getInputGizmo()).isNotNull();
+        assertThat(new TranslateGizmoInteractionTechnique(gizmo)
+            .isInputGizmoKey(keyEvent('5'))).isTrue();
+    }
+
+    @Test
+    void given_minusAndDigits_when_enterPressed_then_gizmoMovesToNegativeCoordinate()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        // Act
+        technique.processKeyPressedEvent(keyEvent('-'));
+        technique.processKeyPressedEvent(keyEvent('4'));
+        technique.processKeyPressedEvent(keyEvent('.'));
+        technique.processKeyPressedEvent(keyEvent('5'));
+        boolean moved = technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_ENTER));
+
+        // Assert
+        assertThat(moved).isTrue();
+        assertThat(gizmo.getPosition().x()).isCloseTo(-4.5, offset(EPS));
+    }
+
+    @Test
+    void given_selectedYField_when_arrowAndPageKeysPressed_then_gizmoMovesInY()
+    {
+        // Arrange
+        TranslateGizmo gizmo = createGizmo(createCamera());
+        TranslateGizmoInteractionTechnique technique =
+            new TranslateGizmoInteractionTechnique(gizmo);
+
+        technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_TAB));
+
+        // Act
+        boolean up = technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_UP));
+        technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_PAGEUP));
+        technique.processKeyPressedEvent(keyCode(KeyEvent.KEY_LEFT));
+
+        // Assert: 1 + 5 - 0.1
+        assertThat(up).isTrue();
+        assertThat(gizmo.getPosition().x()).isCloseTo(0.0, offset(EPS));
+        assertThat(gizmo.getPosition().y()).isCloseTo(5.9, offset(EPS));
+        assertThat(gizmo.getInputGizmo().isEditing()).isFalse();
+    }
 }

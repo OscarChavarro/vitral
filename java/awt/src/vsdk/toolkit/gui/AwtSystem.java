@@ -131,6 +131,9 @@ public class AwtSystem extends PresentationElement
           case java.awt.event.KeyEvent.VK_BACK_SPACE:
             evsdk.keycode = KeyEvent.KEY_BACKSPACE;
             break;
+          case java.awt.event.KeyEvent.VK_TAB:
+            evsdk.keycode = KeyEvent.KEY_TAB;
+            break;
           case java.awt.event.KeyEvent.VK_DELETE:
             evsdk.keycode = KeyEvent.KEY_DELETE;
             break;
@@ -193,6 +196,12 @@ public class AwtSystem extends PresentationElement
                 break;
               case java.awt.event.KeyEvent.VK_RIGHT:
                 evsdk.keycode = KeyEvent.KEY_RIGHT;
+                break;
+              case java.awt.event.KeyEvent.VK_PAGE_UP:
+                evsdk.keycode = KeyEvent.KEY_PAGEUP;
+                break;
+              case java.awt.event.KeyEvent.VK_PAGE_DOWN:
+                evsdk.keycode = KeyEvent.KEY_PAGEDOWN;
                 break;
               case java.awt.event.KeyEvent.VK_ALT:
                 evsdk.keycode = KeyEvent.KEY_LALT;

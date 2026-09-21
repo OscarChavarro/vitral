@@ -150,6 +150,9 @@ class VitralEditorMCPProtocol implements Runnable
         if ( "gui.mouse".equals(tool) ) {
             return injectMouse(request);
         }
+        if ( "gui.key".equals(tool) ) {
+            return injectKey(request);
+        }
         if ( "viewport.project".equals(tool) ) {
             return projectSelectedBody(request);
         }
@@ -356,6 +359,16 @@ class VitralEditorMCPProtocol implements Runnable
         int button = (int)numberProperty(request, "button", 1);
 
         drawingArea.injectMouseEvent(type, x, y, button);
+        return describeScene();
+    }
+
+    private String injectKey(String request)
+    {
+        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        String key = stringProperty(request, "key", "");
+        boolean shift = Boolean.TRUE.equals(booleanProperty(request, "shift"));
+
+        drawingArea.injectKeyEvent(key, shift);
         return describeScene();
     }
 
@@ -577,6 +590,7 @@ class VitralEditorMCPProtocol implements Runnable
             + "," + tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
             + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
             + "," + tool("gui.mouse", "Inject a mouse event into the canvas. Arguments: type (move|press|drag|release), x, y (canvas pixels), button (default 1). Returns the scene state.")
+            + "," + tool("gui.key", "Inject a key press into the canvas. Arguments: key (a single character, or tab|enter|backspace|escape|left|right|up|down|pageup|pagedown), shift (default false). Returns the scene state.")
             + "," + tool("viewport.project", "Canvas pixels of the selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
             + "," + tool("render.get_configuration", "Return the RendererConfiguration flags of the viewports. Arguments: viewport (index; default all).")
             + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners, and shading (nolight|flat|gouraud|phong|cook_terrance).")

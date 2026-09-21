@@ -61,6 +61,9 @@ public class AwtDrawingAreaController implements
             }
         });
 
+        // TAB is a command of the drawing area (it cycles the boxes of the input gizmo of
+        // the translation gizmo), not a request to move the focus
+        canvas.setFocusTraversalKeysEnabled(false);
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
@@ -105,6 +108,66 @@ public class AwtDrawingAreaController implements
             type.equals("move") ? MouseEvent.NOBUTTON : button);
 
         canvas.dispatchEvent(event);
+    }
+
+    /**
+    Delivers a synthetic key press to this controller, as if it came from the
+    user's keyboard (whatever component has the focus). Intended for automated agents (see `VitralEditorMCP`).
+    Must be called from the event dispatch thread.
+    @param key a single character (i.e. "5", "x") or one of the names "tab",
+    "enter", "backspace", "escape", "left", "right", "up", "down", "pageup",
+    "pagedown"
+    @param shift true to press it with the SHIFT key down
+    */
+    public void injectKeyEvent(String key, boolean shift)
+    {
+        int keyCode;
+        char keyChar;
+
+        switch ( key ) {
+            case "tab" -> {
+                keyCode = KeyEvent.VK_TAB;
+                keyChar = '\t';
+            }
+            case "enter" -> {
+                keyCode = KeyEvent.VK_ENTER;
+                keyChar = '\n';
+            }
+            case "backspace" -> {
+                keyCode = KeyEvent.VK_BACK_SPACE;
+                keyChar = '\b';
+            }
+            case "escape" -> {
+                keyCode = KeyEvent.VK_ESCAPE;
+                keyChar = KeyEvent.CHAR_UNDEFINED;
+            }
+            case "left", "right", "up", "down", "pageup", "pagedown" -> {
+                keyCode = switch ( key ) {
+                    case "left" -> KeyEvent.VK_LEFT;
+                    case "right" -> KeyEvent.VK_RIGHT;
+                    case "up" -> KeyEvent.VK_UP;
+                    case "down" -> KeyEvent.VK_DOWN;
+                    case "pageup" -> KeyEvent.VK_PAGE_UP;
+                    default -> KeyEvent.VK_PAGE_DOWN;
+                };
+                keyChar = KeyEvent.CHAR_UNDEFINED;
+            }
+            default -> {
+                if ( key.length() != 1 ) {
+                    throw new IllegalArgumentException("Unknown key \"" + key +
+                        "\". Use a single character, tab, enter, backspace, escape, left, right, up, down, pageup or pagedown");
+                }
+                keyChar = key.charAt(0);
+                keyCode = KeyEvent.getExtendedKeyCodeForChar(keyChar);
+            }
+        }
+        KeyEvent event = new KeyEvent(canvas, KeyEvent.KEY_PRESSED,
+            System.currentTimeMillis(), shift ? KeyEvent.SHIFT_DOWN_MASK : 0,
+            keyCode, keyChar);
+
+        // Delivered directly: through the canvas, the AWT focus manager would
+        // send it to the component that has the focus, if it is not the canvas
+        keyPressed(event);
     }
 
     /**

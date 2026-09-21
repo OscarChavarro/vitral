@@ -36,7 +36,10 @@ Mouse events must have coordinates in canvas pixels (see `DrawingArea`).
 
 Keyboard commands: `c`, `q`, `w`, `e`, `r` select the camera, selection,
 translation, rotation and scale modes; `LEFT` / `RIGHT` select things
-sequentially; `=` / `-` change the size of the translation gizmo; `DELETE`
+sequentially; `=` / `-` change the size of the translation gizmo (in
+translation mode with a selection `-` belongs to the input gizmo); in
+translation mode, digits, `-`, `.`, `TAB` and `BACKSPACE` (and `ENTER`, `ESC`
+while editing) edit the numeric boxes of the gizmo (see `InputGizmo`); `DELETE`
 removes the selected things; `F10` requests a raytraced image; `T` / `B`
 toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
@@ -314,6 +317,8 @@ public class DrawingAreaInteractionTechniques
                 selectionEditor.computeSelectionCentroid() != null;
 
             if ( !gizmoGrabbed ) {
+                // Numbers typed belong to the previous selection
+                interactionTechniques.getTranslationInputGizmo().cancelEditing();
                 model.setVisualDebugRay(scene.selectObjectWithMouse(
                     viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
             }
@@ -461,6 +466,12 @@ public class DrawingAreaInteractionTechniques
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
+        if ( mode == InteractionMode.TRANSLATE &&
+             processInputGizmoKeyPressedEvent(event) ) {
+            listener.repaintRequested();
+            return;
+        }
+
         if ( mode == InteractionMode.CAMERA &&
              interactionTechniques.processCameraKeyPressedEvent(event) ) {
         }
@@ -480,6 +491,32 @@ public class DrawingAreaInteractionTechniques
     }
 
     /**
+    Lets the input gizmo of the translation gizmo use a key. If the user
+    accepts what was typed, the selection is moved so the gizmo is exactly
+    where the numbers say.
+    @return true if the input gizmo used the key, so it must not be processed as any
+    other command
+    */
+    private boolean processInputGizmoKeyPressedEvent(KeyEvent event)
+    {
+        Vector3Dd centroid = selectionEditor.computeSelectionCentroid();
+
+        if ( centroid == null ) {
+            return false;
+        }
+        translationGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
+        if ( !interactionTechniques.isTranslationInputGizmoKey(event) ) {
+            return false;
+        }
+        if ( interactionTechniques.processTranslationKeyPressedEvent(event) ) {
+            selectionEditor.applyTranslationToSelectedObjects(centroid,
+                translationGizmo.getPosition());
+        }
+        return true;
+    }
+
+    /**
     Keys with a meaning that depends on the interaction mode.
     */
     private void processModeKeyPressedEvent(InteractionMode mode, KeyEvent event)
@@ -490,10 +527,12 @@ public class DrawingAreaInteractionTechniques
           case SELECT:
             if ( event.unicode_id == KeyEvent.KEY_NONE ) {
                 if ( event.keycode == KeyEvent.KEY_LEFT ) {
+                    interactionTechniques.getTranslationInputGizmo().cancelEditing();
                     selectionEditor.selectPrevious();
                     reportObjectSelection();
                 }
                 else if ( event.keycode == KeyEvent.KEY_RIGHT ) {
+                    interactionTechniques.getTranslationInputGizmo().cancelEditing();
                     selectionEditor.selectNext();
                     reportObjectSelection();
                 }
@@ -569,6 +608,7 @@ public class DrawingAreaInteractionTechniques
             translationGizmo.setBaseApparentSizeInPixels(apparentSize);
             break;
           case KeyEvent.KEY_DELETE:
+            interactionTechniques.getTranslationInputGizmo().cancelEditing();
             selectionEditor.deleteSelected();
             break;
           case KeyEvent.KEY_F10:
@@ -647,6 +687,7 @@ public class DrawingAreaInteractionTechniques
     private void switchMode(InteractionMode mode, String message)
     {
         listener.statusMessageRequested(message);
+        interactionTechniques.getTranslationInputGizmo().cancelEditing();
         drawingArea.switchInteractionMode(mode);
     }
 

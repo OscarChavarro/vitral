@@ -48,6 +48,7 @@ For tool calls, send:
 - `scene.move_body`: sets the position of a body (default: the last one); missing coordinates are kept. Arguments: `index`, `x`, `y`, `z`.
 - `scene.select_body`: selects one body (a negative `index` clears the selection). Arguments: `index`.
 - `gui.set_mode`: sets the interaction mode. Arguments: `mode` (`camera`, `select`, `translate`, `rotate` or `scale`).
+- `gui.key`: injects a key press into the canvas. Arguments: `key` (a single character, or `tab`, `enter`, `backspace`, `escape`, `left`, `right`, `up`, `down`, `pageup`, `pagedown`) and `shift` (default false).
 - `render.get_configuration`: returns the `RendererConfiguration` flags of the viewports. Arguments: `viewport` (index; default all).
 - `render.set_configuration`: sets the `RendererConfiguration` flags bit by bit. Arguments: `viewport` (index; default all) and any of the booleans `points`, `wires`, `surfaces`, `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`, `selectionCorners`, and `shading` (`nolight`, `flat`, `gouraud`, `phong`, `cook_terrance`).
 - `render.raytrace_png`: raytraces the current scene and exports a PNG. Arguments: `path`, `width`, `height`.

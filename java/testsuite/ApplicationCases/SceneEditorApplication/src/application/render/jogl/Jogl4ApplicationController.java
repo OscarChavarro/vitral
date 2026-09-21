@@ -173,6 +173,17 @@ public class Jogl4ApplicationController
     }
 
     /**
+    Delivers a synthetic key press to the canvas (see
+    `AwtDrawingAreaController.injectKeyEvent`).
+    @param key a single character or a key name (see `AwtDrawingAreaController.injectKeyEvent`)
+    @param shift true to press it with the SHIFT key down
+    */
+    public void injectKeyEvent(String key, boolean shift)
+    {
+        awtController.injectKeyEvent(key, shift);
+    }
+
+    /**
     Projects a point of the scene to canvas (AWT) pixel coordinates.
     @param viewport viewport whose camera is used
     @param point point in world coordinates

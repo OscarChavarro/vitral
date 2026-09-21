@@ -190,6 +190,10 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         view.drawReferenceBase(gl);
         if ( translationGizmoDrawn ) {
             view.drawLabelsForTranslateGizmo(gl, translationGizmo);
+            // Only the selected viewport shows them: it is the one that receives the keyboard
+            if ( view.isSelected() ) {
+                view.drawInputGizmo(gl, translationGizmo.getInputGizmo());
+            }
         }
     }
 
