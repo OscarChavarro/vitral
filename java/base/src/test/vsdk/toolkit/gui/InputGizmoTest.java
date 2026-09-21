@@ -63,6 +63,90 @@ class InputGizmoTest
     }
 
     @Test
+    void given_twoDecimals_when_displayed_then_showsValuesWithTwoDecimals()
+    {
+        // Arrange
+        InputGizmo gizmo = new InputGizmo(3, 2, 3);
+
+        gizmo.setValue(0, 45.678);
+        gizmo.setValue(1, -179.999);
+        gizmo.setValue(2, -0.004);
+
+        // Act & Assert
+        assertThat(gizmo.getDecimals()).isEqualTo(2);
+        assertThat(gizmo.getDisplayText(0)).isEqualTo("45.68");
+        assertThat(gizmo.getDisplayText(1)).isEqualTo("-180.00");
+        assertThat(gizmo.getDisplayText(2)).isEqualTo("0.00");
+        assertThat(InputGizmo.format(-0.004, 2)).isEqualTo("0.00");
+        assertThat(InputGizmo.format(-0.006, 2)).isEqualTo("-0.01");
+    }
+
+    @Test
+    void given_gizmoWidth_when_referenceTextAsked_then_hasTheDigitsOfItsBoxes()
+    {
+        // Act & Assert
+        assertThat(new InputGizmo(3).getReferenceText()).isEqualTo("-0.000");
+        assertThat(new InputGizmo(3, 2, 3).getReferenceText()).isEqualTo("-000.00");
+        assertThat(new InputGizmo(1, 0, 2).getReferenceText()).isEqualTo("-00");
+    }
+
+    @Test
+    void given_twoDecimalsGizmo_when_typingMoreDecimals_then_areNotAccepted()
+    {
+        // Arrange
+        InputGizmo gizmo = new InputGizmo(2, 2, 3);
+
+        // Act
+        type(gizmo, "12.3456");
+
+        // Assert
+        assertThat(gizmo.getEditText(0)).isEqualTo("12.34");
+        assertThat(gizmo.getValuesWithEdits()[0]).isCloseTo(12.34, offset(EPS));
+    }
+
+    @Test
+    void given_twoDecimalsGizmo_when_typingNegativeNumberAndInteger_then_areAccepted()
+    {
+        // Arrange
+        InputGizmo gizmo = new InputGizmo(2, 2, 3);
+
+        // Act
+        type(gizmo, "-170");
+        gizmo.selectNextField();
+        type(gizmo, ".5");
+
+        // Assert
+        assertThat(gizmo.getEditText(0)).isEqualTo("-170");
+        assertThat(gizmo.getEditText(1)).isEqualTo("0.5");
+    }
+
+    @Test
+    void given_noDecimalsGizmo_when_typingPoint_then_isNotAccepted()
+    {
+        // Arrange
+        InputGizmo gizmo = new InputGizmo(1, 0, 3);
+
+        // Act
+        type(gizmo, "12.5");
+
+        // Assert
+        assertThat(gizmo.getEditText(0)).isEqualTo("125");
+    }
+
+    @Test
+    void given_defaultGizmo_when_typingManyDecimals_then_keepsAcceptingThem()
+    {
+        // Arrange
+        InputGizmo gizmo = new InputGizmo(3);
+
+        // Act
+        type(gizmo, "1.23456");
+
+        // Assert
+        assertThat(gizmo.getEditText(0)).isEqualTo("1.23456");
+    }
+
+    @Test
     void given_highlight_when_colorAsked_then_highlightedFieldsAreYellow()
     {
         // Arrange

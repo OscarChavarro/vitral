@@ -22,6 +22,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
+import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
@@ -55,6 +56,8 @@ public class Jogl4ViewportWindow
     // of its arrows
     private static final int BASE_TRANSLATE_GIZMO_LABEL_OFFSET_X = -3;
     private static final int BASE_TRANSLATE_GIZMO_LABEL_OFFSET_Y = 12;
+    // Text of the angle of the arc of the rotate gizmo
+    private static final int BASE_ROTATE_GIZMO_ARC_LABEL_FONT_SIZE = 16;
 
     private final ViewportSet viewportSet;
     private final Viewport viewport;
@@ -74,6 +77,12 @@ public class Jogl4ViewportWindow
     private RGBAImageUncompressed[] translateGizmoLabelImages;
     private RGBAImageUncompressed[] translateGizmoSelectedLabelImages;
     private int translateGizmoLabelFontSize;
+    // Label with the angle of the rotation arc of the rotate gizmo, that
+    // changes as the arc does: it is created again when its text changes
+    private RGBAImageUncompressed rotateGizmoArcLabelImage;
+    private String rotateGizmoArcLabelText;
+    private ColorRgb rotateGizmoArcLabelColor;
+    private int rotateGizmoArcLabelFontSize;
     private final Jogl4InputGizmoRenderer inputGizmoRenderer;
 
     // Each Jogl4ViewportWindow can call a different visualization algorithm
@@ -453,6 +462,9 @@ public class Jogl4ViewportWindow
                 Jogl4ImageRenderer.unload(gl, translateGizmoSelectedLabelImages[axis]);
             }
         }
+        if ( rotateGizmoArcLabelImage != null ) {
+            Jogl4ImageRenderer.unload(gl, rotateGizmoArcLabelImage);
+        }
     }
 
     /**
@@ -555,6 +567,50 @@ public class Jogl4ViewportWindow
                         yellow ? translateGizmoSelectedLabelImages[i] : translateGizmoLabelImages[i]);
                 }
             }
+        }
+    }
+
+    /**
+    Draws the label with the angle, in degrees, of the rotation arc of a
+    rotate gizmo (if it is showing one), next to the middle of the arc and
+    with its color.
+    @param gl OpenGL context
+    @param gizmo the gizmo
+    */
+    public void drawLabelForRotateGizmoArc(GL4 gl, RotateGizmo gizmo)
+    {
+        Vector3Dd anchor = gizmo.getArcLabelPosition();
+
+        if ( anchor == null ) {
+            if ( rotateGizmoArcLabelImage != null ) {
+                discardedLabelImages.add(rotateGizmoArcLabelImage);
+                rotateGizmoArcLabelImage = null;
+                rotateGizmoArcLabelText = null;
+            }
+            return;
+        }
+
+        Vector3Dd projected = viewport.getActiveCamera().projectPointUsingRayMethod(anchor);
+        int fontSize = viewportSet.getElementScaler().scaleSize(BASE_ROTATE_GIZMO_ARC_LABEL_FONT_SIZE);
+        String text = InputGizmo.format(gizmo.getArcSweepInDegrees(), RotateGizmo.ANGLE_DECIMALS) + "\u00b0";
+        ColorRgb color = gizmo.getArcColor();
+
+        if ( rotateGizmoArcLabelImage == null || fontSize != rotateGizmoArcLabelFontSize ||
+             !text.equals(rotateGizmoArcLabelText) || !color.equals(rotateGizmoArcLabelColor) ) {
+            if ( rotateGizmoArcLabelImage != null ) {
+                discardedLabelImages.add(rotateGizmoArcLabelImage);
+            }
+            rotateGizmoArcLabelImage = labelImageProvider.createLabelImage(text, color, fontSize);
+            rotateGizmoArcLabelText = text;
+            rotateGizmoArcLabelColor = color;
+            rotateGizmoArcLabelFontSize = fontSize;
+        }
+        if ( projected != null ) {
+            // Centered at the projected point
+            drawTextureString2D(gl,
+                (int)projected.x() - rotateGizmoArcLabelImage.getXSize() / 2,
+                (int)projected.y() + rotateGizmoArcLabelImage.getYSize() / 2,
+                rotateGizmoArcLabelImage);
         }
     }
 

@@ -9,6 +9,7 @@ import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
+import vsdk.toolkit.gui.gizmo.RotateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
@@ -21,6 +22,7 @@ public class ViewportInteractionTechniques
     private final TranslateGizmo translationGizmo;
     private final TranslateGizmoInteractionTechnique translationTechnique;
     private final RotateGizmo rotateGizmo;
+    private final RotateGizmoInteractionTechnique rotationTechnique;
     private final ScaleGizmo scaleGizmo;
 
     public ViewportInteractionTechniques(Camera camera,
@@ -30,7 +32,8 @@ public class ViewportInteractionTechniques
         qualityController = new RendererConfigurationController(rendererConfiguration);
         translationGizmo = new TranslateGizmo(camera);
         translationTechnique = new TranslateGizmoInteractionTechnique(translationGizmo);
-        rotateGizmo = new RotateGizmo();
+        rotateGizmo = new RotateGizmo(camera);
+        rotationTechnique = new RotateGizmoInteractionTechnique(rotateGizmo);
         scaleGizmo = new ScaleGizmo();
     }
 
@@ -57,6 +60,11 @@ public class ViewportInteractionTechniques
     public RotateGizmo getRotateGizmo()
     {
         return rotateGizmo;
+    }
+
+    public RotateGizmoInteractionTechnique getRotationTechnique()
+    {
+        return rotationTechnique;
     }
 
     public ScaleGizmo getScaleGizmo()
@@ -205,9 +213,74 @@ public class ViewportInteractionTechniques
         return translationTechnique.processMouseDraggedEvent(event);
     }
 
+    /**
+    @return the input gizmo that shows and edits the angles of the rotation
+    gizmo
+    */
+    public InputGizmo getRotationInputGizmo()
+    {
+        return rotateGizmo.getInputGizmo();
+    }
+
+    /**
+    @param event key press
+    @return true if the input gizmo of the rotation gizmo uses the key
+    */
+    public boolean isRotationInputGizmoKey(KeyEvent event)
+    {
+        return rotationTechnique.isInputGizmoKey(event);
+    }
+
     public boolean processRotateKeyPressedEvent(KeyEvent event)
     {
-        return rotateGizmo.processKeyPressedEvent(event);
+        return rotationTechnique.processKeyPressedEvent(event);
+    }
+
+    public boolean processRotationMousePressedEvent(MouseEvent event)
+    {
+        return rotationTechnique.processMousePressedEvent(event);
+    }
+
+    /**
+    Processes the press of a mouse button over a viewport, starting a rotation
+    gesture confined to it if the pointer is over a ring (see
+    `getRotationDragViewport`).
+    @param event event with coordinates relative to the viewport
+    @param viewport viewport where the button was pressed
+    @return false (a press never changes the gizmo)
+    */
+    public boolean processRotationMousePressedEvent(MouseEvent event, Viewport viewport)
+    {
+        return rotationTechnique.processMousePressedEvent(event, viewport);
+    }
+
+    /**
+    @return the viewport where the rotation gesture in course started, or null
+    if there is none
+    */
+    public Viewport getRotationDragViewport()
+    {
+        return rotationTechnique.getDragViewport();
+    }
+
+    public boolean processRotationMouseReleasedEvent(MouseEvent event)
+    {
+        return rotationTechnique.processMouseReleasedEvent(event);
+    }
+
+    public boolean processRotationMouseDraggedEvent(MouseEvent event)
+    {
+        return rotationTechnique.processMouseDraggedEvent(event);
+    }
+
+    public boolean processRotationMouseClickedEvent(MouseEvent event)
+    {
+        return rotationTechnique.processMouseClickedEvent(event);
+    }
+
+    public boolean processRotationMouseMovedEvent(MouseEvent event)
+    {
+        return rotationTechnique.processMouseMovedEvent(event);
     }
 
     public boolean processScaleKeyPressedEvent(KeyEvent event)

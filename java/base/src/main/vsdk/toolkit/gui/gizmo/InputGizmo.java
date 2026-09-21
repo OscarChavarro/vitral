@@ -12,8 +12,8 @@ Gizmo made of a row of numeric input boxes, designed to show (and let the user
 type) the numbers that describe the state of another gizmo, i.e. the
 coordinates of a `TranslateGizmo`, which uses it nested.
 
-Each box shows a value with `DECIMALS` digits, unless the user is editing it:
-then it shows the text typed. Exactly one box is selected, and TAB (SHIFT+TAB)
+Each box shows a value with `getDecimals()` digits (`DECIMALS` by default),
+unless the user is editing it: then it shows the text typed. Exactly one box is selected, and TAB (SHIFT+TAB)
 cycles the selection. Digits, the decimal point and BACKSPACE edit the
 selected box as an input: typing over a box that is not being edited replaces
 its value, and `-` starts a negative number, or changes the sign of the number
@@ -43,8 +43,10 @@ public class InputGizmo extends Gizmo {
 
     private static final int MAX_EDIT_LENGTH = 12;
     private static final ColorRgb DEFAULT_FIELD_COLOR = new ColorRgb(0, 0, 0);
-    private static final String NEGATIVE_ZERO = "-" + format(0.0);
 
+    private final int decimals;
+    private final int integerDigits;
+    private final boolean limitTypedDecimals;
     private final double[] values;
     private final ColorRgb[] colors;
     private final boolean[] highlighted;
@@ -53,12 +55,39 @@ public class InputGizmo extends Gizmo {
     private boolean commitPending;
 
     /**
+    Creates a gizmo that shows `DECIMALS` decimals, and lets the user type as
+    many as fit in a box.
     @param numberOfFields number of input boxes, at least 1
     */
     public InputGizmo(int numberOfFields)
     {
+        this(numberOfFields, DECIMALS, 1, false);
+    }
+
+    /**
+    Creates a gizmo whose boxes show, and accept typing, only the given number
+    of decimals (i.e. 2 for angles in degrees).
+    @param numberOfFields number of input boxes, at least 1
+    @param decimals number of digits shown after the decimal point (not
+    negative); the user can not type more
+    @param integerDigits number of digits before the decimal point the boxes
+    are wide enough for (at least 1); i.e. 3 for angles in degrees
+    */
+    public InputGizmo(int numberOfFields, int decimals, int integerDigits)
+    {
+        this(numberOfFields, decimals, integerDigits, true);
+    }
+
+    private InputGizmo(int numberOfFields,
+                       int decimals,
+                       int integerDigits,
+                       boolean limitTypedDecimals)
+    {
         int count = Math.max(1, numberOfFields);
 
+        this.decimals = Math.max(0, decimals);
+        this.integerDigits = Math.max(1, integerDigits);
+        this.limitTypedDecimals = limitTypedDecimals;
         values = new double[count];
         colors = new ColorRgb[count];
         highlighted = new boolean[count];
@@ -72,17 +101,45 @@ public class InputGizmo extends Gizmo {
 
     /**
     @param value number to show
-    @return the text shown for a value that is not being edited
+    @return the text shown, with `DECIMALS` decimals, for a value that is not
+    being edited
     */
     public static String format(double value)
     {
-        String text = String.format(Locale.ROOT, "%." + DECIMALS + "f", value);
+        return format(value, DECIMALS);
+    }
 
-        if ( text.equals(NEGATIVE_ZERO) ) {
+    /**
+    @param value number to show
+    @param decimals number of digits shown after the decimal point
+    @return the text shown for a value that is not being edited
+    */
+    public static String format(double value, int decimals)
+    {
+        String text = String.format(Locale.ROOT, "%." + decimals + "f", value);
+
+        if ( text.startsWith("-") && text.substring(1).matches("0*\\.?0*") ) {
             // A tiny negative value must not show as a "negative zero"
             return text.substring(1);
         }
         return text;
+    }
+
+    /**
+    @return the number of digits shown after the decimal point
+    */
+    public int getDecimals()
+    {
+        return decimals;
+    }
+
+    /**
+    @return the widest text a box is expected to show (i.e. `-0.000`), so
+    presenters can give every box the same width
+    */
+    public String getReferenceText()
+    {
+        return "-" + "0".repeat(integerDigits) + (decimals > 0 ? "." + "0".repeat(decimals) : "");
     }
 
     /**
@@ -225,7 +282,7 @@ public class InputGizmo extends Gizmo {
         if ( editTexts[field] != null ) {
             return editTexts[field];
         }
-        return format(values[field]);
+        return format(values[field], decimals);
     }
 
     /**
@@ -458,6 +515,13 @@ public class InputGizmo extends Gizmo {
         if ( text.length() >= MAX_EDIT_LENGTH ) {
             return;
         }
+        if ( limitTypedDecimals ) {
+            int point = text.indexOf('.');
+
+            if ( point >= 0 && text.length() - point - 1 >= decimals ) {
+                return;
+            }
+        }
         editTexts[selectedField] = text + character;
     }
 
@@ -468,7 +532,7 @@ public class InputGizmo extends Gizmo {
         if ( text == null ) {
             text = "";
         }
-        if ( text.indexOf('.') >= 0 ) {
+        if ( text.indexOf('.') >= 0 || (limitTypedDecimals && decimals == 0) ) {
             return;
         }
         if ( text.isEmpty() || text.equals("-") ) {

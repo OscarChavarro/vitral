@@ -4,12 +4,12 @@
 
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
+import java.util.Arrays;
 
 // VSDK classes
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.geometry.element.RayHit;
-import vsdk.toolkit.processing.SolverPolynomialQuarticBairstow;
 
 /**
 Current implementation is based on [WAGN2004].
@@ -19,6 +19,12 @@ public class Torus extends Solid
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     @Serial private static final long serialVersionUID = 20131024L;
     
+    /// The roots the quartic solver gives for a ray are accepted only if the
+    /// point they define is on the surface of the torus, within this distance
+    /// (relative to the major radius): verified roots have errors around 1e-11,
+    /// and spurious ones (the solver gives some) errors of the order of 0.1
+    private static final double ROOT_VALIDATION_TOLERANCE = 1.0e-6;
+
     private double majorRadius;
     private double minorRadius;
 
@@ -64,12 +70,27 @@ public class Torus extends Solid
         this.minorRadius = rMinor;
     }
 
+    /**
+    Intersects a ray with the torus, from the equation of [WAGN2004]. The
+    quartic equation is solved with the ray origin moved to the point of the
+    ray nearest to the center of the torus, so its coefficients stay small
+    however far the origin is; its real roots are found in a deterministic
+    way (see `findRealRoots`), as the iterative solver previously used gave
+    real roots that did not belong to the torus, and lost ones that did.
+    @param inOut_ray ray to intersect, in the coordinates of the torus
+    @return the ray with the distance to the nearest hit at its `t`, or null if
+    it does not hit the torus ahead of its origin
+    */
     public Ray doIntersectionFirstHit(Ray inOut_ray) 
     {
-        Vector3Dd p = inOut_ray.getOrigin();
+        Vector3Dd origin = inOut_ray.getOrigin();
 
         inOut_ray = inOut_ray.withDirection(inOut_ray.getDirection().normalized());
         Vector3Dd d = inOut_ray.getDirection();
+
+        // Distance from the original origin to the point nearest to the center
+        double shift = -origin.dotProduct(d);
+        Vector3Dd p = origin.add(d.multiply(shift));
 
         double alpha, beta, gama;
 
@@ -85,25 +106,18 @@ public class Torus extends Solid
         a1 = 2 * beta * gama + 8 * (majorRadius * majorRadius) * p.z() * d.z();
         a0 = (gama * gama) + 4 * (majorRadius * majorRadius) * (p.z() * p.z()) - (4 * (majorRadius * majorRadius) * (minorRadius * minorRadius));
 
-        //System.out.println(inOut_ray);
-        //System.out.println("minorRadius: "+minorRadius+" majorRadius: "+majorRadius);
-        //System.out.println("a4: "+a4+" a3: "+a3+" a2: "+a2+" a1: "+a1+" a0: "+a0);
-        SolverPolynomialQuarticBairstow q;
-
-        q = new SolverPolynomialQuarticBairstow(a4, a3, a2, a1, a0);
-
-        double root[] = q.getReal();
-        double rootImg[] = q.getImg();
+        double[] roots = findRealRoots(new double[] {a0, a1, a2, a3, a4});
         double mRoot = 0;
         int count = 0;
 
-        for (int i = 0; i < 4; i++) {
-            if (rootImg[i] == 0 && root[i] > 0) {
-                if (count == 0) {
-                    mRoot = root[i];
+        for ( double root : roots ) {
+            // Distance along the ray that was given
+            double t = shift + root;
+
+            if ( t > 0 && isOnSurface(origin, d, t) ) {
+                if ( count == 0 || t < mRoot ) {
+                    mRoot = t;
                     count++;
-                } else if (root[i] < mRoot) {
-                    mRoot = root[i];
                 }
             }
         }
@@ -112,8 +126,119 @@ public class Torus extends Solid
             return null;
         } 
         else {
-            return inOut_ray.withT(mRoot); //calculateRoot(a4, a3, a2,  a1, a0, inOut_ray);
+            return inOut_ray.withT(mRoot);
         }
+    }
+
+    /**
+    Finds the real roots of a polynomial, in ascending order, isolating them
+    with the roots of its derivative (that separate the intervals where the
+    polynomial is monotonic) and bisecting the intervals where it changes its
+    sign. Roots of even multiplicity (tangencies) are found only if they are
+    a root of the derivative too.
+    @param polynomial coefficients, in ascending order of the powers
+    @return the real roots
+    */
+    private static double[] findRealRoots(double[] polynomial)
+    {
+        int degree = polynomial.length - 1;
+
+        while ( degree > 0 && polynomial[degree] == 0.0 ) {
+            degree--;
+        }
+        if ( degree <= 0 ) {
+            return new double[0];
+        }
+        if ( degree == 1 ) {
+            return new double[] {-polynomial[0] / polynomial[1]};
+        }
+
+        double[] derivative = new double[degree];
+
+        for ( int k = 1; k <= degree; k++ ) {
+            derivative[k - 1] = k * polynomial[k];
+        }
+        double[] critical = findRealRoots(derivative);
+
+        // Cauchy bound: every root is inside it
+        double bound = 0;
+
+        for ( int k = 0; k < degree; k++ ) {
+            bound = Math.max(bound, Math.abs(polynomial[k] / polynomial[degree]));
+        }
+        bound += 1;
+
+        double[] limits = new double[critical.length + 2];
+
+        limits[0] = -bound;
+        for ( int k = 0; k < critical.length; k++ ) {
+            limits[k + 1] = Math.max(-bound, Math.min(bound, critical[k]));
+        }
+        limits[limits.length - 1] = bound;
+
+        double[] found = new double[degree];
+        int count = 0;
+
+        for ( int k = 0; k < limits.length - 1 && count < degree; k++ ) {
+            double low = limits[k];
+            double high = limits[k + 1];
+            double valueAtLow = evaluate(polynomial, degree, low);
+            double valueAtHigh = evaluate(polynomial, degree, high);
+
+            if ( valueAtLow == 0.0 ) {
+                if ( count == 0 || found[count - 1] != low ) {
+                    found[count++] = low;
+                }
+            }
+            else if ( valueAtHigh != 0.0 && (valueAtLow < 0.0) != (valueAtHigh < 0.0) ) {
+                for ( int iteration = 0; iteration < 200; iteration++ ) {
+                    double middle = 0.5 * (low + high);
+
+                    if ( middle <= low || middle >= high ) {
+                        break;
+                    }
+                    if ( (evaluate(polynomial, degree, middle) < 0.0) == (valueAtLow < 0.0) ) {
+                        low = middle;
+                    }
+                    else {
+                        high = middle;
+                    }
+                }
+                found[count++] = 0.5 * (low + high);
+            }
+        }
+        if ( count < degree && evaluate(polynomial, degree, bound) == 0.0 ) {
+            found[count++] = bound;
+        }
+        return Arrays.copyOf(found, count);
+    }
+
+    private static double evaluate(double[] polynomial, int degree, double x)
+    {
+        double value = 0;
+
+        for ( int k = degree; k >= 0; k-- ) {
+            value = value * x + polynomial[k];
+        }
+        return value;
+    }
+
+    /**
+    Checks a root of the intersection equation: the solver of the equation can
+    give real roots that do not correspond to any point of the torus.
+    @param origin origin of the ray
+    @param direction unit direction of the ray
+    @param t distance along the ray to check
+    @return true if the point of the ray at the distance is on the surface of
+    the torus
+    */
+    private boolean isOnSurface(Vector3Dd origin, Vector3Dd direction, double t)
+    {
+        Vector3Dd hit = origin.add(direction.multiply(t));
+        double distanceToCircle = Math.hypot(Math.hypot(hit.x(), hit.y()) - majorRadius, hit.z());
+        double tolerance = ROOT_VALIDATION_TOLERANCE * Math.max(majorRadius, minorRadius);
+
+        return Math.abs(distanceToCircle - minorRadius) <= tolerance;
     }
 
     @Override

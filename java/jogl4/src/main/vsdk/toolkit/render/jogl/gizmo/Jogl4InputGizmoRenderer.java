@@ -70,9 +70,6 @@ public class Jogl4InputGizmoRenderer
     private static final int BASE_UNDERLINE_DISTANCE = 2;
     private static final int BASE_UNDERLINE_THICKNESS = 2;
 
-    /// The frames have at least the width of a text with this length
-    private static final String REFERENCE_TEXT = "-0.000";
-
     private final Host host;
     private final ViewportSet viewportSet;
     private final Viewport viewport;
@@ -81,6 +78,7 @@ public class Jogl4InputGizmoRenderer
     private String[] imageTexts;
     private ColorRgb[] imageColors;
     private int imageFontSize;
+    private String referenceText;
     private int referenceTextWidth;
 
     /**
@@ -122,10 +120,13 @@ public class Jogl4InputGizmoRenderer
             imageTexts = new String[count];
             imageColors = new ColorRgb[count];
         }
-        if ( fontSize != imageFontSize || referenceTextWidth == 0 ) {
+        // The frames have at least the width of the reference text of the gizmo
+        if ( fontSize != imageFontSize || referenceTextWidth == 0 ||
+             !gizmo.getReferenceText().equals(referenceText) ) {
             // The reference image is only measured, it is never drawn
+            referenceText = gizmo.getReferenceText();
             referenceTextWidth = host.createLabelImage(
-                REFERENCE_TEXT, InputGizmo.HIGHLIGHT_COLOR, fontSize).getXSize();
+                referenceText, InputGizmo.HIGHLIGHT_COLOR, fontSize).getXSize();
         }
 
         //-----------------------------------------------------------------

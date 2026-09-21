@@ -65,6 +65,16 @@ public class SceneSelectionEditor
     }
 
     /**
+    @param body body the rotation gizmo is to be placed at
+    @return a matrix with the orientation and position of the body, for the
+    rotation gizmo
+    */
+    public static Matrix4x4d createRotationGizmoMatrix(SimpleBody body)
+    {
+        return new Matrix4x4d(body.getRotation()).withTranslation(body.getPosition());
+    }
+
+    /**
     Moves rigidly the group of selected things (bodies and lights), so that the group centroid
     goes from oldCentroid to newCentroid. Relative positions are preserved.
     @param oldCentroid centroid of the group before the movement

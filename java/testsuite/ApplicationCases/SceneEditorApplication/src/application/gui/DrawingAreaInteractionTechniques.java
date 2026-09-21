@@ -37,9 +37,12 @@ Mouse events must have coordinates in canvas pixels (see `DrawingArea`).
 Keyboard commands: `c`, `q`, `w`, `e`, `r` select the camera, selection,
 translation, rotation and scale modes; `LEFT` / `RIGHT` select things
 sequentially; `=` / `-` change the size of the translation gizmo (in
-translation mode with a selection `-` belongs to the input gizmo); in
-translation mode, digits, `-`, `.`, `TAB` and `BACKSPACE` (and `ENTER`, `ESC`
-while editing) edit the numeric boxes of the gizmo (see `InputGizmo`); `DELETE`
+translation and rotation modes with a selection `-` belongs to the input
+gizmo); in translation and rotation modes, digits, `-`, `.`, `TAB` and
+`BACKSPACE` (and `ENTER`, `ESC` while editing) edit the numeric boxes of the
+gizmo (see `InputGizmo`), that show coordinates or angles in degrees; in
+rotation mode the mouse highlights (hover) and chooses (click) the rings of
+the gizmo (see `RotateGizmoInteractionTechnique`); `DELETE`
 removes the selected things; `F10` requests a raytraced image; `T` / `B`
 toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
@@ -201,7 +204,7 @@ public class DrawingAreaInteractionTechniques
     */
     private Viewport getInteractionViewportAtPointer(MouseEvent event)
     {
-        Viewport dragViewport = interactionTechniques.getTranslationDragViewport();
+        Viewport dragViewport = getGestureViewport();
 
         if ( dragViewport != null ) {
             return dragViewport;
@@ -209,9 +212,23 @@ public class DrawingAreaInteractionTechniques
         return getViewportAtPointer(event);
     }
 
+    /**
+    @return the viewport of the gizmo gesture (drag of a translation handle or
+    of a rotation ring) in course, or null if there is none
+    */
+    private Viewport getGestureViewport()
+    {
+        Viewport dragViewport = interactionTechniques.getTranslationDragViewport();
+
+        if ( dragViewport != null ) {
+            return dragViewport;
+        }
+        return interactionTechniques.getRotationDragViewport();
+    }
+
     private boolean isTranslationGestureConfined()
     {
-        return interactionTechniques.getTranslationDragViewport() != null;
+        return getGestureViewport() != null;
     }
 
     private MouseEvent toViewportEvent(MouseEvent event, Viewport viewport)
@@ -260,6 +277,48 @@ public class DrawingAreaInteractionTechniques
             listener.repaintRequested();
         }
         return true;
+    }
+
+    /**
+    Places the rotation gizmo over the first selected body, seen from the
+    viewport, and lets the technique process the event.
+    @return false if there is no viewport or selected body to process the event
+    */
+    private boolean processRotationEvent(MouseEvent event,
+                                         Viewport viewport,
+                                         Predicate<MouseEvent> technique)
+    {
+        SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+        if ( viewport == null || body == null ) {
+            return false;
+        }
+        rotateGizmo.setCamera(viewport.getActiveCamera());
+        rotateGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body));
+        if ( technique.test(toViewportEvent(event, viewport)) ) {
+            listener.repaintRequested();
+        }
+        return true;
+    }
+
+    /**
+    Discards the numbers typed in the boxes of the gizmos, so they show the
+    real state of what the gizmos manipulate again.
+    */
+    private void cancelInputGizmoEditing()
+    {
+        interactionTechniques.getTranslationInputGizmo().cancelEditing();
+        interactionTechniques.getRotationInputGizmo().cancelEditing();
+    }
+
+    /**
+    Makes the first selected body take the orientation of the rotation gizmo.
+    @param body first selected body
+    */
+    private void applyRotationGizmoToBody(SimpleBody body)
+    {
+        body.setRotation(new Matrix4x4d(rotateGizmo.getTransformationMatrix()).withoutTranslation());
     }
 
     /**
@@ -328,9 +387,17 @@ public class DrawingAreaInteractionTechniques
                 interactionTechniques.getTranslationTechnique().isActive() &&
                 selectionEditor.computeSelectionCentroid() != null;
 
+            if ( mode == InteractionMode.ROTATE ) {
+                // The ring under the pointer is found again, as the press
+                // could come without a previous movement
+                gizmoGrabbed = processRotationEvent(event, mouseView,
+                    e -> interactionTechniques.processRotationMousePressedEvent(e, mouseView)) &&
+                    interactionTechniques.getRotationTechnique().isActive();
+            }
+
             if ( !gizmoGrabbed ) {
                 // Numbers typed belong to the previous selection
-                interactionTechniques.getTranslationInputGizmo().cancelEditing();
+                cancelInputGizmoEditing();
                 model.setVisualDebugRay(scene.selectObjectWithMouse(
                     viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
             }
@@ -385,6 +452,10 @@ public class DrawingAreaInteractionTechniques
             processTranslationEvent(event, mouseView, centroid,
                 interactionTechniques::processTranslationMouseReleasedEvent);
         }
+        else if ( mode == InteractionMode.ROTATE ) {
+            processRotationEvent(event, mouseView,
+                interactionTechniques::processRotationMouseReleasedEvent);
+        }
     }
 
     public void processMouseClickedEvent(MouseEvent event)
@@ -406,6 +477,10 @@ public class DrawingAreaInteractionTechniques
         else if ( mode == InteractionMode.TRANSLATE && centroid != null ) {
             processTranslationEvent(event, mouseView, centroid,
                 interactionTechniques::processTranslationMouseClickedEvent);
+        }
+        else if ( mode == InteractionMode.ROTATE ) {
+            processRotationEvent(event, mouseView,
+                interactionTechniques::processRotationMouseClickedEvent);
         }
     }
 
@@ -436,6 +511,10 @@ public class DrawingAreaInteractionTechniques
             processTranslationEvent(event, mouseView, centroid,
                 interactionTechniques::processTranslationMouseMovedEvent);
         }
+        else if ( mode == InteractionMode.ROTATE ) {
+            processRotationEvent(event, mouseView,
+                interactionTechniques::processRotationMouseMovedEvent);
+        }
     }
 
     public void processMouseDraggedEvent(MouseEvent event)
@@ -463,6 +542,19 @@ public class DrawingAreaInteractionTechniques
                 wrapCursorIfRequested(mouseView);
             }
         }
+        else if ( mode == InteractionMode.ROTATE ) {
+            SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+            // What the gizmo turns is oriented as the gizmo is
+            processRotationEvent(event, mouseView, e -> {
+                boolean changed = interactionTechniques.processRotationMouseDraggedEvent(e);
+
+                if ( changed && body != null ) {
+                    applyRotationGizmoToBody(body);
+                }
+                return changed;
+            });
+        }
     }
 
     /**
@@ -483,8 +575,8 @@ public class DrawingAreaInteractionTechniques
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
-        if ( mode == InteractionMode.TRANSLATE &&
-             processInputGizmoKeyPressedEvent(event) ) {
+        if ( (mode == InteractionMode.TRANSLATE || mode == InteractionMode.ROTATE) &&
+             processInputGizmoKeyPressedEvent(mode, event) ) {
             listener.repaintRequested();
             return;
         }
@@ -508,13 +600,51 @@ public class DrawingAreaInteractionTechniques
     }
 
     /**
-    Lets the input gizmo of the translation gizmo use a key. If the user
-    accepts what was typed, the selection is moved so the gizmo is exactly
-    where the numbers say.
+    Lets the input gizmo of the gizmo of the interaction mode use a key.
+    @param mode translation or rotation mode
+    @param event key press
     @return true if the input gizmo used the key, so it must not be processed as any
     other command
     */
-    private boolean processInputGizmoKeyPressedEvent(KeyEvent event)
+    private boolean processInputGizmoKeyPressedEvent(InteractionMode mode, KeyEvent event)
+    {
+        if ( mode == InteractionMode.ROTATE ) {
+            return processRotationInputGizmoKeyPressedEvent(event);
+        }
+        return processTranslationInputGizmoKeyPressedEvent(event);
+    }
+
+    /**
+    Lets the input gizmo of the rotation gizmo use a key. If the user accepts
+    what was typed, the first selected body takes the orientation the angles
+    say.
+    @return true if the input gizmo used the key
+    */
+    private boolean processRotationInputGizmoKeyPressedEvent(KeyEvent event)
+    {
+        SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+        if ( body == null ) {
+            return false;
+        }
+        rotateGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body));
+        if ( !interactionTechniques.isRotationInputGizmoKey(event) ) {
+            return false;
+        }
+        if ( interactionTechniques.processRotateKeyPressedEvent(event) ) {
+            applyRotationGizmoToBody(body);
+        }
+        return true;
+    }
+
+    /**
+    Lets the input gizmo of the translation gizmo use a key. If the user
+    accepts what was typed, the selection is moved so the gizmo is exactly
+    where the numbers say.
+    @return true if the input gizmo used the key
+    */
+    private boolean processTranslationInputGizmoKeyPressedEvent(KeyEvent event)
     {
         Vector3Dd centroid = selectionEditor.computeSelectionCentroid();
 
@@ -544,12 +674,12 @@ public class DrawingAreaInteractionTechniques
           case SELECT:
             if ( event.unicode_id == KeyEvent.KEY_NONE ) {
                 if ( event.keycode == KeyEvent.KEY_LEFT ) {
-                    interactionTechniques.getTranslationInputGizmo().cancelEditing();
+                    cancelInputGizmoEditing();
                     selectionEditor.selectPrevious();
                     reportObjectSelection();
                 }
                 else if ( event.keycode == KeyEvent.KEY_RIGHT ) {
-                    interactionTechniques.getTranslationInputGizmo().cancelEditing();
+                    cancelInputGizmoEditing();
                     selectionEditor.selectNext();
                     reportObjectSelection();
                 }
@@ -570,13 +700,10 @@ public class DrawingAreaInteractionTechniques
           case ROTATE:
             body = selectionEditor.getFirstSelectedBody();
             if ( body != null ) {
-                Matrix4x4d rotation = body.getRotation();
-
-                rotateGizmo.setTransformationMatrix(rotation);
+                rotateGizmo.setTransformationMatrix(
+                    SceneSelectionEditor.createRotationGizmoMatrix(body));
                 if ( interactionTechniques.processRotateKeyPressedEvent(event) ) {
-                    rotation = rotateGizmo.getTransformationMatrix();
-                    body.setRotation(rotation);
-                    body.setRotationInverse(new Matrix4x4d(rotation).invert());
+                    applyRotationGizmoToBody(body);
                 }
             }
             break;
@@ -625,7 +752,7 @@ public class DrawingAreaInteractionTechniques
             translationGizmo.setBaseApparentSizeInPixels(apparentSize);
             break;
           case KeyEvent.KEY_DELETE:
-            interactionTechniques.getTranslationInputGizmo().cancelEditing();
+            cancelInputGizmoEditing();
             selectionEditor.deleteSelected();
             break;
           case KeyEvent.KEY_F10:
@@ -704,7 +831,7 @@ public class DrawingAreaInteractionTechniques
     private void switchMode(InteractionMode mode, String message)
     {
         listener.statusMessageRequested(message);
-        interactionTechniques.getTranslationInputGizmo().cancelEditing();
+        cancelInputGizmoEditing();
         drawingArea.switchInteractionMode(mode);
     }
 

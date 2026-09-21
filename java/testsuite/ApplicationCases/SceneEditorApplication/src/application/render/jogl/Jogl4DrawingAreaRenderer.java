@@ -11,6 +11,7 @@ import com.jogamp.opengl.GLEventListener;
 // VSDK classes
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
@@ -52,6 +53,9 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     private final RotateGizmo rotateGizmo;
     private final ScaleGizmo scaleGizmo;
     private boolean translationGizmoDrawn;
+    private boolean rotationGizmoDrawn;
+    /// Input gizmo of the gizmo drawn, or null if it has none
+    private InputGizmo inputGizmoDrawn;
 
     private final Jogl4VisualRayDebugRenderer rayDebugRenderer;
     private final Jogl4FrameCaptureService frameCapture;
@@ -114,10 +118,14 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     {
         // Pending: Turn off scene light and turn on gizmo specific lighting
         translationGizmoDrawn = false;
+        rotationGizmoDrawn = false;
+        inputGizmoDrawn = null;
 
         translationGizmo.setCamera(theScene.activeCamera);
+        rotateGizmo.setCamera(theScene.activeCamera);
         // Size and line width follow the resolution of the screen
         translationGizmo.applyScale(viewportSet.getElementScaler());
+        rotateGizmo.applyScale(viewportSet.getElementScaler());
 
         gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 
@@ -133,13 +141,16 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
 
                 Jogl4TranslateGizmoRenderer.draw(gl, translationGizmo, theScene.activeCamera);
                 translationGizmoDrawn = true;
+                inputGizmoDrawn = translationGizmo.getInputGizmo();
             }
         }
         else if ( mode == InteractionMode.ROTATE ) {
             if ( selectedBody != null ) {
-                rotateGizmo.setTransformationMatrix(selectedBody.getRotation());
-                Jogl4RotateGizmoRenderer.draw(gl, rotateGizmo,
-                    selectedBody.getPosition(), theScene.activeCamera);
+                rotateGizmo.setTransformationMatrix(
+                    SceneSelectionEditor.createRotationGizmoMatrix(selectedBody));
+                Jogl4RotateGizmoRenderer.draw(gl, rotateGizmo, theScene.activeCamera);
+                rotationGizmoDrawn = true;
+                inputGizmoDrawn = rotateGizmo.getInputGizmo();
             }
         }
         else if ( mode == InteractionMode.SCALE && selectedBody != null ) {
@@ -190,10 +201,13 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         view.drawReferenceBase(gl);
         if ( translationGizmoDrawn ) {
             view.drawLabelsForTranslateGizmo(gl, translationGizmo);
-            // Only the selected viewport shows them: it is the one that receives the keyboard
-            if ( view.isSelected() ) {
-                view.drawInputGizmo(gl, translationGizmo.getInputGizmo());
-            }
+        }
+        if ( rotationGizmoDrawn ) {
+            view.drawLabelForRotateGizmoArc(gl, rotateGizmo);
+        }
+        // Only the selected viewport shows them: it is the one that receives the keyboard
+        if ( inputGizmoDrawn != null && view.isSelected() ) {
+            view.drawInputGizmo(gl, inputGizmoDrawn);
         }
     }
 
