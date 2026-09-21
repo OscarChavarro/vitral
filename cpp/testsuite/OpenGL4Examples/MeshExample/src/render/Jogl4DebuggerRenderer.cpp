@@ -16,7 +16,7 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4RayGizmoRenderer.h"
+#include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.h"
 #include "model/MeshModel.h"
 #include "render/Jogl4DebuggerRenderer.h"
 

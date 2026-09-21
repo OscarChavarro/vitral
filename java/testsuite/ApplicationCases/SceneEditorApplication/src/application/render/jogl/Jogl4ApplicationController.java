@@ -1,11 +1,11 @@
-package application;
+package application.render.jogl;
 
+import application.SceneEditorApplication;
 import java.awt.Component;
 
 import javax.swing.JLabel;
 
 import application.model.ApplicationModel;
-import application.render.jogl.Jogl4DrawingAreaRenderer;
 
 public class Jogl4ApplicationController
 {

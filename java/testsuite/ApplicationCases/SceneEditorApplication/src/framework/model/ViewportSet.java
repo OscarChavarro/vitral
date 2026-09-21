@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.gui.widget.WidgetCommand;
 import vsdk.toolkit.gui.widget.WidgetMenu;
@@ -69,7 +70,7 @@ public class ViewportSet
     private int sizeYInPixels;
     private ColorRgb titleColor;
     private ColorRgb selectedTitleColor;
-    private TextScalerForScreen textScaler;
+    private ViewportElementScaler elementScaler;
     private Widget i18nContext;
 
     public ViewportSet()
@@ -83,7 +84,7 @@ public class ViewportSet
         sizeYInPixels = 0;
         titleColor = new ColorRgb(1, 1, 1);
         selectedTitleColor = new ColorRgb(1, 1, 0);
-        textScaler = new TextScalerForScreen();
+        elementScaler = new ViewportElementScaler();
         i18nContext = null;
     }
 
@@ -396,19 +397,19 @@ public class ViewportSet
     @return the scaler that gives the size of the texts of this set for the
     resolution of the screen where the set is presented
     */
-    public TextScalerForScreen getTextScaler()
+    public ViewportElementScaler getElementScaler()
     {
-        return textScaler;
+        return elementScaler;
     }
 
     /**
-    @param textScaler the scaler for the texts of this set; a null value is
+    @param elementScaler the scaler for the elements of this set; a null value is
     ignored
     */
-    public void setTextScaler(TextScalerForScreen textScaler)
+    public void setElementScaler(ViewportElementScaler elementScaler)
     {
-        if ( textScaler != null ) {
-            this.textScaler = textScaler;
+        if ( elementScaler != null ) {
+            this.elementScaler = elementScaler;
         }
     }
 

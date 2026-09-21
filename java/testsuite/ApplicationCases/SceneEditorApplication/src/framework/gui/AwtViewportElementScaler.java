@@ -6,10 +6,10 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 
-import framework.model.TextScalerForScreen;
+import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 
 /**
-AWT specific part of `TextScalerForScreen`: it finds out the resolution of the
+AWT specific part of `ViewportElementScaler`: it finds out the resolution of the
 screen using AWT, and informs it to the (platform independent) scaler injected
 in the constructor. Other platforms should provide an equivalent class.
 
@@ -20,18 +20,18 @@ The resolution informed is in physical pixels, which are the ones text is
 drawn with: the screen bounds (that AWT reports in logical units) multiplied by
 the scale of the screen's default transformation (i.e. 2 in HiDPI displays).
 */
-public class AwtTextScalerForScreen
+public class AwtViewportElementScaler
 {
-    private final TextScalerForScreen textScaler;
+    private final ViewportElementScaler elementScaler;
 
-    public AwtTextScalerForScreen(TextScalerForScreen textScaler)
+    public AwtViewportElementScaler(ViewportElementScaler elementScaler)
     {
-        this.textScaler = textScaler;
+        this.elementScaler = elementScaler;
     }
 
-    public TextScalerForScreen getTextScaler()
+    public ViewportElementScaler getElementScaler()
     {
-        return textScaler;
+        return elementScaler;
     }
 
     /**
@@ -74,7 +74,7 @@ public class AwtTextScalerForScreen
         Rectangle bounds = configuration.getBounds();
         AffineTransform transform = configuration.getDefaultTransform();
 
-        textScaler.setScreenResolution(
+        elementScaler.setScreenResolution(
             (int)Math.round(bounds.width * transform.getScaleX()),
             (int)Math.round(bounds.height * transform.getScaleY()));
     }

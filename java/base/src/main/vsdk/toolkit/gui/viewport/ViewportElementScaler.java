@@ -1,25 +1,26 @@
-package framework.model;
+package vsdk.toolkit.gui.viewport;
 
 /**
-A `TextScalerForScreen` calculates how much the text (and its related
+A `ViewportElementScaler` calculates how much the elements of a viewport (text and its related
 lengths) must be enlarged for the resolution of a screen.
 
 Sizes in the application are designed for a legacy reference resolution
 (1024x768 by default; 640x480 and 800x600 screens are also served with the
 designed sizes). On screens with more pixels the same size in pixels looks
-extremely small, so the scale grows with the resolution: it is the smaller of
+tiny, so the scale grows with the resolution: it is the smaller of
 the width and height ratios between the screen and the reference resolution,
 rounded to steps of a quarter, and never below 1 (sizes are not reduced for
 legacy resolutions). For example, a 2560x1600 screen gets a scale of 2, and
 a 1920x1080 one gets 1.5.
 
 The class is a plain model object: it does not know how the resolution is
-obtained, since that depends on the platform (see `AwtTextScalerForScreen`).
+obtained, since that depends on the platform (for example, an AWT based
+provider can be built on top of `java.awt.Toolkit`).
 Whoever knows it informs the scaler with `setScreenResolution`, and can do it
 again if the resolution changes, so the scale follows the screen. Until a
 valid resolution is given, the scale is 1.
 */
-public class TextScalerForScreen
+public class ViewportElementScaler
 {
     private int screenWidthInPixels;
     private int screenHeightInPixels;
@@ -28,7 +29,7 @@ public class TextScalerForScreen
     private double scaleStep;
     private double maximumScale;
 
-    public TextScalerForScreen()
+    public ViewportElementScaler()
     {
         screenWidthInPixels = 0;
         screenHeightInPixels = 0;
@@ -51,8 +52,6 @@ public class TextScalerForScreen
     /**
     Informs the resolution, in physical pixels, of the screen where text is
     presented.
-    @param screenWidthInPixels
-    @param screenHeightInPixels
     */
     public void setScreenResolution(int screenWidthInPixels,
                                     int screenHeightInPixels)
@@ -74,8 +73,6 @@ public class TextScalerForScreen
     /**
     Sets the resolution for which the base sizes were designed; invalid
     (not positive) values are ignored.
-    @param referenceWidthInPixels
-    @param referenceHeightInPixels
     */
     public void setReferenceResolution(int referenceWidthInPixels,
                                        int referenceHeightInPixels)
@@ -138,12 +135,22 @@ public class TextScalerForScreen
     }
 
     /**
+    @param baseLength a length (line width, etc.) in pixels, designed for the
+    reference resolution, that can have fractional values
+    @return the length to use in the current screen
+    */
+    public double scaleLength(double baseLength)
+    {
+        return baseLength * getScale();
+    }
+
+    /**
     @param baseSize a size (font size, offset, etc.) in pixels, designed for
     the reference resolution
     @return the size to use in the current screen, at least 1
     */
     public int scaleSize(int baseSize)
     {
-        return Math.max(1, (int)Math.round(((double)baseSize) * getScale()));
+        return Math.max(1, (int)Math.round((baseSize) * getScale()));
     }
 }

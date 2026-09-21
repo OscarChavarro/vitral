@@ -1,5 +1,13 @@
 package application;
 
+// Java classes
+import application.render.jogl.Jogl4ApplicationController;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.swing.SwingUtilities;
+
 // VSDK Classes
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -13,11 +21,6 @@ import application.model.ApplicationModel;
 import application.gui.AwtApplicationModel;
 import application.gui.AwtGuiController;
 import application.net.VitralEditorMCP;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.swing.SwingUtilities;
 
 public class SceneEditorApplication {
     // Application model

@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.gizmo;
 
 import com.jogamp.opengl.GL4;
 
@@ -8,6 +8,9 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.gui.gizmo.InfinitePlaneGizmo;
+import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
 public class Jogl4InfinitePlaneGizmoRenderer extends Jogl4Renderer {
     private static final double VIEWPORT_AREA_FRACTION = 0.125;

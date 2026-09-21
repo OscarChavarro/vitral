@@ -1,4 +1,4 @@
-package vsdk.toolkit.render.jogl;
+package vsdk.toolkit.render.jogl.gizmo;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -20,6 +20,12 @@ import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
+import vsdk.toolkit.render.jogl.Jogl4ArrowRenderer;
+import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
+import vsdk.toolkit.render.jogl.Jogl4Renderer;
+import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.Jogl4SphereRenderer;
 
 /**
 Renders a {@link RayGizmo} as a lit arrow (cylinder shaft + cone head) using

@@ -28,10 +28,10 @@ import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
-import vsdk.toolkit.render.jogl.Jogl4InfinitePlaneGizmoRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4InfinitePlaneGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
-import vsdk.toolkit.render.jogl.Jogl4RayGizmoRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4RayGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
 import vsdk.toolkit.render.jogl.Jogl4SolidTextureRenderer;
 

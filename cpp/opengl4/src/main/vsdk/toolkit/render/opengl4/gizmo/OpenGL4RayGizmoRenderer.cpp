@@ -17,7 +17,7 @@
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4RayGizmoRenderer.h"
+#include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
 
 namespace {

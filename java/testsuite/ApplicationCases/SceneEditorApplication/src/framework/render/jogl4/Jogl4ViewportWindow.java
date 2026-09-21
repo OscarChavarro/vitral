@@ -23,11 +23,12 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.render.jogl.Jogl2MatrixRenderer;
+import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4ReferenceFrameGizmoRenderer;
 
 // Framework classes
-import framework.model.TextScalerForScreen;
+import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 import framework.model.Viewport;
 import framework.model.ViewportSet;
 
@@ -42,10 +43,12 @@ injected `Jogl4LabelImageProvider`.
 public class Jogl4ViewportWindow
 {
     // Sizes, in pixels, designed for legacy resolutions; they are enlarged
-    // for bigger screens by the text scaler of the viewport set
+    // for bigger screens by the element scaler of the viewport set
     private static final int BASE_TITLE_FONT_SIZE = 14;
     private static final int BASE_TITLE_BORDER_X = 4;
     private static final int BASE_TITLE_BORDER_Y = 1;
+    // A bit smaller than the titles
+    private static final int BASE_REFERENCE_FRAME_LABEL_FONT_SIZE = 12;
 
     private final ViewportSet viewportSet;
     private final Viewport viewport;
@@ -61,6 +64,9 @@ public class Jogl4ViewportWindow
         new ArrayList<RGBAImageUncompressed>();
     // OpenGL context owning the textures in `labelTextures`
     private GLContext labelTexturesContext;
+    private final ReferenceFrameGizmo referenceFrameGizmo = new ReferenceFrameGizmo();
+    private RGBAImageUncompressed[] referenceFrameLabelImages;
+    private int referenceFrameLabelFontSize;
     private final RGBAImageUncompressed xLabelImage;
     private final RGBAImageUncompressed yLabelImage;
     private final RGBAImageUncompressed zLabelImage;
@@ -80,15 +86,21 @@ public class Jogl4ViewportWindow
         this.viewport = viewport;
         this.labelImageProvider = labelImageProvider;
 
-        xLabelImage = labelImageProvider.createLabelImage("X", new ColorRgb(0.78, 0, 0));
-        yLabelImage = labelImageProvider.createLabelImage("Y", new ColorRgb(0, 0.61, 0));
-        zLabelImage = labelImageProvider.createLabelImage("Z", new ColorRgb(0, 0, 0.76));
+        xLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_X);
+        yLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_Y);
+        zLabelImage = createAxisLabelImage(ReferenceFrameGizmo.AXIS_Z);
 
         xLabelImageSelected = labelImageProvider.createLabelImage("X", new ColorRgb(1, 1, 0));
         yLabelImageSelected = labelImageProvider.createLabelImage("Y", new ColorRgb(1, 1, 0));
         zLabelImageSelected = labelImageProvider.createLabelImage("Z", new ColorRgb(1, 1, 0));
 
         updateTitleImage();
+    }
+
+    private RGBAImageUncompressed createAxisLabelImage(int axis)
+    {
+        return labelImageProvider.createLabelImage(
+            referenceFrameGizmo.getAxisLabel(axis), referenceFrameGizmo.getAxisColor(axis));
     }
 
     public Viewport getViewport()
@@ -141,73 +153,54 @@ public class Jogl4ViewportWindow
         return viewport.getRendererConfiguration();
     }
 
+    /**
+    Draws the reference frame gizmo at the lower left corner of the viewport.
+    Its size, line width and labels follow the screen resolution (see
+    `ViewportElementScaler`), so it keeps a similar apparent size.
+    */
     public void drawReferenceBase(GL2 gl)
     {
-        //-----------------------------------------------------------------
-        int basesize = 64;
-        gl.glPushAttrib(GL2.GL_VIEWPORT_BIT);
-        gl.glPushAttrib(GL2.GL_DEPTH_TEST);
-        gl.glPushAttrib(GL2.GL_TEXTURE_2D);
-        gl.glPushAttrib(GL2.GL_LIGHTING);
-        gl.glViewport(viewport.getPixelStartX(), viewport.getPixelStartY(), basesize, basesize);
+        ViewportElementScaler elementScaler = viewportSet.getElementScaler();
 
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPushMatrix();
-        gl.glLoadIdentity();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-        gl.glPushMatrix();
+        referenceFrameGizmo.applyScale(elementScaler);
+        updateReferenceFrameLabelImages(elementScaler);
 
-        gl.glDisable(GL2.GL_LIGHTING);
-        gl.glDisable(GL2.GL_TEXTURE_2D);
-        gl.glDisable(GL2.GL_DEPTH_TEST);
+        Jogl4ReferenceFrameGizmoRenderer.draw(gl, referenceFrameGizmo,
+            viewport.getActiveCamera().getRotation(),
+            viewport.getPixelStartX(), viewport.getPixelStartY(),
+            (glContext, axis, label) -> {
+                // Label images are drawn at (-1, -1, 0) from the modelview
+                // origin (see `drawTextureString3D`)
+                glContext.glTranslated(1, 1, 0);
+                drawTextureString3D(glContext, referenceFrameLabelImages[axis]);
+            });
+    }
 
-        //-----------------------------------------------------------------
-        Matrix4x4d R = viewport.getActiveCamera().getRotation();
+    /**
+    The label images of the reference frame depend on the screen resolution,
+    so they are regenerated when the font size they need changes.
+    */
+    private void updateReferenceFrameLabelImages(ViewportElementScaler elementScaler)
+    {
+        int currentFontSize = elementScaler.scaleSize(BASE_REFERENCE_FRAME_LABEL_FONT_SIZE);
 
-        gl.glLoadIdentity();
-        R = R.invert();
-        gl.glRotated(90, -1, 0, 0);
-        gl.glRotated(90, 0, 0, 1);
-        Jogl2MatrixRenderer.activate(gl, R);
-
-        gl.glPushMatrix();
-        gl.glTranslated(2, 1, 0);
-        drawTextureString3D(gl, xLabelImage);
-        gl.glPopMatrix();
-
-        gl.glPushMatrix();
-        gl.glTranslated(1, 2, 0);
-        drawTextureString3D(gl, yLabelImage);
-        gl.glPopMatrix();
-
-        gl.glPushMatrix();
-        gl.glTranslated(1, 1, 1);
-        drawTextureString3D(gl, zLabelImage);
-        gl.glPopMatrix();
-
-        //gl.glLoadIdentity();
-        gl.glBegin(GL2.GL_LINES);
-            gl.glColor3d(0.78, 0, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(1, 0, 0);
-            gl.glColor3d(0, 0.61, 0);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 1, 0);
-            gl.glColor3d(0, 0, 0.76);
-            gl.glVertex3d(0, 0, 0);
-            gl.glVertex3d(0, 0, 1);
-        gl.glEnd();
-
-        //-----------------------------------------------------------------
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_PROJECTION);
-        gl.glPopMatrix();
-        gl.glMatrixMode(GL2.GL_MODELVIEW);
-
-        gl.glPopAttrib();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
-        gl.glPopAttrib();
+        if ( referenceFrameLabelImages != null &&
+             currentFontSize == referenceFrameLabelFontSize ) {
+            return;
+        }
+        if ( referenceFrameLabelImages != null ) {
+            for ( RGBAImageUncompressed image : referenceFrameLabelImages ) {
+                discardedLabelImages.add(image);
+            }
+        }
+        referenceFrameLabelFontSize = currentFontSize;
+        referenceFrameLabelImages = new RGBAImageUncompressed[ReferenceFrameGizmo.NUMBER_OF_AXES];
+        for ( int axis = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++ ) {
+            referenceFrameLabelImages[axis] = labelImageProvider.createLabelImage(
+                referenceFrameGizmo.getAxisLabel(axis),
+                referenceFrameGizmo.getAxisColor(axis),
+                currentFontSize);
+        }
     }
 
     private void drawGridRectangle(GL2 gl)
@@ -467,9 +460,9 @@ public class Jogl4ViewportWindow
     {
         updateTitleImage();
 
-        TextScalerForScreen textScaler = viewportSet.getTextScaler();
-        int borderx = textScaler.scaleSize(BASE_TITLE_BORDER_X);
-        int bordery = textScaler.scaleSize(BASE_TITLE_BORDER_Y);
+        ViewportElementScaler elementScaler = viewportSet.getElementScaler();
+        int borderx = elementScaler.scaleSize(BASE_TITLE_BORDER_X);
+        int bordery = elementScaler.scaleSize(BASE_TITLE_BORDER_Y);
 
         // The area of the title (its border included, so it can be easily
         // pointed) is informed to the model, for interaction
@@ -483,14 +476,14 @@ public class Jogl4ViewportWindow
     The title is given by the viewport set (it follows the active camera and
     the language selected by the user), its color is configured in the viewport
     set (it depends on whether the viewport is selected) and its size depends
-    on the screen resolution (see `TextScalerForScreen`), so the image is
+    on the screen resolution (see `ViewportElementScaler`), so the image is
     regenerated whenever any of them changes.
     */
     private void updateTitleImage()
     {
         String currentTitle = viewportSet.getTitleFor(viewport);
         ColorRgb currentColor = viewportSet.getTitleColorFor(viewport);
-        int currentFontSize = viewportSet.getTextScaler().scaleSize(BASE_TITLE_FONT_SIZE);
+        int currentFontSize = viewportSet.getElementScaler().scaleSize(BASE_TITLE_FONT_SIZE);
 
         if ( titleImage == null || !currentTitle.equals(title) ||
              !currentColor.equals(titleColor) ||

@@ -22,7 +22,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
-import application.Jogl4ApplicationController;
+import application.render.jogl.Jogl4ApplicationController;
 import application.SceneEditorApplication;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;

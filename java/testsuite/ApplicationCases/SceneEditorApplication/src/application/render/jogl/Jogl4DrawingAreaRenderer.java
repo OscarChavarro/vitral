@@ -77,7 +77,7 @@ import application.gui.SwingImageControlWindow;
 import application.gui.SwingSelectorDialog;
 import application.model.ApplicationModel;
 import framework.gui.AwtProjectionLocationPopup;
-import framework.gui.AwtTextScalerForScreen;
+import framework.gui.AwtViewportElementScaler;
 import framework.gui.ViewportSetInteractionListener;
 import framework.gui.ViewportInteractionTechniques;
 import framework.gui.ViewportSetInteractionTechniques;
@@ -144,7 +144,7 @@ public class Jogl4DrawingAreaRenderer implements
     private final ViewportSet viewportSet;
     private final ViewportSetInteractionTechniques viewportSetTechniques;
     private final JoglViewportSetRenderer viewportSetRenderer;
-    private final AwtTextScalerForScreen textScalerForScreen;
+    private final AwtViewportElementScaler elementScaler;
     private final AwtProjectionLocationPopup projectionLocationPopup;
 
     //=================================================================
@@ -216,8 +216,8 @@ public class Jogl4DrawingAreaRenderer implements
                     scaleXToCanvas(x), scaleYToCanvas(y));
             }
         });
-        textScalerForScreen = new AwtTextScalerForScreen(viewportSet.getTextScaler());
-        textScalerForScreen.updateFromDefaultScreen();
+        elementScaler = new AwtViewportElementScaler(viewportSet.getElementScaler());
+        elementScaler.updateFromDefaultScreen();
         viewportSetRenderer = new JoglViewportSetRenderer(
             viewportSet,
             new Jogl4LabelImageProvider() {
@@ -1006,7 +1006,7 @@ public class Jogl4DrawingAreaRenderer implements
 
         debugProjectedViewsIfNeeded(gl);
         // Text size follows the resolution of the screen showing the canvas
-        textScalerForScreen.updateFromComponent(canvas);
+        elementScaler.updateFromComponent(canvas);
         syncViewportStateFromCanvas();
         syncViewportStateFromSurface(drawable.getSurfaceWidth(),
             drawable.getSurfaceHeight());
