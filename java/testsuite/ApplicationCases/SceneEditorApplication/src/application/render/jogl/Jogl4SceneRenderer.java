@@ -24,7 +24,6 @@ import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
 
 // Application classes
-import application.SceneEditorApplication;
 import application.framework.Scene;
 import application.gui.ModifyPanel;
 
@@ -147,7 +146,7 @@ public class Jogl4SceneRenderer
             transform);
     }
 
-    public static void draw(GL4 gl, Scene s, SceneEditorApplication parent)
+    public static void draw(GL4 gl, Scene s, ModifyPanel modifyPanel)
     {
         RendererConfiguration quality;
         SimpleBodyGroup ggi;
@@ -155,7 +154,7 @@ public class Jogl4SceneRenderer
 
         s.activateSelectedBackground();
 
-        drawBase(gl, s, parent.getAwtModel().getModifyPanel());
+        drawBase(gl, s, modifyPanel);
 
         //- Draw 3D Gizmos ------------------------------------------------
         s.selectedLights.sync();

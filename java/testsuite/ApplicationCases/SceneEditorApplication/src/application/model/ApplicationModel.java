@@ -30,6 +30,7 @@ public class ApplicationModel
     private int activeViewportSetIndex;
     private Widget i18nContext;
     private final SceneLightFactory lightFactory = new SceneLightFactory();
+    private final DrawingArea drawingArea;
 
     /**
     Creates the model with one standard `ViewportSet`. More sets can be added
@@ -40,6 +41,15 @@ public class ApplicationModel
         viewportSets = new ArrayList<ViewportSet>();
         viewportSets.add(ViewportSet.createStandardSet("Display 1"));
         activeViewportSetIndex = 0;
+        drawingArea = new DrawingArea(viewportSets.get(0));
+    }
+
+    /**
+    @return the drawing area presenting the viewport set of the first display
+    */
+    public DrawingArea getDrawingArea()
+    {
+        return drawingArea;
     }
 
     /**

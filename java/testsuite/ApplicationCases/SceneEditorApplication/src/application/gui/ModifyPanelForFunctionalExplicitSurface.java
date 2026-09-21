@@ -364,7 +364,7 @@ public class ModifyPanelForFunctionalExplicitSurface extends ModifyPanel impleme
             functionalSurface.setBounds(minx, miny, minz, maxx, maxy, maxz);
             functionalSurface.setTesselationHint(nx, ny);
             target.setGeometry(functionalSurface);
-            parent.getJogl4Controller().getDrawingArea().canvas.repaint();
+            parent.getJogl4Controller().repaint();
         }
     }
 

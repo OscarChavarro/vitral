@@ -136,6 +136,8 @@ public class KeyEvent extends PresentationElement
     public static final int KEY_COMMA = 0x0073;
     public static final int KEY_PERIOD = 0x0074;
     public static final int KEY_NUMPERIOD = 0x0075;
+    public static final int KEY_EQUALS = 0x0076;
+    public static final int KEY_MINUS = 0x0077;
 
     public KeyEvent()
     {
@@ -265,6 +267,8 @@ public class KeyEvent extends PresentationElement
   	  case KEY_COMMA: msg = "KEY_COMMA"; break;
   	  case KEY_PERIOD: msg = "KEY_PERIOD"; break;
   	  case KEY_NUMPERIOD: msg = "KEY_NUMPERIOD"; break;
+  	  case KEY_EQUALS: msg = "KEY_EQUALS"; break;
+  	  case KEY_MINUS: msg = "KEY_MINUS"; break;
         }
         return msg;
     }

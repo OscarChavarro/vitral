@@ -17,7 +17,8 @@ import javax.swing.Timer;
 
 import application.SceneEditorApplication;
 import application.framework.Scene;
-import application.render.jogl.Jogl4DrawingAreaRenderer;
+import application.model.InteractionMode;
+import application.render.jogl.Jogl4ApplicationController;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.common.color.ColorRgb;
@@ -318,36 +319,42 @@ class VitralEditorMCPProtocol implements Runnable
     private String setInteractionMode(String request)
     {
         String mode = stringProperty(request, "mode", "");
-        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
-        int value;
+        InteractionMode value;
 
-        if ( drawingArea == null ) {
-            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
-        }
         switch ( mode ) {
-            case "camera" -> value = Jogl4DrawingAreaRenderer.CAMERA_INTERACTION_MODE;
-            case "select" -> value = Jogl4DrawingAreaRenderer.SELECT_INTERACTION_MODE;
-            case "translate" -> value = Jogl4DrawingAreaRenderer.TRANSLATE_INTERACTION_MODE;
-            case "rotate" -> value = Jogl4DrawingAreaRenderer.ROTATE_INTERACTION_MODE;
-            case "scale" -> value = Jogl4DrawingAreaRenderer.SCALE_INTERACTION_MODE;
+            case "camera" -> value = InteractionMode.CAMERA;
+            case "select" -> value = InteractionMode.SELECT;
+            case "translate" -> value = InteractionMode.TRANSLATE;
+            case "rotate" -> value = InteractionMode.ROTATE;
+            case "scale" -> value = InteractionMode.SCALE;
             default -> throw new IllegalArgumentException("Unknown mode \"" + mode +
                 "\". Use camera, select, translate, rotate or scale");
         }
-        drawingArea.interactionMode = value;
+        parent.getApplicationModel().getDrawingArea().setInteractionMode(value);
         return "{\"ok\":true,\"mode\":\"" + mode + "\"}";
+    }
+
+    /**
+    @return the controller of the drawing area, once its canvas was created
+    */
+    private Jogl4ApplicationController getDrawingAreaController()
+    {
+        Jogl4ApplicationController controller = parent.getJogl4Controller();
+
+        if ( !controller.isDrawingAreaCreated() ) {
+            throw new IllegalStateException("The drawing area has not been created");
+        }
+        return controller;
     }
 
     private String injectMouse(String request)
     {
-        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        Jogl4ApplicationController drawingArea = getDrawingAreaController();
         String type = stringProperty(request, "type", "move");
         int x = (int)Math.round(numberProperty(request, "x", 0));
         int y = (int)Math.round(numberProperty(request, "y", 0));
         int button = (int)numberProperty(request, "button", 1);
 
-        if ( drawingArea == null ) {
-            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
-        }
         drawingArea.injectMouseEvent(type, x, y, button);
         return describeScene();
     }
@@ -358,15 +365,12 @@ class VitralEditorMCPProtocol implements Runnable
     */
     private String projectSelectedBody(String request)
     {
-        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
+        Jogl4ApplicationController drawingArea = getDrawingAreaController();
         Scene scene = parent.getApplicationModel().getScene();
         ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
         int viewportIndex = (int)numberProperty(request, "viewport", 0);
         int selected = scene.selectedThings.firstSelected();
 
-        if ( drawingArea == null ) {
-            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
-        }
         if ( selected < 0 ) {
             throw new IllegalStateException("No body is selected");
         }
@@ -504,10 +508,7 @@ class VitralEditorMCPProtocol implements Runnable
     private String viewportJpg(String request)
     {
         String path = stringProperty(request, "path", "./outputSelectedViewport.jpg");
-        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
-        if ( drawingArea == null ) {
-            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
-        }
+        Jogl4ApplicationController drawingArea = getDrawingAreaController();
         File out = new File(path);
         drawingArea.exportViewportJpg(out);
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
@@ -516,10 +517,7 @@ class VitralEditorMCPProtocol implements Runnable
     private String workspaceJpg(String request)
     {
         String path = stringProperty(request, "path", "./outputViewport.jpg");
-        Jogl4DrawingAreaRenderer drawingArea = parent.getJogl4Controller().getDrawingArea();
-        if ( drawingArea == null ) {
-            throw new IllegalStateException("Jogl4DrawingAreaRenderer has not been created");
-        }
+        Jogl4ApplicationController drawingArea = getDrawingAreaController();
         File out = new File(path);
         drawingArea.exportWorkspaceJpg(out);
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";

@@ -22,7 +22,7 @@ public class MyChangeListener implements ChangeListener
         SingleSelectionModel sm = (SingleSelectionModel)e.getSource();
         if ( sm.getSelectedIndex() == 1 ) {
             parent.getAwtModel().setModifyPanelSelected(true);
-            parent.getJogl4Controller().getDrawingArea().reportTargetToModifyPanel();
+            parent.getJogl4Controller().reportTargetToModifyPanel();
         }
         else {
             parent.getAwtModel().setModifyPanelSelected(false);

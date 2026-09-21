@@ -139,7 +139,7 @@ public class AwtGuiController
         loadGuiDefinition();
 
         mainWindowWidget.add(
-            jogl4Controller.getCanvas(model.getStatusMessage(), parent),
+            jogl4Controller.getCanvas(parent),
             BorderLayout.CENTER);
         mainWindowWidget.setPreferredSize(d);
         mainWindowWidget.pack();
@@ -188,7 +188,7 @@ public class AwtGuiController
         // it again (`BasicSplitPaneUI.addHeavyweightDivider`), destroying its
         // native peer and OpenGL context, which freezes the GUI on macOS.
         // Inside a lightweight container the split pane just resizes it.
-        Component canvas = jogl4Controller.getCanvas(model.getStatusMessage(), parent);
+        Component canvas = jogl4Controller.getCanvas(parent);
         JPanel left = new JPanel(new BorderLayout());
         left.add(canvas, BorderLayout.CENTER);
         Component right = createPanel();

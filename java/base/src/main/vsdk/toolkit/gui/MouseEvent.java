@@ -17,6 +17,7 @@ public class MouseEvent extends PresentationElement
     public static final int BUTTON1 = 1;
     public static final int BUTTON2 = 2;
     public static final int BUTTON3 = 3;
+    public static final int CTRL_DOWN_MASK = 128;
     public static final int BUTTON1_DOWN_MASK = 1024;
     public static final int BUTTON2_DOWN_MASK = 2048;
     public static final int BUTTON3_DOWN_MASK = 4096;

@@ -286,6 +286,17 @@ public class Scene
         return selectedRay;
     }
 
+    /**
+    Selects the next background, cycling over the three available ones.
+    */
+    public void rotateBackground()
+    {
+        selectedBackground++;
+        if ( selectedBackground > 2 ) {
+            selectedBackground = 0;
+        }
+    }
+
     public void activateSelectedBackground()
     {
         Background currentBackground;

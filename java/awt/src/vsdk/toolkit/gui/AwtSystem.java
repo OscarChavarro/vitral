@@ -134,6 +134,12 @@ public class AwtSystem extends PresentationElement
           case java.awt.event.KeyEvent.VK_DELETE:
             evsdk.keycode = KeyEvent.KEY_DELETE;
             break;
+          case java.awt.event.KeyEvent.VK_EQUALS:
+            evsdk.keycode = KeyEvent.KEY_EQUALS;
+            break;
+          case java.awt.event.KeyEvent.VK_MINUS:
+            evsdk.keycode = KeyEvent.KEY_MINUS;
+            break;
         }
 
         evsdk.unicode_id = unicode_id;

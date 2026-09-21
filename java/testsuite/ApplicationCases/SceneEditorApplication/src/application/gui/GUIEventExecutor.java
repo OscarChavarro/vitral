@@ -7,7 +7,7 @@ import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.Polyhedra
 
 import application.SceneEditorApplication;
 import application.framework.Scene;
-import application.render.jogl.Jogl4DrawingAreaRenderer;
+import application.model.InteractionMode;
 import java.io.File;
 import java.io.FileOutputStream;
 import javax.swing.JFileChooser;
@@ -158,7 +158,7 @@ public class GUIEventExecutor extends CommandListener{
 
         }
         else if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
-            parent.getJogl4Controller().getDrawingArea().wantToDebugProjectedViews = true;
+            parent.getApplicationModel().getDrawingArea().setProjectedViewsDebugRequested(true);
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -
@@ -540,18 +540,18 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
-            parent.getJogl4Controller().getDrawingArea().wantToGetColor = true;
+            parent.getApplicationModel().getDrawingArea().setColorCaptureRequested(true);
         }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
-            parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
+            parent.getApplicationModel().getDrawingArea().setDepthCaptureRequested(true);
         }
         else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_PENDING_CONTOURNS"));
-            parent.getJogl4Controller().getDrawingArea().wantToGetDepth = true;
-            parent.getJogl4Controller().getDrawingArea().wantToGetContourns = true;
+            parent.getApplicationModel().getDrawingArea().setDepthCaptureRequested(true);
+            parent.getApplicationModel().getDrawingArea().setContoursRequested(true);
         }
         else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
             parent.getAwtModel().getStatusMessage().setText(
@@ -590,7 +590,7 @@ public class GUIEventExecutor extends CommandListener{
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {
-            parent.getJogl4Controller().getDrawingArea().rotateBackground();
+            scene().rotateBackground();
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_TEST_CORRIDOR") ) {
             if ( scene().showCorridor == true ) {
@@ -601,7 +601,7 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_GRID") ) {
-            parent.getJogl4Controller().getDrawingArea().toggleGrid();
+            parent.getApplicationModel().getDrawingArea().toggleSelectedViewportGrid();
         }
         else if ( label.equals("IDC_OTHERS_PRINT_SCENE_ON_CONSOLE") ) {
             scene().print();
@@ -610,46 +610,41 @@ public class GUIEventExecutor extends CommandListener{
         else if ( label.equals("IDC_TOOLS_CAMERA") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_CAMERA_MODE"));
-            parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                Jogl4DrawingAreaRenderer.CAMERA_INTERACTION_MODE;
+            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.CAMERA);
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_SELECTION_MODE"));
-            parent.getJogl4Controller().getDrawingArea().interactionMode = 
-            Jogl4DrawingAreaRenderer.SELECT_INTERACTION_MODE;
+            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.SELECT);
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_TRANSLATION_MODE"));
-            parent.getJogl4Controller().getDrawingArea().interactionMode = 
-            Jogl4DrawingAreaRenderer.TRANSLATE_INTERACTION_MODE;
+            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.TRANSLATE);
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_ROTATION_MODE"));
-            parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                Jogl4DrawingAreaRenderer.ROTATE_INTERACTION_MODE;
+            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.ROTATE);
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
             parent.getAwtModel().getStatusMessage().setText(
                 parent.getAwtModel().getGui().getMessage("IDM_SCALE_MODE"));
-            parent.getJogl4Controller().getDrawingArea().interactionMode = 
-                Jogl4DrawingAreaRenderer.SCALE_INTERACTION_MODE;
+            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.SCALE);
         }
         else if ( label.equals("IDC_TOOLS_RAY") ) {
             parent.getApplicationModel().setWithVisualDebugRay(
                 !parent.getApplicationModel().isWithVisualDebugRay());
         }
         else if ( label.equals("IDC_NEW_VIEW") ) {
-            parent.getJogl4Controller().getDrawingArea().newView();
+            parent.getApplicationModel().getDrawingArea().addViewport();
         }
         else if ( label.equals("IDC_DEL_VIEW") ) {
-            parent.getJogl4Controller().getDrawingArea().delView();
+            parent.getApplicationModel().getDrawingArea().removeLastViewport();
         }
 
         //-----------------------------------------------------------------
-        parent.getJogl4Controller().getDrawingArea().canvas.repaint();
+        parent.getJogl4Controller().repaint();
         return true;
     }
     
