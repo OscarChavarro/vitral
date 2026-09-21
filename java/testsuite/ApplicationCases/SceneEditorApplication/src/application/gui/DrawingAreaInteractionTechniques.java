@@ -143,10 +143,22 @@ public class DrawingAreaInteractionTechniques
         if ( mode == InteractionMode.CAMERA ) {
             return PointerCursor.CAMERA_ROTATE;
         }
-        if ( mode == InteractionMode.TRANSLATE ) {
-            return PointerCursor.CAMERA_TRANSLATE;
+
+        // Transformation modes show what can be done only if there is
+        // something selected to transform
+        if ( selectionEditor.computeSelectionCentroid() == null ) {
+            return PointerCursor.SELECT;
         }
-        return PointerCursor.SELECT;
+        switch ( mode ) {
+          case TRANSLATE:
+            return PointerCursor.TRANSLATE;
+          case ROTATE:
+            return PointerCursor.ROTATE;
+          case SCALE:
+            return PointerCursor.SCALE;
+          default:
+            return PointerCursor.SELECT;
+        }
     }
 
     /**
@@ -329,13 +341,18 @@ public class DrawingAreaInteractionTechniques
                 translationGizmo.setCamera(mouseView.getActiveCamera());
                 translationGizmo.setTransformationMatrix(
                     SceneSelectionEditor.createTranslationGizmoMatrix(centroid));
-                if ( mode != InteractionMode.SELECT ) {
+                // Only the translation gizmo has mouse interaction (a gesture
+                // started in other mode would never be ended)
+                if ( mode == InteractionMode.TRANSLATE ) {
                     interactionTechniques.processTranslationMousePressedEvent(
                         viewportEvent, mouseView);
                 }
             }
 
             reportObjectSelection();
+
+            // The selection may have changed what the pointer can do
+            updateModeCursor(event);
         }
         listener.repaintRequested();
     }

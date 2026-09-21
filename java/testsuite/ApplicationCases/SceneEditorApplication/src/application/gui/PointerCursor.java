@@ -14,5 +14,11 @@ public enum PointerCursor
     /** Camera translation gesture */
     CAMERA_TRANSLATE,
     /** Camera advance gesture */
-    CAMERA_ADVANCE
+    CAMERA_ADVANCE,
+    /** Selected things can be translated (translation mode with a selection) */
+    TRANSLATE,
+    /** Selected things can be rotated (rotation mode with a selection) */
+    ROTATE,
+    /** Selected things can be scaled (scale mode with a selection) */
+    SCALE
 }

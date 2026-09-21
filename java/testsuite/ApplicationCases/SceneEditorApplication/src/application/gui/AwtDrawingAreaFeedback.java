@@ -5,9 +5,15 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 
 // VSDK classes
+import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 // Application classes
@@ -38,6 +44,9 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     private final Cursor camrotateCursor;
     private final Cursor camtranslateCursor;
     private final Cursor camadvanceCursor;
+    private final Cursor translateCursor;
+    private final Cursor rotateCursor;
+    private final Cursor scaleCursor;
     private final Cursor selectCursor;
     private final Cursor titleCursor;
 
@@ -55,6 +64,9 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         camrotateCursor = createCursor("cursor_camrotate.gif", "CameraRotation");
         camtranslateCursor = createCursor("cursor_camtranslate.gif", "CameraTranslation");
         camadvanceCursor = createCursor("cursor_camadvance.gif", "CameraAdvance");
+        translateCursor = createCursor("cursor_translate.png", "Translation");
+        rotateCursor = createCursor("cursor_rotate.png", "Rotation");
+        scaleCursor = createCursor("cursor_scale.png", "Scale");
         selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
         titleCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
@@ -63,12 +75,31 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         elementScaler.updateFromDefaultScreen();
     }
 
+    /**
+    Loads a cursor image (with transparency, hot spot at its center).
+    @param filename image file inside the cursors folder
+    @param name name of the cursor
+    @return the custom cursor, or the default cursor if the image cannot be read
+    */
     private Cursor createCursor(String filename, String name)
     {
-        Toolkit awtToolkit = Toolkit.getDefaultToolkit();
-        java.awt.Image image = awtToolkit.getImage(CURSORS_FOLDER + filename);
+        try {
+            BufferedImage image = ImageIO.read(new File(CURSORS_FOLDER + filename));
 
-        return awtToolkit.createCustomCursor(image, new Point(16, 16), name);
+            if ( image != null ) {
+                Point hotSpot = new Point(image.getWidth() / 2, image.getHeight() / 2);
+
+                return Toolkit.getDefaultToolkit().createCustomCursor(image, hotSpot, name);
+            }
+        }
+        catch ( IOException | IllegalArgumentException e ) {
+            Logger.reportMessage(this, VSDK.WARNING, "createCursor",
+                "Cannot load cursor image " + filename + ": " + e.getMessage());
+            return new Cursor(Cursor.DEFAULT_CURSOR);
+        }
+        Logger.reportMessage(this, VSDK.WARNING, "createCursor",
+            "Unsupported cursor image format: " + filename);
+        return new Cursor(Cursor.DEFAULT_CURSOR);
     }
 
     /**
@@ -125,6 +156,15 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
             break;
           case CAMERA_ADVANCE:
             wanted = camadvanceCursor;
+            break;
+          case TRANSLATE:
+            wanted = translateCursor;
+            break;
+          case ROTATE:
+            wanted = rotateCursor;
+            break;
+          case SCALE:
+            wanted = scaleCursor;
             break;
           case VIEWPORT_TITLE:
             wanted = titleCursor;
