@@ -7,6 +7,7 @@ class ShadersModel;
 class NormalMap;
 class SimpleSceneSnapshot;
 class RGBImageUncompressed;
+class ParallelRaytracer;
 
 class SoftwareRaycaster {
 public:
@@ -20,7 +21,8 @@ public:
         const Matrix4x4d& modelRotation);
 
 private:
-    int numberOfThreads;
+    /** One thread per available processor, reused by every frame */
+    ParallelRaytracer* parallelRaytracer;
     NormalMap* bumpNormalMap;
 
     SimpleSceneSnapshot* buildSceneSnapshot(

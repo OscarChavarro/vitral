@@ -2,17 +2,9 @@ package render;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import model.ShadersModel;
 import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
@@ -29,21 +21,19 @@ import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.media.IndexedColorImageUncompressed;
 import vsdk.toolkit.media.NormalMap;
 import vsdk.toolkit.media.RGBImageUncompressed;
-import vsdk.toolkit.render.raytracing.SimpleRaytracer;
-import vsdk.toolkit.render.raytracing.RasterTileArea;
-import vsdk.toolkit.render.raytracing.RasterTileGenerationStrategy;
-import vsdk.toolkit.render.raytracing.RasterTileGenerator;
+import vsdk.toolkit.render.raytracing.ParallelRaytracer;
 
 public class SoftwareRaycaster
 {
     private static final Vector3Dd DEFAULT_BUMP_SCALE = new Vector3Dd(1.0, 1.0, 1.0);
 
-    private final int numberOfThreads;
+    /// One thread per available processor, reused by every frame
+    private final ParallelRaytracer parallelRaytracer;
     private final NormalMap bumpNormalMap;
 
     public SoftwareRaycaster()
     {
-        numberOfThreads = Math.max(1, Runtime.getRuntime().availableProcessors());
+        parallelRaytracer = new ParallelRaytracer();
         bumpNormalMap = loadBumpNormalMap();
     }
 
@@ -69,39 +59,11 @@ public class SoftwareRaycaster
             activeCamera,
             modelRotation,
             outputImage);
-        RasterTileGenerator tileGenerator = new RasterTileGenerator(
-            RasterTileGenerationStrategy.LINEAR,
+        parallelRaytracer.execute(
             outputImage,
-            outputImage.getXSize(),
-            outputImage.getYSize(),
-            numberOfThreads);
-        ConcurrentLinkedQueue<RasterTileArea> pendingTiles =
-            new ConcurrentLinkedQueue<RasterTileArea>(tileGenerator.getTiles());
-        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
-
-        try {
-            List<Future<Void>> futures = new ArrayList<Future<Void>>(numberOfThreads);
-            for ( int i = 0; i < numberOfThreads; i++ ) {
-                futures.add(executorService.submit(new TileWorker(
-                    pendingTiles,
-                    outputImage,
-                    model.getQuality(),
-                    snapshot)));
-            }
-            for ( Future<Void> future : futures ) {
-                future.get();
-            }
-        }
-        catch ( InterruptedException e ) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Software raytracing was interrupted", e);
-        }
-        catch ( ExecutionException e ) {
-            throw new IllegalStateException("Software raytracing failed", e);
-        }
-        finally {
-            executorService.shutdownNow();
-        }
+            model.getQuality(),
+            snapshot,
+            false);
     }
 
     private SimpleSceneSnapshot buildSceneSnapshot(
@@ -161,34 +123,6 @@ public class SoftwareRaycaster
         }
         catch ( Exception e ) {
             throw new IllegalStateException("Failed loading software bump map", e);
-        }
-    }
-
-    private record TileWorker(
-        ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
-        RGBImageUncompressed resultingImage,
-        RendererConfiguration rendererConfiguration,
-        SimpleSceneSnapshot sceneSnapshot)
-        implements Callable<Void>
-    {
-        @Override
-        public Void call()
-        {
-            RasterTileArea tile;
-            SimpleRaytracer raytracer = new SimpleRaytracer();
-            while ( (tile = pendingTiles.poll()) != null ) {
-                raytracer.execute(
-                    resultingImage,
-                    rendererConfiguration,
-                    sceneSnapshot,
-                    null,
-                    null,
-                    tile.getX0(),
-                    tile.getY0(),
-                    tile.getX1(),
-                    tile.getY1());
-            }
-            return null;
         }
     }
 }

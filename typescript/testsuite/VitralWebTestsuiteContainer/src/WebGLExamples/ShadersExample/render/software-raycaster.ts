@@ -1,37 +1,32 @@
 import {
   BrowserWorkerExecutor,
   MicroFacetedMaterial,
-  RasterTileGenerationStrategy,
-  RasterTileGenerator,
-  RendererConfiguration,
+  ParallelRaytracer,
   RGBImageUncompressed,
   type Camera,
   type Matrix4x4d,
-  type RasterTileArea,
+  type ParallelRaytracerTileRequest,
+  type ParallelRaytracerTileResult,
 } from '@vitral/base';
 import type { ShadersModel } from '../model/shaders-model';
-import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster-protocol';
+import type { ShadersSceneDescriptor } from './software-raycaster-protocol';
 
 /**
  * Port of
  * `java/testsuite/Jogl4Examples/ShadersExample/src/render/SoftwareRaycaster.java`.
  *
- * The CPU path: one `RasterTileGenerator` in `LINEAR` mode splits the frame
- * into as many bands as there are workers, and every worker takes the next
- * band off a shared pending queue until the queue is empty. The tiles, the
- * strategy, the worker count taken from the host's processor count, and the
- * scene snapshot each tile is traced against are Java's.
+ * The CPU path, as in Java, is a `ParallelRaytracer` of `@vitral/base`: it
+ * splits the frame in bands, several per worker, and every worker takes the
+ * next band off a shared pending queue until the queue is empty. The worker
+ * count taken from the host's processor count, and the scene snapshot each
+ * band is traced against, are Java's.
  *
  * Java runs those workers as JVM threads over one shared
  * `RGBImageUncompressed`; a browser has no threads, and its Web Workers share
- * no heap. Two things follow, and only two. The workers are
- * `BrowserWorkerExecutor`s, each handed the next tile by this owner rather
- * than polling a `ConcurrentLinkedQueue` itself — the queue is the same, the
- * polling has simply moved to the side that can see all the workers. And each
- * one returns the bytes of its band instead of writing into the shared image,
- * which this class splices into the frame. The pixels are identical, because
- * a tile only ever reads the scene and only ever writes its own rows; that is
- * the same property that lets Java's threads share the image.
+ * no heap. `ParallelRaytracer` deals with that (see its notes); what is left
+ * here is to say how to create a worker — a `BrowserWorkerExecutor` over
+ * `raytracer-tile.worker` — and to describe the scene
+ * (`ShadersSceneDescriptor`) the workers rebuild the snapshot from.
  *
  * `invalidateSnapshot()` keeps Java's comment and its emptiness: the snapshot
  * is rebuilt on every render, so there is nothing to invalidate.
@@ -41,7 +36,7 @@ import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster
  * bytes it sends to the workers, and the `NormalMap` is built on their side
  * from the very same file with the same unit scale.
  *
- * Java's `render` returns when every tile is done, because `Future.get()`
+ * Java's `render` returns when every band is done, because `Future.get()`
  * blocks. Nothing blocks in a page, so this one is asynchronous; the component
  * treats a frame as finished when it resolves.
  *
@@ -57,8 +52,7 @@ import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster
 export class SoftwareRaycaster {
   private static readonly MAX_WORKERS = 8;
 
-  private readonly numberOfThreads: number;
-  private readonly workers: BrowserWorkerExecutor<ShadersTileRequest, ShadersTileResult>[] = [];
+  private readonly parallelRaytracer: ParallelRaytracer;
   private generation = 0;
   private backBuffer: RGBImageUncompressed | null = null;
   private resources: {
@@ -83,9 +77,12 @@ export class SoftwareRaycaster {
     // pool is capped here. No pixel depends on the number: it decides only how
     // `RasterTileGenerator` bands the frame, and the bands partition the same
     // work whatever their count.
-    this.numberOfThreads = Math.min(
-      SoftwareRaycaster.MAX_WORKERS,
-      Math.max(1, navigator.hardwareConcurrency || 1),
+    this.parallelRaytracer = new ParallelRaytracer(
+      () =>
+        new BrowserWorkerExecutor<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>(
+          new Worker(new URL('./raytracer-tile.worker', import.meta.url), { type: 'module' }),
+        ),
+      Math.min(SoftwareRaycaster.MAX_WORKERS, ParallelRaytracer.availableProcessors()),
     );
   }
 
@@ -145,64 +142,23 @@ export class SoftwareRaycaster {
     const width: number = frontImage.getXSize();
     const height: number = frontImage.getYSize();
     const outputImage: RGBImageUncompressed = this.ensureBackBuffer(width, height);
-    const tileGenerator = new RasterTileGenerator(
-      RasterTileGenerationStrategy.LINEAR,
+    await this.parallelRaytracer.execute(
       outputImage,
-      width,
-      height,
-      this.numberOfThreads,
+      model.getQuality(),
+      this.buildSceneDescriptor(model, activeCamera, modelRotation),
+      false,
     );
-    const pendingTiles: RasterTileArea[] = [...tileGenerator.getTiles()];
 
-    this.ensureWorkers();
-
-    const baseRequest = this.buildBaseRequest(model, activeCamera, modelRotation, width, height);
-    const raw: Uint8Array = outputImage.getRawImageDirectBuffer();
-    const rowStride: number = width * 3;
-
-    // Java's `for (i = 0; i < numberOfThreads; i++) executorService.submit(...)`
-    // followed by `future.get()` on each: one runner per worker, each draining
-    // the shared queue, and the render is over when they all are.
-    const runners: Promise<void>[] = [];
-    let workerIndex: number;
-    for (workerIndex = 0; workerIndex < this.workers.length; workerIndex++) {
-      const worker = this.workers[workerIndex]!;
-      runners.push(
-        (async (): Promise<void> => {
-          for (;;) {
-            const tile: RasterTileArea | undefined = pendingTiles.shift();
-            if (tile === undefined) {
-              return;
-            }
-            const result: ShadersTileResult = await worker.execute({
-              ...baseRequest,
-              x0: tile.getX0(),
-              y0: tile.getY0(),
-              dx: tile.getDx(),
-              dy: tile.getDy(),
-            });
-            raw.set(result.bytes, (height - (result.y0 + result.dy)) * rowStride);
-          }
-        })(),
-      );
-    }
-
-    await Promise.all(runners);
-
-    frontImage.getRawImageDirectBuffer().set(raw);
+    frontImage.getRawImageDirectBuffer().set(outputImage.getRawImageDirectBuffer());
     return true;
   }
 
   /**
-   * Java has no counterpart: its thread pool is created and shut down inside
-   * every `render` call, while a Web Worker costs a module compilation to
-   * start, so the pool here outlives a frame and is torn down with the module.
+   * Stops the workers of the `ParallelRaytracer`, which, as in Java, outlive
+   * a frame; they are torn down with the module.
    */
   dispose(): void {
-    for (const worker of this.workers) {
-      worker.terminate();
-    }
-    this.workers.length = 0;
+    this.parallelRaytracer.dispose();
     this.backBuffer = null;
   }
 
@@ -222,36 +178,18 @@ export class SoftwareRaycaster {
     return image;
   }
 
-  private ensureWorkers(): void {
-    while (this.workers.length < this.numberOfThreads) {
-      const worker = new Worker(new URL('./raytracer-tile.worker', import.meta.url), {
-        type: 'module',
-      });
-      this.workers.push(new BrowserWorkerExecutor<ShadersTileRequest, ShadersTileResult>(worker));
-    }
-  }
-
-  private buildBaseRequest(
+  private buildSceneDescriptor(
     model: ShadersModel,
     activeCamera: Camera,
     modelRotation: Matrix4x4d,
-    width: number,
-    height: number,
-  ): ShadersTileRequest {
+  ): ShadersSceneDescriptor {
     const resources = this.resources!;
-    const quality: RendererConfiguration = model.getQuality();
     const activeMaterial = model.getActiveMaterialForCurrentShading();
     const lightPosition = model.getLight().getPosition();
     const lightColor = model.getLight().getEmission();
 
     return {
       generation: this.generation,
-      width,
-      height,
-      x0: 0,
-      y0: 0,
-      dx: 0,
-      dy: 0,
       cameraPosition: Float64Array.from([
         activeCamera.getPosition().x(),
         activeCamera.getPosition().y(),
@@ -263,9 +201,6 @@ export class SoftwareRaycaster {
       modelRotation: modelRotation.exportToDoubleArrayRowOrder(),
       lightPosition: Float64Array.from([lightPosition.x(), lightPosition.y(), lightPosition.z()]),
       lightColor: Float64Array.from([lightColor.r(), lightColor.g(), lightColor.b()]),
-      qualityTexture: quality.isTextureSet(),
-      qualityBumpMap: quality.isBumpMapSet(),
-      qualityShadingType: quality.getShadingType(),
       microFacetCsvText: resources.microFacetCsvText,
       microFacetCsvName: resources.microFacetCsvName,
       microFacetMaterialName:

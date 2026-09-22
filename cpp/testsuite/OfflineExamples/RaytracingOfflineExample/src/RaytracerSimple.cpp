@@ -4,9 +4,6 @@
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
 #include "ImageExporter.h"
-#include "RaytracerExecutor.h"
-#include "RaytracerParallelExecutor.h"
-#include "RaytracerSerialExecutor.h"
 #include <exception>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
@@ -20,6 +17,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
+#include "vsdk/toolkit/render/raytracing/ParallelRaytracer.h"
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;
@@ -84,15 +82,23 @@ static void offlineExecution(const java::String& fileName,
         scene.exportToSimpleSceneSnapshot(cameraSnapshot, scene.getActiveBackground());
 
     StopWatch clock;
-    RaytracerExecutor* raytracerExecutor =
-        parallel ? (RaytracerExecutor*)new RaytracerParallelExecutor() : (RaytracerExecutor*)new RaytracerSerialExecutor();
 
     clock.start();
-    raytracerExecutor->run(&visualizationEngine,
-                           &resultingImage,
-                           &rendererConfiguration,
-                           sceneSnapshot,
-                           &reporter);
+    if ( parallel ) {
+        ParallelRaytracer parallelRaytracer;
+        parallelRaytracer.execute(&resultingImage,
+                                  &rendererConfiguration,
+                                  sceneSnapshot,
+                                  true);
+        parallelRaytracer.dispose();
+    }
+    else {
+        visualizationEngine.execute(&resultingImage,
+                                    &rendererConfiguration,
+                                    sceneSnapshot,
+                                    &reporter,
+                                    (ZBuffer*)0);
+    }
     clock.stop();
 
     printf("Image generated in %s seconds.\n",
@@ -107,7 +113,6 @@ static void offlineExecution(const java::String& fileName,
         }
     }
 
-    delete raytracerExecutor;
     delete sceneSnapshot;
 }
 

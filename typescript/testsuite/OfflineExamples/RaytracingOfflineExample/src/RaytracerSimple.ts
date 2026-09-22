@@ -17,13 +17,13 @@ import { SimpleScene } from "@vitral/base";
 import type { SimpleSceneSnapshot } from "@vitral/base";
 import { ProgressMonitorConsole } from "@vitral/base";
 import { SimpleRaytracer } from "@vitral/base";
+import { ParallelRaytracer } from "@vitral/base";
+import type { ParallelRaytracerTileRequest, ParallelRaytracerTileResult } from "@vitral/base";
+import { NodeWorkerExecutor } from "@vitral/fs";
 import { ReaderMitScene } from "@vitral/fs";
 
 import { CommandOptionsProcessor } from "./CommandOptionsProcessor.js";
 import { ImageExporter } from "./ImageExporter.js";
-import type { RaytracerExecutor } from "./RaytracerExecutor.js";
-import { RaytracerParallelExecutor } from "./RaytracerParallelExecutor.js";
-import { RaytracerSerialExecutor } from "./RaytracerSerialExecutor.js";
 
 export class RaytracerSimple {
     private static readonly SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
@@ -115,18 +115,21 @@ export class RaytracerSimple {
         );
 
         const clock: StopWatch = new StopWatch();
-        const raytracerExecutor: RaytracerExecutor = parallel
-            ? new RaytracerParallelExecutor(fileName, new URL("./RaytracerTileWorker.js", import.meta.url))
-            : new RaytracerSerialExecutor();
 
         clock.start();
-        await raytracerExecutor.run(
-            visualizationEngine,
-            resultingImage,
-            rendererConfiguration,
-            sceneSnapshot,
-            reporter,
-        );
+        if (parallel) {
+            // Each worker rebuilds the scene from its file (see RaytracerTileWorker)
+            const parallelRaytracer: ParallelRaytracer = new ParallelRaytracer(
+                () =>
+                    new NodeWorkerExecutor<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>(
+                        new URL("./RaytracerTileWorker.js", import.meta.url),
+                    ),
+            );
+            await parallelRaytracer.execute(resultingImage, rendererConfiguration, fileName, true);
+            parallelRaytracer.dispose();
+        } else {
+            visualizationEngine.execute(resultingImage, rendererConfiguration, sceneSnapshot, reporter, null);
+        }
         clock.stop();
 
         platformPrintln(

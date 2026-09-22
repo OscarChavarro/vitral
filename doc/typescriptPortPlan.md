@@ -416,7 +416,11 @@ Migrated so far:
   - `RaytracingOfflineExample` — 2026-09-12. Full 1:1 port of the Java
     project (`RaytracerSimple`, `CommandOptionsProcessor`, `ImageExporter`,
     `RaytracerExecutor`, `RaytracerSerialExecutor`, `RaytracerParallelExecutor`)
-    plus `run.sh`. For `etc/geometry/mitscenes/balls.ray` at 1920x1080 the
+    plus `run.sh`. (Update 2026-09-23: the three `Raytracer*Executor` classes
+    were removed in Java, C++ and TypeScript alike; the example now calls
+    `SimpleRaytracer` or the new base class `ParallelRaytracer`, which the
+    `ShadersExample`s and the Java `SceneEditorApplication` share. Images and
+    console output are still identical across the three ports.) For `etc/geometry/mitscenes/balls.ray` at 1920x1080 the
     TypeScript program writes a PPM that is byte-for-byte identical to the Java
     one, and prints byte-for-byte identical console output, in both the
     single-threaded and the parallel mode; the Java serial, Java parallel,

@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
 import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
+import vsdk.toolkit.render.raytracing.ParallelRaytracer;
 import vsdk.toolkit.render.raytracing.SimpleRaytracer;
 import vsdk.toolkit.io.geometry.ReaderMitScene;
 
@@ -100,16 +101,24 @@ public class RaytracerSimple {
                 scene.getActiveBackground());
 
         StopWatch clock = new StopWatch();
-        RaytracerExecutor raytracerExecutor =
-            parallel ? new RaytracerParallelExecutor() : new RaytracerSerialExecutor();
-
         clock.start();
-        raytracerExecutor.run(
-            visualizationEngine,
-            resultingImage,
-            rendererConfiguration,
-            sceneSnapshot,
-            reporter);
+        if ( parallel ) {
+            ParallelRaytracer parallelRaytracer = new ParallelRaytracer();
+            parallelRaytracer.execute(
+                resultingImage,
+                rendererConfiguration,
+                sceneSnapshot,
+                true);
+            parallelRaytracer.dispose();
+        }
+        else {
+            visualizationEngine.execute(
+                resultingImage,
+                rendererConfiguration,
+                sceneSnapshot,
+                reporter,
+                null);
+        }
         clock.stop();
 
         System.out.println(

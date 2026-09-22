@@ -90,7 +90,8 @@ public class ParallelRaytracer
     @param resultingImage image to fill; its size gives the resolution
     @param rendererConfiguration quality settings
     @param sceneSnapshot scene to render, seen from its camera snapshot
-    @param reportProgress true to report the progress in the console
+    @param reportProgress true to report in the console the number of
+    threads and the progress
     */
     public void execute(RGBImageUncompressed resultingImage,
                         RendererConfiguration rendererConfiguration,
@@ -114,6 +115,8 @@ public class ParallelRaytracer
         Thread consumerThread = null;
 
         if ( reportProgress ) {
+            System.out.println(
+                "Starting parallel raytracing with " + numberOfThreads + " threads.");
             ConcurrentLinkedQueue<ParallelProgressMonitorEvent> progressEvents =
                 new ConcurrentLinkedQueue<>();
             producer = new ParallelProgressMonitorProducer(progressEvents);

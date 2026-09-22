@@ -373,8 +373,7 @@ public class Scene
         long finalTime = System.currentTimeMillis();
 
         if ( interactiveReport ) {
-            System.out.println("Image generated in " + (finalTime-initialTime) +
-                " miliseconds, with " + RAYTRACER.getNumberOfThreads() + " threads.");
+            System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 
             File fd = new File("./output.jpg");
 

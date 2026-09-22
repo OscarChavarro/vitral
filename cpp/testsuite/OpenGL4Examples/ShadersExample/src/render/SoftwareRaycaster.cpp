@@ -1,13 +1,7 @@
 #include "java/io/File.h"
-#include <java/lang/Math.h>
 #include "java/util/ArrayList.txx"
 #include "../model/ShadersModel.h"
 #include "SoftwareRaycaster.h"
-#if defined(_SC_NPROCESSORS_ONLN)
-#include <unistd.h>
-#endif
-#include <atomic>
-#include <thread>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
@@ -24,22 +18,11 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-#include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
-#include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
-#include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "vsdk/toolkit/render/raytracing/ParallelRaytracer.h"
 static const Vector3Dd DEFAULT_BUMP_SCALE(1.0, 1.0, 1.0);
 
-static int detectCpuCount()
-{
-#if defined(_SC_NPROCESSORS_ONLN)
-    long count = sysconf(_SC_NPROCESSORS_ONLN);
-    if ( count > 0 ) return (int)count;
-#endif
-    return 1;
-}
-
 SoftwareRaycaster::SoftwareRaycaster()
-    : numberOfThreads(java::Math::max(1, detectCpuCount())),
+    : parallelRaytracer(new ParallelRaytracer()),
       bumpNormalMap(0)
 {
     try {
@@ -56,6 +39,8 @@ SoftwareRaycaster::SoftwareRaycaster()
             delete bumpNormalMap;
             bumpNormalMap = 0;
         }
+        delete parallelRaytracer;
+        parallelRaytracer = 0;
         Logger::reportMessage("SoftwareRaycaster", Logger::ERROR, "SoftwareRaycaster", "Failed loading software bump map");
         throw VSDKFatalException("Failed loading software bump map");
     }
@@ -63,6 +48,8 @@ SoftwareRaycaster::SoftwareRaycaster()
 
 SoftwareRaycaster::~SoftwareRaycaster()
 {
+    delete parallelRaytracer;
+    parallelRaytracer = 0;
     if ( bumpNormalMap != 0 ) {
         delete bumpNormalMap;
         bumpNormalMap = 0;
@@ -124,57 +111,11 @@ void SoftwareRaycaster::render(
         outputImage);
 
     try {
-        RasterTileGenerator tileGenerator(
-            RasterTileGenerationStrategy::LINEAR,
+        parallelRaytracer->execute(
             outputImage,
-            outputImage->getXSize(),
-            outputImage->getYSize(),
-            numberOfThreads);
-        const java::ArrayList<RasterTileArea>& tiles = tileGenerator.getTiles();
-        const int workerCount = java::Math::max(1, numberOfThreads);
-        std::atomic<size_t> nextTileIndex(0);
-        std::thread* workers = new std::thread[workerCount];
-        std::atomic<bool> failed(false);
-        std::exception_ptr firstError;
-
-        for ( int w = 0; w < workerCount; w++ ) {
-            workers[w] = std::thread([&]() {
-                SimpleRaytracer raytracer;
-                try {
-                    while ( true ) {
-                        size_t tileIndex = nextTileIndex.fetch_add(1);
-                        if ( (long int)tileIndex >= tiles.size() ) {
-                            break;
-                        }
-                        RasterTileArea tile = tiles.get((long int)tileIndex);
-                        raytracer.execute(
-                            outputImage,
-                            &model->quality,
-                            snapshot,
-                            0,
-                            0,
-                            tile.getX0(),
-                            tile.getY0(),
-                            tile.getX1(),
-                            tile.getY1());
-                    }
-                }
-                catch (...) {
-                    if ( !failed.exchange(true) ) {
-                        firstError = std::current_exception();
-                    }
-                }
-            });
-        }
-
-        for ( int i = 0; i < workerCount; i++ ) {
-            workers[i].join();
-        }
-        delete[] workers;
-
-        if ( firstError ) {
-            std::rethrow_exception(firstError);
-        }
+            &model->quality,
+            snapshot,
+            false);
     }
     catch (...) {
         delete snapshot;

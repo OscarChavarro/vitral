@@ -14,32 +14,32 @@ import { Matrix4x4d } from '@vitral/base/vsdk/toolkit/common/linealAlgebra/Matri
 import { MicroFacetedMaterial } from '@vitral/base/vsdk/toolkit/environment/material/MicroFacetedMaterial';
 import { NormalMap } from '@vitral/base/vsdk/toolkit/media/NormalMap';
 import { PointLight } from '@vitral/base/vsdk/toolkit/environment/light/PointLight';
-import { RendererConfiguration } from '@vitral/base/vsdk/toolkit/environment/material/RendererConfiguration';
 import { RGBImageUncompressed } from '@vitral/base/vsdk/toolkit/media/RGBImageUncompressed';
 import { SimpleBackground } from '@vitral/base/vsdk/toolkit/environment/background/SimpleBackground';
 import { SimpleBody } from '@vitral/base/vsdk/toolkit/environment/scene/SimpleBody';
 import { SimpleMaterial } from '@vitral/base/vsdk/toolkit/environment/material/SimpleMaterial';
-import { SimpleRaytracer } from '@vitral/base/vsdk/toolkit/render/raytracing/SimpleRaytracer';
+import { ParallelRaytracerTileRenderer } from '@vitral/base/vsdk/toolkit/render/raytracing/ParallelRaytracerTileRenderer';
 import { SimpleSceneSnapshot } from '@vitral/base/vsdk/toolkit/environment/scene/SimpleSceneSnapshot';
 import { Sphere } from '@vitral/base/vsdk/toolkit/environment/geometry/volume/Sphere';
 import { Vector3Dd } from '@vitral/base/vsdk/toolkit/common/linealAlgebra/Vector3Dd';
 import type { Light } from '@vitral/base/vsdk/toolkit/environment/light/Light';
+import type { WorkerTransferValue } from '@vitral/base/java/concurrent/WorkerProtocol';
+import type {
+  ParallelRaytracerTileRequest,
+  ParallelRaytracerTileResult,
+} from '@vitral/base/vsdk/toolkit/render/raytracing/ParallelRaytracer';
 // The barrel installs these `RendererConfiguration` methods as a side effect;
 // a worker that does not load the barrel must ask for them explicitly.
 import '@vitral/base/vsdk/toolkit/environment/material/RendererConfigurationBehavior';
-import type { ShadersTileRequest, ShadersTileResult } from './software-raycaster-protocol';
+import type { ShadersSceneDescriptor } from './software-raycaster-protocol';
 
 /**
- * Worker-side half of `render.SoftwareRaycaster`.
+ * Worker entry module of the `ParallelRaytracer` of `render.SoftwareRaycaster`.
  *
- * Java's `SoftwareRaycaster.TileWorker` is a `Callable<Void>` on a thread of
- * the same JVM: every worker shares the one scene snapshot and writes straight
- * into the one `RGBImageUncompressed`. A Web Worker shares no heap, so this
- * module rebuilds the snapshot from a description of it and returns the bytes
- * of the band it rendered, which the owner splices into the result. The pixels
- * are the same either way, because a tile only ever reads the scene and only
- * ever writes its own rows, which is exactly why Java can let its threads share
- * the image in the first place.
+ * Java's threads share the one scene snapshot. A Web Worker shares no heap, so
+ * a `ParallelRaytracerTileRenderer` renders its bands here, and this module
+ * only tells it how to rebuild the snapshot from the `ShadersSceneDescriptor`
+ * (once per frame; see `ParallelRaytracerTileRenderer`).
  *
  * The scene description is rebuilt into the very objects Java's
  * `buildSceneSnapshot` creates, in its order: the sphere body carrying a copy
@@ -57,7 +57,7 @@ interface LoadedResources {
 
 let loaded: LoadedResources | undefined;
 
-function loadResources(request: ShadersTileRequest): LoadedResources {
+function loadResources(request: ShadersSceneDescriptor): LoadedResources {
   if (loaded !== undefined && loaded.generation === request.generation) {
     return loaded;
   }
@@ -86,8 +86,10 @@ function loadResources(request: ShadersTileRequest): LoadedResources {
 }
 
 function buildSceneSnapshot(
-  request: ShadersTileRequest,
+  request: ShadersSceneDescriptor,
   resources: LoadedResources,
+  width: number,
+  height: number,
 ): SimpleSceneSnapshot {
   const camera = new Camera();
   camera.setPosition(
@@ -99,8 +101,8 @@ function buildSceneSnapshot(
   );
   camera.setRotation(matrixFromRowOrder(request.cameraRotation));
   camera.setFov(request.cameraFov);
-  camera.updateViewportResize(request.width, request.height);
-  const cameraSnapshot = camera.exportToCameraSnapshot(request.width, request.height);
+  camera.updateViewportResize(width, height);
+  const cameraSnapshot = camera.exportToCameraSnapshot(width, height);
 
   const sphereBody = new SimpleBody();
   sphereBody.setGeometry(new Sphere(request.sphereRadius));
@@ -135,7 +137,7 @@ function buildSceneSnapshot(
 }
 
 /** `ShadersModel.getActiveMaterialForCurrentShading`, on the worker's side. */
-function buildActiveMaterial(request: ShadersTileRequest): SimpleMaterial {
+function buildActiveMaterial(request: ShadersSceneDescriptor): SimpleMaterial {
   if (request.microFacetMaterialName !== null) {
     return MicroFacetedMaterial.fromCsvText(
       request.microFacetCsvText,
@@ -163,42 +165,15 @@ function matrixFromRowOrder(values: Float64Array): Matrix4x4d {
   return new Matrix4x4d(rows);
 }
 
-const handler = createWorkerMessageHandler<ShadersTileRequest, ShadersTileResult>(
-  (request) => {
-    const resources: LoadedResources = loadResources(request);
-    const snapshot: SimpleSceneSnapshot = buildSceneSnapshot(request, resources);
-
-    const quality = new RendererConfiguration();
-    quality.setTexture(request.qualityTexture);
-    quality.setBumpMap(request.qualityBumpMap);
-    quality.setShadingType(request.qualityShadingType);
-
-    const image = new RGBImageUncompressed();
-    image.init(request.width, request.height);
-
-    new SimpleRaytracer().execute(
-      image,
-      quality,
-      snapshot,
-      null,
-      null,
-      request.x0,
-      request.y0,
-      request.x0 + request.dx,
-      request.y0 + request.dy,
-    );
-
-    // `RGBImageUncompressed` stores row `y` at `(ySize - 1 - y) * rowStride`,
-    // so a full-width band is one contiguous byte range. `RasterTileGenerator`
-    // in LINEAR mode only ever produces full-width bands, which the owner
-    // checks before handing a tile over.
-    const rowStride: number = request.width * 3;
-    const raw: Uint8Array = image.getRawImageDirectBuffer();
-    const start: number = (request.height - (request.y0 + request.dy)) * rowStride;
-    const end: number = (request.height - request.y0) * rowStride;
-
-    return { y0: request.y0, dy: request.dy, bytes: raw.slice(start, end) };
+const renderer = new ParallelRaytracerTileRenderer(
+  (sceneDescriptor: WorkerTransferValue, width: number, height: number): SimpleSceneSnapshot => {
+    const descriptor = sceneDescriptor as ShadersSceneDescriptor;
+    return buildSceneSnapshot(descriptor, loadResources(descriptor), width, height);
   },
+);
+
+const handler = createWorkerMessageHandler<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>(
+  (request, _signal, notify) => renderer.renderTile(request, notify),
   (response) => {
     self.postMessage(response);
   },

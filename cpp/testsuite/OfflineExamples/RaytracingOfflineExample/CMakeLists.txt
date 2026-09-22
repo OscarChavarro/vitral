@@ -25,8 +25,6 @@ if(BUILD_RAYTRACING_EXAMPLE)
     src/RaytracerSimple.cpp
     src/CommandOptionsProcessor.cpp
     src/ImageExporter.cpp
-    src/RaytracerSerialExecutor.cpp
-    src/RaytracerParallelExecutor.cpp
   )
 
   target_include_directories(RaytracingOfflineExample PRIVATE

@@ -351,6 +351,14 @@ export { ShaderSelector } from "./vsdk/toolkit/render/shaders/ShaderSelector.js"
 export { RasterTileArea } from "./vsdk/toolkit/render/raytracing/RasterTileArea.js";
 export { RasterTileGenerationStrategy } from "./vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.js";
 export { RasterTileGenerator } from "./vsdk/toolkit/render/raytracing/RasterTileGenerator.js";
+export { ParallelRaytracer } from "./vsdk/toolkit/render/raytracing/ParallelRaytracer.js";
+export type {
+    ParallelRaytracerTileRequest,
+    ParallelRaytracerTileResult,
+    ParallelRaytracerWorkerFactory,
+} from "./vsdk/toolkit/render/raytracing/ParallelRaytracer.js";
+export { ParallelRaytracerTileRenderer } from "./vsdk/toolkit/render/raytracing/ParallelRaytracerTileRenderer.js";
+export type { ParallelRaytracerSceneLoader } from "./vsdk/toolkit/render/raytracing/ParallelRaytracerTileRenderer.js";
 export { SimpleRaytracer } from "./vsdk/toolkit/render/raytracing/SimpleRaytracer.js";
 export { PersistenceElement } from "./vsdk/toolkit/io/PersistenceElement.js";
 export { FontReader } from "./vsdk/toolkit/io/geometry/FontReader.js";
