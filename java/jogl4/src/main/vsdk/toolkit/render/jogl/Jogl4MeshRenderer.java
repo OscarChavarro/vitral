@@ -38,6 +38,17 @@ current.
 */
 public class Jogl4MeshRenderer extends Jogl4Renderer {
     private static final int DEFAULT_SLICES = 32;
+
+    // Every Phong/Gouraud/Cook-Torrance shader declares a `sTexture` sampler
+    // even when the material has no diffuse texture (`withTexture` is set to
+    // 0, and the shader does not sample it then). Some GL drivers (i.e. the
+    // one on MacOSX) still require a complete texture object bound to the
+    // unit a sampler uniform points to, or they log a "texture unloadable"
+    // diagnostic and substitute a zero texture (correct color, noisy log).
+    // This 1x1 white texture is bound to unit 0 instead, whenever the
+    // material has none, so nothing is ever unbound while such a shader is
+    // active.
+    private static int dummyTextureId;
     private static final int DEFAULT_STACKS = 16;
     private static final float SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
     private static final float SURFACE_POLYGON_OFFSET_UNITS = 1.0f;
@@ -397,6 +408,43 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
     public static void dispose(GL4 gl)
     {
         Jogl4MinMaxRenderer.dispose(gl);
+        if ( dummyTextureId > 0 ) {
+            gl.glDeleteTextures(1, new int[] {dummyTextureId}, 0);
+            dummyTextureId = 0;
+        }
+    }
+
+    /**
+    @return the id of the 1x1 white texture, created the first time it is
+    needed
+    */
+    private static int ensureDummyTexture(GL4 gl)
+    {
+        if ( dummyTextureId > 0 ) {
+            return dummyTextureId;
+        }
+
+        int[] tmp = new int[1];
+
+        gl.glGenTextures(1, tmp, 0);
+        dummyTextureId = tmp[0];
+
+        gl.glBindTexture(GL4.GL_TEXTURE_2D, dummyTextureId);
+        gl.glTexImage2D(
+            GL4.GL_TEXTURE_2D,
+            0,
+            GL4.GL_RGB8,
+            1,
+            1,
+            0,
+            GL4.GL_RGB,
+            GL4.GL_UNSIGNED_BYTE,
+            Buffers.newDirectByteBuffer(new byte[] {(byte)255, (byte)255, (byte)255}));
+        gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MAG_FILTER, GL4.GL_NEAREST);
+        gl.glTexParameteri(GL4.GL_TEXTURE_2D, GL4.GL_TEXTURE_MIN_FILTER, GL4.GL_NEAREST);
+        gl.glBindTexture(GL4.GL_TEXTURE_2D, 0);
+
+        return dummyTextureId;
     }
 
     private static void configureProgram(
@@ -456,10 +504,8 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
             "withBumpMap",
             (quality.isBumpMapSet() && normalMapId > 0) ? 1 : 0);
 
-        if ( textureId > 0 ) {
-            gl.glActiveTexture(GL.GL_TEXTURE0);
-            gl.glBindTexture(GL.GL_TEXTURE_2D, textureId);
-        }
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textureId > 0 ? textureId : ensureDummyTexture(gl));
 
         if ( normalMapId > 0 ) {
             gl.glActiveTexture(GL.GL_TEXTURE1);
