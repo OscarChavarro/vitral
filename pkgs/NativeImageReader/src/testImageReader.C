@@ -36,12 +36,20 @@ testPngReader(const char *input, const char *output)
 
     HeaderInfo = readPngHeader(fd);
 
+    if ( HeaderInfo == NULL ) {
+        fprintf(stderr, "testImageReader: can not read image [%s]\n", input);
+        if ( fd != NULL ) {
+            fclose(fd);
+        }
+        return;
+    }
+
     BYTE *arr;
     arr = new BYTE[HeaderInfo->xSize * HeaderInfo->ySize * 3];
 
     printf("Processing image of %d x %d pixels... ", (int)HeaderInfo->xSize, (int)HeaderInfo->ySize);
     fflush(stdout);
-    readPngDataRGB(HeaderInfo, fd, arr, FALSE);
+    readPngDataRGB(HeaderInfo, arr, FALSE);
     printf("Ok!\n");
     fflush(stdout);
 
@@ -51,10 +59,8 @@ testPngReader(const char *input, const char *output)
     printf("Ok!\n");
     fflush(stdout);
 
-    delete arr;
-    delete HeaderInfo;
-
-    fclose(fd);
+    delete [] arr;
+    releasePngHeader(HeaderInfo);
 }
 
 int

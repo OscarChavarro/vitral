@@ -1,12 +1,16 @@
 package vsdk.toolkit.processing;
 
+import vsdk.toolkit.common.NativeLibraryLoader;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
-import vsdk.toolkit.io.PersistenceElement;
 
 public class SpharmonicKitWrapper extends ProcessingElement {
 
+    public static final String LIBRARY_NAME = "spharmonickit";
+    public static final String PACKAGE_NAME = "SpharmonicKit27";
+
     static boolean loaded = false;
+    static boolean loadAttempted = false;
 
     private static native boolean
     executeSphericalHarmonics(
@@ -20,22 +24,23 @@ public class SpharmonicKitWrapper extends ProcessingElement {
         double outSphericalHarmonicsR[],
         double outSphericalHarmonicsI[])
     {
-        if ( !loaded ) {
-            // Not working!
-            //System.setProperty("java.library.path", "./bin");
-            //System.out.println(System.getProperty("java.library.path"));
+        if ( !loaded && !loadAttempted ) {
+            loadAttempted = true;
 
-            if ( !PersistenceElement.verifyLibrary("spharmonickit") ) {
+            String diagnostic[] = new String[1];
+
+            loaded = NativeLibraryLoader.load(LIBRARY_NAME, PACKAGE_NAME,
+                                              diagnostic) != null;
+
+            if ( !loaded ) {
                 Logger.reportMessage(null, VSDK.ERROR,
                   "SpharmonicKitWrapper.calculateSphericalHarmonicLenghts",
-"Native library spharmonickit not available. Check you have it installed\n" + 
-"globally, or that you used the -Djava.library.path=foldercontaning.dllor.so\n" +
-"in the command line for java interpreter JVM.\n" + 
+"Native library spharmonickit not available" +
+(diagnostic[0] != null ? " (" + diagnostic[0] + ")" : "") + ".\n" +
+"Build it with the CMake project in pkgs/SpharmonicKit27.\n" +
 "Further error reporting in this issue disabled.");
                 return false;
             }
-            System.loadLibrary("spharmonickit");
-            loaded = true;
         }
         if ( loaded == true ) {
             return executeSphericalHarmonics(inImage,

@@ -1,13 +1,23 @@
 package vsdk.toolkit.io.image;
 
-import vsdk.toolkit.io.PersistenceElement;
+/**
+Image geometry reported by the `NativeImageReader` native library, plus the
+reference to the native reading context associated with it.
 
-public class _NativeImageReaderWrapperHeaderInfo extends PersistenceElement
+Note this class does not extend `PersistenceElement`: it is compiled stand
+alone by the `pkgs/NativeImageReader` build to generate the JNI header, so
+it must not depend on the rest of the toolkit.
+*/
+public class _NativeImageReaderWrapperHeaderInfo
 {
     public long xSize;
     public long ySize;
     public long channels;
 
-    // Warning: only tested on 64bit environments!
+    /**
+    Address of the native `_NativeImageReaderHeaderInfo` structure of the
+    reading operation in progress, or 0 if no reading is pending. Only
+    manipulated by the native library.
+    */
     public long nativePointer;
 }

@@ -90,9 +90,25 @@ gradle build
 
 This will clean previous outputs, download required dependencies, and build all Java modules.
 
+### Optional native libraries
+
+Some toolkit operations have an optional native (C/C++) implementation,
+contained in the CMake projects of the `pkgs` folder: a libpng based png
+reader, LZW decompression and spherical harmonics. They are built with:
+
+```bash
+cd pkgs
+cmake -S . -B build
+cmake --build build -j
+```
+
+The Java side locates these libraries inside the source tree by itself, so
+no installation nor `-Djava.library.path` is needed; when a library is not
+built, the toolkit uses its pure Java implementation. See `pkgs/README.md`.
+
 ## Repository layout
 
 - `java/`: main toolkit modules and testsuite
 - `doc/`: architecture notes, references, and historical docs
 - `etc/`: shaders, textures, materials, fonts, and sample assets
-- `pkgs/`: auxiliary native/third-party experiments
+- `pkgs/`: optional native libraries used from Java through JNI (CMake projects)

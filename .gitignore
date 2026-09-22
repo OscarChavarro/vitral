@@ -24,9 +24,13 @@ classes/*
 lib/*
 bin/*
 tmp/*
+# Legacy Makefile based output of the pkgs native projects (now CMake, which
+# leaves everything inside each project's build directory)
 pkgs/LempelZivWelch/bin/
 pkgs/LempelZivWelch/classes/
 pkgs/LempelZivWelch/tmp/
+pkgs/LempelZivWelch/main.java
+pkgs/LempelZivWelch/main.java.Z
 pkgs/NativeImageReader/bin/
 pkgs/NativeImageReader/classes/
 pkgs/NativeImageReader/tmp/

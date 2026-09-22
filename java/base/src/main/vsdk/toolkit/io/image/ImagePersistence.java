@@ -249,18 +249,19 @@ public class ImagePersistence extends PersistenceElement
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
             _NativeImageReaderWrapperHeaderInfo header;
             header = new _NativeImageReaderWrapperHeaderInfo();
-            NativeImageReaderWrapper.readPngHeader(header,
-                inImageFd.getAbsolutePath());
-            retImage.initNoFill((int)header.xSize, (int)header.ySize);
-            NativeImageReaderWrapper.readPngDataRGBA(header, retImage.getRawImageDirectBuffer());
-            return retImage;
+            try {
+                NativeImageReaderWrapper.readPngHeader(header,
+                    inImageFd.getAbsolutePath());
+                retImage.initNoFill((int)header.xSize, (int)header.ySize);
+                NativeImageReaderWrapper.readPngDataRGBA(header, retImage.getRawImageDirectBuffer());
+                return retImage;
+            }
+            finally {
+                NativeImageReaderWrapper.releasePngHeader(header);
+            }
         }
 
-        if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
-             type.equals("png") ) {
-            nativeWarningGiven = true;
-            Logger.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGBA", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
-        }
+        reportMissingNativeReader(type);
 
         //-----------------------------------------------------------------
         int i;
@@ -276,6 +277,30 @@ public class ImagePersistence extends PersistenceElement
         }
 
         throw new ImageNotRecognizedException("Image not recognized", inImageFd);
+    }
+
+    /**
+    Reports, only once and as a single informative line, that png images are
+    being read with the slow AWT based path because the NativeImageReader
+    native library is not available. Build it with the CMake project in
+    pkgs/NativeImageReader to enable the fast path.
+    */
+    private static void reportMissingNativeReader(String type)
+    {
+        if ( nativeWarningGiven || NativeImageReaderWrapper.available ||
+             !type.equals("png") ) {
+            return;
+        }
+
+        nativeWarningGiven = true;
+
+        String diagnostic = NativeImageReaderWrapper.getLoadDiagnostic();
+
+        System.err.println(
+            "ImagePersistence: NativeImageReader library not available" +
+            (diagnostic != null ? " (" + diagnostic + ")" : "") +
+            ", using the AWT based png reader, which can be slow. Build " +
+            "pkgs/NativeImageReader to enable the native reader.");
     }
 
     /**
@@ -360,18 +385,19 @@ public class ImagePersistence extends PersistenceElement
         if ( NativeImageReaderWrapper.available && type.equals("png") ) {
             _NativeImageReaderWrapperHeaderInfo header;
             header = new _NativeImageReaderWrapperHeaderInfo();
-            NativeImageReaderWrapper.readPngHeader(header,
-                inImageFd.getAbsolutePath());
-            retImage.initNoFill((int)header.xSize, (int)header.ySize);
-            NativeImageReaderWrapper.readPngDataRGB(header, retImage.getRawImageDirectBuffer());
-            return (T)retImage;
+            try {
+                NativeImageReaderWrapper.readPngHeader(header,
+                    inImageFd.getAbsolutePath());
+                retImage.initNoFill((int)header.xSize, (int)header.ySize);
+                NativeImageReaderWrapper.readPngDataRGB(header, retImage.getRawImageDirectBuffer());
+                return (T)retImage;
+            }
+            finally {
+                NativeImageReaderWrapper.releasePngHeader(header);
+            }
         }
 
-        if ( !nativeWarningGiven && !NativeImageReaderWrapper.available &&
-             type.equals("png") ) {
-            nativeWarningGiven = true;
-            Logger.reportMessage(null, VSDK.WARNING, "ImagePersistence.importRGB", "NativeImageReader library not found, falling to AWT-based PNG reading, which can be slow.");
-        }
+        reportMissingNativeReader(type);
 
         //-----------------------------------------------------------------
         int i;
