@@ -21,7 +21,7 @@ several displays uses one renderer per display. The model is injected in the
 constructor, and it is not modified by the rendering, except for the pixel
 areas of the viewports, which depend on the GL surface size.
 */
-public class JoglViewportSetRenderer
+public class Jogl4ViewportSetRenderer
 {
     public interface ViewRenderer
     {
@@ -34,7 +34,7 @@ public class JoglViewportSetRenderer
     private final Jogl4LabelImageProvider labelImageProvider;
     private final Map<Viewport, Jogl4ViewportWindow> windows;
 
-    public JoglViewportSetRenderer(ViewportSet viewportSet,
+    public Jogl4ViewportSetRenderer(ViewportSet viewportSet,
                                    Jogl4LabelImageProvider labelImageProvider,
                                    ViewRenderer viewRenderer)
     {

@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -19,7 +19,7 @@ placed next to each other. This border only takes the pixels of the bevel, so
 adjacent buttons touch each other. Colors are derived from the background of
 the button, so it follows the theme in use.
 */
-public class CompactBevelButtonBorder extends AbstractBorder
+public class AwtCompactBevelButtonBorder extends AbstractBorder
 {
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,7 @@ public class CompactBevelButtonBorder extends AbstractBorder
     /**
     @param thickness width of the bevel, in pixels
     */
-    public CompactBevelButtonBorder(int thickness)
+    public AwtCompactBevelButtonBorder(int thickness)
     {
         this.thickness = thickness;
     }

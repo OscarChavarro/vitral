@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 // AWT/Swing classes
 import java.awt.Component;
@@ -9,20 +9,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import java.util.EnumMap;
+import java.util.Map;
 import javax.swing.JLabel;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
+import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBImageUncompressed;
 
 // Application classes
-import application.SceneEditorApplication;
 import model.DrawingArea;
+import model.selection.SceneSelectionEditor;
 import render.BodyEditFeedbackProvider;
 import render.DrawingAreaHost;
-import gui.awt.AwtCursorWarper;
-import gui.awt.AwtViewportElementScaler;
+import gui.DrawingAreaInteractionListener;
+import gui.PointerCursor;
 
 /**
 Presents in the AWT/Swing GUI what the drawing area asks for: pointer shapes,
@@ -34,42 +37,32 @@ technology hosting the drawing surface.
 public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     DrawingAreaHost
 {
-    private static final String CURSORS_FOLDER = "./etc/cursors/";
-
-    private final SceneEditorApplication application;
+    private final AwtApplicationHost application;
     private final DrawingArea drawingArea;
     private final Component canvas;
     private final AwtCursorWarper cursorWarper = new AwtCursorWarper();
     private final AwtViewportElementScaler elementScaler;
+    private final SceneSelectionEditor selectionEditor;
 
-    private final Cursor camrotateCursor;
-    private final Cursor camtranslateCursor;
-    private final Cursor camadvanceCursor;
-    private final Cursor translateCursor;
-    private final Cursor rotateCursor;
-    private final Cursor scaleCursor;
-    private final Cursor selectCursor;
-    private final Cursor titleCursor;
+    private final Map<PointerCursor, Cursor> cursors;
 
     /**
     @param application the application whose GUI is used
     @param canvas the component presenting the drawing surface
     */
-    public AwtDrawingAreaFeedback(SceneEditorApplication application,
+    public AwtDrawingAreaFeedback(AwtApplicationHost application,
                                   Component canvas)
     {
         this.application = application;
         this.drawingArea = application.getApplicationModel().getDrawingArea();
         this.canvas = canvas;
+        this.selectionEditor = new SceneSelectionEditor(
+            application.getApplicationModel().getScene());
 
-        camrotateCursor = createCursor("cursor_camrotate.gif", "CameraRotation");
-        camtranslateCursor = createCursor("cursor_camtranslate.gif", "CameraTranslation");
-        camadvanceCursor = createCursor("cursor_camadvance.gif", "CameraAdvance");
-        translateCursor = createCursor("cursor_translate.png", "Translation");
-        rotateCursor = createCursor("cursor_rotate.png", "Rotation");
-        scaleCursor = createCursor("cursor_scale.png", "Scale");
-        selectCursor = new Cursor(Cursor.DEFAULT_CURSOR);
-        titleCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+        cursors = new EnumMap<>(PointerCursor.class);
+        for ( PointerCursor cursor : PointerCursor.values() ) {
+            cursors.put(cursor, createCursor(cursor));
+        }
 
         elementScaler = new AwtViewportElementScaler(
             drawingArea.getViewportSet().getElementScaler());
@@ -77,20 +70,26 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     }
 
     /**
-    Loads a cursor image (with transparency, hot spot at its center).
-    @param filename image file inside the cursors folder
-    @param name name of the cursor
-    @return the custom cursor, or the default cursor if the image cannot be read
+    Loads the image of a pointer (with transparency, hot spot at its center).
+    @param cursor the pointer to present
+    @return the custom cursor, or the default cursor if the pointer has no
+    image or it cannot be read
     */
-    private Cursor createCursor(String filename, String name)
+    private Cursor createCursor(PointerCursor cursor)
     {
+        String filename = cursor.getImagePath();
+
+        if ( filename == null ) {
+            return new Cursor(Cursor.DEFAULT_CURSOR);
+        }
         try {
-            BufferedImage image = ImageIO.read(new File(CURSORS_FOLDER + filename));
+            BufferedImage image = ImageIO.read(new File(filename));
 
             if ( image != null ) {
                 Point hotSpot = new Point(image.getWidth() / 2, image.getHeight() / 2);
 
-                return Toolkit.getDefaultToolkit().createCustomCursor(image, hotSpot, name);
+                return Toolkit.getDefaultToolkit().createCustomCursor(image, hotSpot,
+                    cursor.getDisplayName());
             }
         }
         catch ( IOException | IllegalArgumentException e ) {
@@ -128,13 +127,13 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     public void reportTargetToModifyPanel()
     {
         AwtApplicationModel awtModel = application.getAwtModel();
-        int firstThingSelected =
-            application.getApplicationModel().getScene().selectedThings.firstSelected();
+        SimpleBody target = null;
 
-        if ( awtModel.isModifyPanelSelected() && firstThingSelected >= 0 ) {
-            awtModel.getModifyPanel().notifyTargetBeginEdit(
-                application.getApplicationModel().getScene().scene.getSimpleBodies().get(firstThingSelected)
-            );
+        if ( application.getApplicationModel().getGuiState().isModifyPanelSelected() ) {
+            target = selectionEditor.getFirstSelectedBody();
+        }
+        if ( target != null ) {
+            awtModel.getModifyPanel().notifyTargetBeginEdit(target);
         }
         else {
             awtModel.getModifyPanel().notifyTargetEndEdit();
@@ -146,34 +145,8 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     @Override
     public void cursorRequested(PointerCursor cursor)
     {
-        Cursor wanted;
+        Cursor wanted = cursors.get(cursor);
 
-        switch ( cursor ) {
-          case CAMERA_ROTATE:
-            wanted = camrotateCursor;
-            break;
-          case CAMERA_TRANSLATE:
-            wanted = camtranslateCursor;
-            break;
-          case CAMERA_ADVANCE:
-            wanted = camadvanceCursor;
-            break;
-          case TRANSLATE:
-            wanted = translateCursor;
-            break;
-          case ROTATE:
-            wanted = rotateCursor;
-            break;
-          case SCALE:
-            wanted = scaleCursor;
-            break;
-          case VIEWPORT_TITLE:
-            wanted = titleCursor;
-            break;
-          default:
-            wanted = selectCursor;
-            break;
-        }
         if ( canvas.getCursor() != wanted ) {
             canvas.setCursor(wanted);
         }
@@ -209,7 +182,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     {
         AwtApplicationModel awtModel = application.getAwtModel();
 
-        setStatusText(awtModel.getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
+        setStatusText(application.getApplicationModel().getI18nContext().getMessage("IDM_COMPUTING_RAYTRACING"));
         application.doRaytracingImage();
         showImage(application.getApplicationModel().getRaytracedImage());
     }
@@ -220,7 +193,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         AwtApplicationModel awtModel = application.getAwtModel();
 
         if ( awtModel.getSelectorDialog() == null ) {
-            awtModel.setSelectorDialog(new SwingSelectorDialog());
+            awtModel.setSelectorDialog(new AwtSelectorDialog());
         }
         awtModel.getSelectorDialog().setVisible(true);
         awtModel.getSelectorDialog().repaint();
@@ -235,7 +208,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     @Override
     public void fullScreenGuiToggleRequested()
     {
-        application.getAwtModel().toggleFullScreenGuiMode();
+        application.getApplicationModel().getGuiState().toggleFullScreenGuiMode();
         application.destroyGUI();
         application.createGUI();
     }
@@ -253,7 +226,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     @Override
     public boolean isFullScreenGuiMode()
     {
-        return application.getAwtModel().isFullScreenGuiMode();
+        return application.getApplicationModel().getGuiState().isFullScreenGuiMode();
     }
 
     @Override
@@ -274,9 +247,9 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         AwtApplicationModel awtModel = application.getAwtModel();
 
         if ( awtModel.getImageControlWindow() == null ) {
-            awtModel.setImageControlWindow(new SwingImageControlWindow(
+            awtModel.setImageControlWindow(new AwtImageControlWindow(
                 image,
-                awtModel.getGui(),
+                application.getApplicationModel().getI18nContext(),
                 awtModel.getExecutorPanel()));
         }
         else {

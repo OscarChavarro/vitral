@@ -23,6 +23,8 @@ import vsdk.toolkit.gui.widget.WidgetMenu;
 import vsdk.toolkit.gui.widget.WidgetMenuElement;
 import vsdk.toolkit.gui.widget.WidgetMenuItem;
 
+import gui.PopupDismissClickFilter;
+
 /**
 Awt/Swing presentation of the `VIEWPORT_SET_PROJECTION_LOCATION` popup of the
 viewport set: a popup menu to change the projection location of a viewport
@@ -36,20 +38,16 @@ root pane of the window, which is what allows Swing to give it the keyboard
 focus: the user can move with the up and down keys and select with enter or
 space (escape closes it). Clicking outside closes the menu without applying
 anything, and that click is not processed by the canvas (see
-`consumesMouseEvent`). When the menu closes, the keyboard focus goes back to
+`consumesMouseEvent` and `PopupDismissClickFilter`). When the menu closes, the keyboard focus goes back to
 the canvas.
 */
 public class AwtProjectionLocationPopup
 {
-    // The press that closes the popup is delivered to the canvas right after
-    private static final long OUTSIDE_PRESS_WINDOW_MILLIS = 300;
-
     private final ViewportSet viewportSet;
     private final ViewportSetInteractionTechniques techniques;
     private final Component canvas;
     private JPopupMenu popup;
-    private long closedAtMillis;
-    private boolean swallowingClick;
+    private final PopupDismissClickFilter dismissClickFilter;
 
     /**
     @param viewportSet the set whose I18N context gives the texts
@@ -65,8 +63,7 @@ public class AwtProjectionLocationPopup
         this.techniques = techniques;
         this.canvas = canvas;
         this.popup = null;
-        this.closedAtMillis = 0;
-        this.swallowingClick = false;
+        this.dismissClickFilter = new PopupDismissClickFilter();
     }
 
     /**
@@ -112,7 +109,7 @@ public class AwtProjectionLocationPopup
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
             {
-                closedAtMillis = System.currentTimeMillis();
+                dismissClickFilter.popupClosed(System.currentTimeMillis());
                 // Give the focus back once Swing has finished with the menu
                 SwingUtilities.invokeLater(() -> canvas.requestFocusInWindow());
             }
@@ -134,7 +131,7 @@ public class AwtProjectionLocationPopup
             MenuSelectionManager.defaultManager().setSelectedPath(
                 new MenuElement[] {popup, current});
         }
-        swallowingClick = false;
+        dismissClickFilter.popupShown();
         return true;
     }
 
@@ -174,31 +171,33 @@ public class AwtProjectionLocationPopup
     }
 
     /**
-    A click outside the menu closes it, and that click must not act over the
-    canvas (i.e. selecting another viewport): the user only wanted to leave the
-    menu. Mouse handlers of the canvas must ask this before processing the
-    mouse presses, releases, clicks and drags: the events of a press that
-    closed the menu are consumed.
-    @param event
+    Mouse handlers of the canvas must ask this before processing the mouse
+    presses, releases, clicks and drags: the events of a press that closed
+    the menu are consumed (see `PopupDismissClickFilter`).
+    @param event mouse event of the canvas
     @return true if the event must be ignored
     */
     public boolean consumesMouseEvent(MouseEvent event)
     {
+        PopupDismissClickFilter.MouseEventKind kind;
+
         switch ( event.getID() ) {
           case MouseEvent.MOUSE_PRESSED:
-            swallowingClick = closedAtMillis != 0 &&
-                System.currentTimeMillis() - closedAtMillis <= OUTSIDE_PRESS_WINDOW_MILLIS;
-            closedAtMillis = 0;
-            return swallowingClick;
+            kind = PopupDismissClickFilter.MouseEventKind.PRESS;
+            break;
           case MouseEvent.MOUSE_RELEASED:
+            kind = PopupDismissClickFilter.MouseEventKind.RELEASE;
+            break;
           case MouseEvent.MOUSE_DRAGGED:
-            return swallowingClick;
+            kind = PopupDismissClickFilter.MouseEventKind.DRAG;
+            break;
           case MouseEvent.MOUSE_CLICKED:
-            boolean swallowed = swallowingClick;
-            swallowingClick = false;
-            return swallowed;
+            kind = PopupDismissClickFilter.MouseEventKind.CLICK;
+            break;
           default:
-            return false;
+            kind = PopupDismissClickFilter.MouseEventKind.OTHER;
+            break;
         }
+        return dismissClickFilter.consumes(kind, System.currentTimeMillis());
     }
 }

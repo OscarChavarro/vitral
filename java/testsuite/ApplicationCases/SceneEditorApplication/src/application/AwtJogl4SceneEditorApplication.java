@@ -1,10 +1,6 @@
 package application;
 
 // Java classes
-import render.jogl.Jogl4ApplicationController;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.SwingUtilities;
 
@@ -16,20 +12,20 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Application classes
+import model.GuiState;
 import model.Scene;
 import model.ApplicationModel;
-import gui.AwtApplicationModel;
-import gui.AwtGuiController;
-import net.VitralEditorMCP;
+import gui.awt.AwtApplicationHost;
+import gui.awt.AwtApplicationModel;
 
-public class SceneEditorApplication {
+public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     // Application model
     private ApplicationModel applicationModel;
 
     // Application GUI
     private AwtApplicationModel awtModel;
-    private AwtGuiController awtGuiController;
-    private Jogl4ApplicationController jogl4Controller;
+    private AwtJogl4GuiController awtGuiController;
+    private AwtJogl4ApplicationController jogl4Controller;
 
     public void setLookAndFeel(String lookAndFeel)
     {
@@ -51,19 +47,7 @@ public class SceneEditorApplication {
     */
     public List<String> getGuiLanguages()
     {
-        List<String> languages = new ArrayList<>();
-        File[] files = new File(AwtApplicationModel.GUI_LANGUAGE_FOLDER).listFiles();
-
-        if ( files != null ) {
-            for ( File file : files ) {
-                String name = file.getName();
-                if ( file.isFile() && name.endsWith(AwtApplicationModel.JSON_EXTENSION) ) {
-                    languages.add(name.substring(0, name.length() - AwtApplicationModel.JSON_EXTENSION.length()));
-                }
-            }
-        }
-        Collections.sort(languages);
-        return languages;
+        return GuiState.listLanguages();
     }
 
     /**
@@ -71,12 +55,7 @@ public class SceneEditorApplication {
     */
     public String getCurrentGuiLanguage()
     {
-        String name = new File(awtModel.getLanguageGuiFile()).getName();
-
-        if ( name.endsWith(AwtApplicationModel.JSON_EXTENSION) ) {
-            name = name.substring(0, name.length() - AwtApplicationModel.JSON_EXTENSION.length());
-        }
-        return name;
+        return applicationModel.getGuiState().getCurrentLanguage();
     }
 
     /**
@@ -90,7 +69,7 @@ public class SceneEditorApplication {
         if ( language == null || !getGuiLanguages().contains(language) ) {
             return false;
         }
-        setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + language + AwtApplicationModel.JSON_EXTENSION);
+        setGuiLanguage(GuiState.languageFile(language));
         return true;
     }
 
@@ -118,25 +97,25 @@ public class SceneEditorApplication {
         applicationModel.setVisualDebugRay(new Ray(new Vector3Dd(0, -3, 0), new Vector3Dd(0, 1, 0)));
         applicationModel.setVisualDebugRayLevels(2);
         applicationModel.setWithVisualDebugRay(false);
-        jogl4Controller = new Jogl4ApplicationController(applicationModel);
+        jogl4Controller = new AwtJogl4ApplicationController(applicationModel);
         awtModel = new AwtApplicationModel();
         awtModel.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-        awtModel.setLanguageGuiFile(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "english" + AwtApplicationModel.JSON_EXTENSION);
-        awtModel.setFullScreenGuiMode(false);
-        awtGuiController = new AwtGuiController(this, awtModel, jogl4Controller);
+        awtGuiController = new AwtJogl4GuiController(this, awtModel, jogl4Controller);
     }
 
+    @Override
     public final void createGUI()
     {
         awtGuiController.createGUI();
     }
 
+    @Override
     public void destroyGUI()
     {
         awtGuiController.destroyGUI();
     }
 
-    public SceneEditorApplication(String[] args) {
+    public AwtJogl4SceneEditorApplication(String[] args) {
         createModel();
         createGUI();
 
@@ -144,11 +123,12 @@ public class SceneEditorApplication {
         for ( i = 0; i < args.length; i++ ) {
             if ( args[i].equals("-s") ) {
                 // Starts its own listener thread, which keeps it alive
-                new VitralEditorMCP(this);
+                new AwtJogl4VitralEditorMCP(this);
             }
         }
     }
 
+    @Override
     public void doRaytracingImage()
     {
         applicationModel.getRaytracedImage().init(
@@ -162,17 +142,19 @@ public class SceneEditorApplication {
         applicationModel.getScene().raytrace(applicationModel.getRaytracedImage());
     }
 
+    @Override
     public void closeApplication()
     {
         System.exit(0);
     }
 
+    @Override
     public ApplicationModel getApplicationModel()
     {
         return applicationModel;
     }
 
-    public Jogl4ApplicationController getJogl4Controller()
+    public AwtJogl4ApplicationController getJogl4Controller()
     {
         return jogl4Controller;
     }
@@ -181,6 +163,7 @@ public class SceneEditorApplication {
     Requests to draw again the drawing area, whatever the rendering
     technology presenting it.
     */
+    @Override
     public void repaintDrawingArea()
     {
         if ( jogl4Controller != null ) {
@@ -188,13 +171,22 @@ public class SceneEditorApplication {
         }
     }
 
+    @Override
+    public void reportTargetToModifyPanel()
+    {
+        if ( jogl4Controller != null ) {
+            jogl4Controller.reportTargetToModifyPanel();
+        }
+    }
+
+    @Override
     public AwtApplicationModel getAwtModel()
     {
         return awtModel;
     }
 
     public static void main(String[] args) {
-        MainThread mt = new MainThread(args);
+        AwtJogl4MainThread mt = new AwtJogl4MainThread(args);
         SwingUtilities.invokeLater(mt);
     }
 }

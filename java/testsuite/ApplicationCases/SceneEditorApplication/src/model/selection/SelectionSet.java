@@ -1,4 +1,4 @@
-package model;
+package model.selection;
 
 import java.util.ArrayList;
 

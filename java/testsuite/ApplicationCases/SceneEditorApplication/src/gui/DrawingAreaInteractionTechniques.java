@@ -20,7 +20,8 @@ import model.Scene;
 import model.ApplicationModel;
 import model.DrawingArea;
 import model.InteractionMode;
-import model.SceneSelectionEditor;
+import model.selection.ScenePicker;
+import model.selection.SceneSelectionEditor;
 import vsdk.toolkit.gui.viewport.ViewportInteractionTechniques;
 import vsdk.toolkit.gui.viewport.ViewportSetInteractionTechniques;
 
@@ -56,6 +57,7 @@ public class DrawingAreaInteractionTechniques
     private final Scene scene;
     private final ViewportSet viewportSet;
     private final SceneSelectionEditor selectionEditor;
+    private final ScenePicker scenePicker;
     private final ViewportInteractionTechniques interactionTechniques;
     private final ViewportSetInteractionTechniques viewportSetTechniques;
     private final VisualRayDebugController rayDebugController;
@@ -81,6 +83,7 @@ public class DrawingAreaInteractionTechniques
         this.listener = listener;
 
         selectionEditor = new SceneSelectionEditor(scene);
+        scenePicker = new ScenePicker(scene);
         qualitySelection = scene.qualityTemplate;
         interactionTechniques = new ViewportInteractionTechniques(scene.camera, qualitySelection);
         viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
@@ -441,8 +444,8 @@ public class DrawingAreaInteractionTechniques
             if ( !gizmoGrabbed ) {
                 // Numbers typed belong to the previous selection
                 cancelInputGizmoEditing();
-                model.setVisualDebugRay(scene.selectObjectWithMouse(
-                    viewportEvent.getX(), viewportEvent.getY(), composite, model.getVisualDebugRay()));
+                model.setVisualDebugRay(scenePicker.selectObjectWithMouse(
+                    viewportEvent.getX(), viewportEvent.getY(), composite));
             }
 
             Vector3Dd centroid = selectionEditor.computeSelectionCentroid();

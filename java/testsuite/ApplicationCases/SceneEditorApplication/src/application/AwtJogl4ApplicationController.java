@@ -1,4 +1,4 @@
-package render.jogl;
+package application;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -15,12 +15,12 @@ import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
 
-import application.SceneEditorApplication;
-import gui.AwtDrawingAreaController;
-import gui.AwtDrawingAreaFeedback;
+import gui.awt.AwtDrawingAreaController;
+import gui.awt.AwtDrawingAreaFeedback;
 import gui.DrawingAreaInteractionTechniques;
 import model.ApplicationModel;
 import model.DrawingArea;
+import render.jogl.Jogl4DrawingAreaRenderer;
 
 /**
 Composition root of the drawing area of the editor: it creates the OpenGL
@@ -28,19 +28,19 @@ canvas and connects the drawing area model with its renderer, its interaction
 techniques and the AWT adapters, and offers the operations that need the
 canvas.
 */
-public class Jogl4ApplicationController
+public class AwtJogl4ApplicationController
 {
     private final ApplicationModel model;
     private GLCanvas canvas;
     private AwtDrawingAreaController awtController;
     private AwtDrawingAreaFeedback awtFeedback;
 
-    public Jogl4ApplicationController(ApplicationModel model)
+    public AwtJogl4ApplicationController(ApplicationModel model)
     {
         this.model = model;
     }
 
-    private void createDrawingArea(SceneEditorApplication application)
+    private void createDrawingArea(AwtJogl4SceneEditorApplication application)
     {
         DrawingArea drawingArea = model.getDrawingArea();
 
@@ -79,7 +79,7 @@ public class Jogl4ApplicationController
             techniques, awtFeedback);
     }
 
-    private void ensureDrawingArea(SceneEditorApplication application)
+    private void ensureDrawingArea(AwtJogl4SceneEditorApplication application)
     {
         if ( canvas == null ) {
             createDrawingArea(application);
@@ -91,7 +91,7 @@ public class Jogl4ApplicationController
     first time
     @return the component presenting the drawing area
     */
-    public Component getCanvas(SceneEditorApplication application)
+    public Component getCanvas(AwtJogl4SceneEditorApplication application)
     {
         ensureDrawingArea(application);
         return canvas;

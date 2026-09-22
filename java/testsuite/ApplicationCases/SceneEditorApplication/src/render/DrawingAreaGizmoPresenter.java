@@ -11,7 +11,7 @@ import vsdk.toolkit.gui.viewport.ViewportSet;
 
 import model.DrawingArea;
 import model.InteractionMode;
-import model.SceneSelectionEditor;
+import model.selection.SceneSelectionEditor;
 
 /**
 Decides which manipulation gizmo of a `DrawingArea` must be presented in a

@@ -1,9 +1,10 @@
-package model;
+package model.selection;
 
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import model.Scene;
 
 
 /**

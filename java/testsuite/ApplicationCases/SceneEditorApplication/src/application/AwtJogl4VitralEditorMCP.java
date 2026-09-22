@@ -1,4 +1,4 @@
-package net;
+package application;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,10 +15,8 @@ import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import application.SceneEditorApplication;
 import model.Scene;
 import model.InteractionMode;
-import render.jogl.Jogl4ApplicationController;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.common.color.ColorRgb;
@@ -34,12 +32,12 @@ import vsdk.toolkit.environment.material.ShadingType;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.image.ImagePersistence;
 
-class VitralEditorMCPProtocol implements Runnable
+class AwtJogl4VitralEditorMCPProtocol implements Runnable
 {
-    private final SceneEditorApplication parent;
+    private final AwtJogl4SceneEditorApplication parent;
     private final Socket socket;
 
-    public VitralEditorMCPProtocol(SceneEditorApplication parent, Socket socket)
+    public AwtJogl4VitralEditorMCPProtocol(AwtJogl4SceneEditorApplication parent, Socket socket)
     {
         this.parent = parent;
         this.socket = socket;
@@ -60,7 +58,7 @@ class VitralEditorMCPProtocol implements Runnable
             }
         }
         catch ( Exception e ) {
-            System.err.println("Error on VitralEditorMCPProtocol!");
+            System.err.println("Error on AwtJogl4VitralEditorMCPProtocol!");
             System.err.println(e);
         }
     }
@@ -340,9 +338,9 @@ class VitralEditorMCPProtocol implements Runnable
     /**
     @return the controller of the drawing area, once its canvas was created
     */
-    private Jogl4ApplicationController getDrawingAreaController()
+    private AwtJogl4ApplicationController getDrawingAreaController()
     {
-        Jogl4ApplicationController controller = parent.getJogl4Controller();
+        AwtJogl4ApplicationController controller = parent.getJogl4Controller();
 
         if ( !controller.isDrawingAreaCreated() ) {
             throw new IllegalStateException("The drawing area has not been created");
@@ -352,7 +350,7 @@ class VitralEditorMCPProtocol implements Runnable
 
     private String injectMouse(String request)
     {
-        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         String type = stringProperty(request, "type", "move");
         int x = (int)Math.round(numberProperty(request, "x", 0));
         int y = (int)Math.round(numberProperty(request, "y", 0));
@@ -364,7 +362,7 @@ class VitralEditorMCPProtocol implements Runnable
 
     private String injectKey(String request)
     {
-        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         String key = stringProperty(request, "key", "");
         boolean shift = Boolean.TRUE.equals(booleanProperty(request, "shift"));
 
@@ -378,7 +376,7 @@ class VitralEditorMCPProtocol implements Runnable
     */
     private String projectSelectedBody(String request)
     {
-        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         Scene scene = parent.getApplicationModel().getScene();
         ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
         int viewportIndex = (int)numberProperty(request, "viewport", 0);
@@ -521,7 +519,7 @@ class VitralEditorMCPProtocol implements Runnable
     private String viewportJpg(String request)
     {
         String path = stringProperty(request, "path", "./outputSelectedViewport.jpg");
-        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         File out = new File(path);
         drawingArea.exportViewportJpg(out);
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
@@ -530,7 +528,7 @@ class VitralEditorMCPProtocol implements Runnable
     private String workspaceJpg(String request)
     {
         String path = stringProperty(request, "path", "./outputViewport.jpg");
-        Jogl4ApplicationController drawingArea = getDrawingAreaController();
+        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         File out = new File(path);
         drawingArea.exportWorkspaceJpg(out);
         return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
@@ -695,17 +693,17 @@ class VitralEditorMCPProtocol implements Runnable
     }
 }
 
-public class VitralEditorMCP implements Runnable
+public class AwtJogl4VitralEditorMCP implements Runnable
 {
-    private final SceneEditorApplication parent;
+    private final AwtJogl4SceneEditorApplication parent;
     private final int tcpPort;
 
-    public VitralEditorMCP(SceneEditorApplication parent)
+    public AwtJogl4VitralEditorMCP(AwtJogl4SceneEditorApplication parent)
     {
         this.parent = parent;
         tcpPort = 1234;
         Thread networkThread = new Thread(this);
-        networkThread.setName("VitralEditorMCP");
+        networkThread.setName("AwtJogl4VitralEditorMCP");
         networkThread.start();
     }
 
@@ -717,15 +715,15 @@ public class VitralEditorMCP implements Runnable
         try ( ServerSocket serverSocket = new ServerSocket(tcpPort) ) {
             while ( true ) {
                 Socket clientSocket = serverSocket.accept();
-                VitralEditorMCPProtocol listener =
-                    new VitralEditorMCPProtocol(parent, clientSocket);
+                AwtJogl4VitralEditorMCPProtocol listener =
+                    new AwtJogl4VitralEditorMCPProtocol(parent, clientSocket);
                 Thread listenerThread = new Thread(listener);
                 listenerThread.setName("VitralEditorMCPClient");
                 listenerThread.start();
             }
         }
         catch ( Exception e ) {
-            System.err.println("Error in VitralEditorMCP communications!");
+            System.err.println("Error in AwtJogl4VitralEditorMCP communications!");
             System.err.println(e);
         }
     }

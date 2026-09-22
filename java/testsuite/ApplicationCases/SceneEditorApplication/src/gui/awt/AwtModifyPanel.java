@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 // Java basic classes
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 // Application classes
-import application.SceneEditorApplication;
 import render.BodyEditFeedbackProvider;
 import render.RenderPrimitive;
 
@@ -24,17 +23,17 @@ geometry (subclasses of this panel). It does not draw: renderers ask it,
 through `BodyEditFeedbackProvider`, for the feedback geometry to present over
 the body under edition, so editors do not depend on any rendering technology.
 */
-public class ModifyPanel extends JPanel implements BodyEditFeedbackProvider
+public class AwtModifyPanel extends JPanel implements BodyEditFeedbackProvider
 {
-    protected SceneEditorApplication parent;
+    protected AwtApplicationHost parent;
     protected SimpleBody target;
 
     // Implementations
-    private ModifyPanelForFunctionalExplicitSurface functionalExplicitSurfaceEditor;
+    private AwtModifyPanelForFunctionalExplicitSurface functionalExplicitSurfaceEditor;
     /// Editor for the current target, or null if there is none
-    private ModifyPanel activeEditor;
+    private AwtModifyPanel activeEditor;
 
-    public ModifyPanel(SceneEditorApplication parent)
+    public AwtModifyPanel(AwtApplicationHost parent)
     {
         this.parent = parent;
         notifyTargetEndEdit();
@@ -57,7 +56,7 @@ public class ModifyPanel extends JPanel implements BodyEditFeedbackProvider
 
         if ( target.getGeometry() instanceof FunctionalExplicitSurface ) {
             if ( functionalExplicitSurfaceEditor == null ) {
-                functionalExplicitSurfaceEditor = new ModifyPanelForFunctionalExplicitSurface(parent);
+                functionalExplicitSurfaceEditor = new AwtModifyPanelForFunctionalExplicitSurface(parent);
             }
             functionalExplicitSurfaceEditor.notifyTargetBeginEdit(target, this);
             activeEditor = functionalExplicitSurfaceEditor;

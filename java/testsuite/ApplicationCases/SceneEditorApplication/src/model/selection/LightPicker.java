@@ -1,4 +1,4 @@
-package model;
+package model.selection;
 
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;

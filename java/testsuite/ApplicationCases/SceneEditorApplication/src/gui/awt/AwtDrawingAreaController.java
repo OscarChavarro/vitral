@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 // AWT/Swing classes
 import java.awt.Component;
@@ -15,8 +15,9 @@ import vsdk.toolkit.gui.viewport.Viewport;
 
 // Application classes
 import model.DrawingArea;
-import gui.awt.AwtProjectionLocationPopup;
 import vsdk.toolkit.gui.viewport.ViewportSetInteractionListener;
+import gui.DrawingAreaInteractionListener;
+import gui.DrawingAreaInteractionTechniques;
 
 /**
 Maps the AWT events of the component presenting the drawing area to vitral
@@ -76,7 +77,7 @@ public class AwtDrawingAreaController implements
 
     /**
     Delivers a synthetic mouse event to the canvas, as if it came from the
-    user's pointer. Intended for automated agents (see `VitralEditorMCP`).
+    user's pointer. Intended for automated agents (see `AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param type one of "move", "press", "drag", "release"
     @param x canvas (AWT) x coordinate
@@ -112,7 +113,7 @@ public class AwtDrawingAreaController implements
 
     /**
     Delivers a synthetic key press to this controller, as if it came from the
-    user's keyboard (whatever component has the focus). Intended for automated agents (see `VitralEditorMCP`).
+    user's keyboard (whatever component has the focus). Intended for automated agents (see `AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param key a single character (i.e. "5", "x") or one of the names "tab",
     "enter", "backspace", "escape", "left", "right", "up", "down", "pageup",

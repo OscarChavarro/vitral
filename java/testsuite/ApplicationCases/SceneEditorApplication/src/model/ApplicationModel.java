@@ -30,6 +30,7 @@ public class ApplicationModel
     private Widget i18nContext;
     private final SceneLightFactory lightFactory = new SceneLightFactory();
     private final DrawingArea drawingArea;
+    private final GuiState guiState = new GuiState();
 
     /**
     Creates the model with one standard `ViewportSet`. More sets can be added
@@ -41,6 +42,14 @@ public class ApplicationModel
         viewportSets.add(ViewportSet.createStandardSet("Display 1"));
         activeViewportSetIndex = 0;
         drawingArea = new DrawingArea(viewportSets.get(0));
+    }
+
+    /**
+    @return state of the GUI that does not depend on the GUI technology
+    */
+    public GuiState getGuiState()
+    {
+        return guiState;
     }
 
     /**

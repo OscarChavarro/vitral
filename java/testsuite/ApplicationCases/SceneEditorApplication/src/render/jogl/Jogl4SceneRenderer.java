@@ -165,6 +165,8 @@ public class Jogl4SceneRenderer
 
         //- Draw 3D Gizmos ------------------------------------------------
         s.selectedLights.sync();
+        // The model owns the gizmo size, so picking matches what is drawn
+        Jogl4LightRenderer.setScale(s.getLightGizmoScale());
         for ( i = 0; i < s.scene.getLights().size(); i++ ) {
             Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera,
                 LightGizmoStyle.OMNI_BILLBOARD, s.selectedLights.isSelected(i));

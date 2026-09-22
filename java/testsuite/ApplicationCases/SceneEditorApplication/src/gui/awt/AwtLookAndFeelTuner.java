@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.BorderUIResource;
@@ -15,13 +15,13 @@ the buttons of the side panels appear separated. A thin bevel border is used
 instead, so adjacent buttons touch each other. For the rest of look and feels
 the adjustment is removed, leaving their own defaults.
 */
-public final class LookAndFeelTuner
+public final class AwtLookAndFeelTuner
 {
     private static final String MOTIF_ID = "Motif";
     private static final String BUTTON_BORDER_KEY = "Button.border";
     private static final int MOTIF_BEVEL_THICKNESS = 2;
 
-    private LookAndFeelTuner()
+    private AwtLookAndFeelTuner()
     {
     }
 
@@ -43,7 +43,7 @@ public final class LookAndFeelTuner
             // (`Button.margin`), which the GUI sets to zero for icon buttons
             UIManager.put(BUTTON_BORDER_KEY,
                 new BorderUIResource.CompoundBorderUIResource(
-                    new CompactBevelButtonBorder(MOTIF_BEVEL_THICKNESS),
+                    new AwtCompactBevelButtonBorder(MOTIF_BEVEL_THICKNESS),
                     new BasicBorders.MarginBorder()));
         }
         else {

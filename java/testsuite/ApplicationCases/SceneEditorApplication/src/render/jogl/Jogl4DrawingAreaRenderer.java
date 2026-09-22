@@ -9,6 +9,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
 // VSDK classes
+import vsdk.toolkit.fixtures.Jogl4SimpleCorridorSample;
 import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
@@ -23,13 +24,13 @@ import vsdk.toolkit.render.jogl.gizmo.Jogl4ScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4TranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
 import vsdk.toolkit.render.jogl.viewport.Jogl4ViewportWindow;
-import vsdk.toolkit.render.jogl.viewport.JoglViewportSetRenderer;
+import vsdk.toolkit.render.jogl.viewport.Jogl4ViewportSetRenderer;
 
 // Application classes
 import model.Scene;
 import model.ApplicationModel;
 import model.DrawingArea;
-import model.SceneSelectionEditor;
+import model.selection.SceneSelectionEditor;
 import render.DrawingAreaGizmoPresenter;
 import render.DrawingAreaHost;
 import render.FrameCaptureService;
@@ -58,7 +59,9 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     private final Jogl4VisualRayDebugRenderer rayDebugRenderer;
     private final FrameCaptureService frameCapture;
     private final ProjectedViewsDebugger projectedViewsDebugger;
-    private final JoglViewportSetRenderer viewportSetRenderer;
+    private final Jogl4ViewportSetRenderer viewportSetRenderer;
+    /// Test corridor shown when `Scene.showCorridor` is set
+    private final Jogl4SimpleCorridorSample corridor;
 
     /**
     @param model application model
@@ -92,11 +95,12 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         rayDebugRenderer = new Jogl4VisualRayDebugRenderer(model);
         frameCapture = new FrameCaptureService(model, host);
         projectedViewsDebugger = new ProjectedViewsDebugger(model, host);
+        corridor = new Jogl4SimpleCorridorSample();
 
-        viewportSetRenderer = new JoglViewportSetRenderer(
+        viewportSetRenderer = new Jogl4ViewportSetRenderer(
             viewportSet,
             labelImageProvider,
-            new JoglViewportSetRenderer.ViewRenderer() {
+            new Jogl4ViewportSetRenderer.ViewRenderer() {
                 @Override
                 public void configureView(Jogl4ViewportWindow view) {
                     selectedViewportListener.accept(view.getViewport());
@@ -145,6 +149,11 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
 
         if ( view.getRenderMode() == Jogl4ViewportWindow.RENDER_MODE_ZBUFFER ) {
             Jogl4SceneRenderer.draw(gl, theScene, host.getBodyEditFeedbackProvider());
+            if ( theScene.showCorridor ) {
+                corridor.drawGL(gl, theScene.activeCamera.calculateProjectionMatrix());
+                // The corridor turns on face culling, what follows expects it off
+                gl.glDisable(GL.GL_CULL_FACE);
+            }
         }
         else {
             theScene.activateSelectedBackground();
@@ -226,6 +235,7 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     public void dispose(GLAutoDrawable drawable)
     {
         viewportSetRenderer.disposeGlResources(drawable.getGL().getGL4());
+        corridor.dispose(drawable.getGL().getGL4());
         Jogl4Renderer.disposeAll(drawable.getGL().getGL4());
     }
 

@@ -22,16 +22,12 @@ import vsdk.toolkit.environment.background.CubemapBackground;
 import vsdk.toolkit.environment.background.FixedBackground;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.element.RayHit;
-import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.raytracing.SimpleRaytracer;
-
-// Application classes
-import vsdk.toolkit.fixtures.Jogl2SimpleCorridorSample;
+import model.selection.SelectionSet;
 
 public class Scene
 {
@@ -48,7 +44,7 @@ public class Scene
     public int selectedBackground;
 
     //- 4. Objects ---------------------------------------------------------
-    public Jogl2SimpleCorridorSample corridor;
+    /// Test corridor is drawn by the rendering technology, not stored here
     public boolean showCorridor;
     public ArrayList<SimpleBodyGroup> debugThingGroups;
 
@@ -59,6 +55,8 @@ public class Scene
     // Others
     public RendererConfiguration qualityTemplate;
     private int acumObject = 1;
+    /// Size factor of light gizmos, shared by rendering and picking
+    private double lightGizmoScale = 1.0;
 
     public Scene()
     {
@@ -89,12 +87,27 @@ public class Scene
         selectedBackground = 0;
 
         //-----------------------------------------------------------------
-        corridor = new Jogl2SimpleCorridorSample();
         showCorridor = false;
 
         qualityTemplate = new RendererConfiguration();
         qualityTemplate.setSurfaces(true);
         qualityTemplate.setWires(false);
+    }
+
+    /**
+    @return size factor of light gizmos, used both to draw and to pick them
+    */
+    public double getLightGizmoScale()
+    {
+        return lightGizmoScale;
+    }
+
+    /**
+    @param lightGizmoScale new size factor of light gizmos
+    */
+    public void setLightGizmoScale(double lightGizmoScale)
+    {
+        this.lightGizmoScale = lightGizmoScale;
     }
 
     public boolean
@@ -218,71 +231,6 @@ public class Scene
             return true;
         }
         return false;
-    }
-
-    /**
-    Selects the nearest thing (body or light) under a pixel of the active
-    camera viewport. Without `composite` the previous selection is discarded,
-    with it the picked thing changes its selection state.
-    Bodies are picked with their geometry and lights with a sphere of the size
-    of their gizmo (see `LightPicker`).
-    @param x pixel column in the viewport
-    @param y pixel row in the viewport
-    @param composite true to modify the current selection
-    @param ro ray to be replaced
-    @return the ray fired through the pixel
-    */
-    public Ray selectObjectWithMouse(int x, int y, boolean composite, Ray ro)
-    {
-        Ray r;
-        SimpleBody gi;
-
-        activeCamera.updateVectors();
-        r = activeCamera.generateRay(x, y);
-
-        Ray selectedRay = Ray.copyOf(r);
-
-        double nearestDistance = Float.MAX_VALUE;
-        int nearestBody = -1;
-        int nearestLight = -1;
-
-        int i;
-
-        selectedThings.sync();
-        selectedLights.sync();
-
-        List<SimpleBody> things = scene.getSimpleBodies();
-        for ( i = 0; i < things.size(); i++ ) {
-            gi = things.get(i);
-            Ray hit = gi.doIntersectionFirstHit(r);
-            if ( hit != null && hit.getT() < nearestDistance ) {
-                nearestDistance = hit.getT();
-                nearestBody = i;
-            }
-        }
-
-        List<Light> lights = scene.getLights();
-        for ( i = 0; i < lights.size(); i++ ) {
-            double t = LightPicker.pick(r, activeCamera, lights.get(i),
-                Jogl4LightRenderer.getScale());
-            if ( t >= 0 && t < nearestDistance ) {
-                nearestDistance = t;
-                nearestBody = -1;
-                nearestLight = i;
-            }
-        }
-
-        if ( !composite ) {
-            selectedThings.unselectAll();
-            selectedLights.unselectAll();
-            selectedThings.select(nearestBody);
-            selectedLights.select(nearestLight);
-        }
-        else {
-            selectedThings.change(nearestBody);
-            selectedLights.change(nearestLight);
-        }
-        return selectedRay;
     }
 
     /**

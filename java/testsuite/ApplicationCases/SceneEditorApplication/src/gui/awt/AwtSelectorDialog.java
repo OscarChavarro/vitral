@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -6,9 +6,9 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-public class SwingSelectorDialog extends JDialog
+public class AwtSelectorDialog extends JDialog
 {
-    public SwingSelectorDialog()
+    public AwtSelectorDialog()
     {
         super();
 

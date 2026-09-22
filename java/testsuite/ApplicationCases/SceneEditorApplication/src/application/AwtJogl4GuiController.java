@@ -1,4 +1,4 @@
-package gui;
+package application;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -22,26 +22,41 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
 
-import render.jogl.Jogl4ApplicationController;
-import application.SceneEditorApplication;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.gui.GuiPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
+import gui.awt.AwtApplicationModel;
+import model.GuiState;
+import vsdk.toolkit.gui.widget.Widget;
+import gui.awt.AwtButtonsPanel;
+import gui.awt.AwtModifyPanel;
+import gui.awt.AwtModifyTabChangeListener;
+import gui.awt.AwtLookAndFeelTuner;
 
-public class AwtGuiController
+public class AwtJogl4GuiController
 {
-    private final SceneEditorApplication parent;
+    private final AwtJogl4SceneEditorApplication parent;
     private final AwtApplicationModel model;
-    private final Jogl4ApplicationController jogl4Controller;
+    private final AwtJogl4ApplicationController jogl4Controller;
 
-    public AwtGuiController(SceneEditorApplication parent,
+    public AwtJogl4GuiController(AwtJogl4SceneEditorApplication parent,
                             AwtApplicationModel model,
-                            Jogl4ApplicationController jogl4Controller)
+                            AwtJogl4ApplicationController jogl4Controller)
     {
         this.parent = parent;
         this.model = model;
         this.jogl4Controller = jogl4Controller;
+    }
+
+    private GuiState guiState()
+    {
+        return parent.getApplicationModel().getGuiState();
+    }
+
+    private Widget i18n()
+    {
+        return parent.getApplicationModel().getI18nContext();
     }
 
     public void setLookAndFeel(String lookAndFeel)
@@ -53,14 +68,14 @@ public class AwtGuiController
 
     public void setGuiLanguage(String lang)
     {
-        model.setLanguageGuiFile(lang);
+        guiState().setLanguageGuiFile(lang);
         destroyGUI();
         createGUI();
     }
 
     private JPanel createStatusBar()
     {
-        JLabel statusMessage = new JLabel(model.getGui().getMessage("IDM_INTRO_MESSAGE"));
+        JLabel statusMessage = new JLabel(i18n().getMessage("IDM_INTRO_MESSAGE"));
         Border border = BorderFactory.createLoweredBevelBorder();
         statusMessage.setBorder(border);
         model.setStatusMessage(statusMessage);
@@ -82,32 +97,32 @@ public class AwtGuiController
         JButton button;
         JScrollPane sp;
 
-        container.getModel().addChangeListener(new MyChangeListener(parent));
+        container.getModel().addChangeListener(new AwtModifyTabChangeListener(parent));
 
-        panel = new ButtonsPanel(parent, 1, model.getExecutor());
+        panel = new AwtButtonsPanel(parent, 1, model.getExecutor());
         sp = new JScrollPane(panel);
-        container.addTab(model.getGui().getMessage("IDM_CREATION_TAB"),
+        container.addTab(i18n().getMessage("IDM_CREATION_TAB"),
             null, sp, "Object creation operations");
 
-        ModifyPanel modifyPanel = new ModifyPanel(parent);
+        AwtModifyPanel modifyPanel = new AwtModifyPanel(parent);
         model.setModifyPanel(modifyPanel);
         sp = new JScrollPane(modifyPanel);
-        container.addTab(model.getGui().getMessage("IDM_MODIFY_TAB"),
+        container.addTab(i18n().getMessage("IDM_MODIFY_TAB"),
             null, sp, "Modify selected body");
 
-        panel = new ButtonsPanel(parent, 2, model.getExecutor());
+        panel = new AwtButtonsPanel(parent, 2, model.getExecutor());
         sp = new JScrollPane(panel);
-        container.addTab(model.getGui().getMessage("IDM_GUI_TAB"),
+        container.addTab(i18n().getMessage("IDM_GUI_TAB"),
             null, sp, "GUI Control");
 
-        panel = new ButtonsPanel(parent, 3, model.getExecutor());
+        panel = new AwtButtonsPanel(parent, 3, model.getExecutor());
         sp = new JScrollPane(panel);
-        container.addTab(model.getGui().getMessage("IDM_OTHERS_TAB"),
+        container.addTab(i18n().getMessage("IDM_OTHERS_TAB"),
             null, sp, "Control the scene components");
 
-        panel = new ButtonsPanel(parent, 4, model.getExecutor());
+        panel = new AwtButtonsPanel(parent, 4, model.getExecutor());
         sp = new JScrollPane(panel);
-        container.addTab(model.getGui().getMessage("IDM_RENDER_TAB"),
+        container.addTab(i18n().getMessage("IDM_RENDER_TAB"),
             null, sp, "Control the scene components");
 
         return container;
@@ -116,10 +131,9 @@ public class AwtGuiController
     private void loadGuiDefinition()
     {
         try {
-            model.setGui(GuiPersistence.importAquynzaGui(
-                new FileInputStream(model.getLanguageGuiFile()), "."));
             // The presentation of the viewport sets follows the language
-            parent.getApplicationModel().setI18nContext(model.getGui());
+            parent.getApplicationModel().setI18nContext(GuiPersistence.importAquynzaGui(
+                new FileInputStream(guiState().getLanguageGuiFile()), "."));
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
@@ -148,7 +162,7 @@ public class AwtGuiController
 
         model.setImageControlWindow(null);
         model.setSelectorDialog(null);
-        model.setModifyPanelSelected(false);
+        guiState().setModifyPanelSelected(false);
     }
 
     private void createGUIWindowed()
@@ -161,7 +175,7 @@ public class AwtGuiController
             Logger.reportMessage(this, VSDK.WARNING, "createGUIWindowed",
                 "Warning: Can not set " + model.getLookAndFeel() + " look and feel\n" + e);
         }
-        LookAndFeelTuner.apply();
+        AwtLookAndFeelTuner.apply();
 
         JFrame mainWindowWidget = new JFrame("VITRAL Scene Editor");
         model.setMainWindowWidget(mainWindowWidget);
@@ -172,13 +186,12 @@ public class AwtGuiController
 
         loadGuiDefinition();
 
-        GUIEventExecutor executor = new GUIEventExecutor(parent);
+        AwtJogl4GuiEventExecutor executor = new AwtJogl4GuiEventExecutor(parent);
         model.setExecutor(executor);
-        model.setGuiEventExecutor(executor);
-        model.setExecutorPanel(new ButtonsPanel(parent, 101, executor));
+        model.setExecutorPanel(new AwtButtonsPanel(parent, 101, executor));
 
         JMenuBar menuBar = SwingGuiRenderer.buildMenubar(
-            model.getGui(), null, model.getExecutorPanel());
+            i18n(), null, model.getExecutorPanel());
 
         JSplitPane splitPane;
         model.setStatusBarPanel(createStatusBar());
@@ -229,12 +242,12 @@ public class AwtGuiController
 
         model.setImageControlWindow(null);
         model.setSelectorDialog(null);
-        model.setModifyPanelSelected(false);
+        guiState().setModifyPanelSelected(false);
     }
 
     public final void createGUI()
     {
-        if ( model.isFullScreenGuiMode() ) {
+        if ( guiState().isFullScreenGuiMode() ) {
             createGUIFullScreen();
         }
         else {

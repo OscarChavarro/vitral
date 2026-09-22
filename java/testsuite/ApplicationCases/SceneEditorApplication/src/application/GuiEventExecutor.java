@@ -1,19 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package gui;
-import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
+package application;
 
-import application.SceneEditorApplication;
-import model.Scene;
-import model.InteractionMode;
+// Java basic classes
 import java.io.File;
 import java.io.FileOutputStream;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import vsdk.toolkit.common.color.ColorRgb;
+import java.io.FileReader;
+
+// VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
@@ -27,8 +19,10 @@ import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidEulerOperators;
 import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolidValidationEngine;
 import vsdk.toolkit.environment.geometry.geometricProcessing.Voxelization;
+import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
@@ -40,33 +34,96 @@ import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.io.geometry.EnvironmentPersistence;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.media.RGBAImageUncompressed;
-import vsdk.toolkit.environment.light.PointLight;
-import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.PolyhedralBoundedSolidModeler;
 
-public class GUIEventExecutor extends CommandListener{
-    
-    private SceneEditorApplication parent;
-    
-    public GUIEventExecutor(SceneEditorApplication parent) {
-        this.parent = parent;
+// Application classes
+import model.ApplicationModel;
+import model.InteractionMode;
+import model.Scene;
+
+/**
+Executes the commands of the GUI of the editor (identified by the `IDC_*`
+names of the I18N GUI definition) that only work over the application model:
+creation of objects and lights, capture requests, interaction modes, viewport
+and debugging toggles. It also offers the persistence operations whose files
+are chosen by the GUI. It does not depend on any GUI or rendering technology:
+each GUI technology executes here what it does not present itself (file
+dialogs, windows, look and feel...), and presents the status messages
+requested through its `Presenter`.
+*/
+public class GuiEventExecutor extends CommandListener
+{
+    /**
+    Result of executing a command.
+    */
+    public enum CommandResult
+    {
+        /** The command was executed */
+        DONE,
+        /** The command was recognized, but it could not be executed */
+        FAILED,
+        /** The command is not executed by this class */
+        NOT_HANDLED
+    }
+
+    /**
+    Formats to export the objects of the scene.
+    */
+    public enum ExportFormat
+    {
+        OBJ,
+        GTS,
+        VTK
+    }
+
+    /**
+    What the GUI technology presents for this executor.
+    */
+    public interface Presenter
+    {
+        /**
+        @param message text to show in the status bar
+        */
+        void showStatusMessage(String message);
+    }
+
+    private final ApplicationModel model;
+    private final Presenter presenter;
+
+    /**
+    @param model application model the commands work over
+    @param presenter presents the status messages of the commands
+    */
+    public GuiEventExecutor(ApplicationModel model, Presenter presenter)
+    {
+        this.model = model;
+        this.presenter = presenter;
     }
 
     private Scene scene() {
-        return parent.getApplicationModel().getScene();
+        return model.getScene();
     }
 
-    public boolean executeCommand(String label,String currentFilePathForReading, 
-            String currentFilePathForWriting, JFrame mainWindowWidget) {
+    /**
+    @param label identifier of the command (`IDC_*`)
+    @return true if the command was executed
+    */
+    @Override
+    public boolean executeCommand(String label)
+    {
+        return execute(label) == CommandResult.DONE;
+    }
 
+    /**
+    @param label identifier of the command (`IDC_*`)
+    @return whether the command was executed, failed, or is not one of the
+    commands of this class
+    */
+    public CommandResult execute(String label)
+    {
         Light light;
 
-        //- FILE ----------------------------------------------------------
-        if ( label.equals("IDC_FILE_QUIT") ) {
-            System.exit(0);
-        }
-        //- EDIT ----------------------------------------------------------
         //- CREATE --------------------------------------------------------
-        else if ( label.equals("IDC_CREATE_SPHERE") ) {
+        if ( label.equals("IDC_CREATE_SPHERE") ) {
             scene().addThing(new Sphere(1.0));
         }
         else if ( label.equals("IDC_CREATE_CONE") ) {
@@ -115,7 +172,7 @@ public class GUIEventExecutor extends CommandListener{
 
             if ( referenceGeometry == null ||
                  !(referenceGeometry instanceof VoxelVolume) ) {
-                parent.getAwtModel().getStatusMessage().setText("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
+                presenter.showStatusMessage("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
             }
             else {
                 //- Calculate the VoxelVolume's center of mass ---------------
@@ -158,7 +215,7 @@ public class GUIEventExecutor extends CommandListener{
 
         }
         else if ( label.equals("IDC_CREATE_PROJECTED_VIEWS") ) {
-            parent.getApplicationModel().getDrawingArea().setProjectedViewsDebugRequested(true);
+            model.getDrawingArea().setProjectedViewsDebugRequested(true);
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
             //- Select current object, if empty selection take a temp. sphere -
@@ -397,196 +454,26 @@ public class GUIEventExecutor extends CommandListener{
             //-----------------------------------------------------------------
 */
         }
-        else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
-            JFileChooser jfc;
-            jfc = new JFileChooser(currentFilePathForReading);
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new MyFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
-            jfc.addChoosableFileFilter(new MyFilter("vtk", "vtk Kitware vtk legacy binary file (mesh only)"));
-            jfc.addChoosableFileFilter(new MyFilter("gts", "gts Gts mesh ASCII file"));
-            jfc.addChoosableFileFilter(new MyFilter("obj", "obj Alias/Wavefront text mesh"));
-            jfc.addChoosableFileFilter(new MyFilter("ply", "ply Ply mesh"));
-
-            int opc = jfc.showOpenDialog(new JPanel());
-            if (opc == JFileChooser.APPROVE_OPTION) {
-                try {
-                    File file = jfc.getSelectedFile();
-
-                    EnvironmentPersistence.importEnvironment(file,
-                        scene().scene);
-
-                    currentFilePathForReading = file.getParentFile().getAbsolutePath();
-
-                    parent.getAwtModel().getMainWindowWidget().repaint();
-                }
-                catch ( Exception ex ) {
-                    Logger.reportMessage(this, VSDK.WARNING, "executeCommand", "Failed to read file...\n" + ex);
-                    return false;
-                }
-            }
-
-        }
-        else if ( label.equals("IDC_EXPORT_OBJECTS_TO_OBJ") ) {
-            JFileChooser jfc;
-            jfc = new JFileChooser(currentFilePathForWriting);
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-
-            int opc = jfc.showOpenDialog(new JPanel());
-            if ( opc == JFileChooser.APPROVE_OPTION ) {
-                try {
-                    File file = jfc.getSelectedFile();
-                    FileOutputStream fos;
-                    fos = new FileOutputStream(file);
-
-                    EnvironmentPersistence.exportEnvironmentObj(fos,
-                        scene().scene);
-
-                    fos.close();
-
-                    currentFilePathForWriting = file.getParentFile().getAbsolutePath();
-
-                    mainWindowWidget.repaint();
-                }
-                catch (Exception ex) {
-                    System.out.println("Failed to write file...\n" + ex);
-                    return false;
-                }
-            }
-
-        }
-        else if ( label.equals("IDC_EXPORT_OBJECTS_TO_GTS") ) {
-            JFileChooser jfc;
-            jfc = new JFileChooser(currentFilePathForWriting);
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-
-            int opc = jfc.showOpenDialog(new JPanel());
-            if ( opc == JFileChooser.APPROVE_OPTION ) {
-                try {
-                    File file = jfc.getSelectedFile();
-                    FileOutputStream fos;
-                    fos = new FileOutputStream(file);
-
-                    EnvironmentPersistence.exportEnvironmentGts(fos,
-                        scene().scene);
-
-                    fos.close();
-
-                    currentFilePathForWriting = file.getParentFile().getAbsolutePath();
-
-                    parent.getAwtModel().getMainWindowWidget().repaint();
-                }
-                catch (Exception ex) {
-                    Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
-                    return false;
-                }
-            }
-        }
-        else if ( label.equals("IDC_EXPORT_OBJECTS_TO_VTK") ) {
-            JFileChooser jfc;
-            jfc = new JFileChooser(currentFilePathForWriting);
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-
-            int opc = jfc.showOpenDialog(new JPanel());
-            if ( opc == JFileChooser.APPROVE_OPTION ) {
-                try {
-                    File file = jfc.getSelectedFile();
-                    FileOutputStream fos;
-                    fos = new FileOutputStream(file);
-
-                    EnvironmentPersistence.exportEnvironmentVtk(fos,
-                        scene().scene);
-
-                    fos.close();
-
-                    currentFilePathForWriting = file.getParentFile().getAbsolutePath();
-
-                    parent.getAwtModel().getMainWindowWidget().repaint();
-                }
-                catch (Exception ex) {
-                    Logger.reportMessage(this, VSDK.WARNING, "execute", "Failed to write file...\n" + ex);
-                    return false;
-                }
-            }
-        }
         else if ( label.equals("IDC_CREATE_OMNILIGHT") ) {
-            light = parent.getApplicationModel().addNewLight();
+            light = model.addNewLight();
             if ( light == null ) {
                 Logger.reportMessage(this, VSDK.WARNING, "execute", "No visible viewport where to create the light");
-                return false;
+                return CommandResult.FAILED;
             }
         }
         //- RENDERING -----------------------------------------------------
-        else if ( label.equals("Select palette for depthmap display") ||
-                  label.equals("IDC_RENDERING_SELECTPALETTEDEPTH") ) {
-            JFileChooser jfc;
-            jfc = new JFileChooser( (new File("")).getAbsolutePath() + "/../../../../etc/palettes");
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new MyFilter("gpl", "gpl Gimp Palettes"));
-            int opc = jfc.showOpenDialog(new JPanel());
-            if (opc == JFileChooser.APPROVE_OPTION) {
-                try {
-                    File file = jfc.getSelectedFile();
-                    parent.getApplicationModel().setPalette(
-                        RGBColorPalettePersistence.importGimpPalette(
-                            new java.io.FileReader(file.getAbsolutePath())));
-                    parent.getAwtModel().getMainWindowWidget().repaint();
-                }
-                catch (Exception ex) {
-                    System.out.println("Failed to read file");
-                    return false;
-                }
-            }
-        }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERIMAGE") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
-            parent.getApplicationModel().getDrawingArea().setColorCaptureRequested(true);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_PENDING_ZBUFFER_COLOR_IMAGE"));
+            model.getDrawingArea().setColorCaptureRequested(true);
         }
         else if ( label.equals("IDC_RENDERING_OBTAINZBUFFERDEPTHMAP") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
-            parent.getApplicationModel().getDrawingArea().setDepthCaptureRequested(true);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_PENDING_ZBUFFER_DEPTH"));
+            model.getDrawingArea().setDepthCaptureRequested(true);
         }
         else if ( label.equals("IDC_RENDERING_OBTAINCONTOURNS") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_PENDING_CONTOURNS"));
-            parent.getApplicationModel().getDrawingArea().setDepthCaptureRequested(true);
-            parent.getApplicationModel().getDrawingArea().setContoursRequested(true);
-        }
-        else if ( label.equals("IDC_RENDERING_RAYTRACING") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_COMPUTING_RAYTRACING"));
-            parent.doRaytracingImage();
-            if ( parent.getAwtModel().getImageControlWindow() == null ) {
-                parent.getAwtModel().setImageControlWindow(new SwingImageControlWindow(
-                    parent.getApplicationModel().getRaytracedImage(),
-                    parent.getAwtModel().getGui(),
-                    parent.getAwtModel().getExecutorPanel()));
-            }
-            else {
-                parent.getAwtModel().getImageControlWindow().setImage(
-                    parent.getApplicationModel().getRaytracedImage());
-            }
-            parent.getAwtModel().getImageControlWindow().redrawImage();
-        }
-        //- CUSTOMIZE -----------------------------------------------------
-        else if ( label.equals("IDC_CUSTOMIZE_LAF_MOTIF") ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-        }
-        else if ( label.equals("IDC_CUSTOMIZE_LAF_JAVA") ) {
-            parent.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        }
-        else if ( label.equals("IDC_CUSTOMIZE_LAF_GTK") ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-        }
-        else if ( label.equals("IDC_CUSTOMIZE_LAF_WINDOWS") ) {
-            parent.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        }
-        else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_ENGLISH") ) {
-            parent.setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "english.json");
-        }
-        else if ( label.equals("IDC_CUSTOMIZE_LANGUAGE_SPANISH") ) {
-            parent.setGuiLanguage(AwtApplicationModel.GUI_LANGUAGE_FOLDER + "spanish.json");
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_PENDING_CONTOURNS"));
+            model.getDrawingArea().setDepthCaptureRequested(true);
+            model.getDrawingArea().setContoursRequested(true);
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_OTHERS_CYCLE_BACKGROUND") ) {
@@ -601,53 +488,96 @@ public class GUIEventExecutor extends CommandListener{
             }
         }
         else if ( label.equals("IDC_OTHERS_TOGGLE_GRID") ) {
-            parent.getApplicationModel().getDrawingArea().toggleSelectedViewportGrid();
+            model.getDrawingArea().toggleSelectedViewportGrid();
         }
         else if ( label.equals("IDC_OTHERS_PRINT_SCENE_ON_CONSOLE") ) {
             scene().print();
         }
         //-----------------------------------------------------------------
         else if ( label.equals("IDC_TOOLS_CAMERA") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_CAMERA_MODE"));
-            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.CAMERA);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_CAMERA_MODE"));
+            model.getDrawingArea().setInteractionMode(InteractionMode.CAMERA);
         }
         else if ( label.equals("IDC_TOOLS_SELECT") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_SELECTION_MODE"));
-            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.SELECT);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_SELECTION_MODE"));
+            model.getDrawingArea().setInteractionMode(InteractionMode.SELECT);
         }
         else if ( label.equals("IDC_TOOLS_TRANSLATE") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_TRANSLATION_MODE"));
-            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.TRANSLATE);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_TRANSLATION_MODE"));
+            model.getDrawingArea().setInteractionMode(InteractionMode.TRANSLATE);
         }
         else if ( label.equals("IDC_TOOLS_ROTATE") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_ROTATION_MODE"));
-            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.ROTATE);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_ROTATION_MODE"));
+            model.getDrawingArea().setInteractionMode(InteractionMode.ROTATE);
         }
         else if ( label.equals("IDC_TOOLS_SCALE") ) {
-            parent.getAwtModel().getStatusMessage().setText(
-                parent.getAwtModel().getGui().getMessage("IDM_SCALE_MODE"));
-            parent.getApplicationModel().getDrawingArea().setInteractionMode(InteractionMode.SCALE);
+            presenter.showStatusMessage(model.getI18nContext().getMessage("IDM_SCALE_MODE"));
+            model.getDrawingArea().setInteractionMode(InteractionMode.SCALE);
         }
         else if ( label.equals("IDC_TOOLS_RAY") ) {
-            parent.getApplicationModel().setWithVisualDebugRay(
-                !parent.getApplicationModel().isWithVisualDebugRay());
+            model.setWithVisualDebugRay(
+                !model.isWithVisualDebugRay());
         }
         else if ( label.equals("IDC_NEW_VIEW") ) {
-            parent.getApplicationModel().getDrawingArea().addViewport();
+            model.getDrawingArea().addViewport();
         }
         else if ( label.equals("IDC_DEL_VIEW") ) {
-            parent.getApplicationModel().getDrawingArea().removeLastViewport();
+            model.getDrawingArea().removeLastViewport();
+        }
+        else {
+            return CommandResult.NOT_HANDLED;
+        }
+        return CommandResult.DONE;
+    }
+
+    /**
+    Adds the objects of a file to the scene.
+    @param file 3ds, vtk, gts, obj or ply file
+    @throws Exception if the file can not be read
+    */
+    public void importObjects(File file) throws Exception
+    {
+        EnvironmentPersistence.importEnvironment(file, scene().scene);
+    }
+
+    /**
+    Writes the objects of the scene to a file.
+    @param file destination file
+    @param format format of the file
+    @throws Exception if the file can not be written
+    */
+    public void exportObjects(File file, ExportFormat format) throws Exception
+    {
+        FileOutputStream fos;
+        fos = new FileOutputStream(file);
+
+        switch ( format ) {
+          case OBJ:
+            EnvironmentPersistence.exportEnvironmentObj(fos, scene().scene);
+            break;
+          case GTS:
+            EnvironmentPersistence.exportEnvironmentGts(fos, scene().scene);
+            break;
+          default:
+            EnvironmentPersistence.exportEnvironmentVtk(fos, scene().scene);
+            break;
         }
 
-        //-----------------------------------------------------------------
-        parent.getJogl4Controller().repaint();
-        return true;
+        fos.close();
     }
-    
+
+    /**
+    Replaces the palette used to present depth maps.
+    @param file Gimp palette (gpl) file
+    @throws Exception if the file can not be read
+    */
+    public void loadPalette(File file) throws Exception
+    {
+        model.setPalette(
+            RGBColorPalettePersistence.importGimpPalette(
+                new FileReader(file.getAbsolutePath())));
+    }
+
     private SimpleBody addDebugSphere(SimpleBody voxelBody, int groupIndex,
                                       Vector3Dd cm, double averageDistance)
     {
@@ -705,10 +635,5 @@ public class GUIEventExecutor extends CommandListener{
         //-----------------------------------------------------------------
         body.setTexture(texture);
         return body;
-    }
-
-    @Override
-    public boolean executeCommand(String commandId) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

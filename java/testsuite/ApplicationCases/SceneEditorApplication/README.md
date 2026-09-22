@@ -9,7 +9,7 @@ Run the application with the `-s` argument:
 
 ```bash
 ./gradlew --quiet :testsuite:ApplicationCases:SceneEditorApplication:runMain \
-  -PrunMainClass=application.SceneEditorApplication \
+  -PrunMainClass=application.AwtJogl4SceneEditorApplication \
   -PrunJvmArgs='-Djava.library.path=../../../lib|-Xms300m|-Xmx300m' \
   -PrunArgs='-s'
 ```

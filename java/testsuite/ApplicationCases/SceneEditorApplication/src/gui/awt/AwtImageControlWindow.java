@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 // Java basic classes
 
@@ -23,14 +23,14 @@ import vsdk.toolkit.render.awt.AwtRGBImageUncompressedRenderer;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
-public class SwingImageControlWindow
+public class AwtImageControlWindow
 {
     private JFrame windowWidget;
     public JLabel statusMessage;
     private RGBImageUncompressed controlledImage;
     private ImageDisplayPanel workArea;
 
-    public SwingImageControlWindow(RGBImageUncompressed image,
+    public AwtImageControlWindow(RGBImageUncompressed image,
                                  Widget gui, ActionListener executor) {
         controlledImage = image;
 

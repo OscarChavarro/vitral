@@ -1,4 +1,4 @@
-package gui;
+package gui.awt;
 
 // Java AWT/Swing classes
 import javax.swing.SingleSelectionModel;
@@ -6,12 +6,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 // Application classes
-import application.SceneEditorApplication;
 
-public class MyChangeListener implements ChangeListener
+public class AwtModifyTabChangeListener implements ChangeListener
 {
-    public SceneEditorApplication parent;
-    public MyChangeListener(SceneEditorApplication parent)
+    public AwtApplicationHost parent;
+    public AwtModifyTabChangeListener(AwtApplicationHost parent)
     {
         this.parent = parent;
     }
@@ -21,11 +20,11 @@ public class MyChangeListener implements ChangeListener
     {
         SingleSelectionModel sm = (SingleSelectionModel)e.getSource();
         if ( sm.getSelectedIndex() == 1 ) {
-            parent.getAwtModel().setModifyPanelSelected(true);
-            parent.getJogl4Controller().reportTargetToModifyPanel();
+            parent.getApplicationModel().getGuiState().setModifyPanelSelected(true);
+            parent.reportTargetToModifyPanel();
         }
         else {
-            parent.getAwtModel().setModifyPanelSelected(false);
+            parent.getApplicationModel().getGuiState().setModifyPanelSelected(false);
         }
     }
 }
