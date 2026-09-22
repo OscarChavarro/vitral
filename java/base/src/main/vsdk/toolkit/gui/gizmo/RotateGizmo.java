@@ -130,7 +130,8 @@ public class RotateGizmo extends Gizmo {
         ringInstances = new SimpleBody[RING_COUNT];
         baseRingLineWidths = new double[RING_COUNT];
         ringLineWidths = new double[RING_COUNT];
-        inputGizmo = new InputGizmo(RING_COUNT, ANGLE_DECIMALS, ANGLE_INTEGER_DIGITS);
+        inputGizmo = new InputGizmo(RING_COUNT, ANGLE_DECIMALS, ANGLE_INTEGER_DIGITS,
+            InputGizmoValueChangeRules.forRotation());
 
         for ( int ring = 0; ring < RING_COUNT; ring++ ) {
             axisColors[ring] = axisColorSource.getAxisColor(ring);

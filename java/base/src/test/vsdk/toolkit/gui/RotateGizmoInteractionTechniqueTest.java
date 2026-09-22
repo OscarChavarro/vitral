@@ -326,13 +326,14 @@ class RotateGizmoInteractionTechniqueTest
         RotateGizmo gizmo = createGizmo(createCamera());
         RotateGizmoInteractionTechnique technique = new RotateGizmoInteractionTechnique(gizmo);
 
-        // Act: UP steps one degree, first box (X angle)
+        // Act: UP steps by the level 2 rotation increment (5 degrees), first
+        // box (X angle) -- see InputGizmoValueChangeRules.forRotation()
         boolean changed = technique.processKeyPressedEvent(key(KeyEvent.KEY_UP));
 
         // Assert
         assertThat(changed).isTrue();
         assertThat(RotateGizmo.extractAnglesInDegrees(gizmo.getTransformationMatrix())[0])
-            .isCloseTo(1.0, offset(EPS));
+            .isCloseTo(5.0, offset(EPS));
     }
 
     @Test

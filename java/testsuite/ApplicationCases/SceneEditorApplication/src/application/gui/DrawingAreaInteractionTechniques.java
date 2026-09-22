@@ -37,12 +37,13 @@ Mouse events must have coordinates in canvas pixels (see `DrawingArea`).
 Keyboard commands: `c`, `q`, `w`, `e`, `r` select the camera, selection,
 translation, rotation and scale modes; `LEFT` / `RIGHT` select things
 sequentially; `=` / `-` change the size of the translation gizmo (in
-translation and rotation modes with a selection `-` belongs to the input
-gizmo); in translation and rotation modes, digits, `-`, `.`, `TAB` and
-`BACKSPACE` (and `ENTER`, `ESC` while editing) edit the numeric boxes of the
-gizmo (see `InputGizmo`), that show coordinates or angles in degrees; in
-rotation mode the mouse highlights (hover) and chooses (click) the rings of
-the gizmo (see `RotateGizmoInteractionTechnique`); `DELETE`
+translation, rotation and scale modes with a selection `-` belongs to the
+input gizmo); in translation, rotation and scale modes, digits, `-`, `.`,
+`TAB` and `BACKSPACE` (and `ENTER`, `ESC` while editing) edit the numeric
+boxes of the gizmo (see `InputGizmo`), that show coordinates, angles in
+degrees or scale factors; in rotation mode the mouse highlights (hover) and
+chooses (click) the rings of the gizmo (see
+`RotateGizmoInteractionTechnique`); `DELETE`
 removes the selected things; `F10` requests a raytraced image; `T` / `B`
 toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
@@ -303,6 +304,31 @@ public class DrawingAreaInteractionTechniques
     }
 
     /**
+    Places the scale gizmo over the first selected body (its frame: the same
+    one the rotation gizmo uses, and its current scale factors), seen from the
+    viewport, and lets the technique process the event.
+    @return false if there is no viewport or selected body to process the event
+    */
+    private boolean processScaleEvent(MouseEvent event,
+                                      Viewport viewport,
+                                      Predicate<MouseEvent> technique)
+    {
+        SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+        if ( viewport == null || body == null ) {
+            return false;
+        }
+        scaleGizmo.setCamera(viewport.getActiveCamera());
+        scaleGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body));
+        scaleGizmo.setScale(body.getScale());
+        if ( technique.test(toViewportEvent(event, viewport)) ) {
+            listener.repaintRequested();
+        }
+        return true;
+    }
+
+    /**
     Discards the numbers typed in the boxes of the gizmos, so they show the
     real state of what the gizmos manipulate again.
     */
@@ -310,6 +336,7 @@ public class DrawingAreaInteractionTechniques
     {
         interactionTechniques.getTranslationInputGizmo().cancelEditing();
         interactionTechniques.getRotationInputGizmo().cancelEditing();
+        interactionTechniques.getScaleInputGizmo().cancelEditing();
     }
 
     /**
@@ -319,6 +346,15 @@ public class DrawingAreaInteractionTechniques
     private void applyRotationGizmoToBody(SimpleBody body)
     {
         body.setRotation(new Matrix4x4d(rotateGizmo.getTransformationMatrix()).withoutTranslation());
+    }
+
+    /**
+    Makes the first selected body take the scale factors of the scale gizmo.
+    @param body first selected body
+    */
+    private void applyScaleGizmoToBody(SimpleBody body)
+    {
+        body.setScale(scaleGizmo.getScale());
     }
 
     /**
@@ -394,6 +430,13 @@ public class DrawingAreaInteractionTechniques
                     e -> interactionTechniques.processRotationMousePressedEvent(e, mouseView)) &&
                     interactionTechniques.getRotationTechnique().isActive();
             }
+            else if ( mode == InteractionMode.SCALE ) {
+                // The handle under the pointer is found again, as the press
+                // could come without a previous movement
+                gizmoGrabbed = processScaleEvent(event, mouseView,
+                    e -> interactionTechniques.processScaleMousePressedEvent(e, mouseView)) &&
+                    interactionTechniques.getScaleTechnique().isActive();
+            }
 
             if ( !gizmoGrabbed ) {
                 // Numbers typed belong to the previous selection
@@ -456,6 +499,10 @@ public class DrawingAreaInteractionTechniques
             processRotationEvent(event, mouseView,
                 interactionTechniques::processRotationMouseReleasedEvent);
         }
+        else if ( mode == InteractionMode.SCALE ) {
+            processScaleEvent(event, mouseView,
+                interactionTechniques::processScaleMouseReleasedEvent);
+        }
     }
 
     public void processMouseClickedEvent(MouseEvent event)
@@ -481,6 +528,10 @@ public class DrawingAreaInteractionTechniques
         else if ( mode == InteractionMode.ROTATE ) {
             processRotationEvent(event, mouseView,
                 interactionTechniques::processRotationMouseClickedEvent);
+        }
+        else if ( mode == InteractionMode.SCALE ) {
+            processScaleEvent(event, mouseView,
+                interactionTechniques::processScaleMouseClickedEvent);
         }
     }
 
@@ -514,6 +565,10 @@ public class DrawingAreaInteractionTechniques
         else if ( mode == InteractionMode.ROTATE ) {
             processRotationEvent(event, mouseView,
                 interactionTechniques::processRotationMouseMovedEvent);
+        }
+        else if ( mode == InteractionMode.SCALE ) {
+            processScaleEvent(event, mouseView,
+                interactionTechniques::processScaleMouseMovedEvent);
         }
     }
 
@@ -555,6 +610,18 @@ public class DrawingAreaInteractionTechniques
                 return changed;
             });
         }
+        else if ( mode == InteractionMode.SCALE ) {
+            SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+            processScaleEvent(event, mouseView, e -> {
+                boolean changed = interactionTechniques.processScaleMouseDraggedEvent(e);
+
+                if ( changed && body != null ) {
+                    applyScaleGizmoToBody(body);
+                }
+                return changed;
+            });
+        }
     }
 
     /**
@@ -575,7 +642,8 @@ public class DrawingAreaInteractionTechniques
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
-        if ( (mode == InteractionMode.TRANSLATE || mode == InteractionMode.ROTATE) &&
+        if ( (mode == InteractionMode.TRANSLATE || mode == InteractionMode.ROTATE ||
+              mode == InteractionMode.SCALE) &&
              processInputGizmoKeyPressedEvent(mode, event) ) {
             listener.repaintRequested();
             return;
@@ -601,7 +669,7 @@ public class DrawingAreaInteractionTechniques
 
     /**
     Lets the input gizmo of the gizmo of the interaction mode use a key.
-    @param mode translation or rotation mode
+    @param mode translation, rotation or scale mode
     @param event key press
     @return true if the input gizmo used the key, so it must not be processed as any
     other command
@@ -610,6 +678,9 @@ public class DrawingAreaInteractionTechniques
     {
         if ( mode == InteractionMode.ROTATE ) {
             return processRotationInputGizmoKeyPressedEvent(event);
+        }
+        if ( mode == InteractionMode.SCALE ) {
+            return processScaleInputGizmoKeyPressedEvent(event);
         }
         return processTranslationInputGizmoKeyPressedEvent(event);
     }
@@ -634,6 +705,31 @@ public class DrawingAreaInteractionTechniques
         }
         if ( interactionTechniques.processRotateKeyPressedEvent(event) ) {
             applyRotationGizmoToBody(body);
+        }
+        return true;
+    }
+
+    /**
+    Lets the input gizmo of the scale gizmo use a key. If the user accepts
+    what was typed, the first selected body takes the scale factors the
+    numbers say.
+    @return true if the input gizmo used the key
+    */
+    private boolean processScaleInputGizmoKeyPressedEvent(KeyEvent event)
+    {
+        SimpleBody body = selectionEditor.getFirstSelectedBody();
+
+        if ( body == null ) {
+            return false;
+        }
+        scaleGizmo.setTransformationMatrix(
+            SceneSelectionEditor.createRotationGizmoMatrix(body));
+        scaleGizmo.setScale(body.getScale());
+        if ( !interactionTechniques.isScaleInputGizmoKey(event) ) {
+            return false;
+        }
+        if ( interactionTechniques.processScaleKeyPressedEvent(event) ) {
+            body.setScale(scaleGizmo.getScale());
         }
         return true;
     }
@@ -710,16 +806,11 @@ public class DrawingAreaInteractionTechniques
           case SCALE:
             body = selectionEditor.getFirstSelectedBody();
             if ( body != null ) {
-                Vector3Dd s = body.getScale();
-                Matrix4x4d S = new Matrix4x4d();
-
-                S = S.withVal(0, 0, s.x());
-                S = S.withVal(1, 1, s.y());
-                S = S.withVal(2, 2, s.z());
-                scaleGizmo.setTransformationMatrix(S);
+                scaleGizmo.setTransformationMatrix(
+                    SceneSelectionEditor.createRotationGizmoMatrix(body));
+                scaleGizmo.setScale(body.getScale());
                 if ( interactionTechniques.processScaleKeyPressedEvent(event) ) {
-                    S = scaleGizmo.getTransformationMatrix();
-                    body.setScale(new Vector3Dd(S.get(0, 0), S.get(1, 1), S.get(2, 2)));
+                    body.setScale(scaleGizmo.getScale());
                 }
             }
             break;

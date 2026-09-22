@@ -123,9 +123,11 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
 
         translationGizmo.setCamera(theScene.activeCamera);
         rotateGizmo.setCamera(theScene.activeCamera);
+        scaleGizmo.setCamera(theScene.activeCamera);
         // Size and line width follow the resolution of the screen
         translationGizmo.applyScale(viewportSet.getElementScaler());
         rotateGizmo.applyScale(viewportSet.getElementScaler());
+        scaleGizmo.applyScale(viewportSet.getElementScaler());
 
         gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
 
@@ -154,9 +156,11 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
             }
         }
         else if ( mode == InteractionMode.SCALE && selectedBody != null ) {
-            scaleGizmo.setTransformationMatrix(selectedBody.getRotation());
-            Jogl4ScaleGizmoRenderer.draw(gl, scaleGizmo,
-                selectedBody.getPosition(), theScene.activeCamera);
+            scaleGizmo.setTransformationMatrix(
+                SceneSelectionEditor.createRotationGizmoMatrix(selectedBody));
+            scaleGizmo.setScale(selectedBody.getScale());
+            Jogl4ScaleGizmoRenderer.draw(gl, scaleGizmo, theScene.activeCamera);
+            inputGizmoDrawn = scaleGizmo.getInputGizmo();
         }
         gl.glEnable(GL.GL_DEPTH_TEST);
     }

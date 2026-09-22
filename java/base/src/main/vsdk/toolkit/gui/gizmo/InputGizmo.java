@@ -35,12 +35,6 @@ public class InputGizmo extends Gizmo {
     public static final int DECIMALS = 3;
     public static final ColorRgb HIGHLIGHT_COLOR = new ColorRgb(1, 1, 0);
 
-    /// Increment of the value of the selected box, by key: RIGHT / LEFT,
-    /// UP / DOWN and PAGEUP / PAGEDOWN respectively
-    public static final double SMALL_STEP = 0.1;
-    public static final double MEDIUM_STEP = 1.0;
-    public static final double LARGE_STEP = 5.0;
-
     private static final int MAX_EDIT_LENGTH = 12;
     private static final ColorRgb DEFAULT_FIELD_COLOR = new ColorRgb(0, 0, 0);
 
@@ -53,20 +47,22 @@ public class InputGizmo extends Gizmo {
     private final String[] editTexts;
     private int selectedField;
     private boolean commitPending;
+    private InputGizmoValueChangeRules valueChangeRules;
 
     /**
     Creates a gizmo that shows `DECIMALS` decimals, and lets the user type as
-    many as fit in a box.
+    many as fit in a box. Its boxes step by `InputGizmoValueChangeRules.forTranslation()`.
     @param numberOfFields number of input boxes, at least 1
     */
     public InputGizmo(int numberOfFields)
     {
-        this(numberOfFields, DECIMALS, 1, false);
+        this(numberOfFields, DECIMALS, 1, false, InputGizmoValueChangeRules.forTranslation());
     }
 
     /**
     Creates a gizmo whose boxes show, and accept typing, only the given number
-    of decimals (i.e. 2 for angles in degrees).
+    of decimals (i.e. 2 for angles in degrees). Its boxes step by
+    `InputGizmoValueChangeRules.forTranslation()`.
     @param numberOfFields number of input boxes, at least 1
     @param decimals number of digits shown after the decimal point (not
     negative); the user can not type more
@@ -75,19 +71,40 @@ public class InputGizmo extends Gizmo {
     */
     public InputGizmo(int numberOfFields, int decimals, int integerDigits)
     {
-        this(numberOfFields, decimals, integerDigits, true);
+        this(numberOfFields, decimals, integerDigits, true, InputGizmoValueChangeRules.forTranslation());
+    }
+
+    /**
+    Creates a gizmo whose boxes show, and accept typing, only the given number
+    of decimals, and step as described by the given rules (i.e.
+    `InputGizmoValueChangeRules.forRotation()` for angles in degrees).
+    @param numberOfFields number of input boxes, at least 1
+    @param decimals number of digits shown after the decimal point (not
+    negative); the user can not type more
+    @param integerDigits number of digits before the decimal point the boxes
+    are wide enough for (at least 1); i.e. 3 for angles in degrees
+    @param valueChangeRules rules that describe how the selected box steps
+    with the keyboard; not null
+    */
+    public InputGizmo(int numberOfFields, int decimals, int integerDigits,
+                      InputGizmoValueChangeRules valueChangeRules)
+    {
+        this(numberOfFields, decimals, integerDigits, true, valueChangeRules);
     }
 
     private InputGizmo(int numberOfFields,
                        int decimals,
                        int integerDigits,
-                       boolean limitTypedDecimals)
+                       boolean limitTypedDecimals,
+                       InputGizmoValueChangeRules valueChangeRules)
     {
         int count = Math.max(1, numberOfFields);
 
         this.decimals = Math.max(0, decimals);
         this.integerDigits = Math.max(1, integerDigits);
         this.limitTypedDecimals = limitTypedDecimals;
+        this.valueChangeRules = valueChangeRules != null ?
+            valueChangeRules : InputGizmoValueChangeRules.forTranslation();
         values = new double[count];
         colors = new ColorRgb[count];
         highlighted = new boolean[count];
@@ -97,6 +114,26 @@ public class InputGizmo extends Gizmo {
         }
         selectedField = 0;
         commitPending = false;
+    }
+
+    /**
+    @return the rules that describe how the selected box steps with the
+    keyboard
+    */
+    public InputGizmoValueChangeRules getValueChangeRules()
+    {
+        return valueChangeRules;
+    }
+
+    /**
+    @param valueChangeRules rules that describe how the selected box steps
+    with the keyboard; null is ignored
+    */
+    public void setValueChangeRules(InputGizmoValueChangeRules valueChangeRules)
+    {
+        if ( valueChangeRules != null ) {
+            this.valueChangeRules = valueChangeRules;
+        }
     }
 
     /**
@@ -475,30 +512,32 @@ public class InputGizmo extends Gizmo {
     @return the increment the key requests for the selected box, or 0 if it is
     not a stepping key
     */
-    private static double stepOf(KeyEvent event)
+    private double stepOf(KeyEvent event)
     {
         return switch ( event.keycode ) {
-            case KeyEvent.KEY_RIGHT -> SMALL_STEP;
-            case KeyEvent.KEY_LEFT -> -SMALL_STEP;
-            case KeyEvent.KEY_UP -> MEDIUM_STEP;
-            case KeyEvent.KEY_DOWN -> -MEDIUM_STEP;
-            case KeyEvent.KEY_PAGEUP -> LARGE_STEP;
-            case KeyEvent.KEY_PAGEDOWN -> -LARGE_STEP;
+            case KeyEvent.KEY_RIGHT -> valueChangeRules.getLevelOneStep();
+            case KeyEvent.KEY_LEFT -> -valueChangeRules.getLevelOneStep();
+            case KeyEvent.KEY_UP -> valueChangeRules.getLevelTwoStep();
+            case KeyEvent.KEY_DOWN -> -valueChangeRules.getLevelTwoStep();
+            case KeyEvent.KEY_PAGEUP -> valueChangeRules.getLevelThreeStep();
+            case KeyEvent.KEY_PAGEDOWN -> -valueChangeRules.getLevelThreeStep();
             default -> 0.0;
         };
     }
 
     /**
     Adds the step to the number the selected box shows (the one being typed, if
-    it is valid, or its value) and accepts it right away, as ENTER does (so
-    any other box being edited is accepted too).
+    it is valid, or its value), restricted as `getValueChangeRules()`
+    describes (grid, circular range), and accepts it right away, as ENTER does
+    (so any other box being edited is accepted too).
     */
     private void stepSelected(double step)
     {
         Double typed = parse(editTexts[selectedField]);
         double current = typed != null ? typed : values[selectedField];
-        // Rounded, so repeated 0.1 steps do not accumulate binary noise
-        BigDecimal stepped = BigDecimal.valueOf(current + step)
+        double next = valueChangeRules.applyStep(current, step);
+        // Rounded, so repeated small steps do not accumulate binary noise
+        BigDecimal stepped = BigDecimal.valueOf(next)
             .setScale(9, RoundingMode.HALF_UP).stripTrailingZeros();
 
         editTexts[selectedField] = stepped.toPlainString();

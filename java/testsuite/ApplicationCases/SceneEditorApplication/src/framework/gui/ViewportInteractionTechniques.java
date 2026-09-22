@@ -11,6 +11,7 @@ import vsdk.toolkit.gui.gizmo.InputGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
 import vsdk.toolkit.gui.gizmo.RotateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
+import vsdk.toolkit.gui.gizmo.ScaleGizmoInteractionTechnique;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
 import vsdk.toolkit.gui.viewport.Viewport;
@@ -24,6 +25,7 @@ public class ViewportInteractionTechniques
     private final RotateGizmo rotateGizmo;
     private final RotateGizmoInteractionTechnique rotationTechnique;
     private final ScaleGizmo scaleGizmo;
+    private final ScaleGizmoInteractionTechnique scaleTechnique;
 
     public ViewportInteractionTechniques(Camera camera,
                                          RendererConfiguration rendererConfiguration)
@@ -34,7 +36,8 @@ public class ViewportInteractionTechniques
         translationTechnique = new TranslateGizmoInteractionTechnique(translationGizmo);
         rotateGizmo = new RotateGizmo(camera);
         rotationTechnique = new RotateGizmoInteractionTechnique(rotateGizmo);
-        scaleGizmo = new ScaleGizmo();
+        scaleGizmo = new ScaleGizmo(camera);
+        scaleTechnique = new ScaleGizmoInteractionTechnique(scaleGizmo);
     }
 
     public CameraController getCameraController()
@@ -285,6 +288,80 @@ public class ViewportInteractionTechniques
 
     public boolean processScaleKeyPressedEvent(KeyEvent event)
     {
-        return scaleGizmo.processKeyPressedEvent(event);
+        return scaleTechnique.processKeyPressedEvent(event);
+    }
+
+    /**
+    @return the input gizmo that shows and edits the scale factors of the
+    scale gizmo
+    */
+    public InputGizmo getScaleInputGizmo()
+    {
+        return scaleGizmo.getInputGizmo();
+    }
+
+    /**
+    @param event key press
+    @return true if the input gizmo of the scale gizmo uses the key
+    */
+    public boolean isScaleInputGizmoKey(KeyEvent event)
+    {
+        return scaleTechnique.isInputGizmoKey(event);
+    }
+
+    /**
+    @return the interaction technique that hovers, selects and drags the
+    handles of the scale gizmo
+    */
+    public ScaleGizmoInteractionTechnique getScaleTechnique()
+    {
+        return scaleTechnique;
+    }
+
+    public boolean processScaleMousePressedEvent(MouseEvent event)
+    {
+        return scaleTechnique.processMousePressedEvent(event);
+    }
+
+    /**
+    Processes the press of a mouse button over a viewport, starting a scale
+    gesture confined to it if the pointer is over a handle (see
+    `getScaleDragViewport`).
+    @param event event with coordinates relative to the viewport
+    @param viewport viewport where the button was pressed
+    @return false (a press never changes the gizmo)
+    */
+    public boolean processScaleMousePressedEvent(MouseEvent event, Viewport viewport)
+    {
+        return scaleTechnique.processMousePressedEvent(event, viewport);
+    }
+
+    /**
+    @return the viewport where the scale gesture in course started, or null
+    if there is none
+    */
+    public Viewport getScaleDragViewport()
+    {
+        return scaleTechnique.getDragViewport();
+    }
+
+    public boolean processScaleMouseReleasedEvent(MouseEvent event)
+    {
+        return scaleTechnique.processMouseReleasedEvent(event);
+    }
+
+    public boolean processScaleMouseDraggedEvent(MouseEvent event)
+    {
+        return scaleTechnique.processMouseDraggedEvent(event);
+    }
+
+    public boolean processScaleMouseClickedEvent(MouseEvent event)
+    {
+        return scaleTechnique.processMouseClickedEvent(event);
+    }
+
+    public boolean processScaleMouseMovedEvent(MouseEvent event)
+    {
+        return scaleTechnique.processMouseMovedEvent(event);
     }
 }
