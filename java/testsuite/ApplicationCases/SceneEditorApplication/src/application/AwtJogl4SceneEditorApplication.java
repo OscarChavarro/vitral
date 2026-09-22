@@ -128,8 +128,7 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
         }
     }
 
-    @Override
-    public void doRaytracingImage()
+    private void prepareRaytracedImage()
     {
         applicationModel.getRaytracedImage().init(
             applicationModel.getRaytracedImageWidth(),
@@ -139,7 +138,20 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
                 applicationModel.getScene().fixedBackground.getImage(),
                 applicationModel.getRaytracedImage());
         }
+    }
+
+    @Override
+    public void doRaytracingImage()
+    {
+        prepareRaytracedImage();
         applicationModel.getScene().raytrace(applicationModel.getRaytracedImage());
+    }
+
+    @Override
+    public void doViewportRaytracingImage()
+    {
+        prepareRaytracedImage();
+        applicationModel.getScene().raytraceViewport(applicationModel.getRaytracedImage());
     }
 
     @Override

@@ -606,6 +606,26 @@
           ]
         }
       ]
+    },
+    {
+      "type": "menu",
+      "name": "VIEWPORT_SET_RENDER_MODE",
+      "children": [
+        {
+          "type": "item",
+          "name": "Modo &GPU",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_GPU"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Modo &CPU",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU"
+          ]
+        }
+      ]
     }
   ],
   "commands": [
@@ -842,6 +862,16 @@
       "id": "IDV_VIEWPORT_SET_PROJECTION_LOCATION_FRONT",
       "name": "Frontal",
       "brief": "Proyectar la escena desde el frente"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_GPU",
+      "name": "Modo GPU",
+      "brief": "Dibujar la vista con la tarjeta de video (z-buffer)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU",
+      "name": "Modo CPU",
+      "brief": "Dibujar la vista con el procesador (raytracing en paralelo)"
     }
   ],
   "buttonGroups": [

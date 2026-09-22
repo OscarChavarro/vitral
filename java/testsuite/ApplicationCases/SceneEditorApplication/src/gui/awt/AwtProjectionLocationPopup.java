@@ -26,11 +26,13 @@ import vsdk.toolkit.gui.widget.WidgetMenuItem;
 import gui.PopupDismissClickFilter;
 
 /**
-Awt/Swing presentation of the `VIEWPORT_SET_PROJECTION_LOCATION` popup of the
-viewport set: a popup menu to change the projection location of a viewport
-(Perspective, Top, ...), with the texts of the I18N context of the viewport
-set (so it always shows the language currently selected by the user). The
-projection currently used is marked.
+Awt/Swing presentation of the menu of a viewport: the
+`VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
+projection location of a viewport (Perspective, Top, ...), followed, after a
+separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
+or the CPU (raytracing). Texts come from the I18N context of the viewport set
+(so it always shows the language currently selected by the user). The
+projection and the render mode currently used are marked.
 
 The menu is built each time it is requested. It is a heavyweight popup, since
 it is shown over a heavyweight canvas (i.e. OpenGL), and it is posted over the
@@ -99,7 +101,14 @@ public class AwtProjectionLocationPopup
 
         popup = new JPopupMenu();
         popup.setLightWeightPopupEnabled(false);
-        JRadioButtonMenuItem current = fillMenu(definition, viewport);
+        JRadioButtonMenuItem current = fillMenu(definition, viewport,
+            viewport.getProjectionLocationCommand());
+        WidgetMenu renderModeDefinition =
+            context.getPopup(ViewportSetCommands.POPUP_RENDER_MODE);
+        if ( renderModeDefinition != null ) {
+            popup.addSeparator();
+            fillMenu(renderModeDefinition, viewport, viewport.getRenderModeCommand());
+        }
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e)
@@ -135,10 +144,17 @@ public class AwtProjectionLocationPopup
         return true;
     }
 
-    private JRadioButtonMenuItem fillMenu(WidgetMenu definition, Viewport viewport)
+    /**
+    Adds the items of a popup definition as a group of radio items.
+    @param definition popup of the I18N context
+    @param viewport viewport the commands act over
+    @param currentCommand command of the item to mark as selected
+    @return the item marked as selected, or null if none
+    */
+    private JRadioButtonMenuItem fillMenu(WidgetMenu definition, Viewport viewport,
+                                          String currentCommand)
     {
         ButtonGroup group = new ButtonGroup();
-        String currentCommand = viewport.getProjectionLocationCommand();
         JRadioButtonMenuItem currentItem = null;
 
         for ( WidgetMenuElement element : definition.getChildren() ) {

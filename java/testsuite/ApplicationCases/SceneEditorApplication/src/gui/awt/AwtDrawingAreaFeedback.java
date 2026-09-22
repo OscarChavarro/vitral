@@ -238,7 +238,7 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
     @Override
     public void raytraceImage()
     {
-        application.doRaytracingImage();
+        application.doViewportRaytracingImage();
     }
 
     @Override

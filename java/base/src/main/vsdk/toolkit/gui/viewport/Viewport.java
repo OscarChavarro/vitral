@@ -508,6 +508,38 @@ public class Viewport
     }
 
     /**
+    @return the standard command of the render mode popup that corresponds to
+    the render mode of this viewport (see `ViewportSetCommands`)
+    */
+    public String getRenderModeCommand()
+    {
+        if ( renderMode == RENDER_MODE_RAYTRACING ) {
+            return ViewportSetCommands.IDV_RENDER_MODE_CPU;
+        }
+        return ViewportSetCommands.IDV_RENDER_MODE_GPU;
+    }
+
+    /**
+    Selects the render mode given by one of the standard commands of the
+    render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
+    graphics API, CPU is raytracing.
+    @param command
+    @return true if the command was a render mode one and was applied
+    */
+    public boolean selectRenderMode(String command)
+    {
+        if ( ViewportSetCommands.IDV_RENDER_MODE_GPU.equals(command) ) {
+            renderMode = RENDER_MODE_Z_BUFFER;
+            return true;
+        }
+        if ( ViewportSetCommands.IDV_RENDER_MODE_CPU.equals(command) ) {
+            renderMode = RENDER_MODE_RAYTRACING;
+            return true;
+        }
+        return false;
+    }
+
+    /**
     Selects the projection location given by one of the standard commands of
     the projection location popup (see `ViewportSetCommands`).
     @param command

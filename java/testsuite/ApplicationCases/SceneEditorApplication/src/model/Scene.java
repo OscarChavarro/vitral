@@ -9,7 +9,6 @@ import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.gui.feedback.ProgressMonitorConsole;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
@@ -26,11 +25,14 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
-import vsdk.toolkit.render.raytracing.SimpleRaytracer;
+import vsdk.toolkit.render.raytracing.ParallelRaytracer;
 import model.selection.SelectionSet;
 
 public class Scene
 {
+    /// Shared by all scenes: its threads (one per processor) are reused
+    private static final ParallelRaytracer RAYTRACER = new ParallelRaytracer();
+
     public SimpleScene scene;
 
     //- 1. Camera ----------------------------------------------------------
@@ -295,7 +297,34 @@ public class Scene
         System.out.println("= END OF REPORT ===========================================================");
     }
 
+    /**
+    Raytraces the scene from the active camera, reporting the progress and the
+    time in the console, and exports the result to `output.jpg`.
+    @param out_Viewport image to fill; its size gives the resolution
+    */
     public void raytrace(RGBImageUncompressed out_Viewport)
+    {
+        raytrace(out_Viewport, true);
+    }
+
+    /**
+    Raytraces the scene from the active camera, silently: used to present a
+    viewport in CPU render mode, once per frame.
+    @param out_Viewport image to fill; its size gives the resolution
+    */
+    public void raytraceViewport(RGBImageUncompressed out_Viewport)
+    {
+        raytrace(out_Viewport, false);
+    }
+
+    /**
+    Raytraces with one thread per available processor (see
+    `ParallelRaytracer`).
+    @param out_Viewport image to fill
+    @param interactiveReport true to report progress and time in the console
+    and export the result to `output.jpg`
+    */
+    private void raytrace(RGBImageUncompressed out_Viewport, boolean interactiveReport)
     {
         int originalWidth;
         int originalHeight;
@@ -306,8 +335,6 @@ public class Scene
             out_Viewport.getXSize(), out_Viewport.getYSize());
 
         //-----------------------------------------------------------------
-        ProgressMonitorConsole reporter = new ProgressMonitorConsole();        
-        SimpleRaytracer visualizationEngine;
 
         Background activeBackground;
         switch ( selectedBackground ) {
@@ -338,25 +365,28 @@ public class Scene
             break;
         }
 
-        visualizationEngine = new SimpleRaytracer();
         SimpleSceneSnapshot sceneSnapshot =
             scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();
-        visualizationEngine.execute(out_Viewport, qualityTemplate,
-                                    sceneSnapshot, reporter, null);
+        RAYTRACER.execute(out_Viewport, qualityTemplate, sceneSnapshot,
+            interactiveReport);
         long finalTime = System.currentTimeMillis();
-        System.out.println("Image generated in " + (finalTime-initialTime) + " miliseconds.");
 
-        File fd = new File("./output.jpg");
+        if ( interactiveReport ) {
+            System.out.println("Image generated in " + (finalTime-initialTime) +
+                " miliseconds, with " + RAYTRACER.getNumberOfThreads() + " threads.");
 
-        System.out.print("Exporting result image to file: ");
-        if ( !ImagePersistence.exportJPG(fd, out_Viewport) )
-        {
-            System.err.println("Error grabando la imagen!!");
-            System.exit(1);
+            File fd = new File("./output.jpg");
+
+            System.out.print("Exporting result image to file: ");
+            if ( !ImagePersistence.exportJPG(fd, out_Viewport) )
+            {
+                System.err.println("Error grabando la imagen!!");
+                System.exit(1);
+            }
+            System.out.println(" OK!");
+            System.out.println("An image has been created in the file output.jpg");
         }
-        System.out.println(" OK!");
-        System.out.println("An image has been created in the file output.jpg");
 
         //-----------------------------------------------------------------
         activeCamera.updateViewportResize(originalWidth, originalHeight);

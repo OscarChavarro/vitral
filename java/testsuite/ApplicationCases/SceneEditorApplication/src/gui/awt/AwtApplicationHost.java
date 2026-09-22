@@ -31,9 +31,16 @@ public interface AwtApplicationHost
     void reportTargetToModifyPanel();
 
     /**
-    Ray traces the scene into the raytraced image of the application model.
+    Ray traces the scene into the raytraced image of the application model,
+    reporting it in the console and exporting it to a file.
     */
     void doRaytracingImage();
+
+    /**
+    Ray traces the scene into the raytraced image of the application model,
+    silently: used each frame by viewports in CPU render mode.
+    */
+    void doViewportRaytracingImage();
 
     /**
     Ends the application.

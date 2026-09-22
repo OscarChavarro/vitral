@@ -17,12 +17,13 @@ pressing and releasing over its title requests the menu to change its
 projection location, through the `ViewportSetInteractionListener`.
 
 Keyboard commands:
-  - `.` selects the next viewport, `,` selects the next layout style (the
+  - `;` selects the next viewport, `,` selects the next layout style (the
     last one shows only the selected viewport) and Alt+`w` maximizes /
     restores the selected viewport.
   - Over the selected viewport: `g` toggles the grid, `t`, `l`, `f`, `b` and
-    `p` select the Top, Left, Front, Bottom and Perspective cameras, `9`
-    toggles the render mode and `0` cycles the requested size.
+    `p` select the Top, Left, Front, Bottom and Perspective cameras, `.` (and
+    `9`) toggles the render mode between GPU (z-buffer) and CPU (raytracing)
+    and `0` cycles the requested size.
 */
 public class ViewportSetInteractionTechniques
 {
@@ -64,8 +65,8 @@ public class ViewportSetInteractionTechniques
     }
 
     /**
-    Processes one of the standard commands of the viewport set over the given
-    viewport.
+    Processes one of the standard commands of the viewport set (projection
+    location or render mode) over the given viewport.
     @param command the id of the command, starting with `IDV_`
     @param viewport
     @return true if the command was a viewport set one and was processed
@@ -75,7 +76,8 @@ public class ViewportSetInteractionTechniques
         if ( viewport == null ) {
             return false;
         }
-        return viewport.selectProjectionLocation(command);
+        return viewport.selectProjectionLocation(command) ||
+            viewport.selectRenderMode(command);
     }
 
     /**
@@ -89,7 +91,7 @@ public class ViewportSetInteractionTechniques
         }
 
         switch ( event.unicode_id ) {
-          case '.':
+          case ';':
             viewportSet.selectNextViewport();
             return true;
           case ',':
@@ -124,6 +126,9 @@ public class ViewportSetInteractionTechniques
         }
 
         switch ( event.unicode_id ) {
+          case '.':
+            viewport.toggleRenderMode();
+            return true;
           case 'g':
             viewport.toggleGrid();
             return true;

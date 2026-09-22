@@ -26,8 +26,8 @@ public interface DrawingAreaHost
     BodyEditFeedbackProvider getBodyEditFeedbackProvider();
 
     /**
-    Computes the raytraced image of the scene, leaving it in the application
-    model.
+    Computes the raytraced image of the scene for a viewport in CPU render
+    mode, leaving it in the application model.
     */
     void raytraceImage();
 
