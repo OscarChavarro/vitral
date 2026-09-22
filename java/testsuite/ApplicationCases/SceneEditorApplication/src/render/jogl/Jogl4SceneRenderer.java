@@ -1,0 +1,195 @@
+package render.jogl;
+
+// JOGL classes
+import java.util.List;
+
+import com.jogamp.opengl.GL4;
+
+// VSDK classes
+import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
+import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.volume.Sphere;
+import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.RendererConfiguration;
+import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.environment.scene.SimpleBodyGroup;
+import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
+import vsdk.toolkit.media.Image;
+import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.render.jogl.Jogl4BackgroundRenderer;
+import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
+import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
+import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
+
+// Application classes
+import model.Scene;
+import render.BodyEditFeedbackProvider;
+
+/**
+Draws the scene of the editor into the current viewport with the GL4 core
+pipeline: every geometry goes through `Jogl4GeometryRenderer`, so all of them
+honor the same bits of the `RendererConfiguration` of the viewport.
+*/
+public class Jogl4SceneRenderer
+{
+    /**
+    Draws the background, the lights and the bodies of the scene, with the
+    feedback of the editor over the body under edition.
+    */
+    private static void drawBase(GL4 gl, Scene s, BodyEditFeedbackProvider editor)
+    {
+        //- Draw scene background -----------------------------------------
+        Jogl4BackgroundRenderer.draw(gl,
+            s.scene.getBackgrounds().get(s.scene.getActiveBackgroundIndex()));
+
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthMask(true);
+
+        //- Draw scene bodies ---------------------------------------------
+        List<Light> lights = s.scene.getLights();
+        SimpleBody gi;
+        RendererConfiguration quality;
+        int i;
+
+        for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
+            try {
+                quality = s.qualityTemplate.clone();
+            }
+            catch ( CloneNotSupportedException e ) {
+                break;
+            }
+
+            quality.setSelectionCorners(s.selectedThings.isSelected(i));
+            gi = s.scene.getSimpleBodies().get(i);
+
+            drawBody(gl, gi, s.activeCamera, lights, quality);
+            if ( editor != null && editor.getTarget() == gi ) {
+                Jogl4RenderPrimitiveRenderer.draw(gl, editor.buildEditFeedback(),
+                    s.activeCamera, lights, quality);
+            }
+        }
+    }
+
+    /**
+    Draws one body of the scene.
+
+    @param gl OpenGL context
+    @param body body to draw
+    @param camera camera that views the body
+    @param lights lights of the scene, or null or empty for a light at the camera
+    @param quality bits of rendering configuration
+    */
+    public static void drawBody(GL4 gl, SimpleBody body, Camera camera, List<Light> lights,
+                                RendererConfiguration quality)
+    {
+        drawBody(gl, body, Matrix4x4d.identityMatrix(), camera, lights, quality);
+    }
+
+    /**
+    Draws all the bodies of a group, with the transformation of the group. The
+    bounding volume and the selection corners are drawn once around the whole
+    group, not around each body.
+
+    @param gl OpenGL context
+    @param group group to draw
+    @param camera camera that views the group
+    @param lights lights of the scene, or null or empty for a light at the camera
+    @param quality bits of rendering configuration
+    */
+    public static void drawBodyGroup(GL4 gl, SimpleBodyGroup group, Camera camera,
+                                     List<Light> lights, RendererConfiguration quality)
+    {
+        RendererConfiguration memberQuality;
+
+        try {
+            memberQuality = quality.clone();
+        }
+        catch ( CloneNotSupportedException e ) {
+            return;
+        }
+        memberQuality.setSelectionCorners(false);
+        memberQuality.setBoundingVolume(false);
+
+        for ( SimpleBody body : group.getBodies() ) {
+            drawBody(gl, body, group.getTransformationMatrix(), camera, lights, memberQuality);
+        }
+        if ( quality.isBoundingVolumeSet() ) {
+            Jogl4MinMaxRenderer.draw(gl, group.getMinMax(), camera, group.getTransformationMatrix());
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, group.getMinMax(), camera,
+                group.getTransformationMatrix());
+        }
+    }
+
+    private static void drawBody(GL4 gl, SimpleBody body, Matrix4x4d parentTransform,
+                                 Camera camera, List<Light> lights, RendererConfiguration quality)
+    {
+        Matrix4x4d transform = parentTransform.multiply(body.getTransformationMatrix());
+        Geometry geometry = body.getGeometry();
+        Image texture = body.getTexture();
+        RGBImageUncompressed textureMap = texture instanceof RGBImageUncompressed
+            ? (RGBImageUncompressed)texture
+            : null;
+
+        Jogl4GeometryRenderer.draw(
+            gl,
+            geometry,
+            camera,
+            lights,
+            body.getMaterial(),
+            quality,
+            textureMap,
+            body.getNormalMapRgb(),
+            transform);
+    }
+
+    /**
+    Draws the scene into the current viewport.
+    @param gl OpenGL context
+    @param s scene to draw
+    @param editor editor of the selected body, whose feedback is drawn over
+    it, or null if there is none
+    */
+    public static void draw(GL4 gl, Scene s, BodyEditFeedbackProvider editor)
+    {
+        RendererConfiguration quality;
+        SimpleBodyGroup ggi;
+        int i;
+
+        s.activateSelectedBackground();
+
+        drawBase(gl, s, editor);
+
+        //- Draw 3D Gizmos ------------------------------------------------
+        s.selectedLights.sync();
+        for ( i = 0; i < s.scene.getLights().size(); i++ ) {
+            Jogl4LightRenderer.draw(gl, s.scene.getLights().get(i), s.activeCamera,
+                LightGizmoStyle.OMNI_BILLBOARD, s.selectedLights.isSelected(i));
+        }
+
+        //- Draw visual debug entities (usually transparent) --------------
+        List<Light> lights = s.scene.getLights();
+
+        for ( i = 0; i < s.debugThingGroups.size(); i++ ) {
+            try {
+                quality = s.qualityTemplate.clone();
+            }
+            catch ( CloneNotSupportedException e ) {
+                break;
+            }
+
+            quality.setShadingType(RendererConfiguration.SHADING_TYPE_NOLIGHT);
+            quality.setSelectionCorners(s.selectedDebugThingGroups.isSelected(i));
+            ggi = s.debugThingGroups.get(i);
+            if ( ggi.getBodies().get(0).getGeometry() instanceof Sphere ) {
+                gl.glDisable(GL4.GL_DEPTH_TEST);
+            }
+            drawBodyGroup(gl, ggi, s.activeCamera, lights, quality);
+            gl.glEnable(GL4.GL_DEPTH_TEST);
+        }
+    }
+
+}

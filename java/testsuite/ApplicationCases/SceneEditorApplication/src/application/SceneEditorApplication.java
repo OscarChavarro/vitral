@@ -1,7 +1,7 @@
 package application;
 
 // Java classes
-import application.render.jogl.Jogl4ApplicationController;
+import render.jogl.Jogl4ApplicationController;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,11 +16,11 @@ import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
 // Application classes
-import application.framework.Scene;
-import application.model.ApplicationModel;
-import application.gui.AwtApplicationModel;
-import application.gui.AwtGuiController;
-import application.net.VitralEditorMCP;
+import model.Scene;
+import model.ApplicationModel;
+import gui.AwtApplicationModel;
+import gui.AwtGuiController;
+import net.VitralEditorMCP;
 
 public class SceneEditorApplication {
     // Application model
@@ -175,6 +175,17 @@ public class SceneEditorApplication {
     public Jogl4ApplicationController getJogl4Controller()
     {
         return jogl4Controller;
+    }
+
+    /**
+    Requests to draw again the drawing area, whatever the rendering
+    technology presenting it.
+    */
+    public void repaintDrawingArea()
+    {
+        if ( jogl4Controller != null ) {
+            jogl4Controller.repaint();
+        }
     }
 
     public AwtApplicationModel getAwtModel()
