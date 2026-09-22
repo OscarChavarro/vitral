@@ -5,6 +5,7 @@ import com.jogamp.opengl.GL4;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
+import vsdk.toolkit.gui.gizmo.GizmoVertexArrayBuilder;
 import vsdk.toolkit.gui.gizmo.ReferenceFrameGizmo;
 import vsdk.toolkit.render.jogl.Jogl4ColoredPrimitiveRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
@@ -105,18 +106,9 @@ public class Jogl4ReferenceFrameGizmoRenderer extends Jogl4Renderer {
         for ( int axis = 0; axis < ReferenceFrameGizmo.NUMBER_OF_AXES; axis++ ) {
             ColorRgb c = gizmo.getAxisColor(axis);
             Vector3Dd[] strip = gizmo.buildAxisStrip(axis, cameraRotation);
-            float[] positions = new float[strip.length * 3];
-            float[] colors = new float[strip.length * 4];
+            float[] positions = GizmoVertexArrayBuilder.buildPositions(strip);
+            float[] colors = GizmoVertexArrayBuilder.buildRgbaColors(strip.length, c, 1.0);
 
-            for ( int i = 0; i < strip.length; i++ ) {
-                positions[3*i] = (float)strip[i].x();
-                positions[3*i + 1] = (float)strip[i].y();
-                positions[3*i + 2] = (float)strip[i].z();
-                colors[4*i] = (float)c.r();
-                colors[4*i + 1] = (float)c.g();
-                colors[4*i + 2] = (float)c.b();
-                colors[4*i + 3] = 1.0f;
-            }
             Jogl4ColoredPrimitiveRenderer.draw(gl, identity, GL4.GL_TRIANGLE_STRIP,
                 positions, colors);
         }

@@ -1,5 +1,6 @@
 package vsdk.toolkit.gui.gizmo;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
@@ -124,14 +125,24 @@ public class RotateGizmoInteractionTechnique {
 
         if ( inputGizmo.processKeyPressedEvent(keyEvent) ) {
             if ( inputGizmo.consumeCommit() ) {
-                double[] angles = inputGizmo.getValuesWithEdits();
+                double[] values = inputGizmo.getValuesWithEdits();
 
                 inputGizmo.cancelEditing();
-                Matrix4x4d rotation = RotateGizmo.createRotationFromAnglesInDegrees(
-                    angles[0], angles[1], angles[2]);
 
-                gizmo.setTransformationMatrix(
-                    rotation.withTranslation(gizmo.getPosition()));
+                Matrix4x4d rotation = RotateGizmo.createRotationFromAnglesInDegrees(
+                    values[0], values[1], values[2]).withoutTranslation();
+                double cameraDeltaDegrees = values[RotateGizmo.CAMERA_INPUT_FIELD_INDEX];
+
+                if ( Math.abs(cameraDeltaDegrees) > VSDK.EPSILON ) {
+                    // The fourth field is relative: it rotates on top of the
+                    // orientation given by the other three, around the
+                    // current camera axis, and goes back to 0
+                    Matrix4x4d cameraDelta = new Matrix4x4d().axisRotation(
+                        Math.toRadians(cameraDeltaDegrees), gizmo.getCameraAxisDirection());
+
+                    rotation = cameraDelta.multiply(rotation);
+                }
+                gizmo.setTransformationMatrix(rotation.withTranslation(gizmo.getPosition()));
                 return true;
             }
             return false;
@@ -192,6 +203,9 @@ public class RotateGizmoInteractionTechnique {
         int selection = calculateSelection(e.getX(), e.getY());
 
         if ( selection != RotateGizmo.NULL_GROUP ) {
+            // Groups are 1-based (X=1, Y=2, Z=3, camera=4); ring indexes are
+            // 0-based (0, 1, 2, and RotateGizmo.CAMERA_RING_INDEX for the
+            // camera ring), so they line up as `selection - 1`
             beginGesture(selection - 1, e.getX(), e.getY());
         }
         return false;
@@ -279,12 +293,17 @@ public class RotateGizmoInteractionTechnique {
         }
         dragLastAngle = angle;
 
-        Vector3Dd unitAxis = new Vector3Dd(dragRing == 0 ? 1 : 0, dragRing == 1 ? 1 : 0,
-            dragRing == 2 ? 1 : 0);
+        // `dragAxis` is fixed (in world space) since the gesture started, so
+        // rotating around it, then keeping the position the gizmo had when
+        // pressed, is equivalent to rotating around the matching local axis
+        // of `dragStartTransformation` (used for the X, Y and Z rings) but
+        // also works for the camera ring, whose axis has no local counterpart
+        Matrix4x4d rotationOnly = new Matrix4x4d().axisRotation(dragSweep, dragAxis)
+            .multiply(new Matrix4x4d(dragStartTransformation).withoutTranslation());
 
         gizmo.getInputGizmo().cancelEditing();
-        gizmo.setTransformationMatrix(dragStartTransformation.multiply(
-            new Matrix4x4d().axisRotation(dragSweep, unitAxis)));
+        gizmo.setTransformationMatrix(
+            rotationOnly.withTranslation(dragStartTransformation.extractTranslation()));
         gizmo.setArc(dragRing, dragU, dragV, dragStartAngle, dragSweep);
         return true;
     }
@@ -304,13 +323,21 @@ public class RotateGizmoInteractionTechnique {
     {
         dragRing = ring;
         dragStartTransformation = new Matrix4x4d(gizmo.getTransformationMatrix());
-        dragAxis = gizmo.getAxisDirection(ring);
-        dragU = gizmo.getAxisDirection((ring + 1) % RotateGizmo.RING_COUNT);
-        dragV = gizmo.getAxisDirection((ring + 2) % RotateGizmo.RING_COUNT);
+        if ( ring == RotateGizmo.CAMERA_RING_INDEX ) {
+            dragAxis = gizmo.getCameraAxisDirection();
+            dragU = gizmo.getCameraPlaneRightDirection();
+            dragV = gizmo.getCameraPlaneUpDirection();
+            gizmo.setPersistentSelection(RotateGizmo.CAMERA_RING_GROUP);
+        }
+        else {
+            dragAxis = gizmo.getAxisDirection(ring);
+            dragU = gizmo.getAxisDirection((ring + 1) % RotateGizmo.RING_COUNT);
+            dragV = gizmo.getAxisDirection((ring + 2) % RotateGizmo.RING_COUNT);
+            gizmo.setPersistentSelection(RotateGizmo.groupOfRing(ring));
+        }
         dragStartAngle = 0;
         dragLastAngle = Double.NaN;
         dragSweep = 0;
-        gizmo.setPersistentSelection(RotateGizmo.groupOfRing(ring));
         gizmo.clearArc();
 
         // NaN if the ring is seen edge on: the first angle is taken when dragging

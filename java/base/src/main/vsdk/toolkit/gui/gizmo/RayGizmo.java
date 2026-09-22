@@ -382,6 +382,62 @@ public class RayGizmo extends Gizmo {
         this.refractedRayColors = new ArrayList<>(refractedRayColors);
     }
 
+    /// Outer radius of the roll indicator fin (see `buildIndicatorMesh`)
+    private static final float INDICATOR_OUTER_RADIUS = 0.65f;
+    /// Inner radius of the roll indicator fin
+    private static final float INDICATOR_INNER_RADIUS = 0.17f;
+    /// Half width of the roll indicator fin, at its base
+    private static final float INDICATOR_HALF_WIDTH = 0.12f;
+    /// Distance of the tip of the roll indicator fin, along +Z
+    private static final float INDICATOR_TIP_Z = 0.30f;
+
+    /**
+    Geometry of a single triangle, used to mark the current roll angle around
+    the ray direction: a fin pointing in local +X at the base of the arrow
+    (z=0), with its tip lifted towards +Z. It is generated once around the
+    local +Z axis; the renderer rotates it by the roll angle of the gizmo
+    (see `getRotationAngleInRadians`) and transforms it with the body of the
+    arrow.
+
+    @param positions 3 vertexes (tip, base-left, base-right), 3 floats each
+    @param normals one repeated flat normal, 3 floats each
+    @param uvs 3 texture coordinates, 2 floats each
+    */
+    public record IndicatorMesh(float[] positions, float[] normals, float[] uvs) {
+    }
+
+    /**
+    @return the geometry of the roll indicator fin, in the local space of the
+    arrow (see {@link IndicatorMesh})
+    */
+    public static IndicatorMesh buildIndicatorMesh() {
+        // P0=tip, P1=base-left, P2=base-right.
+        float[] positions = {
+            INDICATOR_OUTER_RADIUS,  0.0f,                 INDICATOR_TIP_Z,
+            INDICATOR_INNER_RADIUS, -INDICATOR_HALF_WIDTH,  0.0f,
+            INDICATOR_INNER_RADIUS,  INDICATOR_HALF_WIDTH,  0.0f
+        };
+        float[] uvs = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+        float ax = INDICATOR_INNER_RADIUS - INDICATOR_OUTER_RADIUS;
+        float ay = -INDICATOR_HALF_WIDTH;
+        float az = -INDICATOR_TIP_Z;
+        float bx = INDICATOR_INNER_RADIUS - INDICATOR_OUTER_RADIUS;
+        float by = INDICATOR_HALF_WIDTH;
+        float bz = -INDICATOR_TIP_Z;
+        float nx = ay*bz - az*by;
+        float ny = az*bx - ax*bz;
+        float nz = ax*by - ay*bx;
+        float normalLength = (float)Math.sqrt(nx*nx + ny*ny + nz*nz);
+
+        nx /= normalLength;
+        ny /= normalLength;
+        nz /= normalLength;
+
+        float[] normals = { nx, ny, nz, nx, ny, nz, nx, ny, nz };
+
+        return new IndicatorMesh(positions, normals, uvs);
+    }
+
     private void recordDataArrival() {
         previousDataTime = lastDataTime;
         lastDataTime = new Date();

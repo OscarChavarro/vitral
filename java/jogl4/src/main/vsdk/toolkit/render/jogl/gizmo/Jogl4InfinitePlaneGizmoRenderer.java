@@ -2,42 +2,49 @@ package vsdk.toolkit.render.jogl.gizmo;
 
 import com.jogamp.opengl.GL4;
 
-import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.gui.gizmo.GizmoVertexArrayBuilder;
 import vsdk.toolkit.gui.gizmo.InfinitePlaneGizmo;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LineRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 
+/**
+Renders an {@link InfinitePlaneGizmo} as a screen-facing square frame, with the
+GL4 core pipeline.
+
+The frame geometry (its 4 corners, sized and oriented for the camera) is
+computed by the gizmo itself (see
+{@link InfinitePlaneGizmo#buildFrameCorners(Camera)}); this class only packs
+that geometry into the flat vertex arrays {@link Jogl4LineRenderer} consumes.
+
+Usage (render thread, once per frame):
+<pre>
+    Jogl4InfinitePlaneGizmoRenderer.draw(gl, gizmo, camera);
+</pre>
+*/
 public class Jogl4InfinitePlaneGizmoRenderer extends Jogl4Renderer {
-    private static final double VIEWPORT_AREA_FRACTION = 0.125;
-    private static final double MIN_PROJECTED_COSINE = 0.10;
     private static final float LINE_WIDTH = 2.0f;
 
+    /**
+    Draws the gizmo over the current contents of the surface.
+
+    @param gl OpenGL context
+    @param gizmo gizmo to draw
+    @param camera camera that views the gizmo
+    */
     public static void draw(GL4 gl, InfinitePlaneGizmo gizmo, Camera camera) {
         if ( gl == null || gizmo == null || camera == null || !gizmo.isVisible() ) {
             return;
         }
 
-        Vector3Dd center = gizmo.getPoint();
-        Vector3Dd normal = gizmo.getNormal();
-        if ( center == null || normal == null || normal.length() < VSDK.EPSILON ) {
+        Vector3Dd[] corners = gizmo.buildFrameCorners(camera);
+        if ( corners == null ) {
             return;
         }
-
-        camera.updateVectors();
-        Vector3Dd n = normal.normalized();
-        Vector3Dd u = buildTangent(n, camera);
-        Vector3Dd v = n.crossProduct(u).normalized();
-        double halfSide = calculateHalfSide(camera, center, n);
-
-        Vector3Dd p0 = center.add(u.multiply(-halfSide)).add(v.multiply(-halfSide));
-        Vector3Dd p1 = center.add(u.multiply( halfSide)).add(v.multiply(-halfSide));
-        Vector3Dd p2 = center.add(u.multiply( halfSide)).add(v.multiply( halfSide));
-        Vector3Dd p3 = center.add(u.multiply(-halfSide)).add(v.multiply( halfSide));
 
         ColorRgb color = gizmo.getFrameColor();
         if ( color == null ) {
@@ -46,78 +53,35 @@ public class Jogl4InfinitePlaneGizmoRenderer extends Jogl4Renderer {
 
         float[] positions = new float[24];
         float[] colors = new float[24];
-        addLine(positions, colors, 0, p0, p1, color);
-        addLine(positions, colors, 6, p1, p2, color);
-        addLine(positions, colors, 12, p2, p3, color);
-        addLine(positions, colors, 18, p3, p0, color);
+        addLine(positions, colors, 0, corners[0], corners[1], color);
+        addLine(positions, colors, 2, corners[1], corners[2], color);
+        addLine(positions, colors, 4, corners[2], corners[3], color);
+        addLine(positions, colors, 6, corners[3], corners[0], color);
 
         Matrix4x4d projection = Jogl4CameraRenderer.activate(gl, camera);
         Jogl4LineRenderer.drawLines(gl, projection, positions, colors, LINE_WIDTH);
     }
 
+    /**
+    Deletes the OpenGL resources of this renderer.
+    PRE: the OpenGL context that created them is current.
+    @param gl OpenGL context
+    */
     public static void dispose(GL4 gl) {
         Jogl4LineRenderer.release(gl);
-    }
-
-    private static Vector3Dd buildTangent(Vector3Dd normal, Camera camera) {
-        Vector3Dd tangent = normal.crossProduct(camera.getFront());
-        if ( tangent.length() < VSDK.EPSILON ) {
-            tangent = normal.crossProduct(camera.getUp());
-        }
-        if ( tangent.length() < VSDK.EPSILON ) {
-            tangent = normal.crossProduct(camera.getLeft());
-        }
-        if ( tangent.length() < VSDK.EPSILON ) {
-            tangent = new Vector3Dd(1, 0, 0);
-        }
-        return tangent.normalized();
-    }
-
-    private static double calculateHalfSide(Camera camera, Vector3Dd center, Vector3Dd normal) {
-        double aspect = Math.max(1.0e-6, camera.getViewportXSize() / camera.getViewportYSize());
-        double visibleHeight;
-        double visibleWidth;
-
-        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
-            visibleHeight = 2.0 / Math.max(camera.getOrthogonalZoom(), 1.0e-6);
-        }
-        else {
-            double depth = center.subtract(camera.getPosition()).dotProduct(camera.getFront());
-            depth = Math.max(camera.getNearPlaneDistance(), Math.abs(depth));
-            visibleHeight = 2.0 * depth * Math.tan(Math.toRadians(camera.getFov()) / 2.0);
-        }
-        visibleWidth = visibleHeight * aspect;
-
-        double projectedCosine = Math.abs(normal.normalized().dotProduct(camera.getFront().normalized()));
-        projectedCosine = Math.max(MIN_PROJECTED_COSINE, projectedCosine);
-        double side = Math.sqrt(visibleWidth * visibleHeight * VIEWPORT_AREA_FRACTION / projectedCosine);
-        return side * 0.5;
     }
 
     private static void addLine(
         float[] positions,
         float[] colors,
-        int offset,
+        int vertexOffset,
         Vector3Dd a,
         Vector3Dd b,
         ColorRgb color)
     {
-        addVertex(positions, colors, offset, a, color);
-        addVertex(positions, colors, offset + 3, b, color);
-    }
-
-    private static void addVertex(
-        float[] positions,
-        float[] colors,
-        int offset,
-        Vector3Dd p,
-        ColorRgb color)
-    {
-        positions[offset] = (float)p.x();
-        positions[offset + 1] = (float)p.y();
-        positions[offset + 2] = (float)p.z();
-        colors[offset] = (float)color.r();
-        colors[offset + 1] = (float)color.g();
-        colors[offset + 2] = (float)color.b();
+        GizmoVertexArrayBuilder.putVertex(positions, vertexOffset, a);
+        GizmoVertexArrayBuilder.putRgb(colors, vertexOffset, color);
+        GizmoVertexArrayBuilder.putVertex(positions, vertexOffset + 1, b);
+        GizmoVertexArrayBuilder.putRgb(colors, vertexOffset + 1, color);
     }
 }

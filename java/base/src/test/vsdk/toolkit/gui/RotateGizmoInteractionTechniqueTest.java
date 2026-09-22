@@ -49,16 +49,22 @@ class RotateGizmoInteractionTechniqueTest
         return event;
     }
 
+    /// Angle (degrees), for each ring, that is both far from the places
+    /// where the rings cross each other and on the half of `createCamera()`
+    /// that faces it (the far half of a ring cannot be picked)
+    private static final double[] VISIBLE_ANGLE_DEGREES = {145, 80, 280};
+
     /**
     @return an event over a point of the given ring, at an angle far from the
-    places where the rings cross each other
+    places where the rings cross each other, and picakble (see
+    `VISIBLE_ANGLE_DEGREES`)
     */
     private static MouseEvent mouseEventOverRing(Camera camera, RotateGizmo gizmo, int ring)
     {
         Vector3Dd[] axes = {
             new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0), new Vector3Dd(0, 0, 1)
         };
-        double angle = Math.toRadians(125);
+        double angle = Math.toRadians(VISIBLE_ANGLE_DEGREES[ring]);
         Vector3Dd point = gizmo.getPosition()
             .add(axes[(ring + 1) % 3].multiply(Math.cos(angle) * gizmo.getRingRadius()))
             .add(axes[(ring + 2) % 3].multiply(Math.sin(angle) * gizmo.getRingRadius()));
@@ -452,19 +458,26 @@ class RotateGizmoInteractionTechniqueTest
     @Test
     void given_dragOverEachRing_when_cursorGoesAroundTheAxis_then_gizmoRotatesThatAngleAroundIt()
     {
+        // The press must land on the half of each ring that faces the
+        // camera (see VISIBLE_ANGLE_DEGREES); once dragging starts, the
+        // angle is tracked from the cursor regardless of that (only the
+        // initial pick needs a visible point)
+        double[] startDegrees = {125, 125, 250};
+
         for ( int ring = 0; ring < 3; ring++ ) {
             // Arrange
             Camera camera = createCamera();
             RotateGizmo gizmo = createGizmo(camera);
             RotateGizmoInteractionTechnique technique = new RotateGizmoInteractionTechnique(gizmo);
-        Matrix4x4d frame = new Matrix4x4d(gizmo.getTransformationMatrix());
+            Matrix4x4d frame = new Matrix4x4d(gizmo.getTransformationMatrix());
+            double start = startDegrees[ring];
 
-            technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, ring, 125));
+            technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, ring, start));
 
-            // Act: the cursor follows the point of the ring from 125 to 185 degrees
+            // Act: the cursor follows the point of the ring 60 degrees on
             boolean changed = false;
 
-            for ( double degrees = 125; degrees <= 185; degrees += 5 ) {
+            for ( double degrees = start; degrees <= start + 60; degrees += 5 ) {
                 changed |= technique.processMouseDraggedEvent(
                     mouseEventOverRingAt(camera, gizmo, frame, ring, degrees));
             }
@@ -491,10 +504,11 @@ class RotateGizmoInteractionTechniqueTest
         RotateGizmoInteractionTechnique technique = new RotateGizmoInteractionTechnique(gizmo);
         Matrix4x4d frame = new Matrix4x4d(gizmo.getTransformationMatrix());
 
-        technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 100));
+        // The press must land on the half of the ring that faces the camera
+        technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 310));
 
         // Act
-        for ( double degrees = 100; degrees >= 40; degrees -= 5 ) {
+        for ( double degrees = 310; degrees >= 250; degrees -= 5 ) {
             technique.processMouseDraggedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, degrees));
         }
 
@@ -735,10 +749,11 @@ class RotateGizmoInteractionTechniqueTest
         RotateGizmoInteractionTechnique technique = new RotateGizmoInteractionTechnique(gizmo);
         Matrix4x4d frame = new Matrix4x4d(gizmo.getTransformationMatrix());
 
-        technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 125));
+        // The press must land on the half of the ring that faces the camera
+        technique.processMousePressedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 250));
 
         // Act: the first drag event is already 40 degrees away
-        technique.processMouseDraggedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 165));
+        technique.processMouseDraggedEvent(mouseEventOverRingAt(camera, gizmo, frame, 2, 290));
 
         // Assert
         assertThat(gizmo.getArcSweepInDegrees()).isCloseTo(40.0, offset(3.0));

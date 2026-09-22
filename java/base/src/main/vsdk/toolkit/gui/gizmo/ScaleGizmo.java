@@ -91,17 +91,20 @@ public class ScaleGizmo extends Gizmo {
     private static final int Z_SHAFT_ELEMENT = 5;
     private static final int Z_TIP_ELEMENT = 6;
 
-    /// Size and contour width designed for legacy resolutions
+    /// Size and contour width designed for legacy resolutions; the width
+    /// matches TranslateGizmo#DEFAULT_LINE_WIDTH so both gizmos look
+    /// visually consistent (same ribbon thickness) in the 3D UI
     public static final int DEFAULT_APPARENT_SIZE_IN_PIXELS = 100;
-    public static final double DEFAULT_LINE_WIDTH = 2.0;
+    public static final double DEFAULT_LINE_WIDTH = 1.0;
 
     /// Color the interior of the handle currently selected is filled with
     public static final ColorRgb HANDLE_FILL_COLOR = new ColorRgb(0.88, 0.88, 0.88);
 
     /// Total length of an axis (shaft and tip together), and shape of its
-    /// parts, relative to the apparent size of the gizmo
+    /// parts, relative to the apparent size of the gizmo. The radius of the
+    /// shaft is not here: it follows `lineWidth`, like the contour of the
+    /// flat handles, so both look consistent (see `getLineWidthInWorldUnits`)
     private static final double AXIS_LENGTH = 0.8;
-    private static final double SHAFT_RADIUS = 0.018;
     private static final double TIP_SIZE = 0.06;
     /// Fractions of the length of an axis where the parallel sides of a
     /// two-axis band meet it. The inner one is also the boundary the uniform
@@ -166,7 +169,8 @@ public class ScaleGizmo extends Gizmo {
             inputGizmo.setFieldColor(axis, axisColors[axis]);
         }
 
-        shaftModel = new Cone(SHAFT_RADIUS, SHAFT_RADIUS, AXIS_LENGTH - TIP_SIZE);
+        double initialShaftRadius = getLineWidthInWorldUnits() / 2;
+        shaftModel = new Cone(initialShaftRadius, initialShaftRadius, AXIS_LENGTH - TIP_SIZE);
         tipModel = new Box(TIP_SIZE, TIP_SIZE, TIP_SIZE);
 
         elementInstances = new ArrayList<>();
@@ -274,6 +278,16 @@ public class ScaleGizmo extends Gizmo {
     public double getCurrentScale()
     {
         return currentScale;
+    }
+
+    /**
+    @return the width of the shaft of the axes and of the contour of the flat
+    handles, converted from pixels to world units, as seen from its camera at
+    its current apparent size
+    */
+    public double getLineWidthInWorldUnits()
+    {
+        return lineWidth * currentScale / apparentSizeInPixels;
     }
 
     //= Transformation and scale factors ===================================
@@ -721,8 +735,9 @@ public class ScaleGizmo extends Gizmo {
         double tipSize = currentScale*TIP_SIZE;
         double shaftLength = Math.max(0.0, totalLength - tipSize);
 
-        shaftModel.setBaseRadius(currentScale*SHAFT_RADIUS);
-        shaftModel.setTopRadius(currentScale*SHAFT_RADIUS);
+        double shaftRadius = getLineWidthInWorldUnits() / 2;
+        shaftModel.setBaseRadius(shaftRadius);
+        shaftModel.setTopRadius(shaftRadius);
         shaftModel.setHeight(shaftLength);
         tipModel.setSize(tipSize, tipSize, tipSize);
 

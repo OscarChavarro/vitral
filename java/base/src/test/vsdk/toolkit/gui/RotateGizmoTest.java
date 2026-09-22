@@ -90,7 +90,8 @@ class RotateGizmoTest
         // Assert
         assertThat(gizmo.getApparentSizeInPixels()).isEqualTo(100);
         for ( int ring = 0; ring < 3; ring++ ) {
-            assertThat(gizmo.getRingLineWidth(ring)).isCloseTo(2.0, offset(EPS));
+            assertThat(gizmo.getRingLineWidth(ring))
+                .isCloseTo(RotateGizmo.DEFAULT_LINE_WIDTH, offset(EPS));
         }
     }
 
@@ -106,9 +107,11 @@ class RotateGizmoTest
 
         // Assert
         assertThat(gizmo.getApparentSizeInPixels()).isEqualTo(200);
-        assertThat(gizmo.getRingLineWidth(0)).isCloseTo(4.0, offset(EPS));
+        assertThat(gizmo.getRingLineWidth(0))
+            .isCloseTo(2*RotateGizmo.DEFAULT_LINE_WIDTH, offset(EPS));
         assertThat(gizmo.getRingLineWidth(1)).isCloseTo(6.0, offset(EPS));
-        assertThat(gizmo.getRingLineWidth(2)).isCloseTo(4.0, offset(EPS));
+        assertThat(gizmo.getRingLineWidth(2))
+            .isCloseTo(2*RotateGizmo.DEFAULT_LINE_WIDTH, offset(EPS));
     }
 
     @Test
@@ -141,8 +144,10 @@ class RotateGizmoTest
         gizmo.setBaseApparentSizeInPixels(0);
 
         // Assert
-        assertThat(gizmo.getRingLineWidth(0)).isCloseTo(2.0, offset(EPS));
-        assertThat(gizmo.getBaseRingLineWidth(0)).isCloseTo(2.0, offset(EPS));
+        assertThat(gizmo.getRingLineWidth(0))
+            .isCloseTo(RotateGizmo.DEFAULT_LINE_WIDTH, offset(EPS));
+        assertThat(gizmo.getBaseRingLineWidth(0))
+            .isCloseTo(RotateGizmo.DEFAULT_LINE_WIDTH, offset(EPS));
         assertThat(gizmo.getBaseApparentSizeInPixels()).isEqualTo(100);
     }
 
@@ -252,6 +257,75 @@ class RotateGizmoTest
         return best;
     }
 
+    /**
+    Same oracle as `distanceFromRayToRing`, for the camera ring (in the
+    identity frame): the smallest distance between a ray and its centerline.
+    */
+    private static double distanceFromRayToCameraRing(Ray ray, RotateGizmo gizmo)
+    {
+        Vector3Dd u = gizmo.getCameraPlaneRightDirection().multiply(gizmo.getCameraRingRadius());
+        Vector3Dd v = gizmo.getCameraPlaneUpDirection().multiply(gizmo.getCameraRingRadius());
+        Vector3Dd direction = ray.getDirection().normalized();
+        double best = Double.MAX_VALUE;
+        int samples = 4000;
+
+        for ( int i = 0; i < samples; i++ ) {
+            double angle = 2 * Math.PI * i / samples;
+            Vector3Dd w = u.multiply(Math.cos(angle)).add(v.multiply(Math.sin(angle)))
+                .subtract(ray.getOrigin());
+
+            best = Math.min(best,
+                w.subtract(direction.multiply(w.dotProduct(direction))).length());
+        }
+        return best;
+    }
+
+    /**
+    Independent oracle for the visibility clipping: whether a point (assumed
+    on the sphere that contains the rings, centered at the origin) faces the
+    camera, the same way `RotateGizmo.isPointOnVisibleHemisphere` defines it.
+    */
+    private static double visibilityMetric(Camera camera, Vector3Dd point)
+    {
+        Vector3Dd normal = point.normalized();
+        Vector3Dd viewDirection = camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ?
+            camera.getFront() : point.subtract(camera.getPosition()).normalized();
+
+        return normal.dotProduct(viewDirection);
+    }
+
+    /**
+    @return the visibility metric (see `visibilityMetric`) of the point of a
+    ring (in the identity frame, i.e. its position is the origin) nearest to
+    the ray, found by `distanceFromRayToRing`; negative if it can be picked
+    */
+    private static double nearestRingPointVisibilityMetric(Ray ray, RotateGizmo gizmo, Camera camera,
+                                                            int ring)
+    {
+        Vector3Dd[] axes = {
+            new Vector3Dd(1, 0, 0), new Vector3Dd(0, 1, 0), new Vector3Dd(0, 0, 1)
+        };
+        Vector3Dd u = axes[(ring + 1) % 3].multiply(gizmo.getRingRadius());
+        Vector3Dd v = axes[(ring + 2) % 3].multiply(gizmo.getRingRadius());
+        Vector3Dd direction = ray.getDirection().normalized();
+        double best = Double.MAX_VALUE;
+        Vector3Dd bestPoint = null;
+        int samples = 4000;
+
+        for ( int i = 0; i < samples; i++ ) {
+            double angle = 2 * Math.PI * i / samples;
+            Vector3Dd point = u.multiply(Math.cos(angle)).add(v.multiply(Math.sin(angle)));
+            Vector3Dd w = point.subtract(ray.getOrigin());
+            double distance = w.subtract(direction.multiply(w.dotProduct(direction))).length();
+
+            if ( distance < best ) {
+                best = distance;
+                bestPoint = point;
+            }
+        }
+        return visibilityMetric(camera, bestPoint);
+    }
+
     @Test
     void given_gridOfRays_when_picked_then_agreesWithTheDistanceToTheRings()
     {
@@ -267,18 +341,30 @@ class RotateGizmoTest
                 for ( int x = 50; x < 350; x += 6 ) {
                     // Arrange
                     Ray ray = camera.generateRay(x, y);
-                    boolean[] surelyHit = new boolean[3];
+                    boolean[] surelyHit = new boolean[4];
                     boolean anyHit = false;
                     boolean ambiguous = false;
 
                     for ( int ring = 0; ring < 3; ring++ ) {
                         double distance = distanceFromRayToRing(ray, gizmo, ring);
+                        double metric = nearestRingPointVisibilityMetric(ray, gizmo, camera, ring);
 
-                        // Rays grazing a tube may go either way
+                        // Rays grazing a tube, or whose nearest point of the
+                        // ring is close to the visible/hidden silhouette, may
+                        // go either way (the picking uses the actual ray hit,
+                        // this oracle the nearest point of the ring's centerline)
                         ambiguous |= distance > 0.9 * tube && distance < 1.1 * tube;
-                        surelyHit[ring] = distance <= 0.9 * tube;
+                        ambiguous |= Math.abs(metric) < 0.25;
+                        surelyHit[ring] = distance <= 0.9 * tube && metric < 0;
                         anyHit |= surelyHit[ring];
                     }
+
+                    double cameraDistance = distanceFromRayToCameraRing(ray, gizmo);
+                    double cameraTube = gizmo.getCameraRingModel().getMinorRadius();
+
+                    ambiguous |= cameraDistance > 0.9 * cameraTube && cameraDistance < 1.1 * cameraTube;
+                    surelyHit[3] = cameraDistance <= 0.9 * cameraTube;
+                    anyHit |= surelyHit[3];
                     if ( ambiguous ) {
                         continue;
                     }
@@ -309,7 +395,7 @@ class RotateGizmoTest
     }
 
     @Test
-    void given_raysToPointsOfEachRing_when_picked_then_aRingIsAlwaysFound()
+    void given_raysToVisiblePointsOfEachRing_when_picked_then_aRingIsAlwaysFound()
     {
         for ( double distanceFactor : new double[] {0.5, 1, 6, 40} ) {
             Camera camera = createCamera(distanceFactor);
@@ -318,7 +404,14 @@ class RotateGizmoTest
             for ( int ring = 0; ring < 3; ring++ ) {
                 for ( double degrees = 5; degrees < 360; degrees += 15 ) {
                     // Arrange
-                    Ray ray = rayThrough(camera, pointOnRing(gizmo, ring, degrees));
+                    Vector3Dd point = pointOnRing(gizmo, ring, degrees);
+
+                    // The far half of a ring is deliberately not pickable
+                    if ( !gizmo.isPointOnVisibleHemisphere(point) ) {
+                        continue;
+                    }
+
+                    Ray ray = rayThrough(camera, point);
 
                     // Act
                     int picked = gizmo.pickRing(ray);
@@ -327,8 +420,10 @@ class RotateGizmoTest
                     assertThat(picked)
                         .as("ring %d at %.0f degrees, distance factor %.1f", ring, degrees, distanceFactor)
                         .isNotEqualTo(RotateGizmo.NULL_GROUP);
-                    assertThat(distanceFromRayToRing(ray, gizmo, picked - 1))
-                        .isLessThanOrEqualTo(gizmo.getRingModel(picked - 1).getMinorRadius());
+                    if ( picked != RotateGizmo.CAMERA_RING_GROUP ) {
+                        assertThat(distanceFromRayToRing(ray, gizmo, picked - 1))
+                            .isLessThanOrEqualTo(gizmo.getRingModel(picked - 1).getMinorRadius());
+                    }
                 }
             }
         }
@@ -369,7 +464,7 @@ class RotateGizmoTest
     //= Strips of quads ===================================================
 
     @Test
-    void given_gizmo_when_buildingRingStrip_then_isAClosedRibbonAroundTheRing()
+    void given_gizmo_when_buildingRingStrips_then_onlyTheVisibleHalfIsAribbonAroundTheRing()
     {
         // Arrange
         Camera camera = createCamera(1);
@@ -377,19 +472,26 @@ class RotateGizmoTest
 
         for ( int ring = 0; ring < 3; ring++ ) {
             // Act
-            Vector3Dd[] strip = gizmo.buildRingStrip(ring);
+            java.util.ArrayList<Vector3Dd[]> arcs = gizmo.buildRingStrips(ring);
 
-            // Assert
-            assertThat(strip).hasSize(2 * (RotateGizmo.RING_SEGMENTS + 1));
-            assertThat(Vector3Dd.distance(strip[0], strip[strip.length - 2])).isLessThan(EPS);
-            assertThat(Vector3Dd.distance(strip[1], strip[strip.length - 1])).isLessThan(EPS);
-            for ( int i = 0; i < strip.length; i += 2 ) {
-                Vector3Dd middle = strip[i].add(strip[i + 1]).multiply(0.5);
-                Vector3Dd fromCenter = middle.subtract(gizmo.getPosition());
+            // Assert: at least one arc, and not the whole ring (it is clipped)
+            assertThat(arcs).isNotEmpty();
+            int totalPairs = 0;
 
-                assertThat(fromCenter.length()).isCloseTo(gizmo.getRingRadius(), offset(EPS));
-                assertThat(fromCenter.dotProduct(gizmo.getAxisDirection(ring))).isCloseTo(0.0, offset(EPS));
+            for ( Vector3Dd[] strip : arcs ) {
+                assertThat(strip.length % 2).isEqualTo(0);
+                totalPairs += strip.length / 2;
+                for ( int i = 0; i < strip.length; i += 2 ) {
+                    Vector3Dd middle = strip[i].add(strip[i + 1]).multiply(0.5);
+                    Vector3Dd fromCenter = middle.subtract(gizmo.getPosition());
+
+                    assertThat(fromCenter.length()).isCloseTo(gizmo.getRingRadius(), offset(1.0e-3));
+                    assertThat(fromCenter.dotProduct(gizmo.getAxisDirection(ring)))
+                        .isCloseTo(0.0, offset(EPS));
+                }
             }
+            assertThat(totalPairs).isLessThan(RotateGizmo.RING_SEGMENTS + 1);
+            assertThat(totalPairs).isGreaterThan(RotateGizmo.RING_SEGMENTS / 4);
         }
     }
 
@@ -405,13 +507,13 @@ class RotateGizmoTest
         gizmo.setRingLineWidth(2, 4);
         gizmo.updateGeometryState();
 
-        // Act
+        // Act: the width of the ribbon is the same all around a ring, so any
+        // vertex pair (of the first visible arc) is a valid sample of it
         double[] widthsInWorld = new double[3];
         double[] widthsInPixels = new double[3];
 
         for ( int ring = 0; ring < 3; ring++ ) {
-            Vector3Dd[] strip = gizmo.buildRingStrip(ring);
-            // Vertices of the ribbon at the same place of the ring
+            Vector3Dd[] strip = gizmo.buildRingStrips(ring).get(0);
             Vector3Dd a = strip[0];
             Vector3Dd b = strip[1];
             Vector3Dd middle = a.add(b).multiply(0.5);
@@ -433,7 +535,7 @@ class RotateGizmoTest
     }
 
     @Test
-    void given_orthogonalCamera_when_buildingRingStrip_then_ribbonFacesTheCamera()
+    void given_orthogonalCamera_when_buildingRingStrips_then_ribbonFacesTheCamera()
     {
         // Arrange
         Camera camera = createCamera(1);
@@ -442,21 +544,20 @@ class RotateGizmoTest
         camera.updateVectors();
         RotateGizmo gizmo = createGizmo(camera);
 
-        // Act
-        Vector3Dd[] strip = gizmo.buildRingStrip(2);
+        // Act & Assert: the width direction is never the direction of view
+        for ( Vector3Dd[] strip : gizmo.buildRingStrips(2) ) {
+            for ( int i = 0; i < strip.length; i += 2 ) {
+                Vector3Dd across = strip[i].subtract(strip[i + 1]);
 
-        // Assert: the width direction is never the direction of view
-        for ( int i = 0; i < strip.length; i += 2 ) {
-            Vector3Dd across = strip[i].subtract(strip[i + 1]);
-
-            assertThat(across.length()).isGreaterThan(0.0);
-            assertThat(Math.abs(across.normalized().dotProduct(camera.getFront().normalized())))
-                .isLessThan(1.0 - 1.0e-3);
+                assertThat(across.length()).isGreaterThan(0.0);
+                assertThat(Math.abs(across.normalized().dotProduct(camera.getFront().normalized())))
+                    .isLessThan(1.0 - 1.0e-3);
+            }
         }
     }
 
     @Test
-    void given_cameraLookingAlongAxis_when_buildingRingStrip_then_isNotDegenerate()
+    void given_cameraLookingAlongAxis_when_buildingRingStrips_then_isNotDegenerate()
     {
         // Arrange
         Camera camera = new Camera();
@@ -468,15 +569,83 @@ class RotateGizmoTest
         camera.updateVectors();
         RotateGizmo gizmo = createGizmo(camera);
 
-        // Act: ring around the axis the camera looks along, and one seen edge-on
-        Vector3Dd[] faceOn = gizmo.buildRingStrip(2);
-        Vector3Dd[] edgeOn = gizmo.buildRingStrip(0);
+        // Act: ring around the axis the camera looks along (seen face on, so
+        // it is not clipped), and one seen edge-on (clipped, but not degenerate)
+        java.util.ArrayList<Vector3Dd[]> faceOn = gizmo.buildRingStrips(2);
+        java.util.ArrayList<Vector3Dd[]> edgeOn = gizmo.buildRingStrips(0);
 
         // Assert
-        for ( Vector3Dd[] strip : new Vector3Dd[][] {faceOn, edgeOn} ) {
-            for ( Vector3Dd v : strip ) {
-                assertThat(Double.isNaN(v.x()) || Double.isNaN(v.y()) || Double.isNaN(v.z())).isFalse();
+        assertThat(faceOn).hasSize(1);
+        assertThat(faceOn.get(0)).hasSize(2 * (RotateGizmo.RING_SEGMENTS + 1));
+        for ( java.util.ArrayList<Vector3Dd[]> arcs : new java.util.ArrayList[] {faceOn, edgeOn} ) {
+            for ( Vector3Dd[] strip : arcs ) {
+                for ( Vector3Dd v : strip ) {
+                    assertThat(Double.isNaN(v.x()) || Double.isNaN(v.y()) || Double.isNaN(v.z())).isFalse();
+                }
             }
+        }
+    }
+
+    //= Camera ring ========================================================
+
+    @Test
+    void given_gizmo_when_buildingCameraRingStrip_then_isAWholeRibbonFacingTheCamera()
+    {
+        // Arrange
+        Camera camera = createCamera(1);
+        RotateGizmo gizmo = createGizmo(camera);
+
+        // Act
+        Vector3Dd[] strip = gizmo.buildCameraRingStrip();
+
+        // Assert: whole (not clipped), at the camera ring radius, around the
+        // camera axis, further out than the axis rings
+        assertThat(strip).hasSize(2 * (RotateGizmo.RING_SEGMENTS + 1));
+        assertThat(gizmo.getCameraRingRadius()).isGreaterThan(gizmo.getRingRadius());
+        for ( int i = 0; i < strip.length; i += 2 ) {
+            Vector3Dd middle = strip[i].add(strip[i + 1]).multiply(0.5);
+            Vector3Dd fromCenter = middle.subtract(gizmo.getPosition());
+
+            assertThat(fromCenter.length()).isCloseTo(gizmo.getCameraRingRadius(), offset(1.0e-3));
+            assertThat(fromCenter.dotProduct(gizmo.getCameraAxisDirection())).isCloseTo(0.0, offset(EPS));
+        }
+    }
+
+    @Test
+    void given_noSelection_when_askingCameraRingColor_then_isGray()
+    {
+        // Arrange
+        RotateGizmo gizmo = createGizmo(createCamera(1));
+
+        // Act & Assert
+        assertThat(gizmo.getCameraRingColor().r()).isCloseTo(gizmo.getCameraRingColor().g(), offset(EPS));
+        assertThat(gizmo.getCameraRingColor().g()).isCloseTo(gizmo.getCameraRingColor().b(), offset(EPS));
+
+        // ... chosen: yellow
+        gizmo.setPersistentSelection(RotateGizmo.CAMERA_RING_GROUP);
+        assertThat(gizmo.getCameraRingColor()).isEqualTo(new ColorRgb(1, 1, 0));
+    }
+
+    @Test
+    void given_pointsOfTheCameraRing_when_picked_then_theCameraRingIsFound()
+    {
+        // Arrange
+        Camera camera = createCamera(1);
+        RotateGizmo gizmo = createGizmo(camera);
+
+        for ( double degrees = 5; degrees < 360; degrees += 15 ) {
+            Vector3Dd u = gizmo.getCameraPlaneRightDirection();
+            Vector3Dd v = gizmo.getCameraPlaneUpDirection();
+            double angle = Math.toRadians(degrees);
+            Vector3Dd point = gizmo.getPosition()
+                .add(u.multiply(Math.cos(angle) * gizmo.getCameraRingRadius()))
+                .add(v.multiply(Math.sin(angle) * gizmo.getCameraRingRadius()));
+
+            // Act & Assert: every point of the camera ring is pickable, as
+            // it always faces the camera and is never clipped
+            assertThat(gizmo.pickRing(rayThrough(camera, point)))
+                .as("degrees %.0f", degrees)
+                .isEqualTo(RotateGizmo.CAMERA_RING_GROUP);
         }
     }
 
@@ -536,12 +705,13 @@ class RotateGizmoTest
         // Act
         InputGizmo input = gizmo.getInputGizmo();
 
-        // Assert
-        assertThat(input.getNumberOfFields()).isEqualTo(3);
+        // Assert: 3 axis angles plus the (always 0) relative camera field
+        assertThat(input.getNumberOfFields()).isEqualTo(4);
         assertThat(input.getDecimals()).isEqualTo(2);
         assertThat(input.getDisplayText(0)).isEqualTo("30.50");
         assertThat(input.getDisplayText(1)).isEqualTo("-20.25");
         assertThat(input.getDisplayText(2)).isEqualTo("10.00");
+        assertThat(input.getDisplayText(3)).isEqualTo("0.00");
         assertThat(input.getReferenceText()).isEqualTo("-000.00");
     }
 

@@ -60,11 +60,6 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
     private static int indicatorUvVboId;
     private static boolean initialized;
 
-    private static final float IND_OUTER_R  = 0.65f;
-    private static final float IND_INNER_R  = 0.17f;
-    private static final float IND_HALF_W   = 0.12f;
-    private static final float IND_TIP_Z    = 0.30f;
-
     /**
      * Draws the ray gizmo for the current frame.  Must be called after
      * {@link RayGizmo#acquireSnapshot()} has been called for this frame.
@@ -196,16 +191,7 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
     }
 
     private static void uploadIndicatorMesh(GL4 gl) {
-        // Fin triangle pointing in +X at the arrow base (z=0).
-        // P0=tip, P1=base-left, P2=base-right.
-        float[] positions = {
-            IND_OUTER_R,  0.0f,         IND_TIP_Z,
-            IND_INNER_R, -IND_HALF_W,   0.0f,
-            IND_INNER_R,  IND_HALF_W,   0.0f
-        };
-
-        float[] normals = computeNormals();
-        float[] uvs     = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
+        RayGizmo.IndicatorMesh mesh = RayGizmo.buildIndicatorMesh();
         int[] tmp = new int[1];
 
         gl.glGenVertexArrays(1, tmp, 0);
@@ -221,29 +207,11 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
         indicatorUvVboId = tmp[0];
 
         gl.glBindVertexArray(indicatorVaoId);
-        uploadBuffer(gl, indicatorPositionVboId, 0, 3, positions);
-        uploadBuffer(gl, indicatorNormalVboId,   1, 3, normals);
-        uploadBuffer(gl, indicatorUvVboId,       2, 2, uvs);
+        uploadBuffer(gl, indicatorPositionVboId, 0, 3, mesh.positions());
+        uploadBuffer(gl, indicatorNormalVboId,   1, 3, mesh.normals());
+        uploadBuffer(gl, indicatorUvVboId,       2, 2, mesh.uvs());
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
         gl.glBindVertexArray(0);
-    }
-
-    private static float[] computeNormals() {
-        float ax = IND_INNER_R - IND_OUTER_R;
-        float ay = -IND_HALF_W;
-        float az = -IND_TIP_Z;
-        float bx = IND_INNER_R - IND_OUTER_R;
-        float by =  IND_HALF_W;
-        float bz = -IND_TIP_Z;
-        float nx = ay * bz - az * by;
-        float ny = az * bx - ax * bz;
-        float nz = ax * by - ay * bx;
-        float normalLength = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
-        nx /= normalLength;
-        ny /= normalLength;
-        nz /= normalLength;
-
-        return new float[]{ nx, ny, nz, nx, ny, nz, nx, ny, nz };
     }
 
     private static void configureProgram(
