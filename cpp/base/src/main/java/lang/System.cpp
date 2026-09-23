@@ -20,4 +20,10 @@ System::nanoTime() {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
 }
 
+long long
+System::currentTimeMillis() {
+    const auto now = std::chrono::system_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
 }

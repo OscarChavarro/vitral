@@ -120,6 +120,8 @@ const char* KeyEvent::getKeyName(int key)
         case KEY_COMMA: return "KEY_COMMA";
         case KEY_PERIOD: return "KEY_PERIOD";
         case KEY_NUMPERIOD: return "KEY_NUMPERIOD";
+        case KEY_EQUALS: return "KEY_EQUALS";
+        case KEY_MINUS: return "KEY_MINUS";
         default: return "KEY_UNKNOWN";
     }
 }

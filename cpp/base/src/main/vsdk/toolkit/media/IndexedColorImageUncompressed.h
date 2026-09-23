@@ -3,6 +3,7 @@
 
 #include "vsdk/toolkit/media/Image.h"
 class RGBColorPalette;
+class RGBAImageUncompressed;
 class RGBPixel;
 class ColorRgb;
 
@@ -53,6 +54,12 @@ public:
     void setRawImage(int xSize, int ySize, char* data);
 
     IndexedColorImageUncompressed* clone() const;
+
+    /**
+    @return a gray level, translucent (alpha 128) copy of this image, owned
+    by the caller
+    */
+    RGBAImageUncompressed* exportToRgbaImage() const;
 };
 
 #endif

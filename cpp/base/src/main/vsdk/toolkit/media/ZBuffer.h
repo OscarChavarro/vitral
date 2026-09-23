@@ -2,6 +2,11 @@
 #define __Z_BUFFER__
 
 #include "vsdk/toolkit/media/MediaEntity.h"
+
+class IndexedColorImageUncompressed;
+class RGBAImageUncompressed;
+class RGBColorPalette;
+class RGBImageUncompressed;
 /**
 This class represents a depth map. A depth map can be used to:
   - Represent how far a pixel in the color buffer is from the camera. This
@@ -75,6 +80,31 @@ public:
     @return a new copy of this z buffer
     */
     ZBuffer* clone() const;
+
+    /**
+    This method converts this Z buffer into a gray level image, with depths
+    clamped to [0, 1].
+    @return a new image, owned by the caller
+    */
+    IndexedColorImageUncompressed* exportIndexedColorImage() const;
+
+    /**
+    This method converts this Z buffer into an RGBImageUncompressed using the
+    specified ColorPalette
+    @param p The color palete used to convert this z buffer into an
+    RGBImageUncompressed
+    @return a new image that represents this z buffer, owned by the caller
+    */
+    RGBImageUncompressed* exportRGBImage(const RGBColorPalette* p) const;
+
+    /**
+    This method converts this Z buffer into an RGBAImageUncompressed using
+    the specified ColorPalette
+    @param p The color palete used to convert this Z buffer into an
+    RGBAImageUncompressed
+    @return a new image that represents this Z buffer, owned by the caller
+    */
+    RGBAImageUncompressed* exportRGBAImage(const RGBColorPalette* p) const;
 };
 
 #endif

@@ -1,3 +1,8 @@
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBColorPalette.h"
+#include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
 ZBuffer::ZBuffer(int width, int height) : xSize(width), ySize(height) {
     depth = new float[xSize * ySize];
@@ -63,4 +68,69 @@ ZBuffer* ZBuffer::clone() const {
         copy->depth[i] = depth[i];
     }
     return copy;
+}
+
+IndexedColorImageUncompressed* ZBuffer::exportIndexedColorImage() const
+{
+    IndexedColorImageUncompressed* image = new IndexedColorImageUncompressed();
+    image->init(xSize, ySize);
+    int pos = 0;
+    int val;
+
+    for ( int y = 0; y < image->getYSize(); y++ ) {
+        for ( int x = 0; x < image->getXSize(); x++ ) {
+            float f = depth[pos];
+            if ( f < 0.0 ) f = 0.0f;
+            if ( f > 1.0 ) f = 1.0f;
+            val = (int)(f * 255.0);
+            image->putPixel(x, y, (char)(val & 0xFF));
+            pos++;
+        }
+    }
+    return image;
+}
+
+RGBImageUncompressed* ZBuffer::exportRGBImage(const RGBColorPalette* p) const
+{
+    RGBImageUncompressed* image = new RGBImageUncompressed();
+    image->init(xSize, ySize);
+    int pos = 0;
+
+    for ( int y = 0; y < image->getYSize(); y++ ) {
+        for ( int x = 0; x < image->getXSize(); x++ ) {
+            float f = depth[pos];
+            if ( f < 0.0 ) f = 0.0f;
+            if ( f > 1.0 ) f = 1.0f;
+            ColorRgb* c = p->evalLinear(f);
+            image->putPixel(x, y,
+                (char)(int)(c->r()*256), (char)(int)(c->g()*256),
+                (char)(int)(c->b()*256));
+            delete c;
+            pos++;
+        }
+    }
+    return image;
+}
+
+RGBAImageUncompressed* ZBuffer::exportRGBAImage(const RGBColorPalette* p) const
+{
+    RGBAImageUncompressed* image = new RGBAImageUncompressed();
+    image->init(xSize, ySize);
+    int pos = 0;
+
+    for ( int y = 0; y < image->getYSize(); y++ ) {
+        for ( int x = 0; x < image->getXSize(); x++ ) {
+            float f = depth[pos];
+            if ( f < 0.0 ) f = 0.0f;
+            if ( f > 1.0 ) f = 1.0f;
+            ColorRgb* c = p->evalLinear(f);
+            // Opaque, as done by the Java version
+            image->putPixelA(x, y,
+                (char)(int)(c->r()*256), (char)(int)(c->g()*256),
+                (char)(int)(c->b()*256), (char)(unsigned char)255);
+            delete c;
+            pos++;
+        }
+    }
+    return image;
 }

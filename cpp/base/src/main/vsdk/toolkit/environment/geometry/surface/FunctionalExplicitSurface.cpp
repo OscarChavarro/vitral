@@ -7,7 +7,8 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
-FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : internalTriangleMesh(0)
+FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy)
+    : xyFunction(0), internalTriangleMesh(0)
 {
     init(fxy);
 }
@@ -15,11 +16,32 @@ FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : 
 FunctionalExplicitSurface::~FunctionalExplicitSurface()
 {
     if (internalTriangleMesh != 0) delete internalTriangleMesh;
+    delete xyFunction;
 }
 
 void FunctionalExplicitSurface::init(const java::String& fxy)
 {
     functionExpression = fxy;
+    delete xyFunction;
+    xyFunction = new AlgebraicExpression();
+    try {
+        xyFunction->setExpression(fxy);
+    }
+    catch (const AlgebraicExpressionException& e) {
+        Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING,
+            "constructor",
+            java::String("Cannot create algebraic expression for \"") + fxy +
+            "\":\n" + e.getMessage());
+        try {
+            xyFunction->setExpression("0");
+        }
+        catch (const AlgebraicExpressionException& e2) {
+            Logger::reportMessage("FunctionalExplicitSurface", Logger::FATAL_ERROR,
+                "constructor",
+                java::String("So bad. Something is wrong with algebraic expressions!:\n") +
+                e2.getMessage());
+        }
+    }
     minXBound = minYBound = minZBound = -1.0;
     maxXBound = maxYBound = maxZBound = 1.0;
     tesselationHintX = 10;
@@ -49,22 +71,6 @@ double FunctionalExplicitSurface::getMaxZBound() const { return maxZBound; }
 
 int FunctionalExplicitSurface::coord(int tesselationHintX, int, int ix, int iy) { return ((tesselationHintX+1)*iy) + ix; }
 
-double FunctionalExplicitSurface::evalExpression(double x, double y, bool& ok) const
-{
-    AlgebraicExpression xyFunction;
-    try {
-        xyFunction.setExpression(functionExpression);
-        xyFunction.defineValue("x", x);
-        xyFunction.defineValue("y", y);
-        ok = true;
-        return xyFunction.eval();
-    }
-    catch (const AlgebraicExpressionException&) {
-        ok = false;
-        return 0.0;
-    }
-}
-
 void FunctionalExplicitSurface::updateInternalGeometry()
 {
     if (tesselationHintX <= 0 || tesselationHintY <= 0) return;
@@ -77,32 +83,41 @@ void FunctionalExplicitSurface::updateInternalGeometry()
     internalTriangleMesh->initVertexPositionsArray((tesselationHintX+1)*(tesselationHintY+1));
     java::ArrayList<double>& v = internalTriangleMesh->getVertexPositions();
 
+    // As the Java version, coordinates are accumulated (x += dx), and an
+    // evaluation error leaves the mesh without triangles
     int index = 0;
-    for (int iy = 0; iy <= tesselationHintY; iy++) {
-        double y = minYBound + ((double)iy)*dy;
-        for (int ix = 0; ix <= tesselationHintX; ix++) {
-            double x = minXBound + ((double)ix)*dx;
-            bool ok = true;
-            double z = evalExpression(x, y, ok);
-            if (!ok) {
-                Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING, "updateInternalGeometry", "Cannot evaluate algebraic expression!");
-                return;
+    int ix;
+    int iy;
+    double x;
+    double y;
+    double z;
+    try {
+        for (iy = 0, y = minYBound; iy <= tesselationHintY; iy++, y += dy) {
+            xyFunction->defineValue("y", y);
+            for (ix = 0, x = minXBound; ix <= tesselationHintX; ix++, x += dx) {
+                xyFunction->defineValue("x", x);
+                z = xyFunction->eval();
+                if (z > maxZBound) z = maxZBound;
+                if (z < minZBound) z = minZBound;
+                v[3*index+0] = x;
+                v[3*index+1] = y;
+                v[3*index+2] = z;
+                index++;
             }
-            if (z > maxZBound) z = maxZBound;
-            if (z < minZBound) z = minZBound;
-            v[3*index+0] = x;
-            v[3*index+1] = y;
-            v[3*index+2] = z;
-            index++;
         }
+    }
+    catch (const AlgebraicExpressionException& e) {
+        Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING, "constructor",
+            java::String("Cannot evaluate algebraic expression!") + e.getMessage());
+        return;
     }
 
     internalTriangleMesh->initTriangleArrays(tesselationHintX*tesselationHintY*2);
     java::ArrayList<int>& t = internalTriangleMesh->getTriangleIndexes();
 
     index = 0;
-    for (int iy = 0; iy < tesselationHintY; iy++) {
-        for (int ix = 0; ix < tesselationHintX; ix++) {
+    for (iy = 0; iy < tesselationHintY; iy++) {
+        for (ix = 0; ix < tesselationHintX; ix++) {
             t[3*index+0] = coord(tesselationHintX, tesselationHintY, ix, iy);
             t[3*index+1] = coord(tesselationHintX, tesselationHintY, ix+1, iy);
             t[3*index+2] = coord(tesselationHintX, tesselationHintY, ix+1, iy+1);

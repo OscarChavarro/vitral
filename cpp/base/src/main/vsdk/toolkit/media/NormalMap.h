@@ -6,6 +6,7 @@
 class Vector3Dd;
 class IndexedColorImageUncompressed;
 class RGBImageUncompressed;
+class RGBAImageUncompressed;
 
 /**
 This class represents a normal map, containing normal vectors for each
@@ -48,6 +49,22 @@ public:
     Vector3Dd* getNormalBiLinear(double u, double v) const;
 
     RGBImageUncompressed* exportToRgbImage() const;
+
+    /**
+    Similar to exportToRgbImage, but each pixel is equivalent to a magnitude
+    of displacement from <0, 0, 1> normal
+    @return a new gray level image owned by the caller, or null if it could
+    not be allocated
+    */
+    RGBImageUncompressed* exportToRgbImageGradient() const;
+
+    /**
+    Similar to exportToRgbImageGradient, but as a translucent (alpha 128)
+    RGBA image
+    @return a new image owned by the caller, or null if it could not be
+    allocated
+    */
+    RGBAImageUncompressed* exportToRgbaImageGradient() const;
     Vector3Dd importBumpMap(IndexedColorImageUncompressed* inBumpmap, const Vector3Dd& inScale);
     NormalMap* clone() const;
 };

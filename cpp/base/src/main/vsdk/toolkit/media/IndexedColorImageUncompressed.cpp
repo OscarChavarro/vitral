@@ -1,6 +1,7 @@
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/media/RGBAPixel.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 IndexedColorImageUncompressed::IndexedColorImageUncompressed(RGBColorPalette* colorTable_) :
@@ -186,5 +187,29 @@ IndexedColorImageUncompressed* IndexedColorImageUncompressed::clone() const {
             copy->putPixel(x, y, getPixel(x, y));
         }
     }
+    return copy;
+}
+
+RGBAImageUncompressed* IndexedColorImageUncompressed::exportToRgbaImage() const
+{
+    RGBAImageUncompressed* copy;
+    int xxSize = getXSize();
+    int yySize = getYSize();
+    int x;
+    int y;
+    char source;
+    RGBAPixel target;
+
+    copy = new RGBAImageUncompressed();
+    copy->init(xxSize, yySize);
+    target.a = (char)128;
+    for ( x = 0; x < xxSize; x++ ) {
+        for ( y = 0; y < yySize; y++ ) {
+            source = getPixel(x, y);
+            target.r = target.g = target.b = source;
+            copy->putPixel(x, y, &target);
+        }
+    }
+
     return copy;
 }

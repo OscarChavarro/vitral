@@ -7,6 +7,9 @@ class _PolyhedralBoundedSolidFace;
 
 class PolyhedralBoundedSolidNumericPolicy {
 public:
+    static const double BREP_EPSILON;
+    static const double BREP_BIG_EPSILON;
+
     class ToleranceContext {
     private:
         double modelScale_;

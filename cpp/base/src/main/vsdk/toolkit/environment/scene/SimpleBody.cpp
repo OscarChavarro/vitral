@@ -14,12 +14,12 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/SurfaceRayIntersection.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 SimpleBody::SimpleBody()
-    : geometry(0), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
+    : geometry(0), ownsGeometry(true), geometryIsSphere(false), position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(),
       rotationQuaternion(rotation.exportToQuaternion()), rotationInverseQuaternion(rotationInverse.exportToQuaternion()),
       inverseScale(1, 1, 1), hasInvertibleScale(true),
       hasIdentityRotation(true), hasUnitScale(true), hasZeroTranslation(true),
       hasTranslationOnlyTransform(true), hasIdentityTransform(true),
-      material(0), texture(0), normalMap(0), normalMapRgb(0),
+      material(0), ownsMaterial(true), texture(0), normalMap(0), normalMapRgb(0),
       name(""), modificationVersion(0)
 {
 }
@@ -27,11 +27,15 @@ SimpleBody::SimpleBody()
 SimpleBody::~SimpleBody()
 {
     if ( geometry != 0 ) {
-        delete geometry;
+        if ( ownsGeometry ) {
+            delete geometry;
+        }
         geometry = 0;
     }
     if ( material != 0 ) {
-        delete material;
+        if ( ownsMaterial ) {
+            delete material;
+        }
         material = 0;
     }
     if ( texture != 0 ) {
@@ -82,10 +86,22 @@ void SimpleBody::setName(const java::String& n) { name = n; markModified(); }
 Geometry* SimpleBody::getGeometry() const { return geometry; }
 void SimpleBody::setGeometry(Geometry* g)
 {
-    if ( geometry != g && geometry != 0 ) {
+    if ( geometry != g && geometry != 0 && ownsGeometry ) {
         delete geometry;
     }
     geometry = g;
+    ownsGeometry = true;
+    geometryIsSphere = dynamic_cast<Sphere*>(geometry) != 0;
+    markModified();
+}
+
+void SimpleBody::setGeometryReference(Geometry* g)
+{
+    if ( geometry != g && geometry != 0 && ownsGeometry ) {
+        delete geometry;
+    }
+    geometry = g;
+    ownsGeometry = false;
     geometryIsSphere = dynamic_cast<Sphere*>(geometry) != 0;
     markModified();
 }
@@ -117,10 +133,21 @@ void SimpleBody::setRotationInverse(const Matrix4x4d& ri)
 SimpleMaterial* SimpleBody::getMaterial() const { return material; }
 void SimpleBody::setMaterial(SimpleMaterial* m)
 {
-    if ( material != m && material != 0 ) {
+    if ( material != m && material != 0 && ownsMaterial ) {
         delete material;
     }
     material = m;
+    ownsMaterial = true;
+    markModified();
+}
+
+void SimpleBody::setMaterialReference(SimpleMaterial* m)
+{
+    if ( material != m && material != 0 && ownsMaterial ) {
+        delete material;
+    }
+    material = m;
+    ownsMaterial = false;
     markModified();
 }
 Image* SimpleBody::getTexture() const { return texture; }

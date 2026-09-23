@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/media/IndexedColorImageUncompressed.h"
 #include "vsdk/toolkit/media/NormalMap.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 static int positiveMod(int value, int modulus) {
     int result = value % modulus;
@@ -247,4 +248,62 @@ Vector3Dd NormalMap::importBumpMap(IndexedColorImageUncompressed* inBumpmap, con
 NormalMap* NormalMap::clone() const
 {
     return new NormalMap(*this);
+}
+
+RGBImageUncompressed* NormalMap::exportToRgbImageGradient() const
+{
+    RGBImageUncompressed* output = new RGBImageUncompressed();
+
+    if ( !output->init(xSize, ySize) ) {
+        delete output;
+        return nullptr;
+    }
+
+    int x;
+    int y;
+    int val;
+    char col;
+    Vector3Dd k(0, 0, 1);
+
+    for ( y = 0; y < ySize; y++ ) {
+        for ( x = 0; x < xSize; x++ ) {
+            Vector3Dd* normal = getNormal(x, y);
+            Vector3Dd n = normal != nullptr ? normal->normalized() : k;
+            delete normal;
+
+            val = (int)((1.0-k.dotProduct(n)) * 255.0);
+            col = (char)(val & 0xFF);
+            output->putPixel(x, y, col, col, col);
+        }
+    }
+    return output;
+}
+
+RGBAImageUncompressed* NormalMap::exportToRgbaImageGradient() const
+{
+    RGBAImageUncompressed* output = new RGBAImageUncompressed();
+
+    if ( !output->init(xSize, ySize) ) {
+        delete output;
+        return nullptr;
+    }
+
+    int x;
+    int y;
+    int val;
+    char col;
+    Vector3Dd k(0, 0, 1);
+
+    for ( y = 0; y < ySize; y++ ) {
+        for ( x = 0; x < xSize; x++ ) {
+            Vector3Dd* normal = getNormal(x, y);
+            Vector3Dd n = normal != nullptr ? normal->normalized() : k;
+            delete normal;
+
+            val = (int)((1.0-k.dotProduct(n)) * 255.0);
+            col = (char)(val & 0xFF);
+            output->putPixel(x, y, col, col, col, (char)128);
+        }
+    }
+    return output;
 }

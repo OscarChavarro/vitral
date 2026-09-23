@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
+#include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 static const int NUMBER_OF_SIDES = 32;
@@ -8,6 +9,38 @@ static const int NUMBER_OF_RAYS = 8;
 static const double CIRCLE_RADIUS = 0.2;
 static const double RAY_INNER_RADIUS = 0.3;
 static const double RAY_OUTER_RADIUS = 0.5;
+
+/// Apparent size of the gizmo (its full width), as a fraction of the
+/// smaller dimension of the viewport
+static const double VIEWPORT_FRACTION = 0.05;
+
+double LightGizmoOmniBillboard::calculateWorldHalfSize(
+    const Camera* camera, const Vector3Dd& position, int viewportWidth,
+    int viewportHeight)
+{
+    double targetPixels = VIEWPORT_FRACTION *
+        (viewportWidth < viewportHeight ? viewportWidth : viewportHeight);
+    double safeHeight = viewportHeight > 1 ? viewportHeight : 1;
+
+    if ( camera == nullptr ) {
+        return std::fmax(0.05, targetPixels / safeHeight);
+    }
+
+    if ( camera->getProjectionMode() == Camera::PROJECTION_MODE_ORTHOGONAL ) {
+        double worldViewHeight = 2.0 / camera->getOrthogonalZoom();
+        double worldPerPixel = worldViewHeight / safeHeight;
+        return std::fmax(1e-5, 0.5 * targetPixels * worldPerPixel);
+    }
+
+    Vector3Dd toLight = position.subtract(camera->getPosition());
+    double depth = std::fabs(toLight.dotProduct(camera->getFront()));
+    depth = std::fmax(depth, camera->getNearPlaneDistance());
+
+    double fovRadians = camera->getFov() * M_PI / 180.0;
+    double worldViewHeightAtDepth = 2.0 * depth * std::tan(fovRadians / 2.0);
+    double worldPerPixel = worldViewHeightAtDepth / safeHeight;
+    return std::fmax(1e-5, 0.5 * targetPixels * worldPerPixel);
+}
 
 Calligraphic2DBuffer LightGizmoOmniBillboard::createLinePattern()
 {

@@ -7,6 +7,7 @@ public:
     static const int BUTTON1 = 1;
     static const int BUTTON2 = 2;
     static const int BUTTON3 = 3;
+    static const int CTRL_DOWN_MASK = 128;
     static const int BUTTON1_DOWN_MASK = 1024;
     static const int BUTTON2_DOWN_MASK = 2048;
     static const int BUTTON3_DOWN_MASK = 4096;

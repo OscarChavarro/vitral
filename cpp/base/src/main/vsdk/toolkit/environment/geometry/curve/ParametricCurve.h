@@ -33,6 +33,13 @@ public:
     const java::ArrayList<Vector3Dd>& getPointVector(int pos) const;
     virtual const Vector3Dd* getPoint(int idx) const;
     int getPointSize() const;
+    /**
+    Returns the segment type (`BREAK`, `CORNER`, ...) of a control point
+    (Java code accesses the public `types` list directly).
+    @param pos index of the control point
+    @return type associated with the control point
+    */
+    int getPointType(int pos) const;
     void removePoint(int pos);
     void setPointAt(const java::ArrayList<Vector3Dd>& p, int pos);
 

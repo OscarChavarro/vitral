@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include <cmath>
 #include <cstdio>
 
@@ -460,4 +461,80 @@ CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewport
         tmp.rightWithScale,
         tmp.nearPlaneDistance,
         tmp.farPlaneDistance);
+}
+
+bool Camera::projectPointUsingRayMethod(const Vector3Dd& inPoint,
+                                        Vector3Dd* outProjected)
+{
+    // 1. Calculate vectors
+    Vector3Dd upCopy;
+    Vector3Dd rightCopy;
+    double fovFactor;
+    double scaleFactor;
+
+    fovFactor = viewportXSize/viewportYSize;
+    updateVectors(); // Should be made a prerequisite for efficiency!
+
+    // 2. Calculate projection plane
+    Vector3Dd p;
+    Vector3Dd center;
+
+    center = front;
+    p = getPosition();
+    center = center.normalized();
+    // Note: as in the Java version, the near plane distance is not applied
+    // (the result of center.multiply(nearPlaneDistance) was discarded)
+    center = center.add(p);
+    InfinitePlane viewPlane(front.multiply(-1), center);
+
+    // 3. Calculate projected global coordinates XYZ
+    Vector3Dd projected;
+
+    if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+        projected = (viewPlane.projectPoint(inPoint).subtract(center)).multiply(orthogonalZoom);
+    }
+    else {
+        // 3.1. Vector calculation for perspective case
+        upCopy = up;
+        rightCopy = left.multiply(-1);
+        scaleFactor = 1.0/std::tan((fov/2) * M_PI / 180.0);
+        upCopy = upCopy.normalized();
+        upCopy = upCopy.multiply(scaleFactor);
+        rightCopy = rightCopy.normalized();
+        rightCopy = rightCopy.multiply(scaleFactor).multiply(1/fovFactor);
+
+        // 3.2. Calculate projector for perspective case
+        Ray r(p, inPoint.subtract(p));
+
+        // 3.3. Project point in view plane from perspective eyepoint
+        Ray* hit = viewPlane.doIntersectionFirstHit(r);
+        if ( hit == nullptr ||
+             r.getDirection().length() < VSDK::EPSILON ) {
+            delete hit;
+            return false;
+        }
+        projected = hit->getOrigin().add(hit->getDirection().multiply(hit->getT())).subtract(center);
+        delete hit;
+        // 3.4. Clip projected point in viewport
+        if ( projected.x() < -1 || projected.x() > 1 ||
+             projected.y() < -1 || projected.y() > 1 ) {
+            return false;
+        }
+    }
+
+    // 4. Scale point to viewport
+    double x;
+    double y;
+
+    if ( projectionMode == PROJECTION_MODE_ORTHOGONAL ) {
+        x = viewportXSize/2 + (projected.dotProduct(left.multiply(-1)))/(2*fovFactor)*viewportXSize;
+        y = (((projected.dotProduct(up)*-1)+1)/2)*viewportYSize;
+    }
+    else {
+        x = (projected.dotProduct(rightCopy)/2+0.5)*viewportXSize;
+        y = (1-(projected.dotProduct(upCopy)/2+0.5))*viewportYSize;
+    }
+
+    *outProjected = Vector3Dd(x, y, 0.0);
+    return true;
 }

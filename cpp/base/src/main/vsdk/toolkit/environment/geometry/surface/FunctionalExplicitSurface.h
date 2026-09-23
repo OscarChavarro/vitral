@@ -3,6 +3,7 @@
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+class AlgebraicExpression;
 class TriangleMesh;
 class Ray;
 class RayHit;
@@ -10,6 +11,7 @@ class RayHit;
 class FunctionalExplicitSurface : public Surface {
 private:
     java::String functionExpression;
+    AlgebraicExpression* xyFunction;
     double minXBound;
     double minYBound;
     double minZBound;
@@ -23,7 +25,6 @@ private:
     void init(const java::String& fxy);
     int coord(int tesselationHintX, int tesselationHintY, int ix, int iy);
     void updateInternalGeometry();
-    double evalExpression(double x, double y, bool& ok) const;
 
 public:
     FunctionalExplicitSurface(const java::String& fxy);

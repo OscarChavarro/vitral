@@ -75,6 +75,19 @@ public:
     Matrix4x4d calculateProjectionMatrix() const;
     Ray generateRay(int x, int y) const;
 
+    /**
+    Projects a point in world coordinates to the viewport of this camera,
+    by intersecting its projector ray with the view plane (see the Java
+    version for applications and notes).
+    @param inPoint point to project, in world coordinates
+    @param outProjected the projected point in viewport pixel coordinates
+    (z is 0), when the projection is valid
+    @return false if the point can not be projected or lies outside the
+    viewport (the Java version returns null)
+    */
+    bool projectPointUsingRayMethod(const Vector3Dd& inPoint,
+                                    Vector3Dd* outProjected);
+
     float* toColumnMajorFloatArray() const;
 
     java::String toString() const;

@@ -79,6 +79,11 @@ void ParametricCurve::setApproximationSteps(int n)
     approximationSteps = n;
 }
 
+int ParametricCurve::getPointType(int pos) const
+{
+    return types.get(pos);
+}
+
 void ParametricCurve::addPoint(const java::ArrayList<Vector3Dd>& point, int type)
 {
     if ( type == BREAK && points.size() == 0 ) {

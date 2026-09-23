@@ -11,6 +11,7 @@ class System {
     static java::PrintStream err;
     [[noreturn]] static void exit(int status);
     static long long nanoTime();
+    static long long currentTimeMillis();
 
   private:
     static java::FileOutputStream standardOutput;

@@ -134,6 +134,8 @@ public:
     static const int KEY_COMMA = 0x0073;
     static const int KEY_PERIOD = 0x0074;
     static const int KEY_NUMPERIOD = 0x0075;
+    static const int KEY_EQUALS = 0x0076;
+    static const int KEY_MINUS = 0x0077;
 
     KeyEvent()
         : keycode(KEY_NONE), unicodeId(KEY_NONE), modifierMask(0)

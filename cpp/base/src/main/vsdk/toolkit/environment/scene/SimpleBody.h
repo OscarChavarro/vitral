@@ -17,6 +17,8 @@ class SimpleMaterial;
 class SimpleBody : public Entity {
 private:
     Geometry* geometry;
+    /// False when the geometry is shared (see `setGeometryReference`)
+    bool ownsGeometry;
     bool geometryIsSphere;
     Vector3Dd position;
     Vector3Dd scale;
@@ -33,6 +35,8 @@ private:
     bool hasIdentityTransform;
 
     SimpleMaterial* material;
+    /// False when the material is shared (see `setMaterialReference`)
+    bool ownsMaterial;
     Image* texture;
     NormalMap* normalMap;
     RGBImageUncompressed* normalMapRgb;
@@ -55,7 +59,21 @@ public:
     void setName(const java::String& n);
 
     Geometry* getGeometry() const;
+
+    /**
+    Sets the geometry, taking its ownership (it is deleted with this body or
+    when replaced).
+    @param g new geometry, or null
+    */
     void setGeometry(Geometry* g);
+
+    /**
+    Sets a geometry shared with other owners (i.e. a primitive instanced by
+    several bodies of a gizmo, as done by Java code with garbage collected
+    references): this body does not delete it.
+    @param g shared geometry, or null
+    */
+    void setGeometryReference(Geometry* g);
 
     Matrix4x4d getRotation() const;
     void setRotation(const Matrix4x4d& rotation);
@@ -63,7 +81,19 @@ public:
     void setRotationInverse(const Matrix4x4d& rotationInverse);
 
     SimpleMaterial* getMaterial() const;
+
+    /**
+    Sets the material, taking its ownership (it is deleted with this body or
+    when replaced).
+    @param m new material, or null
+    */
     void setMaterial(SimpleMaterial* m);
+
+    /**
+    Sets a material shared with other owners: this body does not delete it.
+    @param m shared material, or null
+    */
+    void setMaterialReference(SimpleMaterial* m);
 
     Image* getTexture() const;
     void setTexture(Image* in);

@@ -1,43 +1,42 @@
+//= This example serves as a testbed for AlgebraicExpression class.           =
+
 #include <cstdio>
 
+#include "java/lang/Double.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpression.h"
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
+
 int main(int argc, char** argv)
 {
     AlgebraicExpression regexp;
+
     try {
-        java::String expression;
-        if (argc <= 1) {
-            expression = "666.0";
+        if ( argc <= 1 ) {
+            regexp.setExpression("666.0");
         }
         else {
-            expression = java::String("");
-            for (int i = 1; i < argc; i++) {
-                expression += argv[i];
-                if (i < argc - 1) expression += " ";
+            java::String joined = "";
+            int i;
+            for ( i = 1; i < argc; i++ ) {
+                joined += argv[i];
+                if ( i < argc - 1 ) {
+                    joined += " ";
+                }
             }
-            std::printf(
-                "Parsing from %d parameters with regexp \"%s\"\n",
-                argc - 1,
-                expression.c_str());
+            std::printf("Parsing from %d parameters with regexp \"%s\"\n",
+                        argc - 1, joined.c_str());
+            regexp.setExpression(joined);
         }
-
-        regexp.setExpression(expression);
-        std::printf("REGEXP:\n%s\n", expression.c_str());
-        std::printf("REGEXP VALUE:\n%.17g\n", regexp.eval());
+        std::printf("REGEXP:\n%s\n", regexp.toString().c_str());
+        std::printf("REGEXP VALUE:\n%s\n",
+                    java::Double::toString(regexp.eval()).c_str());
     }
-    catch (const AlgebraicExpressionException& e) {
-        std::printf("Error processing regular expression. %s\n", e.what());
-        return 1;
-    }
-    catch (const std::exception& e) {
-        std::printf("Error processing regular expression. %s\n", e.what());
-        return 1;
-    }
-    catch (...) {
-        std::printf("Error processing regular expression.\n");
-        return 1;
+    catch ( const AlgebraicExpressionException& e ) {
+        // Same text as the Java version prints for the exception
+        std::printf("Error processing regular expression."
+                    "vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException: %s\n",
+                    e.what());
     }
     return 0;
 }

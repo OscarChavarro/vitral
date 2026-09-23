@@ -6,6 +6,9 @@
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "vsdk/toolkit/io/geometry/ReaderObj.h"
 #include "vsdk/toolkit/io/geometry/ReaderPly.h"
+#include "vsdk/toolkit/io/geometry/WriterGts.h"
+#include "vsdk/toolkit/io/geometry/WriterObj.h"
+#include "vsdk/toolkit/io/geometry/WriterVtk.h"
 
 void
 EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleScene* scene)
@@ -27,4 +30,22 @@ EnvironmentPersistence::importEnvironment(const java::File& sceneFile, SimpleSce
     Logger::reportMessage("EnvironmentPersistence", 1,
                           "importEnvironment",
                           "Unsupported scene extension in C++ port");
+}
+
+void
+EnvironmentPersistence::exportEnvironmentObj(java::OutputStream& outputStream, SimpleScene* scene)
+{
+    WriterObj::exportEnvironment(outputStream, scene);
+}
+
+void
+EnvironmentPersistence::exportEnvironmentGts(java::OutputStream& outputStream, SimpleScene* scene)
+{
+    WriterGts::exportEnvironment(outputStream, scene);
+}
+
+void
+EnvironmentPersistence::exportEnvironmentVtk(java::OutputStream& outputStream, SimpleScene* scene)
+{
+    WriterVtk::exportEnvironment(outputStream, scene);
 }

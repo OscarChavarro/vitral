@@ -7,6 +7,14 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+
+
+// Same value as VSDK::EPSILON, spelled as a literal so that it is constant
+// initialized (no static initialization order dependency on VSDK.cpp).
+const double PolyhedralBoundedSolidNumericPolicy::BREP_EPSILON = 1e-6;
+const double PolyhedralBoundedSolidNumericPolicy::BREP_BIG_EPSILON =
+    10.0 * 1e-6;
+
 double PolyhedralBoundedSolidNumericPolicy::sanitizeScale(double modelScale)
 {
     double safeScale = std::abs(modelScale);

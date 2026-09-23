@@ -66,6 +66,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/lang/System.cpp
     src/main/java/lang/Character.cpp
     src/main/java/lang/Float.cpp
+    src/main/java/lang/Double.cpp
     src/main/java/lang/StringBuilder.cpp
     src/main/java/lang/ProcessBuilder.cpp
     src/main/java/io/InputStream.cpp
@@ -193,6 +194,9 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
     src/main/vsdk/toolkit/io/FileLocator.cpp
     src/main/vsdk/toolkit/io/geometry/EnvironmentPersistence.cpp
+    src/main/vsdk/toolkit/io/geometry/WriterObj.cpp
+    src/main/vsdk/toolkit/io/geometry/WriterGts.cpp
+    src/main/vsdk/toolkit/io/geometry/WriterVtk.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderObj.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderPly.cpp
     src/main/vsdk/toolkit/io/geometry/ReaderPlyResult.cpp
@@ -231,6 +235,38 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/material/MicroFacetedMaterial.cpp
     src/main/vsdk/toolkit/environment/material/ShadingType.cpp
     src/main/vsdk/toolkit/environment/material/RendererConfiguration.cpp
+    src/main/vsdk/toolkit/processing/CurveModeler.cpp
+    src/main/vsdk/toolkit/processing/ImageProcessing.cpp
+    src/main/vsdk/toolkit/environment/background/CubemapBackground.cpp
+    src/main/vsdk/toolkit/environment/background/FixedBackground.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.cpp
+    src/main/vsdk/toolkit/io/geometry/ParametricCurvePersistence.cpp
+    src/main/vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.cpp
+    src/main/vsdk/toolkit/io/image/RGBColorPalettePersistence.cpp
+    src/main/org/w3c/dom/Node.cpp
+    src/main/javax/xml/parsers/DocumentBuilder.cpp
+    src/main/javax/xml/transform/Transformer.cpp
+    src/main/vsdk/toolkit/gui/widget/Widget.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetButtonGroup.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetCommand.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetDialog.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetMenu.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetMenuElement.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetMenuItem.cpp
+    src/main/vsdk/toolkit/gui/viewport/Viewport.cpp
+    src/main/vsdk/toolkit/gui/viewport/ViewportElementScaler.cpp
+    src/main/vsdk/toolkit/gui/viewport/ViewportSet.cpp
+    src/main/vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.cpp
+    src/main/vsdk/toolkit/gui/viewport/ViewportInteractionTechniques.cpp
+    src/main/vsdk/toolkit/gui/gizmo/InputGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/InputGizmoValueChangeRules.cpp
+    src/main/vsdk/toolkit/gui/gizmo/ReferenceFrameGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/TranslateGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/TranslateGizmoInteractionTechnique.cpp
+    src/main/vsdk/toolkit/gui/gizmo/RotateGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.cpp
+    src/main/vsdk/toolkit/gui/gizmo/ScaleGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.cpp
 )
 
 add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})
