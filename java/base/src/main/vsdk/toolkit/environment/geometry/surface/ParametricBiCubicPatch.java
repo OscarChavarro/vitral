@@ -383,11 +383,11 @@ public class ParametricBiCubicPatch extends Surface {
     </UL>
 
     PRE: calculateMAtrices() should be called before calling this method.
-    @param p
-    @param s
-    @param t
+    @param s parameter in the first direction, in [0, 1]
+    @param t parameter in the second direction, in [0, 1]
+    @return the point of the patch at (s, t)
     */
-    public void evaluate(Vector3Dd p, double s, double t)
+    public Vector3Dd evaluate(double s, double t)
     {
         S_MATRIX = S_MATRIX
             .withVal(0, 0, s * s * s)
@@ -409,7 +409,23 @@ public class ParametricBiCubicPatch extends Surface {
         Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
 
         // The result is a 1x1 matrix.
-        p = new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
+        return new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
+    }
+
+    /**
+    Former output parameter form of `evaluate(double, double)`. `Vector3Dd` is
+    immutable, so the given vector can not receive the point: use the returned
+    one (as the TypeScript port does).
+    @param p ignored
+    @param s parameter in the first direction, in [0, 1]
+    @param t parameter in the second direction, in [0, 1]
+    @return the point of the patch at (s, t)
+    @deprecated use `evaluate(double, double)`
+    */
+    @Deprecated
+    public Vector3Dd evaluate(Vector3Dd p, double s, double t)
+    {
+        return evaluate(s, t);
     }
 
     public Vector3Dd evaluateTangent(double s, double t)

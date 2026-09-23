@@ -16,6 +16,7 @@ import javax.swing.Timer;
 
 import application.AwtJogl4ApplicationController;
 import application.AwtJogl4SceneEditorApplication;
+import application.GuiEventExecutor;
 import model.Scene;
 import model.InteractionMode;
 import model.history.EditHistory;
@@ -148,6 +149,9 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
         }
         if ( "edit.history".equals(tool) ) {
             return describeEditHistory();
+        }
+        if ( "gui.command".equals(tool) ) {
+            return executeGuiCommand(request);
         }
         if ( "scene.select_body".equals(tool) ) {
             selectBody(request);
@@ -288,6 +292,24 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             ",\"nextUndo\":" + (undoName == null ? "null" : "\"" + escape(undoName) + "\"") +
             ",\"nextRedo\":" + (redoName == null ? "null" : "\"" + escape(redoName) + "\"") +
             "}";
+    }
+
+    /**
+    Executes a command of the GUI that works only over the model (i.e. the
+    `IDC_CREATE_*` ones), as its menu item or button does. What it changes in
+    the scene is recorded in the scene history.
+    */
+    private String executeGuiCommand(String request)
+    {
+        String command = stringProperty(request, "command", "");
+        final String[] message = new String[] { "" };
+        GuiEventExecutor executor = new GuiEventExecutor(
+            parent.getApplicationModel(), text -> message[0] = text);
+        GuiEventExecutor.CommandResult result = executor.execute(command);
+
+        parent.getJogl4Controller().repaint();
+        return "{\"command\":\"" + escape(command) + "\",\"result\":\"" + result +
+            "\",\"message\":\"" + escape(message[0]) + "\"}";
     }
 
     private void clearScene()
@@ -672,6 +694,7 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
             + "," + tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
             + "," + tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|escape|left|right|up|down|pageup|pagedown), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
+            + "," + tool("gui.command", "Execute a command of the GUI that works only over the model, as its menu item or button does (i.e. IDC_CREATE_SPHERE, IDC_CREATE_FUNCTIONALEXPLICITSURFACE, IDC_CREATE_OMNILIGHT, IDC_OTHERS_CYCLE_BACKGROUND). Arguments: command. Returns result (DONE, FAILED or NOT_HANDLED for commands that need the GUI, i.e. file dialogs) and the status message.")
             + "," + tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
             + "," + tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
             + "," + tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")

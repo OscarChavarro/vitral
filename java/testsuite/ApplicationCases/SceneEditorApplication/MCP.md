@@ -87,6 +87,15 @@ The changes done by `scene.clear`, `scene.add_*` and `scene.move_body` are
 recorded in the scene history, so they can be undone as the ones of the user
 (see `edit.history`).
 
+- `gui.command`: executes a command of the user interface that works only
+  over the model, as its menu item or button does: the `IDC_` commands of the
+  I18N files in `etc/gui` that need no dialog, i.e. `IDC_CREATE_SPHERE`,
+  `IDC_CREATE_FUNCTIONALEXPLICITSURFACE`, `IDC_CREATE_PARAMETRICBICUBICPATCH`,
+  `IDC_CREATE_OMNILIGHT` or `IDC_OTHERS_CYCLE_BACKGROUND`. Arguments:
+  `command`. Returns `result` (`DONE`, `FAILED`, or `NOT_HANDLED` for commands
+  that need the user interface, i.e. file dialogs) and the status `message`.
+  Scene changes are recorded in the scene history.
+
 ### Edition history
 
 - `edit.history`: returns the undo/redo state of the global scene history

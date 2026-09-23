@@ -90,6 +90,9 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
         private float[] tangents;
         private float[] biNormals;
         private int vertexCount;
+        /// Vertices of the sides the geometry defines; the rest (if any) are
+        /// back sides added to see open surfaces from both sides
+        private int frontVertexCount;
         private double characteristicSize;
 
         private int vaoId;
@@ -129,7 +132,19 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
             this.tangents = tangents;
             this.biNormals = biNormals;
             this.vertexCount = positions.length / 3;
+            this.frontVertexCount = vertexCount;
             this.characteristicSize = characteristicSize;
+        }
+
+        /**
+        Marks the vertices after the first `count` ones as back sides of open
+        surfaces: they are drawn as surfaces and wires, but their points and
+        normals are not shown again.
+        @param count number of vertices of the front sides
+        */
+        void setFrontVertexCount(int count)
+        {
+            frontVertexCount = Math.max(0, Math.min(count, vertexCount));
         }
     }
 
@@ -354,7 +369,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
             gl.glDisable(GL.GL_CULL_FACE);
             gl.glPointSize(4.0f);
             gl.glBindVertexArray(mesh.vaoId);
-            gl.glDrawArrays(GL.GL_POINTS, 0, mesh.vertexCount);
+            gl.glDrawArrays(GL.GL_POINTS, 0, mesh.frontVertexCount);
             gl.glBindVertexArray(0);
 
             Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
@@ -703,7 +718,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
 
     private static float[] buildVertexNormalLinePositions(Mesh mesh, float length, float epsilon)
     {
-        int vertexCountLocal = mesh.positions.length / 3;
+        int vertexCountLocal = mesh.frontVertexCount;
         float[] lines = new float[vertexCountLocal * 2 * 3];
         int out = 0;
         for ( int i = 0; i < vertexCountLocal; i++ ) {
@@ -734,7 +749,7 @@ public class Jogl4MeshRenderer extends Jogl4Renderer {
 
     private static float[] buildTriangleNormalLinePositions(Mesh mesh, float length, float epsilon)
     {
-        int triangleCount = mesh.positions.length / 9;
+        int triangleCount = mesh.frontVertexCount / 3;
         float[] lines = new float[triangleCount * 2 * 3];
         int out = 0;
 

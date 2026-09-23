@@ -41,7 +41,7 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
             s = ((double)i)*ds;
             for ( j = 0; j < n; j += (n-1) ) {
                 t = ((double)j)*dt;
-                p.evaluate(pos, s, t);
+                pos = p.evaluate(s, t);
                 gl.glVertex3d(pos.x(), pos.y(), pos.z());
             }
         }
@@ -84,7 +84,7 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
                 Vector3Dd p1 = new Vector3Dd();
                 Vector3Dd normal;
 
-                p.evaluate(p1, s, t);
+                p1 = p.evaluate(s, t);
 
                 // Normal
                 normal = p.evaluateNormal(s, t);
@@ -167,8 +167,8 @@ public class Jogl2ParametricBiCubicPatchRenderer extends Jogl2Renderer {
                 Vector3Dd p1 = new Vector3Dd();
                 Vector3Dd p2 = new Vector3Dd();
 
-                p.evaluate(p1, s, t);
-                p.evaluate(p2, s+ds, t);
+                p1 = p.evaluate(s, t);
+                p2 = p.evaluate(s+ds, t);
 
                 Vector3Dd n1 = p.evaluateNormal(s, t);
                 Vector3Dd n2 = p.evaluateNormal(s+ds, t);

@@ -13,6 +13,7 @@ the normal of each vertex.
 final class Jogl4MeshBuilder {
     private final List<float[]> vertices = new ArrayList<>();
     private double characteristicSize;
+    private boolean doubleSided;
 
     Jogl4MeshBuilder(double characteristicSize)
     {
@@ -164,8 +165,26 @@ final class Jogl4MeshBuilder {
         });
     }
 
+    /**
+    Makes the built mesh visible from both sides, as needed by open surfaces
+    (i.e. a patch or a height field): each triangle gets a back side copy with
+    the opposite winding and normals, so it is lit and culled as the front one
+    is, with no special shader support.
+    @param doubleSided true to add the back sides when building
+    */
+    void setDoubleSided(boolean doubleSided)
+    {
+        this.doubleSided = doubleSided;
+    }
+
     Jogl4MeshRenderer.Mesh build()
     {
+        int frontCount = vertices.size();
+
+        if ( doubleSided ) {
+            addBackSides(frontCount);
+        }
+
         int count = vertices.size();
         float[] positions = new float[count * 3];
         float[] normals = new float[count * 3];
@@ -182,7 +201,32 @@ final class Jogl4MeshBuilder {
             System.arraycopy(v, 8, tangents, i * 3, 3);
             System.arraycopy(v, 11, biNormals, i * 3, 3);
         }
-        return new Jogl4MeshRenderer.Mesh(positions, normals, uvs, tangents, biNormals,
-            characteristicSize);
+        Jogl4MeshRenderer.Mesh mesh = new Jogl4MeshRenderer.Mesh(positions, normals,
+            uvs, tangents, biNormals, characteristicSize);
+
+        mesh.setFrontVertexCount(frontCount);
+        return mesh;
+    }
+
+    /**
+    Appends a back side copy of the first triangles: vertices in reverse order
+    and all vectors (normal, tangent, binormal) negated.
+    @param frontCount number of vertices of the front sides
+    */
+    private void addBackSides(int frontCount)
+    {
+        for ( int t = 0; t + 2 < frontCount; t += 3 ) {
+            for ( int k = 2; k >= 0; k-- ) {
+                float[] v = vertices.get(t + k).clone();
+
+                for ( int c = 3; c < 6; c++ ) {
+                    v[c] = -v[c];
+                }
+                for ( int c = 8; c < 14; c++ ) {
+                    v[c] = -v[c];
+                }
+                vertices.add(v);
+            }
+        }
     }
 }

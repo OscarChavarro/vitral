@@ -15,6 +15,10 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.curve.ParametricCurve;
+import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
+import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
+import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
@@ -34,7 +38,11 @@ tessellated once into a mesh (cached by its parameters) that is drawn by
 bounding volume, texture, bump map and shading).
 
 Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
-`Arrow`, `Box`, `Torus` and `TriangleMesh`.
+`Arrow`, `Box`, `Torus`, `TriangleMesh`, and the open surfaces
+`FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
+(tessellated by their `Jogl4*Renderer`, visible from both sides). A
+`ParametricCurve` has no surface: it is drawn as lines by
+`Jogl4ParametricCurveRenderer`.
 */
 public class Jogl4GeometryRenderer extends Jogl4Renderer {
     private static final int SLICES = 32;
@@ -56,7 +64,11 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     {
         return geometry instanceof Sphere || geometry instanceof Cone ||
             geometry instanceof Arrow || geometry instanceof Box ||
-            geometry instanceof Torus || geometry instanceof TriangleMesh;
+            geometry instanceof Torus || geometry instanceof TriangleMesh ||
+            geometry instanceof FunctionalExplicitSurface ||
+            geometry instanceof ParametricBiCubicPatch ||
+            geometry instanceof InfinitePlane ||
+            geometry instanceof ParametricCurve;
     }
 
     /**
@@ -126,12 +138,55 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
                 textureMap, normalMap, localTransform, SLICES, SLICES / 2);
             return;
         }
+        if ( geometry instanceof ParametricCurve curve ) {
+            Jogl4ParametricCurveRenderer.draw(gl, curve, camera, quality, localTransform);
+            return;
+        }
         Jogl4MeshRenderer.Mesh mesh = obtainMesh(geometry);
         if ( mesh == null ) {
             return;
         }
+        if ( geometry instanceof InfinitePlane plane && quality != null ) {
+            drawInfinitePlaneMesh(gl, mesh, plane, camera, lights, material, quality,
+                textureMap, normalMap, localTransform);
+            return;
+        }
         Jogl4MeshRenderer.draw(gl, mesh, geometry, camera, lights, material, quality,
             textureMap, normalMap, localTransform);
+    }
+
+    /**
+    Draws the mesh of the square shown for an infinite plane. Its bounding
+    volume is infinite, so the bounding volume and the selection corners are
+    drawn around the square instead.
+    */
+    private static void drawInfinitePlaneMesh(
+        GL4 gl,
+        Jogl4MeshRenderer.Mesh mesh,
+        InfinitePlane plane,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d localTransform)
+    {
+        RendererConfiguration meshQuality = new RendererConfiguration();
+
+        meshQuality.clone(quality);
+        meshQuality.setBoundingVolume(false);
+        meshQuality.setSelectionCorners(false);
+        Jogl4MeshRenderer.draw(gl, mesh, plane, camera, lights, material, meshQuality,
+            textureMap, normalMap, localTransform);
+
+        double[] shown = Jogl4InfinitePlaneRenderer.calculateShownMinMax(plane);
+        if ( quality.isBoundingVolumeSet() ) {
+            Jogl4MinMaxRenderer.draw(gl, shown, camera, localTransform);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, shown, camera, localTransform);
+        }
     }
 
     /**
@@ -208,6 +263,15 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof TriangleMesh ) {
             return "trianglemesh/" + System.identityHashCode(geometry);
         }
+        if ( geometry instanceof FunctionalExplicitSurface f ) {
+            return Jogl4FunctionalExplicitSurfaceRenderer.meshKey(f);
+        }
+        if ( geometry instanceof ParametricBiCubicPatch p ) {
+            return Jogl4ParametricBiCubicPatchRenderer.meshKey(p);
+        }
+        if ( geometry instanceof InfinitePlane p ) {
+            return Jogl4InfinitePlaneRenderer.meshKey(p);
+        }
         return null;
     }
 
@@ -227,6 +291,15 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         if ( geometry instanceof TriangleMesh m ) {
             return buildTriangleMesh(m);
+        }
+        if ( geometry instanceof FunctionalExplicitSurface f ) {
+            return Jogl4FunctionalExplicitSurfaceRenderer.buildMesh(f);
+        }
+        if ( geometry instanceof ParametricBiCubicPatch p ) {
+            return Jogl4ParametricBiCubicPatchRenderer.buildMesh(p);
+        }
+        if ( geometry instanceof InfinitePlane p ) {
+            return Jogl4InfinitePlaneRenderer.buildMesh(p);
         }
         return null;
     }
