@@ -34,10 +34,10 @@ if(NOT TARGET vitral_opengl4)
     add_subdirectory("${VITRAL_OPENGL4_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_opengl4")
 endif()
 
-# Entry point and pure application classes: the ones of the Java port that
-# depend neither on AWT nor on JOGL (packages model, io, render, gui and the
-# GuiEventExecutor of application). Nothing uses them yet: they are ready for
-# the Xt + GLX + OpenGL 4 GUI.
+# The technology-independent application classes and the OpenGL 4 rendering
+# bridge ported from the Java application.  The bridge is deliberately not
+# instantiated by the current Xt/GLX shell: it is compiled and ready for the
+# future GUI integration, without changing the application's current path.
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
@@ -78,6 +78,12 @@ add_executable(SceneEditorApplication
     src/render/FrameCaptureService.cpp
     src/render/ProjectedViewsDebugger.cpp
     src/render/VisualRayDebugGeometry.cpp
+    src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
+    src/render/opengl4/OpenGL4FrameBufferSource.cpp
+    src/render/opengl4/OpenGL4ProjectedViewRenderer.cpp
+    src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
+    src/render/opengl4/OpenGL4SceneRenderer.cpp
+    src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
 )
 
 target_include_directories(SceneEditorApplication PRIVATE

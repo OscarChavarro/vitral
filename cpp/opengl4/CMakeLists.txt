@@ -11,6 +11,15 @@ find_package(GLEW REQUIRED)
 find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
 add_library(vitral_opengl4 SHARED
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4Renderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4BackgroundRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4FrameBufferReader.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4MinMaxRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4SelectionCornersRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ViewportWindow.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ViewportSetRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.cpp
@@ -22,6 +31,9 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4TranslateGizmoRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RotateGizmoRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4ScaleGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4Polygon2DRenderer.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.cpp

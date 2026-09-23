@@ -1,0 +1,5 @@
+#ifndef __SCENE_EDITOR_OPEN_GL_4_VISUAL_RAY_DEBUG_RENDERER__
+#define __SCENE_EDITOR_OPEN_GL_4_VISUAL_RAY_DEBUG_RENDERER__
+class ApplicationModel;class Scene;class VisualRayDebugGeometry;
+class OpenGL4VisualRayDebugRenderer{Scene*scene;VisualRayDebugGeometry*geometry;public:explicit OpenGL4VisualRayDebugRenderer(ApplicationModel*);~OpenGL4VisualRayDebugRenderer();void draw();};
+#endif

@@ -14,6 +14,8 @@ public:
     static void draw(const Light* light);
     static void draw(const Light* light, Camera* camera);
     static void draw(const Light* light, Camera* camera, LightGizmoStyle lightGizmoStyle);
+    static void draw(const Light* light, Camera* camera,
+                     LightGizmoStyle lightGizmoStyle, bool selected);
 
     static double getScale();
     static void setScale(double newScale);
@@ -36,9 +38,13 @@ private:
         const Vector3Dd& right,
         const Vector3Dd& up,
         double worldSize);
-    static void drawLines(const Matrix4x4d& mvp, const java::ArrayList<float>& positions, const java::ArrayList<float>& colors);
-    static void drawCross(const Light* light, Camera* camera);
-    static void drawOmniBillboard(const Light* light, Camera* camera);
+    static void drawLines(const Matrix4x4d& mvp,
+                          const java::ArrayList<float>& positions,
+                          const java::ArrayList<float>& colors,
+                          float lineWidth);
+    static void drawCross(const Light* light, Camera* camera, bool selected);
+    static void drawOmniBillboard(const Light* light, Camera* camera,
+                                  bool selected);
 };
 
 #endif

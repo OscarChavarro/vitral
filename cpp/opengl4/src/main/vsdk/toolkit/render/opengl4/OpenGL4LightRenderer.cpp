@@ -122,13 +122,16 @@ Vector3Dd OpenGL4LightRenderer::mapPatternPointToWorld(
     return center.add(right.multiply(localX)).add(up.multiply(localY));
 }
 
-void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp, const java::ArrayList<float>& positions, const java::ArrayList<float>& colors)
+void OpenGL4LightRenderer::drawLines(const Matrix4x4d& mvp,
+                                     const java::ArrayList<float>& positions,
+                                     const java::ArrayList<float>& colors,
+                                     float lineWidth)
 {
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     glDepthFunc(GL_LEQUAL);
-    OpenGL4LineRenderer::drawLines(mvp, positions, colors, 2.0f);
+    OpenGL4LineRenderer::drawLines(mvp, positions, colors, lineWidth);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
 }
@@ -145,17 +148,24 @@ void OpenGL4LightRenderer::draw(const Light* light, Camera* camera)
 
 void OpenGL4LightRenderer::draw(const Light* light, Camera* camera, LightGizmoStyle lightGizmoStyle)
 {
+    draw(light, camera, lightGizmoStyle, false);
+}
+
+void OpenGL4LightRenderer::draw(const Light* light, Camera* camera,
+                                LightGizmoStyle lightGizmoStyle, bool selected)
+{
     if (light == nullptr) return;
 
     if (lightGizmoStyle == LightGizmoStyle::OMNI_BILLBOARD) {
-        drawOmniBillboard(light, camera);
+        drawOmniBillboard(light, camera, selected);
         return;
     }
 
-    drawCross(light, camera);
+    drawCross(light, camera, selected);
 }
 
-void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
+void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera,
+                                     bool selected)
 {
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -171,7 +181,7 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
 
     double halfAxisLength = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale;
     Vector3Dd p = light->getPosition();
-    ColorRgb c = light->getEmission();
+    ColorRgb c = selected ? ColorRgb(1, 1, 0) : light->getEmission();
 
     float px = (float)p.x();
     float py = (float)p.y();
@@ -195,10 +205,11 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
         colors.add((float)c.b());
     }
 
-    drawLines(mvp, positions, colors);
+    drawLines(mvp, positions, colors, selected ? 4.0f : 2.0f);
 }
 
-void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
+void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera,
+                                             bool selected)
 {
     int viewport[4] = {0, 0, 1, 1};
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -207,7 +218,7 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
     int viewportHeight = java::Math::max(viewport[3], 1);
 
     if (camera == nullptr) {
-        drawCross(light, nullptr);
+        drawCross(light, nullptr, selected);
         return;
     }
 
@@ -250,7 +261,7 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
         positions.add((float)p1.z());
     }
 
-    ColorRgb c = light->getEmission();
+    ColorRgb c = selected ? ColorRgb(1, 1, 0) : light->getEmission();
     java::ArrayList<float> colors;
     colors.reserve(positions.size());
     for (long int i = 0; i < positions.size() / 3; i++) {
@@ -259,7 +270,7 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
         colors.add((float)c.b());
     }
 
-    drawLines(mvp, positions, colors);
+    drawLines(mvp, positions, colors, selected ? 4.0f : 2.0f);
 }
 
 double OpenGL4LightRenderer::getScale()

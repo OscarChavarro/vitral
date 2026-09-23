@@ -1,0 +1,10 @@
+#include "vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ColorDepthImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4Renderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+void OpenGL4Renderer::disposeAll(){OpenGL4GeometryRenderer::dispose();OpenGL4SphereRenderer::dispose();OpenGL4ColoredPrimitiveRenderer::release();OpenGL4LineRenderer::release();OpenGL4CameraRenderer::dispose();OpenGL4ArrowRenderer::dispose();OpenGL4ImageRenderer::dispose();OpenGL4ColorDepthImageRenderer::dispose();}
