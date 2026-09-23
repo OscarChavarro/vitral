@@ -17,12 +17,12 @@ import javax.swing.event.PopupMenuListener;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.gui.viewport.ViewportSetCommands;
-import vsdk.toolkit.gui.viewport.ViewportSetInteractionTechniques;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.gui.widget.WidgetMenu;
 import vsdk.toolkit.gui.widget.WidgetMenuElement;
 import vsdk.toolkit.gui.widget.WidgetMenuItem;
 
+import gui.DrawingAreaInteractionTechniques;
 import gui.PopupDismissClickFilter;
 
 /**
@@ -46,19 +46,20 @@ the canvas.
 public class AwtProjectionLocationPopup
 {
     private final ViewportSet viewportSet;
-    private final ViewportSetInteractionTechniques techniques;
+    private final DrawingAreaInteractionTechniques techniques;
     private final Component canvas;
     private JPopupMenu popup;
     private final PopupDismissClickFilter dismissClickFilter;
 
     /**
     @param viewportSet the set whose I18N context gives the texts
-    @param techniques the techniques that execute the chosen command
+    @param techniques the techniques that execute the chosen command (and
+    record it in the view history of the viewport)
     @param canvas the component where the viewport set is presented; it
     receives the keyboard focus back when the menu closes
     */
     public AwtProjectionLocationPopup(ViewportSet viewportSet,
-                                      ViewportSetInteractionTechniques techniques,
+                                      DrawingAreaInteractionTechniques techniques,
                                       Component canvas)
     {
         this.viewportSet = viewportSet;
@@ -177,7 +178,7 @@ public class AwtProjectionLocationPopup
                 currentItem = item;
             }
             item.addActionListener(e -> {
-                techniques.processCommand(command, viewport);
+                techniques.processViewportCommand(command, viewport);
                 canvas.repaint();
             });
             group.add(item);

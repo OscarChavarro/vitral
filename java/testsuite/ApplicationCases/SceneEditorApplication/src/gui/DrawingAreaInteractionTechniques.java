@@ -22,6 +22,9 @@ import model.DrawingArea;
 import model.InteractionMode;
 import model.selection.ScenePicker;
 import model.selection.SceneSelectionEditor;
+import gui.history.InteractionEditRecorder;
+import gui.history.UndoRedoCommand;
+import gui.history.UndoRedoInteractionTechnique;
 import vsdk.toolkit.gui.viewport.ViewportInteractionTechniques;
 import vsdk.toolkit.gui.viewport.ViewportSetInteractionTechniques;
 
@@ -49,6 +52,13 @@ removes the selected things; `F10` requests a raytraced image; `T` / `B`
 toggle a sample texture / bump map on the selected body; `h` shows the object
 selector; `ESC` closes the application. Commands of the visual debug ray and
 of the viewport set are processed by their own techniques.
+
+Undo and redo (see `UndoRedoInteractionTechnique`): `Ctrl+Z` / `Ctrl+Y` over
+the scene (creation, deletion and transformation of things), `Ctrl+Shift+Z`
+/ `Ctrl+Shift+Y` over the view of the selected viewport (camera placement,
+projection, display settings). Every mouse gesture (press to release), key
+press, click and viewport menu command is recorded in the edition history of
+the model by an `InteractionEditRecorder`.
 */
 public class DrawingAreaInteractionTechniques
 {
@@ -66,6 +76,8 @@ public class DrawingAreaInteractionTechniques
     private final RotateGizmo rotateGizmo;
     private final ScaleGizmo scaleGizmo;
     private final DrawingAreaInteractionListener listener;
+    private final InteractionEditRecorder editRecorder;
+    private final UndoRedoInteractionTechnique undoRedoTechnique;
 
     private RendererConfiguration qualitySelection;
 
@@ -92,6 +104,8 @@ public class DrawingAreaInteractionTechniques
         translationGizmo = interactionTechniques.getTranslationGizmo();
         rotateGizmo = interactionTechniques.getRotateGizmo();
         scaleGizmo = interactionTechniques.getScaleGizmo();
+        editRecorder = new InteractionEditRecorder(model.getEditHistory(), viewportSet);
+        undoRedoTechnique = new UndoRedoInteractionTechnique(model.getEditHistory());
     }
 
     public ViewportSetInteractionTechniques getViewportSetTechniques()
@@ -381,6 +395,8 @@ public class DrawingAreaInteractionTechniques
         if ( mouseView == null ) {
             return;
         }
+        // Everything the gesture changes, up to its release, is one operation
+        editRecorder.beginGesture(sceneOperationName(mode));
         viewportSetTechniques.processMousePressedEvent(drawingArea.toSurfaceEvent(event));
         activateViewport(mouseView);
 
@@ -506,9 +522,18 @@ public class DrawingAreaInteractionTechniques
             processScaleEvent(event, mouseView,
                 interactionTechniques::processScaleMouseReleasedEvent);
         }
+        editRecorder.endGesture();
     }
 
     public void processMouseClickedEvent(MouseEvent event)
+    {
+        InteractionMode mode = drawingArea.getInteractionMode();
+
+        editRecorder.record(sceneOperationName(mode),
+            () -> processMouseClickedEventWithoutRecording(event));
+    }
+
+    private void processMouseClickedEventWithoutRecording(MouseEvent event)
     {
         Viewport mouseView = getViewportAtPointer(event);
         InteractionMode mode = drawingArea.getInteractionMode();
@@ -633,15 +658,52 @@ public class DrawingAreaInteractionTechniques
     */
     public void processMouseWheelEvent(MouseEvent event)
     {
-        if ( drawingArea.getInteractionMode() == InteractionMode.CAMERA &&
-             interactionTechniques.processCameraMouseWheelEvent(event) ) {
-            listener.repaintRequested();
+        InteractionMode mode = drawingArea.getInteractionMode();
+
+        editRecorder.beginAction();
+        try {
+            if ( mode == InteractionMode.CAMERA &&
+                 interactionTechniques.processCameraMouseWheelEvent(event) ) {
+                listener.repaintRequested();
+            }
+        }
+        finally {
+            editRecorder.endAction(sceneOperationName(mode), true);
         }
     }
 
     //= Keyboard ==========================================================
 
+    /**
+    Processes a key press: undo/redo chords go to the history, any other key
+    is processed recording what it changes.
+    @param event key press, with the key of Ctrl chords in its keycode
+    */
     public void processKeyPressedEvent(KeyEvent event)
+    {
+        InteractionMode mode = drawingArea.getInteractionMode();
+        UndoRedoCommand command = UndoRedoInteractionTechnique.recognize(event);
+
+        if ( command != null ) {
+            processUndoRedoCommand(command);
+            return;
+        }
+        if ( isControlLetterChord(event) ) {
+            // Other Ctrl+letter chords are not commands of the drawing area:
+            // the letters alone are, so they must not be taken as them
+            return;
+        }
+
+        editRecorder.beginAction();
+        try {
+            processEditionKeyPressedEvent(event);
+        }
+        finally {
+            editRecorder.endAction(keyOperationName(mode, event), true);
+        }
+    }
+
+    private void processEditionKeyPressedEvent(KeyEvent event)
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
@@ -950,11 +1012,121 @@ public class DrawingAreaInteractionTechniques
     */
     public void processKeyReleasedEvent(KeyEvent event)
     {
-        if ( drawingArea.getInteractionMode() == InteractionMode.CAMERA &&
-             interactionTechniques.processCameraKeyReleasedEvent(event) ) {
-            listener.repaintRequested();
+        InteractionMode mode = drawingArea.getInteractionMode();
+
+        if ( UndoRedoInteractionTechnique.recognize(event) != null ||
+             isControlLetterChord(event) ) {
+            return;
+        }
+        editRecorder.beginAction();
+        try {
+            if ( mode == InteractionMode.CAMERA &&
+                 interactionTechniques.processCameraKeyReleasedEvent(event) ) {
+                listener.repaintRequested();
+            }
+        }
+        finally {
+            editRecorder.endAction(sceneOperationName(mode), true);
         }
     }
+
+    //= Viewport commands =================================================
+
+    /**
+    Processes one of the standard commands of the viewport set (projection
+    location or render mode, i.e. chosen in the menu of a viewport) over a
+    viewport, recording the change of its view.
+    @param command the id of the command, starting with `IDV_`
+    @param viewport viewport to change
+    @return true if the command was a viewport set one and was processed
+    */
+    public boolean processViewportCommand(String command, Viewport viewport)
+    {
+        boolean processed;
+
+        editRecorder.beginAction();
+        try {
+            processed = viewportSetTechniques.processCommand(command, viewport);
+        }
+        finally {
+            editRecorder.endAction(sceneOperationName(drawingArea.getInteractionMode()), false);
+        }
+        if ( processed && viewport == viewportSet.getSelectedViewport() ) {
+            activateViewport(viewport);
+        }
+        listener.repaintRequested();
+        return processed;
+    }
+
+    //= Undo / redo =======================================================
+
+    /**
+    Undoes or redoes an operation of the scene history or of the view history
+    of the selected viewport. A gesture whose release was lost is finished
+    (recorded) first, so it is what gets undone.
+    @param command the command to execute
+    */
+    public void processUndoRedoCommand(UndoRedoCommand command)
+    {
+        Viewport selectedViewport = viewportSet.getSelectedViewport();
+        UndoRedoInteractionTechnique.Result result;
+
+        editRecorder.endGesture();
+        // Numbers typed in the gizmo boxes belong to the state before
+        cancelInputGizmoEditing();
+        result = undoRedoTechnique.execute(command, selectedViewport);
+
+        if ( result.isDone() ) {
+            if ( command.isViewportCommand() ) {
+                // The viewport may be showing other camera now
+                activateViewport(selectedViewport);
+            }
+            else {
+                listener.selectionChanged();
+            }
+        }
+        listener.statusMessageRequested(result.message());
+        listener.cursorRequested(getModeCursor());
+        listener.repaintRequested();
+    }
+
+    /**
+    @return true if the key press is a Ctrl chord with a letter
+    */
+    private static boolean isControlLetterChord(KeyEvent event)
+    {
+        return (event.modifierMask & KeyEvent.MASK_CTRL) != 0 &&
+            event.keycode >= KeyEvent.KEY_A && event.keycode <= KeyEvent.KEY_z;
+    }
+
+    /**
+    @return name of the operation over the scene done in a mode
+    */
+    private static String sceneOperationName(InteractionMode mode)
+    {
+        switch ( mode ) {
+          case TRANSLATE:
+            return "Translation";
+          case ROTATE:
+            return "Rotation";
+          case SCALE:
+            return "Scale";
+          default:
+            return "Scene edition";
+        }
+    }
+
+    /**
+    @return name of the operation over the scene done by a key in a mode
+    */
+    private static String keyOperationName(InteractionMode mode, KeyEvent event)
+    {
+        if ( event.keycode == KeyEvent.KEY_DELETE ) {
+            return "Deletion";
+        }
+        return sceneOperationName(mode);
+    }
+
 
     //= Selection feedback ================================================
 

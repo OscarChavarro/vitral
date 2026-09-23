@@ -18,6 +18,7 @@ import model.Scene;
 import model.ApplicationModel;
 import gui.awt.AwtApplicationHost;
 import gui.awt.AwtApplicationModel;
+import application.mcp.AwtJogl4VitralEditorMCP;
 
 public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     // Application model

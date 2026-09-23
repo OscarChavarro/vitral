@@ -21,7 +21,9 @@ import gui.DrawingAreaInteractionTechniques;
 
 /**
 Maps the AWT events of the component presenting the drawing area to vitral
-events, which are processed by the `DrawingAreaInteractionTechniques`. It also
+events, which are processed by the `DrawingAreaInteractionTechniques` (key
+events through `AwtKeyEventMapper`, so Ctrl chords such as the undo/redo ones
+keep their key). It also
 owns the AWT services of the interaction: the projection location popup menu
 and the focus of the component.
 */
@@ -53,7 +55,7 @@ public class AwtDrawingAreaController implements
         this.listener = listener;
 
         projectionLocationPopup = new AwtProjectionLocationPopup(
-            drawingArea.getViewportSet(), techniques.getViewportSetTechniques(), canvas);
+            drawingArea.getViewportSet(), techniques, canvas);
         techniques.getViewportSetTechniques().setListener(new ViewportSetInteractionListener() {
             @Override
             public void projectionLocationMenuRequested(Viewport viewport, int x, int y) {
@@ -77,7 +79,7 @@ public class AwtDrawingAreaController implements
 
     /**
     Delivers a synthetic mouse event to the canvas, as if it came from the
-    user's pointer. Intended for automated agents (see `AwtJogl4VitralEditorMCP`).
+    user's pointer. Intended for automated agents (see `application.mcp.AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param type one of "move", "press", "drag", "release"
     @param x canvas (AWT) x coordinate
@@ -113,7 +115,7 @@ public class AwtDrawingAreaController implements
 
     /**
     Delivers a synthetic key press to this controller, as if it came from the
-    user's keyboard (whatever component has the focus). Intended for automated agents (see `AwtJogl4VitralEditorMCP`).
+    user's keyboard (whatever component has the focus). Intended for automated agents (see `application.mcp.AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param key a single character (i.e. "5", "x") or one of the names "tab",
     "enter", "backspace", "escape", "left", "right", "up", "down", "pageup",
@@ -122,8 +124,22 @@ public class AwtDrawingAreaController implements
     */
     public void injectKeyEvent(String key, boolean shift)
     {
+        injectKeyEvent(key, shift, false);
+    }
+
+    /**
+    Delivers a synthetic key press to this controller, as `injectKeyEvent(String, boolean)`
+    does, optionally with the CTRL key down (i.e. "z" with ctrl is undo). As
+    AWT does, the character of a Ctrl+letter chord is the control one.
+    @param key a single character or a key name (see `injectKeyEvent(String, boolean)`)
+    @param shift true to press it with the SHIFT key down
+    @param ctrl true to press it with the CTRL key down
+    */
+    public void injectKeyEvent(String key, boolean shift, boolean ctrl)
+    {
         int keyCode;
         char keyChar;
+        int modifiers = 0;
 
         switch ( key ) {
             case "tab" -> {
@@ -162,9 +178,18 @@ public class AwtDrawingAreaController implements
                 keyCode = KeyEvent.getExtendedKeyCodeForChar(keyChar);
             }
         }
+
+        if ( shift ) {
+            modifiers |= KeyEvent.SHIFT_DOWN_MASK;
+        }
+        if ( ctrl ) {
+            modifiers |= KeyEvent.CTRL_DOWN_MASK;
+            if ( Character.isLetter(keyChar) ) {
+                keyChar = (char)(Character.toUpperCase(keyChar) - 'A' + 1);
+            }
+        }
         KeyEvent event = new KeyEvent(canvas, KeyEvent.KEY_PRESSED,
-            System.currentTimeMillis(), shift ? KeyEvent.SHIFT_DOWN_MASK : 0,
-            keyCode, keyChar);
+            System.currentTimeMillis(), modifiers, keyCode, keyChar);
 
         // Delivered directly: through the canvas, the AWT focus manager would
         // send it to the component that has the focus, if it is not the canvas
@@ -259,7 +284,7 @@ public class AwtDrawingAreaController implements
     @Override
     public void keyPressed(KeyEvent e)
     {
-        techniques.processKeyPressedEvent(AwtSystem.awt2vsdkEvent(e));
+        techniques.processKeyPressedEvent(AwtKeyEventMapper.toVitralEvent(e));
 
         // Ctrl+Shift+F: the key identity is lost in the vitral event for
         // control characters, so the chord is detected here
@@ -275,7 +300,7 @@ public class AwtDrawingAreaController implements
     @Override
     public void keyReleased(KeyEvent e)
     {
-        techniques.processKeyReleasedEvent(AwtSystem.awt2vsdkEvent(e));
+        techniques.processKeyReleasedEvent(AwtKeyEventMapper.toVitralEvent(e));
     }
 
     /**

@@ -167,6 +167,35 @@ public class SelectionSet
         }
     }
 
+    /**
+    Inserts an element in the external list, keeping the selection marks of
+    the other elements aligned with them (`sync` only works at the end of the
+    list).
+    @param index position of the new element in the external list
+    @param element element to insert
+    @param selected true if the inserted element must be selected
+    */
+    @SuppressWarnings("unchecked")
+    public void insertElement(int index, Object element, boolean selected)
+    {
+        sync();
+        elements.add(index, element);
+        selection.add(index, selected);
+    }
+
+    /**
+    Removes an element from the external list, keeping the selection marks of
+    the other elements aligned with them.
+    @param index position of the element in the external list
+    @return the removed element
+    */
+    public Object removeElement(int index)
+    {
+        sync();
+        selection.remove(index);
+        return elements.remove(index);
+    }
+
     public int numberOfSelections()
     {
         int i;

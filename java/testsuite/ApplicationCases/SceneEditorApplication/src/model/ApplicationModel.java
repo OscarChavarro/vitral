@@ -15,6 +15,8 @@ import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.ZBuffer;
 
+import model.history.EditHistory;
+
 public class ApplicationModel
 {
     private Scene scene;
@@ -34,6 +36,7 @@ public class ApplicationModel
     private final SceneLightFactory lightFactory = new SceneLightFactory();
     private final DrawingArea drawingArea;
     private final GuiState guiState = new GuiState();
+    private final EditHistory editHistory = new EditHistory(this::getScene);
 
     /**
     Creates the model with one standard `ViewportSet`. More sets can be added
@@ -127,9 +130,23 @@ public class ApplicationModel
         return scene;
     }
 
+    /**
+    Replaces the edited scene. The operations of the scene history belong to
+    the former scene, so they are forgotten.
+    @param scene the new scene
+    */
     public void setScene(Scene scene)
     {
         this.scene = scene;
+        editHistory.getSceneHistory().clear();
+    }
+
+    /**
+    @return undo/redo history of the scene and of the views of the viewports
+    */
+    public EditHistory getEditHistory()
+    {
+        return editHistory;
     }
 
     public Camera getCamera()

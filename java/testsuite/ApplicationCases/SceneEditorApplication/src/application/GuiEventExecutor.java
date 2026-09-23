@@ -39,6 +39,7 @@ import vsdk.toolkit.media.RGBAImageUncompressed;
 import model.ApplicationModel;
 import model.InteractionMode;
 import model.Scene;
+import model.history.SceneHistory;
 
 /**
 Executes the commands of the GUI of the editor (identified by the `IDC_*`
@@ -49,6 +50,10 @@ are chosen by the GUI. It does not depend on any GUI or rendering technology:
 each GUI technology executes here what it does not present itself (file
 dialogs, windows, look and feel...), and presents the status messages
 requested through its `Presenter`.
+
+What the commands change in the scene (i.e. objects and lights created,
+objects imported) is recorded in the scene history of the model, so it can be
+undone.
 */
 public class GuiEventExecutor extends CommandListener
 {
@@ -119,6 +124,21 @@ public class GuiEventExecutor extends CommandListener
     commands of this class
     */
     public CommandResult execute(String label)
+    {
+        SceneHistory history = model.getEditHistory().getSceneHistory();
+        CommandResult result;
+
+        history.begin();
+        try {
+            result = executeModelCommand(label);
+        }
+        finally {
+            history.end(label, false);
+        }
+        return result;
+    }
+
+    private CommandResult executeModelCommand(String label)
     {
         Light light;
 
@@ -537,7 +557,15 @@ public class GuiEventExecutor extends CommandListener
     */
     public void importObjects(File file) throws Exception
     {
-        EnvironmentPersistence.importEnvironment(file, scene().scene);
+        SceneHistory history = model.getEditHistory().getSceneHistory();
+
+        history.begin();
+        try {
+            EnvironmentPersistence.importEnvironment(file, scene().scene);
+        }
+        finally {
+            history.end("Import of " + file.getName(), false);
+        }
     }
 
     /**

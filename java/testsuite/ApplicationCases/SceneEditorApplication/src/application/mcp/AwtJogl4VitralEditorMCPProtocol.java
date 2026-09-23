@@ -1,11 +1,10 @@
-package application;
+package application.mcp;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -15,8 +14,12 @@ import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import application.AwtJogl4ApplicationController;
+import application.AwtJogl4SceneEditorApplication;
 import model.Scene;
 import model.InteractionMode;
+import model.history.EditHistory;
+import model.history.UndoQueue;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.common.color.ColorRgb;
@@ -32,6 +35,11 @@ import vsdk.toolkit.environment.material.ShadingType;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.io.image.ImagePersistence;
 
+/**
+One connection of the automation service: reads JSON-RPC requests, one per
+line, executes the tools in the thread of the GUI and writes one JSON line per
+response (see `MCP.md`).
+*/
 class AwtJogl4VitralEditorMCPProtocol implements Runnable
 {
     private final AwtJogl4SceneEditorApplication parent;
@@ -115,28 +123,31 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             return describeScene();
         }
         if ( "scene.clear".equals(tool) ) {
-            clearScene();
+            recordSceneChange(tool, this::clearScene);
             return "{\"ok\":true}";
         }
         if ( "scene.add_point_light".equals(tool) ) {
-            addPointLight(request);
+            recordSceneChange(tool, () -> addPointLight(request));
             return describeScene();
         }
         if ( "scene.add_sphere".equals(tool) ) {
-            addSphere(request);
+            recordSceneChange(tool, () -> addSphere(request));
             return describeScene();
         }
         if ( "scene.add_cone".equals(tool) ) {
-            addCone(request);
+            recordSceneChange(tool, () -> addCone(request));
             return describeScene();
         }
         if ( "scene.add_cylinder".equals(tool) ) {
-            addCylinder(request);
+            recordSceneChange(tool, () -> addCylinder(request));
             return describeScene();
         }
         if ( "scene.move_body".equals(tool) ) {
-            moveBody(request);
+            recordSceneChange(tool, () -> moveBody(request));
             return describeScene();
+        }
+        if ( "edit.history".equals(tool) ) {
+            return describeEditHistory();
         }
         if ( "scene.select_body".equals(tool) ) {
             selectBody(request);
@@ -223,6 +234,60 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
         timer.setRepeats(false);
         timer.start();
         return "{\"ok\":true,\"message\":\"The application is closing\"}";
+    }
+
+    /**
+    Executes a change of the scene requested by the agent, recording it in the
+    scene history, as the ones of the user, so it can be undone.
+    */
+    private void recordSceneChange(String tool, Runnable change)
+    {
+        parent.getApplicationModel().getEditHistory().getSceneHistory()
+            .perform(tool, change);
+        parent.getJogl4Controller().repaint();
+    }
+
+    /**
+    @return the state of the scene history and of the view history of each
+    viewport of the active viewport set
+    */
+    private String describeEditHistory()
+    {
+        EditHistory history = parent.getApplicationModel().getEditHistory();
+        ViewportSet viewportSet = parent.getApplicationModel().getActiveViewportSet();
+        StringBuilder sb = new StringBuilder();
+        int i;
+
+        sb.append("{\"scene\":")
+            .append(queueJson(history.getSceneHistory().getQueue()))
+            .append(",\"viewports\":[");
+        for ( i = 0; i < viewportSet.getViewportCount(); i++ ) {
+            Viewport viewport = viewportSet.getViewport(i);
+
+            if ( i > 0 ) {
+                sb.append(',');
+            }
+            sb.append("{\"index\":").append(i)
+                .append(",\"title\":\"").append(escape(viewport.getTitle())).append('"')
+                .append(",\"selected\":").append(viewport == viewportSet.getSelectedViewport())
+                .append(",\"history\":")
+                .append(queueJson(history.getViewportHistory().getQueue(viewport)))
+                .append('}');
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private static String queueJson(UndoQueue queue)
+    {
+        String undoName = queue.getUndoName();
+        String redoName = queue.getRedoName();
+
+        return "{\"undo\":" + queue.getUndoCount() +
+            ",\"redo\":" + queue.getRedoCount() +
+            ",\"nextUndo\":" + (undoName == null ? "null" : "\"" + escape(undoName) + "\"") +
+            ",\"nextRedo\":" + (redoName == null ? "null" : "\"" + escape(redoName) + "\"") +
+            "}";
     }
 
     private void clearScene()
@@ -365,8 +430,9 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
         AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
         String key = stringProperty(request, "key", "");
         boolean shift = Boolean.TRUE.equals(booleanProperty(request, "shift"));
+        boolean ctrl = Boolean.TRUE.equals(booleanProperty(request, "ctrl"));
 
-        drawingArea.injectKeyEvent(key, shift);
+        drawingArea.injectKeyEvent(key, shift, ctrl);
         return describeScene();
     }
 
@@ -595,23 +661,24 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
     private static String toolsJson()
     {
         return "{\"tools\":["
-            + tool("scene.describe", "Return bodies, lights and core transforms as JSON.")
-            + "," + tool("scene.clear", "Remove all bodies, lights and debug groups.")
+            + tool("scene.describe", "Return the bodies (index, name, geometry, position, scale, radius of spheres) and lights (index, type, position, emission) as JSON.")
+            + "," + tool("scene.clear", "Remove all bodies, lights and debug groups (undoable).")
             + "," + tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
             + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
             + "," + tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
             + "," + tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")
-            + "," + tool("scene.move_body", "Set the position of a body (default: the last one). Arguments: index,x,y,z (missing coordinates are kept).")
+            + "," + tool("scene.move_body", "Set the position of a body (default: the last one; undoable). Arguments: index,x,y,z (missing coordinates are kept).")
             + "," + tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
             + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
-            + "," + tool("gui.mouse", "Inject a mouse event into the canvas. Arguments: type (move|press|drag|release), x, y (canvas pixels), button (default 1). Returns the scene state.")
-            + "," + tool("gui.key", "Inject a key press into the canvas. Arguments: key (a single character, or tab|enter|backspace|escape|left|right|up|down|pageup|pagedown), shift (default false). Returns the scene state.")
-            + "," + tool("viewport.project", "Canvas pixels of the selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
-            + "," + tool("render.get_configuration", "Return the RendererConfiguration flags of the viewports. Arguments: viewport (index; default all).")
-            + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
-            + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
-            + "," + tool("viewport.export_jpg", "Export the selected JOGL4 viewport to JPG. Arguments: path.")
-            + "," + tool("workspace.export_jpg", "Export the complete JOGL4 workspace area, including all viewports, to JPG. Arguments: path.")
+            + "," + tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
+            + "," + tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|escape|left|right|up|down|pageup|pagedown), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
+            + "," + tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
+            + "," + tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
+            + "," + tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
+            + "," + tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
+            + "," + tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
+            + "," + tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")
+            + "," + tool("workspace.export_jpg", "Export the whole drawing area, with all its viewports, to a JPG. Arguments: path.")
             + "," + tool("gui.list_languages", "List the languages available for the GUI (I18N files in etc/gui), marking the current one.")
             + "," + tool("gui.set_language", "Change the GUI language, rebuilding the GUI. Arguments: language (an id given by gui.list_languages).")
             + "," + tool("app.exit", "Close the application (after answering this call).")
@@ -707,41 +774,5 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             return "";
         }
         return in.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
-}
-
-public class AwtJogl4VitralEditorMCP implements Runnable
-{
-    private final AwtJogl4SceneEditorApplication parent;
-    private final int tcpPort;
-
-    public AwtJogl4VitralEditorMCP(AwtJogl4SceneEditorApplication parent)
-    {
-        this.parent = parent;
-        tcpPort = 1234;
-        Thread networkThread = new Thread(this);
-        networkThread.setName("AwtJogl4VitralEditorMCP");
-        networkThread.start();
-    }
-
-    @Override
-    public void run()
-    {
-        System.out.println("Waiting for MCP connections on TCP port " + tcpPort);
-
-        try ( ServerSocket serverSocket = new ServerSocket(tcpPort) ) {
-            while ( true ) {
-                Socket clientSocket = serverSocket.accept();
-                AwtJogl4VitralEditorMCPProtocol listener =
-                    new AwtJogl4VitralEditorMCPProtocol(parent, clientSocket);
-                Thread listenerThread = new Thread(listener);
-                listenerThread.setName("VitralEditorMCPClient");
-                listenerThread.start();
-            }
-        }
-        catch ( Exception e ) {
-            System.err.println("Error in AwtJogl4VitralEditorMCP communications!");
-            System.err.println(e);
-        }
     }
 }
