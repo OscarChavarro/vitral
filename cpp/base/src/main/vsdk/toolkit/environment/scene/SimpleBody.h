@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_BODY__
 #define __SIMPLE_BODY__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Quaterniond.h"
@@ -13,7 +14,7 @@ class RGBImageUncompressed;
 class NormalMap;
 class SimpleMaterial;
 
-class SimpleBody {
+class SimpleBody : public Entity {
 private:
     Geometry* geometry;
     bool geometryIsSphere;

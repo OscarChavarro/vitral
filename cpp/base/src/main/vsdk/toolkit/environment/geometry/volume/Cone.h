@@ -7,9 +7,9 @@ class RayHit;
 
 class Cone : public Solid {
 private:
-    double r1;
-    double r2;
-    double h;
+    double bottomRadius; // Radius at the base
+    double topRadius;    // Radius at the top
+    double height;       // Height
 
     static const int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     static const int DEFAULT_HEIGHT_DIVISIONS = 1;
@@ -24,15 +24,15 @@ private:
     Ray* doIntersectionTap(const Ray& inOutRay, double inR, double inH, RayHit* outInfo);
 
 public:
-    Cone(double inR1, double inR2, double inH);
+    Cone(double bottomRadius, double topRadius, double height);
     virtual ~Cone() {}
 
-    double getBaseRadius() const;
+    double getBottomRadius() const;
     double getTopRadius() const;
     double getHeight() const;
-    void setBaseRadius(double val);
-    void setTopRadius(double val);
-    void setHeight(double val);
+    void setBottomRadius(double value);
+    void setTopRadius(double value);
+    void setHeight(double value);
 
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
     virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit);

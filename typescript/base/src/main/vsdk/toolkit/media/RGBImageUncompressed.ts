@@ -112,6 +112,11 @@ export class RGBImageUncompressed extends Image {
             }
         return copy;
     }
-    /** Java's current direct-buffer disposal implementation is intentionally a no-op. */
-    public dispose(): void {}
+    /**
+    Java's current direct-buffer disposal implementation is intentionally a
+    no-op; only the `Entity` event is emitted.
+    */
+    public override dispose(): void {
+        super.dispose();
+    }
 }

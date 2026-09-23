@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_SCENE__
 #define __SIMPLE_SCENE__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/util/ArrayList.h"
 class SimpleBody;
 class Light;
@@ -9,7 +10,7 @@ class Camera;
 class CameraSnapshot;
 class SimpleSceneSnapshot;
 
-class SimpleScene {
+class SimpleScene : public Entity {
 private:
     java::ArrayList<SimpleBody*> simpleBodiesArray;
     java::ArrayList<Light*> lightsArray;

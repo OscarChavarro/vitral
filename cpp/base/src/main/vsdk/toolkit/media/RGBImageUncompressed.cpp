@@ -183,4 +183,5 @@ RGBAImageUncompressed* RGBImageUncompressed::cloneToRgba() const {
 }
 
 void RGBImageUncompressed::dispose() {
+    Entity::dispose();
 }

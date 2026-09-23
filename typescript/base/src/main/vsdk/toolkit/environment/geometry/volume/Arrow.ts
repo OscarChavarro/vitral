@@ -61,7 +61,7 @@ export class Arrow extends Solid {
 
     public setBaseRadius(val: number): void {
         this.baseRadius = val;
-        this.baseCylinder.setBaseRadius(val);
+        this.baseCylinder.setBottomRadius(val);
         this.baseCylinder.setTopRadius(val);
     }
 
@@ -71,7 +71,7 @@ export class Arrow extends Solid {
 
     public setHeadRadius(val: number): void {
         this.headRadius = val;
-        this.headCone.setBaseRadius(val);
+        this.headCone.setBottomRadius(val);
     }
 
     private doIntersectionDistanceOnly(inRay: Ray, outHit: RayHit | null): boolean {

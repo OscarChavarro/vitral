@@ -8,8 +8,8 @@ class PolyhedralBoundedSolid;
 
 class Sphere : public Solid {
 private:
-    double radius_;
-    double radiusSquared_;
+    double radius;
+    double radiusSquared;
 
     static const int DEFAULT_PARALLELS = 8;
     static const int DEFAULT_MERIDIANS = 16;
@@ -31,7 +31,7 @@ public:
 
     double getRadius() const;
     double getRadiusSquared() const;
-    void setRadius(double r);
+    void setRadius(double value);
 
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid();
     PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid(int meridians, int parallels);

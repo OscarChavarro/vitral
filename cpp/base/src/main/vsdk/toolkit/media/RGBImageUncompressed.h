@@ -58,7 +58,7 @@ public:
 
     RGBAImageUncompressed* cloneToRgba() const;
 
-    void dispose();
+    virtual void dispose() override;
 };
 
 #endif

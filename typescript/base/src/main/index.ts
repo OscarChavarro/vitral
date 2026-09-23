@@ -85,6 +85,8 @@ export type { NamedNodeMap } from "./org/w3c/dom/NamedNodeMap.js";
 export { BrowserWorkerExecutor } from "./java/concurrent/BrowserWorkerExecutor.js";
 export { CooperativeFiberScheduler, type CooperativeFiber } from "./java/concurrent/CooperativeFiberScheduler.js";
 export { Entity } from "./vsdk/toolkit/common/Entity.js";
+export { EntityEvent, EntityEventType } from "./vsdk/toolkit/common/EntityEvent.js";
+export type { EntityListener } from "./vsdk/toolkit/common/EntityListener.js";
 export { FundamentalEntity } from "./vsdk/toolkit/common/FundamentalEntity.js";
 export type { ModelElement } from "./vsdk/toolkit/common/ModelElement.js";
 export { VSDK } from "./vsdk/toolkit/common/VSDK.js";

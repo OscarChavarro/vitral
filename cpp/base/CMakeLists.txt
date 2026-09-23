@@ -42,6 +42,7 @@ message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 # Source files for the base library
 set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/common/VSDK.cpp
+    src/main/vsdk/toolkit/common/Entity.cpp
     src/main/vsdk/toolkit/common/logging/Logger.cpp
     src/main/vsdk/toolkit/common/statistics/RaytraceStatistics.cpp
     src/main/vsdk/toolkit/common/statistics/SolidTextureStatistics.cpp
@@ -285,6 +286,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/matrix4x4_tests.cpp
     src/test/parallel_raytracer_tests.cpp
     src/test/raytracer_depth_buffer_tests.cpp
+    src/test/entity_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)

@@ -1,13 +1,14 @@
 #ifndef __CAMERA__
 #define __CAMERA__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 class CameraSnapshot;
 
-class Camera {
+class Camera : public Entity {
 public:
     static const int OPCODE_FAR = (0x01 << 1);
     static const int OPCODE_NEAR = (0x01 << 2);

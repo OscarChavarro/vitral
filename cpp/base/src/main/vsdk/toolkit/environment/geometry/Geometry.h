@@ -1,12 +1,13 @@
 #ifndef __GEOMETRY__
 #define __GEOMETRY__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/processing/Containment.h"
 class Ray;
 class RayHit;
 
-class Geometry {
+class Geometry : public Entity {
 public:
     static constexpr int INSIDE = static_cast<int>(Containment::INSIDE);
     static constexpr int LIMIT = static_cast<int>(Containment::LIMIT);

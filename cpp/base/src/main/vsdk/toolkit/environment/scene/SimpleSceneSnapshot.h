@@ -1,13 +1,14 @@
 #ifndef __SIMPLE_SCENE_SNAPSHOT__
 #define __SIMPLE_SCENE_SNAPSHOT__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/util/ArrayList.h"
 class SimpleBody;
 class Light;
 class Background;
 class CameraSnapshot;
 
-class SimpleSceneSnapshot {
+class SimpleSceneSnapshot : public Entity {
 private:
     java::ArrayList<SimpleBody*> simpleBodies;
     java::ArrayList<Light*> lights;

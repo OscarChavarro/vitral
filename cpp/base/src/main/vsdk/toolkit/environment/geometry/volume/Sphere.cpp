@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -7,7 +8,9 @@
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
-Sphere::Sphere(double r) : radius_(r), radiusSquared_(r * r) {}
+Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
+    getControlSpecifications().add(java::String("double;radius;(0, INFINITE)"));
+}
 
 Ray* Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     double dx = -inoutRay.getOrigin().x();
@@ -16,7 +19,7 @@ Ray* Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     const Vector3Dd& direction = inoutRay.getDirection();
     double v = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
-    double t = radiusSquared_ + v * v - dx * dx - dy * dy - dz * dz;
+    double t = radiusSquared + v * v - dx * dx - dy * dy - dz * dz;
     if (t < 0) {
         return nullptr;
     }
@@ -37,7 +40,7 @@ bool Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     const Vector3Dd& direction = inRay.getDirection();
     double projection = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
-    double discriminant = radiusSquared_ + projection * projection - dx * dx - dy * dy - dz * dz;
+    double discriminant = radiusSquared + projection * projection - dx * dx - dy * dy - dz * dz;
     if (discriminant < 0) {
         return false;
     }
@@ -126,10 +129,10 @@ void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
 
 int Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
     double l = p.length();
-    if (l < radius_ - distanceTolerance) {
+    if (l < radius - distanceTolerance) {
         return INSIDE;
     }
-    else if (l > radius_ + distanceTolerance) {
+    else if (l > radius + distanceTolerance) {
         return OUTSIDE;
     }
     return LIMIT;
@@ -138,17 +141,17 @@ int Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
 double* Sphere::getMinMax() {
     double* minmax = new double[6];
     for (int i = 0; i < 3; i++) {
-        minmax[i] = -radius_;
+        minmax[i] = -radius;
     }
     for (int i = 3; i < 6; i++) {
-        minmax[i] = radius_;
+        minmax[i] = radius;
     }
     return minmax;
 }
 
-double Sphere::getRadius() const { return radius_; }
-double Sphere::getRadiusSquared() const { return radiusSquared_; }
-void Sphere::setRadius(double r) { radius_ = r; radiusSquared_ = r * r; }
+double Sphere::getRadius() const { return radius; }
+double Sphere::getRadiusSquared() const { return radiusSquared; }
+void Sphere::setRadius(double value) { radius = value; radiusSquared = value * value; }
 
 Vector3Dd Sphere::spherePosition(double theta, double t, double r) {
     double phi = (t - 0.5) * M_PI;
@@ -184,19 +187,19 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
     PolyhedralBoundedSolid* solid;
 
     solid = new PolyhedralBoundedSolid();
-    pos = Vector3Dd(0, 0, -radius_);
+    pos = Vector3Dd(0, 0, -radius);
     PolyhedralBoundedSolidEulerOperators::mvfs(solid, pos, 1, 1);
 
-    pos = spherePosition(dtheta, dphi, radius_);
+    pos = spherePosition(dtheta, dphi, radius);
     PolyhedralBoundedSolidEulerOperators::smev(solid, 1, 1, 3, pos);
-    pos = spherePosition(0, dphi, radius_);
+    pos = spherePosition(0, dphi, radius);
     PolyhedralBoundedSolidEulerOperators::smev(solid, 1, 3, 2, pos);
 
     PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1, 3, 2, 3, 2);
 
     for (i = 2; i < nmeridians; i++) {
         theta = dtheta * ((double)i);
-        pos = spherePosition(theta, dphi, radius_);
+        pos = spherePosition(theta, dphi, radius);
         PolyhedralBoundedSolidEulerOperators::smev(solid, 1, 1, (i + 1) + 1, pos);
         PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1, (i + 0) + 1, (1), (i + 1) + 1, (1), i + 1);
     }
@@ -211,7 +214,7 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
         phi = ((double)(p + 2)) / ((double)nparalels);
         for (i = 0; i < nmeridians; i++) {
             theta = dtheta * ((double)i);
-            pos = spherePosition(theta, phi, radius_);
+            pos = spherePosition(theta, phi, radius);
             PolyhedralBoundedSolidEulerOperators::smev(solid, 1, (i) + base1, (i) + base2, pos);
             if (i > 0) {
                 int quadFaceId = nextFaceId++;
@@ -246,7 +249,7 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
         base2 += nmeridians;
     }
 
-    pos = Vector3Dd(0, 0, radius_);
+    pos = Vector3Dd(0, 0, radius);
     PolyhedralBoundedSolidEulerOperators::smev(solid, 1, base1, base2, pos);
 
     for (i = 0; i < nmeridians - 2; i++) {
@@ -270,9 +273,9 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
 
 Vector3Dd Sphere::spherePosition(double theta, double phi) {
     return Vector3Dd(
-        std::cos(phi) * std::cos(theta) * radius_,
-        -std::cos(phi) * std::sin(theta) * radius_,
-        std::sin(phi) * radius_);
+        std::cos(phi) * std::cos(theta) * radius,
+        -std::cos(phi) * std::sin(theta) * radius,
+        std::sin(phi) * radius);
 }
 
 Vector3Dd Sphere::sphereNormal(double theta, double phi) {

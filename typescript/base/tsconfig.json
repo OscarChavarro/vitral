@@ -25,6 +25,8 @@
         "src/main/java/**/*.ts",
         "src/main/org/**/*.ts",
         "src/main/vsdk/toolkit/common/Entity.ts",
+        "src/main/vsdk/toolkit/common/EntityEvent.ts",
+        "src/main/vsdk/toolkit/common/EntityListener.ts",
         "src/main/vsdk/toolkit/common/FundamentalEntity.ts",
         "src/main/vsdk/toolkit/common/ModelElement.ts",
         "src/main/vsdk/toolkit/common/VSDK.ts",

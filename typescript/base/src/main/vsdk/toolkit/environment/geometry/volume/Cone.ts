@@ -16,44 +16,47 @@ import { Solid } from "./Solid.js";
 export class Cone extends Solid {
     private static readonly NO_HIT = Number.POSITIVE_INFINITY;
 
-    private r1: number; // Radius at the base
-    private r2: number; // Radius at the top
-    private h: number; // Height
+    private bottomRadius: number; // Radius at the base
+    private topRadius: number;    // Radius at the top
+    private height: number;       // Height
 
     private static readonly DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     private static readonly DEFAULT_HEIGHT_DIVISIONS = 1;
     private static readonly MIN_CIRCUMFERENCE_DIVISIONS = 3;
     private static readonly MIN_HEIGHT_DIVISIONS = 1;
 
-    public constructor(r1: number, r2: number, h: number) {
+    public constructor(bottomRadius: number, topRadius: number, height: number) {
         super();
-        this.r1 = r1;
-        this.r2 = r2;
-        this.h = h;
+        this.bottomRadius = bottomRadius;
+        this.topRadius = topRadius;
+        this.height = height;
+        this.getControlSpecifications().push("double;bottomRadius;(0, INFINITE)");
+        this.getControlSpecifications().push("double;topRadius;[0, INFINITE)");
+        this.getControlSpecifications().push("double;height;(0, INFINITE)");
     }
 
-    public getBaseRadius(): number {
-        return this.r1;
+    public getBottomRadius(): number {
+        return this.bottomRadius;
     }
 
     public getTopRadius(): number {
-        return this.r2;
+        return this.topRadius;
     }
 
     public getHeight(): number {
-        return this.h;
+        return this.height;
     }
 
-    public setBaseRadius(val: number): void {
-        this.r1 = val;
+    public setBottomRadius(value: number): void {
+        this.bottomRadius = value;
     }
 
-    public setTopRadius(val: number): void {
-        this.r2 = val;
+    public setTopRadius(value: number): void {
+        this.topRadius = value;
     }
 
-    public setHeight(val: number): void {
-        this.h = val;
+    public setHeight(value: number): void {
+        this.height = value;
     }
 
     /**
@@ -290,18 +293,18 @@ export class Cone extends Solid {
     private doIntersectionDistanceOnly(inOutRay: Ray, outHit: RayHit | null): boolean {
         let winnerT = Cone.NO_HIT;
 
-        if (this.r2 < VSDK.EPSILON && this.r1 > VSDK.EPSILON) {
-            const bodyT = this.doIntersectionConeDistance(inOutRay, this.r1, this.h);
-            const tap1T = this.doIntersectionTapDistance(inOutRay, this.r1, 0);
+        if (this.topRadius < VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
+            const bodyT = this.doIntersectionConeDistance(inOutRay, this.bottomRadius, this.height);
+            const tap1T = this.doIntersectionTapDistance(inOutRay, this.bottomRadius, 0);
             if (Cone.hasHit(tap1T) && (!Cone.hasHit(bodyT) || tap1T < bodyT)) {
                 winnerT = tap1T;
             } else if (Cone.hasHit(bodyT)) {
                 winnerT = bodyT;
             }
-        } else if (VSDK.equals(this.r1, this.r2)) {
-            const bodyT = this.doIntersectionCylinderDistance(inOutRay, this.r1, this.h);
-            const tap1T = this.doIntersectionTapDistance(inOutRay, this.r1, 0);
-            const tap2T = this.doIntersectionTapDistance(inOutRay, this.r1, this.h);
+        } else if (VSDK.equals(this.bottomRadius, this.topRadius)) {
+            const bodyT = this.doIntersectionCylinderDistance(inOutRay, this.bottomRadius, this.height);
+            const tap1T = this.doIntersectionTapDistance(inOutRay, this.bottomRadius, 0);
+            const tap2T = this.doIntersectionTapDistance(inOutRay, this.bottomRadius, this.height);
 
             if (
                 Cone.hasHit(bodyT) &&
@@ -366,9 +369,9 @@ export class Cone extends Solid {
         let winner: Ray | null = null;
         let winnerInfo: RayHit | null = null;
 
-        if (this.r2 < VSDK.EPSILON && this.r1 > VSDK.EPSILON) {
-            bodyHit = this.doIntersectionCone(inOutRay, this.r1, this.h, infoBody);
-            tap1Hit = this.doIntersectionTap(inOutRay, this.r1, 0, infoTap1);
+        if (this.topRadius < VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
+            bodyHit = this.doIntersectionCone(inOutRay, this.bottomRadius, this.height, infoBody);
+            tap1Hit = this.doIntersectionTap(inOutRay, this.bottomRadius, 0, infoTap1);
             if (
                 (tap1Hit !== null && bodyHit === null) ||
                 (tap1Hit !== null && bodyHit !== null && tap1Hit.getT() < bodyHit.getT())
@@ -380,11 +383,11 @@ export class Cone extends Solid {
                 winner = inOutRay.withT(bodyHit.getT());
                 winnerInfo = infoBody;
             }
-        } else if (VSDK.equals(this.r1, this.r2)) {
+        } else if (VSDK.equals(this.bottomRadius, this.topRadius)) {
             let nearest = -1;
-            bodyHit = this.doIntersectionCylinder(inOutRay, this.r1, this.h, infoBody);
-            tap1Hit = this.doIntersectionTap(inOutRay, this.r1, 0, infoTap1);
-            tap2Hit = this.doIntersectionTap(inOutRay, this.r1, this.h, infoTap2);
+            bodyHit = this.doIntersectionCylinder(inOutRay, this.bottomRadius, this.height, infoBody);
+            tap1Hit = this.doIntersectionTap(inOutRay, this.bottomRadius, 0, infoTap1);
+            tap2Hit = this.doIntersectionTap(inOutRay, this.bottomRadius, this.height, infoTap2);
 
             if (
                 bodyHit !== null &&
@@ -453,14 +456,14 @@ export class Cone extends Solid {
         // TODO!
         const minmax = new Float64Array(6);
 
-        const r = Math.max(this.r1, this.r2);
+        const r = Math.max(this.bottomRadius, this.topRadius);
 
         minmax[0] = -r;
         minmax[1] = -r;
         minmax[2] = 0;
         minmax[3] = r;
         minmax[4] = r;
-        minmax[5] = this.h;
+        minmax[5] = this.height;
 
         return minmax;
     }
@@ -566,14 +569,14 @@ export class Cone extends Solid {
         let S: Matrix4x4d;
         let M: Matrix4x4d;
 
-        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, this.r1, 0.0, nsides);
+        const solid = PolyhedralBoundedSolidModeler.createCircularLamina(0.0, 0.0, this.bottomRadius, 0.0, nsides);
 
-        if (this.r2 > VSDK.EPSILON && this.r1 > VSDK.EPSILON) {
-            let prevRadius = this.r1;
-            const zStep = this.h / heightDivisions;
+        if (this.topRadius > VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
+            let prevRadius = this.bottomRadius;
+            const zStep = this.height / heightDivisions;
             let i: number;
             for (i = 1; i <= heightDivisions; i++) {
-                const nextRadius = this.r1 + (this.r2 - this.r1) * (i / heightDivisions);
+                const nextRadius = this.bottomRadius + (this.topRadius - this.bottomRadius) * (i / heightDivisions);
                 const f = nextRadius / prevRadius;
                 T = new Matrix4x4d();
                 T = T.translation(0.0, 0.0, zStep);
@@ -583,13 +586,13 @@ export class Cone extends Solid {
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
-        } else if (this.r2 <= VSDK.EPSILON && this.r1 > VSDK.EPSILON) {
+        } else if (this.topRadius <= VSDK.EPSILON && this.bottomRadius > VSDK.EPSILON) {
             // Cone case, with optional vertical subdivisions.
-            let prevRadius = this.r1;
-            const zStep = this.h / heightDivisions;
+            let prevRadius = this.bottomRadius;
+            const zStep = this.height / heightDivisions;
             let i: number;
             for (i = 1; i < heightDivisions; i++) {
-                const nextRadius = this.r1 * (1.0 - i / heightDivisions);
+                const nextRadius = this.bottomRadius * (1.0 - i / heightDivisions);
                 const f = nextRadius / prevRadius;
                 T = new Matrix4x4d();
                 T = T.translation(0.0, 0.0, zStep);
@@ -599,7 +602,7 @@ export class Cone extends Solid {
                 PolyhedralBoundedSolidModeler.translationalSweepExtrudeFacePlanar(solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
-            Cone.closeTopFaceToApex(solid, this.h);
+            Cone.closeTopFaceToApex(solid, this.height);
         }
         return solid;
     }

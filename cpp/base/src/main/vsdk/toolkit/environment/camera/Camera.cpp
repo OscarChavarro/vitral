@@ -35,7 +35,8 @@ Camera::Camera()
 }
 
 Camera::Camera(const Camera& other)
-    : up(other.up),
+    : Entity(other),
+      up(other.up),
       front(other.front),
       left(other.left),
       eyePosition(other.eyePosition),

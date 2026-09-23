@@ -1,12 +1,13 @@
 #ifndef __SIMPLE_MATERIAL__
 #define __SIMPLE_MATERIAL__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/material/Material.h"
 
-class SimpleMaterial : public Material {
+class SimpleMaterial : public Entity, public Material {
   private:
     ColorRgb ambient;
     ColorRgb diffuse;

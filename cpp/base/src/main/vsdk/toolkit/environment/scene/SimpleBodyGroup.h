@@ -1,6 +1,7 @@
 #ifndef __SIMPLE_BODY_GROUP__
 #define __SIMPLE_BODY_GROUP__
 
+#include "vsdk/toolkit/common/Entity.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -8,7 +9,7 @@
 class SimpleBody;
 class Ray;
 
-class SimpleBodyGroup {
+class SimpleBodyGroup : public Entity {
 private:
     java::ArrayList<SimpleBody*> bodies;
     Vector3Dd position;

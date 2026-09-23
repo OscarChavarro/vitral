@@ -12,8 +12,8 @@ import { PolyhedralBoundedSolid } from "./polyhedralBoundedSolid/PolyhedralBound
 import { Solid } from "./Solid.js";
 
 export class Sphere extends Solid {
-    private _radius: number;
-    private _radius_squared: number;
+    private radius: number;
+    private radiusSquared: number;
 
     private static readonly DEFAULT_PARALLELS = 8;
     private static readonly DEFAULT_MERIDIANS = 16;
@@ -22,8 +22,9 @@ export class Sphere extends Solid {
 
     public constructor(r: number) {
         super();
-        this._radius = r;
-        this._radius_squared = this._radius * this._radius;
+        this.radius = r;
+        this.radiusSquared = this.radius * this.radius;
+        this.getControlSpecifications().push("double;radius;(0, INFINITE)");
     }
 
     /**
@@ -47,7 +48,7 @@ export class Sphere extends Solid {
             const v = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
             // Test if the inout_rayo actually intersects the sphere
-            let t = this._radius_squared + v * v - dx * dx - dy * dy - dz * dz;
+            let t = this.radiusSquared + v * v - dx * dx - dy * dy - dz * dz;
             if (t < 0) {
                 return null;
             }
@@ -68,7 +69,7 @@ export class Sphere extends Solid {
         const direction = inRay.getDirection();
         const projection = direction.x() * dx + direction.y() * dy + direction.z() * dz;
 
-        const discriminant = this._radius_squared + projection * projection - dx * dx - dy * dy - dz * dz;
+        const discriminant = this.radiusSquared + projection * projection - dx * dx - dy * dy - dz * dz;
         if (discriminant < 0) {
             return false;
         }
@@ -157,9 +158,9 @@ export class Sphere extends Solid {
     */
     public override doContainmentTest(p: Vector3Dd, distanceTolerance: number): number {
         const l = p.length();
-        if (l < this._radius - distanceTolerance) {
+        if (l < this.radius - distanceTolerance) {
             return Sphere.INSIDE;
-        } else if (l > this._radius + distanceTolerance) {
+        } else if (l > this.radius + distanceTolerance) {
             return Sphere.OUTSIDE;
         }
         return Sphere.LIMIT;
@@ -172,25 +173,25 @@ export class Sphere extends Solid {
     public override getMinMax(): Float64Array {
         const minmax = new Float64Array(6);
         for (let i = 0; i < 3; i++) {
-            minmax[i] = -this._radius;
+            minmax[i] = -this.radius;
         }
         for (let i = 3; i < 6; i++) {
-            minmax[i] = this._radius;
+            minmax[i] = this.radius;
         }
         return minmax;
     }
 
     public getRadius(): number {
-        return this._radius;
+        return this.radius;
     }
 
     public getRadiusSquared(): number {
-        return this._radius_squared;
+        return this.radiusSquared;
     }
 
-    public setRadius(r: number): void {
-        this._radius = r;
-        this._radius_squared = r * r;
+    public setRadius(value: number): void {
+        this.radius = value;
+        this.radiusSquared = value * value;
     }
 
     private static spherePosition(theta: number, t: number, r: number): Vector3Dd {
@@ -253,14 +254,14 @@ export class Sphere extends Solid {
 
         //- Build triangles for lower cap ---------------------------------
         const solid = new PolyhedralBoundedSolid();
-        pos = new Vector3Dd(0, 0, -this._radius);
+        pos = new Vector3Dd(0, 0, -this.radius);
         PolyhedralBoundedSolidEulerOperators.mvfs(solid, pos, 1, 1);
 
         pos = new Vector3Dd();
-        pos = Sphere.spherePosition(dtheta, dphi, this._radius);
+        pos = Sphere.spherePosition(dtheta, dphi, this.radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, 3, pos);
         pos = new Vector3Dd();
-        pos = Sphere.spherePosition(0, dphi, this._radius);
+        pos = Sphere.spherePosition(0, dphi, this.radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 3, 2, pos);
 
         PolyhedralBoundedSolidEulerOperators.mef(solid, 1, 1, 1, 3, 2, 3, 2);
@@ -268,7 +269,7 @@ export class Sphere extends Solid {
         for (i = 2; i < nmeridians; i++) {
             theta = dtheta * i;
             pos = new Vector3Dd();
-            pos = Sphere.spherePosition(theta, dphi, this._radius);
+            pos = Sphere.spherePosition(theta, dphi, this.radius);
             PolyhedralBoundedSolidEulerOperators.smev(solid, 1, 1, i + 1 + 1, pos);
             // Next face is <(1), (i+1), (i+0)>
             PolyhedralBoundedSolidEulerOperators.mef(
@@ -308,7 +309,7 @@ export class Sphere extends Solid {
             for (i = 0; i < nmeridians; i++) {
                 theta = dtheta * i;
                 pos = new Vector3Dd();
-                pos = Sphere.spherePosition(theta, phi, this._radius);
+                pos = Sphere.spherePosition(theta, phi, this.radius);
                 PolyhedralBoundedSolidEulerOperators.smev(solid, 1, i + base1, i + base2, pos);
                 if (i > 0) {
                     const quadFaceId = nextFaceId++;
@@ -361,7 +362,7 @@ export class Sphere extends Solid {
         }
 
         //- Build triangles for upper cap --------------------------------
-        pos = new Vector3Dd(0, 0, this._radius);
+        pos = new Vector3Dd(0, 0, this.radius);
         PolyhedralBoundedSolidEulerOperators.smev(solid, 1, base1, base2, pos);
 
         for (i = 0; i < nmeridians - 2; i++) {
@@ -403,9 +404,9 @@ export class Sphere extends Solid {
     */
     public spherePosition(theta: number, phi: number): Vector3Dd {
         return new Vector3Dd(
-            Math.cos(phi) * Math.cos(theta) * this._radius,
-            -Math.cos(phi) * Math.sin(theta) * this._radius,
-            Math.sin(phi) * this._radius,
+            Math.cos(phi) * Math.cos(theta) * this.radius,
+            -Math.cos(phi) * Math.sin(theta) * this.radius,
+            Math.sin(phi) * this.radius,
         );
     }
 

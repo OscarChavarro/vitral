@@ -1,20 +1,26 @@
 #include <cmath>
 
+#include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
-Cone::Cone(double inR1, double inR2, double inH) : r1(inR1), r2(inR2), h(inH) {}
+Cone::Cone(double bottomRadius, double topRadius, double height) :
+    bottomRadius(bottomRadius), topRadius(topRadius), height(height) {
+    getControlSpecifications().add(java::String("double;bottomRadius;(0, INFINITE)"));
+    getControlSpecifications().add(java::String("double;topRadius;[0, INFINITE)"));
+    getControlSpecifications().add(java::String("double;height;(0, INFINITE)"));
+}
 
 double Cone::sq(double v){ return v*v; }
 bool Cone::approxEq(double a, double b){ return std::abs(a-b) <= VSDK::EPSILON; }
 
-double Cone::getBaseRadius() const { return r1; }
-double Cone::getTopRadius() const { return r2; }
-double Cone::getHeight() const { return h; }
-void Cone::setBaseRadius(double val) { r1 = val; }
-void Cone::setTopRadius(double val) { r2 = val; }
-void Cone::setHeight(double val) { h = val; }
+double Cone::getBottomRadius() const { return bottomRadius; }
+double Cone::getTopRadius() const { return topRadius; }
+double Cone::getHeight() const { return height; }
+void Cone::setBottomRadius(double value) { bottomRadius = value; }
+void Cone::setTopRadius(double value) { topRadius = value; }
+void Cone::setHeight(double value) { height = value; }
 
 Ray* Cone::doIntersectionCylinder(const Ray& inOutRay, double inR, double inH, RayHit* outInfo) {
     double ox=inOutRay.getOrigin().x(), oy=inOutRay.getOrigin().y(), oz=inOutRay.getOrigin().z();
@@ -100,9 +106,9 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
     Ray* winner = nullptr;
     RayHit* winnerInfo = nullptr;
 
-    if (r2 < VSDK::EPSILON && r1 > VSDK::EPSILON) {
-        bodyHit = doIntersectionCone(inOutRay, r1, h, &infoBody);
-        tap1Hit = doIntersectionTap(inOutRay, r1, 0, &infoTap1);
+    if (topRadius < VSDK::EPSILON && bottomRadius > VSDK::EPSILON) {
+        bodyHit = doIntersectionCone(inOutRay, bottomRadius, height, &infoBody);
+        tap1Hit = doIntersectionTap(inOutRay, bottomRadius, 0, &infoTap1);
         if ((tap1Hit != nullptr && bodyHit == nullptr) ||
             (tap1Hit != nullptr && bodyHit != nullptr && tap1Hit->getT() < bodyHit->getT())) {
             infoTap1.n = infoTap1.n.multiply(-1);
@@ -114,11 +120,11 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
             winnerInfo = &infoBody;
         }
     }
-    else if (approxEq(r1, r2)) {
+    else if (approxEq(bottomRadius, topRadius)) {
         int nearest = -1;
-        bodyHit = doIntersectionCylinder(inOutRay, r1, h, &infoBody);
-        tap1Hit = doIntersectionTap(inOutRay, r1, 0, &infoTap1);
-        tap2Hit = doIntersectionTap(inOutRay, r1, h, &infoTap2);
+        bodyHit = doIntersectionCylinder(inOutRay, bottomRadius, height, &infoBody);
+        tap1Hit = doIntersectionTap(inOutRay, bottomRadius, 0, &infoTap1);
+        tap2Hit = doIntersectionTap(inOutRay, bottomRadius, height, &infoTap2);
 
         if (bodyHit != nullptr &&
             ((tap1Hit != nullptr && bodyHit->getT() < tap1Hit->getT()) || tap1Hit == nullptr) &&
@@ -164,7 +170,7 @@ void Cone::doExtraInformation(const Ray& inRay, double, RayHit* outData) {
 
 double* Cone::getMinMax() {
     double* m = new double[6];
-    double r = (r1 > r2) ? r1 : r2;
-    m[0]=-r; m[1]=-r; m[2]=0; m[3]=r; m[4]=r; m[5]=h;
+    double r = (bottomRadius > topRadius) ? bottomRadius : topRadius;
+    m[0]=-r; m[1]=-r; m[2]=0; m[3]=r; m[4]=r; m[5]=height;
     return m;
 }

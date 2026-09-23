@@ -162,9 +162,9 @@ void Arrow::setBaseLength(double val) { baseLength = val; baseCylinder->setHeigh
 double Arrow::getHeadLength() const { return headLength; }
 void Arrow::setHeadLength(double val) { headLength = val; headCone->setHeight(val); }
 double Arrow::getBaseRadius() const { return baseRadius; }
-void Arrow::setBaseRadius(double val) { baseRadius = val; baseCylinder->setBaseRadius(val); baseCylinder->setTopRadius(val); }
+void Arrow::setBaseRadius(double val) { baseRadius = val; baseCylinder->setBottomRadius(val); baseCylinder->setTopRadius(val); }
 double Arrow::getHeadRadius() const { return headRadius; }
-void Arrow::setHeadRadius(double val) { headRadius = val; headCone->setBaseRadius(val); }
+void Arrow::setHeadRadius(double val) { headRadius = val; headCone->setBottomRadius(val); }
 
 Ray* Arrow::doIntersectionFirstHit(const Ray& inOutRay) {
     Vector3Dd tr(0,0,-baseLength);
