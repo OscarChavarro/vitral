@@ -1,5 +1,8 @@
 package model.selection;
 
+import java.util.List;
+
+import vsdk.toolkit.common.Entity;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.environment.light.Light;
@@ -146,20 +149,38 @@ public class SceneSelectionEditor
     }
 
     /**
-    Removes from the scene the selected bodies, lights and debug groups.
+    Removes from the scene the selected bodies, lights and debug groups. The
+    removed bodies (with their geometries) and lights are disposed, so their
+    subscribers (i.e. editors) learn that they were deleted.
     */
     public void deleteSelected()
     {
         int i;
 
-        scene.selectedThings.removeSelected();
-        scene.selectedLights.removeSelected();
+        List<Object> removedThings = scene.selectedThings.removeSelected();
+        List<Object> removedLights = scene.selectedLights.removeSelected();
         for ( i = scene.debugThingGroups.size()-1; i >= 0; i-- ) {
             if ( scene.selectedDebugThingGroups.isSelected(i) ) {
                 scene.debugThingGroups.remove(i);
             }
         }
         scene.selectedThings.sync();
+
+        disposeRemoved(removedThings);
+        disposeRemoved(removedLights);
+    }
+
+    private static void disposeRemoved(List<Object> removed)
+    {
+        for ( Object element : removed ) {
+            if ( element instanceof SimpleBody body &&
+                 body.getGeometry() != null ) {
+                body.getGeometry().dispose();
+            }
+            if ( element instanceof Entity entity ) {
+                entity.dispose();
+            }
+        }
     }
 
     /**

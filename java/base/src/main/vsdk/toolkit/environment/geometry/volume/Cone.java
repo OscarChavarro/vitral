@@ -23,49 +23,52 @@ public class Cone extends Solid {
     @Serial private static final long serialVersionUID = 20060502L;
     private static final double NO_HIT = Double.POSITIVE_INFINITY;
 
-    private double r1; // Radius at the base
-    private double r2; // Radius at the top
-    private double h;  // Height
+    private double bottomRadius; // Radius at the base
+    private double topRadius;    // Radius at the top
+    private double height;       // Height
 
     private static final int DEFAULT_CIRCUMFERENCE_DIVISIONS = 36;
     private static final int DEFAULT_HEIGHT_DIVISIONS = 1;
     private static final int MIN_CIRCUMFERENCE_DIVISIONS = 3;
     private static final int MIN_HEIGHT_DIVISIONS = 1;
 
-    public Cone(double r1, double r2, double h) {
-        this.r1 = r1;
-        this.r2 = r2;
-        this.h = h;
+    public Cone(double bottomRadius, double topRadius, double height) {
+        this.bottomRadius = bottomRadius;
+        this.topRadius = topRadius;
+        this.height = height;
+        getControlSpecifications().add("double;bottomRadius;(0, INFINITE)");
+        getControlSpecifications().add("double;topRadius;[0, INFINITE)");
+        getControlSpecifications().add("double;height;(0, INFINITE)");
     }
 
-    public double getBaseRadius()
+    public double getBottomRadius()
     {
-        return r1;
+        return bottomRadius;
     }
 
     public double getTopRadius()
     {
-        return r2;
+        return topRadius;
     }
 
     public double getHeight()
     {
-        return h;
+        return height;
     }
 
-    public void setBaseRadius(double val)
+    public void setBottomRadius(double value)
     {
-        r1 = val;
+        bottomRadius = value;
     }
 
-    public void setTopRadius(double val)
+    public void setTopRadius(double value)
     {
-        r2 = val;
+        topRadius = value;
     }
 
-    public void setHeight(double val)
+    public void setHeight(double value)
     {
-        h = val;
+        height = value;
     }
 
     private Ray
@@ -317,9 +320,9 @@ public class Cone extends Solid {
     {
         double winnerT = NO_HIT;
 
-        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            double bodyT = doIntersectionConeDistance(inOutRay, r1, h);
-            double tap1T = doIntersectionTapDistance(inOutRay, r1, 0);
+        if ( topRadius < VSDK.EPSILON && bottomRadius > VSDK.EPSILON ) {
+            double bodyT = doIntersectionConeDistance(inOutRay, bottomRadius, height);
+            double tap1T = doIntersectionTapDistance(inOutRay, bottomRadius, 0);
             if ( hasHit(tap1T) && (!hasHit(bodyT) || tap1T < bodyT) ) {
                 winnerT = tap1T;
             }
@@ -327,10 +330,10 @@ public class Cone extends Solid {
                 winnerT = bodyT;
             }
         }
-        else if ( VSDK.equals(r1, r2) ) {
-            double bodyT = doIntersectionCylinderDistance(inOutRay, r1, h);
-            double tap1T = doIntersectionTapDistance(inOutRay, r1, 0);
-            double tap2T = doIntersectionTapDistance(inOutRay, r1, h);
+        else if ( VSDK.equals(bottomRadius, topRadius) ) {
+            double bodyT = doIntersectionCylinderDistance(inOutRay, bottomRadius, height);
+            double tap1T = doIntersectionTapDistance(inOutRay, bottomRadius, 0);
+            double tap2T = doIntersectionTapDistance(inOutRay, bottomRadius, height);
 
             if ( hasHit(bodyT) &&
                  ((hasHit(tap1T) && bodyT < tap1T) || !hasHit(tap1T)) &&
@@ -392,9 +395,9 @@ public class Cone extends Solid {
         Ray winner = null;
         RayHit winnerInfo = null;
 
-        if ( r2 < VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            bodyHit = doIntersectionCone(inOutRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(inOutRay, r1, 0, infoTap1);
+        if ( topRadius < VSDK.EPSILON && bottomRadius > VSDK.EPSILON ) {
+            bodyHit = doIntersectionCone(inOutRay, bottomRadius, height, infoBody);
+            tap1Hit = doIntersectionTap(inOutRay, bottomRadius, 0, infoTap1);
             if ( (tap1Hit != null && bodyHit == null) ||
                  (tap1Hit != null && bodyHit != null && (tap1Hit.getT() < bodyHit.getT())) ) {
                 infoTap1.n = infoTap1.n.multiply(-1);
@@ -406,11 +409,11 @@ public class Cone extends Solid {
                 winnerInfo = infoBody;
             }
         }
-        else if ( VSDK.equals(r1, r2) ) {
+        else if ( VSDK.equals(bottomRadius, topRadius) ) {
             int nearest = -1;
-            bodyHit = doIntersectionCylinder(inOutRay, r1, h, infoBody);
-            tap1Hit = doIntersectionTap(inOutRay, r1, 0, infoTap1);
-            tap2Hit = doIntersectionTap(inOutRay, r1, h, infoTap2);
+            bodyHit = doIntersectionCylinder(inOutRay, bottomRadius, height, infoBody);
+            tap1Hit = doIntersectionTap(inOutRay, bottomRadius, 0, infoTap1);
+            tap2Hit = doIntersectionTap(inOutRay, bottomRadius, height, infoTap2);
 
             if ( bodyHit != null &&
                  ((tap1Hit != null && (bodyHit.getT() < tap1Hit.getT())) || tap1Hit == null) &&
@@ -484,14 +487,14 @@ public class Cone extends Solid {
         // TODO!
         double [] minmax = new double[6];
 
-        double r = Math.max(r1, r2);
+        double r = Math.max(bottomRadius, topRadius);
 
         minmax[0] = -r;
         minmax[1] = -r;
         minmax[2] = 0;
         minmax[3] = r;
         minmax[4] = r;
-        minmax[5] = h;
+        minmax[5] = height;
 
         return minmax;
     }
@@ -581,15 +584,15 @@ public class Cone extends Solid {
         Matrix4x4d T, S, M;
 
         solid = PolyhedralBoundedSolidModeler.createCircularLamina(
-            0.0, 0.0, r1, 0.0, nsides
+            0.0, 0.0, bottomRadius, 0.0, nsides
         );
 
-        if ( r2 > VSDK.EPSILON && r1 > VSDK.EPSILON ) {
-            double prevRadius = r1;
-            double zStep = h / ((double)heightDivisions);
+        if ( topRadius > VSDK.EPSILON && bottomRadius > VSDK.EPSILON ) {
+            double prevRadius = bottomRadius;
+            double zStep = height / ((double)heightDivisions);
             int i;
             for ( i = 1; i <= heightDivisions; i++ ) {
-                double nextRadius = r1 + (r2 - r1) *
+                double nextRadius = bottomRadius + (topRadius - bottomRadius) *
                     (((double)i) / ((double)heightDivisions));
                 double f = nextRadius / prevRadius;
                 T = new Matrix4x4d();
@@ -602,13 +605,13 @@ public class Cone extends Solid {
                 prevRadius = nextRadius;
             }
         }
-        else if ( r2 <= VSDK.EPSILON && r1 > VSDK.EPSILON ) {
+        else if ( topRadius <= VSDK.EPSILON && bottomRadius > VSDK.EPSILON ) {
             // Cone case, with optional vertical subdivisions.
-            double prevRadius = r1;
-            double zStep = h / ((double)heightDivisions);
+            double prevRadius = bottomRadius;
+            double zStep = height / ((double)heightDivisions);
             int i;
             for ( i = 1; i < heightDivisions; i++ ) {
-                double nextRadius = r1 *
+                double nextRadius = bottomRadius *
                     (1.0 - (((double)i) / ((double)heightDivisions)));
                 double f = nextRadius / prevRadius;
                 T = new Matrix4x4d();
@@ -620,7 +623,7 @@ public class Cone extends Solid {
                     solid, solid.findFace(1), M);
                 prevRadius = nextRadius;
             }
-            closeTopFaceToApex(solid, h);
+            closeTopFaceToApex(solid, height);
         }
         return solid;
     }

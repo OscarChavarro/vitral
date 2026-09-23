@@ -155,16 +155,19 @@ public class SelectionSet
     /**
     Removes from the external list the selected elements, keeping the
     selection of the remaining ones.
+    @return the removed elements, in decreasing order of their former index
     */
-    public void removeSelected()
+    public ArrayList<Object> removeSelected()
     {
+        ArrayList<Object> removed = new ArrayList<Object>();
         sync();
         for ( int i = selection.size() - 1; i >= 0; i-- ) {
             if ( selection.get(i).booleanValue() ) {
-                elements.remove(i);
+                removed.add(elements.remove(i));
                 selection.remove(i);
             }
         }
+        return removed;
     }
 
     /**

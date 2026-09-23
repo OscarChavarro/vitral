@@ -141,7 +141,7 @@ public class Jogl4ScaleGizmoRenderer extends Jogl4Renderer {
         ColorRgb c = element.getMaterial().getDiffuse();
         Matrix4x4d local = GizmoSolidTessellator.localTransform(element);
         Vector3Dd[] strip = GizmoSolidTessellator.buildShaftStrip(
-            local, cone.getBaseRadius(), cone.getTopRadius(), cone.getHeight());
+            local, cone.getBottomRadius(), cone.getTopRadius(), cone.getHeight());
 
         drawStrip(gl, mvp, strip, c, 1.0, GL4.GL_TRIANGLE_STRIP);
     }

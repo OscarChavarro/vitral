@@ -485,7 +485,9 @@ public class RGBImageUncompressed extends Image
     }
 //#endif
 
+    @Override
     public void dispose() {
+        super.dispose();
         // TODO: Check if garbabe collection is not a problem!
         /*
         if ( data != null ) {

@@ -69,7 +69,7 @@ public class Arrow extends Solid {
     public void setBaseRadius(double val)
     {
         baseRadius = val;
-        baseCylinder.setBaseRadius(val);
+        baseCylinder.setBottomRadius(val);
         baseCylinder.setTopRadius(val);
     }
 
@@ -81,7 +81,7 @@ public class Arrow extends Solid {
     public void setHeadRadius(double val)
     {
         headRadius = val;
-        headCone.setBaseRadius(val);
+        headCone.setBottomRadius(val);
     }
 
     /**

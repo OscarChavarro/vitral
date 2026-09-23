@@ -5,6 +5,7 @@ import java.io.Serial;
 import java.lang.reflect.Method;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
 This class is a base superclass for all classes in the VSDK model (as of
@@ -30,6 +31,20 @@ public class Entity implements ModelElement, Serializable
     public static final int POINTER_SIZE_IN_BYTES = 8;
 
     /**
+    Control specifications used by reflection-based generic editors to build
+    GUI dialogs for this entity. Kept null until first used, so fine-grained
+    entities (vertices, half-edges, ...) do not pay for an empty list.
+    */
+    private List<String> controlSpecifications = null;
+
+    /**
+    Subscribers notified by `update()` and `dispose()`. Transient because
+    subscribers are runtime objects (editors, views) that are not part of the
+    model; kept null until the first subscription.
+    */
+    private transient List<EntityListener> entityListeners = null;
+
+    /**
     This is a value used for the standard java serialization mechanism to
     keep track of software versions.  To avoid warning at compilation time
     and to ease to keep compatibility tracking of software structure changes
@@ -52,6 +67,95 @@ public class Entity implements ModelElement, Serializable
     public int getSizeInBytes()
     {
         return 0;
+    }
+
+    /**
+    Returns the control specifications used by reflection-based generic
+    editors, creating an empty list on first access.
+    @return the mutable list of control specifications for this entity
+    */
+    public List<String> getControlSpecifications()
+    {
+        if ( controlSpecifications == null ) {
+            controlSpecifications = new ArrayList<String>();
+        }
+        return controlSpecifications;
+    }
+
+    /**
+    Replaces the control specifications used by reflection-based generic
+    editors.
+    @param controlSpecifications new list of control specifications; may be
+    null to release the current list
+    */
+    public void setControlSpecifications(List<String> controlSpecifications)
+    {
+        this.controlSpecifications = controlSpecifications;
+    }
+
+    /**
+    Subscribes a listener to the events of this entity. Adding the same
+    listener twice has no effect.
+    @param listener object to notify; null is ignored
+    */
+    public void addEntityListener(EntityListener listener)
+    {
+        if ( listener == null ) {
+            return;
+        }
+        if ( entityListeners == null ) {
+            entityListeners = new ArrayList<EntityListener>();
+        }
+        if ( !entityListeners.contains(listener) ) {
+            entityListeners.add(listener);
+        }
+    }
+
+    /**
+    Unsubscribes a listener from the events of this entity.
+    @param listener object to stop notifying
+    */
+    public void removeEntityListener(EntityListener listener)
+    {
+        if ( entityListeners != null ) {
+            entityListeners.remove(listener);
+        }
+    }
+
+    /**
+    Notifies the subscribers that this entity changed. Code that modifies an
+    entity (editors, tools) calls this method after the change, so the
+    objects that depend on the entity can refresh.
+    */
+    public void update()
+    {
+        fireEntityEvent(EntityEvent.Type.UPDATED);
+    }
+
+    /**
+    Notifies the subscribers that this entity was discarded (for example,
+    deleted from a scene) and then drops all of them. This is the Java
+    counterpart of emitting the event from a C++ destructor: the entity data is
+    kept, so an undo operation can still insert it again.
+    */
+    public void dispose()
+    {
+        fireEntityEvent(EntityEvent.Type.DELETED);
+        entityListeners = null;
+    }
+
+    private void fireEntityEvent(EntityEvent.Type type)
+    {
+        if ( entityListeners == null || entityListeners.isEmpty() ) {
+            return;
+        }
+        EntityEvent event = new EntityEvent(this, type);
+        // Copy: listeners may unsubscribe while being notified
+        List<EntityListener> listeners;
+        listeners = new ArrayList<EntityListener>(entityListeners);
+        for ( EntityListener listener : listeners ) {
+            listener.notifyEntityEvent(event);
+        }
     }
 
     /**

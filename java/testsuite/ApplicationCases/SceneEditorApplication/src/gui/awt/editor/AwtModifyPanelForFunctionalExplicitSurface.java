@@ -1,4 +1,4 @@
-package gui.awt;
+package gui.awt.editor;
 
 // Java basic classes
 import java.util.EnumMap;
@@ -22,6 +22,8 @@ import javax.swing.border.Border;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 // Application classes
+import gui.awt.AwtApplicationHost;
+import gui.awt.AwtModifyPanel;
 import model.editor.FunctionalExplicitSurfaceEditor;
 import model.editor.FunctionalExplicitSurfaceEditor.Parameter;
 

@@ -118,7 +118,7 @@ public class AwtDrawingAreaController implements
     user's keyboard (whatever component has the focus). Intended for automated agents (see `application.mcp.AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param key a single character (i.e. "5", "x") or one of the names "tab",
-    "enter", "backspace", "escape", "left", "right", "up", "down", "pageup",
+    "enter", "backspace", "delete", "escape", "left", "right", "up", "down", "pageup",
     "pagedown"
     @param shift true to press it with the SHIFT key down
     */
@@ -154,6 +154,10 @@ public class AwtDrawingAreaController implements
                 keyCode = KeyEvent.VK_BACK_SPACE;
                 keyChar = '\b';
             }
+            case "delete" -> {
+                keyCode = KeyEvent.VK_DELETE;
+                keyChar = (char)127;
+            }
             case "escape" -> {
                 keyCode = KeyEvent.VK_ESCAPE;
                 keyChar = KeyEvent.CHAR_UNDEFINED;
@@ -172,7 +176,7 @@ public class AwtDrawingAreaController implements
             default -> {
                 if ( key.length() != 1 ) {
                     throw new IllegalArgumentException("Unknown key \"" + key +
-                        "\". Use a single character, tab, enter, backspace, escape, left, right, up, down, pageup or pagedown");
+                        "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup or pagedown");
                 }
                 keyChar = key.charAt(0);
                 keyCode = KeyEvent.getExtendedKeyCodeForChar(keyChar);

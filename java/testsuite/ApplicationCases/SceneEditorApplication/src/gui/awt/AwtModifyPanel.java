@@ -12,8 +12,10 @@ import javax.swing.BoxLayout;
 // VSDK classes
 import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.gui.editor.AwtGenericEditor;
 
 // Application classes
+import gui.awt.editor.AwtModifyPanelForFunctionalExplicitSurface;
 import render.BodyEditFeedbackProvider;
 import render.RenderPrimitive;
 
@@ -30,6 +32,8 @@ public class AwtModifyPanel extends JPanel implements BodyEditFeedbackProvider
 
     // Implementations
     private AwtModifyPanelForFunctionalExplicitSurface functionalExplicitSurfaceEditor;
+    /// Fallback editor, built from the control specifications of the geometry
+    private AwtGenericEditor genericEditor;
     /// Editor for the current target, or null if there is none
     private AwtModifyPanel activeEditor;
 
@@ -38,6 +42,7 @@ public class AwtModifyPanel extends JPanel implements BodyEditFeedbackProvider
         this.parent = parent;
         notifyTargetEndEdit();
         functionalExplicitSurfaceEditor = null;
+        genericEditor = null;
         activeEditor = null;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
@@ -55,6 +60,9 @@ public class AwtModifyPanel extends JPanel implements BodyEditFeedbackProvider
         activeEditor = null;
 
         if ( target.getGeometry() instanceof FunctionalExplicitSurface ) {
+            if ( genericEditor != null ) {
+                genericEditor.detach();
+            }
             if ( functionalExplicitSurfaceEditor == null ) {
                 functionalExplicitSurfaceEditor = new AwtModifyPanelForFunctionalExplicitSurface(parent);
             }
@@ -62,13 +70,25 @@ public class AwtModifyPanel extends JPanel implements BodyEditFeedbackProvider
             activeEditor = functionalExplicitSurfaceEditor;
         }
         else {
-            JLabel label = new JLabel("No editor for " + target.getGeometry().getClass().getName());
-            add(label);
+            if ( genericEditor == null ) {
+                genericEditor = new AwtGenericEditor(this);
+                genericEditor.setListener(entity -> parent.repaintDrawingArea());
+            }
+            genericEditor.build(target.getGeometry());
         }
     }
 
     public final void notifyTargetEndEdit()
     {
+        target = null;
+        activeEditor = null;
+        if ( genericEditor != null && genericEditor.isEntityDeleted() ) {
+            // Keep the "Entity deleted" message the editor is showing
+            return;
+        }
+        if ( genericEditor != null ) {
+            genericEditor.detach();
+        }
         removeAll();
         JLabel label = new JLabel("No selected object for modifying.");
         add(label);

@@ -110,7 +110,7 @@ public class Jogl4TranslateGizmoRenderer extends Jogl4Renderer {
     */
     private static void drawCone(GL4 gl, Matrix4x4d mvp, SimpleBody element, Cone cone)
     {
-        double radius = cone.getBaseRadius();
+        double radius = cone.getBottomRadius();
         double height = cone.getHeight();
         ColorRgb c = element.getMaterial().getDiffuse();
         Matrix4x4d local = GizmoSolidTessellator.localTransform(element);

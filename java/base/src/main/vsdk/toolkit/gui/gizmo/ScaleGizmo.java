@@ -736,7 +736,7 @@ public class ScaleGizmo extends Gizmo {
         double shaftLength = Math.max(0.0, totalLength - tipSize);
 
         double shaftRadius = getLineWidthInWorldUnits() / 2;
-        shaftModel.setBaseRadius(shaftRadius);
+        shaftModel.setBottomRadius(shaftRadius);
         shaftModel.setTopRadius(shaftRadius);
         shaftModel.setHeight(shaftLength);
         tipModel.setSize(tipSize, tipSize, tipSize);

@@ -327,7 +327,7 @@ public class TranslateGizmo extends Gizmo {
         Vector3Dd subP;
         Vector3Dd eleP;
 
-        coneModel.setBaseRadius(currentScale*0.05);
+        coneModel.setBottomRadius(currentScale*0.05);
         coneModel.setHeight(currentScale*0.3* ARROW_LENGTH);
         boxModel.setSize(currentScale*(BOX_SIDE+0.025), currentScale*(BOX_SIDE+0.025), currentScale*BOX_HEIGHT);
 
@@ -499,7 +499,7 @@ public class TranslateGizmo extends Gizmo {
         arrowModel.setHeadLength(scale*0.3* ARROW_LENGTH);
         arrowModel.setBaseRadius(scale*0.025);
         arrowModel.setHeadRadius(scale*0.05);
-        cylinderModel.setBaseRadius(scale*SEGMENT_WIDTH);
+        cylinderModel.setBottomRadius(scale*SEGMENT_WIDTH);
         cylinderModel.setTopRadius(scale*SEGMENT_WIDTH);
         cylinderModel.setHeight(scale* SEGMENT_LENGTH);
         boxModel.setSize(scale*BOX_SIDE, scale*BOX_SIDE, scale*BOX_HEIGHT);

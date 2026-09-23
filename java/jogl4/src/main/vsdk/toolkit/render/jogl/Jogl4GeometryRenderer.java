@@ -247,7 +247,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
     private static String keyOf(Geometry geometry)
     {
         if ( geometry instanceof Cone c ) {
-            return "cone/" + c.getBaseRadius() + "/" + c.getTopRadius() + "/" + c.getHeight();
+            return "cone/" + c.getBottomRadius() + "/" + c.getTopRadius() + "/" + c.getHeight();
         }
         if ( geometry instanceof Arrow a ) {
             return "arrow/" + a.getBaseLength() + "/" + a.getHeadLength() + "/" +
@@ -306,7 +306,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
 
     private static Jogl4MeshRenderer.Mesh buildCone(Cone cone)
     {
-        double r1 = cone.getBaseRadius();
+        double r1 = cone.getBottomRadius();
         double r2 = cone.getTopRadius();
         double h = cone.getHeight();
         Jogl4MeshBuilder builder = new Jogl4MeshBuilder(Math.max(Math.max(r1, r2), h));

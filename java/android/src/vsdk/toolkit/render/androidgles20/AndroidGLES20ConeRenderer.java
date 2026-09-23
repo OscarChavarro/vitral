@@ -55,7 +55,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i <= slices; i++) {
             //calculating the angle
             theta = i * f;
-            drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+            drawVertex(nCone, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
             drawVertex(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
@@ -100,7 +100,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i <= slices; i++) {
             //calculating the angle
             theta = i * f;
-            drawVertex(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+            drawVertex(nCone, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
             index += vertexFloatElements;
 
         }
@@ -261,7 +261,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i < slices; i++) {
             //calculating the angle
             theta = i * f;
-            drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+            drawSimpleVertex(nCone, color, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
             index += vertexFloatElements;
         }
 
@@ -289,7 +289,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             index++;
 
             theta = i * f;
-            drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+            drawSimpleVertex(nCone, color, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
             index += vertexFloatElements;
         }
 
@@ -343,7 +343,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i < slices; i++) {
             //calculating the angle
             theta = i * f;
-            drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+            drawSimpleVertex(nCone, color, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
             drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
@@ -387,7 +387,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i < slices; i++) {
             //calculating the angle
             theta = i * f;
-            drawSimpleVertex(nCone, color, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+            drawSimpleVertex(nCone, color, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
             drawSimpleVertex(nCone, color, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += vertexFloatElements;
@@ -430,7 +430,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
             theta = i * f;
 
             //Sending the lower vertex on the body
-            drawNormal(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
+            drawNormal(nCone, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BODY);
             index += 2 * vertexFloatElements;
 
             //Sending the upper vertex on the body
@@ -451,7 +451,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
         for (int i = 0; i < slices; i++) {
             theta = i * f;
 
-            drawNormal(nCone, nCone.getBaseRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
+            drawNormal(nCone, nCone.getBottomRadius(), 0, theta, vertexDataArray, index, nRendererConfiguration, BOTTOM_CAP);
             index += 2 * vertexFloatElements;
 
             drawNormal(nCone, nCone.getTopRadius(), nCone.getHeight(), theta, vertexDataArray, index, nRendererConfiguration, TOP_CAP);
@@ -613,7 +613,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
      */
     private static Vector3Dd calculateVectorBodyNormal(Cone nCone, double cosTheta, double sinTheta) {
 
-        Vector3Dd r1 = new Vector3Dd((nCone.getBaseRadius() * cosTheta), (nCone.getBaseRadius() * sinTheta), 0);
+        Vector3Dd r1 = new Vector3Dd((nCone.getBottomRadius() * cosTheta), (nCone.getBottomRadius() * sinTheta), 0);
         Vector3Dd r2 = new Vector3Dd((nCone.getTopRadius() * cosTheta), (nCone.getTopRadius() * sinTheta), nCone.getHeight());
         Vector3Dd tangent = r2.substract(r1);
 
@@ -622,7 +622,7 @@ public class AndroidGLES20ConeRenderer extends AndroidGLES20Renderer {
 
         Vector3Dd binormal;
         //Avoid cross products with the zero vector.
-        if (nCone.getBaseRadius() > 0) {
+        if (nCone.getBottomRadius() > 0) {
             binormal = tangent.crossProduct(r1);
         } else {
             //An auxiliary vector to make the crossProducts

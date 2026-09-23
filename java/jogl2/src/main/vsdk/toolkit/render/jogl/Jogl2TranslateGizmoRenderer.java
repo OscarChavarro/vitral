@@ -42,7 +42,7 @@ public class Jogl2TranslateGizmoRenderer extends Jogl2Renderer
         double r1, r2, h;
         int slices = 8;
 
-        r1 = cone.getBaseRadius();
+        r1 = cone.getBottomRadius();
         r2 = cone.getTopRadius();
         h = cone.getHeight();
 

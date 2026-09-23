@@ -126,8 +126,8 @@ has not been created`).
   description.
 - `gui.key`: sends a key press to the drawing area (whatever has the keyboard
   focus). Arguments: `key` (a single character, or `tab`, `enter`,
-  `backspace`, `escape`, `left`, `right`, `up`, `down`, `pageup`,
-  `pagedown`), `shift` and `ctrl` (default false). `shift` does not change the
+  `backspace`, `delete`, `escape`, `left`, `right`, `up`, `down`,
+  `pageup`, `pagedown`), `shift` and `ctrl` (default false). `shift` does not change the
   character: send `T` for an uppercase letter. No key release is sent.
   Returns the scene description.
 - `viewport.project`: reports where the first selected body is seen in a
