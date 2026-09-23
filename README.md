@@ -59,7 +59,7 @@ The project maintains traceability to classic computer graphics literature used 
 | Shader models (CPU/software) | Constant, flat, Gouraud-textured, Phong, Cook-Torrance, bump variants | `java/base/src/main/vsdk/toolkit/render/shaders` |
 | Media and image data | RGB/RGBA images, palettes, z-buffers, pixel and color handling | `java/base/src/main/vsdk/toolkit/media` |
 | Persistence and import/export | Image formats, geometry IO, XML importer, metadata persistence | `java/base/src/main/vsdk/toolkit/io` |
-| Desktop integration | AWT/Swing rendering and GUI adapters | `java/awt/src/vsdk/toolkit` |
+| Desktop integration | AWT/Swing rendering and GUI adapters | `java/awt/src/main/vsdk/toolkit` |
 | GPU rendering adapters | JOGL2/JOGL4 renderers, fixtures, OpenGL resource helpers | `java/jogl2/src/main/vsdk/toolkit`, `java/jogl4/src/main/vsdk/toolkit` |
 | Experiments and demos | Application cases, offline examples, benchmarks, API tests | `java/testsuite` |
 

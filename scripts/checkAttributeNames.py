@@ -78,6 +78,8 @@ NOTATION_EXEMPTIONS = {
     # files and the shader uniforms (cookKd, cookKs).
     "MicroFacetedMaterial:kd", "MicroFacetedMaterial:ks",
     "CookTorranceShader:kd", "CookTorranceShader:ks",
+    # Jacobian (TS only): the owner keeps A, B, C for now (2026-09-23).
+    "Jacobian:A", "Jacobian:B", "Jacobian:C",
     # SHA-1 state words H0..H4, as named by FIPS 180-4.
     "WebSocketProtocol:h",
     # MD2 file format records (texture coordinates s, t and their indexes).
@@ -99,11 +101,8 @@ RECORD_EXEMPTIONS = {
 
 
 # Pending decisions: reported as warnings, not as violations, until the
-# owner decides. Jacobian: TS-only class, unused and without Java origin;
-# the meaning of A, B, C is unknown (remove the class or document it).
-PENDING_DECISIONS = {
-    "Jacobian:A", "Jacobian:B", "Jacobian:C",
-}
+# owner decides.
+PENDING_DECISIONS = set()
 
 
 def is_constant_name(name):

@@ -46,9 +46,8 @@ implica `getBottomRadius()` y `setBottomRadius(double)`.
    `baseRadius`), claves JSON escritas a mano (`"t"` del volcado de Appel),
    claves compactas del objeto de cambios de `SimpleMaterial.ts` (`ior`).
 
-**Decisión pendiente (dueño):** `Jacobian.ts` (solo TS, sin uso ni origen
-Java): el significado de `A`, `B`, `C` es desconocido. Borrar la clase o
-documentarla. El script lo reporta como *warning*, no como violación.
+**Decisión del dueño (2026-09-23):** `Jacobian.ts` (solo TS, sin uso ni
+origen Java) se queda como está, con `A`, `B`, `C`; exención E4 en el script.
 
 ## Fase 1: inventario
 
@@ -132,5 +131,5 @@ C++ / 109 TS; testsuites 93 / 92 / 13; más ~150 accessors `M`.
 ## Estado
 
 - [x] Fases 0–5 ejecutadas en librerías y testsuites de los tres ports.
-- [ ] Decisión pendiente: `Jacobian.ts`.
+- [x] `Jacobian.ts`: se conservan `A`, `B`, `C` por decisión del dueño.
 - [ ] Commits por lote: no se hicieron (el trabajo quedó sin commitear).
