@@ -15,6 +15,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ColorDepthImageRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.cpp

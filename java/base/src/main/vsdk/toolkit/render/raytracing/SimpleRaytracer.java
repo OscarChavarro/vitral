@@ -516,6 +516,8 @@ public class SimpleRaytracer extends RenderingElement {
                 workspace);
           }
           else {
+            // No hit: the primary distance is read to export depth buffers
+            hitInfo.setHitDistance(Double.POSITIVE_INFINITY);
             return in_background.colorInDireccion(inRay.getDirection());
         }
     }
@@ -549,13 +551,78 @@ public class SimpleRaytracer extends RenderingElement {
                         int limx1, int limy1,
                         int limx2, int limy2)
     {
+        execute(inoutViewport, inQualitySelection, sceneSnapshot, liveReport,
+                outDepthmap, DepthBufferMode.RAY_DISTANCE,
+                limx1, limy1, limx2, limy2);
+    }
+
+    /**
+    Raytraces a rectangular area of the image, optionally exporting a depth
+    buffer of the primary rays.
+    @param inoutViewport image to fill; its size gives the resolution
+    @param inQualitySelection quality settings
+    @param sceneSnapshot scene to render, seen from its camera snapshot
+    @param liveReport progress monitor, or null
+    @param outDepthmap depth buffer of the same size as the image, or null
+    @param depthMode kind of values written in `outDepthmap` (see
+    `DepthBufferMode`); `NONE` leaves it untouched
+    @param limx1 first column of the area
+    @param limy1 first row of the area
+    @param limx2 column after the last one of the area
+    @param limy2 row after the last one of the area
+    */
+    public void execute(RGBImageUncompressed inoutViewport,
+                        RendererConfiguration inQualitySelection,
+                        SimpleSceneSnapshot sceneSnapshot,
+                        ProgressMonitor liveReport,
+                        ZBuffer outDepthmap,
+                        DepthBufferMode depthMode,
+                        int limx1, int limy1,
+                        int limx2, int limy2)
+    {
+        DepthBufferEncoder depthEncoder = null;
+
+        if ( outDepthmap != null && depthMode != null &&
+             depthMode != DepthBufferMode.NONE ) {
+            depthEncoder = new DepthBufferEncoder(depthMode,
+                sceneSnapshot.getCameraSnapshot());
+        }
+        execute(inoutViewport, inQualitySelection, sceneSnapshot, liveReport,
+                outDepthmap, depthEncoder, limx1, limy1, limx2, limy2);
+    }
+
+    /**
+    Raytraces a rectangular area of the image, exporting the depth buffer of
+    the primary rays with the given encoder (with its own depth range).
+    @param inoutViewport image to fill; its size gives the resolution
+    @param inQualitySelection quality settings
+    @param sceneSnapshot scene to render, seen from its camera snapshot
+    @param liveReport progress monitor, or null
+    @param outDepthmap depth buffer of the same size as the image, or null
+    @param depthEncoder converts the primary ray distances in depth values,
+    or null to not export depth
+    @param limx1 first column of the area
+    @param limy1 first row of the area
+    @param limx2 column after the last one of the area
+    @param limy2 row after the last one of the area
+    */
+    public void execute(RGBImageUncompressed inoutViewport,
+                        RendererConfiguration inQualitySelection,
+                        SimpleSceneSnapshot sceneSnapshot,
+                        ProgressMonitor liveReport,
+                        ZBuffer outDepthmap,
+                        DepthBufferEncoder depthEncoder,
+                        int limx1, int limy1,
+                        int limx2, int limy2)
+    {
         execute(inoutViewport, inQualitySelection,
                 sceneSnapshot.getSimpleBodies(),
                 sceneSnapshot.getLights(),
                 sceneSnapshot.getBackground(),
                 sceneSnapshot.getCameraSnapshot(),
                 liveReport,
-                outDepthmap,
+                depthEncoder != null ? outDepthmap : null,
+                depthEncoder,
                 limx1, limy1,
                 limx2, limy2);
     }
@@ -579,11 +646,11 @@ public class SimpleRaytracer extends RenderingElement {
       visualizaci&oacute;n.
     - `depthmap`: can be null or a reference to a ZBuffer. If it is null,
       nothing is done with this parameter. If it is not null, the associated
-      ZBuffer is filled with depth values corresponding to distances 
-      calculated in world space coordinates from ray intersections.
-      Note that depth values are not scaled neither clamped to any specific
-      range, so post-processing should be done if wanting to combine that
-      with other depth maps, as those generated from OpenGL's ZBuffer.
+      ZBuffer is filled with the depth of the primary ray of each pixel,
+      encoded by `depthEncoder` (see `DepthBufferMode`): native world space
+      distances from ray intersections (infinite where nothing is hit), or
+      values normalized as OpenGL's depth buffer, ready to be combined
+      with it.
     - `liveReport` can be null. In that case no report is updated.
 
 
@@ -615,6 +682,7 @@ public class SimpleRaytracer extends RenderingElement {
                          CameraSnapshot cameraSnapshot,
                          ProgressMonitor liveReport,
                          ZBuffer outDepthmap,
+                         DepthBufferEncoder depthEncoder,
                          int limx1, int limy1,
                          int limx2, int limy2)
     {
@@ -663,7 +731,9 @@ public class SimpleRaytracer extends RenderingElement {
                                           inLightsArray, inBackground,
                                           renderContext, sceneRenderCache, workspace);
                     if ( outDepthmap != null ) {
-                        outDepthmap.setZ(x, y, (float)rayo.getT());
+                        outDepthmap.setZ(x, y, depthEncoder.encode(
+                            rayo.getOrigin(), rayo.getDirection(),
+                            workspace.nearestHit.hitDistance()));
                     }
                     //- Exporto el result de color del pixel ----------------
                     outputPixel.r = (byte)(255 * color.r());

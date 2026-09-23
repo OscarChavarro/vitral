@@ -28,5 +28,6 @@ public abstract class Jogl4Renderer extends RenderingElement {
         Jogl4CameraRenderer.dispose(gl);
         Jogl4ArrowRenderer.dispose(gl);
         Jogl4ImageRenderer.dispose(gl);
+        Jogl4ColorDepthImageRenderer.dispose(gl);
     }
 }

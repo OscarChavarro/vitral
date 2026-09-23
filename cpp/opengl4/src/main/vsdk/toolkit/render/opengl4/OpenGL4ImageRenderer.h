@@ -53,6 +53,9 @@ public:
     static void dispose();
 
 private:
+    // Shares the shader base path and the shader loading helpers
+    friend class OpenGL4ColorDepthImageRenderer;
+
     static TextureFilterMode textureFilterMode;
     static GLuint quadVaoId;
     static GLuint quadPositionVboId;

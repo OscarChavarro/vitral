@@ -3,6 +3,9 @@ import { RendererConfiguration } from "../../environment/material/RendererConfig
 import type { SimpleSceneSnapshot } from "../../environment/scene/SimpleSceneSnapshot.js";
 import { ProgressMonitor } from "../../gui/feedback/ProgressMonitor.js";
 import { RGBImageUncompressed } from "../../media/RGBImageUncompressed.js";
+import { ZBuffer } from "../../media/ZBuffer.js";
+import { DepthBufferEncoder } from "./DepthBufferEncoder.js";
+import { DepthBufferMode } from "./DepthBufferMode.js";
 import type { ParallelRaytracerTileRequest, ParallelRaytracerTileResult } from "./ParallelRaytracer.js";
 import { SimpleRaytracer } from "./SimpleRaytracer.js";
 
@@ -52,6 +55,7 @@ export class ParallelRaytracerTileRenderer {
     private sceneVersion: number | null = null;
     private snapshot: SimpleSceneSnapshot | null = null;
     private image: RGBImageUncompressed | null = null;
+    private depth: ZBuffer | null = null;
     private readonly raytracer: SimpleRaytracer = new SimpleRaytracer();
 
     /**
@@ -84,12 +88,27 @@ export class ParallelRaytracerTileRenderer {
         configuration.setTexture(request.texture);
         configuration.setBumpMap(request.bumpMap);
 
+        let depthEncoder: DepthBufferEncoder | null = null;
+        if (request.depthMode !== DepthBufferMode.NONE) {
+            depthEncoder = new DepthBufferEncoder(
+                request.depthMode as DepthBufferMode,
+                this.snapshot.getCameraSnapshot(),
+                request.depthRangeNear,
+                request.depthRangeFar,
+            );
+            if (this.depth === null || this.depth.getXSize() !== request.xSize ||
+                this.depth.getYSize() !== request.ySize) {
+                this.depth = new ZBuffer(request.xSize, request.ySize);
+            }
+        }
+
         this.raytracer.execute(
             this.image,
             configuration,
             this.snapshot,
             request.reportProgress ? new NotifyingProgressMonitor(notify) : null,
-            null,
+            depthEncoder !== null ? this.depth : null,
+            depthEncoder,
             request.x0,
             request.y0,
             request.x0 + request.dx,
@@ -105,6 +124,11 @@ export class ParallelRaytracerTileRenderer {
         const start: number = (request.ySize - (request.y0 + request.dy)) * rowStride;
         const end: number = (request.ySize - request.y0) * rowStride;
 
-        return { y0: request.y0, dy: request.dy, bytes: raw.slice(start, end) };
+        // The depth buffer stores row `y` at `y * xSize`, top row first
+        const depth: Float32Array | null = depthEncoder !== null && this.depth !== null
+            ? this.depth.getZBuffer().slice(request.y0 * request.xSize, (request.y0 + request.dy) * request.xSize)
+            : null;
+
+        return { y0: request.y0, dy: request.dy, bytes: raw.slice(start, end), depth };
     }
 }

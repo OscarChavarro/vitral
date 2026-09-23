@@ -16,8 +16,7 @@ import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
-import vsdk.toolkit.render.jogl.Jogl4BackgroundRenderer;
-import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
+import vsdk.toolkit.render.jogl.Jogl4ColorDepthImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4RotateGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ScaleGizmoRenderer;
@@ -157,15 +156,16 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         }
         else {
             theScene.activateSelectedBackground();
-            Jogl4BackgroundRenderer.draw(gl,
-                theScene.scene.getBackgrounds().get(theScene.scene.getActiveBackgroundIndex()));
             model.setRaytracedImageWidth(view.getViewportSizeX());
             model.setRaytracedImageHeight(view.getViewportSizeY());
             host.raytraceImage();
-            // The ray-traced image changes on each frame: its texture is
-            // created again
-            Jogl4ImageRenderer.unload(gl, model.getRaytracedImage());
-            Jogl4ImageRenderer.draw(gl, model.getRaytracedImage());
+            // The raytraced image comes with its OpenGL depth: after this,
+            // what is rasterized (grid, gizmos, selection) is depth tested
+            // against the raytraced bodies as against rasterized ones
+            Jogl4ColorDepthImageRenderer.draw(gl, model.getRaytracedImage(),
+                model.getRaytracedDepth());
+            Jogl4SceneRenderer.drawEditorOverlays(gl, theScene,
+                host.getBodyEditFeedbackProvider());
         }
 
         //-----------------------------------------------------------------

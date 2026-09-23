@@ -20,6 +20,7 @@ import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorConsumer;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorEvent;
 import vsdk.toolkit.gui.feedback.parallel.ParallelProgressMonitorProducer;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.ZBuffer;
 
 /**
 Raytraces an image with as many threads as processors are available to the
@@ -33,6 +34,14 @@ disjoint rows of the image.
 The threads are created once and reused by every call, so this class suits
 interactive use (one image per frame). They are daemon threads; `dispose`
 stops them.
+
+Optionally (see `setDepthBufferMode`), each call also exports the depth of
+the primary ray of every pixel into a `ZBuffer` of the size of the image:
+native ray distances, or depth values normalized as OpenGL would store them
+for the same camera (with its near and far planes and the configured
+`glDepthRange`), so the raytraced image can be composited with rasterized
+geometry (see `DepthBufferMode`). Rows of the depth buffer follow the rows of
+the image: row 0 is the top one.
 */
 public class ParallelRaytracer
 {
@@ -41,6 +50,12 @@ public class ParallelRaytracer
 
     private final int numberOfThreads;
     private ExecutorService executorService;
+
+    private DepthBufferMode depthBufferMode;
+    private double depthRangeNear;
+    private double depthRangeFar;
+    /// Depth buffer of the last `execute` call, reused while its size fits
+    private ZBuffer depthBuffer;
 
     /**
     Creates a raytracer with one thread per available processor.
@@ -60,6 +75,68 @@ public class ParallelRaytracer
         }
         this.numberOfThreads = numberOfThreads;
         this.executorService = null;
+        this.depthBufferMode = DepthBufferMode.NONE;
+        this.depthRangeNear = 0.0;
+        this.depthRangeFar = 1.0;
+        this.depthBuffer = null;
+    }
+
+    /**
+    Selects whether (and how) the next `execute` calls export a depth buffer.
+    @param mode kind of depth buffer; null is taken as `NONE`
+    */
+    public synchronized void setDepthBufferMode(DepthBufferMode mode)
+    {
+        depthBufferMode = (mode == null) ? DepthBufferMode.NONE : mode;
+        if ( depthBufferMode == DepthBufferMode.NONE ) {
+            depthBuffer = null;
+        }
+    }
+
+    /**
+    @return kind of depth buffer exported by `execute`
+    */
+    public synchronized DepthBufferMode getDepthBufferMode()
+    {
+        return depthBufferMode;
+    }
+
+    /**
+    Sets the mapping from normalized device depth to window depth used by
+    `DepthBufferMode.OPENGL_DEPTH`, as `glDepthRange`. By default [0, 1].
+    @param near window depth of the near plane
+    @param far window depth of the far plane
+    */
+    public synchronized void setOpenGlDepthRange(double near, double far)
+    {
+        depthRangeNear = near;
+        depthRangeFar = far;
+    }
+
+    /**
+    @return window depth of the near plane for `DepthBufferMode.OPENGL_DEPTH`
+    */
+    public synchronized double getOpenGlDepthRangeNear()
+    {
+        return depthRangeNear;
+    }
+
+    /**
+    @return window depth of the far plane for `DepthBufferMode.OPENGL_DEPTH`
+    */
+    public synchronized double getOpenGlDepthRangeFar()
+    {
+        return depthRangeFar;
+    }
+
+    /**
+    @return depth buffer filled by the last `execute` call, of the size of
+    its image, or null if the depth buffer mode is `NONE` or nothing was
+    rendered yet. It is reused (overwritten) by the next calls.
+    */
+    public synchronized ZBuffer getDepthBuffer()
+    {
+        return depthBuffer;
     }
 
     /**
@@ -98,6 +175,71 @@ public class ParallelRaytracer
                         SimpleSceneSnapshot sceneSnapshot,
                         boolean reportProgress)
     {
+        DepthBufferEncoder depthEncoder = null;
+        ZBuffer outDepth = null;
+
+        if ( resultingImage.getXSize() <= 0 || resultingImage.getYSize() <= 0 ) {
+            return;
+        }
+        synchronized ( this ) {
+            if ( depthBufferMode != DepthBufferMode.NONE ) {
+                if ( depthBuffer == null ||
+                     depthBuffer.getXSize() != resultingImage.getXSize() ||
+                     depthBuffer.getYSize() != resultingImage.getYSize() ) {
+                    depthBuffer = new ZBuffer(resultingImage.getXSize(),
+                        resultingImage.getYSize());
+                }
+                outDepth = depthBuffer;
+                depthEncoder = new DepthBufferEncoder(depthBufferMode,
+                    sceneSnapshot.getCameraSnapshot(), depthRangeNear, depthRangeFar);
+            }
+        }
+        execute(resultingImage, outDepth, depthEncoder, rendererConfiguration,
+            sceneSnapshot, reportProgress);
+    }
+
+    /**
+    Raytraces the scene into the whole image and into a depth buffer given by
+    the caller, independently of the configured depth buffer mode.
+    @param resultingImage image to fill; its size gives the resolution
+    @param outDepth depth buffer of the size of the image to fill
+    @param depthMode kind of depth values to write; `NONE` leaves `outDepth`
+    untouched
+    @param rendererConfiguration quality settings
+    @param sceneSnapshot scene to render, seen from its camera snapshot
+    @param reportProgress true to report in the console the number of
+    threads and the progress
+    */
+    public void execute(RGBImageUncompressed resultingImage,
+                        ZBuffer outDepth,
+                        DepthBufferMode depthMode,
+                        RendererConfiguration rendererConfiguration,
+                        SimpleSceneSnapshot sceneSnapshot,
+                        boolean reportProgress)
+    {
+        DepthBufferEncoder depthEncoder = null;
+
+        if ( outDepth != null && depthMode != null && depthMode != DepthBufferMode.NONE ) {
+            if ( outDepth.getXSize() != resultingImage.getXSize() ||
+                 outDepth.getYSize() != resultingImage.getYSize() ) {
+                throw new IllegalArgumentException(
+                    "Depth buffer size must match the image size");
+            }
+            depthEncoder = new DepthBufferEncoder(depthMode,
+                sceneSnapshot.getCameraSnapshot(),
+                getOpenGlDepthRangeNear(), getOpenGlDepthRangeFar());
+        }
+        execute(resultingImage, outDepth, depthEncoder, rendererConfiguration,
+            sceneSnapshot, reportProgress);
+    }
+
+    private void execute(RGBImageUncompressed resultingImage,
+                         ZBuffer outDepth,
+                         DepthBufferEncoder depthEncoder,
+                         RendererConfiguration rendererConfiguration,
+                         SimpleSceneSnapshot sceneSnapshot,
+                         boolean reportProgress)
+    {
         if ( resultingImage.getXSize() <= 0 || resultingImage.getYSize() <= 0 ) {
             return;
         }
@@ -133,6 +275,8 @@ public class ParallelRaytracer
                 futures.add(getExecutorService().submit(new TileWorker(
                     pendingTiles,
                     resultingImage,
+                    depthEncoder != null ? outDepth : null,
+                    depthEncoder,
                     rendererConfiguration,
                     sceneSnapshot,
                     producer)));
@@ -188,6 +332,8 @@ public class ParallelRaytracer
     private record TileWorker(
         ConcurrentLinkedQueue<RasterTileArea> pendingTiles,
         RGBImageUncompressed resultingImage,
+        ZBuffer depthBuffer,
+        DepthBufferEncoder depthEncoder,
         RendererConfiguration rendererConfiguration,
         SimpleSceneSnapshot sceneSnapshot,
         ProgressMonitor progressReporter)
@@ -205,7 +351,8 @@ public class ParallelRaytracer
                     rendererConfiguration,
                     sceneSnapshot,
                     progressReporter,
-                    null,
+                    depthBuffer,
+                    depthEncoder,
                     tile.getX0(),
                     tile.getY0(),
                     tile.getX1(),

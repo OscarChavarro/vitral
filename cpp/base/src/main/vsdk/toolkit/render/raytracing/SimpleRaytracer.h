@@ -6,6 +6,7 @@
 #include "vsdk/toolkit/render/RenderingElement.h"
 #include "vsdk/toolkit/render/TraceWorkspace.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
+#include "vsdk/toolkit/render/raytracing/DepthBufferMode.h"
 class Ray;
 class RayHit;
 class ColorRgb;
@@ -23,6 +24,7 @@ class Shader;
 class Image;
 class NormalMap;
 class CameraSnapshot;
+class DepthBufferEncoder;
 
 class SimpleRaytracer : public RenderingElement {
 private:
@@ -57,7 +59,7 @@ private:
     ColorRgb evaluateIlluminationModel(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,const SceneRenderCache& sceneRenderCache,Background* background,SimpleMaterial* material,RenderContext& renderContext,int recursions,int recursionLevel);
     int selectNearestThingInRayDirection(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,RayHit* outHit,RayHit* candidateHit);
     ColorRgb followRayPath(const Ray& inRay,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* in_background,RenderContext& renderContext,const SceneRenderCache& sceneRenderCache);
-    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
+    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,java::ArrayList<SimpleBody*>& inSimpleBodiesArray,java::ArrayList<Light*>& inLightsArray,Background* inBackground,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2);
 
 public:
     SimpleRaytracer();
@@ -66,6 +68,33 @@ public:
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* report);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* report,ZBuffer* depthmap);
     void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2);
+
+    /**
+    Raytraces a rectangular area of the image, optionally exporting a depth
+    buffer of the primary rays.
+    @param inoutViewport image to fill; its size gives the resolution
+    @param inQualitySelection quality settings
+    @param sceneSnapshot scene to render, seen from its camera snapshot
+    @param liveReport progress monitor, or null
+    @param outDepthmap depth buffer of the same size as the image, or null
+    @param depthMode kind of values written in `outDepthmap` (see
+    `DepthBufferMode`); `NONE` leaves it untouched
+    @param limx1 first column of the area
+    @param limy1 first row of the area
+    @param limx2 column after the last one of the area
+    @param limy2 row after the last one of the area
+    */
+    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,DepthBufferMode depthMode,int limx1,int limy1,int limx2,int limy2);
+
+    /**
+    Raytraces a rectangular area of the image, exporting the depth buffer of
+    the primary rays with the given encoder (with its own depth range).
+    @param outDepthmap depth buffer of the same size as the image, or null
+    @param depthEncoder converts the primary ray distances in depth values,
+    or null to not export depth
+    (the other parameters as in the overload with `DepthBufferMode`)
+    */
+    void execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* inQualitySelection,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2);
 };
 
 #endif

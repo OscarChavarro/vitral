@@ -263,6 +263,8 @@ export class Camera extends Entity {
             this.dir,
             this.upWithScale,
             this.rightWithScale,
+            this.nearPlaneDistance,
+            this.farPlaneDistance,
         );
     }
     public generateRay(x: number, y: number): Ray {

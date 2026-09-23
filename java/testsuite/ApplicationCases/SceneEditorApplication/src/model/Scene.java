@@ -10,6 +10,7 @@ import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.media.RGBAImageUncompressed;
 import vsdk.toolkit.io.image.ImagePersistence;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -25,6 +26,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
+import vsdk.toolkit.render.raytracing.DepthBufferMode;
 import vsdk.toolkit.render.raytracing.ParallelRaytracer;
 import model.selection.SelectionSet;
 
@@ -304,7 +306,7 @@ public class Scene
     */
     public void raytrace(RGBImageUncompressed out_Viewport)
     {
-        raytrace(out_Viewport, true);
+        raytrace(out_Viewport, null, true);
     }
 
     /**
@@ -314,17 +316,32 @@ public class Scene
     */
     public void raytraceViewport(RGBImageUncompressed out_Viewport)
     {
-        raytrace(out_Viewport, false);
+        raytrace(out_Viewport, null, false);
+    }
+
+    /**
+    Raytraces the scene from the active camera, silently, exporting also the
+    depth of each pixel as OpenGL would store it for the same camera, so the
+    image can be composited with rasterized elements (grid, gizmos...).
+    @param out_Viewport image to fill; its size gives the resolution
+    @param out_Depth depth buffer of the size of the image to fill with window
+    space depth values in [0, 1]
+    */
+    public void raytraceViewport(RGBImageUncompressed out_Viewport, ZBuffer out_Depth)
+    {
+        raytrace(out_Viewport, out_Depth, false);
     }
 
     /**
     Raytraces with one thread per available processor (see
     `ParallelRaytracer`).
     @param out_Viewport image to fill
+    @param out_Depth depth buffer to fill with OpenGL depth values, or null
     @param interactiveReport true to report progress and time in the console
     and export the result to `output.jpg`
     */
-    private void raytrace(RGBImageUncompressed out_Viewport, boolean interactiveReport)
+    private void raytrace(RGBImageUncompressed out_Viewport, ZBuffer out_Depth,
+                          boolean interactiveReport)
     {
         int originalWidth;
         int originalHeight;
@@ -368,8 +385,9 @@ public class Scene
         SimpleSceneSnapshot sceneSnapshot =
             scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
         long initialTime = System.currentTimeMillis();
-        RAYTRACER.execute(out_Viewport, qualityTemplate, sceneSnapshot,
-            interactiveReport);
+        RAYTRACER.execute(out_Viewport, out_Depth,
+            out_Depth != null ? DepthBufferMode.OPENGL_DEPTH : DepthBufferMode.NONE,
+            qualityTemplate, sceneSnapshot, interactiveReport);
         long finalTime = System.currentTimeMillis();
 
         if ( interactiveReport ) {

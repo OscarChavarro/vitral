@@ -22,6 +22,8 @@ export class CameraSnapshot {
         dir: Vector3Dd,
         upWithScale: Vector3Dd,
         rightWithScale: Vector3Dd,
+        private readonly nearPlaneDistance: number = 0.05,
+        private readonly farPlaneDistance: number = 100.0,
     ) {
         this.eyePosition = new Vector3Dd(eyePosition);
         this.front = new Vector3Dd(front);
@@ -64,5 +66,13 @@ export class CameraSnapshot {
     }
     public getRightWithScale(): Vector3Dd {
         return this.rightWithScale;
+    }
+    /** @return near plane distance, as used by `Camera.calculateViewVolumeMatrix` */
+    public getNearPlaneDistance(): number {
+        return this.nearPlaneDistance;
+    }
+    /** @return far plane distance, as used by `Camera.calculateViewVolumeMatrix` */
+    public getFarPlaneDistance(): number {
+        return this.farPlaneDistance;
     }
 }

@@ -13,6 +13,8 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
+#include "vsdk/toolkit/render/raytracing/DepthBufferEncoder.h"
+#include <limits>
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
@@ -188,6 +190,8 @@ ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,java::ArrayList<SimpleB
         prepareSurfaceHit(nearestObject, objectData, primaryHitRay, shadingInfo);
         return evaluateIlluminationModel(shadingInfo, -inRay.getDirection().x(), -inRay.getDirection().y(), -inRay.getDirection().z(), lights, bodies, cache, background, resolveMaterial(shadingInfo, objectData), renderContext, MAX_RECURSION_LEVEL, 0);
     }
+    // No hit: the primary distance is read to export depth buffers
+    hitInfo->setHitDistance(std::numeric_limits<double>::infinity());
     return background->colorInDireccion(inRay.getDirection());
 }
 
@@ -198,9 +202,22 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
 { execute(inoutViewport, q, sceneSnapshot, report, depthmap, 0, 0, inoutViewport->getXSize(), inoutViewport->getYSize()); }
 
 void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
-{ execute(inoutViewport, q, sceneSnapshot->getSimpleBodies(), sceneSnapshot->getLights(), sceneSnapshot->getBackground(), sceneSnapshot->getCameraSnapshot(), liveReport, outDepthmap, limx1, limy1, limx2, limy2); }
+{ execute(inoutViewport, q, sceneSnapshot, liveReport, outDepthmap, DepthBufferMode::RAY_DISTANCE, limx1, limy1, limx2, limy2); }
 
-void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,java::ArrayList<SimpleBody*>& bodies,java::ArrayList<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,int limx1,int limy1,int limx2,int limy2)
+void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,DepthBufferMode depthMode,int limx1,int limy1,int limx2,int limy2)
+{
+    if ( outDepthmap != 0 && depthMode != DepthBufferMode::NONE ) {
+        DepthBufferEncoder depthEncoder(depthMode, sceneSnapshot->getCameraSnapshot());
+        execute(inoutViewport, q, sceneSnapshot, liveReport, outDepthmap, &depthEncoder, limx1, limy1, limx2, limy2);
+        return;
+    }
+    execute(inoutViewport, q, sceneSnapshot, liveReport, outDepthmap, (const DepthBufferEncoder*)0, limx1, limy1, limx2, limy2);
+}
+
+void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,SimpleSceneSnapshot* sceneSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2)
+{ execute(inoutViewport, q, sceneSnapshot->getSimpleBodies(), sceneSnapshot->getLights(), sceneSnapshot->getBackground(), sceneSnapshot->getCameraSnapshot(), liveReport, depthEncoder != 0 ? outDepthmap : 0, depthEncoder, limx1, limy1, limx2, limy2); }
+
+void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const RendererConfiguration* q,java::ArrayList<SimpleBody*>& bodies,java::ArrayList<Light*>& lights,Background* bg,const CameraSnapshot* cameraSnapshot,ProgressMonitor* liveReport,ZBuffer* outDepthmap,const DepthBufferEncoder* depthEncoder,int limx1,int limy1,int limx2,int limy2)
 {
     RenderContext renderContext = buildRenderContext(q, lights);
     SceneRenderCache cache;
@@ -230,7 +247,7 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
                 RaytraceStatistics::recordPrimaryRay();
                 Ray ray = generateRay(cameraSnapshot, x, y);
                 ColorRgb color = followRayPath(ray, bodies, lights, bg, renderContext, cache);
-                if ( outDepthmap ) outDepthmap->setDepth(x, y, (float)ray.getT());
+                if ( outDepthmap ) outDepthmap->setDepth(x, y, depthEncoder->encode(ray.getOrigin(), ray.getDirection(), workspace.nearestHit.hitDistance()));
                 outputPixel.r = (char)(255 * color.r()); outputPixel.g = (char)(255 * color.g()); outputPixel.b = (char)(255 * color.b());
                 tileImage->putPixelRgb(x, y, &outputPixel);
             }

@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
 
@@ -151,7 +152,14 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     public void doViewportRaytracingImage()
     {
         prepareRaytracedImage();
-        applicationModel.getScene().raytraceViewport(applicationModel.getRaytracedImage());
+        ZBuffer depth = applicationModel.getRaytracedDepth();
+        RGBImageUncompressed image = applicationModel.getRaytracedImage();
+        if ( depth == null || depth.getXSize() != image.getXSize() ||
+             depth.getYSize() != image.getYSize() ) {
+            depth = new ZBuffer(image.getXSize(), image.getYSize());
+            applicationModel.setRaytracedDepth(depth);
+        }
+        applicationModel.getScene().raytraceViewport(image, depth);
     }
 
     @Override

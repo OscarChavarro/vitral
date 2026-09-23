@@ -352,6 +352,8 @@ export { RasterTileArea } from "./vsdk/toolkit/render/raytracing/RasterTileArea.
 export { RasterTileGenerationStrategy } from "./vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.js";
 export { RasterTileGenerator } from "./vsdk/toolkit/render/raytracing/RasterTileGenerator.js";
 export { ParallelRaytracer } from "./vsdk/toolkit/render/raytracing/ParallelRaytracer.js";
+export { DepthBufferMode } from "./vsdk/toolkit/render/raytracing/DepthBufferMode.js";
+export { DepthBufferEncoder } from "./vsdk/toolkit/render/raytracing/DepthBufferEncoder.js";
 export type {
     ParallelRaytracerTileRequest,
     ParallelRaytracerTileResult,

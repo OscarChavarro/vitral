@@ -7,6 +7,7 @@ export { WebGLShaderLoader } from "./vsdk/toolkit/render/webgl/WebGLShaderLoader
 export { WebGLShaderProgramUtil } from "./vsdk/toolkit/render/webgl/WebGLShaderProgramUtil.js";
 export { WebGLRendererConfigurationShaderSelector } from "./vsdk/toolkit/render/webgl/WebGLRendererConfigurationShaderSelector.js";
 export { WebGLImageRenderer, TextureFilterMode } from "./vsdk/toolkit/render/webgl/WebGLImageRenderer.js";
+export { WebGLColorDepthImageRenderer } from "./vsdk/toolkit/render/webgl/WebGLColorDepthImageRenderer.js";
 export { WebGLRGBImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBImageUncompressedRenderer.js";
 export { WebGLRGBAImageUncompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageUncompressedRenderer.js";
 export { WebGLRGBAImageCompressedRenderer } from "./vsdk/toolkit/render/webgl/WebGLRGBAImageCompressedRenderer.js";

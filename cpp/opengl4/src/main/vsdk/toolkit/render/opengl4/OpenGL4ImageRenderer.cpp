@@ -7,6 +7,7 @@
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ColorDepthImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageUncompressedRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBImageUncompressedRenderer.h"
@@ -282,6 +283,7 @@ void OpenGL4ImageRenderer::ensureBuffers() {
 }
 
 void OpenGL4ImageRenderer::dispose() {
+    OpenGL4ColorDepthImageRenderer::dispose();
     OpenGL4RGBImageUncompressedRenderer::disposeAll();
     OpenGL4RGBAImageUncompressedRenderer::disposeAll();
     OpenGL4RGBAImageCompressedRenderer::disposeAll();

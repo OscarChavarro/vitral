@@ -155,13 +155,70 @@ public class Jogl4SceneRenderer
     */
     public static void draw(GL4 gl, Scene s, BodyEditFeedbackProvider editor)
     {
-        RendererConfiguration quality;
-        SimpleBodyGroup ggi;
-        int i;
-
         s.activateSelectedBackground();
 
         drawBase(gl, s, editor);
+        drawLightsAndDebugEntities(gl, s);
+    }
+
+    /**
+    Draws, over an image of the scene computed by other means (i.e. the
+    raytracer, whose depth is already in the depth buffer), the editor
+    elements that are not part of the rendered scene: the elements asked by
+    the `RendererConfiguration` of the viewport that are not surfaces (selection
+    corners, bounding volumes, normals), the feedback of the body under
+    edition, the light gizmos and the visual debug entities. They are depth
+    tested against the image, as they are over the rasterized scene.
+    @param gl OpenGL context
+    @param s scene whose editor elements are drawn
+    @param editor editor of the selected body, whose feedback is drawn over
+    it, or null if there is none
+    */
+    public static void drawEditorOverlays(GL4 gl, Scene s, BodyEditFeedbackProvider editor)
+    {
+        List<Light> lights = s.scene.getLights();
+        RendererConfiguration quality;
+        SimpleBody gi;
+        int i;
+
+        gl.glEnable(GL4.GL_DEPTH_TEST);
+        gl.glDepthMask(true);
+
+        for ( i = 0; i < s.scene.getSimpleBodies().size(); i++ ) {
+            try {
+                quality = s.qualityTemplate.clone();
+            }
+            catch ( CloneNotSupportedException e ) {
+                break;
+            }
+            // The body itself is in the image: only its annotations are drawn
+            quality.setSurfaces(false);
+            quality.setWires(false);
+            quality.setPoints(false);
+            quality.setSelectionCorners(s.selectedThings.isSelected(i));
+            gi = s.scene.getSimpleBodies().get(i);
+
+            if ( quality.isSelectionCornersSet() || quality.isBoundingVolumeSet() ||
+                 quality.isNormalsSet() || quality.isTrianglesNormalsSet() ) {
+                drawBody(gl, gi, s.activeCamera, lights, quality);
+            }
+            if ( editor != null && editor.getTarget() == gi ) {
+                Jogl4RenderPrimitiveRenderer.draw(gl, editor.buildEditFeedback(),
+                    s.activeCamera, lights, quality);
+            }
+        }
+
+        drawLightsAndDebugEntities(gl, s);
+    }
+
+    /**
+    Draws the light gizmos and the visual debug entities of the scene.
+    */
+    private static void drawLightsAndDebugEntities(GL4 gl, Scene s)
+    {
+        RendererConfiguration quality;
+        SimpleBodyGroup ggi;
+        int i;
 
         //- Draw 3D Gizmos ------------------------------------------------
         s.selectedLights.sync();

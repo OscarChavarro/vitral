@@ -457,7 +457,9 @@ public class Camera extends Entity
             this.viewportYSize,
             _dir,
             upWithScale,
-            rightWithScale);
+            rightWithScale,
+            nearPlaneDistance,
+            farPlaneDistance);
     }
 
     /**

@@ -50,7 +50,7 @@ For tool calls, send:
 - `gui.set_mode`: sets the interaction mode. Arguments: `mode` (`camera`, `select`, `translate`, `rotate` or `scale`).
 - `gui.key`: injects a key press into the canvas. Arguments: `key` (a single character, or `tab`, `enter`, `backspace`, `escape`, `left`, `right`, `up`, `down`, `pageup`, `pagedown`) and `shift` (default false).
 - `render.get_configuration`: returns the `RendererConfiguration` flags of the viewports. Arguments: `viewport` (index; default all).
-- `render.set_configuration`: sets the `RendererConfiguration` flags bit by bit. Arguments: `viewport` (index; default all) and any of the booleans `points`, `wires`, `surfaces`, `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`, `selectionCorners`, and `shading` (`nolight`, `flat`, `gouraud`, `phong`, `cook_terrance`).
+- `render.set_configuration`: sets the `RendererConfiguration` flags bit by bit. Arguments: `viewport` (index; default all) and any of the booleans `points`, `wires`, `surfaces`, `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`, `selectionCorners`, `grid` (reference grid of the viewport), `shading` (`nolight`, `flat`, `gouraud`, `phong`, `cook_terrance`) and `renderMode` (`gpu` for OpenGL, `cpu` for the raytracer). `render.get_configuration` reports `grid` and `renderMode` too.
 - `render.raytrace_png`: raytraces the current scene and exports a PNG. Arguments: `path`, `width`, `height`.
 - `viewport.export_jpg`: exports the selected JOGL4 viewport as a JPG. Arguments: `path`.
 - `workspace.export_jpg`: exports the complete JOGL4 workspace area, including all viewports, as a JPG. Arguments: `path`.
@@ -81,6 +81,12 @@ the complete JOGL4 workspace as `outputViewport.jpg`.
 - Use `scene.describe` before and after mutating the scene to verify state.
 - Use `render.raytrace_png` and `viewport.export_jpg` together when debugging
   mismatches between the raytracer and the JOGL renderer.
+- To compare both render modes of the same view, export the workspace after
+  `render.set_configuration` with `renderMode` `gpu` and then `cpu`. In CPU
+  mode the raytracer also exports its depth buffer normalized as OpenGL depth
+  (`DepthBufferMode.OPENGL_DEPTH`), which `Jogl4ColorDepthImageRenderer`
+  writes to the depth buffer, so the grid, the gizmos, the light gizmos and
+  the selection corners are depth tested against the raytraced bodies.
 - The TCP service is intentionally line-oriented; keep each JSON-RPC request on
   a single line.
 - If the local shell blocks TCP access from a sandbox, run the client command

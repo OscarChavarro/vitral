@@ -13,11 +13,14 @@ import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBImageUncompressed;
+import vsdk.toolkit.media.ZBuffer;
 
 public class ApplicationModel
 {
     private Scene scene;
     private RGBImageUncompressed raytracedImage;
+    /// OpenGL depth of `raytracedImage` when it is shown in a viewport
+    private ZBuffer raytracedDepth;
     private RGBImageUncompressed zbufferImage;
     private int raytracedImageWidth;
     private int raytracedImageHeight;
@@ -167,6 +170,24 @@ public class ApplicationModel
     public List<SimpleBody> getSimpleBodies()
     {
         return scene.scene.getSimpleBodies();
+    }
+
+    /**
+    @return window space (OpenGL) depth of each pixel of the raytraced image
+    of a viewport in CPU render mode, or null if there is none
+    */
+    public ZBuffer getRaytracedDepth()
+    {
+        return raytracedDepth;
+    }
+
+    /**
+    @param raytracedDepth window space (OpenGL) depth of each pixel of the
+    raytraced image, or null
+    */
+    public void setRaytracedDepth(ZBuffer raytracedDepth)
+    {
+        this.raytracedDepth = raytracedDepth;
     }
 
     public RGBImageUncompressed getRaytracedImage()

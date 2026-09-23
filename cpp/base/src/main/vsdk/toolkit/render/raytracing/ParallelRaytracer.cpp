@@ -16,6 +16,8 @@
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorEvent.h"
 #include "vsdk/toolkit/gui/feedback/parallel/ParallelProgressMonitorProducer.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
+#include "vsdk/toolkit/media/ZBuffer.h"
+#include "vsdk/toolkit/render/raytracing/DepthBufferEncoder.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/render/raytracing/ParallelRaytracer.h"
@@ -32,6 +34,8 @@ class ParallelRaytracerTileWorker : public java::Callable<java::Void> {
   private:
     java::ConcurrentLinkedQueue<RasterTileArea>* pendingTiles;
     RGBImageUncompressed* resultingImage;
+    ZBuffer* depthBuffer;
+    const DepthBufferEncoder* depthEncoder;
     const RendererConfiguration* rendererConfiguration;
     SimpleSceneSnapshot* sceneSnapshot;
     ProgressMonitor* progressReporter;
@@ -39,11 +43,15 @@ class ParallelRaytracerTileWorker : public java::Callable<java::Void> {
   public:
     ParallelRaytracerTileWorker(java::ConcurrentLinkedQueue<RasterTileArea>* pendingTiles,
                RGBImageUncompressed* resultingImage,
+               ZBuffer* depthBuffer,
+               const DepthBufferEncoder* depthEncoder,
                const RendererConfiguration* rendererConfiguration,
                SimpleSceneSnapshot* sceneSnapshot,
                ProgressMonitor* progressReporter)
         : pendingTiles(pendingTiles),
           resultingImage(resultingImage),
+          depthBuffer(depthBuffer),
+          depthEncoder(depthEncoder),
           rendererConfiguration(rendererConfiguration),
           sceneSnapshot(sceneSnapshot),
           progressReporter(progressReporter)
@@ -61,7 +69,8 @@ class ParallelRaytracerTileWorker : public java::Callable<java::Void> {
                               rendererConfiguration,
                               sceneSnapshot,
                               progressReporter,
-                              0,
+                              depthBuffer,
+                              depthEncoder,
                               tile.getX0(),
                               tile.getY0(),
                               tile.getX1(),
@@ -73,13 +82,21 @@ class ParallelRaytracerTileWorker : public java::Callable<java::Void> {
 
 ParallelRaytracer::ParallelRaytracer()
     : numberOfThreads(availableProcessors()),
-      executorService(0)
+      executorService(0),
+      depthBufferMode(DepthBufferMode::NONE),
+      depthRangeNear(0.0),
+      depthRangeFar(1.0),
+      depthBuffer(0)
 {
 }
 
 ParallelRaytracer::ParallelRaytracer(int numberOfThreads)
     : numberOfThreads(numberOfThreads),
-      executorService(0)
+      executorService(0),
+      depthBufferMode(DepthBufferMode::NONE),
+      depthRangeNear(0.0),
+      depthRangeFar(1.0),
+      depthBuffer(0)
 {
     if ( numberOfThreads <= 0 ) {
         Logger::reportMessage("ParallelRaytracer", Logger::ERROR, "ParallelRaytracer",
@@ -91,6 +108,42 @@ ParallelRaytracer::ParallelRaytracer(int numberOfThreads)
 ParallelRaytracer::~ParallelRaytracer()
 {
     dispose();
+    delete depthBuffer;
+}
+
+void ParallelRaytracer::setDepthBufferMode(DepthBufferMode mode)
+{
+    depthBufferMode = mode;
+    if ( depthBufferMode == DepthBufferMode::NONE ) {
+        delete depthBuffer;
+        depthBuffer = 0;
+    }
+}
+
+DepthBufferMode ParallelRaytracer::getDepthBufferMode() const
+{
+    return depthBufferMode;
+}
+
+void ParallelRaytracer::setOpenGlDepthRange(double nearValue, double farValue)
+{
+    depthRangeNear = nearValue;
+    depthRangeFar = farValue;
+}
+
+double ParallelRaytracer::getOpenGlDepthRangeNear() const
+{
+    return depthRangeNear;
+}
+
+double ParallelRaytracer::getOpenGlDepthRangeFar() const
+{
+    return depthRangeFar;
+}
+
+ZBuffer* ParallelRaytracer::getDepthBuffer() const
+{
+    return depthBuffer;
 }
 
 int ParallelRaytracer::availableProcessors()
@@ -145,6 +198,60 @@ void ParallelRaytracer::execute(
     if ( resultingImage->getXSize() <= 0 || resultingImage->getYSize() <= 0 ) {
         return;
     }
+    if ( depthBufferMode == DepthBufferMode::NONE ) {
+        executeWithEncoder(resultingImage, 0, 0, rendererConfiguration,
+            sceneSnapshot, reportProgress);
+        return;
+    }
+    if ( depthBuffer == 0 ||
+         depthBuffer->getXSize() != resultingImage->getXSize() ||
+         depthBuffer->getYSize() != resultingImage->getYSize() ) {
+        delete depthBuffer;
+        depthBuffer = new ZBuffer(resultingImage->getXSize(),
+            resultingImage->getYSize());
+    }
+    DepthBufferEncoder depthEncoder(depthBufferMode,
+        sceneSnapshot->getCameraSnapshot(), depthRangeNear, depthRangeFar);
+    executeWithEncoder(resultingImage, depthBuffer, &depthEncoder,
+        rendererConfiguration, sceneSnapshot, reportProgress);
+}
+
+void ParallelRaytracer::execute(
+    RGBImageUncompressed* resultingImage,
+    ZBuffer* outDepth,
+    DepthBufferMode depthMode,
+    const RendererConfiguration* rendererConfiguration,
+    SimpleSceneSnapshot* sceneSnapshot,
+    bool reportProgress)
+{
+    if ( outDepth == 0 || depthMode == DepthBufferMode::NONE ) {
+        executeWithEncoder(resultingImage, 0, 0, rendererConfiguration,
+            sceneSnapshot, reportProgress);
+        return;
+    }
+    if ( outDepth->getXSize() != resultingImage->getXSize() ||
+         outDepth->getYSize() != resultingImage->getYSize() ) {
+        Logger::reportMessage("ParallelRaytracer", Logger::ERROR, "execute",
+            "Depth buffer size must match the image size");
+        throw VSDKFatalException("Depth buffer size must match the image size");
+    }
+    DepthBufferEncoder depthEncoder(depthMode,
+        sceneSnapshot->getCameraSnapshot(), depthRangeNear, depthRangeFar);
+    executeWithEncoder(resultingImage, outDepth, &depthEncoder,
+        rendererConfiguration, sceneSnapshot, reportProgress);
+}
+
+void ParallelRaytracer::executeWithEncoder(
+    RGBImageUncompressed* resultingImage,
+    ZBuffer* outDepth,
+    const DepthBufferEncoder* depthEncoder,
+    const RendererConfiguration* rendererConfiguration,
+    SimpleSceneSnapshot* sceneSnapshot,
+    bool reportProgress)
+{
+    if ( resultingImage->getXSize() <= 0 || resultingImage->getYSize() <= 0 ) {
+        return;
+    }
     RasterTileGenerator tileGenerator(
         RasterTileGenerationStrategy::LINEAR,
         resultingImage,
@@ -179,6 +286,8 @@ void ParallelRaytracer::execute(
         futures.add(getExecutorService()->submit(new ParallelRaytracerTileWorker(
             &pendingTiles,
             resultingImage,
+            depthEncoder != 0 ? outDepth : 0,
+            depthEncoder,
             rendererConfiguration,
             sceneSnapshot,
             progressReporter)));

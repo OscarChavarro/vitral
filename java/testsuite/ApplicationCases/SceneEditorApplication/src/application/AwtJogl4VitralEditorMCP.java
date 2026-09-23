@@ -471,6 +471,19 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             if ( !shading.isEmpty() ) {
                 q.setShadingType(ShadingType.valueOf(shading.toUpperCase()));
             }
+
+            value = booleanProperty(request, "grid");
+            if ( value != null ) viewport.setShowGrid(value);
+            String renderMode = stringProperty(request, "renderMode", "");
+            if ( "gpu".equalsIgnoreCase(renderMode) ) {
+                viewport.setRenderMode(Viewport.RENDER_MODE_Z_BUFFER);
+            }
+            else if ( "cpu".equalsIgnoreCase(renderMode) ) {
+                viewport.setRenderMode(Viewport.RENDER_MODE_RAYTRACING);
+            }
+            else if ( !renderMode.isEmpty() ) {
+                throw new IllegalArgumentException("renderMode must be gpu or cpu");
+            }
         }
     }
 
@@ -498,7 +511,11 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
                 .append(",\"normals\":").append(q.isNormalsSet())
                 .append(",\"trianglesNormals\":").append(q.isTrianglesNormalsSet())
                 .append(",\"selectionCorners\":").append(q.isSelectionCornersSet())
-                .append(",\"shading\":\"").append(q.getShadingTypeEnum()).append("\"}");
+                .append(",\"shading\":\"").append(q.getShadingTypeEnum()).append('"')
+                .append(",\"grid\":").append(viewport.isShowGrid())
+                .append(",\"renderMode\":\"")
+                .append(viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING ? "cpu" : "gpu")
+                .append("\"}");
         }
         return sb.append("]}").toString();
     }
@@ -591,7 +608,7 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             + "," + tool("gui.key", "Inject a key press into the canvas. Arguments: key (a single character, or tab|enter|backspace|escape|left|right|up|down|pageup|pagedown), shift (default false). Returns the scene state.")
             + "," + tool("viewport.project", "Canvas pixels of the selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
             + "," + tool("render.get_configuration", "Return the RendererConfiguration flags of the viewports. Arguments: viewport (index; default all).")
-            + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners, and shading (nolight|flat|gouraud|phong|cook_terrance).")
+            + "," + tool("render.set_configuration", "Set RendererConfiguration flags bit by bit. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
             + "," + tool("render.raytrace_png", "Raytrace the scene and export PNG. Arguments: path,width,height.")
             + "," + tool("viewport.export_jpg", "Export the selected JOGL4 viewport to JPG. Arguments: path.")
             + "," + tool("workspace.export_jpg", "Export the complete JOGL4 workspace area, including all viewports, to JPG. Arguments: path.")

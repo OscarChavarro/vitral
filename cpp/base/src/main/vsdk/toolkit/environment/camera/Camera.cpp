@@ -456,5 +456,7 @@ CameraSnapshot* Camera::exportToCameraSnapshot(int viewportXSizeIn, int viewport
         tmp.viewportYSize,
         tmp._dir,
         tmp.upWithScale,
-        tmp.rightWithScale);
+        tmp.rightWithScale,
+        tmp.nearPlaneDistance,
+        tmp.farPlaneDistance);
 }

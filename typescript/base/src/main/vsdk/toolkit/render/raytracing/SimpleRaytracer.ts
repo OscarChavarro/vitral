@@ -28,6 +28,8 @@ import type { NormalMap } from "../../media/NormalMap.js";
 import { RGBPixel } from "../../media/RGBPixel.js";
 import type { RGBImageUncompressed } from "../../media/RGBImageUncompressed.js";
 import type { ZBuffer } from "../../media/ZBuffer.js";
+import { DepthBufferEncoder } from "./DepthBufferEncoder.js";
+import { DepthBufferMode } from "./DepthBufferMode.js";
 import { Camera } from "../../environment/camera/Camera.js";
 import type { CameraSnapshot } from "../../environment/camera/CameraSnapshot.js";
 import type { Light } from "../../environment/light/Light.js";
@@ -474,6 +476,8 @@ export class SimpleRaytracer extends RenderingElement {
                 workspace,
             );
         } else {
+            // No hit: the primary distance is read to export depth buffers
+            hitInfo.setHitDistance(Number.POSITIVE_INFINITY);
             // See the note in evaluateIlluminationModel: a null here is the
             // Java NullPointerException of a FixedBackground scene.
             return in_background.colorInDireccion(inRay.getDirection())!;
@@ -504,17 +508,50 @@ export class SimpleRaytracer extends RenderingElement {
         limx2: number,
         limy2: number,
     ): void;
+    /**
+    Raytraces a rectangular area of the image, optionally exporting a depth
+    buffer of the primary rays.
+    @param outDepthmap depth buffer of the same size as the image, or null
+    @param depthMode kind of values written in `outDepthmap` (see
+    `DepthBufferMode`); `NONE` leaves it untouched. It can also be a
+    `DepthBufferEncoder` (with its own depth range), or null to not export depth
+    */
+    public execute(
+        inoutViewport: RGBImageUncompressed,
+        inQualitySelection: RendererConfiguration,
+        sceneSnapshot: SimpleSceneSnapshot,
+        liveReport: ProgressMonitor | null,
+        outDepthmap: ZBuffer | null,
+        depthMode: DepthBufferMode | DepthBufferEncoder | null,
+        limx1: number,
+        limy1: number,
+        limx2: number,
+        limy2: number,
+    ): void;
     public execute(
         inoutViewport: RGBImageUncompressed,
         inQualitySelection: RendererConfiguration,
         sceneSnapshot: SimpleSceneSnapshot,
         liveReport: ProgressMonitor | null,
         outDepthmap?: ZBuffer | null,
-        limx1?: number,
-        limy1?: number,
-        limx2?: number,
-        limy2?: number,
+        ...limits: (number | DepthBufferMode | DepthBufferEncoder | null)[]
     ): void {
+        // Without an explicit mode, a depth buffer gets native distances
+        let depthEncoder: DepthBufferEncoder | null = null;
+        let numericLimits: (number | DepthBufferMode | DepthBufferEncoder | null)[] = limits;
+        let depthMode: DepthBufferMode | DepthBufferEncoder | null = DepthBufferMode.RAY_DISTANCE;
+        if (limits.length === 5) {
+            depthMode = limits[0] as DepthBufferMode | DepthBufferEncoder | null;
+            numericLimits = limits.slice(1);
+        }
+        const depthmap: ZBuffer | null = outDepthmap === undefined ? null : outDepthmap;
+        if (depthmap !== null && depthMode !== null) {
+            if (depthMode instanceof DepthBufferEncoder) {
+                depthEncoder = depthMode;
+            } else if (depthMode !== DepthBufferMode.NONE) {
+                depthEncoder = new DepthBufferEncoder(depthMode, sceneSnapshot.getCameraSnapshot());
+            }
+        }
         this.executeInternal(
             inoutViewport,
             inQualitySelection,
@@ -523,11 +560,12 @@ export class SimpleRaytracer extends RenderingElement {
             sceneSnapshot.getBackground(),
             sceneSnapshot.getCameraSnapshot(),
             liveReport,
-            outDepthmap === undefined ? null : outDepthmap,
-            limx1 === undefined ? 0 : limx1,
-            limy1 === undefined ? 0 : limy1,
-            limx2 === undefined ? inoutViewport.getXSize() : limx2,
-            limy2 === undefined ? inoutViewport.getYSize() : limy2,
+            depthEncoder !== null ? depthmap : null,
+            depthEncoder,
+            numericLimits.length > 0 ? (numericLimits[0] as number) : 0,
+            numericLimits.length > 1 ? (numericLimits[1] as number) : 0,
+            numericLimits.length > 2 ? (numericLimits[2] as number) : inoutViewport.getXSize(),
+            numericLimits.length > 3 ? (numericLimits[3] as number) : inoutViewport.getYSize(),
         );
     }
 
@@ -550,11 +588,11 @@ export class SimpleRaytracer extends RenderingElement {
       visualizaci&oacute;n.
     - `depthmap`: can be null or a reference to a ZBuffer. If it is null,
       nothing is done with this parameter. If it is not null, the associated
-      ZBuffer is filled with depth values corresponding to distances
-      calculated in world space coordinates from ray intersections.
-      Note that depth values are not scaled neither clamped to any specific
-      range, so post-processing should be done if wanting to combine that
-      with other depth maps, as those generated from OpenGL's ZBuffer.
+      ZBuffer is filled with the depth of the primary ray of each pixel,
+      encoded by `depthEncoder` (see `DepthBufferMode`): native world space
+      distances from ray intersections (infinite where nothing is hit), or
+      values normalized as OpenGL's depth buffer, ready to be combined
+      with it.
     - `liveReport` can be null. In that case no report is updated.
 
     PRE:
@@ -586,6 +624,7 @@ export class SimpleRaytracer extends RenderingElement {
         cameraSnapshot: CameraSnapshot,
         liveReport: ProgressMonitor | null,
         outDepthmap: ZBuffer | null,
+        depthEncoder: DepthBufferEncoder | null,
         limx1: number,
         limy1: number,
         limx2: number,
@@ -641,8 +680,16 @@ export class SimpleRaytracer extends RenderingElement {
                         sceneRenderCache,
                         workspace,
                     );
-                    if (outDepthmap !== null) {
-                        outDepthmap.setZ(x, y, Math.fround(rayo.getT()));
+                    if (outDepthmap !== null && depthEncoder !== null) {
+                        outDepthmap.setZ(
+                            x,
+                            y,
+                            depthEncoder.encode(
+                                rayo.getOrigin(),
+                                rayo.getDirection(),
+                                workspace.nearestHit.hitDistance(),
+                            ),
+                        );
                     }
                     //- Exporto el result de color del pixel ----------------
                     // `(byte)` narrowing of a double in Java: truncate towards
