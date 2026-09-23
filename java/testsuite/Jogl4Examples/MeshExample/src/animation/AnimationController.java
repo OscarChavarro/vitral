@@ -22,10 +22,10 @@ public class AnimationController {
 
             @Override
             public void tick(AnimationEvent e) {
-                if ( e.getT() - lastTickT >= 1.0 ) {
+                if ( e.getTime() - lastTickT >= 1.0 ) {
                     model.getRayGizmo().update();
                     panel.repaint();
-                    lastTickT = e.getT();
+                    lastTickT = e.getTime();
                 }
             }
         });

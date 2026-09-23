@@ -135,7 +135,7 @@ public class TriangleMeshGroup extends Surface {
     public Ray doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
         if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }
@@ -171,8 +171,8 @@ public class TriangleMeshGroup extends Surface {
             TriangleMesh mesh = meshes.get(i);
             RayHit meshHit = new RayHit();
             if ( mesh.doIntersectionFirstHit(inRay, meshHit, triangleInformation) &&
-                 meshHit.ray().getT() < minT ) {
-                minT = meshHit.ray().getT();
+                 meshHit.getRay().getT() < minT ) {
+                minT = meshHit.getRay().getT();
                 bestHit = new RayHit(meshHit);
                 bestMesh = i;
                 bestTriangle = triangleInformation[0];

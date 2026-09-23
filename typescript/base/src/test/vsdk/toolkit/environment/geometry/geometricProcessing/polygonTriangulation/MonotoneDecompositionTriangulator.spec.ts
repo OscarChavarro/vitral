@@ -26,7 +26,7 @@ describe("MonotoneDecompositionTriangulator", () => {
         expect(stages.stage4FinalizeAndExtractTriangles(count[0]!, triangles)).toBe(2);
         expect(
             triangles
-                .flatMap((triangle) => [triangle.a, triangle.b, triangle.c])
+                .flatMap((triangle) => [triangle.point0, triangle.point1, triangle.point2])
                 .every((index) => index >= 0 && index < 4),
         ).toBe(true);
     });
@@ -68,9 +68,11 @@ describe("MonotoneDecompositionTriangulator", () => {
             new MonotoneDecompositionTriangulator.Triangle(6, 1, 2),
             new MonotoneDecompositionTriangulator.Triangle(6, 2, 3),
         ]);
-        expect(triangles.every((triangle) => ![triangle.a, triangle.b, triangle.c].every((index) => index >= 4))).toBe(
-            true,
-        );
+        expect(
+            triangles.every(
+                (triangle) => ![triangle.point0, triangle.point1, triangle.point2].every((index) => index >= 4),
+            ),
+        ).toBe(true);
     });
 
     it("triangulates two disjoint holes with flattened indices", () => {
@@ -93,7 +95,7 @@ describe("MonotoneDecompositionTriangulator", () => {
         expect(new MonotoneDecompositionTriangulator().triangulate(polygon, triangles)).toBe(14);
         expect(
             triangles
-                .flatMap((triangle) => [triangle.a, triangle.b, triangle.c])
+                .flatMap((triangle) => [triangle.point0, triangle.point1, triangle.point2])
                 .every((index) => index >= 0 && index < 12),
         ).toBe(true);
     });
@@ -116,9 +118,11 @@ describe("MonotoneDecompositionTriangulator", () => {
         polygon.addVertex(4, 6);
         const triangles: MonotoneDecompositionTriangulator.Triangle[] = [];
         expect(new MonotoneDecompositionTriangulator().triangulate(polygon, triangles)).toBe(10);
-        expect(triangles.some((triangle) => [triangle.a, triangle.b, triangle.c].every((index) => index >= 8))).toBe(
-            true,
-        );
+        expect(
+            triangles.some((triangle) =>
+                [triangle.point0, triangle.point1, triangle.point2].every((index) => index >= 8),
+            ),
+        ).toBe(true);
     });
 
     it("clears output for contours with no triangulable area", () => {

@@ -151,8 +151,8 @@ export class QuadMesh extends Surface<Ray, RayHit> {
         }
         if (nearest === null) return false;
         out.setRay(ray.withT(nearest.t));
-        out.p = nearest.point;
-        out.n = nearest.normal;
+        out.point = nearest.point;
+        out.normal = nearest.normal;
         if (triangleInformation !== undefined) triangleInformation[0] = nearest.triangle;
         return true;
     }

@@ -107,8 +107,8 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         private final OrthogonalProfileOperandSpec yExtruded;
         private final double xMin;
         private final double xMax;
-        private final ArrayList<Double> ys;
-        private final ArrayList<Double> zs;
+        private final ArrayList<Double> yCoordinates;
+        private final ArrayList<Double> zCoordinates;
 
         private OrthogonalProfileBooleanFallbackSpec(
             OrthogonalProfileOperandSpec operandA,
@@ -116,16 +116,16 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
             OrthogonalProfileOperandSpec yExtruded,
             double xMin,
             double xMax,
-            ArrayList<Double> ys,
-            ArrayList<Double> zs)
+            ArrayList<Double> yCoordinates,
+            ArrayList<Double> zCoordinates)
         {
             this.operandA = operandA;
             this.operandB = operandB;
             this.yExtruded = yExtruded;
             this.xMin = xMin;
             this.xMax = xMax;
-            this.ys = ys;
-            this.zs = zs;
+            this.yCoordinates = yCoordinates;
+            this.zCoordinates = zCoordinates;
         }
 
         private double xAtBoundary(int boundary, double z)
@@ -143,8 +143,8 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         {
             double z;
 
-            z = zs.get(iz);
-            return new Vector3Dd(xAtBoundary(boundary, z), ys.get(iy), z);
+            z = zCoordinates.get(iz);
+            return new Vector3Dd(xAtBoundary(boundary, z), yCoordinates.get(iy), z);
         }
     }
 
@@ -320,14 +320,14 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
 
     private static OrthogonalProfileOperandSpec createXExtrudedYZSpec(
         PolyhedralBoundedSolid solid,
-        ArrayList<Double> xs,
-        ArrayList<Double> ys,
-        ArrayList<Double> zs)
+        ArrayList<Double> xCoordinates,
+        ArrayList<Double> yCoordinates,
+        ArrayList<Double> zCoordinates)
     {
         ArrayList<Vector3Dd> profile;
         double[] bounds;
 
-        if ( xs.size() != 2 || ys.size() != 4 || zs.size() != 3 ||
+        if ( xCoordinates.size() != 2 || yCoordinates.size() != 4 || zCoordinates.size() != 3 ||
              solid.getVerticesList().size() != 16 ) {
             return null;
         }
@@ -345,16 +345,16 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
 
     private static OrthogonalProfileOperandSpec createYExtrudedXZSpec(
         PolyhedralBoundedSolid solid,
-        ArrayList<Double> xs,
-        ArrayList<Double> ys,
-        ArrayList<Double> zs)
+        ArrayList<Double> xCoordinates,
+        ArrayList<Double> yCoordinates,
+        ArrayList<Double> zCoordinates)
     {
         ArrayList<Double> rightZ;
         ArrayList<Double> rightX;
         double[] bounds;
         int i;
 
-        if ( xs.size() != 3 || ys.size() != 2 || zs.size() != 3 ||
+        if ( xCoordinates.size() != 3 || yCoordinates.size() != 2 || zCoordinates.size() != 3 ||
              solid.getVerticesList().size() != 10 ) {
             return null;
         }
@@ -362,12 +362,12 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         bounds = solid.getMinMax();
         rightZ = new ArrayList<Double>();
         rightX = new ArrayList<Double>();
-        for ( i = 0; i < zs.size(); i++ ) {
+        for ( i = 0; i < zCoordinates.size(); i++ ) {
             double z;
             double maxX;
             int j;
 
-            z = zs.get(i);
+            z = zCoordinates.get(i);
             maxX = -Double.MAX_VALUE;
             for ( j = 0; j < solid.getVerticesList().size(); j++ ) {
                 Vector3Dd p;
@@ -391,20 +391,20 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
     private static OrthogonalProfileOperandSpec createOrthogonalProfileSpec(
         PolyhedralBoundedSolid solid)
     {
-        ArrayList<Double> xs;
-        ArrayList<Double> ys;
-        ArrayList<Double> zs;
+        ArrayList<Double> xCoordinates;
+        ArrayList<Double> yCoordinates;
+        ArrayList<Double> zCoordinates;
         OrthogonalProfileOperandSpec spec;
 
-        xs = uniqueVertexCoordinates(solid, 0);
-        ys = uniqueVertexCoordinates(solid, 1);
-        zs = uniqueVertexCoordinates(solid, 2);
+        xCoordinates = uniqueVertexCoordinates(solid, 0);
+        yCoordinates = uniqueVertexCoordinates(solid, 1);
+        zCoordinates = uniqueVertexCoordinates(solid, 2);
 
-        spec = createYExtrudedXZSpec(solid, xs, ys, zs);
+        spec = createYExtrudedXZSpec(solid, xCoordinates, yCoordinates, zCoordinates);
         if ( spec != null ) {
             return spec;
         }
-        return createXExtrudedYZSpec(solid, xs, ys, zs);
+        return createXExtrudedYZSpec(solid, xCoordinates, yCoordinates, zCoordinates);
     }
 
     private static OrthogonalProfileBooleanFallbackSpec
@@ -416,8 +416,8 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         OrthogonalProfileOperandSpec specB;
         OrthogonalProfileOperandSpec yExtruded;
         OrthogonalProfileOperandSpec xExtruded;
-        ArrayList<Double> ys;
-        ArrayList<Double> zs;
+        ArrayList<Double> yCoordinates;
+        ArrayList<Double> zCoordinates;
         int i;
 
         specA = createOrthogonalProfileSpec(inSolidA);
@@ -438,23 +438,23 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
             return null;
         }
 
-        ys = uniqueVertexCoordinates(inSolidA, 1);
-        zs = uniqueVertexCoordinates(inSolidA, 2);
+        yCoordinates = uniqueVertexCoordinates(inSolidA, 1);
+        zCoordinates = uniqueVertexCoordinates(inSolidA, 2);
         for ( i = 0; i < inSolidB.getVerticesList().size(); i++ ) {
             Vector3Dd p;
 
             p = inSolidB.getVerticesList().get(i).position;
-            addUniqueCoordinate(ys, p.y());
-            addUniqueCoordinate(zs, p.z());
+            addUniqueCoordinate(yCoordinates, p.y());
+            addUniqueCoordinate(zCoordinates, p.z());
         }
-        if ( ys.size() < 2 || zs.size() < 2 ||
-             ys.size() > 8 || zs.size() > 8 ) {
+        if ( yCoordinates.size() < 2 || zCoordinates.size() < 2 ||
+             yCoordinates.size() > 8 || zCoordinates.size() > 8 ) {
             return null;
         }
 
         return new OrthogonalProfileBooleanFallbackSpec(
             specA, specB, yExtruded, xExtruded.bounds[0],
-            xExtruded.bounds[3], ys, zs);
+            xExtruded.bounds[3], yCoordinates, zCoordinates);
     }
 
     private static boolean profileCellSelected(
@@ -472,8 +472,8 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         boolean insideA;
         boolean insideB;
 
-        y = (spec.ys.get(iy) + spec.ys.get(iy + 1)) * 0.5;
-        z = (spec.zs.get(iz) + spec.zs.get(iz + 1)) * 0.5;
+        y = (spec.yCoordinates.get(iy) + spec.yCoordinates.get(iy + 1)) * 0.5;
+        z = (spec.zCoordinates.get(iz) + spec.zCoordinates.get(iz + 1)) * 0.5;
         x0 = spec.xAtBoundary(zone, z);
         x1 = spec.xAtBoundary(zone + 1, z);
         if ( x1 <= x0 + numericContext.bigEpsilon() ) {
@@ -562,10 +562,10 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
         }
 
         occupied =
-            new boolean[2][spec.ys.size() - 1][spec.zs.size() - 1];
+            new boolean[2][spec.yCoordinates.size() - 1][spec.zCoordinates.size() - 1];
         for ( zone = 0; zone < 2; zone++ ) {
-            for ( iy = 0; iy < spec.ys.size() - 1; iy++ ) {
-                for ( iz = 0; iz < spec.zs.size() - 1; iz++ ) {
+            for ( iy = 0; iy < spec.yCoordinates.size() - 1; iy++ ) {
+                for ( iz = 0; iz < spec.zCoordinates.size() - 1; iz++ ) {
                     occupied[zone][iy][iz] =
                         profileCellSelected(spec, op, zone, iy, iz);
                 }
@@ -574,8 +574,8 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
 
         builder = new ProfileCellBooleanBuilder();
         for ( zone = 0; zone < 2; zone++ ) {
-            for ( iy = 0; iy < spec.ys.size() - 1; iy++ ) {
-                for ( iz = 0; iz < spec.zs.size() - 1; iz++ ) {
+            for ( iy = 0; iy < spec.yCoordinates.size() - 1; iy++ ) {
+                for ( iz = 0; iz < spec.zCoordinates.size() - 1; iz++ ) {
                     if ( !occupied[zone][iy][iz] ) {
                         continue;
                     }
@@ -588,14 +588,14 @@ final class _PolyhedralBoundedSolidOrthogonalProfileFallback
                     if ( iy == 0 || !occupied[zone][iy - 1][iz] ) {
                         addProfileBoundaryQuad(builder, spec, zone, iy, iz, 2);
                     }
-                    if ( iy == spec.ys.size() - 2 ||
+                    if ( iy == spec.yCoordinates.size() - 2 ||
                          !occupied[zone][iy + 1][iz] ) {
                         addProfileBoundaryQuad(builder, spec, zone, iy, iz, 3);
                     }
                     if ( iz == 0 || !occupied[zone][iy][iz - 1] ) {
                         addProfileBoundaryQuad(builder, spec, zone, iy, iz, 4);
                     }
-                    if ( iz == spec.zs.size() - 2 ||
+                    if ( iz == spec.zCoordinates.size() - 2 ||
                          !occupied[zone][iy][iz + 1] ) {
                         addProfileBoundaryQuad(builder, spec, zone, iy, iz, 5);
                     }

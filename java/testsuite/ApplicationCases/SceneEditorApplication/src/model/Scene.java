@@ -222,10 +222,10 @@ public class Scene
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
             RayHit hit = new RayHit();
-            if ( gi.doIntersectionFirstHit(r, hit) && hit.ray().getT() < nearestDistance ) {
+            if ( gi.doIntersectionFirstHit(r, hit) && hit.getRay().getT() < nearestDistance ) {
                 ii.clone(hit);
-                nearestDistance = hit.ray().getT();
-                r = hit.ray();
+                nearestDistance = hit.getRay().getT();
+                r = hit.getRay();
                 intersected = true;
             }
         }

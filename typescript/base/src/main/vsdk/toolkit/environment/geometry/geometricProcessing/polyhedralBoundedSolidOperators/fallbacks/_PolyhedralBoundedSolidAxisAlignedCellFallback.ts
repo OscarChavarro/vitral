@@ -17,9 +17,9 @@ class AxisAlignedCellBooleanBuilder {
     private nextVertexId = 1;
     private nextFaceId = 1;
     public constructor(
-        private readonly xs: number[],
-        private readonly ys: number[],
-        private readonly zs: number[],
+        private readonly xCoordinates: number[],
+        private readonly yCoordinates: number[],
+        private readonly zCoordinates: number[],
     ) {}
     private vertexKey(ix: number, iy: number, iz: number): string {
         return `${ix}:${iy}:${iz}`;
@@ -30,7 +30,7 @@ class AxisAlignedCellBooleanBuilder {
         if (vertex !== undefined) return vertex;
         vertex = new _PolyhedralBoundedSolidVertex(
             this.solid,
-            new Vector3Dd(this.xs[ix]!, this.ys[iy]!, this.zs[iz]!),
+            new Vector3Dd(this.xCoordinates[ix]!, this.yCoordinates[iy]!, this.zCoordinates[iz]!),
             this.nextVertexId,
         );
         this.solid.setMaxVertexId(this.nextVertexId);
@@ -188,48 +188,55 @@ export class _PolyhedralBoundedSolidAxisAlignedCellFallback extends _PolyhedralB
         operation: number,
     ): PolyhedralBoundedSolid | null {
         if (!this.isAxisAlignedSolid(solidA) || !this.isAxisAlignedSolid(solidB)) return null;
-        const xs = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 0);
-        const ys = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 1);
-        const zs = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 2);
+        const xCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 0);
+        const yCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 1);
+        const zCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 2);
         for (let i = 0; i < solidB.getVerticesList().size(); i++) {
             const p = solidB.getVerticesList().get(i)!.position;
-            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(xs, p.x());
-            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(ys, p.y());
-            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(zs, p.z());
+            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(xCoordinates, p.x());
+            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(yCoordinates, p.y());
+            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(zCoordinates, p.z());
         }
-        if (xs.length < 2 || ys.length < 2 || zs.length < 2 || xs.length > 16 || ys.length > 16 || zs.length > 16)
+        if (
+            xCoordinates.length < 2 ||
+            yCoordinates.length < 2 ||
+            zCoordinates.length < 2 ||
+            xCoordinates.length > 16 ||
+            yCoordinates.length > 16 ||
+            zCoordinates.length > 16
+        )
             return null;
-        const occupied = Array.from({ length: xs.length - 1 }, () =>
-            Array.from({ length: ys.length - 1 }, () => Array<boolean>(zs.length - 1).fill(false)),
+        const occupied = Array.from({ length: xCoordinates.length - 1 }, () =>
+            Array.from({ length: yCoordinates.length - 1 }, () => Array<boolean>(zCoordinates.length - 1).fill(false)),
         );
-        for (let ix = 0; ix < xs.length - 1; ix++)
-            for (let iy = 0; iy < ys.length - 1; iy++)
-                for (let iz = 0; iz < zs.length - 1; iz++) {
+        for (let ix = 0; ix < xCoordinates.length - 1; ix++)
+            for (let iy = 0; iy < yCoordinates.length - 1; iy++)
+                for (let iz = 0; iz < zCoordinates.length - 1; iz++) {
                     const sample = new Vector3Dd(
-                        (xs[ix]! + xs[ix + 1]!) * 0.5,
-                        (ys[iy]! + ys[iy + 1]!) * 0.5,
-                        (zs[iz]! + zs[iz + 1]!) * 0.5,
+                        (xCoordinates[ix]! + xCoordinates[ix + 1]!) * 0.5,
+                        (yCoordinates[iy]! + yCoordinates[iy + 1]!) * 0.5,
+                        (zCoordinates[iz]! + zCoordinates[iz + 1]!) * 0.5,
                     );
                     const insideA = this.classifyPointForAxisAlignedFallback(solidA, sample) === Geometry.INSIDE;
                     const insideB = this.classifyPointForAxisAlignedFallback(solidB, sample) === Geometry.INSIDE;
                     occupied[ix]![iy]![iz] = this.axisAlignedCellSelected(insideA, insideB, operation);
                 }
-        const builder = new AxisAlignedCellBooleanBuilder(xs, ys, zs);
-        for (let ix = 0; ix < xs.length - 1; ix++)
-            for (let iy = 0; iy < ys.length - 1; iy++)
-                for (let iz = 0; iz < zs.length - 1; iz++) {
+        const builder = new AxisAlignedCellBooleanBuilder(xCoordinates, yCoordinates, zCoordinates);
+        for (let ix = 0; ix < xCoordinates.length - 1; ix++)
+            for (let iy = 0; iy < yCoordinates.length - 1; iy++)
+                for (let iz = 0; iz < zCoordinates.length - 1; iz++) {
                     if (!occupied[ix]![iy]![iz]) continue;
                     if (ix === 0 || !occupied[ix - 1]![iy]![iz])
                         this.addAxisAlignedBoundaryQuad(builder, 0, false, ix, iy, iz);
-                    if (ix === xs.length - 2 || !occupied[ix + 1]![iy]![iz])
+                    if (ix === xCoordinates.length - 2 || !occupied[ix + 1]![iy]![iz])
                         this.addAxisAlignedBoundaryQuad(builder, 0, true, ix, iy, iz);
                     if (iy === 0 || !occupied[ix]![iy - 1]![iz])
                         this.addAxisAlignedBoundaryQuad(builder, 1, false, ix, iy, iz);
-                    if (iy === ys.length - 2 || !occupied[ix]![iy + 1]![iz])
+                    if (iy === yCoordinates.length - 2 || !occupied[ix]![iy + 1]![iz])
                         this.addAxisAlignedBoundaryQuad(builder, 1, true, ix, iy, iz);
                     if (iz === 0 || !occupied[ix]![iy]![iz - 1])
                         this.addAxisAlignedBoundaryQuad(builder, 2, false, ix, iy, iz);
-                    if (iz === zs.length - 2 || !occupied[ix]![iy]![iz + 1])
+                    if (iz === zCoordinates.length - 2 || !occupied[ix]![iy]![iz + 1])
                         this.addAxisAlignedBoundaryQuad(builder, 2, true, ix, iy, iz);
                 }
         return builder["result"]();
@@ -262,9 +269,9 @@ export class _PolyhedralBoundedSolidAxisAlignedCellFallback extends _PolyhedralB
             bounds[4] = Math.max(bounds[4]!, boundsB[4]!);
             bounds[5] = Math.max(bounds[5]!, boundsB[5]!);
         }
-        const xs = this.uniformCoordinates(bounds[0]!, bounds[3]!, divisions);
-        const ys = this.uniformCoordinates(bounds[1]!, bounds[4]!, divisions);
-        const zs = this.uniformCoordinates(bounds[2]!, bounds[5]!, divisions);
+        const xCoordinates = this.uniformCoordinates(bounds[0]!, bounds[3]!, divisions);
+        const yCoordinates = this.uniformCoordinates(bounds[1]!, bounds[4]!, divisions);
+        const zCoordinates = this.uniformCoordinates(bounds[2]!, bounds[5]!, divisions);
         const occupied = Array.from({ length: divisions }, () =>
             Array.from({ length: divisions }, () => Array<boolean>(divisions).fill(false)),
         );
@@ -273,9 +280,9 @@ export class _PolyhedralBoundedSolidAxisAlignedCellFallback extends _PolyhedralB
             for (let iy = 0; iy < divisions; iy++)
                 for (let iz = 0; iz < divisions; iz++) {
                     const sample = new Vector3Dd(
-                        (xs[ix]! + xs[ix + 1]!) * 0.5,
-                        (ys[iy]! + ys[iy + 1]!) * 0.5,
-                        (zs[iz]! + zs[iz + 1]!) * 0.5,
+                        (xCoordinates[ix]! + xCoordinates[ix + 1]!) * 0.5,
+                        (yCoordinates[iy]! + yCoordinates[iy + 1]!) * 0.5,
+                        (zCoordinates[iz]! + zCoordinates[iz + 1]!) * 0.5,
                     );
                     const insideA = this.classifyPointForAxisAlignedFallback(solidA, sample) === Geometry.INSIDE;
                     const insideB = this.classifyPointForAxisAlignedFallback(solidB, sample) === Geometry.INSIDE;
@@ -283,7 +290,7 @@ export class _PolyhedralBoundedSolidAxisAlignedCellFallback extends _PolyhedralB
                     anyOccupied ||= occupied[ix]![iy]![iz]!;
                 }
         if (!anyOccupied) return null;
-        const builder = new AxisAlignedCellBooleanBuilder(xs, ys, zs);
+        const builder = new AxisAlignedCellBooleanBuilder(xCoordinates, yCoordinates, zCoordinates);
         for (let ix = 0; ix < divisions; ix++)
             for (let iy = 0; iy < divisions; iy++)
                 for (let iz = 0; iz < divisions; iz++) {

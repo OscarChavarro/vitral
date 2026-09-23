@@ -65,10 +65,10 @@ public class AwtSystem extends PresentationElement
     public static void awt2vsdkEvent(KeyEvent evsdk, java.awt.event.KeyEvent eawt)
     {
         //-----------------------------------------------------------------
-        char unicode_id;
+        char unicodeId;
         int keycode;
 
-        unicode_id = eawt.getKeyChar();
+        unicodeId = eawt.getKeyChar();
         keycode = eawt.getKeyCode();
 
         //-----------------------------------------------------------------
@@ -145,9 +145,9 @@ public class AwtSystem extends PresentationElement
             break;
         }
 
-        evsdk.unicode_id = unicode_id;
-        if ( unicode_id == java.awt.event.KeyEvent.CHAR_UNDEFINED ) {
-            evsdk.unicode_id = KeyEvent.KEY_NONE;
+        evsdk.unicodeId = unicodeId;
+        if ( unicodeId == java.awt.event.KeyEvent.CHAR_UNDEFINED ) {
+            evsdk.unicodeId = KeyEvent.KEY_NONE;
             switch ( keycode ) {
               case java.awt.event.KeyEvent.VK_F1:
                 evsdk.keycode = KeyEvent.KEY_F1;
@@ -212,7 +212,7 @@ public class AwtSystem extends PresentationElement
             }
         }
         else {
-            switch ( unicode_id ) {
+            switch ( unicodeId ) {
               case 'A':
                 evsdk.keycode = KeyEvent.KEY_A;
                 break;

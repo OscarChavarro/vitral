@@ -7,7 +7,7 @@ export class RendererConfiguration extends FundamentalEntity {
     public static readonly SHADING_TYPE_GOURAUD = 2;
     public static readonly SHADING_TYPE_PHONG = 3;
     public static readonly SHADING_TYPE_COOK_TERRANCE = 4;
-    private shading = 2;
+    private shadingType = 2;
     private surfaces = true;
     private wires = false;
     private boundingVolume = false;
@@ -18,9 +18,9 @@ export class RendererConfiguration extends FundamentalEntity {
     private normals = false;
     private trianglesNormals = false;
     private useVertexColors = false;
-    private threshold = 15;
+    private vertexNormalSmoothingThresholdDegrees = 15;
     private wireColor = new ColorRgb(1, 1, 1);
-    private boundingColor = new ColorRgb(1, 1, 0);
+    private boundingVolumeColor = new ColorRgb(1, 1, 0);
     private lodHint = 0;
     public compareTo(other: RendererConfiguration): number {
         const value = (configuration: RendererConfiguration): number =>
@@ -33,8 +33,8 @@ export class RendererConfiguration extends FundamentalEntity {
             (configuration.points ? 0x0040 : 0) +
             (configuration.normals ? 0x0080 : 0) +
             (configuration.trianglesNormals ? 0x0100 : 0) +
-            configuration.shading * 0x1000 +
-            Math.round(configuration.threshold) * 0x100000;
+            configuration.shadingType * 0x1000 +
+            Math.round(configuration.vertexNormalSmoothingThresholdDegrees) * 0x100000;
         const thisValue = value(this),
             otherValue = value(other);
         return thisValue > otherValue ? 1 : thisValue < otherValue ? -1 : 0;
@@ -47,7 +47,7 @@ export class RendererConfiguration extends FundamentalEntity {
         }
         Object.assign(this, o);
         this.wireColor = new ColorRgb(o.wireColor);
-        this.boundingColor = new ColorRgb(o.boundingColor);
+        this.boundingVolumeColor = new ColorRgb(o.boundingVolumeColor);
     }
     public setLodHint(x: number) {
         this.lodHint = x;
@@ -64,25 +64,25 @@ export class RendererConfiguration extends FundamentalEntity {
         return this.wireColor;
     }
     public setBoundingVolumeColor(c: ColorRgb) {
-        this.boundingColor = new ColorRgb(c);
+        this.boundingVolumeColor = new ColorRgb(c);
     }
     public getBoundingVolumeColor() {
-        return this.boundingColor;
+        return this.boundingVolumeColor;
     }
     public setShadingType(s: number | ShadingType | null) {
-        this.shading = s === null ? RendererConfiguration.SHADING_TYPE_GOURAUD : s;
+        this.shadingType = s === null ? RendererConfiguration.SHADING_TYPE_GOURAUD : s;
     }
     public getShadingType() {
-        return this.shading;
+        return this.shadingType;
     }
     public getShadingTypeEnum() {
-        return ShadingType.fromCode(this.shading);
+        return ShadingType.fromCode(this.shadingType);
     }
     public setVertexNormalSmoothingThresholdDegrees(x: number) {
-        this.threshold = Number.isNaN(x) ? 15 : Math.max(0, Math.min(180, x));
+        this.vertexNormalSmoothingThresholdDegrees = Number.isNaN(x) ? 15 : Math.max(0, Math.min(180, x));
     }
     public getVertexNormalSmoothingThresholdDegrees() {
-        return this.threshold;
+        return this.vertexNormalSmoothingThresholdDegrees;
     }
     public setSurfaces(x: boolean) {
         this.surfaces = x;
@@ -166,7 +166,7 @@ export class RendererConfiguration extends FundamentalEntity {
         this.trianglesNormals = !this.trianglesNormals;
     }
     public changeShadingType() {
-        this.shading = ShadingType.next(this.getShadingTypeEnum());
+        this.shadingType = ShadingType.next(this.getShadingTypeEnum());
     }
     public getUseVertexColors(): boolean {
         return this.useVertexColors;
@@ -176,7 +176,7 @@ export class RendererConfiguration extends FundamentalEntity {
     }
     public override toString(): string {
         const names = ["LIGHTING DISABLED (ONLY AMBIENT COLOR)", "FLAT", "GOURAUD", "PHONG", "COOK-TERRANCE"];
-        let message = `<RendererConfiguration>:\n  - Shading type: ${names[this.shading] ?? "INVALID!"}\n`;
+        let message = `<RendererConfiguration>:\n  - Shading type: ${names[this.shadingType] ?? "INVALID!"}\n`;
         message += `  - Draw points: ${this.points ? "ON" : "OFF"}\n`;
         message += `  - Draw wires: ${this.wires ? "ON" : "OFF"}\n`;
         message += `  - Draw surfaces: ${this.surfaces ? "ON" : "OFF"}\n`;
@@ -186,7 +186,7 @@ export class RendererConfiguration extends FundamentalEntity {
         message += `  - Draw triangles normals: ${this.trianglesNormals ? "ON" : "OFF"}\n`;
         message += `  - With texture: ${this.texture ? "ON" : "OFF"}\n`;
         message += `  - With bump map: ${this.bumpMap ? "ON" : "OFF"}\n`;
-        message += `  - Vertex normal smoothing threshold: ${this.threshold} deg\n`;
+        message += `  - Vertex normal smoothing threshold: ${this.vertexNormalSmoothingThresholdDegrees} deg\n`;
         return message;
     }
 }

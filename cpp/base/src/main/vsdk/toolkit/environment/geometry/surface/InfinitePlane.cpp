@@ -90,11 +90,11 @@ int InfinitePlane::doContainmentTest(const Vector3Dd& p, double distanceToleranc
 void InfinitePlane::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
 {
     if (outData == nullptr) return;
-    outData->p = Vector3Dd(
+    outData->point = Vector3Dd(
         inRay.getOrigin().x() + inT*inRay.getDirection().x(),
         inRay.getOrigin().y() + inT*inRay.getDirection().y(),
         inRay.getOrigin().z() + inT*inRay.getDirection().z());
-    outData->n = getNormal();
+    outData->normal = getNormal();
 }
 
 double* InfinitePlane::getMinMax()

@@ -50,7 +50,7 @@ class _CollapsablePanelMouseListener implements MouseListener {
 class _CollapsablePanelHeader extends JPanel {
     @Serial private static final long serialVersionUID = 20140314L;
 
-    private String text_;
+    private String text;
     private Font font;
     private BufferedImage open, closed;
     private final int OFFSET = 30, PAD = 5;
@@ -60,7 +60,7 @@ class _CollapsablePanelHeader extends JPanel {
         super();
         this.parent = parent;
         addMouseListener(new _CollapsablePanelMouseListener(parent));
-        text_ = text;
+        this.text = text;
         font = new Font("sans-serif", Font.PLAIN, 12);
         // setRequestFocusEnabled(true);
         setPreferredSize(new Dimension(200, 20));
@@ -89,11 +89,11 @@ class _CollapsablePanelHeader extends JPanel {
          */ // Uncomment once you have your own images
         g2.setFont(font);
         FontRenderContext frc = g2.getFontRenderContext();
-        LineMetrics lm = font.getLineMetrics(text_, frc);
+        LineMetrics lm = font.getLineMetrics(text, frc);
         float height = lm.getAscent() + lm.getDescent();
         float x = OFFSET;
         float y = (h + height) / 2 - lm.getDescent();
-        g2.drawString(text_, x, y);
+        g2.drawString(text, x, y);
 
         g2.drawLine(5, 10, 15, 10);
 

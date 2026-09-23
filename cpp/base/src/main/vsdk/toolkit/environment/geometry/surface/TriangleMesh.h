@@ -27,7 +27,7 @@ private:
 
     java::ArrayList< java::ArrayList<int> > incidentTrianglesPerVertexArray;
 
-    java::ArrayList<int> triangleIndices;
+    java::ArrayList<int> triangleIndexes;
     java::ArrayList<double> triangleNormals;
 
     java::ArrayList<SimpleMaterial*> materials;

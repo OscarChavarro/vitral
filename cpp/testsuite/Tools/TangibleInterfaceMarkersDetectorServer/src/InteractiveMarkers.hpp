@@ -11,8 +11,8 @@ public:
     int run();
 
 private:
-    MarkersModel* model_;
-    MarkerTracker* tracker_;
+    MarkersModel* model;
+    MarkerTracker* tracker;
 };
 
 #endif

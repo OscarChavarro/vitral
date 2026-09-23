@@ -6,14 +6,14 @@
 #include <exception>
 class VSDKFatalException : public std::exception {
 private:
-    java::String message_;
+    java::String message;
 
 public:
-    explicit VSDKFatalException(const java::String& message) : message_(message) {}
+    explicit VSDKFatalException(const java::String& message) : message(message) {}
 
     const char* what() const noexcept override
     {
-        return message_.c_str();
+        return message.c_str();
     }
 };
 

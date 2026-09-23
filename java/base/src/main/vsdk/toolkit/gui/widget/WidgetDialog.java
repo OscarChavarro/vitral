@@ -16,7 +16,7 @@ public class WidgetDialog extends WidgetElement {
     private String id;
     private String name;
     private int orientation;
-    private ArrayList<WidgetElement> children;
+    private ArrayList<WidgetElement> widgetElementList;
     /// In the importing from file process, a dialog could be "incomplete",
     /// due to having a variable reference to a variable that is not loaded
     /// yet.  In such situation, a two pass processing is performed:
@@ -31,7 +31,7 @@ public class WidgetDialog extends WidgetElement {
     private boolean collapsable;
 
     public WidgetDialog() {
-        children = new ArrayList<WidgetElement>();
+        widgetElementList = new ArrayList<WidgetElement>();
         pendingVariableNames = new ArrayList<String>();
         pendingCommandNames = new ArrayList<String>();
         pendingDialogNames = new ArrayList<String>();
@@ -58,11 +58,11 @@ public class WidgetDialog extends WidgetElement {
     }
 
     public ArrayList<WidgetElement> getWidgetElementList() {
-        return children;
+        return widgetElementList;
     }
 
     public void setWidgetElementList(ArrayList<WidgetElement> widgetElementList) {
-        this.children = widgetElementList;
+        this.widgetElementList = widgetElementList;
     }
 
     public String getId() {
@@ -106,11 +106,11 @@ public class WidgetDialog extends WidgetElement {
     }
 
     public ArrayList<WidgetElement> getChildren() {
-        return children;
+        return widgetElementList;
     }
 
-    public void setChildren(ArrayList<WidgetElement> children) {
-        this.children = children;
+    public void setChildren(ArrayList<WidgetElement> widgetElementList) {
+        this.widgetElementList = widgetElementList;
     }
 
     public ArrayList<String> getPendingDialogRefNames() {
@@ -141,8 +141,8 @@ public class WidgetDialog extends WidgetElement {
         String msg = "";
 
         msg = msg + "    DIALOG: " + this.getId() + "\n";
-        for (int j = 0; j < children.size(); j++) {
-            msg = msg + "    " + children.get(j).toString() + "\n";
+        for (int j = 0; j < widgetElementList.size(); j++) {
+            msg = msg + "    " + widgetElementList.get(j).toString() + "\n";
         }
         for (int j = 0; j < pendingCommandNames.size(); j++) {
             msg = msg + "    Commandname: " + pendingCommandNames.get(j) + "\n";

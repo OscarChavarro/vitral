@@ -46,8 +46,8 @@ class ParallelRaytracer {
     java::ExecutorService* executorService;
 
     DepthBufferMode depthBufferMode;
-    double depthRangeNear;
-    double depthRangeFar;
+    double openGlDepthRangeNear;
+    double openGlDepthRangeFar;
     /// Depth buffer of the last `execute` call, reused while its size fits
     ZBuffer* depthBuffer;
 

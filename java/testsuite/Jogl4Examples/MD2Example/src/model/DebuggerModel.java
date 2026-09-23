@@ -21,9 +21,9 @@ public class DebuggerModel {
     public Md2Mesh md2Mesh;
 
     public double x;
-    public Vertex2D p0;
-    public Vertex2D p1;
-    public Vertex2D p2;
+    public Vertex2D point0;
+    public Vertex2D point1;
+    public Vertex2D point2;
     public int selectedObject;
 
     public DebuggerModel() {

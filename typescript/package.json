@@ -1,6 +1,6 @@
 {
     "name": "vitral",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "private": true,
     "workspaces": [
         "base",
@@ -15,7 +15,8 @@
         "test": "npm run --workspace @vitral/base test",
         "pack": "npm run --workspace @vitral/base pack",
         "pack:fs": "npm run --workspace @vitral/fs pack",
-        "lint": "prettier --check . && eslint .",
+        "lint": "prettier --check . && eslint . && npm run check:names",
+        "check:names": "python3 ../scripts/checkAttributeNames.py --all",
         "lint-fix": "prettier --write . && eslint . --fix",
         "verify": "npm run clean && npm run build && npm run test && ./scripts/compile.sh",
         "clean_all": "./scripts/clean.sh"

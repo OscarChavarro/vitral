@@ -2,7 +2,7 @@
 #include "render/OpenCVMarkerGroupRenderer.hpp"
 #include <opencv2/imgproc.hpp>
 OpenCVMarkerGroupRenderer::OpenCVMarkerGroupRenderer(MarkersModel* model)
-    : model_(model) {}
+    : model(model) {}
 
 bool OpenCVMarkerGroupRenderer::project(const Vector3Dd& p, double fx, double fy, double cx, double cy, cv::Point2f* out) const {
     if (out == nullptr) return false;
@@ -32,8 +32,8 @@ void OpenCVMarkerGroupRenderer::drawGroupGizmos(cv::Mat& canvas,
 
         MarkerGroup group;
         bool found = false;
-        for (long j = 0; j < model_->getMarkerGroups().size(); ++j) {
-            MarkerGroup g = model_->getMarkerGroups().get(j);
+        for (long j = 0; j < model->getMarkerGroups().size(); ++j) {
+            MarkerGroup g = model->getMarkerGroups().get(j);
             if (g.label == gp.label) {
                 group = g;
                 found = true;

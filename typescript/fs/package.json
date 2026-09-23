@@ -1,6 +1,6 @@
 {
     "name": "@vitral/fs",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "description": "Node/server-side filesystem adapters for Vitral",
     "type": "module",
     "main": "./dist/index.js",
@@ -19,7 +19,7 @@
         "dist"
     ],
     "dependencies": {
-        "@vitral/base": "1.3.0"
+        "@vitral/base": "1.4.0"
     },
     "scripts": {
         "build": "tsc --build ./tsconfig.json",

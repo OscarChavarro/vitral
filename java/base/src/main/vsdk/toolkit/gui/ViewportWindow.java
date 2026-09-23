@@ -42,7 +42,7 @@ public class ViewportWindow extends PresentationElement
     protected double viewportSizeXPercent;
     protected double viewportSizeYPercent;
 
-    protected int viewportBorder; // In pixels
+    protected int border; // In pixels
 
     protected boolean selected;
     protected boolean active;
@@ -54,7 +54,7 @@ public class ViewportWindow extends PresentationElement
         viewportSizeXPercent = 1.0;
         viewportSizeYPercent = 1.0;
 
-        viewportBorder = 2;
+        border = 2;
 
         selected = true;
         active = true;
@@ -62,12 +62,12 @@ public class ViewportWindow extends PresentationElement
 
     public int getBorder()
     {
-        return viewportBorder;
+        return border;
     }
 
     public void setBorder(int b)
     {
-        viewportBorder = b;
+        border = b;
     }
 
     public double getViewportStartXPercent()

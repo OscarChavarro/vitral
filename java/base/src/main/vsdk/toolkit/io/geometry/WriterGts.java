@@ -20,9 +20,9 @@ class _WriterGtsEdge extends PersistenceElement
 
 class _WriterGtsTriangle extends PersistenceElement
 {
-    public int p0;
-    public int p1;
-    public int p2;
+    public int point0;
+    public int point1;
+    public int point2;
 }
 
 public class WriterGts extends PersistenceElement {
@@ -67,9 +67,9 @@ public class WriterGts extends PersistenceElement {
         int t[] = mesh.getTriangleIndexes();
         for ( i = 0; i < nt; i++ ) {
             tt = new _WriterGtsTriangle();
-            tt.p0 = addEdge(edges, t[3*i], t[3*i+1]);
-            tt.p1 = addEdge(edges, t[3*i+1], t[3*i+2]);
-            tt.p2 = addEdge(edges, t[3*i+2], t[3*i]);
+            tt.point0 = addEdge(edges, t[3*i], t[3*i+1]);
+            tt.point1 = addEdge(edges, t[3*i+1], t[3*i+2]);
+            tt.point2 = addEdge(edges, t[3*i+2], t[3*i]);
             triangles.add(tt);
         }
 
@@ -92,7 +92,7 @@ public class WriterGts extends PersistenceElement {
         //- Write triangles -----------------------------------------------
         for ( i = 0; i < triangles.size(); i++ ) {
             tt = triangles.get(i);
-            writeAsciiLine(inOutputStream, "" + (tt.p0+1) + " " + (tt.p1+1) + " " + (tt.p2+1));
+            writeAsciiLine(inOutputStream, "" + (tt.point0+1) + " " + (tt.point1+1) + " " + (tt.point2+1));
         }
 
         return offset + nv;

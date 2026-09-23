@@ -31,8 +31,6 @@ import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 
 public class Jogl2GeometryRenderer extends Jogl2Renderer 
 {
-    private static Vector3Dd p = new Vector3Dd();
-    private static Vector3Dd n = new Vector3Dd();
 
     public static void prepareSurfaceQuality(GL2 gl, RendererConfiguration quality)
     {
@@ -59,15 +57,15 @@ public class Jogl2GeometryRenderer extends Jogl2Renderer
 
     public static void drawVertexNormal(GL2 gl, Vertex vertex) {
         double l = 0.2;
-        p = vertex.getPosition();
-        n = vertex.getNormal();
+        Vector3Dd position = vertex.getPosition();
+        Vector3Dd normal = vertex.getNormal();
 
-        gl.glVertex3d(p.x() + (n.x() * l/100),
-                      p.y() + (n.y() * l/100),
-                      p.z() + (n.z() * l/100));
-        gl.glVertex3d(p.x() + (n.x() * l),
-                      p.y() + (n.y() * l),
-                      p.z() + (n.z() * l));
+        gl.glVertex3d(position.x() + (normal.x() * l/100),
+                      position.y() + (normal.y() * l/100),
+                      position.z() + (normal.z() * l/100));
+        gl.glVertex3d(position.x() + (normal.x() * l),
+                      position.y() + (normal.y() * l),
+                      position.z() + (normal.z() * l));
     }
 
     public static void drawMinMaxBox(GL2 gl, double minmax[], RendererConfiguration q)

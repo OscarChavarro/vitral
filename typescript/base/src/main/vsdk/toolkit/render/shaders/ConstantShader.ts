@@ -22,6 +22,6 @@ export class ConstantShader extends Shader {
         _workspace: TraceWorkspace,
     ): Shader.LocalShadingResult {
         const diffuse: ColorRgb = material.getDiffuseReference();
-        return new Shader.LocalShadingResult(info.n, new ColorRgb(diffuse));
+        return new Shader.LocalShadingResult(info.normal, new ColorRgb(diffuse));
     }
 }

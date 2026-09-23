@@ -6,25 +6,25 @@
 #include "vsdk/toolkit/common/symbolicAlgebra/AlgebraicExpressionException.h"
 class Parser {
 private:
-    const java::String& s;
+    const java::String& text;
     const java::HashMap<java::String, double>& vars;
-    mutable size_t p;
+    mutable size_t position;
 
-    void skip() const { while (p < s.size() && std::isspace((unsigned char)s[p])) p++; }
-    bool consume(char c) const { skip(); if (p < s.size() && s[p] == c) { p++; return true; } return false; }
+    void skip() const { while (position < text.size() && std::isspace((unsigned char)text[position])) position++; }
+    bool consume(char c) const { skip(); if (position < text.size() && text[position] == c) { position++; return true; } return false; }
     java::String id() const {
-        skip(); size_t b = p;
-        if (p < s.size() && (std::isalpha((unsigned char)s[p]) || s[p] == '_')) {
-            p++;
-            while (p < s.size() && (std::isalnum((unsigned char)s[p]) || s[p] == '_')) p++;
+        skip(); size_t b = position;
+        if (position < text.size() && (std::isalpha((unsigned char)text[position]) || text[position] == '_')) {
+            position++;
+            while (position < text.size() && (std::isalnum((unsigned char)text[position]) || text[position] == '_')) position++;
         }
-        return s.substr(b, p-b);
+        return text.substr(b, position-b);
     }
     double num() const {
-        skip(); const char* st = s.c_str() + p; char* end = 0;
+        skip(); const char* st = text.c_str() + position; char* end = 0;
         double v = std::strtod(st, &end);
         if (end == st) throw AlgebraicExpressionException("Invalid number");
-        p += (size_t)(end - st);
+        position += (size_t)(end - st);
         return v;
     }
     double fn(const java::String& f, double v) const {
@@ -38,7 +38,7 @@ private:
     double primary() const {
         skip();
         if (consume('(')) { double v = expr(); if (!consume(')')) throw AlgebraicExpressionException("Missing ')' "); return v; }
-        if (p < s.size() && (std::isdigit((unsigned char)s[p]) || s[p] == '.')) return num();
+        if (position < text.size() && (std::isdigit((unsigned char)text[position]) || text[position] == '.')) return num();
         java::String name = id();
         if (name.empty()) throw AlgebraicExpressionException("Unexpected token");
         if (name == "pi") return 3.14159265358979323846;
@@ -54,8 +54,8 @@ private:
     double expr() const { double a = term(); while (true) { if (consume('+')) a += term(); else if (consume('-')) a -= term(); else break; } return a; }
 
 public:
-    Parser(const java::String& s, const java::HashMap<java::String, double>& vars) : s(s), vars(vars), p(0) {}
-    double eval() const { double v = expr(); skip(); if (p != s.size()) throw AlgebraicExpressionException("Trailing input"); return v; }
+    Parser(const java::String& text, const java::HashMap<java::String, double>& vars) : text(text), vars(vars), position(0) {}
+    double eval() const { double v = expr(); skip(); if (position != text.size()) throw AlgebraicExpressionException("Trailing input"); return v; }
 };
 
 void AlgebraicExpression::setExpression(const java::String& expr) { expression = expr; }

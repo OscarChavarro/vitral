@@ -199,9 +199,9 @@ final class _StlFaceTriangulator
     {
         validateTriangleIndices(face, triangle, originalVertices.size());
 
-        Vector3Dd a = originalVertices.get(triangle.a);
-        Vector3Dd b = originalVertices.get(triangle.b);
-        Vector3Dd c = originalVertices.get(triangle.c);
+        Vector3Dd a = originalVertices.get(triangle.point0);
+        Vector3Dd b = originalVertices.get(triangle.point1);
+        Vector3Dd c = originalVertices.get(triangle.point2);
 
         if ( !PolyhedralBoundedSolidNumericPolicy.pointsSeparated(a, b, numericContext) ||
              !PolyhedralBoundedSolidNumericPolicy.pointsSeparated(b, c, numericContext) ||
@@ -240,9 +240,9 @@ final class _StlFaceTriangulator
         MonotoneDecompositionTriangulator.Triangle triangle,
         int vertexCount)
     {
-        if ( triangle.a < 0 || triangle.a >= vertexCount ||
-             triangle.b < 0 || triangle.b >= vertexCount ||
-             triangle.c < 0 || triangle.c >= vertexCount ) {
+        if ( triangle.point0 < 0 || triangle.point0 >= vertexCount ||
+             triangle.point1 < 0 || triangle.point1 >= vertexCount ||
+             triangle.point2 < 0 || triangle.point2 >= vertexCount ) {
             throw new IllegalStateException(
                 "STL export rejected: face " + face.id
                 + " triangulation returned an out-of-range index");

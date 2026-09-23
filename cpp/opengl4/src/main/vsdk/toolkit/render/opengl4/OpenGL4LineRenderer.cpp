@@ -76,11 +76,11 @@ void OpenGL4LineRenderer::addVertex(
     colors.add(color[2]);
 }
 
-unsigned int OpenGL4LineRenderer::vao_ = 0;
-unsigned int OpenGL4LineRenderer::positionVbo_ = 0;
-unsigned int OpenGL4LineRenderer::colorVbo_ = 0;
-unsigned int OpenGL4LineRenderer::program_ = 0;
-bool OpenGL4LineRenderer::initialized_ = false;
+unsigned int OpenGL4LineRenderer::vao = 0;
+unsigned int OpenGL4LineRenderer::positionVbo = 0;
+unsigned int OpenGL4LineRenderer::colorVbo = 0;
+unsigned int OpenGL4LineRenderer::program = 0;
+bool OpenGL4LineRenderer::initialized = false;
 
 java::String OpenGL4LineRenderer::readShaderFile(const java::String& filename)
 {
@@ -145,7 +145,7 @@ unsigned int OpenGL4LineRenderer::compileShader(
 
 bool OpenGL4LineRenderer::initializeIfNeeded()
 {
-    if ( initialized_ ) {
+    if ( initialized ) {
         return true;
     }
 
@@ -165,25 +165,25 @@ bool OpenGL4LineRenderer::initializeIfNeeded()
         return false;
     }
 
-    program_ = glCreateProgram();
-    glAttachShader(program_, vertexShader);
-    glAttachShader(program_, fragmentShader);
-    glLinkProgram(program_);
+    program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
     int success = 0;
-    glGetProgramiv(program_, GL_LINK_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
     if ( !success ) {
-        glDeleteProgram(program_);
-        program_ = 0;
+        glDeleteProgram(program);
+        program = 0;
         return false;
     }
 
-    glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &positionVbo_);
-    glGenBuffers(1, &colorVbo_);
-    initialized_ = true;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &positionVbo);
+    glGenBuffers(1, &colorVbo);
+    initialized = true;
     return true;
 }
 
@@ -256,26 +256,26 @@ void OpenGL4LineRenderer::drawPrimitives(
     }
 
     float* mvpFloat = modelViewProjection.exportToFloatArrayColumnOrder();
-    glUseProgram(program_);
+    glUseProgram(program);
 
-    GLint mvpLoc = glGetUniformLocation(program_, "modelViewProjectionLocal");
+    GLint mvpLoc = glGetUniformLocation(program, "modelViewProjectionLocal");
     if ( mvpLoc >= 0 ) {
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, mvpFloat);
     }
-    GLint depthBiasLoc = glGetUniformLocation(program_, "depthBiasNdc");
+    GLint depthBiasLoc = glGetUniformLocation(program, "depthBiasNdc");
     if ( depthBiasLoc >= 0 ) {
         glUniform1f(depthBiasLoc, depthBiasNdc);
     }
 
-    glBindVertexArray(vao_);
+    glBindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, positionVbo_);
+    glBindBuffer(GL_ARRAY_BUFFER, positionVbo);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float),
         const_cast<java::ArrayList<float>&>(positions).data(), GL_STREAM_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, colorVbo_);
+    glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
     glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float),
         const_cast<java::ArrayList<float>&>(colors).data(), GL_STREAM_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -373,25 +373,25 @@ void OpenGL4LineRenderer::buildThickLineMesh(
 
 void OpenGL4LineRenderer::release()
 {
-    if ( !initialized_ ) {
+    if ( !initialized ) {
         return;
     }
 
-    if ( positionVbo_ != 0 ) {
-        glDeleteBuffers(1, &positionVbo_);
-        positionVbo_ = 0;
+    if ( positionVbo != 0 ) {
+        glDeleteBuffers(1, &positionVbo);
+        positionVbo = 0;
     }
-    if ( colorVbo_ != 0 ) {
-        glDeleteBuffers(1, &colorVbo_);
-        colorVbo_ = 0;
+    if ( colorVbo != 0 ) {
+        glDeleteBuffers(1, &colorVbo);
+        colorVbo = 0;
     }
-    if ( vao_ != 0 ) {
-        glDeleteVertexArrays(1, &vao_);
-        vao_ = 0;
+    if ( vao != 0 ) {
+        glDeleteVertexArrays(1, &vao);
+        vao = 0;
     }
-    if ( program_ != 0 ) {
-        glDeleteProgram(program_);
-        program_ = 0;
+    if ( program != 0 ) {
+        glDeleteProgram(program);
+        program = 0;
     }
-    initialized_ = false;
+    initialized = false;
 }

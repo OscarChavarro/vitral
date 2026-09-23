@@ -82,10 +82,10 @@ public class MeshModel {
             for ( SimpleBody body : scene.getSimpleBodies() ) {
                 RayHit hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL);
                 if ( body.doIntersectionFirstHit(ray, hit) && hit.hasHitDistance() ) {
-                    double t = hit.hitDistance();
+                    double t = hit.getHitDistance();
                     if ( t > 1e-6 && t < closestT ) {
                         closestT = t;
-                        closest = new Intersection(t, hit.p, hit.n);
+                        closest = new Intersection(t, hit.point, hit.normal);
                     }
                 }
             }

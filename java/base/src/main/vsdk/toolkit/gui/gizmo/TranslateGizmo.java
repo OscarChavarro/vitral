@@ -21,7 +21,7 @@ import vsdk.toolkit.gui.viewport.ViewportElementScaler;
 
 public class TranslateGizmo extends Gizmo {
     /// Internal transformation state
-    private Matrix4x4d T;
+    private Matrix4x4d transformationMatrix;
     private Camera camera;
 
     /// Geometric model based in primitive instancing: primitive concretions
@@ -33,7 +33,7 @@ public class TranslateGizmo extends Gizmo {
     /// Geometric model based in primitive instancing: primitive instances
     /// This list is always of size 12, and its elements follow the order 
     /// indicated in the values of the *_ELEMENT constants of this class.
-    ArrayList<SimpleBody> elementInstances;
+    ArrayList<SimpleBody> elements;
     ArrayList<SimpleBody> elementInstances3dsmax;
 
     /// Internal element selection state
@@ -104,10 +104,10 @@ public class TranslateGizmo extends Gizmo {
         boxModel = new Box(BOX_SIDE, BOX_SIDE, BOX_HEIGHT);
         coneModel = new Cone(0.05, 0, 0.3* ARROW_LENGTH);
 
-        elementInstances = new ArrayList<>();
+        elements = new ArrayList<>();
         for ( int i = 0; i < 12; i++ ) {
             SimpleBody r = new SimpleBody();
-            elementInstances.add(r);
+            elements.add(r);
         }
 
         elementInstances3dsmax = new ArrayList<>();
@@ -214,7 +214,7 @@ public class TranslateGizmo extends Gizmo {
         ArrayList<TranslateGizmoLineSegment> segments = new ArrayList<TranslateGizmoLineSegment>();
         Vector3Dd zAxis = new Vector3Dd(0, 0, 1);
 
-        for ( SimpleBody element : elementInstances ) {
+        for ( SimpleBody element : elements ) {
             Geometry g = element.getGeometry();
             double length;
 
@@ -309,7 +309,7 @@ public class TranslateGizmo extends Gizmo {
 
     public ArrayList<SimpleBody> getElements()
     {
-        return elementInstances;
+        return elements;
     }
 
     public ArrayList<SimpleBody> getElements3dsmax()
@@ -321,7 +321,7 @@ public class TranslateGizmo extends Gizmo {
         SimpleMaterial green = createMaterial(0, 0.61, 0);
         SimpleMaterial blue = createMaterial(0, 0, 0.76);
 
-        Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d R = new Matrix4x4d(transformationMatrix).withoutTranslation();
         Matrix4x4d subR = new Matrix4x4d();
         Matrix4x4d eleR, eleRi;
         Vector3Dd subP;
@@ -342,9 +342,9 @@ public class TranslateGizmo extends Gizmo {
             0, 0, currentScale* SEGMENT_LENGTH);
 
         //-----------------------------------------------------------------
-        for ( i = 0; i < elementInstances.size(); i++ ) {
+        for ( i = 0; i < elements.size(); i++ ) {
             r = elementInstances3dsmax.get(i);
-            o = elementInstances.get(i);
+            o = elements.get(i);
 
             r.setMaterial(o.getMaterial()); 
             r.setRotation(o.getRotation());
@@ -468,7 +468,7 @@ public class TranslateGizmo extends Gizmo {
             currentSelection = volatileSelection;
         }
 
-        Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d R = new Matrix4x4d(transformationMatrix).withoutTranslation();
         Matrix4x4d subR = new Matrix4x4d();
         Matrix4x4d eleR, eleRi;
         Vector3Dd subP;
@@ -521,9 +521,9 @@ public class TranslateGizmo extends Gizmo {
 
         int index;
         for ( i = 0, index = 1;
-              index <= 12 && i < elementInstances.size();
+              index <= 12 && i < elements.size();
               index++, i++ ) {
-            SimpleBody r = elementInstances.get(i);
+            SimpleBody r = elements.get(i);
             r.setGeometry(null);
             switch ( index ) {
               case X_AXIS_ELEMENT:
@@ -817,19 +817,19 @@ public class TranslateGizmo extends Gizmo {
 
     public Vector3Dd getPosition()
     {
-        return T.extractTranslation();
+        return transformationMatrix.extractTranslation();
     }
 
     public void setPosition(Vector3Dd p)
     {
-        T = T.withTranslation(p);
+        transformationMatrix = transformationMatrix.withTranslation(p);
     }
 
-    public void setTransformationMatrix(Matrix4x4d T)
+    public void setTransformationMatrix(Matrix4x4d transformationMatrix)
     {
-        this.T = T;
+        this.transformationMatrix = transformationMatrix;
 
-        Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d R = new Matrix4x4d(transformationMatrix).withoutTranslation();
         calculateGeometryState(getPosition(), 
                                R, selectedResizing, apparentSizeInPixels,
                                camera);
@@ -837,7 +837,7 @@ public class TranslateGizmo extends Gizmo {
 
     public Matrix4x4d getTransformationMatrix()
     {
-        return T;
+        return transformationMatrix;
     }
 
     /**
@@ -847,7 +847,7 @@ public class TranslateGizmo extends Gizmo {
     */
     public void updateGeometryState()
     {
-        Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d R = new Matrix4x4d(transformationMatrix).withoutTranslation();
 
         calculateGeometryState(getPosition(), R, selectedResizing,
             apparentSizeInPixels, camera);
@@ -909,7 +909,7 @@ public class TranslateGizmo extends Gizmo {
     */
     public InputGizmo getInputGizmo()
     {
-        if ( T != null ) {
+        if ( transformationMatrix != null ) {
             Vector3Dd position = getPosition();
 
             inputGizmo.setValue(0, position.x());

@@ -53,6 +53,14 @@ endif()
 include(CTest)
 enable_testing()
 
+# Naming rules of attributes and accessors, shared by the three ports.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  add_test(NAME attribute_names
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/../scripts/checkAttributeNames.py --all
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
+endif()
+
 # Make java/lang helpers visible from every subproject target.
 include_directories(${CMAKE_SOURCE_DIR}/base/src/main)
 

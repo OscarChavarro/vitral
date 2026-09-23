@@ -147,8 +147,8 @@ class MyGraphPanel extends JPanel
 
     public void paintComponent(Graphics graphics)
     {
-        if ( parent.t >= parent.viewportXSize || parent.accelerometerSource != parent.lastSource ) {
-            parent.t = 0;
+        if ( parent.plotColumn >= parent.viewportXSize || parent.accelerometerSource != parent.lastSource ) {
+            parent.plotColumn = 0;
             parent.lastSource = parent.accelerometerSource;
             graphics.clearRect(0, 0, parent.viewportXSize, 600);
             graphics.fillRect(0, 0, parent.viewportXSize, 600);
@@ -157,11 +157,11 @@ class MyGraphPanel extends JPanel
         }
 
         graphics.setColor(Color.RED);
-        graphics.drawLine(parent.t, parent.lastX, parent.t, parent.x);
+        graphics.drawLine(parent.plotColumn, parent.lastX, parent.plotColumn, parent.x);
         graphics.setColor(Color.GREEN);
-        graphics.drawLine(parent.t, parent.lastY, parent.t, parent.y);
+        graphics.drawLine(parent.plotColumn, parent.lastY, parent.plotColumn, parent.y);
         graphics.setColor(Color.BLUE);
-        graphics.drawLine(parent.t, parent.lastZ, parent.t, parent.z);
+        graphics.drawLine(parent.plotColumn, parent.lastZ, parent.plotColumn, parent.z);
     }
 }
 
@@ -180,42 +180,42 @@ class MyWiiRemoteDiscoveryListener implements WiiRemoteDiscoveryListener
 
 class MyMouseTestPanel extends JPanel
 {
-    private int LS;
+    private int cellSize;
     private WiiRemoteSampleApplication parent;
 
-    public MyMouseTestPanel(int LS, WiiRemoteSampleApplication parent)
+    public MyMouseTestPanel(int cellSize, WiiRemoteSampleApplication parent)
     {
-        this.LS = LS;
+        this.cellSize = cellSize;
         this.parent = parent;
     }
 
     public void paintComponent(Graphics graphics)
     {
-        graphics.clearRect(0, 0, 4*LS, 7*LS);
+        graphics.clearRect(0, 0, 4*cellSize, 7*cellSize);
         graphics.setColor(Color.YELLOW);
         if ( parent.status == 0 ) {
-            graphics.fillRect(parent.status*LS, (parent.accelerometerStatus+1)*LS, LS, LS);
+            graphics.fillRect(parent.status*cellSize, (parent.accelerometerStatus+1)*cellSize, cellSize, cellSize);
         }
         else if ( parent.status == 3 ) {
-            graphics.fillRect(parent.status*LS, (parent.analogStickStatus+1)*LS, LS, LS);
+            graphics.fillRect(parent.status*cellSize, (parent.analogStickStatus+1)*cellSize, cellSize, cellSize);
         }
         else {
-            graphics.fillRect(parent.status*LS, LS, LS, LS);
+            graphics.fillRect(parent.status*cellSize, cellSize, cellSize, cellSize);
         }
                     
         graphics.setColor(Color.BLACK);
-        graphics.drawString("WM", (int)(LS*0.5), (int)(LS*1.5));
-        graphics.drawString("WT", (int)(LS*0.5), (int)(LS*2.5));
-        graphics.drawString("NM", (int)(LS*0.5), (int)(LS*3.5));
-        graphics.drawString("NT", (int)(LS*0.5), (int)(LS*4.5));
-        graphics.drawString("**", (int)(LS*1.5), (int)(LS*1.5));
-        graphics.drawString("**", (int)(LS*2.5), (int)(LS*1.5));
-        graphics.drawString("NA", (int)(LS*3.5), (int)(LS*1.5));
-        graphics.drawString("NR", (int)(LS*3.5), (int)(LS*2.5));
-        graphics.drawString("LA", (int)(LS*3.5), (int)(LS*3.5));
-        graphics.drawString("LR", (int)(LS*3.5), (int)(LS*4.5));
-        graphics.drawString("RA", (int)(LS*3.5), (int)(LS*5.5));
-        graphics.drawString("RR", (int)(LS*3.5), (int)(LS*6.5));
+        graphics.drawString("WM", (int)(cellSize*0.5), (int)(cellSize*1.5));
+        graphics.drawString("WT", (int)(cellSize*0.5), (int)(cellSize*2.5));
+        graphics.drawString("NM", (int)(cellSize*0.5), (int)(cellSize*3.5));
+        graphics.drawString("NT", (int)(cellSize*0.5), (int)(cellSize*4.5));
+        graphics.drawString("**", (int)(cellSize*1.5), (int)(cellSize*1.5));
+        graphics.drawString("**", (int)(cellSize*2.5), (int)(cellSize*1.5));
+        graphics.drawString("NA", (int)(cellSize*3.5), (int)(cellSize*1.5));
+        graphics.drawString("NR", (int)(cellSize*3.5), (int)(cellSize*2.5));
+        graphics.drawString("LA", (int)(cellSize*3.5), (int)(cellSize*3.5));
+        graphics.drawString("LR", (int)(cellSize*3.5), (int)(cellSize*4.5));
+        graphics.drawString("RA", (int)(cellSize*3.5), (int)(cellSize*5.5));
+        graphics.drawString("RR", (int)(cellSize*3.5), (int)(cellSize*6.5));
                     
         paintChildren(graphics);
     }
@@ -240,7 +240,7 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
     private static JFrame graphFrame;
     private static JPanel graph;
     private static int[][] pixels;
-    public static int t = 0;
+    public static int plotColumn = 0;
     public static int x = 0;
     public static int y = 0;
     public static int z = 0;
@@ -308,14 +308,14 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
             System.out.println(" done in " + time + " seconds.");
 
             //-----------------------------------------------------------------
-            int LS = 50; //line spacing
+            int cellSize = 50; //line spacing
 
             mouseTestFrame = new JFrame();
             mouseTestFrame.setTitle("Mouse test");
-            mouseTestFrame.setSize(4*LS, 7*LS);
+            mouseTestFrame.setSize(4*cellSize, 7*cellSize);
             mouseTestFrame.setResizable(false);
             
-            mouseTestPanel = new MyMouseTestPanel(LS, this);
+            mouseTestPanel = new MyMouseTestPanel(cellSize, this);
             
             mouseTestPanel.setLayout(new FlowLayout());
             mouseTestPanel.add(new JLabel("A          I       IA         AS"));
@@ -327,7 +327,7 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
             graphFrame.setResizable(true);
             graphFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            t = viewportXSize+1;
+            plotColumn = viewportXSize+1;
             pixels = new int[viewportXSize][600];
             graph = new MyGraphPanel(this);
             graphFrame.add(graph);
@@ -385,7 +385,7 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
             y = (int)(evt.getYAcceleration()/5*300)+300;
             z = (int)(evt.getZAcceleration()/5*300)+300;
             
-            t++;
+            plotColumn++;
             
             graph.repaint();
         }
@@ -413,7 +413,7 @@ public class WiiRemoteSampleApplication extends WiiRemoteAdapter
                 y = (int)(AEvt.getYAcceleration()/5*300)+300;
                 z = (int)(AEvt.getZAcceleration()/5*300)+300;
                 
-                t++;
+                plotColumn++;
                 
                 graph.repaint();
             }

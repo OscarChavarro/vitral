@@ -14,7 +14,7 @@ public:
     void drawDetectedGroups(cv::Mat& canvas, const java::ArrayList<MarkerGroupPose>& groups);
 
 private:
-    MarkersModel* model_;
+    MarkersModel* model;
 };
 
 #endif

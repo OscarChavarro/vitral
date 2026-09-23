@@ -15,7 +15,7 @@ private:
     Vector3Dd position;
     Vector3Dd scale;
     Matrix4x4d rotation;
-    Matrix4x4d rotation_i;
+    Matrix4x4d rotationInverse;
     java::String name;
 
 public:
@@ -31,7 +31,7 @@ public:
     void setRotation(const Matrix4x4d& rotation);
 
     Matrix4x4d getRotationInverse() const;
-    void setRotationInverse(const Matrix4x4d& rotationi);
+    void setRotationInverse(const Matrix4x4d& value);
 
     Vector3Dd getPosition() const;
     void setPosition(const Vector3Dd& p);

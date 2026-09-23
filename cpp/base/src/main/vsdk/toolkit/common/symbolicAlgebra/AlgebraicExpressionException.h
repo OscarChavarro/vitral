@@ -5,14 +5,14 @@
 #include <exception>
 class AlgebraicExpressionException : public std::exception {
 private:
-    java::String message_;
+    java::String message;
 
 public:
-    explicit AlgebraicExpressionException(const java::String& msg) : message_(msg) {}
+    explicit AlgebraicExpressionException(const java::String& msg) : message(msg) {}
 
     const char* what() const noexcept override
     {
-        return message_.c_str();
+        return message.c_str();
     }
 };
 

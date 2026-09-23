@@ -1,6 +1,6 @@
 {
     "name": "@vitral/base",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "description": "Vitral platform-neutral TypeScript base library",
     "type": "module",
     "main": "./dist/index.js",

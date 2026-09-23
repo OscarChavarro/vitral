@@ -351,9 +351,9 @@ public class SimpleRaytracer extends RenderingElement {
                 double reflectZ = twoT*surfaceNormalZ - viewZ;
                 Vector3Dd reflect = new Vector3Dd(reflectX, reflectY, reflectZ);
                 Vector3Dd poffset = new Vector3Dd(
-                    info.p.x() + VSDK.EPSILON*reflectX,
-                    info.p.y() + VSDK.EPSILON*reflectY,
-                    info.p.z() + VSDK.EPSILON*reflectZ);
+                    info.point.x() + VSDK.EPSILON*reflectX,
+                    info.point.y() + VSDK.EPSILON*reflectY,
+                    info.point.z() + VSDK.EPSILON*reflectZ);
                 RaytraceStatistics.recordReflectionRay();
                 Ray reflected_ray = new Ray(poffset, reflect);
 
@@ -373,7 +373,7 @@ public class SimpleRaytracer extends RenderingElement {
                         sceneRenderCache.objectData(nearestObjectIndex);
                     RayHit subInfo = workspace.shadingHits[recursionLevel + 1];
                     Ray reflectedHitRay =
-                        reflected_ray.withT(reflectedHit.hitDistance());
+                        reflected_ray.withT(reflectedHit.getHitDistance());
 
                     prepareSurfaceHit(
                         nearestObject,
@@ -448,7 +448,7 @@ public class SimpleRaytracer extends RenderingElement {
             candidateHit.resetForDistanceOnly();
             RaytraceStatistics.recordObjectIntersectionTest();
             if ( gi.doIntersectionFirstHit(inRay, candidateHit) ) {
-                double hitDistance = candidateHit.hitDistance();
+                double hitDistance = candidateHit.getHitDistance();
                 if ( hitDistance < nearestDistance && hitDistance > VSDK.EPSILON ) {
                     nearestDistance = hitDistance;
                     nearestObjectIndex = i;
@@ -492,7 +492,7 @@ public class SimpleRaytracer extends RenderingElement {
                 inSimpleBodiesArray.get(nearestObjectIndex);
             SceneObjectRenderData objectData =
                 sceneRenderCache.objectData(nearestObjectIndex);
-            Ray primaryHitRay = inRay.withT(hitInfo.hitDistance());
+            Ray primaryHitRay = inRay.withT(hitInfo.getHitDistance());
             RayHit shadingInfo = workspace.shadingHits[0];
             prepareSurfaceHit(
                 nearestObject,
@@ -711,10 +711,10 @@ public class SimpleRaytracer extends RenderingElement {
         }
         while ( (tile = pendingTiles.poll()) != null ) {
             Image tileImage = tile.getImage();
-            int tileX0 = tile.getX0();
-            int tileY0 = tile.getY0();
-            int tileX1 = tileX0 + tile.getDx();
-            int tileY1 = tileY0 + tile.getDy();
+            int tileX0 = tile.getStartX();
+            int tileY0 = tile.getStartY();
+            int tileX1 = tileX0 + tile.getWidth();
+            int tileY1 = tileY0 + tile.getHeight();
 
             for ( y = tileY0; y < tileY1; y++ ) {
                 assertSceneUnmodifiedDuringRender(
@@ -733,7 +733,7 @@ public class SimpleRaytracer extends RenderingElement {
                     if ( outDepthmap != null ) {
                         outDepthmap.setZ(x, y, depthEncoder.encode(
                             rayo.getOrigin(), rayo.getDirection(),
-                            workspace.nearestHit.hitDistance()));
+                            workspace.nearestHit.getHitDistance()));
                     }
                     //- Exporto el result de color del pixel ----------------
                     outputPixel.r = (byte)(255 * color.r());

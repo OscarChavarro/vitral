@@ -297,11 +297,11 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
     }
 
     public void keyPressed(KeyEvent e) {
-        char unicode_id;
+        char unicodeId;
         int keycode;
         boolean skipKey = false;
 
-        unicode_id = e.getKeyChar();
+        unicodeId = e.getKeyChar();
         keycode = e.getKeyCode();
 
         if ( cameraController.processKeyPressedEventAwt(e) ) {
@@ -309,8 +309,8 @@ public class ViewerPanel3DJogl extends ViewerPanel implements GLEventListener, A
             skipKey = true;
         }
 
-        if ( unicode_id != e.CHAR_UNDEFINED && !skipKey ) {
-            switch ( unicode_id ) {
+        if ( unicodeId != e.CHAR_UNDEFINED && !skipKey ) {
+            switch ( unicodeId ) {
               case '1':
                 selectedSlice--;
                 if ( selectedSlice < -1 ) {

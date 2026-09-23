@@ -19,9 +19,9 @@ public:
     static const int DETAIL_TANGENT = 1 << 3;
     static const int DETAIL_ALL = DETAIL_POINT | DETAIL_NORMAL | DETAIL_UV | DETAIL_TANGENT;
 
-    Vector3Dd p; // Intersection point coordinates
-    Vector3Dd n; // Surface normal at intersection point
-    Vector3Dd t; // Surface tangent at intersection point
+    Vector3Dd point; // Intersection point coordinates
+    Vector3Dd normal; // Surface normal at intersection point
+    Vector3Dd tangent; // Surface tangent at intersection point
     // Note that surface binormal at intersection point must be calculated
     // by the application as the cross product (n x t).
 
@@ -38,13 +38,13 @@ public:
     NormalMap* normalMap; // Internal geometry selected normal map
 
 private:
-    Ray rayValue_;
-    bool hasRay_;
+    Ray ray;
+    bool hasRay;
 
-    int requiredDetailMask_;
-    bool storeRay_;
-    double hitDistance_;
-    bool hasHitDistance_;
+    int requiredDetailMask;
+    bool storeRay;
+    double hitDistance;
+    bool hitDistanceKnown;
 
 public:
     RayHit();
@@ -59,11 +59,11 @@ public:
 
     void clone(const RayHit& other);
 
-    int requiredDetailMask() const;
-    void setRequiredDetailMask(int requiredDetailMask);
+    int getRequiredDetailMask() const;
+    void setRequiredDetailMask(int value);
 
     bool shouldStoreRay() const;
-    void setStoreRay(bool storeRay);
+    void setStoreRay(bool value);
 
     bool needsPoint() const;
     bool needsNormal() const;
@@ -71,12 +71,12 @@ public:
     bool needsTangent() const;
     bool needsAnySurfaceData() const;
 
-    const Ray* ray() const;
-    void setRay(const Ray& ray);
+    const Ray* getRay() const;
+    void setRay(const Ray& value);
 
     bool hasHitDistance() const;
-    double hitDistance() const;
-    void setHitDistance(double hitDistance);
+    double getHitDistance() const;
+    void setHitDistance(double value);
 
 };
 

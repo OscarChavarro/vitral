@@ -9,24 +9,24 @@ import vsdk.toolkit.media.RGBAImageUncompressed;
 public class FixedBackground extends Background {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    private RGBAImageUncompressed backgroundImage;
+    private RGBAImageUncompressed image;
     private Camera camera;
 
     public FixedBackground(Camera camera, RGBAImageUncompressed image) {
         super();
 
         this.camera = camera;
-        backgroundImage = image;
+        this.image = image;
     }
 
     public void setImage(RGBAImageUncompressed image)
     {
-        backgroundImage = image;
+        this.image = image;
     }
 
     public RGBAImageUncompressed getImage()
     {
-        return backgroundImage;
+        return image;
     }
 
     /**

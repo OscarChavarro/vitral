@@ -12,92 +12,92 @@ export class RayHit extends FundamentalEntity implements GeometryRayHit {
     public static readonly DETAIL_UV = 4;
     public static readonly DETAIL_TANGENT = 8;
     public static readonly DETAIL_ALL = 15;
-    public p = new Vector3Dd();
-    public n = new Vector3Dd();
-    public t = new Vector3Dd();
+    public point = new Vector3Dd();
+    public normal = new Vector3Dd();
+    public tangent = new Vector3Dd();
     public u = 0;
     public v = 0;
     public material: SimpleMaterial | null = null;
     public texture: Image | null = null;
     public normalMap: NormalMap | null = null;
-    private hitRay: Ray | null = null;
-    private distance = 0;
-    private hasDistance = false;
+    private ray: Ray | null = null;
+    private hitDistance = 0;
+    private hitDistanceKnown = false;
     public constructor(
         mask = 15,
         private storeRay = true,
     ) {
         super();
-        this.requiredMask = mask;
+        this.requiredDetailMask = mask;
     }
-    private requiredMask: number;
+    private requiredDetailMask: number;
     public clear() {
-        this.p = this.n = this.t = new Vector3Dd();
+        this.point = this.normal = this.tangent = new Vector3Dd();
         this.u = this.v = 0;
         this.material = this.texture = this.normalMap = null;
-        this.hitRay = null;
-        this.distance = 0;
-        this.hasDistance = false;
+        this.ray = null;
+        this.hitDistance = 0;
+        this.hitDistanceKnown = false;
     }
     public reset(mask: number) {
-        this.requiredMask = mask;
+        this.requiredDetailMask = mask;
         this.clear();
     }
     public resetForDistanceOnly() {
-        this.requiredMask = 0;
-        this.hitRay = null;
-        this.distance = 0;
-        this.hasDistance = false;
+        this.requiredDetailMask = 0;
+        this.ray = null;
+        this.hitDistance = 0;
+        this.hitDistanceKnown = false;
     }
     public override clone(other?: RayHit): RayHit | void {
-        if (other === undefined) return new RayHit(this.requiredMask, this.storeRay);
+        if (other === undefined) return new RayHit(this.requiredDetailMask, this.storeRay);
         Object.assign(this, other);
     }
-    public requiredDetailMask() {
-        return this.requiredMask;
+    public getRequiredDetailMask() {
+        return this.requiredDetailMask;
     }
-    public setRequiredDetailMask(x: number) {
-        this.requiredMask = x;
+    public setRequiredDetailMask(value: number) {
+        this.requiredDetailMask = value;
     }
     public shouldStoreRay() {
         return this.storeRay;
     }
-    public setStoreRay(x: boolean) {
-        this.storeRay = x;
+    public setStoreRay(value: boolean) {
+        this.storeRay = value;
     }
     public needsPoint() {
-        return !!(this.requiredMask & 1);
+        return !!(this.requiredDetailMask & 1);
     }
     public needsNormal() {
-        return !!(this.requiredMask & 2);
+        return !!(this.requiredDetailMask & 2);
     }
     public needsTextureCoordinates() {
-        return !!(this.requiredMask & 4);
+        return !!(this.requiredDetailMask & 4);
     }
     public needsTangent() {
-        return !!(this.requiredMask & 8);
+        return !!(this.requiredDetailMask & 8);
     }
     public needsAnySurfaceData() {
-        return this.requiredMask !== 0;
+        return this.requiredDetailMask !== 0;
     }
-    public ray() {
-        return this.hitRay;
+    public getRay() {
+        return this.ray;
     }
-    public setRay(x: Ray | null) {
-        this.hitRay = x;
-        if (x) {
-            this.distance = x.getT();
-            this.hasDistance = true;
+    public setRay(value: Ray | null) {
+        this.ray = value;
+        if (value) {
+            this.hitDistance = value.getT();
+            this.hitDistanceKnown = true;
         }
     }
     public hasHitDistance() {
-        return this.hasDistance;
+        return this.hitDistanceKnown;
     }
-    public hitDistance() {
-        return this.hasDistance ? this.distance : (this.hitRay?.getT() ?? 0);
+    public getHitDistance() {
+        return this.hitDistanceKnown ? this.hitDistance : (this.ray?.getT() ?? 0);
     }
-    public setHitDistance(x: number) {
-        this.distance = x;
-        this.hasDistance = true;
+    public setHitDistance(value: number) {
+        this.hitDistance = value;
+        this.hitDistanceKnown = true;
     }
 }

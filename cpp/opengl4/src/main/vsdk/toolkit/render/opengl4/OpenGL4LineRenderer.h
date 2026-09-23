@@ -23,11 +23,11 @@ public:
     static void release();
 
 private:
-    static unsigned int vao_;
-    static unsigned int positionVbo_;
-    static unsigned int colorVbo_;
-    static unsigned int program_;
-    static bool initialized_;
+    static unsigned int vao;
+    static unsigned int positionVbo;
+    static unsigned int colorVbo;
+    static unsigned int program;
+    static bool initialized;
 
     static bool initializeIfNeeded();
     static java::String readShaderFile(const java::String& filename);

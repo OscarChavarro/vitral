@@ -83,14 +83,14 @@ void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
         inRay.getOrigin().z() + inT * inRay.getDirection().z());
 
     if (outData->needsPoint()) {
-        outData->p = point;
+        outData->point = point;
     }
 
     Vector3Dd normal;
     if (needsNormalVector) {
         normal = point.normalized();
         if (outData->needsNormal()) {
-            outData->n = normal;
+            outData->normal = normal;
         }
     }
 
@@ -120,7 +120,7 @@ void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
         outData->v = 1 - (phi / M_PI);
     }
     if (outData->needsTangent()) {
-        outData->t = Vector3Dd(
+        outData->tangent = Vector3Dd(
             std::sin(theta - M_PI / 2),
             -std::cos(theta - M_PI / 2),
             0);

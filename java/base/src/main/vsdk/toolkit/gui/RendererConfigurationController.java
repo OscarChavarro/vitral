@@ -21,7 +21,7 @@ public class RendererConfigurationController extends Controller {
 
   public boolean processKeyPressedEvent(KeyEvent keyEvent) {
     boolean updated = false;
-    char unicode_id;
+    char unicodeId;
     int st;
 
     switch ( keyEvent.keycode ) {

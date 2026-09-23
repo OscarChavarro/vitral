@@ -202,11 +202,11 @@ bool Arrow::doIntersectionDistanceOnly(const Ray& inRay, RayHit* outHit) {
 
     double baseT = NO_HIT;
     candidateHit->resetForDistanceOnly();
-    if (baseCylinder->doIntersectionFirstHit(inRay, candidateHit)) baseT = candidateHit->hitDistance();
+    if (baseCylinder->doIntersectionFirstHit(inRay, candidateHit)) baseT = candidateHit->getHitDistance();
 
     double headT = NO_HIT;
     candidateHit->resetForDistanceOnly();
-    if (headCone->doIntersectionFirstHit(shiftedHeadRay, candidateHit)) headT = candidateHit->hitDistance();
+    if (headCone->doIntersectionFirstHit(shiftedHeadRay, candidateHit)) headT = candidateHit->getHitDistance();
 
     double winnerT = (baseT < headT) ? baseT : headT;
     if (winnerT == NO_HIT) return false;
@@ -227,14 +227,14 @@ bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     Vector3Dd tr(0,0,-baseLength);
     Ray shiftedHeadRay(inRay.getOrigin().add(tr), inRay.getDirection(), inRay.getT());
 
-    RayHit baseHit(outHit->requiredDetailMask());
-    RayHit headHit(outHit->requiredDetailMask());
+    RayHit baseHit(outHit->getRequiredDetailMask());
+    RayHit headHit(outHit->getRequiredDetailMask());
     bool hasBase = baseCylinder->doIntersectionFirstHit(inRay, &baseHit);
     bool hasHead = headCone->doIntersectionFirstHit(shiftedHeadRay, &headHit);
     if (!hasBase && !hasHead) return false;
 
-    double baseT = hasBase ? (baseHit.ray()!=nullptr ? baseHit.ray()->getT() : baseHit.hitDistance()) : NO_HIT;
-    double headT = hasHead ? (headHit.ray()!=nullptr ? headHit.ray()->getT() : headHit.hitDistance()) : NO_HIT;
+    double baseT = hasBase ? (baseHit.getRay()!=nullptr ? baseHit.getRay()->getT() : baseHit.getHitDistance()) : NO_HIT;
+    double headT = hasHead ? (headHit.getRay()!=nullptr ? headHit.getRay()->getT() : headHit.getHitDistance()) : NO_HIT;
 
     if (hasBase && (!hasHead || baseT < headT)) {
         outHit->clone(baseHit);
@@ -244,7 +244,7 @@ bool Arrow::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
         outHit->clone(headHit);
         outHit->setRay(inRay.withT(headT));
         if (outHit->needsPoint()) {
-            outHit->p = Vector3Dd(outHit->p.x(), outHit->p.y(), outHit->p.z() + baseLength);
+            outHit->point = Vector3Dd(outHit->point.x(), outHit->point.y(), outHit->point.z() + baseLength);
         }
     }
     return true;

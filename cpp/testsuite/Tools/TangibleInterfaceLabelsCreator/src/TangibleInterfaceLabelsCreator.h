@@ -14,9 +14,9 @@ class TangibleInterfaceLabelsCreator {
     void exportPdf();
 
   private:
-    CommandLineOptions options_;
-    LabelsModel model_;
-    CairoPdfPageRenderer* pageRenderer_;
+    CommandLineOptions options;
+    LabelsModel model;
+    CairoPdfPageRenderer* pageRenderer;
 };
 
 #endif

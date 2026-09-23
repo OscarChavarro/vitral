@@ -20,19 +20,19 @@ import vsdk.toolkit.environment.geometry.element.RayHit;
 public class ParametricBiCubicPatch extends Surface {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    public Matrix4x4d Gx_MATRIX = new Matrix4x4d();
-    public Matrix4x4d Gy_MATRIX = new Matrix4x4d();
-    public Matrix4x4d Gz_MATRIX = new Matrix4x4d();
+    public Matrix4x4d geometryMatrixX = new Matrix4x4d();
+    public Matrix4x4d geometryMatrixY = new Matrix4x4d();
+    public Matrix4x4d geometryMatrixZ = new Matrix4x4d();
 
-    private Matrix4x4d S_MATRIX;
-    private Matrix4x4d Tt_MATRIX;
-    private Matrix4x4d S_MATRIX_DS;
-    private Matrix4x4d Tt_MATRIX_DT;
-    private Matrix4x4d M_MATRIX;
-    private Matrix4x4d Mt_MATRIX;
-    private Matrix4x4d M_Gx_Mt_MATRIX;
-    private Matrix4x4d M_Gy_Mt_MATRIX;
-    private Matrix4x4d M_Gz_Mt_MATRIX;
+    private Matrix4x4d sParameterMatrix;
+    private Matrix4x4d tParameterMatrix;
+    private Matrix4x4d sDerivativeParameterMatrix;
+    private Matrix4x4d tDerivativeParameterMatrix;
+    private Matrix4x4d basisMatrix;
+    private Matrix4x4d transposedBasisMatrix;
+    private Matrix4x4d coefficientMatrixX;
+    private Matrix4x4d coefficientMatrixY;
+    private Matrix4x4d coefficientMatrixZ;
 
     public static final int FERGUSON = 7;
 
@@ -50,15 +50,15 @@ public class ParametricBiCubicPatch extends Surface {
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = ParametricCurve.HERMITE;
         contourCurve = null;
-        S_MATRIX = null;
-        Tt_MATRIX = null;
-        S_MATRIX_DS = null;
-        Tt_MATRIX_DT = null;
-        M_MATRIX = null;
-        Mt_MATRIX = null;
-        M_Gx_Mt_MATRIX = null;
-        M_Gy_Mt_MATRIX = null;
-        M_Gz_Mt_MATRIX = null;
+        sParameterMatrix = null;
+        tParameterMatrix = null;
+        sDerivativeParameterMatrix = null;
+        tDerivativeParameterMatrix = null;
+        basisMatrix = null;
+        transposedBasisMatrix = null;
+        coefficientMatrixX = null;
+        coefficientMatrixY = null;
+        coefficientMatrixZ = null;
     }
 
     /**
@@ -96,25 +96,25 @@ public class ParametricBiCubicPatch extends Surface {
         //- Build matrices M, Gx, Gy, Gz and Mt ---------------------------
         if ( this.type == ParametricCurve.BEZIER ) {
             buildGeometryMatricesXYZ_Bezier();
-            M_MATRIX = ParametricCurve.BEZIER_MATRIX;
+            basisMatrix = ParametricCurve.BEZIER_MATRIX;
         }
         else if ( this.type == ParametricCurve.HERMITE ) {
             buildGeometryMatricesXYZ_Hermite();
-            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
+            basisMatrix = ParametricCurve.HERMITE_MATRIX;
         }
         else if ( this.type == ParametricBiCubicPatch.FERGUSON ) {
             buildGeometryMatricesXYZ_Ferguson();
-            M_MATRIX = ParametricCurve.HERMITE_MATRIX;
+            basisMatrix = ParametricCurve.HERMITE_MATRIX;
         }
-        Mt_MATRIX = new Matrix4x4d(M_MATRIX);
-        Mt_MATRIX = Mt_MATRIX.transpose();
-        M_Gx_Mt_MATRIX = M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
-        M_Gy_Mt_MATRIX = M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
-        M_Gz_Mt_MATRIX = M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
-        S_MATRIX = new Matrix4x4d();
-        Tt_MATRIX = new Matrix4x4d();
-        S_MATRIX_DS = new Matrix4x4d();
-        Tt_MATRIX_DT = new Matrix4x4d();
+        transposedBasisMatrix = new Matrix4x4d(basisMatrix);
+        transposedBasisMatrix = transposedBasisMatrix.transpose();
+        coefficientMatrixX = basisMatrix.multiply(geometryMatrixX).multiply(transposedBasisMatrix);
+        coefficientMatrixY = basisMatrix.multiply(geometryMatrixY).multiply(transposedBasisMatrix);
+        coefficientMatrixZ = basisMatrix.multiply(geometryMatrixZ).multiply(transposedBasisMatrix);
+        sParameterMatrix = new Matrix4x4d();
+        tParameterMatrix = new Matrix4x4d();
+        sDerivativeParameterMatrix = new Matrix4x4d();
+        tDerivativeParameterMatrix = new Matrix4x4d();
     }
 
     public int getApproximationSteps() {
@@ -148,9 +148,9 @@ public class ParametricBiCubicPatch extends Surface {
                 mz[i][j] = vp.z();
             }
         }
-        Gx_MATRIX = Matrix4x4d.copyOf(mx);
-        Gy_MATRIX = Matrix4x4d.copyOf(my);
-        Gz_MATRIX = Matrix4x4d.copyOf(mz);
+        geometryMatrixX = Matrix4x4d.copyOf(mx);
+        geometryMatrixY = Matrix4x4d.copyOf(my);
+        geometryMatrixZ = Matrix4x4d.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -214,16 +214,16 @@ public class ParametricBiCubicPatch extends Surface {
 
         }
 
-        Gx_MATRIX = Matrix4x4d.copyOf(mx);
-        Gy_MATRIX = Matrix4x4d.copyOf(my);
-        Gz_MATRIX = Matrix4x4d.copyOf(mz);
+        geometryMatrixX = Matrix4x4d.copyOf(mx);
+        geometryMatrixY = Matrix4x4d.copyOf(my);
+        geometryMatrixZ = Matrix4x4d.copyOf(mz);
     }
 
     public void printGeometryMatrices()
     {
-        double[][] mx = Gx_MATRIX.toArrayCopy();
-        double[][] my = Gy_MATRIX.toArrayCopy();
-        double[][] mz = Gz_MATRIX.toArrayCopy();
+        double[][] mx = geometryMatrixX.toArrayCopy();
+        double[][] my = geometryMatrixY.toArrayCopy();
+        double[][] mz = geometryMatrixZ.toArrayCopy();
 
         System.out.println(
             "[ <"   + VSDK.formatDouble(mx[0][0]) + 
@@ -360,9 +360,9 @@ public class ParametricBiCubicPatch extends Surface {
         mz[3][3] = 0;
 
         // Final result
-        Gx_MATRIX = Matrix4x4d.copyOf(mx);
-        Gy_MATRIX = Matrix4x4d.copyOf(my);
-        Gz_MATRIX = Matrix4x4d.copyOf(mz);
+        geometryMatrixX = Matrix4x4d.copyOf(mx);
+        geometryMatrixY = Matrix4x4d.copyOf(my);
+        geometryMatrixZ = Matrix4x4d.copyOf(mz);
         //printGeometryMatrices();
     }
 
@@ -372,14 +372,14 @@ public class ParametricBiCubicPatch extends Surface {
 
     The following class attributes are used:
     <UL>
-      <LI> S_MATRIX  Column vector for storing s parameter polynomial as
+      <LI> sParameterMatrix  Column vector for storing s parameter polynomial as
       explain in section [FOLE1992].11.3
-      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
-      <LI> M_MATRIX  Patch's blending function
-      <LI> Mt_MATRIX M's transpose
-      <LI> Gx_MATRIX Geometry matrix for x
-      <LI> Gy_MATRIX Geometry matrix for y
-      <LI> Gz_MATRIX Geometry matrix for z
+      <LI> tParameterMatrix Row vector for storing t parameter polynomial
+      <LI> basisMatrix  Patch's blending function
+      <LI> transposedBasisMatrix M's transpose
+      <LI> geometryMatrixX Geometry matrix for x
+      <LI> geometryMatrixY Geometry matrix for y
+      <LI> geometryMatrixZ Geometry matrix for z
     </UL>
 
     PRE: calculateMAtrices() should be called before calling this method.
@@ -389,24 +389,24 @@ public class ParametricBiCubicPatch extends Surface {
     */
     public Vector3Dd evaluate(double s, double t)
     {
-        S_MATRIX = S_MATRIX
+        sParameterMatrix = sParameterMatrix
             .withVal(0, 0, s * s * s)
             .withVal(0, 1, s * s)
             .withVal(0, 2, s)
             .withVal(0, 3, 1);
 
-        Tt_MATRIX = Tt_MATRIX
+        tParameterMatrix = tParameterMatrix
             .withVal(0, 0, t * t * t)
             .withVal(1, 0, t * t)
             .withVal(2, 0, t)
             .withVal(3, 0, 1);
 
-        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixY);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixZ);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(tParameterMatrix);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(tParameterMatrix);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(tParameterMatrix);
 
         // The result is a 1x1 matrix.
         return new Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
@@ -430,23 +430,23 @@ public class ParametricBiCubicPatch extends Surface {
 
     public Vector3Dd evaluateTangent(double s, double t)
     {
-        S_MATRIX_DS = S_MATRIX_DS
+        sDerivativeParameterMatrix = sDerivativeParameterMatrix
             .withVal(0, 0, 3 * s * s)
             .withVal(0, 1, 2 * s)
             .withVal(0, 2, 1)
             .withVal(0, 3, 0);
-        Tt_MATRIX = Tt_MATRIX
+        tParameterMatrix = tParameterMatrix
             .withVal(0, 0, t * t * t)
             .withVal(1, 0, t * t)
             .withVal(2, 0, t)
             .withVal(3, 0, 1);
 
-        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX_DS.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX);
-        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixY);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixZ);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(tParameterMatrix);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(tParameterMatrix);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(tParameterMatrix);
 
         // The result is a 1x1 matrix.
         Vector3Dd result = new Vector3Dd();
@@ -459,24 +459,24 @@ public class ParametricBiCubicPatch extends Surface {
 
     public Vector3Dd evaluateBinormal(double s, double t)
     {
-        S_MATRIX = S_MATRIX
+        sParameterMatrix = sParameterMatrix
             .withVal(0, 0, s * s * s)
             .withVal(0, 1, s * s)
             .withVal(0, 2, s)
             .withVal(0, 3, 1);
 
-        Tt_MATRIX_DT = Tt_MATRIX_DT
+        tDerivativeParameterMatrix = tDerivativeParameterMatrix
             .withVal(0, 0, 3 * t * t)
             .withVal(1, 0, 2 * t)
             .withVal(2, 0, 1)
             .withVal(3, 0, 0);
 
-        Matrix4x4d S_M_Gx_Mt_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX);
-        Matrix4x4d S_M_Gy_Mt_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX);
-        Matrix4x4d S_M_Gz_Mt_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX);
-        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(Tt_MATRIX_DT);
-        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(Tt_MATRIX_DT);
-        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(Tt_MATRIX_DT);
+        Matrix4x4d S_M_Gx_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixX);
+        Matrix4x4d S_M_Gy_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixY);
+        Matrix4x4d S_M_Gz_Mt_MATRIX = sParameterMatrix.multiply(coefficientMatrixZ);
+        Matrix4x4d Qx_MATRIX = S_M_Gx_Mt_MATRIX.multiply(tDerivativeParameterMatrix);
+        Matrix4x4d Qy_MATRIX = S_M_Gy_Mt_MATRIX.multiply(tDerivativeParameterMatrix);
+        Matrix4x4d Qz_MATRIX = S_M_Gz_Mt_MATRIX.multiply(tDerivativeParameterMatrix);
 
         // The results are 1x1 matrices.
         Vector3Dd result = new Vector3Dd();
@@ -493,14 +493,14 @@ public class ParametricBiCubicPatch extends Surface {
 
     The following class attributes are used:
     <UL>
-      <LI> S_MATRIX  Column vector for storing s parameter polynomial as
+      <LI> sParameterMatrix  Column vector for storing s parameter polynomial as
       explain in section [FOLE1992].11.3
-      <LI> Tt_MATRIX Row vector for storing t parameter polynomial
-      <LI> M_MATRIX  Patch's blending function
-      <LI> Mt_MATRIX M's transpose
-      <LI> Gx_MATRIX Geometry matrix for x
-      <LI> Gy_MATRIX Geometry matrix for y
-      <LI> Gz_MATRIX Geometry matrix for z
+      <LI> tParameterMatrix Row vector for storing t parameter polynomial
+      <LI> basisMatrix  Patch's blending function
+      <LI> transposedBasisMatrix M's transpose
+      <LI> geometryMatrixX Geometry matrix for x
+      <LI> geometryMatrixY Geometry matrix for y
+      <LI> geometryMatrixZ Geometry matrix for z
     </UL>
 
     PRE: calculateMAtrices() should be called before calling this method.

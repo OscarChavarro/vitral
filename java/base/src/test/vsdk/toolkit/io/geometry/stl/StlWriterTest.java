@@ -55,8 +55,8 @@ class StlWriterTest
             assertThat(facet.normal.length()).isCloseTo(1.0,
                 org.assertj.core.data.Offset.offset(1.0e-4));
 
-            Vector3Dd cross = facet.b.subtract(facet.a)
-                .crossProduct(facet.c.subtract(facet.a));
+            Vector3Dd cross = facet.vertex1.subtract(facet.vertex0)
+                .crossProduct(facet.vertex2.subtract(facet.vertex0));
             assertThat(cross.length()).isGreaterThan(0.0);
             assertThat(cross.normalized().dotProduct(facet.normal))
                 .isGreaterThan(0.999);
@@ -88,9 +88,9 @@ class StlWriterTest
             Facet a = unscaled.facets.get(i);
             Facet b = scaled.facets.get(i);
             assertVectorClose(b.normal, a.normal, EPSILON);
-            assertVectorClose(b.a, a.a.multiply(1000.0), 1.0e-3);
-            assertVectorClose(b.b, a.b.multiply(1000.0), 1.0e-3);
-            assertVectorClose(b.c, a.c.multiply(1000.0), 1.0e-3);
+            assertVectorClose(b.vertex0, a.vertex0.multiply(1000.0), 1.0e-3);
+            assertVectorClose(b.vertex1, a.vertex1.multiply(1000.0), 1.0e-3);
+            assertVectorClose(b.vertex2, a.vertex2.multiply(1000.0), 1.0e-3);
         }
     }
 
@@ -123,9 +123,9 @@ class StlWriterTest
 
         for ( i = 0; i < stl.facets.size(); i++ ) {
             Facet facet = stl.facets.get(i);
-            assertThat(expectedVertices).contains(asFloatKey(facet.a));
-            assertThat(expectedVertices).contains(asFloatKey(facet.b));
-            assertThat(expectedVertices).contains(asFloatKey(facet.c));
+            assertThat(expectedVertices).contains(asFloatKey(facet.vertex0));
+            assertThat(expectedVertices).contains(asFloatKey(facet.vertex1));
+            assertThat(expectedVertices).contains(asFloatKey(facet.vertex2));
         }
         assertThat(countBoundaryEdges(stl)).isZero();
     }
@@ -228,9 +228,9 @@ class StlWriterTest
         int i;
         for ( i = 0; i < stl.facets.size(); i++ ) {
             Facet facet = stl.facets.get(i);
-            increment(edgeCounts, edgeKey(facet.a, facet.b));
-            increment(edgeCounts, edgeKey(facet.b, facet.c));
-            increment(edgeCounts, edgeKey(facet.c, facet.a));
+            increment(edgeCounts, edgeKey(facet.vertex0, facet.vertex1));
+            increment(edgeCounts, edgeKey(facet.vertex1, facet.vertex2));
+            increment(edgeCounts, edgeKey(facet.vertex2, facet.vertex0));
         }
 
         int boundaryEdges = 0;
@@ -280,18 +280,18 @@ class StlWriterTest
 
     private static final class Facet {
         final Vector3Dd normal;
-        final Vector3Dd a;
-        final Vector3Dd b;
-        final Vector3Dd c;
+        final Vector3Dd vertex0;
+        final Vector3Dd vertex1;
+        final Vector3Dd vertex2;
         final int attributeByteCount;
 
         Facet(Vector3Dd normal, Vector3Dd a, Vector3Dd b,
               Vector3Dd c, int attributeByteCount)
         {
             this.normal = normal;
-            this.a = a;
-            this.b = b;
-            this.c = c;
+            this.vertex0 = a;
+            this.vertex1 = b;
+            this.vertex2 = c;
             this.attributeByteCount = attributeByteCount;
         }
     }

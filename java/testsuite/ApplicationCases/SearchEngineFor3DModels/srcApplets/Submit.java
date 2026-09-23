@@ -52,7 +52,7 @@ public class Submit
         Dimension dimension = sketchcanvas.getSize();
         int pixelArray[];
 
-        pixelArray = getPixels(sketchcanvas.get_image(),
+        pixelArray = getPixels(sketchcanvas.getImage(),
                                0, 0, dimension.width, dimension.height);
         if ( pixelArray == null ) {
             return null;
@@ -154,7 +154,7 @@ public class Submit
                                    + URLEncoder.encode(pixelString, "UTF-8"));
                         urlGetParametersString += ("&history" + (i + 1) + "="
                                    + URLEncoder.encode(sketchcanvases[i]
-                                                       .get_history_text(), "UTF-8"));
+                                                       .getHistory_text(), "UTF-8"));
                         System.out.println("Ok.");
                     }
                 }

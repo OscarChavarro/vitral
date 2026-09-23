@@ -181,7 +181,7 @@ public class JoglTriangularRenderer
         List<Float> out = new ArrayList<>(triangleCount * 9);
         for ( int i = 0; i < triangleCount; i++ ) {
             MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
-            addFillTriangle(out, vertices.get(t.a), vertices.get(t.b), vertices.get(t.c));
+            addFillTriangle(out, vertices.get(t.point0), vertices.get(t.point1), vertices.get(t.point2));
         }
         return out;
     }
@@ -194,9 +194,9 @@ public class JoglTriangularRenderer
     {
         for ( int i = 0; i < triangleCount; i++ ) {
             MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
-            double[] a = vertices.get(t.a);
-            double[] b2 = vertices.get(t.b);
-            double[] c = vertices.get(t.c);
+            double[] a = vertices.get(t.point0);
+            double[] b2 = vertices.get(t.point1);
+            double[] c = vertices.get(t.point2);
             addLineEdge(positions, colors, a, b2, r, g, b);
             addLineEdge(positions, colors, b2, c, r, g, b);
             addLineEdge(positions, colors, c, a, r, g, b);
@@ -211,9 +211,9 @@ public class JoglTriangularRenderer
     {
         for ( int i = 0; i < triangleCount; i++ ) {
             MonotoneDecompositionTriangulator.Triangle t = triangles.get(i);
-            addLinePoint(positions, colors, vertices.get(t.a), r, g, b);
-            addLinePoint(positions, colors, vertices.get(t.b), r, g, b);
-            addLinePoint(positions, colors, vertices.get(t.c), r, g, b);
+            addLinePoint(positions, colors, vertices.get(t.point0), r, g, b);
+            addLinePoint(positions, colors, vertices.get(t.point1), r, g, b);
+            addLinePoint(positions, colors, vertices.get(t.point2), r, g, b);
         }
     }
 

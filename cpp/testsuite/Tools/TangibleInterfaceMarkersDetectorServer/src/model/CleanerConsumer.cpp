@@ -5,12 +5,12 @@
 #include <unistd.h>
 
 CleanerConsumer::CleanerConsumer(MarkerEventBus* bus)
-    : bus_(bus), running_(true) {}
+    : bus(bus), running(true) {}
 
 java::Void CleanerConsumer::call() {
-    while (running_) {
-        if (bus_->totalSize() > 1000) {
-            bus_->drainAll();
+    while (running) {
+        if (bus->getTotalSize() > 1000) {
+            bus->drainAll();
         }
         usleep(50000);
     }
@@ -18,5 +18,5 @@ java::Void CleanerConsumer::call() {
 }
 
 void CleanerConsumer::stop() {
-    running_ = false;
+    running = false;
 }

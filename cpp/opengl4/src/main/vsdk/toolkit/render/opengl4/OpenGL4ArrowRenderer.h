@@ -35,13 +35,13 @@ private:
     };
 
     static const int SLICES;
-    static unsigned int vao_;
-    static unsigned int vboPositions_;
-    static unsigned int vboNormals_;
-    static unsigned int vboUvs_;
-    static unsigned int program_;
-    static int vertexCount_;
-    static bool initialized_;
+    static unsigned int vao;
+    static unsigned int vboPositions;
+    static unsigned int vboNormals;
+    static unsigned int vboUvs;
+    static unsigned int program;
+    static int vertexCount;
+    static bool initialized;
 
     static bool ensureProgram();
     static bool ensureMesh(const Arrow* arrow);

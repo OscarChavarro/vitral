@@ -18,8 +18,8 @@ private:
     static long lastId;
 
     long id;
-    java::String* objectFilename;
-    java::ArrayList<ShapeDescriptor*> descriptorsList;
+    java::String* filename;
+    java::ArrayList<ShapeDescriptor*> descriptors;
 
 public:
     GeometryMetadata();

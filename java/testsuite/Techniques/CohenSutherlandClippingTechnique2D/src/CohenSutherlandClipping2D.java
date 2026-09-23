@@ -30,8 +30,8 @@ public class CohenSutherlandClipping2D implements
     private static Vector2Dd max;
     private Vector2Dd clipped0;
     private Vector2Dd clipped1;
-    private static Vector2Dd p0;
-    private static Vector2Dd p1;
+    private static Vector2Dd lineStart;
+    private static Vector2Dd lineEnd;
 
     private JFrame frame;
     private JPanel panel;
@@ -50,7 +50,7 @@ public class CohenSutherlandClipping2D implements
     private void recalculateClip()
     {
         ComputationalGeometry.ClippedLine2DResult result =
-            ComputationalGeometry.cohenSutherlandLineClipping2DResult(p0, p1, min, max, DELTA);
+            ComputationalGeometry.cohenSutherlandLineClipping2DResult(lineStart, lineEnd, min, max, DELTA);
         clipped = result.accepted();
         clipped0 = result.clipped0();
         clipped1 = result.clipped1();
@@ -62,8 +62,8 @@ public class CohenSutherlandClipping2D implements
 
     public void createGUI()
     {
-        p0 = new Vector2Dd(0.85, 0.5);
-        p1 = new Vector2Dd(-0.85, -0.5);
+        lineStart = new Vector2Dd(0.85, 0.5);
+        lineEnd = new Vector2Dd(-0.85, -0.5);
         min = new Vector2Dd(-0.8, -0.8);
         max = new Vector2Dd(0.8, 0.8);
         recalculateClip();
@@ -137,8 +137,8 @@ public class CohenSutherlandClipping2D implements
 
         gl.glColor3d(0.0, 0.0, 1.0);
         gl.glBegin(gl.GL_LINES);
-            gl.glVertex2d(p0.x(), p0.y());
-            gl.glVertex2d(p1.x(), p1.y());
+            gl.glVertex2d(lineStart.x(), lineStart.y());
+            gl.glVertex2d(lineEnd.x(), lineEnd.y());
         gl.glEnd();
 
         if(clipped){
@@ -160,16 +160,16 @@ public class CohenSutherlandClipping2D implements
     public void adjustmentValueChanged(AdjustmentEvent e) {
         double value = (double) e.getValue() / 100;
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("x0") ) {
-            p0 = p0.withX(value);
+            lineStart = lineStart.withX(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("y0") ) {
-            p0 = p0.withY(value);
+            lineStart = lineStart.withY(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("x1") ) {
-            p1 = p1.withX(value);
+            lineEnd = lineEnd.withX(value);
         }
         if ( ((JScrollBar)e.getAdjustable()).getName().equals("y1") ) {
-            p1 = p1.withY(value);
+            lineEnd = lineEnd.withY(value);
         }
         recalculateClip();
         canvas.repaint();

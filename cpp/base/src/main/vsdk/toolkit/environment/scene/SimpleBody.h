@@ -32,10 +32,10 @@ private:
     bool hasTranslationOnlyTransform;
     bool hasIdentityTransform;
 
-    SimpleMaterial* globalMaterial;
-    Image* globalTextureMap;
-    NormalMap* globalNormalMap;
-    RGBImageUncompressed* globalNormalMapRgb;
+    SimpleMaterial* material;
+    Image* texture;
+    NormalMap* normalMap;
+    RGBImageUncompressed* normalMapRgb;
 
     java::String name;
     long long modificationVersion;

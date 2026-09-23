@@ -17,8 +17,8 @@ public class RasterTileGenerator
 {
     private final RasterTileGenerationStrategy strategy;
     private final Image image;
-    private final int x0;
-    private final int y0;
+    private final int startX;
+    private final int startY;
     private final int width;
     private final int height;
     private final int numberOfThreads;
@@ -35,8 +35,8 @@ public class RasterTileGenerator
 
     public RasterTileGenerator(RasterTileGenerationStrategy strategy,
                                Image image,
-                               int x0,
-                               int y0,
+                               int startX,
+                               int startY,
                                int width,
                                int height,
                                int numberOfThreads)
@@ -47,7 +47,7 @@ public class RasterTileGenerator
         if ( image == null ) {
             throw new IllegalArgumentException("image can not be null");
         }
-        if ( x0 < 0 || y0 < 0 ) {
+        if ( startX < 0 || startY < 0 ) {
             throw new IllegalArgumentException("origin must be >= 0");
         }
         if ( width <= 0 ) {
@@ -56,7 +56,7 @@ public class RasterTileGenerator
         if ( height <= 0 ) {
             throw new IllegalArgumentException("height must be > 0");
         }
-        if ( x0 + width > image.getXSize() || y0 + height > image.getYSize() ) {
+        if ( startX + width > image.getXSize() || startY + height > image.getYSize() ) {
             throw new IllegalArgumentException(
                 "requested tile area must be inside image");
         }
@@ -66,8 +66,8 @@ public class RasterTileGenerator
 
         this.strategy = strategy;
         this.image = image;
-        this.x0 = x0;
-        this.y0 = y0;
+        this.startX = startX;
+        this.startY = startY;
         this.width = width;
         this.height = height;
         this.numberOfThreads = numberOfThreads;
@@ -107,7 +107,7 @@ public class RasterTileGenerator
         for ( int i = 0; i < workerBands; i++ ) {
             int currentBandHeight = baseBandHeight + (i < extraRows ? 1 : 0);
             out.add(new RasterTileArea(
-                image, x0, y0 + y, width, currentBandHeight));
+                image, startX, startY + y, width, currentBandHeight));
             y += currentBandHeight;
         }
 
@@ -117,7 +117,7 @@ public class RasterTileGenerator
     private List<RasterTileArea> generateSerialTile()
     {
         ArrayList<RasterTileArea> out = new ArrayList<RasterTileArea>(1);
-        out.add(new RasterTileArea(image, x0, y0, width, height));
+        out.add(new RasterTileArea(image, startX, startY, width, height));
         return out;
     }
 }

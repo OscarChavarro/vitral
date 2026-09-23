@@ -19,7 +19,7 @@ SimpleBody::SimpleBody()
       inverseScale(1, 1, 1), hasInvertibleScale(true),
       hasIdentityRotation(true), hasUnitScale(true), hasZeroTranslation(true),
       hasTranslationOnlyTransform(true), hasIdentityTransform(true),
-      globalMaterial(0), globalTextureMap(0), globalNormalMap(0), globalNormalMapRgb(0),
+      material(0), texture(0), normalMap(0), normalMapRgb(0),
       name(""), modificationVersion(0)
 {
 }
@@ -30,17 +30,17 @@ SimpleBody::~SimpleBody()
         delete geometry;
         geometry = 0;
     }
-    if ( globalMaterial != 0 ) {
-        delete globalMaterial;
-        globalMaterial = 0;
+    if ( material != 0 ) {
+        delete material;
+        material = 0;
     }
-    if ( globalTextureMap != 0 ) {
-        delete globalTextureMap;
-        globalTextureMap = 0;
+    if ( texture != 0 ) {
+        delete texture;
+        texture = 0;
     }
-    if ( globalNormalMap != 0 ) {
-        delete globalNormalMap;
-        globalNormalMap = 0;
+    if ( normalMap != 0 ) {
+        delete normalMap;
+        normalMap = 0;
     }
 }
 
@@ -114,34 +114,34 @@ void SimpleBody::setRotationInverse(const Matrix4x4d& ri)
     markModified();
 }
 
-SimpleMaterial* SimpleBody::getMaterial() const { return globalMaterial; }
+SimpleMaterial* SimpleBody::getMaterial() const { return material; }
 void SimpleBody::setMaterial(SimpleMaterial* m)
 {
-    if ( globalMaterial != m && globalMaterial != 0 ) {
-        delete globalMaterial;
+    if ( material != m && material != 0 ) {
+        delete material;
     }
-    globalMaterial = m;
+    material = m;
     markModified();
 }
-Image* SimpleBody::getTexture() const { return globalTextureMap; }
+Image* SimpleBody::getTexture() const { return texture; }
 void SimpleBody::setTexture(Image* in)
 {
-    if ( globalTextureMap != in && globalTextureMap != 0 ) {
-        delete globalTextureMap;
+    if ( texture != in && texture != 0 ) {
+        delete texture;
     }
-    globalTextureMap = in;
+    texture = in;
     markModified();
 }
-NormalMap* SimpleBody::getNormalMap() const { return globalNormalMap; }
-RGBImageUncompressed* SimpleBody::getNormalMapRgb() const { return globalNormalMapRgb; }
+NormalMap* SimpleBody::getNormalMap() const { return normalMap; }
+RGBImageUncompressed* SimpleBody::getNormalMapRgb() const { return normalMapRgb; }
 
 void SimpleBody::setNormalMap(NormalMap* in)
 {
-    if ( globalNormalMap != in && globalNormalMap != 0 ) {
-        delete globalNormalMap;
+    if ( normalMap != in && normalMap != 0 ) {
+        delete normalMap;
     }
-    globalNormalMap = in;
-    globalNormalMapRgb = 0;
+    normalMap = in;
+    normalMapRgb = 0;
     markModified();
 }
 
@@ -177,10 +177,10 @@ void SimpleBody::setScale(const Vector3Dd& s)
 Ray* SimpleBody::doIntersectionFirstHit(const Ray& inRay) const
 {
     RayHit hit;
-    if ( !doIntersectionFirstHit(inRay, &hit) || hit.ray() == 0 ) {
+    if ( !doIntersectionFirstHit(inRay, &hit) || hit.getRay() == 0 ) {
         return 0;
     }
-    return new Ray(*hit.ray());
+    return new Ray(*hit.getRay());
 }
 
 bool SimpleBody::doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const
@@ -221,7 +221,7 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
         return false;
     }
 
-    const int requestedDetailMask = outHit != 0 ? outHit->requiredDetailMask() : RayHit::DETAIL_NONE;
+    const int requestedDetailMask = outHit != 0 ? outHit->getRequiredDetailMask() : RayHit::DETAIL_NONE;
 
     if ( hasTranslationOnlyTransform && requestedDetailMask == RayHit::DETAIL_NONE && geometryIsSphere ) {
         return doIntersectionWithTranslationOnlySphereFastPath(inOutRay, outHit);
@@ -284,11 +284,11 @@ bool SimpleBody::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) con
 
     if ( outHit != 0 ) {
         double localHitT;
-        if ( outHit->ray() != 0 ) {
-            localHitT = outHit->ray()->getT();
+        if ( outHit->getRay() != 0 ) {
+            localHitT = outHit->getRay()->getT();
         }
         else if ( outHit->hasHitDistance() ) {
-            localHitT = outHit->hitDistance();
+            localHitT = outHit->getHitDistance();
         }
         else {
             return false;
@@ -334,11 +334,11 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
     }
 
     double localHitT;
-    if ( hit->ray() != 0 ) {
-        localHitT = hit->ray()->getT();
+    if ( hit->getRay() != 0 ) {
+        localHitT = hit->getRay()->getT();
     }
     else if ( hit->hasHitDistance() ) {
-        localHitT = hit->hitDistance();
+        localHitT = hit->getHitDistance();
     }
     else {
         return false;
@@ -352,17 +352,17 @@ bool SimpleBody::doIntersectionWithTranslationOnly(
             outHit->setHitDistance(localHitT);
         }
         if ( outHit->needsPoint() ) {
-            outHit->p = hit->p.add(position);
+            outHit->point = hit->point.add(position);
         }
         if ( outHit->needsNormal() ) {
-            outHit->n = hit->n;
+            outHit->normal = hit->normal;
         }
         if ( outHit->needsTextureCoordinates() ) {
             outHit->u = hit->u;
             outHit->v = hit->v;
         }
         if ( outHit->needsTangent() ) {
-            outHit->t = hit->t;
+            outHit->tangent = hit->tangent;
         }
         outHit->material = hit->material;
         outHit->texture = hit->texture;
@@ -401,11 +401,11 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
 {
     if ( outData == 0 || geometry == 0 || !hasInvertibleScale ) return;
 
-    const Ray* worldRayPtr = outData->ray();
+    const Ray* worldRayPtr = outData->getRay();
     if ( worldRayPtr == 0 ) {
-        outData->material = globalMaterial;
-        outData->texture = globalTextureMap;
-        outData->normalMap = globalNormalMap;
+        outData->material = material;
+        outData->texture = texture;
+        outData->normalMap = normalMap;
         return;
     }
 
@@ -426,9 +426,9 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
         rotatedDirection.z() * inverseScale.z());
     double localDirLength = localDirection.length();
     if ( localDirLength <= VSDK::EPSILON ) {
-        outData->material = globalMaterial;
-        outData->texture = globalTextureMap;
-        outData->normalMap = globalNormalMap;
+        outData->material = material;
+        outData->texture = texture;
+        outData->normalMap = normalMap;
         return;
     }
     localDirection = localDirection.multiply(1.0 / localDirLength);
@@ -439,30 +439,30 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
 
     if ( outData->needsPoint() ) {
         Vector3Dd worldPoint = rotation.multiply(Vector3Dd(
-            outData->p.x() * scale.x(),
-            outData->p.y() * scale.y(),
-            outData->p.z() * scale.z())).add(position);
-        outData->p = worldPoint;
+            outData->point.x() * scale.x(),
+            outData->point.y() * scale.y(),
+            outData->point.z() * scale.z())).add(position);
+        outData->point = worldPoint;
     }
 
     if ( outData->needsNormal() ) {
         Vector3Dd worldNormal = rotation.multiply(Vector3Dd(
-            outData->n.x() * inverseScale.x(),
-            outData->n.y() * inverseScale.y(),
-            outData->n.z() * inverseScale.z())).normalized();
-        outData->n = worldNormal;
+            outData->normal.x() * inverseScale.x(),
+            outData->normal.y() * inverseScale.y(),
+            outData->normal.z() * inverseScale.z())).normalized();
+        outData->normal = worldNormal;
     }
 
     if ( outData->needsTangent() ) {
         Vector3Dd worldTangent = rotation.multiply(Vector3Dd(
-            outData->t.x() * scale.x(),
-            outData->t.y() * scale.y(),
-            outData->t.z() * scale.z())).normalized();
-        outData->t = worldTangent;
+            outData->tangent.x() * scale.x(),
+            outData->tangent.y() * scale.y(),
+            outData->tangent.z() * scale.z())).normalized();
+        outData->tangent = worldTangent;
     }
 
-    outData->material = globalMaterial;
-    outData->texture = globalTextureMap;
-    outData->normalMap = globalNormalMap;
+    outData->material = material;
+    outData->texture = texture;
+    outData->normalMap = normalMap;
     outData->setRay(worldRay.withT(worldT));
 }

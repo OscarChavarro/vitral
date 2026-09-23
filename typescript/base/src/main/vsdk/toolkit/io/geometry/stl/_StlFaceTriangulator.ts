@@ -184,9 +184,9 @@ export class _StlFaceTriangulator {
     ): _StlFacetEmitter.Facet {
         _StlFaceTriangulator.validateTriangleIndices(face, triangle, originalVertices.length);
 
-        const a: Vector3Dd = originalVertices[triangle.a]!;
-        let b: Vector3Dd = originalVertices[triangle.b]!;
-        let c: Vector3Dd = originalVertices[triangle.c]!;
+        const a: Vector3Dd = originalVertices[triangle.point0]!;
+        let b: Vector3Dd = originalVertices[triangle.point1]!;
+        let c: Vector3Dd = originalVertices[triangle.point2]!;
 
         if (
             !PolyhedralBoundedSolidNumericPolicy.pointsSeparated(a, b, numericContext) ||
@@ -234,12 +234,12 @@ export class _StlFaceTriangulator {
         vertexCount: number,
     ): void {
         if (
-            triangle.a < 0 ||
-            triangle.a >= vertexCount ||
-            triangle.b < 0 ||
-            triangle.b >= vertexCount ||
-            triangle.c < 0 ||
-            triangle.c >= vertexCount
+            triangle.point0 < 0 ||
+            triangle.point0 >= vertexCount ||
+            triangle.point1 < 0 ||
+            triangle.point1 >= vertexCount ||
+            triangle.point2 < 0 ||
+            triangle.point2 >= vertexCount
         ) {
             throw new IllegalStateException(
                 "STL export rejected: face " + face.id + " triangulation returned an out-of-range index",

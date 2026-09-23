@@ -42,15 +42,15 @@ private:
     double resolveTagSize(int markerId) const;
     Matrix4x4d buildAprilToModelRotation() const;
 
-    MarkerTrackerConfig cfg_;
-    MarkersModel* model_;
-    MarkerPoser poser_;
-    MarkerEventBus* bus_;
-    double fx_, fy_, cx_, cy_;
-    java::ArrayList<double> dist_;
-    bool calibrated_;
+    MarkerTrackerConfig cfg;
+    MarkersModel* model;
+    MarkerPoser poser;
+    MarkerEventBus* bus;
+    double focalLengthX, focalLengthY, principalPointX, principalPointY;
+    java::ArrayList<double> dist;
+    bool calibrated;
 
-    pthread_t thread_;
-    bool running_;
+    pthread_t thread;
+    bool running;
 };
 #endif

@@ -17,15 +17,15 @@ static inline double radiansToDegrees(double radians) {
 }
 
 CameraControllerAquynza::CameraControllerAquynza(Camera* cam)
-    : camera(cam), oldMouseX(0), oldMouseY(0), deltaMov(0.25) {
+    : camera(cam), oldMouseX(0), oldMouseY(0), deltaMovement(0.25) {
 }
 
 double CameraControllerAquynza::getDeltaMovement() const {
-    return deltaMov;
+    return deltaMovement;
 }
 
 void CameraControllerAquynza::setDeltaMovement(double val) {
-    deltaMov = val;
+    deltaMovement = val;
 }
 
 double CameraControllerAquynza::augmentLogarithmic(double val, double EPSILON) {
@@ -108,33 +108,33 @@ bool CameraControllerAquynza::processKeyPressedEvent(const KeyEvent& keyEvent) {
             break;
 
         case KeyEvent::KEY_x:
-            eyePosition = eyePosition.withX(eyePosition.x() - deltaMov);
-            focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMov);
+            eyePosition = eyePosition.withX(eyePosition.x() - deltaMovement);
+            focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMovement);
             updated = true;
             break;
         case KeyEvent::KEY_X:
-            eyePosition = eyePosition.withX(eyePosition.x() + deltaMov);
-            focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMov);
+            eyePosition = eyePosition.withX(eyePosition.x() + deltaMovement);
+            focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMovement);
             updated = true;
             break;
         case KeyEvent::KEY_y:
-            eyePosition = eyePosition.withY(eyePosition.y() - deltaMov);
-            focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMov);
+            eyePosition = eyePosition.withY(eyePosition.y() - deltaMovement);
+            focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMovement);
             updated = true;
             break;
         case KeyEvent::KEY_Y:
-            eyePosition = eyePosition.withY(eyePosition.y() + deltaMov);
-            focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMov);
+            eyePosition = eyePosition.withY(eyePosition.y() + deltaMovement);
+            focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMovement);
             updated = true;
             break;
         case KeyEvent::KEY_z:
-            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMov);
-            focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMov);
+            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMovement);
+            focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMovement);
             updated = true;
             break;
         case KeyEvent::KEY_Z:
-            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMov);
-            focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMov);
+            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMovement);
+            focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMovement);
             updated = true;
             break;
 
@@ -245,7 +245,7 @@ bool CameraControllerAquynza::processMouseDraggedEvent(const MouseEvent& e) {
     int deltaX = e.getX() - oldMouseX;
     int deltaY = e.getY() - oldMouseY;
     bool updated = false;
-    double senseFactor = deltaMov / 5.0;
+    double senseFactor = deltaMovement / 5.0;
 
     deltaX = java::Math::max(-5, java::Math::min(5, deltaX));
     deltaY = java::Math::max(-5, java::Math::min(5, deltaY));

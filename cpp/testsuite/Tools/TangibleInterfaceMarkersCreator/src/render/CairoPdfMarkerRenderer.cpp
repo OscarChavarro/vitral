@@ -71,7 +71,7 @@ void CairoPdfMarkerRenderer::render(cairo_t* cr, const Marker& marker, double xM
         }
     }
 
-    Polygon2D merged = polygonProcessor_.execute(&markerParts);
+    Polygon2D merged = polygonProcessor.execute(&markerParts);
     cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
     cairo_fill_rule_t oldRule = cairo_get_fill_rule(cr);
     cairo_set_fill_rule(cr, CAIRO_FILL_RULE_EVEN_ODD);

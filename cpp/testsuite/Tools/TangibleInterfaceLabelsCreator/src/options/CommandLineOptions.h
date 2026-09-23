@@ -12,10 +12,10 @@ class CommandLineOptions {
     const char* getOutputPdf() const;
 
   private:
-    double labelSizeMm_;
-    double circleHoledRadiusMm_;
-    std::string outputPdfArgument_;
-    mutable std::string generatedOutputPdf_;
+    double labelSizeMm;
+    double circleHoledRadiusMm;
+    std::string outputPdfArgument;
+    mutable std::string generatedOutputPdf;
 };
 
 #endif

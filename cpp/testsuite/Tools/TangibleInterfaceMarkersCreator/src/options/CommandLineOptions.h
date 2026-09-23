@@ -12,10 +12,10 @@ public:
     const char* getOutputPdf(int endId) const;
 
 private:
-    int startId_;
-    double markerSizeMm_;
-    std::string outputPdfArgument_;
-    mutable std::string generatedOutputPdf_;
+    int startId;
+    double markerSizeMm;
+    std::string outputPdfArgument;
+    mutable std::string generatedOutputPdf;
 };
 
 #endif

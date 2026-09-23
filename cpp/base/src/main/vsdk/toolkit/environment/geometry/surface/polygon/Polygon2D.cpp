@@ -96,8 +96,8 @@ static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
 Ray* Polygon2D::doIntersectionFirstHit(const Ray& inOut_ray)
 {
     RayHit hit;
-    if (doIntersectionFirstHit(inOut_ray, &hit) && hit.ray() != nullptr) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOut_ray, &hit) && hit.getRay() != nullptr) {
+        return new Ray(*hit.getRay());
     }
     return nullptr;
 }
@@ -121,8 +121,8 @@ bool Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
     if (outHit != nullptr) {
         if (outHit->shouldStoreRay() || outHit->needsAnySurfaceData()) outHit->setRay(inRay.withT(t));
         else outHit->setHitDistance(t);
-        if (outHit->needsPoint()) outHit->p = p;
-        if (outHit->needsNormal()) outHit->n = Vector3Dd(0,0,1);
+        if (outHit->needsPoint()) outHit->point = p;
+        if (outHit->needsNormal()) outHit->normal = Vector3Dd(0,0,1);
     }
     return true;
 }
@@ -130,8 +130,8 @@ bool Polygon2D::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 void Polygon2D::doExtraInformation(const Ray& inRay, double intT, RayHit* outData)
 {
     if (outData == nullptr) return;
-    outData->p = inRay.getOrigin().add(inRay.getDirection().multiply(intT));
-    outData->n = Vector3Dd(0,0,1);
+    outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(intT));
+    outData->normal = Vector3Dd(0,0,1);
 }
 
 BinaryTreeNode<_Polygon2DContour*>* Polygon2D::getHeadNode() { return headNode; }

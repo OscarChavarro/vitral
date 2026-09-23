@@ -10,44 +10,49 @@ export class RGBAImageCompressed extends Image {
     private data: Int8Array | null = null;
     private xSize = 0;
     private ySize = 0;
-    private format = 0;
-    private compressedSize = 0;
+    private compressionFormat = 0;
+    private compressedDataSize = 0;
     public dettach(): void {
         this.data = null;
     }
     public init(w: number, h: number): boolean {
         this.xSize = w;
         this.ySize = h;
-        this.format = 0;
-        this.compressedSize = 0;
+        this.compressionFormat = 0;
+        this.compressedDataSize = 0;
         this.data = new Int8Array();
         return true;
     }
     public initNoFill(w: number, h: number): boolean {
         return this.init(w, h);
     }
-    public initCompressed(w: number, h: number, format: number, data: Int8Array | Uint8Array | null): boolean {
+    public initCompressed(
+        w: number,
+        h: number,
+        compressionFormat: number,
+        data: Int8Array | Uint8Array | null,
+    ): boolean {
         if (w <= 0 || h <= 0 || data === null) {
             this.dettach();
             this.xSize = 0;
             this.ySize = 0;
-            this.format = 0;
-            this.compressedSize = 0;
+            this.compressionFormat = 0;
+            this.compressedDataSize = 0;
             return false;
         }
-        const size = RGBAImageCompressed.calculateTopLevelDataSize(w, h, format);
+        const size = RGBAImageCompressed.calculateTopLevelDataSize(w, h, compressionFormat);
         if (data.length < size) {
             this.dettach();
             this.xSize = 0;
             this.ySize = 0;
-            this.format = 0;
-            this.compressedSize = 0;
+            this.compressionFormat = 0;
+            this.compressedDataSize = 0;
             return false;
         }
         this.xSize = w;
         this.ySize = h;
-        this.format = format;
-        this.compressedSize = size;
+        this.compressionFormat = compressionFormat;
+        this.compressedDataSize = size;
         this.data = new Int8Array(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
         return true;
     }
@@ -55,10 +60,10 @@ export class RGBAImageCompressed extends Image {
         this.initCompressed(w, h, f, d);
     }
     public getCompressionFormat(): number {
-        return this.format;
+        return this.compressionFormat;
     }
     public getCompressedDataSize(): number {
-        return this.compressedSize;
+        return this.compressedDataSize;
     }
     public getRawImage(): Int8Array | null {
         return this.data;
@@ -97,7 +102,7 @@ export class RGBAImageCompressed extends Image {
     }
     public override clone(): RGBAImageCompressed {
         const copy = new RGBAImageCompressed();
-        if (this.data !== null) copy.initCompressed(this.xSize, this.ySize, this.format, this.data);
+        if (this.data !== null) copy.initCompressed(this.xSize, this.ySize, this.compressionFormat, this.data);
         return copy;
     }
     public static calculateTopLevelDataSize(w: number, h: number, f: number): number {

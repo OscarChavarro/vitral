@@ -17,15 +17,15 @@ public class FunctionalExplicitSurface extends Surface
 
     private AlgebraicExpression xyFunction;
     private String functionExpression;
-    private double minx;
-    private double miny;
-    private double minz;
-    private double maxx;
-    private double maxy;
-    private double maxz;
-    private int nx;
-    private int ny;
-    private TriangleMesh internalGeometry;
+    private double minXBound;
+    private double minYBound;
+    private double minZBound;
+    private double maxXBound;
+    private double maxYBound;
+    private double maxZBound;
+    private int tesselationHintX;
+    private int tesselationHintY;
+    private TriangleMesh internalTriangleMesh;
 
     public FunctionalExplicitSurface(String fxy)
     {
@@ -52,10 +52,10 @@ public class FunctionalExplicitSurface extends Surface
                     "So bad. Something is wrong with algebraic expressions!:\n" + e2);
             }
         }
-        minx = miny = minz = -1.0;
-        maxx = maxy = maxz = 1.0;
-        nx = 10;
-        ny = 10;
+        minXBound = minYBound = minZBound = -1.0;
+        maxXBound = maxYBound = maxZBound = 1.0;
+        tesselationHintX = 10;
+        tesselationHintY = 10;
         updateInternalGeometry();
     }
 
@@ -64,77 +64,77 @@ public class FunctionalExplicitSurface extends Surface
         return functionExpression;
     }
 
-    public void setBounds(double minx, double miny, double minz,
-                          double maxx, double maxy, double maxz)
+    public void setBounds(double minXBound, double minYBound, double minZBound,
+                          double maxXBound, double maxYBound, double maxZBound)
     {
-        this.minx = minx;
-        this.miny = miny;
-        this.minz = minz;
-        this.maxx = maxx;
-        this.maxy = maxy;
-        this.maxz = maxz;
+        this.minXBound = minXBound;
+        this.minYBound = minYBound;
+        this.minZBound = minZBound;
+        this.maxXBound = maxXBound;
+        this.maxYBound = maxYBound;
+        this.maxZBound = maxZBound;
         updateInternalGeometry();
     }
 
     public void setTesselationHint(int tesx, int tesy)
     {
-        nx = tesx;
-        ny = tesy;
+        tesselationHintX = tesx;
+        tesselationHintY = tesy;
         updateInternalGeometry();
     }
 
     public int getTesselationHintX()
     {
-        return nx;
+        return tesselationHintX;
     }
 
     public int getTesselationHintY()
     {
-        return ny;
+        return tesselationHintY;
     }
 
     public double getMinXBound()
     {
-        return minx;
+        return minXBound;
     }
 
     public double getMinYBound()
     {
-        return miny;
+        return minYBound;
     }
 
     public double getMinZBound()
     {
-        return minz;
+        return minZBound;
     }
 
     public double getMaxXBound()
     {
-        return maxx;
+        return maxXBound;
     }
 
     public double getMaxYBound()
     {
-        return maxy;
+        return maxYBound;
     }
 
     public double getMaxZBound()
     {
-        return maxz;
+        return maxZBound;
     }
 
-    private int coord(int nx, int ny, int ix, int iy)
+    private int coord(int tesselationHintX, int tesselationHintY, int ix, int iy)
     {
-        return ((nx+1)*iy) + ix;
+        return ((tesselationHintX+1)*iy) + ix;
     }
 
     private void updateInternalGeometry()
     {
         //-----------------------------------------------------------------
         // Size of each tile in x direction
-        double dx = (maxx - minx) / ((double)nx); 
+        double dx = (maxXBound - minXBound) / ((double)tesselationHintX); 
         // Size of each tile in y direction
-        double dy = (maxy - miny) / ((double)ny);
+        double dy = (maxYBound - minYBound) / ((double)tesselationHintY);
 
         // Temporary variable
         double x;
@@ -143,26 +143,26 @@ public class FunctionalExplicitSurface extends Surface
         int iy;
         int index;
 
-        internalGeometry = new TriangleMesh();
+        internalTriangleMesh = new TriangleMesh();
 
         //-----------------------------------------------------------------
-        internalGeometry.initVertexPositionsArray((nx+1)*(ny+1));
+        internalTriangleMesh.initVertexPositionsArray((tesselationHintX+1)*(tesselationHintY+1));
         double v[];
         double z;
 
-        v = internalGeometry.getVertexPositions();
+        v = internalTriangleMesh.getVertexPositions();
         try {
             index = 0;
-            for ( iy = 0, y = miny; iy <= ny; iy++, y += dy ) {
+            for ( iy = 0, y = minYBound; iy <= tesselationHintY; iy++, y += dy ) {
                 xyFunction.defineValue("y", y);
-                for ( ix = 0, x = minx; ix <= nx; ix++, x += dx ) {
+                for ( ix = 0, x = minXBound; ix <= tesselationHintX; ix++, x += dx ) {
                     xyFunction.defineValue("x", x);
                     z = xyFunction.eval();
-                    if ( z > maxz ) {
-                        z = maxz;
+                    if ( z > maxZBound ) {
+                        z = maxZBound;
                     }
-                    if ( z < minz ) {
-                        z = minz;
+                    if ( z < minZBound ) {
+                        z = minZBound;
                     }
                     v[3*index] = x;
                     v[3*index+1] = y;
@@ -179,32 +179,32 @@ public class FunctionalExplicitSurface extends Surface
         }
 
         //-----------------------------------------------------------------
-        internalGeometry.initTriangleArrays(nx*ny*2);
+        internalTriangleMesh.initTriangleArrays(tesselationHintX*tesselationHintY*2);
         int t[];
 
         index = 0;
-        t = internalGeometry.getTriangleIndexes();
-        for ( iy = 0; iy < ny; iy++ ) {
-            for ( ix = 0; ix < nx; ix++ ) {
-                t[3*index] = coord(nx, ny, ix, iy);
-                t[3*index+1] = coord(nx, ny, ix+1, iy);
-                t[3*index+2] = coord(nx, ny, ix+1, iy+1);
+        t = internalTriangleMesh.getTriangleIndexes();
+        for ( iy = 0; iy < tesselationHintY; iy++ ) {
+            for ( ix = 0; ix < tesselationHintX; ix++ ) {
+                t[3*index] = coord(tesselationHintX, tesselationHintY, ix, iy);
+                t[3*index+1] = coord(tesselationHintX, tesselationHintY, ix+1, iy);
+                t[3*index+2] = coord(tesselationHintX, tesselationHintY, ix+1, iy+1);
                 index++;
 
-                t[3*index] = coord(nx, ny, ix, iy);
-                t[3*index+1] = coord(nx, ny, ix+1, iy+1);
-                t[3*index+2] = coord(nx, ny, ix, iy+1);
+                t[3*index] = coord(tesselationHintX, tesselationHintY, ix, iy);
+                t[3*index+1] = coord(tesselationHintX, tesselationHintY, ix+1, iy+1);
+                t[3*index+2] = coord(tesselationHintX, tesselationHintY, ix, iy+1);
                 index++;
             }
         }
 
         //-----------------------------------------------------------------
-        internalGeometry.calculateNormals();
+        internalTriangleMesh.calculateNormals();
     }
 
     public TriangleMesh getInternalTriangleMesh()
     {
-        return internalGeometry;
+        return internalTriangleMesh;
     }
 
     /**
@@ -215,7 +215,7 @@ public class FunctionalExplicitSurface extends Surface
     */
     @Override
     public double[] getMinMax() {
-        return internalGeometry.getMinMax();
+        return internalTriangleMesh.getMinMax();
     }
 
     /**
@@ -230,8 +230,8 @@ public class FunctionalExplicitSurface extends Surface
     public Ray
     doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit();
-        if ( internalGeometry.doIntersectionFirstHit(inOut_Ray, hit) ) {
-            return hit.ray();
+        if ( internalTriangleMesh.doIntersectionFirstHit(inOut_Ray, hit) ) {
+            return hit.getRay();
         }
         return null;
     }
@@ -239,7 +239,7 @@ public class FunctionalExplicitSurface extends Surface
     @Override
     public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        return internalGeometry.doIntersectionFirstHit(inRay, outHit);
+        return internalTriangleMesh.doIntersectionFirstHit(inRay, outHit);
     }
 
     /**
@@ -253,7 +253,7 @@ public class FunctionalExplicitSurface extends Surface
     doExtraInformation(Ray inRay, double inT,
                                    RayHit outData) {
         RayHit hit = new RayHit();
-        if ( internalGeometry.doIntersectionFirstHit(inRay.withT(inT), hit) ) {
+        if ( internalTriangleMesh.doIntersectionFirstHit(inRay.withT(inT), hit) ) {
             outData.clone(hit);
         }
     }
@@ -268,7 +268,7 @@ public class FunctionalExplicitSurface extends Surface
     @Override
     public int doContainmentTest(Vector3Dd p, double distanceTolerance)
     {
-        return internalGeometry.doContainmentTest(p, distanceTolerance);
+        return internalTriangleMesh.doContainmentTest(p, distanceTolerance);
     }
 
 }

@@ -124,14 +124,14 @@ public class Sphere extends Solid {
             inRay.getOrigin().y() + inT*inRay.getDirection().y(),
             inRay.getOrigin().z() + inT*inRay.getDirection().z());
         if ( outData.needsPoint() ) {
-            outData.p = point;
+            outData.point = point;
         }
 
         Vector3Dd normal = null;
         if ( needsNormalVector ) {
             normal = new Vector3Dd(point).normalized();
             if ( outData.needsNormal() ) {
-                outData.n = normal;
+                outData.normal = normal;
             }
         }
 
@@ -161,7 +161,7 @@ public class Sphere extends Solid {
             outData.v = 1 - (phi / Math.PI);
         }
         if ( outData.needsTangent() ) {
-            outData.t = new Vector3Dd(
+            outData.tangent = new Vector3Dd(
                 Math.sin(theta-Math.PI/2),
                 -Math.cos(theta-Math.PI/2),
                 0);

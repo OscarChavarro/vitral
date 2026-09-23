@@ -32,22 +32,22 @@ export interface ParallelRaytracerTileRequest {
     readonly shadingType: number;
     readonly texture: boolean;
     readonly bumpMap: boolean;
-    readonly x0: number;
-    readonly y0: number;
-    readonly dx: number;
-    readonly dy: number;
+    readonly startX: number;
+    readonly startY: number;
+    readonly width: number;
+    readonly height: number;
     /** Kind of depth to return with the band (a `DepthBufferMode`) */
     readonly depthMode: string;
     /** `depthRange` of `DepthBufferMode.OPENGL_DEPTH` */
-    readonly depthRangeNear: number;
-    readonly depthRangeFar: number;
+    readonly openGlDepthRangeNear: number;
+    readonly openGlDepthRangeFar: number;
     readonly [key: string]: WorkerTransferValue;
 }
 
 /** The pixels of one rendered band, returned by a worker. */
 export interface ParallelRaytracerTileResult {
-    readonly y0: number;
-    readonly dy: number;
+    readonly startY: number;
+    readonly height: number;
     readonly bytes: Uint8Array;
     /** Depth of the rows of the band, top row first, or null without depth mode */
     readonly depth: Float32Array | null;
@@ -101,8 +101,8 @@ export class ParallelRaytracer {
     private workers: WorkerExecutor<ParallelRaytracerTileRequest, ParallelRaytracerTileResult>[] | null = null;
     private sceneVersion = 0;
     private depthBufferMode: DepthBufferMode = DepthBufferMode.NONE;
-    private depthRangeNear = 0.0;
-    private depthRangeFar = 1.0;
+    private openGlDepthRangeNear = 0.0;
+    private openGlDepthRangeFar = 1.0;
     /** Depth buffer of the last `execute` call, reused while its size fits */
     private depthBuffer: ZBuffer | null = null;
 
@@ -159,18 +159,18 @@ export class ParallelRaytracer {
     @param far window depth of the far plane
     */
     public setOpenGlDepthRange(near: number, far: number): void {
-        this.depthRangeNear = near;
-        this.depthRangeFar = far;
+        this.openGlDepthRangeNear = near;
+        this.openGlDepthRangeFar = far;
     }
 
     /** @return window depth of the near plane for `DepthBufferMode.OPENGL_DEPTH` */
     public getOpenGlDepthRangeNear(): number {
-        return this.depthRangeNear;
+        return this.openGlDepthRangeNear;
     }
 
     /** @return window depth of the far plane for `DepthBufferMode.OPENGL_DEPTH` */
     public getOpenGlDepthRangeFar(): number {
-        return this.depthRangeFar;
+        return this.openGlDepthRangeFar;
     }
 
     /**
@@ -353,7 +353,7 @@ export class ParallelRaytracer {
         let totalElements = 0n;
 
         for (let i = 0; i < generatedTiles.size(); i++) {
-            totalElements += BigInt(generatedTiles.get(i).getDy());
+            totalElements += BigInt(generatedTiles.get(i).getHeight());
         }
         return totalElements;
     }
@@ -376,7 +376,7 @@ export class ParallelRaytracer {
         let tile: RasterTileArea | undefined;
 
         while ((tile = pendingTiles.poll()) !== undefined) {
-            if (tile.getX0() !== 0 || tile.getDx() !== resultingImage.getXSize()) {
+            if (tile.getStartX() !== 0 || tile.getWidth() !== resultingImage.getXSize()) {
                 throw new IllegalStateException(
                     "The worker band transfer only supports full-width tiles, which is what " +
                         "RasterTileGenerationStrategy.LINEAR produces",
@@ -392,19 +392,19 @@ export class ParallelRaytracer {
                     shadingType: rendererConfiguration.getShadingType(),
                     texture: rendererConfiguration.isTextureSet(),
                     bumpMap: rendererConfiguration.isBumpMapSet(),
-                    x0: tile.getX0(),
-                    y0: tile.getY0(),
-                    dx: tile.getDx(),
-                    dy: tile.getDy(),
+                    startX: tile.getStartX(),
+                    startY: tile.getStartY(),
+                    width: tile.getWidth(),
+                    height: tile.getHeight(),
                     depthMode: depthMode,
-                    depthRangeNear: this.depthRangeNear,
-                    depthRangeFar: this.depthRangeFar,
+                    openGlDepthRangeNear: this.openGlDepthRangeNear,
+                    openGlDepthRangeFar: this.openGlDepthRangeFar,
                 },
                 progressReporter === null ? undefined : { onNotice: () => progressReporter.update(0, 0, 0) },
             );
             ParallelRaytracer.spliceBand(resultingImage, result);
             if (outDepth !== null && result.depth !== null) {
-                outDepth.getZBuffer().set(result.depth, result.y0 * outDepth.getXSize());
+                outDepth.getZBuffer().set(result.depth, result.startY * outDepth.getXSize());
             }
         }
     }
@@ -414,7 +414,7 @@ export class ParallelRaytracer {
         const ySize: number = resultingImage.getYSize();
         const rowStride: number = resultingImage.getXSize() * 3;
         const raw: Uint8Array = resultingImage.getRawImageDirectBuffer();
-        const start: number = (ySize - (result.y0 + result.dy)) * rowStride;
+        const start: number = (ySize - (result.startY + result.height)) * rowStride;
         raw.set(result.bytes, start);
     }
 }

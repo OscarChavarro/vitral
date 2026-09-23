@@ -31,16 +31,16 @@ import vsdk.toolkit.io.PersistenceElement;
 
 class _ReaderAseTriangleCache extends PersistenceElement implements Comparable <_ReaderAseTriangleCache>
 {
-    public int p0;
-    public int p1;
-    public int p2;
+    public int point0;
+    public int point1;
+    public int point2;
     public int materialId;
 
-    public _ReaderAseTriangleCache(int p0, int p1, int p2, int materialId)
+    public _ReaderAseTriangleCache(int point0, int point1, int point2, int materialId)
     {
-        this.p0 = p0;
-        this.p1 = p1;
-        this.p2 = p2;
+        this.point0 = point0;
+        this.point1 = point1;
+        this.point2 = point2;
         this.materialId = materialId;
     }
 
@@ -93,22 +93,22 @@ class _ReaderAseMeshCache extends PersistenceElement
 
         for ( i = 0; i < triangles.size(); i++ ) {
             elem = triangles.get(i);
-            if ( elem.p0 < 0 || elem.p0 >= n ||
-                 elem.p1 < 0 || elem.p1 >= n ||
-                 elem.p2 < 0 || elem.p2 >= n ) {
+            if ( elem.point0 < 0 || elem.point0 >= n ||
+                 elem.point1 < 0 || elem.point1 >= n ||
+                 elem.point2 < 0 || elem.point2 >= n ) {
                 continue;
             }
 
-            if ( vertexMap[elem.p0] < 0 ) {
-                vertexMap[elem.p0] = count;
+            if ( vertexMap[elem.point0] < 0 ) {
+                vertexMap[elem.point0] = count;
                 count++;
             }
-            if ( vertexMap[elem.p1] < 0 ) {
-                vertexMap[elem.p1] = count;
+            if ( vertexMap[elem.point1] < 0 ) {
+                vertexMap[elem.point1] = count;
                 count++;
             }
-            if ( vertexMap[elem.p2] < 0 ) {
-                vertexMap[elem.p2] = count;
+            if ( vertexMap[elem.point2] < 0 ) {
+                vertexMap[elem.point2] = count;
                 count++;
             }
         }
@@ -134,14 +134,14 @@ class _ReaderAseMeshCache extends PersistenceElement
 
         for ( i = 0; i < triangles.size(); i++ ) {
             elem = triangles.get(i);
-            if ( elem.p0 < 0 || elem.p0 >= n ||
-                 elem.p1 < 0 || elem.p1 >= n ||
-                 elem.p2 < 0 || elem.p2 >= n ) {
+            if ( elem.point0 < 0 || elem.point0 >= n ||
+                 elem.point1 < 0 || elem.point1 >= n ||
+                 elem.point2 < 0 || elem.point2 >= n ) {
                 continue;
             }
-            t[3*i+0] = vertexMap[elem.p0];
-            t[3*i+1] = vertexMap[elem.p1];
-            t[3*i+2] = vertexMap[elem.p2];
+            t[3*i+0] = vertexMap[elem.point0];
+            t[3*i+1] = vertexMap[elem.point1];
+            t[3*i+2] = vertexMap[elem.point2];
         }
 
         mesh.calculateNormals();

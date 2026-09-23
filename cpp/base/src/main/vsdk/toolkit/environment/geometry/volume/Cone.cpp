@@ -35,8 +35,8 @@ Ray* Cone::doIntersectionCylinder(const Ray& inOutRay, double inR, double inH, R
         if (pz > inH || pz < 0) return nullptr;
         if (outInfo != nullptr) {
             double px=ox+dx*t0, py=oy+dy*t0;
-            outInfo->p = Vector3Dd(px,py,pz);
-            outInfo->n = Vector3Dd(px,py,0).normalized();
+            outInfo->point = Vector3Dd(px,py,pz);
+            outInfo->normal = Vector3Dd(px,py,0).normalized();
         }
         Ray hRay = inOutRay.withT(t0);
         return new Ray(hRay);
@@ -61,8 +61,8 @@ Ray* Cone::doIntersectionCone(const Ray& inOutRay, double inR, double inH, RayHi
         if (shiftedPz > 0 || shiftedPz < -inH) return nullptr;
         if (outInfo != nullptr) {
             double px=ox+dx*t0, py=oy+dy*t0;
-            outInfo->p = Vector3Dd(px, py, shiftedPz + inH);
-            outInfo->n = Vector3Dd(px, py, -shiftedPz * ratioSquared).normalized();
+            outInfo->point = Vector3Dd(px, py, shiftedPz + inH);
+            outInfo->normal = Vector3Dd(px, py, -shiftedPz * ratioSquared).normalized();
         }
         Ray hRay = inOutRay.withT(t0);
         return new Ray(hRay);
@@ -79,8 +79,8 @@ Ray* Cone::doIntersectionTap(const Ray& inOutRay, double inR, double inH, RayHit
             double px=ox+dx*t, py=oy+dy*t;
             if (sq(px)+sq(py) < sq(inR)) {
                 if (outInfo != nullptr) {
-                    outInfo->n = Vector3Dd(0,0,1);
-                    outInfo->p = Vector3Dd(px,py,inH);
+                    outInfo->normal = Vector3Dd(0,0,1);
+                    outInfo->point = Vector3Dd(px,py,inH);
                 }
                 Ray hRay = inOutRay.withT(t);
                 return new Ray(hRay);
@@ -92,8 +92,8 @@ Ray* Cone::doIntersectionTap(const Ray& inOutRay, double inR, double inH, RayHit
 
 Ray* Cone::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.getRay() != nullptr) {
+        return new Ray(*hit.getRay());
     }
     return nullptr;
 }
@@ -111,7 +111,7 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
         tap1Hit = doIntersectionTap(inOutRay, bottomRadius, 0, &infoTap1);
         if ((tap1Hit != nullptr && bodyHit == nullptr) ||
             (tap1Hit != nullptr && bodyHit != nullptr && tap1Hit->getT() < bodyHit->getT())) {
-            infoTap1.n = infoTap1.n.multiply(-1);
+            infoTap1.normal = infoTap1.normal.multiply(-1);
             winner = new Ray(inOutRay.withT(tap1Hit->getT()));
             winnerInfo = &infoTap1;
         }
@@ -147,9 +147,9 @@ bool Cone::doIntersectionFirstHit(const Ray& inOutRay, RayHit* outHit) {
 
     if (outHit != nullptr) {
         outHit->setRay(*winner);
-        outHit->p = Vector3Dd(winnerInfo->p);
-        outHit->n = Vector3Dd(winnerInfo->n).normalized();
-        outHit->t = Vector3Dd(winnerInfo->t);
+        outHit->point = Vector3Dd(winnerInfo->point);
+        outHit->normal = Vector3Dd(winnerInfo->normal).normalized();
+        outHit->tangent = Vector3Dd(winnerInfo->tangent);
         outHit->u = winnerInfo->u;
         outHit->v = winnerInfo->v;
         outHit->material = winnerInfo->material;

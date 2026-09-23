@@ -462,7 +462,7 @@ public class PolyhedralBoundedSolidExample
             for ( int j = 0; j < edge.events.size(); j++ ) {
                 HiddenLineRenderer.AppelEventDump event = edge.events.get(j);
                 json.append("        {\"t\": ")
-                    .append(formatDouble(event.t))
+                    .append(formatDouble(event.lineParameter))
                     .append(", \"deltaQI\": ")
                     .append(event.deltaQI)
                     .append(", \"contourEdgeIndex\": ")

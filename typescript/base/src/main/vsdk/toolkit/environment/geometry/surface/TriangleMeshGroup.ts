@@ -49,8 +49,8 @@ export class TriangleMeshGroup extends Surface<Ray, RayHit> {
                 info = new Int32Array(1);
             if (
                 this.meshes[i]!.doIntersectionFirstHit(ray, hit, info) &&
-                hit.ray() !== null &&
-                (best === null || hit.hitDistance() < best.hitDistance())
+                hit.getRay() !== null &&
+                (best === null || hit.getHitDistance() < best.getHitDistance())
             ) {
                 best = new RayHit();
                 best.clone(hit);

@@ -60,8 +60,8 @@ class OrthogonalProfileBooleanFallbackSpec {
         private readonly yExtruded: OrthogonalProfileOperandSpec,
         private readonly xMin: number,
         private readonly xMax: number,
-        private readonly ys: number[],
-        private readonly zs: number[],
+        private readonly yCoordinates: number[],
+        private readonly zCoordinates: number[],
     ) {}
     private xAtBoundary(boundary: number, z: number): number {
         if (boundary === 0) return this.xMin;
@@ -69,8 +69,8 @@ class OrthogonalProfileBooleanFallbackSpec {
         return this.xMax;
     }
     private point(boundary: number, iy: number, iz: number): Vector3Dd {
-        const z = this.zs[iz]!;
-        return new Vector3Dd(this.xAtBoundary(boundary, z), this.ys[iy]!, z);
+        const z = this.zCoordinates[iz]!;
+        return new Vector3Dd(this.xAtBoundary(boundary, z), this.yCoordinates[iy]!, z);
     }
 }
 
@@ -168,11 +168,17 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
     }
     private static createXExtrudedYZSpec(
         solid: PolyhedralBoundedSolid,
-        xs: number[],
-        ys: number[],
-        zs: number[],
+        xCoordinates: number[],
+        yCoordinates: number[],
+        zCoordinates: number[],
     ): OrthogonalProfileOperandSpec | null {
-        if (xs.length !== 2 || ys.length !== 4 || zs.length !== 3 || solid.getVerticesList().size() !== 16) return null;
+        if (
+            xCoordinates.length !== 2 ||
+            yCoordinates.length !== 4 ||
+            zCoordinates.length !== 3 ||
+            solid.getVerticesList().size() !== 16
+        )
+            return null;
         const bounds = Array.from(solid.getMinMax());
         let profile = _PolyhedralBoundedSolidFallbackGeometry.extractProfileAtX(solid, bounds[0]!);
         if (profile === null || profile.length < 3)
@@ -183,16 +189,22 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
     }
     private static createYExtrudedXZSpec(
         solid: PolyhedralBoundedSolid,
-        xs: number[],
-        ys: number[],
-        zs: number[],
+        xCoordinates: number[],
+        yCoordinates: number[],
+        zCoordinates: number[],
     ): OrthogonalProfileOperandSpec | null {
-        if (xs.length !== 3 || ys.length !== 2 || zs.length !== 3 || solid.getVerticesList().size() !== 10) return null;
+        if (
+            xCoordinates.length !== 3 ||
+            yCoordinates.length !== 2 ||
+            zCoordinates.length !== 3 ||
+            solid.getVerticesList().size() !== 10
+        )
+            return null;
         const bounds = Array.from(solid.getMinMax()),
             rightZ: number[] = [],
             rightX: number[] = [];
-        for (let i = 0; i < zs.length; i++) {
-            const z = zs[i]!;
+        for (let i = 0; i < zCoordinates.length; i++) {
+            const z = zCoordinates[i]!;
             let maxX = -Number.MAX_VALUE;
             for (let j = 0; j < solid.getVerticesList().size(); j++) {
                 const p = solid.getVerticesList().get(j)!.position;
@@ -205,11 +217,11 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
         return new OrthogonalProfileOperandSpec(this.PROFILE_Y_EXTRUDED_XZ, bounds, null, rightZ, rightX);
     }
     private static createOrthogonalProfileSpec(solid: PolyhedralBoundedSolid): OrthogonalProfileOperandSpec | null {
-        const xs = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 0);
-        const ys = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 1);
-        const zs = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 2);
-        const spec = this.createYExtrudedXZSpec(solid, xs, ys, zs);
-        return spec ?? this.createXExtrudedYZSpec(solid, xs, ys, zs);
+        const xCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 0);
+        const yCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 1);
+        const zCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solid, 2);
+        const spec = this.createYExtrudedXZSpec(solid, xCoordinates, yCoordinates, zCoordinates);
+        return spec ?? this.createXExtrudedYZSpec(solid, xCoordinates, yCoordinates, zCoordinates);
     }
     private static prepareOrthogonalProfileBooleanFallbackSpec(
         solidA: PolyhedralBoundedSolid,
@@ -231,15 +243,24 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
             yb[3]! >= xb[3]! - this.numericContext.bigEpsilon()
         )
             return null;
-        const ys = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 1),
-            zs = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 2);
+        const yCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 1),
+            zCoordinates = _PolyhedralBoundedSolidFallbackGeometry.uniqueVertexCoordinates(solidA, 2);
         for (let i = 0; i < solidB.getVerticesList().size(); i++) {
             const p = solidB.getVerticesList().get(i)!.position;
-            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(ys, p.y());
-            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(zs, p.z());
+            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(yCoordinates, p.y());
+            _PolyhedralBoundedSolidFallbackGeometry.addUniqueCoordinate(zCoordinates, p.z());
         }
-        if (ys.length < 2 || zs.length < 2 || ys.length > 8 || zs.length > 8) return null;
-        return new OrthogonalProfileBooleanFallbackSpec(specA, specB, yExtruded, xb[0]!, xb[3]!, ys, zs);
+        if (yCoordinates.length < 2 || zCoordinates.length < 2 || yCoordinates.length > 8 || zCoordinates.length > 8)
+            return null;
+        return new OrthogonalProfileBooleanFallbackSpec(
+            specA,
+            specB,
+            yExtruded,
+            xb[0]!,
+            xb[3]!,
+            yCoordinates,
+            zCoordinates,
+        );
     }
     private static profileCellSelected(
         spec: OrthogonalProfileBooleanFallbackSpec,
@@ -248,10 +269,10 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
         iy: number,
         iz: number,
     ): boolean {
-        const ys = spec["ys"],
-            zs = spec["zs"];
-        const y = (ys[iy]! + ys[iy + 1]!) * 0.5,
-            z = (zs[iz]! + zs[iz + 1]!) * 0.5;
+        const yCoordinates = spec["yCoordinates"],
+            zCoordinates = spec["zCoordinates"];
+        const y = (yCoordinates[iy]! + yCoordinates[iy + 1]!) * 0.5,
+            z = (zCoordinates[iz]! + zCoordinates[iz + 1]!) * 0.5;
         const x0 = spec["xAtBoundary"](zone, z),
             x1 = spec["xAtBoundary"](zone + 1, z);
         if (x1 <= x0 + this.numericContext.bigEpsilon()) return false;
@@ -308,19 +329,19 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
     ): PolyhedralBoundedSolid | null {
         const spec = this.prepareOrthogonalProfileBooleanFallbackSpec(solidA, solidB);
         if (spec === null) return null;
-        const ys = spec["ys"],
-            zs = spec["zs"];
+        const yCoordinates = spec["yCoordinates"],
+            zCoordinates = spec["zCoordinates"];
         const occupied = Array.from({ length: 2 }, () =>
-            Array.from({ length: ys.length - 1 }, () => Array<boolean>(zs.length - 1).fill(false)),
+            Array.from({ length: yCoordinates.length - 1 }, () => Array<boolean>(zCoordinates.length - 1).fill(false)),
         );
         for (let zone = 0; zone < 2; zone++)
-            for (let iy = 0; iy < ys.length - 1; iy++)
-                for (let iz = 0; iz < zs.length - 1; iz++)
+            for (let iy = 0; iy < yCoordinates.length - 1; iy++)
+                for (let iz = 0; iz < zCoordinates.length - 1; iz++)
                     occupied[zone]![iy]![iz] = this.profileCellSelected(spec, operation, zone, iy, iz);
         const builder = new ProfileCellBooleanBuilder();
         for (let zone = 0; zone < 2; zone++)
-            for (let iy = 0; iy < ys.length - 1; iy++)
-                for (let iz = 0; iz < zs.length - 1; iz++) {
+            for (let iy = 0; iy < yCoordinates.length - 1; iy++)
+                for (let iz = 0; iz < zCoordinates.length - 1; iz++) {
                     if (!occupied[zone]![iy]![iz]) continue;
                     if (zone === 0 || !occupied[zone - 1]![iy]![iz])
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 0);
@@ -328,11 +349,11 @@ export class _PolyhedralBoundedSolidOrthogonalProfileFallback extends _Polyhedra
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 1);
                     if (iy === 0 || !occupied[zone]![iy - 1]![iz])
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 2);
-                    if (iy === ys.length - 2 || !occupied[zone]![iy + 1]![iz])
+                    if (iy === yCoordinates.length - 2 || !occupied[zone]![iy + 1]![iz])
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 3);
                     if (iz === 0 || !occupied[zone]![iy]![iz - 1])
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 4);
-                    if (iz === zs.length - 2 || !occupied[zone]![iy]![iz + 1])
+                    if (iz === zCoordinates.length - 2 || !occupied[zone]![iy]![iz + 1])
                         this.addProfileBoundaryQuad(builder, spec, zone, iy, iz, 5);
                 }
         return builder["result"]();

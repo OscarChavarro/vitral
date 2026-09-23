@@ -5,63 +5,63 @@ import type { Image } from "../../media/Image.js";
 Represents an absolute sub-region of a target output image.
 
 The origin and end coordinates are expressed in the coordinate system of the
-target image. Rendering code must iterate from x0 to x1 and y0 to y1, and
+target image. Rendering code must iterate from startX to x1 and startY to y1, and
 write directly to the target image at those absolute coordinates. The width
 and height values are extents, not a local coordinate system.
 */
 export class RasterTileArea {
     private readonly image: Image;
-    private readonly x0: number;
-    private readonly y0: number;
-    private readonly dx: number;
-    private readonly dy: number;
+    private readonly startX: number;
+    private readonly startY: number;
+    private readonly width: number;
+    private readonly height: number;
 
-    public constructor(image: Image, x0: number, y0: number, dx: number, dy: number) {
+    public constructor(image: Image, startX: number, startY: number, width: number, height: number) {
         if (image === null) {
             throw new IllegalArgumentException("image can not be null");
         }
-        if (x0 < 0 || y0 < 0) {
+        if (startX < 0 || startY < 0) {
             throw new IllegalArgumentException("tile origin must be >= 0");
         }
-        if (dx <= 0 || dy <= 0) {
+        if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("tile size must be > 0");
         }
-        if (x0 + dx > image.getXSize() || y0 + dy > image.getYSize()) {
+        if (startX + width > image.getXSize() || startY + height > image.getYSize()) {
             throw new IllegalArgumentException("tile bounds must be inside target image");
         }
 
         this.image = image;
-        this.x0 = x0;
-        this.y0 = y0;
-        this.dx = dx;
-        this.dy = dy;
+        this.startX = startX;
+        this.startY = startY;
+        this.width = width;
+        this.height = height;
     }
 
     public getImage(): Image {
         return this.image;
     }
 
-    public getX0(): number {
-        return this.x0;
+    public getStartX(): number {
+        return this.startX;
     }
 
-    public getY0(): number {
-        return this.y0;
+    public getStartY(): number {
+        return this.startY;
     }
 
-    public getDx(): number {
-        return this.dx;
+    public getWidth(): number {
+        return this.width;
     }
 
-    public getDy(): number {
-        return this.dy;
+    public getHeight(): number {
+        return this.height;
     }
 
-    public getX1(): number {
-        return this.x0 + this.dx;
+    public getEndX(): number {
+        return this.startX + this.width;
     }
 
-    public getY1(): number {
-        return this.y0 + this.dy;
+    public getEndY(): number {
+        return this.startY + this.height;
     }
 }

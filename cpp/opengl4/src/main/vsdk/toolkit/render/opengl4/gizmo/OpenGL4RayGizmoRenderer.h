@@ -18,12 +18,12 @@ public:
     static void dispose();
 
 private:
-    static unsigned int indicatorVao_;
-    static unsigned int indicatorPositionVbo_;
-    static unsigned int indicatorNormalVbo_;
-    static unsigned int indicatorUvVbo_;
-    static unsigned int indicatorProgram_;
-    static bool initialized_;
+    static unsigned int indicatorVao;
+    static unsigned int indicatorPositionVbo;
+    static unsigned int indicatorNormalVbo;
+    static unsigned int indicatorUvVbo;
+    static unsigned int indicatorProgram;
+    static bool initialized;
 
     static bool ensureIndicatorMesh();
     static bool ensureIndicatorProgram();

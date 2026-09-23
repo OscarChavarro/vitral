@@ -241,7 +241,7 @@ export class PolyhedralBoundedSolidPredicates {
             if (!plane.doIntersectionFirstHit(ray, planeHit)) {
                 continue;
             }
-            let hit = planeHit.ray()!;
+            let hit = planeHit.getRay()!;
             hit = hit.withDirection(hit.getDirection().normalized());
             const t = hit.getT();
             if (t <= bigEps || t >= reach) {
@@ -291,7 +291,7 @@ export class PolyhedralBoundedSolidPredicates {
             if (!plane.doIntersectionFirstHit(ray, planeHit)) {
                 continue;
             }
-            let hit = planeHit.ray()!;
+            let hit = planeHit.getRay()!;
             hit = hit.withDirection(hit.getDirection().normalized());
             const t = hit.getT();
             if (t <= bigEps || t >= maxT) {

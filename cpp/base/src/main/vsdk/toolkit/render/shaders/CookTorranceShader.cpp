@@ -37,7 +37,7 @@ static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd
     if ( normalVariation.length() <= VSDK::EPSILON ) return surfaceNormal;
 
     Vector3Dd baseNormal = surfaceNormal.normalized();
-    Vector3Dd surfaceTangentU = info->t.normalized();
+    Vector3Dd surfaceTangentU = info->tangent.normalized();
     if ( surfaceTangentU.length() <= VSDK::EPSILON ) return surfaceNormal;
 
     Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
@@ -82,7 +82,7 @@ static LightDirection resolveLightDirection(const Light* light, const RayHit* in
     if ( light == 0 || info == 0 ) return ld;
     Vector3Dd direction;
     double maxShadowDistance;
-    light->getDirectionAndDistance(info->p, &direction, &maxShadowDistance);
+    light->getDirectionAndDistance(info->point, &direction, &maxShadowDistance);
     if ( maxShadowDistance <= VSDK::EPSILON ) return ld;
     ld.x = direction.x(); ld.y = direction.y(); ld.z = direction.z();
     ld.maxShadowDistance = maxShadowDistance;
@@ -100,9 +100,9 @@ static bool isShadowed(
     if ( maxShadowDistance <= VSDK::EPSILON ) return true;
     if ( workspace == 0 ) return false;
     Vector3Dd shadowOrigin(
-        info->p.x() + VSDK::EPSILON * lightDirX,
-        info->p.y() + VSDK::EPSILON * lightDirY,
-        info->p.z() + VSDK::EPSILON * lightDirZ);
+        info->point.x() + VSDK::EPSILON * lightDirX,
+        info->point.y() + VSDK::EPSILON * lightDirY,
+        info->point.z() + VSDK::EPSILON * lightDirZ);
     Ray shadowRay(shadowOrigin, Vector3Dd(lightDirX, lightDirY, lightDirZ));
     RayHit* shadowCandidateHit = workspace->shadowCandidateHit();
     shadowCandidateHit->setStoreRay(false);
@@ -110,7 +110,7 @@ static bool isShadowed(
         SimpleBody* candidateObject = objects.get(i);
         shadowCandidateHit->resetForDistanceOnly();
         if ( candidateObject && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-            double hitDistance = shadowCandidateHit->hitDistance();
+            double hitDistance = shadowCandidateHit->getHitDistance();
             if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
                 return true;
             }
@@ -144,7 +144,7 @@ CookTorranceShader::CookTorranceShader(bool textureEnabledIn, bool bumpMapEnable
 
 Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double viewX,double viewY,double viewZ,java::ArrayList<Light*>& lights,java::ArrayList<SimpleBody*>& objects,SimpleMaterial* material,TraceWorkspace* workspace)
 {
-    Vector3Dd surfaceNormal = info->n;
+    Vector3Dd surfaceNormal = info->normal;
     if ( bumpMapEnabled ) {
         surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
     }
@@ -181,7 +181,7 @@ Shader::LocalShadingResult CookTorranceShader::shadeLocal(RayHit* info,double vi
         LightDirection ld = resolveLightDirection(light, info, &ok);
         if ( !ok ) continue;
 
-        Ray lightSourceRay(info->p, Vector3Dd(ld.x, ld.y, ld.z));
+        Ray lightSourceRay(info->point, Vector3Dd(ld.x, ld.y, ld.z));
         double attenuation = light->evaluateLightResponseFactor(&lightSourceRay);
         if ( attenuation <= 0.0 ) continue;
         if ( isShadowed(info, ld.x, ld.y, ld.z, ld.maxShadowDistance, objects, workspace) ) continue;

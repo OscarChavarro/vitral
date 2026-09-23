@@ -18,23 +18,23 @@ SimpleScene::~SimpleScene()
 
 void SimpleScene::clearOwnedElements()
 {
-    for (long int i = 0; i < simpleBodiesArray.size(); ++i) {
-        delete simpleBodiesArray[i];
+    for (long int i = 0; i < simpleBodies.size(); ++i) {
+        delete simpleBodies[i];
     }
-    for (long int i = 0; i < lightsArray.size(); ++i) {
-        delete lightsArray[i];
+    for (long int i = 0; i < lights.size(); ++i) {
+        delete lights[i];
     }
-    for (long int i = 0; i < backgroundsArray.size(); ++i) {
-        delete backgroundsArray[i];
+    for (long int i = 0; i < backgrounds.size(); ++i) {
+        delete backgrounds[i];
     }
-    for (long int i = 0; i < camerasArray.size(); ++i) {
-        delete camerasArray[i];
+    for (long int i = 0; i < cameras.size(); ++i) {
+        delete cameras[i];
     }
 
-    simpleBodiesArray.clear();
-    lightsArray.clear();
-    backgroundsArray.clear();
-    camerasArray.clear();
+    simpleBodies.clear();
+    lights.clear();
+    backgrounds.clear();
+    cameras.clear();
 
     activeCameraIndex = 0;
     activeBackgroundIndex = 0;
@@ -45,54 +45,54 @@ int SimpleScene::getActiveBackgroundIndex() const { return activeBackgroundIndex
 void SimpleScene::setActiveCameraIndex(int i) { activeCameraIndex = i; }
 void SimpleScene::setActiveBackgroundIndex(int i) { activeBackgroundIndex = i; }
 
-void SimpleScene::addBody(SimpleBody* b) { simpleBodiesArray.add(b); }
-void SimpleScene::addCamera(Camera* c) { camerasArray.add(c); }
-void SimpleScene::addBackground(Background* b) { backgroundsArray.add(b); }
-void SimpleScene::addLight(Light* l) { l->setId(static_cast<int>(lightsArray.size())); lightsArray.add(l); }
+void SimpleScene::addBody(SimpleBody* b) { simpleBodies.add(b); }
+void SimpleScene::addCamera(Camera* c) { cameras.add(c); }
+void SimpleScene::addBackground(Background* b) { backgrounds.add(b); }
+void SimpleScene::addLight(Light* l) { l->setId(static_cast<int>(lights.size())); lights.add(l); }
 
-java::ArrayList<SimpleBody*>& SimpleScene::getSimpleBodies() { return simpleBodiesArray; }
-java::ArrayList<Light*>& SimpleScene::getLights() { return lightsArray; }
-java::ArrayList<Background*>& SimpleScene::getBackgrounds() { return backgroundsArray; }
-java::ArrayList<Camera*>& SimpleScene::getCameras() { return camerasArray; }
+java::ArrayList<SimpleBody*>& SimpleScene::getSimpleBodies() { return simpleBodies; }
+java::ArrayList<Light*>& SimpleScene::getLights() { return lights; }
+java::ArrayList<Background*>& SimpleScene::getBackgrounds() { return backgrounds; }
+java::ArrayList<Camera*>& SimpleScene::getCameras() { return cameras; }
 
 void SimpleScene::setSimpleBodies(java::ArrayList<SimpleBody*>& simpleBodies)
 {
-    for (long int i = 0; i < simpleBodiesArray.size(); ++i) {
-        delete simpleBodiesArray[i];
+    for (long int i = 0; i < this->simpleBodies.size(); ++i) {
+        delete this->simpleBodies[i];
     }
-    simpleBodiesArray.clear();
-    for (long int i = 0; i < simpleBodies.size(); i++) simpleBodiesArray.add(simpleBodies.get(i));
+    this->simpleBodies.clear();
+    for (long int i = 0; i < simpleBodies.size(); i++) this->simpleBodies.add(simpleBodies.get(i));
 }
 void SimpleScene::setLights(java::ArrayList<Light*>& lights)
 {
-    for (long int i = 0; i < lightsArray.size(); ++i) {
-        delete lightsArray[i];
+    for (long int i = 0; i < this->lights.size(); ++i) {
+        delete this->lights[i];
     }
-    lightsArray.clear();
-    for (long int i = 0; i < lights.size(); i++) lightsArray.add(lights.get(i));
-    for (long int i = 0; i < lightsArray.size(); ++i) {
-        lightsArray[i]->setId(static_cast<int>(i));
+    this->lights.clear();
+    for (long int i = 0; i < lights.size(); i++) this->lights.add(lights.get(i));
+    for (long int i = 0; i < this->lights.size(); ++i) {
+        this->lights[i]->setId(static_cast<int>(i));
     }
 }
 void SimpleScene::setBackgrounds(java::ArrayList<Background*>& backgrounds)
 {
-    for (long int i = 0; i < backgroundsArray.size(); ++i) {
-        delete backgroundsArray[i];
+    for (long int i = 0; i < this->backgrounds.size(); ++i) {
+        delete this->backgrounds[i];
     }
-    backgroundsArray.clear();
-    for (long int i = 0; i < backgrounds.size(); i++) backgroundsArray.add(backgrounds.get(i));
+    this->backgrounds.clear();
+    for (long int i = 0; i < backgrounds.size(); i++) this->backgrounds.add(backgrounds.get(i));
 }
 void SimpleScene::setCameras(java::ArrayList<Camera*>& cameras)
 {
-    for (long int i = 0; i < camerasArray.size(); ++i) {
-        delete camerasArray[i];
+    for (long int i = 0; i < this->cameras.size(); ++i) {
+        delete this->cameras[i];
     }
-    camerasArray.clear();
-    for (long int i = 0; i < cameras.size(); i++) camerasArray.add(cameras.get(i));
+    this->cameras.clear();
+    for (long int i = 0; i < cameras.size(); i++) this->cameras.add(cameras.get(i));
 }
 
-Background* SimpleScene::getActiveBackground() const { return backgroundsArray.get(activeBackgroundIndex); }
-Camera* SimpleScene::getActiveCamera() const { return camerasArray.get(activeCameraIndex); }
+Background* SimpleScene::getActiveBackground() const { return backgrounds.get(activeBackgroundIndex); }
+Camera* SimpleScene::getActiveCamera() const { return cameras.get(activeCameraIndex); }
 
 SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot()
 {
@@ -106,5 +106,5 @@ SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(int viewportXSize,
 
 SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(CameraSnapshot* cameraSnapshot, Background* background)
 {
-    return new SimpleSceneSnapshot(simpleBodiesArray, lightsArray, background, cameraSnapshot);
+    return new SimpleSceneSnapshot(simpleBodies, lights, background, cameraSnapshot);
 }

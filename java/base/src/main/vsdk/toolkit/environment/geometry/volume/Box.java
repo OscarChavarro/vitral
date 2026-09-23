@@ -46,7 +46,7 @@ public class Box extends Solid {
     doIntersectionFirstHit(Ray inOutRay) {
         RayHit hit = new RayHit();
         if ( doIntersectionFirstHit(inOutRay, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }
@@ -162,7 +162,7 @@ public class Box extends Solid {
                 double hitZ = oz + dz*minT;
 
                 if ( outHit.needsPoint() ) {
-                    outHit.p = new Vector3Dd(hitX, hitY, hitZ);
+                    outHit.point = new Vector3Dd(hitX, hitY, hitZ);
                 }
 
                 if ( outHit.needsTextureCoordinates() ) {
@@ -199,10 +199,10 @@ public class Box extends Solid {
                 }
 
                 if ( outHit.needsNormal() ) {
-                    outHit.n = planeNormal(hitPlane);
+                    outHit.normal = planeNormal(hitPlane);
                 }
                 if ( outHit.needsTangent() ) {
-                    outHit.t = planeTangent(hitPlane);
+                    outHit.tangent = planeTangent(hitPlane);
                 }
             }
         }
@@ -226,13 +226,13 @@ public class Box extends Solid {
         int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
 
         if ( outData.needsPoint() ) {
-            outData.p = new Vector3Dd(hitX, hitY, hitZ);
+            outData.point = new Vector3Dd(hitX, hitY, hitZ);
         }
         if ( outData.needsNormal() ) {
-            outData.n = planeNormal(hitPlane);
+            outData.normal = planeNormal(hitPlane);
         }
         if ( outData.needsTangent() ) {
-            outData.t = planeTangent(hitPlane);
+            outData.tangent = planeTangent(hitPlane);
         }
 
         if ( outData.needsTextureCoordinates() ) {

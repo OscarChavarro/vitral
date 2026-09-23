@@ -137,13 +137,13 @@ public class Arrow extends Solid {
         double baseT = NO_HIT;
         candidateHit.resetForDistanceOnly();
         if ( baseCylinder.doIntersectionFirstHit(inRay, candidateHit) ) {
-            baseT = candidateHit.hitDistance();
+            baseT = candidateHit.getHitDistance();
         }
 
         double headT = NO_HIT;
         candidateHit.resetForDistanceOnly();
         if ( headCone.doIntersectionFirstHit(shiftedHeadRay, candidateHit) ) {
-            headT = candidateHit.hitDistance();
+            headT = candidateHit.getHitDistance();
         }
 
         double winnerT = baseT < headT ? baseT : headT;
@@ -173,8 +173,8 @@ public class Arrow extends Solid {
         Vector3Dd tr = new Vector3Dd(0, 0, -baseLength);
         Ray shiftedHeadRay = new Ray(inRay.getOrigin().add(tr), inRay.getDirection(), inRay.getT());
 
-        RayHit baseHit = new RayHit(outHit.requiredDetailMask());
-        RayHit headHit = new RayHit(outHit.requiredDetailMask());
+        RayHit baseHit = new RayHit(outHit.getRequiredDetailMask());
+        RayHit headHit = new RayHit(outHit.getRequiredDetailMask());
         boolean hasBase = baseCylinder.doIntersectionFirstHit(inRay, baseHit);
         boolean hasHead = headCone.doIntersectionFirstHit(shiftedHeadRay, headHit);
 
@@ -183,10 +183,10 @@ public class Arrow extends Solid {
         }
 
         double baseT =
-            hasBase ? (baseHit.ray() != null ? baseHit.ray().getT() : baseHit.hitDistance()) :
+            hasBase ? (baseHit.getRay() != null ? baseHit.getRay().getT() : baseHit.getHitDistance()) :
             NO_HIT;
         double headT =
-            hasHead ? (headHit.ray() != null ? headHit.ray().getT() : headHit.hitDistance()) :
+            hasHead ? (headHit.getRay() != null ? headHit.getRay().getT() : headHit.getHitDistance()) :
             NO_HIT;
 
         if ( hasBase && (!hasHead || baseT < headT) ) {
@@ -196,8 +196,8 @@ public class Arrow extends Solid {
         else {
             outHit.clone(headHit);
             outHit.setRay(inRay.withT(headT));
-            if ( outHit.p != null ) {
-                outHit.p = new Vector3Dd(outHit.p.x(), outHit.p.y(), outHit.p.z() + baseLength);
+            if ( outHit.point != null ) {
+                outHit.point = new Vector3Dd(outHit.point.x(), outHit.point.y(), outHit.point.z() + baseLength);
             }
         }
         return true;

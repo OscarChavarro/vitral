@@ -20,7 +20,7 @@ export class Camera extends Entity {
     private up: Vector3Dd;
     private front: Vector3Dd;
     private left: Vector3Dd;
-    private eyePosition: Vector3Dd;
+    private position: Vector3Dd;
     private focalDistance: number;
     private projectionMode: number;
     private fov: number;
@@ -30,7 +30,7 @@ export class Camera extends Entity {
     private name: string | null = null;
     private viewportXSize: number;
     private viewportYSize: number;
-    private dir = new Vector3Dd();
+    private frontWithScale = new Vector3Dd();
     private upWithScale = new Vector3Dd();
     private rightWithScale = new Vector3Dd();
     private normalizingTransformation = new Matrix4x4d();
@@ -39,7 +39,7 @@ export class Camera extends Entity {
     public constructor(other?: Camera) {
         super();
         if (other !== undefined) {
-            this.eyePosition = new Vector3Dd(other.eyePosition);
+            this.position = new Vector3Dd(other.position);
             this.up = new Vector3Dd(other.up);
             this.front = new Vector3Dd(other.front);
             this.left = new Vector3Dd(other.left);
@@ -53,7 +53,7 @@ export class Camera extends Entity {
             this.viewportYSize = other.viewportYSize;
             this.name = other.name;
         } else {
-            this.eyePosition = new Vector3Dd(0, -5, 1);
+            this.position = new Vector3Dd(0, -5, 1);
             this.up = new Vector3Dd(0, 0, 1);
             this.front = new Vector3Dd(0, 1, 0);
             this.left = new Vector3Dd(-1, 0, 0);
@@ -89,14 +89,14 @@ export class Camera extends Entity {
         return this.viewportYSize;
     }
     public getPosition(): Vector3Dd {
-        return this.eyePosition;
+        return this.position;
     }
     public setPosition(position: Vector3Dd): void {
-        this.eyePosition = new Vector3Dd(position);
+        this.position = new Vector3Dd(position);
         this.markModified();
     }
     public getFocusedPosition(): Vector3Dd {
-        return this.eyePosition.add(this.front.multiply(this.focalDistance));
+        return this.position.add(this.front.multiply(this.focalDistance));
     }
     public getUp(): Vector3Dd {
         return this.up;
@@ -130,7 +130,7 @@ export class Camera extends Entity {
     }
 
     public setFocusedPositionDirect(position: Vector3Dd): void {
-        this.front = position.subtract(this.eyePosition);
+        this.front = position.subtract(this.position);
         this.focalDistance = this.front.length();
         this.front = this.front.normalized();
         this.markModified();
@@ -187,7 +187,7 @@ export class Camera extends Entity {
         this.front = this.front.normalized();
 
         const fovFactor: number = this.viewportXSize / this.viewportYSize;
-        this.dir = this.front.multiply(0.5);
+        this.frontWithScale = this.front.multiply(0.5);
         this.upWithScale = this.up.multiply(Math.tan(JavaMath.toRadians(this.fov / 2)));
         this.rightWithScale = this.left.multiply(-fovFactor * Math.tan(JavaMath.toRadians(this.fov / 2)));
 
@@ -204,7 +204,7 @@ export class Camera extends Entity {
         let T1: Matrix4x4d = new Matrix4x4d();
 
         // Warning: near plane clipping
-        VRP = this.eyePosition.add(this.front.multiply(this.nearPlaneDistance));
+        VRP = this.position.add(this.front.multiply(this.nearPlaneDistance));
         T1 = T1.translation(VRP.multiply(-1));
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
@@ -252,7 +252,7 @@ export class Camera extends Entity {
     public exportToCameraSnapshot(width = this.viewportXSize, height = this.viewportYSize): CameraSnapshot {
         this.updateViewportResize(width, height);
         return new CameraSnapshot(
-            this.eyePosition,
+            this.position,
             this.front,
             this.left,
             this.up,
@@ -260,7 +260,7 @@ export class Camera extends Entity {
             this.orthogonalZoom,
             width,
             height,
-            this.dir,
+            this.frontWithScale,
             this.upWithScale,
             this.rightWithScale,
             this.nearPlaneDistance,
@@ -273,11 +273,11 @@ export class Camera extends Entity {
         if (this.projectionMode === Camera.PROJECTION_MODE_ORTHOGONAL) {
             const scaleX = (-(this.viewportXSize / this.viewportYSize) * 2 * u) / this.orthogonalZoom;
             const scaleY = (2 * v) / this.orthogonalZoom;
-            return new Ray(this.eyePosition.add(this.left.multiply(scaleX)).add(this.up.multiply(scaleY)), this.front);
+            return new Ray(this.position.add(this.left.multiply(scaleX)).add(this.up.multiply(scaleY)), this.front);
         }
         return new Ray(
-            this.eyePosition,
-            this.rightWithScale.multiply(u).add(this.upWithScale.multiply(v)).add(this.dir),
+            this.position,
+            this.rightWithScale.multiply(u).add(this.upWithScale.multiply(v)).add(this.frontWithScale),
         );
     }
     public setRotation(rotation: Matrix4x4d): void {
@@ -333,7 +333,7 @@ export class Camera extends Entity {
     }
     public calculateTransformationMatrix(): Matrix4x4d {
         const rotation = this.getRotation().invert();
-        const translation = new Matrix4x4d().translation(this.eyePosition.multiply(-1));
+        const translation = new Matrix4x4d().translation(this.position.multiply(-1));
         const z90 = new Matrix4x4d().axisRotation(Math.PI / 2, 0, 0, 1);
         const xMinus90 = new Matrix4x4d().axisRotation(-Math.PI / 2, 1, 0, 0);
         return xMinus90.multiply(z90.multiply(rotation.multiply(translation)));
@@ -349,13 +349,15 @@ export class Camera extends Entity {
         if (this.projectionMode === Camera.PROJECTION_MODE_ORTHOGONAL) {
             const right = this.left.multiply(-1).normalized();
             const scale = (u * 2 * this.viewportXSize) / this.viewportYSize / this.orthogonalZoom;
-            return new InfinitePlane(scale > 0 ? right : this.left, this.eyePosition.add(right.multiply(scale)));
+            return new InfinitePlane(scale > 0 ? right : this.left, this.position.add(right.multiply(scale)));
         }
         const du = this.rightWithScale.multiply(u),
-            angle = Math.acos(this.front.normalized().dotProduct(du.add(this.dir).normalized())) * (u > 0 ? -1 : 1);
+            angle =
+                Math.acos(this.front.normalized().dotProduct(du.add(this.frontWithScale).normalized())) *
+                (u > 0 ? -1 : 1);
         return new InfinitePlane(
             new Matrix4x4d().axisRotation(angle, this.up).multiply(du).normalized(),
-            this.eyePosition,
+            this.position,
         );
     }
     public calculateVPlaneAtPixel(_x: number, y: number): InfinitePlane {
@@ -367,26 +369,28 @@ export class Camera extends Entity {
             const scale = (v * 2) / this.orthogonalZoom;
             return new InfinitePlane(
                 scale > 0 ? this.up : this.up.multiply(-1),
-                this.eyePosition.add(this.up.multiply(scale)),
+                this.position.add(this.up.multiply(scale)),
             );
         }
         const dv = this.upWithScale.multiply(v),
-            angle = Math.acos(this.front.normalized().dotProduct(dv.add(this.dir).normalized())) * (v > 0 ? -1 : 1);
+            angle =
+                Math.acos(this.front.normalized().dotProduct(dv.add(this.frontWithScale).normalized())) *
+                (v > 0 ? -1 : 1);
         return new InfinitePlane(
             new Matrix4x4d().axisRotation(angle, this.left).multiply(dv).normalized(),
-            this.eyePosition,
+            this.position,
         );
     }
     public calculateNearPlane(): InfinitePlane {
         return new InfinitePlane(
             this.front.normalized().multiply(-1),
-            this.eyePosition.add(this.front.normalized().multiply(this.nearPlaneDistance)),
+            this.position.add(this.front.normalized().multiply(this.nearPlaneDistance)),
         );
     }
     public calculateFarPlane(): InfinitePlane {
         return new InfinitePlane(
             this.front.normalized(),
-            this.eyePosition.add(this.front.normalized().multiply(this.farPlaneDistance)),
+            this.position.add(this.front.normalized().multiply(this.farPlaneDistance)),
         );
     }
     public getBoundingPlanes(): InfinitePlane[] {
@@ -486,7 +490,7 @@ export class Camera extends Entity {
     }
     public projectPointUsingRayMethodResult(inPoint: Vector3Dd): Vector3Dd | null {
         this.updateVectors();
-        const center = this.eyePosition.add(this.front.normalized().multiply(this.nearPlaneDistance));
+        const center = this.position.add(this.front.normalized().multiply(this.nearPlaneDistance));
         const viewPlane = new InfinitePlane(this.front.multiply(-1), center);
         let projected: Vector3Dd;
         if (this.projectionMode === Camera.PROJECTION_MODE_ORTHOGONAL) {
@@ -499,7 +503,7 @@ export class Camera extends Entity {
                 0,
             );
         }
-        const ray = new Ray(this.eyePosition, inPoint.subtract(this.eyePosition));
+        const ray = new Ray(this.position, inPoint.subtract(this.position));
         const hit = viewPlane.doIntersectionFirstHit(ray);
         if (hit === null || ray.getDirection().length() === 0) return null;
         projected = hit.getOrigin().add(hit.getDirection().multiply(hit.getT())).subtract(center);
@@ -517,7 +521,7 @@ export class Camera extends Entity {
     }
     public override clone(other?: Camera): Camera | void {
         if (other === undefined) return new Camera(this);
-        this.eyePosition = new Vector3Dd(other.eyePosition);
+        this.position = new Vector3Dd(other.position);
         this.up = new Vector3Dd(other.up);
         this.front = new Vector3Dd(other.front);
         this.left = new Vector3Dd(other.left);
@@ -551,7 +555,7 @@ export class Camera extends Entity {
                 : this.projectionMode === Camera.PROJECTION_MODE_ORTHOGONAL
                   ? "PARALEL"
                   : "UNKNOWN";
-        return `<Camera>:\n  - Name: \"${this.name}\"\n  - Camera in ${mode} projection mode\n  - eyePosition(x, y, z) = ${this.eyePosition}\n  - focusedPointPosition(x, y, z) = ${this.getFocusedPosition()}\n  - fov = ${this.fov}\n  - nearPlaneDistance = ${this.nearPlaneDistance}\n  - farPlaneDistance = ${this.farPlaneDistance}\n  - Viewport size in pixels = (${this.viewportXSize}, ${this.viewportYSize})`;
+        return `<Camera>:\n  - Name: \"${this.name}\"\n  - Camera in ${mode} projection mode\n  - eyePosition(x, y, z) = ${this.position}\n  - focusedPointPosition(x, y, z) = ${this.getFocusedPosition()}\n  - fov = ${this.fov}\n  - nearPlaneDistance = ${this.nearPlaneDistance}\n  - farPlaneDistance = ${this.farPlaneDistance}\n  - Viewport size in pixels = (${this.viewportXSize}, ${this.viewportYSize})`;
     }
     private markModified(): void {
         this.modificationVersion++;

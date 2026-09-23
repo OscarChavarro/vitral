@@ -10,11 +10,11 @@ export class SimpleMaterial extends Entity implements Material {
     private readonly emission: ColorRgb;
     private readonly transmittance: ColorRgb;
     private readonly doubleSided: boolean;
-    private readonly reflection: number;
-    private readonly refraction: number;
-    private readonly ior: number;
+    private readonly reflectionCoefficient: number;
+    private readonly refractionCoefficient: number;
+    private readonly indexOfRefraction: number;
     private readonly opacity: number;
-    private readonly phong: number;
+    private readonly phongExponent: number;
     public constructor();
     public constructor(m: SimpleMaterial);
     public constructor(
@@ -27,9 +27,9 @@ export class SimpleMaterial extends Entity implements Material {
         ds: boolean,
         kr: number,
         kt: number,
-        ior: number,
+        indexOfRefraction: number,
         opacity: number,
-        phong: number,
+        phongExponent: number,
     );
     public constructor(
         name: string,
@@ -40,7 +40,7 @@ export class SimpleMaterial extends Entity implements Material {
         kr: number,
         kt: number,
         opacity: number,
-        phong: number,
+        phongExponent: number,
     );
     public constructor(...v: unknown[]) {
         super();
@@ -52,9 +52,9 @@ export class SimpleMaterial extends Entity implements Material {
             this.emission = new ColorRgb();
             this.transmittance = new ColorRgb();
             this.doubleSided = true;
-            this.reflection = this.refraction = 0;
-            this.ior = this.opacity = 1;
-            this.phong = 128;
+            this.reflectionCoefficient = this.refractionCoefficient = 0;
+            this.indexOfRefraction = this.opacity = 1;
+            this.phongExponent = 128;
             return;
         }
         if (v[0] instanceof SimpleMaterial) {
@@ -66,11 +66,11 @@ export class SimpleMaterial extends Entity implements Material {
             this.emission = new ColorRgb(m.emission);
             this.transmittance = new ColorRgb(m.transmittance);
             this.doubleSided = m.doubleSided;
-            this.reflection = m.reflection;
-            this.refraction = m.refraction;
-            this.ior = m.ior;
+            this.reflectionCoefficient = m.reflectionCoefficient;
+            this.refractionCoefficient = m.refractionCoefficient;
+            this.indexOfRefraction = m.indexOfRefraction;
             this.opacity = m.opacity;
-            this.phong = m.phong;
+            this.phongExponent = m.phongExponent;
             return;
         }
         const [name, a, d, s, ...r] = v as [string, ColorRgb, ColorRgb, ColorRgb, ...unknown[]];
@@ -81,24 +81,24 @@ export class SimpleMaterial extends Entity implements Material {
         if (r.length === 5) {
             this.emission = new ColorRgb();
             this.transmittance = new ColorRgb();
-            [this.doubleSided, this.reflection, this.refraction, this.opacity, this.phong] = r as [
-                boolean,
-                number,
-                number,
-                number,
-                number,
-            ];
-            this.ior = 1;
+            [
+                this.doubleSided,
+                this.reflectionCoefficient,
+                this.refractionCoefficient,
+                this.opacity,
+                this.phongExponent,
+            ] = r as [boolean, number, number, number, number];
+            this.indexOfRefraction = 1;
         } else {
             [
                 this.emission,
                 this.transmittance,
                 this.doubleSided,
-                this.reflection,
-                this.refraction,
-                this.ior,
+                this.reflectionCoefficient,
+                this.refractionCoefficient,
+                this.indexOfRefraction,
                 this.opacity,
-                this.phong,
+                this.phongExponent,
             ] = r as [ColorRgb, ColorRgb, boolean, number, number, number, number, number];
             this.emission = new ColorRgb(this.emission);
             this.transmittance = new ColorRgb(this.transmittance);
@@ -131,11 +131,11 @@ export class SimpleMaterial extends Entity implements Material {
             change.e ?? this.emission,
             change.t ?? this.transmittance,
             change.ds ?? this.doubleSided,
-            change.kr ?? this.reflection,
-            change.kt ?? this.refraction,
-            change.ior ?? this.ior,
+            change.kr ?? this.reflectionCoefficient,
+            change.kt ?? this.refractionCoefficient,
+            change.ior ?? this.indexOfRefraction,
             change.o ?? this.opacity,
-            change.p ?? this.phong,
+            change.p ?? this.phongExponent,
         );
     }
     public withName(x: string) {
@@ -220,21 +220,21 @@ export class SimpleMaterial extends Entity implements Material {
         return this.transmittance;
     }
     public getPhongExponent() {
-        return this.phong;
+        return this.phongExponent;
     }
     public getReflectionCoefficient() {
-        return this.reflection;
+        return this.reflectionCoefficient;
     }
     public getRefractionCoefficient() {
-        return this.refraction;
+        return this.refractionCoefficient;
     }
     public getIndexOfRefraction() {
-        return this.ior;
+        return this.indexOfRefraction;
     }
     public getOpacity() {
         return this.opacity;
     }
     public override toString() {
-        return `SimpleMaterial [${this.name}]:\n  - Specular ${this.specular}\n  - Diffuse ${this.diffuse}\n  - Ambient ${this.ambient}\n  - Phong exponent: ${this.phong}\n${this.doubleSided ? "  - Double sided" : "  - Single sided"}\n`;
+        return `SimpleMaterial [${this.name}]:\n  - Specular ${this.specular}\n  - Diffuse ${this.diffuse}\n  - Ambient ${this.ambient}\n  - Phong exponent: ${this.phongExponent}\n${this.doubleSided ? "  - Double sided" : "  - Single sided"}\n`;
     }
 }

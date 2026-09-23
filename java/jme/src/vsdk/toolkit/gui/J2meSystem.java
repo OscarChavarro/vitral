@@ -39,10 +39,10 @@ public class J2meSystem extends PresentationElement
             }
         }
         else {
-            char unicode_id;
-            unicode_id = (char)keycode;
+            char unicodeId;
+            unicodeId = (char)keycode;
 
-            switch ( unicode_id ) {
+            switch ( unicodeId ) {
               case 'A':
                 evsdk.keycode = KeyEvent.KEY_A;
                 break;

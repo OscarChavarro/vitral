@@ -7,30 +7,30 @@ RayHit::RayHit() : RayHit(DETAIL_ALL, true) {}
 RayHit::RayHit(int requiredDetailMask) : RayHit(requiredDetailMask, true) {}
 
 RayHit::RayHit(int requiredDetailMask, bool storeRay)
-    : p(ZERO_VECTOR), n(ZERO_VECTOR), t(ZERO_VECTOR),
+    : point(ZERO_VECTOR), normal(ZERO_VECTOR), tangent(ZERO_VECTOR),
       u(0), v(0),
       material(nullptr), texture(nullptr), normalMap(nullptr),
-      rayValue_(),
-      hasRay_(false),
-      requiredDetailMask_(requiredDetailMask),
-      storeRay_(storeRay),
-      hitDistance_(0),
-      hasHitDistance_(false)
+      ray(),
+      hasRay(false),
+      requiredDetailMask(requiredDetailMask),
+      storeRay(storeRay),
+      hitDistance(0),
+      hitDistanceKnown(false)
 {
     clear();
     RaytraceStatistics::recordRayHitInstance();
 }
 
 RayHit::RayHit(const RayHit& other)
-    : p(ZERO_VECTOR), n(ZERO_VECTOR), t(ZERO_VECTOR),
+    : point(ZERO_VECTOR), normal(ZERO_VECTOR), tangent(ZERO_VECTOR),
       u(0), v(0),
       material(nullptr), texture(nullptr), normalMap(nullptr),
-      rayValue_(),
-      hasRay_(false),
-      requiredDetailMask_(other.requiredDetailMask_),
-      storeRay_(other.storeRay_),
-      hitDistance_(0),
-      hasHitDistance_(false)
+      ray(),
+      hasRay(false),
+      requiredDetailMask(other.requiredDetailMask),
+      storeRay(other.storeRay),
+      hitDistance(0),
+      hitDistanceKnown(false)
 {
     clone(other);
 }
@@ -41,131 +41,131 @@ RayHit::~RayHit()
 
 void RayHit::clear()
 {
-    p = ZERO_VECTOR;
-    n = ZERO_VECTOR;
-    t = ZERO_VECTOR;
+    point = ZERO_VECTOR;
+    normal = ZERO_VECTOR;
+    tangent = ZERO_VECTOR;
     u = 0;
     v = 0;
     material = nullptr;
     texture = nullptr;
     normalMap = nullptr;
-    hasRay_ = false;
-    hitDistance_ = 0;
-    hasHitDistance_ = false;
+    hasRay = false;
+    hitDistance = 0;
+    hitDistanceKnown = false;
 }
 
 void RayHit::reset(int newRequiredDetailMask)
 {
-    requiredDetailMask_ = newRequiredDetailMask;
+    requiredDetailMask = newRequiredDetailMask;
     clear();
 }
 
 void RayHit::resetForDistanceOnly()
 {
-    requiredDetailMask_ = DETAIL_NONE;
-    hasRay_ = false;
-    hitDistance_ = 0;
-    hasHitDistance_ = false;
+    requiredDetailMask = DETAIL_NONE;
+    hasRay = false;
+    hitDistance = 0;
+    hitDistanceKnown = false;
 }
 
 void RayHit::clone(const RayHit& other)
 {
     RaytraceStatistics::recordHitInfoClone();
-    requiredDetailMask_ = other.requiredDetailMask_;
-    storeRay_ = other.storeRay_;
-    hitDistance_ = other.hitDistance_;
-    hasHitDistance_ = other.hasHitDistance_;
-    p = other.p;
-    n = other.n;
-    t = other.t;
+    requiredDetailMask = other.requiredDetailMask;
+    storeRay = other.storeRay;
+    hitDistance = other.hitDistance;
+    hitDistanceKnown = other.hitDistanceKnown;
+    point = other.point;
+    normal = other.normal;
+    tangent = other.tangent;
     u = other.u;
     v = other.v;
     material = other.material;
     texture = other.texture;
     normalMap = other.normalMap;
 
-    hasRay_ = other.hasRay_;
-    if ( hasRay_ ) {
-        rayValue_ = other.rayValue_;
+    hasRay = other.hasRay;
+    if ( hasRay ) {
+        ray = other.ray;
     }
 }
 
-int RayHit::requiredDetailMask() const
+int RayHit::getRequiredDetailMask() const
 {
-    return requiredDetailMask_;
+    return requiredDetailMask;
 }
 
-void RayHit::setRequiredDetailMask(int requiredDetailMask)
+void RayHit::setRequiredDetailMask(int value)
 {
-    requiredDetailMask_ = requiredDetailMask;
+    requiredDetailMask = value;
 }
 
 bool RayHit::shouldStoreRay() const
 {
-    return storeRay_;
+    return storeRay;
 }
 
-void RayHit::setStoreRay(bool storeRay)
+void RayHit::setStoreRay(bool value)
 {
-    storeRay_ = storeRay;
+    storeRay = value;
 }
 
 bool RayHit::needsPoint() const
 {
-    return (requiredDetailMask_ & DETAIL_POINT) != 0;
+    return (requiredDetailMask & DETAIL_POINT) != 0;
 }
 
 bool RayHit::needsNormal() const
 {
-    return (requiredDetailMask_ & DETAIL_NORMAL) != 0;
+    return (requiredDetailMask & DETAIL_NORMAL) != 0;
 }
 
 bool RayHit::needsTextureCoordinates() const
 {
-    return (requiredDetailMask_ & DETAIL_UV) != 0;
+    return (requiredDetailMask & DETAIL_UV) != 0;
 }
 
 bool RayHit::needsTangent() const
 {
-    return (requiredDetailMask_ & DETAIL_TANGENT) != 0;
+    return (requiredDetailMask & DETAIL_TANGENT) != 0;
 }
 
 bool RayHit::needsAnySurfaceData() const
 {
-    return requiredDetailMask_ != DETAIL_NONE;
+    return requiredDetailMask != DETAIL_NONE;
 }
 
-const Ray* RayHit::ray() const
+const Ray* RayHit::getRay() const
 {
-    return hasRay_ ? &rayValue_ : nullptr;
+    return hasRay ? &ray : nullptr;
 }
 
-void RayHit::setRay(const Ray& ray)
+void RayHit::setRay(const Ray& value)
 {
-    rayValue_ = ray;
-    hasRay_ = true;
-    hitDistance_ = ray.getT();
-    hasHitDistance_ = true;
+    ray = value;
+    hasRay = true;
+    hitDistance = value.getT();
+    hitDistanceKnown = true;
 }
 
 bool RayHit::hasHitDistance() const
 {
-    return hasHitDistance_;
+    return hitDistanceKnown;
 }
 
-double RayHit::hitDistance() const
+double RayHit::getHitDistance() const
 {
-    if ( hasHitDistance_ ) {
-        return hitDistance_;
+    if ( hitDistanceKnown ) {
+        return hitDistance;
     }
-    if ( hasRay_ ) {
-        return rayValue_.getT();
+    if ( hasRay ) {
+        return ray.getT();
     }
     return 0;
 }
 
-void RayHit::setHitDistance(double hitDistance)
+void RayHit::setHitDistance(double value)
 {
-    hitDistance_ = hitDistance;
-    hasHitDistance_ = true;
+    hitDistance = value;
+    hitDistanceKnown = true;
 }

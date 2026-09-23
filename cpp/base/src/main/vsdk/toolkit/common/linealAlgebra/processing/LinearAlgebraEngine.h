@@ -5,7 +5,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/processing/Strategies.h"
 class LinearAlgebraEngine {
 private:
-    ComputeStrategy strategy_;
+    ComputeStrategy strategy;
 
 public:
     explicit LinearAlgebraEngine(ComputeStrategy strategy = NAIVE_COFACTOR_CPU);

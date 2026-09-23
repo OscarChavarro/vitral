@@ -38,9 +38,9 @@ export class _StlFacetEmitter {
         for (i = 0; i < facets.length; i++) {
             const facet: _StlFacetEmitter.Facet = facets[i]!;
             _StlFacetEmitter.writeVector(outputStream, facet.normal, 1.0, "normal", i);
-            _StlFacetEmitter.writeVector(outputStream, facet.a, scaleFactor, "vertex a", i);
-            _StlFacetEmitter.writeVector(outputStream, facet.b, scaleFactor, "vertex b", i);
-            _StlFacetEmitter.writeVector(outputStream, facet.c, scaleFactor, "vertex c", i);
+            _StlFacetEmitter.writeVector(outputStream, facet.vertex0, scaleFactor, "vertex a", i);
+            _StlFacetEmitter.writeVector(outputStream, facet.vertex1, scaleFactor, "vertex b", i);
+            _StlFacetEmitter.writeVector(outputStream, facet.vertex2, scaleFactor, "vertex c", i);
             PersistenceElement.writeSignedShortLE(outputStream, 0);
         }
     }
@@ -84,9 +84,9 @@ export namespace _StlFacetEmitter {
     export class Facet {
         public constructor(
             public readonly normal: Vector3Dd,
-            public readonly a: Vector3Dd,
-            public readonly b: Vector3Dd,
-            public readonly c: Vector3Dd,
+            public readonly vertex0: Vector3Dd,
+            public readonly vertex1: Vector3Dd,
+            public readonly vertex2: Vector3Dd,
         ) {}
     }
 }

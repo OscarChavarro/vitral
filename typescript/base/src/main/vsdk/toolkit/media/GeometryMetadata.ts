@@ -3,8 +3,8 @@ import { ShapeDescriptor } from "./ShapeDescriptor.js";
 export class GeometryMetadata extends MediaEntity {
     private static lastId = 0;
     private id: number = ++GeometryMetadata.lastId;
-    private objectFilename: string | null = null;
-    private readonly descriptorsList: ShapeDescriptor[] = [];
+    private filename: string | null = null;
+    private readonly descriptors: ShapeDescriptor[] = [];
     public setId(id: number): void {
         this.id = id;
         if (GeometryMetadata.lastId < id) GeometryMetadata.lastId = id;
@@ -13,16 +13,16 @@ export class GeometryMetadata extends MediaEntity {
         return this.id;
     }
     public setFilename(f: string | null): void {
-        this.objectFilename = f !== null && f.length > 0 ? f : null;
+        this.filename = f !== null && f.length > 0 ? f : null;
     }
     public getFilename(): string | null {
-        return this.objectFilename;
+        return this.filename;
     }
     public getDescriptors(): ShapeDescriptor[] {
-        return this.descriptorsList;
+        return this.descriptors;
     }
     public getDescriptorByName(name: string): ShapeDescriptor | null {
-        return this.descriptorsList.find((x) => x.getLabel() === name) ?? null;
+        return this.descriptors.find((x) => x.getLabel() === name) ?? null;
     }
     public doMinskowskiDistance(other: GeometryMetadata, s: number, subGroup: string): number {
         const a = this.getDescriptorByName(subGroup),
@@ -36,6 +36,6 @@ export class GeometryMetadata extends MediaEntity {
         return Math.pow(sum, 1 / s);
     }
     public override toString(): string {
-        return `${this.objectFilename}\n    . ${this.descriptorsList.length} shape descriptors\n${this.descriptorsList.map((x) => `        . ${x.constructor.name}`).join("")}`;
+        return `${this.filename}\n    . ${this.descriptors.length} shape descriptors\n${this.descriptors.map((x) => `        . ${x.constructor.name}`).join("")}`;
     }
 }

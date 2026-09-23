@@ -7,8 +7,8 @@
 
 class CleanerConsumer : public java::Callable<java::Void> {
 private:
-    MarkerEventBus* bus_;
-    volatile bool running_;
+    MarkerEventBus* bus;
+    volatile bool running;
 
 public:
     explicit CleanerConsumer(MarkerEventBus* bus);

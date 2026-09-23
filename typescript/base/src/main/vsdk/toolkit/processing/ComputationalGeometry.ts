@@ -5,18 +5,18 @@ import { Vector3Dd } from "../common/linealAlgebra/Vector3Dd.js";
 import { Containment } from "./Containment.js";
 export class ClippedLine2DResult {
     public constructor(
-        private readonly ok: boolean,
-        private readonly a: Vector2Dd,
-        private readonly b: Vector2Dd,
+        private readonly acceptedValue: boolean,
+        private readonly clipped0Value: Vector2Dd,
+        private readonly clipped1Value: Vector2Dd,
     ) {}
     public accepted(): boolean {
-        return this.ok;
+        return this.acceptedValue;
     }
     public clipped0(): Vector2Dd {
-        return this.a;
+        return this.clipped0Value;
     }
     public clipped1(): Vector2Dd {
-        return this.b;
+        return this.clipped1Value;
     }
 }
 export class ComputationalGeometry extends ProcessingElement {

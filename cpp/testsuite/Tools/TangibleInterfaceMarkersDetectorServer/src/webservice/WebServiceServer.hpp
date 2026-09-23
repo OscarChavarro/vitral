@@ -33,13 +33,13 @@ private:
     static void* clientThreadEntry(void* arg);
     void handleClient(int fd);
 
-    WebServiceConfig config_;
-    MarkerEventBus* bus_;
+    WebServiceConfig config;
+    MarkerEventBus* bus;
     std::atomic<bool> shouldStop_{false};
     java::net::ServerSocket* serverSocket_{nullptr};
-    pthread_mutex_t serverSocketMutex_ = PTHREAD_MUTEX_INITIALIZER;
-    std::vector<pthread_t> clientThreads_;
-    pthread_mutex_t clientThreadsMutex_ = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_t serverSocketMutex = PTHREAD_MUTEX_INITIALIZER;
+    std::vector<pthread_t> clientThreads;
+    pthread_mutex_t clientThreadsMutex = PTHREAD_MUTEX_INITIALIZER;
 };
 
 #endif

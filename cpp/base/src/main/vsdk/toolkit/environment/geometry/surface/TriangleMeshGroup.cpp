@@ -123,8 +123,8 @@ Geometry.doIntersectionFirstHit.
 Ray* TriangleMeshGroup::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit(RayHit::DETAIL_NONE, true);
-    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.getRay() != 0) {
+        return new Ray(*hit.getRay());
     }
     return 0;
 }
@@ -142,8 +142,8 @@ bool TriangleMeshGroup::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
         TriangleMesh& mesh = meshes[i];
         RayHit meshHit;
         if (mesh.doIntersectionFirstHit(inRay, &meshHit, &triangleInformation) &&
-            meshHit.ray() != 0 && meshHit.ray()->getT() < minT) {
-            minT = meshHit.ray()->getT();
+            meshHit.getRay() != 0 && meshHit.getRay()->getT() < minT) {
+            minT = meshHit.getRay()->getT();
             bestHit.clone(meshHit);
             bestMesh = (int)i;
             bestTriangle = triangleInformation;

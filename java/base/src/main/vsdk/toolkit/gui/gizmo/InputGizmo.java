@@ -478,8 +478,8 @@ public class InputGizmo extends Gizmo {
     */
     private static int digitOf(KeyEvent event)
     {
-        if ( event.unicode_id >= '0' && event.unicode_id <= '9' ) {
-            return event.unicode_id - '0';
+        if ( event.unicodeId >= '0' && event.unicodeId <= '9' ) {
+            return event.unicodeId - '0';
         }
         if ( event.keycode >= KeyEvent.KEY_0 && event.keycode <= KeyEvent.KEY_9 ) {
             return event.keycode - KeyEvent.KEY_0;
@@ -496,7 +496,7 @@ public class InputGizmo extends Gizmo {
     */
     private static boolean isDecimalPoint(KeyEvent event)
     {
-        return event.unicode_id == '.' || event.unicode_id == ',' ||
+        return event.unicodeId == '.' || event.unicodeId == ',' ||
             event.keycode == KeyEvent.KEY_PERIOD ||
             event.keycode == KeyEvent.KEY_NUMPERIOD ||
             event.keycode == KeyEvent.KEY_COMMA;
@@ -504,7 +504,7 @@ public class InputGizmo extends Gizmo {
 
     private static boolean isMinus(KeyEvent event)
     {
-        return event.unicode_id == '-' || event.keycode == KeyEvent.KEY_MINUS ||
+        return event.unicodeId == '-' || event.keycode == KeyEvent.KEY_MINUS ||
             event.keycode == KeyEvent.KEY_NUMMINUS;
     }
 

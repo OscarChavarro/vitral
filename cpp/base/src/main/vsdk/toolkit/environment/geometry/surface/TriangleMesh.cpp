@@ -41,7 +41,7 @@ TriangleMesh::TriangleMesh(const TriangleMesh& o)
       vertexBinormals(o.vertexBinormals), vertexTangents(o.vertexTangents),
       vertexColors(o.vertexColors), vertexSelections(o.vertexSelections),
       vertexUvs(o.vertexUvs), incidentTrianglesPerVertexArray(o.incidentTrianglesPerVertexArray),
-      triangleIndices(o.triangleIndices), triangleNormals(o.triangleNormals),
+      triangleIndexes(o.triangleIndexes), triangleNormals(o.triangleNormals),
       materials(o.materials), textureRanges(o.textureRanges), materialRanges(o.materialRanges),
       textures(o.textures), intersectionTriangleIndex(o.intersectionTriangleIndex),
       ownsMaterials(false)
@@ -143,8 +143,8 @@ void TriangleMesh::setVertexes(const java::ArrayList<Vertex>& vertexes, bool wit
 
 void TriangleMesh::initTriangleArrays(int n)
 {
-    triangleIndices.clear(); triangleIndices.reserve((long int)n*3);
-    for (long int i = 0; i < (long int)n*3; i++) triangleIndices.add(0);
+    triangleIndexes.clear(); triangleIndexes.reserve((long int)n*3);
+    for (long int i = 0; i < (long int)n*3; i++) triangleIndexes.add(0);
     triangleNormals.clear(); triangleNormals.reserve((long int)n*3);
     for (long int i = 0; i < (long int)n*3; i++) triangleNormals.add(0.0);
 }
@@ -200,9 +200,9 @@ PRE: 0 <= i < vertexPositions.length/3
 */
 void TriangleMesh::setTriangleAt(int i, const Triangle& t)
 {
-    triangleIndices[i*3] = t.getPoint0();
-    triangleIndices[i*3+1] = t.getPoint1();
-    triangleIndices[i*3+2] = t.getPoint2();
+    triangleIndexes[i*3] = t.getPoint0();
+    triangleIndexes[i*3+1] = t.getPoint1();
+    triangleIndexes[i*3+2] = t.getPoint2();
     if ((int)triangleNormals.size() >= (i+1)*3) {
         triangleNormals[i*3] = t.getNormal().x();
         triangleNormals[i*3+1] = t.getNormal().y();
@@ -211,7 +211,7 @@ void TriangleMesh::setTriangleAt(int i, const Triangle& t)
 }
 
 int TriangleMesh::getNumVertices() const { return (int)vertexPositions.size()/3; }
-int TriangleMesh::getNumTriangles() const { return (int)triangleIndices.size()/3; }
+int TriangleMesh::getNumTriangles() const { return (int)triangleIndexes.size()/3; }
 
 java::ArrayList<bool>& TriangleMesh::getVertexSelections()
 {
@@ -228,7 +228,7 @@ java::ArrayList<double>& TriangleMesh::getVertexBinormals() { return vertexBinor
 java::ArrayList<double>& TriangleMesh::getVertexTangents() { return vertexTangents; }
 java::ArrayList<double>& TriangleMesh::getVertexColors() { return vertexColors; }
 java::ArrayList<double>& TriangleMesh::getVertexUvs() { return vertexUvs; }
-java::ArrayList<int>& TriangleMesh::getTriangleIndexes() { return triangleIndices; }
+java::ArrayList<int>& TriangleMesh::getTriangleIndexes() { return triangleIndexes; }
 java::ArrayList<double>& TriangleMesh::getTriangleNormals() { return triangleNormals; }
 
 java::ArrayList<SimpleMaterial*>& TriangleMesh::getMaterials() { return materials; }
@@ -268,7 +268,7 @@ void TriangleMesh::calculateNormals()
     }
 
     for (int i = 0; i < getNumTriangles(); i++) {
-        int i0 = triangleIndices[i*3], i1 = triangleIndices[i*3+1], i2 = triangleIndices[i*3+2];
+        int i0 = triangleIndexes[i*3], i1 = triangleIndexes[i*3+1], i2 = triangleIndexes[i*3+2];
         Vector3Dd v0(vertexPositions[i0*3], vertexPositions[i0*3+1], vertexPositions[i0*3+2]);
         Vector3Dd v1(vertexPositions[i1*3], vertexPositions[i1*3+1], vertexPositions[i1*3+2]);
         Vector3Dd v2(vertexPositions[i2*3], vertexPositions[i2*3+1], vertexPositions[i2*3+2]);
@@ -292,9 +292,9 @@ void TriangleMesh::reorientateNormals()
 {
     for (long int i = 0; i < vertexNormals.size(); i++) vertexNormals[i] = -vertexNormals[i];
     for (int i = 0; i < getNumTriangles(); i++) {
-        int tmp = triangleIndices[i*3+1];
-        triangleIndices[i*3+1] = triangleIndices[i*3+2];
-        triangleIndices[i*3+2] = tmp;
+        int tmp = triangleIndexes[i*3+1];
+        triangleIndexes[i*3+1] = triangleIndexes[i*3+2];
+        triangleIndexes[i*3+2] = tmp;
     }
 }
 
@@ -334,14 +334,14 @@ bool TriangleMesh::intersectTriangle(const Ray& ray, const Vector3Dd& v0, const 
 Ray* TriangleMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit;
-    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.getRay() != 0) return new Ray(*hit.getRay());
     return 0;
 }
 
 void TriangleMesh::interpolateTriangleData(int tri, double u, double v, RayHit* outHit, const Vector3Dd& rayDirection)
 {
     if (outHit == 0) return;
-    int i0 = triangleIndices[tri*3], i1 = triangleIndices[tri*3+1], i2 = triangleIndices[tri*3+2];
+    int i0 = triangleIndexes[tri*3], i1 = triangleIndexes[tri*3+1], i2 = triangleIndexes[tri*3+2];
     double w = 1.0 - u - v;
 
     if (outHit->needsNormal()) {
@@ -350,13 +350,13 @@ void TriangleMesh::interpolateTriangleData(int tri, double u, double v, RayHit* 
                 w*vertexNormals[i0*3] + u*vertexNormals[i1*3] + v*vertexNormals[i2*3],
                 w*vertexNormals[i0*3+1] + u*vertexNormals[i1*3+1] + v*vertexNormals[i2*3+1],
                 w*vertexNormals[i0*3+2] + u*vertexNormals[i1*3+2] + v*vertexNormals[i2*3+2]);
-            outHit->n = n.normalized();
+            outHit->normal = n.normalized();
         }
         else {
             Vector3Dd n(triangleNormals[tri*3], triangleNormals[tri*3+1], triangleNormals[tri*3+2]);
-            outHit->n = n.normalized();
+            outHit->normal = n.normalized();
         }
-        if (outHit->n.dotProduct(rayDirection) >= 0) outHit->n = outHit->n.multiply(-1);
+        if (outHit->normal.dotProduct(rayDirection) >= 0) outHit->normal = outHit->normal.multiply(-1);
     }
 
     if (outHit->needsTextureCoordinates() && (int)vertexUvs.size() >= getNumVertices()*2) {
@@ -409,7 +409,7 @@ bool TriangleMesh::doIntersectionInternal(const Ray& inRay, RayHit* outHit, int*
     double bestU = 0, bestV = 0;
 
     for (int i = 0; i < getNumTriangles(); i++) {
-        int i0 = triangleIndices[i*3], i1 = triangleIndices[i*3+1], i2 = triangleIndices[i*3+2];
+        int i0 = triangleIndexes[i*3], i1 = triangleIndexes[i*3+1], i2 = triangleIndexes[i*3+2];
         Vector3Dd v0(vertexPositions[i0*3], vertexPositions[i0*3+1], vertexPositions[i0*3+2]);
         Vector3Dd v1(vertexPositions[i1*3], vertexPositions[i1*3+1], vertexPositions[i1*3+2]);
         Vector3Dd v2(vertexPositions[i2*3], vertexPositions[i2*3+1], vertexPositions[i2*3+2]);
@@ -429,9 +429,9 @@ bool TriangleMesh::doIntersectionInternal(const Ray& inRay, RayHit* outHit, int*
 
     if (outHit != 0) {
         outHit->setRay(inRay.withT(bestT));
-        outHit->p = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
-        outHit->n = Vector3Dd(triangleNormals[bestTri*3], triangleNormals[bestTri*3+1], triangleNormals[bestTri*3+2]).normalized();
-        outHit->t = Vector3Dd();
+        outHit->point = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
+        outHit->normal = Vector3Dd(triangleNormals[bestTri*3], triangleNormals[bestTri*3+1], triangleNormals[bestTri*3+2]).normalized();
+        outHit->tangent = Vector3Dd();
         outHit->u = 0;
         outHit->v = 0;
         interpolateTriangleData(bestTri, bestU, bestV, outHit, inRay.getDirection());
@@ -460,9 +460,9 @@ void TriangleMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outD
 int TriangleMesh::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
 {
     for (int i = 0; i < getNumTriangles(); i++) {
-        Vector3Dd p0(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
-        Vector3Dd p1(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
-        Vector3Dd p2(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
+        Vector3Dd p0(vertexPositions[3*triangleIndexes[3*i+0]+0], vertexPositions[3*triangleIndexes[3*i+0]+1], vertexPositions[3*triangleIndexes[3*i+0]+2]);
+        Vector3Dd p1(vertexPositions[3*triangleIndexes[3*i+1]+0], vertexPositions[3*triangleIndexes[3*i+1]+1], vertexPositions[3*triangleIndexes[3*i+1]+2]);
+        Vector3Dd p2(vertexPositions[3*triangleIndexes[3*i+2]+0], vertexPositions[3*triangleIndexes[3*i+2]+1], vertexPositions[3*triangleIndexes[3*i+2]+2]);
         int status = Triangle::containmentTest(p0, p1, p2, p, distanceTolerance);
         if (status != OUTSIDE) return LIMIT;
     }
@@ -486,8 +486,8 @@ void TriangleMesh::compact()
     java::ArrayList<bool> count;
     count.reserve((long int)n);
     for (long int i = 0; i < (long int)n; i++) count.add(false);
-    for (long int i = 0; i < triangleIndices.size(); i++) {
-        int a = triangleIndices[i];
+    for (long int i = 0; i < triangleIndexes.size(); i++) {
+        int a = triangleIndexes[i];
         if (a >= 0 && a < n) count[a] = true;
     }
 
@@ -518,7 +518,7 @@ void TriangleMesh::compact()
         }
     }
 
-    java::ArrayList<int> oldTri = triangleIndices;
+    java::ArrayList<int> oldTri = triangleIndexes;
     j = 0;
     for (int i = 0; i < (int)oldTri.size()/3; i++) {
         int a = oldTri[3*i+0], b = oldTri[3*i+1], c = oldTri[3*i+2];
@@ -531,9 +531,9 @@ void TriangleMesh::compact()
         int a = oldTri[3*i+0], b = oldTri[3*i+1], c = oldTri[3*i+2];
         if (a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n) {}
         else {
-            triangleIndices[3*j+0] = map[a];
-            triangleIndices[3*j+1] = map[b];
-            triangleIndices[3*j+2] = map[c];
+            triangleIndexes[3*j+0] = map[a];
+            triangleIndexes[3*j+1] = map[b];
+            triangleIndexes[3*j+2] = map[c];
             j++;
         }
     }
@@ -548,15 +548,15 @@ void TriangleMesh::removeSelectedVertices()
     vertexTangents.clear();
 
     int n = getNumVertices();
-    for (int i = 0; i < (int)triangleIndices.size()/3; i++) {
-        int a = triangleIndices[3*i+0];
-        int b = triangleIndices[3*i+1];
-        int c = triangleIndices[3*i+2];
+    for (int i = 0; i < (int)triangleIndexes.size()/3; i++) {
+        int a = triangleIndexes[3*i+0];
+        int b = triangleIndexes[3*i+1];
+        int c = triangleIndexes[3*i+2];
         if (a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ||
             vertexSelections[a] || vertexSelections[b] || vertexSelections[c]) {
-            triangleIndices[3*i+0] = -1;
-            triangleIndices[3*i+1] = -1;
-            triangleIndices[3*i+2] = -1;
+            triangleIndexes[3*i+0] = -1;
+            triangleIndexes[3*i+1] = -1;
+            triangleIndexes[3*i+2] = -1;
         }
     }
 
@@ -572,7 +572,7 @@ void TriangleMesh::appendVertices(const java::ArrayList<double>& ev)
 
 void TriangleMesh::appendTriangles(const java::ArrayList<int>& et)
 {
-    for (long int i = 0; i < et.size(); i++) triangleIndices.add(et.get(i));
+    for (long int i = 0; i < et.size(); i++) triangleIndexes.add(et.get(i));
 }
 
 void TriangleMesh::simpleTriangleCut(InfinitePlane& p, java::ArrayList<double>& extraVertices,
@@ -588,13 +588,13 @@ void TriangleMesh::simpleTriangleCut(InfinitePlane& p, java::ArrayList<double>& 
     Ray* hitA = p.doIntersectionWithNegative(Ray(p1, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.point; hasMa = true; }
         delete hitA;
     }
     Ray* hitB = p.doIntersectionWithNegative(Ray(p1, b));
     if (hitB != 0) {
         RayHit gib;
-        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.p; hasMb = true; }
+        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.point; hasMb = true; }
         delete hitB;
     }
 
@@ -619,7 +619,7 @@ void TriangleMesh::halfTriangleCut(InfinitePlane& p, java::ArrayList<double>& ex
     Ray* hitA = p.doIntersectionWithNegative(Ray(p2, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.point; hasMa = true; }
         delete hitA;
     }
 
@@ -644,13 +644,13 @@ void TriangleMesh::doubleTriangleCut(InfinitePlane& p, java::ArrayList<double>& 
     Ray* hitA = p.doIntersectionWithNegative(Ray(p3, a));
     if (hitA != 0) {
         RayHit gia;
-        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.p; hasMa = true; }
+        if (p.doIntersectionFirstHit(*hitA, &gia)) { ma = gia.point; hasMa = true; }
         delete hitA;
     }
     Ray* hitB = p.doIntersectionWithNegative(Ray(p3, b));
     if (hitB != 0) {
         RayHit gib;
-        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.p; hasMb = true; }
+        if (p.doIntersectionFirstHit(*hitB, &gib)) { mb = gib.point; hasMb = true; }
         delete hitB;
     }
 
@@ -673,10 +673,10 @@ void TriangleMesh::slice(InfinitePlane& p)
 
     int nv = getNumVertices();
 
-    for (int i = 0; i < (int)triangleIndices.size()/3; i++) {
-        int ia = triangleIndices[3*i+0];
-        int ib = triangleIndices[3*i+1];
-        int ic = triangleIndices[3*i+2];
+    for (int i = 0; i < (int)triangleIndexes.size()/3; i++) {
+        int ia = triangleIndexes[3*i+0];
+        int ib = triangleIndexes[3*i+1];
+        int ic = triangleIndexes[3*i+2];
         if (ia < 0 || ib < 0 || ic < 0 || ia >= getNumVertices() || ib >= getNumVertices() || ic >= getNumVertices()) continue;
 
         Vector3Dd p1(vertexPositions[3*ia+0], vertexPositions[3*ia+1], vertexPositions[3*ia+2]);
@@ -694,11 +694,11 @@ void TriangleMesh::slice(InfinitePlane& p)
             (t1 == LIMIT && t2 == LIMIT && t3 == OUTSIDE) ||
             (t1 == LIMIT && t2 == OUTSIDE && t3 == LIMIT) ||
             (t1 == OUTSIDE && t2 == LIMIT && t3 == LIMIT)) {
-            triangleIndices[3*i+0] = triangleIndices[3*i+1] = triangleIndices[3*i+2] = -1;
+            triangleIndexes[3*i+0] = triangleIndexes[3*i+1] = triangleIndexes[3*i+2] = -1;
         }
         else if (t1 == LIMIT && t2 == LIMIT && t3 == LIMIT) {
             Vector3Dd n = p2.subtract(p1).crossProduct(p3.subtract(p1));
-            if (n.dotProduct(p.getNormal()) > 0) triangleIndices[3*i+0] = triangleIndices[3*i+1] = triangleIndices[3*i+2] = -1;
+            if (n.dotProduct(p.getNormal()) > 0) triangleIndexes[3*i+0] = triangleIndexes[3*i+1] = triangleIndexes[3*i+2] = -1;
         }
         else if ((t1 == LIMIT && t2 == INSIDE && t3 == INSIDE) ||
                  (t1 == INSIDE && t2 == LIMIT && t3 == INSIDE) ||

@@ -12,10 +12,10 @@ class SimpleSceneSnapshot;
 
 class SimpleScene : public Entity {
 private:
-    java::ArrayList<SimpleBody*> simpleBodiesArray;
-    java::ArrayList<Light*> lightsArray;
-    java::ArrayList<Background*> backgroundsArray;
-    java::ArrayList<Camera*> camerasArray;
+    java::ArrayList<SimpleBody*> simpleBodies;
+    java::ArrayList<Light*> lights;
+    java::ArrayList<Background*> backgrounds;
+    java::ArrayList<Camera*> cameras;
     int activeCameraIndex;
     int activeBackgroundIndex;
 

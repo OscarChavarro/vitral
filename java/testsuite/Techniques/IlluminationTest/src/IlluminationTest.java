@@ -54,8 +54,8 @@ public class IlluminationTest
     private GLCanvas canvas;
     private Vector3Dd lightPosition;
     private boolean showVectors;
-    private Vector3Dd N;
-    private Vector3Dd H;
+    private Vector3Dd normal;
+    private Vector3Dd reflection;
     private double phongExp;
 
     private TriangleMesh baseMesh;
@@ -70,9 +70,9 @@ public class IlluminationTest
     {
         Vector3Dd L = lightPosition.normalized();
 
-        double mag = N.dotProduct(L) * 2;
+        double mag = normal.dotProduct(L) * 2;
 
-        H = (N.multiply(mag)).subtract(L);
+        reflection = (normal.multiply(mag)).subtract(L);
     }
 
     private TriangleMesh createFloorMesh()
@@ -172,7 +172,7 @@ public class IlluminationTest
                 // Constant (ambient)
                 //r = 1;
                 // Lambertian (diffuse) factor
-                d = 1.5*Math.max(0.0, N.dotProduct(L));
+                d = 1.5*Math.max(0.0, normal.dotProduct(L));
 
                 // Phong illumination model (specular) factor
                 x1 = Math.cos(Math.toRadians(tetha)) *
@@ -181,7 +181,7 @@ public class IlluminationTest
                         Math.cos(Math.toRadians(phi));
                 z1 = Math.cos(Math.toRadians(90-phi));
                 // Avoid per-vertex Vector3Dd allocations in this hot loop.
-                double hDotE = (H.x() * x1) + (H.y() * y1) + (H.z() * z1);
+                double hDotE = (reflection.x() * x1) + (reflection.y() * y1) + (reflection.z() * z1);
                 s = Math.pow(hDotE, phongExp);
 
                 r = d + s;
@@ -274,7 +274,7 @@ public class IlluminationTest
         light3.setId(2);
 
         //-----------------------------------------------------------------
-        N = new Vector3Dd(0, 0, 1); // For the floor!
+        normal = new Vector3Dd(0, 0, 1); // For the floor!
         updateH();
 
         phongExp = 60.0;
@@ -384,7 +384,7 @@ public class IlluminationTest
 
                 gl.glColor3d(0.5, 0.9, 0.5);
                 gl.glVertex3d(0, 0, 0);
-                gl.glVertex3d(3*H.x(), 3*H.y(), 3*H.z());
+                gl.glVertex3d(3*reflection.x(), 3*reflection.y(), 3*reflection.z());
 
             gl.glEnd();
         }

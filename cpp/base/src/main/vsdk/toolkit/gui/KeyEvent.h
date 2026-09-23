@@ -136,12 +136,12 @@ public:
     static const int KEY_NUMPERIOD = 0x0075;
 
     KeyEvent()
-        : keycode(KEY_NONE), unicode_id(KEY_NONE), modifierMask(0)
+        : keycode(KEY_NONE), unicodeId(KEY_NONE), modifierMask(0)
     {
     }
 
     int keycode;
-    char unicode_id;
+    char unicodeId;
     int modifierMask;
 
     static const char* getKeyName(int key);

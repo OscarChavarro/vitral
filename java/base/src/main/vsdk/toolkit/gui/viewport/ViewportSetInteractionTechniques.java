@@ -90,7 +90,7 @@ public class ViewportSetInteractionTechniques
             return false;
         }
 
-        switch ( event.unicode_id ) {
+        switch ( event.unicodeId ) {
           case ';':
             viewportSet.selectNextViewport();
             return true;
@@ -125,7 +125,7 @@ public class ViewportSetInteractionTechniques
             return true;
         }
 
-        switch ( event.unicode_id ) {
+        switch ( event.unicodeId ) {
           case '.':
             viewport.toggleRenderMode();
             return true;

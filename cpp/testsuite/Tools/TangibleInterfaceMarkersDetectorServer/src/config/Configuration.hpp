@@ -16,7 +16,7 @@ public:
     bool loadMarkerGroups(MarkersModel* model) const;
 
 private:
-    const CommandLineOptions& opts_;
+    const CommandLineOptions& opts;
 };
 
 #endif

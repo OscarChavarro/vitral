@@ -19,269 +19,269 @@ KeyEvent GlfwSystem::glfw2vsdkKeyEvent(int glfwKey, int glfwMods) {
     switch (glfwKey) {
         case GLFW_KEY_ESCAPE:
             event.keycode = KeyEvent::KEY_ESC;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_BACKSPACE:
             event.keycode = KeyEvent::KEY_BACKSPACE;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_TAB:
             event.keycode = KeyEvent::KEY_TAB;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_ENTER:
             event.keycode = KeyEvent::KEY_ENTER;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_SPACE:
             event.keycode = KeyEvent::KEY_SPACE;
-            event.unicode_id = ' ';
+            event.unicodeId = ' ';
             break;
 
         case GLFW_KEY_A:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_A : KeyEvent::KEY_a;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'A' : 'a';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'A' : 'a';
             break;
         case GLFW_KEY_B:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_B : KeyEvent::KEY_b;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'B' : 'b';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'B' : 'b';
             break;
         case GLFW_KEY_C:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_C : KeyEvent::KEY_c;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'C' : 'c';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'C' : 'c';
             break;
         case GLFW_KEY_D:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_D : KeyEvent::KEY_d;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'D' : 'd';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'D' : 'd';
             break;
         case GLFW_KEY_E:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_E : KeyEvent::KEY_e;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'E' : 'e';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'E' : 'e';
             break;
         case GLFW_KEY_F:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_F : KeyEvent::KEY_f;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'F' : 'f';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'F' : 'f';
             break;
         case GLFW_KEY_G:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_G : KeyEvent::KEY_g;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'G' : 'g';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'G' : 'g';
             break;
         case GLFW_KEY_H:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_H : KeyEvent::KEY_h;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'H' : 'h';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'H' : 'h';
             break;
         case GLFW_KEY_I:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_I : KeyEvent::KEY_i;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'I' : 'i';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'I' : 'i';
             break;
         case GLFW_KEY_J:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_J : KeyEvent::KEY_j;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'J' : 'j';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'J' : 'j';
             break;
         case GLFW_KEY_K:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_K : KeyEvent::KEY_k;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'K' : 'k';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'K' : 'k';
             break;
         case GLFW_KEY_L:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_L : KeyEvent::KEY_l;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'L' : 'l';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'L' : 'l';
             break;
         case GLFW_KEY_M:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_M : KeyEvent::KEY_m;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'M' : 'm';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'M' : 'm';
             break;
         case GLFW_KEY_N:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_N : KeyEvent::KEY_n;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'N' : 'n';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'N' : 'n';
             break;
         case GLFW_KEY_O:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_O : KeyEvent::KEY_o;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'O' : 'o';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'O' : 'o';
             break;
         case GLFW_KEY_P:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_P : KeyEvent::KEY_p;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'P' : 'p';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'P' : 'p';
             break;
         case GLFW_KEY_Q:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_Q : KeyEvent::KEY_q;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'Q' : 'q';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'Q' : 'q';
             break;
         case GLFW_KEY_R:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_R : KeyEvent::KEY_r;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'R' : 'r';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'R' : 'r';
             break;
         case GLFW_KEY_S:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_S : KeyEvent::KEY_s;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'S' : 's';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'S' : 's';
             break;
         case GLFW_KEY_T:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_T : KeyEvent::KEY_t;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'T' : 't';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'T' : 't';
             break;
         case GLFW_KEY_U:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_U : KeyEvent::KEY_u;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'U' : 'u';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'U' : 'u';
             break;
         case GLFW_KEY_V:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_V : KeyEvent::KEY_v;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'V' : 'v';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'V' : 'v';
             break;
         case GLFW_KEY_W:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_W : KeyEvent::KEY_w;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'W' : 'w';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'W' : 'w';
             break;
         case GLFW_KEY_X:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_X : KeyEvent::KEY_x;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'X' : 'x';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'X' : 'x';
             break;
         case GLFW_KEY_Y:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_Y : KeyEvent::KEY_y;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'Y' : 'y';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'Y' : 'y';
             break;
         case GLFW_KEY_Z:
             event.keycode = (glfwMods & GLFW_MOD_SHIFT) ? KeyEvent::KEY_Z : KeyEvent::KEY_z;
-            event.unicode_id = (glfwMods & GLFW_MOD_SHIFT) ? 'Z' : 'z';
+            event.unicodeId = (glfwMods & GLFW_MOD_SHIFT) ? 'Z' : 'z';
             break;
 
         case GLFW_KEY_0:
             event.keycode = KeyEvent::KEY_0;
-            event.unicode_id = '0';
+            event.unicodeId = '0';
             break;
         case GLFW_KEY_1:
             event.keycode = KeyEvent::KEY_1;
-            event.unicode_id = '1';
+            event.unicodeId = '1';
             break;
         case GLFW_KEY_2:
             event.keycode = KeyEvent::KEY_2;
-            event.unicode_id = '2';
+            event.unicodeId = '2';
             break;
         case GLFW_KEY_3:
             event.keycode = KeyEvent::KEY_3;
-            event.unicode_id = '3';
+            event.unicodeId = '3';
             break;
         case GLFW_KEY_4:
             event.keycode = KeyEvent::KEY_4;
-            event.unicode_id = '4';
+            event.unicodeId = '4';
             break;
         case GLFW_KEY_5:
             event.keycode = KeyEvent::KEY_5;
-            event.unicode_id = '5';
+            event.unicodeId = '5';
             break;
         case GLFW_KEY_6:
             event.keycode = KeyEvent::KEY_6;
-            event.unicode_id = '6';
+            event.unicodeId = '6';
             break;
         case GLFW_KEY_7:
             event.keycode = KeyEvent::KEY_7;
-            event.unicode_id = '7';
+            event.unicodeId = '7';
             break;
         case GLFW_KEY_8:
             event.keycode = KeyEvent::KEY_8;
-            event.unicode_id = '8';
+            event.unicodeId = '8';
             break;
         case GLFW_KEY_9:
             event.keycode = KeyEvent::KEY_9;
-            event.unicode_id = '9';
+            event.unicodeId = '9';
             break;
         case GLFW_KEY_PERIOD:
             event.keycode = KeyEvent::KEY_PERIOD;
-            event.unicode_id = '.';
+            event.unicodeId = '.';
             break;
 
         case GLFW_KEY_F1:
             event.keycode = KeyEvent::KEY_F1;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F2:
             event.keycode = KeyEvent::KEY_F2;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F3:
             event.keycode = KeyEvent::KEY_F3;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F4:
             event.keycode = KeyEvent::KEY_F4;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F5:
             event.keycode = KeyEvent::KEY_F5;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F6:
             event.keycode = KeyEvent::KEY_F6;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F7:
             event.keycode = KeyEvent::KEY_F7;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F8:
             event.keycode = KeyEvent::KEY_F8;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F9:
             event.keycode = KeyEvent::KEY_F9;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F10:
             event.keycode = KeyEvent::KEY_F10;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F11:
             event.keycode = KeyEvent::KEY_F11;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_F12:
             event.keycode = KeyEvent::KEY_F12;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
 
         case GLFW_KEY_UP:
             event.keycode = KeyEvent::KEY_UP;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_DOWN:
             event.keycode = KeyEvent::KEY_DOWN;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_LEFT:
             event.keycode = KeyEvent::KEY_LEFT;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_RIGHT:
             event.keycode = KeyEvent::KEY_RIGHT;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
 
         case GLFW_KEY_HOME:
             event.keycode = KeyEvent::KEY_HOME;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_END:
             event.keycode = KeyEvent::KEY_END;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_PAGE_UP:
             event.keycode = KeyEvent::KEY_PAGEUP;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_PAGE_DOWN:
             event.keycode = KeyEvent::KEY_PAGEDOWN;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_INSERT:
             event.keycode = KeyEvent::KEY_INSERT;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case GLFW_KEY_DELETE:
             event.keycode = KeyEvent::KEY_DELETE;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
 
         default:
             event.keycode = KeyEvent::KEY_NONE;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
     }
 

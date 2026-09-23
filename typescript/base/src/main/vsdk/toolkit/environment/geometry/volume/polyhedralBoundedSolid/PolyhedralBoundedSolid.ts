@@ -216,7 +216,7 @@ export class PolyhedralBoundedSolid extends Solid {
         if (outHit === undefined) {
             const hit = new RayHit(RayHit.DETAIL_NONE, true);
             if (this.doIntersectionFirstHit(inRay, hit)) {
-                return hit.ray();
+                return hit.getRay();
             }
             return null;
         }
@@ -240,7 +240,7 @@ export class PolyhedralBoundedSolid extends Solid {
             }
             const planeHit = new RayHit();
             if (containingPlane.doIntersectionFirstHit(ray, planeHit)) {
-                let hit = planeHit.ray()!;
+                let hit = planeHit.getRay()!;
                 if (hit.getT() < minT) {
                     hit = hit.withDirection(hit.getDirection().normalized());
                     p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
@@ -251,7 +251,7 @@ export class PolyhedralBoundedSolid extends Solid {
                     );
                     if (pos === Geometry.INSIDE || pos === Geometry.LIMIT) {
                         minT = hit.getT();
-                        bestInfo = new RayHit(planeHit.requiredDetailMask());
+                        bestInfo = new RayHit(planeHit.getRequiredDetailMask());
                         bestInfo.clone(planeHit);
                     }
                 }

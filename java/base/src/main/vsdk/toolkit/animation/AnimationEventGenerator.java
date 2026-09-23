@@ -46,7 +46,7 @@ public class AnimationEventGenerator implements Runnable {
         AnimationEvent e = new AnimationEvent();
         while ( true ) {
             t = getRealTimeSeconds() - t0;
-            e.setT(t);
+            e.setTime(t);
             try { Thread.sleep(1000/fps); }
             catch ( InterruptedException ex ) {
                 Logger.reportMessageWithException(

@@ -23,8 +23,8 @@ Box::Box(const Vector3Dd& s) : size(s) {}
 
 Ray* Box::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.getRay() != nullptr) {
+        return new Ray(*hit.getRay());
     }
     return nullptr;
 }
@@ -87,7 +87,7 @@ bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
 
     if (outHit->needsAnySurfaceData()) {
         double hitX = ox + dx*minT, hitY = oy + dy*minT, hitZ = oz + dz*minT;
-        if (outHit->needsPoint()) outHit->p = Vector3Dd(hitX, hitY, hitZ);
+        if (outHit->needsPoint()) outHit->point = Vector3Dd(hitX, hitY, hitZ);
         if (outHit->needsTextureCoordinates()) {
             outHit->u = 0; outHit->v = 0;
             switch (hitPlane) {
@@ -99,8 +99,8 @@ bool Box::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
                 case 6: outHit->u = 1-(hitY / size.y() - 0.5); outHit->v = hitZ / size.z() - 0.5; break;
             }
         }
-        if (outHit->needsNormal()) outHit->n = planeNormal(hitPlane);
-        if (outHit->needsTangent()) outHit->t = planeTangent(hitPlane);
+        if (outHit->needsNormal()) outHit->normal = planeNormal(hitPlane);
+        if (outHit->needsTangent()) outHit->tangent = planeTangent(hitPlane);
     }
     return true;
 }
@@ -111,9 +111,9 @@ void Box::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     double hitY = inRay.getOrigin().y() + inRay.getDirection().y()*inT;
     double hitZ = inRay.getOrigin().z() + inRay.getDirection().z()*inT;
     int hitPlane = classifyHitPlane(hitX, hitY, hitZ);
-    if (outData->needsPoint()) outData->p = Vector3Dd(hitX, hitY, hitZ);
-    if (outData->needsNormal()) outData->n = planeNormal(hitPlane);
-    if (outData->needsTangent()) outData->t = planeTangent(hitPlane);
+    if (outData->needsPoint()) outData->point = Vector3Dd(hitX, hitY, hitZ);
+    if (outData->needsNormal()) outData->normal = planeNormal(hitPlane);
+    if (outData->needsTangent()) outData->tangent = planeTangent(hitPlane);
 }
 
 Vector3Dd Box::planeNormal(int h) { switch (h){case 1:return NORMAL_POS_Z;case 2:return NORMAL_NEG_Z;case 3:return NORMAL_POS_Y;case 4:return NORMAL_NEG_Y;case 5:return NORMAL_POS_X;case 6:return NORMAL_NEG_X;default:return ZERO_VECTOR;}}

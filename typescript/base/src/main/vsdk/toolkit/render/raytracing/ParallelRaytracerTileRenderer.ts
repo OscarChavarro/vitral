@@ -93,8 +93,8 @@ export class ParallelRaytracerTileRenderer {
             depthEncoder = new DepthBufferEncoder(
                 request.depthMode as DepthBufferMode,
                 this.snapshot.getCameraSnapshot(),
-                request.depthRangeNear,
-                request.depthRangeFar,
+                request.openGlDepthRangeNear,
+                request.openGlDepthRangeFar,
             );
             if (this.depth === null || this.depth.getXSize() !== request.xSize ||
                 this.depth.getYSize() !== request.ySize) {
@@ -109,10 +109,10 @@ export class ParallelRaytracerTileRenderer {
             request.reportProgress ? new NotifyingProgressMonitor(notify) : null,
             depthEncoder !== null ? this.depth : null,
             depthEncoder,
-            request.x0,
-            request.y0,
-            request.x0 + request.dx,
-            request.y0 + request.dy,
+            request.startX,
+            request.startY,
+            request.startX + request.width,
+            request.startY + request.height,
         );
 
         // `RGBImageUncompressed` stores row `y` at `(ySize - 1 - y) * rowStride`,
@@ -121,14 +121,14 @@ export class ParallelRaytracerTileRenderer {
         // checks before handing a band over.
         const rowStride: number = request.xSize * 3;
         const raw: Uint8Array = this.image.getRawImageDirectBuffer();
-        const start: number = (request.ySize - (request.y0 + request.dy)) * rowStride;
-        const end: number = (request.ySize - request.y0) * rowStride;
+        const start: number = (request.ySize - (request.startY + request.height)) * rowStride;
+        const end: number = (request.ySize - request.startY) * rowStride;
 
         // The depth buffer stores row `y` at `y * xSize`, top row first
         const depth: Float32Array | null = depthEncoder !== null && this.depth !== null
-            ? this.depth.getZBuffer().slice(request.y0 * request.xSize, (request.y0 + request.dy) * request.xSize)
+            ? this.depth.getZBuffer().slice(request.startY * request.xSize, (request.startY + request.height) * request.xSize)
             : null;
 
-        return { y0: request.y0, dy: request.dy, bytes: raw.slice(start, end), depth };
+        return { startY: request.startY, height: request.height, bytes: raw.slice(start, end), depth };
     }
 }

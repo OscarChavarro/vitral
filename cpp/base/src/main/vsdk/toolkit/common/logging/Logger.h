@@ -17,8 +17,8 @@ public:
     static void reportMessageWithException(const java::String& className, int level, const java::String& method, const java::String& message, const std::exception* cause);
 
 private:
-    static bool withSystemExit_;
-    static bool withFatalExceptions_;
+    static bool withSystemExit;
+    static bool withFatalExceptions;
     static void processFatalError(const java::String& method, const java::String& message, const std::exception* cause);
 };
 

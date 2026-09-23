@@ -218,35 +218,35 @@ public class StlComparisonTool
         int i;
         for ( i = 0; i < stl.facets.size(); i++ ) {
             Facet facet = stl.facets.get(i);
-            updateBounds(analysis, facet.a);
-            updateBounds(analysis, facet.b);
-            updateBounds(analysis, facet.c);
+            updateBounds(analysis, facet.vertex0);
+            updateBounds(analysis, facet.vertex1);
+            updateBounds(analysis, facet.vertex2);
 
-            uniqueVertices.add(facet.a.key());
-            uniqueVertices.add(facet.b.key());
-            uniqueVertices.add(facet.c.key());
+            uniqueVertices.add(facet.vertex0.key());
+            uniqueVertices.add(facet.vertex1.key());
+            uniqueVertices.add(facet.vertex2.key());
 
             if ( facet.normal.length() <= EXACT_EPSILON ) {
                 analysis.zeroNormals++;
             }
 
-            double ab = facet.a.distance(facet.b);
-            double bc = facet.b.distance(facet.c);
-            double ca = facet.c.distance(facet.a);
+            double ab = facet.vertex0.distance(facet.vertex1);
+            double bc = facet.vertex1.distance(facet.vertex2);
+            double ca = facet.vertex2.distance(facet.vertex0);
             double minEdge = Math.min(ab, Math.min(bc, ca));
             analysis.minEdgeLength = Math.min(analysis.minEdgeLength, minEdge);
             incrementThresholds(analysis.edgeBelowThresholds, EDGE_THRESHOLDS,
                 minEdge);
 
-            Vec3 cross = facet.b.subtract(facet.a).cross(facet.c.subtract(facet.a));
+            Vec3 cross = facet.vertex1.subtract(facet.vertex0).cross(facet.vertex2.subtract(facet.vertex0));
             double doubleArea = cross.length();
             analysis.minDoubleArea = Math.min(analysis.minDoubleArea, doubleArea);
             incrementThresholds(analysis.areaBelowThresholds, AREA_THRESHOLDS,
                 doubleArea);
 
-            registerEdge(edgeUseCount, edgeEndpoints, facet.a, facet.b);
-            registerEdge(edgeUseCount, edgeEndpoints, facet.b, facet.c);
-            registerEdge(edgeUseCount, edgeEndpoints, facet.c, facet.a);
+            registerEdge(edgeUseCount, edgeEndpoints, facet.vertex0, facet.vertex1);
+            registerEdge(edgeUseCount, edgeEndpoints, facet.vertex1, facet.vertex2);
+            registerEdge(edgeUseCount, edgeEndpoints, facet.vertex2, facet.vertex0);
             increment(triangleUseCount, facet.canonicalTriangleKey());
             increment(orientedTriangleUseCount, facet.orientedTriangleKey());
         }
@@ -298,9 +298,9 @@ public class StlComparisonTool
         int i;
         for ( i = 0; i < facets.size(); i++ ) {
             Facet facet = facets.get(i);
-            int a = weldVertex(representatives, facet.a, epsilon);
-            int b = weldVertex(representatives, facet.b, epsilon);
-            int c = weldVertex(representatives, facet.c, epsilon);
+            int a = weldVertex(representatives, facet.vertex0, epsilon);
+            int b = weldVertex(representatives, facet.vertex1, epsilon);
+            int c = weldVertex(representatives, facet.vertex2, epsilon);
 
             increment(edgeUseCount, weldedEdgeKey(a, b));
             increment(edgeUseCount, weldedEdgeKey(b, c));
@@ -394,8 +394,8 @@ public class StlComparisonTool
             String edgeKey = entry.getKey();
             EdgeEndpoints endpoints = edgeEndpoints.get(edgeKey);
             boundaryEdgeKeys.add(edgeKey);
-            addAdjacency(adjacency, endpoints.a.key(), edgeKey);
-            addAdjacency(adjacency, endpoints.b.key(), edgeKey);
+            addAdjacency(adjacency, endpoints.start.key(), edgeKey);
+            addAdjacency(adjacency, endpoints.end.key(), edgeKey);
         }
 
         ArrayList<BoundaryLoop> loops = new ArrayList<>();
@@ -430,16 +430,16 @@ public class StlComparisonTool
 
         int edgeCount = 0;
         double perimeter = 0.0;
-        Vec3 start = edgeEndpoints.get(startEdge).a;
+        Vec3 start = edgeEndpoints.get(startEdge).start;
 
         while ( !queue.isEmpty() ) {
             String edgeKey = queue.remove(queue.size() - 1);
             EdgeEndpoints endpoints = edgeEndpoints.get(edgeKey);
             edgeCount++;
-            perimeter += endpoints.a.distance(endpoints.b);
+            perimeter += endpoints.start.distance(endpoints.end);
 
-            enqueueAdjacentEdges(endpoints.a.key(), adjacency, visitedEdges, queue);
-            enqueueAdjacentEdges(endpoints.b.key(), adjacency, visitedEdges, queue);
+            enqueueAdjacentEdges(endpoints.start.key(), adjacency, visitedEdges, queue);
+            enqueueAdjacentEdges(endpoints.end.key(), adjacency, visitedEdges, queue);
         }
 
         return new BoundaryLoop(edgeCount, perimeter, start);
@@ -508,13 +508,13 @@ public class StlComparisonTool
     }
 
     private static final class EdgeEndpoints {
-        final Vec3 a;
-        final Vec3 b;
+        final Vec3 start;
+        final Vec3 end;
 
         EdgeEndpoints(Vec3 a, Vec3 b)
         {
-            this.a = a;
-            this.b = b;
+            this.start = a;
+            this.end = b;
         }
     }
 
@@ -536,28 +536,28 @@ public class StlComparisonTool
 
     private static final class Facet {
         final Vec3 normal;
-        final Vec3 a;
-        final Vec3 b;
-        final Vec3 c;
+        final Vec3 vertex0;
+        final Vec3 vertex1;
+        final Vec3 vertex2;
         final int attributeByteCount;
 
         Facet(Vec3 normal, Vec3 a, Vec3 b, Vec3 c, int attributeByteCount)
         {
             this.normal = normal;
-            this.a = a;
-            this.b = b;
-            this.c = c;
+            this.vertex0 = a;
+            this.vertex1 = b;
+            this.vertex2 = c;
             this.attributeByteCount = attributeByteCount;
         }
 
         String canonicalTriangleKey()
         {
-            return sortedKey(a.key(), b.key(), c.key());
+            return sortedKey(vertex0.key(), vertex1.key(), vertex2.key());
         }
 
         String orientedTriangleKey()
         {
-            return a.key() + ">" + b.key() + ">" + c.key();
+            return vertex0.key() + ">" + vertex1.key() + ">" + vertex2.key();
         }
 
         static String edgeKey(Vec3 p, Vec3 q)

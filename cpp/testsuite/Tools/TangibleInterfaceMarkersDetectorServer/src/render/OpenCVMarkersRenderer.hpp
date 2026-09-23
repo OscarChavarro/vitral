@@ -20,9 +20,9 @@ public:
 private:
     void drawDetections(const cv::Mat& frame, zarray_t* detections);
 
-    MarkersModel* model_;
-    OpenCVHudRenderer* hudRenderer_;
-    cv::Mat preview_;
+    MarkersModel* model;
+    OpenCVHudRenderer* hudRenderer;
+    cv::Mat preview;
 };
 
 #endif

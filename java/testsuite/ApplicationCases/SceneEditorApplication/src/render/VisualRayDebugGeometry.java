@@ -29,7 +29,7 @@ public class VisualRayDebugGeometry
 {
     private final ApplicationModel model;
     private final Scene scene;
-    private final RendererConfiguration qualitySelectionVisualDebug;
+    private final RendererConfiguration rendererConfiguration;
     private final SimpleMaterial visualDebugMaterial;
 
     public VisualRayDebugGeometry(ApplicationModel model)
@@ -37,8 +37,8 @@ public class VisualRayDebugGeometry
         this.model = model;
         this.scene = model.getScene();
 
-        qualitySelectionVisualDebug = new RendererConfiguration();
-        qualitySelectionVisualDebug.setShadingType(
+        rendererConfiguration = new RendererConfiguration();
+        rendererConfiguration.setShadingType(
             RendererConfiguration.SHADING_TYPE_GOURAUD);
         visualDebugMaterial = scene.defaultMaterial();
     }
@@ -48,7 +48,7 @@ public class VisualRayDebugGeometry
     */
     public RendererConfiguration getRendererConfiguration()
     {
-        return qualitySelectionVisualDebug;
+        return rendererConfiguration;
     }
 
     /**
@@ -133,12 +133,12 @@ public class VisualRayDebugGeometry
             if ( level >= 1 ) {
                 // Draw normal
                 SimpleMaterial normalMaterial = visualDebugMaterial.withDiffuse(new ColorRgb(0.9, 0.9, 0.5));
-                addSegment(primitives, p, p.add(info.n.multiply(0.5)), false, 0.05, 0.2, normalMaterial);
+                addSegment(primitives, p, p.add(info.normal.multiply(0.5)), false, 0.05, 0.2, normalMaterial);
             }
             // Reflection ray
             Vector3Dd dd = ray.getDirection().multiply(-1);
             dd = dd.normalized();
-            Vector3Dd h = info.n.multiply(dd.dotProduct(info.n)).subtract(dd);
+            Vector3Dd h = info.normal.multiply(dd.dotProduct(info.normal)).subtract(dd);
             Ray subray = new Ray(p, dd.add(h.multiply(2)));
             subray = subray.withOrigin(
                 subray.getOrigin().add(subray.getDirection().multiply(VSDK.EPSILON*10.0)));

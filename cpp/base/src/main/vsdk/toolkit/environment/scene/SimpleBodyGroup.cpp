@@ -8,7 +8,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleBodyGroup.h"
 SimpleBodyGroup::SimpleBodyGroup()
-    : position(0, 0, 0), scale(1, 1, 1), rotation(), rotation_i(), name("")
+    : position(0, 0, 0), scale(1, 1, 1), rotation(), rotationInverse(), name("")
 {
 }
 
@@ -18,8 +18,8 @@ void SimpleBodyGroup::setName(const java::String& n) { name = n; }
 
 Matrix4x4d SimpleBodyGroup::getRotation() const { return rotation; }
 void SimpleBodyGroup::setRotation(const Matrix4x4d& r) { rotation = r.withoutTranslation(); }
-Matrix4x4d SimpleBodyGroup::getRotationInverse() const { return rotation_i; }
-void SimpleBodyGroup::setRotationInverse(const Matrix4x4d& r) { rotation_i = r; }
+Matrix4x4d SimpleBodyGroup::getRotationInverse() const { return rotationInverse; }
+void SimpleBodyGroup::setRotationInverse(const Matrix4x4d& value) { rotationInverse = value; }
 
 Vector3Dd SimpleBodyGroup::getPosition() const { return position; }
 void SimpleBodyGroup::setPosition(const Vector3Dd& p) { position = p; }
@@ -38,8 +38,8 @@ Ray* SimpleBodyGroup::doIntersectionFirstHit(const Ray& inputRay)
     Ray inOutRay = inputRay.withT(DBL_MAX);
 
     Ray myRay(
-        rotation_i.multiply(inOutRay.getOrigin().subtract(position)),
-        rotation_i.multiply(inOutRay.getDirection()),
+        rotationInverse.multiply(inOutRay.getOrigin().subtract(position)),
+        rotationInverse.multiply(inOutRay.getDirection()),
         inOutRay.getT());
 
     Ray* nearestHit = 0;
@@ -47,9 +47,9 @@ Ray* SimpleBodyGroup::doIntersectionFirstHit(const Ray& inputRay)
     for (long int i = 0; i < bodies.size(); i++) {
         if ( bodies[i] == 0 || bodies[i]->getGeometry() == 0 ) continue;
         RayHit hit;
-        if ( bodies[i]->getGeometry()->doIntersectionFirstHit(myRay, &hit) && hit.ray() != 0 ) {
-            if ( hit.ray()->getT() < inOutRay.getT() ) {
-                inOutRay = inOutRay.withT(hit.ray()->getT());
+        if ( bodies[i]->getGeometry()->doIntersectionFirstHit(myRay, &hit) && hit.getRay() != 0 ) {
+            if ( hit.getRay()->getT() < inOutRay.getT() ) {
+                inOutRay = inOutRay.withT(hit.getRay()->getT());
                 if ( nearestHit != 0 ) delete nearestHit;
                 nearestHit = new Ray(inOutRay);
             }

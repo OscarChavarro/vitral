@@ -52,8 +52,8 @@ public class ParallelRaytracer
     private ExecutorService executorService;
 
     private DepthBufferMode depthBufferMode;
-    private double depthRangeNear;
-    private double depthRangeFar;
+    private double openGlDepthRangeNear;
+    private double openGlDepthRangeFar;
     /// Depth buffer of the last `execute` call, reused while its size fits
     private ZBuffer depthBuffer;
 
@@ -76,8 +76,8 @@ public class ParallelRaytracer
         this.numberOfThreads = numberOfThreads;
         this.executorService = null;
         this.depthBufferMode = DepthBufferMode.NONE;
-        this.depthRangeNear = 0.0;
-        this.depthRangeFar = 1.0;
+        this.openGlDepthRangeNear = 0.0;
+        this.openGlDepthRangeFar = 1.0;
         this.depthBuffer = null;
     }
 
@@ -109,8 +109,8 @@ public class ParallelRaytracer
     */
     public synchronized void setOpenGlDepthRange(double near, double far)
     {
-        depthRangeNear = near;
-        depthRangeFar = far;
+        openGlDepthRangeNear = near;
+        openGlDepthRangeFar = far;
     }
 
     /**
@@ -118,7 +118,7 @@ public class ParallelRaytracer
     */
     public synchronized double getOpenGlDepthRangeNear()
     {
-        return depthRangeNear;
+        return openGlDepthRangeNear;
     }
 
     /**
@@ -126,7 +126,7 @@ public class ParallelRaytracer
     */
     public synchronized double getOpenGlDepthRangeFar()
     {
-        return depthRangeFar;
+        return openGlDepthRangeFar;
     }
 
     /**
@@ -191,7 +191,7 @@ public class ParallelRaytracer
                 }
                 outDepth = depthBuffer;
                 depthEncoder = new DepthBufferEncoder(depthBufferMode,
-                    sceneSnapshot.getCameraSnapshot(), depthRangeNear, depthRangeFar);
+                    sceneSnapshot.getCameraSnapshot(), openGlDepthRangeNear, openGlDepthRangeFar);
             }
         }
         execute(resultingImage, outDepth, depthEncoder, rendererConfiguration,
@@ -324,7 +324,7 @@ public class ParallelRaytracer
         long totalElements = 0;
 
         for ( RasterTileArea tile : generatedTiles ) {
-            totalElements += tile.getDy();
+            totalElements += tile.getHeight();
         }
         return totalElements;
     }
@@ -353,10 +353,10 @@ public class ParallelRaytracer
                     progressReporter,
                     depthBuffer,
                     depthEncoder,
-                    tile.getX0(),
-                    tile.getY0(),
-                    tile.getX1(),
-                    tile.getY1());
+                    tile.getStartX(),
+                    tile.getStartY(),
+                    tile.getEndX(),
+                    tile.getEndY());
             }
 
             return null;

@@ -2,7 +2,7 @@ import { FundamentalEntity } from "../../../../common/FundamentalEntity.js";
 import { Vertex2D } from "../../element/Vertex2D.js";
 export class _Polygon2DContour extends FundamentalEntity {
     public vertices: Vertex2D[] = [];
-    private exterior: _Polygon2DContour | null = null;
+    private exteriorContour: _Polygon2DContour | null = null;
     public fleetingFlag = false;
     public addVertex(x: number, y: number, r?: number, g?: number, b?: number) {
         this.vertices.push(r === undefined ? new Vertex2D(x, y) : new Vertex2D(x, y, r, g!, b!));
@@ -29,10 +29,10 @@ export class _Polygon2DContour extends FundamentalEntity {
         return (m[3]! - m[0]!) * (m[4]! - m[1]!);
     }
     public getExteriorContour() {
-        return this.exterior;
+        return this.exteriorContour;
     }
     public setExteriorContour(x: _Polygon2DContour | null) {
-        this.exterior = x;
+        this.exteriorContour = x;
     }
     public compareTo(x: _Polygon2DContour) {
         return Math.sign(this.calcMinMaxArea(false) - x.calcMinMaxArea(false));

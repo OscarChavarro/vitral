@@ -17,12 +17,12 @@ public class LuCpuStrategy implements DeterminantStrategy, InverseStrategy
     {
         MatrixAlgorithmsSupport.requireSquare(matrix);
         LuDecomposition lu = decompose(MatrixAlgorithmsSupport.toArray(matrix));
-        int n = lu.lu.length;
+        int n = lu.factors.length;
         double det = lu.pivotSign;
 
         int i;
         for ( i = 0; i < n; i++ ) {
-            det *= lu.lu[i][i];
+            det *= lu.factors[i][i];
         }
         return det;
     }
@@ -32,7 +32,7 @@ public class LuCpuStrategy implements DeterminantStrategy, InverseStrategy
     {
         MatrixAlgorithmsSupport.requireSquare(matrix);
         LuDecomposition lu = decompose(MatrixAlgorithmsSupport.toArray(matrix));
-        int n = lu.lu.length;
+        int n = lu.factors.length;
         double[][] inv = new double[n][n];
 
         int col;
@@ -105,25 +105,25 @@ public class LuCpuStrategy implements DeterminantStrategy, InverseStrategy
 
     private double[] solve(LuDecomposition lu, double[] b)
     {
-        int n = lu.lu.length;
+        int n = lu.factors.length;
         double[] x = new double[n];
         int i;
         for ( i = 0; i < n; i++ ) {
-            x[i] = b[lu.piv[i]];
+            x[i] = b[lu.pivots[i]];
         }
 
         int j;
         for ( i = 0; i < n; i++ ) {
             for ( j = 0; j < i; j++ ) {
-                x[i] -= lu.lu[i][j] * x[j];
+                x[i] -= lu.factors[i][j] * x[j];
             }
         }
 
         for ( i = n - 1; i >= 0; i-- ) {
             for ( j = i + 1; j < n; j++ ) {
-                x[i] -= lu.lu[i][j] * x[j];
+                x[i] -= lu.factors[i][j] * x[j];
             }
-            x[i] /= lu.lu[i][i];
+            x[i] /= lu.factors[i][i];
         }
 
         return x;
@@ -131,14 +131,14 @@ public class LuCpuStrategy implements DeterminantStrategy, InverseStrategy
 
     private static final class LuDecomposition
     {
-        private final double[][] lu;
-        private final int[] piv;
+        private final double[][] factors;
+        private final int[] pivots;
         private final int pivotSign;
 
         private LuDecomposition(double[][] lu, int[] piv, int pivotSign)
         {
-            this.lu = lu;
-            this.piv = piv;
+            this.factors = lu;
+            this.pivots = piv;
             this.pivotSign = pivotSign;
         }
     }

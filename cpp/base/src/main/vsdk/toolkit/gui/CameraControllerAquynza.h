@@ -29,7 +29,7 @@ private:
     Camera* camera;
     int oldMouseX;
     int oldMouseY;
-    double deltaMov;
+    double deltaMovement;
 
     double augmentLogarithmic(double val, double EPSILON);
     double diminishLogarithmic(double val, double EPSILON);

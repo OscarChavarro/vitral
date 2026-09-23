@@ -33,11 +33,11 @@ public class VisualRayDebugController
     */
     public boolean processKeyPressedEvent(KeyEvent event)
     {
-        if ( event.unicode_id == KeyEvent.KEY_NONE ) {
+        if ( event.unicodeId == KeyEvent.KEY_NONE ) {
             return false;
         }
 
-        switch ( event.unicode_id ) {
+        switch ( event.unicodeId ) {
           case '4':
             moveOrigin(-ORIGIN_STEP, 0, 0);
             return true;

@@ -1404,7 +1404,7 @@ public class Torus extends Solid
             inRay.getOrigin().x() + intT*inRay.getDirection().x(),
             inRay.getOrigin().y() + intT*inRay.getDirection().y(),
             inRay.getOrigin().z() + intT*inRay.getDirection().z());
-        outData.p = hitPoint;
+        outData.point = hitPoint;
         double r2=minorRadius*minorRadius;
         double R2=majorRadius*majorRadius;
         double hitNormSquared =
@@ -1412,7 +1412,7 @@ public class Torus extends Solid
             hitPoint.y()*hitPoint.y() +
             hitPoint.z()*hitPoint.z();
      
-        outData.n = new Vector3Dd(
+        outData.normal = new Vector3Dd(
             4 * hitPoint.x() * (hitNormSquared - r2 - R2),
             4 * hitPoint.y() * (hitNormSquared - r2 - R2),
             4 * hitPoint.z() * (hitNormSquared - r2 - R2) + 8 * R2 * hitPoint.z()

@@ -267,10 +267,10 @@ public:
                                 snapshot,
                                 0,
                                 0,
-                                tile.getX0(),
-                                tile.getY0(),
-                                tile.getX1(),
-                                tile.getY1());
+                                tile.getStartX(),
+                                tile.getStartY(),
+                                tile.getEndX(),
+                                tile.getEndY());
                         }
                     }
                     catch (...) {

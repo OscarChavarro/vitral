@@ -106,8 +106,8 @@ void PolyhedralBoundedSolid::setMaxFaceId(int v) { maxFaceId = v; }
 Ray* PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inOutRay)
 {
     RayHit hit(RayHit::DETAIL_NONE, true);
-    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != 0) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.getRay() != 0) {
+        return new Ray(*hit.getRay());
     }
     return 0;
 }
@@ -133,8 +133,8 @@ bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* ou
 
         RayHit planeHit;
         bool hitsPlane = containingPlane->doIntersectionFirstHit(inRay, &planeHit);
-        if (hitsPlane && planeHit.ray() != 0 && planeHit.ray()->getT() < minT) {
-            Ray hit = *(planeHit.ray());
+        if (hitsPlane && planeHit.getRay() != 0 && planeHit.getRay()->getT() < minT) {
+            Ray hit = *(planeHit.getRay());
             hit = hit.withDirection(hit.getDirection().normalized());
             Vector3Dd p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
             int pos = face->testPointInside(

@@ -4,12 +4,12 @@ import { WebGLShaderPreprocessor } from "../render/webgl/WebGLShaderPreprocessor
 const SHADER_BASE_URL = "/etc/glslShaders";
 
 export class WebGLSimpleCorridorSample {
-    private readonly a = 6;
-    private readonly na = 6;
-    private readonly b = 20;
-    private readonly nb = 20;
-    private readonly c = 4;
-    private readonly nc = 4;
+    private readonly width = 6;
+    private readonly widthTiles = 6;
+    private readonly length = 20;
+    private readonly lengthTiles = 20;
+    private readonly height = 4;
+    private readonly heightTiles = 4;
     private readonly interSpace = 0.05;
 
     private initialized = false;
@@ -197,9 +197,9 @@ export class WebGLSimpleCorridorSample {
             this.appendTilesLong(positions, colors, 0.5, 0.5, 0.9, 90 * i, false, 0);
         }
 
-        this.appendTilesCenter(positions, colors, 0.0, 0.0, 1.0, 0, true, this.c);
+        this.appendTilesCenter(positions, colors, 0.0, 0.0, 1.0, 0, true, this.height);
         for (let i = 0; i < 4; i++) {
-            this.appendTilesLong(positions, colors, 0.0, 0.0, 1.0, 90 * i, true, this.c);
+            this.appendTilesLong(positions, colors, 0.0, 0.0, 1.0, 90 * i, true, this.height);
         }
 
         for (let i = 0; i < 4; i++) {
@@ -237,13 +237,13 @@ export class WebGLSimpleCorridorSample {
         flipYZ: boolean,
         translateZ: number,
     ): void {
-        const da = this.a / this.na;
+        const da = this.width / this.widthTiles;
         const epsilon = 0.005;
 
-        for (let i = 0; i < this.na; i++) {
-            const x = -this.a / 2 + i * da;
-            for (let j = 0; j < this.na; j++) {
-                const y = -this.a / 2 + j * da;
+        for (let i = 0; i < this.widthTiles; i++) {
+            const x = -this.width / 2 + i * da;
+            for (let j = 0; j < this.widthTiles; j++) {
+                const y = -this.width / 2 + j * da;
                 this.addQuad(
                     positions,
                     colors,
@@ -280,14 +280,14 @@ export class WebGLSimpleCorridorSample {
         flipYZ: boolean,
         translateZ: number,
     ): void {
-        const da = this.a / this.na;
-        const db = this.b / this.nb;
+        const da = this.width / this.widthTiles;
+        const db = this.length / this.lengthTiles;
         const epsilon = 0.001;
 
-        for (let i = 0; i < this.nb; i++) {
-            const x = -this.a / 2 - this.b + i * db;
-            for (let j = 0; j < this.na; j++) {
-                const y = -this.a / 2 + j * da;
+        for (let i = 0; i < this.lengthTiles; i++) {
+            const x = -this.width / 2 - this.length + i * db;
+            for (let j = 0; j < this.widthTiles; j++) {
+                const y = -this.width / 2 + j * da;
                 this.addQuad(
                     positions,
                     colors,
@@ -322,29 +322,29 @@ export class WebGLSimpleCorridorSample {
         bColor: number,
         rotZDeg: number,
     ): void {
-        const da = this.a / this.na;
-        const dc = this.c / this.nc;
+        const da = this.width / this.widthTiles;
+        const dc = this.height / this.heightTiles;
 
-        for (let i = 0; i < this.nc; i++) {
+        for (let i = 0; i < this.heightTiles; i++) {
             const z = i * dc;
-            for (let j = 0; j < this.na; j++) {
-                const y = -this.a / 2 + j * da;
+            for (let j = 0; j < this.widthTiles; j++) {
+                const y = -this.width / 2 + j * da;
                 this.addQuad(
                     positions,
                     colors,
                     r,
                     g,
                     bColor,
-                    -this.a / 2 - this.b,
+                    -this.width / 2 - this.length,
                     y + this.interSpace / 2,
                     z + dc - this.interSpace / 2,
-                    -this.a / 2 - this.b,
+                    -this.width / 2 - this.length,
                     y + this.interSpace / 2,
                     z + this.interSpace / 2,
-                    -this.a / 2 - this.b,
+                    -this.width / 2 - this.length,
                     y + da - this.interSpace / 2,
                     z + this.interSpace / 2,
-                    -this.a / 2 - this.b,
+                    -this.width / 2 - this.length,
                     y + da - this.interSpace / 2,
                     z + dc - this.interSpace / 2,
                     rotZDeg,
@@ -363,29 +363,29 @@ export class WebGLSimpleCorridorSample {
         bColor: number,
         rotZDeg: number,
     ): void {
-        const db = this.b / this.nb;
-        const dc = this.c / this.nc;
+        const db = this.length / this.lengthTiles;
+        const dc = this.height / this.heightTiles;
 
-        for (let i = 0; i < this.nc; i++) {
+        for (let i = 0; i < this.heightTiles; i++) {
             const z = i * dc;
-            for (let j = 0; j < this.nb; j++) {
-                const y = this.a / 2 + j * db;
+            for (let j = 0; j < this.lengthTiles; j++) {
+                const y = this.width / 2 + j * db;
                 this.addQuad(
                     positions,
                     colors,
                     r,
                     g,
                     bColor,
-                    -this.a / 2,
+                    -this.width / 2,
                     y + this.interSpace / 2,
                     z + dc - this.interSpace / 2,
-                    -this.a / 2,
+                    -this.width / 2,
                     y + this.interSpace / 2,
                     z + this.interSpace / 2,
-                    -this.a / 2,
+                    -this.width / 2,
                     y + db - this.interSpace / 2,
                     z + this.interSpace / 2,
-                    -this.a / 2,
+                    -this.width / 2,
                     y + db - this.interSpace / 2,
                     z + dc - this.interSpace / 2,
                     rotZDeg,
@@ -404,12 +404,12 @@ export class WebGLSimpleCorridorSample {
         bColor: number,
         rotZDeg: number,
     ): void {
-        const db = this.b / this.nb;
-        const dc = this.c / this.nc;
+        const db = this.length / this.lengthTiles;
+        const dc = this.height / this.heightTiles;
 
-        for (let i = 0; i < this.nb; i++) {
-            const x = -this.a / 2 - this.b + i * db;
-            for (let j = 0; j < this.nc; j++) {
+        for (let i = 0; i < this.lengthTiles; i++) {
+            const x = -this.width / 2 - this.length + i * db;
+            for (let j = 0; j < this.heightTiles; j++) {
                 const z = j * dc;
                 this.addQuad(
                     positions,
@@ -418,16 +418,16 @@ export class WebGLSimpleCorridorSample {
                     g,
                     bColor,
                     x + this.interSpace / 2,
-                    this.a / 2,
+                    this.width / 2,
                     z + this.interSpace / 2,
                     x + db - this.interSpace / 2,
-                    this.a / 2,
+                    this.width / 2,
                     z + this.interSpace / 2,
                     x + db - this.interSpace / 2,
-                    this.a / 2,
+                    this.width / 2,
                     z + dc - this.interSpace / 2,
                     x + this.interSpace / 2,
-                    this.a / 2,
+                    this.width / 2,
                     z + dc - this.interSpace / 2,
                     rotZDeg,
                     false,

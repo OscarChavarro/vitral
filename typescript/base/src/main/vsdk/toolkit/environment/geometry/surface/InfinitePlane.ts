@@ -103,8 +103,8 @@ export class InfinitePlane extends HalfSpace<Ray, RayHit> {
         return q > t ? InfinitePlane.OUTSIDE : q < -t ? -InfinitePlane.INSIDE : InfinitePlane.LIMIT;
     }
     public override doExtraInformation(ray: Ray, t: number, out: RayHit) {
-        out.p = ray.getOrigin().add(ray.getDirection().multiply(t));
-        out.n = this.getNormal();
+        out.point = ray.getOrigin().add(ray.getDirection().multiply(t));
+        out.normal = this.getNormal();
     }
     public getMinMax() {
         return new Float64Array([-Infinity, -Infinity, -Infinity, Infinity, Infinity, Infinity]);

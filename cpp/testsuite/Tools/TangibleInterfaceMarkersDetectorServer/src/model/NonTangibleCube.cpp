@@ -4,16 +4,16 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "model/NonTangibleCube.hpp"
-NonTangibleCube::NonTangibleCube() : hasMapping_(false) {}
+NonTangibleCube::NonTangibleCube() : hasMapping(false) {}
 
 void NonTangibleCube::mapMarker(int markerId, int cubeId) {
-    markerToCube_.put(markerId, cubeId);
-    hasMapping_ = true;
+    markerToCube.put(markerId, cubeId);
+    hasMapping = true;
 }
 
 bool NonTangibleCube::parseMapping(const java::String& spec) {
-    markerToCube_.clear();
-    hasMapping_ = false;
+    markerToCube.clear();
+    hasMapping = false;
 
     int pos = 0;
     while (pos < spec.length()) {
@@ -40,11 +40,11 @@ bool NonTangibleCube::parseMapping(const java::String& spec) {
         pos = semicolon + 1;
     }
 
-    return hasMapping_;
+    return hasMapping;
 }
 
 int NonTangibleCube::cubeOf(int markerId) const {
-    return markerToCube_.getOrDefault(markerId, -1);
+    return markerToCube.getOrDefault(markerId, -1);
 }
 
 java::ArrayList<CubePose> NonTangibleCube::update(const java::ArrayList<MarkerPose>& markers,
@@ -58,7 +58,7 @@ java::ArrayList<CubePose> NonTangibleCube::update(const java::ArrayList<MarkerPo
         if (m.viewDot < viewAngleCosThreshold) continue;
 
         int cubeId = -1;
-        if (hasMapping_) {
+        if (hasMapping) {
             cubeId = cubeOf(m.markerId);
             if (cubeId < 0) continue;
         } else {

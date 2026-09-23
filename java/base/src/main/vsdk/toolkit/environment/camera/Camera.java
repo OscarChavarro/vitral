@@ -38,7 +38,7 @@ public class Camera extends Entity
     private Vector3Dd up;
     private Vector3Dd front;
     private Vector3Dd left;
-    private Vector3Dd eyePosition;
+    private Vector3Dd position;
     private double focalDistance;
     private int projectionMode;
     
@@ -70,13 +70,13 @@ public class Camera extends Entity
     private double viewportYSize;
 
     // Private values which are preprocessed to speed up calculations
-    private Vector3Dd dx, dy, _dir, upWithScale, rightWithScale;
+    private Vector3Dd frontWithScale, upWithScale, rightWithScale;
     private Matrix4x4d normalizingTransformation;
     private final AtomicLong modificationVersion = new AtomicLong();
     
     public Camera() 
     {
-        eyePosition = new Vector3Dd(0,-5,1);
+        position = new Vector3Dd(0,-5,1);
         
         up = new Vector3Dd(0,0,1);
         front=new Vector3Dd(0,1,0);
@@ -97,7 +97,7 @@ public class Camera extends Entity
 
     public Camera(Camera b)
     {
-        eyePosition = new Vector3Dd(b.eyePosition);
+        position = new Vector3Dd(b.position);
         
         up = new Vector3Dd(b.up);
         front=new Vector3Dd(b.front);
@@ -155,12 +155,12 @@ public class Camera extends Entity
 
     public Vector3Dd getPosition()
     {
-        return eyePosition;
+        return position;
     }
 
-    public void setPosition(Vector3Dd eyePosition)
+    public void setPosition(Vector3Dd position)
     {
-        this.eyePosition = new Vector3Dd(eyePosition);
+        this.position = new Vector3Dd(position);
         markModified();
     }
     
@@ -169,7 +169,7 @@ public class Camera extends Entity
         Vector3Dd partial;
         Vector3Dd result;
         partial = front.multiply(focalDistance);
-        result = eyePosition.add(partial);
+        result = position.add(partial);
         return result;
     }
 
@@ -185,7 +185,7 @@ public class Camera extends Entity
     {
         Vector3Dd partial;
 
-        partial = focusedPosition.subtract(eyePosition);
+        partial = focusedPosition.subtract(position);
         front = new Vector3Dd(partial);
         focalDistance = front.length();
         front = front.normalized();
@@ -212,7 +212,7 @@ public class Camera extends Entity
     */
     public void setFocusedPositionMaintainingOrthogonality(Vector3Dd focusedPosition)
     {
-        front = focusedPosition.subtract(eyePosition);
+        front = focusedPosition.subtract(position);
         focalDistance = front.length();
         front = front.normalized();
 
@@ -364,7 +364,7 @@ public class Camera extends Entity
         front = front.normalized();
 
         double fovFactor = viewportXSize / viewportYSize;
-        _dir = front.multiply(0.5);
+        frontWithScale = front.multiply(0.5);
         upWithScale = up.multiply(Math.tan(Math.toRadians(fov/2)));
         rightWithScale = left.multiply(-fovFactor*Math.tan(Math.toRadians(fov/2)));
 
@@ -381,7 +381,7 @@ public class Camera extends Entity
         Matrix4x4d T1 = new Matrix4x4d();
 
         // Warning: near plane clipping
-        VRP = eyePosition.add(front.multiply(nearPlaneDistance));
+        VRP = position.add(front.multiply(nearPlaneDistance));
         T1 = T1.translation(VRP.multiply(-1));
 
         // 2. Rotate the "VRC" coordinate system such as the front axis
@@ -447,7 +447,7 @@ public class Camera extends Entity
     {
         updateViewportResize(viewportXSize, viewportYSize);
         return new CameraSnapshot(
-            eyePosition,
+            position,
             front,
             left,
             up,
@@ -455,7 +455,7 @@ public class Camera extends Entity
             orthogonalZoom,
             this.viewportXSize,
             this.viewportYSize,
-            _dir,
+            frontWithScale,
             upWithScale,
             rightWithScale,
             nearPlaneDistance,
@@ -472,7 +472,7 @@ public class Camera extends Entity
     visualization (i.e. ray casting, ray tracing, radiosity), object selection
     and others (simulation, colision detection, visual debugging, etc.). As it
     is important to improve the efficiency of this method, some precalculated
-    values are stored in the class attributes `_dir`, `upWithScale` and
+    values are stored in the class attributes `frontWithScale`, `upWithScale` and
     `rightWithScale`, which values are stored in the `updateVectors`
     method, leading to the following precondition:
 
@@ -499,20 +499,20 @@ public class Camera extends Entity
             double duScale = (-fovFactor) * (2*u/orthogonalZoom);
             double dvScale = 2*v/orthogonalZoom;
             Vector3Dd origin = new Vector3Dd(
-                eyePosition.x() + left.x()*duScale + up.x()*dvScale,
-                eyePosition.y() + left.y()*duScale + up.y()*dvScale,
-                eyePosition.z() + left.z()*duScale + up.z()*dvScale);
+                position.x() + left.x()*duScale + up.x()*dvScale,
+                position.y() + left.y()*duScale + up.y()*dvScale,
+                position.z() + left.z()*duScale + up.z()*dvScale);
             return new Ray(origin, front);
         }
 
         // 2. Default behavior is to assume planar perspective projection
         Vector3Dd direction = new Vector3Dd(
-            rightWithScale.x()*u + upWithScale.x()*v + _dir.x(),
-            rightWithScale.y()*u + upWithScale.y()*v + _dir.y(),
-            rightWithScale.z()*u + upWithScale.z()*v + _dir.z());
+            rightWithScale.x()*u + upWithScale.x()*v + frontWithScale.x(),
+            rightWithScale.y()*u + upWithScale.y()*v + frontWithScale.y(),
+            rightWithScale.z()*u + upWithScale.z()*v + frontWithScale.z());
 
         // 3. Build up and return a ray with origin in the eye position
-        return new Ray(eyePosition, direction);
+        return new Ray(position, direction);
     }
 
     public double getOrthogonalZoom()
@@ -604,7 +604,7 @@ public class Camera extends Entity
         R1 = getRotation();
         R1 = R1.invert();
 
-        T1 = T1.translation(-eyePosition.x(), -eyePosition.y(), -eyePosition.z());
+        T1 = T1.translation(-position.x(), -position.y(), -position.z());
         R_adic2 = R_adic2.axisRotation(Math.toRadians(90), 0, 0, 1);
         R_adic1 = R_adic1.axisRotation(Math.toRadians(-90), 1, 0, 0);
 
@@ -650,8 +650,8 @@ public class Camera extends Entity
             msg = msg + "  - UNKNOWN Camera projection mode!\n";
         }
 
-        msg = msg + "  - eyePosition(x, y, z) = " + eyePosition + "\n";
-        msg = msg + "  - focusedPointPosition(x, y, z) = " + eyePosition.add(front.multiply(focalDistance)) + "\n";
+        msg = msg + "  - eyePosition(x, y, z) = " + position + "\n";
+        msg = msg + "  - focusedPointPosition(x, y, z) = " + position.add(front.multiply(focalDistance)) + "\n";
 
         //------------------------------------------------------------
         Matrix4x4d R, TP;
@@ -681,7 +681,7 @@ public class Camera extends Entity
         msg = msg + "    . Vector LEFT = " + left + " (length " + VSDK.formatDouble(front.length()) + ")\n";
         msg = msg + "  - Reference frame with scales:\n";
         msg = msg + "    . Vector UP' = " + upWithScale + " (length " + VSDK.formatDouble(upWithScale.length()) + ")\n";
-        msg = msg + "    . Vector FRONT' = " + _dir + " (length " + VSDK.formatDouble(_dir.length()) + ")\n";
+        msg = msg + "    . Vector FRONT' = " + frontWithScale + " (length " + VSDK.formatDouble(frontWithScale.length()) + ")\n";
         msg = msg + "    . Vector RIGHT' = " + rightWithScale + " (length " + VSDK.formatDouble(rightWithScale.length()) + ")\n";
         msg = msg + "  - fov = " + VSDK.formatDouble(fov) + "\n";
         msg = msg + "  - nearPlaneDistance = " + VSDK.formatDouble(nearPlaneDistance) + "\n";
@@ -757,16 +757,16 @@ public class Camera extends Entity
             Vector3Dd right = left.multiply(-1);
             right = right.normalized();
             if ( u > 0 ) {
-                return new InfinitePlane(right, eyePosition.add(right.multiply(u)));
+                return new InfinitePlane(right, position.add(right.multiply(u)));
             }
             else {
-                return new InfinitePlane(left, eyePosition.add(right.multiply(u)));
+                return new InfinitePlane(left, position.add(right.multiply(u)));
             }
         }
 
         Vector3Dd du = rightWithScale.multiply(u);
         Vector3Dd f = new Vector3Dd(front);
-        Vector3Dd dir = du.add(_dir);
+        Vector3Dd dir = du.add(frontWithScale);
 
         f = f.normalized();
 
@@ -788,7 +788,7 @@ public class Camera extends Entity
         // 3. Build the plane and return
         InfinitePlane plane;
 
-        plane = new InfinitePlane(n, eyePosition);
+        plane = new InfinitePlane(n, position);
 
         return plane;
     }
@@ -827,17 +827,17 @@ public class Camera extends Entity
             Vector3Dd up2 = new Vector3Dd(up);
             up = up.normalized();
             if ( v > 0 ) {
-                return new InfinitePlane(up, eyePosition.add(up.multiply(v)));
+                return new InfinitePlane(up, position.add(up.multiply(v)));
             }
             else {
                 Vector3Dd down = up.multiply(-1);
-                return new InfinitePlane(down, eyePosition.add(up.multiply(v)));
+                return new InfinitePlane(down, position.add(up.multiply(v)));
             }
         }
 
         Vector3Dd dv = upWithScale.multiply(v);
         Vector3Dd f = new Vector3Dd(front);
-        Vector3Dd dir = dv.add(_dir);
+        Vector3Dd dir = dv.add(frontWithScale);
 
         f = f.normalized();
 
@@ -859,7 +859,7 @@ public class Camera extends Entity
         // 3. Build the plane and return
         InfinitePlane plane;
 
-        plane = new InfinitePlane(n, eyePosition);
+        plane = new InfinitePlane(n, position);
 
         return plane;
     }
@@ -881,7 +881,7 @@ public class Camera extends Entity
         f = f.normalized();
         Vector3Dd back = f.multiply(-1);
         f = f.multiply(nearPlaneDistance);
-        Vector3Dd c = eyePosition.add(f);
+        Vector3Dd c = position.add(f);
 
         plane = new InfinitePlane(back, c);
 
@@ -904,7 +904,7 @@ public class Camera extends Entity
         Vector3Dd f = new Vector3Dd(front);
         f = f.normalized();
         f = f.multiply(farPlaneDistance);
-        Vector3Dd c = eyePosition.add(f);
+        Vector3Dd c = position.add(f);
         plane = new InfinitePlane(front, c);
 
         return plane;
@@ -1557,11 +1557,9 @@ public class Camera extends Entity
         this.up = other.up;
         this.front = other.front;
         this.left = other.left;
-        this.eyePosition = other.eyePosition;
+        this.position = other.position;
         this.name = other.name;
-        this.dx = other.dx;
-        this.dy = other.dy;
-        this._dir = other._dir;
+        this.frontWithScale = other.frontWithScale;
         this.upWithScale = other.upWithScale;
         this.rightWithScale = other.rightWithScale;
         this.normalizingTransformation = other.normalizingTransformation;

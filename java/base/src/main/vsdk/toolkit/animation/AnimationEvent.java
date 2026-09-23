@@ -1,19 +1,19 @@
 package vsdk.toolkit.animation;
 
 public class AnimationEvent {
-    private double t;
+    private double time;
 
     /**
-    @return the t
+    @return the time of the event
     */
-    public double getT() {
-        return t;
+    public double getTime() {
+        return time;
     }
 
     /**
-    @param t the t to set
+    @param value the time of the event
     */
-    public void setT(double t) {
-        this.t = t;
+    public void setTime(double value) {
+        this.time = value;
     }
 }

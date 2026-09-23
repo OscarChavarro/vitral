@@ -77,7 +77,7 @@ class RotateGizmoInteractionTechniqueTest
     {
         KeyEvent event = new KeyEvent();
 
-        event.unicode_id = unicode;
+        event.unicodeId = unicode;
         return event;
     }
 

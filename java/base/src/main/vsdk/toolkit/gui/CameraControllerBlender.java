@@ -63,7 +63,7 @@ public class CameraControllerBlender extends CameraController {
         double farPlaneDistance;
 
         // Internal variables to control the interaction
-        char unicode_id;
+        char unicodeId;
         int keycode;
         double deltaMov = 100.0;
         double angleInc;
@@ -89,7 +89,7 @@ public class CameraControllerBlender extends CameraController {
         farPlaneDistance = camera.getFarPlaneDistance();
 
         // 2. Calculate variables used for interaction manipulation
-        unicode_id = keyEvent.unicode_id;
+        unicodeId = keyEvent.unicodeId;
         keycode = keyEvent.keycode;
         mask = keyEvent.modifierMask;
 
@@ -104,7 +104,7 @@ public class CameraControllerBlender extends CameraController {
         else angleInc = Math.toRadians(0.1);
 
         // 3. Event processing: update the copy of the camera's internal parameters
-//        if ( unicode_id == keyEvent.CHAR_UNDEFINED ) {
+//        if ( unicodeId == keyEvent.CHAR_UNDEFINED ) {
 
             switch ( keycode ) {
               case KeyEvent.KEY_X:
@@ -271,7 +271,7 @@ public class CameraControllerBlender extends CameraController {
 /*
         }
         else {
-            switch ( unicode_id ) {
+            switch ( unicodeId ) {
               // Position
               case 'y':
                 eyePosition.y -= deltaMov; focusedPosition.y -= deltaMov;

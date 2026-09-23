@@ -13,39 +13,39 @@ public:
 
     CommandLineOptions(int argc, char** argv);
 
-    Action getAction() const { return action_; }
+    Action getAction() const { return action; }
 
-    int getPort() const { return port_; }
-    int getCameraIndex() const { return cameraIndex_; }
-    double getMarkerSize() const { return markerSize_; }
-    const java::String& getCalibFile() const { return calibFile_; }
-    double getDecisionMarginThreshold() const { return decisionMarginThreshold_; }
-    double getViewAngleCosThreshold() const { return viewAngleCosThreshold_; }
-    int getStreamHz() const { return streamHz_; }
-    bool isDebugMode() const { return debugMode_; }
-    const java::String& getDebugDir() const { return debugDir_; }
-    bool isPreviewMode() const { return previewMode_; }
-    bool isMappingValid() const { return mappingValid_; }
-    const char* getProgramName() const { return programName_; }
+    int getPort() const { return port; }
+    int getCameraIndex() const { return cameraIndex; }
+    double getMarkerSize() const { return markerSize; }
+    const java::String& getCalibFile() const { return calibFile; }
+    double getDecisionMarginThreshold() const { return decisionMarginThreshold; }
+    double getViewAngleCosThreshold() const { return viewAngleCosThreshold; }
+    int getStreamHz() const { return streamHz; }
+    bool isDebugMode() const { return debugMode; }
+    const java::String& getDebugDir() const { return debugDir; }
+    bool isPreviewMode() const { return previewMode; }
+    bool isMappingValid() const { return mappingValid; }
+    const char* getProgramName() const { return programName; }
 
 private:
     void parse(int argc, char** argv);
     static void showHelp(const char* progName);
     static void listCameras();
 
-    Action action_;
-    int port_;
-    int cameraIndex_;
-    double markerSize_;
-    java::String calibFile_;
-    double decisionMarginThreshold_;
-    double viewAngleCosThreshold_;
-    int streamHz_;
-    bool debugMode_;
-    java::String debugDir_;
-    bool previewMode_;
-    bool mappingValid_;
-    const char* programName_;
+    Action action;
+    int port;
+    int cameraIndex;
+    double markerSize;
+    java::String calibFile;
+    double decisionMarginThreshold;
+    double viewAngleCosThreshold;
+    int streamHz;
+    bool debugMode;
+    java::String debugDir;
+    bool previewMode;
+    bool mappingValid;
+    const char* programName;
 };
 
 #endif

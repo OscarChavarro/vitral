@@ -59,15 +59,15 @@ struct ReaderPlyHeader {
 };
 
 struct ReaderPlyTriangleIndices {
-    int a;
-    int b;
-    int c;
+    int point0;
+    int point1;
+    int point2;
 
-    ReaderPlyTriangleIndices() : a(0), b(0), c(0)
+    ReaderPlyTriangleIndices() : point0(0), point1(0), point2(0)
     {
     }
 
-    ReaderPlyTriangleIndices(int inA, int inB, int inC) : a(inA), b(inB), c(inC)
+    ReaderPlyTriangleIndices(int inA, int inB, int inC) : point0(inA), point1(inB), point2(inC)
     {
     }
 };
@@ -516,10 +516,10 @@ public:
         out->reserve(triangles->size());
         for ( long int i = 0; i < triangles->size(); i++ ) {
             const ReaderPlyTriangleIndices& t = (*triangles)[i];
-            if ( t.a >= 0 && t.a < vertexCount &&
-                 t.b >= 0 && t.b < vertexCount &&
-                 t.c >= 0 && t.c < vertexCount ) {
-                out->add(Triangle(t.a, t.b, t.c));
+            if ( t.point0 >= 0 && t.point0 < vertexCount &&
+                 t.point1 >= 0 && t.point1 < vertexCount &&
+                 t.point2 >= 0 && t.point2 < vertexCount ) {
+                out->add(Triangle(t.point0, t.point1, t.point2));
             }
         }
         return out;

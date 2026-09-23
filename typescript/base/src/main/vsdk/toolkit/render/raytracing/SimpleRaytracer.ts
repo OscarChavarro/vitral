@@ -322,9 +322,9 @@ export class SimpleRaytracer extends RenderingElement {
                 const reflectZ: number = twoT * surfaceNormalZ - viewZ;
                 const reflect: Vector3Dd = new Vector3Dd(reflectX, reflectY, reflectZ);
                 const poffset: Vector3Dd = new Vector3Dd(
-                    info.p.x() + VSDK.EPSILON * reflectX,
-                    info.p.y() + VSDK.EPSILON * reflectY,
-                    info.p.z() + VSDK.EPSILON * reflectZ,
+                    info.point.x() + VSDK.EPSILON * reflectX,
+                    info.point.y() + VSDK.EPSILON * reflectY,
+                    info.point.z() + VSDK.EPSILON * reflectZ,
                 );
                 RaytraceStatistics.recordReflectionRay();
                 const reflected_ray: Ray = new Ray(poffset, reflect);
@@ -343,7 +343,7 @@ export class SimpleRaytracer extends RenderingElement {
                     const nearestObject: SimpleBody = objects.get(nearestObjectIndex);
                     const objectData: _SceneObjectRenderData = sceneRenderCache.objectData(nearestObjectIndex);
                     const subInfo: RayHit = workspace.shadingHits[recursionLevel + 1]!;
-                    const reflectedHitRay: Ray = reflected_ray.withT(reflectedHit.hitDistance());
+                    const reflectedHitRay: Ray = reflected_ray.withT(reflectedHit.getHitDistance());
 
                     this.prepareSurfaceHit(nearestObject, objectData, reflectedHitRay, subInfo);
                     const rcolor: ColorRgb = this.evaluateIlluminationModel(
@@ -413,7 +413,7 @@ export class SimpleRaytracer extends RenderingElement {
             candidateHit.resetForDistanceOnly();
             RaytraceStatistics.recordObjectIntersectionTest();
             if (gi.doIntersectionFirstHit(inRay, candidateHit)) {
-                const hitDistance: number = candidateHit.hitDistance();
+                const hitDistance: number = candidateHit.getHitDistance();
                 if (hitDistance < nearestDistance && hitDistance > VSDK.EPSILON) {
                     nearestDistance = hitDistance;
                     nearestObjectIndex = i;
@@ -456,7 +456,7 @@ export class SimpleRaytracer extends RenderingElement {
             //------------------------------------------------------------
             const nearestObject: SimpleBody = inSimpleBodiesArray.get(nearestObjectIndex);
             const objectData: _SceneObjectRenderData = sceneRenderCache.objectData(nearestObjectIndex);
-            const primaryHitRay: Ray = inRay.withT(hitInfo.hitDistance());
+            const primaryHitRay: Ray = inRay.withT(hitInfo.getHitDistance());
             const shadingInfo: RayHit = workspace.shadingHits[0]!;
             this.prepareSurfaceHit(nearestObject, objectData, primaryHitRay, shadingInfo);
 
@@ -657,10 +657,10 @@ export class SimpleRaytracer extends RenderingElement {
         }
         while ((tile = pendingTiles.poll()) !== undefined) {
             const tileImage: Image = tile.getImage();
-            const tileX0: number = tile.getX0();
-            const tileY0: number = tile.getY0();
-            const tileX1: number = tileX0 + tile.getDx();
-            const tileY1: number = tileY0 + tile.getDy();
+            const tileX0: number = tile.getStartX();
+            const tileY0: number = tile.getStartY();
+            const tileX1: number = tileX0 + tile.getWidth();
+            const tileY1: number = tileY0 + tile.getHeight();
 
             for (y = tileY0; y < tileY1; y++) {
                 SimpleRaytracer.assertSceneUnmodifiedDuringRender(initialBodyVersions, inSimpleBodiesArray);
@@ -687,7 +687,7 @@ export class SimpleRaytracer extends RenderingElement {
                             depthEncoder.encode(
                                 rayo.getOrigin(),
                                 rayo.getDirection(),
-                                workspace.nearestHit.hitDistance(),
+                                workspace.nearestHit.getHitDistance(),
                             ),
                         );
                     }

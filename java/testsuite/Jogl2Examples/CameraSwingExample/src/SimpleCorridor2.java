@@ -2,22 +2,22 @@ import com.jogamp.opengl.GL2;
 
 public class SimpleCorridor2
 {
-    private double a;
-    private int na;
-    private double b;
-    private int nb;
-    private double c;
-    private int nc;
+    private double width;
+    private int widthTiles;
+    private double length;
+    private int lengthTiles;
+    private double height;
+    private int heightTiles;
     private double interSpace;
 
     public SimpleCorridor2()
     {
-        a = 6;
-        na = 6;
-        b = 20;
-        nb = 20;
-        c = 4;
-        nc = 4;
+        width = 6;
+        widthTiles = 6;
+        length = 20;
+        lengthTiles = 20;
+        height = 4;
+        heightTiles = 4;
         interSpace = 0.05;
     }
 
@@ -29,12 +29,12 @@ public class SimpleCorridor2
         int i;
         int j;
 
-        da = a / ((double)na);
+        da = width / ((double)widthTiles);
 
         gl.glNormal3d(0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
-        for ( x = -a/2, i = 0; i < na; i++, x += da ) {
-            for ( y = -a/2, j = 0; j < na; j++, y += da ) {
+        for ( x = -width/2, i = 0; i < widthTiles; i++, x += da ) {
+            for ( y = -width/2, j = 0; j < widthTiles; j++, y += da ) {
                 gl.glVertex3d(x+interSpace/2, y+interSpace/2, -EPSILON);
                 gl.glVertex3d(x+da-interSpace/2, y+interSpace/2, -EPSILON);
                 gl.glVertex3d(x+da-interSpace/2, y+da-interSpace/2, -EPSILON);
@@ -53,13 +53,13 @@ public class SimpleCorridor2
         int i;
         int j;
 
-        da = a / ((double)na);
-        db = b / ((double)nb);
+        da = width / ((double)widthTiles);
+        db = length / ((double)lengthTiles);
 
         gl.glNormal3d(0, 0, 1);
         gl.glBegin(gl.GL_QUADS);
-        for ( x = -a/2 - b, i = 0; i < nb; i++, x += db ) {
-            for ( y = -a/2, j = 0; j < na; j++, y += da ) {
+        for ( x = -width/2 - length, i = 0; i < lengthTiles; i++, x += db ) {
+            for ( y = -width/2, j = 0; j < widthTiles; j++, y += da ) {
                 gl.glVertex3d(x+interSpace/2, y+interSpace/2, -EPSILON);
                 gl.glVertex3d(x+da-interSpace/2, y+interSpace/2, -EPSILON);
                 gl.glVertex3d(x+da-interSpace/2, y+da-interSpace/2, -EPSILON);
@@ -74,17 +74,17 @@ public class SimpleCorridor2
         double y, z, da, dc;
         int i, j;
 
-        da = a / ((double)na);
-        dc = c / ((double)nc);
+        da = width / ((double)widthTiles);
+        dc = height / ((double)heightTiles);
 
         gl.glNormal3d(1, 0, 0);
         gl.glBegin(gl.GL_QUADS);
-        for ( z = 0, i = 0; i < nc; i++, z += dc ) {
-            for ( y = -a/2, j = 0; j < na; j++, y += da ) {
-                gl.glVertex3d(-a/2-b, y+interSpace/2, z+dc-interSpace/2);
-                gl.glVertex3d(-a/2-b, y+interSpace/2, z+interSpace/2);
-                gl.glVertex3d(-a/2-b, y+da-interSpace/2, z+interSpace/2);
-                gl.glVertex3d(-a/2-b, y+da-interSpace/2, z+dc-interSpace/2);
+        for ( z = 0, i = 0; i < heightTiles; i++, z += dc ) {
+            for ( y = -width/2, j = 0; j < widthTiles; j++, y += da ) {
+                gl.glVertex3d(-width/2-length, y+interSpace/2, z+dc-interSpace/2);
+                gl.glVertex3d(-width/2-length, y+interSpace/2, z+interSpace/2);
+                gl.glVertex3d(-width/2-length, y+da-interSpace/2, z+interSpace/2);
+                gl.glVertex3d(-width/2-length, y+da-interSpace/2, z+dc-interSpace/2);
             }
         }
         gl.glEnd();
@@ -95,17 +95,17 @@ public class SimpleCorridor2
         double y, z, db, dc;
         int i, j;
 
-        db = b / ((double)nb);
-        dc = c / ((double)nc);
+        db = length / ((double)lengthTiles);
+        dc = height / ((double)heightTiles);
 
         gl.glNormal3d(1, 0, 0);
         gl.glBegin(gl.GL_QUADS);
-        for ( z = 0, i = 0; i < nc; i++, z += dc ) {
-            for ( y = a/2, j = 0; j < nb; j++, y += db ) {
-                gl.glVertex3d(-a/2, y+interSpace/2, z+dc-interSpace/2);
-                gl.glVertex3d(-a/2, y+interSpace/2, z+interSpace/2);
-                gl.glVertex3d(-a/2, y+db-interSpace/2, z+interSpace/2);
-                gl.glVertex3d(-a/2, y+db-interSpace/2, z+dc-interSpace/2);
+        for ( z = 0, i = 0; i < heightTiles; i++, z += dc ) {
+            for ( y = width/2, j = 0; j < lengthTiles; j++, y += db ) {
+                gl.glVertex3d(-width/2, y+interSpace/2, z+dc-interSpace/2);
+                gl.glVertex3d(-width/2, y+interSpace/2, z+interSpace/2);
+                gl.glVertex3d(-width/2, y+db-interSpace/2, z+interSpace/2);
+                gl.glVertex3d(-width/2, y+db-interSpace/2, z+dc-interSpace/2);
             }
         }
         gl.glEnd();
@@ -116,17 +116,17 @@ public class SimpleCorridor2
         double x, z, db, dc;
         int i, j;
 
-        db = b / ((double)nb);
-        dc = c / ((double)nc);
+        db = length / ((double)lengthTiles);
+        dc = height / ((double)heightTiles);
 
         gl.glNormal3d(0, -1, 0);
         gl.glBegin(gl.GL_QUADS);
-        for ( x = -a/2-b, i = 0; i < nb; i++, x += db ) {
-            for ( z = 0, j = 0; j < nc; j++, z += dc ) {
-                gl.glVertex3d(x+interSpace/2, a/2, z+interSpace/2);
-                gl.glVertex3d(x+db-interSpace/2, a/2, z+interSpace/2);
-                gl.glVertex3d(x+db-interSpace/2, a/2, z+dc-interSpace/2);
-                gl.glVertex3d(x+interSpace/2, a/2, z+dc-interSpace/2);
+        for ( x = -width/2-length, i = 0; i < lengthTiles; i++, x += db ) {
+            for ( z = 0, j = 0; j < heightTiles; j++, z += dc ) {
+                gl.glVertex3d(x+interSpace/2, width/2, z+interSpace/2);
+                gl.glVertex3d(x+db-interSpace/2, width/2, z+interSpace/2);
+                gl.glVertex3d(x+db-interSpace/2, width/2, z+dc-interSpace/2);
+                gl.glVertex3d(x+interSpace/2, width/2, z+dc-interSpace/2);
             }
         }
         gl.glEnd();
@@ -154,7 +154,7 @@ public class SimpleCorridor2
         // Build ceiling
         gl.glColor3d(0, 0, 1);
         gl.glPushMatrix();
-        gl.glTranslated(0, 0, c);
+        gl.glTranslated(0, 0, height);
         gl.glRotated(180, 1, 0, 0);
         drawTilesCenter(gl);
         for ( i = 0; i < 4; i++ ) {

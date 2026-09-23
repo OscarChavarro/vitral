@@ -19,12 +19,12 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
     private boolean colormaskrr;
     private boolean colormaskrg;
     private boolean colormaskrb;
-    double lr;
-    double lg;
-    double lb;
-    double rr;
-    double rg;
-    double rb;
+    double leftRed;
+    double leftGreen;
+    double leftBlue;
+    double rightRed;
+    double rightGreen;
+    double rightBlue;
 
     public Jogl2StereoStrategyAnaglyphRenderer()
     {
@@ -36,20 +36,20 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         colormaskrr = false;
         colormaskrg = false;
         colormaskrb = true;
-        lr = 1.0;
-        lg = 0.0;
-        lb = 0.0;
-        rr = 0.0;
-        rg = 0.0;
-        rb = 1.0;
+        leftRed = 1.0;
+        leftGreen = 0.0;
+        leftBlue = 0.0;
+        rightRed = 0.0;
+        rightGreen = 0.0;
+        rightBlue = 1.0;
     }
 
     /**
     If `blendColor` is true, the color blending method is activated,
     otherwise, the color masking method is activated.
 
-    Left channel anaglyph image will be combined with color <lr, lg, lb>,
-    while right channel anaglyph image will be combined with color <rr, rg, rb>.
+    Left channel anaglyph image will be combined with color <leftRed, leftGreen, leftBlue>,
+    while right channel anaglyph image will be combined with color <rightRed, rightGreen, rightBlue>.
 
     Note that given combined colors will be exact on the blend color method,
     but approximated when using color mask method. On color mask method,
@@ -58,17 +58,17 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
     */
     public void
     setBlendingMethod(boolean blendColorMethod,
-                      double lr, double lg, double lb,
-                      double rr, double rg, double rb)
+                      double leftRed, double leftGreen, double leftBlue,
+                      double rightRed, double rightGreen, double rightBlue)
     {
         colorBlendMethod = blendColorMethod;
 
-        this.lr = lr;
-        this.lg = lg;
-        this.lb = lb;
-        this.rr = rr;
-        this.rg = rg;
-        this.rb = rb;
+        this.leftRed = leftRed;
+        this.leftGreen = leftGreen;
+        this.leftBlue = leftBlue;
+        this.rightRed = rightRed;
+        this.rightGreen = rightGreen;
+        this.rightBlue = rightBlue;
 
         colormasklr = false;
         colormasklg = false;
@@ -77,22 +77,22 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         colormaskrg = false;
         colormaskrb = false;
 
-        if ( lr > 0.5 ) {
+        if ( leftRed > 0.5 ) {
             colormasklr = true;
         }
-        if ( lg > 0.5 ) {
+        if ( leftGreen > 0.5 ) {
             colormasklg = true;
         }
-        if ( lb > 0.5 ) {
+        if ( leftBlue > 0.5 ) {
             colormasklb = true;
         }
-        if ( rr > 0.5 ) {
+        if ( rightRed > 0.5 ) {
             colormaskrr = true;
         }
-        if ( rg > 0.5 ) {
+        if ( rightGreen > 0.5 ) {
             colormaskrg = true;
         }
-        if ( rb > 0.5 ) {
+        if ( rightBlue > 0.5 ) {
             colormaskrb = true;
         }
 
@@ -104,7 +104,7 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         if ( swapChannels  ) {
             if ( colorBlendMethod ) {
                 gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
-                gl.glBlendColor((float)(1-rr), (float)(1-rg), (float)(1-rb), 1);
+                gl.glBlendColor((float)(1-rightRed), (float)(1-rightGreen), (float)(1-rightBlue), 1);
             }
             else {
                 gl.glColorMask(colormaskrr, colormaskrg, colormaskrb, true);
@@ -113,7 +113,7 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         else {
             if ( colorBlendMethod ) {
                 gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
-                gl.glBlendColor((float)(1-lr), (float)(1-lg), (float)(1-lb), 1);
+                gl.glBlendColor((float)(1-leftRed), (float)(1-leftGreen), (float)(1-leftBlue), 1);
             }
             else {
                 gl.glColorMask(colormasklr, colormasklg, colormasklb, true);
@@ -128,7 +128,7 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         if ( swapChannels  ) {
             if ( colorBlendMethod ) {
                 gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
-                gl.glBlendColor((float)(1-lr), (float)(1-lg), (float)(1-lb), 1);
+                gl.glBlendColor((float)(1-leftRed), (float)(1-leftGreen), (float)(1-leftBlue), 1);
             }
             else {
                 gl.glColorMask(colormasklr, colormasklg, colormasklb, true);
@@ -137,7 +137,7 @@ public class Jogl2StereoStrategyAnaglyphRenderer extends Jogl2StereoStrategyRend
         else {
             if ( colorBlendMethod ) {
                 gl.glBlendFunc(GL2ES2.GL_ONE_MINUS_CONSTANT_COLOR, GL2.GL_CONSTANT_COLOR);
-                gl.glBlendColor((float)(1-rr), (float)(1-rg), (float)(1-rb), 1);
+                gl.glBlendColor((float)(1-rightRed), (float)(1-rightGreen), (float)(1-rightBlue), 1);
             }
             else {
                 gl.glColorMask(colormaskrr, colormaskrg, colormaskrb, true);

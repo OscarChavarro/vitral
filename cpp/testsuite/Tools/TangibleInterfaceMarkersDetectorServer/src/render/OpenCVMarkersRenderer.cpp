@@ -7,16 +7,16 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 OpenCVMarkersRenderer::OpenCVMarkersRenderer(MarkersModel* model)
-    : model_(model), hudRenderer_(new OpenCVHudRenderer(model)) {}
+    : model(model), hudRenderer(new OpenCVHudRenderer(model)) {}
 
 void OpenCVMarkersRenderer::render(const cv::Mat& frame, zarray_t* detections, const java::ArrayList<MarkerGroupPose>& groups) {
-    preview_ = frame.clone();
+    preview = frame.clone();
     drawDetections(frame, detections);
-    hudRenderer_->drawDetectedGroups(preview_, groups);
+    hudRenderer->drawDetectedGroups(preview, groups);
 }
 
 void OpenCVMarkersRenderer::displayFrame(const char* windowName) {
-    cv::imshow(windowName, preview_);
+    cv::imshow(windowName, preview);
 }
 
 void OpenCVMarkersRenderer::drawDetections(const cv::Mat& frame, zarray_t* detections) {
@@ -30,17 +30,17 @@ void OpenCVMarkersRenderer::drawDetections(const cv::Mat& frame, zarray_t* detec
                            static_cast<float>(det->p[j][1]));
             cv::Point2f p2(static_cast<float>(det->p[(j+1)%4][0]),
                            static_cast<float>(det->p[(j+1)%4][1]));
-            cv::line(preview_, p1, p2, cv::Scalar(0, 255, 0), 2);
+            cv::line(preview, p1, p2, cv::Scalar(0, 255, 0), 2);
         }
 
         cv::Point2f center(static_cast<float>(det->c[0]),
                            static_cast<float>(det->c[1]));
-        cv::circle(preview_, center, 6, cv::Scalar(0, 0, 255), -1);
-        cv::circle(preview_, center, 8, cv::Scalar(0, 0, 255), 2);
+        cv::circle(preview, center, 6, cv::Scalar(0, 0, 255), -1);
+        cv::circle(preview, center, 8, cv::Scalar(0, 0, 255), 2);
 
         char label[16];
         std::snprintf(label, sizeof(label), "ID:%d", det->id);
-        cv::putText(preview_, label, center + cv::Point2f(8, -8),
+        cv::putText(preview, label, center + cv::Point2f(8, -8),
                     cv::FONT_HERSHEY_SIMPLEX, 1.2, cv::Scalar(0, 0, 255), 2);
     }
 }

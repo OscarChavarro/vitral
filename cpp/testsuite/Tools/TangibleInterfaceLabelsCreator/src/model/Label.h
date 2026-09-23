@@ -12,7 +12,7 @@ class Label {
     void setTitle(const java::String& title);
 
   private:
-    java::String title_;
+    java::String title;
 };
 
 #endif

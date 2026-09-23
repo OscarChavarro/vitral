@@ -10,11 +10,11 @@ class CairoPdfPageRenderer {
     explicit CairoPdfPageRenderer(double labelSizeMm, double circleRadiusMm);
     ~CairoPdfPageRenderer();
 
-    int getColumns() const { return columns_; }
-    int getRows() const { return rows_; }
-    int getCapacity() const { return columns_ * rows_; }
+    int getColumns() const { return columns; }
+    int getRows() const { return rows; }
+    int getCapacity() const { return columns * rows; }
 
-    double getLabelSizeMm() const { return labelSizeMm_; }
+    double getLabelSizeMm() const { return labelSizeMm; }
 
     void renderPage(const char* outputPdf, java::ArrayList<Label*>* labels);
 
@@ -29,13 +29,13 @@ class CairoPdfPageRenderer {
     static constexpr double REFERENCE_SPACING_MM = 5.0;
     static constexpr double REFERENCE_STROKE_MM = 0.6;
 
-    double labelSizeMm_;
-    double circleRadiusMm_;
-    double spacingMm_;
-    int columns_;
-    int rows_;
+    double labelSizeMm;
+    double circleRadiusMm;
+    double spacingMm;
+    int columns;
+    int rows;
 
-    CairoPdfLabelRenderer labelRenderer_;
+    CairoPdfLabelRenderer labelRenderer;
 
     void computeLayout();
     double mmToPt(double mm) const;

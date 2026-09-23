@@ -51,7 +51,7 @@ describe("Entity", () => {
             EntityEventType.UPDATED,
             EntityEventType.DELETED,
         ]);
-        expect(listener.events[0].getSource()).toBe(sphere);
+        expect(listener.events[0]?.getSource()).toBe(sphere);
     });
 
     it("stops notifying removed listeners", () => {
@@ -61,6 +61,18 @@ describe("Entity", () => {
         entity.removeEntityListener(listener);
         entity.update();
         expect(listener.events).toEqual([]);
+    });
+
+    it("has getX/setX accessors for every declared control specification", () => {
+        for (const entity of [new Sphere(1), new Cone(1, 0, 2)]) {
+            for (const specification of entity.getControlSpecifications()) {
+                const name = specification.split(";")[1]!.trim();
+                const label = name.charAt(0).toUpperCase() + name.slice(1);
+                const accessors = entity as unknown as Record<string, unknown>;
+                expect(typeof accessors[`get${label}`]).toBe("function");
+                expect(typeof accessors[`set${label}`]).toBe("function");
+            }
+        }
     });
 
     it("does not report its own event methods as encapsulated variables", () => {

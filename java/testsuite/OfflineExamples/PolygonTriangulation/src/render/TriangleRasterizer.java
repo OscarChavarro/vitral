@@ -45,9 +45,9 @@ public class TriangleRasterizer
                 continue;
             }
 
-            Vertex2D vertexA = polygonVertices.get(triangle.a);
-            Vertex2D vertexB = polygonVertices.get(triangle.b);
-            Vertex2D vertexC = polygonVertices.get(triangle.c);
+            Vertex2D vertexA = polygonVertices.get(triangle.point0);
+            Vertex2D vertexB = polygonVertices.get(triangle.point1);
+            Vertex2D vertexC = polygonVertices.get(triangle.point2);
 
             int ax = projectX(vertexA.x, minX, scale, offsetX);
             int ay = projectY(vertexA.y, minY, scale, offsetY);
@@ -86,9 +86,9 @@ public class TriangleRasterizer
             MonotoneDecompositionTriangulator.Triangle triangle,
             int vertexCount)
     {
-        return triangle.a >= 0 && triangle.b >= 0 && triangle.c >= 0 &&
-            triangle.a < vertexCount && triangle.b < vertexCount &&
-            triangle.c < vertexCount;
+        return triangle.point0 >= 0 && triangle.point1 >= 0 && triangle.point2 >= 0 &&
+            triangle.point0 < vertexCount && triangle.point1 < vertexCount &&
+            triangle.point2 < vertexCount;
     }
 
     private static int projectX(double x, double minX, double scale,

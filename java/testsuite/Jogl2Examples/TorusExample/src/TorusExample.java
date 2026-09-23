@@ -70,8 +70,8 @@ public class TorusExample implements
     private RendererConfigurationController qualityController;
     private GLCanvas canvas;  
     private Torus torus;
-    private int N;
-    private int n;
+    private int majorDivisions;
+    private int minorDivisions;
 
     
     // Attributes of Menu Bar
@@ -99,8 +99,8 @@ public class TorusExample implements
     */
     public TorusExample() {
         //Parameters to draw de torus
-        N=10;
-        n=10;
+        majorDivisions=10;
+        minorDivisions=10;
         // Empty! call `createModel` explicity from entry point function!
         jButton1.addActionListener(new ActionListener () {
  
@@ -154,7 +154,7 @@ public class TorusExample implements
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                N=((int)jSpinner3.getValue());
+                majorDivisions=((int)jSpinner3.getValue());
                 canvas.repaint();
             }
 
@@ -166,7 +166,7 @@ public class TorusExample implements
 
             @Override
             public void stateChanged(ChangeEvent e) {
-                n=((int)jSpinner4.getValue());
+                minorDivisions=((int)jSpinner4.getValue());
                 canvas.repaint();
             }
 
@@ -406,7 +406,7 @@ public class TorusExample implements
         Jogl2LightRenderer.activate(gl, light);
         Jogl2SimpleMaterialRenderer.activate(gl, material);
 
-        Jogl2TorusRenderer.draw(gl, torus, camera, qualitySelection, n, N);
+        Jogl2TorusRenderer.draw(gl, torus, camera, qualitySelection, minorDivisions, majorDivisions);
         
         //-----------------------------------------------------------------
         gl.glDisable(GL2.GL_LIGHTING);

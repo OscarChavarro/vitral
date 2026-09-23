@@ -7,14 +7,14 @@
 #include <vector>
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 CairoPdfPageRenderer::CairoPdfPageRenderer()
-    : labelSizeMm_(REFERENCE_LABEL_SIZE_MM),
-      circleRadiusMm_(REFERENCE_LABEL_SIZE_MM * 0.1) {
+    : labelSizeMm(REFERENCE_LABEL_SIZE_MM),
+      circleRadiusMm(REFERENCE_LABEL_SIZE_MM * 0.1) {
     computeLayout();
 }
 
 CairoPdfPageRenderer::CairoPdfPageRenderer(double labelSizeMm, double circleRadiusMm)
-    : labelSizeMm_(labelSizeMm),
-      circleRadiusMm_(circleRadiusMm) {
+    : labelSizeMm(labelSizeMm),
+      circleRadiusMm(circleRadiusMm) {
     computeLayout();
 }
 
@@ -31,11 +31,11 @@ CairoPdfPageRenderer::fitCount(double pageMm, double labelSizeMm, double spacing
 }
 
 void CairoPdfPageRenderer::computeLayout() {
-    spacingMm_ = labelSizeMm_ * (REFERENCE_SPACING_MM / REFERENCE_LABEL_SIZE_MM);
+    spacingMm = labelSizeMm * (REFERENCE_SPACING_MM / REFERENCE_LABEL_SIZE_MM);
     const double usableWmm = PAGE_WIDTH_MM - MARGIN_LEFT_MM - MARGIN_RIGHT_MM;
     const double usableHmm = PAGE_HEIGHT_MM - MARGIN_TOP_MM - MARGIN_BOTTOM_MM;
-    columns_ = fitCount(usableWmm, labelSizeMm_, spacingMm_);
-    rows_ = fitCount(usableHmm, labelSizeMm_, spacingMm_);
+    columns = fitCount(usableWmm, labelSizeMm, spacingMm);
+    rows = fitCount(usableHmm, labelSizeMm, spacingMm);
 }
 
 double CairoPdfPageRenderer::mmToPt(double mm) const {
@@ -43,14 +43,14 @@ double CairoPdfPageRenderer::mmToPt(double mm) const {
 }
 
 void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Label*>* labels) {
-    const double cellMm = labelSizeMm_ + spacingMm_;
-    const double gridWmm = columns_ > 0 ? (columns_ * labelSizeMm_ + (columns_ - 1) * spacingMm_) : 0.0;
-    const double gridHmm = rows_ > 0 ? (rows_ * labelSizeMm_ + (rows_ - 1) * spacingMm_) : 0.0;
+    const double cellMm = labelSizeMm + spacingMm;
+    const double gridWmm = columns > 0 ? (columns * labelSizeMm + (columns - 1) * spacingMm) : 0.0;
+    const double gridHmm = rows > 0 ? (rows * labelSizeMm + (rows - 1) * spacingMm) : 0.0;
     const double usableWmm = PAGE_WIDTH_MM - MARGIN_LEFT_MM - MARGIN_RIGHT_MM;
     const double usableHmm = PAGE_HEIGHT_MM - MARGIN_TOP_MM - MARGIN_BOTTOM_MM;
     const double startXmm = MARGIN_LEFT_MM + (usableWmm - gridWmm) * 0.5;
     const double startYmm = MARGIN_TOP_MM + (usableHmm - gridHmm) * 0.5;
-    const double strokeMm = REFERENCE_STROKE_MM * (labelSizeMm_ / REFERENCE_LABEL_SIZE_MM);
+    const double strokeMm = REFERENCE_STROKE_MM * (labelSizeMm / REFERENCE_LABEL_SIZE_MM);
 
     cairo_surface_t* surface = cairo_pdf_surface_create(outputPdf, mmToPt(PAGE_WIDTH_MM), mmToPt(PAGE_HEIGHT_MM));
     cairo_pdf_surface_restrict_to_version(surface, CAIRO_PDF_VERSION_1_4);
@@ -66,8 +66,8 @@ void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Lab
     int measurableLabelCount = 0;
 
     int measureIdx = 0;
-    for (int r = 0; r < rows_ && measureIdx < labelCount; ++r) {
-        for (int c = 0; c < columns_ && measureIdx < labelCount; ++c) {
+    for (int r = 0; r < rows && measureIdx < labelCount; ++r) {
+        for (int c = 0; c < columns && measureIdx < labelCount; ++c) {
             const double rxMm = startXmm + c * cellMm;
             const double ryMm = startYmm + r * cellMm;
 
@@ -75,8 +75,8 @@ void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Lab
             if (label != nullptr) {
                 icons[static_cast<size_t>(measureIdx)] = iconGenerator.generate(label->getTitle());
                 const bool hasIcon = icons[static_cast<size_t>(measureIdx)] != nullptr;
-                const double maxFontSizeMm = labelRenderer_.calculateMaxFontSizeMm(
-                    cr, label->getTitle(), hasIcon, rxMm, ryMm, labelSizeMm_, circleRadiusMm_);
+                const double maxFontSizeMm = labelRenderer.calculateMaxFontSizeMm(
+                    cr, label->getTitle(), hasIcon, rxMm, ryMm, labelSizeMm, circleRadiusMm);
                 if (maxFontSizeMm > 0.0) {
                     totalMaxFontSizeMm += maxFontSizeMm;
                     measurableLabelCount++;
@@ -92,17 +92,17 @@ void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Lab
 
     cairo_tag_begin(cr, "Figure", NULL);
     int labelIdx = 0;
-    for (int r = 0; r < rows_ && labelIdx < labelCount; ++r) {
-        for (int c = 0; c < columns_ && labelIdx < labelCount; ++c) {
+    for (int r = 0; r < rows && labelIdx < labelCount; ++r) {
+        for (int c = 0; c < columns && labelIdx < labelCount; ++c) {
             const double rxMm = startXmm + c * cellMm;
             const double ryMm = startYmm + r * cellMm;
 
             Label* label = labels->get(labelIdx);
             if (label != nullptr) {
                 cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-                cairo_rectangle(cr, mmToPt(rxMm), mmToPt(ryMm), mmToPt(labelSizeMm_), mmToPt(labelSizeMm_));
+                cairo_rectangle(cr, mmToPt(rxMm), mmToPt(ryMm), mmToPt(labelSizeMm), mmToPt(labelSizeMm));
                 cairo_stroke(cr);
-                labelRenderer_.renderRedCircle(cr, rxMm, ryMm, labelSizeMm_, circleRadiusMm_);
+                labelRenderer.renderRedCircle(cr, rxMm, ryMm, labelSizeMm, circleRadiusMm);
             }
 
             labelIdx++;
@@ -111,15 +111,15 @@ void CairoPdfPageRenderer::renderPage(const char* outputPdf, java::ArrayList<Lab
     cairo_tag_end(cr, "Figure");
 
     labelIdx = 0;
-    for (int r = 0; r < rows_ && labelIdx < labelCount; ++r) {
-        for (int c = 0; c < columns_ && labelIdx < labelCount; ++c) {
+    for (int r = 0; r < rows && labelIdx < labelCount; ++r) {
+        for (int c = 0; c < columns && labelIdx < labelCount; ++c) {
             const double rxMm = startXmm + c * cellMm;
             const double ryMm = startYmm + r * cellMm;
 
             Label* label = labels->get(labelIdx);
             if (label != nullptr) {
                 Calligraphic2DBuffer* icon = icons[static_cast<size_t>(labelIdx)];
-                labelRenderer_.renderContent(cr, *label, icon, rxMm, ryMm, labelSizeMm_, circleRadiusMm_, preferredFontSizeMm);
+                labelRenderer.renderContent(cr, *label, icon, rxMm, ryMm, labelSizeMm, circleRadiusMm, preferredFontSizeMm);
             }
 
             labelIdx++;

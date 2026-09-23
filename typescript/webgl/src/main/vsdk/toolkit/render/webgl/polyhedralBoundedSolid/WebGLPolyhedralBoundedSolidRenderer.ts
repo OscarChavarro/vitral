@@ -777,9 +777,9 @@ export class WebGLPolyhedralBoundedSolidRenderer {
         }
 
         for (const triangle of triangles) {
-            const a: Vector3Dd | undefined = originalVertices[triangle.a];
-            let b: Vector3Dd | undefined = originalVertices[triangle.b];
-            let c: Vector3Dd | undefined = originalVertices[triangle.c];
+            const a: Vector3Dd | undefined = originalVertices[triangle.point0];
+            let b: Vector3Dd | undefined = originalVertices[triangle.point1];
+            let c: Vector3Dd | undefined = originalVertices[triangle.point2];
             if (a === undefined || b === undefined || c === undefined) {
                 continue;
             }

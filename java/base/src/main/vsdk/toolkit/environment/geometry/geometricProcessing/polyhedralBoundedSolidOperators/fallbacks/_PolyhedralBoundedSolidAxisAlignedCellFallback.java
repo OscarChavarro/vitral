@@ -36,22 +36,22 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
     private static final class AxisAlignedCellBooleanBuilder
     {
         private final PolyhedralBoundedSolid solid;
-        private final ArrayList<Double> xs;
-        private final ArrayList<Double> ys;
-        private final ArrayList<Double> zs;
+        private final ArrayList<Double> xCoordinates;
+        private final ArrayList<Double> yCoordinates;
+        private final ArrayList<Double> zCoordinates;
         private final HashMap<String, _PolyhedralBoundedSolidVertex> vertices;
         private final HashMap<String, _PolyhedralBoundedSolidEdge> edges;
         private int nextVertexId;
         private int nextFaceId;
 
-        private AxisAlignedCellBooleanBuilder(ArrayList<Double> xs,
-                                              ArrayList<Double> ys,
-                                              ArrayList<Double> zs)
+        private AxisAlignedCellBooleanBuilder(ArrayList<Double> xCoordinates,
+                                              ArrayList<Double> yCoordinates,
+                                              ArrayList<Double> zCoordinates)
         {
             this.solid = new PolyhedralBoundedSolid();
-            this.xs = xs;
-            this.ys = ys;
-            this.zs = zs;
+            this.xCoordinates = xCoordinates;
+            this.yCoordinates = yCoordinates;
+            this.zCoordinates = zCoordinates;
             this.vertices =
                 new HashMap<String, _PolyhedralBoundedSolidVertex>();
             this.edges = new HashMap<String, _PolyhedralBoundedSolidEdge>();
@@ -76,7 +76,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             }
 
             vertex = new _PolyhedralBoundedSolidVertex(solid,
-                new Vector3Dd(xs.get(ix), ys.get(iy), zs.get(iz)),
+                new Vector3Dd(xCoordinates.get(ix), yCoordinates.get(iy), zCoordinates.get(iz)),
                 nextVertexId);
             solid.setMaxVertexId(nextVertexId);
             nextVertexId++;
@@ -316,9 +316,9 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
         PolyhedralBoundedSolid inSolidB,
         int op)
     {
-        ArrayList<Double> xs;
-        ArrayList<Double> ys;
-        ArrayList<Double> zs;
+        ArrayList<Double> xCoordinates;
+        ArrayList<Double> yCoordinates;
+        ArrayList<Double> zCoordinates;
         boolean[][][] occupied;
         AxisAlignedCellBooleanBuilder builder;
         int ix;
@@ -330,33 +330,33 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             return null;
         }
 
-        xs = uniqueVertexCoordinates(inSolidA, 0);
-        ys = uniqueVertexCoordinates(inSolidA, 1);
-        zs = uniqueVertexCoordinates(inSolidA, 2);
+        xCoordinates = uniqueVertexCoordinates(inSolidA, 0);
+        yCoordinates = uniqueVertexCoordinates(inSolidA, 1);
+        zCoordinates = uniqueVertexCoordinates(inSolidA, 2);
         for ( ix = 0; ix < inSolidB.getVerticesList().size(); ix++ ) {
             Vector3Dd p = inSolidB.getVerticesList().get(ix).position;
-            addUniqueCoordinate(xs, p.x());
-            addUniqueCoordinate(ys, p.y());
-            addUniqueCoordinate(zs, p.z());
+            addUniqueCoordinate(xCoordinates, p.x());
+            addUniqueCoordinate(yCoordinates, p.y());
+            addUniqueCoordinate(zCoordinates, p.z());
         }
 
-        if ( xs.size() < 2 || ys.size() < 2 || zs.size() < 2 ||
-             xs.size() > 16 || ys.size() > 16 || zs.size() > 16 ) {
+        if ( xCoordinates.size() < 2 || yCoordinates.size() < 2 || zCoordinates.size() < 2 ||
+             xCoordinates.size() > 16 || yCoordinates.size() > 16 || zCoordinates.size() > 16 ) {
             return null;
         }
 
-        occupied = new boolean[xs.size() - 1][ys.size() - 1][zs.size() - 1];
-        for ( ix = 0; ix < xs.size() - 1; ix++ ) {
-            for ( iy = 0; iy < ys.size() - 1; iy++ ) {
-                for ( iz = 0; iz < zs.size() - 1; iz++ ) {
+        occupied = new boolean[xCoordinates.size() - 1][yCoordinates.size() - 1][zCoordinates.size() - 1];
+        for ( ix = 0; ix < xCoordinates.size() - 1; ix++ ) {
+            for ( iy = 0; iy < yCoordinates.size() - 1; iy++ ) {
+                for ( iz = 0; iz < zCoordinates.size() - 1; iz++ ) {
                     Vector3Dd sample;
                     boolean insideA;
                     boolean insideB;
 
                     sample = new Vector3Dd(
-                        (xs.get(ix) + xs.get(ix + 1)) * 0.5,
-                        (ys.get(iy) + ys.get(iy + 1)) * 0.5,
-                        (zs.get(iz) + zs.get(iz + 1)) * 0.5);
+                        (xCoordinates.get(ix) + xCoordinates.get(ix + 1)) * 0.5,
+                        (yCoordinates.get(iy) + yCoordinates.get(iy + 1)) * 0.5,
+                        (zCoordinates.get(iz) + zCoordinates.get(iz + 1)) * 0.5);
                     insideA = classifyPointForAxisAlignedFallback(
                         inSolidA, sample) == Geometry.INSIDE;
                     insideB = classifyPointForAxisAlignedFallback(
@@ -367,10 +367,10 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             }
         }
 
-        builder = new AxisAlignedCellBooleanBuilder(xs, ys, zs);
-        for ( ix = 0; ix < xs.size() - 1; ix++ ) {
-            for ( iy = 0; iy < ys.size() - 1; iy++ ) {
-                for ( iz = 0; iz < zs.size() - 1; iz++ ) {
+        builder = new AxisAlignedCellBooleanBuilder(xCoordinates, yCoordinates, zCoordinates);
+        for ( ix = 0; ix < xCoordinates.size() - 1; ix++ ) {
+            for ( iy = 0; iy < yCoordinates.size() - 1; iy++ ) {
+                for ( iz = 0; iz < zCoordinates.size() - 1; iz++ ) {
                     if ( !occupied[ix][iy][iz] ) {
                         continue;
                     }
@@ -378,7 +378,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
                         addAxisAlignedBoundaryQuad(builder, 0, false,
                             ix, iy, iz);
                     }
-                    if ( ix == xs.size() - 2 ||
+                    if ( ix == xCoordinates.size() - 2 ||
                          !occupied[ix + 1][iy][iz] ) {
                         addAxisAlignedBoundaryQuad(builder, 0, true,
                             ix, iy, iz);
@@ -387,7 +387,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
                         addAxisAlignedBoundaryQuad(builder, 1, false,
                             ix, iy, iz);
                     }
-                    if ( iy == ys.size() - 2 ||
+                    if ( iy == yCoordinates.size() - 2 ||
                          !occupied[ix][iy + 1][iz] ) {
                         addAxisAlignedBoundaryQuad(builder, 1, true,
                             ix, iy, iz);
@@ -396,7 +396,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
                         addAxisAlignedBoundaryQuad(builder, 2, false,
                             ix, iy, iz);
                     }
-                    if ( iz == zs.size() - 2 ||
+                    if ( iz == zCoordinates.size() - 2 ||
                          !occupied[ix][iy][iz + 1] ) {
                         addAxisAlignedBoundaryQuad(builder, 2, true,
                             ix, iy, iz);
@@ -429,9 +429,9 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
         int op)
     {
         final int divisions = 12;
-        ArrayList<Double> xs;
-        ArrayList<Double> ys;
-        ArrayList<Double> zs;
+        ArrayList<Double> xCoordinates;
+        ArrayList<Double> yCoordinates;
+        ArrayList<Double> zCoordinates;
         boolean[][][] occupied;
         AxisAlignedCellBooleanBuilder builder;
         double[] bounds;
@@ -459,9 +459,9 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             bounds[5] = Math.max(bounds[5], boundsB[5]);
         }
 
-        xs = uniformCoordinates(bounds[0], bounds[3], divisions);
-        ys = uniformCoordinates(bounds[1], bounds[4], divisions);
-        zs = uniformCoordinates(bounds[2], bounds[5], divisions);
+        xCoordinates = uniformCoordinates(bounds[0], bounds[3], divisions);
+        yCoordinates = uniformCoordinates(bounds[1], bounds[4], divisions);
+        zCoordinates = uniformCoordinates(bounds[2], bounds[5], divisions);
         occupied = new boolean[divisions][divisions][divisions];
         anyOccupied = false;
 
@@ -473,9 +473,9 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
                     boolean insideB;
 
                     sample = new Vector3Dd(
-                        (xs.get(ix) + xs.get(ix + 1)) * 0.5,
-                        (ys.get(iy) + ys.get(iy + 1)) * 0.5,
-                        (zs.get(iz) + zs.get(iz + 1)) * 0.5);
+                        (xCoordinates.get(ix) + xCoordinates.get(ix + 1)) * 0.5,
+                        (yCoordinates.get(iy) + yCoordinates.get(iy + 1)) * 0.5,
+                        (zCoordinates.get(iz) + zCoordinates.get(iz + 1)) * 0.5);
                     insideA = classifyPointForAxisAlignedFallback(
                         inSolidA, sample) == Geometry.INSIDE;
                     insideB = classifyPointForAxisAlignedFallback(
@@ -491,7 +491,7 @@ final class _PolyhedralBoundedSolidAxisAlignedCellFallback
             return null;
         }
 
-        builder = new AxisAlignedCellBooleanBuilder(xs, ys, zs);
+        builder = new AxisAlignedCellBooleanBuilder(xCoordinates, yCoordinates, zCoordinates);
         for ( ix = 0; ix < divisions; ix++ ) {
             for ( iy = 0; iy < divisions; iy++ ) {
                 for ( iz = 0; iz < divisions; iz++ ) {

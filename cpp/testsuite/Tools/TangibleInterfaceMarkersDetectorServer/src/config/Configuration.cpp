@@ -6,24 +6,24 @@
 #include "model/MarkersModel.hpp"
 #include <dirent.h>
 #include "options/CommandLineOptions.hpp"
-Configuration::Configuration(const CommandLineOptions& opts) : opts_(opts) {}
+Configuration::Configuration(const CommandLineOptions& opts) : opts(opts) {}
 
 MarkerTrackerConfig Configuration::getMarkerTrackerConfig() const {
     MarkerTrackerConfig cfg;
-    cfg.cameraIndex = opts_.getCameraIndex();
-    cfg.markerSize = opts_.getMarkerSize();
-    cfg.calibFile = opts_.getCalibFile();
-    cfg.decisionMarginThreshold = opts_.getDecisionMarginThreshold();
-    cfg.viewAngleCosThreshold = opts_.getViewAngleCosThreshold();
-    cfg.debugMode = opts_.isDebugMode();
-    cfg.debugDir = opts_.getDebugDir();
+    cfg.cameraIndex = opts.getCameraIndex();
+    cfg.markerSize = opts.getMarkerSize();
+    cfg.calibFile = opts.getCalibFile();
+    cfg.decisionMarginThreshold = opts.getDecisionMarginThreshold();
+    cfg.viewAngleCosThreshold = opts.getViewAngleCosThreshold();
+    cfg.debugMode = opts.isDebugMode();
+    cfg.debugDir = opts.getDebugDir();
     return cfg;
 }
 
 WebServiceConfig Configuration::getWebServiceConfig() const {
     WebServiceConfig cfg;
-    cfg.port = opts_.getPort();
-    cfg.streamHz = opts_.getStreamHz();
+    cfg.port = opts.getPort();
+    cfg.streamHz = opts.getStreamHz();
     cfg.path = "/v1/values";
     return cfg;
 }

@@ -65,7 +65,7 @@ describe("Voxelization", () => {
                 hit,
             ),
         ).toBe(true);
-        expect(hit.hitDistance()).toBeCloseTo(2);
+        expect(hit.getHitDistance()).toBeCloseTo(2);
         expect(
             SurfaceRayIntersection.doIntersectionFirstHit(
                 mesh,

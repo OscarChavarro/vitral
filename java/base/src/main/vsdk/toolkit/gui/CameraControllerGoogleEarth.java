@@ -247,7 +247,7 @@ public class CameraControllerGoogleEarth extends CameraController {
         double farPlaneDistance;
 
         // Internal variables to control the interaction
-        char unicode_id;
+        char unicodeId;
         int keycode;
         double yaw;
         double pitch;

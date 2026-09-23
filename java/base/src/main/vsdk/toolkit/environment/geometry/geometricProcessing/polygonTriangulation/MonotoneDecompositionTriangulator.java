@@ -19,14 +19,14 @@ public class MonotoneDecompositionTriangulator {
     contours are traversed (all loops concatenated, first loop first).
     */
     public static final class Triangle {
-        public final int a;
-        public final int b;
-        public final int c;
+        public final int point0;
+        public final int point1;
+        public final int point2;
 
-        public Triangle(int a, int b, int c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
+        public Triangle(int point0, int point1, int point2) {
+            this.point0 = point0;
+            this.point1 = point1;
+            this.point2 = point2;
         }
     }
 

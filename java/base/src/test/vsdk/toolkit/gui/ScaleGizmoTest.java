@@ -554,7 +554,7 @@ class ScaleGizmoTest
         KeyEvent digit = new KeyEvent();
         KeyEvent enter = new KeyEvent();
 
-        digit.unicode_id = '3';
+        digit.unicodeId = '3';
         enter.keycode = KeyEvent.KEY_ENTER;
 
         // Act
@@ -575,7 +575,7 @@ class ScaleGizmoTest
         ScaleGizmo gizmo = createGizmo(createCamera());
         KeyEvent upperX = new KeyEvent();
 
-        upperX.unicode_id = 'X';
+        upperX.unicodeId = 'X';
 
         // Act
         boolean changed = gizmo.processKeyPressedEvent(upperX);

@@ -63,8 +63,8 @@ public class Jogl4ParametricBiCubicPatchRenderer extends Jogl4Renderer {
     {
         return "parametricbicubicpatch/" + System.identityHashCode(patch) + "/" +
             patch.getType() + "/" + patch.getApproximationSteps() + "/" +
-            patch.Gx_MATRIX.hashCode() + "/" + patch.Gy_MATRIX.hashCode() + "/" +
-            patch.Gz_MATRIX.hashCode();
+            patch.geometryMatrixX.hashCode() + "/" + patch.geometryMatrixY.hashCode() + "/" +
+            patch.geometryMatrixZ.hashCode();
     }
 
     /**

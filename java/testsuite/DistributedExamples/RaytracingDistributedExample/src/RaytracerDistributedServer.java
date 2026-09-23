@@ -27,10 +27,10 @@ class VitralVisualizationServerProtocol implements Runnable
     private RGBImageUncompressed theResultingImage;
     private ProgressMonitorConsole reporter;
     private int id;
-    private int x0;
-    private int y0;
-    private int x1;
-    private int y1;
+    private int startX;
+    private int startY;
+    private int endX;
+    private int endY;
 
     private int readInt32BE(InputStream is) throws Exception
     {
@@ -49,10 +49,10 @@ class VitralVisualizationServerProtocol implements Runnable
         rendererConfiguration = new RendererConfiguration();
         theResultingImage = new RGBImageUncompressed();
         id = 0;
-        x0 = 0;
-        y0 = 0;
-        x1 = 100;
-        y1 = 100;
+        startX = 0;
+        startY = 0;
+        endX = 100;
+        endY = 100;
     }
 
     /**
@@ -98,22 +98,22 @@ class VitralVisualizationServerProtocol implements Runnable
             out[0] = 1;
         }
         else if ( in.equals("x0") ) {
-            x0 = readInt32BE(is);
+            startX = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("y0") ) {
-            y0 = readInt32BE(is);
+            startY = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("x1") ) {
-            x1 = readInt32BE(is);
+            endX = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
         else if ( in.equals("y1") ) {
-            y1 = readInt32BE(is);
+            endY = readInt32BE(is);
             out = new byte[1];
             out[0] = 1;
         }
@@ -127,7 +127,7 @@ class VitralVisualizationServerProtocol implements Runnable
         }
         else if ( in.equals("render") ) {
             if ( theScene != null ) {
-                theResultingImage.init(x1 - x0, y1 - y0);
+                theResultingImage.init(endX - startX, endY - startY);
                 reporter = null; //new ProgressMonitorConsole();
                 CameraSnapshot cameraSnapshot =
                     theScene.getActiveCamera().exportToCameraSnapshot();
@@ -141,9 +141,9 @@ class VitralVisualizationServerProtocol implements Runnable
                                 rendererConfiguration,
                                 sceneSnapshot,
                                 reporter, null,
-                                x0, y0, x1, y1);
+                                startX, startY, endX, endY);
                 System.out.println("SCENE RAYTRACED!");
-                System.out.printf("Extends: <%d, %d> - <%d, %d>\n", x0, y0, x1, y1);
+                System.out.printf("Extends: <%d, %d> - <%d, %d>\n", startX, startY, endX, endY);
                 ObjectOutputStream oos = new ObjectOutputStream(os);
                 oos.writeObject(theResultingImage);
                 oos.flush();

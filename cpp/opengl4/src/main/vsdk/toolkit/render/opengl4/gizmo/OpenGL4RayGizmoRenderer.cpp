@@ -27,12 +27,12 @@ const float IND_HALF_W = 0.12f;
 const float IND_TIP_Z = 0.30f;
 }
 
-unsigned int OpenGL4RayGizmoRenderer::indicatorVao_ = 0;
-unsigned int OpenGL4RayGizmoRenderer::indicatorPositionVbo_ = 0;
-unsigned int OpenGL4RayGizmoRenderer::indicatorNormalVbo_ = 0;
-unsigned int OpenGL4RayGizmoRenderer::indicatorUvVbo_ = 0;
-unsigned int OpenGL4RayGizmoRenderer::indicatorProgram_ = 0;
-bool OpenGL4RayGizmoRenderer::initialized_ = false;
+unsigned int OpenGL4RayGizmoRenderer::indicatorVao = 0;
+unsigned int OpenGL4RayGizmoRenderer::indicatorPositionVbo = 0;
+unsigned int OpenGL4RayGizmoRenderer::indicatorNormalVbo = 0;
+unsigned int OpenGL4RayGizmoRenderer::indicatorUvVbo = 0;
+unsigned int OpenGL4RayGizmoRenderer::indicatorProgram = 0;
+bool OpenGL4RayGizmoRenderer::initialized = false;
 
 void OpenGL4RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::ArrayList<Light*>& lights)
 {
@@ -85,31 +85,31 @@ void OpenGL4RayGizmoRenderer::dispose()
     OpenGL4ArrowRenderer::dispose();
     OpenGL4SphereRenderer::dispose();
 
-    if ( indicatorPositionVbo_ != 0 ) { glDeleteBuffers(1, &indicatorPositionVbo_); indicatorPositionVbo_ = 0; }
-    if ( indicatorNormalVbo_ != 0 ) { glDeleteBuffers(1, &indicatorNormalVbo_); indicatorNormalVbo_ = 0; }
-    if ( indicatorUvVbo_ != 0 ) { glDeleteBuffers(1, &indicatorUvVbo_); indicatorUvVbo_ = 0; }
-    if ( indicatorVao_ != 0 ) { glDeleteVertexArrays(1, &indicatorVao_); indicatorVao_ = 0; }
-    if ( indicatorProgram_ != 0 ) { glDeleteProgram(indicatorProgram_); indicatorProgram_ = 0; }
-    initialized_ = false;
+    if ( indicatorPositionVbo != 0 ) { glDeleteBuffers(1, &indicatorPositionVbo); indicatorPositionVbo = 0; }
+    if ( indicatorNormalVbo != 0 ) { glDeleteBuffers(1, &indicatorNormalVbo); indicatorNormalVbo = 0; }
+    if ( indicatorUvVbo != 0 ) { glDeleteBuffers(1, &indicatorUvVbo); indicatorUvVbo = 0; }
+    if ( indicatorVao != 0 ) { glDeleteVertexArrays(1, &indicatorVao); indicatorVao = 0; }
+    if ( indicatorProgram != 0 ) { glDeleteProgram(indicatorProgram); indicatorProgram = 0; }
+    initialized = false;
 }
 
 bool OpenGL4RayGizmoRenderer::ensureIndicatorMesh()
 {
-    if ( initialized_ ) {
+    if ( initialized ) {
         return true;
     }
     uploadIndicatorMesh();
-    initialized_ = true;
+    initialized = true;
     return true;
 }
 
 bool OpenGL4RayGizmoRenderer::ensureIndicatorProgram()
 {
-    if ( indicatorProgram_ != 0 ) {
+    if ( indicatorProgram != 0 ) {
         return true;
     }
-    indicatorProgram_ = buildProgram("gouraudTextureVertexShader.glsl", "gouraudTexturePixelShader.glsl");
-    return indicatorProgram_ != 0;
+    indicatorProgram = buildProgram("gouraudTextureVertexShader.glsl", "gouraudTexturePixelShader.glsl");
+    return indicatorProgram != 0;
 }
 
 void OpenGL4RayGizmoRenderer::uploadIndicatorMesh()
@@ -123,15 +123,15 @@ void OpenGL4RayGizmoRenderer::uploadIndicatorMesh()
     float uvs[] = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
     computeNormals(normals);
 
-    glGenVertexArrays(1, &indicatorVao_);
-    glGenBuffers(1, &indicatorPositionVbo_);
-    glGenBuffers(1, &indicatorNormalVbo_);
-    glGenBuffers(1, &indicatorUvVbo_);
+    glGenVertexArrays(1, &indicatorVao);
+    glGenBuffers(1, &indicatorPositionVbo);
+    glGenBuffers(1, &indicatorNormalVbo);
+    glGenBuffers(1, &indicatorUvVbo);
 
-    glBindVertexArray(indicatorVao_);
-    uploadBuffer(indicatorPositionVbo_, 0, 3, positions, 9);
-    uploadBuffer(indicatorNormalVbo_, 1, 3, normals, 9);
-    uploadBuffer(indicatorUvVbo_, 2, 2, uvs, 6);
+    glBindVertexArray(indicatorVao);
+    uploadBuffer(indicatorPositionVbo, 0, 3, positions, 9);
+    uploadBuffer(indicatorNormalVbo, 1, 3, normals, 9);
+    uploadBuffer(indicatorUvVbo, 2, 2, uvs, 6);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -150,11 +150,11 @@ void OpenGL4RayGizmoRenderer::drawIndicator(
     Matrix4x4d indicatorModelIt = indicatorModelMatrix.invert().transpose();
     SimpleMaterial material = indicatorMaterial();
 
-    glUseProgram(indicatorProgram_);
-    setMatrix(indicatorProgram_, "modelViewProjectionLocal", indicatorMvp);
-    setMatrix(indicatorProgram_, "modelViewLocal", indicatorModelMatrix);
-    setMatrix(indicatorProgram_, "modelViewITLocal", indicatorModelIt);
-    setVector3(indicatorProgram_, "cameraPositionGlobal", camera->getPosition());
+    glUseProgram(indicatorProgram);
+    setMatrix(indicatorProgram, "modelViewProjectionLocal", indicatorMvp);
+    setMatrix(indicatorProgram, "modelViewLocal", indicatorModelMatrix);
+    setMatrix(indicatorProgram, "modelViewITLocal", indicatorModelIt);
+    setVector3(indicatorProgram, "cameraPositionGlobal", camera->getPosition());
 
     int lightCount = 0;
     for ( long i = 0; i < lights.size(); i++ ) {
@@ -164,26 +164,26 @@ void OpenGL4RayGizmoRenderer::drawIndicator(
         }
         char name[64];
         std::snprintf(name, sizeof(name), "lightPositionsGlobal[%d]", lightCount);
-        setVector3(indicatorProgram_, name, light->getPosition());
+        setVector3(indicatorProgram, name, light->getPosition());
         std::snprintf(name, sizeof(name), "lightColorsGlobal[%d]", lightCount);
-        setVector3(indicatorProgram_, name, light->getEmission());
+        setVector3(indicatorProgram, name, light->getEmission());
         lightCount++;
     }
-    setInt(indicatorProgram_, "numberOfLights", lightCount);
-    setVector3(indicatorProgram_, "ambientColor", material.getAmbient());
-    setVector3(indicatorProgram_, "diffuseColor", material.getDiffuse());
-    setVector3(indicatorProgram_, "specularColor", material.getSpecular());
-    setFloat(indicatorProgram_, "phongExponent", (float)material.getPhongExponent());
-    setInt(indicatorProgram_, "withTexture", 0);
-    setInt(indicatorProgram_, "withBumpMap", 0);
-    setInt(indicatorProgram_, "withVertexColors", 0);
+    setInt(indicatorProgram, "numberOfLights", lightCount);
+    setVector3(indicatorProgram, "ambientColor", material.getAmbient());
+    setVector3(indicatorProgram, "diffuseColor", material.getDiffuse());
+    setVector3(indicatorProgram, "specularColor", material.getSpecular());
+    setFloat(indicatorProgram, "phongExponent", (float)material.getPhongExponent());
+    setInt(indicatorProgram, "withTexture", 0);
+    setInt(indicatorProgram, "withBumpMap", 0);
+    setInt(indicatorProgram, "withVertexColors", 0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(indicatorVao_);
+    glBindVertexArray(indicatorVao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);

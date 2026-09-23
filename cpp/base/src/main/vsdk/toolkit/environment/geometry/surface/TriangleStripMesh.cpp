@@ -56,8 +56,8 @@ static bool intersectTriangle(const Ray& ray, const Vector3Dd& v0, const Vector3
 Ray* TriangleStripMesh::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
     RayHit hit;
-    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != nullptr) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOut_Ray, &hit) && hit.getRay() != nullptr) {
+        return new Ray(*hit.getRay());
     }
     return nullptr;
 }
@@ -94,8 +94,8 @@ bool TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
     if (outHit != nullptr) {
         if (outHit->shouldStoreRay() || outHit->needsAnySurfaceData()) outHit->setRay(inRay.withT(bestT));
         else outHit->setHitDistance(bestT);
-        if (outHit->needsPoint()) outHit->p = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
-        if (outHit->needsNormal()) outHit->n = bestN;
+        if (outHit->needsPoint()) outHit->point = inRay.getOrigin().add(inRay.getDirection().multiply(bestT));
+        if (outHit->needsNormal()) outHit->normal = bestN;
     }
     return true;
 }
@@ -103,5 +103,5 @@ bool TriangleStripMesh::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 void TriangleStripMesh::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
 {
     if (outData == nullptr) return;
-    outData->p = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
+    outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
 }

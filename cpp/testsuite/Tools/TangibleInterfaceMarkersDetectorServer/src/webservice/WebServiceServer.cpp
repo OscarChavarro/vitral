@@ -7,31 +7,31 @@
 #include "webservice/WebServiceServer.hpp"
 #include <pthread.h>
 WebServiceServer::WebServiceServer(const WebServiceConfig& cfg, MarkerEventBus* bus)
-    : config_(cfg), bus_(bus), shouldStop_(false) {}
+    : config(cfg), bus(bus), shouldStop_(false) {}
 
 WebServiceServer::~WebServiceServer() {
     requestStop();
-    pthread_mutex_destroy(&serverSocketMutex_);
-    pthread_mutex_destroy(&clientThreadsMutex_);
+    pthread_mutex_destroy(&serverSocketMutex);
+    pthread_mutex_destroy(&clientThreadsMutex);
 }
 
 bool WebServiceServer::start() {
-    pthread_mutex_lock(&serverSocketMutex_);
-    serverSocket_ = new java::net::ServerSocket(config_.port);
-    pthread_mutex_unlock(&serverSocketMutex_);
+    pthread_mutex_lock(&serverSocketMutex);
+    serverSocket_ = new java::net::ServerSocket(config.port);
+    pthread_mutex_unlock(&serverSocketMutex);
 
     if (!serverSocket_->isOpen()) {
-        std::fprintf(stderr, "[webservice] failed to bind port %d\n", config_.port);
-        pthread_mutex_lock(&serverSocketMutex_);
+        std::fprintf(stderr, "[webservice] failed to bind port %d\n", config.port);
+        pthread_mutex_lock(&serverSocketMutex);
         delete serverSocket_;
         serverSocket_ = nullptr;
-        pthread_mutex_unlock(&serverSocketMutex_);
+        pthread_mutex_unlock(&serverSocketMutex);
         return false;
     }
     std::printf("[webservice] listening on port %d, path %s\n",
-                config_.port, config_.path);
+                config.port, config.path);
     std::printf("[webservice] Test WebSocket messages with: websocat ws://localhost:%d%s\n",
-                config_.port, config_.path);
+                config.port, config.path);
 
     while (!shouldStop_) {
         java::net::Socket* clientSocket = serverSocket_->accept();
@@ -52,38 +52,38 @@ bool WebServiceServer::start() {
 
         pthread_t thread;
         if (pthread_create(&thread, NULL, &WebServiceServer::clientThreadEntry, threadArg) == 0) {
-            pthread_mutex_lock(&clientThreadsMutex_);
-            clientThreads_.push_back(thread);
-            pthread_mutex_unlock(&clientThreadsMutex_);
+            pthread_mutex_lock(&clientThreadsMutex);
+            clientThreads.push_back(thread);
+            pthread_mutex_unlock(&clientThreadsMutex);
         } else {
             delete threadArg;
         }
     }
 
-    pthread_mutex_lock(&clientThreadsMutex_);
-    for (size_t i = 0; i < clientThreads_.size(); ++i) {
-        pthread_join(clientThreads_[i], NULL);
+    pthread_mutex_lock(&clientThreadsMutex);
+    for (size_t i = 0; i < clientThreads.size(); ++i) {
+        pthread_join(clientThreads[i], NULL);
     }
-    clientThreads_.clear();
-    pthread_mutex_unlock(&clientThreadsMutex_);
+    clientThreads.clear();
+    pthread_mutex_unlock(&clientThreadsMutex);
 
-    pthread_mutex_lock(&serverSocketMutex_);
+    pthread_mutex_lock(&serverSocketMutex);
     if (serverSocket_ != nullptr) {
         serverSocket_->close();
         delete serverSocket_;
         serverSocket_ = nullptr;
     }
-    pthread_mutex_unlock(&serverSocketMutex_);
+    pthread_mutex_unlock(&serverSocketMutex);
     return true;
 }
 
 void WebServiceServer::requestStop() {
     shouldStop_.store(true);
-    pthread_mutex_lock(&serverSocketMutex_);
+    pthread_mutex_lock(&serverSocketMutex);
     if (serverSocket_ != nullptr) {
         serverSocket_->close();
     }
-    pthread_mutex_unlock(&serverSocketMutex_);
+    pthread_mutex_unlock(&serverSocketMutex);
 }
 
 void* WebServiceServer::clientThreadEntry(void* arg) {
@@ -96,6 +96,6 @@ void* WebServiceServer::clientThreadEntry(void* arg) {
 }
 
 void WebServiceServer::handleClient(int fd) {
-    WebServiceClient client(fd, config_, bus_);
+    WebServiceClient client(fd, config, bus);
     client.serve();
 }

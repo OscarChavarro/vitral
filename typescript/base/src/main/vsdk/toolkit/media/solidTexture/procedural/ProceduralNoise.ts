@@ -11,18 +11,18 @@ class _Lattice {
     public x = 0;
     public y = 0;
     public z = 0;
-    public ix = 0;
-    public iy = 0;
-    public iz = 0;
-    public jx = 0;
-    public jy = 0;
-    public jz = 0;
-    public sx = 0;
-    public sy = 0;
-    public sz = 0;
-    public tx = 0;
-    public ty = 0;
-    public tz = 0;
+    public lowerCellX = 0;
+    public lowerCellY = 0;
+    public lowerCellZ = 0;
+    public upperCellX = 0;
+    public upperCellY = 0;
+    public upperCellZ = 0;
+    public upperWeightX = 0;
+    public upperWeightY = 0;
+    public upperWeightZ = 0;
+    public lowerWeightX = 0;
+    public lowerWeightY = 0;
+    public lowerWeightZ = 0;
 }
 
 /**
@@ -137,22 +137,70 @@ export class ProceduralNoise {
         let sum: number;
         let m: number;
 
-        m = this.hash3d(l.ix, l.iy, l.iz) & 0xff;
-        sum = this.incrSum(m, l.tx * l.ty * l.tz, l.x - l.ix, l.y - l.iy, l.z - l.iz);
-        m = this.hash3d(l.jx, l.iy, l.iz) & 0xff;
-        sum += this.incrSum(m, l.sx * l.ty * l.tz, l.x - l.jx, l.y - l.iy, l.z - l.iz);
-        m = this.hash3d(l.ix, l.jy, l.iz) & 0xff;
-        sum += this.incrSum(m, l.tx * l.sy * l.tz, l.x - l.ix, l.y - l.jy, l.z - l.iz);
-        m = this.hash3d(l.jx, l.jy, l.iz) & 0xff;
-        sum += this.incrSum(m, l.sx * l.sy * l.tz, l.x - l.jx, l.y - l.jy, l.z - l.iz);
-        m = this.hash3d(l.ix, l.iy, l.jz) & 0xff;
-        sum += this.incrSum(m, l.tx * l.ty * l.sz, l.x - l.ix, l.y - l.iy, l.z - l.jz);
-        m = this.hash3d(l.jx, l.iy, l.jz) & 0xff;
-        sum += this.incrSum(m, l.sx * l.ty * l.sz, l.x - l.jx, l.y - l.iy, l.z - l.jz);
-        m = this.hash3d(l.ix, l.jy, l.jz) & 0xff;
-        sum += this.incrSum(m, l.tx * l.sy * l.sz, l.x - l.ix, l.y - l.jy, l.z - l.jz);
-        m = this.hash3d(l.jx, l.jy, l.jz) & 0xff;
-        sum += this.incrSum(m, l.sx * l.sy * l.sz, l.x - l.jx, l.y - l.jy, l.z - l.jz);
+        m = this.hash3d(l.lowerCellX, l.lowerCellY, l.lowerCellZ) & 0xff;
+        sum = this.incrSum(
+            m,
+            l.lowerWeightX * l.lowerWeightY * l.lowerWeightZ,
+            l.x - l.lowerCellX,
+            l.y - l.lowerCellY,
+            l.z - l.lowerCellZ,
+        );
+        m = this.hash3d(l.upperCellX, l.lowerCellY, l.lowerCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.upperWeightX * l.lowerWeightY * l.lowerWeightZ,
+            l.x - l.upperCellX,
+            l.y - l.lowerCellY,
+            l.z - l.lowerCellZ,
+        );
+        m = this.hash3d(l.lowerCellX, l.upperCellY, l.lowerCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.lowerWeightX * l.upperWeightY * l.lowerWeightZ,
+            l.x - l.lowerCellX,
+            l.y - l.upperCellY,
+            l.z - l.lowerCellZ,
+        );
+        m = this.hash3d(l.upperCellX, l.upperCellY, l.lowerCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.upperWeightX * l.upperWeightY * l.lowerWeightZ,
+            l.x - l.upperCellX,
+            l.y - l.upperCellY,
+            l.z - l.lowerCellZ,
+        );
+        m = this.hash3d(l.lowerCellX, l.lowerCellY, l.upperCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.lowerWeightX * l.lowerWeightY * l.upperWeightZ,
+            l.x - l.lowerCellX,
+            l.y - l.lowerCellY,
+            l.z - l.upperCellZ,
+        );
+        m = this.hash3d(l.upperCellX, l.lowerCellY, l.upperCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.upperWeightX * l.lowerWeightY * l.upperWeightZ,
+            l.x - l.upperCellX,
+            l.y - l.lowerCellY,
+            l.z - l.upperCellZ,
+        );
+        m = this.hash3d(l.lowerCellX, l.upperCellY, l.upperCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.lowerWeightX * l.upperWeightY * l.upperWeightZ,
+            l.x - l.lowerCellX,
+            l.y - l.upperCellY,
+            l.z - l.upperCellZ,
+        );
+        m = this.hash3d(l.upperCellX, l.upperCellY, l.upperCellZ) & 0xff;
+        sum += this.incrSum(
+            m,
+            l.upperWeightX * l.upperWeightY * l.upperWeightZ,
+            l.x - l.upperCellX,
+            l.y - l.upperCellY,
+            l.z - l.upperCellZ,
+        );
 
         sum += 0.5;
         if (sum < 0.0) sum = 0.0;
@@ -167,60 +215,60 @@ export class ProceduralNoise {
         }
 
         const l: _Lattice = this.setupLattice(x, y, z);
-        let px: number = l.x - l.ix;
-        let py: number = l.y - l.iy;
-        let pz: number = l.z - l.iz;
-        let s: number = l.tx * l.ty * l.tz;
-        let m: number = this.hash3d(l.ix, l.iy, l.iz) & 0xff;
+        let px: number = l.x - l.lowerCellX;
+        let py: number = l.y - l.lowerCellY;
+        let pz: number = l.z - l.lowerCellZ;
+        let s: number = l.lowerWeightX * l.lowerWeightY * l.lowerWeightZ;
+        let m: number = this.hash3d(l.lowerCellX, l.lowerCellY, l.lowerCellZ) & 0xff;
         let rx: number = this.incrSum(m, s, px, py, pz);
         let ry: number = this.incrSum(m + 4, s, px, py, pz);
         let rz: number = this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.jx, l.iy, l.iz) & 0xff;
-        px = l.x - l.jx;
-        s = l.sx * l.ty * l.tz;
+        m = this.hash3d(l.upperCellX, l.lowerCellY, l.lowerCellZ) & 0xff;
+        px = l.x - l.upperCellX;
+        s = l.upperWeightX * l.lowerWeightY * l.lowerWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.jx, l.jy, l.iz) & 0xff;
-        py = l.y - l.jy;
-        s = l.sx * l.sy * l.tz;
+        m = this.hash3d(l.upperCellX, l.upperCellY, l.lowerCellZ) & 0xff;
+        py = l.y - l.upperCellY;
+        s = l.upperWeightX * l.upperWeightY * l.lowerWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.ix, l.jy, l.iz) & 0xff;
-        px = l.x - l.ix;
-        s = l.tx * l.sy * l.tz;
+        m = this.hash3d(l.lowerCellX, l.upperCellY, l.lowerCellZ) & 0xff;
+        px = l.x - l.lowerCellX;
+        s = l.lowerWeightX * l.upperWeightY * l.lowerWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.ix, l.jy, l.jz) & 0xff;
-        pz = l.z - l.jz;
-        s = l.tx * l.sy * l.sz;
+        m = this.hash3d(l.lowerCellX, l.upperCellY, l.upperCellZ) & 0xff;
+        pz = l.z - l.upperCellZ;
+        s = l.lowerWeightX * l.upperWeightY * l.upperWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.jx, l.jy, l.jz) & 0xff;
-        px = l.x - l.jx;
-        s = l.sx * l.sy * l.sz;
+        m = this.hash3d(l.upperCellX, l.upperCellY, l.upperCellZ) & 0xff;
+        px = l.x - l.upperCellX;
+        s = l.upperWeightX * l.upperWeightY * l.upperWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.jx, l.iy, l.jz) & 0xff;
-        py = l.y - l.iy;
-        s = l.sx * l.ty * l.sz;
+        m = this.hash3d(l.upperCellX, l.lowerCellY, l.upperCellZ) & 0xff;
+        py = l.y - l.lowerCellY;
+        s = l.upperWeightX * l.lowerWeightY * l.upperWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
 
-        m = this.hash3d(l.ix, l.iy, l.jz) & 0xff;
-        px = l.x - l.ix;
-        s = l.tx * l.ty * l.sz;
+        m = this.hash3d(l.lowerCellX, l.lowerCellY, l.upperCellZ) & 0xff;
+        px = l.x - l.lowerCellX;
+        s = l.lowerWeightX * l.lowerWeightY * l.upperWeightZ;
         rx += this.incrSum(m, s, px, py, pz);
         ry += this.incrSum(m + 4, s, px, py, pz);
         rz += this.incrSum(m + 8, s, px, py, pz);
@@ -316,18 +364,18 @@ export class ProceduralNoise {
         l.x = x - ProceduralNoise.MIN_X;
         l.y = y - ProceduralNoise.MIN_Y;
         l.z = z - ProceduralNoise.MIN_Z;
-        l.ix = Math.trunc(l.x);
-        l.iy = Math.trunc(l.y);
-        l.iz = Math.trunc(l.z);
-        l.jx = l.ix + 1;
-        l.jy = l.iy + 1;
-        l.jz = l.iz + 1;
-        l.sx = this.sCurve(l.x - l.ix);
-        l.sy = this.sCurve(l.y - l.iy);
-        l.sz = this.sCurve(l.z - l.iz);
-        l.tx = 1.0 - l.sx;
-        l.ty = 1.0 - l.sy;
-        l.tz = 1.0 - l.sz;
+        l.lowerCellX = Math.trunc(l.x);
+        l.lowerCellY = Math.trunc(l.y);
+        l.lowerCellZ = Math.trunc(l.z);
+        l.upperCellX = l.lowerCellX + 1;
+        l.upperCellY = l.lowerCellY + 1;
+        l.upperCellZ = l.lowerCellZ + 1;
+        l.upperWeightX = this.sCurve(l.x - l.lowerCellX);
+        l.upperWeightY = this.sCurve(l.y - l.lowerCellY);
+        l.upperWeightZ = this.sCurve(l.z - l.lowerCellZ);
+        l.lowerWeightX = 1.0 - l.upperWeightX;
+        l.lowerWeightY = 1.0 - l.upperWeightY;
+        l.lowerWeightZ = 1.0 - l.upperWeightZ;
         return l;
     }
 

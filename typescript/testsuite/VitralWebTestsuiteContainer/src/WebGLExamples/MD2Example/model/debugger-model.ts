@@ -16,7 +16,7 @@ import {
  * The program's whole state: the MD2 mesh, the camera looking at it from a
  * hundred units along -Y, three white point lights, the renderer configuration
  * the quality controller edits, and the index of the object the XYZ keys move
- * (-1 meaning the camera). `scene`, `x`, `p0`, `p1` and `p2` are Java's and are
+ * (-1 meaning the camera). `scene`, `x`, `point0`, `point1` and `point2` are Java's and are
  * carried over unused, as they are unused there.
  *
  * Java exposes every field directly; the container's other modules read their
@@ -32,9 +32,9 @@ export class DebuggerModel {
   private readonly md2Mesh: Md2Mesh;
 
   private x = 0.0;
-  private p0: Vertex2D | null = null;
-  private p1: Vertex2D | null = null;
-  private p2: Vertex2D | null = null;
+  private point0: Vertex2D | null = null;
+  private point1: Vertex2D | null = null;
+  private point2: Vertex2D | null = null;
   private selectedObject: number;
 
   constructor() {
@@ -106,28 +106,28 @@ export class DebuggerModel {
     this.x = x;
   }
 
-  getP0(): Vertex2D | null {
-    return this.p0;
+  getPoint0(): Vertex2D | null {
+    return this.point0;
   }
 
-  setP0(p0: Vertex2D | null): void {
-    this.p0 = p0;
+  setPoint0(p0: Vertex2D | null): void {
+    this.point0 = p0;
   }
 
-  getP1(): Vertex2D | null {
-    return this.p1;
+  getPoint1(): Vertex2D | null {
+    return this.point1;
   }
 
-  setP1(p1: Vertex2D | null): void {
-    this.p1 = p1;
+  setPoint1(p1: Vertex2D | null): void {
+    this.point1 = p1;
   }
 
-  getP2(): Vertex2D | null {
-    return this.p2;
+  getPoint2(): Vertex2D | null {
+    return this.point2;
   }
 
-  setP2(p2: Vertex2D | null): void {
-    this.p2 = p2;
+  setPoint2(p2: Vertex2D | null): void {
+    this.point2 = p2;
   }
 
   getSelectedObject(): number {

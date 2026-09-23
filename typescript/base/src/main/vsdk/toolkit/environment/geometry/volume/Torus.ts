@@ -130,12 +130,12 @@ export class Torus extends Solid {
             inRay.getOrigin().y() + intT * inRay.getDirection().y(),
             inRay.getOrigin().z() + intT * inRay.getDirection().z(),
         );
-        outData.p = hitPoint;
+        outData.point = hitPoint;
         const r2 = this.minorRadius * this.minorRadius;
         const R2 = this.majorRadius * this.majorRadius;
         const hitNormSquared = hitPoint.x() * hitPoint.x() + hitPoint.y() * hitPoint.y() + hitPoint.z() * hitPoint.z();
 
-        outData.n = new Vector3Dd(
+        outData.normal = new Vector3Dd(
             4 * hitPoint.x() * (hitNormSquared - r2 - R2),
             4 * hitPoint.y() * (hitNormSquared - r2 - R2),
             4 * hitPoint.z() * (hitNormSquared - r2 - R2) + 8 * R2 * hitPoint.z(),

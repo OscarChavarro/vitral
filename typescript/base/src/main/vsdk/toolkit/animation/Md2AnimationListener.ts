@@ -21,7 +21,7 @@ export class Md2AnimationListener extends AnimationListener {
 
         if (this.md2Mesh !== null) {
             //model.setAnimationTestCursorPosition(p);
-            this.md2Mesh.setElapsedTimeSeg(e.getT());
+            this.md2Mesh.setElapsedTimeSeg(e.getTime());
         }
     }
 }

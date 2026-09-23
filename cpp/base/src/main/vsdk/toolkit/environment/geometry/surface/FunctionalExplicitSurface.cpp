@@ -7,47 +7,47 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
-FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : internalGeometry(0)
+FunctionalExplicitSurface::FunctionalExplicitSurface(const java::String& fxy) : internalTriangleMesh(0)
 {
     init(fxy);
 }
 
 FunctionalExplicitSurface::~FunctionalExplicitSurface()
 {
-    if (internalGeometry != 0) delete internalGeometry;
+    if (internalTriangleMesh != 0) delete internalTriangleMesh;
 }
 
 void FunctionalExplicitSurface::init(const java::String& fxy)
 {
     functionExpression = fxy;
-    minx = miny = minz = -1.0;
-    maxx = maxy = maxz = 1.0;
-    nx = 10;
-    ny = 10;
+    minXBound = minYBound = minZBound = -1.0;
+    maxXBound = maxYBound = maxZBound = 1.0;
+    tesselationHintX = 10;
+    tesselationHintY = 10;
     updateInternalGeometry();
 }
 
 java::String FunctionalExplicitSurface::getFunctionExpression() const { return functionExpression; }
 
-void FunctionalExplicitSurface::setBounds(double minx, double miny, double minz,
-                                          double maxx, double maxy, double maxz)
+void FunctionalExplicitSurface::setBounds(double minXBound, double minYBound, double minZBound,
+                                          double maxXBound, double maxYBound, double maxZBound)
 {
-    this->minx = minx; this->miny = miny; this->minz = minz;
-    this->maxx = maxx; this->maxy = maxy; this->maxz = maxz;
+    this->minXBound = minXBound; this->minYBound = minYBound; this->minZBound = minZBound;
+    this->maxXBound = maxXBound; this->maxYBound = maxYBound; this->maxZBound = maxZBound;
     updateInternalGeometry();
 }
 
-void FunctionalExplicitSurface::setTesselationHint(int tesx, int tesy) { nx = tesx; ny = tesy; updateInternalGeometry(); }
-int FunctionalExplicitSurface::getTesselationHintX() const { return nx; }
-int FunctionalExplicitSurface::getTesselationHintY() const { return ny; }
-double FunctionalExplicitSurface::getMinXBound() const { return minx; }
-double FunctionalExplicitSurface::getMinYBound() const { return miny; }
-double FunctionalExplicitSurface::getMinZBound() const { return minz; }
-double FunctionalExplicitSurface::getMaxXBound() const { return maxx; }
-double FunctionalExplicitSurface::getMaxYBound() const { return maxy; }
-double FunctionalExplicitSurface::getMaxZBound() const { return maxz; }
+void FunctionalExplicitSurface::setTesselationHint(int tesx, int tesy) { tesselationHintX = tesx; tesselationHintY = tesy; updateInternalGeometry(); }
+int FunctionalExplicitSurface::getTesselationHintX() const { return tesselationHintX; }
+int FunctionalExplicitSurface::getTesselationHintY() const { return tesselationHintY; }
+double FunctionalExplicitSurface::getMinXBound() const { return minXBound; }
+double FunctionalExplicitSurface::getMinYBound() const { return minYBound; }
+double FunctionalExplicitSurface::getMinZBound() const { return minZBound; }
+double FunctionalExplicitSurface::getMaxXBound() const { return maxXBound; }
+double FunctionalExplicitSurface::getMaxYBound() const { return maxYBound; }
+double FunctionalExplicitSurface::getMaxZBound() const { return maxZBound; }
 
-int FunctionalExplicitSurface::coord(int nx, int, int ix, int iy) { return ((nx+1)*iy) + ix; }
+int FunctionalExplicitSurface::coord(int tesselationHintX, int, int ix, int iy) { return ((tesselationHintX+1)*iy) + ix; }
 
 double FunctionalExplicitSurface::evalExpression(double x, double y, bool& ok) const
 {
@@ -67,29 +67,29 @@ double FunctionalExplicitSurface::evalExpression(double x, double y, bool& ok) c
 
 void FunctionalExplicitSurface::updateInternalGeometry()
 {
-    if (nx <= 0 || ny <= 0) return;
-    if (internalGeometry != 0) delete internalGeometry;
-    internalGeometry = new TriangleMesh();
+    if (tesselationHintX <= 0 || tesselationHintY <= 0) return;
+    if (internalTriangleMesh != 0) delete internalTriangleMesh;
+    internalTriangleMesh = new TriangleMesh();
 
-    double dx = (maxx - minx) / ((double)nx);
-    double dy = (maxy - miny) / ((double)ny);
+    double dx = (maxXBound - minXBound) / ((double)tesselationHintX);
+    double dy = (maxYBound - minYBound) / ((double)tesselationHintY);
 
-    internalGeometry->initVertexPositionsArray((nx+1)*(ny+1));
-    java::ArrayList<double>& v = internalGeometry->getVertexPositions();
+    internalTriangleMesh->initVertexPositionsArray((tesselationHintX+1)*(tesselationHintY+1));
+    java::ArrayList<double>& v = internalTriangleMesh->getVertexPositions();
 
     int index = 0;
-    for (int iy = 0; iy <= ny; iy++) {
-        double y = miny + ((double)iy)*dy;
-        for (int ix = 0; ix <= nx; ix++) {
-            double x = minx + ((double)ix)*dx;
+    for (int iy = 0; iy <= tesselationHintY; iy++) {
+        double y = minYBound + ((double)iy)*dy;
+        for (int ix = 0; ix <= tesselationHintX; ix++) {
+            double x = minXBound + ((double)ix)*dx;
             bool ok = true;
             double z = evalExpression(x, y, ok);
             if (!ok) {
                 Logger::reportMessage("FunctionalExplicitSurface", Logger::WARNING, "updateInternalGeometry", "Cannot evaluate algebraic expression!");
                 return;
             }
-            if (z > maxz) z = maxz;
-            if (z < minz) z = minz;
+            if (z > maxZBound) z = maxZBound;
+            if (z < minZBound) z = minZBound;
             v[3*index+0] = x;
             v[3*index+1] = y;
             v[3*index+2] = z;
@@ -97,28 +97,28 @@ void FunctionalExplicitSurface::updateInternalGeometry()
         }
     }
 
-    internalGeometry->initTriangleArrays(nx*ny*2);
-    java::ArrayList<int>& t = internalGeometry->getTriangleIndexes();
+    internalTriangleMesh->initTriangleArrays(tesselationHintX*tesselationHintY*2);
+    java::ArrayList<int>& t = internalTriangleMesh->getTriangleIndexes();
 
     index = 0;
-    for (int iy = 0; iy < ny; iy++) {
-        for (int ix = 0; ix < nx; ix++) {
-            t[3*index+0] = coord(nx, ny, ix, iy);
-            t[3*index+1] = coord(nx, ny, ix+1, iy);
-            t[3*index+2] = coord(nx, ny, ix+1, iy+1);
+    for (int iy = 0; iy < tesselationHintY; iy++) {
+        for (int ix = 0; ix < tesselationHintX; ix++) {
+            t[3*index+0] = coord(tesselationHintX, tesselationHintY, ix, iy);
+            t[3*index+1] = coord(tesselationHintX, tesselationHintY, ix+1, iy);
+            t[3*index+2] = coord(tesselationHintX, tesselationHintY, ix+1, iy+1);
             index++;
 
-            t[3*index+0] = coord(nx, ny, ix, iy);
-            t[3*index+1] = coord(nx, ny, ix+1, iy+1);
-            t[3*index+2] = coord(nx, ny, ix, iy+1);
+            t[3*index+0] = coord(tesselationHintX, tesselationHintY, ix, iy);
+            t[3*index+1] = coord(tesselationHintX, tesselationHintY, ix+1, iy+1);
+            t[3*index+2] = coord(tesselationHintX, tesselationHintY, ix, iy+1);
             index++;
         }
     }
 
-    internalGeometry->calculateNormals();
+    internalTriangleMesh->calculateNormals();
 }
 
-TriangleMesh* FunctionalExplicitSurface::getInternalTriangleMesh() const { return internalGeometry; }
+TriangleMesh* FunctionalExplicitSurface::getInternalTriangleMesh() const { return internalTriangleMesh; }
 
 /*
 Check the general interface contract in superclass method
@@ -126,7 +126,7 @@ Geometry.getMinMax.
 @return a new 6 valued double array containing the coordinates of a min-max
 bounding box for current geometry.
 */
-double* FunctionalExplicitSurface::getMinMax() { return internalGeometry ? internalGeometry->getMinMax() : 0; }
+double* FunctionalExplicitSurface::getMinMax() { return internalTriangleMesh ? internalTriangleMesh->getMinMax() : 0; }
 
 /*
 Check the general interface contract in superclass method
@@ -139,15 +139,15 @@ evaluate directly from algebraic function surface!
 */
 Ray* FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inOut_Ray)
 {
-    if (internalGeometry == 0) return 0;
+    if (internalTriangleMesh == 0) return 0;
     RayHit hit;
-    if (internalGeometry->doIntersectionFirstHit(inOut_Ray, &hit) && hit.ray() != 0) return new Ray(*hit.ray());
+    if (internalTriangleMesh->doIntersectionFirstHit(inOut_Ray, &hit) && hit.getRay() != 0) return new Ray(*hit.getRay());
     return 0;
 }
 
 bool FunctionalExplicitSurface::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 {
-    return internalGeometry ? internalGeometry->doIntersectionFirstHit(inRay, outHit) : false;
+    return internalTriangleMesh ? internalTriangleMesh->doIntersectionFirstHit(inRay, outHit) : false;
 }
 
 /*
@@ -159,9 +159,9 @@ Geometry.doExtraInformation.
 */
 void FunctionalExplicitSurface::doExtraInformation(const Ray& inRay, double inT, RayHit* outData)
 {
-    if (internalGeometry == 0 || outData == 0) return;
+    if (internalTriangleMesh == 0 || outData == 0) return;
     RayHit hit;
-    if (internalGeometry->doIntersectionFirstHit(inRay.withT(inT), &hit)) outData->clone(hit);
+    if (internalTriangleMesh->doIntersectionFirstHit(inRay.withT(inT), &hit)) outData->clone(hit);
 }
 
 /*
@@ -175,5 +175,5 @@ over the line.
 */
 int FunctionalExplicitSurface::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
 {
-    return internalGeometry ? internalGeometry->doContainmentTest(p, distanceTolerance) : OUTSIDE;
+    return internalTriangleMesh ? internalTriangleMesh->doContainmentTest(p, distanceTolerance) : OUTSIDE;
 }

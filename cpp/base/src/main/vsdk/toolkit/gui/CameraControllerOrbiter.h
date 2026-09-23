@@ -33,7 +33,7 @@ private:
     Camera* camera;
     int oldMouseX;
     int oldMouseY;
-    double deltaMov;
+    double deltaMovement;
     Vector3Dd pointOfInterest;
 
     double augmentLogarithmic(double val, double epsilon);

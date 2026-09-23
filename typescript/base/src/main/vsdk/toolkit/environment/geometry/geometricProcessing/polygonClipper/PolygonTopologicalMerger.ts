@@ -81,24 +81,25 @@ export class PolygonTopologicalMerger {
             for (let i = 0; i < contour.length; i++) {
                 const a = contour[i]!;
                 const b = contour[(i + 1) % contour.length]!;
-                if (!this.samePoint(a, b, epsilon)) segments.push({ a: this.copyVertex(a), b: this.copyVertex(b) });
+                if (!this.samePoint(a, b, epsilon))
+                    segments.push({ start: this.copyVertex(a), end: this.copyVertex(b) });
             }
         if (segments.length === 0) return contours;
         const signedUsage = new Map<string, { key: EdgeKey; balance: number }>();
         for (const segment of segments) {
             const splits: SplitPoint[] = [
-                { t: 0, p: segment.a },
-                { t: 1, p: segment.b },
+                { segmentParameter: 0, point: segment.start },
+                { segmentParameter: 1, point: segment.end },
             ];
             for (const other of segments) {
-                this.maybeAddPointOnSegment(segment, other.a, epsilon, splits);
-                this.maybeAddPointOnSegment(segment, other.b, epsilon, splits);
+                this.maybeAddPointOnSegment(segment, other.start, epsilon, splits);
+                this.maybeAddPointOnSegment(segment, other.end, epsilon, splits);
             }
-            splits.sort((a, b) => a.t - b.t);
+            splits.sort((a, b) => a.segmentParameter - b.segmentParameter);
             const dedup = this.dedupSplitPoints(splits, epsilon);
             for (let i = 0; i + 1 < dedup.length; i++) {
-                const p0 = dedup[i]!.p;
-                const p1 = dedup[i + 1]!.p;
+                const p0 = dedup[i]!.point;
+                const p1 = dedup[i + 1]!.point;
                 if (this.samePoint(p0, p1, epsilon)) continue;
                 const key = new EdgeKey(p0, p1, epsilon);
                 const id = key.id;
@@ -109,8 +110,8 @@ export class PolygonTopologicalMerger {
         }
         const edges: DirectedEdge[] = [];
         for (const { key, balance } of signedUsage.values()) {
-            if (balance > 0) edges.push({ start: key.a, end: key.b });
-            else if (balance < 0) edges.push({ start: key.b, end: key.a });
+            if (balance > 0) edges.push({ start: key.start, end: key.end });
+            else if (balance < 0) edges.push({ start: key.end, end: key.start });
         }
         return edges.length === 0 ? [] : this.extractLoopsFromBoundaryEdges(edges, epsilon);
     }
@@ -121,26 +122,26 @@ export class PolygonTopologicalMerger {
         output: SplitPoint[],
     ): void {
         const t = this.parameterOnSegment(segment, point, epsilon);
-        if (t >= -0.5) output.push({ t, p: this.copyVertex(point) });
+        if (t >= -0.5) output.push({ segmentParameter: t, point: this.copyVertex(point) });
     }
     private static parameterOnSegment(segment: Segment2D, point: Vertex2D, epsilon: number): number {
-        const dx = segment.b.x - segment.a.x,
-            dy = segment.b.y - segment.a.y,
+        const dx = segment.end.x - segment.start.x,
+            dy = segment.end.y - segment.start.y,
             len2 = dx * dx + dy * dy;
         if (len2 <= epsilon * epsilon) return -1;
-        let t = ((point.x - segment.a.x) * dx + (point.y - segment.a.y) * dy) / len2;
+        let t = ((point.x - segment.start.x) * dx + (point.y - segment.start.y) * dy) / len2;
         if (t < -epsilon || t > 1 + epsilon) return -1;
         t = Math.max(0, Math.min(1, t));
-        const x = segment.a.x + t * dx,
-            y = segment.a.y + t * dy;
+        const x = segment.start.x + t * dx,
+            y = segment.start.y + t * dy;
         return (point.x - x) ** 2 + (point.y - y) ** 2 > epsilon * epsilon ? -1 : t;
     }
     private static dedupSplitPoints(points: SplitPoint[], epsilon: number): SplitPoint[] {
         return points.filter(
             (point, i) =>
                 i === 0 ||
-                Math.abs(points[i - 1]!.t - point.t) > epsilon ||
-                !this.samePoint(points[i - 1]!.p, point.p, epsilon),
+                Math.abs(points[i - 1]!.segmentParameter - point.segmentParameter) > epsilon ||
+                !this.samePoint(points[i - 1]!.point, point.point, epsilon),
         );
     }
     private static extractLoopsFromBoundaryEdges(edges: DirectedEdge[], epsilon: number): Vertex2D[][] {
@@ -217,12 +218,12 @@ export class PolygonTopologicalMerger {
     }
 }
 interface Segment2D {
-    a: Vertex2D;
-    b: Vertex2D;
+    start: Vertex2D;
+    end: Vertex2D;
 }
 interface SplitPoint {
-    t: number;
-    p: Vertex2D;
+    segmentParameter: number;
+    point: Vertex2D;
 }
 interface DirectedEdge {
     start: Vertex2D;
@@ -234,13 +235,13 @@ class PointKey {
     }
 }
 class EdgeKey {
-    public readonly a: Vertex2D;
-    public readonly b: Vertex2D;
+    public readonly start: Vertex2D;
+    public readonly end: Vertex2D;
     public readonly id: string;
     public constructor(p0: Vertex2D, p1: Vertex2D, epsilon: number) {
         const k0 = PointKey.of(p0, epsilon),
             k1 = PointKey.of(p1, epsilon);
-        [this.a, this.b, this.id] =
+        [this.start, this.end, this.id] =
             k0 <= k1
                 ? [
                       new Vertex2D(p0.x, p0.y, p0.color.r(), p0.color.g(), p0.color.b()),
@@ -253,7 +254,7 @@ class EdgeKey {
                       `${k1}|${k0}`,
                   ];
     }
-    public isForward(start: Vertex2D, epsilon: number): boolean {
-        return Math.abs(this.a.x - start.x) <= epsilon && Math.abs(this.a.y - start.y) <= epsilon;
+    public isForward(candidate: Vertex2D, epsilon: number): boolean {
+        return Math.abs(this.start.x - candidate.x) <= epsilon && Math.abs(this.start.y - candidate.y) <= epsilon;
     }
 }

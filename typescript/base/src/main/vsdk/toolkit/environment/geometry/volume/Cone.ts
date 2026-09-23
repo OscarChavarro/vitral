@@ -109,8 +109,8 @@ export class Cone extends Solid {
             if (outInfo !== null) {
                 const px = ox + dx * t0;
                 const py = oy + dy * t0;
-                outInfo.p = new Vector3Dd(px, py, pz);
-                outInfo.n = new Vector3Dd(px, py, 0).normalized();
+                outInfo.point = new Vector3Dd(px, py, pz);
+                outInfo.normal = new Vector3Dd(px, py, 0).normalized();
             }
             return inOutRay.withT(t0);
         }
@@ -167,8 +167,8 @@ export class Cone extends Solid {
             if (outInfo !== null) {
                 const px = ox + dx * t0;
                 const py = oy + dy * t0;
-                outInfo.p = new Vector3Dd(px, py, shiftedPz + inH);
-                outInfo.n = new Vector3Dd(px, py, -shiftedPz * ratioSquared).normalized();
+                outInfo.point = new Vector3Dd(px, py, shiftedPz + inH);
+                outInfo.normal = new Vector3Dd(px, py, -shiftedPz * ratioSquared).normalized();
             }
             return inOutRay.withT(t0);
         }
@@ -191,8 +191,8 @@ export class Cone extends Solid {
                 const py = oy + dy * t;
                 if (VSDK.square(px) + VSDK.square(py) < VSDK.square(inR)) {
                     if (outInfo !== null) {
-                        outInfo.n = new Vector3Dd(0, 0, 1);
-                        outInfo.p = new Vector3Dd(px, py, inH);
+                        outInfo.normal = new Vector3Dd(0, 0, 1);
+                        outInfo.point = new Vector3Dd(px, py, inH);
                     }
                     return inOutRay.withT(t);
                 }
@@ -351,7 +351,7 @@ export class Cone extends Solid {
         if (outHit === undefined) {
             const hit = new RayHit();
             if (this.doIntersectionFirstHit(inOutRay, hit)) {
-                return hit.ray();
+                return hit.getRay();
             }
             return null;
         }
@@ -376,7 +376,7 @@ export class Cone extends Solid {
                 (tap1Hit !== null && bodyHit === null) ||
                 (tap1Hit !== null && bodyHit !== null && tap1Hit.getT() < bodyHit.getT())
             ) {
-                infoTap1.n = infoTap1.n.multiply(-1);
+                infoTap1.normal = infoTap1.normal.multiply(-1);
                 winner = inOutRay.withT(tap1Hit.getT());
                 winnerInfo = infoTap1;
             } else if (bodyHit !== null) {
@@ -422,9 +422,9 @@ export class Cone extends Solid {
         }
         if (outHit !== null) {
             outHit.setRay(winner);
-            outHit.p = new Vector3Dd(winnerInfo!.p);
-            outHit.n = new Vector3Dd(winnerInfo!.n).normalized();
-            outHit.t = new Vector3Dd(winnerInfo!.t);
+            outHit.point = new Vector3Dd(winnerInfo!.point);
+            outHit.normal = new Vector3Dd(winnerInfo!.normal).normalized();
+            outHit.tangent = new Vector3Dd(winnerInfo!.tangent);
             outHit.u = winnerInfo!.u;
             outHit.v = winnerInfo!.v;
             outHit.material = winnerInfo!.material;

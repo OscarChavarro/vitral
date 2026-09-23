@@ -77,11 +77,11 @@ Intersection* MeshModel::makeIntersectionCallback(const Ray& ray)
         SimpleBody* body = bodies.get(i);
         RayHit hit(RayHit::DETAIL_POINT | RayHit::DETAIL_NORMAL);
         if ( body != 0 && body->doIntersectionFirstHit(ray, &hit) && hit.hasHitDistance() ) {
-            double t = hit.hitDistance();
+            double t = hit.getHitDistance();
             if ( t > 1e-6 && t < closestT ) {
                 closestT = t;
                 delete closest;
-                closest = new Intersection(t, hit.p, hit.n);
+                closest = new Intersection(t, hit.point, hit.normal);
             }
         }
     }

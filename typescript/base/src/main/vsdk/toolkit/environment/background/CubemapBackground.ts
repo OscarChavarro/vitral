@@ -9,7 +9,7 @@ import { Background } from "./Background.js";
 
 /** A six-image environment map sampled by casting a ray through a unit cube. */
 export class CubemapBackground extends Background {
-    private readonly backgroundImages: RGBAImageUncompressed[];
+    private readonly images: RGBAImageUncompressed[];
     private readonly boundingCube = new Box(1, 1, 1);
 
     public constructor(
@@ -22,7 +22,7 @@ export class CubemapBackground extends Background {
         up: RGBAImageUncompressed,
     ) {
         super();
-        this.backgroundImages = [front, right, back, left, down, up];
+        this.images = [front, right, back, left, down, up];
     }
 
     public override colorInDireccion(d: Vector3Dd): ColorRgb {
@@ -30,39 +30,39 @@ export class CubemapBackground extends Background {
         const hit = new RayHit();
         if (!this.boundingCube.doIntersectionFirstHit(ray, hit)) return new ColorRgb();
 
-        const plane = this.classifyPlane(hit.n);
+        const plane = this.classifyPlane(hit.normal);
         let u = 1 - hit.u;
         let v = 1 - hit.v;
         let image: RGBAImageUncompressed;
         switch (plane) {
             case 1:
-                image = this.backgroundImages[5]!;
+                image = this.images[5]!;
                 u = 1 - hit.v;
                 v = hit.u;
                 break;
             case 2:
-                image = this.backgroundImages[4]!;
+                image = this.images[4]!;
                 u = hit.v;
                 v = 1 - hit.u;
                 break;
             case 3:
-                image = this.backgroundImages[0]!;
+                image = this.images[0]!;
                 break;
             case 4:
-                image = this.backgroundImages[2]!;
+                image = this.images[2]!;
                 break;
             case 5:
-                image = this.backgroundImages[1]!;
+                image = this.images[1]!;
                 break;
             default:
-                image = this.backgroundImages[3]!;
+                image = this.images[3]!;
                 break;
         }
         return image.getColorRgbBiLinear(u, v);
     }
 
     public getImages(): RGBAImageUncompressed[] {
-        return this.backgroundImages;
+        return this.images;
     }
 
     public getCamera(): Camera {

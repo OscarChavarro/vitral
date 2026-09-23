@@ -37,7 +37,7 @@ public class AndroidGLES20SharedContextFactory
     public static int[] getPrimaryAttribList() {
         return primaryAttribList;
     }
-    private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+    private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
     private int mEGLContextClientVersion = 2;
     private static EGLContext primaryContext = null;
     private static EGLConfig primaryConfig = null;

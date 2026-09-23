@@ -329,7 +329,7 @@ public class QuadMesh extends Surface {
     doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
         if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }

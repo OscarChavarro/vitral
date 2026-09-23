@@ -112,10 +112,10 @@ public class ScaleGizmo extends Gizmo {
     private static final double BAND_INNER_REACH = 0.52;
     private static final double BAND_OUTER_REACH = 0.73;
 
-    private Matrix4x4d T;
+    private Matrix4x4d transformationMatrix;
     private Camera camera;
 
-    /// Scale factors shown (and edited) by the gizmo; kept apart from `T`,
+    /// Scale factors shown (and edited) by the gizmo; kept apart from `transformationMatrix`,
     /// which only carries the orientation and position of its frame
     private Vector3Dd scale;
 
@@ -135,7 +135,7 @@ public class ScaleGizmo extends Gizmo {
 
     /// Geometric model based in primitive instancing: primitive instances,
     /// always of size 6, in the order given by the `*_ELEMENT` constants
-    private final ArrayList<SimpleBody> elementInstances;
+    private final ArrayList<SimpleBody> elements;
 
     private final ColorRgb[] axisColors;
 
@@ -150,7 +150,7 @@ public class ScaleGizmo extends Gizmo {
     */
     public ScaleGizmo(Camera cam)
     {
-        T = new Matrix4x4d();
+        transformationMatrix = new Matrix4x4d();
         scale = new Vector3Dd(1, 1, 1);
         baseApparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         apparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
@@ -173,9 +173,9 @@ public class ScaleGizmo extends Gizmo {
         shaftModel = new Cone(initialShaftRadius, initialShaftRadius, AXIS_LENGTH - TIP_SIZE);
         tipModel = new Box(TIP_SIZE, TIP_SIZE, TIP_SIZE);
 
-        elementInstances = new ArrayList<>();
+        elements = new ArrayList<>();
         for ( int i = 0; i < 6; i++ ) {
-            elementInstances.add(new SimpleBody());
+            elements.add(new SimpleBody());
         }
 
         setCamera(cam);
@@ -294,28 +294,28 @@ public class ScaleGizmo extends Gizmo {
 
     public Vector3Dd getPosition()
     {
-        return T.extractTranslation();
+        return transformationMatrix.extractTranslation();
     }
 
     public void setPosition(Vector3Dd p)
     {
-        setTransformationMatrix(T.withTranslation(p));
+        setTransformationMatrix(transformationMatrix.withTranslation(p));
     }
 
     /**
     Sets the frame (orientation and position) of the gizmo and recalculates
     its geometry.
-    @param T orientation and position of the frame of the gizmo
+    @param transformationMatrix orientation and position of the frame of the gizmo
     */
-    public void setTransformationMatrix(Matrix4x4d T)
+    public void setTransformationMatrix(Matrix4x4d transformationMatrix)
     {
-        this.T = T;
+        this.transformationMatrix = transformationMatrix;
         updateGeometryState();
     }
 
     public Matrix4x4d getTransformationMatrix()
     {
-        return T;
+        return transformationMatrix;
     }
 
     /**
@@ -352,7 +352,7 @@ public class ScaleGizmo extends Gizmo {
 
     private void updateScale()
     {
-        if ( camera == null || T == null ) {
+        if ( camera == null || transformationMatrix == null ) {
             return;
         }
         camera.updateVectors();
@@ -551,7 +551,7 @@ public class ScaleGizmo extends Gizmo {
         int nearestGroup = NULL_GROUP;
         int index = 1;
 
-        for ( SimpleBody element : elementInstances ) {
+        for ( SimpleBody element : elements ) {
             Ray hit = element.getGeometry() != null ?
                 element.doIntersectionFirstHit(ray.withT(Double.MAX_VALUE)) : null;
 
@@ -607,7 +607,7 @@ public class ScaleGizmo extends Gizmo {
 
     public ArrayList<SimpleBody> getElements()
     {
-        return elementInstances;
+        return elements;
     }
 
     /**
@@ -618,7 +618,7 @@ public class ScaleGizmo extends Gizmo {
     {
         checkAxis(axis);
 
-        Matrix4x4d rotation = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d rotation = new Matrix4x4d(transformationMatrix).withoutTranslation();
 
         return rotation.multiply(unitAxis(axis)).normalized();
     }
@@ -725,11 +725,11 @@ public class ScaleGizmo extends Gizmo {
     */
     private void calculateGeometryState()
     {
-        if ( T == null ) {
+        if ( transformationMatrix == null ) {
             return;
         }
 
-        Matrix4x4d R = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d R = new Matrix4x4d(transformationMatrix).withoutTranslation();
         Vector3Dd origin = getPosition();
         double totalLength = currentScale*AXIS_LENGTH;
         double tipSize = currentScale*TIP_SIZE;
@@ -746,7 +746,7 @@ public class ScaleGizmo extends Gizmo {
             Matrix4x4d eleR = R.multiply(axisTilt(axis));
             Matrix4x4d eleRi = new Matrix4x4d(eleR).invert();
 
-            SimpleBody shaft = elementInstances.get(2*axis);
+            SimpleBody shaft = elements.get(2*axis);
 
             shaft.setGeometry(shaftModel);
             shaft.setMaterial(material);
@@ -754,7 +754,7 @@ public class ScaleGizmo extends Gizmo {
             shaft.setRotationInverse(eleRi);
             shaft.setPosition(origin);
 
-            SimpleBody tip = elementInstances.get(2*axis + 1);
+            SimpleBody tip = elements.get(2*axis + 1);
 
             tip.setGeometry(tipModel);
             tip.setMaterial(material);
@@ -908,14 +908,14 @@ public class ScaleGizmo extends Gizmo {
             return false;
         }
 
-        char unicode_id = keyEvent.unicode_id;
+        char unicodeId = keyEvent.unicodeId;
         int keycode = keyEvent.keycode;
         double deltaMov = 1.1;
         boolean updateNeeded = false;
         Vector3Dd s = scale;
 
-        if ( unicode_id != KeyEvent.KEY_NONE ) {
-            switch ( unicode_id ) {
+        if ( unicodeId != KeyEvent.KEY_NONE ) {
+            switch ( unicodeId ) {
               case 'x':
                 s = s.withX(s.x() / deltaMov);
                 updateNeeded = true;

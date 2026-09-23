@@ -86,9 +86,9 @@ export class TriangleRasterizer {
                 continue;
             }
 
-            const vertexA: Vertex2D = polygonVertices[triangle.a]!;
-            const vertexB: Vertex2D = polygonVertices[triangle.b]!;
-            const vertexC: Vertex2D = polygonVertices[triangle.c]!;
+            const vertexA: Vertex2D = polygonVertices[triangle.point0]!;
+            const vertexB: Vertex2D = polygonVertices[triangle.point1]!;
+            const vertexC: Vertex2D = polygonVertices[triangle.point2]!;
 
             const ax: number = TriangleRasterizer.projectX(vertexA.x, minX, scale, offsetX);
             const ay: number = TriangleRasterizer.projectY(vertexA.y, minY, scale, offsetY);
@@ -128,12 +128,12 @@ export class TriangleRasterizer {
         vertexCount: number,
     ): boolean {
         return (
-            triangle.a >= 0 &&
-            triangle.b >= 0 &&
-            triangle.c >= 0 &&
-            triangle.a < vertexCount &&
-            triangle.b < vertexCount &&
-            triangle.c < vertexCount
+            triangle.point0 >= 0 &&
+            triangle.point1 >= 0 &&
+            triangle.point2 >= 0 &&
+            triangle.point0 < vertexCount &&
+            triangle.point1 < vertexCount &&
+            triangle.point2 < vertexCount
         );
     }
 

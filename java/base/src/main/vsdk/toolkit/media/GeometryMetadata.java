@@ -26,8 +26,8 @@ public class GeometryMetadata extends MediaEntity
     private static long lastId = 0;
 
     private long id;
-    private String objectFilename;
-    private ArrayList<ShapeDescriptor> descriptorsList;
+    private String filename;
+    private ArrayList<ShapeDescriptor> descriptors;
 
     /**
     Given a pair of GeometryMetadata elements, this method computes the
@@ -52,8 +52,8 @@ public class GeometryMetadata extends MediaEntity
         double acum = 0;
 
         //-----------------------------------------------------------------
-        for ( i = 0; i < this.descriptorsList.size(); i++ ) {
-            aa = this.descriptorsList.get(i);
+        for ( i = 0; i < this.descriptors.size(); i++ ) {
+            aa = this.descriptors.get(i);
             if ( aa.getLabel().equals(subGroup) ) {
                 a = aa;
             }
@@ -63,8 +63,8 @@ public class GeometryMetadata extends MediaEntity
         }
 
         //-----------------------------------------------------------------
-        for ( i = 0; i < other.descriptorsList.size(); i++ ) {
-            bb = other.descriptorsList.get(i);
+        for ( i = 0; i < other.descriptors.size(); i++ ) {
+            bb = other.descriptors.get(i);
             if ( bb.getLabel().equals(subGroup) ) {
                 b = bb;
             }
@@ -91,8 +91,8 @@ public class GeometryMetadata extends MediaEntity
     {
         lastId++;
         id = lastId;
-        objectFilename = null;
-        descriptorsList = new ArrayList<ShapeDescriptor>();
+        filename = null;
+        descriptors = new ArrayList<ShapeDescriptor>();
     }
 
     public void setId(long id)
@@ -109,21 +109,21 @@ public class GeometryMetadata extends MediaEntity
     public void setFilename(String filename)
     {
         if ( filename != null && filename.length() > 0 ) {
-            objectFilename = filename;
+            this.filename = filename;
         }
         else {
-            objectFilename = null;
+            this.filename = null;
         }
     }
 
     public String getFilename()
     {
-        return objectFilename;
+        return filename;
     }
 
     public ArrayList<ShapeDescriptor> getDescriptors()
     {
-        return descriptorsList;
+        return descriptors;
     }
 
     public ShapeDescriptor getDescriptorByName(String name)
@@ -131,8 +131,8 @@ public class GeometryMetadata extends MediaEntity
         int i;
         ShapeDescriptor s;
 
-        for ( i = 0; i < descriptorsList.size(); i++ ) {
-            s = descriptorsList.get(i);
+        for ( i = 0; i < descriptors.size(); i++ ) {
+            s = descriptors.get(i);
             if ( s.getLabel().equals(name) ) {
                 return s;
             }
@@ -143,11 +143,11 @@ public class GeometryMetadata extends MediaEntity
     @Override
     public String toString()
     {
-        String msg = objectFilename;
-        msg += "\n    . " + descriptorsList.size() + " shape descriptors\n";
+        String msg = filename;
+        msg += "\n    . " + descriptors.size() + " shape descriptors\n";
         int i;
-        for ( i = 0; i < descriptorsList.size(); i++ ) {
-            msg += "        . " + descriptorsList.get(i).getClass().getName();
+        for ( i = 0; i < descriptors.size(); i++ ) {
+            msg += "        . " + descriptors.get(i).getClass().getName();
         }
         return msg;
     }

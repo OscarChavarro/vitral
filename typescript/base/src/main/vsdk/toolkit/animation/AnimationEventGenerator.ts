@@ -71,12 +71,12 @@ export class AnimationEventGenerator {
         // callback dispatches the reading the previous iteration took before
         // taking the next one.
         t = this.getRealTimeSeconds() - t0;
-        e.setT(t);
+        e.setTime(t);
         this.timerId = setInterval(
             () => {
                 this.dispatch(e);
                 t = this.getRealTimeSeconds() - t0;
-                e.setT(t);
+                e.setTime(t);
             },
             Math.trunc(1000 / this.fps),
         );

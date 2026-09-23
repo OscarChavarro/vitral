@@ -117,7 +117,7 @@ public class RotateGizmo extends Gizmo {
         {0, 0, 0, 1}
     };
 
-    private Matrix4x4d T;
+    private Matrix4x4d transformationMatrix;
     private Camera camera;
 
     /// Geometric model based in primitive instancing: one torus for each ring
@@ -157,7 +157,7 @@ public class RotateGizmo extends Gizmo {
     */
     public RotateGizmo(Camera cam)
     {
-        T = new Matrix4x4d();
+        transformationMatrix = new Matrix4x4d();
         baseApparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         apparentSizeInPixels = DEFAULT_APPARENT_SIZE_IN_PIXELS;
         currentScale = 1.0;
@@ -396,27 +396,27 @@ public class RotateGizmo extends Gizmo {
 
     public Vector3Dd getPosition()
     {
-        return T.extractTranslation();
+        return transformationMatrix.extractTranslation();
     }
 
     public void setPosition(Vector3Dd p)
     {
-        setTransformationMatrix(T.withTranslation(p));
+        setTransformationMatrix(transformationMatrix.withTranslation(p));
     }
 
     /**
     Sets the frame of the gizmo and recalculates the geometry of its rings.
-    @param T orientation and position of the frame the rings belong to
+    @param transformationMatrix orientation and position of the frame the rings belong to
     */
-    public void setTransformationMatrix(Matrix4x4d T)
+    public void setTransformationMatrix(Matrix4x4d transformationMatrix)
     {
-        this.T = T;
+        this.transformationMatrix = transformationMatrix;
         updateGeometryState();
     }
 
     public Matrix4x4d getTransformationMatrix()
     {
-        return T;
+        return transformationMatrix;
     }
 
     /**
@@ -428,7 +428,7 @@ public class RotateGizmo extends Gizmo {
         updateScale();
 
         double ringRadius = getRingRadius();
-        Matrix4x4d rotation = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d rotation = new Matrix4x4d(transformationMatrix).withoutTranslation();
         Vector3Dd position = getPosition();
 
         for ( int ring = 0; ring < RING_COUNT; ring++ ) {
@@ -537,7 +537,7 @@ public class RotateGizmo extends Gizmo {
     {
         checkRing(ring);
 
-        Matrix4x4d rotation = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d rotation = new Matrix4x4d(transformationMatrix).withoutTranslation();
 
         return rotation.multiply(unitAxis(ring)).normalized();
     }
@@ -647,7 +647,7 @@ public class RotateGizmo extends Gizmo {
 
         Vector3Dd center = getPosition();
         Vector3Dd axis = getAxisDirection(ring);
-        Matrix4x4d rotation = new Matrix4x4d(T).withoutTranslation();
+        Matrix4x4d rotation = new Matrix4x4d(transformationMatrix).withoutTranslation();
         // The plane of the ring is spanned by the next two axes (X: YZ,
         // Y: ZX, Z: XY), so the ring goes around its axis counterclockwise
         Vector3Dd u = rotation.multiply(unitAxis((ring + 1) % RING_COUNT)).normalized();
@@ -1137,7 +1137,7 @@ public class RotateGizmo extends Gizmo {
     */
     public InputGizmo getInputGizmo()
     {
-        double[] angles = extractAnglesInDegrees(T);
+        double[] angles = extractAnglesInDegrees(transformationMatrix);
 
         for ( int ring = 0; ring < RING_COUNT; ring++ ) {
             inputGizmo.setValue(ring, angles[ring]);

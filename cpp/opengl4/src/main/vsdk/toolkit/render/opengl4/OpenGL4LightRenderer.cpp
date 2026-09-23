@@ -13,11 +13,11 @@
 #include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
-double OpenGL4LightRenderer::scale_ = 1.0;
-unsigned int OpenGL4LightRenderer::vao_ = 0;
-unsigned int OpenGL4LightRenderer::vboPositions_ = 0;
-unsigned int OpenGL4LightRenderer::vboColors_ = 0;
-unsigned int OpenGL4LightRenderer::program_ = 0;
+double OpenGL4LightRenderer::scale = 1.0;
+unsigned int OpenGL4LightRenderer::vao = 0;
+unsigned int OpenGL4LightRenderer::vboPositions = 0;
+unsigned int OpenGL4LightRenderer::vboColors = 0;
+unsigned int OpenGL4LightRenderer::program = 0;
 
 unsigned int OpenGL4LightRenderer::compileShader(unsigned int type, const char* source)
 {
@@ -35,7 +35,7 @@ unsigned int OpenGL4LightRenderer::compileShader(unsigned int type, const char* 
 
 bool OpenGL4LightRenderer::initIfNeeded()
 {
-    if (program_ != 0) return true;
+    if (program != 0) return true;
 
     static const char* kVertexShader =
         "#version 410 core\n"
@@ -64,24 +64,24 @@ bool OpenGL4LightRenderer::initIfNeeded()
         return false;
     }
 
-    program_ = glCreateProgram();
-    glAttachShader(program_, vs);
-    glAttachShader(program_, fs);
-    glLinkProgram(program_);
+    program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
     glDeleteShader(vs);
     glDeleteShader(fs);
 
     int ok = 0;
-    glGetProgramiv(program_, GL_LINK_STATUS, &ok);
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
     if (!ok) {
-        glDeleteProgram(program_);
-        program_ = 0;
+        glDeleteProgram(program);
+        program = 0;
         return false;
     }
 
-    glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &vboPositions_);
-    glGenBuffers(1, &vboColors_);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vboPositions);
+    glGenBuffers(1, &vboColors);
     return true;
 }
 
@@ -169,7 +169,7 @@ void OpenGL4LightRenderer::drawCross(const Light* light, Camera* camera)
         mvp = camera->calculateProjectionMatrix();
     }
 
-    double halfAxisLength = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale_;
+    double halfAxisLength = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale;
     Vector3Dd p = light->getPosition();
     ColorRgb c = light->getEmission();
 
@@ -214,7 +214,7 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
     camera->updateViewportResize(viewportWidth, viewportHeight);
     Matrix4x4d mvp = camera->calculateProjectionMatrix();
 
-    double worldHalfSize = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale_;
+    double worldHalfSize = calculateHalfAxisLength(light, camera, viewportWidth, viewportHeight) * scale;
     double worldFullSize = 2.0 * worldHalfSize;
 
     Vector3Dd lightPosition = light->getPosition();
@@ -264,18 +264,18 @@ void OpenGL4LightRenderer::drawOmniBillboard(const Light* light, Camera* camera)
 
 double OpenGL4LightRenderer::getScale()
 {
-    return scale_;
+    return scale;
 }
 
 void OpenGL4LightRenderer::setScale(double newScale)
 {
-    scale_ = newScale;
+    scale = newScale;
 }
 
 void OpenGL4LightRenderer::dispose()
 {
-    if (vboPositions_ != 0) { glDeleteBuffers(1, &vboPositions_); vboPositions_ = 0; }
-    if (vboColors_ != 0) { glDeleteBuffers(1, &vboColors_); vboColors_ = 0; }
-    if (vao_ != 0) { glDeleteVertexArrays(1, &vao_); vao_ = 0; }
-    if (program_ != 0) { glDeleteProgram(program_); program_ = 0; }
+    if (vboPositions != 0) { glDeleteBuffers(1, &vboPositions); vboPositions = 0; }
+    if (vboColors != 0) { glDeleteBuffers(1, &vboColors); vboColors = 0; }
+    if (vao != 0) { glDeleteVertexArrays(1, &vao); vao = 0; }
+    if (program != 0) { glDeleteProgram(program); program = 0; }
 }

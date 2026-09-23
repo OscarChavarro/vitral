@@ -9,8 +9,8 @@ public:
 
 private:
     static unsigned int VAO;
-    static unsigned int VBO_positions;
-    static unsigned int VBO_colors;
+    static unsigned int positionsVbo;
+    static unsigned int colorsVbo;
     static unsigned int shaderProgram;
     static bool initialized;
 

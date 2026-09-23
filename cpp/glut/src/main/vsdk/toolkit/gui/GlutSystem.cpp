@@ -18,25 +18,25 @@ KeyEvent GlutSystem::glut2vsdkKeyEvent(unsigned char glutKey, int modifiers)
         event.modifierMask |= KeyEvent::MASK_ALT;
     }
 
-    event.unicode_id = (char)glutKey;
+    event.unicodeId = (char)glutKey;
 
     switch (glutKey) {
         case 27:  // ESC
             event.keycode = KeyEvent::KEY_ESC;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case 8:   // Backspace
             event.keycode = KeyEvent::KEY_BACKSPACE;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case 9:   // Tab
             event.keycode = KeyEvent::KEY_TAB;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case 10:  // Enter/newline
         case 13:  // Carriage return
             event.keycode = KeyEvent::KEY_ENTER;
-            event.unicode_id = KeyEvent::KEY_NONE;
+            event.unicodeId = KeyEvent::KEY_NONE;
             break;
         case 32:  // Space
             event.keycode = KeyEvent::KEY_SPACE;
@@ -81,7 +81,7 @@ KeyEvent GlutSystem::glut2vsdkSpecialKeyEvent(int glutSpecialKey, int modifiers)
         event.modifierMask |= KeyEvent::MASK_ALT;
     }
 
-    event.unicode_id = KeyEvent::KEY_NONE;
+    event.unicodeId = KeyEvent::KEY_NONE;
 
     switch (glutSpecialKey) {
         case GLUT_KEY_F1:

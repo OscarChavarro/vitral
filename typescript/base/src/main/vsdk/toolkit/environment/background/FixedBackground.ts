@@ -12,17 +12,17 @@ import { Background } from "./Background.js";
 export class FixedBackground extends Background {
     public constructor(
         private camera: Camera,
-        private backgroundImage: RGBAImageUncompressed,
+        private image: RGBAImageUncompressed,
     ) {
         super();
     }
 
     public setImage(image: RGBAImageUncompressed): void {
-        this.backgroundImage = image;
+        this.image = image;
     }
 
     public getImage(): RGBAImageUncompressed {
-        return this.backgroundImage;
+        return this.image;
     }
 
     /** BUG compatibility: the Java near-plane projection is not implemented. */

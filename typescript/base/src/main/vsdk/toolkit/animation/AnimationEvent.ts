@@ -6,19 +6,19 @@ generator that dispatches it started. Java's `double` field is a `number` here,
 and the accessors keep their Java names.
 */
 export class AnimationEvent {
-    private t = 0.0;
+    private time = 0.0;
 
     /**
-    @return the t
+    @return the time of the event
     */
-    public getT(): number {
-        return this.t;
+    public getTime(): number {
+        return this.time;
     }
 
     /**
-    @param t the t to set
+    @param value the time of the event
     */
-    public setT(t: number): void {
-        this.t = t;
+    public setTime(value: number): void {
+        this.time = value;
     }
 }

@@ -11,5 +11,5 @@ Shader::LocalShadingResult ConstantTextureShader::shadeLocal(RayHit* info,double
         ColorRgb tc = CpuTextureSamplingConfig::sample(info->texture, info->u, 1-info->v);
         r*=tc.r(); g*=tc.g(); b*=tc.b();
     }
-    return LocalShadingResult(info->n, ColorRgb(r,g,b));
+    return LocalShadingResult(info->normal, ColorRgb(r,g,b));
 }

@@ -11,19 +11,19 @@ import type { SimpleBody } from "./SimpleBody.js";
 import { SimpleSceneSnapshot } from "./SimpleSceneSnapshot.js";
 
 export class SimpleScene extends Entity {
-    private simpleBodiesArray: ArrayList<SimpleBody>;
-    private lightsArray: ArrayList<Light>;
-    private backgroundsArray: ArrayList<Background>;
-    private camerasArray: ArrayList<Camera>;
+    private simpleBodies: ArrayList<SimpleBody>;
+    private lights: ArrayList<Light>;
+    private backgrounds: ArrayList<Background>;
+    private cameras: ArrayList<Camera>;
     private activeCameraIndex = 0;
     private activeBackgroundIndex = 0;
 
     public constructor() {
         super();
-        this.simpleBodiesArray = new ArrayList<SimpleBody>();
-        this.lightsArray = new ArrayList<Light>();
-        this.backgroundsArray = new ArrayList<Background>();
-        this.camerasArray = new ArrayList<Camera>();
+        this.simpleBodies = new ArrayList<SimpleBody>();
+        this.lights = new ArrayList<Light>();
+        this.backgrounds = new ArrayList<Background>();
+        this.cameras = new ArrayList<Camera>();
     }
 
     public getActiveCameraIndex(): number {
@@ -43,63 +43,63 @@ export class SimpleScene extends Entity {
     }
 
     public addBody(b: SimpleBody): void {
-        this.simpleBodiesArray.add(b);
+        this.simpleBodies.add(b);
     }
 
     public addCamera(c: Camera): void {
-        this.camerasArray.add(c);
+        this.cameras.add(c);
     }
 
     public addBackground(b: Background): void {
-        this.backgroundsArray.add(b);
+        this.backgrounds.add(b);
     }
 
     public addLight(l: Light): void {
-        l.setId(this.lightsArray.size());
-        this.lightsArray.add(l);
+        l.setId(this.lights.size());
+        this.lights.add(l);
     }
 
     public getSimpleBodies(): ArrayList<SimpleBody> {
-        return this.simpleBodiesArray;
+        return this.simpleBodies;
     }
 
     public getLights(): ArrayList<Light> {
-        return this.lightsArray;
+        return this.lights;
     }
 
     public getBackgrounds(): ArrayList<Background> {
-        return this.backgroundsArray;
+        return this.backgrounds;
     }
 
     public getCameras(): ArrayList<Camera> {
-        return this.camerasArray;
+        return this.cameras;
     }
 
     public setSimpleBodies(simpleBodies: ArrayList<SimpleBody>): void {
-        this.simpleBodiesArray = simpleBodies;
+        this.simpleBodies = simpleBodies;
     }
 
     public setLights(lights: ArrayList<Light>): void {
-        this.lightsArray = lights;
-        for (let i = 0; i < this.lightsArray.size(); i++) {
-            this.lightsArray.get(i).setId(i);
+        this.lights = lights;
+        for (let i = 0; i < this.lights.size(); i++) {
+            this.lights.get(i).setId(i);
         }
     }
 
     public setBackgrounds(backgrounds: ArrayList<Background>): void {
-        this.backgroundsArray = backgrounds;
+        this.backgrounds = backgrounds;
     }
 
     public getActiveBackground(): Background {
-        return this.backgroundsArray.get(this.activeBackgroundIndex);
+        return this.backgrounds.get(this.activeBackgroundIndex);
     }
 
     public getActiveCamera(): Camera {
-        return this.camerasArray.get(this.activeCameraIndex);
+        return this.cameras.get(this.activeCameraIndex);
     }
 
     public setCameras(cameras: ArrayList<Camera>): void {
-        this.camerasArray = cameras;
+        this.cameras = cameras;
     }
 
     public exportToSimpleSceneSnapshot(): SimpleSceneSnapshot;
@@ -118,6 +118,6 @@ export class SimpleScene extends Entity {
                 this.getActiveBackground(),
             );
         }
-        return new SimpleSceneSnapshot(this.simpleBodiesArray, this.lightsArray, b as Background, a);
+        return new SimpleSceneSnapshot(this.simpleBodies, this.lights, b as Background, a);
     }
 }

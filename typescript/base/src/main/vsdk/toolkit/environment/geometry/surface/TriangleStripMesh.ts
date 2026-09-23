@@ -46,8 +46,8 @@ export class TriangleStripMesh extends Surface<Ray, RayHit> {
                 const hit = Triangle.doIntersectionWithTriangle(ray, a, b, c);
                 if (hit !== null && (best === null || hit.getT() < best.getT())) {
                     best = ray.withT(hit.getT());
-                    out.p = hit.getPoint();
-                    out.n = hit.getNormal();
+                    out.point = hit.getPoint();
+                    out.normal = hit.getNormal();
                 }
             }
         if (best === null) return false;

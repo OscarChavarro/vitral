@@ -71,10 +71,10 @@ class ParallelRaytracerTileWorker : public java::Callable<java::Void> {
                               progressReporter,
                               depthBuffer,
                               depthEncoder,
-                              tile.getX0(),
-                              tile.getY0(),
-                              tile.getX1(),
-                              tile.getY1());
+                              tile.getStartX(),
+                              tile.getStartY(),
+                              tile.getEndX(),
+                              tile.getEndY());
         }
         return java::Void();
     }
@@ -84,8 +84,8 @@ ParallelRaytracer::ParallelRaytracer()
     : numberOfThreads(availableProcessors()),
       executorService(0),
       depthBufferMode(DepthBufferMode::NONE),
-      depthRangeNear(0.0),
-      depthRangeFar(1.0),
+      openGlDepthRangeNear(0.0),
+      openGlDepthRangeFar(1.0),
       depthBuffer(0)
 {
 }
@@ -94,8 +94,8 @@ ParallelRaytracer::ParallelRaytracer(int numberOfThreads)
     : numberOfThreads(numberOfThreads),
       executorService(0),
       depthBufferMode(DepthBufferMode::NONE),
-      depthRangeNear(0.0),
-      depthRangeFar(1.0),
+      openGlDepthRangeNear(0.0),
+      openGlDepthRangeFar(1.0),
       depthBuffer(0)
 {
     if ( numberOfThreads <= 0 ) {
@@ -127,18 +127,18 @@ DepthBufferMode ParallelRaytracer::getDepthBufferMode() const
 
 void ParallelRaytracer::setOpenGlDepthRange(double nearValue, double farValue)
 {
-    depthRangeNear = nearValue;
-    depthRangeFar = farValue;
+    openGlDepthRangeNear = nearValue;
+    openGlDepthRangeFar = farValue;
 }
 
 double ParallelRaytracer::getOpenGlDepthRangeNear() const
 {
-    return depthRangeNear;
+    return openGlDepthRangeNear;
 }
 
 double ParallelRaytracer::getOpenGlDepthRangeFar() const
 {
-    return depthRangeFar;
+    return openGlDepthRangeFar;
 }
 
 ZBuffer* ParallelRaytracer::getDepthBuffer() const
@@ -184,7 +184,7 @@ long long ParallelRaytracer::calculateTotalProgressElements(
     long long totalElements = 0;
 
     for ( long int i = 0; i < generatedTiles.size(); i++ ) {
-        totalElements += generatedTiles.get(i).getDy();
+        totalElements += generatedTiles.get(i).getHeight();
     }
     return totalElements;
 }
@@ -211,7 +211,7 @@ void ParallelRaytracer::execute(
             resultingImage->getYSize());
     }
     DepthBufferEncoder depthEncoder(depthBufferMode,
-        sceneSnapshot->getCameraSnapshot(), depthRangeNear, depthRangeFar);
+        sceneSnapshot->getCameraSnapshot(), openGlDepthRangeNear, openGlDepthRangeFar);
     executeWithEncoder(resultingImage, depthBuffer, &depthEncoder,
         rendererConfiguration, sceneSnapshot, reportProgress);
 }
@@ -236,7 +236,7 @@ void ParallelRaytracer::execute(
         throw VSDKFatalException("Depth buffer size must match the image size");
     }
     DepthBufferEncoder depthEncoder(depthMode,
-        sceneSnapshot->getCameraSnapshot(), depthRangeNear, depthRangeFar);
+        sceneSnapshot->getCameraSnapshot(), openGlDepthRangeNear, openGlDepthRangeFar);
     executeWithEncoder(resultingImage, outDepth, &depthEncoder,
         rendererConfiguration, sceneSnapshot, reportProgress);
 }

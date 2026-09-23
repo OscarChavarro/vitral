@@ -208,9 +208,9 @@ public class DebuggerKeyboardInteractionTechniques
         double area = 0.0;
         for ( int i = 0; i < triangles.size(); i++ ) {
             MonotoneDecompositionTriangulator.Triangle triangle = triangles.get(i);
-            ProjectedVertex a = vertices.get(triangle.a);
-            ProjectedVertex b = vertices.get(triangle.b);
-            ProjectedVertex c = vertices.get(triangle.c);
+            ProjectedVertex a = vertices.get(triangle.point0);
+            ProjectedVertex b = vertices.get(triangle.point1);
+            ProjectedVertex c = vertices.get(triangle.point2);
             area += Math.abs(
                 (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) * 0.5;
         }

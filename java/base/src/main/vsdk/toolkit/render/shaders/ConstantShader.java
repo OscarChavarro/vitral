@@ -23,6 +23,6 @@ public final class ConstantShader extends Shader {
         TraceWorkspace workspace)
     {
         ColorRgb diffuse = material.getDiffuseReference();
-        return new LocalShadingResult(info.n, new ColorRgb(diffuse));
+        return new LocalShadingResult(info.normal, new ColorRgb(diffuse));
     }
 }

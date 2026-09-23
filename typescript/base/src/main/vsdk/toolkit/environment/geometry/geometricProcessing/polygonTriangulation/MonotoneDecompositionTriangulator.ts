@@ -82,9 +82,9 @@ export class MonotoneDecompositionTriangulator {
 export namespace MonotoneDecompositionTriangulator {
     export class Triangle {
         public constructor(
-            public readonly a: number,
-            public readonly b: number,
-            public readonly c: number,
+            public readonly point0: number,
+            public readonly point1: number,
+            public readonly point2: number,
         ) {}
     }
 }

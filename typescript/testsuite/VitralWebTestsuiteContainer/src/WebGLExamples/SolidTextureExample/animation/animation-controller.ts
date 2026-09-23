@@ -16,7 +16,7 @@ import type { SolidTextureModel } from '../model/solid-texture-model';
  * no thread to give it, and what this Java listener drives is the scene
  * rotation and gizmo aging rather than a mesh, so the tick source here stays
  * the page's own timer at the same twenty-four ticks a second, and the listener
- * body is the Java one, its `e.getT()` becoming the seconds since
+ * body is the Java one, its `e.getTime()` becoming the seconds since
  * {@link start} was called. A
  * `requestAnimationFrame` loop would have been the other candidate, and was not
  * chosen because it ties the tick rate to the display refresh, whereas the

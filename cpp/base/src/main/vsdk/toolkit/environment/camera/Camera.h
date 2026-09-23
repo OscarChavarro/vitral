@@ -85,7 +85,7 @@ private:
     Vector3Dd up;
     Vector3Dd front;
     Vector3Dd left;
-    Vector3Dd eyePosition;
+    Vector3Dd position;
     double focalDistance;
     int projectionMode;
 
@@ -99,7 +99,7 @@ private:
     double viewportXSize;
     double viewportYSize;
 
-    Vector3Dd dx, dy, _dir, upWithScale, rightWithScale;
+    Vector3Dd frontWithScale, upWithScale, rightWithScale;
     Matrix4x4d normalizingTransformation;
     mutable long modificationVersion;
 

@@ -35,6 +35,6 @@ public final class ConstantTextureShader extends Shader {
             b *= textureColor.b();
         }
 
-        return new LocalShadingResult(info.n, new ColorRgb(r, g, b));
+        return new LocalShadingResult(info.normal, new ColorRgb(r, g, b));
     }
 }

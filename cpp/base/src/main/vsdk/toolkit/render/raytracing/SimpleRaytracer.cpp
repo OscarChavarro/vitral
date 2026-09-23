@@ -137,7 +137,7 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
             double twoT = 2*t;
             double rx = twoT*nx - viewX, ry = twoT*ny - viewY, rz = twoT*nz - viewZ;
             Vector3Dd reflect(rx, ry, rz);
-            Vector3Dd poffset(info->p.x() + VSDK::EPSILON*rx, info->p.y() + VSDK::EPSILON*ry, info->p.z() + VSDK::EPSILON*rz);
+            Vector3Dd poffset(info->point.x() + VSDK::EPSILON*rx, info->point.y() + VSDK::EPSILON*ry, info->point.z() + VSDK::EPSILON*rz);
             Ray reflectedRay(poffset, reflect);
 
             RayHit* reflectedHit = &workspace.reflectionHits[recursionLevel];
@@ -146,7 +146,7 @@ ColorRgb SimpleRaytracer::evaluateIlluminationModel(RayHit* info,double viewX,do
                 SimpleBody* nearestObject = objects.get(nearestObjectIndex);
                 const SceneObjectRenderData& objectData = cache.objects.get(nearestObjectIndex);
                 RayHit* subInfo = &workspace.shadingHits[recursionLevel + 1];
-                Ray reflectedHitRay = reflectedRay.withT(reflectedHit->hitDistance());
+                Ray reflectedHitRay = reflectedRay.withT(reflectedHit->getHitDistance());
                 prepareSurfaceHit(nearestObject, objectData, reflectedHitRay, subInfo);
                 ColorRgb rcolor = evaluateIlluminationModel(subInfo, -reflectedRay.getDirection().x(), -reflectedRay.getDirection().y(), -reflectedRay.getDirection().z(), lights, objects, cache, background, resolveMaterial(subInfo, objectData), renderContext, recursions - 1, recursionLevel + 1);
                 outR += rcolor.r() * kr; outG += rcolor.g() * kr; outB += rcolor.b() * kr;
@@ -170,7 +170,7 @@ int SimpleRaytracer::selectNearestThingInRayDirection(const Ray& inRay,java::Arr
         candidateHit->resetForDistanceOnly();
         RaytraceStatistics::recordObjectIntersectionTest();
         if ( bodies.get(i)->doIntersectionFirstHit(inRay, candidateHit) ) {
-            double d = candidateHit->hitDistance();
+            double d = candidateHit->getHitDistance();
             if ( d < nearestDistance && d > VSDK::EPSILON ) { nearestDistance = d; nearestIndex = (int)i; }
         }
     }
@@ -185,7 +185,7 @@ ColorRgb SimpleRaytracer::followRayPath(const Ray& inRay,java::ArrayList<SimpleB
     if ( nearestIndex >= 0 ) {
         SimpleBody* nearestObject = bodies.get(nearestIndex);
         const SceneObjectRenderData& objectData = cache.objects.get(nearestIndex);
-        Ray primaryHitRay = inRay.withT(hitInfo->hitDistance());
+        Ray primaryHitRay = inRay.withT(hitInfo->getHitDistance());
         RayHit* shadingInfo = &workspace.shadingHits[0];
         prepareSurfaceHit(nearestObject, objectData, primaryHitRay, shadingInfo);
         return evaluateIlluminationModel(shadingInfo, -inRay.getDirection().x(), -inRay.getDirection().y(), -inRay.getDirection().z(), lights, bodies, cache, background, resolveMaterial(shadingInfo, objectData), renderContext, MAX_RECURSION_LEVEL, 0);
@@ -240,14 +240,14 @@ void SimpleRaytracer::execute(RGBImageUncompressed* inoutViewport,const Renderer
     for ( long int ti=0; ti<tiles.size(); ti++ ) {
         const RasterTileArea& tile = tiles.get(ti);
         Image* tileImage = tile.getImage();
-        for ( int y = tile.getY0(); y < tile.getY1(); y++ ) {
+        for ( int y = tile.getStartY(); y < tile.getEndY(); y++ ) {
             assertSceneUnmodifiedDuringRender(versions, bodies);
             if ( liveReport ) liveReport->update(0, inoutViewport->getYSize(), y);
-            for ( int x = tile.getX0(); x < tile.getX1(); x++ ) {
+            for ( int x = tile.getStartX(); x < tile.getEndX(); x++ ) {
                 RaytraceStatistics::recordPrimaryRay();
                 Ray ray = generateRay(cameraSnapshot, x, y);
                 ColorRgb color = followRayPath(ray, bodies, lights, bg, renderContext, cache);
-                if ( outDepthmap ) outDepthmap->setDepth(x, y, depthEncoder->encode(ray.getOrigin(), ray.getDirection(), workspace.nearestHit.hitDistance()));
+                if ( outDepthmap ) outDepthmap->setDepth(x, y, depthEncoder->encode(ray.getOrigin(), ray.getDirection(), workspace.nearestHit.getHitDistance()));
                 outputPixel.r = (char)(255 * color.r()); outputPixel.g = (char)(255 * color.g()); outputPixel.b = (char)(255 * color.b());
                 tileImage->putPixelRgb(x, y, &outputPixel);
             }

@@ -29,14 +29,14 @@ public class AnimationController {
 
             @Override
             public void tick(AnimationEvent e) {
-                double elapsedSeconds = e.getT() - lastTickT;
-                lastTickT = e.getT();
+                double elapsedSeconds = e.getTime() - lastTickT;
+                lastTickT = e.getTime();
 
                 boolean gizmoUpdated = false;
-                if ( e.getT() - lastRayGizmoUpdateT >= 1.0 ) {
+                if ( e.getTime() - lastRayGizmoUpdateT >= 1.0 ) {
                     model.getRayGizmo().update();
                     model.getInfinitePlaneGizmo().update();
-                    lastRayGizmoUpdateT = e.getT();
+                    lastRayGizmoUpdateT = e.getTime();
                     gizmoUpdated = true;
                 }
 

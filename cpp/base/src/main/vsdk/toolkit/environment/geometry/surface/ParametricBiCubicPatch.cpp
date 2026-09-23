@@ -44,25 +44,25 @@ void ParametricBiCubicPatch::calculateMatrices()
 {
     if (type == ParametricCurve::BEZIER) {
         buildGeometryMatricesXYZ_Bezier();
-        M_MATRIX = ParametricCurve::BEZIER_MATRIX;
+        basisMatrix = ParametricCurve::BEZIER_MATRIX;
     }
     else if (type == ParametricCurve::HERMITE) {
         buildGeometryMatricesXYZ_Hermite();
-        M_MATRIX = ParametricCurve::HERMITE_MATRIX;
+        basisMatrix = ParametricCurve::HERMITE_MATRIX;
     }
     else if (type == FERGUSON) {
         buildGeometryMatricesXYZ_Ferguson();
-        M_MATRIX = ParametricCurve::HERMITE_MATRIX;
+        basisMatrix = ParametricCurve::HERMITE_MATRIX;
     }
 
-    Mt_MATRIX = Matrix4x4d(M_MATRIX).transpose();
-    M_Gx_Mt_MATRIX = M_MATRIX.multiply(Gx_MATRIX).multiply(Mt_MATRIX);
-    M_Gy_Mt_MATRIX = M_MATRIX.multiply(Gy_MATRIX).multiply(Mt_MATRIX);
-    M_Gz_Mt_MATRIX = M_MATRIX.multiply(Gz_MATRIX).multiply(Mt_MATRIX);
-    S_MATRIX = Matrix4x4d();
-    Tt_MATRIX = Matrix4x4d();
-    S_MATRIX_DS = Matrix4x4d();
-    Tt_MATRIX_DT = Matrix4x4d();
+    transposedBasisMatrix = Matrix4x4d(basisMatrix).transpose();
+    coefficientMatrixX = basisMatrix.multiply(geometryMatrixX).multiply(transposedBasisMatrix);
+    coefficientMatrixY = basisMatrix.multiply(geometryMatrixY).multiply(transposedBasisMatrix);
+    coefficientMatrixZ = basisMatrix.multiply(geometryMatrixZ).multiply(transposedBasisMatrix);
+    sParameterMatrix = Matrix4x4d();
+    tParameterMatrix = Matrix4x4d();
+    sDerivativeParameterMatrix = Matrix4x4d();
+    tDerivativeParameterMatrix = Matrix4x4d();
 }
 
 int ParametricBiCubicPatch::getApproximationSteps() const { return approximationSteps; }
@@ -81,9 +81,9 @@ void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Bezier()
             mz[i][j] = vp.z();
         }
     }
-    Gx_MATRIX = Matrix4x4d::copyOf(mx);
-    Gy_MATRIX = Matrix4x4d::copyOf(my);
-    Gz_MATRIX = Matrix4x4d::copyOf(mz);
+    geometryMatrixX = Matrix4x4d::copyOf(mx);
+    geometryMatrixY = Matrix4x4d::copyOf(my);
+    geometryMatrixZ = Matrix4x4d::copyOf(mz);
 }
 
 void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Hermite()
@@ -114,16 +114,16 @@ void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Hermite()
         p++;
     }
 
-    Gx_MATRIX = Matrix4x4d::copyOf(mx);
-    Gy_MATRIX = Matrix4x4d::copyOf(my);
-    Gz_MATRIX = Matrix4x4d::copyOf(mz);
+    geometryMatrixX = Matrix4x4d::copyOf(mx);
+    geometryMatrixY = Matrix4x4d::copyOf(my);
+    geometryMatrixZ = Matrix4x4d::copyOf(mz);
 }
 
 void ParametricBiCubicPatch::printGeometryMatrices() const
 {
-    double** mx = Gx_MATRIX.toArrayCopy();
-    double** my = Gy_MATRIX.toArrayCopy();
-    double** mz = Gz_MATRIX.toArrayCopy();
+    double** mx = geometryMatrixX.toArrayCopy();
+    double** my = geometryMatrixY.toArrayCopy();
+    double** mz = geometryMatrixZ.toArrayCopy();
 
     for (int r = 0; r < 4; r++) {
         std::printf("[ <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> | <%.2f, %.2f, %.2f> ]\n",
@@ -171,43 +171,43 @@ void ParametricBiCubicPatch::buildGeometryMatricesXYZ_Ferguson()
     mx[3][2] = 0; my[3][2] = 0; mz[3][2] = 0;
     mx[3][3] = 0; my[3][3] = 0; mz[3][3] = 0;
 
-    Gx_MATRIX = Matrix4x4d::copyOf(mx);
-    Gy_MATRIX = Matrix4x4d::copyOf(my);
-    Gz_MATRIX = Matrix4x4d::copyOf(mz);
+    geometryMatrixX = Matrix4x4d::copyOf(mx);
+    geometryMatrixY = Matrix4x4d::copyOf(my);
+    geometryMatrixZ = Matrix4x4d::copyOf(mz);
 }
 
 void ParametricBiCubicPatch::evaluate(Vector3Dd& p, double s, double t)
 {
-    S_MATRIX = S_MATRIX.withVal(0, 0, s*s*s).withVal(0, 1, s*s).withVal(0, 2, s).withVal(0, 3, 1);
-    Tt_MATRIX = Tt_MATRIX.withVal(0, 0, t*t*t).withVal(1, 0, t*t).withVal(2, 0, t).withVal(3, 0, 1);
+    sParameterMatrix = sParameterMatrix.withVal(0, 0, s*s*s).withVal(0, 1, s*s).withVal(0, 2, s).withVal(0, 3, 1);
+    tParameterMatrix = tParameterMatrix.withVal(0, 0, t*t*t).withVal(1, 0, t*t).withVal(2, 0, t).withVal(3, 0, 1);
 
-    Matrix4x4d Qx_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX).multiply(Tt_MATRIX);
-    Matrix4x4d Qy_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX).multiply(Tt_MATRIX);
-    Matrix4x4d Qz_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX).multiply(Tt_MATRIX);
+    Matrix4x4d Qx_MATRIX = sParameterMatrix.multiply(coefficientMatrixX).multiply(tParameterMatrix);
+    Matrix4x4d Qy_MATRIX = sParameterMatrix.multiply(coefficientMatrixY).multiply(tParameterMatrix);
+    Matrix4x4d Qz_MATRIX = sParameterMatrix.multiply(coefficientMatrixZ).multiply(tParameterMatrix);
 
     p = Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0));
 }
 
 Vector3Dd ParametricBiCubicPatch::evaluateTangent(double s, double t)
 {
-    S_MATRIX_DS = S_MATRIX_DS.withVal(0, 0, 3*s*s).withVal(0, 1, 2*s).withVal(0, 2, 1).withVal(0, 3, 0);
-    Tt_MATRIX = Tt_MATRIX.withVal(0, 0, t*t*t).withVal(1, 0, t*t).withVal(2, 0, t).withVal(3, 0, 1);
+    sDerivativeParameterMatrix = sDerivativeParameterMatrix.withVal(0, 0, 3*s*s).withVal(0, 1, 2*s).withVal(0, 2, 1).withVal(0, 3, 0);
+    tParameterMatrix = tParameterMatrix.withVal(0, 0, t*t*t).withVal(1, 0, t*t).withVal(2, 0, t).withVal(3, 0, 1);
 
-    Matrix4x4d Qx_MATRIX = S_MATRIX_DS.multiply(M_Gx_Mt_MATRIX).multiply(Tt_MATRIX);
-    Matrix4x4d Qy_MATRIX = S_MATRIX_DS.multiply(M_Gy_Mt_MATRIX).multiply(Tt_MATRIX);
-    Matrix4x4d Qz_MATRIX = S_MATRIX_DS.multiply(M_Gz_Mt_MATRIX).multiply(Tt_MATRIX);
+    Matrix4x4d Qx_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixX).multiply(tParameterMatrix);
+    Matrix4x4d Qy_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixY).multiply(tParameterMatrix);
+    Matrix4x4d Qz_MATRIX = sDerivativeParameterMatrix.multiply(coefficientMatrixZ).multiply(tParameterMatrix);
 
     return Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0)).normalized();
 }
 
 Vector3Dd ParametricBiCubicPatch::evaluateBinormal(double s, double t)
 {
-    S_MATRIX = S_MATRIX.withVal(0, 0, s*s*s).withVal(0, 1, s*s).withVal(0, 2, s).withVal(0, 3, 1);
-    Tt_MATRIX_DT = Tt_MATRIX_DT.withVal(0, 0, 3*t*t).withVal(1, 0, 2*t).withVal(2, 0, 1).withVal(3, 0, 0);
+    sParameterMatrix = sParameterMatrix.withVal(0, 0, s*s*s).withVal(0, 1, s*s).withVal(0, 2, s).withVal(0, 3, 1);
+    tDerivativeParameterMatrix = tDerivativeParameterMatrix.withVal(0, 0, 3*t*t).withVal(1, 0, 2*t).withVal(2, 0, 1).withVal(3, 0, 0);
 
-    Matrix4x4d Qx_MATRIX = S_MATRIX.multiply(M_Gx_Mt_MATRIX).multiply(Tt_MATRIX_DT);
-    Matrix4x4d Qy_MATRIX = S_MATRIX.multiply(M_Gy_Mt_MATRIX).multiply(Tt_MATRIX_DT);
-    Matrix4x4d Qz_MATRIX = S_MATRIX.multiply(M_Gz_Mt_MATRIX).multiply(Tt_MATRIX_DT);
+    Matrix4x4d Qx_MATRIX = sParameterMatrix.multiply(coefficientMatrixX).multiply(tDerivativeParameterMatrix);
+    Matrix4x4d Qy_MATRIX = sParameterMatrix.multiply(coefficientMatrixY).multiply(tDerivativeParameterMatrix);
+    Matrix4x4d Qz_MATRIX = sParameterMatrix.multiply(coefficientMatrixZ).multiply(tDerivativeParameterMatrix);
 
     return Vector3Dd(Qx_MATRIX.get(0, 0), Qy_MATRIX.get(0, 0), Qz_MATRIX.get(0, 0)).normalized();
 }

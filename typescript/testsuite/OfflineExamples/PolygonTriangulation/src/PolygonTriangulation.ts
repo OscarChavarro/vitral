@@ -53,7 +53,9 @@ export class PolygonTriangulation {
         let triangleIndex: number;
         for (triangleIndex = 0; triangleIndex < triangles.length; triangleIndex++) {
             const triangle: MonotoneDecompositionTriangulator.Triangle = triangles[triangleIndex]!;
-            console.log("triangle #" + triangleIndex + ": " + triangle.a + " " + triangle.b + " " + triangle.c);
+            console.log(
+                "triangle #" + triangleIndex + ": " + triangle.point0 + " " + triangle.point1 + " " + triangle.point2,
+            );
         }
     }
 

@@ -13,7 +13,7 @@ public class IndexedColorImageUncompressed extends Image
     private int ySize;
     private RGBColorPalette colorTable;
 
-    private ColorRgb _static_color;
+    private ColorRgb staticColor;
 
     /**
     Check the general signature contract in superclass method
@@ -131,11 +131,11 @@ public class IndexedColorImageUncompressed extends Image
         double val;
         val = (double)(VSDK.signedByte2unsignedInteger(data[index])) / 255.0;
 
-        _static_color = colorTable.evalLinear(val);
+        staticColor = colorTable.evalLinear(val);
         RGBPixel p = new RGBPixel();
-        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r()*255.0));
-        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g()*255.0));
-        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b()*255.0));
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.r()*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.g()*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.b()*255.0));
         return p;
     }
 
@@ -146,10 +146,10 @@ public class IndexedColorImageUncompressed extends Image
         double val;
         val = (double)(VSDK.signedByte2unsignedInteger(data[index])) / 255.0;
 
-        _static_color = colorTable.evalLinear(val);
-        p.r = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.r()*255.0));
-        p.g = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.g()*255.0));
-        p.b = VSDK.unsigned8BitInteger2signedByte((int)(_static_color.b()*255.0));
+        staticColor = colorTable.evalLinear(val);
+        p.r = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.r()*255.0));
+        p.g = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.g()*255.0));
+        p.b = VSDK.unsigned8BitInteger2signedByte((int)(staticColor.b()*255.0));
     }
 
     public RGBColorPalette getColorTable()

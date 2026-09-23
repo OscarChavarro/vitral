@@ -21,14 +21,14 @@ import vsdk.toolkit.io.PersistenceElement;
 
 class JobAssigment
 {
-    public int x0;
-    public int y0;
-    public int x1;
-    public int y1;
+    public int startX;
+    public int startY;
+    public int endX;
+    public int endY;
     public RGBImageUncompressed result;
     public String toString()
     {
-        String msg = "<" + x0 + ", " + y0 + "> - <" + x1 + ", " + y1 + ">";
+        String msg = "<" + startX + ", " + startY + "> - <" + endX + ", " + endY + ">";
         return msg;
     }
     public void merge(RGBImageUncompressed tile)
@@ -41,7 +41,7 @@ class JobAssigment
         for ( y = 1; y < tile.getYSize(); y++ ) {
             for ( x = 1; x < tile.getXSize(); x++ ) {
                 tile.getPixelRgb(x, y, p);
-                result.putPixelRgb(x+x0, y+y0, p);
+                result.putPixelRgb(x+startX, y+startY, p);
             }
         }
     }
@@ -51,17 +51,17 @@ class RaytracerDistributedClient implements Runnable
 {
     private LinkedBlockingQueue<JobAssigment> pendingtasks;
     private LinkedBlockingQueue<JobAssigment> pendingends;
-    private String ip;
+    private String ipAddress;
     private int port;
     private Socket socket;
     private boolean running;
     private int id;
 
     private SimpleScene theScene;
-    private int x0;
-    private int y0;
-    private int x1;
-    private int y1;
+    private int startX;
+    private int startY;
+    private int endX;
+    private int endY;
 
     private void writeInt32BE(OutputStream os, int value) throws Exception
     {
@@ -69,7 +69,7 @@ class RaytracerDistributedClient implements Runnable
     }
 
     public RaytracerDistributedClient(
-        String ip, int port,
+        String ipAddress, int port,
         SimpleScene theScene,
         int id,
         LinkedBlockingQueue<JobAssigment> pendingtasks,
@@ -78,12 +78,12 @@ class RaytracerDistributedClient implements Runnable
     {
         this.pendingtasks = pendingtasks;
         this.pendingends = pendingends;
-        this.ip = new String(ip);
+        this.ipAddress = new String(ipAddress);
         this.port = port;
-        x0 = 150;
-        y0 = 150;
-        x1 = 300;
-        y1 = 300;
+        startX = 150;
+        startY = 150;
+        endX = 300;
+        endY = 300;
         socket = null;
         running = true;
         this.theScene = theScene;
@@ -93,14 +93,14 @@ class RaytracerDistributedClient implements Runnable
     public void run()
     {
         System.out.println("Starting VitralVisualizationClient thread.");
-        System.out.println("Trying to connect to IP " + ip + " at port " + port + "... ");
+        System.out.println("Trying to connect to IP " + ipAddress + " at port " + port + "... ");
         InputStream is;
         OutputStream os;
         ObjectOutputStream serializer;
         byte responseType[] = new byte[1];
 
         try {
-            socket = new Socket(ip, port);
+            socket = new Socket(ipAddress, port);
         }
         catch ( IOException e ) {
             System.err.println("Cannot connect to server!");
@@ -134,19 +134,19 @@ class RaytracerDistributedClient implements Runnable
                     pendingends.put(task);
                     System.out.println("Sending task " + task);
                     PersistenceElement.writeAsciiString(os, "x0");
-                    writeInt32BE(os, task.x0);
+                    writeInt32BE(os, task.startX);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "y0");
-                    writeInt32BE(os, task.y0);
+                    writeInt32BE(os, task.startY);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "x1");
-                    writeInt32BE(os, task.x1);
+                    writeInt32BE(os, task.endX);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "y1");
-                    writeInt32BE(os, task.y1);
+                    writeInt32BE(os, task.endY);
                     PersistenceElement.readBytes(is, responseType);
 
                     PersistenceElement.writeAsciiString(os, "render");
@@ -202,16 +202,16 @@ public class DistributerByArea
             for ( x = 0; x < theResultingImage.getXSize(); x += dx ) {
                 JobAssigment tile;
                 tile = new JobAssigment();
-                tile.x0 = x;
-                tile.y0 = y;
-                tile.x1 = x + dx;
-                tile.y1 = y + dy;
+                tile.startX = x;
+                tile.startY = y;
+                tile.endX = x + dx;
+                tile.endY = y + dy;
                 tile.result = theResultingImage;
-                if ( tile.x1 >= theResultingImage.getXSize() ) {
-                    tile.x1 = theResultingImage.getXSize() - 1;
+                if ( tile.endX >= theResultingImage.getXSize() ) {
+                    tile.endX = theResultingImage.getXSize() - 1;
                 }
-                if ( tile.y1 >= theResultingImage.getYSize() ) {
-                    tile.y1 = theResultingImage.getYSize() - 1;
+                if ( tile.endY >= theResultingImage.getYSize() ) {
+                    tile.endY = theResultingImage.getYSize() - 1;
                 }
                 try { 
                     pendingtasks.put(tile);

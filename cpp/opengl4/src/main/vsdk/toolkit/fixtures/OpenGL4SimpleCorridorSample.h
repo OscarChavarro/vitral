@@ -12,12 +12,12 @@ public:
     void dispose();
 
 private:
-    double a;
-    int na;
-    double b;
-    int nb;
-    double c;
-    int nc;
+    double width;
+    int widthTiles;
+    double length;
+    int lengthTiles;
+    double height;
+    int heightTiles;
     double interSpace;
 
     bool initialized;

@@ -43,7 +43,7 @@ public final class CookTorranceShader extends Shader {
         SimpleMaterial material,
         TraceWorkspace workspace)
     {
-        Vector3Dd surfaceNormal = info.n;
+        Vector3Dd surfaceNormal = info.normal;
         if ( bumpMapEnabled ) {
             surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
         }
@@ -76,7 +76,7 @@ public final class CookTorranceShader extends Shader {
                 continue;
             }
 
-            LightDirection lightDirection = light.getDirectionAndDistance(info.p);
+            LightDirection lightDirection = light.getDirectionAndDistance(info.point);
             if ( lightDirection.maxShadowDistance() <= VSDK.EPSILON ) {
                 continue;
             }
@@ -84,7 +84,7 @@ public final class CookTorranceShader extends Shader {
             double lightDirY = lightDirection.direction().y();
             double lightDirZ = lightDirection.direction().z();
 
-            Ray lightSourceRay = new Ray(info.p, lightDirection.direction());
+            Ray lightSourceRay = new Ray(info.point, lightDirection.direction());
             double attenuation = light.evaluateLightResponseFactor(lightSourceRay);
             if ( attenuation <= 0.0 ) {
                 continue;
@@ -207,7 +207,7 @@ public final class CookTorranceShader extends Shader {
         RayHit info,
         Vector3Dd surfaceNormal)
     {
-        if ( info.normalMap == null || info.t == null ) {
+        if ( info.normalMap == null || info.tangent == null ) {
             return surfaceNormal;
         }
         Vector3Dd normalVariation =
@@ -217,7 +217,7 @@ public final class CookTorranceShader extends Shader {
         }
 
         Vector3Dd baseNormal = surfaceNormal.normalized();
-        Vector3Dd surfaceTangentU = info.t.normalized();
+        Vector3Dd surfaceTangentU = info.tangent.normalized();
         Vector3Dd surfaceTangentV = baseNormal.crossProduct(surfaceTangentU).normalized();
         Vector3Dd nCrossPv = baseNormal.crossProduct(surfaceTangentV);
         Vector3Dd nCrossPu = baseNormal.crossProduct(surfaceTangentU);
@@ -259,9 +259,9 @@ public final class CookTorranceShader extends Shader {
             return true;
         }
         Vector3Dd shadowOrigin = new Vector3Dd(
-            info.p.x() + VSDK.EPSILON * lightDirX,
-            info.p.y() + VSDK.EPSILON * lightDirY,
-            info.p.z() + VSDK.EPSILON * lightDirZ);
+            info.point.x() + VSDK.EPSILON * lightDirX,
+            info.point.y() + VSDK.EPSILON * lightDirY,
+            info.point.z() + VSDK.EPSILON * lightDirZ);
         Vector3Dd shadowDirection = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         Ray shadowRay = new Ray(shadowOrigin, shadowDirection);
         RayHit shadowCandidateHit = workspace.shadowCandidateHit();
@@ -271,7 +271,7 @@ public final class CookTorranceShader extends Shader {
             SimpleBody candidateObject = objects.get(i);
             shadowCandidateHit.resetForDistanceOnly();
             if ( candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-                double hitDistance = shadowCandidateHit.hitDistance();
+                double hitDistance = shadowCandidateHit.getHitDistance();
                 if ( hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance ) {
                     return true;
                 }

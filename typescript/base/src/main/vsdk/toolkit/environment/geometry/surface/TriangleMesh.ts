@@ -19,7 +19,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     private vertexColors: Float64Array | null = null;
     private vertexSelections: boolean[] | null = null;
     private vertexUvs: Float64Array | null = null;
-    private triangleIndices: Int32Array | null = null;
+    private triangleIndexes: Int32Array | null = null;
     private triangleNormals: Float64Array | null = null;
     private incidentTrianglesPerVertexArray: number[][] | null = null;
     private materials: SimpleMaterial[] | null = null;
@@ -51,7 +51,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.vertexColors = other.vertexColors?.slice() ?? null;
         this.vertexSelections = other.vertexSelections?.slice() ?? null;
         this.vertexUvs = other.vertexUvs?.slice() ?? null;
-        this.triangleIndices = other.triangleIndices?.slice() ?? null;
+        this.triangleIndexes = other.triangleIndexes?.slice() ?? null;
         this.triangleNormals = other.triangleNormals?.slice() ?? null;
         this.materials = other.materials?.slice() ?? null;
         this.textures = other.textures?.slice() ?? null;
@@ -81,7 +81,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.incidentTrianglesPerVertexArray = Array.from({ length: this.getNumVertices() }, () => []);
     }
     public initTriangleArrays(n: number): void {
-        this.triangleIndices = new Int32Array(n * 3);
+        this.triangleIndexes = new Int32Array(n * 3);
         this.triangleNormals = new Float64Array(n * 3);
     }
     public detachColors(): void {
@@ -127,18 +127,18 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.writeVertex(i, vertex);
     }
     public setTriangleAt(i: number, triangle: Triangle): void {
-        if (this.triangleIndices === null || i < 0 || i >= this.getNumTriangles())
+        if (this.triangleIndexes === null || i < 0 || i >= this.getNumTriangles())
             throw new RangeError("Triangle index out of bounds");
         const indices = [triangle.getPoint0(), triangle.getPoint1(), triangle.getPoint2()];
         for (const index of indices) this.assertVertex(index);
-        this.triangleIndices.set(indices, i * 3);
+        this.triangleIndexes.set(indices, i * 3);
         if (this.triangleNormals !== null) this.setVector(this.triangleNormals, i, triangle.getNormal());
     }
     public getNumVertices(): number {
         return this.vertexPositions?.length === undefined ? 0 : this.vertexPositions.length / 3;
     }
     public getNumTriangles(): number {
-        return this.triangleIndices?.length === undefined ? 0 : this.triangleIndices.length / 3;
+        return this.triangleIndexes?.length === undefined ? 0 : this.triangleIndexes.length / 3;
     }
     public getVertexSelections(): boolean[] {
         return (this.vertexSelections ??= Array.from({ length: this.getNumVertices() }, () => false));
@@ -162,7 +162,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         return this.vertexUvs;
     }
     public getTriangleIndexes(): Int32Array | null {
-        return this.triangleIndices;
+        return this.triangleIndexes;
     }
     public getTriangleNormals(): Float64Array | null {
         return this.triangleNormals;
@@ -205,7 +205,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.materialRanges = x;
     }
     public calculateNormals(): void {
-        if (this.vertexPositions === null || this.triangleIndices === null) return;
+        if (this.vertexPositions === null || this.triangleIndexes === null) return;
         this.triangleNormals = new Float64Array(this.getNumTriangles() * 3);
         const sums = Array.from({ length: this.getNumVertices() }, () => new Vector3Dd());
         this.initIncidentTrianglesPerVertexArray();
@@ -258,9 +258,9 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         this.intersectionTriangleIndex = best.index;
         if (triangleInformation !== undefined) triangleInformation[0] = best.index;
         out.setRay(ray.withT(best.t));
-        out.p = new Vector3Dd(best.point);
-        out.n = new Vector3Dd(best.normal).normalized();
-        out.t = new Vector3Dd();
+        out.point = new Vector3Dd(best.point);
+        out.normal = new Vector3Dd(best.normal).normalized();
+        out.tangent = new Vector3Dd();
         out.u = 0;
         out.v = 0;
         this.interpolateTriangleData(best.index, out, ray.getDirection());
@@ -298,7 +298,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         return new TriangleMeshGroup([this]);
     }
     public compact(): void {
-        if (this.vertexPositions === null || this.triangleIndices === null) return;
+        if (this.vertexPositions === null || this.triangleIndexes === null) return;
         const used = new Set<number>();
         const valid: number[][] = [];
         for (let i = 0; i < this.getNumTriangles(); i++) {
@@ -321,7 +321,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         );
         this.initTriangleArrays(valid.length);
         valid.forEach((triangle, i) =>
-            this.triangleIndices!.set(
+            this.triangleIndexes!.set(
                 triangle.map((x) => map.get(x)!),
                 i * 3,
             ),
@@ -331,14 +331,14 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
 
     /** Retains the Java clipping algorithm and its original case ordering. */
     public slice(plane: import("./InfinitePlane.js").InfinitePlane): void {
-        if (this.vertexPositions === null || this.triangleIndices === null) return;
+        if (this.vertexPositions === null || this.triangleIndexes === null) return;
         const extraVertices: number[] = [],
             extraTriangles: number[] = [],
             nv = this.getNumVertices();
-        for (let i = 0; i < this.triangleIndices.length / 3; i++) {
-            const i0 = this.triangleIndices[3 * i]!,
-                i1 = this.triangleIndices[3 * i + 1]!,
-                i2 = this.triangleIndices[3 * i + 2]!;
+        for (let i = 0; i < this.triangleIndexes.length / 3; i++) {
+            const i0 = this.triangleIndexes[3 * i]!,
+                i1 = this.triangleIndexes[3 * i + 1]!,
+                i2 = this.triangleIndexes[3 * i + 2]!;
             const p1 = new Vector3Dd(
                 this.vertexPositions[3 * i0]!,
                 this.vertexPositions[3 * i0 + 1]!,
@@ -369,10 +369,10 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
                 (t1 === limit && t2 === outside && t3 === limit) ||
                 (t1 === outside && t2 === limit && t3 === limit)
             )
-                this.triangleIndices.set([-1, -1, -1], 3 * i);
+                this.triangleIndexes.set([-1, -1, -1], 3 * i);
             else if (t1 === limit && t2 === limit && t3 === limit) {
                 if (p2.subtract(p1).crossProduct(p3.subtract(p1)).dotProduct(plane.getNormal()) > 0)
-                    this.triangleIndices.set([-1, -1, -1], 3 * i);
+                    this.triangleIndexes.set([-1, -1, -1], 3 * i);
             } else if (
                 (t1 === limit && t2 === inside && t3 === inside) ||
                 (t1 === inside && t2 === limit && t3 === inside) ||
@@ -422,11 +422,11 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         }
     }
     private appendSliceTriangles(values: number[]): void {
-        if (this.triangleIndices !== null) {
-            const out = new Int32Array(this.triangleIndices.length + values.length);
-            out.set(this.triangleIndices);
-            out.set(values, this.triangleIndices.length);
-            this.triangleIndices = out;
+        if (this.triangleIndexes !== null) {
+            const out = new Int32Array(this.triangleIndexes.length + values.length);
+            out.set(this.triangleIndexes);
+            out.set(values, this.triangleIndexes.length);
+            this.triangleIndexes = out;
         }
     }
     private intersectionVertex(
@@ -438,7 +438,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
             hit = plane.doIntersectionWithNegative(new Ray(origin, direction));
         if (hit === null) return null;
         const out = new RayHit();
-        return plane.doIntersectionFirstHit(hit, out) ? out.p : null;
+        return plane.doIntersectionFirstHit(hit, out) ? out.point : null;
     }
     private simpleTriangleCut(
         plane: import("./InfinitePlane.js").InfinitePlane,
@@ -457,7 +457,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         ev.push(a.x(), a.y(), a.z());
         et.push(ev.length / 3 + nv);
         ev.push(b.x(), b.y(), b.z());
-        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+        this.triangleIndexes!.set([-1, -1, -1], 3 * index);
     }
     private halfTriangleCut(
         plane: import("./InfinitePlane.js").InfinitePlane,
@@ -475,7 +475,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         if (a === null) return;
         ev.push(a.x(), a.y(), a.z());
         et.push(second);
-        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+        this.triangleIndexes!.set([-1, -1, -1], 3 * index);
     }
     private doubleTriangleCut(
         plane: import("./InfinitePlane.js").InfinitePlane,
@@ -490,19 +490,19 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
     ): void {
         const a = this.intersectionVertex(plane, p3, p1),
             b = this.intersectionVertex(plane, p3, p2);
-        et.push(this.triangleIndices![3 * index]!, ev.length / 3 + nv);
+        et.push(this.triangleIndexes![3 * index]!, ev.length / 3 + nv);
         if (a === null || b === null) return;
         ev.push(a.x(), a.y(), a.z());
         et.push(ev.length / 3 + nv);
         ev.push(b.x(), b.y(), b.z());
         et.push(index, ev.length / 3 + nv, second);
-        this.triangleIndices!.set([-1, -1, -1], 3 * index);
+        this.triangleIndexes!.set([-1, -1, -1], 3 * index);
     }
     public removeSelectedVertices(): void {
-        if (this.vertexSelections === null || this.triangleIndices === null) return;
+        if (this.vertexSelections === null || this.triangleIndexes === null) return;
         for (let i = 0; i < this.getNumTriangles(); i++) {
             const indices = this.triangle(i);
-            if (indices.some((x) => this.vertexSelections![x])) this.triangleIndices.set([-1, -1, -1], i * 3);
+            if (indices.some((x) => this.vertexSelections![x])) this.triangleIndexes.set([-1, -1, -1], i * 3);
         }
         this.vertexSelections = null;
         this.compact();
@@ -515,7 +515,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         const p0 = this.position(a),
             p1 = this.position(b),
             p2 = this.position(c);
-        const q = out.p;
+        const q = out.point;
         const v0 = p1.subtract(p0),
             v1 = p2.subtract(p0),
             v2 = q.subtract(p0);
@@ -530,7 +530,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
                 u = (d11 * d20 - d01 * d21) / den,
                 v = 1 - u - w;
             if (this.vertexNormals !== null)
-                out.n = this.vector(this.vertexNormals, a)
+                out.normal = this.vector(this.vertexNormals, a)
                     .multiply(v)
                     .add(this.vector(this.vertexNormals, b).multiply(u))
                     .add(this.vector(this.vertexNormals, c).multiply(w))
@@ -541,7 +541,7 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
                     this.vertexUvs[a * 2 + 1]! * v + this.vertexUvs[b * 2 + 1]! * u + this.vertexUvs[c * 2 + 1]! * w;
             }
         }
-        if (out.n.dotProduct(direction) >= 0) out.n = out.n.multiply(-1);
+        if (out.normal.dotProduct(direction) >= 0) out.normal = out.normal.multiply(-1);
     }
     private fillMaterialAndTexture(triangle: number, out: RayHit): void {
         out.material = this.materials?.[0] ?? null;
@@ -584,9 +584,9 @@ export class TriangleMesh extends Surface<Ray, RayHit> {
         a[i * 3 + 2] = v.z();
     }
     private triangle(i: number): [number, number, number] {
-        if (this.triangleIndices === null || i < 0 || i >= this.getNumTriangles())
+        if (this.triangleIndexes === null || i < 0 || i >= this.getNumTriangles())
             throw new RangeError("Triangle index out of bounds");
         const n = i * 3;
-        return [this.triangleIndices[n]!, this.triangleIndices[n + 1]!, this.triangleIndices[n + 2]!];
+        return [this.triangleIndexes[n]!, this.triangleIndexes[n + 1]!, this.triangleIndexes[n + 2]!];
     }
 }

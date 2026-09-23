@@ -11,16 +11,16 @@ final class _StlFacetEmitter
 {
     static final class Facet {
         final Vector3Dd normal;
-        final Vector3Dd a;
-        final Vector3Dd b;
-        final Vector3Dd c;
+        final Vector3Dd vertex0;
+        final Vector3Dd vertex1;
+        final Vector3Dd vertex2;
 
         Facet(Vector3Dd normal, Vector3Dd a, Vector3Dd b, Vector3Dd c)
         {
             this.normal = normal;
-            this.a = a;
-            this.b = b;
-            this.c = c;
+            this.vertex0 = a;
+            this.vertex1 = b;
+            this.vertex2 = c;
         }
     }
 
@@ -45,9 +45,9 @@ final class _StlFacetEmitter
         for ( i = 0; i < facets.size(); i++ ) {
             Facet facet = facets.get(i);
             writeVector(outputStream, facet.normal, 1.0, "normal", i);
-            writeVector(outputStream, facet.a, scaleFactor, "vertex a", i);
-            writeVector(outputStream, facet.b, scaleFactor, "vertex b", i);
-            writeVector(outputStream, facet.c, scaleFactor, "vertex c", i);
+            writeVector(outputStream, facet.vertex0, scaleFactor, "vertex a", i);
+            writeVector(outputStream, facet.vertex1, scaleFactor, "vertex b", i);
+            writeVector(outputStream, facet.vertex2, scaleFactor, "vertex c", i);
             PersistenceElement.writeSignedShortLE(outputStream, 0);
         }
     }

@@ -83,19 +83,19 @@ static bool areEquivalentContours(const java::ArrayList<Vertex2D>& a, const java
 }
 
 struct PointKey {
-    long long qx;
-    long long qy;
+    long long quantizedX;
+    long long quantizedY;
     explicit PointKey(const Vertex2D& p, double epsilon)
-        : qx(static_cast<long long>(std::llround(p.x / epsilon))),
-          qy(static_cast<long long>(std::llround(p.y / epsilon))) {}
-    bool operator==(const PointKey& o) const { return qx == o.qx && qy == o.qy; }
+        : quantizedX(static_cast<long long>(std::llround(p.x / epsilon))),
+          quantizedY(static_cast<long long>(std::llround(p.y / epsilon))) {}
+    bool operator==(const PointKey& o) const { return quantizedX == o.quantizedX && quantizedY == o.quantizedY; }
 };
 
 struct PointKeyHasher {
     std::size_t operator()(const PointKey& k) const
     {
-        std::size_t h = static_cast<std::size_t>(k.qx);
-        std::size_t v = static_cast<std::size_t>(k.qy);
+        std::size_t h = static_cast<std::size_t>(k.quantizedX);
+        std::size_t v = static_cast<std::size_t>(k.quantizedY);
         h ^= v + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
         return h;
     }
@@ -103,10 +103,10 @@ struct PointKeyHasher {
 
 static int compareKeys(const PointKey& a, const PointKey& b)
 {
-    if (a.qx < b.qx) return -1;
-    if (a.qx > b.qx) return 1;
-    if (a.qy < b.qy) return -1;
-    if (a.qy > b.qy) return 1;
+    if (a.quantizedX < b.quantizedX) return -1;
+    if (a.quantizedX > b.quantizedX) return 1;
+    if (a.quantizedY < b.quantizedY) return -1;
+    if (a.quantizedY > b.quantizedY) return 1;
     return 0;
 }
 
@@ -135,53 +135,53 @@ static void addOutgoingIndex(
 }
 
 struct EdgeKey {
-    Vertex2D a;
-    Vertex2D b;
-    PointKey ka;
-    PointKey kb;
+    Vertex2D start;
+    Vertex2D end;
+    PointKey startKey;
+    PointKey endKey;
     EdgeKey(const Vertex2D& p0, const Vertex2D& p1, double epsilon)
-        : a(), b(), ka(p0, epsilon), kb(p1, epsilon)
+        : start(), end(), startKey(p0, epsilon), endKey(p1, epsilon)
     {
         PointKey k0(p0, epsilon);
         PointKey k1(p1, epsilon);
         if (compareKeys(k0, k1) <= 0) {
-            a = copyVertex(p0);
-            b = copyVertex(p1);
-            ka = k0;
-            kb = k1;
+            start = copyVertex(p0);
+            end = copyVertex(p1);
+            startKey = k0;
+            endKey = k1;
         } else {
-            a = copyVertex(p1);
-            b = copyVertex(p0);
-            ka = k1;
-            kb = k0;
+            start = copyVertex(p1);
+            end = copyVertex(p0);
+            startKey = k1;
+            endKey = k0;
         }
     }
-    bool isForward(const Vertex2D& start, double epsilon) const { return samePoint(a, start, epsilon); }
-    bool operator==(const EdgeKey& o) const { return ka == o.ka && kb == o.kb; }
+    bool isForward(const Vertex2D& candidate, double epsilon) const { return samePoint(start, candidate, epsilon); }
+    bool operator==(const EdgeKey& o) const { return startKey == o.startKey && endKey == o.endKey; }
 };
 
 struct EdgeKeyHasher {
     std::size_t operator()(const EdgeKey& k) const
     {
-        std::size_t h1 = PointKeyHasher()(k.ka);
-        std::size_t h2 = PointKeyHasher()(k.kb);
+        std::size_t h1 = PointKeyHasher()(k.startKey);
+        std::size_t h2 = PointKeyHasher()(k.endKey);
         return h1 ^ (h2 << 1);
     }
 };
 
 struct Segment2D {
-    Vertex2D a;
-    Vertex2D b;
-    Segment2D() : a(), b() {}
-    Segment2D(const Vertex2D& aIn, const Vertex2D& bIn) : a(aIn), b(bIn) {}
+    Vertex2D start;
+    Vertex2D end;
+    Segment2D() : start(), end() {}
+    Segment2D(const Vertex2D& startIn, const Vertex2D& endIn) : start(startIn), end(endIn) {}
 };
 
 struct SplitPoint {
-    double t;
-    Vertex2D p;
-    SplitPoint() : t(0.0), p() {}
-    SplitPoint(double tIn, const Vertex2D& pIn) : t(tIn), p(pIn) {}
-    bool operator<(const SplitPoint& o) const { return t < o.t; }
+    double segmentParameter;
+    Vertex2D point;
+    SplitPoint() : segmentParameter(0.0), point() {}
+    SplitPoint(double segmentParameterIn, const Vertex2D& pointIn) : segmentParameter(segmentParameterIn), point(pointIn) {}
+    bool operator<(const SplitPoint& o) const { return segmentParameter < o.segmentParameter; }
 };
 
 static void sortSplitPoints(java::ArrayList<SplitPoint>& values)
@@ -206,16 +206,16 @@ struct DirectedEdge {
 
 static double parameterOnSegment(const Segment2D& seg, const Vertex2D& p, double epsilon)
 {
-    double dx = seg.b.x - seg.a.x;
-    double dy = seg.b.y - seg.a.y;
+    double dx = seg.end.x - seg.start.x;
+    double dy = seg.end.y - seg.start.y;
     double len2 = dx * dx + dy * dy;
     if (len2 <= epsilon * epsilon) return -1.0;
-    double t = ((p.x - seg.a.x) * dx + (p.y - seg.a.y) * dy) / len2;
+    double t = ((p.x - seg.start.x) * dx + (p.y - seg.start.y) * dy) / len2;
     if (t < -epsilon || t > 1.0 + epsilon) return -1.0;
     if (t < 0.0) t = 0.0;
     else if (t > 1.0) t = 1.0;
-    double projx = seg.a.x + t * dx;
-    double projy = seg.a.y + t * dy;
+    double projx = seg.start.x + t * dx;
+    double projy = seg.start.y + t * dy;
     double dist2 = (p.x - projx) * (p.x - projx) + (p.y - projy) * (p.y - projy);
     if (dist2 > epsilon * epsilon) return -1.0;
     return t;
@@ -234,8 +234,8 @@ static java::ArrayList<SplitPoint> dedupSplitPoints(const java::ArrayList<SplitP
     for (size_t i = 0; i < in.size(); ++i) {
         const SplitPoint& cur = in[i];
         if (out.size() == 0
-            || std::fabs(out[out.size() - 1].t - cur.t) > epsilon
-            || !samePoint(out[out.size() - 1].p, cur.p, epsilon)) {
+            || std::fabs(out[out.size() - 1].segmentParameter - cur.segmentParameter) > epsilon
+            || !samePoint(out[out.size() - 1].point, cur.point, epsilon)) {
             out.add(cur);
         }
     }
@@ -249,17 +249,17 @@ static void splitAndAccumulateSegments(
     for (size_t i = 0; i < segments.size(); ++i) {
         const Segment2D& seg = segments[i];
         java::ArrayList<SplitPoint> splitPoints;
-        splitPoints.add(SplitPoint(0.0, seg.a));
-        splitPoints.add(SplitPoint(1.0, seg.b));
+        splitPoints.add(SplitPoint(0.0, seg.start));
+        splitPoints.add(SplitPoint(1.0, seg.end));
         for (size_t j = 0; j < segments.size(); ++j) {
-            maybeAddPointOnSegment(seg, segments[j].a, epsilon, splitPoints);
-            maybeAddPointOnSegment(seg, segments[j].b, epsilon, splitPoints);
+            maybeAddPointOnSegment(seg, segments[j].start, epsilon, splitPoints);
+            maybeAddPointOnSegment(seg, segments[j].end, epsilon, splitPoints);
         }
         sortSplitPoints(splitPoints);
         java::ArrayList<SplitPoint> dedup = dedupSplitPoints(splitPoints, epsilon);
         for (size_t j = 0; j + 1 < dedup.size(); ++j) {
-            const Vertex2D& p0 = dedup[j].p;
-            const Vertex2D& p1 = dedup[j + 1].p;
+            const Vertex2D& p0 = dedup[j].point;
+            const Vertex2D& p1 = dedup[j + 1].point;
             if (samePoint(p0, p1, epsilon)) continue;
             EdgeKey key(p0, p1, epsilon);
             int delta = key.isForward(p0, epsilon) ? 1 : -1;
@@ -378,11 +378,11 @@ static java::ArrayList< java::ArrayList<Vertex2D> > weldInternalEdges(
     java::ArrayList<DirectedEdge> boundaryEdges;
     for (size_t i = 0; i < segments.size(); ++i) {
         const Segment2D& seg = segments[i];
-        EdgeKey key(seg.a, seg.b, epsilon);
+        EdgeKey key(seg.start, seg.end, epsilon);
         const int* balance = signedUsage.get(key);
         if (balance == 0 || *balance == 0) continue;
-        if (*balance > 0) boundaryEdges.add(DirectedEdge(key.a, key.b));
-        else boundaryEdges.add(DirectedEdge(key.b, key.a));
+        if (*balance > 0) boundaryEdges.add(DirectedEdge(key.start, key.end));
+        else boundaryEdges.add(DirectedEdge(key.end, key.start));
     }
     if (boundaryEdges.size() == 0) return java::ArrayList< java::ArrayList<Vertex2D> >();
     return extractLoopsFromBoundaryEdges(boundaryEdges, epsilon);

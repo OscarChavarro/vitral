@@ -11,8 +11,8 @@ class RasterTileGenerator {
   private:
     RasterTileGenerationStrategy strategy;
     Image* image;
-    int x0;
-    int y0;
+    int startX;
+    int startY;
     int width;
     int height;
     int numberOfThreads;
@@ -33,8 +33,8 @@ class RasterTileGenerator {
     RasterTileGenerator(
         RasterTileGenerationStrategy strategy,
         Image* image,
-        int x0,
-        int y0,
+        int startX,
+        int startY,
         int width,
         int height,
         int numberOfThreads);

@@ -11,7 +11,7 @@
 #include <GL/gl.h>
 #endif
 OpenGL4SimpleCorridorSample::OpenGL4SimpleCorridorSample()
-    : a(6), na(6), b(20), nb(20), c(4), nc(4), interSpace(0.05),
+    : width(6), widthTiles(6), length(20), lengthTiles(20), height(4), heightTiles(4), interSpace(0.05),
       initialized(false), shaderProgramId(0), vertexArrayId(0),
       positionBufferId(0), colorBufferId(0),
       modelViewProjectionLocalLoc(-1), withTextureLoc(-1),
@@ -221,9 +221,9 @@ void OpenGL4SimpleCorridorSample::buildGeometry(java::ArrayList<float>& position
         appendTilesLong(positions, colors, 0.5f, 0.5f, 0.9f, 90 * i, false, 0);
     }
 
-    appendTilesCenter(positions, colors, 0.0f, 0.0f, 1.0f, 0, true, c);
+    appendTilesCenter(positions, colors, 0.0f, 0.0f, 1.0f, 0, true, height);
     for (int i = 0; i < 4; i++) {
-        appendTilesLong(positions, colors, 0.0f, 0.0f, 1.0f, 90 * i, true, c);
+        appendTilesLong(positions, colors, 0.0f, 0.0f, 1.0f, 90 * i, true, height);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -255,13 +255,13 @@ void OpenGL4SimpleCorridorSample::appendTilesCenter(
     float r, float g, float bColor,
     double rotZDeg, bool flipYZ, double translateZ) {
 
-    double da = a / ((double)na);
+    double da = width / ((double)widthTiles);
     double epsilon = 0.005;
 
-    for (int i = 0; i < na; i++) {
-        double x = -a / 2 + i * da;
-        for (int j = 0; j < na; j++) {
-            double y = -a / 2 + j * da;
+    for (int i = 0; i < widthTiles; i++) {
+        double x = -width / 2 + i * da;
+        for (int j = 0; j < widthTiles; j++) {
+            double y = -width / 2 + j * da;
             addQuad(positions, colors, r, g, bColor,
                 x + interSpace / 2, y + interSpace / 2, -epsilon,
                 x + da - interSpace / 2, y + interSpace / 2, -epsilon,
@@ -278,14 +278,14 @@ void OpenGL4SimpleCorridorSample::appendTilesLong(
     float r, float g, float bColor,
     double rotZDeg, bool flipYZ, double translateZ) {
 
-    double da = a / ((double)na);
-    double db = b / ((double)nb);
+    double da = width / ((double)widthTiles);
+    double db = length / ((double)lengthTiles);
     double epsilon = 0.001;
 
-    for (int i = 0; i < nb; i++) {
-        double x = -a / 2 - b + i * db;
-        for (int j = 0; j < na; j++) {
-            double y = -a / 2 + j * da;
+    for (int i = 0; i < lengthTiles; i++) {
+        double x = -width / 2 - length + i * db;
+        for (int j = 0; j < widthTiles; j++) {
+            double y = -width / 2 + j * da;
             addQuad(positions, colors, r, g, bColor,
                 x + interSpace / 2, y + interSpace / 2, -epsilon,
                 x + da - interSpace / 2, y + interSpace / 2, -epsilon,
@@ -302,18 +302,18 @@ void OpenGL4SimpleCorridorSample::appendTilesWallA(
     float r, float g, float bColor,
     double rotZDeg) {
 
-    double da = a / ((double)na);
-    double dc = c / ((double)nc);
+    double da = width / ((double)widthTiles);
+    double dc = height / ((double)heightTiles);
 
-    for (int i = 0; i < nc; i++) {
+    for (int i = 0; i < heightTiles; i++) {
         double z = i * dc;
-        for (int j = 0; j < na; j++) {
-            double y = -a / 2 + j * da;
+        for (int j = 0; j < widthTiles; j++) {
+            double y = -width / 2 + j * da;
             addQuad(positions, colors, r, g, bColor,
-                -a / 2 - b, y + interSpace / 2, z + dc - interSpace / 2,
-                -a / 2 - b, y + interSpace / 2, z + interSpace / 2,
-                -a / 2 - b, y + da - interSpace / 2, z + interSpace / 2,
-                -a / 2 - b, y + da - interSpace / 2, z + dc - interSpace / 2,
+                -width / 2 - length, y + interSpace / 2, z + dc - interSpace / 2,
+                -width / 2 - length, y + interSpace / 2, z + interSpace / 2,
+                -width / 2 - length, y + da - interSpace / 2, z + interSpace / 2,
+                -width / 2 - length, y + da - interSpace / 2, z + dc - interSpace / 2,
                 rotZDeg, false, 0);
         }
     }
@@ -325,18 +325,18 @@ void OpenGL4SimpleCorridorSample::appendTilesWallB(
     float r, float g, float bColor,
     double rotZDeg) {
 
-    double db = b / ((double)nb);
-    double dc = c / ((double)nc);
+    double db = length / ((double)lengthTiles);
+    double dc = height / ((double)heightTiles);
 
-    for (int i = 0; i < nc; i++) {
+    for (int i = 0; i < heightTiles; i++) {
         double z = i * dc;
-        for (int j = 0; j < nb; j++) {
-            double y = a / 2 + j * db;
+        for (int j = 0; j < lengthTiles; j++) {
+            double y = width / 2 + j * db;
             addQuad(positions, colors, r, g, bColor,
-                -a / 2, y + interSpace / 2, z + dc - interSpace / 2,
-                -a / 2, y + interSpace / 2, z + interSpace / 2,
-                -a / 2, y + db - interSpace / 2, z + interSpace / 2,
-                -a / 2, y + db - interSpace / 2, z + dc - interSpace / 2,
+                -width / 2, y + interSpace / 2, z + dc - interSpace / 2,
+                -width / 2, y + interSpace / 2, z + interSpace / 2,
+                -width / 2, y + db - interSpace / 2, z + interSpace / 2,
+                -width / 2, y + db - interSpace / 2, z + dc - interSpace / 2,
                 rotZDeg, false, 0);
         }
     }
@@ -348,18 +348,18 @@ void OpenGL4SimpleCorridorSample::appendTilesWallC(
     float r, float g, float bColor,
     double rotZDeg) {
 
-    double db = b / ((double)nb);
-    double dc = c / ((double)nc);
+    double db = length / ((double)lengthTiles);
+    double dc = height / ((double)heightTiles);
 
-    for (int i = 0; i < nb; i++) {
-        double x = -a / 2 - b + i * db;
-        for (int j = 0; j < nc; j++) {
+    for (int i = 0; i < lengthTiles; i++) {
+        double x = -width / 2 - length + i * db;
+        for (int j = 0; j < heightTiles; j++) {
             double z = j * dc;
             addQuad(positions, colors, r, g, bColor,
-                x + interSpace / 2, a / 2, z + interSpace / 2,
-                x + db - interSpace / 2, a / 2, z + interSpace / 2,
-                x + db - interSpace / 2, a / 2, z + dc - interSpace / 2,
-                x + interSpace / 2, a / 2, z + dc - interSpace / 2,
+                x + interSpace / 2, width / 2, z + interSpace / 2,
+                x + db - interSpace / 2, width / 2, z + interSpace / 2,
+                x + db - interSpace / 2, width / 2, z + dc - interSpace / 2,
+                x + interSpace / 2, width / 2, z + dc - interSpace / 2,
                 rotZDeg, false, 0);
         }
     }

@@ -191,15 +191,15 @@ public class TranslateGizmoInteractionTechnique {
             return false;
         }
 
-        if ( keyEvent.unicode_id != KeyEvent.KEY_NONE ) {
+        if ( keyEvent.unicodeId != KeyEvent.KEY_NONE ) {
             Vector3Dd p = gizmo.getPosition();
-            boolean isMovementKey = "xXyYzZ".indexOf(keyEvent.unicode_id) >= 0;
+            boolean isMovementKey = "xXyYzZ".indexOf(keyEvent.unicodeId) >= 0;
 
             if ( isMovementKey ) {
                 gizmo.getInputGizmo().cancelEditing();
             }
 
-            switch ( keyEvent.unicode_id ) {
+            switch ( keyEvent.unicodeId ) {
               case 'x':
                 gizmo.setPosition(new Vector3Dd(p.x() - KEY_MOVEMENT_STEP, p.y(), p.z()));
                 updateNeeded = true;

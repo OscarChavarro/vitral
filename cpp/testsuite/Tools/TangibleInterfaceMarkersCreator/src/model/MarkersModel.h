@@ -23,11 +23,11 @@ class MarkersModel {
   private:
     static const int OUTPUT_PDF_MAX_LENGTH = 256;
 
-    int startId_;
-    int count_;
-    double markerSizeMm_;
-    char outputPdf_[OUTPUT_PDF_MAX_LENGTH];
-    java::ArrayList<Marker*>* markers_;
+    int startId;
+    int count;
+    double markerSizeMm;
+    char outputPdf[OUTPUT_PDF_MAX_LENGTH];
+    java::ArrayList<Marker*>* markers;
 };
 
 #endif

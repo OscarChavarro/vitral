@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class WidgetButtonGroup extends WidgetElement
 {
-    private final ArrayList<WidgetCommand> commandReferenceList;
+    private final ArrayList<WidgetCommand> commands;
     private String name;
 
     private boolean showText;
@@ -17,7 +17,7 @@ public class WidgetButtonGroup extends WidgetElement
 
     public WidgetButtonGroup(Widget parent)
     {
-        commandReferenceList = new ArrayList<WidgetCommand>();
+        commands = new ArrayList<WidgetCommand>();
         context = parent;
     }
 
@@ -63,7 +63,7 @@ public class WidgetButtonGroup extends WidgetElement
 
     public ArrayList<WidgetCommand> getCommands()
     {
-        return commandReferenceList;
+        return commands;
     }
 
     public void setName(String n)
@@ -81,7 +81,7 @@ public class WidgetButtonGroup extends WidgetElement
         WidgetCommand command = context.getCommandByName(commandName);
 
         if ( command != null ) {
-            commandReferenceList.add(command);
+            commands.add(command);
         }
     }
 }

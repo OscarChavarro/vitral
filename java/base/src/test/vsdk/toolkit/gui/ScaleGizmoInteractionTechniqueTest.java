@@ -275,7 +275,7 @@ class ScaleGizmoInteractionTechniqueTest
         ScaleGizmoInteractionTechnique technique = new ScaleGizmoInteractionTechnique(gizmo);
         KeyEvent digit = new KeyEvent();
 
-        digit.unicode_id = '5';
+        digit.unicodeId = '5';
 
         // Act & Assert
         assertThat(technique.isInputGizmoKey(digit)).isTrue();

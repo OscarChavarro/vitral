@@ -95,13 +95,13 @@ export class Arrow extends Solid {
         let baseT = Arrow.NO_HIT;
         candidateHit.resetForDistanceOnly();
         if (this.baseCylinder.doIntersectionFirstHit(inRay, candidateHit)) {
-            baseT = candidateHit.hitDistance();
+            baseT = candidateHit.getHitDistance();
         }
 
         let headT = Arrow.NO_HIT;
         candidateHit.resetForDistanceOnly();
         if (this.headCone.doIntersectionFirstHit(shiftedHeadRay, candidateHit)) {
-            headT = candidateHit.hitDistance();
+            headT = candidateHit.getHitDistance();
         }
 
         const winnerT = baseT < headT ? baseT : headT;
@@ -166,8 +166,8 @@ export class Arrow extends Solid {
         const tr = new Vector3Dd(0, 0, -this.baseLength);
         const shiftedHeadRay = new Ray(inRay.getOrigin().add(tr), inRay.getDirection(), inRay.getT());
 
-        const baseHit = new RayHit(outHit.requiredDetailMask());
-        const headHit = new RayHit(outHit.requiredDetailMask());
+        const baseHit = new RayHit(outHit.getRequiredDetailMask());
+        const headHit = new RayHit(outHit.getRequiredDetailMask());
         const hasBase = this.baseCylinder.doIntersectionFirstHit(inRay, baseHit);
         const hasHead = this.headCone.doIntersectionFirstHit(shiftedHeadRay, headHit);
 
@@ -175,8 +175,16 @@ export class Arrow extends Solid {
             return false;
         }
 
-        const baseT = hasBase ? (baseHit.ray() !== null ? baseHit.ray()!.getT() : baseHit.hitDistance()) : Arrow.NO_HIT;
-        const headT = hasHead ? (headHit.ray() !== null ? headHit.ray()!.getT() : headHit.hitDistance()) : Arrow.NO_HIT;
+        const baseT = hasBase
+            ? baseHit.getRay() !== null
+                ? baseHit.getRay()!.getT()
+                : baseHit.getHitDistance()
+            : Arrow.NO_HIT;
+        const headT = hasHead
+            ? headHit.getRay() !== null
+                ? headHit.getRay()!.getT()
+                : headHit.getHitDistance()
+            : Arrow.NO_HIT;
 
         if (hasBase && (!hasHead || baseT < headT)) {
             outHit.clone(baseHit);
@@ -184,8 +192,8 @@ export class Arrow extends Solid {
         } else {
             outHit.clone(headHit);
             outHit.setRay(inRay.withT(headT));
-            if (outHit.p !== null) {
-                outHit.p = new Vector3Dd(outHit.p.x(), outHit.p.y(), outHit.p.z() + this.baseLength);
+            if (outHit.point !== null) {
+                outHit.point = new Vector3Dd(outHit.point.x(), outHit.point.y(), outHit.point.z() + this.baseLength);
             }
         }
         return true;

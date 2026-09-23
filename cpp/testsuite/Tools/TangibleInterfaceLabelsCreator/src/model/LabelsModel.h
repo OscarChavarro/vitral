@@ -23,11 +23,11 @@ class LabelsModel {
   private:
     static const int OUTPUT_PDF_MAX_LENGTH = 256;
 
-    int count_;
-    double labelSizeMm_;
-    double circleHoledRadiusMm_;
-    char outputPdf_[OUTPUT_PDF_MAX_LENGTH];
-    java::ArrayList<Label*>* labels_;
+    int count;
+    double labelSizeMm;
+    double circleHoledRadiusMm;
+    char outputPdf[OUTPUT_PDF_MAX_LENGTH];
+    java::ArrayList<Label*>* labels;
 };
 
 #endif

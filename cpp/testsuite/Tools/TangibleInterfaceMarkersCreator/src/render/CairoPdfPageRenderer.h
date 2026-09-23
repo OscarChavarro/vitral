@@ -12,11 +12,11 @@ public:
 
     // Number of marker columns/rows that fit on the A4 page for the configured
     // marker size. A zero in either dimension means not even one marker fits.
-    int getColumns() const { return columns_; }
-    int getRows() const { return rows_; }
-    int getCapacity() const { return columns_ * rows_; }
+    int getColumns() const { return columns; }
+    int getRows() const { return rows; }
+    int getCapacity() const { return columns * rows; }
 
-    double getMarkerSizeMm() const { return markerSizeMm_; }
+    double getMarkerSizeMm() const { return markerSizeMm; }
 
     void renderPage(const char* outputPdf, java::ArrayList<Marker*>* markers);
 
@@ -35,12 +35,12 @@ private:
     static constexpr double REFERENCE_SPACING_MM = 5.0;
     static constexpr double REFERENCE_STROKE_MM = 0.6;
 
-    double markerSizeMm_;
-    double spacingMm_;
-    int columns_;
-    int rows_;
+    double markerSizeMm;
+    double spacingMm;
+    int columns;
+    int rows;
 
-    CairoPdfMarkerRenderer markerRenderer_;
+    CairoPdfMarkerRenderer markerRenderer;
 
     void computeLayout();
     double mmToPt(double mm) const;

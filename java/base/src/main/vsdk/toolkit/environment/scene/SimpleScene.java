@@ -15,19 +15,19 @@ public class SimpleScene extends Entity
 {
     @Serial private static final long serialVersionUID = 20100901L;
 
-    private ArrayList<SimpleBody> simpleBodiesArray;
-    private ArrayList<Light> lightsArray;
-    private ArrayList<Background> backgroundsArray;
-    private ArrayList<Camera> camerasArray;
+    private ArrayList<SimpleBody> simpleBodies;
+    private ArrayList<Light> lights;
+    private ArrayList<Background> backgrounds;
+    private ArrayList<Camera> cameras;
     private int activeCameraIndex;
     private int activeBackgroundIndex;
 
     public SimpleScene()
     {
-        simpleBodiesArray = new ArrayList<SimpleBody>();
-        lightsArray = new ArrayList<Light>();
-        backgroundsArray = new ArrayList<Background>();
-        camerasArray = new ArrayList<Camera>();
+        simpleBodies = new ArrayList<SimpleBody>();
+        lights = new ArrayList<Light>();
+        backgrounds = new ArrayList<Background>();
+        cameras = new ArrayList<Camera>();
     }
 
     public int getActiveCameraIndex()
@@ -52,76 +52,76 @@ public class SimpleScene extends Entity
 
     public void addBody(SimpleBody b)
     {
-        simpleBodiesArray.add(b);
+        simpleBodies.add(b);
     }
 
     public void addCamera(Camera c)
     {
-        camerasArray.add(c);
+        cameras.add(c);
     }
 
     public void addBackground(Background b)
     {
-        backgroundsArray.add(b);
+        backgrounds.add(b);
     }
 
     public void addLight(Light l)
     {
-        l.setId(lightsArray.size());
-        lightsArray.add(l);
+        l.setId(lights.size());
+        lights.add(l);
     }
 
     public ArrayList<SimpleBody> getSimpleBodies()
     {
-        return simpleBodiesArray;
+        return simpleBodies;
     }
 
     public ArrayList<Light> getLights()
     {
-        return lightsArray;
+        return lights;
     }
 
     public ArrayList<Background> getBackgrounds()
     {
-        return backgroundsArray;
+        return backgrounds;
     }
 
     public ArrayList<Camera> getCameras()
     {
-        return camerasArray;
+        return cameras;
     }
 
     public void setSimpleBodies(ArrayList<SimpleBody> simpleBodies)
     {
-        simpleBodiesArray = simpleBodies;
+        this.simpleBodies = simpleBodies;
     }
 
     public void setLights(ArrayList<Light> lights)
     {
-        lightsArray = lights;
-        for ( int i = 0; i < lightsArray.size(); i++ ) {
-            lightsArray.get(i).setId(i);
+        this.lights = lights;
+        for ( int i = 0; i < this.lights.size(); i++ ) {
+            this.lights.get(i).setId(i);
         }
     }
 
     public void setBackgrounds(ArrayList<Background> backgrounds)
     {
-        backgroundsArray = backgrounds;
+        this.backgrounds = backgrounds;
     }
 
     public Background getActiveBackground()
     {
-        return backgroundsArray.get(activeBackgroundIndex);
+        return backgrounds.get(activeBackgroundIndex);
     }
 
     public Camera getActiveCamera()
     {
-        return camerasArray.get(activeCameraIndex);
+        return cameras.get(activeCameraIndex);
     }
 
     public void setCameras(ArrayList<Camera> cameras)
     {
-        camerasArray = cameras;
+        this.cameras = cameras;
     }
 
     public SimpleSceneSnapshot exportToSimpleSceneSnapshot()
@@ -145,8 +145,8 @@ public class SimpleScene extends Entity
         Background background)
     {
         return new SimpleSceneSnapshot(
-            simpleBodiesArray,
-            lightsArray,
+            simpleBodies,
+            lights,
             background,
             cameraSnapshot);
     }

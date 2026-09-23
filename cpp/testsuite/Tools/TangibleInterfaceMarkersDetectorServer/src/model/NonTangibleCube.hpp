@@ -25,7 +25,7 @@ private:
 
     int cubeOf(int markerId) const;
 
-    java::HashMap<int, int> markerToCube_;
-    bool hasMapping_;
+    java::HashMap<int, int> markerToCube;
+    bool hasMapping;
 };
 #endif

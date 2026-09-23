@@ -238,7 +238,7 @@ public class PolyhedralBoundedSolid extends Solid {
     public Ray doIntersectionFirstHit(Ray inOutRay) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
         if ( doIntersectionFirstHit(inOutRay, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }
@@ -266,7 +266,7 @@ public class PolyhedralBoundedSolid extends Solid {
             }
             RayHit planeHit = new RayHit();
             if ( containingPlane.doIntersectionFirstHit(ray, planeHit) ) {
-                Ray hit = planeHit.ray();
+                Ray hit = planeHit.getRay();
                 if ( hit.getT() < minT ) {
                     hit = hit.withDirection(hit.getDirection().normalized());
                     p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));

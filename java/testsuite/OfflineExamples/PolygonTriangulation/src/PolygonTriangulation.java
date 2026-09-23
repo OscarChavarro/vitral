@@ -62,7 +62,7 @@ public class PolygonTriangulation {
             MonotoneDecompositionTriangulator.Triangle triangle =
                 triangles.get(triangleIndex);
             System.out.printf("triangle #%d: %d %d %d%n", triangleIndex,
-                triangle.a, triangle.b, triangle.c);
+                triangle.point0, triangle.point1, triangle.point2);
         }
     }
 

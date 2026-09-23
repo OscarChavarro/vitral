@@ -1,6 +1,6 @@
 export interface WebKeyEvent {
     keycode: string;
-    unicode_id: string;
+    unicodeId: string;
     modifierMask: number;
 }
 
@@ -57,7 +57,7 @@ export class WebSystem {
     public static web2vsdkKeyEvent(event: KeyboardEvent): WebKeyEvent {
         return {
             keycode: WebSystem.normalizeKey(event),
-            unicode_id: WebSystem.normalizeUnicode(event),
+            unicodeId: WebSystem.normalizeUnicode(event),
             modifierMask: WebSystem.modifierMask(event),
         };
     }

@@ -17,8 +17,8 @@ Current strategies:
 export class RasterTileGenerator {
     private readonly strategy: RasterTileGenerationStrategy;
     private readonly image: Image;
-    private readonly x0: number;
-    private readonly y0: number;
+    private readonly startX: number;
+    private readonly startY: number;
     private readonly width: number;
     private readonly height: number;
     private readonly numberOfThreads: number;
@@ -34,8 +34,8 @@ export class RasterTileGenerator {
     public constructor(
         strategy: RasterTileGenerationStrategy,
         image: Image,
-        x0: number,
-        y0: number,
+        startX: number,
+        startY: number,
         width: number,
         height: number,
         numberOfThreads: number,
@@ -49,8 +49,8 @@ export class RasterTileGenerator {
         d?: number,
         e?: number,
     ) {
-        const x0: number = e === undefined ? 0 : a;
-        const y0: number = e === undefined ? 0 : b;
+        const startX: number = e === undefined ? 0 : a;
+        const startY: number = e === undefined ? 0 : b;
         const width: number = e === undefined ? a : c;
         const height: number = e === undefined ? b : d!;
         const numberOfThreads: number = e === undefined ? c : e;
@@ -61,7 +61,7 @@ export class RasterTileGenerator {
         if (image === null) {
             throw new IllegalArgumentException("image can not be null");
         }
-        if (x0 < 0 || y0 < 0) {
+        if (startX < 0 || startY < 0) {
             throw new IllegalArgumentException("origin must be >= 0");
         }
         if (width <= 0) {
@@ -70,7 +70,7 @@ export class RasterTileGenerator {
         if (height <= 0) {
             throw new IllegalArgumentException("height must be > 0");
         }
-        if (x0 + width > image.getXSize() || y0 + height > image.getYSize()) {
+        if (startX + width > image.getXSize() || startY + height > image.getYSize()) {
             throw new IllegalArgumentException("requested tile area must be inside image");
         }
         if (numberOfThreads <= 0) {
@@ -79,8 +79,8 @@ export class RasterTileGenerator {
 
         this.strategy = strategy;
         this.image = image;
-        this.x0 = x0;
-        this.y0 = y0;
+        this.startX = startX;
+        this.startY = startY;
         this.width = width;
         this.height = height;
         this.numberOfThreads = numberOfThreads;
@@ -116,7 +116,7 @@ export class RasterTileGenerator {
 
         for (let i = 0; i < workerBands; i++) {
             const currentBandHeight: number = baseBandHeight + (i < extraRows ? 1 : 0);
-            out.add(new RasterTileArea(this.image, this.x0, this.y0 + y, this.width, currentBandHeight));
+            out.add(new RasterTileArea(this.image, this.startX, this.startY + y, this.width, currentBandHeight));
             y += currentBandHeight;
         }
 
@@ -125,7 +125,7 @@ export class RasterTileGenerator {
 
     private generateSerialTile(): ArrayList<RasterTileArea> {
         const out: ArrayList<RasterTileArea> = new ArrayList<RasterTileArea>();
-        out.add(new RasterTileArea(this.image, this.x0, this.y0, this.width, this.height));
+        out.add(new RasterTileArea(this.image, this.startX, this.startY, this.width, this.height));
         return out;
     }
 }

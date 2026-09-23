@@ -1,10 +1,10 @@
 import { Polygon2D } from "@vitral/base";
 
 interface TessellationEdge {
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
 }
 
 /**
@@ -99,7 +99,7 @@ export class _Polygon2DOddWindingTessellator {
                     // take no part in the parity count.
                     continue;
                 }
-                edges.push({ x1: current.x, y1: current.y, x2: next.x, y2: next.y });
+                edges.push({ startX: current.x, startY: current.y, endX: next.x, endY: next.y });
             }
         }
         return edges;
@@ -142,14 +142,14 @@ export class _Polygon2DOddWindingTessellator {
         if (to - from <= 0.0) {
             return;
         }
-        const x1: number = edge.x1 + (edge.x2 - edge.x1) * from;
-        const y1: number = edge.y1 + (edge.y2 - edge.y1) * from;
-        const x2: number = edge.x1 + (edge.x2 - edge.x1) * to;
-        const y2: number = edge.y1 + (edge.y2 - edge.y1) * to;
+        const x1: number = edge.startX + (edge.endX - edge.startX) * from;
+        const y1: number = edge.startY + (edge.endY - edge.startY) * from;
+        const x2: number = edge.startX + (edge.endX - edge.startX) * to;
+        const y2: number = edge.startY + (edge.endY - edge.startY) * to;
         if (Math.abs(y2 - y1) < _Polygon2DOddWindingTessellator.EPSILON) {
             return;
         }
-        split.push({ x1, y1, x2, y2 });
+        split.push({ startX: x1, startY: y1, endX: x2, endY: y2 });
     }
 
     /**
@@ -158,18 +158,18 @@ export class _Polygon2DOddWindingTessellator {
     ordinate of that endpoint is already a band boundary.
     */
     private static properCrossing(a: TessellationEdge, b: TessellationEdge): [number, number] | null {
-        const ax: number = a.x2 - a.x1;
-        const ay: number = a.y2 - a.y1;
-        const bx: number = b.x2 - b.x1;
-        const by: number = b.y2 - b.y1;
+        const ax: number = a.endX - a.startX;
+        const ay: number = a.endY - a.startY;
+        const bx: number = b.endX - b.startX;
+        const by: number = b.endY - b.startY;
 
         const denominator: number = ax * by - ay * bx;
         if (Math.abs(denominator) < 1e-12) {
             return null;
         }
 
-        const dx: number = b.x1 - a.x1;
-        const dy: number = b.y1 - a.y1;
+        const dx: number = b.startX - a.startX;
+        const dy: number = b.startY - a.startY;
         const t: number = (dx * by - dy * bx) / denominator;
         const s: number = (dx * ay - dy * ax) / denominator;
 
@@ -183,8 +183,8 @@ export class _Polygon2DOddWindingTessellator {
     private static collectBandBoundaries(edges: TessellationEdge[]): number[] {
         const ordinates: number[] = [];
         for (const edge of edges) {
-            ordinates.push(edge.y1);
-            ordinates.push(edge.y2);
+            ordinates.push(edge.startY);
+            ordinates.push(edge.endY);
         }
         ordinates.sort((a, b) => a - b);
 
@@ -202,8 +202,8 @@ export class _Polygon2DOddWindingTessellator {
         const crossings: { middle: number; low: number; high: number }[] = [];
 
         for (const edge of edges) {
-            const minimum: number = Math.min(edge.y1, edge.y2);
-            const maximum: number = Math.max(edge.y1, edge.y2);
+            const minimum: number = Math.min(edge.startY, edge.endY);
+            const maximum: number = Math.max(edge.startY, edge.endY);
             if (minimum > low + _Polygon2DOddWindingTessellator.EPSILON) {
                 continue;
             }
@@ -231,8 +231,8 @@ export class _Polygon2DOddWindingTessellator {
     }
 
     private static abscissaAt(edge: TessellationEdge, y: number): number {
-        const t: number = (y - edge.y1) / (edge.y2 - edge.y1);
-        return edge.x1 + (edge.x2 - edge.x1) * t;
+        const t: number = (y - edge.startY) / (edge.endY - edge.startY);
+        return edge.startX + (edge.endX - edge.startX) * t;
     }
 
     private static emitTriangle(

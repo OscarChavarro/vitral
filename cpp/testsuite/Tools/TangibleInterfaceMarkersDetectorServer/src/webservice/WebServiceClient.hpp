@@ -16,10 +16,10 @@ public:
     void serve();
 
 private:
-    java::net::Socket socket_;
-    WebSocketProtocol protocol_;
-    WebServiceConfig config_;
-    MarkerEventBus* bus_;
+    java::net::Socket socket;
+    WebSocketProtocol protocol;
+    WebServiceConfig config;
+    MarkerEventBus* bus;
 };
 
 #endif

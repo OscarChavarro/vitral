@@ -13,23 +13,23 @@ class MarkersModel {
 public:
     MarkersModel();
 
-    void setMarkerTracker(MarkerTracker* tracker) { tracker_ = tracker; }
-    MarkerTracker* getMarkerTracker() const { return tracker_; }
+    void setMarkerTracker(MarkerTracker* markerTracker) { this->markerTracker = markerTracker; }
+    MarkerTracker* getMarkerTracker() const { return markerTracker; }
 
-    bool isRunning() const { return running_; }
-    void setRunning(bool running) { running_ = running; }
+    bool isRunning() const { return running; }
+    void setRunning(bool running) { this->running = running; }
 
-    void addMarkerGroup(const MarkerGroup& group) { markerGroups_.add(group); }
-    const java::ArrayList<MarkerGroup>& getMarkerGroups() const { return markerGroups_; }
-    PreviewOperationMode getPreviewOperationMode() const { return previewOperationMode_; }
+    void addMarkerGroup(const MarkerGroup& group) { markerGroups.add(group); }
+    const java::ArrayList<MarkerGroup>& getMarkerGroups() const { return markerGroups; }
+    PreviewOperationMode getPreviewOperationMode() const { return previewOperationMode; }
     void cyclePreviewOperationMode() {
-        previewOperationMode_ = (previewOperationMode_ == SINGLE_MARKER) ? MARKER_GROUP : SINGLE_MARKER;
+        previewOperationMode = (previewOperationMode == SINGLE_MARKER) ? MARKER_GROUP : SINGLE_MARKER;
     }
 
     bool findGroupByMarkerId(int markerId, MarkerGroup* outGroup) const {
         if (outGroup == nullptr) return false;
-        for (long i = 0; i < markerGroups_.size(); ++i) {
-            MarkerGroup g = markerGroups_.get(i);
+        for (long i = 0; i < markerGroups.size(); ++i) {
+            MarkerGroup g = markerGroups.get(i);
             if (g.containsMarkerId(markerId)) {
                 *outGroup = g;
                 return true;
@@ -38,39 +38,39 @@ public:
         return false;
     }
 
-    int getYawTest() const { return yawTest_; }
-    int getPitchTest() const { return pitchTest_; }
-    int getRollTest() const { return rollTest_; }
-    int getMarkerIdTest() const { return markerIdTest_; }
-    void cycleYawTest() { yawTest_ = cycleAngle90(yawTest_); }
-    void cyclePitchTest() { pitchTest_ = cycleAngle90(pitchTest_); }
-    void cycleRollTest() { rollTest_ = cycleAngle90(rollTest_); }
+    int getYawTest() const { return yawTest; }
+    int getPitchTest() const { return pitchTest; }
+    int getRollTest() const { return rollTest; }
+    int getMarkerIdTest() const { return markerIdTest; }
+    void cycleYawTest() { yawTest = cycleAngle90(yawTest); }
+    void cyclePitchTest() { pitchTest = cycleAngle90(pitchTest); }
+    void cycleRollTest() { rollTest = cycleAngle90(rollTest); }
     void cycleMarkerIdTest() {
-        if (markerGroups_.size() <= 0) return;
-        MarkerGroup g0 = markerGroups_.get(0);
+        if (markerGroups.size() <= 0) return;
+        MarkerGroup g0 = markerGroups.get(0);
         if (g0.markers.size() <= 0) return;
         long currentIdx = -1;
         for (long i = 0; i < g0.markers.size(); ++i) {
             Marker m = g0.markers.get(i);
-            if (m.id == markerIdTest_) {
+            if (m.id == markerIdTest) {
                 currentIdx = i;
                 break;
             }
         }
         if (currentIdx < 0) {
-            markerIdTest_ = g0.markers.get(0).id;
+            markerIdTest = g0.markers.get(0).id;
             return;
         }
         long nextIdx = (currentIdx + 1) % g0.markers.size();
-        markerIdTest_ = g0.markers.get(nextIdx).id;
+        markerIdTest = g0.markers.get(nextIdx).id;
         syncTestsFromSelectedMarker();
     }
 
     void initializeTestsFromFirstMarkerGroup() {
-        if (markerGroups_.size() <= 0) return;
-        MarkerGroup g0 = markerGroups_.get(0);
+        if (markerGroups.size() <= 0) return;
+        MarkerGroup g0 = markerGroups.get(0);
         if (g0.markers.size() <= 0) return;
-        markerIdTest_ = g0.markers.get(0).id;
+        markerIdTest = g0.markers.get(0).id;
         syncTestsFromSelectedMarker();
     }
 
@@ -98,16 +98,16 @@ private:
     }
 
     void syncTestsFromSelectedMarker() {
-        if (markerGroups_.size() <= 0) return;
-        MarkerGroup g0 = markerGroups_.get(0);
+        if (markerGroups.size() <= 0) return;
+        MarkerGroup g0 = markerGroups.get(0);
         for (long i = 0; i < g0.markers.size(); ++i) {
             Marker m = g0.markers.get(i);
-            if (m.id != markerIdTest_) continue;
+            if (m.id != markerIdTest) continue;
             Matrix4x4d r = Matrix4x4d().importFromQuaternion(m.rotation.normalized());
             const double toDeg = 180.0 / 3.14159265358979323846;
-            yawTest_ = snapToRightAngle(r.obtainEulerYawAngle() * toDeg);
-            pitchTest_ = snapToRightAngle(r.obtainEulerPitchAngle() * toDeg);
-            rollTest_ = snapToRightAngle(r.obtainEulerRollAngle() * toDeg);
+            yawTest = snapToRightAngle(r.obtainEulerYawAngle() * toDeg);
+            pitchTest = snapToRightAngle(r.obtainEulerPitchAngle() * toDeg);
+            rollTest = snapToRightAngle(r.obtainEulerRollAngle() * toDeg);
             return;
         }
     }
@@ -119,14 +119,14 @@ private:
         return 0;
     }
 
-    MarkerTracker* tracker_;
-    bool running_;
-    PreviewOperationMode previewOperationMode_;
-    int yawTest_;
-    int pitchTest_;
-    int rollTest_;
-    int markerIdTest_;
-    java::ArrayList<MarkerGroup> markerGroups_;
+    MarkerTracker* markerTracker;
+    bool running;
+    PreviewOperationMode previewOperationMode;
+    int yawTest;
+    int pitchTest;
+    int rollTest;
+    int markerIdTest;
+    java::ArrayList<MarkerGroup> markerGroups;
 };
 
 #endif

@@ -10,7 +10,7 @@ import vsdk.toolkit.gui.feedback.ProgressMonitor;
  */
 public class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
 
-    private long n;
+    private long updateCount;
     private int charactersPrintedInLastLine = 0;
     private double currentPercent;
 
@@ -19,7 +19,7 @@ public class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
 
     @Override
     public void begin() {
-        n = 0;
+        updateCount = 0;
         currentPercent = 0;
         charactersPrintedInLastLine = 0;
         System.out.print("    ");
@@ -44,16 +44,16 @@ public class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
         double v = 100 * (currentValue - minValue) / (maxValue - minValue);
         currentPercent = v;
 
-        n++;
+        updateCount++;
 
         System.out.print(".");
         charactersPrintedInLastLine++;
 
-        if (n % 10 == 0) {
+        if (updateCount % 10 == 0) {
             System.out.print(" ");
             charactersPrintedInLastLine++;
         }
-        if (n % 50 == 0) {
+        if (updateCount % 50 == 0) {
             System.out.print(" - [" + VSDK.formatDouble(v) + "% of " + Math.round(maxValue) + "]\n    ");
             charactersPrintedInLastLine = 0;
         }

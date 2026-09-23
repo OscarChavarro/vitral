@@ -81,22 +81,22 @@ public final class ProceduralNoise
         double sum;
         short m;
 
-        m = (short)(hash3d(l.ix, l.iy, l.iz) & 0xff);
-        sum = incrSum(m, l.tx * l.ty * l.tz, l.x - l.ix, l.y - l.iy, l.z - l.iz);
-        m = (short)(hash3d(l.jx, l.iy, l.iz) & 0xff);
-        sum += incrSum(m, l.sx * l.ty * l.tz, l.x - l.jx, l.y - l.iy, l.z - l.iz);
-        m = (short)(hash3d(l.ix, l.jy, l.iz) & 0xff);
-        sum += incrSum(m, l.tx * l.sy * l.tz, l.x - l.ix, l.y - l.jy, l.z - l.iz);
-        m = (short)(hash3d(l.jx, l.jy, l.iz) & 0xff);
-        sum += incrSum(m, l.sx * l.sy * l.tz, l.x - l.jx, l.y - l.jy, l.z - l.iz);
-        m = (short)(hash3d(l.ix, l.iy, l.jz) & 0xff);
-        sum += incrSum(m, l.tx * l.ty * l.sz, l.x - l.ix, l.y - l.iy, l.z - l.jz);
-        m = (short)(hash3d(l.jx, l.iy, l.jz) & 0xff);
-        sum += incrSum(m, l.sx * l.ty * l.sz, l.x - l.jx, l.y - l.iy, l.z - l.jz);
-        m = (short)(hash3d(l.ix, l.jy, l.jz) & 0xff);
-        sum += incrSum(m, l.tx * l.sy * l.sz, l.x - l.ix, l.y - l.jy, l.z - l.jz);
-        m = (short)(hash3d(l.jx, l.jy, l.jz) & 0xff);
-        sum += incrSum(m, l.sx * l.sy * l.sz, l.x - l.jx, l.y - l.jy, l.z - l.jz);
+        m = (short)(hash3d(l.lowerCellX, l.lowerCellY, l.lowerCellZ) & 0xff);
+        sum = incrSum(m, l.lowerWeightX * l.lowerWeightY * l.lowerWeightZ, l.x - l.lowerCellX, l.y - l.lowerCellY, l.z - l.lowerCellZ);
+        m = (short)(hash3d(l.upperCellX, l.lowerCellY, l.lowerCellZ) & 0xff);
+        sum += incrSum(m, l.upperWeightX * l.lowerWeightY * l.lowerWeightZ, l.x - l.upperCellX, l.y - l.lowerCellY, l.z - l.lowerCellZ);
+        m = (short)(hash3d(l.lowerCellX, l.upperCellY, l.lowerCellZ) & 0xff);
+        sum += incrSum(m, l.lowerWeightX * l.upperWeightY * l.lowerWeightZ, l.x - l.lowerCellX, l.y - l.upperCellY, l.z - l.lowerCellZ);
+        m = (short)(hash3d(l.upperCellX, l.upperCellY, l.lowerCellZ) & 0xff);
+        sum += incrSum(m, l.upperWeightX * l.upperWeightY * l.lowerWeightZ, l.x - l.upperCellX, l.y - l.upperCellY, l.z - l.lowerCellZ);
+        m = (short)(hash3d(l.lowerCellX, l.lowerCellY, l.upperCellZ) & 0xff);
+        sum += incrSum(m, l.lowerWeightX * l.lowerWeightY * l.upperWeightZ, l.x - l.lowerCellX, l.y - l.lowerCellY, l.z - l.upperCellZ);
+        m = (short)(hash3d(l.upperCellX, l.lowerCellY, l.upperCellZ) & 0xff);
+        sum += incrSum(m, l.upperWeightX * l.lowerWeightY * l.upperWeightZ, l.x - l.upperCellX, l.y - l.lowerCellY, l.z - l.upperCellZ);
+        m = (short)(hash3d(l.lowerCellX, l.upperCellY, l.upperCellZ) & 0xff);
+        sum += incrSum(m, l.lowerWeightX * l.upperWeightY * l.upperWeightZ, l.x - l.lowerCellX, l.y - l.upperCellY, l.z - l.upperCellZ);
+        m = (short)(hash3d(l.upperCellX, l.upperCellY, l.upperCellZ) & 0xff);
+        sum += incrSum(m, l.upperWeightX * l.upperWeightY * l.upperWeightZ, l.x - l.upperCellX, l.y - l.upperCellY, l.z - l.upperCellZ);
 
         sum += 0.5;
         if ( sum < 0.0 ) sum = 0.0;
@@ -112,60 +112,60 @@ public final class ProceduralNoise
         }
 
         Lattice l = setupLattice(x, y, z);
-        double px = l.x - l.ix;
-        double py = l.y - l.iy;
-        double pz = l.z - l.iz;
-        double s = l.tx * l.ty * l.tz;
-        short m = (short)(hash3d(l.ix, l.iy, l.iz) & 0xff);
+        double px = l.x - l.lowerCellX;
+        double py = l.y - l.lowerCellY;
+        double pz = l.z - l.lowerCellZ;
+        double s = l.lowerWeightX * l.lowerWeightY * l.lowerWeightZ;
+        short m = (short)(hash3d(l.lowerCellX, l.lowerCellY, l.lowerCellZ) & 0xff);
         double rx = incrSum(m, s, px, py, pz);
         double ry = incrSum(m + 4, s, px, py, pz);
         double rz = incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.jx, l.iy, l.iz) & 0xff);
-        px = l.x - l.jx;
-        s = l.sx * l.ty * l.tz;
+        m = (short)(hash3d(l.upperCellX, l.lowerCellY, l.lowerCellZ) & 0xff);
+        px = l.x - l.upperCellX;
+        s = l.upperWeightX * l.lowerWeightY * l.lowerWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.jx, l.jy, l.iz) & 0xff);
-        py = l.y - l.jy;
-        s = l.sx * l.sy * l.tz;
+        m = (short)(hash3d(l.upperCellX, l.upperCellY, l.lowerCellZ) & 0xff);
+        py = l.y - l.upperCellY;
+        s = l.upperWeightX * l.upperWeightY * l.lowerWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.ix, l.jy, l.iz) & 0xff);
-        px = l.x - l.ix;
-        s = l.tx * l.sy * l.tz;
+        m = (short)(hash3d(l.lowerCellX, l.upperCellY, l.lowerCellZ) & 0xff);
+        px = l.x - l.lowerCellX;
+        s = l.lowerWeightX * l.upperWeightY * l.lowerWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.ix, l.jy, l.jz) & 0xff);
-        pz = l.z - l.jz;
-        s = l.tx * l.sy * l.sz;
+        m = (short)(hash3d(l.lowerCellX, l.upperCellY, l.upperCellZ) & 0xff);
+        pz = l.z - l.upperCellZ;
+        s = l.lowerWeightX * l.upperWeightY * l.upperWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.jx, l.jy, l.jz) & 0xff);
-        px = l.x - l.jx;
-        s = l.sx * l.sy * l.sz;
+        m = (short)(hash3d(l.upperCellX, l.upperCellY, l.upperCellZ) & 0xff);
+        px = l.x - l.upperCellX;
+        s = l.upperWeightX * l.upperWeightY * l.upperWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.jx, l.iy, l.jz) & 0xff);
-        py = l.y - l.iy;
-        s = l.sx * l.ty * l.sz;
+        m = (short)(hash3d(l.upperCellX, l.lowerCellY, l.upperCellZ) & 0xff);
+        py = l.y - l.lowerCellY;
+        s = l.upperWeightX * l.lowerWeightY * l.upperWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
 
-        m = (short)(hash3d(l.ix, l.iy, l.jz) & 0xff);
-        px = l.x - l.ix;
-        s = l.tx * l.ty * l.sz;
+        m = (short)(hash3d(l.lowerCellX, l.lowerCellY, l.upperCellZ) & 0xff);
+        px = l.x - l.lowerCellX;
+        s = l.lowerWeightX * l.lowerWeightY * l.upperWeightZ;
         rx += incrSum(m, s, px, py, pz);
         ry += incrSum(m + 4, s, px, py, pz);
         rz += incrSum(m + 8, s, px, py, pz);
@@ -279,18 +279,18 @@ public final class ProceduralNoise
         l.x = x - MIN_X;
         l.y = y - MIN_Y;
         l.z = z - MIN_Z;
-        l.ix = (long)l.x;
-        l.iy = (long)l.y;
-        l.iz = (long)l.z;
-        l.jx = l.ix + 1;
-        l.jy = l.iy + 1;
-        l.jz = l.iz + 1;
-        l.sx = sCurve(l.x - l.ix);
-        l.sy = sCurve(l.y - l.iy);
-        l.sz = sCurve(l.z - l.iz);
-        l.tx = 1.0 - l.sx;
-        l.ty = 1.0 - l.sy;
-        l.tz = 1.0 - l.sz;
+        l.lowerCellX = (long)l.x;
+        l.lowerCellY = (long)l.y;
+        l.lowerCellZ = (long)l.z;
+        l.upperCellX = l.lowerCellX + 1;
+        l.upperCellY = l.lowerCellY + 1;
+        l.upperCellZ = l.lowerCellZ + 1;
+        l.upperWeightX = sCurve(l.x - l.lowerCellX);
+        l.upperWeightY = sCurve(l.y - l.lowerCellY);
+        l.upperWeightZ = sCurve(l.z - l.lowerCellZ);
+        l.lowerWeightX = 1.0 - l.upperWeightX;
+        l.lowerWeightY = 1.0 - l.upperWeightY;
+        l.lowerWeightZ = 1.0 - l.upperWeightZ;
         return l;
     }
 
@@ -304,18 +304,18 @@ public final class ProceduralNoise
         double x;
         double y;
         double z;
-        long ix;
-        long iy;
-        long iz;
-        long jx;
-        long jy;
-        long jz;
-        double sx;
-        double sy;
-        double sz;
-        double tx;
-        double ty;
-        double tz;
+        long lowerCellX;
+        long lowerCellY;
+        long lowerCellZ;
+        long upperCellX;
+        long upperCellY;
+        long upperCellZ;
+        double upperWeightX;
+        double upperWeightY;
+        double upperWeightZ;
+        double lowerWeightX;
+        double lowerWeightY;
+        double lowerWeightZ;
     }
 
     private static final class CRandom

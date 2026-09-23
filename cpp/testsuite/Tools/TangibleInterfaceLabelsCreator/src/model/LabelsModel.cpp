@@ -2,53 +2,53 @@
 
 #include "model/LabelsModel.h"
 LabelsModel::LabelsModel()
-    : count_(0),
-      labelSizeMm_(0.0),
-      circleHoledRadiusMm_(0.0),
-      labels_(nullptr) {
-    outputPdf_[0] = '\0';
+    : count(0),
+      labelSizeMm(0.0),
+      circleHoledRadiusMm(0.0),
+      labels(nullptr) {
+    outputPdf[0] = '\0';
 }
 
 LabelsModel::~LabelsModel() {
 }
 
 int LabelsModel::getCount() const {
-    return count_;
+    return count;
 }
 
 double LabelsModel::getLabelSizeMm() const {
-    return labelSizeMm_;
+    return labelSizeMm;
 }
 
 double LabelsModel::getCircleHoledRadiusMm() const {
-    return circleHoledRadiusMm_;
+    return circleHoledRadiusMm;
 }
 
 const char* LabelsModel::getOutputPdf() const {
-    return outputPdf_;
+    return outputPdf;
 }
 
 java::ArrayList<Label*>* LabelsModel::getLabels() const {
-    return labels_;
+    return labels;
 }
 
 void LabelsModel::setCount(int count) {
-    count_ = count;
+    this->count = count;
 }
 
 void LabelsModel::setLabelSizeMm(double labelSizeMm) {
-    labelSizeMm_ = labelSizeMm;
+    this->labelSizeMm = labelSizeMm;
 }
 
 void LabelsModel::setCircleHoledRadiusMm(double circleHoledRadiusMm) {
-    circleHoledRadiusMm_ = circleHoledRadiusMm;
+    this->circleHoledRadiusMm = circleHoledRadiusMm;
 }
 
 void LabelsModel::setOutputPdf(const char* outputPdf) {
-    std::strncpy(outputPdf_, outputPdf, OUTPUT_PDF_MAX_LENGTH - 1);
-    outputPdf_[OUTPUT_PDF_MAX_LENGTH - 1] = '\0';
+    std::strncpy(this->outputPdf, outputPdf, OUTPUT_PDF_MAX_LENGTH - 1);
+    this->outputPdf[OUTPUT_PDF_MAX_LENGTH - 1] = '\0';
 }
 
 void LabelsModel::setLabels(java::ArrayList<Label*>* labels) {
-    labels_ = labels;
+    this->labels = labels;
 }

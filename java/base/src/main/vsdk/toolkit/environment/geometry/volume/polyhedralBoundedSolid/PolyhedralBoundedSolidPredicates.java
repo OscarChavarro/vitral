@@ -241,7 +241,7 @@ public class PolyhedralBoundedSolidPredicates
             if ( !plane.doIntersectionFirstHit(ray, planeHit) ) {
                 continue;
             }
-            Ray hit = planeHit.ray();
+            Ray hit = planeHit.getRay();
             hit = hit.withDirection(hit.getDirection().normalized());
             double t = hit.getT();
             if ( t <= bigEps || t >= reach ) {
@@ -289,7 +289,7 @@ public class PolyhedralBoundedSolidPredicates
             if ( !plane.doIntersectionFirstHit(ray, planeHit) ) {
                 continue;
             }
-            Ray hit = planeHit.ray();
+            Ray hit = planeHit.getRay();
             hit = hit.withDirection(hit.getDirection().normalized());
             double t = hit.getT();
             if ( t <= bigEps || t >= maxT ) {

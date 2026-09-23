@@ -6,12 +6,12 @@
 #include "render/OpenCVMarkersRenderer.hpp"
 #include "vision/MarkerTracker.hpp"
 InteractiveMarkers::InteractiveMarkers(MarkersModel* model, MarkerTracker* tracker)
-    : model_(model), tracker_(tracker) {}
+    : model(model), tracker(tracker) {}
 
 int InteractiveMarkers::run() {
-    KeyboardInteractionTechniques keyHandler(model_);
-    OpenCVMarkersRenderer renderer(model_);
+    KeyboardInteractionTechniques keyHandler(model);
+    OpenCVMarkersRenderer renderer(model);
 
-    tracker_->runPreviewLoop();
+    tracker->runPreviewLoop();
     return 0;
 }

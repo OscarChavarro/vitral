@@ -51,14 +51,14 @@ public class ReaderPly extends PersistenceElement {
     }
 
     private static class TriangleIndices {
-        int a;
-        int b;
-        int c;
+        int point0;
+        int point1;
+        int point2;
 
         TriangleIndices(int a, int b, int c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
+            this.point0 = a;
+            this.point1 = b;
+            this.point2 = c;
         }
     }
 
@@ -468,10 +468,10 @@ public class ReaderPly extends PersistenceElement {
                 ArrayList<Triangle> out = new ArrayList<Triangle>(triangles.size());
                 int vertexCount = vertices.size();
                 for ( TriangleIndices t : triangles ) {
-                    if ( t.a >= 0 && t.a < vertexCount &&
-                         t.b >= 0 && t.b < vertexCount &&
-                         t.c >= 0 && t.c < vertexCount ) {
-                        out.add(new Triangle(t.a, t.b, t.c));
+                    if ( t.point0 >= 0 && t.point0 < vertexCount &&
+                         t.point1 >= 0 && t.point1 < vertexCount &&
+                         t.point2 >= 0 && t.point2 < vertexCount ) {
+                        out.add(new Triangle(t.point0, t.point1, t.point2));
                     }
                 }
                 return out.toArray(new Triangle[out.size()]);

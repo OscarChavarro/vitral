@@ -247,7 +247,7 @@ MatrixNxM GaussCpuStrategy::inverse(const MatrixNxM& matrix) const
 }
 
 LinearAlgebraEngine::LinearAlgebraEngine(ComputeStrategy strategy)
-    : strategy_(strategy)
+    : strategy(strategy)
 {
 }
 
@@ -263,7 +263,7 @@ LinearAlgebraEngine LinearAlgebraEngine::fromStrategy(ComputeStrategy strategy)
 
 double LinearAlgebraEngine::determinant(const MatrixNxM& m) const
 {
-    switch ( strategy_ ) {
+    switch ( strategy ) {
         case NAIVE_COFACTOR_CPU: {
             NaiveCofactorCpuStrategy s;
             return s.determinant(m);
@@ -282,7 +282,7 @@ double LinearAlgebraEngine::determinant(const MatrixNxM& m) const
 
 MatrixNxM LinearAlgebraEngine::inverse(const MatrixNxM& m) const
 {
-    switch ( strategy_ ) {
+    switch ( strategy ) {
         case NAIVE_COFACTOR_CPU: {
             NaiveCofactorCpuStrategy s;
             return s.inverse(m);

@@ -42,7 +42,7 @@ export abstract class LightingShader extends Shader {
         material: SimpleMaterial,
         workspace: TraceWorkspace,
     ): Shader.LocalShadingResult {
-        let surfaceNormal: Vector3Dd = info.n;
+        let surfaceNormal: Vector3Dd = info.normal;
 
         if (this.bumpMapEnabled) {
             surfaceNormal = LightingShader.computeBlinnPerturbedNormal(info, surfaceNormal);
@@ -67,7 +67,7 @@ export abstract class LightingShader extends Shader {
                 continue;
             }
 
-            const lightDirection: Light.LightDirection = light.getDirectionAndDistance(info.p);
+            const lightDirection: Light.LightDirection = light.getDirectionAndDistance(info.point);
             const maxShadowDistance: number = lightDirection.maxShadowDistance();
             if (maxShadowDistance <= VSDK.EPSILON) {
                 continue;
@@ -77,7 +77,7 @@ export abstract class LightingShader extends Shader {
             const lz: number = lightDirection.direction().z();
 
             const shadowDirection: Vector3Dd = new Vector3Dd(lx, ly, lz);
-            const lightSourceRay: Ray = new Ray(info.p, shadowDirection);
+            const lightSourceRay: Ray = new Ray(info.point, shadowDirection);
             const attenuation: number = light.evaluateLightResponseFactor(lightSourceRay);
             if (attenuation <= 0.0) {
                 continue;
@@ -144,9 +144,9 @@ export abstract class LightingShader extends Shader {
         workspace: TraceWorkspace,
     ): boolean {
         const shadowOrigin: Vector3Dd = new Vector3Dd(
-            info.p.x() + VSDK.EPSILON * lightDirX,
-            info.p.y() + VSDK.EPSILON * lightDirY,
-            info.p.z() + VSDK.EPSILON * lightDirZ,
+            info.point.x() + VSDK.EPSILON * lightDirX,
+            info.point.y() + VSDK.EPSILON * lightDirY,
+            info.point.z() + VSDK.EPSILON * lightDirZ,
         );
         const shadowDirection: Vector3Dd = new Vector3Dd(lightDirX, lightDirY, lightDirZ);
         const shadowRay: Ray = new Ray(shadowOrigin, shadowDirection);
@@ -157,7 +157,7 @@ export abstract class LightingShader extends Shader {
             const candidateObject: SimpleBody = objects.get(i);
             shadowCandidateHit.resetForDistanceOnly();
             if (candidateObject.doIntersectionFirstHit(shadowRay, shadowCandidateHit)) {
-                const hitDistance: number = shadowCandidateHit.hitDistance();
+                const hitDistance: number = shadowCandidateHit.getHitDistance();
                 if (hitDistance > VSDK.EPSILON && hitDistance < maxShadowDistance) {
                     return true;
                 }
@@ -180,7 +180,7 @@ export abstract class LightingShader extends Shader {
         }
 
         const baseNormal: Vector3Dd = surfaceNormal.normalized();
-        const surfaceTangentU: Vector3Dd = info.t.normalized();
+        const surfaceTangentU: Vector3Dd = info.tangent.normalized();
         const surfaceTangentV: Vector3Dd = baseNormal.crossProduct(surfaceTangentU).normalized();
         const nCrossPv: Vector3Dd = baseNormal.crossProduct(surfaceTangentV);
         const nCrossPu: Vector3Dd = baseNormal.crossProduct(surfaceTangentU);

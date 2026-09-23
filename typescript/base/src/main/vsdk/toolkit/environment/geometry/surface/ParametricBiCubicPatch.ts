@@ -9,9 +9,9 @@ import { VSDK } from "../../../common/VSDK.js";
 /** Tensor-product cubic patch using the Vitral curve blending matrices. */
 export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
     public static readonly FERGUSON = 7;
-    public Gx_MATRIX = new Matrix4x4d();
-    public Gy_MATRIX = new Matrix4x4d();
-    public Gz_MATRIX = new Matrix4x4d();
+    public geometryMatrixX = new Matrix4x4d();
+    public geometryMatrixY = new Matrix4x4d();
+    public geometryMatrixZ = new Matrix4x4d();
     public contourCurve: ParametricCurve | null = null;
     public type = ParametricCurve.HERMITE;
     private controlMeshPoints: Vector3Dd[][] | null = null;
@@ -50,9 +50,9 @@ export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
 
     /** Prints the three geometry matrices in Java's row-oriented diagnostic format. */
     public printGeometryMatrices(): void {
-        const x = this.Gx_MATRIX.toArrayCopy(),
-            y = this.Gy_MATRIX.toArrayCopy(),
-            z = this.Gz_MATRIX.toArrayCopy();
+        const x = this.geometryMatrixX.toArrayCopy(),
+            y = this.geometryMatrixY.toArrayCopy(),
+            z = this.geometryMatrixZ.toArrayCopy();
         for (let row = 0; row < 4; row++) {
             const values: string[] = [];
             for (let column = 0; column < 4; column++)
@@ -121,9 +121,9 @@ export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
         } else throw new RangeError(`Unsupported bicubic patch type: ${this.type}`);
         const transpose = blending.transpose();
         this.coefficients = [
-            blending.multiply(this.Gx_MATRIX).multiply(transpose),
-            blending.multiply(this.Gy_MATRIX).multiply(transpose),
-            blending.multiply(this.Gz_MATRIX).multiply(transpose),
+            blending.multiply(this.geometryMatrixX).multiply(transpose),
+            blending.multiply(this.geometryMatrixY).multiply(transpose),
+            blending.multiply(this.geometryMatrixZ).multiply(transpose),
         ];
     }
 
@@ -175,9 +175,9 @@ export class ParametricBiCubicPatch extends Surface<Ray, RayHit> {
         const xyz = [0, 1, 2].map((axis) =>
             mesh.map((row) => row.map((p) => (axis === 0 ? p.x() : axis === 1 ? p.y() : p.z()))),
         );
-        this.Gx_MATRIX = Matrix4x4d.copyOf(xyz[0]!);
-        this.Gy_MATRIX = Matrix4x4d.copyOf(xyz[1]!);
-        this.Gz_MATRIX = Matrix4x4d.copyOf(xyz[2]!);
+        this.geometryMatrixX = Matrix4x4d.copyOf(xyz[0]!);
+        this.geometryMatrixY = Matrix4x4d.copyOf(xyz[1]!);
+        this.geometryMatrixZ = Matrix4x4d.copyOf(xyz[2]!);
     }
     private evaluateComponents(s: number, t: number, ds: boolean, dt: boolean): [number, number, number] {
         if (this.coefficients === null) throw new Error("Build a bicubic patch before evaluating it");

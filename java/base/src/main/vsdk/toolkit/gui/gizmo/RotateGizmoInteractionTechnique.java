@@ -150,7 +150,7 @@ public class RotateGizmoInteractionTechnique {
 
         Vector3Dd axis;
 
-        switch ( keyEvent.unicode_id ) {
+        switch ( keyEvent.unicodeId ) {
           case 'x', 'X' -> axis = new Vector3Dd(1, 0, 0);
           case 'y', 'Y' -> axis = new Vector3Dd(0, 1, 0);
           case 'z', 'Z' -> axis = new Vector3Dd(0, 0, 1);
@@ -159,7 +159,7 @@ public class RotateGizmoInteractionTechnique {
           }
         }
 
-        double angle = Character.isUpperCase(keyEvent.unicode_id) ?
+        double angle = Character.isUpperCase(keyEvent.unicodeId) ?
             KEY_ROTATION_STEP : -KEY_ROTATION_STEP;
         Matrix4x4d delta = new Matrix4x4d().axisRotation(angle, axis);
 

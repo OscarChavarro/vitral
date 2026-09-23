@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsoleLongFormat : public ProgressMonitor {
 private:
-    long n;
+    long updateCount;
     int charactersPrintedInLastLine;
     double currentPercent;
 

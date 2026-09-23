@@ -34,6 +34,6 @@ export class ConstantTextureShader extends Shader {
             b *= textureColor.b();
         }
 
-        return new Shader.LocalShadingResult(info.n, new ColorRgb(r, g, b));
+        return new Shader.LocalShadingResult(info.normal, new ColorRgb(r, g, b));
     }
 }

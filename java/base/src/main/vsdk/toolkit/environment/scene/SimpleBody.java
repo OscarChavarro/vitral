@@ -49,10 +49,10 @@ public class SimpleBody extends Entity {
     private boolean hasTranslationOnlyTransform;
 
     //- Model (3/6): body visual data ---------------------------------
-    private SimpleMaterial globalMaterial;
-    private Image globalTextureMap;
-    private NormalMap globalNormalMap;
-    private RGBImageUncompressed globalNormalMapRgb;
+    private SimpleMaterial material;
+    private Image texture;
+    private NormalMap normalMap;
+    private RGBImageUncompressed normalMapRgb;
 
     //- Model (4/6): body physical data -------------------------------
 
@@ -68,9 +68,9 @@ public class SimpleBody extends Entity {
         setPosition(new Vector3Dd(0, 0, 0));
         setRotation(new Matrix4x4d());
         setScale(new Vector3Dd(1, 1, 1));
-        globalMaterial = new SimpleMaterial();
-        globalTextureMap = null;
-        globalNormalMap = null;
+        material = new SimpleMaterial();
+        texture = null;
+        normalMap = null;
     }
 
     /**
@@ -180,7 +180,7 @@ public class SimpleBody extends Entity {
     */
     public SimpleMaterial getMaterial()
     {
-        return globalMaterial;
+        return material;
     }
 
     /**
@@ -188,7 +188,7 @@ public class SimpleBody extends Entity {
     */
     public void setMaterial(SimpleMaterial m)
     {
-        globalMaterial = m;
+        material = m;
         markModified();
     }
 
@@ -197,7 +197,7 @@ public class SimpleBody extends Entity {
     */
     public Image getTexture()
     {
-        return globalTextureMap;
+        return texture;
     }
 
     /**
@@ -205,7 +205,7 @@ public class SimpleBody extends Entity {
     */
     public void setTexture(Image in)
     {
-        globalTextureMap = in;
+        texture = in;
         markModified();
     }
 
@@ -214,7 +214,7 @@ public class SimpleBody extends Entity {
     */
     public NormalMap getNormalMap()
     {
-        return globalNormalMap;
+        return normalMap;
     }
 
     /**
@@ -222,7 +222,7 @@ public class SimpleBody extends Entity {
     */
     public RGBImageUncompressed getNormalMapRgb()
     {
-        return globalNormalMapRgb;
+        return normalMapRgb;
     }
 
     /**
@@ -230,9 +230,9 @@ public class SimpleBody extends Entity {
     */
     public void setNormalMap(NormalMap in)
     {
-        globalNormalMap = in;
-        if ( globalNormalMap != null ) {
-            globalNormalMapRgb = globalNormalMap.exportToRgbImage();
+        normalMap = in;
+        if ( normalMap != null ) {
+            normalMapRgb = normalMap.exportToRgbImage();
         }
         markModified();
     }
@@ -350,7 +350,7 @@ public class SimpleBody extends Entity {
     {
         RayHit hit = new RayHit();
         if ( doIntersectionFirstHit(inRay, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }
@@ -370,7 +370,7 @@ public class SimpleBody extends Entity {
         }
 
         int requiredDetailMask =
-            outHit != null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
+            outHit != null ? outHit.getRequiredDetailMask() : RayHit.DETAIL_NONE;
 
         if ( hasTranslationOnlyTransform &&
              requiredDetailMask == RayHit.DETAIL_NONE &&
@@ -418,11 +418,11 @@ public class SimpleBody extends Entity {
         // ... and compute doIntersectionFirstHit operation on object's coordinates
         if ( SurfaceRayIntersection.doIntersectionFirstHit(geometry, localRay, hit) ) {
             double localHitT;
-            if ( hit.ray() != null ) {
-                localHitT = hit.ray().getT();
+            if ( hit.getRay() != null ) {
+                localHitT = hit.getRay().getT();
             }
             else if ( hit.hasHitDistance() ) {
-                localHitT = hit.hitDistance();
+                localHitT = hit.getHitDistance();
             }
             else {
                 return false;
@@ -436,17 +436,17 @@ public class SimpleBody extends Entity {
                     outHit.setHitDistance(worldT);
                 }
                 if ( outHit.needsPoint() ) {
-                    outHit.p = objectPointToWorldSpace(hit.p);
+                    outHit.point = objectPointToWorldSpace(hit.point);
                 }
                 if ( outHit.needsNormal() ) {
-                    outHit.n = objectNormalToWorldSpace(hit.n);
+                    outHit.normal = objectNormalToWorldSpace(hit.normal);
                 }
                 if ( outHit.needsTextureCoordinates() ) {
                     outHit.u = hit.u;
                     outHit.v = hit.v;
                 }
                 if ( outHit.needsTangent() ) {
-                    outHit.t = objectTangentToWorldSpace(hit.t);
+                    outHit.tangent = objectTangentToWorldSpace(hit.tangent);
                 }
                 outHit.material = hit.material;
                 outHit.texture = hit.texture;
@@ -504,7 +504,7 @@ public class SimpleBody extends Entity {
             geometry.doExtraInformation(localRay, inT, outInfo);
             outInfo.setRay(inRay);
             if ( outInfo.needsPoint() ) {
-                outInfo.p = outInfo.p.add(position);
+                outInfo.point = outInfo.point.add(position);
             }
             return;
         }
@@ -526,13 +526,13 @@ public class SimpleBody extends Entity {
         geometry.doExtraInformation(localRay, localT, outInfo);
         outInfo.setRay(inRay);
         if ( outInfo.needsPoint() ) {
-            outInfo.p = objectPointToWorldSpace(outInfo.p);
+            outInfo.point = objectPointToWorldSpace(outInfo.point);
         }
         if ( outInfo.needsNormal() ) {
-            outInfo.n = objectNormalToWorldSpace(outInfo.n);
+            outInfo.normal = objectNormalToWorldSpace(outInfo.normal);
         }
         if ( outInfo.needsTangent() ) {
-            outInfo.t = objectTangentToWorldSpace(outInfo.t);
+            outInfo.tangent = objectTangentToWorldSpace(outInfo.tangent);
         }
     }
 
@@ -597,11 +597,11 @@ public class SimpleBody extends Entity {
             return false;
         }
         double localHitT;
-        if ( hit.ray() != null ) {
-            localHitT = hit.ray().getT();
+        if ( hit.getRay() != null ) {
+            localHitT = hit.getRay().getT();
         }
         else if ( hit.hasHitDistance() ) {
-            localHitT = hit.hitDistance();
+            localHitT = hit.getHitDistance();
         }
         else {
             return false;
@@ -614,17 +614,17 @@ public class SimpleBody extends Entity {
                 outHit.setHitDistance(localHitT);
             }
             if ( outHit.needsPoint() ) {
-                outHit.p = hit.p.add(position);
+                outHit.point = hit.point.add(position);
             }
             if ( outHit.needsNormal() ) {
-                outHit.n = hit.n;
+                outHit.normal = hit.normal;
             }
             if ( outHit.needsTextureCoordinates() ) {
                 outHit.u = hit.u;
                 outHit.v = hit.v;
             }
             if ( outHit.needsTangent() ) {
-                outHit.t = hit.t;
+                outHit.tangent = hit.tangent;
             }
             outHit.material = hit.material;
             outHit.texture = hit.texture;

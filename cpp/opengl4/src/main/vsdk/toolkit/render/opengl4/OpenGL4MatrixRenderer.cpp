@@ -12,8 +12,8 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
 unsigned int OpenGL4MatrixRenderer::VAO = 0;
-unsigned int OpenGL4MatrixRenderer::VBO_positions = 0;
-unsigned int OpenGL4MatrixRenderer::VBO_colors = 0;
+unsigned int OpenGL4MatrixRenderer::positionsVbo = 0;
+unsigned int OpenGL4MatrixRenderer::colorsVbo = 0;
 unsigned int OpenGL4MatrixRenderer::shaderProgram = 0;
 bool OpenGL4MatrixRenderer::initialized = false;
 
@@ -131,8 +131,8 @@ void OpenGL4MatrixRenderer::initializeIfNeeded() {
     }
 
     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO_positions);
-    glGenBuffers(1, &VBO_colors);
+    glGenBuffers(1, &positionsVbo);
+    glGenBuffers(1, &colorsVbo);
 
     glBindVertexArray(VAO);
 
@@ -148,13 +148,13 @@ void OpenGL4MatrixRenderer::initializeIfNeeded() {
         0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 1.0f
     };
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_positions);
+    glBindBuffer(GL_ARRAY_BUFFER, positionsVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_colors);
+    glBindBuffer(GL_ARRAY_BUFFER, colorsVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -224,13 +224,13 @@ void OpenGL4MatrixRenderer::release() {
         glDeleteVertexArrays(1, &VAO);
         VAO = 0;
     }
-    if (VBO_positions != 0) {
-        glDeleteBuffers(1, &VBO_positions);
-        VBO_positions = 0;
+    if (positionsVbo != 0) {
+        glDeleteBuffers(1, &positionsVbo);
+        positionsVbo = 0;
     }
-    if (VBO_colors != 0) {
-        glDeleteBuffers(1, &VBO_colors);
-        VBO_colors = 0;
+    if (colorsVbo != 0) {
+        glDeleteBuffers(1, &colorsVbo);
+        colorsVbo = 0;
     }
     if (shaderProgram != 0) {
         glDeleteProgram(shaderProgram);

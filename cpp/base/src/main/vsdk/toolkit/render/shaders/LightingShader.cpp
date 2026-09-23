@@ -25,7 +25,7 @@ static Vector3Dd computeBlinnPerturbedNormal(const RayHit* info, const Vector3Dd
     }
 
     Vector3Dd baseNormal = surfaceNormal.normalized();
-    Vector3Dd surfaceTangentU = info->t.normalized();
+    Vector3Dd surfaceTangentU = info->tangent.normalized();
     if ( surfaceTangentU.length() <= VSDK::EPSILON ) {
         return surfaceNormal;
     }
@@ -70,7 +70,7 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
     java::ArrayList<Light*>& lights, java::ArrayList<SimpleBody*>& objects,
     SimpleMaterial* material, TraceWorkspace* workspace)
 {
-    Vector3Dd surfaceNormal = info->n;
+    Vector3Dd surfaceNormal = info->normal;
     if ( bumpMapEnabled ) {
         surfaceNormal = computeBlinnPerturbedNormal(info, surfaceNormal);
     }
@@ -95,16 +95,16 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
 
         Vector3Dd direction;
         double maxShadowDistance;
-        light->getDirectionAndDistance(info->p, &direction, &maxShadowDistance);
+        light->getDirectionAndDistance(info->point, &direction, &maxShadowDistance);
         if ( maxShadowDistance <= VSDK::EPSILON ) continue;
         double lx = direction.x();
         double ly = direction.y();
         double lz = direction.z();
 
         Vector3Dd shadowOrigin(
-            info->p.x() + VSDK::EPSILON * lx,
-            info->p.y() + VSDK::EPSILON * ly,
-            info->p.z() + VSDK::EPSILON * lz);
+            info->point.x() + VSDK::EPSILON * lx,
+            info->point.y() + VSDK::EPSILON * ly,
+            info->point.z() + VSDK::EPSILON * lz);
         Ray shadowRay(shadowOrigin, Vector3Dd(lx, ly, lz));
 
         double attenuation = light->evaluateLightResponseFactor(&shadowRay);
@@ -120,7 +120,7 @@ Shader::LocalShadingResult LightingShader::shadeLocal(
                 shadowCandidateHit->resetForDistanceOnly();
                 RaytraceStatistics::recordShadowRay();
                 if ( candidateObject != 0 && candidateObject->doIntersectionFirstHit(shadowRay, shadowCandidateHit) ) {
-                    double hitDistance = shadowCandidateHit->hitDistance();
+                    double hitDistance = shadowCandidateHit->getHitDistance();
                     if ( hitDistance > VSDK::EPSILON && hitDistance < maxShadowDistance ) {
                         shadowed = true;
                         break;

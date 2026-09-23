@@ -5,10 +5,10 @@
 #include <opencv2/videoio.hpp>
 #include "options/CommandLineOptions.hpp"
 CommandLineOptions::CommandLineOptions(int argc, char** argv)
-    : action_(RUN), port_(8090), cameraIndex_(0), markerSize_(0.035),
-      decisionMarginThreshold_(30.0), viewAngleCosThreshold_(0.5),
-      streamHz_(30), debugMode_(false), debugDir_("debug"),
-      previewMode_(false), mappingValid_(true), programName_(argv[0]) {
+    : action(RUN), port(8090), cameraIndex(0), markerSize(0.035),
+      decisionMarginThreshold(30.0), viewAngleCosThreshold(0.5),
+      streamHz(30), debugMode(false), debugDir("debug"),
+      previewMode(false), mappingValid(true), programName(argv[0]) {
     parse(argc, argv);
 }
 
@@ -16,33 +16,33 @@ void CommandLineOptions::parse(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         java::String arg = argv[i];
         if (arg == "-h" || arg == "--help") {
-            action_ = SHOW_HELP;
-            showHelp(programName_);
+            action = SHOW_HELP;
+            showHelp(programName);
             return;
         } else if (arg == "-list") {
-            action_ = LIST_CAMERAS;
+            action = LIST_CAMERAS;
             listCameras();
             return;
         } else if (arg == "-preview") {
-            previewMode_ = true;
+            previewMode = true;
         } else if (arg == "--debug") {
-            debugMode_ = true;
+            debugMode = true;
         } else if (arg == "-p" || arg == "--port") {
-            if (i + 1 < argc) port_ = std::atoi(argv[++i]);
+            if (i + 1 < argc) port = std::atoi(argv[++i]);
         } else if (arg == "-cam" || arg == "--camera") {
-            if (i + 1 < argc) cameraIndex_ = std::atoi(argv[++i]);
+            if (i + 1 < argc) cameraIndex = std::atoi(argv[++i]);
         } else if (arg == "--marker-size") {
-            if (i + 1 < argc) markerSize_ = std::atof(argv[++i]);
+            if (i + 1 < argc) markerSize = std::atof(argv[++i]);
         } else if (arg == "--calib") {
-            if (i + 1 < argc) calibFile_ = argv[++i];
+            if (i + 1 < argc) calibFile = argv[++i];
         } else if (arg == "--margin") {
-            if (i + 1 < argc) decisionMarginThreshold_ = std::atof(argv[++i]);
+            if (i + 1 < argc) decisionMarginThreshold = std::atof(argv[++i]);
         } else if (arg == "--view-cos") {
-            if (i + 1 < argc) viewAngleCosThreshold_ = std::atof(argv[++i]);
+            if (i + 1 < argc) viewAngleCosThreshold = std::atof(argv[++i]);
         } else if (arg == "--hz") {
-            if (i + 1 < argc) streamHz_ = std::atoi(argv[++i]);
+            if (i + 1 < argc) streamHz = std::atoi(argv[++i]);
         } else if (arg == "--debug-dir") {
-            if (i + 1 < argc) debugDir_ = argv[++i];
+            if (i + 1 < argc) debugDir = argv[++i];
         }
     }
 }

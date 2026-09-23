@@ -833,7 +833,7 @@ public class DrawingAreaInteractionTechniques
 
         switch ( mode ) {
           case SELECT:
-            if ( event.unicode_id == KeyEvent.KEY_NONE ) {
+            if ( event.unicodeId == KeyEvent.KEY_NONE ) {
                 if ( event.keycode == KeyEvent.KEY_LEFT ) {
                     cancelInputGizmoEditing();
                     selectionEditor.selectPrevious();
@@ -928,7 +928,7 @@ public class DrawingAreaInteractionTechniques
     */
     private void processCharacterKeyPressedEvent(KeyEvent event)
     {
-        if ( event.unicode_id == KeyEvent.KEY_NONE ) {
+        if ( event.unicodeId == KeyEvent.KEY_NONE ) {
             return;
         }
 
@@ -939,7 +939,7 @@ public class DrawingAreaInteractionTechniques
 
         SimpleBody body;
 
-        switch ( event.unicode_id ) {
+        switch ( event.unicodeId ) {
           case 'T':
             body = selectionEditor.getFirstSelectedBody();
             if ( body != null ) {

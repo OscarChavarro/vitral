@@ -15,7 +15,7 @@ public:
     KeyAction processKey(int key);
 
 private:
-    MarkersModel* model_;
+    MarkersModel* model;
 };
 
 #endif

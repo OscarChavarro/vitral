@@ -26,14 +26,14 @@ namespace {
 
 class AppelEdgeSegment {
 public:
-    double t;
+    double lineParameter;
     int deltaQI;
 
-    AppelEdgeSegment() : t(0.0), deltaQI(0) {}
+    AppelEdgeSegment() : lineParameter(0.0), deltaQI(0) {}
 
     bool samePosition(const AppelEdgeSegment& other) const
     {
-        return std::abs(t - other.t) <= VSDK::EPSILON;
+        return std::abs(lineParameter - other.lineParameter) <= VSDK::EPSILON;
     }
 };
 
@@ -47,7 +47,7 @@ public:
     bool onSequence;
     Vector3Dd start;
     Vector3Dd end;
-    Vector3Dd d;
+    Vector3Dd direction;
     SimpleBody* ownerBody;
     PolyhedralBoundedSolid* ownerSolid;
     _PolyhedralBoundedSolidFace* visibleEdgeForContourLine;
@@ -61,7 +61,7 @@ public:
           onSequence(false),
           start(),
           end(),
-          d(),
+          direction(),
           ownerBody(0),
           ownerSolid(0),
           visibleEdgeForContourLine(0),
@@ -336,7 +336,7 @@ void buildCache(
         AppelEdgeCache& materialLine = cache[cache.size() - 1];
         materialLine.setStart(startPosition);
         materialLine.setEnd(endPosition);
-        materialLine.d = endPosition.subtract(startPosition);
+        materialLine.direction = endPosition.subtract(startPosition);
         materialLine.ownerBody = body;
         materialLine.ownerSolid = solid;
         materialLine.leftFace = face1;
@@ -413,20 +413,20 @@ void processLineToBeDrawn(
         }
 
         Ray ray(
-            cl->start.add(cl->d.multiply(3 * VSDK::EPSILON)),
-            cl->d);
+            cl->start.add(cl->direction.multiply(3 * VSDK::EPSILON)),
+            cl->direction);
         double t0 = ray.getDirection().length() - 6 * VSDK::EPSILON;
         ray = ray.withDirection(ray.getDirection().normalized());
         Intersection* hit = Triangle::doIntersectionWithTriangle(
             ray, sp1a, sp1b, sp1c);
         if (hit != 0 && hit->t < t0) {
             InfinitePlane plane(cl->start, cl->end, sp2c);
-            Ray edgeRay(inEdge.start, inEdge.d.normalized());
+            Ray edgeRay(inEdge.start, inEdge.direction.normalized());
             Ray* planeHit = plane.doIntersectionFirstHit(edgeRay);
             if (planeHit != 0) {
                 AppelEdgeSegment segment;
-                segment.t = planeHit->getT() / inEdge.d.length();
-                if (isUnitInterval(segment.t)) {
+                segment.lineParameter = planeHit->getT() / inEdge.direction.length();
+                if (isUnitInterval(segment.lineParameter)) {
                     segments.push_back(segment);
                 }
                 delete planeHit;
@@ -436,13 +436,13 @@ void processLineToBeDrawn(
     }
 
     AppelEdgeSegment endSegment;
-    endSegment.t = 1.0;
+    endSegment.lineParameter = 1.0;
     segments.push_back(endSegment);
 
     std::sort(segments.begin(), segments.end(),
         [](const AppelEdgeSegment& a, const AppelEdgeSegment& b) {
-            if (a.t < b.t - VSDK::EPSILON) return true;
-            if (a.t > b.t + VSDK::EPSILON) return false;
+            if (a.lineParameter < b.lineParameter - VSDK::EPSILON) return true;
+            if (a.lineParameter > b.lineParameter + VSDK::EPSILON) return false;
             return false;
         });
 
@@ -457,12 +457,12 @@ void processLineToBeDrawn(
     }
 
     for (size_t i = 0; i + 1 < segments.size(); ++i) {
-        double t1 = segments[i].t;
-        double t2 = segments[i + 1].t;
-        Vector3Dd pos1 = inEdge.start.add(inEdge.d.multiply(t1));
-        Vector3Dd pos2 = inEdge.start.add(inEdge.d.multiply(t2));
+        double t1 = segments[i].lineParameter;
+        double t2 = segments[i + 1].lineParameter;
+        Vector3Dd pos1 = inEdge.start.add(inEdge.direction.multiply(t1));
+        Vector3Dd pos2 = inEdge.start.add(inEdge.direction.multiply(t2));
         Vector3Dd midpoint = inEdge.start.add(
-            inEdge.d.multiply((t1 + t2) * 0.5));
+            inEdge.direction.multiply((t1 + t2) * 0.5));
 
         int midpointQi =
             computeMidpointQuantitativeInvisibility(solids, inCamera, midpoint);

@@ -9,24 +9,24 @@ public class CameraControllerAquynza extends CameraController {
     private Camera camera;
     private int oldMouseX;
     private int oldMouseY;
-    private double deltaMov;
+    private double deltaMovement;
 
     public CameraControllerAquynza(Camera camera) {
         this.camera = camera;
         oldMouseX = 0;
         oldMouseY = 0;
-        deltaMov = 0.25;
+        deltaMovement = 0.25;
     }
 
     public double getDeltaMovement()
     {
-        return deltaMov;
+        return deltaMovement;
     }
 
     @Override
     public void setDeltaMovement(double val)
     {
-        deltaMov = val;
+        deltaMovement = val;
     }
 
     private double augmentLogarithmic(double val, double EPSILON)
@@ -131,27 +131,27 @@ public class CameraControllerAquynza extends CameraController {
 
           // Position
           case KeyEvent.KEY_x:
-            eyePosition = eyePosition.withX(eyePosition.x() - deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMov);
+            eyePosition = eyePosition.withX(eyePosition.x() - deltaMovement); focusedPosition = focusedPosition.withX(focusedPosition.x() - deltaMovement);
             updated = true;
             break;
           case KeyEvent.KEY_X:
-            eyePosition = eyePosition.withX(eyePosition.x() + deltaMov); focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMov);
+            eyePosition = eyePosition.withX(eyePosition.x() + deltaMovement); focusedPosition = focusedPosition.withX(focusedPosition.x() + deltaMovement);
             updated = true;
             break;
           case KeyEvent.KEY_y:
-            eyePosition = eyePosition.withY(eyePosition.y() - deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMov);
+            eyePosition = eyePosition.withY(eyePosition.y() - deltaMovement); focusedPosition = focusedPosition.withY(focusedPosition.y() - deltaMovement);
             updated = true;
             break;
           case KeyEvent.KEY_Y:
-            eyePosition = eyePosition.withY(eyePosition.y() + deltaMov); focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMov);
+            eyePosition = eyePosition.withY(eyePosition.y() + deltaMovement); focusedPosition = focusedPosition.withY(focusedPosition.y() + deltaMovement);
             updated = true;
             break;
           case KeyEvent.KEY_z:
-            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMov);
+            eyePosition = eyePosition.withZ(eyePosition.z() - deltaMovement); focusedPosition = focusedPosition.withZ(focusedPosition.z() - deltaMovement);
             updated = true;
             break;
           case KeyEvent.KEY_Z:
-            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMov); focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMov);
+            eyePosition = eyePosition.withZ(eyePosition.z() + deltaMovement); focusedPosition = focusedPosition.withZ(focusedPosition.z() + deltaMovement);
             updated = true;
             break; 
           // Rotation
@@ -280,7 +280,7 @@ public class CameraControllerAquynza extends CameraController {
         int deltaX;
         int deltaY;
         boolean updated = false;
-        double senseFactor = deltaMov/5;
+        double senseFactor = deltaMovement/5;
 
         deltaX = e.getX() - oldMouseX;
         deltaY = e.getY() - oldMouseY;

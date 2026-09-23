@@ -19,7 +19,7 @@ private:
     double computeAxisLength(const MarkerGroup& group) const;
     bool project(const Vector3Dd& p, double fx, double fy, double cx, double cy, cv::Point2f* out) const;
 
-    MarkersModel* model_;
+    MarkersModel* model;
 };
 
 #endif

@@ -29,26 +29,26 @@ public:
     static void dispose();
 
 private:
-    static unsigned int vao_;
-    static unsigned int vboPositions_;
-    static unsigned int vboNormals_;
-    static unsigned int vboUvs_;
-    static unsigned int vboTangents_;
-    static unsigned int vboBinormals_;
-    static unsigned int ebo_;
-    static unsigned int constantProgram_;
-    static unsigned int texturedProgram_;
-    static unsigned int flatProgram_;
-    static unsigned int flatTexturedProgram_;
-    static unsigned int gouraudProgram_;
-    static unsigned int phongProgram_;
-    static unsigned int phongBumpProgram_;
-    static unsigned int cookProgram_;
-    static unsigned int cookBumpProgram_;
+    static unsigned int vao;
+    static unsigned int vboPositions;
+    static unsigned int vboNormals;
+    static unsigned int vboUvs;
+    static unsigned int vboTangents;
+    static unsigned int vboBinormals;
+    static unsigned int ebo;
+    static unsigned int constantProgram;
+    static unsigned int texturedProgram;
+    static unsigned int flatProgram;
+    static unsigned int flatTexturedProgram;
+    static unsigned int gouraudProgram;
+    static unsigned int phongProgram;
+    static unsigned int phongBumpProgram;
+    static unsigned int cookProgram;
+    static unsigned int cookBumpProgram;
 
-    static int cachedMeridians_;
-    static int cachedParallels_;
-    static unsigned int indexCount_;
+    static int cachedMeridians;
+    static int cachedParallels;
+    static unsigned int indexCount;
 
     static bool initProgramIfNeeded();
     static bool buildSphereMeshIfNeeded(int meridians, int parallels);

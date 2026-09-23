@@ -4,7 +4,7 @@
 #include "vsdk/toolkit/environment/background/Background.h"
 class SimpleBackground : public Background {
 private:
-    ColorRgb color_;
+    ColorRgb color;
 
 public:
     SimpleBackground();

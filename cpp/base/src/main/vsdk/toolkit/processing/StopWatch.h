@@ -4,9 +4,9 @@
 #include <chrono>
 class StopWatch {
 private:
-    bool running_;
-    std::chrono::steady_clock::time_point start_;
-    double elapsedSeconds_;
+    bool running;
+    std::chrono::steady_clock::time_point startTime;
+    double elapsedSeconds;
 
 public:
     StopWatch();

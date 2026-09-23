@@ -51,7 +51,7 @@ export class Box extends Solid {
         if (outHit === undefined) {
             const hit = new RayHit();
             if (this.doIntersectionFirstHit(inRay, hit)) {
-                return hit.ray();
+                return hit.getRay();
             }
             return null;
         }
@@ -150,7 +150,7 @@ export class Box extends Solid {
                 const hitY = oy + dy * minT;
                 const hitZ = oz + dz * minT;
                 if (outHit.needsPoint()) {
-                    outHit.p = new Vector3Dd(hitX, hitY, hitZ);
+                    outHit.point = new Vector3Dd(hitX, hitY, hitZ);
                 }
                 if (outHit.needsTextureCoordinates()) {
                     outHit.u = 0;
@@ -185,10 +185,10 @@ export class Box extends Solid {
                     }
                 }
                 if (outHit.needsNormal()) {
-                    outHit.n = Box.planeNormal(hitPlane);
+                    outHit.normal = Box.planeNormal(hitPlane);
                 }
                 if (outHit.needsTangent()) {
-                    outHit.t = Box.planeTangent(hitPlane);
+                    outHit.tangent = Box.planeTangent(hitPlane);
                 }
             }
         }
@@ -209,13 +209,13 @@ export class Box extends Solid {
         const hitPlane = this.classifyHitPlane(hitX, hitY, hitZ);
 
         if (outData.needsPoint()) {
-            outData.p = new Vector3Dd(hitX, hitY, hitZ);
+            outData.point = new Vector3Dd(hitX, hitY, hitZ);
         }
         if (outData.needsNormal()) {
-            outData.n = Box.planeNormal(hitPlane);
+            outData.normal = Box.planeNormal(hitPlane);
         }
         if (outData.needsTangent()) {
-            outData.t = Box.planeTangent(hitPlane);
+            outData.tangent = Box.planeTangent(hitPlane);
         }
         if (outData.needsTextureCoordinates()) {
             switch (hitPlane) {

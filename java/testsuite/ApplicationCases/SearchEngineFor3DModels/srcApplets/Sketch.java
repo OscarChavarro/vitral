@@ -8,18 +8,18 @@ import java.awt.event.ActionListener;
 
 public class Sketch extends SearchApplet
 {
-    QueryPanel query_panel;
-    SketchCanvas[] draw_areas;
+    QueryPanel queryPanel;
+    SketchCanvas[] drawAreas;
     MyTimer timer = null;
-    private int nr_sketches = 0;
-    private int active_id = 0;
+    private int sketchCount = 0;
+    private int activeId = 0;
     String[] filespecs = new String[3];
-    Panel button_panel;
+    Panel buttonPanel;
     TextArea[] text;
-    Button[] undo_button;
-    Button[] clear_button;
-    Button clear_all_button;
-    private GridBagLayout my_layout = new GridBagLayout();
+    Button[] undoButton;
+    Button[] clearButton;
+    Button clearAllButton;
+    private GridBagLayout layout = new GridBagLayout();
     private long sessionId;
 
     public Sketch() {
@@ -39,8 +39,8 @@ public class Sketch extends SearchApplet
 
     public boolean all_filled() {
         boolean bool = true;
-        for (int i = 0; i < nr_sketches; i++) {
-            if (draw_areas[i].is_empty())
+        for (int i = 0; i < sketchCount; i++) {
+            if (drawAreas[i].is_empty())
                 bool = false;
         }
         if (!bool)
@@ -50,78 +50,78 @@ public class Sketch extends SearchApplet
     
     private void create_layout() {
         System.out.println("  doing layout");
-        this.setLayout(my_layout);
-        button_panel.setLayout(my_layout);
-        for (int i = 0; i < nr_sketches; i++) {
-            Layout.constrain(this, draw_areas[i], 1, i * 3 + 2,
+        this.setLayout(layout);
+        buttonPanel.setLayout(layout);
+        for (int i = 0; i < sketchCount; i++) {
+            Layout.constrain(this, drawAreas[i], 1, i * 3 + 2,
                              3, 3, 1, 10, 3.0, 1.0, 2, 2, 2, 2);
-            Layout.constrain_field(button_panel,
+            Layout.constrain_field(buttonPanel,
                                    text[i], 0, i * 3);
-            Layout.constrain_button(button_panel,
-                                    undo_button[i], 0,
+            Layout.constrain_button(buttonPanel,
+                                    undoButton[i], 0,
                                     i * 3 + 1);
-            Layout.constrain_button(button_panel,
-                                    clear_button[i], 0,
+            Layout.constrain_button(buttonPanel,
+                                    clearButton[i], 0,
                                     i * 3 + 2);
         }
-        Layout.constrain(this, query_panel, 0, 0, 4, 2, 3, 10,
+        Layout.constrain(this, queryPanel, 0, 0, 4, 2, 3, 10,
                          1.0, 1.0, 2, 2, 2, 2);
-        Layout.constrain(this, button_panel, 0, 2, 1,
-                         3 * nr_sketches, 3, 10, 0.75, 1.0, 2, 2, 2, 2);
+        Layout.constrain(this, buttonPanel, 0, 2, 1,
+                         3 * sketchCount, 3, 10, 0.75, 1.0, 2, 2, 2, 2);
     }
     
     private void create_user_interface() {
         System.out.println("Sketch::create_user_interface, creating "
-                           + nr_sketches + " drawing areas");
+                           + sketchCount + " drawing areas");
         this.setBackground(Color.white);
         System.out.println("  creating panels");
-        query_panel = new QueryPanel(this);
-        button_panel = new Panel();
-        button_panel.setBackground(Color.white);
-        button_panel.setForeground(Color.black);
-        draw_areas = new SketchCanvas[nr_sketches];
-        for (int i = 0; i < nr_sketches; i++)
-            draw_areas[i] = new SketchCanvas(i, this);
+        queryPanel = new QueryPanel(this);
+        buttonPanel = new Panel();
+        buttonPanel.setBackground(Color.white);
+        buttonPanel.setForeground(Color.black);
+        drawAreas = new SketchCanvas[sketchCount];
+        for (int i = 0; i < sketchCount; i++)
+            drawAreas[i] = new SketchCanvas(i, this);
         System.out.println("  creating buttons");
-        undo_button = new Button[3];
-        for (int i = 0; i < nr_sketches; i++) {
-            undo_button[i] = new Button(" Undo ");
-            undo_button[i].setFont(Globals.button_font);
-            undo_button[i]
+        undoButton = new Button[3];
+        for (int i = 0; i < sketchCount; i++) {
+            undoButton[i] = new Button(" Undo ");
+            undoButton[i].setFont(Globals.buttonFont);
+            undoButton[i]
                 .setActionCommand(Integer.toString(i));
-            undo_button[i]
-                .setBackground(Globals.button_bg_colour);
-            undo_button[i]
-                .setForeground(Globals.button_fg_colour);
-            undo_button[i]
+            undoButton[i]
+                .setBackground(Globals.buttonBgColour);
+            undoButton[i]
+                .setForeground(Globals.buttonFgColour);
+            undoButton[i]
                 .addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent actionevent) {
                     int i_1_
                         = Integer.parseInt(actionevent.getActionCommand());
-                    if (((Sketch) Sketch.this).draw_areas[i_1_].get_status()
+                    if (((Sketch) Sketch.this).drawAreas[i_1_].getStatus()
                         != 4)
-                        ((Sketch) Sketch.this).draw_areas[i_1_].undo_segment();
+                        ((Sketch) Sketch.this).drawAreas[i_1_].undo_segment();
                 }
             });
         }
-        clear_button = new Button[3];
-        for (int i = 0; i < nr_sketches; i++) {
-            clear_button[i] = new Button(" Clear ");
-            clear_button[i].setFont(Globals.button_font);
-            clear_button[i]
+        clearButton = new Button[3];
+        for (int i = 0; i < sketchCount; i++) {
+            clearButton[i] = new Button(" Clear ");
+            clearButton[i].setFont(Globals.buttonFont);
+            clearButton[i]
                 .setActionCommand(Integer.toString(i));
-            clear_button[i]
-                .setBackground(Globals.button_bg_colour);
-            clear_button[i]
-                .setForeground(Globals.button_fg_colour);
-            clear_button[i]
+            clearButton[i]
+                .setBackground(Globals.buttonBgColour);
+            clearButton[i]
+                .setForeground(Globals.buttonFgColour);
+            clearButton[i]
                 .addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent actionevent) {
                     int i_3_
                         = Integer.parseInt(actionevent.getActionCommand());
-                    if (((Sketch) Sketch.this).draw_areas[i_3_].get_status()
+                    if (((Sketch) Sketch.this).drawAreas[i_3_].getStatus()
                         != 4)
-                        ((Sketch) Sketch.this).draw_areas[i_3_].clear_points();
+                        ((Sketch) Sketch.this).drawAreas[i_3_].clear_points();
                 }
             });
         }
@@ -129,8 +129,8 @@ public class Sketch extends SearchApplet
         text[0] = new TextArea(" View\n     1", 2, 5, 3);
         text[1] = new TextArea("  View\n     2", 2, 5, 3);
         text[2] = new TextArea("  View\n     3", 2, 5, 3);
-        for (int i = 0; i < nr_sketches; i++) {
-            text[i].setFont(Globals.text_font);
+        for (int i = 0; i < sketchCount; i++) {
+            text[i].setFont(Globals.textFont);
             text[i].setEditable(false);
             text[i].setBackground(Color.white);
             text[i].setForeground(Color.black);
@@ -138,53 +138,53 @@ public class Sketch extends SearchApplet
     }
     
     private void disableButtons() {
-        for (int i = 0; i < nr_sketches; i++) {
-            undo_button[i].setEnabled(false);
-            clear_button[i].setEnabled(false);
+        for (int i = 0; i < sketchCount; i++) {
+            undoButton[i].setEnabled(false);
+            clearButton[i].setEnabled(false);
         }
     }
     
     public void disable_search() {
-        query_panel.disable_search();
+        queryPanel.disable_search();
     }
     
     public void doSearch() {
         int i;
 
-        if ( !query_panel.get_searching() ) {
+        if ( !queryPanel.getSearching() ) {
             disable_search();
             Flag.set_loading();
             sendImages();
             StringBuffer stringbuffer
-                = query_panel.construct_url();
+                = queryPanel.construct_url();
             stringbuffer.append("&input=text_2d&method=fourier");
             for ( i = 1; i <= 3; i++) {
                 stringbuffer.append("&file" + i + "="
                                     + filespecs[i - 1]);
             }
-            query_panel.request_url(stringbuffer);
+            queryPanel.request_url(stringbuffer);
         }
     }
     
     private void enableButtons() {
-        for (int i = 0; i < nr_sketches; i++) {
-            undo_button[i].setEnabled(true);
-            clear_button[i].setEnabled(true);
+        for (int i = 0; i < sketchCount; i++) {
+            undoButton[i].setEnabled(true);
+            clearButton[i].setEnabled(true);
         }
     }
     
     public void enable_search() {
-        query_panel.enable_search();
+        queryPanel.enable_search();
         if (timer != null)
             timer.start();
     }
     
-    public MyTimer get_timer() {
+    public MyTimer getTimer() {
         return timer;
     }
     
     public void init() {
-        nr_sketches = Integer.parseInt(this.getParameter("nr_sketches"));
+        sketchCount = Integer.parseInt(this.getParameter("nr_sketches"));
         create_user_interface();
         create_layout();
         set_help_strings();
@@ -193,32 +193,32 @@ public class Sketch extends SearchApplet
     public void notify_canvas_active(int i) {
         if (timer == null)
             timer = new MyTimer("draw_timer");
-        active_id = i;
-        for (int i_4_ = 0; i_4_ < nr_sketches; i_4_++) {
+        activeId = i;
+        for (int i_4_ = 0; i_4_ < sketchCount; i_4_++) {
             if (i_4_ != i)
-                draw_areas[i_4_].setStatus(0);
+                drawAreas[i_4_].setStatus(0);
             else
-                draw_areas[i_4_].setStatus(1);
-            draw_areas[i_4_].paint();
+                drawAreas[i_4_].setStatus(1);
+            drawAreas[i_4_].paint();
         }
     }
     
     public void select_database(int i) {
         if (i == 5) {
-            draw_areas[0]
+            drawAreas[0]
                 .set_help_string(0, "2D sketch is unavailable");
-            draw_areas[0]
+            drawAreas[0]
                 .set_help_string(1, "for the Protein Database");
-            draw_areas[0]
+            drawAreas[0]
                 .set_help_string(2, "Enter a PDB ID as a query,");
-            draw_areas[0].set_help_string(3,
+            drawAreas[0].set_help_string(3,
                                                           "or 'random' for");
-            draw_areas[0]
+            drawAreas[0]
                 .set_help_string(4, "100 random proteins");
             setStatus(4);
         } else {
             for (int i_5_ = 0; i_5_ < 5; i_5_++)
-                draw_areas[0].set_help_string(i_5_, "");
+                drawAreas[0].set_help_string(i_5_, "");
             setStatus(0);
         }
     }
@@ -230,7 +230,7 @@ public class Sketch extends SearchApplet
         if ( timer != null ) {
             timer.stop();
         }
-        if ( draw_areas[0].get_status() == 4 ) {
+        if ( drawAreas[0].getStatus() == 4 ) {
             System.out
                 .println("  skipping because sketch canvases are disabled");
           }
@@ -242,16 +242,16 @@ public class Sketch extends SearchApplet
                     ("Sketch::sendImages, connect says ok, calling send");
                 disableButtons();
                 setStatus(2);
-                submit.send(this, draw_areas, nr_sketches);
+                submit.send(this, drawAreas, sketchCount);
                 System.out.println("calling receive");
                 setStatus(3);
-                for ( i = 0; i < nr_sketches; i++) {
+                for ( i = 0; i < sketchCount; i++) {
                     filespecs[i] = new String("null");
                 }
                 submit.receive(this, filespecs);
                 System.out
-                    .println("receive called, nr_sketches is " + nr_sketches);
-                for ( i = 0; i < nr_sketches; i++) {
+                    .println("receive called, nr_sketches is " + sketchCount);
+                for ( i = 0; i < sketchCount; i++) {
                     System.out.println("  filespec " + (i + 1) + ": "
                                        + filespecs[i]);
                     if ( filespecs[i] == null ) {
@@ -268,9 +268,9 @@ public class Sketch extends SearchApplet
     }
     
     private void set_help_strings() {
-        draw_areas[1]
+        drawAreas[1]
             .set_help_string(2, "Left mouse button = draw");
-        draw_areas[1]
+        drawAreas[1]
             .set_help_string(3, "Right mouse button = erase");
     }
     
@@ -280,9 +280,9 @@ public class Sketch extends SearchApplet
     }
     
     private void setStatus(int i) {
-        for (int i_6_ = 0; i_6_ < nr_sketches; i_6_++) {
-            draw_areas[i_6_].setStatus(i);
-            draw_areas[i_6_].paint();
+        for (int i_6_ = 0; i_6_ < sketchCount; i_6_++) {
+            drawAreas[i_6_].setStatus(i);
+            drawAreas[i_6_].paint();
         }
     }
 }

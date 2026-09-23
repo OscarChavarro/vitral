@@ -73,8 +73,8 @@ public class UndoRedoInteractionTechnique
         y = event.keycode == KeyEvent.KEY_y || event.keycode == KeyEvent.KEY_Y;
         if ( event.keycode == KeyEvent.KEY_NONE ) {
             // Technologies that do not give the key of Ctrl chords
-            z = event.unicode_id == CONTROL_Z;
-            y = event.unicode_id == CONTROL_Y;
+            z = event.unicodeId == CONTROL_Z;
+            y = event.unicodeId == CONTROL_Y;
         }
         if ( z ) {
             return shift ? UndoRedoCommand.UNDO_VIEWPORT : UndoRedoCommand.UNDO_SCENE;

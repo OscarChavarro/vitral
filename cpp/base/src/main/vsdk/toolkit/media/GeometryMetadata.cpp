@@ -8,23 +8,23 @@
 #include "vsdk/toolkit/media/ShapeDescriptor.h"
 long GeometryMetadata::lastId = 0;
 
-GeometryMetadata::GeometryMetadata() : objectFilename(nullptr) {
+GeometryMetadata::GeometryMetadata() : filename(nullptr) {
     lastId++;
     id = lastId;
 }
 
 GeometryMetadata::~GeometryMetadata() {
-    for (long int i = 0; i < descriptorsList.size(); i++) {
-        if (descriptorsList[i] != nullptr) {
-            delete descriptorsList[i];
-            descriptorsList[i] = nullptr;
+    for (long int i = 0; i < descriptors.size(); i++) {
+        if (descriptors[i] != nullptr) {
+            delete descriptors[i];
+            descriptors[i] = nullptr;
         }
     }
-    descriptorsList.clear();
+    descriptors.clear();
 
-    if (objectFilename != nullptr) {
-        delete objectFilename;
-        objectFilename = nullptr;
+    if (filename != nullptr) {
+        delete filename;
+        filename = nullptr;
     }
 }
 
@@ -39,8 +39,8 @@ double GeometryMetadata::doMinskowskiDistance(
     ShapeDescriptor* a = nullptr;
     ShapeDescriptor* b = nullptr;
 
-    for (long int i = 0; i < descriptorsList.size(); i++) {
-        ShapeDescriptor* aa = descriptorsList.get(i);
+    for (long int i = 0; i < descriptors.size(); i++) {
+        ShapeDescriptor* aa = descriptors.get(i);
         if (aa != nullptr) {
             java::String* label = aa->getLabel();
             if (label != nullptr && label->equals(*subGroup)) {
@@ -53,8 +53,8 @@ double GeometryMetadata::doMinskowskiDistance(
         return std::numeric_limits<double>::max();
     }
 
-    for (long int i = 0; i < other->descriptorsList.size(); i++) {
-        ShapeDescriptor* bb = other->descriptorsList.get(i);
+    for (long int i = 0; i < other->descriptors.size(); i++) {
+        ShapeDescriptor* bb = other->descriptors.get(i);
         if (bb != nullptr) {
             java::String* label = bb->getLabel();
             if (label != nullptr && label->equals(*subGroup)) {
@@ -123,31 +123,31 @@ long GeometryMetadata::getId() const {
 
 void GeometryMetadata::setFilename(const java::String* filename) {
     if (filename != nullptr && filename->length() > 0) {
-        if (objectFilename != nullptr) {
-            delete objectFilename;
+        if (this->filename != nullptr) {
+            delete this->filename;
         }
-        objectFilename = new java::String(*filename);
+        this->filename = new java::String(*filename);
     } else {
-        if (objectFilename != nullptr) {
-            delete objectFilename;
-            objectFilename = nullptr;
+        if (this->filename != nullptr) {
+            delete this->filename;
+            this->filename = nullptr;
         }
     }
 }
 
 java::String* GeometryMetadata::getFilename() const {
-    if (objectFilename != nullptr) {
-        return new java::String(*objectFilename);
+    if (filename != nullptr) {
+        return new java::String(*filename);
     }
     return nullptr;
 }
 
 java::ArrayList<ShapeDescriptor*>& GeometryMetadata::getDescriptors() {
-    return descriptorsList;
+    return descriptors;
 }
 
 const java::ArrayList<ShapeDescriptor*>& GeometryMetadata::getDescriptors() const {
-    return descriptorsList;
+    return descriptors;
 }
 
 ShapeDescriptor* GeometryMetadata::getDescriptorByName(const java::String* name) const {
@@ -155,8 +155,8 @@ ShapeDescriptor* GeometryMetadata::getDescriptorByName(const java::String* name)
         return nullptr;
     }
 
-    for (long int i = 0; i < descriptorsList.size(); i++) {
-        ShapeDescriptor* s = descriptorsList.get(i);
+    for (long int i = 0; i < descriptors.size(); i++) {
+        ShapeDescriptor* s = descriptors.get(i);
         if (s != nullptr) {
             java::String* label = s->getLabel();
             if (label != nullptr && label->equals(*name)) {
@@ -171,20 +171,20 @@ ShapeDescriptor* GeometryMetadata::getDescriptorByName(const java::String* name)
 
 void GeometryMetadata::addDescriptor(ShapeDescriptor* descriptor) {
     if (descriptor != nullptr) {
-        descriptorsList.add(descriptor);
+        descriptors.add(descriptor);
     }
 }
 
 java::String* GeometryMetadata::toString() const {
     char fullBuffer[4096];
     int offset = 0;
-    const char* filename_str = objectFilename != nullptr ? objectFilename->toCString() : "nullptr";
+    const char* filename_str = filename != nullptr ? filename->toCString() : "nullptr";
 
     offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset,
         "%s\n    . %zu shape descriptors\n",
-        filename_str, descriptorsList.size());
+        filename_str, descriptors.size());
 
-    for (long int i = 0; i < descriptorsList.size(); i++) {
+    for (long int i = 0; i < descriptors.size(); i++) {
         offset += snprintf(fullBuffer + offset, sizeof(fullBuffer) - offset, "        . descriptor_%ld\n", i);
     }
 

@@ -14,13 +14,13 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.h"
 
 const int OpenGL4ArrowRenderer::SLICES = 16;
-unsigned int OpenGL4ArrowRenderer::vao_ = 0;
-unsigned int OpenGL4ArrowRenderer::vboPositions_ = 0;
-unsigned int OpenGL4ArrowRenderer::vboNormals_ = 0;
-unsigned int OpenGL4ArrowRenderer::vboUvs_ = 0;
-unsigned int OpenGL4ArrowRenderer::program_ = 0;
-int OpenGL4ArrowRenderer::vertexCount_ = 0;
-bool OpenGL4ArrowRenderer::initialized_ = false;
+unsigned int OpenGL4ArrowRenderer::vao = 0;
+unsigned int OpenGL4ArrowRenderer::vboPositions = 0;
+unsigned int OpenGL4ArrowRenderer::vboNormals = 0;
+unsigned int OpenGL4ArrowRenderer::vboUvs = 0;
+unsigned int OpenGL4ArrowRenderer::program = 0;
+int OpenGL4ArrowRenderer::vertexCount = 0;
+bool OpenGL4ArrowRenderer::initialized = false;
 
 void OpenGL4ArrowRenderer::draw(
     const Arrow* arrow,
@@ -41,11 +41,11 @@ void OpenGL4ArrowRenderer::draw(
     Matrix4x4d mvp = projection.multiply(modelMatrix);
     Matrix4x4d modelIt = modelMatrix.invert().transpose();
 
-    glUseProgram(program_);
-    setMatrix(program_, "modelViewProjectionLocal", mvp);
-    setMatrix(program_, "modelViewLocal", modelMatrix);
-    setMatrix(program_, "modelViewITLocal", modelIt);
-    setVector3(program_, "cameraPositionGlobal", camera->getPosition());
+    glUseProgram(program);
+    setMatrix(program, "modelViewProjectionLocal", mvp);
+    setMatrix(program, "modelViewLocal", modelMatrix);
+    setMatrix(program, "modelViewITLocal", modelIt);
+    setVector3(program, "cameraPositionGlobal", camera->getPosition());
 
     int lightCount = 0;
     for ( long i = 0; i < lights.size(); i++ ) {
@@ -55,20 +55,20 @@ void OpenGL4ArrowRenderer::draw(
         }
         char name[64];
         std::snprintf(name, sizeof(name), "lightPositionsGlobal[%d]", lightCount);
-        setVector3(program_, name, light->getPosition());
+        setVector3(program, name, light->getPosition());
         std::snprintf(name, sizeof(name), "lightColorsGlobal[%d]", lightCount);
-        setVector3(program_, name, light->getEmission());
+        setVector3(program, name, light->getEmission());
         lightCount++;
     }
 
-    setInt(program_, "numberOfLights", lightCount);
-    setVector3(program_, "ambientColor", material->getAmbient());
-    setVector3(program_, "diffuseColor", material->getDiffuse());
-    setVector3(program_, "specularColor", material->getSpecular());
-    setFloat(program_, "phongExponent", (float)material->getPhongExponent());
-    setInt(program_, "withTexture", 0);
-    setInt(program_, "withBumpMap", 0);
-    setInt(program_, "withVertexColors", 0);
+    setInt(program, "numberOfLights", lightCount);
+    setVector3(program, "ambientColor", material->getAmbient());
+    setVector3(program, "diffuseColor", material->getDiffuse());
+    setVector3(program, "specularColor", material->getSpecular());
+    setFloat(program, "phongExponent", (float)material->getPhongExponent());
+    setInt(program, "withTexture", 0);
+    setInt(program, "withBumpMap", 0);
+    setInt(program, "withVertexColors", 0);
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -79,8 +79,8 @@ void OpenGL4ArrowRenderer::draw(
     glPolygonOffset(1.0f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    glBindVertexArray(vao_);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glBindVertexArray(0);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
@@ -90,27 +90,27 @@ void OpenGL4ArrowRenderer::draw(
 
 void OpenGL4ArrowRenderer::dispose()
 {
-    if ( vboPositions_ != 0 ) { glDeleteBuffers(1, &vboPositions_); vboPositions_ = 0; }
-    if ( vboNormals_ != 0 ) { glDeleteBuffers(1, &vboNormals_); vboNormals_ = 0; }
-    if ( vboUvs_ != 0 ) { glDeleteBuffers(1, &vboUvs_); vboUvs_ = 0; }
-    if ( vao_ != 0 ) { glDeleteVertexArrays(1, &vao_); vao_ = 0; }
-    if ( program_ != 0 ) { glDeleteProgram(program_); program_ = 0; }
-    vertexCount_ = 0;
-    initialized_ = false;
+    if ( vboPositions != 0 ) { glDeleteBuffers(1, &vboPositions); vboPositions = 0; }
+    if ( vboNormals != 0 ) { glDeleteBuffers(1, &vboNormals); vboNormals = 0; }
+    if ( vboUvs != 0 ) { glDeleteBuffers(1, &vboUvs); vboUvs = 0; }
+    if ( vao != 0 ) { glDeleteVertexArrays(1, &vao); vao = 0; }
+    if ( program != 0 ) { glDeleteProgram(program); program = 0; }
+    vertexCount = 0;
+    initialized = false;
 }
 
 bool OpenGL4ArrowRenderer::ensureProgram()
 {
-    if ( program_ != 0 ) {
+    if ( program != 0 ) {
         return true;
     }
-    program_ = buildProgram("gouraudTextureVertexShader.glsl", "gouraudTexturePixelShader.glsl");
-    return program_ != 0;
+    program = buildProgram("gouraudTextureVertexShader.glsl", "gouraudTexturePixelShader.glsl");
+    return program != 0;
 }
 
 bool OpenGL4ArrowRenderer::ensureMesh(const Arrow* arrow)
 {
-    if ( initialized_ ) {
+    if ( initialized ) {
         return true;
     }
     ArrowMesh mesh = buildArrowMesh(
@@ -120,7 +120,7 @@ bool OpenGL4ArrowRenderer::ensureMesh(const Arrow* arrow)
         arrow->getHeadLength(),
         SLICES);
     uploadMesh(mesh);
-    initialized_ = true;
+    initialized = true;
     return true;
 }
 
@@ -220,19 +220,19 @@ OpenGL4ArrowRenderer::ArrowMesh OpenGL4ArrowRenderer::buildArrowMesh(
 
 void OpenGL4ArrowRenderer::uploadMesh(const ArrowMesh& mesh)
 {
-    glGenVertexArrays(1, &vao_);
-    glGenBuffers(1, &vboPositions_);
-    glGenBuffers(1, &vboNormals_);
-    glGenBuffers(1, &vboUvs_);
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vboPositions);
+    glGenBuffers(1, &vboNormals);
+    glGenBuffers(1, &vboUvs);
 
-    glBindVertexArray(vao_);
-    uploadBuffer(vboPositions_, 0, 3, mesh.positions);
-    uploadBuffer(vboNormals_, 1, 3, mesh.normals);
-    uploadBuffer(vboUvs_, 2, 2, mesh.uvs);
+    glBindVertexArray(vao);
+    uploadBuffer(vboPositions, 0, 3, mesh.positions);
+    uploadBuffer(vboNormals, 1, 3, mesh.normals);
+    uploadBuffer(vboUvs, 2, 2, mesh.uvs);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    vertexCount_ = mesh.vertexCount;
+    vertexCount = mesh.vertexCount;
 }
 
 unsigned int OpenGL4ArrowRenderer::buildProgram(const char* vsFile, const char* fsFile)
@@ -252,23 +252,23 @@ unsigned int OpenGL4ArrowRenderer::buildProgram(const char* vsFile, const char* 
         return 0;
     }
 
-    unsigned int program = glCreateProgram();
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
+    unsigned int linkedProgram = glCreateProgram();
+    glAttachShader(linkedProgram, vs);
+    glAttachShader(linkedProgram, fs);
+    glLinkProgram(linkedProgram);
     glDeleteShader(vs);
     glDeleteShader(fs);
 
     int ok = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    glGetProgramiv(linkedProgram, GL_LINK_STATUS, &ok);
     if ( !ok ) {
         char log[4096];
-        glGetProgramInfoLog(program, sizeof(log), 0, log);
+        glGetProgramInfoLog(linkedProgram, sizeof(log), 0, log);
         std::fprintf(stderr, "OpenGL4ArrowRenderer link error: %s\n", log);
-        glDeleteProgram(program);
+        glDeleteProgram(linkedProgram);
         return 0;
     }
-    return program;
+    return linkedProgram;
 }
 
 unsigned int OpenGL4ArrowRenderer::compileShader(unsigned int type, const char* source)

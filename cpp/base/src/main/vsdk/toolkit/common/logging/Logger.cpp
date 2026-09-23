@@ -4,18 +4,18 @@
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
-bool Logger::withSystemExit_ = true;
-bool Logger::withFatalExceptions_ = true;
+bool Logger::withSystemExit = true;
+bool Logger::withFatalExceptions = true;
 
-void Logger::setWithSystemExit(bool flag) { withSystemExit_ = flag; }
-void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions_ = flag; }
+void Logger::setWithSystemExit(bool flag) { withSystemExit = flag; }
+void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions = flag; }
 
 void Logger::processFatalError(const java::String& method, const java::String& message, const std::exception* cause)
 {
-    if ( withSystemExit_ ) {
+    if ( withSystemExit ) {
         std::exit(1);
     }
-    if ( !withFatalExceptions_ ) {
+    if ( !withFatalExceptions ) {
         return;
     }
     java::String m = method.empty() ? "VSDK fatal error" : ("VSDK fatal error at " + method);

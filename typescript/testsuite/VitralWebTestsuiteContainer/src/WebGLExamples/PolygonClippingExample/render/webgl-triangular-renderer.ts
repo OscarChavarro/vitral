@@ -186,7 +186,12 @@ export class WebGLTriangularRenderer {
     const out: number[] = [];
     for (let i = 0; i < triangleCount; i++) {
       const t = triangles[i]!;
-      WebGLTriangularRenderer.addFillTriangle(out, vertices[t.a]!, vertices[t.b]!, vertices[t.c]!);
+      WebGLTriangularRenderer.addFillTriangle(
+        out,
+        vertices[t.point0]!,
+        vertices[t.point1]!,
+        vertices[t.point2]!,
+      );
     }
     return out;
   }
@@ -203,9 +208,9 @@ export class WebGLTriangularRenderer {
   ): void {
     for (let i = 0; i < triangleCount; i++) {
       const t = triangles[i]!;
-      const a: number[] = vertices[t.a]!;
-      const b2: number[] = vertices[t.b]!;
-      const c: number[] = vertices[t.c]!;
+      const a: number[] = vertices[t.point0]!;
+      const b2: number[] = vertices[t.point1]!;
+      const c: number[] = vertices[t.point2]!;
       WebGLTriangularRenderer.addLineEdge(positions, colors, a, b2, r, g, b);
       WebGLTriangularRenderer.addLineEdge(positions, colors, b2, c, r, g, b);
       WebGLTriangularRenderer.addLineEdge(positions, colors, c, a, r, g, b);
@@ -224,9 +229,9 @@ export class WebGLTriangularRenderer {
   ): void {
     for (let i = 0; i < triangleCount; i++) {
       const t = triangles[i]!;
-      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.a]!, r, g, b);
-      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.b]!, r, g, b);
-      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.c]!, r, g, b);
+      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.point0]!, r, g, b);
+      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.point1]!, r, g, b);
+      WebGLTriangularRenderer.addLinePoint(positions, colors, vertices[t.point2]!, r, g, b);
     }
   }
 

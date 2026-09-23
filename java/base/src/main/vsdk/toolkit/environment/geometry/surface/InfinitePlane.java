@@ -154,12 +154,12 @@ public class InfinitePlane extends HalfSpace {
     public void
     doExtraInformation(Ray inRay, double inT, 
                                   RayHit outData) {
-        outData.p = new Vector3Dd(
+        outData.point = new Vector3Dd(
             inRay.getOrigin().x() + inT*inRay.getDirection().x(),
             inRay.getOrigin().y() + inT*inRay.getDirection().y(),
             inRay.getOrigin().z() + inT*inRay.getDirection().z()
         );
-        outData.n = getNormal();
+        outData.normal = getNormal();
     }
 
     /**

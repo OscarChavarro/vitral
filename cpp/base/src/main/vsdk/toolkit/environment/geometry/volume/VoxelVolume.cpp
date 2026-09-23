@@ -95,8 +95,8 @@ double* VoxelVolume::getMinMax() {
 
 Ray* VoxelVolume::doIntersectionFirstHit(const Ray& inOutRay) {
     RayHit hit;
-    if (doIntersectionFirstHit(inOutRay, &hit) && hit.ray() != nullptr) {
-        return new Ray(*hit.ray());
+    if (doIntersectionFirstHit(inOutRay, &hit) && hit.getRay() != nullptr) {
+        return new Ray(*hit.getRay());
     }
     return nullptr;
 }
@@ -136,7 +136,7 @@ bool VoxelVolume::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
 void VoxelVolume::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData == nullptr) return;
     if (outData->needsPoint()) {
-        outData->p = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
+        outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
     }
 }
 

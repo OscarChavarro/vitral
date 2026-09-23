@@ -83,7 +83,7 @@ void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {
 
     Vector3Dd p = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
     if (outHit->needsPoint()) {
-        outHit->p = p;
+        outHit->point = p;
     }
 
     if (outHit->needsNormal() || outHit->needsTextureCoordinates() || outHit->needsTangent()) {
@@ -94,7 +94,7 @@ void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {
             4*y*sum - 8*majorRadius*majorRadius*y,
             4*z*sum);
         Vector3Dd n = grad.normalized();
-        if (outHit->needsNormal()) outHit->n = n;
+        if (outHit->needsNormal()) outHit->normal = n;
 
         if (outHit->needsTextureCoordinates()) {
             double theta = std::atan2(y, x);
@@ -106,7 +106,7 @@ void Torus::doExtraInformation(const Ray& inRay, double inT, RayHit* outHit) {
 
         if (outHit->needsTangent()) {
             double theta = std::atan2(y, x);
-            outHit->t = Vector3Dd(-std::sin(theta), std::cos(theta), 0);
+            outHit->tangent = Vector3Dd(-std::sin(theta), std::cos(theta), 0);
         }
     }
 }

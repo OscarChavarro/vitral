@@ -4,11 +4,11 @@ import { ProgressMonitor } from "./ProgressMonitor.js";
 
 /** Single-runtime console monitor; it deliberately has no browser-worker mode. */
 export class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
-    private n = 0n;
+    private updateCount = 0n;
     private charactersPrintedInLastLine = 0;
     private currentPercent = 0;
     public begin(): void {
-        this.n = 0n;
+        this.updateCount = 0n;
         this.currentPercent = 0;
         this.charactersPrintedInLastLine = 0;
         this.write("    ");
@@ -23,14 +23,14 @@ export class ProgressMonitorConsoleLongFormat extends ProgressMonitor {
         if (Math.abs(maxValue - minValue) < VSDK.EPSILON) return;
         const value = (100 * (currentValue - minValue)) / (maxValue - minValue);
         this.currentPercent = value;
-        this.n++;
+        this.updateCount++;
         this.write(".");
         this.charactersPrintedInLastLine++;
-        if (this.n % 10n === 0n) {
+        if (this.updateCount % 10n === 0n) {
             this.write(" ");
             this.charactersPrintedInLastLine++;
         }
-        if (this.n % 50n === 0n) {
+        if (this.updateCount % 50n === 0n) {
             this.write(` - [${VSDK.formatDouble(value)}% of ${Math.round(maxValue)}]\n    `);
             this.charactersPrintedInLastLine = 0;
         }

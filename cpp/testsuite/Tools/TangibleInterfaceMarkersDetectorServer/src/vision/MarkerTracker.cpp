@@ -27,12 +27,12 @@ Matrix4x4d MarkerTracker::buildAprilToModelRotation() const {
 }
 
 MarkerTracker::MarkerTracker(const MarkerTrackerConfig& cfg, MarkersModel* model, MarkerEventBus* bus)
-    : cfg_(cfg), model_(model), bus_(bus),
-      fx_(600), fy_(600), cx_(320), cy_(240),
-      calibrated_(false), thread_(0), running_(false) {
-    dist_.clear();
+    : cfg(cfg), model(model), bus(bus),
+      focalLengthX(600), focalLengthY(600), principalPointX(320), principalPointY(240),
+      calibrated(false), thread(0), running(false) {
+    dist.clear();
     for (int i = 0; i < 5; ++i) {
-        dist_.add(0.0);
+        dist.add(0.0);
     }
 }
 
@@ -40,60 +40,60 @@ MarkerTracker::~MarkerTracker() { stop(); }
 
 double MarkerTracker::resolveTagSize(int markerId) const {
     MarkerGroup group;
-    if (model_ != nullptr && model_->findGroupByMarkerId(markerId, &group)) {
+    if (model != nullptr && model->findGroupByMarkerId(markerId, &group)) {
         return group.physicalSideLength;
     }
-    return cfg_.markerSize;
+    return cfg.markerSize;
 }
 
 bool MarkerTracker::loadCalibration() {
-    if (cfg_.calibFile.empty()) return false;
-    cv::FileStorage fs(cfg_.calibFile.c_str(), cv::FileStorage::READ);
+    if (cfg.calibFile.empty()) return false;
+    cv::FileStorage fs(cfg.calibFile.c_str(), cv::FileStorage::READ);
     if (fs.isOpened()) {
         cv::Mat K, D;
         fs["camera_matrix"] >> K;
         fs["distortion_coefficients"] >> D;
         if (!K.empty() && K.rows == 3 && K.cols == 3) {
-            fx_ = K.at<double>(0,0); fy_ = K.at<double>(1,1);
-            cx_ = K.at<double>(0,2); cy_ = K.at<double>(1,2);
-            dist_.clear();
+            focalLengthX = K.at<double>(0,0); focalLengthY = K.at<double>(1,1);
+            principalPointX = K.at<double>(0,2); principalPointY = K.at<double>(1,2);
+            dist.clear();
     for (int i = 0; i < 5; ++i) {
-        dist_.add(0.0);
+        dist.add(0.0);
     }
             for (int i = 0; i < (int)D.total() && i < 5; ++i)
-                dist_[i] = D.at<double>(i);
+                dist[i] = D.at<double>(i);
             return true;
         }
     }
-    FILE* in = std::fopen(cfg_.calibFile.c_str(), "r");
+    FILE* in = std::fopen(cfg.calibFile.c_str(), "r");
     if (in) {
         double k1=0,k2=0,p1=0,p2=0,k3=0;
-        if (std::fscanf(in, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &fx_, &fy_, &cx_, &cy_, &k1, &k2, &p1, &p2, &k3) == 9) {
-            dist_[0]=k1; dist_[1]=k2; dist_[2]=p1; dist_[3]=p2; dist_[4]=k3;
+        if (std::fscanf(in, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", &focalLengthX, &focalLengthY, &principalPointX, &principalPointY, &k1, &k2, &p1, &p2, &k3) == 9) {
+            dist[0]=k1; dist[1]=k2; dist[2]=p1; dist[3]=p2; dist[4]=k3;
             std::fclose(in);
             return true;
         }
         std::fclose(in);
     }
-    std::fprintf(stderr, "[marker_tracker] could not parse %s; using defaults\n", cfg_.calibFile.c_str());
+    std::fprintf(stderr, "[marker_tracker] could not parse %s; using defaults\n", cfg.calibFile.c_str());
     return false;
 }
 
 bool MarkerTracker::start() {
-    calibrated_ = loadCalibration();
-    running_ = true;
-    if (pthread_create(&thread_, NULL, &MarkerTracker::threadEntry, this) != 0) {
-        running_ = false;
+    calibrated = loadCalibration();
+    running = true;
+    if (pthread_create(&thread, NULL, &MarkerTracker::threadEntry, this) != 0) {
+        running = false;
         return false;
     }
     return true;
 }
 
 void MarkerTracker::stop() {
-    if (running_) {
-        running_ = false;
-        pthread_join(thread_, NULL);
-        thread_ = 0;
+    if (running) {
+        running = false;
+        pthread_join(thread, NULL);
+        thread = 0;
     }
 }
 
@@ -136,10 +136,10 @@ void MarkerTracker::configureCapture(cv::VideoCapture& cap) {
 }
 
 void MarkerTracker::loop() {
-    cv::VideoCapture cap(cfg_.cameraIndex);
+    cv::VideoCapture cap(cfg.cameraIndex);
     if (!cap.isOpened()) {
-        std::fprintf(stderr, "[marker_tracker] cannot open camera %d\n", cfg_.cameraIndex);
-        running_ = false;
+        std::fprintf(stderr, "[marker_tracker] cannot open camera %d\n", cfg.cameraIndex);
+        running = false;
         return;
     }
     configureCapture(cap);
@@ -151,7 +151,7 @@ void MarkerTracker::loop() {
     td->nthreads = 1;
 
     cv::Mat frame, gray;
-    while (running_) {
+    while (running) {
         if (!cap.read(frame) || frame.empty()) continue;
         cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
 
@@ -167,8 +167,8 @@ void MarkerTracker::loop() {
             apriltag_detection_info_t info;
             info.det     = det;
             info.tagsize = resolveTagSize(det->id);
-            info.fx = fx_; info.fy = fy_;
-            info.cx = cx_; info.cy = cy_;
+            info.fx = focalLengthX; info.fy = focalLengthY;
+            info.cx = principalPointX; info.cy = principalPointY;
 
             apriltag_pose_t pose;
             estimate_tag_pose(&info, &pose);
@@ -223,10 +223,10 @@ void MarkerTracker::loop() {
         apriltag_detections_destroy(dets);
 
         java::ArrayList<MarkerGroupPose> groups =
-            poser_.estimate(markers, model_->getMarkerGroups(),
-                            cfg_.decisionMarginThreshold,
-                            cfg_.viewAngleCosThreshold);
-        bus_->publish(groups);
+            poser.estimate(markers, model->getMarkerGroups(),
+                            cfg.decisionMarginThreshold,
+                            cfg.viewAngleCosThreshold);
+        bus->publish(groups);
     }
 
     apriltag_detector_destroy(td);
@@ -234,9 +234,9 @@ void MarkerTracker::loop() {
 }
 
 void MarkerTracker::runPreviewLoop() {
-    cv::VideoCapture cap(cfg_.cameraIndex);
+    cv::VideoCapture cap(cfg.cameraIndex);
     if (!cap.isOpened()) {
-        std::fprintf(stderr, "[marker_tracker] cannot open camera %d\n", cfg_.cameraIndex);
+        std::fprintf(stderr, "[marker_tracker] cannot open camera %d\n", cfg.cameraIndex);
         return;
     }
     configureCapture(cap);
@@ -251,7 +251,7 @@ void MarkerTracker::runPreviewLoop() {
     loadCalibration();
 
     cv::Mat frame, gray;
-    OpenCVMarkerGroupRenderer markerGroupRenderer(model_);
+    OpenCVMarkerGroupRenderer markerGroupRenderer(model);
     int frameCount = 0;
     bool shouldExit = false;
 
@@ -271,8 +271,8 @@ void MarkerTracker::runPreviewLoop() {
             apriltag_detection_info_t info;
             info.det     = det;
             info.tagsize = resolveTagSize(det->id);
-            info.fx = fx_; info.fy = fy_;
-            info.cx = cx_; info.cy = cy_;
+            info.fx = focalLengthX; info.fy = focalLengthY;
+            info.cx = principalPointX; info.cy = principalPointY;
 
             apriltag_pose_t pose;
             estimate_tag_pose(&info, &pose);
@@ -324,18 +324,18 @@ void MarkerTracker::runPreviewLoop() {
             markers.add(mp);
         }
 
-        java::ArrayList<MarkerGroup> effectiveGroups = model_->getMarkerGroups();
+        java::ArrayList<MarkerGroup> effectiveGroups = model->getMarkerGroups();
         if (effectiveGroups.size() > 0) {
             MarkerGroup g0 = effectiveGroups.get(0);
-            const int markerIdTest = model_->getMarkerIdTest();
+            const int markerIdTest = model->getMarkerIdTest();
             for (long mi = 0; mi < g0.markers.size(); ++mi) {
                 Marker marker = g0.markers.get(mi);
                 if (marker.id == markerIdTest) {
                     const double toRad = 3.14159265358979323846 / 180.0;
                     Matrix4x4d r = Matrix4x4d().eulerAnglesRotation(
-                        model_->getYawTest() * toRad,
-                        model_->getPitchTest() * toRad,
-                        model_->getRollTest() * toRad);
+                        model->getYawTest() * toRad,
+                        model->getPitchTest() * toRad,
+                        model->getRollTest() * toRad);
                     marker.rotation = r.exportToQuaternion().normalized();
                     g0.markers.set(mi, marker);
                     break;
@@ -345,18 +345,18 @@ void MarkerTracker::runPreviewLoop() {
         }
 
         java::ArrayList<MarkerGroupPose> groups =
-            poser_.estimate(markers, effectiveGroups,
-                            cfg_.decisionMarginThreshold,
-                            cfg_.viewAngleCosThreshold);
-        bus_->publish(groups);
+            poser.estimate(markers, effectiveGroups,
+                            cfg.decisionMarginThreshold,
+                            cfg.viewAngleCosThreshold);
+        bus->publish(groups);
         cv::Mat preview = frame.clone();
-        PreviewOperationMode mode = model_->getPreviewOperationMode();
+        PreviewOperationMode mode = model->getPreviewOperationMode();
         if (mode == SINGLE_MARKER) {
             for (int i = 0; i < n; ++i) {
                 apriltag_detection_t* det;
                 zarray_get(dets, i, &det);
                 MarkerGroup group;
-                bool foundGroup = model_->findGroupByMarkerId(det->id, &group);
+                bool foundGroup = model->findGroupByMarkerId(det->id, &group);
                 cv::Scalar color(84, 84, 84);
                 if (foundGroup) {
                     color = cv::Scalar(
@@ -390,7 +390,7 @@ void MarkerTracker::runPreviewLoop() {
                 apriltag_detection_t* det;
                 zarray_get(dets, i, &det);
                 MarkerGroup group;
-                bool foundGroup = model_->findGroupByMarkerId(det->id, &group);
+                bool foundGroup = model->findGroupByMarkerId(det->id, &group);
                 if (foundGroup) {
                     continue;
                 }
@@ -413,7 +413,7 @@ void MarkerTracker::runPreviewLoop() {
                 cv::putText(preview, label, labelPos, cv::FONT_HERSHEY_SIMPLEX, 1.2, color, 2);
             }
 
-            markerGroupRenderer.drawGroupGizmos(preview, groups, fx_, fy_, cx_, cy_);
+            markerGroupRenderer.drawGroupGizmos(preview, groups, focalLengthX, focalLengthY, principalPointX, principalPointY);
         }
 
         int hudY = 32;
@@ -421,8 +421,8 @@ void MarkerTracker::runPreviewLoop() {
             const MarkerGroupPose& gp = groups.get(i);
             MarkerGroup group;
             bool foundGroupColor = false;
-            for (long j = 0; j < model_->getMarkerGroups().size(); ++j) {
-                MarkerGroup g = model_->getMarkerGroups().get(j);
+            for (long j = 0; j < model->getMarkerGroups().size(); ++j) {
+                MarkerGroup g = model->getMarkerGroups().get(j);
                 if (g.label == gp.label) {
                     group = g;
                     foundGroupColor = true;
@@ -448,23 +448,23 @@ void MarkerTracker::runPreviewLoop() {
             exitPose.label = "exit";
             java::ArrayList<MarkerGroupPose> exitMsg;
             exitMsg.add(exitPose);
-            bus_->publish(exitMsg);
+            bus->publish(exitMsg);
             usleep(100000);
             shouldExit = true;
             cv::destroyAllWindows();
         } else if (key == ' ') {
-            model_->cyclePreviewOperationMode();
+            model->cyclePreviewOperationMode();
         } else if (key == '1') {
-            model_->cycleYawTest();
+            model->cycleYawTest();
         } else if (key == '2') {
-            model_->cyclePitchTest();
+            model->cyclePitchTest();
         } else if (key == '3') {
-            model_->cycleRollTest();
+            model->cycleRollTest();
         } else if (key == '4') {
-            model_->cycleMarkerIdTest();
+            model->cycleMarkerIdTest();
         }
 
-        if (model_->getPreviewOperationMode() == SINGLE_MARKER && frameCount % 30 == 0 && n > 0) {
+        if (model->getPreviewOperationMode() == SINGLE_MARKER && frameCount % 30 == 0 && n > 0) {
             for (int i = 0; i < n; ++i) {
                 apriltag_detection_t* det;
                 zarray_get(dets, i, &det);

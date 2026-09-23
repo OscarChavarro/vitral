@@ -69,7 +69,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     // Vitral model
     private Scene scene;
-    private RendererConfiguration quality;
+    private RendererConfiguration rendererConfiguration;
     private SimpleMaterial material;
     private SimpleScene preloadedCow;
     private SimpleScene preloadedMug;
@@ -112,7 +112,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
 
     public RendererConfiguration getRendererConfiguration()
     {
-        return quality;
+        return rendererConfiguration;
     }
 
     public Camera getCamera()
@@ -294,15 +294,15 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         //-----------------------------------------------------------------
         scene = new Scene();
         raytracingImage = null;
-        quality = new RendererConfiguration();
-        quality.setPoints(false);
-        quality.setWires(false);
-        quality.setWireColor(new ColorRgb(1.0, 1.0, 0.0));
-        quality.setSurfaces(true);
-        quality.setTexture(false);
-        quality.setBumpMap(false);
-        quality.setUseVertexColors(false);
-        quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+        rendererConfiguration = new RendererConfiguration();
+        rendererConfiguration.setPoints(false);
+        rendererConfiguration.setWires(false);
+        rendererConfiguration.setWireColor(new ColorRgb(1.0, 1.0, 0.0));
+        rendererConfiguration.setSurfaces(true);
+        rendererConfiguration.setTexture(false);
+        rendererConfiguration.setBumpMap(false);
+        rendererConfiguration.setUseVertexColors(false);
+        rendererConfiguration.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
 
         material = new SimpleMaterial();
         material = material.withAmbient(new ColorRgb(0.2, 0.2, 0.2));
@@ -580,7 +580,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
         }
 
         glLoadIdentity();
-        AndroidGLES20SceneRenderer.draw(getScene(), quality);
+        AndroidGLES20SceneRenderer.draw(getScene(), rendererConfiguration);
         drawNonStandardSceneElements(x);
         
         if ( frameCount > 1 ) timers.get("02_GEOMETRY").stop();
@@ -601,22 +601,22 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     private void drawNonStandardSceneElements(float x) {
         //- Prepare rendering environment ---------------------------------
         if ( withReferenceSquare ) {
-            setRendererConfiguration(quality);
+            setRendererConfiguration(rendererConfiguration);
             AndroidGLES20MaterialRenderer.activate(material);
 
             // Activate texture image.activate()
-            if ( quality.isTextureSet() ) {
+            if ( rendererConfiguration.isTextureSet() ) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                 AndroidGLES20ImageRenderer.activate(texture);
                 activateDefaultTextureParameters();
             }
 
-            if ( quality.isBumpMapSet()
+            if ( rendererConfiguration.isBumpMapSet()
                     && (bumpmap == null || normalMap == null) ) {
                 loadBumpmap();
             }
             
-            if ( quality.isBumpMapSet() ) {
+            if ( rendererConfiguration.isBumpMapSet() ) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
                 AndroidGLES20ImageRenderer.activate(testImage);
                 activateDefaultTextureParameters();
@@ -744,7 +744,7 @@ implements GLSurfaceView.Renderer, View.OnTouchListener {
     {
         raytracingImage = new RGBImageUncompressed();
         raytracingImage.init(256, 256);
-        getScene().raytrace(raytracingImage, quality);
+        getScene().raytrace(raytracingImage, rendererConfiguration);
     }
     
     public void requestRaytracer()

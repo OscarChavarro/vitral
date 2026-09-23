@@ -10,18 +10,18 @@ class RayHit;
 class FunctionalExplicitSurface : public Surface {
 private:
     java::String functionExpression;
-    double minx;
-    double miny;
-    double minz;
-    double maxx;
-    double maxy;
-    double maxz;
-    int nx;
-    int ny;
-    TriangleMesh* internalGeometry;
+    double minXBound;
+    double minYBound;
+    double minZBound;
+    double maxXBound;
+    double maxYBound;
+    double maxZBound;
+    int tesselationHintX;
+    int tesselationHintY;
+    TriangleMesh* internalTriangleMesh;
 
     void init(const java::String& fxy);
-    int coord(int nx, int ny, int ix, int iy);
+    int coord(int tesselationHintX, int tesselationHintY, int ix, int iy);
     void updateInternalGeometry();
     double evalExpression(double x, double y, bool& ok) const;
 
@@ -31,8 +31,8 @@ public:
 
     java::String getFunctionExpression() const;
 
-    void setBounds(double minx, double miny, double minz,
-                   double maxx, double maxy, double maxz);
+    void setBounds(double minXBound, double minYBound, double minZBound,
+                   double maxXBound, double maxYBound, double maxZBound);
     void setTesselationHint(int tesx, int tesy);
 
     int getTesselationHintX() const;

@@ -14,9 +14,9 @@ public class Triangle extends FundamentalEntity
 {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    private int p0;
-    private int p1;
-    private int p2;
+    private int point0;
+    private int point1;
+    private int point2;
 
     private Vector3Dd normal;
 
@@ -25,57 +25,57 @@ public class Triangle extends FundamentalEntity
     }
 
     /**
-    @param p0
-    @param p1
-    @param p2
+    @param point0 index of the first vertex
+    @param point1 index of the second vertex
+    @param point2 index of the third vertex
     */
-    public Triangle(int p0, int p1, int p2) {
-        this.p0 = p0;
-        this.p1 = p1;
-        this.p2 = p2;
+    public Triangle(int point0, int point1, int point2) {
+        this.point0 = point0;
+        this.point1 = point1;
+        this.point2 = point2;
         normal = new Vector3Dd(0, 0, 0);
     }
 
     /**
-    @return point p0
+    @return index of vertex 0
     */
     public int getPoint0() {
-        return this.p0;
+        return this.point0;
     }
 
     /**
-    @return point p1
+    @return index of vertex 1
     */
     public int getPoint1() {
-        return this.p1;
+        return this.point1;
     }
 
     /**
-    @return point p2
+    @return index of vertex 2
     */
     public int getPoint2() {
-        return this.p2;
+        return this.point2;
     }
 
     /**
-    @param p0
+    @param value index of vertex 0
     */
-    public void setPoint0(int p0) {
-        this.p0 = p0;
+    public void setPoint0(int value) {
+        this.point0 = value;
     }
 
     /**
-    @param p1
+    @param value index of vertex 1
     */
-    public void setPoint1(int p1) {
-        this.p1 = p1;
+    public void setPoint1(int value) {
+        this.point1 = value;
     }
 
     /**
-    @param p2
+    @param value index of vertex 2
     */
-    public void setPoint2(int p2) {
-        this.p2 = p2;
+    public void setPoint2(int value) {
+        this.point2 = value;
     }
 
     /**
@@ -215,7 +215,7 @@ public class Triangle extends FundamentalEntity
     @Override
     public String toString() {
 
-        return "f < " + p0 + ", " + p1 + ", " + p2 + " >";
+        return "f < " + point0 + ", " + point1 + ", " + point2 + " >";
     }
 
 }

@@ -7,29 +7,29 @@ import { Intersection } from "./Intersection.js";
 export class Triangle extends FundamentalEntity {
     private normal = new Vector3Dd();
     public constructor(
-        private p0 = 0,
-        private p1 = 0,
-        private p2 = 0,
+        private point0 = 0,
+        private point1 = 0,
+        private point2 = 0,
     ) {
         super();
     }
     public getPoint0() {
-        return this.p0;
+        return this.point0;
     }
     public getPoint1() {
-        return this.p1;
+        return this.point1;
     }
     public getPoint2() {
-        return this.p2;
+        return this.point2;
     }
-    public setPoint0(x: number) {
-        this.p0 = x;
+    public setPoint0(value: number) {
+        this.point0 = value;
     }
-    public setPoint1(x: number) {
-        this.p1 = x;
+    public setPoint1(value: number) {
+        this.point1 = value;
     }
-    public setPoint2(x: number) {
-        this.p2 = x;
+    public setPoint2(value: number) {
+        this.point2 = value;
     }
     public getNormal() {
         return this.normal;
@@ -81,6 +81,6 @@ export class Triangle extends FundamentalEntity {
         m[5] = Math.max(a.z(), b.z(), c.z());
     }
     public override toString() {
-        return `f < ${this.p0}, ${this.p1}, ${this.p2} >`;
+        return `f < ${this.point0}, ${this.point1}, ${this.point2} >`;
     }
 }

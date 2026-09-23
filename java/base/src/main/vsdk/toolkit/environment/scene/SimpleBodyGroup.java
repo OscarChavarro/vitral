@@ -22,7 +22,7 @@ public class SimpleBodyGroup extends Entity {
     /// Warning: The translation value in this matrix must be <0, 0, 0>
     private Matrix4x4d rotation;
     /// Warning: The translation value in this matrix must be <0, 0, 0>
-    private Matrix4x4d rotation_i;
+    private Matrix4x4d rotationInverse;
 
     //- Model (3/6): body visual data ---------------------------------
 
@@ -40,7 +40,7 @@ public class SimpleBodyGroup extends Entity {
     {
         bodies = new ArrayList<SimpleBody>();
         rotation = new Matrix4x4d();
-        rotation_i = new Matrix4x4d();
+        rotationInverse = new Matrix4x4d();
         position = new Vector3Dd(0, 0, 0);
         scale = new Vector3Dd(1, 1, 1);
     }
@@ -73,12 +73,12 @@ public class SimpleBodyGroup extends Entity {
 
     public Matrix4x4d getRotationInverse()
     {
-        return rotation_i;
+        return rotationInverse;
     }
 
-    public void setRotationInverse(Matrix4x4d rotationi)
+    public void setRotationInverse(Matrix4x4d value)
     {
-        this.rotation_i = rotationi;
+        this.rotationInverse = value;
     }
 
     public Vector3Dd getPosition()
@@ -131,8 +131,8 @@ public class SimpleBodyGroup extends Entity {
         inOutRay = inOutRay.withT(Double.MAX_VALUE);
 
         myRay = new Ray (
-            rotation_i.multiply(inOutRay.getOrigin().subtract(position)),
-            rotation_i.multiply(inOutRay.getDirection())
+            rotationInverse.multiply(inOutRay.getOrigin().subtract(position)),
+            rotationInverse.multiply(inOutRay.getDirection())
         );
         myRay = myRay.withT(inOutRay.getT());
 
@@ -141,8 +141,8 @@ public class SimpleBodyGroup extends Entity {
         for ( i = 0; i < bodies.size(); i++ ) {
             RayHit hit = new RayHit();
             if ( bodies.get(i).getGeometry().doIntersectionFirstHit(myRay, hit) ) {
-                if ( hit.ray().getT() < inOutRay.getT() ) {
-                    inOutRay = inOutRay.withT(hit.ray().getT());
+                if ( hit.getRay().getT() < inOutRay.getT() ) {
+                    inOutRay = inOutRay.withT(hit.getRay().getT());
                     nearestHit = inOutRay;
                 }
             }

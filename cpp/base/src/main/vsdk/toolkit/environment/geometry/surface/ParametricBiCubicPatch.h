@@ -10,9 +10,9 @@ class RayHit;
 
 class ParametricBiCubicPatch : public Surface {
 public:
-    Matrix4x4d Gx_MATRIX;
-    Matrix4x4d Gy_MATRIX;
-    Matrix4x4d Gz_MATRIX;
+    Matrix4x4d geometryMatrixX;
+    Matrix4x4d geometryMatrixY;
+    Matrix4x4d geometryMatrixZ;
 
     static const int FERGUSON = 7;
 
@@ -21,15 +21,15 @@ public:
     ParametricCurve* contourCurve;
 
 private:
-    Matrix4x4d S_MATRIX;
-    Matrix4x4d Tt_MATRIX;
-    Matrix4x4d S_MATRIX_DS;
-    Matrix4x4d Tt_MATRIX_DT;
-    Matrix4x4d M_MATRIX;
-    Matrix4x4d Mt_MATRIX;
-    Matrix4x4d M_Gx_Mt_MATRIX;
-    Matrix4x4d M_Gy_Mt_MATRIX;
-    Matrix4x4d M_Gz_Mt_MATRIX;
+    Matrix4x4d sParameterMatrix;
+    Matrix4x4d tParameterMatrix;
+    Matrix4x4d sDerivativeParameterMatrix;
+    Matrix4x4d tDerivativeParameterMatrix;
+    Matrix4x4d basisMatrix;
+    Matrix4x4d transposedBasisMatrix;
+    Matrix4x4d coefficientMatrixX;
+    Matrix4x4d coefficientMatrixY;
+    Matrix4x4d coefficientMatrixZ;
 
     Vector3Dd controlMeshPoints[4][4];
     bool hasControlMeshPoints;

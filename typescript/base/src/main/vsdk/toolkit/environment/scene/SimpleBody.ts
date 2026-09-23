@@ -41,10 +41,10 @@ export class SimpleBody extends Entity {
     private hasTranslationOnlyTransform = false;
 
     //- Model (3/6): body visual data ---------------------------------
-    private globalMaterial: SimpleMaterial | null;
-    private globalTextureMap: Image | null;
-    private globalNormalMap: NormalMap | null;
-    private globalNormalMapRgb: RGBImageUncompressed | null = null;
+    private material: SimpleMaterial | null;
+    private texture: Image | null;
+    private normalMap: NormalMap | null;
+    private normalMapRgb: RGBImageUncompressed | null = null;
 
     //- Model (4/6): body physical data -------------------------------
 
@@ -60,9 +60,9 @@ export class SimpleBody extends Entity {
         this.setPosition(new Vector3Dd(0, 0, 0));
         this.setRotation(new Matrix4x4d());
         this.setScale(new Vector3Dd(1, 1, 1));
-        this.globalMaterial = new SimpleMaterial();
-        this.globalTextureMap = null;
-        this.globalNormalMap = null;
+        this.material = new SimpleMaterial();
+        this.texture = null;
+        this.normalMap = null;
     }
 
     /**
@@ -157,14 +157,14 @@ export class SimpleBody extends Entity {
     @returns default material used by this body
     */
     public getMaterial(): SimpleMaterial | null {
-        return this.globalMaterial;
+        return this.material;
     }
 
     /**
     @param m default material used by this body
     */
     public setMaterial(m: SimpleMaterial | null): void {
-        this.globalMaterial = m;
+        this.material = m;
         this.markModified();
     }
 
@@ -172,14 +172,14 @@ export class SimpleBody extends Entity {
     @returns body texture, or `null`
     */
     public getTexture(): Image | null {
-        return this.globalTextureMap;
+        return this.texture;
     }
 
     /**
     @param inTexture texture to associate with this body
     */
     public setTexture(inTexture: Image | null): void {
-        this.globalTextureMap = inTexture;
+        this.texture = inTexture;
         this.markModified();
     }
 
@@ -187,23 +187,23 @@ export class SimpleBody extends Entity {
     @returns body normal map, or `null`
     */
     public getNormalMap(): NormalMap | null {
-        return this.globalNormalMap;
+        return this.normalMap;
     }
 
     /**
     @returns RGB preview image for the current normal map, or `null`
     */
     public getNormalMapRgb(): RGBImageUncompressed | null {
-        return this.globalNormalMapRgb;
+        return this.normalMapRgb;
     }
 
     /**
     @param inNormalMap normal map to associate with this body
     */
     public setNormalMap(inNormalMap: NormalMap | null): void {
-        this.globalNormalMap = inNormalMap;
-        if (this.globalNormalMap !== null) {
-            this.globalNormalMapRgb = this.globalNormalMap.exportToRgbImage();
+        this.normalMap = inNormalMap;
+        if (this.normalMap !== null) {
+            this.normalMapRgb = this.normalMap.exportToRgbImage();
         }
         this.markModified();
     }
@@ -320,7 +320,7 @@ export class SimpleBody extends Entity {
         if (arguments.length === 1) {
             const firstHit = new RayHit();
             if (this.doIntersectionFirstHit(inOutRay, firstHit)) {
-                return firstHit.ray();
+                return firstHit.getRay();
             }
             return null;
         }
@@ -330,7 +330,7 @@ export class SimpleBody extends Entity {
             return false;
         }
 
-        const requiredDetailMask = outHit !== null ? outHit.requiredDetailMask() : RayHit.DETAIL_NONE;
+        const requiredDetailMask = outHit !== null ? outHit.getRequiredDetailMask() : RayHit.DETAIL_NONE;
 
         if (
             this.hasTranslationOnlyTransform &&
@@ -375,10 +375,10 @@ export class SimpleBody extends Entity {
         // ... and compute doIntersectionFirstHit operation on object's coordinates
         if (SurfaceRayIntersection.doIntersectionFirstHit(this.geometry, localRay, hit)) {
             let localHitT: number;
-            if (hit.ray() !== null) {
-                localHitT = (hit.ray() as Ray).getT();
+            if (hit.getRay() !== null) {
+                localHitT = (hit.getRay() as Ray).getT();
             } else if (hit.hasHitDistance()) {
-                localHitT = hit.hitDistance();
+                localHitT = hit.getHitDistance();
             } else {
                 return false;
             }
@@ -390,17 +390,17 @@ export class SimpleBody extends Entity {
                     outHit.setHitDistance(worldT);
                 }
                 if (outHit.needsPoint()) {
-                    outHit.p = this.objectPointToWorldSpace(hit.p);
+                    outHit.point = this.objectPointToWorldSpace(hit.point);
                 }
                 if (outHit.needsNormal()) {
-                    outHit.n = this.objectNormalToWorldSpace(hit.n);
+                    outHit.normal = this.objectNormalToWorldSpace(hit.normal);
                 }
                 if (outHit.needsTextureCoordinates()) {
                     outHit.u = hit.u;
                     outHit.v = hit.v;
                 }
                 if (outHit.needsTangent()) {
-                    outHit.t = this.objectTangentToWorldSpace(hit.t);
+                    outHit.tangent = this.objectTangentToWorldSpace(hit.tangent);
                 }
                 outHit.material = hit.material;
                 outHit.texture = hit.texture;
@@ -455,7 +455,7 @@ export class SimpleBody extends Entity {
             this.geometry.doExtraInformation(translationOnlyLocalRay, inT, outInfo);
             outInfo.setRay(inRay);
             if (outInfo.needsPoint()) {
-                outInfo.p = outInfo.p.add(this.position);
+                outInfo.point = outInfo.point.add(this.position);
             }
             return;
         }
@@ -474,13 +474,13 @@ export class SimpleBody extends Entity {
         this.geometry.doExtraInformation(localRay, localT, outInfo);
         outInfo.setRay(inRay);
         if (outInfo.needsPoint()) {
-            outInfo.p = this.objectPointToWorldSpace(outInfo.p);
+            outInfo.point = this.objectPointToWorldSpace(outInfo.point);
         }
         if (outInfo.needsNormal()) {
-            outInfo.n = this.objectNormalToWorldSpace(outInfo.n);
+            outInfo.normal = this.objectNormalToWorldSpace(outInfo.normal);
         }
         if (outInfo.needsTangent()) {
-            outInfo.t = this.objectTangentToWorldSpace(outInfo.t);
+            outInfo.tangent = this.objectTangentToWorldSpace(outInfo.tangent);
         }
     }
 
@@ -543,10 +543,10 @@ export class SimpleBody extends Entity {
             return false;
         }
         let localHitT: number;
-        if (hit.ray() !== null) {
-            localHitT = (hit.ray() as Ray).getT();
+        if (hit.getRay() !== null) {
+            localHitT = (hit.getRay() as Ray).getT();
         } else if (hit.hasHitDistance()) {
-            localHitT = hit.hitDistance();
+            localHitT = hit.getHitDistance();
         } else {
             return false;
         }
@@ -557,17 +557,17 @@ export class SimpleBody extends Entity {
                 outHit.setHitDistance(localHitT);
             }
             if (outHit.needsPoint()) {
-                outHit.p = hit.p.add(this.position);
+                outHit.point = hit.point.add(this.position);
             }
             if (outHit.needsNormal()) {
-                outHit.n = hit.n;
+                outHit.normal = hit.normal;
             }
             if (outHit.needsTextureCoordinates()) {
                 outHit.u = hit.u;
                 outHit.v = hit.v;
             }
             if (outHit.needsTangent()) {
-                outHit.t = hit.t;
+                outHit.tangent = hit.tangent;
             }
             outHit.material = hit.material;
             outHit.texture = hit.texture;

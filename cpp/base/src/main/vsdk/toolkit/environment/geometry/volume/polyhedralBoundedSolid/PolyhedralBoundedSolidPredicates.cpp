@@ -74,12 +74,12 @@ int countBoundaryCrossingsToInfinity(
         }
 
         RayHit planeHit;
-        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.ray() == 0) {
+        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.getRay() == 0) {
             if (!borrowedPlanes) delete plane;
             continue;
         }
 
-        Ray hit = *(planeHit.ray());
+        Ray hit = *(planeHit.getRay());
         hit = hit.withDirection(hit.getDirection().normalized());
         double t = hit.getT();
         if (t <= bigEps || t >= maxT) {
@@ -136,12 +136,12 @@ std::vector<double> collectBoundaryCrossings(
         }
 
         RayHit planeHit;
-        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.ray() == 0) {
+        if (!plane->doIntersectionFirstHit(ray, &planeHit) || planeHit.getRay() == 0) {
             if (!borrowedPlanes) delete plane;
             continue;
         }
 
-        Ray hit = *(planeHit.ray());
+        Ray hit = *(planeHit.getRay());
         hit = hit.withDirection(hit.getDirection().normalized());
         double t = hit.getT();
         if (t <= bigEps || t >= reach) {

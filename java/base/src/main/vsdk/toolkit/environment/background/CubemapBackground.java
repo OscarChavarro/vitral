@@ -12,7 +12,7 @@ import vsdk.toolkit.media.RGBAImageUncompressed;
 public class CubemapBackground extends Background {
     @Serial private static final long serialVersionUID = 20060502L;
 
-    private RGBAImageUncompressed [] backgroundImages;
+    private RGBAImageUncompressed [] images;
     private Camera camera;
     private Box boundingCube = null;
 
@@ -26,13 +26,13 @@ public class CubemapBackground extends Background {
         super();
 
         this.camera = camera;
-        backgroundImages = new RGBAImageUncompressed[6];
-        backgroundImages[0] = front;
-        backgroundImages[1] = right;
-        backgroundImages[2] = back;
-        backgroundImages[3] = left;
-        backgroundImages[4] = down;
-        backgroundImages[5] = up;
+        images = new RGBAImageUncompressed[6];
+        images[0] = front;
+        images[1] = right;
+        images[2] = back;
+        images[3] = left;
+        images[4] = down;
+        images[5] = up;
         boundingCube = new Box(1, 1, 1);
     }
 
@@ -53,32 +53,32 @@ public class CubemapBackground extends Background {
         if ( !boundingCube.doIntersectionFirstHit(r, hit) ) {
             return new ColorRgb();
         }
-        int plane = classifyPlane(hit.n);
+        int plane = classifyPlane(hit.normal);
 
         u = 1 - hit.u;
         v = 1 - hit.v;
         switch ( plane ) {
           case 1: // Top
-            img = backgroundImages[5];
+            img = images[5];
             u = 1 - hit.v;
             v = hit.u;
             break;
           case 2: // Down
-            img = backgroundImages[4];
+            img = images[4];
             u = hit.v;
             v = 1 - hit.u;
             break;
           case 3: // Front
-            img = backgroundImages[0];
+            img = images[0];
             break;
           case 4: // Back
-            img = backgroundImages[2];
+            img = images[2];
             break;
           case 5: // Right
-            img = backgroundImages[1];
+            img = images[1];
             break;
           default: // Left
-            img = backgroundImages[3];
+            img = images[3];
             break;
         }
 
@@ -102,7 +102,7 @@ public class CubemapBackground extends Background {
 
     public RGBAImageUncompressed [] getImages()
     {
-        return backgroundImages;
+        return images;
     }
 
     public Camera getCamera()

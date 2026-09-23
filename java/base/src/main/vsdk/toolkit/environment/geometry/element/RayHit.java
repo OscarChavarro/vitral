@@ -26,9 +26,9 @@ public class RayHit extends FundamentalEntity {
 
     private static final Vector3Dd ZERO_VECTOR = new Vector3Dd();
 
-    public Vector3Dd p; // Intersection point coordinates
-    public Vector3Dd n; // Surface normal at intersection point
-    public Vector3Dd t; // Surface tangent at intersection point
+    public Vector3Dd point; // Intersection point coordinates
+    public Vector3Dd normal; // Surface normal at intersection point
+    public Vector3Dd tangent; // Surface tangent at intersection point
     // Note that surface binormal at intersection point must be calculated
     // by the application as the cross product (n x t).
 
@@ -50,7 +50,7 @@ public class RayHit extends FundamentalEntity {
     private int requiredDetailMask;
     private boolean storeRay;
     private double hitDistance;
-    private boolean hasHitDistance;
+    private boolean hitDistanceKnown;
 
     public RayHit()
     {
@@ -78,9 +78,9 @@ public class RayHit extends FundamentalEntity {
 
     public final void clear()
     {
-        p = ZERO_VECTOR;
-        n = ZERO_VECTOR;
-        t = ZERO_VECTOR;
+        point = ZERO_VECTOR;
+        normal = ZERO_VECTOR;
+        tangent = ZERO_VECTOR;
         u = 0;
         v = 0;
         material = null;
@@ -88,7 +88,7 @@ public class RayHit extends FundamentalEntity {
         normalMap = null;
         ray = null;
         hitDistance = 0;
-        hasHitDistance = false;
+        hitDistanceKnown = false;
     }
 
     public final void reset(int newRequiredDetailMask)
@@ -102,7 +102,7 @@ public class RayHit extends FundamentalEntity {
         requiredDetailMask = DETAIL_NONE;
         ray = null;
         hitDistance = 0;
-        hasHitDistance = false;
+        hitDistanceKnown = false;
     }
 
     public final void clone(RayHit other)
@@ -111,10 +111,10 @@ public class RayHit extends FundamentalEntity {
         this.requiredDetailMask = other.requiredDetailMask;
         this.storeRay = other.storeRay;
         this.hitDistance = other.hitDistance;
-        this.hasHitDistance = other.hasHitDistance;
-        this.p = other.p;
-        this.n = other.n;
-        this.t = other.t;
+        this.hitDistanceKnown = other.hitDistanceKnown;
+        this.point = other.point;
+        this.normal = other.normal;
+        this.tangent = other.tangent;
         this.u = other.u;
         this.v = other.v;
         this.material = other.material;
@@ -123,7 +123,7 @@ public class RayHit extends FundamentalEntity {
         this.ray = other.ray;
     }
 
-    public int requiredDetailMask()
+    public int getRequiredDetailMask()
     {
         return requiredDetailMask;
     }
@@ -168,7 +168,7 @@ public class RayHit extends FundamentalEntity {
         return requiredDetailMask != DETAIL_NONE;
     }
 
-    public Ray ray()
+    public Ray getRay()
     {
         return ray;
     }
@@ -178,18 +178,18 @@ public class RayHit extends FundamentalEntity {
         this.ray = ray;
         if ( ray != null ) {
             hitDistance = ray.getT();
-            hasHitDistance = true;
+            hitDistanceKnown = true;
         }
     }
 
     public boolean hasHitDistance()
     {
-        return hasHitDistance;
+        return hitDistanceKnown;
     }
 
-    public double hitDistance()
+    public double getHitDistance()
     {
-        if ( hasHitDistance ) {
+        if ( hitDistanceKnown ) {
             return hitDistance;
         }
         if ( ray != null ) {
@@ -201,6 +201,6 @@ public class RayHit extends FundamentalEntity {
     public void setHitDistance(double hitDistance)
     {
         this.hitDistance = hitDistance;
-        this.hasHitDistance = true;
+        this.hitDistanceKnown = true;
     }
 }

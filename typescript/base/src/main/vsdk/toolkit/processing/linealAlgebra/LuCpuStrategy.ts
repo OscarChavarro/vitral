@@ -7,8 +7,8 @@ import { MatrixAlgorithmsSupport } from "./MatrixAlgorithmsSupport.js";
 
 export class LuDecomposition {
     public constructor(
-        public readonly lu: number[][],
-        public readonly piv: number[],
+        public readonly factors: number[][],
+        public readonly pivots: number[],
         public readonly pivotSign: number,
     ) {}
 }
@@ -20,13 +20,13 @@ export class LuCpuStrategy implements DeterminantStrategy, InverseStrategy {
         MatrixAlgorithmsSupport.requireSquare(matrix);
         const decomposition = this.decompose(MatrixAlgorithmsSupport.toArray(matrix));
         let determinant = decomposition.pivotSign;
-        for (let i = 0; i < decomposition.lu.length; i++) determinant *= decomposition.lu[i]![i]!;
+        for (let i = 0; i < decomposition.factors.length; i++) determinant *= decomposition.factors[i]![i]!;
         return determinant;
     }
     public inverse(matrix: MatrixNxM): MatrixNxM {
         MatrixAlgorithmsSupport.requireSquare(matrix);
         const decomposition = this.decompose(MatrixAlgorithmsSupport.toArray(matrix)),
-            n = decomposition.lu.length;
+            n = decomposition.factors.length;
         const inverse = Array.from({ length: n }, () => new Array<number>(n).fill(0));
         for (let column = 0; column < n; column++) {
             const e = new Array<number>(n).fill(0);
@@ -64,12 +64,12 @@ export class LuCpuStrategy implements DeterminantStrategy, InverseStrategy {
         return new LuDecomposition(lu, piv, pivotSign);
     }
     private solve(decomposition: LuDecomposition, b: number[]): number[] {
-        const n = decomposition.lu.length,
-            x = Array.from({ length: n }, (_, i) => b[decomposition.piv[i]!]!);
-        for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) x[i]! -= decomposition.lu[i]![j]! * x[j]!;
+        const n = decomposition.factors.length,
+            x = Array.from({ length: n }, (_, i) => b[decomposition.pivots[i]!]!);
+        for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) x[i]! -= decomposition.factors[i]![j]! * x[j]!;
         for (let i = n - 1; i >= 0; i--) {
-            for (let j = i + 1; j < n; j++) x[i]! -= decomposition.lu[i]![j]! * x[j]!;
-            x[i]! /= decomposition.lu[i]![i]!;
+            for (let j = i + 1; j < n; j++) x[i]! -= decomposition.factors[i]![j]! * x[j]!;
+            x[i]! /= decomposition.factors[i]![i]!;
         }
         return x;
     }

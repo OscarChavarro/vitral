@@ -225,9 +225,9 @@ public class PolygonTopologicalMerger
                 continue;
             }
             if ( balance > 0 ) {
-                boundaryEdges.add(new DirectedEdge(e.getKey().a, e.getKey().b));
+                boundaryEdges.add(new DirectedEdge(e.getKey().start, e.getKey().end));
             } else {
-                boundaryEdges.add(new DirectedEdge(e.getKey().b, e.getKey().a));
+                boundaryEdges.add(new DirectedEdge(e.getKey().end, e.getKey().start));
             }
         }
         if ( boundaryEdges.isEmpty() ) {
@@ -246,19 +246,19 @@ public class PolygonTopologicalMerger
             Segment2D seg = segments.get(i);
             List<SplitPoint> splitPoints = new ArrayList<SplitPoint>();
 
-            splitPoints.add(new SplitPoint(0.0, seg.a));
-            splitPoints.add(new SplitPoint(1.0, seg.b));
+            splitPoints.add(new SplitPoint(0.0, seg.start));
+            splitPoints.add(new SplitPoint(1.0, seg.end));
             for ( j = 0; j < segments.size(); ++j ) {
                 Segment2D other = segments.get(j);
-                maybeAddPointOnSegment(seg, other.a, epsilon, splitPoints);
-                maybeAddPointOnSegment(seg, other.b, epsilon, splitPoints);
+                maybeAddPointOnSegment(seg, other.start, epsilon, splitPoints);
+                maybeAddPointOnSegment(seg, other.end, epsilon, splitPoints);
             }
 
             Collections.sort(splitPoints);
             List<SplitPoint> dedup = dedupSplitPoints(splitPoints, epsilon);
             for ( j = 0; j + 1 < dedup.size(); ++j ) {
-                Vertex2D p0 = dedup.get(j).p;
-                Vertex2D p1 = dedup.get(j + 1).p;
+                Vertex2D p0 = dedup.get(j).point;
+                Vertex2D p1 = dedup.get(j + 1).point;
                 if ( samePoint(p0, p1, epsilon) ) {
                     continue;
                 }
@@ -283,8 +283,8 @@ public class PolygonTopologicalMerger
     private static double parameterOnSegment(Segment2D seg, Vertex2D p,
         double epsilon)
     {
-        double dx = seg.b.x - seg.a.x;
-        double dy = seg.b.y - seg.a.y;
+        double dx = seg.end.x - seg.start.x;
+        double dy = seg.end.y - seg.start.y;
         double len2 = dx * dx + dy * dy;
         double t;
         double projx;
@@ -294,7 +294,7 @@ public class PolygonTopologicalMerger
         if ( len2 <= epsilon * epsilon ) {
             return -1.0;
         }
-        t = ((p.x - seg.a.x) * dx + (p.y - seg.a.y) * dy) / len2;
+        t = ((p.x - seg.start.x) * dx + (p.y - seg.start.y) * dy) / len2;
         if ( t < -epsilon || t > 1.0 + epsilon ) {
             return -1.0;
         }
@@ -303,8 +303,8 @@ public class PolygonTopologicalMerger
         } else if ( t > 1.0 ) {
             t = 1.0;
         }
-        projx = seg.a.x + t * dx;
-        projy = seg.a.y + t * dy;
+        projx = seg.start.x + t * dx;
+        projy = seg.start.y + t * dy;
         dist2 = (p.x - projx) * (p.x - projx) + (p.y - projy) * (p.y - projy);
         if ( dist2 > epsilon * epsilon ) {
             return -1.0;
@@ -320,8 +320,8 @@ public class PolygonTopologicalMerger
         for ( i = 0; i < in.size(); ++i ) {
             SplitPoint cur = in.get(i);
             if ( out.isEmpty() ||
-                 Math.abs(out.get(out.size() - 1).t - cur.t) > epsilon ||
-                 !samePoint(out.get(out.size() - 1).p, cur.p, epsilon) ) {
+                 Math.abs(out.get(out.size() - 1).segmentParameter - cur.segmentParameter) > epsilon ||
+                 !samePoint(out.get(out.size() - 1).point, cur.point, epsilon) ) {
                 out.add(cur);
             }
         }
@@ -433,31 +433,31 @@ public class PolygonTopologicalMerger
 
     private static class Segment2D
     {
-        final Vertex2D a;
-        final Vertex2D b;
+        final Vertex2D start;
+        final Vertex2D end;
 
         Segment2D(Vertex2D a, Vertex2D b)
         {
-            this.a = a;
-            this.b = b;
+            this.start = a;
+            this.end = b;
         }
     }
 
     private static class SplitPoint implements Comparable<SplitPoint>
     {
-        final double t;
-        final Vertex2D p;
+        final double segmentParameter;
+        final Vertex2D point;
 
         SplitPoint(double t, Vertex2D p)
         {
-            this.t = t;
-            this.p = p;
+            this.segmentParameter = t;
+            this.point = p;
         }
 
         @Override
         public int compareTo(SplitPoint other)
         {
-            return Double.compare(t, other.t);
+            return Double.compare(segmentParameter, other.segmentParameter);
         }
     }
 
@@ -475,21 +475,21 @@ public class PolygonTopologicalMerger
 
     private static class PointKey
     {
-        final long qx;
-        final long qy;
+        final long quantizedX;
+        final long quantizedY;
 
         PointKey(Vertex2D p, double epsilon)
         {
-            qx = Math.round(p.x / epsilon);
-            qy = Math.round(p.y / epsilon);
+            quantizedX = Math.round(p.x / epsilon);
+            quantizedY = Math.round(p.y / epsilon);
         }
 
         @Override
         public int hashCode()
         {
             int h = 17;
-            h = 31 * h + Long.hashCode(qx);
-            h = 31 * h + Long.hashCode(qy);
+            h = 31 * h + Long.hashCode(quantizedX);
+            h = 31 * h + Long.hashCode(quantizedY);
             return h;
         }
 
@@ -503,45 +503,45 @@ public class PolygonTopologicalMerger
                 return false;
             }
             PointKey other = (PointKey) obj;
-            return qx == other.qx && qy == other.qy;
+            return quantizedX == other.quantizedX && quantizedY == other.quantizedY;
         }
     }
 
     private static class EdgeKey
     {
-        final Vertex2D a;
-        final Vertex2D b;
-        final PointKey ka;
-        final PointKey kb;
+        final Vertex2D start;
+        final Vertex2D end;
+        final PointKey startKey;
+        final PointKey endKey;
 
         EdgeKey(Vertex2D p0, Vertex2D p1, double epsilon)
         {
             PointKey k0 = new PointKey(p0, epsilon);
             PointKey k1 = new PointKey(p1, epsilon);
             if ( compareKeys(k0, k1) <= 0 ) {
-                a = copyVertex(p0);
-                b = copyVertex(p1);
-                ka = k0;
-                kb = k1;
+                start = copyVertex(p0);
+                end = copyVertex(p1);
+                startKey = k0;
+                endKey = k1;
             } else {
-                a = copyVertex(p1);
-                b = copyVertex(p0);
-                ka = k1;
-                kb = k0;
+                start = copyVertex(p1);
+                end = copyVertex(p0);
+                startKey = k1;
+                endKey = k0;
             }
         }
 
-        boolean isForward(Vertex2D start, double epsilon)
+        boolean isForward(Vertex2D candidate, double epsilon)
         {
-            return samePoint(a, start, epsilon);
+            return samePoint(start, candidate, epsilon);
         }
 
         @Override
         public int hashCode()
         {
             int h = 17;
-            h = 31 * h + ka.hashCode();
-            h = 31 * h + kb.hashCode();
+            h = 31 * h + startKey.hashCode();
+            h = 31 * h + endKey.hashCode();
             return h;
         }
 
@@ -555,21 +555,21 @@ public class PolygonTopologicalMerger
                 return false;
             }
             EdgeKey other = (EdgeKey) obj;
-            return ka.equals(other.ka) && kb.equals(other.kb);
+            return startKey.equals(other.startKey) && endKey.equals(other.endKey);
         }
 
         private static int compareKeys(PointKey a, PointKey b)
         {
-            if ( a.qx < b.qx ) {
+            if ( a.quantizedX < b.quantizedX ) {
                 return -1;
             }
-            if ( a.qx > b.qx ) {
+            if ( a.quantizedX > b.quantizedX ) {
                 return 1;
             }
-            if ( a.qy < b.qy ) {
+            if ( a.quantizedY < b.quantizedY ) {
                 return -1;
             }
-            if ( a.qy > b.qy ) {
+            if ( a.quantizedY > b.quantizedY ) {
                 return 1;
             }
             return 0;

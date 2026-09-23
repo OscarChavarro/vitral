@@ -21,11 +21,11 @@ public:
     static void dispose();
 
 private:
-    static double scale_;
-    static unsigned int vao_;
-    static unsigned int vboPositions_;
-    static unsigned int vboColors_;
-    static unsigned int program_;
+    static double scale;
+    static unsigned int vao;
+    static unsigned int vboPositions;
+    static unsigned int vboColors;
+    static unsigned int program;
 
     static bool initIfNeeded();
     static unsigned int compileShader(unsigned int type, const char* source);

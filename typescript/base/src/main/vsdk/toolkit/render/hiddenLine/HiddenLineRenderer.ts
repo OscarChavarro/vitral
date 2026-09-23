@@ -37,7 +37,7 @@ symbol stays traceable, and not re-exported by the package barrel.
 */
 export class _AppelEdgeSegment extends RenderingElement {
     /// Distance from start to end with respect to line parameter
-    public t = 0.0;
+    public lineParameter = 0.0;
     /// Change in quantitative invisibility when the edge crosses this boundary,
     /// computed at detection from Appel's image-space side rule. Coincident
     /// crossings are merged by SUMMING their deltaQI so none is lost. 0 for the
@@ -45,8 +45,8 @@ export class _AppelEdgeSegment extends RenderingElement {
     public deltaQI = 0;
 
     public compareTo(other: _AppelEdgeSegment): number {
-        if (this.t < other.t - VSDK.EPSILON) return -1;
-        else if (this.t > other.t + VSDK.EPSILON) return 1;
+        if (this.lineParameter < other.lineParameter - VSDK.EPSILON) return -1;
+        else if (this.lineParameter > other.lineParameter + VSDK.EPSILON) return 1;
         return 0;
     }
 }
@@ -68,8 +68,8 @@ export class _AppelEdgeCache extends RenderingElement {
     public onSequence = false;
     public start: Vector3Dd = null as unknown as Vector3Dd;
     public end: Vector3Dd = null as unknown as Vector3Dd;
-    /// d = start - end
-    public d: Vector3Dd = null as unknown as Vector3Dd;
+    /// direction = end - start
+    public direction: Vector3Dd = null as unknown as Vector3Dd;
     public ownerBody: SimpleBody | null = null;
     /// `visibleEdgeForContourLine` contains an explicit reference to the
     /// planar surface marked as "S" on figure [APPE1967].5.
@@ -344,7 +344,7 @@ export class HiddenLineRenderer extends RenderingElement {
                     materialLine = new _AppelEdgeCache();
                     materialLine.setStart(HiddenLineRenderer.transformToWorld(body, startPosition));
                     materialLine.setEnd(HiddenLineRenderer.transformToWorld(body, endPosition));
-                    materialLine.d = materialLine.end.subtract(materialLine.start);
+                    materialLine.direction = materialLine.end.subtract(materialLine.start);
                     materialLine.ownerBody = body;
                     materialLine.leftFace = face1;
                     materialLine.rightFace = face2;
@@ -531,7 +531,7 @@ export class HiddenLineRenderer extends RenderingElement {
 
         const segments: _AppelEdgeSegment[] = [];
         segment = new _AppelEdgeSegment();
-        segment.t = 0;
+        segment.lineParameter = 0;
         segment.deltaQI = 0;
         segments.push(segment);
         const sp2c: Vector3Dd = inCamera.getPosition();
@@ -542,8 +542,8 @@ export class HiddenLineRenderer extends RenderingElement {
                 // Do not break an edge with itself.
                 continue;
             }
-            ray = ray.withOrigin(cl.start.add(cl.d.multiply(3 * VSDK.EPSILON)));
-            ray = ray.withDirection(cl.d);
+            ray = ray.withOrigin(cl.start.add(cl.direction.multiply(3 * VSDK.EPSILON)));
+            ray = ray.withDirection(cl.direction);
             t0 = ray.getDirection().length() - 6 * VSDK.EPSILON;
             ray = ray.withDirection(ray.getDirection().normalized());
             const hit: Intersection | null = Triangle.doIntersectionWithTriangle(ray, sp1a, sp1b, sp1c);
@@ -568,7 +568,7 @@ export class HiddenLineRenderer extends RenderingElement {
                 sp2b = cl.end;
                 plane = new InfinitePlane(sp2a, sp2b, sp2c);
                 ray = ray.withOrigin(inEdge.start);
-                ray = ray.withDirection(inEdge.d.normalized());
+                ray = ray.withDirection(inEdge.direction.normalized());
                 const planeHit: Ray | null = plane.doIntersectionFirstHit(ray);
                 if (planeHit === null) {
                     HiddenLineRenderer.debugSplit(
@@ -581,14 +581,14 @@ export class HiddenLineRenderer extends RenderingElement {
                 // Point PP2 lies on the current edge, so its parameter must
                 // come from the edge/plane intersection rather than from the
                 // contour line piercing the sweep triangle.
-                segment.t = planeHit.getT() / inEdge.d.length();
-                if (!HiddenLineRenderer.isUnitInterval(segment.t)) {
+                segment.lineParameter = planeHit.getT() / inEdge.direction.length();
+                if (!HiddenLineRenderer.isUnitInterval(segment.lineParameter)) {
                     HiddenLineRenderer.debugSplit(
                         inEdge.edgeIndex,
                         "  cl=" +
                             cl.edgeIndex +
                             " DISCARDED: split t=" +
-                            segment.t.toFixed(5) +
+                            segment.lineParameter.toFixed(5) +
                             " outside unit interval",
                     );
                     continue;
@@ -601,13 +601,13 @@ export class HiddenLineRenderer extends RenderingElement {
                 // step 4 by its midpoint Q.I.
                 HiddenLineRenderer.debugSplit(
                     inEdge.edgeIndex,
-                    "  cl=" + cl.edgeIndex + " ADDED split t=" + segment.t.toFixed(5),
+                    "  cl=" + cl.edgeIndex + " ADDED split t=" + segment.lineParameter.toFixed(5),
                 );
                 segments.push(segment);
             }
         }
         segment = new _AppelEdgeSegment();
-        segment.t = 1;
+        segment.lineParameter = 1;
         segments.push(segment);
 
         //- 3. Sort segment set -------------------------------------------
@@ -641,11 +641,11 @@ export class HiddenLineRenderer extends RenderingElement {
         let pos2: Vector3Dd;
 
         for (i = 0; i < segments.length - 1; i++) {
-            const val1: number = segments[i]!.t;
-            const val2: number = segments[i + 1]!.t;
-            pos1 = inEdge.start.add(inEdge.d.multiply(val1));
-            pos2 = inEdge.start.add(inEdge.d.multiply(val2));
-            const posx: Vector3Dd = inEdge.start.add(inEdge.d.multiply((val1 + val2) / 2));
+            const val1: number = segments[i]!.lineParameter;
+            const val2: number = segments[i + 1]!.lineParameter;
+            pos1 = inEdge.start.add(inEdge.direction.multiply(val1));
+            pos2 = inEdge.start.add(inEdge.direction.multiply(val2));
+            const posx: Vector3Dd = inEdge.start.add(inEdge.direction.multiply((val1 + val2) / 2));
 
             const midpointQi: number = HiddenLineRenderer.computeMidpointQuantitativeInvisibility(
                 solids,
@@ -842,7 +842,7 @@ export namespace HiddenLineRenderer {
     }
 
     export class AppelEventDump extends RenderingElement {
-        public t = 0.0;
+        public lineParameter = 0.0;
         public deltaQI = 0;
         public contourEdgeIndex = 0;
         public visibleFaceId = 0;

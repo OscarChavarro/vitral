@@ -14,56 +14,56 @@ import java.net.URLConnection;
 public class QueryPanel extends Panel
 {
     private static final int SEARCH_TIMEOUT = 40;
-    Button search_button;
-    private static final String search_string = new String("   Search   ");
-    private static final String searching_string = new String("  Searching  ");
-    Choice db_list;
-    TextField keywords_text;
+    Button searchButton;
+    private static final String searchString = new String("   Search   ");
+    private static final String searchingString = new String("  Searching  ");
+    Choice databaseList;
+    TextField keywordsText;
     TextField query;
     private static final int QUERY_LENGTH = 20;
     boolean searching = false;
-    private Sketch parent_applet;
+    private Sketch parentApplet;
     
     QueryPanel(Sketch searchapplet) {
-        parent_applet = searchapplet;
-        search_button = new Button(search_string);
-        search_button.setFont(Globals.search_button_font);
-        search_button
-            .setBackground(Globals.search_button_bg_colour);
-        search_button
-            .setForeground(Globals.search_button_fg_colour);
-        search_button
+        parentApplet = searchapplet;
+        searchButton = new Button(searchString);
+        searchButton.setFont(Globals.searchButtonFont);
+        searchButton
+            .setBackground(Globals.searchButtonBgColour);
+        searchButton
+            .setForeground(Globals.searchButtonFgColour);
+        searchButton
             .addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionevent) {
                 System.out.println("search button pressed");
-                parent_applet.doSearch();
+                parentApplet.doSearch();
             }
         });
-        db_list = new Choice();
-        db_list.addItem("All Models");
-        db_list.addItem("Free Web Models");
+        databaseList = new Choice();
+        databaseList.addItem("All Models");
+        databaseList.addItem("Free Web Models");
 /*
         db_list.addItem("Viewpoint Models");
         db_list.addItem("De Espona Models");
         db_list.addItem("CacheForce Models");
         db_list.addItem("Protein Database");
 */
-        db_list.select(0);
-        db_list.addItemListener(new ItemListener() {
+        databaseList.select(0);
+        databaseList.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent itemevent) {
-                parent_applet.select_database(((QueryPanel) QueryPanel.this)
-                                                  .db_list.getSelectedIndex());
+                parentApplet.select_database(((QueryPanel) QueryPanel.this)
+                                                  .databaseList.getSelectedIndex());
             }
         });
-        keywords_text = new TextField("Keywords: ", 10);
-        keywords_text.setFont(Globals.text_font);
-        keywords_text.setEditable(false);
-        keywords_text.setBackground(Color.white);
+        keywordsText = new TextField("Keywords: ", 10);
+        keywordsText.setFont(Globals.textFont);
+        keywordsText.setEditable(false);
+        keywordsText.setBackground(Color.white);
         query = new TextField(20);
         query.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionevent) {
                 System.out.println("emter key pressed");
-                parent_applet.doSearch();
+                parentApplet.doSearch();
             }
         });
         this.setBackground(Color.white);
@@ -73,11 +73,11 @@ public class QueryPanel extends Panel
     
     public StringBuffer construct_url() {
         StringBuffer stringbuffer
-            = (new StringBuffer(parent_applet.getCodeBase() + "ServletConsole?"));
-        stringbuffer.append("session=" + parent_applet.getSessionId());
-        stringbuffer.append("&textquery=" + get_query_string());
+            = (new StringBuffer(parentApplet.getCodeBase() + "ServletConsole?"));
+        stringbuffer.append("session=" + parentApplet.getSessionId());
+        stringbuffer.append("&textquery=" + getQuery_string());
         stringbuffer.append("&dataset=");
-        int i = get_selected_index();
+        int i = getSelected_index();
         switch (i) {
         case 0:
             stringbuffer.append("all");
@@ -102,9 +102,9 @@ public class QueryPanel extends Panel
     }
     
     void create_layout() {
-        Layout.constrain(this, search_button, 0, 0, 2, 1,
+        Layout.constrain(this, searchButton, 0, 0, 2, 1,
                          0, 10, 2.0, 0.75, 2, 2, 2, 2);
-        Layout.constrain(this, db_list, 2, 0, 2, 1, 0, 10,
+        Layout.constrain(this, databaseList, 2, 0, 2, 1, 0, 10,
                          2.0, 0.75, 4, 2, 0, 2);
 
 /*
@@ -117,27 +117,27 @@ public class QueryPanel extends Panel
     
     public void disable_search() {
         searching = true;
-        search_button.setEnabled(false);
-        search_button.setLabel(searching_string);
+        searchButton.setEnabled(false);
+        searchButton.setLabel(searchingString);
     }
     
     public void enable_search() {
         System.out.println("enabling search button");
-        search_button.setLabel(search_string);
-        search_button.setEnabled(true);
+        searchButton.setLabel(searchString);
+        searchButton.setEnabled(true);
         searching = false;
     }
     
-    public String get_query_string() {
+    public String getQuery_string() {
         return query.getText();
     }
     
-    public boolean get_searching() {
+    public boolean getSearching() {
         return searching;
     }
     
-    public int get_selected_index() {
-        return db_list.getSelectedIndex();
+    public int getSelected_index() {
+        return databaseList.getSelectedIndex();
     }
     
     public void request_url(StringBuffer stringbuffer) {
@@ -153,7 +153,7 @@ public class QueryPanel extends Panel
             urlconnection.setDoOutput(true);
             urlconnection.setRequestProperty
                 ("Content-Type", "application/x-www-form-urlencoded");
-            parent_applet.getAppletContext().showDocument(url,
+            parentApplet.getAppletContext().showDocument(url,
                                                     Globals.resultsFrameName);
             System.out.println("Sending results to frame [" + Globals.resultsFrameName + "]");
             System.out.println("done");

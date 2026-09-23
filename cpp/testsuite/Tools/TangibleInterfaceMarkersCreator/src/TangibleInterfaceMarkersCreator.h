@@ -14,9 +14,9 @@ class TangibleInterfaceMarkersCreator {
     void exportPdf();
 
   private:
-    CommandLineOptions options_;
-    MarkersModel model_;
-    CairoPdfPageRenderer* pageRenderer_;
+    CommandLineOptions options;
+    MarkersModel model;
+    CairoPdfPageRenderer* pageRenderer;
 };
 
 #endif

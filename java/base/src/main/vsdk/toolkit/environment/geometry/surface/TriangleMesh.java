@@ -86,7 +86,7 @@ public class TriangleMesh extends Surface {
     private ArrayList<ArrayList<Integer>> incidentTrianglesPerVertexArray;
 
     /// Consecutive triads of p0/p1/p2 indices into the vertex arrays
-    private int[] triangleIndices;
+    private int[] triangleIndexes;
     /// Consecutive triads of nx/ny/nz for normal vectors, one per triangle
     private double[] triangleNormals;
 
@@ -131,7 +131,7 @@ public class TriangleMesh extends Surface {
         vertexColors = null;
         vertexUvs = null;
         vertexSelections = null;
-        triangleIndices = null;
+        triangleIndexes = null;
         triangleNormals = null;
         incidentTrianglesPerVertexArray = null;
     }
@@ -203,7 +203,7 @@ public class TriangleMesh extends Surface {
         other.triangleNormals = cloneDoubleArray(this.triangleNormals);
 
         other. vertexSelections = cloneBooleanArray(this.vertexSelections);
-        other.triangleIndices = cloneIntArray(this.triangleIndices);
+        other.triangleIndexes = cloneIntArray(this.triangleIndexes);
 
         // Pending!
         other.incidentTrianglesPerVertexArray = null;
@@ -395,7 +395,7 @@ public class TriangleMesh extends Surface {
 
     public void initTriangleArrays(int n)
     {
-        triangleIndices = new int[n*3];
+        triangleIndexes = new int[n*3];
         triangleNormals = new double [n*3];
     }
 
@@ -413,9 +413,9 @@ public class TriangleMesh extends Surface {
         initTriangleArrays(n);
 
         for ( i = 0; i < n; i++ ) {
-            triangleIndices[3*i] = triangles[i].getPoint0();
-            triangleIndices[3*i+1] = triangles[i].getPoint1();
-            triangleIndices[3*i+2] = triangles[i].getPoint2();
+            triangleIndexes[3*i] = triangles[i].getPoint0();
+            triangleIndexes[3*i+1] = triangles[i].getPoint1();
+            triangleIndexes[3*i+2] = triangles[i].getPoint2();
             if ( triangleNormals != null ) {
                 triangleNormals[3*i] = triangles[i].getNormal().x();
                 triangleNormals[3*i+1] = triangles[i].getNormal().y();
@@ -464,9 +464,9 @@ public class TriangleMesh extends Surface {
     @param triangle
     */
     public void setTriangleAt(int i, Triangle triangle) {
-        triangleIndices[3*i] = triangle.getPoint0();
-        triangleIndices[3*i+1] = triangle.getPoint1();
-        triangleIndices[3*i+2] = triangle.getPoint2();
+        triangleIndexes[3*i] = triangle.getPoint0();
+        triangleIndexes[3*i+1] = triangle.getPoint1();
+        triangleIndexes[3*i+2] = triangle.getPoint2();
         if ( triangleNormals != null ) {
             triangleNormals[3*i] = triangle.getNormal().x();
             triangleNormals[3*i+1] = triangle.getNormal().y();
@@ -482,8 +482,8 @@ public class TriangleMesh extends Surface {
 
     public int getNumTriangles()
     {
-        if ( triangleIndices == null ) return 0;
-        return triangleIndices.length/3;
+        if ( triangleIndexes == null ) return 0;
+        return triangleIndexes.length/3;
     }
 
     public boolean[] getVertexSelections()
@@ -531,7 +531,7 @@ public class TriangleMesh extends Surface {
 
     public int[] getTriangleIndexes()
     {
-        return triangleIndices;
+        return triangleIndexes;
     }
 
     public double[] getTriangleNormals()
@@ -596,9 +596,9 @@ public class TriangleMesh extends Surface {
         Vector3Dd v3 = new Vector3Dd();
 
         for ( i = 0; i < getNumTriangles(); i++ ) {
-            v1 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
-            v2 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
-            v3 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
+            v1 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+0]+0], vertexPositions[3*triangleIndexes[3*i+0]+1], vertexPositions[3*triangleIndexes[3*i+0]+2]);
+            v2 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+1]+0], vertexPositions[3*triangleIndexes[3*i+1]+1], vertexPositions[3*triangleIndexes[3*i+1]+2]);
+            v3 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+2]+0], vertexPositions[3*triangleIndexes[3*i+2]+1], vertexPositions[3*triangleIndexes[3*i+2]+2]);
 
             double ax = v2.x() - v1.x();
             double ay = v2.y() - v1.y();
@@ -627,9 +627,9 @@ public class TriangleMesh extends Surface {
         }
 
         for ( i = 0; i < getNumTriangles(); i++ ) {
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+0]).add(i);
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+1]).add(i);
-            incidentTrianglesPerVertexArray.get(triangleIndices[3*i+2]).add(i);
+            incidentTrianglesPerVertexArray.get(triangleIndexes[3*i+0]).add(i);
+            incidentTrianglesPerVertexArray.get(triangleIndexes[3*i+1]).add(i);
+            incidentTrianglesPerVertexArray.get(triangleIndexes[3*i+2]).add(i);
         }
 
         initVertexNormalsArray();
@@ -676,13 +676,13 @@ public class TriangleMesh extends Surface {
         cn = new Vector3Dd();
         for ( i = 0; i < getNumTriangles(); i++ ) {
 
-            a = new Vector3Dd(vertexPositions[3*triangleIndices[3*i]+0], vertexPositions[3*triangleIndices[3*i]+1], vertexPositions[3*triangleIndices[3*i]+2]);
-            b = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
-            c = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
+            a = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i]+0], vertexPositions[3*triangleIndexes[3*i]+1], vertexPositions[3*triangleIndexes[3*i]+2]);
+            b = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+1]+0], vertexPositions[3*triangleIndexes[3*i+1]+1], vertexPositions[3*triangleIndexes[3*i+1]+2]);
+            c = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+2]+0], vertexPositions[3*triangleIndexes[3*i+2]+1], vertexPositions[3*triangleIndexes[3*i+2]+2]);
 
-            an = new Vector3Dd(vertexNormals[3*triangleIndices[3*i]+0], vertexNormals[3*triangleIndices[3*i]+1], vertexNormals[3*triangleIndices[3*i]+2]);
-            bn = new Vector3Dd(vertexNormals[3*triangleIndices[3*i+1]+0], vertexNormals[3*triangleIndices[3*i+1]+1], vertexNormals[3*triangleIndices[3*i+1]+2]);
-            cn = new Vector3Dd(vertexNormals[3*triangleIndices[3*i+2]+0], vertexNormals[3*triangleIndices[3*i+2]+1], vertexNormals[3*triangleIndices[3*i+2]+2]);
+            an = new Vector3Dd(vertexNormals[3*triangleIndexes[3*i]+0], vertexNormals[3*triangleIndexes[3*i]+1], vertexNormals[3*triangleIndexes[3*i]+2]);
+            bn = new Vector3Dd(vertexNormals[3*triangleIndexes[3*i+1]+0], vertexNormals[3*triangleIndexes[3*i+1]+1], vertexNormals[3*triangleIndexes[3*i+1]+2]);
+            cn = new Vector3Dd(vertexNormals[3*triangleIndexes[3*i+2]+0], vertexNormals[3*triangleIndexes[3*i+2]+1], vertexNormals[3*triangleIndexes[3*i+2]+2]);
 
             u = b.subtract(a);
             v = c.subtract(a);
@@ -695,21 +695,21 @@ public class TriangleMesh extends Surface {
             }
             if ( n.dotProduct(an) < 0 ) {
                 an = an.multiply(-1);
-                vertexNormals[3*triangleIndices[3*i]+0] = an.x();
-                vertexNormals[3*triangleIndices[3*i]+1] = an.y();
-                vertexNormals[3*triangleIndices[3*i]+2] = an.z();
+                vertexNormals[3*triangleIndexes[3*i]+0] = an.x();
+                vertexNormals[3*triangleIndexes[3*i]+1] = an.y();
+                vertexNormals[3*triangleIndexes[3*i]+2] = an.z();
             }
             if ( n.dotProduct(bn) < 0 ) {
                 bn = bn.multiply(-1);
-                vertexNormals[3*triangleIndices[3*i+1]+0] = bn.x();
-                vertexNormals[3*triangleIndices[3*i+1]+1] = bn.y();
-                vertexNormals[3*triangleIndices[3*i+1]+2] = bn.z();
+                vertexNormals[3*triangleIndexes[3*i+1]+0] = bn.x();
+                vertexNormals[3*triangleIndexes[3*i+1]+1] = bn.y();
+                vertexNormals[3*triangleIndexes[3*i+1]+2] = bn.z();
             }
             if ( n.dotProduct(cn) < 0 ) {
                 cn = cn.multiply(-1);
-                vertexNormals[3*triangleIndices[3*i+2]+0] = cn.x();
-                vertexNormals[3*triangleIndices[3*i+2]+1] = cn.y();
-                vertexNormals[3*triangleIndices[3*i+2]+2] = cn.z();
+                vertexNormals[3*triangleIndexes[3*i+2]+0] = cn.x();
+                vertexNormals[3*triangleIndexes[3*i+2]+1] = cn.y();
+                vertexNormals[3*triangleIndexes[3*i+2]+2] = cn.z();
             }
         }
     }
@@ -827,7 +827,7 @@ public class TriangleMesh extends Surface {
     doIntersectionFirstHit(Ray inOut_Ray) {
         RayHit hit = new RayHit(RayHit.DETAIL_NONE, true);
         if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
-            return hit.ray();
+            return hit.getRay();
         }
         return null;
     }
@@ -856,19 +856,19 @@ public class TriangleMesh extends Surface {
         int nt = getNumTriangles();
         for ( int i = 0; i < nt; i++ ) {
             Vector3Dd v0 = new Vector3Dd(
-                vertexPositions[3*triangleIndices[3*i+0]+0],
-                vertexPositions[3*triangleIndices[3*i+0]+1],
-                vertexPositions[3*triangleIndices[3*i+0]+2]
+                vertexPositions[3*triangleIndexes[3*i+0]+0],
+                vertexPositions[3*triangleIndexes[3*i+0]+1],
+                vertexPositions[3*triangleIndexes[3*i+0]+2]
             );
             Vector3Dd v1 = new Vector3Dd(
-                vertexPositions[3*triangleIndices[3*i+1]+0],
-                vertexPositions[3*triangleIndices[3*i+1]+1],
-                vertexPositions[3*triangleIndices[3*i+1]+2]
+                vertexPositions[3*triangleIndexes[3*i+1]+0],
+                vertexPositions[3*triangleIndexes[3*i+1]+1],
+                vertexPositions[3*triangleIndexes[3*i+1]+2]
             );
             Vector3Dd v2 = new Vector3Dd(
-                vertexPositions[3*triangleIndices[3*i+2]+0],
-                vertexPositions[3*triangleIndices[3*i+2]+1],
-                vertexPositions[3*triangleIndices[3*i+2]+2]
+                vertexPositions[3*triangleIndexes[3*i+2]+0],
+                vertexPositions[3*triangleIndexes[3*i+2]+1],
+                vertexPositions[3*triangleIndexes[3*i+2]+2]
             );
 
             Intersection hit =
@@ -894,9 +894,9 @@ public class TriangleMesh extends Surface {
 
         if ( outHit != null ) {
             outHit.setRay(inRay.withT(bestHit.getT()));
-            outHit.p = new Vector3Dd(bestHit.getPoint());
-            outHit.n = new Vector3Dd(bestHit.getNormal()).normalized();
-            outHit.t = new Vector3Dd();
+            outHit.point = new Vector3Dd(bestHit.getPoint());
+            outHit.normal = new Vector3Dd(bestHit.getNormal()).normalized();
+            outHit.tangent = new Vector3Dd();
             outHit.u = 0;
             outHit.v = 0;
 
@@ -909,67 +909,67 @@ public class TriangleMesh extends Surface {
     private void interpolateTriangleData(int triangleIndex, RayHit outHit, Vector3Dd rayDirection)
     {
         if ( vertexNormals == null || vertexUvs == null ) {
-            if ( outHit.n.dotProduct(rayDirection) >= 0 ) {
-                outHit.n = outHit.n.multiply(-1);
+            if ( outHit.normal.dotProduct(rayDirection) >= 0 ) {
+                outHit.normal = outHit.normal.multiply(-1);
             }
             return;
         }
 
         Vector3Dd p0 = new Vector3Dd(
-            vertexPositions[3*triangleIndices[3*triangleIndex+0]+0],
-            vertexPositions[3*triangleIndices[3*triangleIndex+0]+1],
-            vertexPositions[3*triangleIndices[3*triangleIndex+0]+2]);
+            vertexPositions[3*triangleIndexes[3*triangleIndex+0]+0],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+0]+1],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+0]+2]);
         Vector3Dd p1 = new Vector3Dd(
-            vertexPositions[3*triangleIndices[3*triangleIndex+1]+0],
-            vertexPositions[3*triangleIndices[3*triangleIndex+1]+1],
-            vertexPositions[3*triangleIndices[3*triangleIndex+1]+2]);
+            vertexPositions[3*triangleIndexes[3*triangleIndex+1]+0],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+1]+1],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+1]+2]);
         Vector3Dd p2 = new Vector3Dd(
-            vertexPositions[3*triangleIndices[3*triangleIndex+2]+0],
-            vertexPositions[3*triangleIndices[3*triangleIndex+2]+1],
-            vertexPositions[3*triangleIndices[3*triangleIndex+2]+2]);
+            vertexPositions[3*triangleIndexes[3*triangleIndex+2]+0],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+2]+1],
+            vertexPositions[3*triangleIndexes[3*triangleIndex+2]+2]);
 
         double A = p0.x() - p2.x();
         double B = p1.x() - p2.x();
-        double C = p2.x() - outHit.p.x();
+        double C = p2.x() - outHit.point.x();
         double D = p0.y() - p2.y();
         double E = p1.y() - p2.y();
-        double F = p2.y() - outHit.p.y();
+        double F = p2.y() - outHit.point.y();
         double G = p0.z() - p2.z();
         double H = p1.z() - p2.z();
-        double I = p2.z() - outHit.p.z();
+        double I = p2.z() - outHit.point.z();
 
         double lambda0 = (B*(F+I)-C*(E+H))/(A*(E+H)-B*(D+G));
         double lambda1 = (A*(F+I)-C*(D+G))/(B*(D+G)-A*(E+H));
         double lambda2 = 1-lambda0-lambda1;
 
         Vector3Dd n0 = new Vector3Dd(
-            vertexNormals[3*triangleIndices[3*triangleIndex+0]+0],
-            vertexNormals[3*triangleIndices[3*triangleIndex+0]+1],
-            vertexNormals[3*triangleIndices[3*triangleIndex+0]+2]);
+            vertexNormals[3*triangleIndexes[3*triangleIndex+0]+0],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+0]+1],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+0]+2]);
         Vector3Dd n1 = new Vector3Dd(
-            vertexNormals[3*triangleIndices[3*triangleIndex+1]+0],
-            vertexNormals[3*triangleIndices[3*triangleIndex+1]+1],
-            vertexNormals[3*triangleIndices[3*triangleIndex+1]+2]);
+            vertexNormals[3*triangleIndexes[3*triangleIndex+1]+0],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+1]+1],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+1]+2]);
         Vector3Dd n2 = new Vector3Dd(
-            vertexNormals[3*triangleIndices[3*triangleIndex+2]+0],
-            vertexNormals[3*triangleIndices[3*triangleIndex+2]+1],
-            vertexNormals[3*triangleIndices[3*triangleIndex+2]+2]);
-        outHit.n = n0.multiply(lambda0)
+            vertexNormals[3*triangleIndexes[3*triangleIndex+2]+0],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+2]+1],
+            vertexNormals[3*triangleIndexes[3*triangleIndex+2]+2]);
+        outHit.normal = n0.multiply(lambda0)
             .add(n1.multiply(lambda1)
             .add(n2.multiply(lambda2)))
             .normalized();
 
-        double u0 = vertexUvs[2*triangleIndices[3*triangleIndex+0]+0];
-        double v0 = vertexUvs[2*triangleIndices[3*triangleIndex+0]+1];
-        double u1 = vertexUvs[2*triangleIndices[3*triangleIndex+1]+0];
-        double v1 = vertexUvs[2*triangleIndices[3*triangleIndex+1]+1];
-        double u2 = vertexUvs[2*triangleIndices[3*triangleIndex+2]+0];
-        double v2 = vertexUvs[2*triangleIndices[3*triangleIndex+2]+1];
+        double u0 = vertexUvs[2*triangleIndexes[3*triangleIndex+0]+0];
+        double v0 = vertexUvs[2*triangleIndexes[3*triangleIndex+0]+1];
+        double u1 = vertexUvs[2*triangleIndexes[3*triangleIndex+1]+0];
+        double v1 = vertexUvs[2*triangleIndexes[3*triangleIndex+1]+1];
+        double u2 = vertexUvs[2*triangleIndexes[3*triangleIndex+2]+0];
+        double v2 = vertexUvs[2*triangleIndexes[3*triangleIndex+2]+1];
         outHit.u = u0*lambda0 + u1*lambda1 + u2*lambda2;
         outHit.v = v0*lambda0 + v1*lambda1 + v2*lambda2;
 
-        if ( outHit.n.dotProduct(rayDirection) >= 0 ) {
-            outHit.n = outHit.n.multiply(-1);
+        if ( outHit.normal.dotProduct(rayDirection) >= 0 ) {
+            outHit.normal = outHit.normal.multiply(-1);
         }
     }
 
@@ -1036,9 +1036,9 @@ public class TriangleMesh extends Surface {
         p2 = new Vector3Dd();
 
         for ( i = 0; i < getNumTriangles(); i++ ) {
-            p0 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
-            p1 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
-            p2 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
+            p0 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+0]+0], vertexPositions[3*triangleIndexes[3*i+0]+1], vertexPositions[3*triangleIndexes[3*i+0]+2]);
+            p1 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+1]+0], vertexPositions[3*triangleIndexes[3*i+1]+1], vertexPositions[3*triangleIndexes[3*i+1]+2]);
+            p2 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+2]+0], vertexPositions[3*triangleIndexes[3*i+2]+1], vertexPositions[3*triangleIndexes[3*i+2]+2]);
             status = Triangle.containmentTest(
                 p0, p1, p2, p, distanceTolerance);
             if ( status != OUTSIDE ) {
@@ -1091,8 +1091,8 @@ public class TriangleMesh extends Surface {
             count[i] = false;
         }
 
-        for ( i = 0; i < triangleIndices.length; i++ ) {
-            a = triangleIndices[i];
+        for ( i = 0; i < triangleIndexes.length; i++ ) {
+            a = triangleIndexes[i];
             if ( a >= 0 && a < n ) {
                 count[a] = true;
             }
@@ -1139,7 +1139,7 @@ public class TriangleMesh extends Surface {
 
         //- Calculate new triangle indices arrays -------------------------
         j = 0;
-        int oldTriangleIndices[] = triangleIndices;
+        int oldTriangleIndices[] = triangleIndexes;
 
         for ( i = 0; i < oldTriangleIndices.length/3; i++ ) {
             a = oldTriangleIndices[3*i+0];
@@ -1163,9 +1163,9 @@ public class TriangleMesh extends Surface {
                 // This triangle is not copied
             }
             else {
-                triangleIndices[3*j+0] = map[oldTriangleIndices[3*i+0]];
-                triangleIndices[3*j+1] = map[oldTriangleIndices[3*i+1]];
-                triangleIndices[3*j+2] = map[oldTriangleIndices[3*i+2]];
+                triangleIndexes[3*j+0] = map[oldTriangleIndices[3*i+0]];
+                triangleIndexes[3*j+1] = map[oldTriangleIndices[3*i+1]];
+                triangleIndexes[3*j+2] = map[oldTriangleIndices[3*i+2]];
                 j++;
             }
         }
@@ -1192,16 +1192,16 @@ public class TriangleMesh extends Surface {
         //-----------------------------------------------------------------
         int i, a, b, c, n;
         n = vertexPositions.length/3;
-        for ( i = 0; i < triangleIndices.length/3; i++ ) {
-            a = triangleIndices[3*i+0];
-            b = triangleIndices[3*i+1];
-            c = triangleIndices[3*i+2];
+        for ( i = 0; i < triangleIndexes.length/3; i++ ) {
+            a = triangleIndexes[3*i+0];
+            b = triangleIndexes[3*i+1];
+            c = triangleIndexes[3*i+2];
             if ( a < 0 || a >= n || b < 0 || b >= n || c < 0 || c >= n ||
                  vertexSelections[a] || vertexSelections[b] ||
                  vertexSelections[c] ) {
-                triangleIndices[3*i+0] = -1;
-                triangleIndices[3*i+1] = -1;
-                triangleIndices[3*i+2] = -1;
+                triangleIndexes[3*i+0] = -1;
+                triangleIndexes[3*i+1] = -1;
+                triangleIndexes[3*i+2] = -1;
             }
         }
 
@@ -1240,17 +1240,17 @@ public class TriangleMesh extends Surface {
     private void appendTriangles(ArrayListOfInts et)
     {
         int i;
-        int newTriangleIndices[] = new int[triangleIndices.length + et.size()];
+        int newTriangleIndices[] = new int[triangleIndexes.length + et.size()];
 
-        for ( i = 0; i < triangleIndices.length; i++ ) {
-            newTriangleIndices[i] = triangleIndices[i];
+        for ( i = 0; i < triangleIndexes.length; i++ ) {
+            newTriangleIndices[i] = triangleIndexes[i];
         }
 
         for ( i = 0; i < et.size(); i++ ) {
-            newTriangleIndices[i+triangleIndices.length] = et.get(i);
+            newTriangleIndices[i+triangleIndexes.length] = et.get(i);
         }
 
-        triangleIndices = newTriangleIndices;
+        triangleIndexes = newTriangleIndices;
     }
 
     private void
@@ -1274,13 +1274,13 @@ public class TriangleMesh extends Surface {
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
             if ( p.doIntersectionFirstHit(hitA, gia) ) {
-                ma = gia.p;
+                ma = gia.point;
             }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
             if ( p.doIntersectionFirstHit(hitB, gib) ) {
-                mb = gib.p;
+                mb = gib.point;
             }
         }
 
@@ -1304,9 +1304,9 @@ public class TriangleMesh extends Surface {
         extraVertices.add(mb.y());
         extraVertices.add(mb.z());
 
-        triangleIndices[3*i+0] = -1;
-        triangleIndices[3*i+1] = -1;
-        triangleIndices[3*i+2] = -1;
+        triangleIndexes[3*i+0] = -1;
+        triangleIndexes[3*i+1] = -1;
+        triangleIndexes[3*i+2] = -1;
     }
 
     private void
@@ -1327,7 +1327,7 @@ public class TriangleMesh extends Surface {
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
             if ( p.doIntersectionFirstHit(hitA, gia) ) {
-                ma = gia.p;
+                ma = gia.point;
             }
         }
 
@@ -1347,9 +1347,9 @@ public class TriangleMesh extends Surface {
 
         extraTriangles.add(j);
 
-        triangleIndices[3*i+0] = -1;
-        triangleIndices[3*i+1] = -1;
-        triangleIndices[3*i+2] = -1;
+        triangleIndexes[3*i+0] = -1;
+        triangleIndexes[3*i+1] = -1;
+        triangleIndexes[3*i+2] = -1;
     }
 
     private void
@@ -1373,18 +1373,18 @@ public class TriangleMesh extends Surface {
         Ray hitA = p.doIntersectionWithNegative(ra);
         if ( hitA != null ) {
             if ( p.doIntersectionFirstHit(hitA, gia) ) {
-                ma = gia.p;
+                ma = gia.point;
             }
         }
         Ray hitB = p.doIntersectionWithNegative(rb);
         if ( hitB != null ) {
             if ( p.doIntersectionFirstHit(hitB, gib) ) {
-                mb = gib.p;
+                mb = gib.point;
             }
         }
 
         //-----------------------------------------------------------------
-        extraTriangles.add(3*triangleIndices[3*i+0]+0);
+        extraTriangles.add(3*triangleIndexes[3*i+0]+0);
 
         extraTriangles.add(((extraVertices.size()/3 + nv)));
 
@@ -1409,9 +1409,9 @@ public class TriangleMesh extends Surface {
         extraVertices.add(mb.z());
 
         //-----------------------------------------------------------------
-        triangleIndices[3*i+0] = -1;
-        triangleIndices[3*i+1] = -1;
-        triangleIndices[3*i+2] = -1;
+        triangleIndexes[3*i+0] = -1;
+        triangleIndexes[3*i+1] = -1;
+        triangleIndexes[3*i+2] = -1;
     }
 
     /**
@@ -1435,13 +1435,13 @@ public class TriangleMesh extends Surface {
 
         int nv = vertexPositions.length/3;
 
-        for ( i = 0; i < triangleIndices.length/3; i++ ) {
+        for ( i = 0; i < triangleIndexes.length/3; i++ ) {
 
-            p1 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+0]+0], vertexPositions[3*triangleIndices[3*i+0]+1], vertexPositions[3*triangleIndices[3*i+0]+2]);
+            p1 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+0]+0], vertexPositions[3*triangleIndexes[3*i+0]+1], vertexPositions[3*triangleIndexes[3*i+0]+2]);
 
-            p2 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+1]+0], vertexPositions[3*triangleIndices[3*i+1]+1], vertexPositions[3*triangleIndices[3*i+1]+2]);
+            p2 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+1]+0], vertexPositions[3*triangleIndexes[3*i+1]+1], vertexPositions[3*triangleIndexes[3*i+1]+2]);
 
-            p3 = new Vector3Dd(vertexPositions[3*triangleIndices[3*i+2]+0], vertexPositions[3*triangleIndices[3*i+2]+1], vertexPositions[3*triangleIndices[3*i+2]+2]);
+            p3 = new Vector3Dd(vertexPositions[3*triangleIndexes[3*i+2]+0], vertexPositions[3*triangleIndexes[3*i+2]+1], vertexPositions[3*triangleIndexes[3*i+2]+2]);
 
             t1 = p.doContainmentTestHalfSpace(p1, VSDK.EPSILON);
             t2 = p.doContainmentTestHalfSpace(p2, VSDK.EPSILON);
@@ -1455,9 +1455,9 @@ public class TriangleMesh extends Surface {
                  (t1 == LIMIT && t2 == OUTSIDE && t3 == LIMIT) ||
                  (t1 == OUTSIDE && t2 == LIMIT && t3 == LIMIT) 
                ) {
-                triangleIndices[3*i+0] = -1;
-                triangleIndices[3*i+1] = -1;
-                triangleIndices[3*i+2] = -1;
+                triangleIndexes[3*i+0] = -1;
+                triangleIndexes[3*i+1] = -1;
+                triangleIndexes[3*i+2] = -1;
             }
             else if ( t1 == LIMIT && t2 == LIMIT && t3 == LIMIT ) {
                 Vector3Dd a, b, n;
@@ -1465,9 +1465,9 @@ public class TriangleMesh extends Surface {
                 b = p3.subtract(p1);
                 n = a.crossProduct(b);
                 if ( n.dotProduct(p.getNormal()) > 0 ) {
-                    triangleIndices[3*i+0] = -1;
-                    triangleIndices[3*i+1] = -1;
-                    triangleIndices[3*i+2] = -1;
+                    triangleIndexes[3*i+0] = -1;
+                    triangleIndexes[3*i+1] = -1;
+                    triangleIndexes[3*i+2] = -1;
                 }
             }
             else if (
@@ -1484,43 +1484,43 @@ public class TriangleMesh extends Surface {
             }
             else {
                 if ( t1 == INSIDE && t2 == OUTSIDE && t3 == OUTSIDE ) {
-                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p1, p2, p3);
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, p1, p2, p3);
                 }
                 else if ( t2 == INSIDE && t1 == OUTSIDE && t3 == OUTSIDE ) {
-                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p2, p1, p3);
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, p2, p1, p3);
                 }
                 else if ( t3 == INSIDE && t1 == OUTSIDE && t2 == OUTSIDE ) {
-                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, p3, p1, p2);
+                    simpleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, p3, p1, p2);
                 }
                 else if ( t1 == INSIDE && t2 == INSIDE && t3 == OUTSIDE ) {
-                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p1, p2, p3);
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+1, p1, p2, p3);
                 }
                 else if ( t1 == INSIDE && t3 == INSIDE && t2 == OUTSIDE ) {
-                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p1, p3, p2);
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+2, p1, p3, p2);
                 }
                 else if ( t2 == INSIDE && t3 == INSIDE && t1 == OUTSIDE ) {
-                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+1, 3*triangleIndices[3*i+0]+2, p2, p3, p1);
+                    doubleTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+1, 3*triangleIndexes[3*i+0]+2, p2, p3, p1);
                 }
 
 
                 else if ( t1 == INSIDE && t2 == LIMIT && t3 == OUTSIDE ) {
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p2, p1, p3);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+1, p2, p1, p3);
                 }
                 else if ( t2 == INSIDE && t1 == LIMIT && t3 == OUTSIDE ) {
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+0, p1, p2, p3);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+0, p1, p2, p3);
                 }
                 else if ( t2 == INSIDE && t3 == LIMIT && t1 == OUTSIDE ) {
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p3, p2, p1);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+2, p3, p2, p1);
                 }
                 else if ( t3 == INSIDE && t2 == LIMIT && t1 == OUTSIDE ) {
                     System.out.println("MyCase4");
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+1, p2, p3, p1);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+1, p2, p3, p1);
                 }
                 else if ( t3 == INSIDE && t1 == LIMIT && t2 == OUTSIDE ) {
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+0, p1, p3, p2);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+0, p1, p3, p2);
                 }
                 else if ( t1 == INSIDE && t3 == LIMIT && t2 == OUTSIDE ) {
-                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndices[3*i+0]+0, 3*triangleIndices[3*i+0]+2, p3, p1, p2);
+                    halfTriangleCut(p, extraVertices, extraTriangles, nv, 3*triangleIndexes[3*i+0]+0, 3*triangleIndexes[3*i+0]+2, p3, p1, p2);
                 }
                 else {
                     System.out.println("Unhandled case: ");

@@ -19,7 +19,7 @@ public class History
         this.history = new StringBuffer("");
     }
     
-    public String get_text() {
+    public String getText() {
         return this.history.toString();
     }
 }

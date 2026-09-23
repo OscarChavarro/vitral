@@ -45,12 +45,12 @@ struct Bounds2D {
 };
 
 struct App {
-    GLFWwindow* w;
+    GLFWwindow* window;
     GLuint lineProg;
     GLuint constantProg;
     GLuint vao, vboP, vboC;
     int testIndex;
-    Operation op;
+    Operation operation;
     PolygonSurfaceTessellationMode tessellationMode;
     bool showRef, showClip, showSubj, showInner, showOuter, showIntersections, showFilled;
     Polygon2D* clipPolygon;
@@ -64,7 +64,7 @@ struct App {
     RendererConfigurationController* qualityController;
     PolygonClippingHudRenderer* hud;
 
-    App() : w(0), lineProg(0), constantProg(0), vao(0), vboP(0), vboC(0), testIndex(0), op(INTERSECTION),
+    App() : window(0), lineProg(0), constantProg(0), vao(0), vboP(0), vboC(0), testIndex(0), operation(INTERSECTION),
         tessellationMode(PolygonSurfaceTessellationMode::GLU),
         showRef(true), showClip(true), showSubj(true), showInner(true), showOuter(true),
         showIntersections(true), showFilled(true), clipPolygon(0), subjectPolygon(0), innerPolygon(0), outerPolygon(0),
@@ -206,16 +206,16 @@ static void rebuildScene(App* a)
     a->innerPolygon = new Polygon2D();
     a->outerPolygon = new Polygon2D();
     a->clipper = new WeilerAthertonPolygonClipper();
-    if (a->op == INTERSECTION) {
+    if (a->operation == INTERSECTION) {
         a->clipper->clipPolygons(a->clipPolygon, a->subjectPolygon, a->innerPolygon, a->outerPolygon);
     }
-    else if (a->op == UNION) {
+    else if (a->operation == UNION) {
         a->clipper->unionPolygons(a->clipPolygon, a->subjectPolygon, a->innerPolygon);
         for (long int i = 0; i < a->outerPolygon->loops.size(); ++i) delete a->outerPolygon->loops[i];
         a->outerPolygon->loops.clear();
         a->outerPolygon->nextLoop();
     }
-    else if (a->op == A_MINUS_B) {
+    else if (a->operation == A_MINUS_B) {
         Polygon2D scratch;
         a->clipper->clipPolygons(a->subjectPolygon, a->clipPolygon, &scratch, a->innerPolygon);
     }
@@ -317,7 +317,7 @@ static java::String buildHudLine1(const App* a)
     const PolygonClippingTestCase& t = PolygonClippingFixtures::CASES[a->testIndex];
     java::String line = java::String("Test [1,2]: ") + java::String(t.name)
         + " (" + java::String::valueOf(a->testIndex + 1) + "/" + java::String::valueOf((int)PolygonClippingFixtures::COUNT) + ")";
-    line += "  Op [3]: " + operationName(a->op);
+    line += "  Op [3]: " + operationName(a->operation);
     return line;
 }
 
@@ -333,7 +333,7 @@ static java::String buildHudLine2(const App* a)
 static java::String buildHudLine3(const App* a)
 {
     java::String base;
-    if (a->op == INTERSECTION) {
+    if (a->operation == INTERSECTION) {
         base = java::String("Inner [I]: ") + onOff(a->showInner)
             + "  Outer [O]: " + onOff(a->showOuter);
     } else {
@@ -449,7 +449,7 @@ static void keyCb(GLFWwindow* w, int key, int, int action, int)
         if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(w, GLFW_TRUE);
         else if (key == GLFW_KEY_1) { a->testIndex = (a->testIndex + PolygonClippingFixtures::COUNT - 1) % PolygonClippingFixtures::COUNT; rebuild = true; }
         else if (key == GLFW_KEY_2) { a->testIndex = (a->testIndex + 1) % PolygonClippingFixtures::COUNT; rebuild = true; }
-        else if (key == GLFW_KEY_3) { a->op = (Operation)(((int)a->op + 1) % 4); rebuild = true; }
+        else if (key == GLFW_KEY_3) { a->operation = (Operation)(((int)a->operation + 1) % 4); rebuild = true; }
         else if (key == GLFW_KEY_SPACE) a->showRef = !a->showRef;
         else if (key == GLFW_KEY_C) { a->showClip = !a->showClip; handledLetterShortcut = true; }
         else if (key == GLFW_KEY_S) { a->showSubj = !a->showSubj; handledLetterShortcut = true; }
@@ -568,7 +568,7 @@ static int runOffline(const CommandLineOptions& options)
 
     App app;
     applyOptions(app, options);
-    app.w = w;
+    app.window = w;
     setupGlResources(app);
     glViewport(0, 0, width, height);
     app.camera.updateViewportResize(width, height);
@@ -645,7 +645,7 @@ int main(int argc, char** argv)
 
     App app;
     applyOptions(app, options);
-    app.w = w;
+    app.window = w;
     glfwSetWindowUserPointer(w, &app);
     glfwSetKeyCallback(w, keyCb);
     glfwSetFramebufferSizeCallback(w, framebufferSizeCb);

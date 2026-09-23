@@ -1,6 +1,6 @@
 #include "gui/KeyboardInteractionTechniques.hpp"
 KeyboardInteractionTechniques::KeyboardInteractionTechniques(MarkersModel* model)
-    : model_(model) {}
+    : model(model) {}
 
 KeyboardInteractionTechniques::KeyAction KeyboardInteractionTechniques::processKey(int key) {
     if (key == 'q' || key == 27) {
