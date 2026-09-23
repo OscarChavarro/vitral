@@ -1,13 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
 project(SceneEditorApplication CXX)
 
+if(APPLE)
+    message(FATAL_ERROR
+        "SceneEditorApplication uses Xt + GLX + OpenGL 4.1 and is only "
+        "supported on Linux/X11 with OpenGL 4.1-capable GLX drivers. "
+        "XQuartz on macOS exposes only legacy OpenGL for this path.")
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(X11 REQUIRED)
 find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
+
+if(NOT X11_Xt_LIB)
+    message(FATAL_ERROR "SceneEditorApplication requires libXt from the X11 development packages.")
+endif()
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
 set(VITRAL_OPENGL4_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4")
@@ -72,35 +84,15 @@ target_include_directories(SceneEditorApplication PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${VITRAL_BASE_DIR}/src/main"
     "${VITRAL_OPENGL4_DIR}/src/main"
+    ${X11_INCLUDE_DIR}
     ${GLEW_INCLUDE_DIRS}
 )
 
 target_link_libraries(SceneEditorApplication PRIVATE
     OpenGL::GL
     ${VITRAL_GLEW_LIB}
+    ${X11_Xt_LIB}
+    ${X11_LIBRARIES}
     vitral_base
     vitral_opengl4
 )
-
-if(APPLE)
-    target_compile_definitions(SceneEditorApplication PRIVATE GL_SILENCE_DEPRECATION)
-
-    option(VITRAL_SIGN_EXECUTABLES "Sign macOS executables after build" ON)
-    set(VITRAL_CODESIGN_IDENTITY "-" CACHE STRING "codesign identity used for macOS executable signing")
-
-    if(VITRAL_SIGN_EXECUTABLES)
-        find_program(CODESIGN_EXECUTABLE codesign)
-        if(CODESIGN_EXECUTABLE)
-            add_custom_command(TARGET SceneEditorApplication POST_BUILD
-                COMMAND ${CODESIGN_EXECUTABLE}
-                    --force
-                    --sign "${VITRAL_CODESIGN_IDENTITY}"
-                    --timestamp=none
-                    "$<TARGET_FILE:SceneEditorApplication>"
-                COMMENT "Signing SceneEditorApplication with identity '${VITRAL_CODESIGN_IDENTITY}'"
-                VERBATIM)
-        else()
-            message(WARNING "codesign tool not found; SceneEditorApplication will not be signed")
-        endif()
-    endif()
-endif()
