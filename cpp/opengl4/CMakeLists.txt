@@ -8,12 +8,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
 add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4Renderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4RendererConfigurationShaderSelector.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4BackgroundRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4FrameBufferReader.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MinMaxRenderer.cpp
@@ -42,7 +44,7 @@ add_library(vitral_opengl4 SHARED
 target_include_directories(vitral_opengl4 PUBLIC src/main)
 target_include_directories(vitral_opengl4 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../base/src/main)
 target_include_directories(vitral_opengl4 SYSTEM PUBLIC ${GLEW_INCLUDE_DIRS})
-target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL OpenGL::GLU ${VITRAL_GLEW_LIB})
+target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL OpenGL::GLU GLEW::GLEW)
 target_link_libraries(vitral_opengl4 PRIVATE vitral_base)
 
 if(APPLE)

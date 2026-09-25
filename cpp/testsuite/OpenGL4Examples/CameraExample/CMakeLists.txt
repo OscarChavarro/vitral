@@ -26,8 +26,7 @@ if(NOT GLEW_FOUND)
   set(BUILD_CAMERA_EXAMPLE FALSE)
 endif()
 
-find_library(VITRAL_GLEW_LIB NAMES GLEW glew)
-if(NOT VITRAL_GLEW_LIB)
+if(NOT TARGET GLEW::GLEW)
   message(WARNING "GLEW library not found. CameraExample will be skipped.")
   set(BUILD_CAMERA_EXAMPLE FALSE)
 endif()
@@ -81,7 +80,7 @@ if(BUILD_CAMERA_EXAMPLE)
   target_link_libraries(CameraExample PRIVATE
       glfw
       OpenGL::GL
-      ${VITRAL_GLEW_LIB}
+      GLEW::GLEW
       vitral_base
       vitral_glfw
       vitral_opengl4

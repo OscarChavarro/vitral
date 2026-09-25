@@ -8,7 +8,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
 set(VITRAL_GLFW_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../glfw")
@@ -49,7 +48,7 @@ target_include_directories(ShadersExample PRIVATE
 target_link_libraries(ShadersExample PRIVATE
     glfw
     OpenGL::GL
-    ${VITRAL_GLEW_LIB}
+    GLEW::GLEW
     vitral_base
     vitral_glfw
     vitral_opengl4

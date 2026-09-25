@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
-find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -38,7 +37,7 @@ if(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.dylib")
         ${VITRAL_OPENGL4_LIB_DIR}/libvitral_opengl4.dylib
         ${VITRAL_GLFW_LIB_DIR}/libvitral_glfw.dylib
         OpenGL::GL
-        ${VITRAL_GLEW_LIB}
+        GLEW::GLEW
         glfw
     )
 elseif(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.a")
@@ -48,7 +47,7 @@ elseif(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.a")
         ${VITRAL_OPENGL4_LIB_DIR}/libvitral_opengl4.a
         ${VITRAL_GLFW_LIB_DIR}/libvitral_glfw.a
         OpenGL::GL
-        ${VITRAL_GLEW_LIB}
+        GLEW::GLEW
         glfw
     )
 else()
@@ -58,7 +57,7 @@ else()
         vitral_opengl4
         vitral_glfw
         OpenGL::GL
-        ${VITRAL_GLEW_LIB}
+        GLEW::GLEW
         glfw
     )
 endif()

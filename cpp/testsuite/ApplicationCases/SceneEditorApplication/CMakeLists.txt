@@ -15,10 +15,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(X11 REQUIRED)
-find_library(VITRAL_GLEW_LIB NAMES GLEW glew REQUIRED)
 
-if(NOT X11_Xt_LIB)
-    message(FATAL_ERROR "SceneEditorApplication requires libXt from the X11 development packages.")
+if(NOT X11_Xt_LIB OR NOT X11_Xaw_LIB)
+    message(FATAL_ERROR "SceneEditorApplication requires libXt and libXaw from the X11 development packages.")
 endif()
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
@@ -34,10 +33,9 @@ if(NOT TARGET vitral_opengl4)
     add_subdirectory("${VITRAL_OPENGL4_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_opengl4")
 endif()
 
-# The technology-independent application classes and the OpenGL 4 rendering
-# bridge ported from the Java application.  The bridge is deliberately not
-# instantiated by the current Xt/GLX shell: it is compiled and ready for the
-# future GUI integration, without changing the application's current path.
+# The technology-independent application classes, the OpenGL 4 rendering
+# bridge ported from the Java application and the Xt/Xlib adapters (event
+# mapping and label rasterization) that connect them to the Xt/GLX shell.
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
@@ -48,7 +46,11 @@ add_executable(SceneEditorApplication
     src/gui/VisualRayDebugController.cpp
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
+    src/gui/xt/XlibLabelImageProvider.cpp
+    src/gui/xt/XtEventMapper.cpp
     src/io/FileSuffixFilter.cpp
+    src/io/GuiI18nContextBuilder.cpp
+    src/io/GuiJsonReader.cpp
     src/io/XmlManager.cpp
     src/model/ApplicationModel.cpp
     src/model/DrawingArea.cpp
@@ -83,6 +85,7 @@ add_executable(SceneEditorApplication
     src/render/opengl4/OpenGL4ProjectedViewRenderer.cpp
     src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
     src/render/opengl4/OpenGL4SceneRenderer.cpp
+    src/render/opengl4/XtOpenGL4SceneBridge.cpp
     src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
 )
 
@@ -96,8 +99,9 @@ target_include_directories(SceneEditorApplication PRIVATE
 
 target_link_libraries(SceneEditorApplication PRIVATE
     OpenGL::GL
-    ${VITRAL_GLEW_LIB}
+    GLEW::GLEW
     ${X11_Xt_LIB}
+    ${X11_Xaw_LIB}
     ${X11_LIBRARIES}
     vitral_base
     vitral_opengl4

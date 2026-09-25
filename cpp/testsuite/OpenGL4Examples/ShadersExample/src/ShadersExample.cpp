@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 
 #include <java/lang/Math.h>
 #include "java/lang/String.h"

@@ -2,15 +2,34 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <clocale>
+#include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <sys/time.h>
 
 #include <GL/glew.h>
 #include <GL/glx.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #include <X11/StringDefs.h>
-#include <X11/keysym.h>
+#include <X11/Xresource.h>
+#include <X11/cursorfont.h>
+#include <X11/Xaw/MenuButton.h>
+#include <X11/Xaw/Command.h>
+#include <X11/Xaw/Label.h>
+#include <X11/Xaw/SimpleMenu.h>
+#include <X11/Xaw/SmeBSB.h>
+#include <X11/Xaw/SmeLine.h>
+#include <X11/Composite.h>
 
 #include "java/lang/String.h"
+#include "gui/PopupDismissClickFilter.h"
+#include "gui/xt/XlibLabelImageProvider.h"
+#include "gui/xt/XtEventMapper.h"
+#include "io/GuiJsonReader.h"
+#include "render/opengl4/XtOpenGL4SceneBridge.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 
@@ -45,13 +64,43 @@ typedef GLXContext (*CreateContextAttribsARBProc)(
     const int*);
 typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
 
-class SceneEditorApplication
+class SceneEditorApplication;
+
+struct SubmenuBinding {
+    SceneEditorApplication* application;
+    Widget popup;
+};
+
+struct CommandBinding {
+    SceneEditorApplication* application;
+    std::string identifier;
+};
+
+struct TabBinding {
+    SceneEditorApplication* application;
+    bool creation;
+};
+
+class SceneEditorApplication : private XtOpenGL4SceneBridge::Listener
 {
 public:
     SceneEditorApplication()
         : appContext(nullptr)
         , display(nullptr)
         , shell(nullptr)
+        , workspace(nullptr)
+        , menuBar(nullptr)
+        , drawingCanvas(nullptr)
+        , visual(nullptr)
+        , visualDepth(0)
+        , colormap(0)
+        , menuFontSet(nullptr)
+        , rightPanel(nullptr)
+        , creationPage(nullptr)
+        , pendingPage(nullptr)
+        , viewportMenu(nullptr)
+        , checkMarkBitmap(None)
+        , labelProvider(nullptr)
         , window(0)
         , fbConfig(nullptr)
         , context(nullptr)
@@ -61,14 +110,41 @@ public:
         , vertexBufferId(0)
         , width(640)
         , height(480)
+        , canvasWidth(320)
+        , canvasHeight(452)
+        , guiLanguage(selectedGuiLanguage())
+        , pendingGuiLanguage()
+        , menuSequence(0)
+        , guiRebuildQueued(false)
+        , sceneBridge(nullptr)
         , ready(false)
         , closing(false)
+        , repaintQueued(false)
+        , currentCursor(PointerCursor::SELECT)
+        , pressButton(0)
+        , pressX(0)
+        , pressY(0)
+        , pressMoved(false)
+        , lastClickButton(0)
+        , lastClickTime(0)
+        , clickCount(0)
+        , viewportMenuX(0)
+        , viewportMenuY(0)
     {
     }
 
     ~SceneEditorApplication()
     {
         cleanupOpenGL();
+        if (sceneBridge != nullptr) {
+            if (display != nullptr && context != nullptr)
+                glXMakeCurrent(display, window, context);
+            sceneBridge->dispose();
+            delete sceneBridge;
+            sceneBridge = nullptr;
+        }
+        delete labelProvider;
+        labelProvider = nullptr;
         if (context != nullptr) {
             glXMakeCurrent(display, None, nullptr);
             glXDestroyContext(display, context);
@@ -77,6 +153,24 @@ public:
         if (shell != nullptr) {
             XtDestroyWidget(shell);
             shell = nullptr;
+        }
+        clearSubmenuBindings();
+        clearSideBindings();
+        clearViewportMenuBindings();
+        if (display != nullptr) {
+            for (std::map<int, Cursor>::iterator it = cursors.begin(); it != cursors.end(); ++it)
+                XFreeCursor(display, it->second);
+            cursors.clear();
+            if (checkMarkBitmap != None) XFreePixmap(display, checkMarkBitmap);
+            checkMarkBitmap = None;
+        }
+        if (display != nullptr && colormap != 0) {
+            XFreeColormap(display, colormap);
+            colormap = 0;
+        }
+        if (display != nullptr && menuFontSet != nullptr) {
+            XFreeFontSet(display, menuFontSet);
+            menuFontSet = nullptr;
         }
         if (display != nullptr) {
             XtCloseDisplay(display);
@@ -108,6 +202,20 @@ private:
     XtAppContext appContext;
     Display* display;
     Widget shell;
+    Widget workspace;
+    Widget menuBar;
+    Widget drawingCanvas;
+    Visual* visual;
+    int visualDepth;
+    Colormap colormap;
+    XFontSet menuFontSet;
+    Widget rightPanel;
+    Widget creationPage;
+    Widget pendingPage;
+    Widget pendingLabel;
+    Widget viewportMenu;
+    Pixmap checkMarkBitmap;
+    XlibLabelImageProvider* labelProvider;
     Window window;
     GLXFBConfig fbConfig;
     GLXContext context;
@@ -117,11 +225,447 @@ private:
     GLuint vertexBufferId;
     int width;
     int height;
+    int canvasWidth;
+    int canvasHeight;
+    std::string guiLanguage;
+    std::string guiDefinition;
+    std::string pendingGuiLanguage;
+    unsigned int menuSequence;
+    bool guiRebuildQueued;
+    std::vector<SubmenuBinding*> submenuBindings;
+    std::vector<CommandBinding*> commandBindings;
+    std::vector<TabBinding*> tabBindings;
+    std::vector<CommandBinding*> viewportMenuBindings;
+    std::vector<CommandBinding*> menuCommandBindings;
+    std::map<std::string, std::string> commandLabels;
+    std::map<std::string, std::string> messages;
+    XtOpenGL4SceneBridge* sceneBridge;
     bool ready;
     bool closing;
+    bool repaintQueued;
+    std::map<int, Cursor> cursors;
+    PointerCursor::Value currentCursor;
+    PopupDismissClickFilter popupDismissFilter;
+    int viewportMenuX;
+    int viewportMenuY;
+    // Clicks are synthesized from press / release pairs, as AWT does
+    unsigned int pressButton;
+    int pressX;
+    int pressY;
+    bool pressMoved;
+    unsigned int lastClickButton;
+    long long lastClickTime;
+    int clickCount;
+
+    static std::string cleanLabel(const std::string& label)
+    {
+        std::string result;
+        for (size_t i = 0; i < label.size(); ++i) {
+            if (label[i] == '&' || label[i] == '!') continue;
+            if (label[i] == '\t') { result += "    "; continue; }
+            result += label[i];
+        }
+        return result;
+    }
+
+    static bool hasModifier(const GuiNode& node, const char* modifier)
+    {
+        for (size_t i = 0; i < node.modifiers.size(); ++i)
+            if (node.modifiers[i] == modifier) return true;
+        return false;
+    }
+
+    static std::string selectedGuiLanguage()
+    {
+        const char* language = std::getenv("SCENE_EDITOR_GUI_LANGUAGE");
+        return language != nullptr ? language : "spanish";
+    }
+
+    static void selectGuiLocale()
+    {
+        const char* overrideLocale = std::getenv("SCENE_EDITOR_GUI_LOCALE");
+        // UI text is UTF-8 regardless of the selected JSON language.  A
+        // neutral Unicode locale lets English labels such as "Español" and
+        // future translations share one FontSet encoding.
+        if (overrideLocale != nullptr &&
+            setlocale(LC_CTYPE, overrideLocale) != nullptr) return;
+        if (setlocale(LC_CTYPE, "C.UTF-8") != nullptr) return;
+        setlocale(LC_CTYPE, "");
+    }
+
+    static void menuItemSelected(Widget, XtPointer clientData, XtPointer)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self != nullptr) self->requestClose();
+    }
+
+    static void selectEnglish(Widget, XtPointer clientData, XtPointer)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self != nullptr) self->scheduleMenuRebuild("english");
+    }
+
+    static void selectSpanish(Widget, XtPointer clientData, XtPointer)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self != nullptr) self->scheduleMenuRebuild("spanish");
+    }
+
+    static void executePanelCommand(Widget, XtPointer clientData, XtPointer)
+    {
+        CommandBinding* binding = reinterpret_cast<CommandBinding*>(clientData);
+        if (binding == nullptr || binding->application == nullptr) return;
+        binding->application->executeCreationCommand(binding->identifier);
+        binding->application->redraw();
+    }
+
+    static void selectSideTab(Widget, XtPointer clientData, XtPointer)
+    {
+        TabBinding* binding = reinterpret_cast<TabBinding*>(clientData);
+        if (binding != nullptr && binding->application != nullptr)
+            binding->application->showSidePage(binding->creation);
+    }
+
+    static void popupSubmenu(Widget entry, XtPointer clientData, XtPointer)
+    {
+        SubmenuBinding* binding = reinterpret_cast<SubmenuBinding*>(clientData);
+        if (binding == nullptr || binding->application == nullptr ||
+            binding->popup == nullptr) return;
+        binding->application->showSubmenu(entry, binding->popup);
+    }
+
+    GuiNode loadGuiDefinition()
+    {
+        const char* filename = guiLanguage == "english" ? "english.json" : "spanish.json";
+        const std::string path = std::string("../../../../java/testsuite/ApplicationCases/SceneEditorApplication/etc/gui/") + filename;
+        std::ifstream input(path.c_str());
+        if (!input) {
+            throw VSDKFatalException(
+                java::String(("Could not open Java GUI definition: " + path).c_str()));
+        }
+        guiDefinition.assign((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        commandLabels = GuiJsonReader(guiDefinition).readCommandLabels();
+        messages = GuiJsonReader(guiDefinition).readMessages();
+        return GuiJsonReader(guiDefinition).readMenuBar();
+    }
+
+    Widget createPopupMenu(Widget parent, const GuiNode& definition)
+    {
+        const std::string popupName = "sceneMenu" + std::to_string(menuSequence++);
+        Arg popupArgs[4]; Cardinal popupArgCount = 0;
+        XtSetArg(popupArgs[popupArgCount], XtNvisual, visual); ++popupArgCount;
+        XtSetArg(popupArgs[popupArgCount], XtNdepth, visualDepth); ++popupArgCount;
+        XtSetArg(popupArgs[popupArgCount], XtNcolormap, colormap); ++popupArgCount;
+        // Xaw only follows an SmeBSB's menuName while the pointer enters the
+        // entry when popupOnEntry is enabled on its containing SimpleMenu.
+        XtSetArg(popupArgs[popupArgCount], XtNpopupOnEntry, True); ++popupArgCount;
+        Widget popup = XtCreatePopupShell(
+            popupName.c_str(), simpleMenuWidgetClass,
+            menuBar != nullptr ? menuBar : parent,
+            popupArgs, popupArgCount);
+        addMenuEntries(popup, definition.children);
+        return popup;
+    }
+
+    void addMenuEntries(Widget menu, const std::vector<GuiNode>& entries)
+    {
+        for (size_t i = 0; i < entries.size(); ++i) {
+            const GuiNode& entry = entries[i];
+            if (hasModifier(entry, "SEPARATOR")) {
+                XtCreateManagedWidget("separator", smeLineObjectClass, menu, nullptr, 0);
+                continue;
+            }
+            const std::string label = cleanLabel(entry.name);
+            Arg args[5]; Cardinal n = 0;
+            XtSetArg(args[n], XtNlabel, label.c_str()); ++n;
+            XtSetArg(args[n], XtNinternational, True); ++n;
+            XtSetArg(args[n], XtNfontSet, menuFontSet); ++n;
+            Widget submenu = nullptr;
+            if (entry.type == "menu") {
+                submenu = createPopupMenu(menu, entry);
+            }
+            if (hasModifier(entry, "GRAYED")) { XtSetArg(args[n], XtNsensitive, False); ++n; }
+            Widget item = XtCreateManagedWidget("menuItem", smeBSBObjectClass, menu, args, n);
+            if (hasModifier(entry, "IDC_FILE_QUIT"))
+                XtAddCallback(item, XtNcallback, &SceneEditorApplication::menuItemSelected, reinterpret_cast<XtPointer>(this));
+            if (hasModifier(entry, "IDC_CUSTOMIZE_LANGUAGE_ENGLISH"))
+                XtAddCallback(item, XtNcallback, &SceneEditorApplication::selectEnglish, reinterpret_cast<XtPointer>(this));
+            if (hasModifier(entry, "IDC_CUSTOMIZE_LANGUAGE_SPANISH"))
+                XtAddCallback(item, XtNcallback, &SceneEditorApplication::selectSpanish, reinterpret_cast<XtPointer>(this));
+            for (size_t m = 0; m < entry.modifiers.size(); ++m) {
+                if (!isCreationCommand(entry.modifiers[m])) continue;
+                CommandBinding* binding = new CommandBinding{this, entry.modifiers[m]};
+                menuCommandBindings.push_back(binding);
+                XtAddCallback(item, XtNcallback, &SceneEditorApplication::executePanelCommand, binding);
+            }
+            if (entry.type == "menu") {
+                SubmenuBinding* binding = new SubmenuBinding{this, submenu};
+                submenuBindings.push_back(binding);
+                XtAddCallback(item, XtNcallback, &SceneEditorApplication::popupSubmenu, binding);
+            }
+        }
+    }
+
+    void showSubmenu(Widget entry, Widget popup)
+    {
+        Position x = 0;
+        Position y = 0;
+        Position entryX = 0;
+        Position entryY = 0;
+        Dimension entryWidth = 0;
+        XtVaGetValues(
+            entry,
+            XtNx, &entryX,
+            XtNy, &entryY,
+            XtNwidth, &entryWidth,
+            nullptr);
+        // SmeBSB is a windowless RectObj.  Translate through its owning
+        // SimpleMenu, which owns the actual X window.
+        XtTranslateCoords(
+            XtParent(entry), entryX + static_cast<Position>(entryWidth),
+            entryY, &x, &y);
+        XtVaSetValues(popup, XtNx, x, XtNy, y, nullptr);
+        XtPopup(popup, XtGrabNonexclusive);
+    }
+
+    void clearSubmenuBindings()
+    {
+        for (size_t i = 0; i < submenuBindings.size(); ++i)
+            delete submenuBindings[i];
+        submenuBindings.clear();
+        for (size_t i = 0; i < menuCommandBindings.size(); ++i)
+            delete menuCommandBindings[i];
+        menuCommandBindings.clear();
+    }
+
+    void clearSideBindings()
+    {
+        for (size_t i = 0; i < commandBindings.size(); ++i)
+            delete commandBindings[i];
+        commandBindings.clear();
+        for (size_t i = 0; i < tabBindings.size(); ++i)
+            delete tabBindings[i];
+        tabBindings.clear();
+    }
+
+    std::string text(const char* id) const
+    {
+        std::map<std::string, std::string>::const_iterator it = messages.find(id);
+        return it != messages.end() ? it->second : id;
+    }
+
+    void showSidePage(bool creation)
+    {
+        if (creationPage == nullptr || pendingPage == nullptr) return;
+        if (creation) {
+            XtManageChild(creationPage);
+            XtUnmanageChild(pendingPage);
+        }
+        else {
+            XtUnmanageChild(creationPage);
+            XtManageChild(pendingPage);
+        }
+    }
+
+    void createRightPanel()
+    {
+        const int sideWidth = 320;
+        const int tabHeight = 28;
+        const int contentWidth = width - sideWidth;
+        Arg args[4]; Cardinal n = 0;
+        XtSetArg(args[n], XtNx, contentWidth); ++n;
+        XtSetArg(args[n], XtNy, tabHeight); ++n;
+        XtSetArg(args[n], XtNwidth, sideWidth); ++n;
+        XtSetArg(args[n], XtNheight, height - tabHeight); ++n;
+        rightPanel = XtCreateManagedWidget(
+            "rightPanel", compositeWidgetClass, workspace, args, n);
+
+        const char* tabs[] = {
+            "IDM_CREATION_TAB", "IDM_MODIFY_TAB", "IDM_GUI_TAB",
+            "IDM_OTHERS_TAB", "IDM_RENDER_TAB"
+        };
+        for (int i = 0; i < 5; ++i) {
+            const std::string label = text(tabs[i]);
+            Arg tabArgs[6]; Cardinal tabN = 0;
+            XtSetArg(tabArgs[tabN], XtNlabel, label.c_str()); ++tabN;
+            XtSetArg(tabArgs[tabN], XtNinternational, True); ++tabN;
+            XtSetArg(tabArgs[tabN], XtNfontSet, menuFontSet); ++tabN;
+            XtSetArg(tabArgs[tabN], XtNx, i * 64); ++tabN;
+            XtSetArg(tabArgs[tabN], XtNy, 0); ++tabN;
+            XtSetArg(tabArgs[tabN], XtNwidth, 64); ++tabN;
+            Widget tab = XtCreateManagedWidget(
+                "sideTab", commandWidgetClass, rightPanel, tabArgs, tabN);
+            TabBinding* binding = new TabBinding{this, i == 0};
+            tabBindings.push_back(binding);
+            XtAddCallback(tab, XtNcallback, &SceneEditorApplication::selectSideTab, binding);
+        }
+
+        Arg pageArgs[4]; Cardinal pageN = 0;
+        XtSetArg(pageArgs[pageN], XtNx, 0); ++pageN;
+        XtSetArg(pageArgs[pageN], XtNy, tabHeight); ++pageN;
+        XtSetArg(pageArgs[pageN], XtNwidth, sideWidth); ++pageN;
+        XtSetArg(pageArgs[pageN], XtNheight, height - 2 * tabHeight); ++pageN;
+        creationPage = XtCreateManagedWidget(
+            "creationPage", compositeWidgetClass, rightPanel, pageArgs, pageN);
+        pendingPage = XtCreateWidget(
+            "pendingPage", compositeWidgetClass, rightPanel, pageArgs, pageN);
+
+        // The commands of the CREATION group of the GUI definition, but the
+        // import / export ones, that need file dialogs
+        std::vector<std::string> commands;
+        const std::vector<std::string> group =
+            GuiJsonReader(guiDefinition).readButtonGroupCommands("CREATION");
+        for (size_t i = 0; i < group.size(); ++i)
+            if (isCreationCommand(group[i])) commands.push_back(group[i]);
+        for (size_t i = 0; i < commands.size(); ++i) {
+            const std::string& id = commands[i];
+            std::map<std::string, std::string>::const_iterator labelIt = commandLabels.find(id);
+            const std::string label = labelIt != commandLabels.end() ? labelIt->second : id;
+            Arg buttonArgs[7]; Cardinal buttonN = 0;
+            XtSetArg(buttonArgs[buttonN], XtNlabel, label.c_str()); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNinternational, True); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNfontSet, menuFontSet); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNx, 8); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNy, static_cast<Position>(i * 29)); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNwidth, sideWidth - 16); ++buttonN;
+            XtSetArg(buttonArgs[buttonN], XtNheight, 26); ++buttonN;
+            Widget button = XtCreateManagedWidget(
+                "creationCommand", commandWidgetClass, creationPage, buttonArgs, buttonN);
+            CommandBinding* binding = new CommandBinding{this, id};
+            commandBindings.push_back(binding);
+            XtAddCallback(button, XtNcallback, &SceneEditorApplication::executePanelCommand, binding);
+        }
+    }
+
+    void rebuildRightPanel()
+    {
+        if (rightPanel != nullptr) XtDestroyWidget(rightPanel);
+        rightPanel = nullptr;
+        creationPage = nullptr;
+        pendingPage = nullptr;
+        clearSideBindings();
+        createRightPanel();
+    }
+
+    static bool isCreationCommand(const std::string& id)
+    {
+        return id.compare(0, 11, "IDC_CREATE_") == 0;
+    }
+
+    void executeCreationCommand(const std::string& id)
+    {
+        if (sceneBridge == nullptr) return;
+        if (!sceneBridge->executeCommand(id))
+            fprintf(stderr, "SceneEditorApplication: command %s was not executed\n", id.c_str());
+    }
+
+    void createMenuBar(Widget parent)
+    {
+        menuSequence = 0;
+        GuiNode menubar = loadGuiDefinition();
+        const int buttonWidth = 112;
+        for (size_t i = 0; i < menubar.children.size(); ++i) {
+            const GuiNode& menu = menubar.children[i];
+            Widget popup = createPopupMenu(parent, menu);
+            const std::string popupName = XtName(popup);
+
+            Arg args[8]; Cardinal n = 0;
+            const std::string label = cleanLabel(menu.name);
+            XtSetArg(args[n], XtNlabel, label.c_str()); ++n;
+            XtSetArg(args[n], XtNinternational, True); ++n;
+            XtSetArg(args[n], XtNfontSet, menuFontSet); ++n;
+            XtSetArg(args[n], XtNmenuName, popupName.c_str()); ++n;
+            XtSetArg(args[n], XtNx, static_cast<Position>(i * buttonWidth)); ++n;
+            XtSetArg(args[n], XtNy, 0); ++n;
+            XtSetArg(args[n], XtNwidth, buttonWidth); ++n;
+            XtSetArg(args[n], XtNheight, 28); ++n;
+            XtCreateManagedWidget("menuButton", menuButtonWidgetClass, parent, args, n);
+        }
+    }
+
+    static void rebuildMenusAfterCallback(XtPointer clientData, XtIntervalId*)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self == nullptr) return;
+        self->guiRebuildQueued = false;
+        self->rebuildMenus(self->pendingGuiLanguage);
+    }
+
+    void scheduleMenuRebuild(const std::string& language)
+    {
+        if (language == guiLanguage || guiRebuildQueued) return;
+        pendingGuiLanguage = language;
+        guiRebuildQueued = true;
+        XtAppAddTimeOut(
+            appContext, 0, &SceneEditorApplication::rebuildMenusAfterCallback,
+            reinterpret_cast<XtPointer>(this));
+    }
+
+    void rebuildMenus(const std::string& language)
+    {
+        if (language == guiLanguage || workspace == nullptr) return;
+        guiLanguage = language;
+        if (menuBar != nullptr) {
+            XtDestroyWidget(menuBar);
+            menuBar = nullptr;
+        }
+        clearSubmenuBindings();
+        if (menuFontSet != nullptr) {
+            XFreeFontSet(display, menuFontSet);
+            menuFontSet = nullptr;
+        }
+        selectGuiLocale();
+        createMenuFontSet();
+        Arg args[4]; Cardinal n = 0;
+        XtSetArg(args[n], XtNx, 0); ++n;
+        XtSetArg(args[n], XtNy, 0); ++n;
+        XtSetArg(args[n], XtNwidth, width); ++n;
+        XtSetArg(args[n], XtNheight, 28); ++n;
+        menuBar = XtCreateManagedWidget("menuBar", compositeWidgetClass, workspace, args, n);
+        createMenuBar(menuBar);
+        rebuildRightPanel();
+        // Viewport titles, their menus and the HUDs follow the language
+        if (sceneBridge != nullptr) sceneBridge->setGuiDefinition(guiDefinition);
+        requestRedraw();
+    }
+
+    void createMenuFontSet()
+    {
+        char** missingCharsets = nullptr;
+        int missingCharsetCount = 0;
+        char* defaultString = nullptr;
+        menuFontSet = XCreateFontSet(
+            display,
+            "-adobe-helvetica-medium-r-normal--14-*-*-*-*-*-iso8859-1",
+            &missingCharsets,
+            &missingCharsetCount,
+            &defaultString);
+        if (missingCharsets != nullptr) XFreeStringList(missingCharsets);
+        if (menuFontSet == nullptr) {
+            throw VSDKFatalException(
+                "Could not create the UTF-8 menu font set");
+        }
+    }
+
+    /**
+    Merges the resources of the application (its black and white look) over
+    the ones of the display, so they win over the user's defaults.
+    */
+    void loadResourceFile()
+    {
+        const char* path = std::getenv("SCENE_EDITOR_XRESOURCES");
+        if (path == nullptr) path = "XResources";
+        XrmDatabase database = XtDatabase(display);
+        if (!XrmCombineFileDatabase(path, &database, True)) {
+            fprintf(stderr, "SceneEditorApplication: could not read X resources file %s\n", path);
+            return;
+        }
+        XrmSetDatabase(display, database);
+    }
 
     void createWindow(int argc, char** argv)
     {
+        selectGuiLocale();
         XtToolkitInitialize();
         appContext = XtCreateApplicationContext();
         display = XtOpenDisplay(
@@ -136,22 +680,35 @@ private:
         if (display == nullptr) {
             throw VSDKFatalException("Could not open X display. Is DISPLAY set?");
         }
-
+        loadResourceFile();
+        const int screen = DefaultScreen(display);
+        // Request a screen-sized client area at the upper-left corner.  This
+        // keeps the window manager's title bar and borders, unlike fullscreen.
+        width = DisplayWidth(display, screen);
+        height = DisplayHeight(display, screen);
+        createMenuFontSet();
         XVisualInfo* visualInfo = chooseVisual();
-        Colormap colormap = XCreateColormap(
+        visual = visualInfo->visual;
+        visualDepth = visualInfo->depth;
+        colormap = XCreateColormap(
             display,
             RootWindow(display, visualInfo->screen),
-            visualInfo->visual,
+            visual,
             AllocNone);
 
-        Arg args[8];
+        Arg args[9];
         Cardinal n = 0;
-        XtSetArg(args[n], XtNvisual, visualInfo->visual); n++;
+        // The shell accepts the keyboard focus from the window manager, so
+        // it can redirect it to the drawing canvas (see XtSetKeyboardFocus)
+        XtSetArg(args[n], XtNinput, True); n++;
+        XtSetArg(args[n], XtNvisual, visual); n++;
         XtSetArg(args[n], XtNcolormap, colormap); n++;
-        XtSetArg(args[n], XtNdepth, visualInfo->depth); n++;
+        XtSetArg(args[n], XtNdepth, visualDepth); n++;
         XtSetArg(args[n], XtNwidth, width); n++;
         XtSetArg(args[n], XtNheight, height); n++;
         XtSetArg(args[n], XtNtitle, "VITRAL Scene Editor - Xt GLX OpenGL 4"); n++;
+        XtSetArg(args[n], XtNx, 0); n++;
+        XtSetArg(args[n], XtNy, 0); n++;
 
         shell = XtAppCreateShell(
             "sceneEditor",
@@ -165,22 +722,60 @@ private:
             throw VSDKFatalException("Could not create Xt shell");
         }
 
+        Cardinal workspaceArgsCount = 0;
+        XtSetArg(args[workspaceArgsCount], XtNwidth, width); ++workspaceArgsCount;
+        XtSetArg(args[workspaceArgsCount], XtNheight, height); ++workspaceArgsCount;
+        workspace = XtCreateManagedWidget(
+            "workspace", compositeWidgetClass, shell, args, workspaceArgsCount);
+
+        Arg menuBarArgs[4]; Cardinal menuBarArgCount = 0;
+        XtSetArg(menuBarArgs[menuBarArgCount], XtNx, 0); ++menuBarArgCount;
+        XtSetArg(menuBarArgs[menuBarArgCount], XtNy, 0); ++menuBarArgCount;
+        XtSetArg(menuBarArgs[menuBarArgCount], XtNwidth, width); ++menuBarArgCount;
+        XtSetArg(menuBarArgs[menuBarArgCount], XtNheight, 28); ++menuBarArgCount;
+        menuBar = XtCreateManagedWidget(
+            "menuBar", compositeWidgetClass, workspace, menuBarArgs, menuBarArgCount);
+        createMenuBar(menuBar);
+        createRightPanel();
+        canvasWidth = width - 320;
+        canvasHeight = height - 28;
+        Cardinal canvasArgsCount = 0;
+        XtSetArg(args[canvasArgsCount], XtNx, 0); ++canvasArgsCount;
+        XtSetArg(args[canvasArgsCount], XtNy, 28); ++canvasArgsCount;
+        XtSetArg(args[canvasArgsCount], XtNwidth, canvasWidth); ++canvasArgsCount;
+        XtSetArg(args[canvasArgsCount], XtNheight, canvasHeight); ++canvasArgsCount;
+        drawingCanvas = XtCreateManagedWidget(
+            "drawingCanvas", coreWidgetClass, workspace, args, canvasArgsCount);
+
+        // Every mouse and keyboard event of the canvas is captured and
+        // converted to a vitral event for the interaction techniques
         XtAddEventHandler(
-            shell,
-            ExposureMask | StructureNotifyMask | KeyPressMask,
+            drawingCanvas,
+            ExposureMask | StructureNotifyMask |
+            KeyPressMask | KeyReleaseMask |
+            ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+            EnterWindowMask,
             False,
             &SceneEditorApplication::eventHandler,
             reinterpret_cast<XtPointer>(this));
 
+        // Keys typed anywhere in the window (i.e. with the pointer over the
+        // side panel) are redirected to the canvas: the shell selects them,
+        // so they reach Xt, which delivers them to its focus widget
+        XtAddEventHandler(
+            shell, KeyPressMask | KeyReleaseMask, False,
+            &SceneEditorApplication::ignoreEventHandler, nullptr);
+        XtSetKeyboardFocus(shell, drawingCanvas);
+
         XtRealizeWidget(shell);
-        window = XtWindow(shell);
+        window = XtWindow(drawingCanvas);
         wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
-        XSetWMProtocols(display, window, &wmDeleteWindow, 1);
+        XSetWMProtocols(display, XtWindow(shell), &wmDeleteWindow, 1);
         XtAddEventHandler(
             shell,
             NoEventMask,
             True,
-            &SceneEditorApplication::eventHandler,
+            &SceneEditorApplication::shellEventHandler,
             reinterpret_cast<XtPointer>(this));
 
         XFree(visualInfo);
@@ -281,6 +876,11 @@ private:
         glGetError();
 
         checkOpenGLVersion();
+        labelProvider = new XlibLabelImageProvider(display);
+        sceneBridge = new XtOpenGL4SceneBridge(labelProvider, this);
+        sceneBridge->setGuiDefinition(guiDefinition);
+        sceneBridge->setCanvasSize(canvasWidth, canvasHeight);
+        sceneBridge->init();
         shaderProgramId = createShaderProgram();
 
         glGenVertexArrays(1, &vertexArrayId);
@@ -307,7 +907,7 @@ private:
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, canvasWidth, canvasHeight);
         ready = true;
     }
 
@@ -430,16 +1030,21 @@ private:
             return;
         }
         glXMakeCurrent(display, window, context);
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, canvasWidth, canvasHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgramId);
-        glBindVertexArray(vertexArrayId);
-        glLineWidth(1.0f);
-        glDrawArrays(GL_LINES, 0, 2);
-        glBindVertexArray(0);
-        glUseProgram(0);
+        if (sceneBridge != nullptr) {
+            sceneBridge->display(canvasWidth, canvasHeight);
+        }
+        else {
+            glUseProgram(shaderProgramId);
+            glBindVertexArray(vertexArrayId);
+            glLineWidth(1.0f);
+            glDrawArrays(GL_LINES, 0, 2);
+            glBindVertexArray(0);
+            glUseProgram(0);
+        }
 
         glXSwapBuffers(display, window);
     }
@@ -453,6 +1058,33 @@ private:
         XtAppSetExitFlag(appContext);
     }
 
+    //= Events ============================================================
+
+    static long long currentTimeMillis()
+    {
+        struct timeval now;
+        gettimeofday(&now, nullptr);
+        return static_cast<long long>(now.tv_sec) * 1000 + now.tv_usec / 1000;
+    }
+
+    static void ignoreEventHandler(Widget, XtPointer, XEvent*, Boolean*)
+    {
+    }
+
+    static void shellEventHandler(
+        Widget,
+        XtPointer clientData,
+        XEvent* event,
+        Boolean*)
+    {
+        SceneEditorApplication* self =
+            reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self != nullptr && event->type == ClientMessage &&
+            static_cast<Atom>(event->xclient.data.l[0]) == self->wmDeleteWindow) {
+            self->requestClose();
+        }
+    }
+
     static void eventHandler(
         Widget,
         XtPointer clientData,
@@ -464,33 +1096,342 @@ private:
         if (self == nullptr) {
             return;
         }
+        try {
+            self->processEvent(event);
+        }
+        catch (const std::exception& ex) {
+            fprintf(stderr, "SceneEditorApplication: event processing failed: %s\n", ex.what());
+        }
+    }
 
+    void processEvent(XEvent* event)
+    {
         switch (event->type) {
         case Expose:
             if (event->xexpose.count == 0) {
-                self->redraw();
+                redraw();
             }
             break;
         case ConfigureNotify:
-            self->width = event->xconfigure.width;
-            self->height = event->xconfigure.height;
-            self->redraw();
+            canvasWidth = event->xconfigure.width;
+            canvasHeight = event->xconfigure.height;
+            if (sceneBridge != nullptr) {
+                sceneBridge->setCanvasSize(canvasWidth, canvasHeight);
+            }
+            redraw();
             break;
-        case KeyPress: {
-            KeySym key = XLookupKeysym(&event->xkey, 0);
-            if (key == XK_Escape || key == XK_q || key == XK_Q) {
-                self->requestClose();
+        case EnterNotify:
+            if (sceneBridge != nullptr) {
+                sceneBridge->mouseEntered(XtEventMapper::toMouseEvent(*event));
             }
             break;
-        }
-        case ClientMessage:
-            if (static_cast<Atom>(event->xclient.data.l[0]) == self->wmDeleteWindow) {
-                self->requestClose();
+        case ButtonPress:
+            processButtonPress(*event);
+            break;
+        case ButtonRelease:
+            processButtonRelease(*event);
+            break;
+        case MotionNotify:
+            processMotion(event);
+            break;
+        case KeyPress:
+            if (sceneBridge != nullptr) {
+                sceneBridge->keyPressed(XtEventMapper::toKeyEvent(event->xkey));
+                requestRedraw();
+            }
+            break;
+        case KeyRelease:
+            if (sceneBridge != nullptr && !isAutoRepeatRelease(event->xkey)) {
+                sceneBridge->keyReleased(XtEventMapper::toKeyEvent(event->xkey));
+                requestRedraw();
             }
             break;
         default:
             break;
         }
+    }
+
+    /**
+    X repeats a held key as release / press pairs: the release of such a
+    pair is not reported, so the key is seen as held (as with AWT).
+    */
+    bool isAutoRepeatRelease(const XKeyEvent& release)
+    {
+        if (XEventsQueued(display, QueuedAfterReading) == 0) return false;
+        XEvent next;
+        XPeekEvent(display, &next);
+        return next.type == KeyPress && next.xkey.window == release.window &&
+            next.xkey.keycode == release.keycode && next.xkey.time == release.time;
+    }
+
+    bool consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind kind)
+    {
+        return popupDismissFilter.consumes(kind, currentTimeMillis());
+    }
+
+    void processButtonPress(const XEvent& event)
+    {
+        if (sceneBridge == nullptr) return;
+        if (XtEventMapper::isWheelButton(event)) {
+            MouseEvent wheel = XtEventMapper::toMouseWheelEvent(event);
+            if (wheel.getClicks() != 0) {
+                sceneBridge->mouseWheel(wheel);
+                requestRedraw();
+            }
+            return;
+        }
+        if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::PRESS)) return;
+        pressButton = event.xbutton.button;
+        pressX = event.xbutton.x;
+        pressY = event.xbutton.y;
+        pressMoved = false;
+        sceneBridge->mousePressed(XtEventMapper::toMouseEvent(event));
+        requestRedraw();
+    }
+
+    void processButtonRelease(const XEvent& event)
+    {
+        if (sceneBridge == nullptr || XtEventMapper::isWheelButton(event)) return;
+        if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::RELEASE)) return;
+        const bool clicked = event.xbutton.button == pressButton && !pressMoved;
+        pressButton = 0;
+        // The release may request the viewport menu, that grabs the pointer
+        sceneBridge->mouseReleased(XtEventMapper::toMouseEvent(event));
+        if (clicked &&
+            !consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::CLICK)) {
+            const long long now = currentTimeMillis();
+            const long long multiClickTime = XtGetMultiClickTime(display);
+            if (event.xbutton.button == lastClickButton &&
+                now - lastClickTime <= multiClickTime) {
+                ++clickCount;
+            }
+            else {
+                clickCount = 1;
+            }
+            lastClickButton = event.xbutton.button;
+            lastClickTime = now;
+            MouseEvent click = XtEventMapper::toMouseEvent(event);
+            click.setClicks(clickCount);
+            sceneBridge->mouseClicked(click);
+        }
+        requestRedraw();
+    }
+
+    void processMotion(XEvent* event)
+    {
+        if (sceneBridge == nullptr) return;
+        // Only the last position of consecutive motions matters
+        XEvent next;
+        while (XEventsQueued(display, QueuedAfterReading) > 0) {
+            XPeekEvent(display, &next);
+            if (next.type != MotionNotify || next.xmotion.window != event->xmotion.window) break;
+            XNextEvent(display, event);
+        }
+        const unsigned int buttons = Button1Mask | Button2Mask | Button3Mask;
+        if ((event->xmotion.state & buttons) == 0) {
+            sceneBridge->mouseMoved(XtEventMapper::toMouseEvent(*event));
+            return;
+        }
+        if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::DRAG)) return;
+        // As in AWT, a press followed by any motion is not a click
+        if (event->xmotion.x != pressX || event->xmotion.y != pressY) pressMoved = true;
+        sceneBridge->mouseDragged(XtEventMapper::toMouseEvent(*event));
+        requestRedraw();
+    }
+
+    static void redrawAfterEvents(XtPointer clientData, XtIntervalId*)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self == nullptr) return;
+        self->repaintQueued = false;
+        self->redraw();
+    }
+
+    /**
+    Coalesces the repaints requested while processing a burst of events in
+    one redraw, done once the pending events are processed.
+    */
+    void requestRedraw()
+    {
+        if (repaintQueued || appContext == nullptr) return;
+        repaintQueued = true;
+        XtAppAddTimeOut(appContext, 0, &SceneEditorApplication::redrawAfterEvents,
+                        reinterpret_cast<XtPointer>(this));
+    }
+
+    //= Viewport menu =====================================================
+
+    static void executeViewportMenuCommand(Widget, XtPointer clientData, XtPointer)
+    {
+        CommandBinding* binding = reinterpret_cast<CommandBinding*>(clientData);
+        if (binding == nullptr || binding->application == nullptr ||
+            binding->application->sceneBridge == nullptr) return;
+        binding->application->sceneBridge->executeViewportCommand(binding->identifier);
+        binding->application->requestRedraw();
+    }
+
+    static void viewportMenuPoppedDown(Widget popup, XtPointer clientData, XtPointer)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        XtUngrabPointer(popup, CurrentTime);
+        if (self != nullptr) {
+            self->popupDismissFilter.popupClosed(currentTimeMillis());
+            self->requestRedraw();
+        }
+    }
+
+    void clearViewportMenuBindings()
+    {
+        for (size_t i = 0; i < viewportMenuBindings.size(); ++i)
+            delete viewportMenuBindings[i];
+        viewportMenuBindings.clear();
+    }
+
+    Pixmap getCheckMarkBitmap()
+    {
+        static const unsigned char checkMarkBits[] = {
+            0x00, 0x80, 0xc0, 0x61, 0x33, 0x1e, 0x0c, 0x00
+        };
+        if (checkMarkBitmap == None) {
+            checkMarkBitmap = XCreateBitmapFromData(
+                display, RootWindow(display, DefaultScreen(display)),
+                reinterpret_cast<const char*>(checkMarkBits), 8, 8);
+        }
+        return checkMarkBitmap;
+    }
+
+    /**
+    Pops up, with Xt, the menu of the viewport whose title was clicked: its
+    projection locations and render modes, the ones in use checked. It
+    grabs the pointer, so a click outside only closes it.
+    */
+    void showViewportMenu(int canvasX, int canvasY)
+    {
+        if (viewportMenu != nullptr) {
+            XtDestroyWidget(viewportMenu);
+            viewportMenu = nullptr;
+        }
+        clearViewportMenuBindings();
+        const std::vector<XtOpenGL4SceneBridge::ViewportMenuItem> items =
+            sceneBridge->getViewportMenuItems();
+        if (items.empty()) return;
+
+        Arg popupArgs[3]; Cardinal popupArgCount = 0;
+        XtSetArg(popupArgs[popupArgCount], XtNvisual, visual); ++popupArgCount;
+        XtSetArg(popupArgs[popupArgCount], XtNdepth, visualDepth); ++popupArgCount;
+        XtSetArg(popupArgs[popupArgCount], XtNcolormap, colormap); ++popupArgCount;
+        viewportMenu = XtCreatePopupShell(
+            "viewportMenu", simpleMenuWidgetClass, drawingCanvas,
+            popupArgs, popupArgCount);
+        // Entries follow the pointer without a button pressed, too
+        XtOverrideTranslations(viewportMenu, XtParseTranslationTable("<Motion>: highlight()"));
+        XtAddCallback(viewportMenu, XtNpopdownCallback,
+                      &SceneEditorApplication::viewportMenuPoppedDown,
+                      reinterpret_cast<XtPointer>(this));
+
+        for (size_t i = 0; i < items.size(); ++i) {
+            if (items[i].separator) {
+                XtCreateManagedWidget("separator", smeLineObjectClass, viewportMenu, nullptr, 0);
+                continue;
+            }
+            Arg args[6]; Cardinal n = 0;
+            XtSetArg(args[n], XtNlabel, items[i].label.c_str()); ++n;
+            XtSetArg(args[n], XtNinternational, True); ++n;
+            XtSetArg(args[n], XtNfontSet, menuFontSet); ++n;
+            XtSetArg(args[n], XtNleftMargin, 16); ++n;
+            if (items[i].current) {
+                XtSetArg(args[n], XtNleftBitmap, getCheckMarkBitmap()); ++n;
+            }
+            Widget item = XtCreateManagedWidget(
+                "viewportMenuItem", smeBSBObjectClass, viewportMenu, args, n);
+            CommandBinding* binding = new CommandBinding{this, items[i].command};
+            viewportMenuBindings.push_back(binding);
+            XtAddCallback(item, XtNcallback,
+                          &SceneEditorApplication::executeViewportMenuCommand, binding);
+        }
+
+        Position rootX = 0;
+        Position rootY = 0;
+        XtTranslateCoords(drawingCanvas, static_cast<Position>(canvasX),
+                          static_cast<Position>(canvasY), &rootX, &rootY);
+        XtVaSetValues(viewportMenu, XtNx, rootX, XtNy, rootY, nullptr);
+        XtPopup(viewportMenu, XtGrabExclusive);
+        // Without owner events, every pointer event (over the menu, the
+        // canvas or anywhere) goes to the menu: an outside release closes it
+        XtGrabPointer(viewportMenu, False,
+                      ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
+                      EnterWindowMask | LeaveWindowMask,
+                      GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+        popupDismissFilter.popupShown();
+    }
+
+    //= XtOpenGL4SceneBridge::Listener ====================================
+
+    void repaintRequested() override
+    {
+        requestRedraw();
+    }
+
+    Cursor getCursor(PointerCursor::Value cursor)
+    {
+        unsigned int shape = XC_left_ptr;
+        switch (cursor) {
+        case PointerCursor::VIEWPORT_TITLE: shape = XC_hand2; break;
+        case PointerCursor::CAMERA_ROTATE: shape = XC_exchange; break;
+        case PointerCursor::CAMERA_TRANSLATE: shape = XC_fleur; break;
+        case PointerCursor::CAMERA_ADVANCE: shape = XC_sb_v_double_arrow; break;
+        case PointerCursor::TRANSLATE: shape = XC_fleur; break;
+        case PointerCursor::ROTATE: shape = XC_exchange; break;
+        case PointerCursor::SCALE: shape = XC_sizing; break;
+        default: shape = XC_left_ptr; break;
+        }
+        std::map<int, Cursor>::iterator known = cursors.find(static_cast<int>(shape));
+        if (known != cursors.end()) return known->second;
+        Cursor created = XCreateFontCursor(display, shape);
+        cursors[static_cast<int>(shape)] = created;
+        return created;
+    }
+
+    void cursorRequested(PointerCursor::Value cursor) override
+    {
+        if (cursor == currentCursor || window == 0) return;
+        currentCursor = cursor;
+        XDefineCursor(display, window, getCursor(cursor));
+    }
+
+    void cursorWarpRequested(int canvasX, int canvasY) override
+    {
+        if (window == 0) return;
+        XWarpPointer(display, None, window, 0, 0, 0, 0, canvasX, canvasY);
+    }
+
+    void statusMessageRequested(const std::string& message) override
+    {
+        printf("%s\n", message.c_str());
+        fflush(stdout);
+    }
+
+    void closeRequested() override
+    {
+        requestClose();
+    }
+
+    static void showViewportMenuAfterEvent(XtPointer clientData, XtIntervalId*)
+    {
+        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self != nullptr && self->sceneBridge != nullptr)
+            self->showViewportMenu(self->viewportMenuX, self->viewportMenuY);
+    }
+
+    void viewportMenuRequested(int canvasX, int canvasY) override
+    {
+        // Requested while dispatching the release over the title: popped
+        // up once it is dispatched, or Xt would also deliver that release
+        // to the new menu, closing it
+        viewportMenuX = canvasX;
+        viewportMenuY = canvasY;
+        XtAppAddTimeOut(appContext, 0, &SceneEditorApplication::showViewportMenuAfterEvent,
+                        reinterpret_cast<XtPointer>(this));
     }
 
     java::String getShaderInfoLog(GLuint shader)
