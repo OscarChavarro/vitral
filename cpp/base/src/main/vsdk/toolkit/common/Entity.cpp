@@ -1,18 +1,24 @@
+#include <cctype>
+#include <string>
+
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/Entity.h"
 #include "vsdk/toolkit/common/EntityListener.h"
 
-Entity::Entity() : controlSpecifications(nullptr), entityListeners(nullptr)
+Entity::Entity() : controlSpecifications(nullptr), controlAccessors(nullptr),
+    entityListeners(nullptr)
 {
 }
 
 Entity::Entity(const Entity &other) :
-    controlSpecifications(nullptr), entityListeners(nullptr)
+    controlSpecifications(nullptr), controlAccessors(nullptr),
+    entityListeners(nullptr)
 {
     if ( other.controlSpecifications != nullptr ) {
         controlSpecifications = new java::ArrayList<java::String>(
             *other.controlSpecifications);
     }
+    copyControlAccessors(other);
 }
 
 Entity &
@@ -27,6 +33,8 @@ Entity::operator=(const Entity &other)
         controlSpecifications = new java::ArrayList<java::String>(
             *other.controlSpecifications);
     }
+    deleteControlAccessors();
+    copyControlAccessors(other);
     // Subscribers stay with this entity: they did not subscribe to `other`
     return *this;
 }
@@ -36,6 +44,81 @@ Entity::~Entity()
     // Virtual calls inside a destructor resolve to Entity::dispose
     dispose();
     delete controlSpecifications;
+    deleteControlAccessors();
+}
+
+void
+Entity::copyControlAccessors(const Entity &other)
+{
+    if ( other.controlAccessors == nullptr ) {
+        return;
+    }
+    for ( long int i = 0; i < other.controlAccessors->size(); i++ ) {
+        addControlAccessor(other.controlAccessors->get(i)->clone());
+    }
+}
+
+void
+Entity::deleteControlAccessors()
+{
+    if ( controlAccessors == nullptr ) {
+        return;
+    }
+    for ( long int i = 0; i < controlAccessors->size(); i++ ) {
+        delete controlAccessors->get(i);
+    }
+    delete controlAccessors;
+    controlAccessors = nullptr;
+}
+
+void
+Entity::addControlAccessor(EntityControlAccessor *accessor)
+{
+    if ( controlAccessors == nullptr ) {
+        controlAccessors = new java::ArrayList<EntityControlAccessor *>();
+    }
+    controlAccessors->add(accessor);
+}
+
+/**
+@return the name field of a "type;name;interval" specification, without
+surrounding blanks, or an empty string if it has none (the generic editors
+report malformed specifications when they parse them)
+*/
+java::String
+Entity::controlNameOf(const java::String &specification)
+{
+    std::string text(specification.c_str());
+    size_t begin = text.find(';');
+    if ( begin == std::string::npos ) {
+        return java::String();
+    }
+    begin++;
+    size_t end = text.find(';', begin);
+    if ( end == std::string::npos ) {
+        end = text.size();
+    }
+    while ( begin < end && std::isspace((unsigned char)text[begin]) ) {
+        begin++;
+    }
+    while ( end > begin && std::isspace((unsigned char)text[end - 1]) ) {
+        end--;
+    }
+    return java::String(text.substr(begin, end - begin).c_str());
+}
+
+const EntityControlAccessor *
+Entity::getControlAccessor(const java::String &name) const
+{
+    if ( controlAccessors == nullptr ) {
+        return nullptr;
+    }
+    for ( long int i = 0; i < controlAccessors->size(); i++ ) {
+        if ( controlAccessors->get(i)->getName() == name ) {
+            return controlAccessors->get(i);
+        }
+    }
+    return nullptr;
 }
 
 java::ArrayList<java::String> &

@@ -6,6 +6,7 @@
 
 #include "java/lang/Double.h"
 #include "java/lang/Integer.h"
+#include "java/lang/Long.h"
 #include "java/lang/NumberFormatException.h"
 
 namespace java {
@@ -153,6 +154,32 @@ int Integer::parseInt(const java::String& text)
             java::String("For input string: \"") + text + "\"");
     }
     return (int)value;
+}
+
+long long Long::parseLong(const java::String& text)
+{
+    const char* start = text.c_str();
+    const char* p = start;
+    if ( *p == '+' || *p == '-' ) {
+        p++;
+    }
+    if ( *p == '\0' ) {
+        throw NumberFormatException(
+            java::String("For input string: \"") + text + "\"");
+    }
+    for ( const char* q = p; *q != '\0'; q++ ) {
+        if ( *q < '0' || *q > '9' ) {
+            throw NumberFormatException(
+                java::String("For input string: \"") + text + "\"");
+        }
+    }
+    errno = 0;
+    long long value = std::strtoll(start, nullptr, 10);
+    if ( errno != 0 ) {
+        throw NumberFormatException(
+            java::String("For input string: \"") + text + "\"");
+    }
+    return value;
 }
 
 }

@@ -685,9 +685,14 @@ std::string keyOf(Geometry* geometry)
             m->getNumTriangles());
     }
     if ( FunctionalExplicitSurface* f = dynamic_cast<FunctionalExplicitSurface*>(geometry) ) {
-        // The internal mesh is replaced by the surface whenever it changes
-        return format("functionalexplicitsurface/%p/%p", (void*)f,
-            (void*)f->getInternalTriangleMesh());
+        // Keyed by content, not by address: editors replace the surface of
+        // a body with a new one, which the allocator may place at the
+        // address of the deleted one (and its mesh at the old mesh one)
+        return format("functionalexplicitsurface/%.17g/%.17g/%.17g/%.17g/"
+            "%.17g/%.17g/%d/%d/", f->getMinXBound(), f->getMinYBound(),
+            f->getMinZBound(), f->getMaxXBound(), f->getMaxYBound(),
+            f->getMaxZBound(), f->getTesselationHintX(),
+            f->getTesselationHintY()) + f->getFunctionExpression().c_str();
     }
     if ( ParametricBiCubicPatch* p = dynamic_cast<ParametricBiCubicPatch*>(geometry) ) {
         double hash = 0;

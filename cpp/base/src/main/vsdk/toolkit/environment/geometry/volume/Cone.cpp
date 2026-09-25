@@ -7,9 +7,12 @@
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 Cone::Cone(double bottomRadius, double topRadius, double height) :
     bottomRadius(bottomRadius), topRadius(topRadius), height(height) {
-    getControlSpecifications().add(java::String("double;bottomRadius;(0, INFINITE)"));
-    getControlSpecifications().add(java::String("double;topRadius;[0, INFINITE)"));
-    getControlSpecifications().add(java::String("double;height;(0, INFINITE)"));
+    addControlSpecification("double;bottomRadius;(0, INFINITE)",
+        &Cone::getBottomRadius, &Cone::setBottomRadius);
+    addControlSpecification("double;topRadius;[0, INFINITE)",
+        &Cone::getTopRadius, &Cone::setTopRadius);
+    addControlSpecification("double;height;(0, INFINITE)",
+        &Cone::getHeight, &Cone::setHeight);
 }
 
 double Cone::sq(double v){ return v*v; }

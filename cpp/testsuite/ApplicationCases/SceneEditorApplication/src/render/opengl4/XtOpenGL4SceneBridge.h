@@ -6,9 +6,11 @@
 
 #include "gui/PointerCursor.h"
 
+class BodyEditFeedbackProvider;
 class KeyEvent;
 class MouseEvent;
 class OpenGL4LabelImageProvider;
+class SimpleBody;
 
 /**
 Xt-facing façade for the technology-independent scene model, its
@@ -48,6 +50,12 @@ public:
         @param canvasY vertical position of the menu, in canvas pixels
         */
         virtual void viewportMenuRequested(int canvasX, int canvasY) = 0;
+
+        /**
+        The set of selected things changed: the modify panel must be told
+        its new target (see `getModifyPanelTarget`).
+        */
+        virtual void selectionChanged() = 0;
     };
 
     /**
@@ -123,6 +131,25 @@ public:
     was clicked, recording the change of its view.
     */
     void executeViewportCommand(const std::string& command);
+
+    //= Modify panel ======================================================
+
+    /**
+    @param selected true while the modify panel of the GUI is shown
+    */
+    void setModifyPanelSelected(bool selected);
+
+    /**
+    @return the body the modify panel must edit: the first selected body
+    while the modify panel is shown, or null
+    */
+    SimpleBody* getModifyPanelTarget();
+
+    /**
+    @param provider editor of the modify panel, whose feedback geometry is
+    drawn over the body under edition (referenced, not owned), or null
+    */
+    void setBodyEditFeedbackProvider(BodyEditFeedbackProvider* provider);
 };
 
 #endif

@@ -8,11 +8,14 @@
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+
 Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
-    getControlSpecifications().add(java::String("double;radius;(0, INFINITE)"));
+    addControlSpecification("double;radius;(0, INFINITE)",
+        &Sphere::getRadius, &Sphere::setRadius);
 }
 
-Ray* Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
+Ray*
+Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     double dx = -inoutRay.getOrigin().x();
     double dy = -inoutRay.getOrigin().y();
     double dz = -inoutRay.getOrigin().z();
@@ -33,7 +36,8 @@ Ray* Sphere::doIntersectionFirstHit(const Ray& inoutRay) {
     return new Ray(r);
 }
 
-bool Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
+bool
+Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     double dx = -inRay.getOrigin().x();
     double dy = -inRay.getOrigin().y();
     double dz = -inRay.getOrigin().z();
@@ -66,7 +70,8 @@ bool Sphere::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) {
     return true;
 }
 
-void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
+void
+Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     if (outData == nullptr) {
         return;
     }
@@ -127,7 +132,8 @@ void Sphere::doExtraInformation(const Ray& inRay, double inT, RayHit* outData) {
     }
 }
 
-int Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
+int
+Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
     double l = p.length();
     if (l < radius - distanceTolerance) {
         return INSIDE;
@@ -138,7 +144,8 @@ int Sphere::doContainmentTest(const Vector3Dd& p, double distanceTolerance) {
     return LIMIT;
 }
 
-double* Sphere::getMinMax() {
+double*
+Sphere::getMinMax() {
     double* minmax = new double[6];
     for (int i = 0; i < 3; i++) {
         minmax[i] = -radius;

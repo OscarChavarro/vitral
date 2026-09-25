@@ -48,6 +48,10 @@ add_executable(SceneEditorApplication
     src/gui/history/UndoRedoInteractionTechnique.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
     src/gui/xt/XtEventMapper.cpp
+    src/gui/xt/XtGenericEditor.cpp
+    src/gui/xt/XtModifyPanel.cpp
+    src/gui/xt/XtPanelWidgets.cpp
+    src/gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.cpp
     src/io/FileSuffixFilter.cpp
     src/io/GuiI18nContextBuilder.cpp
     src/io/GuiJsonReader.cpp

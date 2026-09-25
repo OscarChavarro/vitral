@@ -26,6 +26,8 @@
 
 #include "java/lang/String.h"
 #include "gui/PopupDismissClickFilter.h"
+#include "gui/xt/XtModifyPanel.h"
+#include "gui/xt/XtModifyPanelHost.h"
 #include "gui/xt/XlibLabelImageProvider.h"
 #include "gui/xt/XtEventMapper.h"
 #include "io/GuiJsonReader.h"
@@ -78,10 +80,12 @@ struct CommandBinding {
 
 struct TabBinding {
     SceneEditorApplication* application;
-    bool creation;
+    int page;
 };
 
-class SceneEditorApplication : private XtOpenGL4SceneBridge::Listener
+class SceneEditorApplication :
+    private XtOpenGL4SceneBridge::Listener,
+    private XtModifyPanelHost
 {
 public:
     SceneEditorApplication()
@@ -97,7 +101,9 @@ public:
         , menuFontSet(nullptr)
         , rightPanel(nullptr)
         , creationPage(nullptr)
+        , modifyPage(nullptr)
         , pendingPage(nullptr)
+        , modifyPanel(nullptr)
         , viewportMenu(nullptr)
         , checkMarkBitmap(None)
         , labelProvider(nullptr)
@@ -136,6 +142,10 @@ public:
     ~SceneEditorApplication()
     {
         cleanupOpenGL();
+        // The editors stop listening to the entities before the scene goes
+        if (sceneBridge != nullptr) sceneBridge->setBodyEditFeedbackProvider(nullptr);
+        delete modifyPanel;
+        modifyPanel = nullptr;
         if (sceneBridge != nullptr) {
             if (display != nullptr && context != nullptr)
                 glXMakeCurrent(display, window, context);
@@ -211,8 +221,10 @@ private:
     XFontSet menuFontSet;
     Widget rightPanel;
     Widget creationPage;
+    Widget modifyPage;
     Widget pendingPage;
     Widget pendingLabel;
+    XtModifyPanel* modifyPanel;
     Widget viewportMenu;
     Pixmap checkMarkBitmap;
     XlibLabelImageProvider* labelProvider;
@@ -323,7 +335,7 @@ private:
     {
         TabBinding* binding = reinterpret_cast<TabBinding*>(clientData);
         if (binding != nullptr && binding->application != nullptr)
-            binding->application->showSidePage(binding->creation);
+            binding->application->showSidePage(binding->page);
     }
 
     static void popupSubmenu(Widget entry, XtPointer clientData, XtPointer)
@@ -454,17 +466,47 @@ private:
         return it != messages.end() ? it->second : id;
     }
 
-    void showSidePage(bool creation)
+    static const int CREATION_PAGE = 0;
+    static const int MODIFY_PAGE = 1;
+
+    /**
+    Shows the page of a tab of the side panel: creation, modify or (for the
+    tabs not ported yet) an empty one. As `AwtModifyTabChangeListener`,
+    showing the modify page tells it the body it must edit.
+    */
+    void showSidePage(int page)
     {
-        if (creationPage == nullptr || pendingPage == nullptr) return;
-        if (creation) {
-            XtManageChild(creationPage);
-            XtUnmanageChild(pendingPage);
-        }
-        else {
-            XtUnmanageChild(creationPage);
-            XtManageChild(pendingPage);
-        }
+        if (creationPage == nullptr || modifyPage == nullptr ||
+            pendingPage == nullptr) return;
+        Widget pages[] = { creationPage, modifyPage, pendingPage };
+        Widget shown = page == CREATION_PAGE ? creationPage :
+            page == MODIFY_PAGE ? modifyPage : pendingPage;
+        for (int i = 0; i < 3; ++i)
+            if (pages[i] != shown) XtUnmanageChild(pages[i]);
+        XtManageChild(shown);
+        setModifyPanelSelected(page == MODIFY_PAGE);
+    }
+
+    void setModifyPanelSelected(bool selected)
+    {
+        if (sceneBridge == nullptr) return;
+        sceneBridge->setModifyPanelSelected(selected);
+        if (selected) reportTargetToModifyPanel();
+    }
+
+    /**
+    Notifies the modify panel of the target it must edit: the first selected
+    body while the modify page is shown, or none.
+    */
+    void reportTargetToModifyPanel()
+    {
+        if (sceneBridge == nullptr || modifyPanel == nullptr) return;
+        SimpleBody* target = sceneBridge->getModifyPanelTarget();
+        if (target != nullptr)
+            modifyPanel->notifyTargetBeginEdit(target);
+        else
+            modifyPanel->notifyTargetEndEdit();
+        requestRedraw();
     }
 
     void createRightPanel()
@@ -495,7 +537,7 @@ private:
             XtSetArg(tabArgs[tabN], XtNwidth, 64); ++tabN;
             Widget tab = XtCreateManagedWidget(
                 "sideTab", commandWidgetClass, rightPanel, tabArgs, tabN);
-            TabBinding* binding = new TabBinding{this, i == 0};
+            TabBinding* binding = new TabBinding{this, i};
             tabBindings.push_back(binding);
             XtAddCallback(tab, XtNcallback, &SceneEditorApplication::selectSideTab, binding);
         }
@@ -507,8 +549,15 @@ private:
         XtSetArg(pageArgs[pageN], XtNheight, height - 2 * tabHeight); ++pageN;
         creationPage = XtCreateManagedWidget(
             "creationPage", compositeWidgetClass, rightPanel, pageArgs, pageN);
+        modifyPage = XtCreateWidget(
+            "modifyPage", compositeWidgetClass, rightPanel, pageArgs, pageN);
         pendingPage = XtCreateWidget(
             "pendingPage", compositeWidgetClass, rightPanel, pageArgs, pageN);
+        modifyPanel = new XtModifyPanel(this, modifyPage, sideWidth);
+        if (sceneBridge != nullptr) {
+            sceneBridge->setBodyEditFeedbackProvider(modifyPanel);
+            sceneBridge->setModifyPanelSelected(false);
+        }
 
         // The commands of the CREATION group of the GUI definition, but the
         // import / export ones, that need file dialogs
@@ -539,9 +588,13 @@ private:
 
     void rebuildRightPanel()
     {
+        if (sceneBridge != nullptr) sceneBridge->setBodyEditFeedbackProvider(nullptr);
+        delete modifyPanel;
+        modifyPanel = nullptr;
         if (rightPanel != nullptr) XtDestroyWidget(rightPanel);
         rightPanel = nullptr;
         creationPage = nullptr;
+        modifyPage = nullptr;
         pendingPage = nullptr;
         clearSideBindings();
         createRightPanel();
@@ -881,6 +934,7 @@ private:
         checkOpenGLVersion();
         labelProvider = new XlibLabelImageProvider(display);
         sceneBridge = new XtOpenGL4SceneBridge(labelProvider, this);
+        sceneBridge->setBodyEditFeedbackProvider(modifyPanel);
         sceneBridge->setGuiDefinition(guiDefinition);
         sceneBridge->setCanvasSize(canvasWidth, canvasHeight);
         sceneBridge->init();
@@ -1184,6 +1238,8 @@ private:
             return;
         }
         if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::PRESS)) return;
+        // Keys go back to the canvas after typing in a field of the panel
+        XtSetKeyboardFocus(shell, drawingCanvas);
         pressButton = event.xbutton.button;
         pressX = event.xbutton.x;
         pressY = event.xbutton.y;
@@ -1417,6 +1473,32 @@ private:
     void closeRequested() override
     {
         requestClose();
+    }
+
+    void selectionChanged() override
+    {
+        reportTargetToModifyPanel();
+    }
+
+    //= XtModifyPanelHost =================================================
+
+    void repaintDrawingArea() override
+    {
+        requestRedraw();
+    }
+
+    XFontSet getPanelFontSet() override
+    {
+        return menuFontSet;
+    }
+
+    Widget createPopupMenu(Widget parent, const char* name) override
+    {
+        Arg args[3]; Cardinal n = 0;
+        XtSetArg(args[n], XtNvisual, visual); ++n;
+        XtSetArg(args[n], XtNdepth, visualDepth); ++n;
+        XtSetArg(args[n], XtNcolormap, colormap); ++n;
+        return XtCreatePopupShell(name, simpleMenuWidgetClass, parent, args, n);
     }
 
     static void showViewportMenuAfterEvent(XtPointer clientData, XtIntervalId*)

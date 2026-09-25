@@ -5,6 +5,8 @@
 #include "io/GuiI18nContextBuilder.h"
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
+#include "model/GuiState.h"
+#include "model/selection/SceneSelectionEditor.h"
 #include "model/Scene.h"
 #include "render/DrawingAreaHost.h"
 #include "render/opengl4/OpenGL4DrawingAreaRenderer.h"
@@ -36,14 +38,20 @@ public:
     GuiEventExecutor* executor;
     /// Viewport whose title was clicked, target of the viewport menu
     Viewport* menuViewport;
+    /// Finds the target of the modify panel
+    SceneSelectionEditor* selectionEditor;
+    /// Editor of the modify panel, or null
+    BodyEditFeedbackProvider* editFeedbackProvider;
 
     Impl(OpenGL4LabelImageProvider* labels,
          XtOpenGL4SceneBridge::Listener* listener)
         : listener(listener), model(new ApplicationModel()),
           techniques(nullptr), renderer(nullptr), executor(nullptr),
-          menuViewport(nullptr)
+          menuViewport(nullptr), selectionEditor(nullptr),
+          editFeedbackProvider(nullptr)
     {
         model->setScene(new Scene());
+        selectionEditor = new SceneSelectionEditor(model->getScene());
         techniques = new DrawingAreaInteractionTechniques(model, this);
         // While dragging a gizmo, the pointer wraps around its viewport
         techniques->setCursorWrapEnabled(true);
@@ -62,6 +70,7 @@ public:
 
     ~Impl()
     {
+        delete selectionEditor;
         delete executor;
         delete renderer;
         delete techniques;
@@ -114,7 +123,7 @@ public:
     bool isFullScreenGuiMode() override { return false; }
     BodyEditFeedbackProvider* getBodyEditFeedbackProvider() override
     {
-        return nullptr;
+        return editFeedbackProvider;
     }
     /**
     Raytraces the view of a viewport in CPU render mode (see
@@ -178,7 +187,7 @@ public:
         listener->statusMessageRequested(message.c_str());
     }
 
-    void selectionChanged() override {}
+    void selectionChanged() override { listener->selectionChanged(); }
     void raytracingRequested() override {}
     void selectorDialogRequested() override {}
     void closeRequested() override { listener->closeRequested(); }
@@ -312,4 +321,25 @@ void XtOpenGL4SceneBridge::executeViewportCommand(const std::string& command)
         return;
     }
     impl->techniques->processViewportCommand(command.c_str(), viewport);
+}
+
+//= Modify panel ==========================================================
+
+void XtOpenGL4SceneBridge::setModifyPanelSelected(bool selected)
+{
+    impl->model->getGuiState()->setModifyPanelSelected(selected);
+}
+
+SimpleBody* XtOpenGL4SceneBridge::getModifyPanelTarget()
+{
+    if ( !impl->model->getGuiState()->isModifyPanelSelected() ) {
+        return nullptr;
+    }
+    return impl->selectionEditor->getFirstSelectedBody();
+}
+
+void XtOpenGL4SceneBridge::setBodyEditFeedbackProvider(
+    BodyEditFeedbackProvider* provider)
+{
+    impl->editFeedbackProvider = provider;
 }
