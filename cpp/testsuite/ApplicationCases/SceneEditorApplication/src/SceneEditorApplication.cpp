@@ -278,7 +278,7 @@ private:
     static std::string selectedGuiLanguage()
     {
         const char* language = std::getenv("SCENE_EDITOR_GUI_LANGUAGE");
-        return language != nullptr ? language : "spanish";
+        return language != nullptr ? language : "english";
     }
 
     static void selectGuiLocale()
@@ -710,10 +710,13 @@ private:
         XtSetArg(args[n], XtNx, 0); n++;
         XtSetArg(args[n], XtNy, 0); n++;
 
+        // An application shell: only for it Xt starts the resource path of
+        // the widgets with the application class, so the entries of the
+        // XResources file (`SceneEditorApplication*...`) apply
         shell = XtAppCreateShell(
             "sceneEditor",
             "SceneEditorApplication",
-            topLevelShellWidgetClass,
+            applicationShellWidgetClass,
             display,
             args,
             n);

@@ -329,7 +329,21 @@ java::ArrayList<SimpleBody*>& TranslateGizmo::getElements3dsmax()
         }
     }
 
-    // The previous curves are no longer referenced by any instance
+    // Instances not updated in this call (as the line of an axis hidden
+    // because it points to the viewer of an orthogonal camera) still refer
+    // to the previous curves; in Java the garbage collector keeps those
+    // alive, here they are moved to the new ones before deleting the old
+    for ( i = 0; i < elementInstances3dsmax.size(); i++ ) {
+        r = elementInstances3dsmax.get(i);
+        if ( lineModel3dsmax != nullptr &&
+             r->getGeometry() == lineModel3dsmax ) {
+            r->setGeometryReference(lineModel);
+        }
+        else if ( segmentModel3dsmax != nullptr &&
+                  r->getGeometry() == segmentModel3dsmax ) {
+            r->setGeometryReference(segmentModel);
+        }
+    }
     delete lineModel3dsmax;
     delete segmentModel3dsmax;
     lineModel3dsmax = lineModel;

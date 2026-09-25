@@ -32,6 +32,7 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ArrowRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4InputGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4TranslateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/gizmo/OpenGL4RotateGizmoRenderer.cpp

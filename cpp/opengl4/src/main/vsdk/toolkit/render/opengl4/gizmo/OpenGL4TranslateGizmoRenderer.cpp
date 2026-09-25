@@ -1,9 +1,128 @@
+#include <GL/glew.h>
+
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/camera/Camera.h"
-#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
+#include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/volume/Box.h"
+#include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/gui/gizmo/GizmoSolidTessellator.h"
+#include "vsdk/toolkit/gui/gizmo/GizmoVertexArrayBuilder.h"
 #include "vsdk/toolkit/gui/gizmo/TranslateGizmo.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
-#include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+#include "vsdk/toolkit/gui/gizmo/TranslateGizmoLineSegment.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.h"
 #include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4TranslateGizmoRenderer.h"
-void OpenGL4TranslateGizmoRenderer::draw(TranslateGizmo*g,Camera*c){if(!g||!c)return;g->setCamera(c);g->updateGeometryState();RendererConfiguration q;q.setWires(false);q.setSelectionCorners(false);java::ArrayList<SimpleBody*>&e=g->getElements();for(long i=0;i<e.size();i++)if(e[i])OpenGL4GeometryRenderer::draw(e[i]->getGeometry(),c,0,e[i]->getMaterial(),&q,0,0,e[i]->getTransformationMatrix());java::ArrayList<TranslateGizmoLineSegment>s=g->getLineSegments();java::ArrayList<float>p,col;for(long i=0;i<s.size();i++){const Vector3Dd&a=s[i].start();const Vector3Dd&b=s[i].end();const ColorRgb&x=s[i].color();p.add(a.x());p.add(a.y());p.add(a.z());p.add(b.x());p.add(b.y());p.add(b.z());for(int k=0;k<2;k++){col.add(x.r());col.add(x.g());col.add(x.b());}}OpenGL4LineRenderer::drawLines(c->calculateProjectionMatrix(),p,col,(float)g->getLineWidth());}
+
+const double OpenGL4TranslateGizmoRenderer::CONE_BASE_SHADE = 0.5;
+
+void OpenGL4TranslateGizmoRenderer::draw(TranslateGizmo* gizmo, Camera* camera)
+{
+    if ( gizmo == nullptr || camera == nullptr ) {
+        return;
+    }
+
+    java::ArrayList<SimpleBody*>& elements = gizmo->getElements3dsmax();
+    Matrix4x4d mvp = camera->calculateProjectionMatrix();
+    long i;
+
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    //- Opaque elements -----------------------------------------------
+    drawLines(gizmo, mvp);
+    for ( i = 0; i < elements.size(); i++ ) {
+        SimpleBody* element = elements.get(i);
+        Cone* cone = dynamic_cast<Cone*>(element->getGeometry());
+
+        if ( cone != nullptr ) {
+            drawCone(mvp, element, cone);
+        }
+    }
+
+    //- Translucent elements, over the opaque ones --------------------
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    for ( i = 0; i < elements.size(); i++ ) {
+        SimpleBody* element = elements.get(i);
+        Box* box = dynamic_cast<Box*>(element->getGeometry());
+
+        if ( box != nullptr ) {
+            drawPlaneHandle(mvp, element, box);
+        }
+    }
+
+    //-----------------------------------------------------------------
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+}
+
+void OpenGL4TranslateGizmoRenderer::drawLines(TranslateGizmo* gizmo,
+                                              const Matrix4x4d& mvp)
+{
+    java::ArrayList<TranslateGizmoLineSegment> segments =
+        gizmo->getLineSegments();
+
+    for ( long i = 0; i < segments.size(); i++ ) {
+        TranslateGizmoLineSegment segment = segments.get(i);
+        Vector3Dd points[4];
+
+        if ( !gizmo->buildLineStrip(segment, points) ) {
+            continue;
+        }
+        java::ArrayList<Vector3Dd> strip;
+        for ( int k = 0; k < 4; k++ ) {
+            strip.add(points[k]);
+        }
+        drawStrip(mvp, strip, segment.color(), 1.0, GL_TRIANGLE_STRIP);
+    }
+}
+
+void OpenGL4TranslateGizmoRenderer::drawCone(const Matrix4x4d& mvp,
+                                             SimpleBody* element, Cone* cone)
+{
+    double radius = cone->getBottomRadius();
+    double height = cone->getHeight();
+    ColorRgb c = element->getMaterial()->getDiffuse();
+    Matrix4x4d local = GizmoSolidTessellator::localTransform(element);
+
+    // Side
+    java::ArrayList<Vector3Dd> sideFan =
+        GizmoSolidTessellator::buildConeSideFan(local, radius, height);
+    drawStrip(mvp, sideFan, c, 1.0, GL_TRIANGLE_FAN);
+
+    // Base, darker
+    ColorRgb dark(c.r()*CONE_BASE_SHADE, c.g()*CONE_BASE_SHADE,
+        c.b()*CONE_BASE_SHADE);
+    java::ArrayList<Vector3Dd> baseFan =
+        GizmoSolidTessellator::buildConeBaseFan(local, radius);
+
+    drawStrip(mvp, baseFan, dark, 1.0, GL_TRIANGLE_FAN);
+}
+
+void OpenGL4TranslateGizmoRenderer::drawPlaneHandle(const Matrix4x4d& mvp,
+                                                    SimpleBody* element, Box* box)
+{
+    ColorRgb c = element->getMaterial()->getDiffuse();
+    Matrix4x4d local = GizmoSolidTessellator::localTransform(element);
+    java::ArrayList<Vector3Dd> quad = GizmoSolidTessellator::buildPlaneQuad(
+        local, box->getSize().x(), box->getSize().y());
+
+    drawStrip(mvp, quad, c, element->getMaterial()->getOpacity(),
+        GL_TRIANGLE_STRIP);
+}
+
+void OpenGL4TranslateGizmoRenderer::drawStrip(const Matrix4x4d& mvp,
+    const java::ArrayList<Vector3Dd>& points, const ColorRgb& c, double alpha,
+    unsigned int primitiveType)
+{
+    java::ArrayList<float> positions =
+        GizmoVertexArrayBuilder::buildPositions(points);
+    java::ArrayList<float> colors =
+        GizmoVertexArrayBuilder::buildRgbaColors(points.size(), c, alpha);
+
+    OpenGL4ColoredPrimitiveRenderer::draw(mvp, primitiveType, positions, colors);
+}

@@ -258,6 +258,8 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/viewport/ViewportSet.cpp
     src/main/vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.cpp
     src/main/vsdk/toolkit/gui/viewport/ViewportInteractionTechniques.cpp
+    src/main/vsdk/toolkit/gui/gizmo/GizmoSolidTessellator.cpp
+    src/main/vsdk/toolkit/gui/gizmo/GizmoVertexArrayBuilder.cpp
     src/main/vsdk/toolkit/gui/gizmo/InputGizmo.cpp
     src/main/vsdk/toolkit/gui/gizmo/InputGizmoValueChangeRules.cpp
     src/main/vsdk/toolkit/gui/gizmo/ReferenceFrameGizmo.cpp
