@@ -35,8 +35,9 @@ XtOpenGL4GuiEventExecutor::XtOpenGL4GuiEventExecutor(XtApplicationHost* parent)
 {
 }
 
-bool XtOpenGL4GuiEventExecutor::executeCommand(const std::string& label)
+bool XtOpenGL4GuiEventExecutor::executeCommand(const java::String& command)
 {
+    std::string label(command.c_str());
     GuiEventExecutor::CommandResult result =
         parent->getSceneBridge()->executeCommand(label);
 

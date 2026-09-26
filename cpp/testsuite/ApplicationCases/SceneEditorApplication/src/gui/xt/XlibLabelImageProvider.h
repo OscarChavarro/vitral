@@ -4,32 +4,26 @@
 #include <map>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <X11/Xlib.h>
 
 #include "vsdk/toolkit/render/opengl4/OpenGL4LabelImageProvider.h"
 
+class RGBAImageUncompressed;
+
 /**
-Rasterizes the labels of the viewports (titles, HUD, gizmo labels) with the
-UTF-8 font sets of Xlib, so the OpenGL4 renderers can present them as
-textures. The coverage of each text is cached, since the renderers ask for
-the same labels every frame.
+Gives the OpenGL4 renderers the images of the labels of the viewports
+(titles, HUD, gizmo labels), rasterized by `XtSystem::calculateLabelImage`,
+as the `Jogl4LabelImageProvider` of `AwtJogl4ApplicationController` does
+with `AwtSystem`. The images are cached, since the renderers ask for the
+same labels every frame.
 */
 class XlibLabelImageProvider : public OpenGL4LabelImageProvider {
 private:
-    struct Coverage {
-        int width;
-        int height;
-        std::vector<unsigned char> alpha;
-    };
+    typedef std::pair<std::pair<std::string, int>, unsigned long> Key;
 
     Display* display;
-    std::map<int, XFontSet> fontSets;
-    std::map<std::pair<std::string, int>, Coverage> cache;
-
-    XFontSet getFontSet(int pixelSize);
-    const Coverage& rasterize(const std::string& text, int pixelSize);
+    std::map<Key, RGBAImageUncompressed*> cache;
 
     XlibLabelImageProvider(const XlibLabelImageProvider& other);
     XlibLabelImageProvider& operator=(const XlibLabelImageProvider& other);

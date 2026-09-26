@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #include "java/io/BufferedInputStream.h"
 #include "java/io/BufferedOutputStream.h"
@@ -559,9 +560,90 @@ IndexedColorImageUncompressed* ImagePersistence::importIndexedColor(const java::
 }
 
 RGBAImageUncompressed* ImagePersistence::importRGBA(const java::File& inImageFd) {
+#ifdef VITRAL_WITH_PNG
+    java::String* type = extractExtensionFromFile(inImageFd);
+    bool isPng = type->equals("png");
+    delete type;
+    if (isPng) {
+        java::String pngNameStr = inImageFd.getPath();
+        FILE* fp = std::fopen(pngNameStr.toCString(), "rb");
+        if (!fp) {
+            fprintf(stderr, "Cannot open PNG file: %s\n", pngNameStr.toCString());
+            return nullptr;
+        }
+        png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+        png_infop info_ptr = png_ptr ? png_create_info_struct(png_ptr) : nullptr;
+        if (!png_ptr || !info_ptr) {
+            png_destroy_read_struct(&png_ptr, nullptr, nullptr);
+            std::fclose(fp);
+            return nullptr;
+        }
+        if (setjmp(png_jmpbuf(png_ptr))) {
+            png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+            std::fclose(fp);
+            return nullptr;
+        }
+        png_init_io(png_ptr, fp);
+        png_read_info(png_ptr, info_ptr);
+
+        int width = (int)png_get_image_width(png_ptr, info_ptr);
+        int height = (int)png_get_image_height(png_ptr, info_ptr);
+        int color_type = png_get_color_type(png_ptr, info_ptr);
+        int bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+
+        // Everything to 8 bits RGBA: files without alpha are opaque
+        if (bit_depth == 16) png_set_strip_16(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr);
+        if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png_ptr);
+        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY ||
+            color_type == PNG_COLOR_TYPE_PALETTE) {
+            png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
+        }
+        png_read_update_info(png_ptr, info_ptr);
+
+        std::vector<unsigned char> pixels((size_t)width * (size_t)height * 4);
+        std::vector<png_bytep> rows((size_t)height);
+        for (int y = 0; y < height; y++) {
+            rows[(size_t)y] = &pixels[(size_t)y * (size_t)width * 4];
+        }
+        png_read_image(png_ptr, rows.data());
+        png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+        std::fclose(fp);
+
+        RGBAImageUncompressed* retImage = new RGBAImageUncompressed();
+        if (!retImage->init(width, height)) {
+            delete retImage;
+            return nullptr;
+        }
+        size_t pos = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                retImage->putPixel(x, y, (char)pixels[pos], (char)pixels[pos + 1],
+                                   (char)pixels[pos + 2], (char)pixels[pos + 3]);
+                pos += 4;
+            }
+        }
+        return retImage;
+    }
+#endif
+
+    // Formats without transparency: an opaque image
+    RGBImageUncompressed* rgb = importRGB(inImageFd);
+    if (rgb == nullptr) {
+        return nullptr;
+    }
     RGBAImageUncompressed* retImage = new RGBAImageUncompressed();
-    retImage->init(256, 256);
-    retImage->createTestPattern();
+    retImage->init(rgb->getXSize(), rgb->getYSize());
+    RGBPixel pixel;
+    for (int y = 0; y < rgb->getYSize(); y++) {
+        for (int x = 0; x < rgb->getXSize(); x++) {
+            rgb->getPixelRgb(x, y, &pixel);
+            retImage->putPixel(x, y, pixel.r, pixel.g, pixel.b, (char)255);
+        }
+    }
+    delete rgb;
     return retImage;
 }
 

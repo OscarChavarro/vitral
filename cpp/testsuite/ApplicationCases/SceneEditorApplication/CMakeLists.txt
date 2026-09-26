@@ -22,6 +22,7 @@ endif()
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
 set(VITRAL_OPENGL4_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4")
+set(VITRAL_XT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../xt")
 
 if(NOT TARGET vitral_base)
     set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
@@ -32,10 +33,13 @@ endif()
 if(NOT TARGET vitral_opengl4)
     add_subdirectory("${VITRAL_OPENGL4_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_opengl4")
 endif()
+if(NOT TARGET vitral_xt)
+    add_subdirectory("${VITRAL_XT_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_xt")
+endif()
 
 # The technology-independent application classes, the OpenGL 4 rendering
-# bridge ported from the Java application and the Xt/Xlib adapters (event
-# mapping and label rasterization) that connect them to the Xt/GLX shell.
+# bridge ported from the Java application and its Xt GUI, built over the
+# Xt/Xaw layer of the toolkit (vitral_xt, as the Java one over `awt`).
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
@@ -49,17 +53,11 @@ add_executable(SceneEditorApplication
     src/gui/VisualRayDebugController.cpp
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
-    src/gui/xt/XlibImageConverter.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
-    src/gui/xt/XtButtonsPanel.cpp
-    src/gui/xt/XtEventQueue.cpp
     src/gui/xt/XtFileDialog.cpp
     src/gui/xt/XtImageControlWindow.cpp
     src/gui/xt/XtSelectorDialog.cpp
-    src/gui/xt/XtEventMapper.cpp
-    src/gui/xt/XtGenericEditor.cpp
     src/gui/xt/XtModifyPanel.cpp
-    src/gui/xt/XtPanelWidgets.cpp
     src/gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.cpp
     src/io/FileSuffixFilter.cpp
     src/io/GuiI18nContextBuilder.cpp
@@ -106,6 +104,7 @@ target_include_directories(SceneEditorApplication PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${VITRAL_BASE_DIR}/src/main"
     "${VITRAL_OPENGL4_DIR}/src/main"
+    "${VITRAL_XT_DIR}/src/main"
     ${X11_INCLUDE_DIR}
     ${GLEW_INCLUDE_DIRS}
 )
@@ -118,4 +117,5 @@ target_link_libraries(SceneEditorApplication PRIVATE
     ${X11_LIBRARIES}
     vitral_base
     vitral_opengl4
+    vitral_xt
 )

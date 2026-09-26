@@ -5,7 +5,7 @@
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
 #include "gui/xt/XtModifyPanelHost.h"
-#include "gui/xt/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 

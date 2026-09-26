@@ -338,6 +338,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/entity_tests.cpp
     src/test/generic_editor_tests.cpp
     src/test/java_emulation_tests.cpp
+    src/test/image_persistence_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)

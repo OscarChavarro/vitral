@@ -1,8 +1,8 @@
 #include <cctype>
 #include <string>
 
-#include "gui/xt/XtGenericEditor.h"
-#include "gui/xt/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/editor/XtGenericEditor.h"
+#include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "vsdk/toolkit/gui/editor/ControlSpecification.h"
 
 namespace {

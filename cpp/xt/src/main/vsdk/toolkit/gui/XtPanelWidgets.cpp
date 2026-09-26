@@ -7,7 +7,7 @@
 #include <X11/Xaw/AsciiText.h>
 #include <X11/Xaw/Label.h>
 
-#include "gui/xt/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtPanelWidgets.h"
 
 namespace {
 

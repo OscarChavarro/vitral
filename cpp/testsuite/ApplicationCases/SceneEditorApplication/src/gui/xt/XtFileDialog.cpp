@@ -13,7 +13,7 @@
 
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtFileDialog.h"
-#include "gui/xt/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtPanelWidgets.h"
 
 namespace {
 

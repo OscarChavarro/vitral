@@ -9,7 +9,7 @@
 
 #include <X11/Intrinsic.h>
 
-#include "gui/xt/XtEventQueue.h"
+#include "vsdk/toolkit/gui/XtEventQueue.h"
 
 namespace {
 

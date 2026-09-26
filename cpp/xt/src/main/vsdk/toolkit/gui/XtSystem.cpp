@@ -1,9 +1,15 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
-#include "gui/xt/XtEventMapper.h"
+#include <cstdio>
+#include <map>
+#include <utility>
 
-int XtEventMapper::buttonMaskFor(unsigned int button)
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/gui/XtSystem.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+
+int XtSystem::buttonMaskFor(unsigned int button)
 {
     switch ( button ) {
       case Button1: return MouseEvent::BUTTON1_DOWN_MASK;
@@ -13,7 +19,7 @@ int XtEventMapper::buttonMaskFor(unsigned int button)
     }
 }
 
-int XtEventMapper::stateToModifiers(unsigned int state)
+int XtSystem::stateToModifiers(unsigned int state)
 {
     int modifiers = 0;
 
@@ -26,7 +32,7 @@ int XtEventMapper::stateToModifiers(unsigned int state)
     return modifiers;
 }
 
-MouseEvent XtEventMapper::toMouseEvent(const XEvent& event)
+MouseEvent XtSystem::xt2vsdkMouseEvent(const XEvent& event)
 {
     MouseEvent result;
 
@@ -64,12 +70,12 @@ MouseEvent XtEventMapper::toMouseEvent(const XEvent& event)
     return result;
 }
 
-bool XtEventMapper::isWheelButton(const XEvent& event)
+bool XtSystem::isWheelButton(const XEvent& event)
 {
     return event.xbutton.button >= 4 && event.xbutton.button <= 7;
 }
 
-MouseEvent XtEventMapper::toMouseWheelEvent(const XEvent& event)
+MouseEvent XtSystem::xt2vsdkWheelEvent(const XEvent& event)
 {
     MouseEvent result;
 
@@ -86,18 +92,18 @@ MouseEvent XtEventMapper::toMouseWheelEvent(const XEvent& event)
     return result;
 }
 
-KeyEvent XtEventMapper::toKeyEvent(XKeyEvent& event)
+KeyEvent XtSystem::xt2vsdkKeyEvent(XKeyEvent& event)
 {
     char buffer[8] = {0};
     KeySym keysym = NoSymbol;
     int count = XLookupString(&event, buffer, sizeof(buffer) - 1, &keysym,
                               nullptr);
 
-    return toKeyEvent(keysym, XLookupKeysym(&event, 0), buffer, count,
+    return xt2vsdkKeyEvent(keysym, XLookupKeysym(&event, 0), buffer, count,
                       event.state);
 }
 
-KeyEvent XtEventMapper::toKeyEvent(KeySym keysym, KeySym base,
+KeyEvent XtSystem::xt2vsdkKeyEvent(KeySym keysym, KeySym base,
                                    const char* buffer, int count,
                                    unsigned int state)
 {
@@ -179,4 +185,118 @@ KeyEvent XtEventMapper::toKeyEvent(KeySym keysym, KeySym base,
     else if ( c == '*' && keysym == XK_KP_Multiply ) result.keycode = KeyEvent::KEY_NUMASTERISK;
     else if ( c == '/' && keysym == XK_KP_Divide ) result.keycode = KeyEvent::KEY_NUMSLASH;
     return result;
+}
+
+//= Labels ================================================================
+
+namespace {
+
+std::map<std::pair<Display*, int>, XFontSet>& fontSets()
+{
+    static std::map<std::pair<Display*, int>, XFontSet> sets;
+    return sets;
+}
+
+XFontSet getFontSet(Display* display, int pixelSize)
+{
+    std::pair<Display*, int> key(display, pixelSize);
+    std::map<std::pair<Display*, int>, XFontSet>::iterator known =
+        fontSets().find(key);
+    if ( known != fontSets().end() ) {
+        return known->second;
+    }
+
+    // Closest size of a scalable or bitmap Helvetica, then any font
+    char pattern[256];
+    snprintf(pattern, sizeof(pattern),
+        "-*-helvetica-medium-r-normal--%d-*-*-*-*-*-*-*,"
+        "-*-*-medium-r-normal--%d-*-*-*-*-*-*-*,fixed",
+        pixelSize, pixelSize);
+    char** missingCharsets = nullptr;
+    int missingCharsetCount = 0;
+    char* defaultString = nullptr;
+    XFontSet fontSet = XCreateFontSet(display, pattern, &missingCharsets,
+                                      &missingCharsetCount, &defaultString);
+    if ( missingCharsets != nullptr ) {
+        XFreeStringList(missingCharsets);
+    }
+    fontSets()[key] = fontSet;
+    return fontSet;
+}
+
+}
+
+RGBAImageUncompressed* XtSystem::calculateLabelImage(
+    Display* display, const java::String& label, const ColorRgb& color,
+    int fontSize)
+{
+    RGBAImageUncompressed* image = new RGBAImageUncompressed();
+    XFontSet fontSet = getFontSet(display, fontSize);
+    int textLength = label.length();
+
+    // Renderers use the image without checking it: an empty text (or a
+    // missing font) gives a transparent pixel
+    if ( fontSet == nullptr || textLength == 0 ) {
+        image->init(1, 1);
+        return image;
+    }
+
+    XRectangle ink;
+    XRectangle logical;
+    Xutf8TextExtents(fontSet, label.c_str(), textLength, &ink, &logical);
+    int width = logical.width > 0 ? logical.width : 1;
+    int height = logical.height > 0 ? logical.height : 1;
+
+    // White text over black: the text coverage
+    int screen = DefaultScreen(display);
+    Window root = RootWindow(display, screen);
+    Pixmap pixmap = XCreatePixmap(display, root, width, height,
+                                  DefaultDepth(display, screen));
+    GC gc = XCreateGC(display, pixmap, 0, nullptr);
+    XSetForeground(display, gc, BlackPixel(display, screen));
+    XFillRectangle(display, pixmap, gc, 0, 0, width, height);
+    XSetForeground(display, gc, WhitePixel(display, screen));
+    Xutf8DrawString(display, pixmap, fontSet, gc, -logical.x, -logical.y,
+                    label.c_str(), textLength);
+    XImage* coverage = XGetImage(display, pixmap, 0, 0, width, height,
+                                 AllPlanes, ZPixmap);
+    XFreeGC(display, gc);
+    XFreePixmap(display, pixmap);
+    if ( coverage == nullptr ) {
+        image->init(1, 1);
+        return image;
+    }
+
+    image->init(width, height);
+    char r = static_cast<char>(static_cast<int>(color.r() * 255.0));
+    char g = static_cast<char>(static_cast<int>(color.g() * 255.0));
+    char b = static_cast<char>(static_cast<int>(color.b() * 255.0));
+    unsigned long white = WhitePixel(display, screen);
+    for ( int y = 0; y < height; y++ ) {
+        for ( int x = 0; x < width; x++ ) {
+            char a = XGetPixel(coverage, x, y) == white ?
+                static_cast<char>(255) : 0;
+            // putPixel takes y from the top, as the X image does
+            image->putPixel(x, y, r, g, b, a);
+        }
+    }
+    XDestroyImage(coverage);
+    return image;
+}
+
+void XtSystem::releaseResources(Display* display)
+{
+    std::map<std::pair<Display*, int>, XFontSet>::iterator i =
+        fontSets().begin();
+    while ( i != fontSets().end() ) {
+        if ( i->first.first == display ) {
+            if ( i->second != nullptr ) {
+                XFreeFontSet(display, i->second);
+            }
+            fontSets().erase(i++);
+        }
+        else {
+            ++i;
+        }
+    }
 }

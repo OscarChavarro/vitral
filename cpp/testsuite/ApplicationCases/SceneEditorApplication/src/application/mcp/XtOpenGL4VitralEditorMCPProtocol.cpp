@@ -31,7 +31,7 @@
 #include "application/XtOpenGL4ApplicationController.h"
 #include "application/XtOpenGL4SceneEditorApplication.h"
 #include "application/mcp/XtOpenGL4VitralEditorMCPProtocol.h"
-#include "gui/xt/XtEventQueue.h"
+#include "vsdk/toolkit/gui/XtEventQueue.h"
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
 #include "model/InteractionMode.h"

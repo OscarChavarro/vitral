@@ -16,6 +16,32 @@ struct GuiNode {
 };
 
 /**
+Command of the GUI definition: its identifier, texts and images.
+*/
+struct GuiCommand {
+    std::string id;
+    /// String properties: name, brief, icon, iconTransparency...
+    std::map<std::string, std::string> properties;
+    /// Lines of its help (a string or an array of them in the JSON)
+    std::vector<std::string> help;
+
+    /**
+    @return the value of a string property, or an empty string
+    */
+    std::string get(const std::string& property) const
+    {
+        std::map<std::string, std::string>::const_iterator value =
+            properties.find(property);
+        return value != properties.end() ? value->second : std::string();
+    }
+
+    bool has(const std::string& property) const
+    {
+        return properties.find(property) != properties.end();
+    }
+};
+
+/**
 Group of command buttons of the GUI definition (i.e. the ones of a tab of
 the side panel).
 */
@@ -31,7 +57,7 @@ struct GuiButtonGroup {
 
     GuiButtonGroup()
         : found(false), horizontal(false), showTitle(false),
-          showIcons(false), showText(true) {}
+          showIcons(false), showText(false) {}
 };
 
 /**
@@ -65,6 +91,16 @@ public:
     (relative to the folder of the Java application)
     */
     std::map<std::string, std::string> readCommandIcons();
+
+    /**
+    @return the commands of the definition, in order
+    */
+    std::vector<GuiCommand> readCommands();
+
+    /**
+    @return the button groups of the definition, in order
+    */
+    std::vector<GuiButtonGroup> readButtonGroups();
 
     /**
     @return message id -> message text

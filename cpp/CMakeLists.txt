@@ -69,4 +69,9 @@ add_subdirectory(base)
 add_subdirectory(glut)
 add_subdirectory(glfw)
 add_subdirectory(opengl4)
+# Xt/Xaw is the GUI of the X Window System: not available on macOS (XQuartz
+# lacks the OpenGL 4 GLX the applications using it need) nor Windows
+if(UNIX AND NOT APPLE)
+  add_subdirectory(xt)
+endif()
 add_subdirectory(testsuite)

@@ -124,6 +124,18 @@ sudo apt-get install libglfw3-dev libglu1-mesa-dev freeglut3-dev
 brew install glfw3
 ```
 
+### Optional: Xt/Xaw GUI (Linux only)
+
+The `xt` module (`vitral_xt`) is the Xt/Xaw layer of the toolkit, the C++
+counterpart of the Java `awt` module: conversion of X events to vitral ones
+(`XtSystem`), Xlib image renderers (`render/xlib`), Xaw widgets built from
+the vitral GUI definition (`render/xaw/XawGuiRenderer`) and the Xaw generic
+editor. It is built on Linux only, and needs:
+
+```bash
+sudo apt-get install libxt-dev libxaw7-dev
+```
+
 ## Building with Image Format Support
 
 Once you have installed the required libraries, build with support enabled:

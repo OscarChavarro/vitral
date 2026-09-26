@@ -3,10 +3,10 @@
 #include <X11/Composite.h>
 #include <X11/Xutil.h>
 
-#include "gui/xt/XlibImageConverter.h"
+#include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtImageControlWindow.h"
-#include "gui/xt/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
 namespace {
@@ -85,7 +85,7 @@ void XtImageControlWindow::updateXImage()
     if ( visual == nullptr ) {
         visual = DefaultVisualOfScreen(XtScreen(windowWidget));
     }
-    ximage = XlibImageConverter::createXImage(XtDisplay(windowWidget), visual,
+    ximage = XlibRGBImageUncompressedRenderer::exportToXImage(XtDisplay(windowWidget), visual,
                                               depth, *controlledImage);
 }
 

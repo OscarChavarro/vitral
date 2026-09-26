@@ -18,6 +18,8 @@ class RGBImageUncompressed;
 class SimpleBody;
 class Vector3Dd;
 class Viewport;
+class WidgetButtonGroup;
+class WidgetMenu;
 
 /**
 Xt-facing façade for the technology-independent scene model, its
@@ -25,7 +27,7 @@ interaction techniques (camera, selection and the translation, rotation and
 scale gizmos) and its OpenGL4 drawing-area renderer. Its implementation
 intentionally has no Xt dependency, avoiding the legacy Widget name
 collision in the port: the Xt side converts its events to vitral ones (see
-`XtEventMapper`) and presents what the interaction requests through the
+`XtSystem`) and presents what the interaction requests through the
 `Listener`.
 
 Mouse events must have coordinates in canvas pixels, with origin at the
@@ -124,6 +126,17 @@ public:
     in their HUDs.
     */
     void setGuiDefinition(const std::string& json);
+
+    /**
+    @return the menubar of the I18N context, or null
+    */
+    WidgetMenu* getMenubar();
+
+    /**
+    @param name name of a button group of the I18N context (i.e. `CREATION`)
+    @return the group, or null
+    */
+    WidgetButtonGroup* getButtonGroup(const char* name);
 
     void init();
     void dispose();

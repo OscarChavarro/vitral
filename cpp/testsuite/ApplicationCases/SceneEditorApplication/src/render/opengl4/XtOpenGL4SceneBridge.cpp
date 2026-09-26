@@ -283,7 +283,20 @@ XtOpenGL4SceneBridge::~XtOpenGL4SceneBridge() { delete impl; }
 
 void XtOpenGL4SceneBridge::setGuiDefinition(const std::string& json)
 {
-    impl->model->setI18nContext(GuiI18nContextBuilder::build(json));
+    impl->model->setI18nContext(GuiI18nContextBuilder::build(
+        json, GuiState::APPLICATION_DATA_FOLDER));
+}
+
+WidgetMenu* XtOpenGL4SceneBridge::getMenubar()
+{
+    Widget* context = impl->model->getI18nContext();
+    return context != nullptr ? context->getMenubar() : nullptr;
+}
+
+WidgetButtonGroup* XtOpenGL4SceneBridge::getButtonGroup(const char* name)
+{
+    Widget* context = impl->model->getI18nContext();
+    return context != nullptr ? context->getButtonGroup(name) : nullptr;
 }
 
 void XtOpenGL4SceneBridge::init() { impl->renderer->init(); }
