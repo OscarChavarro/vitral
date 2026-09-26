@@ -1,5 +1,6 @@
 #include <cstring>
 
+#include "java/lang/Double.h"
 #include "java/lang/StringBuilder.h"
 namespace java {
 
@@ -139,6 +140,31 @@ StringBuilder::append(char ch) {
     lengthValue++;
     value[lengthValue] = '\0';
     return *this;
+}
+
+StringBuilder &
+StringBuilder::append(int value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
+StringBuilder::append(long value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
+StringBuilder::append(long long value) {
+    return append(String::valueOf(value));
+}
+
+StringBuilder &
+StringBuilder::append(double value) {
+    return append(Double::toString(value));
+}
+
+StringBuilder &
+StringBuilder::append(bool value) {
+    return append(value ? "true" : "false");
 }
 
 String

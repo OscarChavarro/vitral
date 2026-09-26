@@ -50,6 +50,20 @@ public:
     */
     static KeyEvent toKeyEvent(XKeyEvent& event);
 
+    /**
+    Maps a key already looked up (i.e. a synthetic one, see
+    `XtOpenGL4ApplicationController::injectKeyEvent`).
+    @param keysym symbol of the key with the modifiers applied
+    @param baseKeysym symbol of the key without modifiers (its level 0)
+    @param text characters of the key, as `XLookupString` gives them
+    @param count number of characters of the key
+    @param state X modifiers mask (`ShiftMask`, `ControlMask`...)
+    @return the vitral event
+    */
+    static KeyEvent toKeyEvent(KeySym keysym, KeySym baseKeysym,
+                               const char* text, int count,
+                               unsigned int state);
+
 private:
     static int buttonMaskFor(unsigned int button);
     static int stateToModifiers(unsigned int state);

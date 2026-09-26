@@ -16,6 +16,7 @@
 #include "vsdk/toolkit/gui/viewport/ViewportSetCommands.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionListener.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.h"
+#include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenu.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
@@ -24,6 +25,16 @@
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
 #include "vsdk/toolkit/processing/ImageProcessing.h"
+#include "java/io/File.h"
+#include "java/io/FileInputStream.h"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/io/image/RGBColorPalettePersistence.h"
+#include "vsdk/toolkit/media/RGBColorPalette.h"
+
+namespace {
+const char* const PALETTE_FILE = "../../../../etc/palettes/Cranes.gpl";
+}
 
 class XtOpenGL4SceneBridge::Impl :
     public DrawingAreaHost,
@@ -50,7 +61,7 @@ public:
           menuViewport(nullptr), selectionEditor(nullptr),
           editFeedbackProvider(nullptr)
     {
-        model->setScene(new Scene());
+        createModel();
         selectionEditor = new SceneSelectionEditor(model->getScene());
         techniques = new DrawingAreaInteractionTechniques(model, this);
         // While dragging a gizmo, the pointer wraps around its viewport
@@ -75,6 +86,64 @@ public:
         delete renderer;
         delete techniques;
         delete model;
+    }
+
+    /**
+    Initializes the model as `AwtJogl4SceneEditorApplication.createModel`
+    does: the scene, the raytraced image, the palette of depth maps and the
+    visual debug ray.
+    */
+    void createModel()
+    {
+        model->setScene(new Scene());
+
+        model->setRaytracedImage(new RGBImageUncompressed());
+        model->setRaytracedImageWidth(320);
+        model->setRaytracedImageHeight(240);
+
+        model->setPalette(nullptr);
+        if ( !java::File(PALETTE_FILE).canRead() ) {
+            throw VSDKFatalException(
+                java::String("Can not read palette file ") + PALETTE_FILE);
+        }
+        java::FileInputStream paletteStream(PALETTE_FILE);
+        model->setPalette(
+            RGBColorPalettePersistence::importGimpPalette(paletteStream));
+
+        Ray ray(Vector3Dd(0, -3, 0), Vector3Dd(0, 1, 0));
+        model->setVisualDebugRay(&ray);
+        model->setVisualDebugRayLevels(2);
+        model->setWithVisualDebugRay(false);
+    }
+
+    /**
+    Sizes the raytraced image as the model requests, over the fixed
+    background if it is the selected one (as
+    `AwtJogl4SceneEditorApplication.prepareRaytracedImage`).
+    @return false if the requested size is empty
+    */
+    bool prepareRaytracedImage()
+    {
+        int width = model->getRaytracedImageWidth();
+        int height = model->getRaytracedImageHeight();
+        if ( width <= 0 || height <= 0 ) {
+            return false;
+        }
+
+        RGBImageUncompressed* image = model->getRaytracedImage();
+        if ( image == nullptr ) {
+            image = new RGBImageUncompressed();
+            model->setRaytracedImage(image);
+        }
+        if ( image->getXSize() != width || image->getYSize() != height ) {
+            image->init(width, height);
+        }
+        Scene* scene = model->getScene();
+        if ( scene->selectedBackground == 1 &&
+             scene->fixedBackground != nullptr ) {
+            ImageProcessing::resize(scene->fixedBackground->getImage(), image);
+        }
+        return true;
     }
 
     bool isKnownViewport(Viewport* viewport) const
@@ -120,7 +189,10 @@ public:
 
     //= DrawingAreaHost ===================================================
     void beforeFrame() override {}
-    bool isFullScreenGuiMode() override { return false; }
+    bool isFullScreenGuiMode() override
+    {
+        return model->getGuiState()->isFullScreenGuiMode();
+    }
     BodyEditFeedbackProvider* getBodyEditFeedbackProvider() override
     {
         return editFeedbackProvider;
@@ -133,25 +205,13 @@ public:
     */
     void raytraceImage() override
     {
-        int width = model->getRaytracedImageWidth();
-        int height = model->getRaytracedImageHeight();
-        if ( width <= 0 || height <= 0 ) {
+        if ( !prepareRaytracedImage() ) {
             return;
         }
-
+        int width = model->getRaytracedImageWidth();
+        int height = model->getRaytracedImageHeight();
         RGBImageUncompressed* image = model->getRaytracedImage();
-        if ( image == nullptr ) {
-            image = new RGBImageUncompressed();
-            model->setRaytracedImage(image);
-        }
-        if ( image->getXSize() != width || image->getYSize() != height ) {
-            image->init(width, height);
-        }
         Scene* scene = model->getScene();
-        if ( scene->selectedBackground == 1 &&
-             scene->fixedBackground != nullptr ) {
-            ImageProcessing::resize(scene->fixedBackground->getImage(), image);
-        }
 
         ZBuffer* depth = model->getRaytracedDepth();
         if ( depth == nullptr || depth->getXSize() != width ||
@@ -161,7 +221,10 @@ public:
         }
         scene->raytraceViewport(image, depth);
     }
-    void showImage(RGBImageUncompressed* image) override { delete image; }
+    void showImage(RGBImageUncompressed* image) override
+    {
+        listener->imageRequested(image);
+    }
     void showStatusMessage(const java::String& message) override
     {
         listener->statusMessageRequested(message.c_str());
@@ -188,10 +251,16 @@ public:
     }
 
     void selectionChanged() override { listener->selectionChanged(); }
-    void raytracingRequested() override {}
-    void selectorDialogRequested() override {}
+    void raytracingRequested() override { listener->raytracingRequested(); }
+    void selectorDialogRequested() override
+    {
+        listener->selectorDialogRequested();
+    }
     void closeRequested() override { listener->closeRequested(); }
-    void fullScreenGuiToggleRequested() override {}
+    void fullScreenGuiToggleRequested() override
+    {
+        listener->fullScreenGuiToggleRequested();
+    }
 
     //= ViewportSetInteractionListener ====================================
     void projectionLocationMenuRequested(Viewport* viewport,
@@ -232,10 +301,66 @@ void XtOpenGL4SceneBridge::reshape(int w, int h)
     impl->renderer->reshape(w, h);
 }
 
-bool XtOpenGL4SceneBridge::executeCommand(const std::string& command)
+ApplicationModel* XtOpenGL4SceneBridge::getApplicationModel()
 {
-    return impl->executor->execute(command.c_str()) ==
-        GuiEventExecutor::CommandResult::DONE;
+    return impl->model;
+}
+
+GuiState* XtOpenGL4SceneBridge::getGuiState()
+{
+    return impl->model->getGuiState();
+}
+
+GuiEventExecutor* XtOpenGL4SceneBridge::getCommands()
+{
+    return impl->executor;
+}
+
+GuiEventExecutor::CommandResult XtOpenGL4SceneBridge::executeCommand(
+    const std::string& command)
+{
+    return impl->executor->execute(command.c_str());
+}
+
+void XtOpenGL4SceneBridge::doRaytracingImage()
+{
+    if ( impl->prepareRaytracedImage() ) {
+        impl->model->getScene()->raytrace(impl->model->getRaytracedImage());
+    }
+}
+
+RGBImageUncompressed* XtOpenGL4SceneBridge::getRaytracedImage()
+{
+    return impl->model->getRaytracedImage();
+}
+
+void XtOpenGL4SceneBridge::requestViewportExport(const java::File& file,
+                                                 bool jpg)
+{
+    impl->model->getDrawingArea()->requestViewportExport(file, jpg);
+}
+
+void XtOpenGL4SceneBridge::requestWorkspaceExport(const java::File& file)
+{
+    impl->model->getDrawingArea()->requestWorkspaceExport(file);
+}
+
+bool XtOpenGL4SceneBridge::projectToCanvas(Viewport* viewport,
+                                           const Vector3Dd& point,
+                                           double outCanvas[2])
+{
+    return impl->model->getDrawingArea()->projectToCanvas(viewport, point,
+                                                          outCanvas);
+}
+
+void XtOpenGL4SceneBridge::setScreenResolution(int width, int height)
+{
+    ViewportElementScaler* scaler =
+        impl->model->getDrawingArea()->getViewportSet()->getElementScaler();
+    if ( scaler != nullptr && (scaler->getScreenWidthInPixels() != width ||
+                               scaler->getScreenHeightInPixels() != height) ) {
+        scaler->setScreenResolution(width, height);
+    }
 }
 
 //= Interaction ===========================================================

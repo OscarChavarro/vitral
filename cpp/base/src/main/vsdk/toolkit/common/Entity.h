@@ -130,6 +130,13 @@ public:
         const java::String &name) const;
 
     /**
+    @return the name of the class of this entity, without namespaces (as
+    Java `getClass().getSimpleName()`); while it is destroyed, the one of
+    the classes not destroyed yet
+    */
+    java::String getClassSimpleName() const;
+
+    /**
     Subscribes a listener to the events of this entity. Adding the same
     listener twice has no effect.
     @param listener object to notify; null is ignored

@@ -21,6 +21,17 @@ In the Java port:
 adds the JVM options the Java port needs (see the root `build.gradle`). When
 launching it some other way (i.e. from an IDE), copy those options too.
 
+In the C++ port (Xt GUI and OpenGL 4 drawing area, in
+`cpp/testsuite/ApplicationCases/SceneEditorApplication`):
+
+```bash
+./run.sh -s
+```
+
+It is served by `XtOpenGL4VitralEditorMCP` and
+`XtOpenGL4VitralEditorMCPProtocol`, ports of the Java classes, with the same
+tools, arguments, results and error messages.
+
 ## Protocol
 
 - Each request is one JSON-RPC 2.0 message on a single line; each response is

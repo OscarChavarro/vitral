@@ -22,11 +22,22 @@ std::vector<GuiNode> GuiJsonReader::readPopups()
 
 std::map<std::string, std::string> GuiJsonReader::readCommandLabels()
 {
+    return readCommandProperty("name");
+}
+
+std::map<std::string, std::string> GuiJsonReader::readCommandIcons()
+{
+    return readCommandProperty("icon");
+}
+
+std::map<std::string, std::string> GuiJsonReader::readCommandProperty(
+    const std::string& property)
+{
     const size_t commands = text.find("\"commands\"");
     if (commands == std::string::npos) return std::map<std::string, std::string>();
     at = text.find('[', commands);
     if (at == std::string::npos) return std::map<std::string, std::string>();
-    return readCommandArray();
+    return readCommandArray(property);
 }
 
 std::map<std::string, std::string> GuiJsonReader::readMessages()
@@ -41,27 +52,48 @@ std::map<std::string, std::string> GuiJsonReader::readMessages()
 std::vector<std::string> GuiJsonReader::readButtonGroupCommands(
     const std::string& name)
 {
-    std::vector<std::string> commands;
+    return readButtonGroup(name).commands;
+}
+
+GuiButtonGroup GuiJsonReader::readButtonGroup(const std::string& name)
+{
+    GuiButtonGroup notFound;
     const size_t groups = text.find("\"buttonGroups\"");
-    if (groups == std::string::npos) return commands;
+    if (groups == std::string::npos) return notFound;
     at = text.find('[', groups);
-    if (at == std::string::npos) return commands;
+    if (at == std::string::npos) return notFound;
     consume('[');
     while (!consume(']')) {
-        std::string groupName;
-        std::vector<std::string> groupCommands;
+        GuiButtonGroup group;
         consume('{');
         while (!consume('}')) {
             const std::string key = stringValue(); consume(':');
-            if (key == "name") groupName = stringValue();
-            else if (key == "commands") groupCommands = readStrings();
+            if (key == "name") group.name = stringValue();
+            else if (key == "title") group.title = stringValue();
+            else if (key == "direction") group.horizontal = stringValue() == "horizontal";
+            else if (key == "showTitle") group.showTitle = booleanValue();
+            else if (key == "showIcons") group.showIcons = booleanValue();
+            else if (key == "showText") group.showText = booleanValue();
+            else if (key == "commands") group.commands = readStrings();
             else skipValue();
             consume(',');
         }
-        if (groupName == name) return groupCommands;
+        if (group.name == name) {
+            group.found = true;
+            return group;
+        }
         consume(',');
     }
-    return commands;
+    return notFound;
+}
+
+bool GuiJsonReader::booleanValue()
+{
+    whitespace();
+    if (text.compare(at, 4, "true") == 0) { at += 4; return true; }
+    if (text.compare(at, 5, "false") == 0) { at += 5; return false; }
+    skipValue();
+    return false;
 }
 
 void GuiJsonReader::whitespace()
@@ -137,22 +169,24 @@ std::vector<GuiNode> GuiJsonReader::readNodes()
     return result;
 }
 
-std::map<std::string, std::string> GuiJsonReader::readCommandArray()
+std::map<std::string, std::string> GuiJsonReader::readCommandArray(
+    const std::string& property)
 {
     std::map<std::string, std::string> result;
     consume('[');
     while (!consume(']')) {
         std::string id;
-        std::string name;
+        std::string value;
+        bool found = false;
         consume('{');
         while (!consume('}')) {
             const std::string key = stringValue(); consume(':');
             if (key == "id") id = stringValue();
-            else if (key == "name") name = stringValue();
+            else if (key == property) { value = stringValue(); found = true; }
             else skipValue();
             consume(',');
         }
-        if (!id.empty()) result[id] = name;
+        if (!id.empty() && found) result[id] = value;
         consume(',');
     }
     return result;

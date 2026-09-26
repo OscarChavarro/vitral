@@ -88,17 +88,26 @@ MouseEvent XtEventMapper::toMouseWheelEvent(const XEvent& event)
 
 KeyEvent XtEventMapper::toKeyEvent(XKeyEvent& event)
 {
-    KeyEvent result;
     char buffer[8] = {0};
     KeySym keysym = NoSymbol;
     int count = XLookupString(&event, buffer, sizeof(buffer) - 1, &keysym,
                               nullptr);
-    bool shift = (event.state & ShiftMask) != 0;
-    bool control = (event.state & ControlMask) != 0;
+
+    return toKeyEvent(keysym, XLookupKeysym(&event, 0), buffer, count,
+                      event.state);
+}
+
+KeyEvent XtEventMapper::toKeyEvent(KeySym keysym, KeySym base,
+                                   const char* buffer, int count,
+                                   unsigned int state)
+{
+    KeyEvent result;
+    bool shift = (state & ShiftMask) != 0;
+    bool control = (state & ControlMask) != 0;
 
     if ( shift ) result.modifierMask |= KeyEvent::MASK_SHIFT;
     if ( control ) result.modifierMask |= KeyEvent::MASK_CTRL;
-    if ( (event.state & Mod1Mask) != 0 ) result.modifierMask |= KeyEvent::MASK_ALT;
+    if ( (state & Mod1Mask) != 0 ) result.modifierMask |= KeyEvent::MASK_ALT;
 
     //- Keys identified by their symbol -----------------------------------
     switch ( keysym ) {
@@ -137,7 +146,6 @@ KeyEvent XtEventMapper::toKeyEvent(XKeyEvent& event)
     }
 
     //- Ctrl+letter chords: the letter from the unshifted symbol ----------
-    KeySym base = XLookupKeysym(&event, 0);
     if ( control && base >= XK_a && base <= XK_z ) {
         result.keycode = (shift ? KeyEvent::KEY_A : KeyEvent::KEY_a) +
             static_cast<int>(base - XK_a);

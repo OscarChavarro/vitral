@@ -13,9 +13,12 @@ folders proposed by file dialogs. The I18N texts themselves are the
 class GuiState {
 public:
     /** Folder with the I18N files (one JSON file per language) used to build
-    the GUI. */
+    the GUI: the one of the Java application, which the C++ port shares. */
     static const char* const GUI_LANGUAGE_FOLDER;
     static const char* const JSON_EXTENSION;
+    /** Folder of the data of the Java application (i.e. the icons, whose
+    paths in the I18N files are relative to it), shared by the C++ port. */
+    static const char* const APPLICATION_DATA_FOLDER;
 
 private:
     java::String languageGuiFile;

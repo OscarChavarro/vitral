@@ -49,6 +49,23 @@ class StringBuilder {
     StringBuilder &
     append(char ch);
 
+    StringBuilder &
+    append(int value);
+
+    StringBuilder &
+    append(long value);
+
+    StringBuilder &
+    append(long long value);
+
+    /// As Java, with the text of `Double.toString` (i.e. "1.0")
+    StringBuilder &
+    append(double value);
+
+    /// As Java: "true" or "false"
+    StringBuilder &
+    append(bool value);
+
     String
     toString() const;
 };

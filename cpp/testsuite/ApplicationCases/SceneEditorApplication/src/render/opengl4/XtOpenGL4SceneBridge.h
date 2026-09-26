@@ -4,13 +4,20 @@
 #include <string>
 #include <vector>
 
+#include "application/GuiEventExecutor.h"
 #include "gui/PointerCursor.h"
+#include "java/io/File.h"
 
+class ApplicationModel;
 class BodyEditFeedbackProvider;
+class GuiState;
 class KeyEvent;
 class MouseEvent;
 class OpenGL4LabelImageProvider;
+class RGBImageUncompressed;
 class SimpleBody;
+class Vector3Dd;
+class Viewport;
 
 /**
 Xt-facing façade for the technology-independent scene model, its
@@ -56,6 +63,30 @@ public:
         its new target (see `getModifyPanelTarget`).
         */
         virtual void selectionChanged() = 0;
+
+        /**
+        The user requested (Ctrl+Shift+F) to switch between showing only
+        the drawing area and showing all the GUI.
+        */
+        virtual void fullScreenGuiToggleRequested() = 0;
+
+        /**
+        The user requested (F10) the raytraced image of the scene, to be
+        computed (see `doRaytracingImage`) and shown.
+        */
+        virtual void raytracingRequested() = 0;
+
+        /**
+        The user requested (h) the dialog to select objects by name.
+        */
+        virtual void selectorDialogRequested() = 0;
+
+        /**
+        An image obtained from the renderer (i.e. a depth map) must be shown
+        to the user.
+        @param image the image (not owned: it stays in the model)
+        */
+        virtual void imageRequested(RGBImageUncompressed* image) = 0;
     };
 
     /**
@@ -100,13 +131,75 @@ public:
     void reshape(int width, int height);
 
     /**
+    @return technology independent model of the application, created as
+    `AwtJogl4SceneEditorApplication` does it
+    */
+    ApplicationModel* getApplicationModel();
+
+    /**
+    @return the executor of the commands of the GUI that only work over the
+    model (see `GuiEventExecutor`); its status messages are presented
+    through the `Listener`
+    */
+    GuiEventExecutor* getCommands();
+
+    /**
+    @return the state of the GUI kept in the model (language, folders of
+    the file dialogs, full screen mode)
+    */
+    GuiState* getGuiState();
+
+    /**
     Executes a command of the GUI that only works over the model (i.e. the
     `IDC_CREATE_...` ones, that create objects and lights), recording what
     it changes in the scene history (see `GuiEventExecutor`).
-    @return false if the command is unknown, needs the GUI (file dialogs)
-    or failed
+    @return whether the command was executed, failed, or needs the GUI
     */
-    bool executeCommand(const std::string& command);
+    GuiEventExecutor::CommandResult executeCommand(const std::string& command);
+
+    /**
+    Ray traces the scene from its active camera into the raytraced image of
+    the model, with the size set there, reporting the progress in the
+    console and exporting it to `output.jpg`.
+    */
+    void doRaytracingImage();
+
+    /**
+    @return the raytraced image of the model (kept there)
+    */
+    RGBImageUncompressed* getRaytracedImage();
+
+    /**
+    Requests the export of the selected viewport, done while drawing the
+    next frame.
+    @param file destination file
+    @param jpg true for a JPG file, false for a PNG one
+    */
+    void requestViewportExport(const java::File& file, bool jpg);
+
+    /**
+    Requests the export of the whole viewport set area as a JPG, done while
+    drawing the next frame.
+    @param file destination file
+    */
+    void requestWorkspaceExport(const java::File& file);
+
+    /**
+    Projects a point of the scene to canvas pixel coordinates.
+    @param viewport viewport whose camera is used
+    @param point point in world coordinates
+    @param outCanvas {x, y} in canvas pixels
+    @return false if the point is behind the camera
+    */
+    bool projectToCanvas(Viewport* viewport, const Vector3Dd& point,
+                         double outCanvas[2]);
+
+    /**
+    Informs the scaler of the texts and marks of the viewports of the
+    resolution of the screen showing the drawing area, in the pixels text is
+    drawn with (as `AwtViewportElementScaler` does for AWT).
+    */
+    void setScreenResolution(int width, int height);
 
     //= Interaction =======================================================
     void setCanvasSize(int width, int height);

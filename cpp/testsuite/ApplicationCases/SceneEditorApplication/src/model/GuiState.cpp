@@ -6,8 +6,12 @@
 #include "java/util/ArrayList.txx"
 #include "model/GuiState.h"
 
-const char* const GuiState::GUI_LANGUAGE_FOLDER = "./etc/gui/";
+// The C++ port shares the I18N files of the Java application
+const char* const GuiState::GUI_LANGUAGE_FOLDER =
+    "../../../../java/testsuite/ApplicationCases/SceneEditorApplication/etc/gui/";
 const char* const GuiState::JSON_EXTENSION = ".json";
+const char* const GuiState::APPLICATION_DATA_FOLDER =
+    "../../../../java/testsuite/ApplicationCases/SceneEditorApplication/";
 
 namespace {
 bool endsWith(const java::String& text, const java::String& suffix)

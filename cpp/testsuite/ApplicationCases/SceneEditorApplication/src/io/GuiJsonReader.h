@@ -16,6 +16,25 @@ struct GuiNode {
 };
 
 /**
+Group of command buttons of the GUI definition (i.e. the ones of a tab of
+the side panel).
+*/
+struct GuiButtonGroup {
+    bool found;
+    std::string name;
+    std::string title;
+    bool horizontal;
+    bool showTitle;
+    bool showIcons;
+    bool showText;
+    std::vector<std::string> commands;
+
+    GuiButtonGroup()
+        : found(false), horizontal(false), showTitle(false),
+          showIcons(false), showText(true) {}
+};
+
+/**
 The Java application stores its GUI definition (menus, popups, commands and
 messages) as a small JSON tree. This deliberately tiny reader keeps the native
 application independent of another JSON library while importing that same
@@ -42,6 +61,12 @@ public:
     std::map<std::string, std::string> readCommandLabels();
 
     /**
+    @return command id -> path of its icon, for the commands with one
+    (relative to the folder of the Java application)
+    */
+    std::map<std::string, std::string> readCommandIcons();
+
+    /**
     @return message id -> message text
     */
     std::map<std::string, std::string> readMessages();
@@ -52,6 +77,12 @@ public:
     */
     std::vector<std::string> readButtonGroupCommands(const std::string& name);
 
+    /**
+    @param name name of a button group (i.e. `GLOBAL`)
+    @return the group, not `found` if there is none with that name
+    */
+    GuiButtonGroup readButtonGroup(const std::string& name);
+
 private:
     const std::string& text;
     size_t at;
@@ -59,11 +90,15 @@ private:
     void whitespace();
     bool consume(char c);
     std::string stringValue();
+    bool booleanValue();
     void skipValueStart();
     void skipValue();
     std::vector<std::string> readStrings();
     std::vector<GuiNode> readNodes();
-    std::map<std::string, std::string> readCommandArray();
+    std::map<std::string, std::string> readCommandProperty(
+        const std::string& property);
+    std::map<std::string, std::string> readCommandArray(
+        const std::string& property);
     std::map<std::string, std::string> readStringMap();
     GuiNode readNode();
 };

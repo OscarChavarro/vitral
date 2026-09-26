@@ -103,6 +103,43 @@ class String {
     bool
     startsWith(const char *prefix) const;
 
+    /**
+    @return the index of the first occurrence of the text, or -1
+    */
+    int
+    indexOf(const String &text, int fromIndex = 0) const;
+
+    bool
+    contains(const String &text) const;
+
+    bool
+    endsWith(const String &suffix) const;
+
+    /**
+    Emulation of `String.replace(CharSequence, CharSequence)`: replaces every
+    occurrence of the target, from the start to the end.
+    */
+    String
+    replace(const String &target, const String &replacement) const;
+
+    /// ASCII only, as the texts of the port are
+    String
+    toUpperCase() const;
+
+    /// ASCII only, as the texts of the port are
+    String
+    toLowerCase() const;
+
+    bool
+    equalsIgnoreCase(const String &other) const;
+
+    /**
+    @return the text without leading and trailing characters up to the
+    space (as Java `trim`)
+    */
+    String
+    trim() const;
+
     int
     rfind(char token) const;
 

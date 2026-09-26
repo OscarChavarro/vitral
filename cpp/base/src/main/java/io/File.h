@@ -32,6 +32,13 @@ class File {
     java::String
     getName() const;
 
+    /**
+    @return the path, prefixed with the current working directory when it
+    is relative (without normalizing it, as Java)
+    */
+    java::String
+    getAbsolutePath() const;
+
     bool
     exists() const;
 

@@ -503,6 +503,97 @@ String::formatCStringToJavaString(const char *format, va_list arguments) {
     return result;
 }
 
+int
+String::indexOf(const String &text, int fromIndex) const {
+    const char *source = toCString();
+    const int sourceLength = length();
+    if ( fromIndex < 0 ) {
+        fromIndex = 0;
+    }
+    if ( fromIndex > sourceLength ) {
+        return -1;
+    }
+    const char *found = std::strstr(source + fromIndex, text.toCString());
+    return found == nullptr ? -1 : static_cast<int>(found - source);
+}
+
+bool
+String::contains(const String &text) const {
+    return indexOf(text) >= 0;
+}
+
+bool
+String::endsWith(const String &suffix) const {
+    const int sourceLength = length();
+    const int suffixLength = suffix.length();
+    return suffixLength <= sourceLength &&
+        std::strcmp(toCString() + sourceLength - suffixLength,
+                    suffix.toCString()) == 0;
+}
+
+String
+String::replace(const String &target, const String &replacement) const {
+    const int targetLength = target.length();
+    if ( targetLength == 0 ) {
+        return *this;
+    }
+    String result;
+    int start = 0;
+    int found;
+    while ( (found = indexOf(target, start)) >= 0 ) {
+        result += substring(start, found);
+        result += replacement;
+        start = found + targetLength;
+    }
+    result += substring(start);
+    return result;
+}
+
+String
+String::toUpperCase() const {
+    String result(*this);
+    for ( int i = 0; i < result.length(); i++ ) {
+        char c = result.value[i];
+        if ( c >= 'a' && c <= 'z' ) {
+            result.value[i] = static_cast<char>(c - 'a' + 'A');
+        }
+    }
+    return result;
+}
+
+String
+String::toLowerCase() const {
+    String result(*this);
+    for ( int i = 0; i < result.length(); i++ ) {
+        char c = result.value[i];
+        if ( c >= 'A' && c <= 'Z' ) {
+            result.value[i] = static_cast<char>(c - 'A' + 'a');
+        }
+    }
+    return result;
+}
+
+bool
+String::equalsIgnoreCase(const String &other) const {
+    return toLowerCase().equals(other.toLowerCase());
+}
+
+String
+String::trim() const {
+    const char *source = toCString();
+    int begin = 0;
+    int end = length();
+    while ( begin < end &&
+            static_cast<unsigned char>(source[begin]) <= ' ' ) {
+        begin++;
+    }
+    while ( end > begin &&
+            static_cast<unsigned char>(source[end - 1]) <= ' ' ) {
+        end--;
+    }
+    return substring(begin, end);
+}
+
 String
 operator+(const char *left, const String &right) {
     return String(left).concat(right);

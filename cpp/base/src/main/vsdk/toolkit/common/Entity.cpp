@@ -1,5 +1,10 @@
 #include <cctype>
+#include <cstdlib>
 #include <string>
+#include <typeinfo>
+#if defined(__GNUC__) || defined(__clang__)
+#include <cxxabi.h>
+#endif
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/Entity.h"
@@ -194,4 +199,30 @@ Entity::fireEntityEvent(EntityEvent::Type type)
     for ( long int i = 0; i < listeners.size(); i++ ) {
         listeners.get(i)->notifyEntityEvent(event);
     }
+}
+
+java::String
+Entity::getClassSimpleName() const
+{
+    const char *mangled = typeid(*this).name();
+    std::string name(mangled);
+#if defined(__GNUC__) || defined(__clang__)
+    int status = 0;
+    char *demangled = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
+    if ( status == 0 && demangled != nullptr ) {
+        name = demangled;
+    }
+    std::free(demangled);
+#else
+    // MSVC names are "class Sphere"
+    size_t space = name.rfind(' ');
+    if ( space != std::string::npos ) {
+        name = name.substr(space + 1);
+    }
+#endif
+    size_t scope = name.rfind("::");
+    if ( scope != std::string::npos ) {
+        name = name.substr(scope + 2);
+    }
+    return java::String(name.c_str());
 }

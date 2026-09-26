@@ -4,6 +4,7 @@
 
 #include "java/io/File.h"
 #include <sys/stat.h>
+#include <unistd.h>
 namespace java {
 
 bool
@@ -91,6 +92,22 @@ File::dispose() {
 java::String
 File::getPath() const {
     return path;
+}
+
+java::String
+File::getAbsolutePath() const {
+    if ( path.startsWith("/") ) {
+        return path;
+    }
+    char buffer[4096];
+    if ( getcwd(buffer, sizeof(buffer)) == nullptr ) {
+        return path;
+    }
+    java::String directory(buffer);
+    if ( path.isEmpty() ) {
+        return directory;
+    }
+    return directory + "/" + path;
 }
 
 java::String

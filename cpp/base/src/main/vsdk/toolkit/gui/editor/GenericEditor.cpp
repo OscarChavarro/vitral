@@ -1,9 +1,4 @@
-#include <cstdlib>
 #include <string>
-#include <typeinfo>
-#if defined(__GNUC__) || defined(__clang__)
-#include <cxxabi.h>
-#endif
 
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
@@ -301,25 +296,5 @@ GenericEditor::reportMissingAccessor(const ControlSpecification &specification,
 java::String
 GenericEditor::getSimpleClassName(const Entity &entity)
 {
-    const char *mangled = typeid(entity).name();
-    std::string name(mangled);
-#if defined(__GNUC__) || defined(__clang__)
-    int status = 0;
-    char *demangled = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
-    if ( status == 0 && demangled != nullptr ) {
-        name = demangled;
-    }
-    std::free(demangled);
-#else
-    // MSVC names are "class Sphere"
-    size_t space = name.rfind(' ');
-    if ( space != std::string::npos ) {
-        name = name.substr(space + 1);
-    }
-#endif
-    size_t scope = name.rfind("::");
-    if ( scope != std::string::npos ) {
-        name = name.substr(scope + 2);
-    }
-    return java::String(name.c_str());
+    return entity.getClassSimpleName();
 }

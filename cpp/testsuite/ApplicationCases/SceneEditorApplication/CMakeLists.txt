@@ -39,6 +39,9 @@ endif()
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
+    src/application/XtOpenGL4GuiEventExecutor.cpp
+    src/application/mcp/XtOpenGL4VitralEditorMCP.cpp
+    src/application/mcp/XtOpenGL4VitralEditorMCPProtocol.cpp
     src/gui/DrawingAreaInteractionTechniques.cpp
     src/gui/PointerCursor.cpp
     src/gui/PopupDismissClickFilter.cpp
@@ -46,7 +49,13 @@ add_executable(SceneEditorApplication
     src/gui/VisualRayDebugController.cpp
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
+    src/gui/xt/XlibImageConverter.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
+    src/gui/xt/XtButtonsPanel.cpp
+    src/gui/xt/XtEventQueue.cpp
+    src/gui/xt/XtFileDialog.cpp
+    src/gui/xt/XtImageControlWindow.cpp
+    src/gui/xt/XtSelectorDialog.cpp
     src/gui/xt/XtEventMapper.cpp
     src/gui/xt/XtGenericEditor.cpp
     src/gui/xt/XtModifyPanel.cpp

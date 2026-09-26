@@ -72,6 +72,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/lang/Double.cpp
     src/main/java/lang/StringBuilder.cpp
     src/main/java/lang/ProcessBuilder.cpp
+    src/main/java/lang/Thread.cpp
     src/main/java/io/InputStream.cpp
     src/main/java/io/File.cpp
     src/main/java/io/FileInputStream.cpp
@@ -79,6 +80,8 @@ set(VITRAL_BASE_SOURCES
     src/main/java/io/BufferedInputStream.cpp
     src/main/java/io/BufferedOutputStream.cpp
     src/main/java/io/PrintStream.cpp
+    src/main/java/io/BufferedReader.cpp
+    src/main/java/io/PrintWriter.cpp
     src/main/java/net/ServerSocket.cpp
     src/main/java/net/SocketInputStream.cpp
     src/main/java/net/SocketOutputStream.cpp
@@ -86,6 +89,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/net/WebSocket.cpp
     src/main/java/util/Formatter.cpp
     src/main/java/util/StringTokenizer.cpp
+    src/main/java/util/regex/Pattern.cpp
     src/main/java/util/concurrent/Executors.cpp
     src/main/vsdk/toolkit/gui/KeyEvent.cpp
     src/main/vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.cpp
@@ -276,6 +280,10 @@ set(VITRAL_BASE_SOURCES
 
 add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})
 
+# java::Thread runs over std::thread
+find_package(Threads REQUIRED)
+target_link_libraries(vitral_base PUBLIC Threads::Threads)
+
 target_include_directories(vitral_base PUBLIC src src/main)
 
 # Link optional libraries and set compile definitions
@@ -329,6 +337,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/raytracer_depth_buffer_tests.cpp
     src/test/entity_tests.cpp
     src/test/generic_editor_tests.cpp
+    src/test/java_emulation_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)
