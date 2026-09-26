@@ -1,12 +1,13 @@
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
-#include <X11/Composite.h>
 #include <X11/Xutil.h>
 
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtImageControlWindow.h"
+#include "gui/xt/XtUiFactory.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 
 namespace {
@@ -19,19 +20,17 @@ const int IMAGE_MARGIN = 10;
 XtImageControlWindow::XtImageControlWindow(XtApplicationHost* host,
                                            RGBImageUncompressed* image)
     : statusMessage(nullptr), host(host), controlledImage(image),
-      windowWidget(nullptr), workArea(nullptr), ximage(nullptr),
-      wmDeleteWindow(None)
+      windowWidget(nullptr), workArea(nullptr), ximage(nullptr)
 {
     windowWidget = host->createDialogShell(
         "imageControlWindow", topLevelShellWidgetClass, "Image control tool");
-    XtAddEventHandler(windowWidget, NoEventMask, True,
-                      &XtImageControlWindow::shellEvent, this);
+    host->getUiFactory()->getWidgetSet()->setWindowCloseHandler(
+        windowWidget, &XtImageControlWindow::closeRequested, this);
 
-    Arg args[4]; Cardinal n = 0;
-    XtSetArg(args[n], XtNwidth, WINDOW_WIDTH); ++n;
-    XtSetArg(args[n], XtNheight, WINDOW_HEIGHT); ++n;
-    Widget frame = XtCreateManagedWidget("imageControlFrame",
-        compositeWidgetClass, windowWidget, args, n);
+    XtPanelWidgets* widgets = host->getPanelWidgets();
+    Widget frame = widgets->createPanel(windowWidget, "imageControlFrame",
+                                        0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+                                        true);
 
     Arg areaArgs[4]; Cardinal areaN = 0;
     XtSetArg(areaArgs[areaN], XtNx, 0); ++areaN;
@@ -43,16 +42,12 @@ XtImageControlWindow::XtImageControlWindow(XtApplicationHost* host,
     XtAddEventHandler(workArea, ExposureMask, False,
                       &XtImageControlWindow::workAreaEvent, this);
 
-    statusMessage = XtPanelWidgets::createLabel(frame,
+    statusMessage = widgets->createLabel(frame,
         "Image control window ready", host->getPanelFontSet(),
         XtPanelWidgets::LEFT, 3, WINDOW_HEIGHT - STATUS_HEIGHT + 1,
         WINDOW_WIDTH - 6, STATUS_HEIGHT - 2);
 
     XtPopup(windowWidget, XtGrabNone);
-    wmDeleteWindow = XInternAtom(XtDisplay(windowWidget), "WM_DELETE_WINDOW",
-                                 False);
-    XSetWMProtocols(XtDisplay(windowWidget), XtWindow(windowWidget),
-                    &wmDeleteWindow, 1);
 }
 
 XtImageControlWindow::~XtImageControlWindow()
@@ -123,12 +118,7 @@ void XtImageControlWindow::workAreaEvent(Widget, XtPointer clientData,
     }
 }
 
-void XtImageControlWindow::shellEvent(Widget, XtPointer clientData,
-                                      XEvent* event, Boolean*)
+void XtImageControlWindow::closeRequested(void* clientData)
 {
-    XtImageControlWindow* self = static_cast<XtImageControlWindow*>(clientData);
-    if ( event->type == ClientMessage &&
-         static_cast<Atom>(event->xclient.data.l[0]) == self->wmDeleteWindow ) {
-        XtPopdown(self->windowWidget);
-    }
+    XtPopdown(static_cast<XtImageControlWindow*>(clientData)->windowWidget);
 }

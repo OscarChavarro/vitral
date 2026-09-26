@@ -3,6 +3,7 @@
 
 #include "vsdk/toolkit/gui/editor/XtGenericEditor.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtWidgetSupport.h"
 #include "vsdk/toolkit/gui/editor/ControlSpecification.h"
 
 namespace {
@@ -13,25 +14,25 @@ const int FIELD_WIDTH = 120;
 const char* const MESSAGE_COLOR = "red";
 }
 
-XtGenericEditor::XtGenericEditor(Widget container, XFontSet fontSet,
-                                 int width)
-    : container(container), fontSet(fontSet), width(width), nextY(0),
-      messageLabel(nullptr)
+XtGenericEditor::XtGenericEditor(XtPanelWidgets* widgets, Widget container,
+                                 XFontSet fontSet, int width)
+    : widgets(widgets), container(container), fontSet(fontSet),
+      width(width), nextY(0), messageLabel(nullptr)
 {
 }
 
 void XtGenericEditor::beginBuild(const java::String& title)
 {
-    XtPanelWidgets::removeAll(container);
+    XtWidgetSupport::removeAll(container);
     fields.clear();
     nextY = MARGIN;
 
     std::string upper(title.c_str());
     for (size_t i = 0; i < upper.size(); ++i)
         upper[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(upper[i])));
-    XtPanelWidgets::createLabel(container, upper + " EDITOR", fontSet,
-                                XtPanelWidgets::CENTER, MARGIN, nextY,
-                                width - 2 * MARGIN, ROW_HEIGHT);
+    widgets->createLabel(container, upper + " EDITOR", fontSet,
+                         XtPanelWidgets::CENTER, MARGIN, nextY,
+                         width - 2 * MARGIN, ROW_HEIGHT);
     nextY += ROW_HEIGHT + ROW_SPACING;
     messageLabel = nullptr;
 }
@@ -44,10 +45,10 @@ void XtGenericEditor::addControl(const ControlSpecification* specification,
         label += std::string(" ") + specification->getIntervalText().c_str();
 
     const int fieldX = width - MARGIN - FIELD_WIDTH;
-    XtPanelWidgets::createLabel(container, label + ": ", fontSet,
-                                XtPanelWidgets::RIGHT, MARGIN, nextY,
-                                fieldX - MARGIN, ROW_HEIGHT);
-    Widget field = XtPanelWidgets::createTextField(
+    widgets->createLabel(container, label + ": ", fontSet,
+                         XtPanelWidgets::RIGHT, MARGIN, nextY,
+                         fieldX - MARGIN, ROW_HEIGHT);
+    Widget field = widgets->createTextField(
         container, value.c_str(), fontSet, fieldX, nextY, FIELD_WIDTH,
         ROW_HEIGHT,
         &XtGenericEditor::fieldActivated, this);
@@ -57,10 +58,10 @@ void XtGenericEditor::addControl(const ControlSpecification* specification,
 
 void XtGenericEditor::endBuild()
 {
-    messageLabel = XtPanelWidgets::createLabel(
+    messageLabel = widgets->createLabel(
         container, " ", fontSet, XtPanelWidgets::LEFT, MARGIN, nextY,
         width - 2 * MARGIN, ROW_HEIGHT);
-    XtPanelWidgets::setForeground(messageLabel, MESSAGE_COLOR);
+    widgets->setForeground(messageLabel, MESSAGE_COLOR);
     nextY += ROW_HEIGHT + ROW_SPACING;
     // The message given while building was shown before the label existed
     showValidationMessage(pendingMessage.empty() ? nullptr :
@@ -71,8 +72,7 @@ void XtGenericEditor::showValidationMessage(const char* message)
 {
     pendingMessage = message != nullptr ? message : "";
     if (messageLabel != nullptr)
-        XtPanelWidgets::setLabel(messageLabel,
-                                 message != nullptr ? message : " ");
+        widgets->setLabel(messageLabel, message != nullptr ? message : " ");
 }
 
 void XtGenericEditor::setControlValue(
@@ -80,18 +80,18 @@ void XtGenericEditor::setControlValue(
 {
     for (size_t i = 0; i < fields.size(); ++i) {
         if (fields[i].second == specification)
-            XtPanelWidgets::setText(fields[i].first, value.c_str());
+            widgets->setText(fields[i].first, value.c_str());
     }
 }
 
 void XtGenericEditor::clearControls(const java::String& message)
 {
-    XtPanelWidgets::removeAll(container);
+    XtWidgetSupport::removeAll(container);
     fields.clear();
     messageLabel = nullptr;
-    XtPanelWidgets::createLabel(container, message.c_str(), fontSet,
-                                XtPanelWidgets::CENTER, MARGIN, MARGIN,
-                                width - 2 * MARGIN, ROW_HEIGHT);
+    widgets->createLabel(container, message.c_str(), fontSet,
+                         XtPanelWidgets::CENTER, MARGIN, MARGIN,
+                         width - 2 * MARGIN, ROW_HEIGHT);
 }
 
 void XtGenericEditor::fieldActivated(Widget field, void* clientData)
@@ -102,8 +102,8 @@ void XtGenericEditor::fieldActivated(Widget field, void* clientData)
         // On success the entity emits UPDATED and `setControlValue`
         // refreshes the field
         if (!self->updateValue(self->fields[i].second,
-                               XtPanelWidgets::getText(field).c_str()))
-            XtPanelWidgets::setInvalid(field, true);
+                               self->widgets->getText(field).c_str()))
+            self->widgets->setInvalid(field, true);
         return;
     }
 }

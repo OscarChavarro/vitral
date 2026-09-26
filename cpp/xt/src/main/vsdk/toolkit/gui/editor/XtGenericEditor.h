@@ -9,16 +9,20 @@
 
 #include "vsdk/toolkit/gui/editor/GenericEditor.h"
 
+class XtPanelWidgets;
+
 /**
-Xt/Xaw presentation of a `GenericEditor`, as `AwtGenericEditor` is for
-Swing: a title, one labeled text field per control specification and a
-message line. All the logic (reading, validating and writing values
-through the accessors registered by the entity) lives in `GenericEditor`;
-this class only creates widgets and forwards what the user types (confirmed
+Xt presentation of a `GenericEditor`, as `AwtGenericEditor` is for Swing:
+a title, one labeled text field per control specification and a message
+line. All the logic (reading, validating and writing values through the
+accessors registered by the entity) lives in `GenericEditor`; this class
+only creates widgets, with the `XtPanelWidgets` of the widget set of the
+application (Athena or Motif), and forwards what the user types (confirmed
 with Return).
 */
 class XtGenericEditor : public GenericEditor {
 private:
+    XtPanelWidgets* widgets;
     Widget container;
     XFontSet fontSet;
     int width;
@@ -42,13 +46,15 @@ protected:
 
 public:
     /**
-    @param container Composite that will hold the editor, placing its
+    @param widgets builder of the widgets of the editor (referenced)
+    @param container panel that will hold the editor, placing its
     children at explicit positions; its previous contents are removed on
     each `build`
     @param fontSet font set of the labels
     @param width width available in the container
     */
-    XtGenericEditor(Widget container, XFontSet fontSet, int width);
+    XtGenericEditor(XtPanelWidgets* widgets, Widget container,
+                    XFontSet fontSet, int width);
 };
 
 #endif

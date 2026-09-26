@@ -31,6 +31,13 @@ bool PopupDismissClickFilter::consumes(MouseEventKind kind,
         return swallowingClick;
       case MouseEventKind::DRAG:
       case MouseEventKind::RELEASE:
+        // Some widget sets (Motif) take the press that closes their menus:
+        // only the rest of that click reaches the drawing area
+        if ( !swallowingClick && closedAtMillis != 0 &&
+             nowMillis - closedAtMillis <= OUTSIDE_PRESS_WINDOW_MILLIS ) {
+            swallowingClick = true;
+            closedAtMillis = 0;
+        }
         return swallowingClick;
       case MouseEventKind::CLICK: {
         bool swallowed = swallowingClick;

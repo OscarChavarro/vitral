@@ -3,6 +3,8 @@
 
 #include <X11/Intrinsic.h>
 
+class XtPanelWidgets;
+
 /**
 Services of the Xt application that the modify panel and its editors need,
 as `AwtApplicationHost` provides them to the Swing ones.
@@ -23,12 +25,10 @@ public:
     virtual XFontSet getPanelFontSet() = 0;
 
     /**
-    Creates a SimpleMenu popup shell with the visual of the application
-    (its GLX visual is not the default one of the screen).
-    @param parent widget owning the popup (i.e. its MenuButton)
-    @param name name of the popup shell, used as the menu name
+    @return the builder of the widgets of the panel, of the widget set the
+    application is built with
     */
-    virtual Widget createPopupMenu(Widget parent, const char* name) = 0;
+    virtual XtPanelWidgets* getPanelWidgets() = 0;
 };
 
 #endif

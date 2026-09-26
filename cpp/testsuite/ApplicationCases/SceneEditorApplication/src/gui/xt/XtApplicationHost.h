@@ -9,6 +9,7 @@
 
 class RGBImageUncompressed;
 class XtOpenGL4SceneBridge;
+class XtUiFactory;
 
 /**
 Services that the Xt GUI classes need from the application hosting them, as
@@ -23,6 +24,11 @@ public:
     @return the scene model, its commands and its drawing area
     */
     virtual XtOpenGL4SceneBridge* getSceneBridge() = 0;
+
+    /**
+    @return the widget set of the GUI and its file dialog
+    */
+    virtual XtUiFactory* getUiFactory() = 0;
 
     /**
     @param id identifier of a message of the I18N file (`IDM_*`)

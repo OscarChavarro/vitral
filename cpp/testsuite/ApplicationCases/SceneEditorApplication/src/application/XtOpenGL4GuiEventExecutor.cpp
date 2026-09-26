@@ -5,11 +5,12 @@
 #include "application/GuiEventExecutor.h"
 #include "application/XtOpenGL4GuiEventExecutor.h"
 #include "gui/xt/XtApplicationHost.h"
-#include "gui/xt/XtFileDialog.h"
+#include "gui/xt/XtUiFactory.h"
 #include "io/FileSuffixFilter.h"
 #include "model/GuiState.h"
 #include "render/opengl4/XtOpenGL4SceneBridge.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "vsdk/toolkit/gui/XtWidgetSet.h"
 
 namespace {
 
@@ -77,7 +78,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
         filters.push_back(FileSuffixFilter("obj", "obj Alias/Wavefront text mesh"));
         filters.push_back(FileSuffixFilter("ply", "ply Ply mesh"));
 
-        if ( XtFileDialog::showDialog(parent, "Open",
+        if ( parent->getUiFactory()->showFileDialog(parent, "Open",
                  guiState->getReadFolder().c_str(), filters, path) ) {
             if ( !commands->importObjects(java::File(path.c_str())) ) {
                 Logger::reportMessage("XtOpenGL4GuiEventExecutor",
@@ -96,7 +97,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
             label == "IDC_EXPORT_OBJECTS_TO_GTS" ? GuiEventExecutor::ExportFormat::GTS :
             GuiEventExecutor::ExportFormat::VTK;
 
-        if ( XtFileDialog::showDialog(parent, "Save",
+        if ( parent->getUiFactory()->showFileDialog(parent, "Save",
                  guiState->getWriteFolder().c_str(),
                  std::vector<FileSuffixFilter>(), path) ) {
             if ( !commands->exportObjects(java::File(path.c_str()), format) ) {
@@ -113,7 +114,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
               label == "IDC_RENDERING_SELECTPALETTEDEPTH" ) {
         std::vector<FileSuffixFilter> filters;
         filters.push_back(FileSuffixFilter("gpl", "gpl Gimp Palettes"));
-        if ( XtFileDialog::showDialog(parent, "Open",
+        if ( parent->getUiFactory()->showFileDialog(parent, "Open",
                  currentFolder() + "/../../../../etc/palettes", filters,
                  path) ) {
             if ( !commands->loadPalette(java::File(path.c_str())) ) {
@@ -133,9 +134,12 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
               label == "IDC_CUSTOMIZE_LAF_JAVA" ||
               label == "IDC_CUSTOMIZE_LAF_GTK" ||
               label == "IDC_CUSTOMIZE_LAF_WINDOWS" ) {
-        // Swing look and feels: the Xt GUI has only the look of its
-        // XResources file
-        parent->showStatusMessage("Look and feel changes are not available in the Xt GUI");
+        // Swing look and feels: the widget set of the Xt GUI (and so its
+        // look) is chosen when building the application
+        parent->showStatusMessage(
+            std::string("Look and feel changes are not available: this Xt GUI "
+                        "is built with ") +
+            parent->getUiFactory()->getWidgetSet()->getName());
     }
     else if ( label == "IDC_CUSTOMIZE_LANGUAGE_ENGLISH" ) {
         parent->setGuiLanguage("english");

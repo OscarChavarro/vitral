@@ -22,10 +22,8 @@ public:
 
 private:
     Widget dialog;
-    Atom wmDeleteWindow;
 
-    static void shellEvent(Widget, XtPointer clientData, XEvent* event,
-                           Boolean*);
+    static void closeRequested(void* clientData);
 
     XtSelectorDialog(const XtSelectorDialog& other);
     XtSelectorDialog& operator=(const XtSelectorDialog& other);

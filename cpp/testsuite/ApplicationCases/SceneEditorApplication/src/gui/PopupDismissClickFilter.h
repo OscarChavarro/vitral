@@ -7,7 +7,9 @@ drawing area (i.e. selecting another viewport): the user only wanted to leave
 the menu. The GUI technology notifies here when the menu closes and asks,
 for each mouse event of the drawing area, if it must be ignored: the press
 arriving shortly after the menu closed, and the drag, release and click that
-follow it, are consumed. It does not depend on any GUI technology.
+follow it, are consumed. When the menu itself takes that press (as Motif
+menus do), the drag or release arriving shortly after it closed starts the
+consumed click instead. It does not depend on any GUI technology.
 */
 class PopupDismissClickFilter {
 public:

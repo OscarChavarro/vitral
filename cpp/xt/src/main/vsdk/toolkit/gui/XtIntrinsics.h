@@ -2,11 +2,15 @@
 #define __XT_INTRINSICS__
 
 /**
-Includes the Xt and Xaw headers for the sources that also use the vitral
+Includes the Xt Intrinsics headers for the sources that also use the vitral
 `Widget` class, naming the Xt `Widget` type `XtIntrinsicWidget` instead
 (`XtWidget`, of "vsdk/toolkit/gui/XtWidget.h", is the same type). It must
 be included before any other Xt header of the source: Xt headers are read
 only once.
+
+Only the Intrinsics are included here: the headers of a widget set are
+included by its own module (`XawIntrinsics.h`, `XmIntrinsics.h`), which
+applies the same renaming to them.
 
 The functions of Xt have C linkage, so renaming the type of their
 parameters does not change the symbols they link to.
@@ -21,12 +25,6 @@ parameters does not change the symbols they link to.
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 #include <X11/Composite.h>
-#include <X11/Xaw/Command.h>
-#include <X11/Xaw/Label.h>
-#include <X11/Xaw/MenuButton.h>
-#include <X11/Xaw/SimpleMenu.h>
-#include <X11/Xaw/SmeBSB.h>
-#include <X11/Xaw/SmeLine.h>
 #undef Widget
 
 #include "vsdk/toolkit/gui/XtWidget.h"

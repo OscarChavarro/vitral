@@ -3,6 +3,7 @@
 #include "gui/xt/XtModifyPanel.h"
 #include "gui/xt/XtModifyPanelHost.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtWidgetSupport.h"
 #include "gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
@@ -30,7 +31,7 @@ SimpleBody* XtModifyPanel::getTarget()
 void XtModifyPanel::notifyTargetBeginEdit(SimpleBody* target)
 {
     this->target = target;
-    XtPanelWidgets::removeAll(container);
+    XtWidgetSupport::removeAll(container);
     activeEditor = nullptr;
 
     if (dynamic_cast<FunctionalExplicitSurface*>(target->getGeometry()) != nullptr) {
@@ -48,7 +49,8 @@ void XtModifyPanel::notifyTargetBeginEdit(SimpleBody* target)
     else {
         if (genericEditor == nullptr) {
             genericEditor = new XtGenericEditor(
-                container, parent->getPanelFontSet(), width);
+                parent->getPanelWidgets(), container,
+                parent->getPanelFontSet(), width);
             genericEditor->setListener(this);
         }
         genericEditor->build(target->getGeometry());
@@ -70,10 +72,10 @@ void XtModifyPanel::notifyTargetEndEdit()
     if (genericEditor != nullptr) {
         genericEditor->detach();
     }
-    XtPanelWidgets::removeAll(container);
-    XtPanelWidgets::createLabel(container, "No selected object for modifying.",
-                                parent->getPanelFontSet(),
-                                XtPanelWidgets::LEFT, 8, 8, width - 16, 24);
+    XtWidgetSupport::removeAll(container);
+    parent->getPanelWidgets()->createLabel(
+        container, "No selected object for modifying.",
+        parent->getPanelFontSet(), XtPanelWidgets::LEFT, 8, 8, width - 16, 24);
 }
 
 java::ArrayList<RenderPrimitive> XtModifyPanel::buildEditFeedback()

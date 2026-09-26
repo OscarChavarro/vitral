@@ -8,20 +8,32 @@ if(APPLE)
         "XQuartz on macOS exposes only legacy OpenGL for this path.")
 endif()
 
+# Widget set of the Xt GUI, chosen when building: each executable links
+# either Motif or Athena, never both (they must not share a process)
+set(VITRAL_XT_WIDGET_SET "xm" CACHE STRING
+    "Widget set of the Xt GUIs: xm (Motif) or xaw (Athena)")
+set_property(CACHE VITRAL_XT_WIDGET_SET PROPERTY STRINGS xm xaw)
+if(NOT VITRAL_XT_WIDGET_SET STREQUAL "xm" AND
+   NOT VITRAL_XT_WIDGET_SET STREQUAL "xaw")
+    message(FATAL_ERROR
+        "VITRAL_XT_WIDGET_SET must be xm (Motif) or xaw (Athena), not "
+        "'${VITRAL_XT_WIDGET_SET}'")
+endif()
+message(STATUS "SceneEditorApplication Xt widget set: ${VITRAL_XT_WIDGET_SET}")
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    "${CMAKE_CURRENT_LIST_DIR}/build/${VITRAL_XT_WIDGET_SET}")
 
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
 
-if(NOT X11_Xt_LIB OR NOT X11_Xaw_LIB)
-    message(FATAL_ERROR "SceneEditorApplication requires libXt and libXaw from the X11 development packages.")
-endif()
-
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
 set(VITRAL_OPENGL4_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4")
 set(VITRAL_XT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../xt")
+set(VITRAL_WIDGET_SET_DIR
+    "${CMAKE_CURRENT_LIST_DIR}/../../../${VITRAL_XT_WIDGET_SET}")
 
 if(NOT TARGET vitral_base)
     set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
@@ -35,10 +47,28 @@ endif()
 if(NOT TARGET vitral_xt)
     add_subdirectory("${VITRAL_XT_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_xt")
 endif()
+if(NOT TARGET vitral_${VITRAL_XT_WIDGET_SET})
+    add_subdirectory("${VITRAL_WIDGET_SET_DIR}"
+                     "${CMAKE_CURRENT_BINARY_DIR}/vitral_${VITRAL_XT_WIDGET_SET}")
+endif()
+
+# The GUI classes of the chosen widget set; each set defines createUiFactory
+if(VITRAL_XT_WIDGET_SET STREQUAL "xm")
+    set(SCENE_EDITOR_WIDGET_SET_SOURCES
+        src/gui/xm/XmFileDialog.cpp
+        src/gui/xm/XmUiFactory.cpp
+    )
+else()
+    set(SCENE_EDITOR_WIDGET_SET_SOURCES
+        src/gui/xaw/XawFileDialog.cpp
+        src/gui/xaw/XawUiFactory.cpp
+    )
+endif()
 
 # The technology-independent application classes, the OpenGL 4 rendering
 # bridge ported from the Java application and its Xt GUI, built over the
-# Xt/Xaw layer of the toolkit (vitral_xt, as the Java one over `awt`).
+# Xt layer of the toolkit (vitral_xt, as the Java one over `awt`) and the
+# widget set chosen (vitral_xm or vitral_xaw).
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
@@ -53,12 +83,12 @@ add_executable(SceneEditorApplication
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
-    src/gui/xt/XtFileDialog.cpp
     src/gui/xt/XtImageControlWindow.cpp
     src/gui/xt/XtSelectorDialog.cpp
     src/gui/xt/XtModifyPanel.cpp
     src/gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.cpp
     src/io/FileSuffixFilter.cpp
+    src/io/FolderListing.cpp
     src/io/GuiI18nContextBuilder.cpp
     src/io/GuiJsonReader.cpp
     src/io/XmlManager.cpp
@@ -97,6 +127,7 @@ add_executable(SceneEditorApplication
     src/render/opengl4/OpenGL4SceneRenderer.cpp
     src/render/opengl4/XtOpenGL4SceneBridge.cpp
     src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
+    ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )
 
 target_include_directories(SceneEditorApplication PRIVATE
@@ -104,16 +135,24 @@ target_include_directories(SceneEditorApplication PRIVATE
     "${VITRAL_BASE_DIR}/src/main"
     "${VITRAL_OPENGL4_DIR}/src/main"
     "${VITRAL_XT_DIR}/src/main"
+    "${VITRAL_WIDGET_SET_DIR}/src/main"
     ${X11_INCLUDE_DIR}
     "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include"
 )
 
+# The widget set first. Motif must come before Xt in the libraries of the
+# executable: its VendorShell replaces the one of Xt only if the dynamic
+# linker finds it first
+if(VITRAL_XT_WIDGET_SET STREQUAL "xm")
+    find_package(Motif REQUIRED)
+    set(SCENE_EDITOR_WIDGET_SET_LIBRARIES ${MOTIF_LIBRARIES})
+endif()
 target_link_libraries(SceneEditorApplication PRIVATE
+    ${SCENE_EDITOR_WIDGET_SET_LIBRARIES}
+    vitral_${VITRAL_XT_WIDGET_SET}
+    vitral_xt
     OpenGL::GL
-    ${X11_Xt_LIB}
-    ${X11_Xaw_LIB}
     ${X11_LIBRARIES}
     vitral_base
     vitral_opengl4
-    vitral_xt
 )

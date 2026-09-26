@@ -26,8 +26,8 @@ class XtModifyPanel :
 protected:
     XtModifyPanelHost* parent;
     SimpleBody* target;
-    /// Composite holding the widgets of the panel, or null for editors
-    /// that build into the container of the panel that owns them
+    /// Panel holding the widgets of the panel, or null for editors that
+    /// build into the container of the panel that owns them
     Widget container;
     int width;
 
@@ -47,7 +47,8 @@ private:
 public:
     /**
     @param parent application services (referenced)
-    @param container Composite where the panel places its widgets
+    @param container panel (see `XtPanelWidgets::createPanel`) where this
+    one places its widgets
     @param width width of the container
     */
     XtModifyPanel(XtModifyPanelHost* parent, Widget container, int width);

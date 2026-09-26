@@ -124,17 +124,33 @@ sudo apt-get install libglfw3-dev libglu1-mesa-dev freeglut3-dev
 brew install glfw3
 ```
 
-### Optional: Xt/Xaw GUI (Linux only)
+### Optional: Xt GUI with Motif or Athena (Linux only)
 
-The `xt` module (`vitral_xt`) is the Xt/Xaw layer of the toolkit, the C++
+The `xt` module (`vitral_xt`) is the Xt layer of the toolkit, the C++
 counterpart of the Java `awt` module: conversion of X events to vitral ones
-(`XtSystem`), Xlib image renderers (`render/xlib`), Xaw widgets built from
-the vitral GUI definition (`render/xaw/XawGuiRenderer`) and the Xaw generic
-editor. It is built on Linux only, and needs:
+(`XtSystem`), Xlib image renderers (`render/xlib`), the interfaces of the
+widget sets over the Xt Intrinsics (`XtWidgetSet`, `XtPanelWidgets`,
+`XtGuiRenderer`) and the Xt generic editor. It depends only on libXt.
+
+The widgets come from one of two sibling modules, which implement those
+interfaces and never use each other:
+
+- `xm` (`vitral_xm`): Motif, the default.
+- `xaw` (`vitral_xaw`): Athena.
+
+The widget set is chosen when building, with the `VITRAL_XT_WIDGET_SET`
+CMake option (`xm` or `xaw`): each executable links only one of them, since
+Motif and Athena must not share a process. Only the chosen module is built.
+They are built on Linux only, and need:
 
 ```bash
-sudo apt-get install libxt-dev libxaw7-dev
+sudo apt-get install libxt-dev libmotif-dev   # Motif (default)
+sudo apt-get install libxt-dev libxaw7-dev    # Athena
+cmake -DVITRAL_XT_WIDGET_SET=xaw ..           # to build with Athena
 ```
+
+The `xt_layers` test (`scripts/checkXtLayers.py`) checks that the Xt layer
+uses neither widget set and that they do not use each other.
 
 ## Building with Image Format Support
 

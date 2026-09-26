@@ -1,5 +1,5 @@
 // Before any other header that could include the Xt ones
-#include "vsdk/toolkit/gui/XtIntrinsics.h"
+#include "vsdk/toolkit/gui/XawIntrinsics.h"
 
 #include <string>
 
@@ -11,8 +11,8 @@
 #include "vsdk/toolkit/gui/widget/WidgetMenuElement.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/gui/XtWidgetSupport.h"
 #include "vsdk/toolkit/render/xaw/XawGuiRenderer.h"
-#include "vsdk/toolkit/render/xlib/XlibRGBAImageUncompressedRenderer.h"
 
 namespace {
 
@@ -22,71 +22,10 @@ const int ICON_BUTTON_SIZE = 30;
 const int TEXT_BUTTON_WIDTH = 120;
 const int MARGIN = 8;
 
-/**
-A command of a menu item or a button, executed by its listener (as
-`SwingEventListener` does for Swing). Freed with its widget.
-*/
-struct CommandBinding {
-    CommandListener* executor;
-    java::String command;
-};
-
-void executeCommand(XtWidget, XtPointer clientData, XtPointer)
-{
-    CommandBinding* binding = static_cast<CommandBinding*>(clientData);
-    if ( binding != nullptr && binding->executor != nullptr ) {
-        binding->executor->executeCommand(binding->command);
-    }
-}
-
-void freeCommandBinding(XtWidget, XtPointer clientData, XtPointer)
-{
-    delete static_cast<CommandBinding*>(clientData);
-}
-
 void bindCommand(XtWidget widget, CommandListener* executor,
                  const java::String& command)
 {
-    CommandBinding* binding = new CommandBinding;
-    binding->executor = executor;
-    binding->command = command;
-    XtAddCallback(widget, XtNcallback, &executeCommand, binding);
-    XtAddCallback(widget, XtNdestroyCallback, &freeCommandBinding, binding);
-}
-
-void freePixmap(XtWidget widget, XtPointer clientData, XtPointer)
-{
-    XFreePixmap(XtDisplay(widget), reinterpret_cast<Pixmap>(clientData));
-}
-
-/**
-Visual, depth and colormap of the shell of a widget: popups must use them
-(the GLX visual of OpenGL applications is not the default one).
-*/
-struct ShellVisual {
-    Visual* visual;
-    int depth;
-    Colormap colormap;
-};
-
-ShellVisual shellVisualOf(XtWidget widget)
-{
-    XtWidget shell = widget;
-    while ( shell != nullptr && !XtIsShell(shell) ) {
-        shell = XtParent(shell);
-    }
-    ShellVisual result;
-    result.visual = nullptr;
-    result.depth = 0;
-    result.colormap = 0;
-    if ( shell != nullptr ) {
-        XtVaGetValues(shell, XtNvisual, &result.visual, XtNdepth,
-                      &result.depth, XtNcolormap, &result.colormap, nullptr);
-    }
-    if ( result.visual == nullptr ) {
-        result.visual = DefaultVisualOfScreen(XtScreen(widget));
-    }
-    return result;
+    XtWidgetSupport::bindCommand(widget, XtNcallback, executor, command);
 }
 
 /**
@@ -114,9 +53,9 @@ void popupSubmenu(XtWidget entry, XtPointer clientData, XtPointer)
 XtWidget createPopupShell(XtWidget owner)
 {
     // Unique names: menu buttons find their popup by name
-    static unsigned int sequence = 0;
-    std::string name = "vitralMenu" + std::to_string(sequence++);
-    ShellVisual shellVisual = shellVisualOf(owner);
+    std::string name = XtWidgetSupport::uniqueName("vitralMenu");
+    XtWidgetSupport::ShellVisual shellVisual =
+        XtWidgetSupport::shellVisualOf(owner);
     Arg args[4]; Cardinal n = 0;
     // Xaw follows the menuName of an entry while the pointer enters it only
     // with popupOnEntry
@@ -296,24 +235,12 @@ XtWidget XawGuiRenderer::buildButtonGroup(XtWidget parent,
             commandWidgetClass, frame, buttonArgs, buttonN);
 
         if ( withIcon ) {
-            Pixel backgroundPixel = 0;
-            Colormap colormap = 0;
-            int depth = 0;
-            XtVaGetValues(button, XtNbackground, &backgroundPixel,
-                          XtNcolormap, &colormap, XtNdepth, &depth, nullptr);
-            XColor background;
-            background.pixel = backgroundPixel;
-            XQueryColor(XtDisplay(button), colormap, &background);
-            Pixmap pixmap = XlibRGBAImageUncompressedRenderer::exportToPixmap(
-                XtDisplay(button), RootWindowOfScreen(XtScreen(button)),
-                shellVisualOf(button).visual, depth, *icon, background);
+            Pixmap pixmap = XtWidgetSupport::createIconPixmap(button, *icon);
             if ( pixmap != None ) {
                 // Label resizes to the bitmap: the size of the button stays
                 XtVaSetValues(button, XtNbitmap, pixmap,
                               XtNwidth, ICON_BUTTON_SIZE,
                               XtNheight, ICON_BUTTON_SIZE, nullptr);
-                XtAddCallback(button, XtNdestroyCallback, &freePixmap,
-                              reinterpret_cast<XtPointer>(pixmap));
             }
         }
         bindCommand(button, executor, element->getId());

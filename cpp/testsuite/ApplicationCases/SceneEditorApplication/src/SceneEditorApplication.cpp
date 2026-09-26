@@ -20,13 +20,6 @@
 #include <X11/Xresource.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
-#include <X11/Xaw/MenuButton.h>
-#include <X11/Xaw/Command.h>
-#include <X11/Xaw/Label.h>
-#include <X11/Xaw/SimpleMenu.h>
-#include <X11/Xaw/SmeBSB.h>
-#include <X11/Xaw/SmeLine.h>
-#include <X11/Composite.h>
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
@@ -38,10 +31,12 @@
 #include "gui/xt/XtApplicationHost.h"
 #include "vsdk/toolkit/gui/XtEventQueue.h"
 #include "gui/xt/XtImageControlWindow.h"
-#include "vsdk/toolkit/render/xaw/XawGuiRenderer.h"
 #include "gui/xt/XtModifyPanel.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "gui/xt/XtSelectorDialog.h"
+#include "gui/xt/XtUiFactory.h"
+#include "vsdk/toolkit/render/xt/XtGuiRenderer.h"
 #include "model/GuiState.h"
 #include "gui/xt/XlibLabelImageProvider.h"
 #include "vsdk/toolkit/gui/XtSystem.h"
@@ -92,11 +87,6 @@ static GLADapiproc glxGetProcAddress(const char* name)
 
 class SceneEditorApplication;
 
-struct CommandBinding {
-    SceneEditorApplication* application;
-    std::string identifier;
-};
-
 struct TabBinding {
     SceneEditorApplication* application;
     int page;
@@ -108,6 +98,10 @@ composition root of `AwtJogl4SceneEditorApplication`,
 `AwtJogl4GuiController` and `AwtJogl4ApplicationController` of the Java
 application. The model, its interaction techniques and its renderer are
 behind the `XtOpenGL4SceneBridge`, which has no Xt dependency.
+
+The GUI is built through the `XtWidgetSet` of the `XtUiFactory` it is
+given: the widget set (Athena or Motif) is chosen when building the
+application, and this class only uses the Xt Intrinsics.
 */
 class SceneEditorApplication :
     public XtOpenGL4SceneEditorApplication,
@@ -116,8 +110,12 @@ class SceneEditorApplication :
     private XtApplicationHost
 {
 public:
-    SceneEditorApplication()
-        : appContext(nullptr)
+    explicit SceneEditorApplication(XtUiFactory* uiFactory)
+        : uiFactory(uiFactory)
+        , widgetSet(uiFactory->getWidgetSet())
+        , panelWidgets(widgetSet->getPanelWidgets())
+        , guiRenderer(widgetSet->getGuiRenderer())
+        , appContext(nullptr)
         , display(nullptr)
         , shell(nullptr)
         , workspace(nullptr)
@@ -141,12 +139,10 @@ public:
         , selectorDialog(nullptr)
         , automationService(nullptr)
         , viewportMenu(nullptr)
-        , checkMarkBitmap(None)
         , labelProvider(nullptr)
         , window(0)
         , fbConfig(nullptr)
         , context(nullptr)
-        , wmDeleteWindow(None)
         , shaderProgramId(0)
         , vertexArrayId(0)
         , vertexBufferId(0)
@@ -208,13 +204,10 @@ public:
         delete executor;
         executor = nullptr;
         clearSideBindings();
-        clearViewportMenuBindings();
         if (display != nullptr) {
             for (std::map<int, Cursor>::iterator it = cursors.begin(); it != cursors.end(); ++it)
                 XFreeCursor(display, it->second);
             cursors.clear();
-            if (checkMarkBitmap != None) XFreePixmap(display, checkMarkBitmap);
-            checkMarkBitmap = None;
         }
         if (display != nullptr && menuFontSet != nullptr) {
             XFreeFontSet(display, menuFontSet);
@@ -258,6 +251,10 @@ public:
     }
 
 private:
+    XtUiFactory* uiFactory;
+    XtWidgetSet* widgetSet;
+    XtPanelWidgets* panelWidgets;
+    XtGuiRenderer* guiRenderer;
     XtAppContext appContext;
     Display* display;
     Widget shell;
@@ -282,12 +279,12 @@ private:
     XtSelectorDialog* selectorDialog;
     XtOpenGL4VitralEditorMCP* automationService;
     Widget viewportMenu;
-    Pixmap checkMarkBitmap;
+    /// Commands of the items of the viewport menu shown
+    std::vector<std::string> viewportMenuCommands;
     XlibLabelImageProvider* labelProvider;
     Window window;
     GLXFBConfig fbConfig;
     GLXContext context;
-    Atom wmDeleteWindow;
     GLuint shaderProgramId;
     GLuint vertexArrayId;
     GLuint vertexBufferId;
@@ -299,9 +296,7 @@ private:
     std::string guiDefinition;
     std::string pendingGuiLanguage;
     bool guiRebuildQueued;
-    std::vector<CommandBinding*> commandBindings;
     std::vector<TabBinding*> tabBindings;
-    std::vector<CommandBinding*> viewportMenuBindings;
     std::map<std::string, std::string> messages;
     XtOpenGL4SceneBridge* sceneBridge;
     bool ready;
@@ -339,7 +334,7 @@ private:
         setlocale(LC_CTYPE, "");
     }
 
-    static void selectSideTab(Widget, XtPointer clientData, XtPointer)
+    static void selectSideTab(Widget, void* clientData)
     {
         TabBinding* binding = reinterpret_cast<TabBinding*>(clientData);
         if (binding != nullptr && binding->application != nullptr)
@@ -368,9 +363,6 @@ private:
 
     void clearSideBindings()
     {
-        for (size_t i = 0; i < commandBindings.size(); ++i)
-            delete commandBindings[i];
-        commandBindings.clear();
         for (size_t i = 0; i < tabBindings.size(); ++i)
             delete tabBindings[i];
         tabBindings.clear();
@@ -389,6 +381,7 @@ private:
     static const int RENDER_PAGE = 4;
     static const int MENU_BAR_HEIGHT = 28;
     static const int SIDE_TAB_HEIGHT = 28;
+    static const int SIDE_TAB_WIDTH = 64;
     static const int SIDE_PANEL_WIDTH = 320;
     static const int STATUS_BAR_HEIGHT = 24;
 
@@ -444,15 +437,10 @@ private:
 
     Widget createSidePage(const char* name, bool managed)
     {
-        Arg pageArgs[4]; Cardinal pageN = 0;
-        XtSetArg(pageArgs[pageN], XtNx, 0); ++pageN;
-        XtSetArg(pageArgs[pageN], XtNy, SIDE_TAB_HEIGHT); ++pageN;
-        XtSetArg(pageArgs[pageN], XtNwidth, SIDE_PANEL_WIDTH); ++pageN;
-        XtSetArg(pageArgs[pageN], XtNheight,
-                 height - contentTop() - STATUS_BAR_HEIGHT - SIDE_TAB_HEIGHT); ++pageN;
-        return managed ?
-            XtCreateManagedWidget(name, compositeWidgetClass, rightPanel, pageArgs, pageN) :
-            XtCreateWidget(name, compositeWidgetClass, rightPanel, pageArgs, pageN);
+        return panelWidgets->createPanel(
+            rightPanel, name, 0, SIDE_TAB_HEIGHT, SIDE_PANEL_WIDTH,
+            height - contentTop() - STATUS_BAR_HEIGHT - SIDE_TAB_HEIGHT,
+            managed);
     }
 
     /**
@@ -462,32 +450,21 @@ private:
     void createRightPanel()
     {
         const int top = contentTop();
-        Arg args[4]; Cardinal n = 0;
-        XtSetArg(args[n], XtNx, width - SIDE_PANEL_WIDTH); ++n;
-        XtSetArg(args[n], XtNy, top); ++n;
-        XtSetArg(args[n], XtNwidth, SIDE_PANEL_WIDTH); ++n;
-        XtSetArg(args[n], XtNheight, height - top - STATUS_BAR_HEIGHT); ++n;
-        rightPanel = XtCreateManagedWidget(
-            "rightPanel", compositeWidgetClass, workspace, args, n);
+        rightPanel = panelWidgets->createPanel(
+            workspace, "rightPanel", width - SIDE_PANEL_WIDTH, top,
+            SIDE_PANEL_WIDTH, height - top - STATUS_BAR_HEIGHT, true);
 
         const char* tabs[] = {
             "IDM_CREATION_TAB", "IDM_MODIFY_TAB", "IDM_GUI_TAB",
             "IDM_OTHERS_TAB", "IDM_RENDER_TAB"
         };
         for (int i = 0; i < 5; ++i) {
-            const std::string label = text(tabs[i]);
-            Arg tabArgs[6]; Cardinal tabN = 0;
-            XtSetArg(tabArgs[tabN], XtNlabel, label.c_str()); ++tabN;
-            XtSetArg(tabArgs[tabN], XtNinternational, True); ++tabN;
-            XtSetArg(tabArgs[tabN], XtNfontSet, menuFontSet); ++tabN;
-            XtSetArg(tabArgs[tabN], XtNx, i * 64); ++tabN;
-            XtSetArg(tabArgs[tabN], XtNy, 0); ++tabN;
-            XtSetArg(tabArgs[tabN], XtNwidth, 64); ++tabN;
-            Widget tab = XtCreateManagedWidget(
-                "sideTab", commandWidgetClass, rightPanel, tabArgs, tabN);
             TabBinding* binding = new TabBinding{this, i};
             tabBindings.push_back(binding);
-            XtAddCallback(tab, XtNcallback, &SceneEditorApplication::selectSideTab, binding);
+            panelWidgets->createPushButton(
+                rightPanel, text(tabs[i]), menuFontSet,
+                i * SIDE_TAB_WIDTH, 0, SIDE_TAB_WIDTH, SIDE_TAB_HEIGHT - 4,
+                &SceneEditorApplication::selectSideTab, binding);
         }
 
         creationPage = createSidePage("creationPage", true);
@@ -505,7 +482,7 @@ private:
         const char* groups[] = { "CREATION", "GUI", "OTHER", "RENDER" };
         Widget pages[] = { creationPage, guiPage, othersPage, renderPage };
         for (int i = 0; i < 4; ++i) {
-            XawGuiRenderer::buildButtonGroup(
+            guiRenderer->buildButtonGroup(
                 pages[i], sceneBridge->getButtonGroup(groups[i]), executor,
                 menuFontSet, 0, 0, SIDE_PANEL_WIDTH);
         }
@@ -533,7 +510,7 @@ private:
     */
     void createGlobalBar()
     {
-        globalBar = XawGuiRenderer::buildButtonGroup(
+        globalBar = guiRenderer->buildButtonGroup(
             workspace, sceneBridge->getButtonGroup("GLOBAL"), executor,
             menuFontSet, 0, MENU_BAR_HEIGHT, width);
     }
@@ -547,7 +524,7 @@ private:
 
     void createStatusBar()
     {
-        statusBar = XtPanelWidgets::createLabel(
+        statusBar = panelWidgets->createLabel(
             workspace, text("IDM_INTRO_MESSAGE"), menuFontSet,
             XtPanelWidgets::LEFT, 3, height - STATUS_BAR_HEIGHT + 1,
             width - 6, STATUS_BAR_HEIGHT - 2);
@@ -559,7 +536,7 @@ private:
     */
     void createMenuBar()
     {
-        menuBar = XawGuiRenderer::buildMenubar(
+        menuBar = guiRenderer->buildMenubar(
             workspace, sceneBridge->getMenubar(), executor, menuFontSet,
             0, 0, width, MENU_BAR_HEIGHT, 112);
     }
@@ -631,13 +608,14 @@ private:
     }
 
     /**
-    Merges the resources of the application (its black and white look) over
-    the ones of the display, so they win over the user's defaults.
+    Merges the resources of the look of the GUI (the black and white one of
+    the Athena GUI) over the ones of the display, so they win over the
+    user's defaults. Widget sets keeping their own look (Motif) have none.
     */
     void loadResourceFile()
     {
-        const char* path = std::getenv("SCENE_EDITOR_XRESOURCES");
-        if (path == nullptr) path = "XResources";
+        const char* path = uiFactory->getResourceFile();
+        if (path == nullptr) return;
         XrmDatabase database = XtDatabase(display);
         if (!XrmCombineFileDatabase(path, &database, True)) {
             fprintf(stderr, "SceneEditorApplication: could not read X resources file %s\n", path);
@@ -684,14 +662,17 @@ private:
         Arg args[9];
         Cardinal n = 0;
         // The shell accepts the keyboard focus from the window manager, so
-        // it can redirect it to the drawing canvas (see XtSetKeyboardFocus)
+        // it can redirect it to the drawing canvas (see
+        // XtWidgetSet::setKeyboardFocus)
         XtSetArg(args[n], XtNinput, True); n++;
         XtSetArg(args[n], XtNvisual, visual); n++;
         XtSetArg(args[n], XtNcolormap, colormap); n++;
         XtSetArg(args[n], XtNdepth, visualDepth); n++;
         XtSetArg(args[n], XtNwidth, width); n++;
         XtSetArg(args[n], XtNheight, height); n++;
-        XtSetArg(args[n], XtNtitle, "VITRAL Scene Editor - Xt GLX OpenGL 4"); n++;
+        const std::string title = std::string("VITRAL Scene Editor - ") +
+            widgetSet->getName() + " GLX OpenGL 4";
+        XtSetArg(args[n], XtNtitle, title.c_str()); n++;
         XtSetArg(args[n], XtNx, 0); n++;
         XtSetArg(args[n], XtNy, 0); n++;
 
@@ -710,11 +691,10 @@ private:
             throw VSDKFatalException("Could not create Xt shell");
         }
 
-        Cardinal workspaceArgsCount = 0;
-        XtSetArg(args[workspaceArgsCount], XtNwidth, width); ++workspaceArgsCount;
-        XtSetArg(args[workspaceArgsCount], XtNheight, height); ++workspaceArgsCount;
-        workspace = XtCreateManagedWidget(
-            "workspace", compositeWidgetClass, shell, args, workspaceArgsCount);
+        workspace = panelWidgets->createPanel(shell, "workspace", 0, 0,
+                                              width, height, true);
+        widgetSet->setWindowCloseHandler(
+            shell, &SceneEditorApplication::closeRequestedByWindowManager, this);
 
         // The model is created first: the GUI is built from its I18N context
         labelProvider = new XlibLabelImageProvider(display);
@@ -727,13 +707,9 @@ private:
         createStatusBar();
         canvasWidth = width - SIDE_PANEL_WIDTH;
         canvasHeight = height - contentTop() - STATUS_BAR_HEIGHT;
-        Cardinal canvasArgsCount = 0;
-        XtSetArg(args[canvasArgsCount], XtNx, 0); ++canvasArgsCount;
-        XtSetArg(args[canvasArgsCount], XtNy, contentTop()); ++canvasArgsCount;
-        XtSetArg(args[canvasArgsCount], XtNwidth, canvasWidth); ++canvasArgsCount;
-        XtSetArg(args[canvasArgsCount], XtNheight, canvasHeight); ++canvasArgsCount;
-        drawingCanvas = XtCreateManagedWidget(
-            "drawingCanvas", coreWidgetClass, workspace, args, canvasArgsCount);
+        drawingCanvas = widgetSet->createDrawingArea(
+            workspace, "drawingCanvas", 0, contentTop(), canvasWidth,
+            canvasHeight);
 
         // Every mouse and keyboard event of the canvas is captured and
         // converted to a vitral event for the interaction techniques
@@ -748,23 +724,12 @@ private:
             reinterpret_cast<XtPointer>(this));
 
         // Keys typed anywhere in the window (i.e. with the pointer over the
-        // side panel) are redirected to the canvas: the shell selects them,
-        // so they reach Xt, which delivers them to its focus widget
-        XtAddEventHandler(
-            shell, KeyPressMask | KeyReleaseMask, False,
-            &SceneEditorApplication::ignoreEventHandler, nullptr);
-        XtSetKeyboardFocus(shell, drawingCanvas);
+        // side panel) are redirected to the canvas
+        widgetSet->setKeyboardFocus(shell, drawingCanvas);
 
         XtRealizeWidget(shell);
         window = XtWindow(drawingCanvas);
-        wmDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", False);
-        XSetWMProtocols(display, XtWindow(shell), &wmDeleteWindow, 1);
-        XtAddEventHandler(
-            shell,
-            NoEventMask,
-            True,
-            &SceneEditorApplication::shellEventHandler,
-            reinterpret_cast<XtPointer>(this));
+        widgetSet->setKeyboardFocus(shell, drawingCanvas);
 
         XFree(visualInfo);
     }
@@ -1053,22 +1018,9 @@ private:
         return static_cast<long long>(now.tv_sec) * 1000 + now.tv_usec / 1000;
     }
 
-    static void ignoreEventHandler(Widget, XtPointer, XEvent*, Boolean*)
+    static void closeRequestedByWindowManager(void* clientData)
     {
-    }
-
-    static void shellEventHandler(
-        Widget,
-        XtPointer clientData,
-        XEvent* event,
-        Boolean*)
-    {
-        SceneEditorApplication* self =
-            reinterpret_cast<SceneEditorApplication*>(clientData);
-        if (self != nullptr && event->type == ClientMessage &&
-            static_cast<Atom>(event->xclient.data.l[0]) == self->wmDeleteWindow) {
-            self->requestClose();
-        }
+        static_cast<SceneEditorApplication*>(clientData)->requestClose();
     }
 
     static void eventHandler(
@@ -1188,7 +1140,7 @@ private:
         }
         if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::PRESS)) return;
         // Keys go back to the canvas after typing in a field of the panel
-        XtSetKeyboardFocus(shell, drawingCanvas);
+        widgetSet->setKeyboardFocus(shell, drawingCanvas);
         pressButton = event.xbutton.button;
         pressX = event.xbutton.x;
         pressY = event.xbutton.y;
@@ -1269,49 +1221,26 @@ private:
 
     //= Viewport menu =====================================================
 
-    static void executeViewportMenuCommand(Widget, XtPointer clientData, XtPointer)
+    static void executeViewportMenuCommand(int index, void* clientData)
     {
-        CommandBinding* binding = reinterpret_cast<CommandBinding*>(clientData);
-        if (binding == nullptr || binding->application == nullptr ||
-            binding->application->sceneBridge == nullptr) return;
-        binding->application->sceneBridge->executeViewportCommand(binding->identifier);
-        binding->application->requestRedraw();
+        SceneEditorApplication* self = static_cast<SceneEditorApplication*>(clientData);
+        if (self->sceneBridge == nullptr || index < 0 ||
+            index >= static_cast<int>(self->viewportMenuCommands.size())) return;
+        self->sceneBridge->executeViewportCommand(self->viewportMenuCommands[index]);
+        self->requestRedraw();
     }
 
-    static void viewportMenuPoppedDown(Widget popup, XtPointer clientData, XtPointer)
+    static void viewportMenuPoppedDown(void* clientData)
     {
-        SceneEditorApplication* self = reinterpret_cast<SceneEditorApplication*>(clientData);
-        XtUngrabPointer(popup, CurrentTime);
-        if (self != nullptr) {
-            self->popupDismissFilter.popupClosed(currentTimeMillis());
-            self->requestRedraw();
-        }
-    }
-
-    void clearViewportMenuBindings()
-    {
-        for (size_t i = 0; i < viewportMenuBindings.size(); ++i)
-            delete viewportMenuBindings[i];
-        viewportMenuBindings.clear();
-    }
-
-    Pixmap getCheckMarkBitmap()
-    {
-        static const unsigned char checkMarkBits[] = {
-            0x00, 0x80, 0xc0, 0x61, 0x33, 0x1e, 0x0c, 0x00
-        };
-        if (checkMarkBitmap == None) {
-            checkMarkBitmap = XCreateBitmapFromData(
-                display, RootWindow(display, DefaultScreen(display)),
-                reinterpret_cast<const char*>(checkMarkBits), 8, 8);
-        }
-        return checkMarkBitmap;
+        SceneEditorApplication* self = static_cast<SceneEditorApplication*>(clientData);
+        self->popupDismissFilter.popupClosed(currentTimeMillis());
+        self->requestRedraw();
     }
 
     /**
-    Pops up, with Xt, the menu of the viewport whose title was clicked: its
+    Pops up the menu of the viewport whose title was clicked: its
     projection locations and render modes, the ones in use checked. It
-    grabs the pointer, so a click outside only closes it.
+    takes the pointer, so a click outside only closes it.
     */
     void showViewportMenu(int canvasX, int canvasY)
     {
@@ -1319,57 +1248,31 @@ private:
             XtDestroyWidget(viewportMenu);
             viewportMenu = nullptr;
         }
-        clearViewportMenuBindings();
         const std::vector<XtOpenGL4SceneBridge::ViewportMenuItem> items =
             sceneBridge->getViewportMenuItems();
         if (items.empty()) return;
 
-        Arg popupArgs[3]; Cardinal popupArgCount = 0;
-        XtSetArg(popupArgs[popupArgCount], XtNvisual, visual); ++popupArgCount;
-        XtSetArg(popupArgs[popupArgCount], XtNdepth, visualDepth); ++popupArgCount;
-        XtSetArg(popupArgs[popupArgCount], XtNcolormap, colormap); ++popupArgCount;
-        viewportMenu = XtCreatePopupShell(
-            "viewportMenu", simpleMenuWidgetClass, drawingCanvas,
-            popupArgs, popupArgCount);
-        // Entries follow the pointer without a button pressed, too
-        XtOverrideTranslations(viewportMenu, XtParseTranslationTable("<Motion>: highlight()"));
-        XtAddCallback(viewportMenu, XtNpopdownCallback,
-                      &SceneEditorApplication::viewportMenuPoppedDown,
-                      reinterpret_cast<XtPointer>(this));
-
+        std::vector<XtWidgetSet::MenuChoice> choices;
+        viewportMenuCommands.clear();
         for (size_t i = 0; i < items.size(); ++i) {
-            if (items[i].separator) {
-                XtCreateManagedWidget("separator", smeLineObjectClass, viewportMenu, nullptr, 0);
-                continue;
-            }
-            Arg args[6]; Cardinal n = 0;
-            XtSetArg(args[n], XtNlabel, items[i].label.c_str()); ++n;
-            XtSetArg(args[n], XtNinternational, True); ++n;
-            XtSetArg(args[n], XtNfontSet, menuFontSet); ++n;
-            XtSetArg(args[n], XtNleftMargin, 16); ++n;
-            if (items[i].current) {
-                XtSetArg(args[n], XtNleftBitmap, getCheckMarkBitmap()); ++n;
-            }
-            Widget item = XtCreateManagedWidget(
-                "viewportMenuItem", smeBSBObjectClass, viewportMenu, args, n);
-            CommandBinding* binding = new CommandBinding{this, items[i].command};
-            viewportMenuBindings.push_back(binding);
-            XtAddCallback(item, XtNcallback,
-                          &SceneEditorApplication::executeViewportMenuCommand, binding);
+            XtWidgetSet::MenuChoice choice;
+            choice.label = items[i].label;
+            choice.checked = items[i].current;
+            choice.separator = items[i].separator;
+            choices.push_back(choice);
+            viewportMenuCommands.push_back(items[i].command);
         }
+        viewportMenu = widgetSet->createChoiceMenu(
+            drawingCanvas, choices, menuFontSet,
+            &SceneEditorApplication::executeViewportMenuCommand, this);
 
         Position rootX = 0;
         Position rootY = 0;
         XtTranslateCoords(drawingCanvas, static_cast<Position>(canvasX),
                           static_cast<Position>(canvasY), &rootX, &rootY);
-        XtVaSetValues(viewportMenu, XtNx, rootX, XtNy, rootY, nullptr);
-        XtPopup(viewportMenu, XtGrabExclusive);
-        // Without owner events, every pointer event (over the menu, the
-        // canvas or anywhere) goes to the menu: an outside release closes it
-        XtGrabPointer(viewportMenu, False,
-                      ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-                      EnterWindowMask | LeaveWindowMask,
-                      GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+        widgetSet->popupChoiceMenu(viewportMenu, rootX, rootY,
+                                   &SceneEditorApplication::viewportMenuPoppedDown,
+                                   this);
         popupDismissFilter.popupShown();
     }
 
@@ -1467,7 +1370,7 @@ private:
                               height - contentTop() - STATUS_BAR_HEIGHT, 0);
         }
         setWindowManagerFullScreen(fullScreen);
-        XtSetKeyboardFocus(shell, drawingCanvas);
+        widgetSet->setKeyboardFocus(shell, drawingCanvas);
     }
 
     /**
@@ -1516,6 +1419,11 @@ private:
         return sceneBridge;
     }
 
+    XtUiFactory* getUiFactory() override
+    {
+        return uiFactory;
+    }
+
     std::string getMessage(const char* id) override
     {
         return text(id);
@@ -1523,7 +1431,7 @@ private:
 
     void showStatusMessage(const std::string& message) override
     {
-        if (statusBar != nullptr) XtPanelWidgets::setLabel(statusBar, message);
+        if (statusBar != nullptr) panelWidgets->setLabel(statusBar, message);
     }
 
     void showImage(RGBImageUncompressed* image) override
@@ -1744,13 +1652,9 @@ private:
         return menuFontSet;
     }
 
-    Widget createPopupMenu(Widget parent, const char* name) override
+    XtPanelWidgets* getPanelWidgets() override
     {
-        Arg args[3]; Cardinal n = 0;
-        XtSetArg(args[n], XtNvisual, visual); ++n;
-        XtSetArg(args[n], XtNdepth, visualDepth); ++n;
-        XtSetArg(args[n], XtNcolormap, colormap); ++n;
-        return XtCreatePopupShell(name, simpleMenuWidgetClass, parent, args, n);
+        return panelWidgets;
     }
 
     static void showViewportMenuAfterEvent(XtPointer clientData, XtIntervalId*)
@@ -1824,6 +1728,13 @@ private:
 
 int main(int argc, char** argv)
 {
-    SceneEditorApplication app;
-    return app.run(argc, argv);
+    // The widget set the application is built with
+    XtUiFactory* uiFactory = createUiFactory();
+    int result = 0;
+    {
+        SceneEditorApplication app(uiFactory);
+        result = app.run(argc, argv);
+    }
+    delete uiFactory;
+    return result;
 }

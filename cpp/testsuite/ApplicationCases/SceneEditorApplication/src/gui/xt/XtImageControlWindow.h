@@ -39,15 +39,13 @@ private:
     Widget windowWidget;
     Widget workArea;
     XImage* ximage;
-    Atom wmDeleteWindow;
 
     void updateXImage();
     void paint();
 
     static void workAreaEvent(Widget, XtPointer clientData, XEvent* event,
                               Boolean*);
-    static void shellEvent(Widget, XtPointer clientData, XEvent* event,
-                           Boolean*);
+    static void closeRequested(void* clientData);
 
     XtImageControlWindow(const XtImageControlWindow& other);
     XtImageControlWindow& operator=(const XtImageControlWindow& other);
