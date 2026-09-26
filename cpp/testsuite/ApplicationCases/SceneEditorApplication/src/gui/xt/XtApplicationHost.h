@@ -5,10 +5,10 @@
 
 #include <X11/Intrinsic.h>
 
+#include "application/XtSceneEditorOpenGLVariant.h"
 #include "gui/xt/XtModifyPanelHost.h"
 
 class RGBImageUncompressed;
-class XtOpenGL4SceneBridge;
 class XtUiFactory;
 
 /**
@@ -23,7 +23,7 @@ public:
     /**
     @return the scene model, its commands and its drawing area
     */
-    virtual XtOpenGL4SceneBridge* getSceneBridge() = 0;
+    virtual XtOpenGLSceneBridge* getSceneBridge() = 0;
 
     /**
     @return the widget set of the GUI and its file dialog

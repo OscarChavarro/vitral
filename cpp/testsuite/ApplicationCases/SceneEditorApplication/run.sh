@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Builds and runs the editor. The widget set of its Xt GUI is chosen when
-# building: VITRAL_XT_WIDGET_SET=xm (Motif, the default) or xaw (Athena),
-# each one in its own build folder, i.e.:
+# Builds and runs the editor. Its variant is chosen when building, with the
+# widget set of its Xt GUI (xm: Motif, xaw: Athena) and the OpenGL version of
+# its drawing area (opengl4: 4.1 core, opengl1: 1.2 fixed function):
+# SCENE_EDITOR_VARIANT=xm_opengl4 (the default), xaw_opengl4, xm_opengl1 or
+# xaw_opengl1, each one in its own build folder, i.e.:
 #   ./run.sh -s
-#   VITRAL_XT_WIDGET_SET=xaw ./run.sh -s
+#   SCENE_EDITOR_VARIANT=xaw_opengl1 ./run.sh -s
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WIDGET_SET="${VITRAL_XT_WIDGET_SET:-xm}"
-BUILD_DIR="$ROOT_DIR/build-cmake-$WIDGET_SET"
+VARIANT="${SCENE_EDITOR_VARIANT:-xm_opengl4}"
+BUILD_DIR="$ROOT_DIR/build-cmake-$VARIANT"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
-cmake -DVITRAL_XT_WIDGET_SET="$WIDGET_SET" ..
+cmake -DSCENE_EDITOR_VARIANT="$VARIANT" ..
 cmake --build . --config Release
 cd "$ROOT_DIR"
-"./build/$WIDGET_SET/SceneEditorApplication" "$@"
+"./build/$VARIANT/SceneEditorApplication" "$@"

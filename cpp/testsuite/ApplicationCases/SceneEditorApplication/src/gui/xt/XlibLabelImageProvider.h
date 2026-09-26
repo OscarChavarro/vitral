@@ -7,18 +7,24 @@
 
 #include <X11/Xlib.h>
 
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+#include "vsdk/toolkit/render/opengl1/OpenGL1LabelImageProvider.h"
+#else
 #include "vsdk/toolkit/render/opengl4/OpenGL4LabelImageProvider.h"
+#endif
+#include "application/XtSceneEditorOpenGLVariant.h"
 
 class RGBAImageUncompressed;
 
 /**
-Gives the OpenGL4 renderers the images of the labels of the viewports
-(titles, HUD, gizmo labels), rasterized by `XtSystem::calculateLabelImage`,
+Gives the OpenGL renderers (4.1 or 1.2, the one the editor is built with)
+the images of the labels of the viewports (titles, HUD, gizmo labels),
+rasterized by `XtSystem::calculateLabelImage`,
 as the `Jogl4LabelImageProvider` of `AwtJogl4ApplicationController` does
 with `AwtSystem`. The images are cached, since the renderers ask for the
 same labels every frame.
 */
-class XlibLabelImageProvider : public OpenGL4LabelImageProvider {
+class XlibLabelImageProvider : public XtOpenGLLabelImageProvider {
 private:
     typedef std::pair<std::pair<std::string, int>, unsigned long> Key;
 

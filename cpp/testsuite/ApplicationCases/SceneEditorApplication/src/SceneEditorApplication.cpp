@@ -10,8 +10,13 @@
 #include <vector>
 #include <sys/time.h>
 
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+#include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
+#else
 #include <glad/gl.h>
 #include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
+#endif
 #include <GL/glx.h>
 #include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
@@ -23,10 +28,20 @@
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+#include "application/XtOpenGL1ApplicationController.h"
+#include "application/XtOpenGL1GuiEventExecutor.h"
+#include "application/XtOpenGL1SceneEditorApplication.h"
+#include "application/mcp/XtOpenGL1VitralEditorMCP.h"
+#include "render/opengl1/XtOpenGL1SceneBridge.h"
+#else
 #include "application/XtOpenGL4ApplicationController.h"
 #include "application/XtOpenGL4GuiEventExecutor.h"
 #include "application/XtOpenGL4SceneEditorApplication.h"
 #include "application/mcp/XtOpenGL4VitralEditorMCP.h"
+#include "render/opengl4/XtOpenGL4SceneBridge.h"
+#endif
+#include "application/XtSceneEditorOpenGLVariant.h"
 #include "gui/PopupDismissClickFilter.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "vsdk/toolkit/gui/XtEventQueue.h"
@@ -41,10 +56,10 @@
 #include "gui/xt/XlibLabelImageProvider.h"
 #include "vsdk/toolkit/gui/XtSystem.h"
 #include "io/GuiJsonReader.h"
-#include "render/opengl4/XtOpenGL4SceneBridge.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 
+#ifndef VITRAL_SCENE_EDITOR_OPENGL1
 #ifdef __APPLE__
 #error "SceneEditorApplication Xt + GLX + OpenGL 4.1 is supported only on Linux/X11, not macOS/XQuartz."
 #endif
@@ -74,7 +89,6 @@ typedef GLXContext (*CreateContextAttribsARBProc)(
     GLXContext,
     Bool,
     const int*);
-typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
 
 /**
 Lookup of the OpenGL functions of GLX, as `OpenGL4Loader` expects it.
@@ -84,6 +98,9 @@ static GLADapiproc glxGetProcAddress(const char* name)
     return reinterpret_cast<GLADapiproc>(
         glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
 }
+#endif
+
+typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
 
 class SceneEditorApplication;
 
@@ -93,20 +110,23 @@ struct TabBinding {
 };
 
 /**
-The scene editor with an Xt GUI and an OpenGL 4 drawing area: the
+The scene editor with an Xt GUI and an OpenGL drawing area (OpenGL 4.1
+core, or OpenGL 1.2 fixed function when `VITRAL_SCENE_EDITOR_OPENGL1` is
+defined when building): the
 composition root of `AwtJogl4SceneEditorApplication`,
 `AwtJogl4GuiController` and `AwtJogl4ApplicationController` of the Java
 application. The model, its interaction techniques and its renderer are
-behind the `XtOpenGL4SceneBridge`, which has no Xt dependency.
+behind the `XtOpenGL4SceneBridge` (or `XtOpenGL1SceneBridge`), which has
+no Xt dependency.
 
 The GUI is built through the `XtWidgetSet` of the `XtUiFactory` it is
 given: the widget set (Athena or Motif) is chosen when building the
 application, and this class only uses the Xt Intrinsics.
 */
 class SceneEditorApplication :
-    public XtOpenGL4SceneEditorApplication,
-    public XtOpenGL4ApplicationController,
-    private XtOpenGL4SceneBridge::Listener,
+    public XtOpenGLSceneEditorApplication,
+    public XtOpenGLApplicationController,
+    private XtOpenGLSceneBridge::Listener,
     private XtApplicationHost
 {
 public:
@@ -143,9 +163,11 @@ public:
         , window(0)
         , fbConfig(nullptr)
         , context(nullptr)
+#ifndef VITRAL_SCENE_EDITOR_OPENGL1
         , shaderProgramId(0)
         , vertexArrayId(0)
         , vertexBufferId(0)
+#endif
         , width(640)
         , height(480)
         , canvasWidth(320)
@@ -235,7 +257,7 @@ public:
             redraw();
             if (withAutomationService) {
                 // Starts its own listener thread, which keeps it alive
-                automationService = new XtOpenGL4VitralEditorMCP(this);
+                automationService = new XtOpenGLVitralEditorMCP(this);
             }
             XtAppMainLoop(appContext);
         }
@@ -274,10 +296,10 @@ private:
     XtModifyPanel* modifyPanel;
     Widget globalBar;
     Widget statusBar;
-    XtOpenGL4GuiEventExecutor* executor;
+    XtOpenGLGuiEventExecutor* executor;
     XtImageControlWindow* imageControlWindow;
     XtSelectorDialog* selectorDialog;
-    XtOpenGL4VitralEditorMCP* automationService;
+    XtOpenGLVitralEditorMCP* automationService;
     Widget viewportMenu;
     /// Commands of the items of the viewport menu shown
     std::vector<std::string> viewportMenuCommands;
@@ -285,9 +307,11 @@ private:
     Window window;
     GLXFBConfig fbConfig;
     GLXContext context;
+#ifndef VITRAL_SCENE_EDITOR_OPENGL1
     GLuint shaderProgramId;
     GLuint vertexArrayId;
     GLuint vertexBufferId;
+#endif
     int width;
     int height;
     int canvasWidth;
@@ -298,7 +322,7 @@ private:
     bool guiRebuildQueued;
     std::vector<TabBinding*> tabBindings;
     std::map<std::string, std::string> messages;
-    XtOpenGL4SceneBridge* sceneBridge;
+    XtOpenGLSceneBridge* sceneBridge;
     bool ready;
     bool closing;
     bool repaintQueued;
@@ -670,8 +694,13 @@ private:
         XtSetArg(args[n], XtNdepth, visualDepth); n++;
         XtSetArg(args[n], XtNwidth, width); n++;
         XtSetArg(args[n], XtNheight, height); n++;
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        const std::string title = std::string("VITRAL Scene Editor - ") +
+            widgetSet->getName() + " GLX OpenGL 1.2";
+#else
         const std::string title = std::string("VITRAL Scene Editor - ") +
             widgetSet->getName() + " GLX OpenGL 4";
+#endif
         XtSetArg(args[n], XtNtitle, title.c_str()); n++;
         XtSetArg(args[n], XtNx, 0); n++;
         XtSetArg(args[n], XtNy, 0); n++;
@@ -698,9 +727,9 @@ private:
 
         // The model is created first: the GUI is built from its I18N context
         labelProvider = new XlibLabelImageProvider(display);
-        sceneBridge = new XtOpenGL4SceneBridge(labelProvider, this);
+        sceneBridge = new XtOpenGLSceneBridge(labelProvider, this);
         loadGuiDefinition();
-        executor = new XtOpenGL4GuiEventExecutor(this);
+        executor = new XtOpenGLGuiEventExecutor(this);
         createMenuBar();
         createGlobalBar();
         createRightPanel();
@@ -776,6 +805,19 @@ private:
         return visualInfo;
     }
 
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    void createContext()
+    {
+        // A legacy context: it offers the OpenGL 1.2 fixed function
+        // pipeline (as XQuartz does on macOS)
+        context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE,
+                                      nullptr, True);
+        if (context == nullptr) {
+            throw VSDKFatalException("Could not create an OpenGL GLX context");
+        }
+        makeContextCurrentWithVSync();
+    }
+#else
     void createContext()
     {
         CreateContextAttribsARBProc createContextAttribs =
@@ -804,7 +846,12 @@ private:
         if (context == nullptr) {
             throw VSDKFatalException("Could not create an OpenGL 4.1 core GLX context");
         }
+        makeContextCurrentWithVSync();
+    }
+#endif
 
+    void makeContextCurrentWithVSync()
+    {
         if (!glXMakeCurrent(display, window, context)) {
             throw VSDKFatalException("Could not make GLX context current");
         }
@@ -818,6 +865,52 @@ private:
         }
     }
 
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    void initOpenGL()
+    {
+        // The functions are exported by the system OpenGL library: only
+        // the version of the context is checked
+        if (!OpenGL1Loader::load()) {
+            throw VSDKFatalException("The context does not offer OpenGL 1.2");
+        }
+
+        checkOpenGLVersion();
+        sceneBridge->setCanvasSize(canvasWidth, canvasHeight);
+        sceneBridge->init();
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glViewport(0, 0, canvasWidth, canvasHeight);
+        ready = true;
+    }
+
+    void checkOpenGLVersion()
+    {
+        const char* versionStr = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+        const char* rendererStr = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+        const char* vendorStr = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+        printf("OpenGL vendor: %s\n", vendorStr != nullptr ? vendorStr : "(unknown)");
+        printf("OpenGL renderer: %s\n", rendererStr != nullptr ? rendererStr : "(unknown)");
+        printf("OpenGL version string: %s\n", versionStr != nullptr ? versionStr : "(unknown)");
+
+        // GL_MAJOR_VERSION does not exist before OpenGL 3.0
+        int major = 0;
+        int minor = 0;
+        if (versionStr != nullptr) {
+            sscanf(versionStr, "%d.%d", &major, &minor);
+        }
+        printf("OpenGL parsed version: %d.%d\n", major, minor);
+
+        if (major < 1 || (major == 1 && minor < 2)) {
+            Logger::reportMessage(
+                "SceneEditorApplication",
+                Logger::ERROR,
+                "checkOpenGLVersion",
+                "OpenGL version too old");
+            throw VSDKFatalException("This example requires OpenGL 1.2+");
+        }
+    }
+#else
     void initOpenGL()
     {
         // The functions of the GLX context, as glad loads them
@@ -970,6 +1063,7 @@ private:
             glUniform3f(diffuseColorLoc, 1.0f, 1.0f, 1.0f);
         }
     }
+#endif
 
     void redraw()
     {
@@ -989,12 +1083,21 @@ private:
             sceneBridge->display(canvasWidth, canvasHeight);
         }
         else {
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+            glLineWidth(1.0f);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glBegin(GL_LINES);
+            glVertex3f(-0.8f, -0.8f, 0.0f);
+            glVertex3f(0.8f, 0.8f, 0.0f);
+            glEnd();
+#else
             glUseProgram(shaderProgramId);
             glBindVertexArray(vertexArrayId);
             glLineWidth(1.0f);
             glDrawArrays(GL_LINES, 0, 2);
             glBindVertexArray(0);
             glUseProgram(0);
+#endif
         }
 
         glXSwapBuffers(display, window);
@@ -1248,7 +1351,7 @@ private:
             XtDestroyWidget(viewportMenu);
             viewportMenu = nullptr;
         }
-        const std::vector<XtOpenGL4SceneBridge::ViewportMenuItem> items =
+        const std::vector<XtOpenGLSceneBridge::ViewportMenuItem> items =
             sceneBridge->getViewportMenuItems();
         if (items.empty()) return;
 
@@ -1276,7 +1379,7 @@ private:
         popupDismissFilter.popupShown();
     }
 
-    //= XtOpenGL4SceneBridge::Listener ====================================
+    //= XtOpenGLSceneBridge::Listener =====================================
 
     void repaintRequested() override
     {
@@ -1414,7 +1517,7 @@ private:
 
     //= XtApplicationHost =================================================
 
-    XtOpenGL4SceneBridge* getSceneBridge() override
+    XtOpenGLSceneBridge* getSceneBridge() override
     {
         return sceneBridge;
     }
@@ -1459,14 +1562,18 @@ private:
         scheduleMenuRebuild(language);
     }
 
-    //= XtOpenGL4SceneEditorApplication ===================================
+    //= XtOpenGLSceneEditorApplication ====================================
 
     ApplicationModel* getApplicationModel() override
     {
         return sceneBridge != nullptr ? sceneBridge->getApplicationModel() : nullptr;
     }
 
-    XtOpenGL4ApplicationController* getOpenGL4Controller() override
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    XtOpenGLApplicationController* getOpenGL1Controller() override
+#else
+    XtOpenGLApplicationController* getOpenGL4Controller() override
+#endif
     {
         return this;
     }
@@ -1503,7 +1610,7 @@ private:
         requestClose();
     }
 
-    //= XtOpenGL4ApplicationController ====================================
+    //= XtOpenGLApplicationController =====================================
 
     bool isDrawingAreaCreated() override
     {
@@ -1675,6 +1782,7 @@ private:
                         reinterpret_cast<XtPointer>(this));
     }
 
+#ifndef VITRAL_SCENE_EDITOR_OPENGL1
     java::String getShaderInfoLog(GLuint shader)
     {
         GLint length = 0;
@@ -1704,12 +1812,14 @@ private:
         delete[] log;
         return result;
     }
+#endif
 
     void cleanupOpenGL()
     {
         if (display != nullptr && context != nullptr) {
             glXMakeCurrent(display, window, context);
         }
+#ifndef VITRAL_SCENE_EDITOR_OPENGL1
         if (vertexBufferId != 0) {
             glDeleteBuffers(1, &vertexBufferId);
             vertexBufferId = 0;
@@ -1722,6 +1832,7 @@ private:
             glDeleteProgram(shaderProgramId);
             shaderProgramId = 0;
         }
+#endif
         ready = false;
     }
 };

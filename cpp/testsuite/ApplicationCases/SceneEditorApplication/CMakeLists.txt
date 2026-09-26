@@ -1,36 +1,40 @@
 cmake_minimum_required(VERSION 3.10)
 project(SceneEditorApplication CXX)
 
-if(APPLE)
+# Variant of the application, chosen when building: the widget set of its
+# Xt GUI (each executable links either Motif or Athena, never both: they
+# must not share a process) and the OpenGL version of its drawing area
+# (OpenGL 4.1 core, or OpenGL 1.2 fixed function, without shaders)
+set(SCENE_EDITOR_VARIANT "xm_opengl4" CACHE STRING
+    "Variant: xm_opengl4, xaw_opengl4, xm_opengl1 or xaw_opengl1")
+set_property(CACHE SCENE_EDITOR_VARIANT PROPERTY STRINGS
+    xm_opengl4 xaw_opengl4 xm_opengl1 xaw_opengl1)
+if(NOT SCENE_EDITOR_VARIANT MATCHES "^(xm|xaw)_(opengl4|opengl1)$")
     message(FATAL_ERROR
-        "SceneEditorApplication uses Xt + GLX + OpenGL 4.1 and is only "
-        "supported on Linux/X11 with OpenGL 4.1-capable GLX drivers. "
-        "XQuartz on macOS exposes only legacy OpenGL for this path.")
+        "SCENE_EDITOR_VARIANT must be xm_opengl4, xaw_opengl4, xm_opengl1 "
+        "or xaw_opengl1, not '${SCENE_EDITOR_VARIANT}'")
 endif()
+set(VITRAL_XT_WIDGET_SET "${CMAKE_MATCH_1}")
+set(SCENE_EDITOR_OPENGL "${CMAKE_MATCH_2}")
+message(STATUS "SceneEditorApplication variant: ${SCENE_EDITOR_VARIANT}")
 
-# Widget set of the Xt GUI, chosen when building: each executable links
-# either Motif or Athena, never both (they must not share a process)
-set(VITRAL_XT_WIDGET_SET "xm" CACHE STRING
-    "Widget set of the Xt GUIs: xm (Motif) or xaw (Athena)")
-set_property(CACHE VITRAL_XT_WIDGET_SET PROPERTY STRINGS xm xaw)
-if(NOT VITRAL_XT_WIDGET_SET STREQUAL "xm" AND
-   NOT VITRAL_XT_WIDGET_SET STREQUAL "xaw")
+if(APPLE AND SCENE_EDITOR_OPENGL STREQUAL "opengl4")
     message(FATAL_ERROR
-        "VITRAL_XT_WIDGET_SET must be xm (Motif) or xaw (Athena), not "
-        "'${VITRAL_XT_WIDGET_SET}'")
+        "SceneEditorApplication with Xt + GLX + OpenGL 4.1 is only supported "
+        "on Linux/X11 with OpenGL 4.1-capable GLX drivers. XQuartz on macOS "
+        "exposes only legacy OpenGL: build an opengl1 variant instead.")
 endif()
-message(STATUS "SceneEditorApplication Xt widget set: ${VITRAL_XT_WIDGET_SET}")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
-    "${CMAKE_CURRENT_LIST_DIR}/build/${VITRAL_XT_WIDGET_SET}")
+    "${CMAKE_CURRENT_LIST_DIR}/build/${SCENE_EDITOR_VARIANT}")
 
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
-set(VITRAL_OPENGL4_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4")
+set(VITRAL_OPENGL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../${SCENE_EDITOR_OPENGL}")
 set(VITRAL_XT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../xt")
 set(VITRAL_WIDGET_SET_DIR
     "${CMAKE_CURRENT_LIST_DIR}/../../../${VITRAL_XT_WIDGET_SET}")
@@ -41,8 +45,9 @@ if(NOT TARGET vitral_base)
     set(WITH_PNG ON CACHE BOOL "Enable PNG image format support" FORCE)
     add_subdirectory("${VITRAL_BASE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_base")
 endif()
-if(NOT TARGET vitral_opengl4)
-    add_subdirectory("${VITRAL_OPENGL4_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_opengl4")
+if(NOT TARGET vitral_${SCENE_EDITOR_OPENGL})
+    add_subdirectory("${VITRAL_OPENGL_DIR}"
+                     "${CMAKE_CURRENT_BINARY_DIR}/vitral_${SCENE_EDITOR_OPENGL}")
 endif()
 if(NOT TARGET vitral_xt)
     add_subdirectory("${VITRAL_XT_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/vitral_xt")
@@ -65,16 +70,45 @@ else()
     )
 endif()
 
-# The technology-independent application classes, the OpenGL 4 rendering
+# The application classes and the rendering bridge of the OpenGL version
+# chosen, each one defines the Xt<OpenGL version> classes the shared ones use
+# (see XtSceneEditorOpenGLVariant.h)
+if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
+    set(SCENE_EDITOR_OPENGL_SOURCES
+        src/application/XtOpenGL4GuiEventExecutor.cpp
+        src/application/mcp/XtOpenGL4VitralEditorMCP.cpp
+        src/application/mcp/XtOpenGL4VitralEditorMCPProtocol.cpp
+        src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
+        src/render/opengl4/OpenGL4FrameBufferSource.cpp
+        src/render/opengl4/OpenGL4ProjectedViewRenderer.cpp
+        src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
+        src/render/opengl4/OpenGL4SceneRenderer.cpp
+        src/render/opengl4/XtOpenGL4SceneBridge.cpp
+        src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
+    )
+else()
+    set(SCENE_EDITOR_OPENGL_SOURCES
+        src/application/XtOpenGL1GuiEventExecutor.cpp
+        src/application/mcp/XtOpenGL1VitralEditorMCP.cpp
+        src/application/mcp/XtOpenGL1VitralEditorMCPProtocol.cpp
+        src/render/opengl1/OpenGL1DrawingAreaRenderer.cpp
+        src/render/opengl1/OpenGL1FrameBufferSource.cpp
+        src/render/opengl1/OpenGL1ProjectedViewRenderer.cpp
+        src/render/opengl1/OpenGL1RenderPrimitiveRenderer.cpp
+        src/render/opengl1/OpenGL1SceneRenderer.cpp
+        src/render/opengl1/XtOpenGL1SceneBridge.cpp
+        src/render/opengl1/OpenGL1VisualRayDebugRenderer.cpp
+    )
+endif()
+
+# The technology-independent application classes, the OpenGL rendering
 # bridge ported from the Java application and its Xt GUI, built over the
-# Xt layer of the toolkit (vitral_xt, as the Java one over `awt`) and the
-# widget set chosen (vitral_xm or vitral_xaw).
+# Xt layer of the toolkit (vitral_xt, as the Java one over `awt`), the
+# widget set chosen (vitral_xm or vitral_xaw) and the OpenGL version chosen
+# (vitral_opengl4 or vitral_opengl1).
 add_executable(SceneEditorApplication
     src/SceneEditorApplication.cpp
     src/application/GuiEventExecutor.cpp
-    src/application/XtOpenGL4GuiEventExecutor.cpp
-    src/application/mcp/XtOpenGL4VitralEditorMCP.cpp
-    src/application/mcp/XtOpenGL4VitralEditorMCPProtocol.cpp
     src/gui/DrawingAreaInteractionTechniques.cpp
     src/gui/PointerCursor.cpp
     src/gui/PopupDismissClickFilter.cpp
@@ -120,25 +154,31 @@ add_executable(SceneEditorApplication
     src/render/FrameCaptureService.cpp
     src/render/ProjectedViewsDebugger.cpp
     src/render/VisualRayDebugGeometry.cpp
-    src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
-    src/render/opengl4/OpenGL4FrameBufferSource.cpp
-    src/render/opengl4/OpenGL4ProjectedViewRenderer.cpp
-    src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
-    src/render/opengl4/OpenGL4SceneRenderer.cpp
-    src/render/opengl4/XtOpenGL4SceneBridge.cpp
-    src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
+    ${SCENE_EDITOR_OPENGL_SOURCES}
     ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )
+
+if(SCENE_EDITOR_OPENGL STREQUAL "opengl1")
+    target_compile_definitions(SceneEditorApplication PRIVATE
+        VITRAL_SCENE_EDITOR_OPENGL1)
+    if(APPLE)
+        target_compile_definitions(SceneEditorApplication PRIVATE
+            GL_SILENCE_DEPRECATION)
+    endif()
+endif()
 
 target_include_directories(SceneEditorApplication PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${VITRAL_BASE_DIR}/src/main"
-    "${VITRAL_OPENGL4_DIR}/src/main"
+    "${VITRAL_OPENGL_DIR}/src/main"
     "${VITRAL_XT_DIR}/src/main"
     "${VITRAL_WIDGET_SET_DIR}/src/main"
     ${X11_INCLUDE_DIR}
-    "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include"
 )
+if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
+    target_include_directories(SceneEditorApplication PRIVATE
+        "${VITRAL_OPENGL_DIR}/src/glad/include")
+endif()
 
 # The widget set first. Motif must come before Xt in the libraries of the
 # executable: its VendorShell replaces the one of Xt only if the dynamic
@@ -154,5 +194,5 @@ target_link_libraries(SceneEditorApplication PRIVATE
     OpenGL::GL
     ${X11_LIBRARIES}
     vitral_base
-    vitral_opengl4
+    vitral_${SCENE_EDITOR_OPENGL}
 )
