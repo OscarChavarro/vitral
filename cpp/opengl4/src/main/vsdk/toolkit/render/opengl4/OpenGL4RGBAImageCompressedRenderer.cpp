@@ -5,6 +5,7 @@
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/RGBAImageCompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RGBAImageCompressedRenderer.h"
 #ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
@@ -112,10 +113,10 @@ GLuint OpenGL4RGBAImageCompressedRenderer::upload(RGBAImageCompressed* img) {
     }
 
     const bool s3tcAvailable =
-        glewIsSupported("GL_EXT_texture_compression_s3tc") ||
-        glewIsSupported("GL_ANGLE_texture_compression_dxt1") ||
-        glewIsSupported("GL_ANGLE_texture_compression_dxt3") ||
-        glewIsSupported("GL_ANGLE_texture_compression_dxt5");
+        OpenGL4Loader::isExtensionSupported("GL_EXT_texture_compression_s3tc") ||
+        OpenGL4Loader::isExtensionSupported("GL_ANGLE_texture_compression_dxt1") ||
+        OpenGL4Loader::isExtensionSupported("GL_ANGLE_texture_compression_dxt3") ||
+        OpenGL4Loader::isExtensionSupported("GL_ANGLE_texture_compression_dxt5");
 
     int internalFormat = toOpenGlInternalFormat(img->getCompressionFormat());
 

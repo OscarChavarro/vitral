@@ -4,7 +4,7 @@
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <GL/gl.h>
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"

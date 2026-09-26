@@ -5,7 +5,7 @@
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #else
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <GL/gl.h>
 #endif
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"

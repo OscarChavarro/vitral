@@ -3,7 +3,7 @@
 
 #include "java/util/ArrayList.h"
 #include "java/util/HashMap.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 class RGBAImageCompressed;
 
 class OpenGL4RGBAImageCompressedRenderer {

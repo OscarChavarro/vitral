@@ -6,7 +6,8 @@
 #include <java/lang/Math.h>
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include <GL/gl.h>
 #include <atomic>
 #include <thread>
@@ -385,8 +386,7 @@ public:
         glfwSetWindowUserPointer(window, this);
         glfwSwapInterval(1);
 
-        glewExperimental = GL_TRUE;
-        if (glewInit() != GLEW_OK) return false;
+        if (!OpenGL4Loader::load(glfwGetProcAddress)) return false;
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);

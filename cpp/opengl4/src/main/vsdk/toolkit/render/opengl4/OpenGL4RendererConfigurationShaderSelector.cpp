@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <string>
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RendererConfigurationShaderSelector.h"

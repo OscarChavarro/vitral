@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "render/opengl4/OpenGL4ProjectedViewRenderer.h"
 #include "render/opengl4/OpenGL4SceneRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4FrameBufferReader.h"

@@ -5,7 +5,8 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include <GLFW/glfw3.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/media/Image.h"
@@ -84,10 +85,7 @@ public:
         glfwSetCursorPosCallback(window, cursorPosCallback);
         glfwSetScrollCallback(window, scrollCallback);
 
-        glewExperimental = GL_TRUE;
-        GLenum err = glewInit();
-        if (err != GLEW_OK) {
-            fprintf(stderr, "Failed to initialize GLEW: %s\n", glewGetErrorString(err));
+        if (!OpenGL4Loader::load(glfwGetProcAddress)) {
             return false;
         }
 

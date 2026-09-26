@@ -8,7 +8,6 @@ project(ImageExample)
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
 include_directories(
@@ -17,7 +16,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/../../../base/src/main
     ${CMAKE_SOURCE_DIR}/../../../opengl4/src/main
     ${CMAKE_SOURCE_DIR}/../../../glfw/src/main
-    ${GLEW_INCLUDE_DIRS}
+    "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include"
 )
 
 # Find pre-compiled libraries from the module builds
@@ -37,7 +36,6 @@ if(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.dylib")
         ${VITRAL_OPENGL4_LIB_DIR}/libvitral_opengl4.dylib
         ${VITRAL_GLFW_LIB_DIR}/libvitral_glfw.dylib
         OpenGL::GL
-        GLEW::GLEW
         glfw
     )
 elseif(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.a")
@@ -47,7 +45,6 @@ elseif(EXISTS "${VITRAL_BASE_LIB_DIR}/libvitral_base.a")
         ${VITRAL_OPENGL4_LIB_DIR}/libvitral_opengl4.a
         ${VITRAL_GLFW_LIB_DIR}/libvitral_glfw.a
         OpenGL::GL
-        GLEW::GLEW
         glfw
     )
 else()
@@ -57,7 +54,6 @@ else()
         vitral_opengl4
         vitral_glfw
         OpenGL::GL
-        GLEW::GLEW
         glfw
     )
 endif()

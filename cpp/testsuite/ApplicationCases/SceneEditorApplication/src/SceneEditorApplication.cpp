@@ -10,7 +10,8 @@
 #include <vector>
 #include <sys/time.h>
 
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include <GL/glx.h>
 #include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
@@ -79,6 +80,15 @@ typedef GLXContext (*CreateContextAttribsARBProc)(
     Bool,
     const int*);
 typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
+
+/**
+Lookup of the OpenGL functions of GLX, as `OpenGL4Loader` expects it.
+*/
+static GLADapiproc glxGetProcAddress(const char* name)
+{
+    return reinterpret_cast<GLADapiproc>(
+        glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
+}
 
 class SceneEditorApplication;
 
@@ -845,13 +855,10 @@ private:
 
     void initOpenGL()
     {
-        glewExperimental = GL_TRUE;
-        GLenum err = glewInit();
-        if (err != GLEW_OK) {
-            fprintf(stderr, "GLEW init failed: %s\n", glewGetErrorString(err));
-            throw VSDKFatalException("GLEW init failed");
+        // The functions of the GLX context, as glad loads them
+        if (!OpenGL4Loader::load(&glxGetProcAddress)) {
+            throw VSDKFatalException("The OpenGL 4.1 functions could not be loaded");
         }
-        glGetError();
 
         checkOpenGLVersion();
         sceneBridge->setCanvasSize(canvasWidth, canvasHeight);

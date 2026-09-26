@@ -2,7 +2,7 @@
 #define __OPEN_GL_4_RGBA_IMAGE_UNCOMPRESSED_RENDERER__
 
 #include "java/util/HashMap.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 class RGBAImageUncompressed;
 
 class OpenGL4RGBAImageUncompressedRenderer {

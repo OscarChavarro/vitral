@@ -7,7 +7,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 
 add_executable(PolygonClippingExample
     src/PolygonClippingExample.cpp
@@ -22,7 +21,7 @@ target_include_directories(PolygonClippingExample PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/../../../base/src/main"
     "${CMAKE_CURRENT_LIST_DIR}/../../../glfw/src/main"
     "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/main"
-    ${GLEW_INCLUDE_DIRS})
+    "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include")
 
 target_link_libraries(PolygonClippingExample PRIVATE
-    glfw OpenGL::GL GLEW::GLEW vitral_base vitral_glfw vitral_opengl4)
+    glfw OpenGL::GL vitral_base vitral_glfw vitral_opengl4)

@@ -20,17 +20,6 @@ if(NOT OpenGL_FOUND)
   set(BUILD_CAMERA_EXAMPLE FALSE)
 endif()
 
-find_package(GLEW QUIET)
-if(NOT GLEW_FOUND)
-  message(WARNING "GLEW not found. CameraExample will be skipped.")
-  set(BUILD_CAMERA_EXAMPLE FALSE)
-endif()
-
-if(NOT TARGET GLEW::GLEW)
-  message(WARNING "GLEW library not found. CameraExample will be skipped.")
-  set(BUILD_CAMERA_EXAMPLE FALSE)
-endif()
-
 # Define base directory for vitral libraries
 # CameraExample is at: cpp/testsuite/OpenGL4Examples/CameraExample
 # We need to go up 3 levels to reach cpp/
@@ -74,13 +63,12 @@ if(BUILD_CAMERA_EXAMPLE)
       "${VITRAL_BASE_DIR}/src/main"
       "${VITRAL_GLFW_DIR}/src/main"
       "${VITRAL_OPENGL4_DIR}/src/main"
-      ${GLEW_INCLUDE_DIRS}
+      "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include"
   )
 
   target_link_libraries(CameraExample PRIVATE
       glfw
       OpenGL::GL
-      GLEW::GLEW
       vitral_base
       vitral_glfw
       vitral_opengl4

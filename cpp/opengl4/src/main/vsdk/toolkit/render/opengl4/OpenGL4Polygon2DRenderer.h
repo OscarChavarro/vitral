@@ -2,7 +2,7 @@
 #define __OPEN_GL_4_POLYGON_2_D_RENDERER__
 
 #include "java/util/ArrayList.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

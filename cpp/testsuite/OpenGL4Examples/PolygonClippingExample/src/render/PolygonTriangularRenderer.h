@@ -1,7 +1,7 @@
 #ifndef __POLYGON_TRIANGULAR_RENDERER__
 #define __POLYGON_TRIANGULAR_RENDERER__
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"

@@ -1,7 +1,7 @@
 #include <cstdio>
 
 #include "java/util/ArrayList.txx"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"

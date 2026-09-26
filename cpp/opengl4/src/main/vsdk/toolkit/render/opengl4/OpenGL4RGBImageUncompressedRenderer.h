@@ -2,7 +2,7 @@
 #define __OPEN_GL_4_RGB_IMAGE_UNCOMPRESSED_RENDERER__
 
 #include "java/util/HashMap.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 class RGBImageUncompressed;
 
 class OpenGL4RGBImageUncompressedRenderer {

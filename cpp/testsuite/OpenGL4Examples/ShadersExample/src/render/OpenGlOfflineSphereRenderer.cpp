@@ -1,6 +1,7 @@
 #include "../model/ShadersModel.h"
 #include "OpenGlOfflineSphereRenderer.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -27,8 +28,7 @@ RGBImageUncompressed* OpenGlOfflineSphereRenderer::render(
     GLFWwindow* window = glfwCreateWindow(width, height, "offline", 0, 0);
     if (!window) { glfwTerminate(); return 0; }
     glfwMakeContextCurrent(window);
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) { glfwDestroyWindow(window); glfwTerminate(); return 0; }
+    if (!OpenGL4Loader::load(glfwGetProcAddress)) { glfwDestroyWindow(window); glfwTerminate(); return 0; }
 
     model->camera->updateViewportResize(width, height);
     glViewport(0, 0, width, height);

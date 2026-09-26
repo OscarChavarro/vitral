@@ -3,7 +3,8 @@
 #include <cstring>
 
 #include "java/lang/String.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #include <GLFW/glfw3.h>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -166,10 +167,7 @@ int main()
 
     glfwMakeContextCurrent(window);
 
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        std::fprintf(stderr, "GLEW init failed: %s\n", glewGetErrorString(err));
+    if (!OpenGL4Loader::load(glfwGetProcAddress)) {
         glfwDestroyWindow(window);
         glfwTerminate();
         return 1;

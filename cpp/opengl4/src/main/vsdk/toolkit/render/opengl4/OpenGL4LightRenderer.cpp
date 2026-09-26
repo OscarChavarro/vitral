@@ -2,7 +2,7 @@
 
 #include <java/lang/Math.h>
 #include "java/util/ArrayList.txx"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <GL/gl.h>
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"

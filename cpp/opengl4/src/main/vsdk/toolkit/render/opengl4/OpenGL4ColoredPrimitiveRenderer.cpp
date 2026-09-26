@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.h"
 

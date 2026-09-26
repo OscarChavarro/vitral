@@ -3,7 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -530,8 +531,7 @@ static int initGlfw(int width, int height, bool visible, GLFWwindow*& outWindow)
     if (!outWindow) { glfwTerminate(); return 1; }
     glfwMakeContextCurrent(outWindow);
     if (visible) glfwSwapInterval(1);
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) { glfwDestroyWindow(outWindow); glfwTerminate(); return 1; }
+    if (!OpenGL4Loader::load(glfwGetProcAddress)) { glfwDestroyWindow(outWindow); glfwTerminate(); return 1; }
     return 0;
 }
 

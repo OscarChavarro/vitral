@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
@@ -16,11 +15,10 @@ add_executable(_OpenGL4HelloWorld
 
 target_link_libraries(_OpenGL4HelloWorld
     OpenGL::GL
-    GLEW::GLEW
     glfw
     vitral_base
+    vitral_opengl4
 )
-target_include_directories(_OpenGL4HelloWorld SYSTEM PRIVATE ${GLEW_INCLUDE_DIRS})
 
 if(APPLE)
     target_compile_definitions(_OpenGL4HelloWorld PRIVATE GL_SILENCE_DEPRECATION)

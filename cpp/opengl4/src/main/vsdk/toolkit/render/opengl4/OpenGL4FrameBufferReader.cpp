@@ -1,5 +1,6 @@
+#include <cstddef>
 #include <vector>
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4FrameBufferReader.h"

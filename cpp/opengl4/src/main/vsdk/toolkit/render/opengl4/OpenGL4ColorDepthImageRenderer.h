@@ -1,7 +1,7 @@
 #ifndef __OPEN_GL_4_COLOR_DEPTH_IMAGE_RENDERER__
 #define __OPEN_GL_4_COLOR_DEPTH_IMAGE_RENDERER__
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 class RGBImageUncompressed;
 class ZBuffer;

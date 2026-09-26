@@ -4,7 +4,7 @@
 
 #include <java/lang/Math.h>
 #include "JogHudRenderer.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"

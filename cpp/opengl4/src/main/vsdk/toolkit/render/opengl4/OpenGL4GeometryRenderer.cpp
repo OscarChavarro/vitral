@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <GL/glu.h>
 #include <cmath>
 #include <cstdarg>

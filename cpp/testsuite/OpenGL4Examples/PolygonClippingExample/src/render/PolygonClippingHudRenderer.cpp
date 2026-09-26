@@ -2,7 +2,7 @@
 #include <cstring>
 
 #include "PolygonClippingHudRenderer.h"
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 static const int HUD_HEIGHT = 122;

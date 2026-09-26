@@ -1,4 +1,4 @@
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
 #include "model/Scene.h"

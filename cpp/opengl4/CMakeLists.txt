@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-project(vitral_opengl4 CXX)
+# C, for the glad loader
+project(vitral_opengl4 C CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,9 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 
 add_library(vitral_opengl4 SHARED
+    src/glad/src/gl.c
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4Loader.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4Renderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.cpp
@@ -44,8 +46,11 @@ add_library(vitral_opengl4 SHARED
 
 target_include_directories(vitral_opengl4 PUBLIC src/main)
 target_include_directories(vitral_opengl4 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../base/src/main)
-target_include_directories(vitral_opengl4 SYSTEM PUBLIC ${GLEW_INCLUDE_DIRS})
-target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL OpenGL::GLU GLEW::GLEW)
+# The OpenGL functions are loaded by glad (see src/glad/README.md), once the
+# application has a context (see OpenGL4Loader)
+target_include_directories(vitral_opengl4 SYSTEM PUBLIC src/glad/include)
+set_target_properties(vitral_opengl4 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(vitral_opengl4 PUBLIC OpenGL::GL OpenGL::GLU)
 target_link_libraries(vitral_opengl4 PRIVATE vitral_base)
 
 if(APPLE)

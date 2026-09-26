@@ -7,7 +7,8 @@
 #include <OpenGL/gl3.h>
 #else
 #define GLFW_INCLUDE_NONE
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 #endif
 #include <GLFW/glfw3.h>
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -115,16 +116,11 @@ int main(int argc, char** argv) {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-#ifndef __APPLE__
-    glewExperimental = GL_TRUE;
-    GLenum glewErr = glewInit();
-    if (glewErr != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW: %s\n", glewGetErrorString(glewErr));
+    if (!OpenGL4Loader::load(glfwGetProcAddress)) {
         glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
     }
-#endif
 
     camera = new Camera();
     camera->updateViewportResize(640, 480);

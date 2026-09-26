@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(X11 REQUIRED)
 
 if(NOT X11_Xt_LIB OR NOT X11_Xaw_LIB)
@@ -106,12 +105,11 @@ target_include_directories(SceneEditorApplication PRIVATE
     "${VITRAL_OPENGL4_DIR}/src/main"
     "${VITRAL_XT_DIR}/src/main"
     ${X11_INCLUDE_DIR}
-    ${GLEW_INCLUDE_DIRS}
+    "${CMAKE_CURRENT_LIST_DIR}/../../../opengl4/src/glad/include"
 )
 
 target_link_libraries(SceneEditorApplication PRIVATE
     OpenGL::GL
-    GLEW::GLEW
     ${X11_Xt_LIB}
     ${X11_Xaw_LIB}
     ${X11_LIBRARIES}

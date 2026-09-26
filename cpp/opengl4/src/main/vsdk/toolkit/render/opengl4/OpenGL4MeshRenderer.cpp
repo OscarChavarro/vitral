@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cstdio>
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
