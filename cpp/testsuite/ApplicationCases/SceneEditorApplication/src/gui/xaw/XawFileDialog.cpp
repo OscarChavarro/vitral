@@ -131,8 +131,9 @@ void XawFileDialog::showFolder(const std::string& newFolder)
     for ( size_t i = 0; i < entries.size(); i++ ) {
         entryTexts.push_back(entries[i].c_str());
     }
-    XawListChange(list, entryTexts.data(), static_cast<int>(entryTexts.size()),
-                  0, True);
+    // Older Xaw releases (i.e. XQuartz) take String*, newer ones const char**
+    XawListChange(list, const_cast<String*>(entryTexts.data()),
+                  static_cast<int>(entryTexts.size()), 0, True);
 }
 
 void XawFileDialog::close(bool approve)

@@ -30,8 +30,38 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
     "${CMAKE_CURRENT_LIST_DIR}/build/${SCENE_EDITOR_VARIANT}")
 
+# On macOS the whole X11 stack (libX11, libXt, widget set, GLX libGL and
+# libGLU) must come from one place: mixing XQuartz and Homebrew loads two
+# libXt and two libX11 in the process, and gl* functions of OpenGL.framework
+# crash without the CGL context that only the GLX of XQuartz makes current.
+# Athena comes from XQuartz (Homebrew has no libXaw); Motif only from
+# Homebrew, with its libX11 and its Mesa (libGL and mesa-glu).
+# The libX11 of Homebrew looks for its locale modules as `*.so.2`, but
+# installs them as `*.2.so`: without links with the expected names it
+# supports no locale and no UTF-8 XFontSet can be created
+if(APPLE)
+    if(VITRAL_XT_WIDGET_SET STREQUAL "xaw" AND
+       EXISTS "/opt/X11/lib/libX11.dylib")
+        set(SCENE_EDITOR_X11_PREFIX "/opt/X11")
+    else()
+        set(SCENE_EDITOR_X11_PREFIX "/opt/homebrew")
+    endif()
+    list(INSERT CMAKE_PREFIX_PATH 0 "${SCENE_EDITOR_X11_PREFIX}")
+    find_library(OPENGL_gl_LIBRARY NAMES GL
+                 PATHS "${SCENE_EDITOR_X11_PREFIX}/lib" NO_DEFAULT_PATH)
+    find_library(OPENGL_glu_LIBRARY NAMES GLU
+                 PATHS "${SCENE_EDITOR_X11_PREFIX}/lib" NO_DEFAULT_PATH)
+    if(NOT OPENGL_gl_LIBRARY OR NOT OPENGL_glu_LIBRARY)
+        message(FATAL_ERROR
+            "libGL (with GLX) and libGLU not found in "
+            "${SCENE_EDITOR_X11_PREFIX}/lib: install XQuartz for xaw "
+            "variants, or `brew install mesa mesa-glu` for xm variants")
+    endif()
+    set(CMAKE_FIND_FRAMEWORK NEVER)
+endif()
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
+unset(CMAKE_FIND_FRAMEWORK)
 
 set(VITRAL_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../base")
 set(VITRAL_OPENGL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../${SCENE_EDITOR_OPENGL}")
@@ -56,6 +86,14 @@ if(NOT TARGET vitral_${VITRAL_XT_WIDGET_SET})
     add_subdirectory("${VITRAL_WIDGET_SET_DIR}"
                      "${CMAKE_CURRENT_BINARY_DIR}/vitral_${VITRAL_XT_WIDGET_SET}")
 endif()
+
+# The libraries of each variant go next to its executable: by default they
+# share the build folder of their module, and the last variant built would
+# replace the ones of the others, linked with another X11/OpenGL stack
+set_target_properties(
+    vitral_base vitral_xt vitral_${VITRAL_XT_WIDGET_SET}
+    vitral_${SCENE_EDITOR_OPENGL}
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
 # The GUI classes of the chosen widget set; each set defines createUiFactory
 if(VITRAL_XT_WIDGET_SET STREQUAL "xm")

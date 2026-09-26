@@ -43,4 +43,18 @@ The counterpart of `glad/gl.h` in the OpenGL 4 port.
 #define GL_RESCALE_NORMAL 0x803A
 #endif
 
+// Calling convention of GL/GLU callbacks: defined by Mesa and Windows
+// headers, but not by the macOS ones
+#ifndef GLAPIENTRY
+#ifdef _WIN32
+#define GLAPIENTRY APIENTRY
+#else
+#define GLAPIENTRY
+#endif
+#endif
+
+/// Type of the callbacks given to `gluTessCallback` (`_GLUfuncptr` in Mesa,
+/// `GLvoid (*)()` in macOS)
+typedef void (GLAPIENTRY *OpenGL1GluCallback)();
+
 #endif

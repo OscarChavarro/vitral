@@ -15,4 +15,11 @@ cd "$BUILD_DIR"
 cmake -DSCENE_EDITOR_VARIANT="$VARIANT" ..
 cmake --build . --config Release
 cd "$ROOT_DIR"
+# On macOS the Motif variants use the Mesa of Homebrew: its direct software
+# rendering fails over the MIT-SHM of XQuartz (BadShmSeg), so it renders
+# through the indirect GLX of XQuartz (needs, once, and restarting XQuartz:
+# defaults write org.xquartz.X11 enable_iglx -bool true)
+if [[ "$(uname)" == "Darwin" && "$VARIANT" == xm_* ]]; then
+    export LIBGL_ALWAYS_INDIRECT="${LIBGL_ALWAYS_INDIRECT:-1}"
+fi
 "./build/$VARIANT/SceneEditorApplication" "$@"

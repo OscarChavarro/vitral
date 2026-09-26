@@ -600,9 +600,9 @@ OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     if ( tess == nullptr ) {
         return nullptr;
     }
-    gluTessCallback(tess, GLU_TESS_VERTEX_DATA, (_GLUfuncptr)tessVertex);
-    gluTessCallback(tess, GLU_TESS_EDGE_FLAG_DATA, (_GLUfuncptr)tessEdgeFlag);
-    gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (_GLUfuncptr)tessCombine);
+    gluTessCallback(tess, GLU_TESS_VERTEX_DATA, (OpenGL1GluCallback)tessVertex);
+    gluTessCallback(tess, GLU_TESS_EDGE_FLAG_DATA, (OpenGL1GluCallback)tessEdgeFlag);
+    gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (OpenGL1GluCallback)tessCombine);
 
     OpenGL1MeshBuilder builder(maxAbsExtent(solid.getMinMax()));
     builder.setDoubleSided(doubleSided);
