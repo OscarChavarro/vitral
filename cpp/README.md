@@ -7,7 +7,10 @@ This directory contains the C++ port of the Vitral graphics toolkit. It follows 
 The C++ port includes:
 
 - **Core module** (`base/`): Linear algebra, geometry, media, and IO foundations
-- **Rendering backends**: OpenGL 4.1 (via GLFW), GLUT, and others
+- **Rendering backends**: OpenGL 4.1 core with GLSL shaders (`opengl4/`),
+  OpenGL 1.2 fixed function pipeline without shaders (`opengl1/`, a
+  mechanical port of `opengl4/` without Phong / Cook-Torrance shading nor
+  bump mapping), GLFW, GLUT, and others
 - **Testsuite** (`testsuite/`): Examples and benchmarks
 - **Native library integration**: Direct bindings for image processing (libpng, libjpeg)
 

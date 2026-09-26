@@ -1,0 +1,61 @@
+#include <cstdio>
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
+#include "vsdk/toolkit/environment/scene/SimpleBody.h"
+#include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/ReferenceFrameGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/RotateGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/TranslateGizmo.h"
+#include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
+#include "vsdk/toolkit/gui/viewport/Viewport.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSet.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1LabelImageProvider.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1LineRenderer.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1ViewportWindow.h"
+#include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.h"
+
+/**
+Services of a viewport window for the renderer of its input gizmo: label
+images from the provider of the window, drawn relative to the viewport.
+*/
+class OpenGL1InputGizmoHost : public OpenGL1InputGizmoRenderer::Host {
+private:
+    OpenGL1ViewportWindow* window;
+    OpenGL1LabelImageProvider* labels;
+
+public:
+    OpenGL1InputGizmoHost(OpenGL1ViewportWindow* window,
+                          OpenGL1LabelImageProvider* labels)
+        : window(window), labels(labels) {}
+
+    RGBAImageUncompressed* createLabelImage(const java::String& text,
+        const ColorRgb& color, int fontSize) override
+    {
+        return labels->createLabelImage(text, color, fontSize);
+    }
+
+    void drawLabelImage(RGBAImageUncompressed* image, int x, int y) override
+    {
+        window->drawLabel(image, window->getViewportStartX() + x,
+            window->getViewportStartY() + y);
+    }
+
+    void discardLabelImage(RGBAImageUncompressed* image) override
+    {
+        OpenGL1ImageRenderer::unload(image);
+        delete image;
+    }
+};
+OpenGL1ViewportWindow::OpenGL1ViewportWindow(ViewportSet*s,Viewport*v,OpenGL1LabelImageProvider*l):set(s),viewport(v),labels(l),titleImage(0),inputGizmoHost(0),inputGizmoRenderer(0){if(l){inputGizmoHost=new OpenGL1InputGizmoHost(this,l);inputGizmoRenderer=new OpenGL1InputGizmoRenderer(inputGizmoHost,s,v);}}OpenGL1ViewportWindow::~OpenGL1ViewportWindow(){delete inputGizmoRenderer;delete inputGizmoHost;delete titleImage;}Viewport*OpenGL1ViewportWindow::getViewport()const{return viewport;}int OpenGL1ViewportWindow::getRenderMode()const{return viewport->getRenderMode();}int OpenGL1ViewportWindow::getViewportStartX()const{return viewport->getPixelStartX();}int OpenGL1ViewportWindow::getViewportStartY()const{return viewport->getPixelStartY();}int OpenGL1ViewportWindow::getViewportSizeX()const{return viewport->getPixelSizeX();}int OpenGL1ViewportWindow::getViewportSizeY()const{return viewport->getPixelSizeY();}bool OpenGL1ViewportWindow::isSelected()const{return set->isSelected(viewport);}bool OpenGL1ViewportWindow::isActive()const{return viewport->isActive();}Camera*OpenGL1ViewportWindow::getCamera()const{return viewport->getActiveCamera();}RendererConfiguration*OpenGL1ViewportWindow::getRendererConfiguration()const{return viewport->getRendererConfiguration();}void OpenGL1ViewportWindow::toggleGrid(){viewport->toggleGrid();}
+void OpenGL1ViewportWindow::drawGrid(){if(!viewport->isShowGrid()||!getCamera())return;java::ArrayList<float>p,c;for(int i=-7;i<=7;i++){p.add(i);p.add(-7);p.add(0);p.add(i);p.add(7);p.add(0);p.add(-7);p.add(i);p.add(0);p.add(7);p.add(i);p.add(0);for(int k=0;k<4;k++){float x=i?0.37f:0;c.add(x);c.add(x);c.add(x);} }OpenGL1LineRenderer::drawLines(getCamera()->calculateProjectionMatrix(),p,c,1);}
+void OpenGL1ViewportWindow::drawLabel(RGBAImageUncompressed*i,int x,int y){if(!i)return;GLint old[4];glGetIntegerv(GL_VIEWPORT,old);int sw=set->getSizeXInPixels(),sh=set->getSizeYInPixels();float x0=x,y0=y,x1=x+i->getXSize(),y1=y+i->getYSize();float p[]={x0,y0,0,x1,y0,0,x1,y1,0,x0,y0,0,x1,y1,0,x0,y1,0};float uv[]={0,0,1,0,1,1,0,0,1,1,0,1};Matrix4x4d m=Matrix4x4d::identityMatrix().withVal(0,0,2.0/sw).withVal(0,3,-1).withVal(1,1,2.0/sh).withVal(1,3,-1);float*mf=m.exportToFloatArrayColumnOrder();glViewport(0,0,sw,sh);glEnable(GL_SCISSOR_TEST);glScissor(viewport->getPixelStartX(),viewport->getPixelStartY(),viewport->getPixelSizeX(),viewport->getPixelSizeY());glDisable(GL_DEPTH_TEST);glEnable(GL_BLEND);glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);OpenGL1ImageRenderer::drawTexturedQuad(OpenGL1ImageRenderer::activate(i),mf,p,6,uv,6,1,1,1);delete[]mf;glDisable(GL_BLEND);glDisable(GL_SCISSOR_TEST);glEnable(GL_DEPTH_TEST);glViewport(old[0],old[1],old[2],old[3]);}
+void OpenGL1ViewportWindow::drawReferenceBase(){ReferenceFrameGizmo g;g.applyScale(set->getElementScaler());if(!g.isVisible())return;GLint old[4];glGetIntegerv(GL_VIEWPORT,old);int size=g.getSizeInPixels();glViewport(viewport->getPixelStartX(),viewport->getPixelStartY(),size,size);glDisable(GL_DEPTH_TEST);for(int a=0;a<ReferenceFrameGizmo::NUMBER_OF_AXES;a++){Vector3Dd strip[4];g.buildAxisStrip(a,getCamera()->getRotation(),strip);java::ArrayList<float>p,c;ColorRgb color=g.getAxisColor(a);for(int i=0;i<4;i++){p.add(strip[i].x());p.add(strip[i].y());p.add(strip[i].z());c.add(color.r());c.add(color.g());c.add(color.b());c.add(1);}OpenGL1ColoredPrimitiveRenderer::draw(Matrix4x4d::identityMatrix(),GL_TRIANGLE_STRIP,p,c);}glViewport(old[0],old[1],old[2],old[3]);glEnable(GL_DEPTH_TEST);if(labels){Matrix4x4d orientation=g.estimateOrientation(getCamera()->getRotation());int font=set->getElementScaler()->scaleSize(12);for(int a=0;a<ReferenceFrameGizmo::NUMBER_OF_AXES;a++){Vector3Dd p=orientation.multiply(g.getLabelPosition(a));RGBAImageUncompressed*i=labels->createLabelImage(g.getAxisLabel(a),g.getAxisColor(a),font);drawLabel(i,viewport->getPixelStartX()+(int)((p.x()+1)*size/2),viewport->getPixelStartY()+(int)((p.y()+1)*size/2));OpenGL1ImageRenderer::unload(i);delete i;}}}
+void OpenGL1ViewportWindow::drawTitle(){if(!labels)return;java::String text=set->getTitleFor(viewport);if(!titleImage||text!=titleText){if(titleImage){OpenGL1ImageRenderer::unload(titleImage);delete titleImage;}titleText=text;titleImage=labels->createLabelImage(text,set->getTitleColorFor(viewport),set->getElementScaler()->scaleSize(14));}if(titleImage){int x=viewport->getPixelStartX()+4,y=viewport->getPixelStartY()+viewport->getPixelSizeY()-titleImage->getYSize()-1;drawLabel(titleImage,x,y);viewport->setTitleArea(4,1,titleImage->getXSize(),titleImage->getYSize());}}
+void OpenGL1ViewportWindow::drawLabelsForTranslateGizmo(TranslateGizmo*g){if(!labels||!g)return;java::ArrayList<SimpleBody*>&b=g->getElements();for(int a=0;a<3&&a<b.size();a++){SimpleBody*body=b[a];if(!body||!body->getGeometry())continue;double z=1;Arrow*arrow=dynamic_cast<Arrow*>(body->getGeometry());if(arrow)z=(arrow->getHeadLength()+arrow->getBaseLength())*1.1;Vector3Dd world=body->getTransformationMatrix().multiply(Vector3Dd(0,0,z)),projected;if(!getCamera()->projectPointUsingRayMethod(world,&projected))continue;ColorRgb color=g->isAxisHighlighted(a)?ColorRgb(1,1,0):ColorRgb(a==0, a==1, a==2);const char*axis=a==0?"X":(a==1?"Y":"Z");RGBAImageUncompressed*i=labels->createLabelImage(axis,color,set->getElementScaler()->scaleSize(12));int wx=viewport->getPixelStartX()+(int)projected.x()-3;int wy=viewport->getPixelStartY()+viewport->getPixelSizeY()-(int)projected.y()-i->getYSize()+12;drawLabel(i,wx,wy);OpenGL1ImageRenderer::unload(i);delete i;}}
+void OpenGL1ViewportWindow::drawLabelForRotateGizmoArc(RotateGizmo*g){if(!labels||!g)return;Vector3Dd anchor,projected;if(!g->getArcLabelPosition(&anchor)||!getCamera()->projectPointUsingRayMethod(anchor,&projected))return;char text[64];snprintf(text,sizeof(text),"%.*f deg",RotateGizmo::ANGLE_DECIMALS,g->getArcSweepInDegrees());RGBAImageUncompressed*i=labels->createLabelImage(text,g->getArcColor(),set->getElementScaler()->scaleSize(16));int wx=viewport->getPixelStartX()+(int)projected.x()-i->getXSize()/2;int wy=viewport->getPixelStartY()+viewport->getPixelSizeY()-(int)projected.y()-i->getYSize()/2;drawLabel(i,wx,wy);OpenGL1ImageRenderer::unload(i);delete i;}
+void OpenGL1ViewportWindow::drawInputGizmo(InputGizmo*g){if(inputGizmoRenderer)inputGizmoRenderer->draw(g);}
+void OpenGL1ViewportWindow::disposeGlResources(){if(titleImage)OpenGL1ImageRenderer::unload(titleImage);if(inputGizmoRenderer)inputGizmoRenderer->disposeGlResources();}void OpenGL1ViewportWindow::invalidateGlResources(){}

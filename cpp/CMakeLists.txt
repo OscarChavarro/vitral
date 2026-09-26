@@ -84,6 +84,7 @@ include_directories(${CMAKE_SOURCE_DIR}/base/src/main)
 add_subdirectory(base)
 add_subdirectory(glut)
 add_subdirectory(glfw)
+add_subdirectory(opengl1)
 add_subdirectory(opengl4)
 # Xt is the GUI of the X Window System: not available on macOS (XQuartz
 # lacks the OpenGL 4 GLX the applications using it need) nor Windows. Only
