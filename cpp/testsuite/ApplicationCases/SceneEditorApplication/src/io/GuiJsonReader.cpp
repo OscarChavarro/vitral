@@ -5,7 +5,7 @@
 
 GuiNode GuiJsonReader::readMenuBar()
 {
-    at = 0;
+    position = 0;
     skipValueStart();
     GuiNode root = readNode();
     return root;
@@ -15,8 +15,8 @@ std::vector<GuiNode> GuiJsonReader::readPopups()
 {
     const size_t popups = text.find("\"popups\"");
     if (popups == std::string::npos) return std::vector<GuiNode>();
-    at = text.find('[', popups);
-    if (at == std::string::npos) return std::vector<GuiNode>();
+    position = text.find('[', popups);
+    if (position == std::string::npos) return std::vector<GuiNode>();
     return readNodes();
 }
 
@@ -35,8 +35,8 @@ std::map<std::string, std::string> GuiJsonReader::readCommandProperty(
 {
     const size_t commands = text.find("\"commands\"");
     if (commands == std::string::npos) return std::map<std::string, std::string>();
-    at = text.find('[', commands);
-    if (at == std::string::npos) return std::map<std::string, std::string>();
+    position = text.find('[', commands);
+    if (position == std::string::npos) return std::map<std::string, std::string>();
     return readCommandArray(property);
 }
 
@@ -44,8 +44,8 @@ std::map<std::string, std::string> GuiJsonReader::readMessages()
 {
     const size_t messages = text.find("\"messages\"");
     if (messages == std::string::npos) return std::map<std::string, std::string>();
-    at = text.find('{', messages);
-    if (at == std::string::npos) return std::map<std::string, std::string>();
+    position = text.find('{', messages);
+    if (position == std::string::npos) return std::map<std::string, std::string>();
     return readStringMap();
 }
 
@@ -60,8 +60,8 @@ std::vector<GuiCommand> GuiJsonReader::readCommands()
     std::vector<GuiCommand> result;
     const size_t commands = text.find("\"commands\"");
     if (commands == std::string::npos) return result;
-    at = text.find('[', commands);
-    if (at == std::string::npos) return result;
+    position = text.find('[', commands);
+    if (position == std::string::npos) return result;
     consume('[');
     while (!consume(']')) {
         GuiCommand command;
@@ -70,9 +70,9 @@ std::vector<GuiCommand> GuiJsonReader::readCommands()
             const std::string key = stringValue(); consume(':');
             whitespace();
             if (key == "id") command.id = stringValue();
-            else if (key == "help" && at < text.size() && text[at] == '[') command.help = readStrings();
+            else if (key == "help" && position < text.size() && text[position] == '[') command.help = readStrings();
             else if (key == "help") command.help.push_back(stringValue());
-            else if (at < text.size() && text[at] == '\"') command.properties[key] = stringValue();
+            else if (position < text.size() && text[position] == '\"') command.properties[key] = stringValue();
             else skipValue();
             consume(',');
         }
@@ -87,8 +87,8 @@ std::vector<GuiButtonGroup> GuiJsonReader::readButtonGroups()
     std::vector<GuiButtonGroup> result;
     const size_t groups = text.find("\"buttonGroups\"");
     if (groups == std::string::npos) return result;
-    at = text.find('[', groups);
-    if (at == std::string::npos) return result;
+    position = text.find('[', groups);
+    if (position == std::string::npos) return result;
     consume('[');
     while (!consume(']')) {
         GuiButtonGroup group;
@@ -117,8 +117,8 @@ GuiButtonGroup GuiJsonReader::readButtonGroup(const std::string& name)
     GuiButtonGroup notFound;
     const size_t groups = text.find("\"buttonGroups\"");
     if (groups == std::string::npos) return notFound;
-    at = text.find('[', groups);
-    if (at == std::string::npos) return notFound;
+    position = text.find('[', groups);
+    if (position == std::string::npos) return notFound;
     consume('[');
     while (!consume(']')) {
         GuiButtonGroup group;
@@ -147,41 +147,41 @@ GuiButtonGroup GuiJsonReader::readButtonGroup(const std::string& name)
 bool GuiJsonReader::booleanValue()
 {
     whitespace();
-    if (text.compare(at, 4, "true") == 0) { at += 4; return true; }
-    if (text.compare(at, 5, "false") == 0) { at += 5; return false; }
+    if (text.compare(position, 4, "true") == 0) { position += 4; return true; }
+    if (text.compare(position, 5, "false") == 0) { position += 5; return false; }
     skipValue();
     return false;
 }
 
 void GuiJsonReader::whitespace()
 {
-    while (at < text.size() && std::isspace(static_cast<unsigned char>(text[at]))) ++at;
+    while (position < text.size() && std::isspace(static_cast<unsigned char>(text[position]))) ++position;
 }
 
 bool GuiJsonReader::consume(char c)
 {
     whitespace();
-    if (at < text.size() && text[at] == c) { ++at; return true; }
+    if (position < text.size() && text[position] == c) { ++position; return true; }
     return false;
 }
 
 std::string GuiJsonReader::stringValue()
 {
     whitespace();
-    if (at >= text.size() || text[at++] != '\"') throw std::runtime_error("Invalid GUI JSON string");
+    if (position >= text.size() || text[position++] != '\"') throw std::runtime_error("Invalid GUI JSON string");
     std::string result;
-    while (at < text.size() && text[at] != '\"') {
-        char c = text[at++];
-        if (c == '\\' && at < text.size()) {
-            c = text[at++];
+    while (position < text.size() && text[position] != '\"') {
+        char c = text[position++];
+        if (c == '\\' && position < text.size()) {
+            c = text[position++];
             if (c == 'n') result += '\n';
             else if (c == 't') result += '\t';
             else result += c;
         }
         else result += c;
     }
-    if (at >= text.size()) throw std::runtime_error("Unterminated GUI JSON string");
-    ++at;
+    if (position >= text.size()) throw std::runtime_error("Unterminated GUI JSON string");
+    ++position;
     return result;
 }
 
@@ -189,7 +189,7 @@ void GuiJsonReader::skipValueStart()
 {
     whitespace();
     if (!consume('{')) throw std::runtime_error("Invalid GUI JSON document");
-    while (at < text.size()) {
+    while (position < text.size()) {
         std::string key = stringValue();
         consume(':');
         if (key == "menubar") return;
@@ -202,12 +202,12 @@ void GuiJsonReader::skipValueStart()
 void GuiJsonReader::skipValue()
 {
     whitespace();
-    if (at >= text.size()) return;
-    if (text[at] == '\"') { stringValue(); return; }
-    char open = text[at];
-    if (open != '{' && open != '[') { while (at < text.size() && text[at] != ',' && text[at] != '}' && text[at] != ']') ++at; return; }
-    char close = open == '{' ? '}' : ']'; ++at;
-    while (at < text.size()) { whitespace(); if (text[at] == close) { ++at; return; } skipValue(); whitespace(); if (at < text.size() && text[at] == ',') ++at; }
+    if (position >= text.size()) return;
+    if (text[position] == '\"') { stringValue(); return; }
+    char open = text[position];
+    if (open != '{' && open != '[') { while (position < text.size() && text[position] != ',' && text[position] != '}' && text[position] != ']') ++position; return; }
+    char close = open == '{' ? '}' : ']'; ++position;
+    while (position < text.size()) { whitespace(); if (text[position] == close) { ++position; return; } skipValue(); whitespace(); if (position < text.size() && text[position] == ',') ++position; }
 }
 
 std::vector<std::string> GuiJsonReader::readStrings()

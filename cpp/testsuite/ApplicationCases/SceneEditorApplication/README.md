@@ -5,8 +5,7 @@ drawing area, ported from the Java `SceneEditorApplication`.
 
 ## Variants
 
-Each executable is built for one **widget set** and one **OpenGL version**,
-chosen with `SCENE_EDITOR_VARIANT`:
+Each executable is built for one **widget set** and one **OpenGL version**:
 
 | Variant       | Widget set    | OpenGL                          |
 |---------------|---------------|---------------------------------|
@@ -24,22 +23,21 @@ different X11/OpenGL stacks never overwrite each other.
 
 ## Build and run
 
-`run.sh` configures, builds and runs one variant:
+Each launcher configures, builds and runs its fixed variant:
 
 ```sh
-./run.sh -s                                   # xm_opengl4
-SCENE_EDITOR_VARIANT=xaw_opengl1 ./run.sh -s
-SCENE_EDITOR_VARIANT=xm_opengl1 ./run.sh -s
+./runXawOpenGL1.sh -s
+./runXawOpenGL4.sh -s
+./runXmOpenGL1.sh -s
+./runXmOpenGL4.sh -s
 ```
 
 The `-s` option starts the MCP automation service on TCP port 1234.
 
-To build only:
+To configure and build every variant without running it:
 
 ```sh
-mkdir -p build-cmake-xaw_opengl1 && cd build-cmake-xaw_opengl1
-cmake -DSCENE_EDITOR_VARIANT=xaw_opengl1 ..
-cmake --build .
+./compileAllVariants.sh
 ```
 
 ## macOS (XQuartz)
@@ -83,7 +81,7 @@ renders them with the Apple GPU:
    DISPLAY=:0 LIBGL_ALWAYS_INDIRECT=1 ./build/xm_opengl1/SceneEditorApplication -s
    ```
 
-   `run.sh` sets it automatically for the `xm_*` variants on macOS.
+The `runXmOpenGL1.sh` launcher sets it automatically on macOS.
 
 The editor then reports `OpenGL version string: 1.4 (2.1 Metal ...)`, enough
 for its OpenGL 1.2 pipeline.

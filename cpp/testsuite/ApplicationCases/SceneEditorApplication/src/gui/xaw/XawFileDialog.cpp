@@ -131,8 +131,14 @@ void XawFileDialog::showFolder(const std::string& newFolder)
     for ( size_t i = 0; i < entries.size(); i++ ) {
         entryTexts.push_back(entries[i].c_str());
     }
-    // Older Xaw releases (i.e. XQuartz) take String*, newer ones const char**
-    XawListChange(list, const_cast<String*>(entryTexts.data()),
+    // XQuartz's older Xaw declares String*, whereas current Xaw uses
+    // const char**. XawListChange only reads the entries in either API.
+#ifdef __APPLE__
+    String* xawEntries = const_cast<String*>(entryTexts.data());
+#else
+    const char** xawEntries = entryTexts.data();
+#endif
+    XawListChange(list, xawEntries,
                   static_cast<int>(entryTexts.size()), 0, True);
 }
 

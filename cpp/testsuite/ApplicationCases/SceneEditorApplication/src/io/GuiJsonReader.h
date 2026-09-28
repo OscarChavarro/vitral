@@ -71,7 +71,7 @@ public:
     /**
     @param text JSON document, referenced (it must outlive the reader)
     */
-    explicit GuiJsonReader(const std::string& text) : text(text), at(0) {}
+    explicit GuiJsonReader(const std::string& text) : text(text), position(0) {}
 
     GuiNode readMenuBar();
 
@@ -121,7 +121,7 @@ public:
 
 private:
     const std::string& text;
-    size_t at;
+    size_t position;
 
     void whitespace();
     bool consume(char c);
