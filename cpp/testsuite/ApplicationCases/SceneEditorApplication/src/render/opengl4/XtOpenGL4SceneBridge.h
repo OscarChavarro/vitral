@@ -141,6 +141,8 @@ public:
     void init();
     void dispose();
     void display(int width, int height);
+    void display(int surfaceWidth, int surfaceHeight,
+                 int canvasWidth, int canvasHeight);
     void reshape(int width, int height);
 
     /**

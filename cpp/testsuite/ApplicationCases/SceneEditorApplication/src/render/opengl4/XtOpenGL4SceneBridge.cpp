@@ -308,6 +308,13 @@ void XtOpenGL4SceneBridge::display(int w, int h)
     impl->renderer->display(w, h);
 }
 
+void XtOpenGL4SceneBridge::display(int surfaceWidth, int surfaceHeight,
+                                   int canvasWidth, int canvasHeight)
+{
+    setCanvasSize(canvasWidth, canvasHeight);
+    impl->renderer->display(surfaceWidth, surfaceHeight);
+}
+
 void XtOpenGL4SceneBridge::reshape(int w, int h)
 {
     setCanvasSize(w, h);

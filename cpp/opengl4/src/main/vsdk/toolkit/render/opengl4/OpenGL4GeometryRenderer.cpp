@@ -1,5 +1,9 @@
 #include <glad/gl.h>
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -39,6 +43,12 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.h"
+
+#ifdef __APPLE__
+#define VITRAL_GLU_CALLBACK(f) reinterpret_cast<GLvoid (*)()>(f)
+#else
+#define VITRAL_GLU_CALLBACK(f) reinterpret_cast<_GLUfuncptr>(f)
+#endif
 #include "vsdk/toolkit/render/opengl4/OpenGL4MeshRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MinMaxRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SelectionCornersRenderer.h"
@@ -601,9 +611,12 @@ OpenGL4MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     if ( tess == nullptr ) {
         return nullptr;
     }
-    gluTessCallback(tess, GLU_TESS_VERTEX_DATA, (_GLUfuncptr)tessVertex);
-    gluTessCallback(tess, GLU_TESS_EDGE_FLAG_DATA, (_GLUfuncptr)tessEdgeFlag);
-    gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (_GLUfuncptr)tessCombine);
+    gluTessCallback(tess, GLU_TESS_VERTEX_DATA,
+                    VITRAL_GLU_CALLBACK(tessVertex));
+    gluTessCallback(tess, GLU_TESS_EDGE_FLAG_DATA,
+                    VITRAL_GLU_CALLBACK(tessEdgeFlag));
+    gluTessCallback(tess, GLU_TESS_COMBINE_DATA,
+                    VITRAL_GLU_CALLBACK(tessCombine));
 
     OpenGL4MeshBuilder builder(maxAbsExtent(solid.getMinMax()));
     builder.setDoubleSided(doubleSided);

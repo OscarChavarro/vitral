@@ -86,6 +86,15 @@ add_subdirectory(glut)
 add_subdirectory(glfw)
 add_subdirectory(opengl1)
 add_subdirectory(opengl4)
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(GTK4 QUIET gtk4>=4.22)
+endif()
+if(GTK4_FOUND)
+  add_subdirectory(gtk4)
+else()
+  message(STATUS "vitral_gtk4 disabled: install GTK 4.22 development files (brew install gtk4 pkg-config) to build it")
+endif()
 # Xt is the GUI of the X Window System: not available on macOS (XQuartz
 # lacks the OpenGL 4 GLX the applications using it need) nor Windows. Only
 # the chosen widget set over it is built.
