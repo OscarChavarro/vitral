@@ -31,6 +31,7 @@ public class MeshModel {
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
         rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
+        rayGizmo.setVisible(false);
         lights = new ArrayList<>();
         Light light0 = new PointLight(new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
         light0.setId(0);

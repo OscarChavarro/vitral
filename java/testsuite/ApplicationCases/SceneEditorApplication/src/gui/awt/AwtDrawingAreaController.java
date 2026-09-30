@@ -118,8 +118,9 @@ public class AwtDrawingAreaController implements
     user's keyboard (whatever component has the focus). Intended for automated agents (see `application.mcp.AwtJogl4VitralEditorMCP`).
     Must be called from the event dispatch thread.
     @param key a single character (i.e. "5", "x") or one of the names "tab",
-    "enter", "backspace", "delete", "escape", "left", "right", "up", "down", "pageup",
-    "pagedown"
+    "enter", "backspace", "delete", "escape", "left", "right", "up", "down",
+    "pageup", "pagedown", "num0".."num9", "num/", "num*", "num-", "num+",
+    "num.", "numenter"
     @param shift true to press it with the SHIFT key down
     */
     public void injectKeyEvent(String key, boolean shift)
@@ -140,6 +141,7 @@ public class AwtDrawingAreaController implements
         int keyCode;
         char keyChar;
         int modifiers = 0;
+        int location = KeyEvent.KEY_LOCATION_STANDARD;
 
         switch ( key ) {
             case "tab" -> {
@@ -149,6 +151,11 @@ public class AwtDrawingAreaController implements
             case "enter" -> {
                 keyCode = KeyEvent.VK_ENTER;
                 keyChar = '\n';
+            }
+            case "numenter" -> {
+                keyCode = KeyEvent.VK_ENTER;
+                keyChar = '\n';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
             }
             case "backspace" -> {
                 keyCode = KeyEvent.VK_BACK_SPACE;
@@ -173,10 +180,41 @@ public class AwtDrawingAreaController implements
                 };
                 keyChar = KeyEvent.CHAR_UNDEFINED;
             }
+            case "num0", "num1", "num2", "num3", "num4",
+                 "num5", "num6", "num7", "num8", "num9" -> {
+                keyCode = KeyEvent.VK_NUMPAD0 + (key.charAt(3) - '0');
+                keyChar = key.charAt(3);
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
+            case "num/" -> {
+                keyCode = KeyEvent.VK_DIVIDE;
+                keyChar = '/';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
+            case "num*" -> {
+                keyCode = KeyEvent.VK_MULTIPLY;
+                keyChar = '*';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
+            case "num-" -> {
+                keyCode = KeyEvent.VK_SUBTRACT;
+                keyChar = '-';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
+            case "num+" -> {
+                keyCode = KeyEvent.VK_ADD;
+                keyChar = '+';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
+            case "num." -> {
+                keyCode = KeyEvent.VK_DECIMAL;
+                keyChar = '.';
+                location = KeyEvent.KEY_LOCATION_NUMPAD;
+            }
             default -> {
                 if ( key.length() != 1 ) {
                     throw new IllegalArgumentException("Unknown key \"" + key +
-                        "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup or pagedown");
+                        "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup, pagedown, num0..num9, num/, num*, num-, num+, num. or numenter");
                 }
                 keyChar = key.charAt(0);
                 keyCode = KeyEvent.getExtendedKeyCodeForChar(keyChar);
@@ -193,7 +231,7 @@ public class AwtDrawingAreaController implements
             }
         }
         KeyEvent event = new KeyEvent(canvas, KeyEvent.KEY_PRESSED,
-            System.currentTimeMillis(), modifiers, keyCode, keyChar);
+            System.currentTimeMillis(), modifiers, keyCode, keyChar, location);
 
         // Delivered directly: through the canvas, the AWT focus manager would
         // send it to the component that has the focus, if it is not the canvas

@@ -19,6 +19,7 @@ import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.render.jogl.Jogl4ColorDepthImageRenderer;
 import vsdk.toolkit.render.jogl.Jogl4Renderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4RotateGizmoRenderer;
+import vsdk.toolkit.render.jogl.gizmo.Jogl4RayGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4ScaleGizmoRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4TranslateGizmoRenderer;
 import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
@@ -55,7 +56,6 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     /// Gizmo drawn in the view being drawn
     private DrawingAreaGizmoPresenter.GizmoKind gizmoDrawn;
 
-    private final Jogl4VisualRayDebugRenderer rayDebugRenderer;
     private final FrameCaptureService frameCapture;
     private final ProjectedViewsDebugger projectedViewsDebugger;
     private final Jogl4ViewportSetRenderer viewportSetRenderer;
@@ -91,7 +91,6 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
             translationGizmo, rotateGizmo, scaleGizmo);
         gizmoDrawn = DrawingAreaGizmoPresenter.GizmoKind.NONE;
 
-        rayDebugRenderer = new Jogl4VisualRayDebugRenderer(model);
         frameCapture = new FrameCaptureService(model, host);
         projectedViewsDebugger = new ProjectedViewsDebugger(model, host);
         corridor = new Jogl4SimpleCorridorSample();
@@ -169,7 +168,9 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         }
 
         //-----------------------------------------------------------------
-        rayDebugRenderer.draw(gl);
+        model.getRayGizmo().acquireSnapshot();
+        Jogl4RayGizmoRenderer.draw(gl, model.getRayGizmo(), theScene.activeCamera,
+            theScene.scene.getLights());
 
         view.drawGrid(gl);
 
@@ -193,6 +194,9 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
         }
         // Only the selected viewport shows them: it is the one that receives the keyboard
         InputGizmo inputGizmo = gizmoPresenter.getInputGizmo();
+        if ( inputGizmo == null && model.getRayGizmo().isVisible() ) {
+            inputGizmo = model.getRayGizmo().getInputGizmo();
+        }
         if ( inputGizmo != null && view.isSelected() ) {
             view.drawInputGizmo(gl, inputGizmo);
         }
@@ -236,6 +240,7 @@ public class Jogl4DrawingAreaRenderer implements GLEventListener
     {
         viewportSetRenderer.disposeGlResources(drawable.getGL().getGL4());
         corridor.dispose(drawable.getGL().getGL4());
+        Jogl4RayGizmoRenderer.dispose(drawable.getGL().getGL4());
         Jogl4Renderer.disposeAll(drawable.getGL().getGL4());
     }
 

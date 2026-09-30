@@ -102,7 +102,7 @@ recorded in the scene history, so they can be undone as the ones of the user
   over the model, as its menu item or button does: the `IDC_` commands of the
   I18N files in `etc/gui` that need no dialog, i.e. `IDC_CREATE_SPHERE`,
   `IDC_CREATE_FUNCTIONALEXPLICITSURFACE`, `IDC_CREATE_PARAMETRICBICUBICPATCH`,
-  `IDC_CREATE_OMNILIGHT` or `IDC_OTHERS_CYCLE_BACKGROUND`. Arguments:
+  `IDC_CREATE_OMNILIGHT`, `IDC_TOOLS_RAY` or `IDC_OTHERS_CYCLE_BACKGROUND`. Arguments:
   `command`. Returns `result` (`DONE`, `FAILED`, or `NOT_HANDLED` for commands
   that need the user interface, i.e. file dialogs) and the status `message`.
   Scene changes are recorded in the scene history.
@@ -138,7 +138,8 @@ has not been created`).
 - `gui.key`: sends a key press to the drawing area (whatever has the keyboard
   focus). Arguments: `key` (a single character, or `tab`, `enter`,
   `backspace`, `delete`, `escape`, `left`, `right`, `up`, `down`,
-  `pageup`, `pagedown`), `shift` and `ctrl` (default false). `shift` does not change the
+  `pageup`, `pagedown`, `num0`..`num9`, `num/`, `num*`, `num-`, `num+`,
+  `num.`, `numenter`), `shift` and `ctrl` (default false). `shift` does not change the
   character: send `T` for an uppercase letter. No key release is sent.
   Returns the scene description.
 - `viewport.project`: reports where the first selected body is seen in a

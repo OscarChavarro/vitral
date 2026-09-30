@@ -15,6 +15,7 @@ import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
@@ -73,12 +74,12 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
         if ( gl == null || gizmo == null || camera == null ) {
             return;
         }
-        if ( lights == null || lights.isEmpty() ) {
-            return;
-        }
         if ( !gizmo.isVisible() ) {
             return;
         }
+        List<Light> activeLights = (lights == null || lights.isEmpty()) ?
+            List.of(new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1))) :
+            lights;
 
         ensureMesh(gl);
 
@@ -95,15 +96,15 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
 
             if ( geom instanceof Arrow arrowGeom ) {
                 Jogl4ArrowRenderer.draw(gl, arrowGeom, modelMatrix, projection,
-                        camera, lights, material, quality);
+                        camera, activeLights, material, quality);
             } else if ( geom instanceof Sphere sphereGeom ) {
-                Jogl4SphereRenderer.draw(gl, sphereGeom, camera, lights.get(0),
+                Jogl4SphereRenderer.draw(gl, sphereGeom, camera, activeLights.get(0),
                         material, quality, null, null, modelMatrix, 16, 12);
             }
         }
 
         drawIndicator(gl, gizmo.getRotationAngleInRadians(), primaryModelMatrix,
-                projection, camera, lights, quality);
+                projection, camera, activeLights, quality);
 
         gl.glDepthMask(true);
         gl.glDepthFunc(GL.GL_LESS);

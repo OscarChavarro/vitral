@@ -4,11 +4,13 @@ import model.SolidTextureModel;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.RendererConfigurationController;
+import vsdk.toolkit.gui.gizmo.RayGizmoInteractionTechniques;
 
 public class SolidTextureKeyboardInteractionTechniques {
     private final SolidTextureModel model;
     private final CameraController cameraController;
     private final RendererConfigurationController qualityController;
+    private final RayGizmoInteractionTechniques rayGizmoTechniques;
 
     public SolidTextureKeyboardInteractionTechniques(
         SolidTextureModel model,
@@ -18,6 +20,9 @@ public class SolidTextureKeyboardInteractionTechniques {
         this.model = model;
         this.cameraController = cameraController;
         this.qualityController = qualityController;
+        this.rayGizmoTechniques =
+            new RayGizmoInteractionTechniques(model.getRayGizmo(),
+                KeyEvent.KEY_r, KeyEvent.KEY_R);
     }
 
     public boolean processKeyPressedEvent(KeyEvent event)
@@ -49,7 +54,10 @@ public class SolidTextureKeyboardInteractionTechniques {
             model.selectNextSolidTexture();
             return true;
         }
-        if ( event.keycode == KeyEvent.KEY_r || event.keycode == KeyEvent.KEY_R ) {
+        if ( rayGizmoTechniques.processKeyPressedEvent(event) ) {
+            return true;
+        }
+        if ( event.keycode == KeyEvent.KEY_a || event.keycode == KeyEvent.KEY_A ) {
             model.toggleAnimationEnabled();
             return true;
         }

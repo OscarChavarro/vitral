@@ -71,7 +71,8 @@ public class RayGizmo extends Gizmo {
     private final Sphere dotSphere;
     private final SimpleBody body;
     private final Function<Ray, Intersection> intersectionCallback;
-    private final int maxNumOfReflections;
+    private final InputGizmo inputGizmo;
+    private int maxNumOfReflections;
     private final AtomicReference<RaySnapshot> pendingSnapshot = new AtomicReference<>(null);
 
     private Vector3Dd currentPosition;
@@ -110,11 +111,13 @@ public class RayGizmo extends Gizmo {
 
         this.intersectionCallback = intersectionCallback;
         this.maxNumOfReflections = maxNumOfReflections;
+        inputGizmo = new InputGizmo(5, 3, 3);
 
         currentPosition = new Vector3Dd(0, 0, 0);
         currentDirection = new Vector3Dd(0, 0, 1);
         currentRotationAngleInRadians = 0.0;
         applyTransform(currentPosition, currentDirection);
+        syncInputGizmo(currentPosition, currentDirection);
 
         lastDataTime = new Date();
         previousDataTime = new Date();
@@ -168,8 +171,21 @@ public class RayGizmo extends Gizmo {
         }
 
         pendingSnapshot.set(new RaySnapshot(rotationAngleInRadians, rays, intersections));
+        syncInputGizmo(ray.getOrigin(), ray.getDirection());
         visible = true;
         recordDataArrival();
+    }
+
+    public int getMaxNumOfReflections() {
+        return maxNumOfReflections;
+    }
+
+    public void setMaxNumOfReflections(int maxNumOfReflections) {
+        this.maxNumOfReflections = Math.max(0, maxNumOfReflections);
+    }
+
+    public InputGizmo getInputGizmo() {
+        return inputGizmo;
     }
 
     public void update() {
@@ -211,6 +227,7 @@ public class RayGizmo extends Gizmo {
         if ( !snap.rays().isEmpty() ) {
             Ray primary = snap.rays().get(0);
             applyTransform(primary.getOrigin(), primary.getDirection());
+            syncInputGizmo(primary.getOrigin(), primary.getDirection());
         }
         currentRotationAngleInRadians = snap.rotationAngleInRadians;
         currentSnapshot = snap;
@@ -458,6 +475,19 @@ public class RayGizmo extends Gizmo {
         body.setPosition(position);
         body.setRotation(rotation);
         body.setRotationInverse(rotationInverse);
+    }
+
+    private void syncInputGizmo(Vector3Dd position, Vector3Dd direction) {
+        Vector3Dd d = direction.length() > VSDK.EPSILON ?
+            direction.normalized() : new Vector3Dd(0, 0, 1);
+        double yaw = Math.atan2(d.y(), d.x());
+        double pitch = Math.asin(Math.max(-1.0, Math.min(1.0, d.z())));
+
+        inputGizmo.setValue(0, position.x());
+        inputGizmo.setValue(1, position.y());
+        inputGizmo.setValue(2, position.z());
+        inputGizmo.setValue(3, Math.toDegrees(yaw));
+        inputGizmo.setValue(4, Math.toDegrees(pitch));
     }
 
     private static Ray computeReflectedRay(Ray incomingRay, Intersection intersection) {

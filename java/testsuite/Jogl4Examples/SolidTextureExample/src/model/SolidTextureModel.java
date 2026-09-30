@@ -61,6 +61,7 @@ public class SolidTextureModel {
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
         rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
+        rayGizmo.setVisible(false);
         infinitePlaneGizmo = new InfinitePlaneGizmo();
         texture2DStack = new ArrayList<>();
         TextureUtils textureUtils = new TextureUtils();

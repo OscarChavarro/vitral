@@ -95,6 +95,21 @@ public class AwtSystem extends PresentationElement
           case java.awt.event.KeyEvent.VK_ESCAPE:
             evsdk.keycode = KeyEvent.KEY_ESC;
             return;
+          case java.awt.event.KeyEvent.VK_DIVIDE:
+            evsdk.keycode = KeyEvent.KEY_NUMSLASH;
+            return;
+          case java.awt.event.KeyEvent.VK_MULTIPLY:
+            evsdk.keycode = KeyEvent.KEY_NUMASTERISK;
+            return;
+          case java.awt.event.KeyEvent.VK_SUBTRACT:
+            evsdk.keycode = KeyEvent.KEY_NUMMINUS;
+            return;
+          case java.awt.event.KeyEvent.VK_ADD:
+            evsdk.keycode = KeyEvent.KEY_NUMPLUS;
+            return;
+          case java.awt.event.KeyEvent.VK_DECIMAL:
+            evsdk.keycode = KeyEvent.KEY_NUMPERIOD;
+            return;
           case java.awt.event.KeyEvent.VK_NUMPAD0:
             evsdk.keycode = KeyEvent.KEY_NUM0;
             return;
@@ -126,7 +141,9 @@ public class AwtSystem extends PresentationElement
             evsdk.keycode = KeyEvent.KEY_NUM9;
             return;
           case java.awt.event.KeyEvent.VK_ENTER:
-            evsdk.keycode = KeyEvent.KEY_ENTER;
+            evsdk.keycode =
+                eawt.getKeyLocation() == java.awt.event.KeyEvent.KEY_LOCATION_NUMPAD ?
+                KeyEvent.KEY_NUMENTER : KeyEvent.KEY_ENTER;
             break;
           case java.awt.event.KeyEvent.VK_BACK_SPACE:
             evsdk.keycode = KeyEvent.KEY_BACKSPACE;

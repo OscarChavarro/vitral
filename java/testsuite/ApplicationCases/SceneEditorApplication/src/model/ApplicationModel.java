@@ -3,14 +3,19 @@ package model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
+import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.element.Intersection;
 import vsdk.toolkit.environment.geometry.element.Ray;
+import vsdk.toolkit.environment.geometry.element.RayHit;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.light.PointLight;
 import vsdk.toolkit.environment.scene.SimpleBody;
+import vsdk.toolkit.gui.gizmo.RayGizmo;
 import vsdk.toolkit.media.RGBColorPalette;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.ZBuffer;
@@ -27,9 +32,7 @@ public class ApplicationModel
     private int raytracedImageWidth;
     private int raytracedImageHeight;
     private RGBColorPalette palette;
-    private boolean withVisualDebugRay;
-    private Ray visualDebugRay;
-    private int visualDebugRayLevels;
+    private RayGizmo rayGizmo;
     private final List<ViewportSet> viewportSets;
     private int activeViewportSetIndex;
     private Widget i18nContext;
@@ -138,6 +141,7 @@ public class ApplicationModel
     public void setScene(Scene scene)
     {
         this.scene = scene;
+        this.rayGizmo = new RayGizmo(makeRayGizmoIntersectionCallback(), 2);
         editHistory.getSceneHistory().clear();
     }
 
@@ -259,31 +263,69 @@ public class ApplicationModel
 
     public boolean isWithVisualDebugRay()
     {
-        return withVisualDebugRay;
+        return rayGizmo != null && rayGizmo.isVisible();
     }
 
     public void setWithVisualDebugRay(boolean withVisualDebugRay)
     {
-        this.withVisualDebugRay = withVisualDebugRay;
+        if ( rayGizmo != null ) {
+            rayGizmo.setVisible(withVisualDebugRay);
+        }
     }
 
     public Ray getVisualDebugRay()
     {
-        return visualDebugRay;
+        if ( rayGizmo == null ) {
+            return null;
+        }
+        return new Ray(rayGizmo.getPosition(), rayGizmo.getDirection());
     }
 
     public void setVisualDebugRay(Ray visualDebugRay)
     {
-        this.visualDebugRay = visualDebugRay;
+        if ( rayGizmo != null ) {
+            rayGizmo.setRay(visualDebugRay, 0.0);
+        }
     }
 
     public int getVisualDebugRayLevels()
     {
-        return visualDebugRayLevels;
+        return rayGizmo != null ? rayGizmo.getMaxNumOfReflections() : 0;
     }
 
     public void setVisualDebugRayLevels(int visualDebugRayLevels)
     {
-        this.visualDebugRayLevels = visualDebugRayLevels;
+        if ( rayGizmo != null ) {
+            rayGizmo.setMaxNumOfReflections(visualDebugRayLevels);
+        }
+    }
+
+    public RayGizmo getRayGizmo()
+    {
+        return rayGizmo;
+    }
+
+    private Function<Ray, Intersection> makeRayGizmoIntersectionCallback()
+    {
+        return ray -> {
+            if ( scene == null ) {
+                return null;
+            }
+
+            Intersection closest = null;
+            double closestT = Double.MAX_VALUE;
+
+            for ( SimpleBody body : scene.scene.getSimpleBodies() ) {
+                RayHit hit = new RayHit(RayHit.DETAIL_POINT | RayHit.DETAIL_NORMAL);
+                if ( body.doIntersectionFirstHit(ray, hit) && hit.hasHitDistance() ) {
+                    double t = hit.getHitDistance();
+                    if ( t > VSDK.EPSILON && t < closestT ) {
+                        closestT = t;
+                        closest = new Intersection(t, hit.point, hit.normal);
+                    }
+                }
+            }
+            return closest;
+        };
     }
 }

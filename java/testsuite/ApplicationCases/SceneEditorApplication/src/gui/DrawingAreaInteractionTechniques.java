@@ -10,6 +10,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.KeyEvent;
 import vsdk.toolkit.gui.MouseEvent;
 import vsdk.toolkit.gui.gizmo.RotateGizmo;
+import vsdk.toolkit.gui.gizmo.RayGizmoInteractionTechniques;
 import vsdk.toolkit.gui.gizmo.ScaleGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmo;
 import vsdk.toolkit.gui.gizmo.TranslateGizmoInteractionTechnique;
@@ -70,7 +71,7 @@ public class DrawingAreaInteractionTechniques
     private final ScenePicker scenePicker;
     private final ViewportInteractionTechniques interactionTechniques;
     private final ViewportSetInteractionTechniques viewportSetTechniques;
-    private final VisualRayDebugController rayDebugController;
+    private final RayGizmoInteractionTechniques rayGizmoTechniques;
     private final SelectedBodyMapToggles mapToggles;
     private final TranslateGizmo translationGizmo;
     private final RotateGizmo rotateGizmo;
@@ -99,7 +100,7 @@ public class DrawingAreaInteractionTechniques
         qualitySelection = scene.qualityTemplate;
         interactionTechniques = new ViewportInteractionTechniques(scene.camera, qualitySelection);
         viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
-        rayDebugController = new VisualRayDebugController(model);
+        rayGizmoTechniques = new RayGizmoInteractionTechniques(model.getRayGizmo());
         mapToggles = new SelectedBodyMapToggles();
         translationGizmo = interactionTechniques.getTranslationGizmo();
         rotateGizmo = interactionTechniques.getRotateGizmo();
@@ -460,7 +461,7 @@ public class DrawingAreaInteractionTechniques
             if ( !gizmoGrabbed ) {
                 // Numbers typed belong to the previous selection
                 cancelInputGizmoEditing();
-                model.setVisualDebugRay(scenePicker.selectObjectWithMouse(
+                rayGizmoTechniques.setRay(scenePicker.selectObjectWithMouse(
                     viewportEvent.getX(), viewportEvent.getY(), composite));
             }
 
@@ -707,6 +708,11 @@ public class DrawingAreaInteractionTechniques
     {
         InteractionMode mode = drawingArea.getInteractionMode();
 
+        if ( rayGizmoTechniques.processKeyPressedEvent(event) ) {
+            listener.repaintRequested();
+            return;
+        }
+
         if ( (mode == InteractionMode.TRANSLATE || mode == InteractionMode.ROTATE ||
               mode == InteractionMode.SCALE) &&
              processInputGizmoKeyPressedEvent(mode, event) ) {
@@ -929,11 +935,6 @@ public class DrawingAreaInteractionTechniques
     private void processCharacterKeyPressedEvent(KeyEvent event)
     {
         if ( event.unicodeId == KeyEvent.KEY_NONE ) {
-            return;
-        }
-
-        // Visual debug ray control
-        if ( rayDebugController.processKeyPressedEvent(event) ) {
             return;
         }
 
