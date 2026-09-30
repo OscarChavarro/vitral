@@ -77,7 +77,8 @@ public:
     SHIFT does not change the character.
     @param key a single character (i.e. "5", "x") or one of the names "tab",
     "enter", "backspace", "delete", "escape", "left", "right", "up", "down",
-    "pageup", "pagedown"
+    "pageup", "pagedown", "num0".."num9", "num/", "num*", "num-", "num+",
+    "num.", "numenter"
     @param shift true to press it with the SHIFT key down
     @param ctrl true to press it with the CTRL key down
     @throws std::invalid_argument for an unknown key (Java throws

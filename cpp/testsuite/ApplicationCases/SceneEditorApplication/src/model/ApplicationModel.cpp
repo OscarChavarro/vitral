@@ -1,7 +1,11 @@
+#include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/geometry/element/Intersection.h"
+#include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
@@ -13,8 +17,8 @@
 ApplicationModel::ApplicationModel()
     : scene(nullptr), raytracedImage(nullptr), raytracedDepth(nullptr),
       zbufferImage(nullptr), raytracedImageWidth(0), raytracedImageHeight(0),
-      palette(nullptr), withVisualDebugRay(false), hasVisualDebugRay(false),
-      visualDebugRayLevels(0), activeViewportSetIndex(0),
+      palette(nullptr), rayGizmo(nullptr),
+      activeViewportSetIndex(0),
       i18nContext(nullptr), drawingArea(nullptr),
       editHistory([this]() { return getScene(); })
 {
@@ -37,6 +41,7 @@ ApplicationModel::~ApplicationModel()
     delete scene;
     delete i18nContext;
     delete palette;
+    delete rayGizmo;
     delete raytracedImage;
     delete raytracedDepth;
     delete zbufferImage;
@@ -113,6 +118,9 @@ void ApplicationModel::setScene(Scene* scene)
         delete this->scene;
     }
     this->scene = scene;
+    delete rayGizmo;
+    rayGizmo = new RayGizmo(
+        [this](const Ray& ray) { return makeRayGizmoIntersection(ray); }, 2);
 }
 
 EditHistory* ApplicationModel::getEditHistory()
@@ -230,33 +238,74 @@ void ApplicationModel::setPalette(RGBColorPalette* palette)
 
 bool ApplicationModel::isWithVisualDebugRay() const
 {
-    return withVisualDebugRay;
+    return rayGizmo != nullptr && rayGizmo->isVisible();
 }
 
 void ApplicationModel::setWithVisualDebugRay(bool withVisualDebugRay)
 {
-    this->withVisualDebugRay = withVisualDebugRay;
+    if ( rayGizmo != nullptr ) {
+        rayGizmo->setVisible(withVisualDebugRay);
+    }
 }
 
 const Ray* ApplicationModel::getVisualDebugRay() const
 {
-    return hasVisualDebugRay ? &visualDebugRay : nullptr;
+    if ( rayGizmo == nullptr ) {
+        return nullptr;
+    }
+    visualDebugRay = Ray(rayGizmo->getPosition(), rayGizmo->getDirection());
+    return &visualDebugRay;
 }
 
 void ApplicationModel::setVisualDebugRay(const Ray* visualDebugRay)
 {
-    hasVisualDebugRay = visualDebugRay != nullptr;
-    if ( hasVisualDebugRay ) {
-        this->visualDebugRay = *visualDebugRay;
+    if ( rayGizmo != nullptr && visualDebugRay != nullptr ) {
+        rayGizmo->setRay(*visualDebugRay, 0.0);
     }
 }
 
 int ApplicationModel::getVisualDebugRayLevels() const
 {
-    return visualDebugRayLevels;
+    return rayGizmo != nullptr ? rayGizmo->getMaxNumOfReflections() : 0;
 }
 
 void ApplicationModel::setVisualDebugRayLevels(int visualDebugRayLevels)
 {
-    this->visualDebugRayLevels = visualDebugRayLevels;
+    if ( rayGizmo != nullptr ) {
+        rayGizmo->setMaxNumOfReflections(visualDebugRayLevels);
+    }
+}
+
+RayGizmo* ApplicationModel::getRayGizmo() const
+{
+    return rayGizmo;
+}
+
+Intersection* ApplicationModel::makeRayGizmoIntersection(const Ray& ray)
+{
+    if ( scene == nullptr || scene->scene == nullptr ) {
+        return nullptr;
+    }
+
+    Intersection* closest = nullptr;
+    double closestT = 1e308;
+    java::ArrayList<SimpleBody*>& bodies = scene->scene->getSimpleBodies();
+
+    for ( long i = 0; i < bodies.size(); i++ ) {
+        SimpleBody* body = bodies.get(i);
+        RayHit hit(RayHit::DETAIL_POINT | RayHit::DETAIL_NORMAL);
+
+        if ( body != nullptr &&
+             body->doIntersectionFirstHit(ray, &hit) &&
+             hit.hasHitDistance() ) {
+            double t = hit.getHitDistance();
+
+            if ( t > VSDK::EPSILON && t < closestT ) {
+                closestT = t;
+                delete closest;
+                closest = new Intersection(t, hit.point, hit.normal);
+            }
+        }
+    }
+    return closest;
 }

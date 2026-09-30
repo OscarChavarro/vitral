@@ -16,6 +16,7 @@ class DrawingArea;
 class DrawingAreaInteractionListener;
 class InteractionEditRecorder;
 class RendererConfiguration;
+class RayGizmoInteractionTechniques;
 class RotateGizmo;
 class ScaleGizmo;
 class Scene;
@@ -29,7 +30,6 @@ class Viewport;
 class ViewportInteractionTechniques;
 class ViewportSet;
 class ViewportSetInteractionTechniques;
-class VisualRayDebugController;
 
 /**
 Mouse and keyboard interaction techniques of the drawing area of the editor:
@@ -75,7 +75,7 @@ private:
     ScenePicker* scenePicker;
     ViewportInteractionTechniques* interactionTechniques;
     ViewportSetInteractionTechniques* viewportSetTechniques;
-    VisualRayDebugController* rayDebugController;
+    RayGizmoInteractionTechniques* rayGizmoTechniques;
     SelectedBodyMapToggles* mapToggles;
     TranslateGizmo* translationGizmo;
     RotateGizmo* rotateGizmo;

@@ -11,6 +11,7 @@
 class Camera;
 class Light;
 class PointLight;
+class RayGizmo;
 class RGBColorPalette;
 class RGBImageUncompressed;
 class Scene;
@@ -38,10 +39,8 @@ private:
     int raytracedImageWidth;
     int raytracedImageHeight;
     RGBColorPalette* palette;
-    bool withVisualDebugRay;
-    bool hasVisualDebugRay;
-    Ray visualDebugRay;
-    int visualDebugRayLevels;
+    RayGizmo* rayGizmo;
+    mutable Ray visualDebugRay;
     java::ArrayList<ViewportSet*> viewportSets;
     int activeViewportSetIndex;
     Widget* i18nContext;
@@ -52,6 +51,7 @@ private:
 
     ApplicationModel(const ApplicationModel& other);
     ApplicationModel& operator=(const ApplicationModel& other);
+    class Intersection* makeRayGizmoIntersection(const Ray& ray);
 
 public:
     /**
@@ -159,6 +159,7 @@ public:
     void setVisualDebugRay(const Ray* visualDebugRay);
     int getVisualDebugRayLevels() const;
     void setVisualDebugRayLevels(int visualDebugRayLevels);
+    RayGizmo* getRayGizmo() const;
 };
 
 #endif

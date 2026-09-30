@@ -95,6 +95,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.cpp
     src/main/vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.cpp
     src/main/vsdk/toolkit/gui/gizmo/RayGizmo.cpp
+    src/main/vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.cpp
     src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.cpp
     src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2InfinitePlaneGizmoMapper.cpp
     src/main/vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.cpp

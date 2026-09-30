@@ -14,6 +14,8 @@ MeshModel::MeshModel()
     : rayGizmo([this](const Ray& ray) { return this->makeIntersectionCallback(ray); }, 1),
       tangibleServiceUrl("ws://localhost:8090/v1/values")
 {
+    rayGizmo.setVisible(false);
+
     Light* light0 = new PointLight(Vector3Dd(10, -20, 50), ColorRgb(1, 1, 1));
     light0->setId(0);
     Light* light1 = new PointLight(Vector3Dd(-10, 20, 50), ColorRgb(1, 1, 1));

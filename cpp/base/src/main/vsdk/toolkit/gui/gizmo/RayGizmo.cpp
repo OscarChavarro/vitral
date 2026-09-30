@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include <stdexcept>
 
 #include "java/util/ArrayList.txx"
@@ -83,6 +84,7 @@ RayGizmo::RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback
       dotSphere(new Sphere(ARROW_BASE_RADIUS)),
       body(new SimpleBody()),
       intersectionCallback(intersectionCallback),
+      inputGizmo(5, 3, 3),
       maxNumOfReflections(maxNumOfReflections),
       pendingSnapshot(0),
       currentPosition(0, 0, 0),
@@ -109,6 +111,7 @@ RayGizmo::RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback
     currentPosition = Vector3Dd(0, 0, 0);
     currentDirection = Vector3Dd(0, 0, 1);
     applyTransform(currentPosition, currentDirection);
+    syncInputGizmo(currentPosition, currentDirection);
 
     normalRayColors.add(DEFAULT_NORMAL_COLOR);
     reflectedRayColors.add(DEFAULT_RAY_COLOR);
@@ -177,8 +180,25 @@ void RayGizmo::setRay(const Ray& ray, double rotationAngleInRadians)
     pendingSnapshot = snap;
     pthread_mutex_unlock(&pendingMutex);
 
+    syncInputGizmo(ray.getOrigin(), ray.getDirection());
     visible = true;
     recordDataArrival();
+}
+
+int RayGizmo::getMaxNumOfReflections() const
+{
+    return maxNumOfReflections;
+}
+
+void RayGizmo::setMaxNumOfReflections(int maxNumOfReflections)
+{
+    this->maxNumOfReflections =
+        maxNumOfReflections < 0 ? 0 : maxNumOfReflections;
+}
+
+InputGizmo* RayGizmo::getInputGizmo()
+{
+    return &inputGizmo;
 }
 
 void RayGizmo::update()
@@ -232,6 +252,7 @@ RayGizmo::RaySnapshot* RayGizmo::acquireSnapshot()
     if ( snap->rays.size() > 0 ) {
         Ray primary = snap->rays.get(0);
         applyTransform(primary.getOrigin(), primary.getDirection());
+        syncInputGizmo(primary.getOrigin(), primary.getDirection());
     }
     currentRotationAngleInRadians = snap->rotationAngleInRadians;
     delete currentSnapshot;
@@ -442,6 +463,20 @@ void RayGizmo::applyTransform(const Vector3Dd& position, const Vector3Dd& direct
     body->setPosition(position);
     body->setRotation(rotation);
     body->setRotationInverse(rotationInverse);
+}
+
+void RayGizmo::syncInputGizmo(const Vector3Dd& position, const Vector3Dd& direction)
+{
+    Vector3Dd d = direction.length() > VSDK::EPSILON ?
+        direction.normalized() : Vector3Dd(0, 0, 1);
+    double yaw = std::atan2(d.y(), d.x());
+    double pitch = std::asin(std::max(-1.0, std::min(1.0, d.z())));
+
+    inputGizmo.setValue(0, position.x());
+    inputGizmo.setValue(1, position.y());
+    inputGizmo.setValue(2, position.z());
+    inputGizmo.setValue(3, yaw * 180.0 / M_PI);
+    inputGizmo.setValue(4, pitch * 180.0 / M_PI);
 }
 
 Ray* RayGizmo::computeReflectedRay(const Ray& incomingRay, const Intersection* intersection)

@@ -11,6 +11,7 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/element/Intersection.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
+#include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
 class Arrow;
 class Sphere;
 class SimpleBody;
@@ -46,6 +47,9 @@ public:
     Vector3Dd getPosition() const;
     Vector3Dd getDirection() const;
     void setRay(const Ray& ray, double rotationAngleInRadians);
+    int getMaxNumOfReflections() const;
+    void setMaxNumOfReflections(int maxNumOfReflections);
+    InputGizmo* getInputGizmo();
     void update();
     bool isVisible() const;
     void setVisible(bool visible);
@@ -79,6 +83,7 @@ private:
     Sphere* dotSphere;
     SimpleBody* body;
     std::function<Intersection*(const Ray&)> intersectionCallback;
+    InputGizmo inputGizmo;
     int maxNumOfReflections;
     pthread_mutex_t pendingMutex;
     RaySnapshot* pendingSnapshot;
@@ -111,6 +116,7 @@ private:
     void recordDataArrival();
     bool inactivityThresholdExceeded() const;
     void applyTransform(const Vector3Dd& position, const Vector3Dd& direction);
+    void syncInputGizmo(const Vector3Dd& position, const Vector3Dd& direction);
     static Ray* computeReflectedRay(const Ray& incomingRay, const Intersection* intersection);
     static Matrix4x4d rotationFromZToDirection(const Vector3Dd& direction);
 };

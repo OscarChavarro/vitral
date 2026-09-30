@@ -3,6 +3,7 @@
 #include "vsdk/toolkit/gui/CameraController.h"
 #include "vsdk/toolkit/gui/KeyEvent.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.h"
 #include "gui/MeshKeyboardInteractionTechniques.h"
 #include "model/MeshModel.h"
 
@@ -14,8 +15,16 @@ MeshKeyboardInteractionTechniques::MeshKeyboardInteractionTechniques(
     : model(model),
       cameraController(cameraController),
       qualityController(qualityController),
+      rayGizmoTechniques(new RayGizmoInteractionTechniques(
+          model != 0 ? model->getRayGizmo() : 0,
+          KeyEvent::KEY_r, KeyEvent::KEY_R)),
       shouldClose(shouldClose)
 {
+}
+
+MeshKeyboardInteractionTechniques::~MeshKeyboardInteractionTechniques()
+{
+    delete rayGizmoTechniques;
 }
 
 bool MeshKeyboardInteractionTechniques::processKeyPressedEvent(const KeyEvent& event)
@@ -28,6 +37,10 @@ bool MeshKeyboardInteractionTechniques::processKeyPressedEvent(const KeyEvent& e
     }
     if ( event.keycode == KeyEvent::KEY_I ) {
         std::printf("%s\n", model->getQualitySelection()->toString().c_str());
+        return true;
+    }
+    if ( rayGizmoTechniques != 0 &&
+         rayGizmoTechniques->processKeyPressedEvent(event) ) {
         return true;
     }
     if ( cameraController != 0 && cameraController->processKeyPressedEvent(event) ) {

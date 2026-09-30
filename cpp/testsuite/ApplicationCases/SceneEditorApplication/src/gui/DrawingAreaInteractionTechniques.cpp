@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.h"
 #include "vsdk/toolkit/gui/gizmo/RotateGizmo.h"
 #include "vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.h"
 #include "vsdk/toolkit/gui/gizmo/ScaleGizmo.h"
@@ -23,7 +24,6 @@
 #include "gui/DrawingAreaInteractionListener.h"
 #include "gui/DrawingAreaInteractionTechniques.h"
 #include "gui/SelectedBodyMapToggles.h"
-#include "gui/VisualRayDebugController.h"
 #include "gui/history/InteractionEditRecorder.h"
 #include "gui/history/UndoRedoInteractionTechnique.h"
 
@@ -42,7 +42,8 @@ DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
     interactionTechniques = new ViewportInteractionTechniques(scene->camera,
                                                               qualitySelection);
     viewportSetTechniques = new ViewportSetInteractionTechniques(viewportSet);
-    rayDebugController = new VisualRayDebugController(model);
+    rayGizmoTechniques =
+        new RayGizmoInteractionTechniques(model->getRayGizmo());
     mapToggles = new SelectedBodyMapToggles();
     translationGizmo = interactionTechniques->getTranslationGizmo();
     rotateGizmo = interactionTechniques->getRotateGizmo();
@@ -58,7 +59,7 @@ DrawingAreaInteractionTechniques::~DrawingAreaInteractionTechniques()
     delete undoRedoTechnique;
     delete editRecorder;
     delete mapToggles;
-    delete rayDebugController;
+    delete rayGizmoTechniques;
     delete viewportSetTechniques;
     delete interactionTechniques;
     delete scenePicker;
@@ -389,7 +390,7 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
             cancelInputGizmoEditing();
             Ray selectedRay = scenePicker->selectObjectWithMouse(
                 viewportEvent.getX(), viewportEvent.getY(), composite);
-            model->setVisualDebugRay(&selectedRay);
+            rayGizmoTechniques->setRay(&selectedRay);
         }
 
         if ( selectionEditor->computeSelectionCentroid(&centroid) ) {
@@ -673,6 +674,11 @@ void DrawingAreaInteractionTechniques::processEditionKeyPressedEvent(
 {
     InteractionMode mode = drawingArea->getInteractionMode();
 
+    if ( rayGizmoTechniques->processKeyPressedEvent(event) ) {
+        listener->repaintRequested();
+        return;
+    }
+
     if ( (mode == InteractionMode::TRANSLATE ||
           mode == InteractionMode::ROTATE ||
           mode == InteractionMode::SCALE) &&
@@ -880,11 +886,6 @@ void DrawingAreaInteractionTechniques::processCharacterKeyPressedEvent(
 {
     // Keys with a character (letters, digits and symbols).
     if ( event.unicodeId == KeyEvent::KEY_NONE ) {
-        return;
-    }
-
-    // Visual debug ray control
-    if ( rayDebugController->processKeyPressedEvent(event) ) {
         return;
     }
 

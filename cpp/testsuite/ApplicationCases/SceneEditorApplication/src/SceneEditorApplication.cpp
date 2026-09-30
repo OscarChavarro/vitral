@@ -1710,10 +1710,21 @@ private:
         else if (key.equals("down")) keysym = XK_Down;
         else if (key.equals("pageup")) keysym = XK_Page_Up;
         else if (key.equals("pagedown")) keysym = XK_Page_Down;
+        else if (key.equals("numenter")) { keysym = XK_KP_Enter; keyChar = '\n'; }
+        else if (key.length() == 4 && key.startsWith("num") &&
+                 key.charAt(3) >= '0' && key.charAt(3) <= '9') {
+            keyChar = key.charAt(3);
+            keysym = XK_KP_0 + (keyChar - '0');
+        }
+        else if (key.equals("num/")) { keysym = XK_KP_Divide; keyChar = '/'; }
+        else if (key.equals("num*")) { keysym = XK_KP_Multiply; keyChar = '*'; }
+        else if (key.equals("num-")) { keysym = XK_KP_Subtract; keyChar = '-'; }
+        else if (key.equals("num+")) { keysym = XK_KP_Add; keyChar = '+'; }
+        else if (key.equals("num.")) { keysym = XK_KP_Decimal; keyChar = '.'; }
         else {
             if (key.length() != 1) {
                 throw std::invalid_argument((java::String("Unknown key \"") + key +
-                    "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup or pagedown").c_str());
+                    "\". Use a single character, tab, enter, backspace, delete, escape, left, right, up, down, pageup, pagedown, num0..num9, num/, num*, num-, num+, num. or numenter").c_str());
             }
             keyChar = key.charAt(0);
             // Latin 1 symbols are their characters

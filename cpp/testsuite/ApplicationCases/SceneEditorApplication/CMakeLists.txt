@@ -146,7 +146,6 @@ if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
         src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
         src/render/opengl4/OpenGL4SceneRenderer.cpp
         src/render/opengl4/XtOpenGL4SceneBridge.cpp
-        src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
     )
     set(SCENE_EDITOR_OPENGL_GTK4_SOURCES
         src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
@@ -155,7 +154,6 @@ if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
         src/render/opengl4/OpenGL4RenderPrimitiveRenderer.cpp
         src/render/opengl4/OpenGL4SceneRenderer.cpp
         src/render/opengl4/XtOpenGL4SceneBridge.cpp
-        src/render/opengl4/OpenGL4VisualRayDebugRenderer.cpp
     )
 else()
     set(SCENE_EDITOR_OPENGL_SOURCES
@@ -168,7 +166,6 @@ else()
         src/render/opengl1/OpenGL1RenderPrimitiveRenderer.cpp
         src/render/opengl1/OpenGL1SceneRenderer.cpp
         src/render/opengl1/XtOpenGL1SceneBridge.cpp
-        src/render/opengl1/OpenGL1VisualRayDebugRenderer.cpp
     )
 endif()
 
@@ -184,7 +181,6 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/gui/PointerCursor.cpp
     src/gui/PopupDismissClickFilter.cpp
     src/gui/SelectedBodyMapToggles.cpp
-    src/gui/VisualRayDebugController.cpp
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
@@ -224,7 +220,6 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/render/DrawingAreaGizmoPresenter.cpp
     src/render/FrameCaptureService.cpp
     src/render/ProjectedViewsDebugger.cpp
-    src/render/VisualRayDebugGeometry.cpp
     ${SCENE_EDITOR_OPENGL_SOURCES}
     ${SCENE_EDITOR_WIDGET_SET_SOURCES}
 )
@@ -236,7 +231,6 @@ if(SCENE_EDITOR_IS_GTK4)
         src/gui/DrawingAreaInteractionTechniques.cpp
         src/gui/PointerCursor.cpp
         src/gui/SelectedBodyMapToggles.cpp
-        src/gui/VisualRayDebugController.cpp
         src/gui/history/InteractionEditRecorder.cpp
         src/gui/history/UndoRedoInteractionTechnique.cpp
         src/io/GuiI18nContextBuilder.cpp
@@ -268,7 +262,6 @@ if(SCENE_EDITOR_IS_GTK4)
         src/render/DrawingAreaGizmoPresenter.cpp
         src/render/FrameCaptureService.cpp
         src/render/ProjectedViewsDebugger.cpp
-        src/render/VisualRayDebugGeometry.cpp
         ${SCENE_EDITOR_OPENGL_GTK4_SOURCES}
     )
 else()

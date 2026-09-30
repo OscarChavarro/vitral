@@ -9,6 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Arrow.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
@@ -30,8 +31,16 @@ const float IND_TIP_Z = 0.30f;
 
 void OpenGL1RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::ArrayList<Light*>& lights)
 {
-    if ( gizmo == 0 || camera == 0 || lights.size() == 0 || !gizmo->isVisible() ) {
+    if ( gizmo == 0 || camera == 0 || !gizmo->isVisible() ) {
         return;
+    }
+    java::ArrayList<Light*> fallbackLights;
+    const java::ArrayList<Light*>* activeLights = &lights;
+    PointLight fallbackLight(camera->getPosition(), ColorRgb(1, 1, 1));
+
+    if ( lights.size() == 0 ) {
+        fallbackLights.add(&fallbackLight);
+        activeLights = &fallbackLights;
     }
     RendererConfiguration quality = buildSurfaceQuality();
     Matrix4x4d primaryModelMatrix = gizmo->getBody()->getTransformationMatrix();
@@ -51,19 +60,19 @@ void OpenGL1RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::
 
         Arrow* arrow = dynamic_cast<Arrow*>(geom);
         if ( arrow != 0 ) {
-            OpenGL1ArrowRenderer::draw(arrow, modelMatrix, projection, camera, lights, material, &quality);
+            OpenGL1ArrowRenderer::draw(arrow, modelMatrix, projection, camera, *activeLights, material, &quality);
             continue;
         }
 
         Sphere* sphere = dynamic_cast<Sphere*>(geom);
         if ( sphere != 0 ) {
             OpenGL1SphereRenderer::draw(
-                sphere, camera, lights.get(0), material, &quality,
+                sphere, camera, activeLights->get(0), material, &quality,
                 0, 0, modelMatrix, 16, 12);
         }
     }
 
-    drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix, projection, camera, lights, &quality);
+    drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix, projection, camera, *activeLights, &quality);
     delete scene;
 
     glDepthMask(GL_TRUE);
