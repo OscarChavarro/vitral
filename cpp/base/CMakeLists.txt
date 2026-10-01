@@ -183,6 +183,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/CameraControllerBlender.cpp
     src/main/vsdk/toolkit/gui/CameraControllerGoogleEarth.cpp
     src/main/vsdk/toolkit/render/TraceWorkspace.cpp
+    src/main/vsdk/toolkit/render/SpherePolyhedralCache.cpp
     src/main/vsdk/toolkit/render/raytracing/DepthBufferEncoder.cpp
     src/main/vsdk/toolkit/render/raytracing/ParallelRaytracer.cpp
     src/main/vsdk/toolkit/render/raytracing/RasterTileArea.cpp
@@ -340,6 +341,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/generic_editor_tests.cpp
     src/test/java_emulation_tests.cpp
     src/test/image_persistence_tests.cpp
+    src/test/sphere_polyhedral_cache_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
   include(GoogleTest)

@@ -1,3 +1,4 @@
+import { Math as JavaMath } from "../../../../java/lang/Math.js";
 import { Date as JavaDate } from "../../../../java/util/Date.js";
 import { VSDK } from "../../common/VSDK.js";
 import { ColorRgb } from "../../common/color/ColorRgb.js";
@@ -11,6 +12,7 @@ import { SimpleMaterial } from "../../environment/material/SimpleMaterial.js";
 import { SimpleBody } from "../../environment/scene/SimpleBody.js";
 import { SimpleScene } from "../../environment/scene/SimpleScene.js";
 import { Gizmo } from "./Gizmo.js";
+import { InputGizmo } from "./InputGizmo.js";
 
 /**
 Java's `RayGizmo.RaySnapshot` is a record whose canonical constructor checks
@@ -34,6 +36,27 @@ export class RaySnapshot {
         this.rays = Object.freeze([...rays]);
         this.intersections = Object.freeze([...intersections]);
     }
+}
+
+/**
+Java record `RayGizmo.IndicatorMesh`: geometry of a single triangle, used to
+mark the current roll angle around the ray direction: a fin pointing in local
++X at the base of the arrow (z=0), with its tip lifted towards +Z. It is
+generated once around the local +Z axis; the renderer rotates it by the roll
+angle of the gizmo (see `getRotationAngleInRadians`) and transforms it with the
+body of the arrow.
+*/
+export class IndicatorMesh {
+    /**
+    @param positions 3 vertexes (tip, base-left, base-right), 3 floats each
+    @param normals one repeated flat normal, 3 floats each
+    @param uvs 3 texture coordinates, 2 floats each
+    */
+    public constructor(
+        public readonly positions: Float32Array,
+        public readonly normals: Float32Array,
+        public readonly uvs: Float32Array,
+    ) {}
 }
 
 /**
@@ -81,7 +104,8 @@ export class RayGizmo extends Gizmo {
     private readonly dotSphere: Sphere;
     private readonly body: SimpleBody;
     private readonly intersectionCallback: ((ray: Ray) => Intersection | null) | null;
-    private readonly maxNumOfReflections: number;
+    private readonly inputGizmo: InputGizmo;
+    private maxNumOfReflections: number;
     private pendingSnapshot: RaySnapshot | null = null;
 
     private currentPosition: Vector3Dd;
@@ -125,11 +149,13 @@ export class RayGizmo extends Gizmo {
 
         this.intersectionCallback = intersectionCallback;
         this.maxNumOfReflections = maxNumOfReflections;
+        this.inputGizmo = new InputGizmo(5, 3, 3);
 
         this.currentPosition = new Vector3Dd(0, 0, 0);
         this.currentDirection = new Vector3Dd(0, 0, 1);
         this.currentRotationAngleInRadians = 0.0;
         this.applyTransform(this.currentPosition, this.currentDirection);
+        this.syncInputGizmo(this.currentPosition, this.currentDirection);
 
         this.lastDataTime = new JavaDate();
         this.previousDataTime = new JavaDate();
@@ -183,8 +209,21 @@ export class RayGizmo extends Gizmo {
         }
 
         this.pendingSnapshot = new RaySnapshot(rotationAngleInRadians, rays, intersections);
+        this.syncInputGizmo(ray.getOrigin(), ray.getDirection());
         this.visible = true;
         this.recordDataArrival();
+    }
+
+    public getMaxNumOfReflections(): number {
+        return this.maxNumOfReflections;
+    }
+
+    public setMaxNumOfReflections(maxNumOfReflections: number): void {
+        this.maxNumOfReflections = Math.max(0, maxNumOfReflections);
+    }
+
+    public getInputGizmo(): InputGizmo {
+        return this.inputGizmo;
     }
 
     public update(): void {
@@ -227,6 +266,7 @@ export class RayGizmo extends Gizmo {
         if (snap.rays.length !== 0) {
             const primary: Ray = snap.rays[0]!;
             this.applyTransform(primary.getOrigin(), primary.getDirection());
+            this.syncInputGizmo(primary.getOrigin(), primary.getDirection());
         }
         this.currentRotationAngleInRadians = snap.rotationAngleInRadians;
         this.currentSnapshot = snap;
@@ -406,6 +446,49 @@ export class RayGizmo extends Gizmo {
         this.refractedRayColors = [...refractedRayColors];
     }
 
+    /// Outer radius of the roll indicator fin (see `buildIndicatorMesh`)
+    private static readonly INDICATOR_OUTER_RADIUS = Math.fround(0.65);
+    /// Inner radius of the roll indicator fin
+    private static readonly INDICATOR_INNER_RADIUS = Math.fround(0.17);
+    /// Half width of the roll indicator fin, at its base
+    private static readonly INDICATOR_HALF_WIDTH = Math.fround(0.12);
+    /// Distance of the tip of the roll indicator fin, along +Z
+    private static readonly INDICATOR_TIP_Z = Math.fround(0.3);
+
+    /**
+    @return the geometry of the roll indicator fin, in the local space of the
+    arrow (see {@link IndicatorMesh})
+    */
+    public static buildIndicatorMesh(): IndicatorMesh {
+        const outer: number = RayGizmo.INDICATOR_OUTER_RADIUS;
+        const inner: number = RayGizmo.INDICATOR_INNER_RADIUS;
+        const halfWidth: number = RayGizmo.INDICATOR_HALF_WIDTH;
+        const tipZ: number = RayGizmo.INDICATOR_TIP_Z;
+        // P0=tip, P1=base-left, P2=base-right.
+        const positions = new Float32Array([outer, 0.0, tipZ, inner, -halfWidth, 0.0, inner, halfWidth, 0.0]);
+        const uvs = new Float32Array([0.5, 1.0, 0.0, 0.0, 1.0, 0.0]);
+        // Java computes the normal in float arithmetic: every step is rounded
+        const f = Math.fround;
+        const ax: number = f(inner - outer);
+        const ay: number = f(-halfWidth);
+        const az: number = f(-tipZ);
+        const bx: number = f(inner - outer);
+        const by: number = halfWidth;
+        const bz: number = f(-tipZ);
+        let nx: number = f(f(ay * bz) - f(az * by));
+        let ny: number = f(f(az * bx) - f(ax * bz));
+        let nz: number = f(f(ax * by) - f(ay * bx));
+        const normalLength: number = f(Math.sqrt(f(f(f(nx * nx) + f(ny * ny)) + f(nz * nz))));
+
+        nx = f(nx / normalLength);
+        ny = f(ny / normalLength);
+        nz = f(nz / normalLength);
+
+        const normals = new Float32Array([nx, ny, nz, nx, ny, nz, nx, ny, nz]);
+
+        return new IndicatorMesh(positions, normals, uvs);
+    }
+
     private recordDataArrival(): void {
         this.previousDataTime = this.lastDataTime;
         this.lastDataTime = new JavaDate();
@@ -426,6 +509,18 @@ export class RayGizmo extends Gizmo {
         this.body.setPosition(position);
         this.body.setRotation(rotation);
         this.body.setRotationInverse(rotationInverse);
+    }
+
+    private syncInputGizmo(position: Vector3Dd, direction: Vector3Dd): void {
+        const d: Vector3Dd = direction.length() > VSDK.EPSILON ? direction.normalized() : new Vector3Dd(0, 0, 1);
+        const yaw: number = Math.atan2(d.y(), d.x());
+        const pitch: number = Math.asin(Math.max(-1.0, Math.min(1.0, d.z())));
+
+        this.inputGizmo.setValue(0, position.x());
+        this.inputGizmo.setValue(1, position.y());
+        this.inputGizmo.setValue(2, position.z());
+        this.inputGizmo.setValue(3, JavaMath.toDegrees(yaw));
+        this.inputGizmo.setValue(4, JavaMath.toDegrees(pitch));
     }
 
     private static computeReflectedRay(incomingRay: Ray, intersection: Intersection | null): Ray | null {

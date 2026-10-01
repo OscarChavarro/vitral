@@ -33,3 +33,50 @@ export { WebGLPolyhedralBoundedSolidRenderer } from "./vsdk/toolkit/render/webgl
 export { WebGLPolyhedralBoundedSolidDebugRenderer } from "./vsdk/toolkit/render/webgl/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidDebugRenderer.js";
 export { WebGLPolyhedralBoundedSolidDebugHUDRenderer } from "./vsdk/toolkit/render/webgl/polyhedralBoundedSolid/WebGLPolyhedralBoundedSolidDebugHUDRenderer.js";
 export { WebFontReader } from "./vsdk/toolkit/io/geometry/WebFontReader.js";
+export { WebGLMesh, WebGLMeshRenderer } from "./vsdk/toolkit/render/webgl/WebGLMeshRenderer.js";
+export { WebGLMeshBuilder } from "./vsdk/toolkit/render/webgl/WebGLMeshBuilder.js";
+export { WebGLColoredPrimitiveRenderer } from "./vsdk/toolkit/render/webgl/WebGLColoredPrimitiveRenderer.js";
+export { WebGLSelectionCornersRenderer } from "./vsdk/toolkit/render/webgl/WebGLSelectionCornersRenderer.js";
+export { WebGLGeometryRenderer } from "./vsdk/toolkit/render/webgl/WebGLGeometryRenderer.js";
+export { WebGLFunctionalExplicitSurfaceRenderer } from "./vsdk/toolkit/render/webgl/WebGLFunctionalExplicitSurfaceRenderer.js";
+export { WebGLParametricBiCubicPatchRenderer } from "./vsdk/toolkit/render/webgl/WebGLParametricBiCubicPatchRenderer.js";
+export { WebGLInfinitePlaneRenderer } from "./vsdk/toolkit/render/webgl/WebGLInfinitePlaneRenderer.js";
+export { WebGLParametricCurveRenderer } from "./vsdk/toolkit/render/webgl/WebGLParametricCurveRenderer.js";
+export { WebGLBackgroundRenderer } from "./vsdk/toolkit/render/webgl/WebGLBackgroundRenderer.js";
+export { WebGLFrameBufferReader } from "./vsdk/toolkit/render/webgl/WebGLFrameBufferReader.js";
+export { WebGLOffscreenFrameBuffer } from "./vsdk/toolkit/render/webgl/WebGLOffscreenFrameBuffer.js";
+export { WebGLRenderer } from "./vsdk/toolkit/render/webgl/WebGLRenderer.js";
+export {
+    WebGLInputGizmoRenderer,
+    type WebGLInputGizmoRendererHost,
+} from "./vsdk/toolkit/render/webgl/WebGLInputGizmoRenderer.js";
+export {
+    WebGLReferenceFrameGizmoRenderer,
+    type WebGLReferenceFrameGizmoLabelPainter,
+} from "./vsdk/toolkit/render/webgl/WebGLReferenceFrameGizmoRenderer.js";
+export { WebGLTranslateGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLTranslateGizmoRenderer.js";
+export { WebGLRotateGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLRotateGizmoRenderer.js";
+export { WebGLScaleGizmoRenderer } from "./vsdk/toolkit/render/webgl/WebGLScaleGizmoRenderer.js";
+export {
+    WEBGL_LABEL_DEFAULT_FONT_SIZE,
+    type WebGLLabelImageProvider,
+} from "./vsdk/toolkit/render/webgl/viewport/WebGLLabelImageProvider.js";
+export { WebGLViewportWindow } from "./vsdk/toolkit/render/webgl/viewport/WebGLViewportWindow.js";
+export {
+    WebGLViewportSetRenderer,
+    type WebGLViewRenderer,
+} from "./vsdk/toolkit/render/webgl/viewport/WebGLViewportSetRenderer.js";
+export { HtmlActionEvent, type HtmlActionListener } from "./vsdk/toolkit/render/html/HtmlActionListener.js";
+export { HtmlCollapsablePanel } from "./vsdk/toolkit/render/html/HtmlCollapsablePanel.js";
+export { HtmlImageRenderer } from "./vsdk/toolkit/render/html/HtmlImageRenderer.js";
+export {
+    HtmlMenuBar,
+    HtmlMenuItem,
+    HtmlPopupMenu,
+    appendMnemonicText,
+    type HtmlMenuItemKind,
+} from "./vsdk/toolkit/render/html/HtmlMenus.js";
+export { HtmlGridConstraints, HtmlGuiRenderer, HtmlMenu } from "./vsdk/toolkit/render/html/HtmlGuiRenderer.js";
+export { HtmlSplitPane, HtmlTabbedPane, HtmlWindow } from "./vsdk/toolkit/render/html/HtmlContainers.js";
+export { HtmlGenericEditor } from "./vsdk/toolkit/gui/editor/HtmlGenericEditor.js";
+export { HtmlChosenFile, HtmlFileChooser, HtmlFileFilter, downloadFile } from "./vsdk/toolkit/render/html/HtmlFileChooser.js";

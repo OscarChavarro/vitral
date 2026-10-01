@@ -9,10 +9,12 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
-        }
+        },
+        "./styles/*": "./styles/*"
     },
     "files": [
-        "dist"
+        "dist",
+        "styles"
     ],
     "dependencies": {
         "@vitral/base": "1.4.0"

@@ -4,6 +4,7 @@ import {
     ColorRgb,
     Light,
     Matrix4x4d,
+    PointLight,
     RayGizmo,
     RendererConfiguration,
     SimpleMaterial,
@@ -11,6 +12,7 @@ import {
     Sphere,
     Vector3Dd,
     type Geometry,
+    type IndicatorMesh,
 } from "@vitral/base";
 import { WebGLArrowRenderer } from "./WebGLArrowRenderer.js";
 import { WebGLCameraRenderer } from "./WebGLCameraRenderer.js";
@@ -60,11 +62,6 @@ since a page can own several contexts; a GLSL source arrives over `fetch`, so
 because WebGL rasterizes filled polygons and nothing else.
 */
 export class WebGLRayGizmoRenderer {
-    private static readonly IND_OUTER_R = 0.65;
-    private static readonly IND_INNER_R = 0.17;
-    private static readonly IND_HALF_W = 0.12;
-    private static readonly IND_TIP_Z = 0.3;
-
     private static readonly resources = new WeakMap<WebGL2RenderingContext, IndicatorResources>();
 
     private constructor() {}
@@ -76,7 +73,8 @@ export class WebGLRayGizmoRenderer {
     @param gl     WebGL2 context
     @param gizmo  gizmo to draw
     @param camera active camera
-    @param lights scene lights (only the first is used for sphere shading)
+    @param lights scene lights (only the first is used for sphere shading);
+    null or empty to use a light at the camera
     */
     public static async draw(
         gl: WebGL2RenderingContext,
@@ -87,12 +85,12 @@ export class WebGLRayGizmoRenderer {
         if (gizmo === null || camera === null) {
             return;
         }
-        if (lights === null || lights.length === 0) {
-            return;
-        }
         if (!gizmo.isVisible()) {
             return;
         }
+        const activeLights: readonly (Light | null)[] = (lights === null || lights.length === 0) ?
+            [new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1))] :
+            lights;
 
         const indicator: IndicatorResources = WebGLRayGizmoRenderer.ensureMesh(gl);
 
@@ -110,13 +108,13 @@ export class WebGLRayGizmoRenderer {
             const material: SimpleMaterial | null = body.getMaterial();
 
             if (geom instanceof Arrow) {
-                await WebGLArrowRenderer.draw(gl, geom, modelMatrix, projection, camera, lights, material, quality);
+                await WebGLArrowRenderer.draw(gl, geom, modelMatrix, projection, camera, activeLights, material, quality);
             } else if (geom instanceof Sphere) {
                 await WebGLSphereRenderer.draw(
                     gl,
                     geom,
                     camera,
-                    lights[0]!,
+                    activeLights[0]!,
                     material,
                     quality,
                     null,
@@ -135,7 +133,7 @@ export class WebGLRayGizmoRenderer {
             primaryModelMatrix,
             projection,
             camera,
-            lights,
+            activeLights,
             quality,
         );
 
@@ -225,22 +223,7 @@ export class WebGLRayGizmoRenderer {
     }
 
     private static uploadIndicatorMesh(gl: WebGL2RenderingContext): IndicatorResources {
-        // Fin triangle pointing in +X at the arrow base (z=0).
-        // P0=tip, P1=base-left, P2=base-right.
-        const positions = new Float32Array([
-            WebGLRayGizmoRenderer.IND_OUTER_R,
-            0.0,
-            WebGLRayGizmoRenderer.IND_TIP_Z,
-            WebGLRayGizmoRenderer.IND_INNER_R,
-            -WebGLRayGizmoRenderer.IND_HALF_W,
-            0.0,
-            WebGLRayGizmoRenderer.IND_INNER_R,
-            WebGLRayGizmoRenderer.IND_HALF_W,
-            0.0,
-        ]);
-
-        const normals: Float32Array = WebGLRayGizmoRenderer.computeNormals();
-        const uvs = new Float32Array([0.5, 1.0, 0.0, 0.0, 1.0, 0.0]);
+        const mesh: IndicatorMesh = RayGizmo.buildIndicatorMesh();
 
         const vertexArray = gl.createVertexArray();
         const positionBuffer = gl.createBuffer();
@@ -251,33 +234,15 @@ export class WebGLRayGizmoRenderer {
         }
 
         gl.bindVertexArray(vertexArray);
-        WebGLRayGizmoRenderer.uploadBuffer(gl, positionBuffer, 0, 3, positions);
-        WebGLRayGizmoRenderer.uploadBuffer(gl, normalBuffer, 1, 3, normals);
-        WebGLRayGizmoRenderer.uploadBuffer(gl, uvBuffer, 2, 2, uvs);
+        WebGLRayGizmoRenderer.uploadBuffer(gl, positionBuffer, 0, 3, mesh.positions);
+        WebGLRayGizmoRenderer.uploadBuffer(gl, normalBuffer, 1, 3, mesh.normals);
+        WebGLRayGizmoRenderer.uploadBuffer(gl, uvBuffer, 2, 2, mesh.uvs);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindVertexArray(null);
 
         const resources: IndicatorResources = { vertexArray, positionBuffer, normalBuffer, uvBuffer };
         WebGLRayGizmoRenderer.resources.set(gl, resources);
         return resources;
-    }
-
-    private static computeNormals(): Float32Array {
-        const ax: number = WebGLRayGizmoRenderer.IND_INNER_R - WebGLRayGizmoRenderer.IND_OUTER_R;
-        const ay: number = -WebGLRayGizmoRenderer.IND_HALF_W;
-        const az: number = -WebGLRayGizmoRenderer.IND_TIP_Z;
-        const bx: number = WebGLRayGizmoRenderer.IND_INNER_R - WebGLRayGizmoRenderer.IND_OUTER_R;
-        const by: number = WebGLRayGizmoRenderer.IND_HALF_W;
-        const bz: number = -WebGLRayGizmoRenderer.IND_TIP_Z;
-        let nx: number = ay * bz - az * by;
-        let ny: number = az * bx - ax * bz;
-        let nz: number = ax * by - ay * bx;
-        const normalLength: number = Math.sqrt(nx * nx + ny * ny + nz * nz);
-        nx /= normalLength;
-        ny /= normalLength;
-        nz /= normalLength;
-
-        return new Float32Array([nx, ny, nz, nx, ny, nz, nx, ny, nz]);
     }
 
     private static configureProgram(

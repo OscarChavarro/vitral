@@ -35,7 +35,6 @@ private:
     static unsigned int vboUvs;
     static unsigned int vboTangents;
     static unsigned int vboBinormals;
-    static unsigned int ebo;
     static unsigned int constantProgram;
     static unsigned int texturedProgram;
     static unsigned int flatProgram;
@@ -48,7 +47,7 @@ private:
 
     static int cachedMeridians;
     static int cachedParallels;
-    static unsigned int indexCount;
+    static unsigned int vertexCount;
 
     static bool initProgramIfNeeded();
     static bool buildSphereMeshIfNeeded(int meridians, int parallels);

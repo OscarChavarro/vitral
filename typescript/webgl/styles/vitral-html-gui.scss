@@ -1,0 +1,468 @@
+// Styles of the DOM GUIs of the toolkit (`vsdk/toolkit/render/html`).
+//
+// The look of each component follows the look and feel selected on the
+// root element of the application (`vitral-laf-motif`, `vitral-laf-metal`,
+// `vitral-laf-gtk`, `vitral-laf-windows`), as Swing's `UIManager` does:
+// every theme only redefines the custom properties below.
+
+@mixin vitral-theme(
+  $background,
+  $foreground,
+  $control,
+  $control-light,
+  $control-dark,
+  $selection,
+  $selection-text,
+  $font,
+  $font-size,
+  $radius
+) {
+  --vitral-background: #{$background};
+  --vitral-foreground: #{$foreground};
+  --vitral-control: #{$control};
+  --vitral-control-light: #{$control-light};
+  --vitral-control-dark: #{$control-dark};
+  --vitral-selection: #{$selection};
+  --vitral-selection-text: #{$selection-text};
+  --vitral-font: #{$font};
+  --vitral-font-size: #{$font-size};
+  --vitral-radius: #{$radius};
+}
+
+:root,
+.vitral-laf-motif {
+  @include vitral-theme(#aeb2c3, #000000, #aeb2c3, #e2e4ec, #63656f, #72778f, #ffffff,
+    'Helvetica, Arial, sans-serif', 12px, 0px);
+}
+
+.vitral-laf-metal {
+  @include vitral-theme(#eeeeee, #333333, #eeeeee, #ffffff, #8e8f91, #a3b8cc, #000000,
+    '"Lucida Grande", "Segoe UI", Arial, sans-serif', 12px, 2px);
+}
+
+.vitral-laf-gtk {
+  @include vitral-theme(#f6f5f4, #2e3436, #f6f5f4, #ffffff, #b6b6b3, #3584e4, #ffffff,
+    'Cantarell, Ubuntu, "Noto Sans", Arial, sans-serif', 13px, 4px);
+}
+
+.vitral-laf-windows {
+  @include vitral-theme(#f0f0f0, #000000, #f0f0f0, #ffffff, #a0a0a0, #0078d7, #ffffff,
+    '"Segoe UI", Tahoma, Arial, sans-serif', 12px, 0px);
+}
+
+@mixin vitral-raised {
+  border: 1px solid;
+  border-color: var(--vitral-control-light) var(--vitral-control-dark)
+    var(--vitral-control-dark) var(--vitral-control-light);
+}
+
+@mixin vitral-lowered {
+  border: 1px solid;
+  border-color: var(--vitral-control-dark) var(--vitral-control-light)
+    var(--vitral-control-light) var(--vitral-control-dark);
+}
+
+.vitral-gui {
+  box-sizing: border-box;
+
+  // A hidden element (i.e. the content of a tab not selected) stays hidden
+  // whatever display its layout rules give it
+  [hidden] {
+    display: none !important;
+  }
+
+  background: var(--vitral-background);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+}
+
+//- Menus -------------------------------------------------------------------
+
+.vitral-menubar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  background: var(--vitral-control);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+  border-bottom: 1px solid var(--vitral-control-dark);
+  user-select: none;
+}
+
+.vitral-menubar-title {
+  padding: 3px 9px;
+  cursor: default;
+  white-space: nowrap;
+
+  &:hover,
+  &.vitral-menubar-title-open {
+    background: var(--vitral-selection);
+    color: var(--vitral-selection-text);
+  }
+}
+
+.vitral-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 160px;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2px 0;
+  background: var(--vitral-control);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+  @include vitral-raised;
+  border-radius: var(--vitral-radius);
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.35);
+  user-select: none;
+  outline: none;
+}
+
+.vitral-menu-item {
+  position: relative;
+  padding: 3px 24px 3px 22px;
+  white-space: nowrap;
+  cursor: default;
+
+  &.vitral-menu-item-active {
+    background: var(--vitral-selection);
+    color: var(--vitral-selection-text);
+  }
+
+  &.vitral-menu-item-submenu::after {
+    content: '\25B8';
+    position: absolute;
+    right: 8px;
+  }
+
+  &.vitral-menu-item-checked::before {
+    content: '\25CF';
+    position: absolute;
+    left: 8px;
+    font-size: 0.8em;
+    line-height: 1.6;
+  }
+}
+
+.vitral-menu-separator {
+  height: 0;
+  margin: 3px 2px;
+  border-top: 1px solid var(--vitral-control-dark);
+  border-bottom: 1px solid var(--vitral-control-light);
+}
+
+//- Buttons and panels ------------------------------------------------------
+
+.vitral-button {
+  margin: 0;
+  padding: 3px 8px;
+  background: var(--vitral-control);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+  @include vitral-raised;
+  border-radius: var(--vitral-radius);
+  cursor: default;
+
+  &:hover {
+    background: var(--vitral-control-light);
+  }
+
+  &:active {
+    @include vitral-lowered;
+  }
+
+  &:focus-visible {
+    outline: 1px dotted var(--vitral-foreground);
+    outline-offset: -3px;
+  }
+}
+
+.vitral-button-icon {
+  padding: 0;
+  line-height: 0;
+
+  img {
+    display: block;
+    image-rendering: pixelated;
+  }
+}
+
+.vitral-button-group {
+  display: flex;
+  gap: 0;
+
+  &.vitral-button-group-horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  &.vitral-button-group-vertical {
+    flex-direction: column;
+    align-items: stretch;
+
+    .vitral-button {
+      width: 100%;
+    }
+  }
+
+  &.vitral-button-group-error {
+    background: #ff0000;
+    padding: 4px;
+  }
+}
+
+.vitral-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.vitral-grid-panel {
+  display: grid;
+}
+
+.vitral-collapsable-panel-header {
+  padding: 2px 6px 2px 30px;
+  cursor: pointer;
+  @include vitral-raised;
+}
+
+input.vitral-text-field,
+.vitral-panel input[type='text'],
+.vitral-panel select {
+  background: var(--vitral-control-light);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+  @include vitral-lowered;
+  padding: 2px 4px;
+}
+
+//- Tabbed panes, split panes and status bars --------------------------------
+
+.vitral-tabbed-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.vitral-tabbed-pane-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 2px 2px 0;
+  user-select: none;
+}
+
+.vitral-tabbed-pane-tab {
+  padding: 3px 10px;
+  background: var(--vitral-control);
+  @include vitral-raised;
+  border-bottom: none;
+  border-radius: var(--vitral-radius) var(--vitral-radius) 0 0;
+  cursor: default;
+
+  &.vitral-tabbed-pane-tab-selected {
+    background: var(--vitral-control-light);
+    position: relative;
+    top: 1px;
+  }
+}
+
+.vitral-tabbed-pane-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  @include vitral-raised;
+  background: var(--vitral-background);
+}
+
+.vitral-split-pane {
+  display: flex;
+  flex-direction: row;
+  min-width: 0;
+  min-height: 0;
+
+  > .vitral-split-pane-left,
+  > .vitral-split-pane-right {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  > .vitral-split-pane-divider {
+    flex: 0 0 6px;
+    cursor: col-resize;
+    background: var(--vitral-control);
+    @include vitral-raised;
+  }
+}
+
+.vitral-status-bar {
+  padding: 3px;
+
+  > .vitral-status-message {
+    padding: 1px 4px;
+    min-height: 1.5em;
+    @include vitral-lowered;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+//- Windows ------------------------------------------------------------------
+
+.vitral-window {
+  position: fixed;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  min-height: 80px;
+  background: var(--vitral-background);
+  color: var(--vitral-foreground);
+  font-family: var(--vitral-font);
+  font-size: var(--vitral-font-size);
+  @include vitral-raised;
+  border-radius: var(--vitral-radius);
+  box-shadow: 3px 4px 14px rgba(0, 0, 0, 0.4);
+  resize: both;
+  overflow: hidden;
+}
+
+.vitral-window-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 8px;
+  background: var(--vitral-selection);
+  color: var(--vitral-selection-text);
+  cursor: move;
+  user-select: none;
+
+  > .vitral-window-title-text {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  > .vitral-window-close {
+    padding: 0 6px;
+    line-height: 1.2;
+  }
+}
+
+.vitral-window-menubar {
+  flex: 0 0 auto;
+}
+
+.vitral-window-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.vitral-window-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 8999;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+//- Generic editor -----------------------------------------------------------
+
+.vitral-generic-editor-rows {
+  display: grid;
+  grid-auto-rows: auto;
+  gap: 3px;
+  padding: 6px;
+}
+
+.vitral-generic-editor-title {
+  text-align: center;
+  padding: 2px;
+}
+
+.vitral-generic-editor-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.vitral-generic-editor-message {
+  color: #ff0000;
+  min-height: 1.2em;
+}
+
+//- File chooser -------------------------------------------------------------
+
+.vitral-file-chooser {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  padding: 8px;
+}
+
+.vitral-file-chooser-path {
+  padding: 2px 4px;
+  @include vitral-lowered;
+  background: var(--vitral-control-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vitral-file-chooser-list {
+  flex: 1 1 auto;
+  min-height: 120px;
+  overflow: auto;
+  @include vitral-lowered;
+  background: var(--vitral-control-light);
+}
+
+.vitral-file-chooser-entry {
+  padding: 1px 6px;
+  cursor: default;
+  white-space: nowrap;
+
+  &.vitral-file-chooser-folder::before {
+    content: '\1F4C1  ';
+  }
+
+  &.vitral-file-chooser-entry-selected,
+  &:hover {
+    background: var(--vitral-selection);
+    color: var(--vitral-selection-text);
+  }
+}
+
+.vitral-file-chooser-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.vitral-file-chooser-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}

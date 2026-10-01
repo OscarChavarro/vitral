@@ -17,7 +17,8 @@ Port of `vsdk.toolkit.render.jogl.Jogl4LightRenderer`.
 Both gizmo styles are the Java ones: the three-axis cross, and the omni
 billboard whose line pattern comes from `LightGizmoOmniBillboard` and is mapped
 onto the camera-facing plane. The screen-size calculation, including its
-orthogonal and perspective branches, is unchanged.
+orthogonal and perspective branches, is `LightGizmoOmniBillboard`'s, shared
+with the picking of lights.
 
 Two runtime boundaries are crossed:
 
@@ -36,6 +37,9 @@ draws into, so `WebGL2RenderingContext` is already the narrowed type.
 */
 export class WebGLLightRenderer {
     private static readonly activeLights = new WeakMap<WebGL2RenderingContext, Map<number, Light>>();
+    private static readonly SELECTED_COLOR: ColorRgb = new ColorRgb(1, 1, 0);
+    private static readonly LINE_WIDTH: number = 2.0;
+    private static readonly SELECTED_LINE_WIDTH: number = 4.0;
     private static scale = 1.0;
 
     private constructor() {}
@@ -52,22 +56,33 @@ export class WebGLLightRenderer {
         table.set(light.getId(), light.copy());
     }
 
+    /**
+    Draws the gizmo of a light. A selected light is drawn in the selection
+    color and with thicker lines, instead of with its own emission color
+    (Java's overloads are one method with optional arguments).
+    @param gl WebGL context
+    @param light light to draw
+    @param camera camera that views the light
+    @param lightGizmoStyle shape of the gizmo
+    @param selected true if the light is selected
+    */
     public static async draw(
         gl: WebGL2RenderingContext,
         light: Light | null,
         camera: Camera | null = null,
         lightGizmoStyle: LightGizmoStyle = LightGizmoStyle.CROSS,
+        selected: boolean = false,
     ): Promise<void> {
         if (light === null) {
             return;
         }
 
         if (lightGizmoStyle === LightGizmoStyle.OMNI_BILLBOARD) {
-            await WebGLLightRenderer.drawOmniBillboard(gl, light, camera);
+            await WebGLLightRenderer.drawOmniBillboard(gl, light, camera, selected);
             return;
         }
 
-        await WebGLLightRenderer.drawCross(gl, light, camera);
+        await WebGLLightRenderer.drawCross(gl, light, camera, selected);
     }
 
     public static getScale(): number {
@@ -91,7 +106,12 @@ export class WebGLLightRenderer {
         return out;
     }
 
-    private static async drawCross(gl: WebGL2RenderingContext, light: Light, camera: Camera | null): Promise<void> {
+    private static async drawCross(
+        gl: WebGL2RenderingContext,
+        light: Light,
+        camera: Camera | null,
+        selected: boolean,
+    ): Promise<void> {
         const viewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
 
         const viewportWidth: number = Math.max(viewport[2] ?? 1, 1);
@@ -108,7 +128,7 @@ export class WebGLLightRenderer {
             WebGLLightRenderer.scale;
 
         const p: Vector3Dd = light.getPosition();
-        const c: ColorRgb = light.getEmission();
+        const c: ColorRgb = selected ? WebGLLightRenderer.SELECTED_COLOR : light.getEmission();
 
         const px: number = p.x();
         const py: number = p.y();
@@ -140,13 +160,15 @@ export class WebGLLightRenderer {
 
         const colors: Float32Array = WebGLLightRenderer.buildUniformColorArray(c, positions.length / 3);
 
-        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors, 2.0);
+        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors,
+            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH);
     }
 
     private static async drawOmniBillboard(
         gl: WebGL2RenderingContext,
         light: Light,
         camera: Camera | null,
+        selected: boolean,
     ): Promise<void> {
         const viewport = gl.getParameter(gl.VIEWPORT) as Int32Array;
 
@@ -154,7 +176,7 @@ export class WebGLLightRenderer {
         const viewportHeight: number = Math.max(viewport[3] ?? 1, 1);
 
         if (camera === null) {
-            await WebGLLightRenderer.drawCross(gl, light, null);
+            await WebGLLightRenderer.drawCross(gl, light, null, selected);
             return;
         }
 
@@ -206,10 +228,11 @@ export class WebGLLightRenderer {
         }
 
         const colors: Float32Array = WebGLLightRenderer.buildUniformColorArray(
-            light.getEmission(),
+            selected ? WebGLLightRenderer.SELECTED_COLOR : light.getEmission(),
             positions.length / 3,
         );
-        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors, 2.0);
+        await WebGLLineRenderer.drawLines(gl, modelViewProjection, positions, colors,
+            selected ? WebGLLightRenderer.SELECTED_LINE_WIDTH : WebGLLightRenderer.LINE_WIDTH);
     }
 
     private static mapPatternPointToWorld(
@@ -249,27 +272,8 @@ export class WebGLLightRenderer {
         viewportWidth: number,
         viewportHeight: number,
     ): number {
-        const viewportFraction = 0.05;
-        const targetPixels: number = viewportFraction * Math.min(viewportWidth, viewportHeight);
-
-        if (camera === null) {
-            return Math.max(0.05, targetPixels / Math.max(viewportHeight, 1));
-        }
-
-        if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL) {
-            const worldViewHeight: number = 2.0 / camera.getOrthogonalZoom();
-            const worldPerPixel: number = worldViewHeight / Math.max(viewportHeight, 1);
-            return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
-        }
-
-        const toLight: Vector3Dd = light.getPosition().subtract(camera.getPosition());
-        let depth: number = Math.abs(toLight.dotProduct(camera.getFront()));
-        depth = Math.max(depth, camera.getNearPlaneDistance());
-
-        const fovRadians: number = (camera.getFov() * Math.PI) / 180.0;
-        const worldViewHeightAtDepth: number = 2.0 * depth * Math.tan(fovRadians / 2.0);
-        const worldPerPixel: number = worldViewHeightAtDepth / Math.max(viewportHeight, 1);
-        return Math.max(1e-5, 0.5 * targetPixels * worldPerPixel);
+        return LightGizmoOmniBillboard.calculateWorldHalfSize(camera,
+            light.getPosition(), viewportWidth, viewportHeight);
     }
 
     private static defaultLight(): Light {

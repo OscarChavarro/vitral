@@ -117,6 +117,9 @@
           (deactivate)="clearSelection()"
         />
       }
+      @if (selectedItem() === 'SceneEditorApplication') {
+        <app-scene-editor-application (deactivate)="clearSelection()" />
+      }
     </div>
   </section>
 

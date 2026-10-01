@@ -1,0 +1,158 @@
+// Layout of the scene editor (`scene-editor-*` classes built by the GUI
+// classes of the application). The widgets themselves (menus, buttons, tabs,
+// split pane, windows, look and feel themes) are styled by
+// `@vitral/webgl/styles/vitral-html-gui.scss`. Global, as the GUI is built
+// with the DOM API outside Angular's view encapsulation.
+
+// Java's main window: menubar, icon bar, split pane and status bar, top down
+.scene-editor-main-window {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  > .vitral-menubar,
+  > .vitral-status-bar {
+    flex: 0 0 auto;
+  }
+}
+
+// Java's full screen mode: only the drawing area
+.scene-editor-full-screen {
+  background: #000000;
+}
+
+.scene-editor-work-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  > .scene-editor-buttons-panel-bar {
+    flex: 0 0 auto;
+  }
+}
+
+.scene-editor-split-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  > .vitral-split-pane-left {
+    flex: 1 1 auto;
+  }
+
+  > .vitral-split-pane-right {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+}
+
+// The canvas fills its area; the controller sizes its buffer with the
+// device pixel ratio
+.scene-editor-canvas-area {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #000000;
+}
+
+.scene-editor-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+// Java's `ButtonsPanel`: a flow of buttons, wrapping
+.scene-editor-buttons-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 2px;
+}
+
+.scene-editor-buttons-panel-bar {
+  flex-direction: row;
+  border-bottom: 1px solid var(--vitral-shadow, #808080);
+}
+
+.scene-editor-buttons-panel-tab {
+  flex-direction: column;
+  align-items: stretch;
+
+  .vitral-button {
+    width: 100%;
+  }
+}
+
+// Motif keeps Java's tight insets
+.scene-editor-compact-buttons {
+  .scene-editor-buttons-panel {
+    gap: 0;
+    padding: 0;
+  }
+
+  .vitral-button {
+    padding: 1px 3px;
+  }
+}
+
+.scene-editor-modify-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+
+.scene-editor-surface-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--vitral-shadow, #808080);
+}
+
+.scene-editor-surface-editor-title {
+  font-weight: bold;
+  text-align: center;
+}
+
+.scene-editor-surface-editor-row {
+  display: grid;
+  grid-template-columns: minmax(80px, auto) 1fr;
+  align-items: center;
+  gap: 4px;
+}
+
+.scene-editor-image-window-content {
+  display: flex;
+  overflow: auto;
+}
+
+.scene-editor-image-display {
+  flex: 1 1 auto;
+  padding: 10px;
+  background: var(--vitral-background, #c0c0c0);
+
+  > canvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+}
+
+.scene-editor-selector-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+}

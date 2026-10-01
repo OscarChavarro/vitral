@@ -202,7 +202,7 @@ PolyhedralBoundedSolid* Sphere::buildPolyhedralBoundedSolid(int nmeridians, int 
     pos = spherePosition(0, dphi, radius);
     PolyhedralBoundedSolidEulerOperators::smev(solid, 1, 3, 2, pos);
 
-    PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1, 3, 2, 3, 2);
+    PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1, 1, 3, 2, 3, 2);
 
     for (i = 2; i < nmeridians; i++) {
         theta = dtheta * ((double)i);

@@ -13,83 +13,27 @@
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.h"
+#include "vsdk/toolkit/render/SpherePolyhedralCache.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.h"
-java::ArrayList<float> OpenGL1SphereRenderer::positions;
-java::ArrayList<float> OpenGL1SphereRenderer::normals;
-java::ArrayList<float> OpenGL1SphereRenderer::uvs;
-java::ArrayList<unsigned int> OpenGL1SphereRenderer::indices;
-
-int OpenGL1SphereRenderer::cachedMeridians = -1;
-int OpenGL1SphereRenderer::cachedParallels = -1;
-unsigned int OpenGL1SphereRenderer::indexCount = 0;
-
-bool OpenGL1SphereRenderer::buildSphereMeshIfNeeded(int meridians, int parallels)
+const SpherePolyhedralCache::Entry* OpenGL1SphereRenderer::obtainTessellation(int meridians, int parallels)
 {
-    meridians = java::Math::max(12, meridians);
-    parallels = java::Math::max(8, parallels);
-    if (cachedMeridians == meridians && cachedParallels == parallels && indexCount > 0) {
-        return true;
-    }
-
+    // The tessellation comes from a unit sphere converted into a polyhedral
+    // bounded solid (shared with the other drawing algorithms), scaled by the
+    // radius of each sphere drawn
     Sphere unitSphere(1.0);
-    long int vertexCount = (long int)(parallels + 1) * (long int)(meridians + 1);
-    positions.clear();
-    normals.clear();
-    uvs.clear();
-    indices.clear();
-    positions.reserve(vertexCount * 3);
-    normals.reserve(vertexCount * 3);
-    uvs.reserve(vertexCount * 2);
-    indices.reserve((long int)parallels * (long int)meridians * 6L);
-
-    for (int p = 0; p <= parallels; ++p) {
-        double t = static_cast<double>(p) / static_cast<double>(parallels);
-        double phi = M_PI * t - M_PI / 2.0;
-        for (int m = 0; m <= meridians; ++m) {
-            double s = static_cast<double>(m) / static_cast<double>(meridians);
-            double theta = 2.0 * M_PI * s;
-
-            Vector3Dd pos = unitSphere.spherePosition(theta, phi);
-            Vector3Dd nrm = unitSphere.sphereNormal(theta, phi);
-
-            positions.add((float)pos.x());
-            positions.add((float)pos.y());
-            positions.add((float)pos.z());
-            normals.add((float)nrm.x());
-            normals.add((float)nrm.y());
-            normals.add((float)nrm.z());
-            uvs.add((float)(1.0 - s)); // Java parity
-            uvs.add((float)t);
-        }
-    }
-
-    int row = meridians + 1;
-    for (int p = 0; p < parallels; ++p) {
-        for (int m = 0; m < meridians; ++m) {
-            unsigned int i0 = static_cast<unsigned int>(p * row + m);
-            unsigned int i1 = i0 + 1;
-            unsigned int i2 = i0 + row;
-            unsigned int i3 = i2 + 1;
-            indices.add(i0); indices.add(i2); indices.add(i1);
-            indices.add(i1); indices.add(i2); indices.add(i3);
-        }
-    }
-
-    cachedMeridians = meridians;
-    cachedParallels = parallels;
-    indexCount = (unsigned int)indices.size();
-    return true;
+    return SpherePolyhedralCache::obtain(&unitSphere,
+        java::Math::max(12, meridians), java::Math::max(8, parallels));
 }
 
-void OpenGL1SphereRenderer::drawElements()
+void OpenGL1SphereRenderer::drawElements(const SpherePolyhedralCache::Entry* entry)
 {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, positions.data());
-    glNormalPointer(GL_FLOAT, 0, normals.data());
-    glTexCoordPointer(2, GL_FLOAT, 0, uvs.data());
-    glDrawElements(GL_TRIANGLES, (GLsizei)indexCount, GL_UNSIGNED_INT, indices.data());
+    glVertexPointer(3, GL_FLOAT, 0, entry->getPositions().data());
+    glNormalPointer(GL_FLOAT, 0, entry->getNormals().data());
+    glTexCoordPointer(2, GL_FLOAT, 0, entry->getUvs().data());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)entry->getVertexCount());
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -110,7 +54,8 @@ void OpenGL1SphereRenderer::draw(
     if (sphere == nullptr || camera == nullptr || light == nullptr || material == nullptr || quality == nullptr) {
         return;
     }
-    if (!buildSphereMeshIfNeeded(meridians, parallels)) {
+    const SpherePolyhedralCache::Entry* entry = obtainTessellation(meridians, parallels);
+    if (entry == nullptr || entry->getVertexCount() <= 0) {
         return;
     }
 
@@ -138,7 +83,7 @@ void OpenGL1SphereRenderer::draw(
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        drawElements();
+        drawElements(entry);
         glDisable(GL_POLYGON_OFFSET_FILL);
         OpenGL1RendererConfigurationStateSelector::deactivateState();
     }
@@ -154,7 +99,7 @@ void OpenGL1SphereRenderer::draw(
         glDisable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(1.0f);
-        drawElements();
+        drawElements(entry);
         glDisable(GL_POLYGON_OFFSET_LINE);
         OpenGL1RendererConfigurationStateSelector::deactivateState();
     }
@@ -168,7 +113,7 @@ void OpenGL1SphereRenderer::draw(
         glDisable(GL_CULL_FACE);
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         glPointSize(4.0f);
-        drawElements();
+        drawElements(entry);
         OpenGL1RendererConfigurationStateSelector::deactivateState();
     }
 
@@ -180,11 +125,6 @@ void OpenGL1SphereRenderer::draw(
 
 void OpenGL1SphereRenderer::dispose()
 {
-    positions.clear();
-    normals.clear();
-    uvs.clear();
-    indices.clear();
-    cachedMeridians = -1;
-    cachedParallels = -1;
-    indexCount = 0;
+    // The tessellations are client side arrays owned by SpherePolyhedralCache,
+    // there are no OpenGL resources to release
 }

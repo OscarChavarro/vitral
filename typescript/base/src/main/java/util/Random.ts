@@ -19,6 +19,29 @@ export class Random {
         return Number(this.seed >> BigInt(48 - bits));
     }
 
+    /**
+    `Random.nextInt(int bound)`: Java's algorithm, so the same seed gives the
+    same sequence; the `int` overflow test of the rejection loop is done with
+    32-bit wrapping arithmetic.
+    @param bound upper bound (exclusive), positive
+    @return a value in [0, bound)
+    */
+    public nextInt(bound: number): number {
+        if (bound <= 0) {
+            throw new RangeError("bound must be positive");
+        }
+        if ((bound & -bound) === bound) {
+            return Number((BigInt(bound) * BigInt(this.next(31))) >> 31n);
+        }
+        let bits: number;
+        let val: number;
+        do {
+            bits = this.next(31);
+            val = bits % bound;
+        } while (((bits - val + (bound - 1)) | 0) < 0);
+        return val;
+    }
+
     public nextDouble(): number {
         const high = BigInt(this.next(26));
         const low = BigInt(this.next(27));

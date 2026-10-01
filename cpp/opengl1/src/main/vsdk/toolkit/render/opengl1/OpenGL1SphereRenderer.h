@@ -3,6 +3,7 @@
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/render/SpherePolyhedralCache.h"
 class Sphere;
 class Light;
 class SimpleMaterial;
@@ -27,18 +28,8 @@ public:
     static void dispose();
 
 private:
-    // Unit sphere, drawn from client side vertex arrays
-    static java::ArrayList<float> positions;
-    static java::ArrayList<float> normals;
-    static java::ArrayList<float> uvs;
-    static java::ArrayList<unsigned int> indices;
-
-    static int cachedMeridians;
-    static int cachedParallels;
-    static unsigned int indexCount;
-
-    static bool buildSphereMeshIfNeeded(int meridians, int parallels);
-    static void drawElements();
+    static const SpherePolyhedralCache::Entry* obtainTessellation(int meridians, int parallels);
+    static void drawElements(const SpherePolyhedralCache::Entry* entry);
 };
 
 #endif

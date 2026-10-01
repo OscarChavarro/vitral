@@ -3455,3 +3455,31 @@ a temporary consumer). Vitest ran serially and reported zero test files: no
 allowed Java test yet had a production closure contained in that phase. The
 source scan found no `TODO`, `FIXME`, `@ts-ignore`, `@ts-nocheck`, focused tests,
 or skipped tests.
+
+## ApplicationCases/SceneEditorApplication (2026-10-01)
+
+Port of the Java `SceneEditorApplication` (AWT/Swing + JOGL4) in
+`typescript/testsuite/VitralWebTestsuiteContainer/src/ApplicationCases/SceneEditorApplication`,
+listed in the explorer tree of the container under `ApplicationCases`.
+
+- UI: the GUI is built with the DOM from the same Aquynza GUI definitions
+  (`etc/gui/english.json`, `spanish.json`; languages listed by the generated
+  `etc/gui/languages.json`). Reusable widgets (menus, buttons, tabs, split
+  pane, windows, file chooser, generic editor) live in `@vitral/webgl`
+  (`render/html`, `gui/editor`) with `styles/vitral-html-gui.scss`; the look and
+  feel themes (Motif, Metal, Windows, GTK) are CSS classes.
+- Rendering: WebGL2, each frame drawn into an offscreen frame buffer so the
+  depth can be read back (`depthPack*.glsl`). No frame is drawn before the
+  first reshape or while the canvas has no layout size.
+- Raytracing: Web Workers (`ObjectGraphTransfer` + `SimpleSceneSnapshotTransfer`).
+- Files: reads are fetched from `etc` (browsed through `etc/index.json`),
+  writes are downloads.
+- Agent API: the Java MCP protocol (same tools and JSON) is served in-page by
+  `window.vitralEditorMCP.request(line)` when the page URL carries `?arg=-s`.
+- Class names: a production bundle renames classes, so Java names come from
+  an `instanceof` mapper (`model/java-class-name.ts`), installed in
+  `GenericEditor.setSimpleClassNameResolver` for editor titles.
+
+Pending: model readers other than OBJ (3ds, gts, ply, ase, vrml, vtk, bin),
+XML persistence (`XmlManager`; only used by commented-out Java code), and the
+port of the application's Java tests to vitest.

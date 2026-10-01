@@ -43,6 +43,33 @@ export class WebEnvironmentPersistence extends PersistenceElement {
     }
 
     /**
+    The same dispatch over a resource whose contents are already at hand
+    (i.e. a file of the user's computer, given by the browser's file
+    chooser). Resources that a scene names beside it (the material libraries
+    of an `.obj`) are fetched relative to `resourceName`; for a local file
+    there is no folder to fetch them from, and they are left out, as Java does
+    when they are missing.
+
+    @param resourceName name (or URL) of the resource, whose extension tells
+    its format
+    @param contents bytes of the resource
+    @param inoutScene scene that receives what the resource holds
+    */
+    public static async importEnvironmentFromBytes(
+        resourceName: string,
+        contents: Uint8Array,
+        inoutScene: SimpleScene,
+    ): Promise<void> {
+        const type = WebEnvironmentPersistence.extractExtensionFromUrl(resourceName).toLowerCase();
+
+        if (type === "obj") {
+            const objText = new TextDecoder().decode(contents);
+            const provider = await WebFetchedObjResourceProvider.forObjText(resourceName, objText);
+            ReaderObj.importEnvironment(resourceName, inoutScene, provider);
+        }
+    }
+
+    /**
     The counterpart of Java's `extractExtensionFromFile`, which asks a `File`
     for its name. A URL can carry a query string and a fragment, and neither is
     part of the resource name, so both are dropped before the last dot is
@@ -76,8 +103,15 @@ class WebFetchedObjResourceProvider implements ObjResourceProvider {
     already catches around its material read.
     */
     public static async forObjUrl(objUrl: string): Promise<WebFetchedObjResourceProvider> {
+        return WebFetchedObjResourceProvider.forObjText(objUrl, await WebFetchedObjResourceProvider.fetchText(objUrl));
+    }
+
+    /**
+    The same, over the text of an `.obj` already at hand: only its material
+    libraries are fetched.
+    */
+    public static async forObjText(objUrl: string, objText: string): Promise<WebFetchedObjResourceProvider> {
         const texts = new Map<string, string>();
-        const objText = await WebFetchedObjResourceProvider.fetchText(objUrl);
         texts.set(objUrl, objText);
 
         for (const lineOfText of objText.split("\n")) {

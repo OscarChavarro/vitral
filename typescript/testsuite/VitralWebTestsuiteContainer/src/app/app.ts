@@ -30,6 +30,7 @@ import {
   SolidTextureUrlDialog,
   type SolidTextureSelection,
 } from '../WebGLExamples/SolidTextureExample/gui/solid-texture-url-dialog';
+import { SceneEditorApplication } from '../ApplicationCases/SceneEditorApplication/scene-editor-application';
 
 type ExplorerItem =
   | {
@@ -49,7 +50,8 @@ type ExplorerItem =
         | 'MD2Example'
         | 'ShadersExample'
         | 'PolygonClippingExample'
-        | 'PolyhedralBoundedSolidExample';
+        | 'PolyhedralBoundedSolidExample'
+        | 'SceneEditorApplication';
     };
 
 @Component({
@@ -70,6 +72,7 @@ type ExplorerItem =
     PolygonClippingUrlDialog,
     PolyhedralBoundedSolidExample,
     PolyhedralBoundedSolidUrlDialog,
+    SceneEditorApplication,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -136,7 +139,17 @@ export class App {
     },
     { kind: 'folder', label: 'WebGPUExamples' },
     { kind: 'folder', label: 'Tools' },
-    { kind: 'folder', label: 'ApplicationCases' },
+    {
+      kind: 'folder',
+      label: 'ApplicationCases',
+      children: [
+        {
+          kind: 'file',
+          label: 'SceneEditorApplication',
+          exampleId: 'SceneEditorApplication',
+        },
+      ],
+    },
   ];
 
   protected readonly selectedItem = signal<string | null>(null);

@@ -34,6 +34,10 @@ export class DataInputStream {
             offset += count;
         }
     }
+    /** `FilterInputStream.available()`, which `DataInputStream` inherits. */
+    public available(): number {
+        return this.input.available();
+    }
     public close(): void {
         this.input.close();
     }
