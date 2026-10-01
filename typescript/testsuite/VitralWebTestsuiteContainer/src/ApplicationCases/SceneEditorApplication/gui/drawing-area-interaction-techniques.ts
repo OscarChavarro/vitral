@@ -435,9 +435,13 @@ export class DrawingAreaInteractionTechniques {
       if (!gizmoGrabbed) {
         // Numbers typed belong to the previous selection
         this.cancelInputGizmoEditing();
+        // The picking ray aims the visual debug ray, but only the
+        // IDC_TOOLS_RAY command (or the keypad) shows or hides it
+        const rayVisible: boolean = this.model.isWithVisualDebugRay();
         this.rayGizmoTechniques.setRay(
           this.scenePicker.selectObjectWithMouse(viewportEvent.getX(), viewportEvent.getY(), composite),
         );
+        this.model.setWithVisualDebugRay(rayVisible);
       }
 
       const centroid: Vector3Dd | null = this.selectionEditor.computeSelectionCentroid();

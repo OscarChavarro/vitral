@@ -3,7 +3,8 @@ DOM menus for the GUIs of the toolkit: the counterpart of Swing's
 `JPopupMenu`, `JMenu`, `JMenuItem`, `JRadioButtonMenuItem` and `JMenuBar`,
 which the Swing GUI renderer builds from the `Widget` definitions.
 
-A popup is a `div` posted on the document body with fixed position, so it
+A popup is a `div` posted on the document body (or on the full screen element,
+see `HtmlOverlayHost`) with fixed position, so it
 floats over everything (as Swing's heavyweight popups float over an OpenGL
 canvas). As in Swing:
   - Only one tree of popups is open at a time; a press outside it closes it
@@ -16,6 +17,8 @@ canvas). As in Swing:
 
 Texts are plain text: they are never parsed as HTML.
 */
+
+import { attachToOverlayHost, detachFromOverlayHost } from "./HtmlOverlayHost.js";
 
 /** Kinds of the items of a popup. */
 export type HtmlMenuItemKind = "command" | "radio" | "submenu" | "separator";
@@ -290,7 +293,7 @@ export class HtmlPopupMenu {
         for (const item of this.items) {
             item.element.classList.remove("vitral-menu-item-active");
         }
-        document.body.appendChild(this.element);
+        attachToOverlayHost(this.element);
         this.element.style.left = "0px";
         this.element.style.top = "0px";
 
@@ -317,7 +320,7 @@ export class HtmlPopupMenu {
         }
         this.visible = false;
         HtmlMenuManager.closed(this);
-        this.element.remove();
+        detachFromOverlayHost(this.element);
         for (const listener of this.closeListeners) {
             listener();
         }

@@ -5,6 +5,8 @@ application opens over its main window. They are styled by
 `styles/vitral-html-gui.scss` of this package.
 */
 
+import { attachToOverlayHost, detachFromOverlayHost } from "./HtmlOverlayHost.js";
+
 /**
 Swing's `JTabbedPane`: a row of tabs, each showing one content element.
 */
@@ -305,18 +307,18 @@ export class HtmlWindow {
             if (this.modal) {
                 this.backdrop = document.createElement("div");
                 this.backdrop.className = "vitral-window-modal-backdrop";
-                document.body.appendChild(this.backdrop);
+                attachToOverlayHost(this.backdrop);
             }
-            document.body.appendChild(this.element);
+            attachToOverlayHost(this.element);
             if (this.element.style.left === "") {
                 const box: DOMRect = this.element.getBoundingClientRect();
                 this.setLocation((window.innerWidth - box.width) / 2, (window.innerHeight - box.height) / 3);
             }
         }
         else {
-            this.element.remove();
+            detachFromOverlayHost(this.element);
             if (this.backdrop !== null) {
-                this.backdrop.remove();
+                detachFromOverlayHost(this.backdrop);
                 this.backdrop = null;
             }
         }

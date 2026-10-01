@@ -461,8 +461,12 @@ public class DrawingAreaInteractionTechniques
             if ( !gizmoGrabbed ) {
                 // Numbers typed belong to the previous selection
                 cancelInputGizmoEditing();
+                // The picking ray aims the visual debug ray, but only the
+                // IDC_TOOLS_RAY command (or the keypad) shows or hides it
+                boolean rayVisible = model.isWithVisualDebugRay();
                 rayGizmoTechniques.setRay(scenePicker.selectObjectWithMouse(
                     viewportEvent.getX(), viewportEvent.getY(), composite));
+                model.setWithVisualDebugRay(rayVisible);
             }
 
             Vector3Dd centroid = selectionEditor.computeSelectionCentroid();

@@ -388,9 +388,13 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
         if ( !gizmoGrabbed ) {
             // Numbers typed belong to the previous selection
             cancelInputGizmoEditing();
+            // The picking ray aims the visual debug ray, but only the
+            // IDC_TOOLS_RAY command (or the keypad) shows or hides it
+            bool rayVisible = model->isWithVisualDebugRay();
             Ray selectedRay = scenePicker->selectObjectWithMouse(
                 viewportEvent.getX(), viewportEvent.getY(), composite);
             rayGizmoTechniques->setRay(&selectedRay);
+            model->setWithVisualDebugRay(rayVisible);
         }
 
         if ( selectionEditor->computeSelectionCentroid(&centroid) ) {

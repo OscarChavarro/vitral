@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Vector3Dd } from '@vitral/base';
 import { WebGLHelloWorld } from '../_APITests/_WebGLHelloWorld/webgl-hello-world';
 import { CameraExample } from '../WebGLExamples/CameraExample/camera-example';
@@ -151,6 +159,44 @@ export class App {
       ],
     },
   ];
+
+  private readonly workspacePane = viewChild.required<ElementRef<HTMLElement>>('workspacePane');
+
+  /**
+   * Ctrl+F (Cmd+F on macOS), with or without Shift, toggles full screen for
+   * the workspace pane. The listener sits on `window` in the capture phase so
+   * that no example's own key handling can swallow the shortcut first.
+   */
+  constructor() {
+    const isMac: boolean = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const primaryModifier: boolean = isMac ? event.metaKey : event.ctrlKey;
+      if (!primaryModifier || event.altKey || event.code !== 'KeyF') {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) {
+        void this.toggleWorkspaceFullscreen();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown, { capture: true });
+    inject(DestroyRef).onDestroy(() =>
+      window.removeEventListener('keydown', onKeyDown, { capture: true }),
+    );
+  }
+
+  private async toggleWorkspaceFullscreen(): Promise<void> {
+    try {
+      if (document.fullscreenElement !== null) {
+        await document.exitFullscreen();
+      } else {
+        await this.workspacePane().nativeElement.requestFullscreen();
+      }
+    } catch (error) {
+      console.error('Unable to toggle workspace full screen', error);
+    }
+  }
 
   protected readonly selectedItem = signal<string | null>(null);
   protected readonly workspaceOrigin = new Vector3Dd();
