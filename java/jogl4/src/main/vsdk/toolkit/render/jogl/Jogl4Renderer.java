@@ -3,6 +3,7 @@ package vsdk.toolkit.render.jogl;
 import com.jogamp.opengl.GL4;
 
 import vsdk.toolkit.render.RenderingElement;
+import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 
 public abstract class Jogl4Renderer extends RenderingElement {
     public static boolean verifyOpenGLAvailability()
@@ -29,5 +30,6 @@ public abstract class Jogl4Renderer extends RenderingElement {
         Jogl4ArrowRenderer.dispose(gl);
         Jogl4ImageRenderer.dispose(gl);
         Jogl4ColorDepthImageRenderer.dispose(gl);
+        Jogl4PolyhedralBoundedSolidRenderer.release(gl);
     }
 }

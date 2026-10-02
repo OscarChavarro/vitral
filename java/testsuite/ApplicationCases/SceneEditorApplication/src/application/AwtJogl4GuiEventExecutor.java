@@ -18,6 +18,9 @@ import gui.awt.AwtCommandExecutor;
 import gui.awt.AwtImageControlWindow;
 import gui.awt.AwtSuffixFileFilter;
 import model.GuiState;
+import application.commands.CommandResult;
+import application.commands.ExportFormat;
+import application.commands.GuiEventExecutor;
 
 /**
 Executes the commands of the GUI of the editor that need Swing (file
@@ -50,12 +53,12 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
     @Override
     public boolean executeCommand(String label, JFrame mainWindowWidget) {
 
-        GuiEventExecutor.CommandResult result = commands.execute(label);
+        CommandResult result = commands.execute(label);
 
-        if ( result == GuiEventExecutor.CommandResult.FAILED ) {
+        if ( result == CommandResult.FAILED ) {
             return false;
         }
-        if ( result == GuiEventExecutor.CommandResult.NOT_HANDLED &&
+        if ( result == CommandResult.NOT_HANDLED &&
              !executeSwingCommand(label, mainWindowWidget) ) {
             return false;
         }
@@ -112,7 +115,7 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    commands.exportObjects(file, GuiEventExecutor.ExportFormat.OBJ);
+                    commands.exportObjects(file, ExportFormat.OBJ);
 
                     guiState().setWriteFolder(file.getParentFile().getAbsolutePath());
 
@@ -134,7 +137,7 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    commands.exportObjects(file, GuiEventExecutor.ExportFormat.GTS);
+                    commands.exportObjects(file, ExportFormat.GTS);
 
                     guiState().setWriteFolder(file.getParentFile().getAbsolutePath());
 
@@ -155,7 +158,7 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
             if ( opc == JFileChooser.APPROVE_OPTION ) {
                 try {
                     File file = jfc.getSelectedFile();
-                    commands.exportObjects(file, GuiEventExecutor.ExportFormat.VTK);
+                    commands.exportObjects(file, ExportFormat.VTK);
 
                     guiState().setWriteFolder(file.getParentFile().getAbsolutePath());
 

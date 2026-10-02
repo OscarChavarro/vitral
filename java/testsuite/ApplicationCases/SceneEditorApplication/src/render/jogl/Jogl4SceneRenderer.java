@@ -9,6 +9,7 @@ import com.jogamp.opengl.GL4;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.Geometry;
+import vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid.PolyhedralBoundedSolid;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
@@ -22,6 +23,8 @@ import vsdk.toolkit.render.jogl.Jogl4GeometryRenderer;
 import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MinMaxRenderer;
 import vsdk.toolkit.render.jogl.Jogl4SelectionCornersRenderer;
+import vsdk.toolkit.render.jogl.Jogl4SimpleMaterialRenderer;
+import vsdk.toolkit.render.jogl.polyhedralBoundedSolid.Jogl4PolyhedralBoundedSolidRenderer;
 
 // Application classes
 import model.Scene;
@@ -30,7 +33,9 @@ import render.BodyEditFeedbackProvider;
 /**
 Draws the scene of the editor into the current viewport with the GL4 core
 pipeline: every geometry goes through `Jogl4GeometryRenderer`, so all of them
-honor the same bits of the `RendererConfiguration` of the viewport.
+honor the same bits of the `RendererConfiguration` of the viewport. The
+exception are the polyhedral bounded solids (breps), that `Jogl4GeometryRenderer`
+does not support yet, and are drawn by `Jogl4PolyhedralBoundedSolidRenderer`.
 */
 public class Jogl4SceneRenderer
 {
@@ -134,6 +139,12 @@ public class Jogl4SceneRenderer
             ? (RGBImageUncompressed)texture
             : null;
 
+        if ( geometry instanceof PolyhedralBoundedSolid solid ) {
+            drawPolyhedralBoundedSolid(gl, solid, body, transform, camera,
+                lights, quality);
+            return;
+        }
+
         Jogl4GeometryRenderer.draw(
             gl,
             geometry,
@@ -144,6 +155,31 @@ public class Jogl4SceneRenderer
             textureMap,
             body.getNormalMapRgb(),
             transform);
+    }
+
+    /**
+    Draws a brep with `Jogl4PolyhedralBoundedSolidRenderer`, that takes the
+    material and the lights from the active ones instead of as parameters, so
+    they are activated only while the solid is drawn. Textures and normal maps
+    are not supported by that renderer.
+    */
+    private static void drawPolyhedralBoundedSolid(GL4 gl,
+        PolyhedralBoundedSolid solid, SimpleBody body, Matrix4x4d transform,
+        Camera camera, List<Light> lights, RendererConfiguration quality)
+    {
+        Jogl4SimpleMaterialRenderer.activate(gl, body.getMaterial());
+        Jogl4LightRenderer.deactivateAll(gl);
+        if ( lights != null ) {
+            for ( Light light : lights ) {
+                Jogl4LightRenderer.activate(gl, light);
+            }
+        }
+
+        Jogl4PolyhedralBoundedSolidRenderer.draw(gl, solid, camera, quality,
+            transform);
+
+        Jogl4LightRenderer.deactivateAll(gl);
+        Jogl4SimpleMaterialRenderer.activate(gl, null);
     }
 
     /**

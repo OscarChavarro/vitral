@@ -34,6 +34,16 @@ public class Jogl4LightRenderer extends Jogl4Renderer
         ACTIVE_LIGHTS.put(light.getId(), light.copy());
     }
 
+    /**
+    Forgets all the lights activated so far, so `getActiveLights` reports
+    the default light until other lights are activated.
+    @param gl OpenGL context
+    */
+    public static void deactivateAll(GL gl)
+    {
+        ACTIVE_LIGHTS.clear();
+    }
+
     public static void draw(GL gl, Light light)
     {
         draw(gl, light, null, LightGizmoStyle.CROSS);

@@ -1,55 +1,43 @@
 package application.mcp;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
-import application.AwtJogl4ApplicationController;
 import application.AwtJogl4SceneEditorApplication;
-import application.GuiEventExecutor;
-import model.Scene;
-import model.InteractionMode;
-import model.history.EditHistory;
-import model.history.UndoQueue;
-import vsdk.toolkit.gui.viewport.Viewport;
-import vsdk.toolkit.gui.viewport.ViewportSet;
-import vsdk.toolkit.common.color.ColorRgb;
-import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
-import vsdk.toolkit.environment.geometry.Geometry;
-import vsdk.toolkit.environment.geometry.volume.Cone;
-import vsdk.toolkit.environment.geometry.volume.Sphere;
-import model.SceneLightFactory;
-import vsdk.toolkit.environment.light.Light;
-import vsdk.toolkit.environment.light.PointLight;
-import vsdk.toolkit.environment.material.RendererConfiguration;
-import vsdk.toolkit.environment.material.ShadingType;
-import vsdk.toolkit.environment.scene.SimpleBody;
-import vsdk.toolkit.io.image.ImagePersistence;
 
 /**
-One connection of the automation service: reads JSON-RPC requests, one per
-line, executes the tools in the thread of the GUI and writes one JSON line per
-response (see `MCP.md`).
+Serves one connection of the automation service of the editor: reads one
+JSON-RPC request per line (`initialize`, `tools/list`, `tools/call`) and
+answers it in one line. Each tool is executed in the Swing event dispatch
+thread, delegated to the tool group that owns it:
+- `MCPSceneTools`: the scene and the GUI commands over the model,
+- `MCPViewportTools`: rendering configuration and interaction mode,
+- `AwtJogl4MCPApplicationTools`: the running application (input events,
+  images, language, exit).
 */
 class AwtJogl4VitralEditorMCPProtocol implements Runnable
 {
-    private final AwtJogl4SceneEditorApplication parent;
     private final Socket socket;
+    private final MCPSceneTools sceneTools;
+    private final MCPViewportTools viewportTools;
+    private final AwtJogl4MCPApplicationTools applicationTools;
 
+    /**
+    @param parent application to automate
+    @param socket connection to serve
+    */
     public AwtJogl4VitralEditorMCPProtocol(AwtJogl4SceneEditorApplication parent, Socket socket)
     {
-        this.parent = parent;
         this.socket = socket;
+        this.sceneTools = new MCPSceneTools(parent.getApplicationModel());
+        this.viewportTools = new MCPViewportTools(parent.getApplicationModel());
+        this.applicationTools = new AwtJogl4MCPApplicationTools(parent);
     }
 
     @Override
@@ -74,25 +62,25 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
 
     private String handle(String request)
     {
-        String id = idProperty(request);
-        String method = stringProperty(request, "method", "");
+        String id = MCPJson.idProperty(request);
+        String method = MCPJson.stringProperty(request, "method", "");
 
         try {
             if ( "initialize".equals(method) ) {
-                return result(id,
+                return MCPJson.result(id,
                     "{\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"VitralEditorMCP\",\"version\":\"0.1\"},\"capabilities\":{\"tools\":{}}}");
             }
             if ( "tools/list".equals(method) ) {
-                return result(id, toolsJson());
+                return MCPJson.result(id, toolsJson());
             }
             if ( "tools/call".equals(method) ) {
-                String tool = nestedStringProperty(request, "name", "");
-                return result(id, callTool(tool, request));
+                String tool = MCPJson.stringProperty(request, "name", "");
+                return MCPJson.result(id, callTool(tool, request));
             }
-            return error(id, -32601, "Unknown method: " + method);
+            return MCPJson.error(id, -32601, "Unknown method: " + method);
         }
         catch ( Exception e ) {
-            return error(id, -32000, e.getMessage());
+            return MCPJson.error(id, -32000, e.getMessage());
         }
     }
 
@@ -104,7 +92,7 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
                 result[0] = executeTool(tool, request);
             }
             catch ( Exception e ) {
-                result[0] = "{\"error\":\"" + escape(e.getMessage()) + "\"}";
+                result[0] = "{\"error\":\"" + MCPJson.escape(e.getMessage()) + "\"}";
             }
         };
 
@@ -115,687 +103,128 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             SwingUtilities.invokeAndWait(command);
         }
 
-        return content(result[0]);
+        return MCPJson.content(result[0]);
     }
 
     private String executeTool(String tool, String request) throws Exception
     {
-        if ( "scene.describe".equals(tool) ) {
-            return describeScene();
-        }
-        if ( "scene.clear".equals(tool) ) {
-            recordSceneChange(tool, this::clearScene);
-            return "{\"ok\":true}";
-        }
-        if ( "scene.add_point_light".equals(tool) ) {
-            recordSceneChange(tool, () -> addPointLight(request));
-            return describeScene();
-        }
-        if ( "scene.add_sphere".equals(tool) ) {
-            recordSceneChange(tool, () -> addSphere(request));
-            return describeScene();
-        }
-        if ( "scene.add_cone".equals(tool) ) {
-            recordSceneChange(tool, () -> addCone(request));
-            return describeScene();
-        }
-        if ( "scene.add_cylinder".equals(tool) ) {
-            recordSceneChange(tool, () -> addCylinder(request));
-            return describeScene();
-        }
-        if ( "scene.move_body".equals(tool) ) {
-            recordSceneChange(tool, () -> moveBody(request));
-            return describeScene();
-        }
-        if ( "edit.history".equals(tool) ) {
-            return describeEditHistory();
-        }
-        if ( "gui.command".equals(tool) ) {
-            return executeGuiCommand(request);
-        }
-        if ( "scene.select_body".equals(tool) ) {
-            selectBody(request);
-            return describeScene();
-        }
-        if ( "gui.set_mode".equals(tool) ) {
-            return setInteractionMode(request);
-        }
-        if ( "gui.mouse".equals(tool) ) {
-            return injectMouse(request);
-        }
-        if ( "gui.key".equals(tool) ) {
-            return injectKey(request);
-        }
-        if ( "viewport.project".equals(tool) ) {
-            return projectSelectedBody(request);
-        }
-        if ( "render.get_configuration".equals(tool) ) {
-            return describeRendererConfigurations(request);
-        }
-        if ( "render.set_configuration".equals(tool) ) {
-            setRendererConfiguration(request);
-            return describeRendererConfigurations(request);
-        }
-        if ( "render.raytrace_png".equals(tool) ) {
-            return raytracePng(request);
-        }
-        if ( "viewport.export_jpg".equals(tool) ) {
-            return viewportJpg(request);
-        }
-        if ( "workspace.export_jpg".equals(tool) ) {
-            return workspaceJpg(request);
-        }
-        if ( "gui.list_languages".equals(tool) ) {
-            return listLanguages();
-        }
-        if ( "gui.set_language".equals(tool) ) {
-            return setLanguage(request);
-        }
-        if ( "app.exit".equals(tool) ) {
-            return exitApplication();
-        }
-        throw new IllegalArgumentException("Unknown tool: " + tool);
-    }
-
-    private String listLanguages()
-    {
-        StringBuilder sb = new StringBuilder();
-        String current = parent.getCurrentGuiLanguage();
-        boolean first = true;
-
-        sb.append("{\"current\":\"").append(escape(current)).append("\",\"languages\":[");
-        for ( String language : parent.getGuiLanguages() ) {
-            if ( !first ) {
-                sb.append(',');
+        switch ( tool ) {
+            //- Scene -----------------------------------------------------
+            case "scene.describe" -> {
+                return sceneTools.describeScene();
             }
-            first = false;
-            sb.append("{\"id\":\"").append(escape(language)).append('"')
-                .append(",\"current\":").append(language.equals(current)).append('}');
-        }
-        sb.append("]}");
-        return sb.toString();
-    }
-
-    private String setLanguage(String request)
-    {
-        String language = stringProperty(request, "language", "");
-
-        if ( !parent.setGuiLanguageById(language) ) {
-            throw new IllegalArgumentException("Unknown language \"" + language +
-                "\". Available languages: " + parent.getGuiLanguages());
-        }
-        return "{\"ok\":true,\"language\":\"" + escape(language) + "\"}";
-    }
-
-    /**
-    The exit is deferred a short time, so the response of this call can be
-    sent to the client before the process ends.
-    */
-    private String exitApplication()
-    {
-        Timer timer = new Timer(300, e -> parent.closeApplication());
-
-        timer.setRepeats(false);
-        timer.start();
-        return "{\"ok\":true,\"message\":\"The application is closing\"}";
-    }
-
-    /**
-    Executes a change of the scene requested by the agent, recording it in the
-    scene history, as the ones of the user, so it can be undone.
-    */
-    private void recordSceneChange(String tool, Runnable change)
-    {
-        parent.getApplicationModel().getEditHistory().getSceneHistory()
-            .perform(tool, change);
-        parent.getJogl4Controller().repaint();
-    }
-
-    /**
-    @return the state of the scene history and of the view history of each
-    viewport of the active viewport set
-    */
-    private String describeEditHistory()
-    {
-        EditHistory history = parent.getApplicationModel().getEditHistory();
-        ViewportSet viewportSet = parent.getApplicationModel().getActiveViewportSet();
-        StringBuilder sb = new StringBuilder();
-        int i;
-
-        sb.append("{\"scene\":")
-            .append(queueJson(history.getSceneHistory().getQueue()))
-            .append(",\"viewports\":[");
-        for ( i = 0; i < viewportSet.getViewportCount(); i++ ) {
-            Viewport viewport = viewportSet.getViewport(i);
-
-            if ( i > 0 ) {
-                sb.append(',');
+            case "scene.clear" -> {
+                sceneTools.clearScene();
+                applicationTools.repaint();
+                return "{\"ok\":true}";
             }
-            sb.append("{\"index\":").append(i)
-                .append(",\"title\":\"").append(escape(viewport.getTitle())).append('"')
-                .append(",\"selected\":").append(viewport == viewportSet.getSelectedViewport())
-                .append(",\"history\":")
-                .append(queueJson(history.getViewportHistory().getQueue(viewport)))
-                .append('}');
-        }
-        sb.append("]}");
-        return sb.toString();
-    }
-
-    private static String queueJson(UndoQueue queue)
-    {
-        String undoName = queue.getUndoName();
-        String redoName = queue.getRedoName();
-
-        return "{\"undo\":" + queue.getUndoCount() +
-            ",\"redo\":" + queue.getRedoCount() +
-            ",\"nextUndo\":" + (undoName == null ? "null" : "\"" + escape(undoName) + "\"") +
-            ",\"nextRedo\":" + (redoName == null ? "null" : "\"" + escape(redoName) + "\"") +
-            "}";
-    }
-
-    /**
-    Executes a command of the GUI that works only over the model (i.e. the
-    `IDC_CREATE_*` ones), as its menu item or button does. What it changes in
-    the scene is recorded in the scene history.
-    */
-    private String executeGuiCommand(String request)
-    {
-        String command = stringProperty(request, "command", "");
-        final String[] message = new String[] { "" };
-        GuiEventExecutor executor = new GuiEventExecutor(
-            parent.getApplicationModel(), text -> message[0] = text);
-        GuiEventExecutor.CommandResult result = executor.execute(command);
-
-        parent.getJogl4Controller().repaint();
-        return "{\"command\":\"" + escape(command) + "\",\"result\":\"" + result +
-            "\",\"message\":\"" + escape(message[0]) + "\"}";
-    }
-
-    private void clearScene()
-    {
-        Scene scene = parent.getApplicationModel().getScene();
-        scene.scene.getSimpleBodies().clear();
-        scene.scene.getLights().clear();
-        scene.debugThingGroups.clear();
-    }
-
-    private void addPointLight(String request)
-    {
-        boolean explicitPosition = hasProperty(request, "x") ||
-            hasProperty(request, "y") || hasProperty(request, "z");
-        boolean explicitColor = hasProperty(request, "r") ||
-            hasProperty(request, "g") || hasProperty(request, "b");
-
-        if ( !explicitPosition && !explicitColor ) {
-            parent.getApplicationModel().addNewLight();
-            return;
-        }
-        // Missing values follow the default policy of the first light
-        PointLight defaults = new SceneLightFactory().createLight(
-            new ArrayList<Light>(), parent.getApplicationModel().getActiveViewportSet());
-        Vector3Dd p = defaults == null ? new Vector3Dd() : defaults.getPosition();
-        double x = numberProperty(request, "x", p.x());
-        double y = numberProperty(request, "y", p.y());
-        double z = numberProperty(request, "z", p.z());
-        double r = numberProperty(request, "r", 1.0);
-        double g = numberProperty(request, "g", 1.0);
-        double b = numberProperty(request, "b", 1.0);
-        Scene scene = parent.getApplicationModel().getScene();
-        scene.scene.addLight(new PointLight(new Vector3Dd(x, y, z),
-            new ColorRgb(r, g, b)));
-    }
-
-    private static boolean hasProperty(String json, String key)
-    {
-        return Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:").matcher(json).find();
-    }
-
-    private void addSphere(String request)
-    {
-        double radius = numberProperty(request, "radius", 1.0);
-        double x = numberProperty(request, "x", 0.0);
-        double y = numberProperty(request, "y", 0.0);
-        double z = numberProperty(request, "z", 0.0);
-        SimpleBody body = parent.getApplicationModel().getScene()
-            .addThing(new Sphere(radius));
-        body.setPosition(new Vector3Dd(x, y, z));
-    }
-
-    private void addCone(String request)
-    {
-        double baseRadius = numberProperty(request, "baseRadius", 1.0);
-        double topRadius = numberProperty(request, "topRadius", 0.0);
-        double height = numberProperty(request, "height", 2.0);
-        placeNewBody(new Cone(baseRadius, topRadius, height), request);
-    }
-
-    private void addCylinder(String request)
-    {
-        double radius = numberProperty(request, "radius", 1.0);
-        double height = numberProperty(request, "height", 2.0);
-        placeNewBody(new Cone(radius, radius, height), request);
-    }
-
-    private void placeNewBody(Geometry geometry, String request)
-    {
-        SimpleBody body = parent.getApplicationModel().getScene().addThing(geometry);
-        body.setPosition(new Vector3Dd(
-            numberProperty(request, "x", 0.0),
-            numberProperty(request, "y", 0.0),
-            numberProperty(request, "z", 0.0)));
-    }
-
-    private void moveBody(String request)
-    {
-        ArrayList<SimpleBody> bodies =
-            parent.getApplicationModel().getScene().scene.getSimpleBodies();
-        int index = (int)numberProperty(request, "index", bodies.size() - 1);
-
-        if ( index < 0 || index >= bodies.size() ) {
-            throw new IllegalArgumentException("Body index out of range: " + index);
-        }
-        SimpleBody body = bodies.get(index);
-        Vector3Dd p = body.getPosition();
-
-        body.setPosition(new Vector3Dd(
-            numberProperty(request, "x", p.x()),
-            numberProperty(request, "y", p.y()),
-            numberProperty(request, "z", p.z())));
-    }
-
-    private String setInteractionMode(String request)
-    {
-        String mode = stringProperty(request, "mode", "");
-        InteractionMode value;
-
-        switch ( mode ) {
-            case "camera" -> value = InteractionMode.CAMERA;
-            case "select" -> value = InteractionMode.SELECT;
-            case "translate" -> value = InteractionMode.TRANSLATE;
-            case "rotate" -> value = InteractionMode.ROTATE;
-            case "scale" -> value = InteractionMode.SCALE;
-            default -> throw new IllegalArgumentException("Unknown mode \"" + mode +
-                "\". Use camera, select, translate, rotate or scale");
-        }
-        parent.getApplicationModel().getDrawingArea().setInteractionMode(value);
-        return "{\"ok\":true,\"mode\":\"" + mode + "\"}";
-    }
-
-    /**
-    @return the controller of the drawing area, once its canvas was created
-    */
-    private AwtJogl4ApplicationController getDrawingAreaController()
-    {
-        AwtJogl4ApplicationController controller = parent.getJogl4Controller();
-
-        if ( !controller.isDrawingAreaCreated() ) {
-            throw new IllegalStateException("The drawing area has not been created");
-        }
-        return controller;
-    }
-
-    private String injectMouse(String request)
-    {
-        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
-        String type = stringProperty(request, "type", "move");
-        int x = (int)Math.round(numberProperty(request, "x", 0));
-        int y = (int)Math.round(numberProperty(request, "y", 0));
-        int button = (int)numberProperty(request, "button", 1);
-
-        drawingArea.injectMouseEvent(type, x, y, button);
-        return describeScene();
-    }
-
-    private String injectKey(String request)
-    {
-        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
-        String key = stringProperty(request, "key", "");
-        boolean shift = Boolean.TRUE.equals(booleanProperty(request, "shift"));
-        boolean ctrl = Boolean.TRUE.equals(booleanProperty(request, "ctrl"));
-
-        drawingArea.injectKeyEvent(key, shift, ctrl);
-        return describeScene();
-    }
-
-    /**
-    Reports the canvas pixel of the first selected body and of the tips of its
-    three axes (one unit long), as seen by a viewport.
-    */
-    private String projectSelectedBody(String request)
-    {
-        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
-        Scene scene = parent.getApplicationModel().getScene();
-        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
-        int viewportIndex = (int)numberProperty(request, "viewport", 0);
-        int selected = scene.selectedThings.firstSelected();
-
-        if ( selected < 0 ) {
-            throw new IllegalStateException("No body is selected");
-        }
-        Viewport viewport = set.getViewport(viewportIndex);
-        Vector3Dd p = scene.scene.getSimpleBodies().get(selected).getPosition();
-        String[] names = {"origin", "x", "y", "z"};
-        Vector3Dd[] points = {
-            p,
-            p.add(new Vector3Dd(1, 0, 0)),
-            p.add(new Vector3Dd(0, 1, 0)),
-            p.add(new Vector3Dd(0, 0, 1))
-        };
-        StringBuilder sb = new StringBuilder("{\"viewport\":\"" + escape(viewport.getTitle()) + "\"");
-
-        for ( int i = 0; i < names.length; i++ ) {
-            double[] pixel = drawingArea.projectToCanvas(viewport, points[i]);
-
-            sb.append(",\"").append(names[i]).append("\":");
-            sb.append(pixel == null ? "null" : "[" + pixel[0] + "," + pixel[1] + "]");
-        }
-        sb.append('}');
-        return sb.toString();
-    }
-
-    private void selectBody(String request)
-    {
-        Scene scene = parent.getApplicationModel().getScene();
-        int index = (int)numberProperty(request, "index", -1);
-
-        scene.selectedThings.unselectAll();
-        if ( index >= 0 ) {
-            if ( index >= scene.scene.getSimpleBodies().size() ) {
-                throw new IllegalArgumentException("Body index out of range: " + index);
+            case "scene.add_point_light" -> {
+                sceneTools.addPointLight(request);
+                applicationTools.repaint();
+                return sceneTools.describeScene();
             }
-            scene.selectedThings.select(index);
-        }
-    }
-
-    /**
-    @return the viewports selected by the "viewport" argument: an index, or
-    all of them when it is missing
-    */
-    private ArrayList<Viewport> selectedViewports(String request)
-    {
-        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
-        ArrayList<Viewport> out = new ArrayList<>();
-        double index = numberProperty(request, "viewport", -1);
-
-        if ( index < 0 ) {
-            out.addAll(set.getViewports());
-        }
-        else if ( index < set.getViewportCount() ) {
-            out.add(set.getViewport((int)index));
-        }
-        else {
-            throw new IllegalArgumentException("Viewport index out of range: " + (int)index);
-        }
-        return out;
-    }
-
-    private void setRendererConfiguration(String request)
-    {
-        for ( Viewport viewport : selectedViewports(request) ) {
-            RendererConfiguration q = viewport.getRendererConfiguration();
-            Boolean value;
-
-            value = booleanProperty(request, "points");
-            if ( value != null ) q.setPoints(value);
-            value = booleanProperty(request, "wires");
-            if ( value != null ) q.setWires(value);
-            value = booleanProperty(request, "surfaces");
-            if ( value != null ) q.setSurfaces(value);
-            value = booleanProperty(request, "texture");
-            if ( value != null ) q.setTexture(value);
-            value = booleanProperty(request, "bumpMap");
-            if ( value != null ) q.setBumpMap(value);
-            value = booleanProperty(request, "boundingVolume");
-            if ( value != null ) q.setBoundingVolume(value);
-            value = booleanProperty(request, "normals");
-            if ( value != null ) q.setNormals(value);
-            value = booleanProperty(request, "trianglesNormals");
-            if ( value != null ) q.setTrianglesNormals(value);
-            value = booleanProperty(request, "selectionCorners");
-            if ( value != null ) q.setSelectionCorners(value);
-
-            String shading = stringProperty(request, "shading", "");
-            if ( !shading.isEmpty() ) {
-                q.setShadingType(ShadingType.valueOf(shading.toUpperCase()));
+            case "scene.add_sphere" -> {
+                sceneTools.addSphere(request);
+                applicationTools.repaint();
+                return sceneTools.describeScene();
             }
-
-            value = booleanProperty(request, "grid");
-            if ( value != null ) viewport.setShowGrid(value);
-            String renderMode = stringProperty(request, "renderMode", "");
-            if ( "gpu".equalsIgnoreCase(renderMode) ) {
-                viewport.setRenderMode(Viewport.RENDER_MODE_Z_BUFFER);
+            case "scene.add_cone" -> {
+                sceneTools.addCone(request);
+                applicationTools.repaint();
+                return sceneTools.describeScene();
             }
-            else if ( "cpu".equalsIgnoreCase(renderMode) ) {
-                viewport.setRenderMode(Viewport.RENDER_MODE_RAYTRACING);
+            case "scene.add_cylinder" -> {
+                sceneTools.addCylinder(request);
+                applicationTools.repaint();
+                return sceneTools.describeScene();
             }
-            else if ( !renderMode.isEmpty() ) {
-                throw new IllegalArgumentException("renderMode must be gpu or cpu");
+            case "scene.move_body" -> {
+                sceneTools.moveBody(request);
+                applicationTools.repaint();
+                return sceneTools.describeScene();
             }
+            case "scene.select_body" -> {
+                sceneTools.selectBody(request);
+                return sceneTools.describeScene();
+            }
+            case "edit.history" -> {
+                return sceneTools.describeEditHistory();
+            }
+            case "gui.command" -> {
+                String answer = sceneTools.executeGuiCommand(request);
+                applicationTools.repaint();
+                return answer;
+            }
+            //- Viewports -------------------------------------------------
+            case "gui.set_mode" -> {
+                return viewportTools.setInteractionMode(request);
+            }
+            case "render.get_configuration" -> {
+                return viewportTools.describeRendererConfigurations(request);
+            }
+            case "render.set_configuration" -> {
+                viewportTools.setRendererConfiguration(request);
+                return viewportTools.describeRendererConfigurations(request);
+            }
+            //- Application -----------------------------------------------
+            case "gui.mouse" -> {
+                applicationTools.injectMouse(request);
+                return sceneTools.describeScene();
+            }
+            case "gui.key" -> {
+                applicationTools.injectKey(request);
+                return sceneTools.describeScene();
+            }
+            case "viewport.project" -> {
+                return applicationTools.projectSelectedBody(request);
+            }
+            case "render.raytrace_png" -> {
+                return applicationTools.raytracePng(request);
+            }
+            case "viewport.export_jpg" -> {
+                return applicationTools.exportViewportJpg(request);
+            }
+            case "workspace.export_jpg" -> {
+                return applicationTools.exportWorkspaceJpg(request);
+            }
+            case "gui.list_languages" -> {
+                return applicationTools.listLanguages();
+            }
+            case "gui.set_language" -> {
+                return applicationTools.setLanguage(request);
+            }
+            case "app.exit" -> {
+                return applicationTools.exitApplication();
+            }
+            default -> throw new IllegalArgumentException("Unknown tool: " + tool);
         }
-    }
-
-    private String describeRendererConfigurations(String request)
-    {
-        StringBuilder sb = new StringBuilder("{\"viewports\":[");
-        ViewportSet set = parent.getApplicationModel().getActiveViewportSet();
-        boolean first = true;
-
-        for ( Viewport viewport : selectedViewports(request) ) {
-            RendererConfiguration q = viewport.getRendererConfiguration();
-
-            if ( !first ) {
-                sb.append(',');
-            }
-            first = false;
-            sb.append("{\"index\":").append(set.getViewports().indexOf(viewport))
-                .append(",\"title\":\"").append(escape(viewport.getTitle())).append('"')
-                .append(",\"points\":").append(q.isPointsSet())
-                .append(",\"wires\":").append(q.isWiresSet())
-                .append(",\"surfaces\":").append(q.isSurfacesSet())
-                .append(",\"texture\":").append(q.isTextureSet())
-                .append(",\"bumpMap\":").append(q.isBumpMapSet())
-                .append(",\"boundingVolume\":").append(q.isBoundingVolumeSet())
-                .append(",\"normals\":").append(q.isNormalsSet())
-                .append(",\"trianglesNormals\":").append(q.isTrianglesNormalsSet())
-                .append(",\"selectionCorners\":").append(q.isSelectionCornersSet())
-                .append(",\"shading\":\"").append(q.getShadingTypeEnum()).append('"')
-                .append(",\"grid\":").append(viewport.isShowGrid())
-                .append(",\"renderMode\":\"")
-                .append(viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING ? "cpu" : "gpu")
-                .append("\"}");
-        }
-        return sb.append("]}").toString();
-    }
-
-    private String raytracePng(String request)
-    {
-        String path = stringProperty(request, "path", "./mcp-raytrace.png");
-        int width = (int)numberProperty(request, "width", 640);
-        int height = (int)numberProperty(request, "height", 480);
-        parent.getApplicationModel().setRaytracedImageWidth(width);
-        parent.getApplicationModel().setRaytracedImageHeight(height);
-        parent.doRaytracingImage();
-        File out = new File(path);
-        ImagePersistence.exportPNG(out, parent.getApplicationModel().getRaytracedImage());
-        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
-    }
-
-    private String viewportJpg(String request)
-    {
-        String path = stringProperty(request, "path", "./outputSelectedViewport.jpg");
-        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
-        File out = new File(path);
-        drawingArea.exportViewportJpg(out);
-        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
-    }
-
-    private String workspaceJpg(String request)
-    {
-        String path = stringProperty(request, "path", "./outputViewport.jpg");
-        AwtJogl4ApplicationController drawingArea = getDrawingAreaController();
-        File out = new File(path);
-        drawingArea.exportWorkspaceJpg(out);
-        return "{\"ok\":true,\"path\":\"" + escape(out.getAbsolutePath()) + "\"}";
-    }
-
-    private String describeScene()
-    {
-        Scene scene = parent.getApplicationModel().getScene();
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\"bodies\":[");
-        ArrayList<SimpleBody> bodies = scene.scene.getSimpleBodies();
-        for ( int i = 0; i < bodies.size(); i++ ) {
-            if ( i > 0 ) {
-                sb.append(',');
-            }
-            SimpleBody body = bodies.get(i);
-            Geometry geometry = body.getGeometry();
-            Vector3Dd position = body.getPosition();
-            Vector3Dd scale = body.getScale();
-            sb.append("{\"index\":").append(i)
-                .append(",\"name\":\"").append(escape(body.getName())).append('"')
-                .append(",\"geometry\":\"").append(geometry.getClass().getSimpleName()).append('"')
-                .append(",\"position\":").append(vector(position))
-                .append(",\"scale\":").append(vector(scale));
-            if ( geometry instanceof Sphere ) {
-                sb.append(",\"radius\":").append(((Sphere)geometry).getRadius());
-            }
-            sb.append('}');
-        }
-        sb.append("],\"lights\":[");
-        ArrayList<Light> lights = scene.scene.getLights();
-        for ( int i = 0; i < lights.size(); i++ ) {
-            if ( i > 0 ) {
-                sb.append(',');
-            }
-            Light light = lights.get(i);
-            sb.append("{\"index\":").append(i)
-                .append(",\"type\":\"").append(light.getClass().getSimpleName()).append('"')
-                .append(",\"position\":").append(vector(light.getPosition()))
-                .append(",\"emission\":").append(color(light.getEmission()))
-                .append('}');
-        }
-        sb.append("]}");
-        return sb.toString();
     }
 
     private static String toolsJson()
     {
         return "{\"tools\":["
-            + tool("scene.describe", "Return the bodies (index, name, geometry, position, scale, radius of spheres) and lights (index, type, position, emission) as JSON.")
-            + "," + tool("scene.clear", "Remove all bodies, lights and debug groups (undoable).")
-            + "," + tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
-            + "," + tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
-            + "," + tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
-            + "," + tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")
-            + "," + tool("scene.move_body", "Set the position of a body (default: the last one; undoable). Arguments: index,x,y,z (missing coordinates are kept).")
-            + "," + tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
-            + "," + tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
-            + "," + tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
-            + "," + tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|delete|escape|left|right|up|down|pageup|pagedown|num0..num9|num/|num*|num-|num+|num.|numenter), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
-            + "," + tool("gui.command", "Execute a command of the GUI that works only over the model, as its menu item or button does (i.e. IDC_CREATE_SPHERE, IDC_CREATE_FUNCTIONALEXPLICITSURFACE, IDC_CREATE_OMNILIGHT, IDC_TOOLS_RAY, IDC_OTHERS_CYCLE_BACKGROUND). Arguments: command. Returns result (DONE, FAILED or NOT_HANDLED for commands that need the GUI, i.e. file dialogs) and the status message.")
-            + "," + tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
-            + "," + tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
-            + "," + tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
-            + "," + tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
-            + "," + tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
-            + "," + tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")
-            + "," + tool("workspace.export_jpg", "Export the whole drawing area, with all its viewports, to a JPG. Arguments: path.")
-            + "," + tool("gui.list_languages", "List the languages available for the GUI (I18N files in etc/gui), marking the current one.")
-            + "," + tool("gui.set_language", "Change the GUI language, rebuilding the GUI. Arguments: language (an id given by gui.list_languages).")
-            + "," + tool("app.exit", "Close the application (after answering this call).")
+            + MCPJson.tool("scene.describe", "Return the bodies (index, name, geometry, position, scale, radius of spheres) and lights (index, type, position, emission) as JSON.")
+            + "," + MCPJson.tool("scene.clear", "Remove all bodies, lights and debug groups (undoable).")
+            + "," + MCPJson.tool("scene.add_point_light", "Create a point light inside the view of a viewport (first light white, the rest random light colors and positions). Optional arguments: x,y,z,r,g,b override the automatic values.")
+            + "," + MCPJson.tool("scene.add_sphere", "Create a sphere. Arguments: radius,x,y,z.")
+            + "," + MCPJson.tool("scene.add_cone", "Create a cone (or truncated cone). Arguments: baseRadius,topRadius,height,x,y,z.")
+            + "," + MCPJson.tool("scene.add_cylinder", "Create a cylinder. Arguments: radius,height,x,y,z.")
+            + "," + MCPJson.tool("scene.move_body", "Set the position of a body (default: the last one; undoable). Arguments: index,x,y,z (missing coordinates are kept).")
+            + "," + MCPJson.tool("scene.select_body", "Select one body (a negative index clears the selection). Arguments: index.")
+            + "," + MCPJson.tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
+            + "," + MCPJson.tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
+            + "," + MCPJson.tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|delete|escape|left|right|up|down|pageup|pagedown|num0..num9|num/|num*|num-|num+|num.|numenter), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
+            + "," + MCPJson.tool("gui.command", "Execute a command of the GUI that works only over the model, as its menu item or button does (i.e. IDC_CREATE_SPHERE, IDC_CREATE_FUNCTIONALEXPLICITSURFACE, IDC_CREATE_OMNILIGHT, IDC_TOOLS_RAY, IDC_OTHERS_CYCLE_BACKGROUND). Arguments: command. Returns result (DONE, FAILED or NOT_HANDLED for commands that need the GUI, i.e. file dialogs) and the status message.")
+            + "," + MCPJson.tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
+            + "," + MCPJson.tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
+            + "," + MCPJson.tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
+            + "," + MCPJson.tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
+            + "," + MCPJson.tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
+            + "," + MCPJson.tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")
+            + "," + MCPJson.tool("workspace.export_jpg", "Export the whole drawing area, with all its viewports, to a JPG. Arguments: path.")
+            + "," + MCPJson.tool("gui.list_languages", "List the languages available for the GUI (I18N files in etc/gui), marking the current one.")
+            + "," + MCPJson.tool("gui.set_language", "Change the GUI language, rebuilding the GUI. Arguments: language (an id given by gui.list_languages).")
+            + "," + MCPJson.tool("app.exit", "Close the application (after answering this call).")
             + "]}";
-    }
-
-    private static String tool(String name, String description)
-    {
-        return "{\"name\":\"" + name + "\",\"description\":\""
-            + escape(description)
-            + "\",\"inputSchema\":{\"type\":\"object\",\"additionalProperties\":true}}";
-    }
-
-    private static String content(String json)
-    {
-        return "{\"content\":[{\"type\":\"text\",\"text\":\""
-            + escape(json) + "\"}],\"isError\":false}";
-    }
-
-    private static String result(String id, String json)
-    {
-        return "{\"jsonrpc\":\"2.0\",\"id\":" + id + ",\"result\":" + json + "}";
-    }
-
-    private static String error(String id, int code, String message)
-    {
-        return "{\"jsonrpc\":\"2.0\",\"id\":" + id
-            + ",\"error\":{\"code\":" + code + ",\"message\":\""
-            + escape(message) + "\"}}";
-    }
-
-    private static String vector(Vector3Dd v)
-    {
-        return "{\"x\":" + v.x() + ",\"y\":" + v.y() + ",\"z\":" + v.z() + "}";
-    }
-
-    private static String color(ColorRgb c)
-    {
-        return "{\"r\":" + c.r() + ",\"g\":" + c.g() + ",\"b\":" + c.b() + "}";
-    }
-
-    private static String stringProperty(String json, String key, String defaultValue)
-    {
-        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
-            + "\"\\s*:\\s*\"((?:\\\\.|[^\"])*)\"");
-        Matcher matcher = pattern.matcher(json);
-        if ( !matcher.find() ) {
-            return defaultValue;
-        }
-        return matcher.group(1);
-    }
-
-    private static String nestedStringProperty(String json, String key, String defaultValue)
-    {
-        return stringProperty(json, key, defaultValue);
-    }
-
-    private static String idProperty(String json)
-    {
-        Pattern pattern = Pattern.compile("\"id\"\\s*:\\s*(\"((?:\\\\.|[^\"])*)\"|[-0-9]+|null)");
-        Matcher matcher = pattern.matcher(json);
-        if ( !matcher.find() ) {
-            return "null";
-        }
-        return matcher.group(1);
-    }
-
-    private static double numberProperty(String json, String key, double defaultValue)
-    {
-        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
-            + "\"\\s*:\\s*(-?[0-9]+(?:\\.[0-9]+)?)");
-        Matcher matcher = pattern.matcher(json);
-        if ( !matcher.find() ) {
-            return defaultValue;
-        }
-        return Double.parseDouble(matcher.group(1));
-    }
-
-    private static Boolean booleanProperty(String json, String key)
-    {
-        Pattern pattern = Pattern.compile("\"" + Pattern.quote(key)
-            + "\"\\s*:\\s*(true|false)");
-        Matcher matcher = pattern.matcher(json);
-        if ( !matcher.find() ) {
-            return null;
-        }
-        return Boolean.valueOf(matcher.group(1));
-    }
-
-    private static String escape(String in)
-    {
-        if ( in == null ) {
-            return "";
-        }
-        return in.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
