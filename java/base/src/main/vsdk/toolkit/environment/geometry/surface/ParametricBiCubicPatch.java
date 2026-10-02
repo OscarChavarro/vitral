@@ -46,6 +46,10 @@ public class ParametricBiCubicPatch extends Surface {
     private static final int INITIAL_APPROXIMATION_STEPS = 12;
     private int approximationSteps;
 
+    // Lazily built ray intersection structures, discarded each time the
+    // patch matrices are rebuilt
+    private transient volatile _ParametricBiCubicPatchIntersector rayIntersector;
+
     public ParametricBiCubicPatch() {
         approximationSteps = INITIAL_APPROXIMATION_STEPS;
         this.type = ParametricCurve.HERMITE;
@@ -115,6 +119,50 @@ public class ParametricBiCubicPatch extends Surface {
         tParameterMatrix = new Matrix4x4d();
         sDerivativeParameterMatrix = new Matrix4x4d();
         tDerivativeParameterMatrix = new Matrix4x4d();
+        rayIntersector = null;
+    }
+
+    /**
+    Returns the ray intersection structures for current patch, building them
+    on first use.
+    @return intersector, or null if the patch has not been built yet
+    */
+    private _ParametricBiCubicPatchIntersector getRayIntersector()
+    {
+        _ParametricBiCubicPatchIntersector intersector = rayIntersector;
+        if ( intersector != null ) {
+            return intersector;
+        }
+        synchronized ( this ) {
+            if ( rayIntersector == null ) {
+                if ( coefficientMatrixX == null || coefficientMatrixY == null ||
+                     coefficientMatrixZ == null ) {
+                    return null;
+                }
+                rayIntersector = new _ParametricBiCubicPatchIntersector(
+                    coefficientMatrixX, coefficientMatrixY, coefficientMatrixZ);
+            }
+            return rayIntersector;
+        }
+    }
+
+    /**
+    Returns the control point of the Bezier patch equivalent to current
+    patch (for Bezier patches, this is the original control mesh point).
+    PRE: Some of the "build*Patch" methods should be called before calling
+    this method.
+    @param i control point index on the s direction, in [0, 3]
+    @param j control point index on the t direction, in [0, 3]
+    @return the Bezier control point (i, j), or null if the patch has not been
+    built
+    */
+    public Vector3Dd getBezierControlPoint(int i, int j)
+    {
+        _ParametricBiCubicPatchIntersector intersector = getRayIntersector();
+        if ( intersector == null ) {
+            return null;
+        }
+        return intersector.getBezierControlPoint(i, j);
     }
 
     public int getApproximationSteps() {
@@ -526,52 +574,157 @@ public class ParametricBiCubicPatch extends Surface {
     Check the general interface contract in superclass method
     Geometry.doIntersectionFirstHit.
 
-    \todo  implement the method
-    @param r
-    @return true if given ray intersects current ParametricBicubicPatch
+    Check the discusion in [WAYN1990] about solving this problem. This
+    implementation follows the subdivision strategy of POV-Ray's
+    bicubic_patch (as replicated on povCpp): the patch is converted to Bezier
+    form and recursively subdivided into nearly flat sub-patches, organized on
+    a tree of bounding spheres. Hits against the flat sub-patches are then
+    refined with Newton iterations over the exact surface.
+    @param r ray to test
+    @return a copy of given ray with its t set at the nearest intersection,
+    or null if the ray misses the patch
     */
     public Ray doIntersectionFirstHit(Ray r) {
-        return null;
+        _ParametricBiCubicPatchIntersector intersector = getRayIntersector();
+        if ( r == null || intersector == null ) {
+            return null;
+        }
+        _ParametricBiCubicPatchIntersector.PatchHit hit = intersector.intersect(r);
+        if ( hit == null ) {
+            return null;
+        }
+        return r.withT(hit.t);
     }
 
     @Override
     public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        return false;
+        _ParametricBiCubicPatchIntersector intersector = getRayIntersector();
+        if ( inRay == null || intersector == null ) {
+            return false;
+        }
+        _ParametricBiCubicPatchIntersector.PatchHit hit =
+            intersector.intersect(inRay);
+        if ( hit == null ) {
+            return false;
+        }
+
+        if ( outHit != null ) {
+            if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                Ray hitRay = inRay.withT(hit.t);
+                outHit.setRay(hitRay);
+                if ( outHit.needsAnySurfaceData() ) {
+                    fillHitInformation(intersector, hit, inRay, outHit);
+                }
+            }
+            else {
+                outHit.setHitDistance(hit.t);
+            }
+        }
+        return true;
     }
 
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
 
-    Check the discusion in [WAYN1990] about solving this problem. Two main
-    strategies are known for solving this: a numeric root finding
-    (trying different values for Ray.t() until a given error tolerance is
-    reached) and converting the patch to a mesh and test the mesh.
-
-    This method implements the numerical approach, while an explicit
-    convertion to a Mesh could be managed by the user/programmer directly.
-    WARNING: The numerical approach is really, really slow... 
-
-    TO DO implement the method
+    Since a patch surface point can not be mapped back to its (s, t)
+    parameters in closed form, the ray is intersected again and the
+    information reported is the one for the nearest hit.
+    @param inRay ray that intersects current patch
+    @param intT ray parameter at the intersection point
+    @param outData receives the intersection details
     */
+    @Override
     public void
-    doExtraInformation(Ray inRay, double intT, 
+    doExtraInformation(Ray inRay, double intT,
                                    RayHit outData) {
-        
+        _ParametricBiCubicPatchIntersector intersector = getRayIntersector();
+        if ( inRay == null || outData == null || intersector == null ) {
+            return;
+        }
+        _ParametricBiCubicPatchIntersector.PatchHit hit =
+            intersector.intersect(inRay);
+        if ( hit == null ) {
+            if ( outData.needsPoint() ) {
+                outData.point = new Vector3Dd(
+                    inRay.getOrigin().x() + intT*inRay.getDirection().x(),
+                    inRay.getOrigin().y() + intT*inRay.getDirection().y(),
+                    inRay.getOrigin().z() + intT*inRay.getDirection().z());
+            }
+            return;
+        }
+        fillHitInformation(intersector, hit, inRay, outData);
+    }
+
+    /**
+    Fills point, normal, tangent and (s, t) texture coordinates for a hit.
+    The normal is oriented against the ray direction, as the patch is an
+    open surface.
+    */
+    private static void fillHitInformation(
+        _ParametricBiCubicPatchIntersector intersector,
+        _ParametricBiCubicPatchIntersector.PatchHit hit,
+        Ray inRay,
+        RayHit outData)
+    {
+        if ( outData.needsPoint() ) {
+            outData.point = new Vector3Dd(hit.px, hit.py, hit.pz);
+        }
+        if ( !outData.needsNormal() && !outData.needsTangent() &&
+             !outData.needsTextureCoordinates() ) {
+            return;
+        }
+
+        double[] derivatives = new double[9];
+        intersector.evaluate(hit.u, hit.v, derivatives);
+        Vector3Dd dQds = new Vector3Dd(
+            derivatives[3], derivatives[4], derivatives[5]);
+        Vector3Dd dQdt = new Vector3Dd(
+            derivatives[6], derivatives[7], derivatives[8]);
+        Vector3Dd triangleNormal = new Vector3Dd(
+            hit.triangleNx, hit.triangleNy, hit.triangleNz);
+
+        Vector3Dd normal = dQds.crossProduct(dQdt);
+        if ( normal.length() <= VSDK.EPSILON * VSDK.EPSILON ) {
+            // Degenerated parameterization (i.e. collapsed patch border)
+            normal = triangleNormal;
+        }
+        normal = normal.normalized();
+        if ( normal.dotProduct(inRay.getDirection()) > 0 ) {
+            normal = normal.multiply(-1);
+        }
+
+        if ( outData.needsNormal() ) {
+            outData.normal = normal;
+        }
+        if ( outData.needsTangent() ) {
+            Vector3Dd tangent = dQds;
+            if ( tangent.length() <= VSDK.EPSILON * VSDK.EPSILON ) {
+                tangent = dQdt;
+            }
+            outData.tangent = tangent.normalized();
+        }
+        if ( outData.needsTextureCoordinates() ) {
+            outData.u = hit.u;
+            outData.v = hit.v;
+        }
     }
 
     /** 
-    Returns an approximate bounding volume minmax for current patch, from
-    the minmax of its contour curve.
-
-    BUG: current contour curve asumption is not valid
+    Returns a bounding volume minmax for current patch. When the patch has
+    been built, this is the minmax of its equivalent Bezier control net, which
+    contains the whole patch by the convex hull property.
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
     */
     @Override
     public double[] getMinMax() {
-        if ( contourCurve != null ) {
+        _ParametricBiCubicPatchIntersector intersector = getRayIntersector();
+        if ( intersector != null ) {
+            return intersector.getMinMax();
+        }
+        else if ( contourCurve != null ) {
             return contourCurve.getMinMax();
         }
         else {
