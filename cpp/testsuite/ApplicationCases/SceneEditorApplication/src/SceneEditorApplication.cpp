@@ -502,10 +502,21 @@ private:
             sceneBridge->setModifyPanelSelected(false);
         }
 
-        // As the `AwtButtonsPanel`s of the tabs
-        const char* groups[] = { "CREATION", "GUI", "OTHER", "RENDER" };
-        Widget pages[] = { creationPage, guiPage, othersPage, renderPage };
-        for (int i = 0; i < 4; ++i) {
+        // As the `AwtButtonsPanel`s of the tabs. The creation page shows its
+        // two groups one below the other (the Java GUI shows them as
+        // collapsible sections)
+        Widget geometryGroup = guiRenderer->buildButtonGroup(
+            creationPage, sceneBridge->getButtonGroup("CREATION_GEOMETRY"),
+            executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH);
+        Dimension geometryGroupHeight = 0;
+        XtVaGetValues(geometryGroup, XtNheight, &geometryGroupHeight, nullptr);
+        guiRenderer->buildButtonGroup(
+            creationPage, sceneBridge->getButtonGroup("CREATION_OTHER"),
+            executor, menuFontSet, 0, geometryGroupHeight, SIDE_PANEL_WIDTH);
+
+        const char* groups[] = { "GUI", "OTHER", "RENDER" };
+        Widget pages[] = { guiPage, othersPage, renderPage };
+        for (int i = 0; i < 3; ++i) {
             guiRenderer->buildButtonGroup(
                 pages[i], sceneBridge->getButtonGroup(groups[i]), executor,
                 menuFontSet, 0, 0, SIDE_PANEL_WIDTH);

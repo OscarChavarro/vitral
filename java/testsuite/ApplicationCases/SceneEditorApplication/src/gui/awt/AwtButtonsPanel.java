@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 // VSDK Classes
+import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 
 // Application classes
@@ -44,8 +45,7 @@ public class AwtButtonsPanel extends JPanel implements ActionListener
 
         switch ( group ) {
           case 1:
-            internal = 
-            SwingGuiRenderer.buildButtonGroup(parent.getApplicationModel().getI18nContext(), "CREATION", this);
+            addCreationSections();
             break;
           case 2:
             internal = 
@@ -72,7 +72,23 @@ public class AwtButtonsPanel extends JPanel implements ActionListener
         //-------------------------------------------------------------------
     }
 
-    
+    /**
+    Adds the creation commands as two collapsible sections: the creation of
+    geometries, and the other creation and exchange operations.
+    */
+    private void addCreationSections()
+    {
+        Widget i18n = parent.getApplicationModel().getI18nContext();
+
+        this.add(new AwtCollapsibleSection(
+            i18n.getMessage("IDM_CREATION_GEOMETRY_SECTION"),
+            SwingGuiRenderer.buildButtonGroup(i18n, "CREATION_GEOMETRY", this),
+            true));
+        this.add(new AwtCollapsibleSection(
+            i18n.getMessage("IDM_CREATION_OTHER_SECTION"),
+            SwingGuiRenderer.buildButtonGroup(i18n, "CREATION_OTHER", this),
+            true));
+    }
 
     @Override
     public void actionPerformed(ActionEvent ev) {

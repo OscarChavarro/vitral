@@ -2,6 +2,10 @@
 //= [KAUF1987] Kaufman, Arie. "Efficient Algorithms for 3D Scan-Conversion  =
 //=     of Parametric Curves, Surfaces, and Volumes", ACM SIGGRAPH Computer =
 //=     Graphics, volume 21, number 4, July 1987.                           =
+//= [AMAN1987] Amanatides, John. Woo, Andrew. "A Fast Voxel Traversal      =
+//=     Algorithm for Ray Tracing", Eurographics '87, 1987.                 =
+//= [SNYD1987] Snyder, John. Barr, Alan. "Ray Tracing Complex Models       =
+//=     Containing Surface Tessellations", SIGGRAPH '87, p. 119-128, 1987.  =
 
 package vsdk.toolkit.environment.geometry.volume;
 import java.io.Serial;
@@ -37,29 +41,70 @@ format, use another toolkit, like ITK or VTK.
 public class VoxelVolume extends Solid {
     @Serial private static final long serialVersionUID = 20070222L;
 
+    /** Default lowest value of a voxel considered part of the solid */
+    public static final int DEFAULT_THRESHOLD = 127;
+
+    /** Smallest ray direction component not considered parallel to an axis */
+    private static final double PARALLEL_EPSILON = 1.0e-12;
+
     private ArrayList<IndexedColorImageUncompressed> data;
+    private int threshold;
 
     public VoxelVolume()
     {
         data = null;
+        threshold = DEFAULT_THRESHOLD;
     }
 
     public int getXSize()
     {
-        if ( data == null || data.size() < 0 ) return 0;
+        if ( data == null || data.isEmpty() ) return 0;
         return data.get(0).getXSize();
     }
 
     public int getYSize()
     {
-        if ( data == null || data.size() < 0 ) return 0;
-        return data.get(0).getXSize();
+        if ( data == null || data.isEmpty() ) return 0;
+        return data.get(0).getYSize();
     }
 
     public int getZSize()
     {
-        if ( data == null || data.size() < 0 ) return 0;
+        if ( data == null || data.isEmpty() ) return 0;
         return data.size();
+    }
+
+    /**
+    @return lowest value of a voxel considered part of the solid (by the ray
+    intersection and by the renderers)
+    */
+    public int getThreshold()
+    {
+        return threshold;
+    }
+
+    /**
+    @param threshold lowest value of a voxel considered part of the solid
+    */
+    public void setThreshold(int threshold)
+    {
+        this.threshold = threshold;
+    }
+
+    /**
+    @param x voxel index along X
+    @param y voxel index along Y
+    @param z voxel index along Z
+    @return true if the voxel is inside the volume and its value reaches the
+    threshold
+    */
+    public boolean isFilled(int x, int y, int z)
+    {
+        if ( x < 0 || y < 0 || z < 0 || x >= getXSize() ||
+             y >= getYSize() || z >= getZSize() ) {
+            return false;
+        }
+        return getVoxel(x, y, z) >= threshold;
     }
 
     public boolean init(int xSize, int ySize, int zSize)
@@ -269,34 +314,237 @@ public class VoxelVolume extends Solid {
     /**
     Check the general interface contract in superclass method
     Geometry.doIntersectionFirstHit.
-
-    NOT IMPLEMENTED YET!
-
     @param inOut_Ray
-    @return true if given ray intersects current VoxelVolume
+    @return the ray with the distance to the first filled voxel hit, or null
+    if no filled voxel is hit
     */
     public Ray doIntersectionFirstHit(Ray inOut_Ray) {
+        RayHit hit = new RayHit();
+        if ( doIntersectionFirstHit(inOut_Ray, hit) ) {
+            return hit.getRay();
+        }
         return null;
     }
 
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doIntersectionFirstHit. The volume is seen as the union of the
+    cubes of its filled voxels (see `isFilled`), and the ray hits the first
+    face through which it enters one of them. A ray starting inside a filled
+    voxel does not hit the voxels it leaves: as with the other solids, only
+    the surface it enters counts.
+
+    The voxels are visited in the order the ray crosses them, as the uniform
+    grid traversal of [SNYD1987] (with the incremental formulation of
+    [AMAN1987]), so the cost grows with the number of voxels crossed, not
+    with the number of voxels of the volume.
+    @param inRay ray in the space of the volume
+    @param outHit receives the hit, or null if only the test is needed
+    @return true if the ray hits a filled voxel
+    */
     @Override
     public boolean doIntersectionFirstHit(Ray inRay, RayHit outHit)
     {
-        return false;
+        VoxelFaceHit hit = traceFirstFilledVoxel(inRay);
+
+        if ( hit == null ) {
+            return false;
+        }
+        if ( outHit != null ) {
+            if ( outHit.shouldStoreRay() || outHit.needsAnySurfaceData() ) {
+                Ray hitRay = inRay.withT(hit.t());
+                outHit.setRay(hitRay);
+                if ( outHit.needsAnySurfaceData() ) {
+                    fillSurfaceData(hitRay, hit, outHit);
+                    outHit.setRay(hitRay);
+                }
+            }
+            else {
+                outHit.setHitDistance(hit.t());
+            }
+        }
+        return true;
     }
 
     /**
     Check the general interface contract in superclass method
     Geometry.doExtraInformation.
-    @param inRay
-    @param inT
-    @param outData
+    @param inRay ray (in the space of the volume) whose first hit is described
+    @param inT distance to the hit
+    @param outData receives the point, normal, texture coordinates and
+    tangent of the hit
     */
     public void
     doExtraInformation(Ray inRay, 
         double inT,
         RayHit outData) {
+        VoxelFaceHit hit = traceFirstFilledVoxel(inRay);
 
+        if ( hit != null ) {
+            fillSurfaceData(inRay.withT(hit.t()), hit, outData);
+        }
+    }
+
+    /**
+    Face of a voxel entered by a ray.
+    @param t distance along the ray to the face
+    @param axis axis perpendicular to the face (0: x, 1: y, 2: z)
+    @param side sign of the outer normal of the face along its axis
+    */
+    private record VoxelFaceHit(double t, int axis, int side)
+    {
+    }
+
+    /**
+    Finds the face of the first filled voxel entered by the ray: clips the
+    ray against the cube <-1, -1, -1>-<1, 1, 1> and visits the voxels it
+    crosses, as `VoxelGrid.gridIntersect` of [SNYD1987]. For each axis,
+    `tNext` is the distance to the next voxel boundary along that axis and
+    `tDelta` the distance between two boundaries; each step moves to the
+    voxel whose boundary is nearest.
+    @param ray ray in the space of the volume
+    @return the face entered, or null if the ray enters no filled voxel
+    */
+    private VoxelFaceHit traceFirstFilledVoxel(Ray ray)
+    {
+        int[] size = { getXSize(), getYSize(), getZSize() };
+
+        if ( size[0] <= 0 || size[1] <= 0 || size[2] <= 0 || ray == null ) {
+            return null;
+        }
+
+        Vector3Dd o = ray.getOrigin();
+        Vector3Dd d = ray.getDirection();
+        double[] origin = { o.x(), o.y(), o.z() };
+        double[] direction = { d.x(), d.y(), d.z() };
+        double[] cellSize = new double[3];
+        double tEnter = Double.NEGATIVE_INFINITY;
+        double tExit = Double.POSITIVE_INFINITY;
+        int enterAxis = 0;
+        int i;
+
+        //- Clip the ray against the volume cube (slabs method) ------------
+        for ( i = 0; i < 3; i++ ) {
+            cellSize[i] = 2.0 / size[i];
+            if ( Math.abs(direction[i]) < PARALLEL_EPSILON ) {
+                if ( origin[i] < -1.0 || origin[i] > 1.0 ) {
+                    return null;
+                }
+                continue;
+            }
+            double t1 = (-1.0 - origin[i]) / direction[i];
+            double t2 = (1.0 - origin[i]) / direction[i];
+            double tNear = Math.min(t1, t2);
+            double tFar = Math.max(t1, t2);
+            if ( tNear > tEnter ) {
+                tEnter = tNear;
+                enterAxis = i;
+            }
+            tExit = Math.min(tExit, tFar);
+        }
+        if ( tExit < Math.max(tEnter, 0.0) ) {
+            return null;
+        }
+        boolean startsInside = tEnter < 0.0;
+        double t = startsInside ? 0.0 : tEnter;
+
+        //- Setup of the traversal, from the voxel where the ray starts ----
+        int[] g = new int[3];
+        int[] step = new int[3];
+        double[] tDelta = new double[3];
+        double[] tNext = new double[3];
+
+        for ( i = 0; i < 3; i++ ) {
+            double p = origin[i] + t * direction[i];
+            g[i] = (int)Math.floor((p + 1.0) / cellSize[i]);
+            if ( g[i] < 0 ) {
+                g[i] = 0;
+            }
+            if ( g[i] >= size[i] ) {
+                g[i] = size[i] - 1;
+            }
+            if ( direction[i] > PARALLEL_EPSILON ) {
+                step[i] = 1;
+                tDelta[i] = cellSize[i] / direction[i];
+                tNext[i] = (-1.0 + (g[i] + 1) * cellSize[i] - origin[i]) / direction[i];
+            }
+            else if ( direction[i] < -PARALLEL_EPSILON ) {
+                step[i] = -1;
+                tDelta[i] = cellSize[i] / -direction[i];
+                tNext[i] = (-1.0 + g[i] * cellSize[i] - origin[i]) / direction[i];
+            }
+            else {
+                step[i] = 0;
+                tDelta[i] = Double.POSITIVE_INFINITY;
+                tNext[i] = Double.POSITIVE_INFINITY;
+            }
+        }
+
+        boolean previousFilled = isFilled(g[0], g[1], g[2]);
+        if ( previousFilled && !startsInside ) {
+            return new VoxelFaceHit(t, enterAxis, direction[enterAxis] > 0 ? -1 : 1);
+        }
+
+        //- Visit the voxels crossed by the ray -----------------------------
+        while ( true ) {
+            int axis;
+            if ( tNext[0] <= tNext[1] && tNext[0] <= tNext[2] ) {
+                axis = 0;
+            }
+            else if ( tNext[1] <= tNext[2] ) {
+                axis = 1;
+            }
+            else {
+                axis = 2;
+            }
+            if ( tNext[axis] > tExit ) {
+                return null;
+            }
+            double tCell = tNext[axis];
+            g[axis] += step[axis];
+            tNext[axis] += tDelta[axis];
+            if ( g[axis] < 0 || g[axis] >= size[axis] ) {
+                return null;
+            }
+            boolean filled = isFilled(g[0], g[1], g[2]);
+            if ( filled && !previousFilled ) {
+                return new VoxelFaceHit(tCell, axis, -step[axis]);
+            }
+            previousFilled = filled;
+        }
+    }
+
+    /**
+    Fills the surface data of a hit on a voxel face: the point, the normal of
+    the face, texture coordinates spanning the volume along the two axes of
+    the face, and a tangent along the first of them.
+    */
+    private static void fillSurfaceData(Ray hitRay, VoxelFaceHit hit,
+                                        RayHit outData)
+    {
+        Vector3Dd p = hitRay.getOrigin().add(
+            hitRay.getDirection().multiply(hit.t()));
+        double[] coordinates = { p.x(), p.y(), p.z() };
+        double[] normal = new double[3];
+        double[] tangent = new double[3];
+        int uAxis = (hit.axis() + 1) % 3;
+        int vAxis = (hit.axis() + 2) % 3;
+
+        normal[hit.axis()] = hit.side();
+        tangent[uAxis] = 1.0;
+        if ( outData.needsPoint() ) {
+            outData.point = p;
+        }
+        if ( outData.needsNormal() ) {
+            outData.normal = new Vector3Dd(normal[0], normal[1], normal[2]);
+        }
+        if ( outData.needsTextureCoordinates() ) {
+            outData.u = (coordinates[uAxis] + 1.0) / 2.0;
+            outData.v = (coordinates[vAxis] + 1.0) / 2.0;
+        }
+        if ( outData.needsTangent() ) {
+            outData.tangent = new Vector3Dd(tangent[0], tangent[1], tangent[2]);
+        }
     }
 
     /**

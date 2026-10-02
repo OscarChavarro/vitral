@@ -25,6 +25,7 @@ import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
 import vsdk.toolkit.environment.geometry.volume.Sphere;
 import vsdk.toolkit.environment.geometry.volume.Torus;
+import vsdk.toolkit.environment.geometry.volume.VoxelVolume;
 import vsdk.toolkit.environment.light.Light;
 import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
@@ -38,7 +39,8 @@ tessellated once into a mesh (cached by its parameters) that is drawn by
 bounding volume, texture, bump map and shading).
 
 Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
-`Arrow`, `Box`, `Torus`, `TriangleMesh`, and the open surfaces
+`Arrow`, `Box`, `Torus`, `TriangleMesh`, `VoxelVolume` (as the cubes of its
+voxels, tessellated by `Jogl4VoxelVolumeRenderer`), and the open surfaces
 `FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
 (tessellated by their `Jogl4*Renderer`, visible from both sides). A
 `ParametricCurve` has no surface: it is drawn as lines by
@@ -68,6 +70,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             geometry instanceof FunctionalExplicitSurface ||
             geometry instanceof ParametricBiCubicPatch ||
             geometry instanceof InfinitePlane ||
+            geometry instanceof VoxelVolume ||
             geometry instanceof ParametricCurve;
     }
 
@@ -272,6 +275,9 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         if ( geometry instanceof InfinitePlane p ) {
             return Jogl4InfinitePlaneRenderer.meshKey(p);
         }
+        if ( geometry instanceof VoxelVolume v ) {
+            return Jogl4VoxelVolumeRenderer.meshKey(v);
+        }
         return null;
     }
 
@@ -300,6 +306,9 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         if ( geometry instanceof InfinitePlane p ) {
             return Jogl4InfinitePlaneRenderer.buildMesh(p);
+        }
+        if ( geometry instanceof VoxelVolume v ) {
+            return Jogl4VoxelVolumeRenderer.buildMesh(v);
         }
         return null;
     }

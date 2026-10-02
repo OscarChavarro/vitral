@@ -478,6 +478,42 @@ public class Cone extends Solid {
     }
 
     /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest. The cone (or truncated cone, or cylinder)
+    has its axis along Z, its base of radius `bottomRadius` at z = 0 and its
+    top of radius `topRadius` at z = `height`. The distance to the side is
+    measured perpendicular to the side, so the tolerance is the same for the
+    side and for the caps.
+    @param p point to classify, in the space of the cone
+    @param distanceTolerance distance to the surface of the cone under which
+    the point is classified as `LIMIT`
+    @return INSIDE, OUTSIDE or LIMIT constant value
+    */
+    @Override
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
+    {
+        if ( height <= 0 ) {
+            return OUTSIDE;
+        }
+        double z = p.z();
+        double radialDistance = Math.sqrt(p.x() * p.x() + p.y() * p.y());
+        double radiusAtZ = bottomRadius + (topRadius - bottomRadius) * (z / height);
+        double radiusChange = bottomRadius - topRadius;
+        double sideCosine = height / Math.sqrt(height * height + radiusChange * radiusChange);
+        double sideDistance = (radialDistance - radiusAtZ) * sideCosine;
+
+        if ( z < -distanceTolerance || z > height + distanceTolerance ||
+             sideDistance > distanceTolerance ) {
+            return OUTSIDE;
+        }
+        if ( z > distanceTolerance && z < height - distanceTolerance &&
+             sideDistance < -distanceTolerance ) {
+            return INSIDE;
+        }
+        return LIMIT;
+    }
+
+    /**
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
     */

@@ -71,7 +71,9 @@ class GeometryCreationCommandsExecutor
             createSphericalHarmonicDebugSpheres();
         }
         else if ( label.equals("IDC_CREATE_VOLUME") ) {
-            createVolume();
+            if ( !createVolume() ) {
+                return CommandResult.FAILED;
+            }
         }
         else if ( label.equals("IDC_CREATE_BREP") ) {
             createBrep();
@@ -155,20 +157,18 @@ class GeometryCreationCommandsExecutor
         }
     }
 
-    private void createVolume()
+    private boolean createVolume()
     {
-        //- Select current object, if empty selection take a temp. sphere -
+        //- The volume is built from the selected object -------------------
         int selectedThing = scene().selectedThings.firstSelected();
-        Geometry referenceGeometry;
-        SimpleBody thing = null;
 
         if ( selectedThing < 0 ) {
-            referenceGeometry = new Sphere(0.5);
+            presenter.showStatusMessage(model.getI18nContext().getMessage(
+                "IDM_CREATE_VOLUME_NO_SELECTION"));
+            return false;
         }
-        else {
-            thing = scene().scene.getSimpleBodies().get(selectedThing);
-            referenceGeometry = thing.getGeometry();
-        }
+        SimpleBody thing = scene().scene.getSimpleBodies().get(selectedThing);
+        Geometry referenceGeometry = thing.getGeometry();
 
         //- Calculate transform matrix ------------------------------------
         double minmax[] = referenceGeometry.getMinMax();
@@ -186,17 +186,46 @@ class GeometryCreationCommandsExecutor
         ProgressMonitorConsole reporter = new ProgressMonitorConsole();
         Voxelization.doVoxelization(referenceGeometry, vv, M, reporter);
 
-        //- Append newly created volume to scene, matching reference form -
-        SimpleBody newThing = scene().addThing(vv);
-        Vector3Dd pos = M.extractTranslation();
-        if ( thing != null ) {
-            pos = pos.add(thing.getPosition());
-            newThing.setRotation(thing.getRotation());
-            newThing.setScale(thing.getScale());
+        if ( !hasFilledVoxels(vv) ) {
+            presenter.showStatusMessage(model.getI18nContext().getMessage(
+                "IDM_CREATE_VOLUME_EMPTY"));
+            return false;
         }
-        newThing.setPosition(pos);
-        Vector3Dd size = new Vector3Dd(M.get(0, 0), M.get(1, 1), M.get(2, 2));
-        newThing.setScale(size);
+
+        //- Append newly created volume to scene, matching reference form -
+        // The body of the volume composes the transformation of the
+        // selected body with M (a translation to the center of the minmax
+        // box and a uniform scale): its rotation is the one of the selected
+        // body, its scale the product of both scales, and the center is
+        // moved by the rotation and scale of the selected body
+        Vector3Dd center = M.extractTranslation();
+        Vector3Dd thingScale = thing.getScale();
+        double voxelSpaceScale = M.get(0, 0);
+        Vector3Dd scaledCenter = new Vector3Dd(center.x() * thingScale.x(),
+            center.y() * thingScale.y(), center.z() * thingScale.z());
+
+        SimpleBody newThing = scene().addThing(vv);
+        newThing.setRotation(thing.getRotation());
+        newThing.setScale(thingScale.multiply(voxelSpaceScale));
+        newThing.setPosition(thing.getPosition().add(
+            thing.getRotation().multiply(scaledCenter)));
+        return true;
+    }
+
+    private static boolean hasFilledVoxels(VoxelVolume vv)
+    {
+        int x, y, z;
+
+        for ( z = 0; z < vv.getZSize(); z++ ) {
+            for ( y = 0; y < vv.getYSize(); y++ ) {
+                for ( x = 0; x < vv.getXSize(); x++ ) {
+                    if ( vv.isFilled(x, y, z) ) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void createBrep()

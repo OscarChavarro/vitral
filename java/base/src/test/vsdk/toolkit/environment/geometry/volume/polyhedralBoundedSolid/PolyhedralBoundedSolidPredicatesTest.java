@@ -1,6 +1,7 @@
 package vsdk.toolkit.environment.geometry.volume.polyhedralBoundedSolid;
 import org.junit.jupiter.api.Test;
 import vsdk.toolkit.common.linealAlgebra.*;
+import vsdk.toolkit.environment.geometry.Geometry;
 import vsdk.toolkit.environment.geometry.geometricProcessing.polyhedralBoundedSolidOperators.SimpleTestGeometryLibrary;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,4 +42,45 @@ class PolyhedralBoundedSolidPredicatesTest {
     }
 
 
+    @Test
+    void given_boxSolid_when_pointsClassified_then_doContainmentTestDistinguishesFaces()
+    {
+        // Arrange: unit box centered at (2, 0, 0)
+        PolyhedralBoundedSolid solid =
+            PolyhedralBoundedSolidTestFixtures.createBoxSolid(1, 1, 1, 2, 0, 0);
+        double tolerance = 0.01;
+
+        // Act & Assert
+        assertThat(solid.doContainmentTest(new Vector3Dd(2, 0, 0), tolerance))
+            .isEqualTo(Geometry.INSIDE);
+        assertThat(solid.doContainmentTest(new Vector3Dd(2.5, 0.1, -0.2), tolerance))
+            .isEqualTo(Geometry.LIMIT);
+        assertThat(solid.doContainmentTest(new Vector3Dd(2, 0, 0.505), tolerance))
+            .isEqualTo(Geometry.LIMIT);
+        assertThat(solid.doContainmentTest(new Vector3Dd(2, 0, 0.6), tolerance))
+            .isEqualTo(Geometry.OUTSIDE);
+        assertThat(solid.doContainmentTest(new Vector3Dd(0, 0, 0), tolerance))
+            .isEqualTo(Geometry.OUTSIDE);
+    }
+
+    @Test
+    void given_nonConvexSolid_when_pointInTheNotchClassified_then_itIsOutside()
+    {
+        // Arrange: profile of [MANT1986].4 in the XZ plane, extruded along Y
+        // from y = 0.4 to y = 0; its top has a notch between x = 0.37 and
+        // x = 0.60 down to z = 0.30
+        PolyhedralBoundedSolid solid =
+            PolyhedralBoundedSolidTestFixtures.createMant1986_1Solid();
+        double tolerance = 0.001;
+
+        // Act & Assert
+        assertThat(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.40), tolerance))
+            .isEqualTo(Geometry.OUTSIDE);
+        assertThat(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.20), tolerance))
+            .isEqualTo(Geometry.INSIDE);
+        assertThat(solid.doContainmentTest(new Vector3Dd(0.90, 0.2, 0.40), tolerance))
+            .isEqualTo(Geometry.INSIDE);
+        assertThat(solid.doContainmentTest(new Vector3Dd(0.48, 0.2, 0.30), tolerance))
+            .isEqualTo(Geometry.LIMIT);
+    }
 }

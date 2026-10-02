@@ -323,6 +323,34 @@ public class Box extends Solid {
     }
 
     /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest. The box is centered at the origin, with its
+    faces perpendicular to the axes.
+    @param p point to classify, in the space of the box
+    @param distanceTolerance distance to the faces of the box under which
+    the point is classified as `LIMIT`
+    @return INSIDE, OUTSIDE or LIMIT constant value
+    */
+    @Override
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
+    {
+        double[] half = { size.x() / 2, size.y() / 2, size.z() / 2 };
+        double[] coordinates = { p.x(), p.y(), p.z() };
+        boolean inside = true;
+
+        for ( int i = 0; i < 3; i++ ) {
+            double distance = Math.abs(coordinates[i]);
+            if ( distance > half[i] + distanceTolerance ) {
+                return OUTSIDE;
+            }
+            if ( distance >= half[i] - distanceTolerance ) {
+                inside = false;
+            }
+        }
+        return inside ? INSIDE : LIMIT;
+    }
+
+    /**
     @return a new 6 valued double array containing the coordinates of a min-max
     bounding box for current geometry.
     */

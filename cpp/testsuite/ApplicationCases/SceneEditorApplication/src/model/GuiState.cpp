@@ -6,12 +6,10 @@
 #include "java/util/ArrayList.txx"
 #include "model/GuiState.h"
 
-// The C++ port shares the I18N files of the Java application
-const char* const GuiState::GUI_LANGUAGE_FOLDER =
-    "../../../../java/testsuite/ApplicationCases/SceneEditorApplication/etc/gui/";
+// All the ports share the I18N files of the etc folder of VITRAL
+const char* const GuiState::GUI_LANGUAGE_FOLDER = "../../../../etc/gui/";
 const char* const GuiState::JSON_EXTENSION = ".json";
-const char* const GuiState::APPLICATION_DATA_FOLDER =
-    "../../../../java/testsuite/ApplicationCases/SceneEditorApplication/";
+const char* const GuiState::APPLICATION_DATA_FOLDER = "../../../../";
 
 namespace {
 bool endsWith(const java::String& text, const java::String& suffix)

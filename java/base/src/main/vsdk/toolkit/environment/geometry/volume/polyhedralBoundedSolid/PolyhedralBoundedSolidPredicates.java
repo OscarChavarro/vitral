@@ -112,6 +112,43 @@ public class PolyhedralBoundedSolidPredicates
         return (lastCrossings & 1) == 1;
     }
 
+    /**
+    Classifies a point against the solid, as `Geometry.doContainmentTest`:
+    `LIMIT` if it lies on a face (closer than the tolerance to the plane of
+    the face, and inside the face polygon with that tolerance), otherwise
+    `INSIDE` or `OUTSIDE` as decided by the robust {@link #isPointInside}.
+
+    @param solid the solid to test against (object-space geometry)
+    @param point the query point, in the solid's object space
+    @param distanceTolerance distance to the boundary under which the point
+    is classified as `LIMIT` (the numeric tolerance of the solid is used if
+    it is larger)
+    @return Geometry.INSIDE, Geometry.OUTSIDE or Geometry.LIMIT
+    */
+    public static int classifyPoint(PolyhedralBoundedSolid solid,
+        Vector3Dd point, double distanceTolerance)
+    {
+        double tolerance = Math.max(distanceTolerance,
+            solid.queryToleranceContext().bigEpsilon());
+
+        for ( int i = 0; i < solid.getPolygonsList().size(); i++ ) {
+            if ( !solid.queryPointNearFace(point, i, tolerance) ) {
+                continue;
+            }
+            _PolyhedralBoundedSolidFace face = solid.getPolygonsList().get(i);
+            InfinitePlane plane = solid.cachedFacePlane(i);
+            if ( plane == null ) {
+                continue;
+            }
+            if ( Math.abs(plane.pointDistance(point)) <= tolerance &&
+                 face.testPointInside(point, tolerance, plane) !=
+                     Geometry.OUTSIDE ) {
+                return Geometry.LIMIT;
+            }
+        }
+        return isPointInside(solid, point) ? Geometry.INSIDE : Geometry.OUTSIDE;
+    }
+
     // Interval classification of a point on the line of sight.
     private static final int OUTSIDE = 0;
     private static final int INTERIOR = 1;

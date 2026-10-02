@@ -1294,10 +1294,10 @@
       ]
     },
     {
-      "name": "CREATION",
+      "name": "CREATION_GEOMETRY",
       "showTitle": true,
       "side": "1",
-      "title": "Global bar",
+      "title": "Geometry elements",
       "showIcons": false,
       "showText": true,
       "direction": "vertical",
@@ -1311,15 +1311,26 @@
         "IDC_CREATE_ARROW",
         "IDC_CREATE_VOLUME",
         "IDC_CREATE_BREP",
-        "IDC_IMPORT_OBJECTS_FROM_FILE",
-        "IDC_EXPORT_OBJECTS_TO_OBJ",
-        "IDC_EXPORT_OBJECTS_TO_GTS",
-        "IDC_EXPORT_OBJECTS_TO_VTK",
         "IDC_CREATE_PARAMETRICCUBICCURVE",
         "IDC_CREATE_PARAMETRICBICUBICPATCH",
         "IDC_CREATE_PLANE",
         "IDC_CREATE_FUNCTIONALEXPLICITSURFACE",
-        "IDC_CREATE_SPHERE_HARMONIC",
+        "IDC_CREATE_SPHERE_HARMONIC"
+      ]
+    },
+    {
+      "name": "CREATION_OTHER",
+      "showTitle": true,
+      "side": "1",
+      "title": "Other elements",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_IMPORT_OBJECTS_FROM_FILE",
+        "IDC_EXPORT_OBJECTS_TO_OBJ",
+        "IDC_EXPORT_OBJECTS_TO_GTS",
+        "IDC_EXPORT_OBJECTS_TO_VTK",
         "IDC_CREATE_PROJECTED_VIEWS",
         "IDC_CREATE_OMNILIGHT"
       ]
@@ -1374,6 +1385,10 @@
   "messages": {
     "IDM_EXIT": "Close application",
     "IDM_CREATION_TAB": "Creation",
+    "IDM_CREATION_GEOMETRY_SECTION": "Geometry elements",
+    "IDM_CREATION_OTHER_SECTION": "Other elements",
+    "IDM_CREATE_VOLUME_NO_SELECTION": "ERROR: select the object to voxelize before creating a volume",
+    "IDM_CREATE_VOLUME_EMPTY": "ERROR: the voxelization of the selected object is empty (its geometry has no containment test)",
     "IDM_OTHERS_TAB": "Scene components",
     "IDM_GUI_TAB": "GUI Control",
     "IDM_RENDER_TAB": "Render",

@@ -25,7 +25,7 @@ public enum PointerCursor
     SCALE("cursor_scale.png", "Scale");
 
     /** Folder with the images of the pointers */
-    public static final String IMAGE_FOLDER = "./etc/cursors/";
+    public static final String IMAGE_FOLDER = "../../../../etc/cursors/";
 
     private final String imageFileName;
     private final String displayName;

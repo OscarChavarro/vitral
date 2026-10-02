@@ -933,6 +933,26 @@ private:
         return scrolled;
     }
 
+    /**
+    Creates the creation page: its two groups one below the other (the Java
+    GUI shows them as collapsible sections).
+    */
+    GtkWidget* createScrolledCreationGroups()
+    {
+        GtkWidget* scrolled = gtk_scrolled_window_new();
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
+                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+        gtk_widget_set_vexpand(scrolled, TRUE);
+
+        GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_box_append(GTK_BOX(box), createButtonGroup(
+            sceneBridge.getButtonGroup("CREATION_GEOMETRY"), false));
+        gtk_box_append(GTK_BOX(box), createButtonGroup(
+            sceneBridge.getButtonGroup("CREATION_OTHER"), false));
+        gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), box);
+        return scrolled;
+    }
+
     GtkWidget* createModifyPanel()
     {
         GtkWidget* scrolled = gtk_scrolled_window_new();
@@ -966,7 +986,7 @@ private:
             "IDM_OTHERS_TAB", "IDM_RENDER_TAB"
         };
         GtkWidget* pages[] = {
-            createScrolledGroup("CREATION"),
+            createScrolledCreationGroups(),
             createModifyPanel(),
             createScrolledGroup("GUI"),
             createScrolledGroup("OTHER"),

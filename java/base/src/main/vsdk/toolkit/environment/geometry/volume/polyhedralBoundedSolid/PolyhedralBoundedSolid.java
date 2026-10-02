@@ -14,6 +14,7 @@ import java.util.List;
 
 // Vitral classes
 import vsdk.toolkit.common.VSDK;
+import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.environment.geometry.element.Vertex2D;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.dataStructures.CircularDoubleLinkedList;
@@ -708,6 +709,28 @@ public class PolyhedralBoundedSolid extends Solid {
                point.y() <= queryFaceAabb[o + 4] + pad &&
                point.z() >= queryFaceAabb[o + 2] - pad &&
                point.z() <= queryFaceAabb[o + 5] + pad;
+    }
+
+    /**
+    Check the general interface contract in superclass method
+    Geometry.doContainmentTest. Delegated to the robust predicate layer
+    (`PolyhedralBoundedSolidPredicates.classifyPoint`): a point on a face is
+    `LIMIT`, any other is classified by a ray-cast parity test.
+    @param p point to classify, in the space of the solid
+    @param distanceTolerance distance to the faces under which the point is
+    classified as `LIMIT`
+    @return INSIDE, OUTSIDE or LIMIT constant value
+    */
+    @Override
+    public int doContainmentTest(Vector3Dd p, double distanceTolerance)
+    {
+        if ( p == null ) {
+            Logger.reportMessage(this, VSDK.WARNING, "doContainmentTest",
+                "Null point given: it is classified as OUTSIDE.");
+            return OUTSIDE;
+        }
+        return PolyhedralBoundedSolidPredicates.classifyPoint(this, p,
+            distanceTolerance);
     }
 
     @Override

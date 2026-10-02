@@ -35,7 +35,10 @@ export class HtmlButtonsPanel implements HtmlActionListener {
 
     switch (group) {
       case 1:
-        internal = HtmlGuiRenderer.buildButtonGroup(context, 'CREATION', this);
+        // The two creation groups one below the other (the Java GUI shows
+        // them as collapsible sections)
+        this.element.appendChild(HtmlGuiRenderer.buildButtonGroup(context, 'CREATION_GEOMETRY', this));
+        internal = HtmlGuiRenderer.buildButtonGroup(context, 'CREATION_OTHER', this);
         break;
       case 2:
         internal = HtmlGuiRenderer.buildButtonGroup(context, 'GUI', this);

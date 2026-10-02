@@ -131,9 +131,11 @@ public class AwtJogl4GuiController
     private void loadGuiDefinition()
     {
         try {
-            // The presentation of the viewport sets follows the language
+            // The presentation of the viewport sets follows the language.
+            // The paths of the icons (./etc/icons/...) are relative to the
+            // VITRAL root folder, whose etc folder is shared by all the ports
             parent.getApplicationModel().setI18nContext(GuiPersistence.importAquynzaGui(
-                new FileInputStream(guiState().getLanguageGuiFile()), "."));
+                new FileInputStream(guiState().getLanguageGuiFile()), "../../../.."));
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");

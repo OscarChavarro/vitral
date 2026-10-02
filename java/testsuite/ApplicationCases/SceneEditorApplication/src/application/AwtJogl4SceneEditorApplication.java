@@ -29,43 +29,26 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     private AwtJogl4GuiController awtGuiController;
     private AwtJogl4ApplicationController jogl4Controller;
 
-    public void setLookAndFeel(String lookAndFeel)
+    void setLookAndFeel(String lookAndFeel)
     {
         awtGuiController.setLookAndFeel(lookAndFeel);
     }
 
-    /**
-    Could be better: if the Swing GUI is not destroyed, but all labels are
-    renamed... but ... what if language files are not exactly equal?
-    */
-    public void setGuiLanguage(String lang)
+    void setGuiLanguage(String lang)
     {
         awtGuiController.setGuiLanguage(lang);
     }
 
-    /**
-    @return the identifiers of the languages available for the GUI, sorted:
-    the names (without extension) of the JSON files in the GUI language folder
-    */
     public List<String> getGuiLanguages()
     {
         return GuiState.listLanguages();
     }
 
-    /**
-    @return the identifier of the language currently used by the GUI
-    */
     public String getCurrentGuiLanguage()
     {
         return applicationModel.getGuiState().getCurrentLanguage();
     }
 
-    /**
-    Changes the language of the GUI, rebuilding it (and so, propagating the new
-    messages to the application model).
-    @param language one of the identifiers given by `getGuiLanguages`
-    @return true if the language exists and was selected
-    */
     public boolean setGuiLanguageById(String language)
     {
         if ( language == null || !getGuiLanguages().contains(language) ) {
@@ -117,7 +100,7 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
         awtGuiController.destroyGUI();
     }
 
-    public AwtJogl4SceneEditorApplication(String[] args) {
+    AwtJogl4SceneEditorApplication(String[] args) {
         createModel();
         createGUI();
 
@@ -180,10 +163,6 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
         return jogl4Controller;
     }
 
-    /**
-    Requests to draw again the drawing area, whatever the rendering
-    technology presenting it.
-    */
     @Override
     public void repaintDrawingArea()
     {
@@ -207,7 +186,7 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     }
 
     public static void main(String[] args) {
-        AwtJogl4MainThread mt = new AwtJogl4MainThread(args);
-        SwingUtilities.invokeLater(mt);
+        AwtJogl4MainThread mainThread = new AwtJogl4MainThread(args);
+        SwingUtilities.invokeLater(mainThread);
     }
 }

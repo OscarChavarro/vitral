@@ -893,10 +893,10 @@
       ]
     },
     {
-      "name": "CREATION",
+      "name": "CREATION_GEOMETRY",
       "showTitle": true,
       "side": "1",
-      "title": "Global bar",
+      "title": "Elementos geométricos",
       "showIcons": false,
       "showText": true,
       "direction": "vertical",
@@ -910,15 +910,26 @@
         "IDC_CREATE_ARROW",
         "IDC_CREATE_VOLUME",
         "IDC_CREATE_BREP",
-        "IDC_IMPORT_OBJECTS_FROM_FILE",
-        "IDC_EXPORT_OBJECTS_TO_OBJ",
-        "IDC_EXPORT_OBJECTS_TO_GTS",
-        "IDC_EXPORT_OBJECTS_TO_VTK",
         "IDC_CREATE_PARAMETRICCUBICCURVE",
         "IDC_CREATE_FUNCTIONALEXPLICITSURFACE",
         "IDC_CREATE_PARAMETRICBICUBICPATCH",
         "IDC_CREATE_PLANE",
-        "IDC_CREATE_SPHERE_HARMONIC",
+        "IDC_CREATE_SPHERE_HARMONIC"
+      ]
+    },
+    {
+      "name": "CREATION_OTHER",
+      "showTitle": true,
+      "side": "1",
+      "title": "Otros elementos",
+      "showIcons": false,
+      "showText": true,
+      "direction": "vertical",
+      "commands": [
+        "IDC_IMPORT_OBJECTS_FROM_FILE",
+        "IDC_EXPORT_OBJECTS_TO_OBJ",
+        "IDC_EXPORT_OBJECTS_TO_GTS",
+        "IDC_EXPORT_OBJECTS_TO_VTK",
         "IDC_CREATE_PROJECTED_VIEWS",
         "IDC_CREATE_OMNILIGHT"
       ]
@@ -973,6 +984,10 @@
   "messages": {
     "IDM_EXIT": "Cierra la aplicación",
     "IDM_CREATION_TAB": "Creación",
+    "IDM_CREATION_GEOMETRY_SECTION": "Elementos geométricos",
+    "IDM_CREATION_OTHER_SECTION": "Otros elementos",
+    "IDM_CREATE_VOLUME_NO_SELECTION": "ERROR: seleccione el objeto a voxelizar antes de crear un volumen",
+    "IDM_CREATE_VOLUME_EMPTY": "ERROR: la voxelización del objeto seleccionado está vacía (su geometría no tiene prueba de contención)",
     "IDM_OTHERS_TAB": "Elementos de escena",
     "IDM_GUI_TAB": "Control de GUI",
     "IDM_RENDER_TAB": "Visualización",

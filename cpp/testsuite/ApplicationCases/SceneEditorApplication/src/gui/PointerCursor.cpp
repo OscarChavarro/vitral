@@ -1,6 +1,6 @@
 #include "gui/PointerCursor.h"
 
-const char* const PointerCursor::IMAGE_FOLDER = "./etc/cursors/";
+const char* const PointerCursor::IMAGE_FOLDER = "../../../../etc/cursors/";
 
 namespace {
 const char* const IMAGE_FILE_NAMES[PointerCursor::COUNT] = {
