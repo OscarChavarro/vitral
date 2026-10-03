@@ -2,6 +2,7 @@ package gui.awt;
 
 // Application classes
 import model.ApplicationModel;
+import model.RenderTechnology;
 
 /**
 Services that the AWT/Swing GUI classes need from the application hosting
@@ -56,4 +57,11 @@ public interface AwtApplicationHost
     Creates the main window of the GUI.
     */
     void createGUI();
+
+    /**
+    Presents the viewport set with other technology, replacing the drawing
+    surface.
+    @param technology the technology to use
+    */
+    void setRenderTechnology(RenderTechnology technology);
 }

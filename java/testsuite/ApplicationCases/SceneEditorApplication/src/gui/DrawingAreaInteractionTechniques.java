@@ -21,6 +21,7 @@ import model.Scene;
 import model.ApplicationModel;
 import model.DrawingArea;
 import model.InteractionMode;
+import model.RenderTechnology;
 import model.selection.ScenePicker;
 import model.selection.SceneSelectionEditor;
 import gui.history.InteractionEditRecorder;
@@ -1040,7 +1041,9 @@ public class DrawingAreaInteractionTechniques
     /**
     Processes one of the standard commands of the viewport set (projection
     location or render mode, i.e. chosen in the menu of a viewport) over a
-    viewport, recording the change of its view.
+    viewport, recording the change of its view. A render technology command
+    is passed to the listener, as only the application can replace the
+    drawing surface.
     @param command the id of the command, starting with `IDV_`
     @param viewport viewport to change
     @return true if the command was a viewport set one and was processed
@@ -1048,6 +1051,16 @@ public class DrawingAreaInteractionTechniques
     public boolean processViewportCommand(String command, Viewport viewport)
     {
         boolean processed;
+        RenderTechnology technology = RenderTechnology.fromCommand(command);
+
+        // The technology presents the whole set: it is not part of the view
+        // history of a viewport
+        if ( technology != null ) {
+            if ( technology != drawingArea.getRenderTechnology() ) {
+                listener.renderTechnologyChangeRequested(technology);
+            }
+            return true;
+        }
 
         editRecorder.beginAction();
         try {

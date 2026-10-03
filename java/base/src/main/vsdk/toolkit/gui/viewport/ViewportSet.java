@@ -31,6 +31,11 @@ last one for each of them where only the selected viewport is visible (see
 `getLayoutStyleCount`); the percent-based area of each viewport has its origin
 at the lower left corner of the set area. If the set has more viewports than the supported layouts, only
 the first one is shown, maximized.
+
+The technology presenting the set decides which render modes its viewports
+can use (i.e. a 2D canvas without a 3D API has no GPU z-buffer): they are
+given with `setAvailableRenderModes`, and the viewports of the set are kept
+in one of them.
 */
 public class ViewportSet
 {
@@ -72,6 +77,7 @@ public class ViewportSet
     private ColorRgb selectedTitleColor;
     private ViewportElementScaler elementScaler;
     private Widget i18nContext;
+    private int[] availableRenderModes;
 
     public ViewportSet()
     {
@@ -86,6 +92,9 @@ public class ViewportSet
         selectedTitleColor = new ColorRgb(1, 1, 0);
         elementScaler = new ViewportElementScaler();
         i18nContext = null;
+        availableRenderModes = new int[] {
+            Viewport.RENDER_MODE_Z_BUFFER, Viewport.RENDER_MODE_RAYTRACING
+        };
     }
 
     /**
@@ -150,7 +159,85 @@ public class ViewportSet
             return;
         }
         viewports.add(viewport);
+        coerceRenderMode(viewport);
         updateLayout();
+    }
+
+    /**
+    @return the render modes (`Viewport.RENDER_MODE_*`) the viewports of this
+    set can use, in the order they are cycled; the first one is the default
+    */
+    public int[] getAvailableRenderModes()
+    {
+        return availableRenderModes.clone();
+    }
+
+    /**
+    Sets the render modes the viewports of this set can use, as given by the
+    technology presenting the set. Viewports in a mode that is no longer
+    available change to the first given mode.
+    @param modes render modes (`Viewport.RENDER_MODE_*`), the default first;
+    null or empty is ignored
+    */
+    public void setAvailableRenderModes(int... modes)
+    {
+        if ( modes == null || modes.length == 0 ) {
+            return;
+        }
+        availableRenderModes = modes.clone();
+        enforceAvailableRenderModes();
+    }
+
+    /**
+    Changes to the default render mode the viewports whose mode is not
+    available (i.e. restored from a view history recorded while the set was
+    presented by other technology). Renderers call it before each frame.
+    */
+    public void enforceAvailableRenderModes()
+    {
+        for ( Viewport viewport : viewports ) {
+            coerceRenderMode(viewport);
+        }
+    }
+
+    /**
+    @param renderMode one of the `Viewport.RENDER_MODE_*` constants
+    @return true if the viewports of this set can use the given render mode
+    */
+    public boolean isRenderModeAvailable(int renderMode)
+    {
+        for ( int mode : availableRenderModes ) {
+            if ( mode == renderMode ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+    Changes the render mode of a viewport to the next available one.
+    @param viewport
+    */
+    public void cycleRenderMode(Viewport viewport)
+    {
+        if ( viewport == null ) {
+            return;
+        }
+        int next = availableRenderModes[0];
+        for ( int i = 0; i < availableRenderModes.length; i++ ) {
+            if ( availableRenderModes[i] == viewport.getRenderMode() ) {
+                next = availableRenderModes[(i + 1) % availableRenderModes.length];
+                break;
+            }
+        }
+        viewport.setRenderMode(next);
+    }
+
+    private void coerceRenderMode(Viewport viewport)
+    {
+        if ( !isRenderModeAvailable(viewport.getRenderMode()) ) {
+            viewport.setRenderMode(availableRenderModes[0]);
+        }
     }
 
     /**

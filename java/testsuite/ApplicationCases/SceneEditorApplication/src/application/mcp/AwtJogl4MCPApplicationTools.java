@@ -9,6 +9,7 @@ import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.io.image.ImagePersistence;
 
+import model.RenderTechnology;
 import model.Scene;
 
 import application.AwtJogl4ApplicationController;
@@ -207,6 +208,28 @@ class AwtJogl4MCPApplicationTools
                 "\". Available languages: " + parent.getGuiLanguages());
         }
         return "{\"ok\":true,\"language\":\"" + MCPJson.escape(language) + "\"}";
+    }
+
+    /**
+    Changes the technology presenting the viewport set, rebuilding the GUI
+    (tool `render.set_technology`).
+    @param request request with the argument technology (opengl4 or awt)
+    @return the answer of the tool as JSON
+    */
+    String setRenderTechnology(String request)
+    {
+        String name = MCPJson.stringProperty(request, "technology", "");
+        RenderTechnology technology;
+
+        try {
+            technology = RenderTechnology.valueOf(name.toUpperCase());
+        }
+        catch ( IllegalArgumentException e ) {
+            throw new IllegalArgumentException("Unknown technology \"" + name +
+                "\". Use opengl4 or awt");
+        }
+        parent.setRenderTechnology(technology);
+        return "{\"ok\":true,\"technology\":\"" + technology.name().toLowerCase() + "\"}";
     }
 
     /**

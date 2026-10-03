@@ -21,6 +21,12 @@ here independently of any implementation.
 - Per viewport render mode: GPU rasterization or CPU raytracing (`.`), with
   the grid, gizmos and selection marks correctly occluded by the raytraced
   objects.
+- Render technology of the whole viewport set, from the menu of a viewport
+  title: OpenGL 4 (JOGL), or AWT 2D drawing only (`src/render/awt`), where
+  viewports are CPU raytraced or CPU hidden lines: wireframe, or hidden line
+  removal with Appel's quantitative invisibility for the solids that are (or
+  export to) a `PolyhedralBoundedSolid` when surfaces are shown. `.` cycles
+  only the render modes of the technology in use.
 - Camera control with the mouse (rotate, pan, advance) and the keyboard.
 
 ### Selection and transformation

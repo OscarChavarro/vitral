@@ -24,15 +24,20 @@ import vsdk.toolkit.gui.widget.WidgetMenuItem;
 
 import gui.DrawingAreaInteractionTechniques;
 import gui.PopupDismissClickFilter;
+import model.DrawingArea;
 
 /**
 Awt/Swing presentation of the menu of a viewport: the
 `VIEWPORT_SET_PROJECTION_LOCATION` popup of the viewport set, to change the
 projection location of a viewport (Perspective, Top, ...), followed, after a
 separator, by the `VIEWPORT_SET_RENDER_MODE` popup, to render it with the GPU
-or the CPU (raytracing). Texts come from the I18N context of the viewport set
-(so it always shows the language currently selected by the user). The
-projection and the render mode currently used are marked.
+or the CPU (raytracing or hidden lines; only the modes available in the
+render technology in use are listed), and by the
+`VIEWPORT_SET_RENDER_TECHNOLOGY` popup, to present the whole viewport set with
+other technology (OpenGL 4 or AWT). Texts come from the I18N context of the
+viewport set (so it always shows the language currently selected by the
+user). The projection, the render mode and the technology currently used are
+marked.
 
 The menu is built each time it is requested. It is a heavyweight popup, since
 it is shown over a heavyweight canvas (i.e. OpenGL), and it is posted over the
@@ -45,6 +50,7 @@ the canvas.
 */
 public class AwtProjectionLocationPopup
 {
+    private final DrawingArea drawingArea;
     private final ViewportSet viewportSet;
     private final DrawingAreaInteractionTechniques techniques;
     private final Component canvas;
@@ -52,17 +58,19 @@ public class AwtProjectionLocationPopup
     private final PopupDismissClickFilter dismissClickFilter;
 
     /**
-    @param viewportSet the set whose I18N context gives the texts
+    @param drawingArea the area presenting the set, whose I18N context gives the
+    texts
     @param techniques the techniques that execute the chosen command (and
     record it in the view history of the viewport)
     @param canvas the component where the viewport set is presented; it
     receives the keyboard focus back when the menu closes
     */
-    public AwtProjectionLocationPopup(ViewportSet viewportSet,
+    public AwtProjectionLocationPopup(DrawingArea drawingArea,
                                       DrawingAreaInteractionTechniques techniques,
                                       Component canvas)
     {
-        this.viewportSet = viewportSet;
+        this.drawingArea = drawingArea;
+        this.viewportSet = drawingArea.getViewportSet();
         this.techniques = techniques;
         this.canvas = canvas;
         this.popup = null;
@@ -109,6 +117,13 @@ public class AwtProjectionLocationPopup
         if ( renderModeDefinition != null ) {
             popup.addSeparator();
             fillMenu(renderModeDefinition, viewport, viewport.getRenderModeCommand());
+        }
+        WidgetMenu technologyDefinition =
+            context.getPopup(ViewportSetCommands.POPUP_RENDER_TECHNOLOGY);
+        if ( technologyDefinition != null ) {
+            popup.addSeparator();
+            fillMenu(technologyDefinition, viewport,
+                drawingArea.getRenderTechnology().getCommand());
         }
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -169,6 +184,10 @@ public class AwtProjectionLocationPopup
             }
 
             final String command = definitionItem.getCommandName();
+            int renderMode = Viewport.renderModeForCommand(command);
+            if ( renderMode != 0 && !viewportSet.isRenderModeAvailable(renderMode) ) {
+                continue;
+            }
             JRadioButtonMenuItem item = new JRadioButtonMenuItem(definitionItem.getName());
             if ( definitionItem.getMnemonic() != 0 ) {
                 item.setMnemonic(KeyEvent.getExtendedKeyCodeForChar(definitionItem.getMnemonic()));

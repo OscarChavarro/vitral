@@ -28,6 +28,9 @@ public class Viewport
 {
     public static final int RENDER_MODE_Z_BUFFER = 1;
     public static final int RENDER_MODE_RAYTRACING = 2;
+    /// Lines computed in the processor: wireframe, or hidden line removal
+    /// (Appel's algorithm) when the rendering configuration asks for surfaces
+    public static final int RENDER_MODE_HIDDEN_LINES = 3;
 
     private int requestedSizeXInPixels;
     private int requestedSizeYInPixels;
@@ -513,30 +516,62 @@ public class Viewport
     */
     public String getRenderModeCommand()
     {
+        return commandForRenderMode(renderMode);
+    }
+
+    /**
+    @param renderMode one of the `RENDER_MODE_*` constants
+    @return the standard command of the render mode popup that selects the
+    given render mode (see `ViewportSetCommands`)
+    */
+    public static String commandForRenderMode(int renderMode)
+    {
         if ( renderMode == RENDER_MODE_RAYTRACING ) {
             return ViewportSetCommands.IDV_RENDER_MODE_CPU;
+        }
+        if ( renderMode == RENDER_MODE_HIDDEN_LINES ) {
+            return ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES;
         }
         return ViewportSetCommands.IDV_RENDER_MODE_GPU;
     }
 
     /**
+    @param command a command of the render mode popup
+    @return the render mode (`RENDER_MODE_*`) selected by the command, or 0
+    if it is not a render mode command
+    */
+    public static int renderModeForCommand(String command)
+    {
+        if ( ViewportSetCommands.IDV_RENDER_MODE_GPU.equals(command) ) {
+            return RENDER_MODE_Z_BUFFER;
+        }
+        if ( ViewportSetCommands.IDV_RENDER_MODE_CPU.equals(command) ) {
+            return RENDER_MODE_RAYTRACING;
+        }
+        if ( ViewportSetCommands.IDV_RENDER_MODE_CPU_HIDDEN_LINES.equals(command) ) {
+            return RENDER_MODE_HIDDEN_LINES;
+        }
+        return 0;
+    }
+
+    /**
     Selects the render mode given by one of the standard commands of the
     render mode popup (see `ViewportSetCommands`): GPU is the z-buffer of the
-    graphics API, CPU is raytracing.
+    graphics API, CPU is raytracing or hidden lines. It does not check if the
+    mode is available in the technology presenting the viewport (see
+    `ViewportSet.isRenderModeAvailable`).
     @param command
     @return true if the command was a render mode one and was applied
     */
     public boolean selectRenderMode(String command)
     {
-        if ( ViewportSetCommands.IDV_RENDER_MODE_GPU.equals(command) ) {
-            renderMode = RENDER_MODE_Z_BUFFER;
-            return true;
+        int mode = renderModeForCommand(command);
+
+        if ( mode == 0 ) {
+            return false;
         }
-        if ( ViewportSetCommands.IDV_RENDER_MODE_CPU.equals(command) ) {
-            renderMode = RENDER_MODE_RAYTRACING;
-            return true;
-        }
-        return false;
+        renderMode = mode;
+        return true;
     }
 
     /**

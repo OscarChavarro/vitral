@@ -22,8 +22,9 @@ Keyboard commands:
     restores the selected viewport.
   - Over the selected viewport: `g` toggles the grid, `t`, `l`, `f`, `b` and
     `p` select the Top, Left, Front, Bottom and Perspective cameras, `.` (and
-    `9`) toggles the render mode between GPU (z-buffer) and CPU (raytracing)
-    and `0` cycles the requested size.
+    `9`) cycles the render modes available in the technology presenting the
+    set (GPU z-buffer, CPU raytracing, CPU hidden lines) and `0` cycles the
+    requested size.
 */
 public class ViewportSetInteractionTechniques
 {
@@ -76,6 +77,10 @@ public class ViewportSetInteractionTechniques
         if ( viewport == null ) {
             return false;
         }
+        int renderMode = Viewport.renderModeForCommand(command);
+        if ( renderMode != 0 && !viewportSet.isRenderModeAvailable(renderMode) ) {
+            return false;
+        }
         return viewport.selectProjectionLocation(command) ||
             viewport.selectRenderMode(command);
     }
@@ -117,7 +122,7 @@ public class ViewportSetInteractionTechniques
         }
 
         if ( event.keycode == KeyEvent.KEY_9 ) {
-            viewport.toggleRenderMode();
+            viewportSet.cycleRenderMode(viewport);
             return true;
         }
         if ( event.keycode == KeyEvent.KEY_NUM0 ) {
@@ -127,7 +132,7 @@ public class ViewportSetInteractionTechniques
 
         switch ( event.unicodeId ) {
           case '.':
-            viewport.toggleRenderMode();
+            viewportSet.cycleRenderMode(viewport);
             return true;
           case 'g':
             viewport.toggleGrid();

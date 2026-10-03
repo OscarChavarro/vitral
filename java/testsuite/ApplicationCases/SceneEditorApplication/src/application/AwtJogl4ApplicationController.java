@@ -20,18 +20,24 @@ import gui.awt.AwtDrawingAreaFeedback;
 import gui.DrawingAreaInteractionTechniques;
 import model.ApplicationModel;
 import model.DrawingArea;
+import model.RenderTechnology;
+import render.awt.AwtDrawingAreaRenderer;
+import render.awt.AwtViewportSetCanvas;
 import render.jogl.Jogl4DrawingAreaRenderer;
 
 /**
-Composition root of the drawing area of the editor: it creates the OpenGL
-canvas and connects the drawing area model with its renderer, its interaction
-techniques and the AWT adapters, and offers the operations that need the
-canvas.
+Composition root of the drawing area of the editor: it creates the canvas of
+the render technology selected in the `DrawingArea` (an OpenGL canvas, or an
+AWT canvas drawn only with 2D operations) and connects the drawing area model
+with its renderer, its interaction techniques and the AWT adapters, and offers
+the operations that need the canvas.
 */
 public class AwtJogl4ApplicationController
 {
     private final ApplicationModel model;
-    private GLCanvas canvas;
+    private Component canvas;
+    /// Technology of the current canvas
+    private RenderTechnology canvasTechnology;
     private AwtDrawingAreaController awtController;
     private AwtDrawingAreaFeedback awtFeedback;
 
@@ -43,20 +49,58 @@ public class AwtJogl4ApplicationController
     private void createDrawingArea(AwtJogl4SceneEditorApplication application)
     {
         DrawingArea drawingArea = model.getDrawingArea();
+        DrawingAreaInteractionTechniques techniques;
 
-        //-----------------------------------------------------------------
-        GLProfile profile = GLProfile.get(GLProfile.GL4);
-        GLCapabilities capabilities = new GLCapabilities(profile);
-        capabilities.setDepthBits(32);
-        canvas = new GLCanvas(capabilities);
+        canvasTechnology = drawingArea.getRenderTechnology();
+        if ( canvasTechnology == RenderTechnology.AWT ) {
+            techniques = createAwtCanvas(application);
+        }
+        else {
+            techniques = createJogl4Canvas(application);
+        }
         canvas.setMinimumSize(new Dimension(8, 8));
 
         //-----------------------------------------------------------------
+        awtController = new AwtDrawingAreaController(canvas, drawingArea,
+            techniques, awtFeedback);
+    }
+
+    /**
+    Creates the interaction techniques, reporting to the feedback of the
+    current canvas.
+    */
+    private DrawingAreaInteractionTechniques createTechniques(
+        AwtJogl4SceneEditorApplication application)
+    {
         awtFeedback = new AwtDrawingAreaFeedback(application, canvas);
         DrawingAreaInteractionTechniques techniques =
             new DrawingAreaInteractionTechniques(model, awtFeedback);
         // While dragging the gizmo, the cursor wraps around its viewport
         techniques.setCursorWrapEnabled(awtFeedback.isCursorWarpAvailable());
+        return techniques;
+    }
+
+    private DrawingAreaInteractionTechniques createAwtCanvas(
+        AwtJogl4SceneEditorApplication application)
+    {
+        AwtViewportSetCanvas awtCanvas = new AwtViewportSetCanvas();
+        canvas = awtCanvas;
+        DrawingAreaInteractionTechniques techniques = createTechniques(application);
+
+        awtCanvas.setRenderer(new AwtDrawingAreaRenderer(model, awtFeedback,
+            techniques::activateViewport));
+        return techniques;
+    }
+
+    private DrawingAreaInteractionTechniques createJogl4Canvas(
+        AwtJogl4SceneEditorApplication application)
+    {
+        GLProfile profile = GLProfile.get(GLProfile.GL4);
+        GLCapabilities capabilities = new GLCapabilities(profile);
+        capabilities.setDepthBits(32);
+        GLCanvas glCanvas = new GLCanvas(capabilities);
+        canvas = glCanvas;
+        DrawingAreaInteractionTechniques techniques = createTechniques(application);
 
         //-----------------------------------------------------------------
         Jogl4DrawingAreaRenderer renderer = new Jogl4DrawingAreaRenderer(
@@ -72,17 +116,35 @@ public class AwtJogl4ApplicationController
             techniques.getTranslationGizmo(),
             techniques.getRotateGizmo(),
             techniques.getScaleGizmo());
-        canvas.addGLEventListener(renderer);
-
-        //-----------------------------------------------------------------
-        awtController = new AwtDrawingAreaController(canvas, drawingArea,
-            techniques, awtFeedback);
+        glCanvas.addGLEventListener(renderer);
+        return techniques;
     }
 
     private void ensureDrawingArea(AwtJogl4SceneEditorApplication application)
     {
+        if ( canvas != null &&
+             canvasTechnology != model.getDrawingArea().getRenderTechnology() ) {
+            // The previous canvas leaves with the window that contains it
+            canvas = null;
+            awtController = null;
+            awtFeedback = null;
+        }
         if ( canvas == null ) {
             createDrawingArea(application);
+        }
+    }
+
+    /**
+    Draws a frame now, so the requests of the frame (i.e. exports to files)
+    are done on return.
+    */
+    private void displayNow()
+    {
+        if ( canvas instanceof GLCanvas ) {
+            ((GLCanvas)canvas).display();
+        }
+        else if ( canvas instanceof AwtViewportSetCanvas ) {
+            ((AwtViewportSetCanvas)canvas).display();
         }
     }
 
@@ -136,7 +198,7 @@ public class AwtJogl4ApplicationController
     public void exportViewportPng(File file)
     {
         model.getDrawingArea().requestViewportExport(file, false);
-        canvas.display();
+        displayNow();
     }
 
     /**
@@ -146,7 +208,7 @@ public class AwtJogl4ApplicationController
     public void exportViewportJpg(File file)
     {
         model.getDrawingArea().requestViewportExport(file, true);
-        canvas.display();
+        displayNow();
     }
 
     /**
@@ -156,7 +218,7 @@ public class AwtJogl4ApplicationController
     public void exportWorkspaceJpg(File file)
     {
         model.getDrawingArea().requestWorkspaceExport(file);
-        canvas.display();
+        displayNow();
     }
 
     /**

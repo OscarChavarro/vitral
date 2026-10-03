@@ -1,5 +1,7 @@
 package gui;
 
+import model.RenderTechnology;
+
 /**
 Receives the requests that `DrawingAreaInteractionTechniques` derives from
 user interaction, so the GUI technology in use can present them (pointer
@@ -54,4 +56,10 @@ public interface DrawingAreaInteractionListener
     The user requested to toggle the full screen GUI mode.
     */
     void fullScreenGuiToggleRequested();
+
+    /**
+    The user requested to present the viewport set with other technology.
+    @param technology the requested technology
+    */
+    void renderTechnologyChangeRequested(RenderTechnology technology);
 }

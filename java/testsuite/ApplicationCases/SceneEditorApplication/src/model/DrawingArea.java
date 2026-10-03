@@ -21,6 +21,7 @@ displays). The viewport set is always expressed in surface pixels.
 public class DrawingArea
 {
     private final ViewportSet viewportSet;
+    private RenderTechnology renderTechnology;
 
     private InteractionMode interactionMode;
     private InteractionMode lastInteractionMode;
@@ -43,6 +44,7 @@ public class DrawingArea
     public DrawingArea(ViewportSet viewportSet)
     {
         this.viewportSet = viewportSet;
+        setRenderTechnology(RenderTechnology.OPENGL4);
 
         // As in 3ds Max, the application starts in selection mode
         interactionMode = InteractionMode.SELECT;
@@ -61,6 +63,31 @@ public class DrawingArea
     public ViewportSet getViewportSet()
     {
         return viewportSet;
+    }
+
+    //= Render technology =================================================
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    public RenderTechnology getRenderTechnology()
+    {
+        return renderTechnology;
+    }
+
+    /**
+    Changes the technology presenting the viewport set, which changes the
+    render modes its viewports can use. The application must replace the
+    drawing surface accordingly.
+    @param renderTechnology the new technology; null is ignored
+    */
+    public void setRenderTechnology(RenderTechnology renderTechnology)
+    {
+        if ( renderTechnology == null ) {
+            return;
+        }
+        this.renderTechnology = renderTechnology;
+        viewportSet.setAvailableRenderModes(renderTechnology.getRenderModes());
     }
 
     //= Interaction mode ==================================================

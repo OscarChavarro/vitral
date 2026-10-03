@@ -21,6 +21,7 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 
 // Application classes
 import model.DrawingArea;
+import model.RenderTechnology;
 import model.selection.SceneSelectionEditor;
 import render.BodyEditFeedbackProvider;
 import render.DrawingAreaHost;
@@ -211,6 +212,12 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         application.getApplicationModel().getGuiState().toggleFullScreenGuiMode();
         application.destroyGUI();
         application.createGUI();
+    }
+
+    @Override
+    public void renderTechnologyChangeRequested(RenderTechnology technology)
+    {
+        application.setRenderTechnology(technology);
     }
 
     //= DrawingAreaHost ===================================================

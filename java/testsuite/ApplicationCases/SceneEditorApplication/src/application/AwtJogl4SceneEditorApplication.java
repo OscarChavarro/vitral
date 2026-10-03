@@ -16,6 +16,7 @@ import vsdk.toolkit.processing.ImageProcessing;
 import model.GuiState;
 import model.Scene;
 import model.ApplicationModel;
+import model.RenderTechnology;
 import gui.awt.AwtApplicationHost;
 import gui.awt.AwtApplicationModel;
 import application.mcp.AwtJogl4VitralEditorMCP;
@@ -144,6 +145,29 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
             applicationModel.setRaytracedDepth(depth);
         }
         applicationModel.getScene().raytraceViewport(image, depth);
+    }
+
+    @Override
+    public void setRenderTechnology(RenderTechnology technology)
+    {
+        if ( technology == null ||
+             technology == applicationModel.getDrawingArea().getRenderTechnology() ) {
+            return;
+        }
+        applicationModel.getDrawingArea().setRenderTechnology(technology);
+        // After the menu that requested it has finished with the old canvas
+        SwingUtilities.invokeLater(() -> {
+            destroyGUI();
+            createGUI();
+        });
+    }
+
+    /**
+    @return the technology presenting the viewport set
+    */
+    public RenderTechnology getRenderTechnology()
+    {
+        return applicationModel.getDrawingArea().getRenderTechnology();
     }
 
     @Override

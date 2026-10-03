@@ -55,7 +55,7 @@ public class AwtDrawingAreaController implements
         this.listener = listener;
 
         projectionLocationPopup = new AwtProjectionLocationPopup(
-            drawingArea.getViewportSet(), techniques, canvas);
+            drawingArea, techniques, canvas);
         techniques.getViewportSetTechniques().setListener(new ViewportSetInteractionListener() {
             @Override
             public void projectionLocationMenuRequested(Viewport viewport, int x, int y) {

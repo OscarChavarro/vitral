@@ -107,14 +107,14 @@ class MCPViewportTools
             value = MCPJson.booleanProperty(request, "grid");
             if ( value != null ) viewport.setShowGrid(value);
             String renderMode = MCPJson.stringProperty(request, "renderMode", "");
-            if ( "gpu".equalsIgnoreCase(renderMode) ) {
-                viewport.setRenderMode(Viewport.RENDER_MODE_Z_BUFFER);
-            }
-            else if ( "cpu".equalsIgnoreCase(renderMode) ) {
-                viewport.setRenderMode(Viewport.RENDER_MODE_RAYTRACING);
-            }
-            else if ( !renderMode.isEmpty() ) {
-                throw new IllegalArgumentException("renderMode must be gpu or cpu");
+            if ( !renderMode.isEmpty() ) {
+                int mode = renderModeFromName(renderMode);
+                if ( !model.getActiveViewportSet().isRenderModeAvailable(mode) ) {
+                    throw new IllegalArgumentException("renderMode " + renderMode +
+                        " is not available with the render technology " +
+                        model.getDrawingArea().getRenderTechnology());
+                }
+                viewport.setRenderMode(mode);
             }
         }
     }
@@ -151,9 +151,31 @@ class MCPViewportTools
                 .append(",\"shading\":\"").append(q.getShadingTypeEnum()).append('"')
                 .append(",\"grid\":").append(viewport.isShowGrid())
                 .append(",\"renderMode\":\"")
-                .append(viewport.getRenderMode() == Viewport.RENDER_MODE_RAYTRACING ? "cpu" : "gpu")
+                .append(renderModeName(viewport.getRenderMode()))
                 .append("\"}");
         }
-        return sb.append("]}").toString();
+        return sb.append("],\"technology\":\"")
+            .append(model.getDrawingArea().getRenderTechnology().name().toLowerCase())
+            .append("\"}").toString();
+    }
+
+    private static int renderModeFromName(String name)
+    {
+        return switch ( name.toLowerCase() ) {
+            case "gpu" -> Viewport.RENDER_MODE_Z_BUFFER;
+            case "cpu" -> Viewport.RENDER_MODE_RAYTRACING;
+            case "hidden_lines" -> Viewport.RENDER_MODE_HIDDEN_LINES;
+            default -> throw new IllegalArgumentException(
+                "renderMode must be gpu, cpu or hidden_lines");
+        };
+    }
+
+    private static String renderModeName(int mode)
+    {
+        return switch ( mode ) {
+            case Viewport.RENDER_MODE_RAYTRACING -> "cpu";
+            case Viewport.RENDER_MODE_HIDDEN_LINES -> "hidden_lines";
+            default -> "gpu";
+        };
     }
 }

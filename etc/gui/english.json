@@ -1017,9 +1017,36 @@
         },
         {
           "type": "item",
-          "name": "&CPU mode",
+          "name": "&CPU mode (raytracing)",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "CPU mode (&hidden lines)",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "VIEWPORT_SET_RENDER_TECHNOLOGY",
+      "children": [
+        {
+          "type": "item",
+          "name": "Render using &OpenGL4",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Render using &AWT",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT"
           ]
         }
       ]
@@ -1271,8 +1298,23 @@
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU",
-      "name": "CPU mode",
+      "name": "CPU mode (raytracing)",
       "brief": "Render the viewport with the processor (parallel raytracing)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES",
+      "name": "CPU mode (hidden lines)",
+      "brief": "Render the viewport with the processor as lines (wireframe, or Appel hidden line removal when surfaces are shown)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4",
+      "name": "Render using OpenGL4",
+      "brief": "Present the viewport set with OpenGL 4 (JOGL)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT",
+      "name": "Render using AWT",
+      "brief": "Present the viewport set with AWT 2D drawing only (no OpenGL)"
     }
   ],
   "buttonGroups": [

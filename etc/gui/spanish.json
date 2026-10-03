@@ -620,9 +620,36 @@
         },
         {
           "type": "item",
-          "name": "Modo &CPU",
+          "name": "Modo &CPU (raytracing)",
           "modifiers": [
             "IDV_VIEWPORT_SET_RENDER_MODE_CPU"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Modo CPU (&líneas ocultas)",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "VIEWPORT_SET_RENDER_TECHNOLOGY",
+      "children": [
+        {
+          "type": "item",
+          "name": "Dibujar usando &OpenGL4",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4"
+          ]
+        },
+        {
+          "type": "item",
+          "name": "Dibujar usando &AWT",
+          "modifiers": [
+            "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT"
           ]
         }
       ]
@@ -870,8 +897,23 @@
     },
     {
       "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU",
-      "name": "Modo CPU",
+      "name": "Modo CPU (raytracing)",
       "brief": "Dibujar la vista con el procesador (raytracing en paralelo)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES",
+      "name": "Modo CPU (líneas ocultas)",
+      "brief": "Dibujar la vista con el procesador como líneas (alambre, o eliminación de líneas ocultas de Appel cuando se muestran superficies)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_OPENGL4",
+      "name": "Dibujar usando OpenGL4",
+      "brief": "Presentar el conjunto de vistas con OpenGL 4 (JOGL)"
+    },
+    {
+      "id": "IDV_VIEWPORT_SET_RENDER_TECHNOLOGY_AWT",
+      "name": "Dibujar usando AWT",
+      "brief": "Presentar el conjunto de vistas solo con dibujo 2D de AWT (sin OpenGL)"
     }
   ],
   "buttonGroups": [

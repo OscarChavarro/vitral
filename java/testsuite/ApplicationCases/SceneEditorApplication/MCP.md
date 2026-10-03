@@ -155,13 +155,23 @@ has not been created`).
   `texture`, `bumpMap`, `boundingVolume`, `normals`, `trianglesNormals`,
   `selectionCorners`, `grid` (reference grid of the viewport), `shading`
   (uppercase, i.e. `PHONG`) and `renderMode` (`gpu` for rasterization, `cpu`
-  for raytracing). Arguments: `viewport` (index; default all).
+  for raytracing, `hidden_lines` for lines computed in the processor), plus
+  the `technology` presenting the viewport set (`opengl4` or `awt`).
+  Arguments: `viewport` (index; default all).
 - `render.set_configuration`: changes the rendering configuration of the
   viewports, only in the given values. Arguments: `viewport` (index; default
   all), any of the booleans reported by `render.get_configuration`, `shading`
   (`nolight`, `flat`, `gouraud`, `phong` or `cook_terrance`, in any case) and
-  `renderMode` (`gpu` or `cpu`). Returns the new configuration. These changes are not
+  `renderMode` (`gpu`, `cpu` or `hidden_lines`; only the modes available in
+  the current technology: `gpu`/`cpu` with `opengl4`, `hidden_lines`/`cpu`
+  with `awt`). Returns the new configuration. These changes are not
   recorded in the view histories.
+- `render.set_technology`: presents the viewport set with other technology,
+  rebuilding the GUI (wait about a second before the next call). Arguments:
+  `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports
+  are drawn with AWT 2D operations, as lines (wireframe, or Appel hidden line
+  removal for the solids when `surfaces` is on; hidden lines dashed when
+  `wires` is also on) or as raytraced images. Gizmos are not drawn there yet.
 - `render.raytrace_png`: raytraces the scene and exports it as a PNG. It uses
   the active camera and rendering configuration of the scene, which the
   editor sets to the ones of each viewport while drawing it: in practice, the
