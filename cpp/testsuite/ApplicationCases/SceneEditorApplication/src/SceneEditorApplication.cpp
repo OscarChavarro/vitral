@@ -44,6 +44,7 @@
 #include "application/XtSceneEditorOpenGLVariant.h"
 #include "gui/PopupDismissClickFilter.h"
 #include "gui/xt/XtApplicationHost.h"
+#include "gui/xt/XtCollapsibleSection.h"
 #include "vsdk/toolkit/gui/XtEventQueue.h"
 #include "gui/xt/XtImageControlWindow.h"
 #include "gui/xt/XtModifyPanel.h"
@@ -145,6 +146,7 @@ public:
         , visualDepth(0)
         , colormap(0)
         , menuFontSet(nullptr)
+        , sectionFontSet(nullptr)
         , rightPanel(nullptr)
         , creationPage(nullptr)
         , modifyPage(nullptr)
@@ -231,6 +233,11 @@ public:
                 XFreeCursor(display, it->second);
             cursors.clear();
         }
+        clearCreationSections();
+        if (display != nullptr && sectionFontSet != nullptr) {
+            XFreeFontSet(display, sectionFontSet);
+            sectionFontSet = nullptr;
+        }
         if (display != nullptr && menuFontSet != nullptr) {
             XFreeFontSet(display, menuFontSet);
             menuFontSet = nullptr;
@@ -287,6 +294,10 @@ private:
     int visualDepth;
     Colormap colormap;
     XFontSet menuFontSet;
+    // Bold font set of the headers of the collapsible sections (the menu
+    // one if the display has no bold font)
+    XFontSet sectionFontSet;
+    std::vector<XtCollapsibleSection*> creationSections;
     Widget rightPanel;
     Widget creationPage;
     Widget modifyPage;
@@ -502,17 +513,8 @@ private:
             sceneBridge->setModifyPanelSelected(false);
         }
 
-        // As the `AwtButtonsPanel`s of the tabs. The creation page shows its
-        // two groups one below the other (the Java GUI shows them as
-        // collapsible sections)
-        Widget geometryGroup = guiRenderer->buildButtonGroup(
-            creationPage, sceneBridge->getButtonGroup("CREATION_GEOMETRY"),
-            executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH);
-        Dimension geometryGroupHeight = 0;
-        XtVaGetValues(geometryGroup, XtNheight, &geometryGroupHeight, nullptr);
-        guiRenderer->buildButtonGroup(
-            creationPage, sceneBridge->getButtonGroup("CREATION_OTHER"),
-            executor, menuFontSet, 0, geometryGroupHeight, SIDE_PANEL_WIDTH);
+        // As the `AwtButtonsPanel`s of the tabs
+        createCreationSections();
 
         const char* groups[] = { "GUI", "OTHER", "RENDER" };
         Widget pages[] = { guiPage, othersPage, renderPage };
@@ -523,6 +525,54 @@ private:
         }
     }
 
+    /**
+    Adds the creation commands as two collapsible sections, as
+    `AwtButtonsPanel.addCreationSections`: the creation of geometries, and
+    the other creation and exchange operations.
+    */
+    void createCreationSections()
+    {
+        const char* titles[] = {
+            "IDM_CREATION_GEOMETRY_SECTION", "IDM_CREATION_OTHER_SECTION"
+        };
+        const char* groups[] = { "CREATION_GEOMETRY", "CREATION_OTHER" };
+        int y = 0;
+        for (int i = 0; i < 2; ++i) {
+            XtCollapsibleSection* section = new XtCollapsibleSection(
+                panelWidgets, creationPage, text(titles[i]),
+                sectionFontSet != nullptr ? sectionFontSet : menuFontSet,
+                y, SIDE_PANEL_WIDTH, true);
+            section->setContent(guiRenderer->buildButtonGroup(
+                section->getContainer(), sceneBridge->getButtonGroup(groups[i]),
+                executor, menuFontSet, 0, 0, SIDE_PANEL_WIDTH));
+            section->setLayoutListener(
+                &SceneEditorApplication::creationSectionResized, this);
+            creationSections.push_back(section);
+            y += section->getHeight();
+        }
+    }
+
+    static void creationSectionResized(XtCollapsibleSection*, void* clientData)
+    {
+        SceneEditorApplication* self =
+            reinterpret_cast<SceneEditorApplication*>(clientData);
+        if (self == nullptr || self->creationSections.empty()) return;
+        XtCollapsibleSection::stack(
+            &self->creationSections[0],
+            static_cast<int>(self->creationSections.size()), 0);
+    }
+
+    /**
+    Deletes the sections of the creation page (their widgets go with the
+    page).
+    */
+    void clearCreationSections()
+    {
+        for (size_t i = 0; i < creationSections.size(); ++i)
+            delete creationSections[i];
+        creationSections.clear();
+    }
+
     void rebuildRightPanel()
     {
         if (sceneBridge != nullptr) sceneBridge->setBodyEditFeedbackProvider(nullptr);
@@ -530,6 +580,7 @@ private:
         modifyPanel = nullptr;
         if (rightPanel != nullptr) XtDestroyWidget(rightPanel);
         rightPanel = nullptr;
+        clearCreationSections();
         creationPage = nullptr;
         modifyPage = nullptr;
         guiPage = nullptr;
@@ -606,6 +657,10 @@ private:
             XFreeFontSet(display, menuFontSet);
             menuFontSet = nullptr;
         }
+        if (sectionFontSet != nullptr) {
+            XFreeFontSet(display, sectionFontSet);
+            sectionFontSet = nullptr;
+        }
         selectGuiLocale();
         createMenuFontSet();
         loadGuiDefinition();
@@ -640,6 +695,17 @@ private:
             throw VSDKFatalException(
                 "Could not create the UTF-8 menu font set");
         }
+
+        // Headers of the sections are bold, as in `AwtCollapsibleSection`
+        missingCharsets = nullptr;
+        missingCharsetCount = 0;
+        sectionFontSet = XCreateFontSet(
+            display,
+            "-adobe-helvetica-bold-r-normal--14-*-*-*-*-*-iso8859-1",
+            &missingCharsets,
+            &missingCharsetCount,
+            &defaultString);
+        if (missingCharsets != nullptr) XFreeStringList(missingCharsets);
     }
 
     /**

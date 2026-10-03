@@ -58,6 +58,17 @@ static Matrix4x4d buildCatmullRomMatrix()
     return Matrix4x4d::copyOf(m);
 }
 
+// Out-of-class definitions, needed when the constants are bound to
+// references (e.g. by gtest assertions) under C++11
+const int ParametricCurve::BREAK;
+const int ParametricCurve::CORNER;
+const int ParametricCurve::QUAD;
+const int ParametricCurve::HERMITE;
+const int ParametricCurve::BEZIER;
+const int ParametricCurve::UNRBSPLINE;
+const int ParametricCurve::NUNRBSPLINE;
+const int ParametricCurve::CATMULLROM;
+
 const Matrix4x4d ParametricCurve::LINEAR_MATRIX = buildLinearMatrix();
 const Matrix4x4d ParametricCurve::HERMITE_MATRIX = buildHermiteMatrix();
 const Matrix4x4d ParametricCurve::BEZIER_MATRIX = buildBezierMatrix();

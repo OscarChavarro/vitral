@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$ROOT_DIR"
-
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ "$#" -eq 0 ]; then
-    ./build/MeshExample ../../../../etc/geometry/cow.obj
-else
-    ./build/MeshExample "$@"
+    set -- ../../../../etc/geometry/cow.obj
 fi
+exec "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
+  MeshExample ./build/MeshExample "$@"

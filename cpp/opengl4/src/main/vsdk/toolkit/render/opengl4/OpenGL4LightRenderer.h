@@ -9,8 +9,32 @@ class Camera;
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "java/util/ArrayList.h"
 
+#include <utility>
+#include <vector>
+
 class OpenGL4LightRenderer {
 public:
+    /**
+    Activates a copy of the light for the renderers that take the lights
+    from the active ones instead of as a parameter (i.e.
+    `OpenGL4PolyhedralBoundedSolidRenderer`). A light with the id of an
+    already active one replaces it.
+    @param light light to activate, or null to do nothing
+    */
+    static void activate(const Light* light);
+
+    /**
+    Forgets all the lights activated so far, so `getActiveLights` reports
+    the default light until other lights are activated.
+    */
+    static void deactivateAll();
+
+    /**
+    @param outLights receives copies (owned by the caller) of the active
+    lights, in activation order, or of the default light if none is active
+    */
+    static void getActiveLights(java::ArrayList<Light*>& outLights);
+
     static void draw(const Light* light);
     static void draw(const Light* light, Camera* camera);
     static void draw(const Light* light, Camera* camera, LightGizmoStyle lightGizmoStyle);
@@ -23,6 +47,11 @@ public:
     static void dispose();
 
 private:
+    /// Copies of the active lights by id, in activation order (Java uses a
+    /// `LinkedHashMap`)
+    static std::vector<std::pair<int, Light*> > activeLights;
+    static Light* defaultLight();
+
     static double scale;
     static unsigned int vao;
     static unsigned int vboPositions;

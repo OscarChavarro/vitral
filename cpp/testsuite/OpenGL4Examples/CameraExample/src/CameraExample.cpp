@@ -1,104 +1,166 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
-#ifdef __APPLE__
-#define GLFW_INCLUDE_GLCOREARB
-#include <OpenGL/gl3.h>
-#else
-#define GLFW_INCLUDE_NONE
 #include <glad/gl.h>
 #include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
-#endif
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
+#include "vsdk/toolkit/fixtures/OpenGL4SimpleCorridorSample.h"
+#include "vsdk/toolkit/gui/CameraController.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MatrixRenderer.h"
-GLFWwindow* window = nullptr;
-Camera* camera = nullptr;
-CameraControllerAquynza* controller = nullptr;
-OpenGL4SimpleCorridorSample* corridor = nullptr;
-int lastFramebufferWidth = 640;
-int lastFramebufferHeight = 480;
 
-void framebufferSizeCallback(GLFWwindow* win, int width, int height) {
-    glViewport(0, 0, width, height);
-    if (camera) {
-        camera->updateViewportResize(width, height);
+/**
+C++ counterpart of Java's `Jogl4Examples/CameraExample`. As in Java, the
+scene is only redrawn when the camera controller reports a change (or the
+window is resized / exposed).
+*/
+static GLFWwindow* window = nullptr;
+static Camera* camera = nullptr;
+static CameraController* cameraController = nullptr;
+static OpenGL4SimpleCorridorSample* corridor = nullptr;
+static bool needsRepaint = true;
+
+static void createModel()
+{
+    camera = new Camera();
+    cameraController = new CameraControllerAquynza(camera);
+    corridor = new OpenGL4SimpleCorridorSample();
+}
+
+static void drawObjectsGL()
+{
+    glEnable(GL_DEPTH_TEST);
+
+    Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
+    float* mvp = projection.exportToFloatArrayColumnOrder();
+    corridor->drawGL(mvp, projection);
+    OpenGL4MatrixRenderer::draw(mvp, Matrix4x4d::identityMatrix());
+    delete[] mvp;
+}
+
+static void display()
+{
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    drawObjectsGL();
+    glfwSwapBuffers(window);
+}
+
+static void dispose()
+{
+    if ( corridor != nullptr ) {
+        corridor->dispose();
+    }
+    OpenGL4CameraRenderer::dispose();
+}
+
+static void reshape(GLFWwindow* /*win*/, int xSize, int ySize)
+{
+    glViewport(0, 0, xSize, ySize);
+    camera->updateViewportResize(xSize, ySize);
+    needsRepaint = true;
+}
+
+static void refresh(GLFWwindow* /*win*/)
+{
+    needsRepaint = true;
+}
+
+static void requestClose()
+{
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
+static void keyCallback(GLFWwindow* /*win*/, int key, int /*scancode*/,
+    int action, int mods)
+{
+    KeyEvent e = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
+
+    if ( action == GLFW_RELEASE ) {
+        if ( cameraController->processKeyReleasedEvent(e) ) {
+            needsRepaint = true;
+        }
+        return;
+    }
+
+    if ( key == GLFW_KEY_ESCAPE ) {
+        requestClose();
+        return;
+    }
+
+    if ( cameraController->processKeyPressedEvent(e) ) {
+        needsRepaint = true;
     }
 }
 
-void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods) {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
-        if (controller) {
-            controller->processKeyPressedEvent(event);
+static void mouseButtonCallback(GLFWwindow* win, int button, int action,
+    int /*mods*/)
+{
+    double x;
+    double y;
+    glfwGetCursorPos(win, &x, &y);
+    MouseEvent e = GlfwSystem::glfw2vsdkMouseEvent(button, action, x, y);
+
+    if ( action == GLFW_PRESS ) {
+        if ( cameraController->processMousePressedEvent(e) ) {
+            needsRepaint = true;
         }
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(win, GLFW_TRUE);
-        }
-    } else if (action == GLFW_RELEASE) {
-        KeyEvent event = GlfwSystem::glfw2vsdkKeyEvent(key, mods);
-        if (controller) {
-            controller->processKeyReleasedEvent(event);
+    }
+    else if ( action == GLFW_RELEASE ) {
+        if ( cameraController->processMouseReleasedEvent(e) ) {
+            needsRepaint = true;
         }
     }
 }
 
-void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods) {
-    double xpos, ypos;
-    glfwGetCursorPos(win, &xpos, &ypos);
-    MouseEvent event = GlfwSystem::glfw2vsdkMouseEvent(button, action, xpos, ypos);
+static void cursorPosCallback(GLFWwindow* win, double x, double y)
+{
+    MouseEvent e = GlfwSystem::glfw2vsdkMotionEvent(x, y);
+    int modifiers = 0;
 
-    if (controller) {
-        if (action == GLFW_PRESS) {
-            controller->processMousePressedEvent(event);
-        } else if (action == GLFW_RELEASE) {
-            controller->processMouseReleasedEvent(event);
-        }
+    if ( glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ) {
+        modifiers |= MouseEvent::BUTTON1_DOWN_MASK;
+    }
+    if ( glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
+        modifiers |= MouseEvent::BUTTON2_DOWN_MASK;
+    }
+    if ( glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS ) {
+        modifiers |= MouseEvent::BUTTON3_DOWN_MASK;
+    }
+    e.setModifiers(modifiers);
+
+    bool changed;
+    if ( modifiers != 0 ) {
+        changed = cameraController->processMouseDraggedEvent(e);
+    }
+    else {
+        changed = cameraController->processMouseMovedEvent(e);
+    }
+    if ( changed ) {
+        needsRepaint = true;
     }
 }
 
-void cursorPosCallback(GLFWwindow* win, double xpos, double ypos) {
-    if (controller) {
-        MouseEvent event = GlfwSystem::glfw2vsdkMotionEvent(xpos, ypos);
-        int leftButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT);
-        int middleButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_MIDDLE);
-        int rightButton = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_RIGHT);
-
-        int modifiers = 0;
-        if (leftButton == GLFW_PRESS) {
-            modifiers |= MouseEvent::BUTTON1_DOWN_MASK;
-        }
-        if (middleButton == GLFW_PRESS) {
-            modifiers |= MouseEvent::BUTTON2_DOWN_MASK;
-        }
-        if (rightButton == GLFW_PRESS) {
-            modifiers |= MouseEvent::BUTTON3_DOWN_MASK;
-        }
-        event.setModifiers(modifiers);
-
-        if (leftButton == GLFW_PRESS || middleButton == GLFW_PRESS || rightButton == GLFW_PRESS) {
-            controller->processMouseDraggedEvent(event);
-        } else {
-            controller->processMouseMovedEvent(event);
-        }
+static void scrollCallback(GLFWwindow* /*win*/, double xOffset, double yOffset)
+{
+    MouseEvent e = GlfwSystem::glfw2vsdkWheelEvent(xOffset, yOffset);
+    if ( cameraController->processMouseWheelEvent(e) ) {
+        needsRepaint = true;
     }
 }
 
-void scrollCallback(GLFWwindow* win, double xoffset, double yoffset) {
-    if (controller) {
-        MouseEvent event = GlfwSystem::glfw2vsdkWheelEvent(xoffset, yoffset);
-        controller->processMouseWheelEvent(event);
-    }
-}
-
-int main(int argc, char** argv) {
-    if (!glfwInit()) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
-        return -1;
+int main(int /*argc*/, char** /*argv*/)
+{
+    if ( !glfwInit() ) {
+        printf("Can not start OpenGL/GLFW.\n");
+        return 0;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -106,85 +168,52 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-    window = glfwCreateWindow(640, 480, "Camera Example", nullptr, nullptr);
-    if (!window) {
-        fprintf(stderr, "Failed to create GLFW window\n");
+    window = glfwCreateWindow(640, 480,
+        "VITRAL concept test - OpenGL4 Camera control example",
+        nullptr, nullptr);
+    if ( window == nullptr ) {
+        printf("Can not start OpenGL/GLFW.\n");
         glfwTerminate();
-        return -1;
+        return 0;
     }
-
+    glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    if (!OpenGL4Loader::load(glfwGetProcAddress)) {
+    if ( !OpenGL4Loader::load(glfwGetProcAddress) ) {
+        printf("Can not start OpenGL/GLFW.\n");
         glfwDestroyWindow(window);
         glfwTerminate();
-        return -1;
+        return 0;
     }
 
-    camera = new Camera();
-    camera->updateViewportResize(640, 480);
+    createModel();
 
-    controller = new CameraControllerAquynza(camera);
-    corridor = new OpenGL4SimpleCorridorSample();
-
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetFramebufferSizeCallback(window, reshape);
+    glfwSetWindowRefreshCallback(window, refresh);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPosCallback);
     glfwSetScrollCallback(window, scrollCallback);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
+    int xSize;
+    int ySize;
+    glfwGetFramebufferSize(window, &xSize, &ySize);
+    reshape(window, xSize, ySize);
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-
-        int currentWidth, currentHeight;
-        glfwGetFramebufferSize(window, &currentWidth, &currentHeight);
-        if (currentWidth != lastFramebufferWidth || currentHeight != lastFramebufferHeight) {
-            lastFramebufferWidth = currentWidth;
-            lastFramebufferHeight = currentHeight;
-            glViewport(0, 0, currentWidth, currentHeight);
-            if (camera) {
-                camera->updateViewportResize(currentWidth, currentHeight);
-            }
+    while ( !glfwWindowShouldClose(window) ) {
+        if ( needsRepaint ) {
+            needsRepaint = false;
+            display();
         }
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
-        float* mvp = projection.exportToFloatArrayColumnOrder();
-        Matrix4x4d identity = Matrix4x4d::identityMatrix();
-
-        corridor->drawGL(mvp, identity);
-        OpenGL4MatrixRenderer::draw(mvp, identity);
-
-        delete[] mvp;
-
-        glfwSwapBuffers(window);
+        glfwWaitEvents();
     }
 
-    OpenGL4MatrixRenderer::release();
-
-    if (corridor) {
-        corridor->dispose();
-        delete corridor;
-        corridor = nullptr;
-    }
-    OpenGL4CameraRenderer::dispose();
-    if (controller) {
-        delete controller;
-        controller = nullptr;
-    }
-    if (camera) {
-        delete camera;
-        camera = nullptr;
-    }
-
-    if (window) {
-        glfwDestroyWindow(window);
-    }
+    dispose();
+    delete corridor;
+    delete cameraController;
+    delete camera;
+    glfwDestroyWindow(window);
     glfwTerminate();
 
     return 0;

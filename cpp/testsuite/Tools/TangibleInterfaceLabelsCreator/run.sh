@@ -1,10 +1,6 @@
-#!/usr/bin/env sh
-set -e
-cd "$(dirname "$0")"
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ ! -x build/tangibleInterfaceLabelsCreator ]; then
-  echo "Binary not found. Run ../../../../scripts/compile.sh first." >&2
-  exit 1
-fi
-
-exec build/tangibleInterfaceLabelsCreator "$@"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
+  tangibleInterfaceLabelsCreator ./build/tangibleInterfaceLabelsCreator "$@"

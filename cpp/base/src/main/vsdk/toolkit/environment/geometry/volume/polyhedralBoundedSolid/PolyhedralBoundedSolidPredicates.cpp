@@ -189,6 +189,32 @@ bool PolyhedralBoundedSolidPredicates::isPointInside(
     return (lastCrossings & 1) == 1;
 }
 
+int PolyhedralBoundedSolidPredicates::classifyPoint(
+    PolyhedralBoundedSolid* solid,
+    const Vector3Dd& point,
+    double distanceTolerance)
+{
+    double tolerance = std::max(distanceTolerance,
+        solid->queryToleranceContext().bigEpsilon());
+
+    for ( int i = 0; i < (int)solid->getPolygonsList().size(); i++ ) {
+        if ( !solid->queryPointNearFace(point, i, tolerance) ) {
+            continue;
+        }
+        _PolyhedralBoundedSolidFace* face = solid->getPolygonsList().get(i);
+        InfinitePlane* plane = solid->cachedFacePlane(i);
+        if ( plane == nullptr ) {
+            continue;
+        }
+        if ( std::abs(plane->pointDistance(point)) <= tolerance &&
+             face->testPointInside(point, tolerance, plane) !=
+                 Geometry::OUTSIDE ) {
+            return Geometry::LIMIT;
+        }
+    }
+    return isPointInside(solid, point) ? Geometry::INSIDE : Geometry::OUTSIDE;
+}
+
 int PolyhedralBoundedSolidPredicates::quantitativeInvisibility(
     PolyhedralBoundedSolid* solid,
     const Vector3Dd& eye,

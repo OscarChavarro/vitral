@@ -1,13 +1,6 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$SCRIPT_DIR/build"
-
-if [ ! -f "$BUILD_DIR/_OpenGL4HelloWorld" ]; then
-    echo "Executable not found. Building..."
-    bash "$SCRIPT_DIR/build.sh"
-fi
-
-echo "Running _OpenGL4HelloWorld..."
-"$BUILD_DIR/_OpenGL4HelloWorld"
+exec "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
+  _OpenGL4HelloWorld ./build/_OpenGL4HelloWorld "$@"

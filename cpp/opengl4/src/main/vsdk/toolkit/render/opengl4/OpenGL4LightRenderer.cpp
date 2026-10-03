@@ -10,10 +10,56 @@
 #include "vsdk/toolkit/media/Calligraphic2DBuffer.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoOmniBillboard.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
+std::vector<std::pair<int, Light*> > OpenGL4LightRenderer::activeLights;
 double OpenGL4LightRenderer::scale = 1.0;
+
+void OpenGL4LightRenderer::activate(const Light* light)
+{
+    if ( light == nullptr ) {
+        return;
+    }
+    for ( size_t i = 0; i < activeLights.size(); i++ ) {
+        if ( activeLights[i].first == light->getId() ) {
+            delete activeLights[i].second;
+            activeLights[i].second = light->copy();
+            return;
+        }
+    }
+    activeLights.push_back(std::make_pair(light->getId(), light->copy()));
+}
+
+void OpenGL4LightRenderer::deactivateAll()
+{
+    for ( size_t i = 0; i < activeLights.size(); i++ ) {
+        delete activeLights[i].second;
+    }
+    activeLights.clear();
+}
+
+void OpenGL4LightRenderer::getActiveLights(java::ArrayList<Light*>& outLights)
+{
+    if ( activeLights.empty() ) {
+        outLights.add(defaultLight());
+        return;
+    }
+    for ( size_t i = 0; i < activeLights.size(); i++ ) {
+        outLights.add(activeLights[i].second->copy());
+    }
+}
+
+/**
+@return a new white light at <10, 10, 10>, owned by the caller
+*/
+Light* OpenGL4LightRenderer::defaultLight()
+{
+    Light* light = new PointLight(Vector3Dd(10, 10, 10), ColorRgb(1, 1, 1));
+    light->setId(0);
+    return light;
+}
 unsigned int OpenGL4LightRenderer::vao = 0;
 unsigned int OpenGL4LightRenderer::vboPositions = 0;
 unsigned int OpenGL4LightRenderer::vboColors = 0;

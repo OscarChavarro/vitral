@@ -13,7 +13,7 @@
 
 #include <glad/gl.h>
 
-#include "application/GuiEventExecutor.h"
+#include "application/commands/GuiEventExecutor.h"
 #include "java/io/File.h"
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
@@ -418,6 +418,11 @@ private:
     bool glLoaded;
     bool bridgeInitialized;
     bool buttonDown;
+    // As in AWT, a press followed by any motion is not a click
+    bool pressMoved;
+    double pressX;
+    double pressY;
+    gint pressCount;
 
 public:
     explicit Gtk4SceneEditor(GtkApplication* app)
@@ -438,7 +443,11 @@ public:
           sceneBridge(&labels, this),
           glLoaded(false),
           bridgeInitialized(false),
-          buttonDown(false)
+          buttonDown(false),
+          pressMoved(false),
+          pressX(0.0),
+          pressY(0.0),
+          pressCount(0)
     {
     }
 
@@ -934,8 +943,31 @@ private:
     }
 
     /**
-    Creates the creation page: its two groups one below the other (the Java
-    GUI shows them as collapsible sections).
+    Creates a section with a bold title that shows or hides its content when
+    clicked, as `AwtCollapsibleSection`.
+    @param titleId I18N message of the title of the section
+    @param content widget shown or hidden by the section
+    @return the section, starting expanded
+    */
+    GtkWidget* createCollapsibleSection(const char* titleId, GtkWidget* content)
+    {
+        gchar* escaped = g_markup_escape_text(message(titleId).c_str(), -1);
+        gchar* markup = g_strdup_printf("<b>%s</b>", escaped);
+        GtkWidget* section = gtk_expander_new(markup);
+        g_free(markup);
+        g_free(escaped);
+        gtk_expander_set_use_markup(GTK_EXPANDER(section), TRUE);
+        gtk_expander_set_expanded(GTK_EXPANDER(section), TRUE);
+        gtk_widget_set_margin_top(section, 4);
+        gtk_widget_set_margin_bottom(section, 4);
+        gtk_expander_set_child(GTK_EXPANDER(section), content);
+        return section;
+    }
+
+    /**
+    Creates the creation page as `AwtButtonsPanel.addCreationSections`: two
+    collapsible sections, the creation of geometries and the other creation
+    and exchange operations.
     */
     GtkWidget* createScrolledCreationGroups()
     {
@@ -945,10 +977,12 @@ private:
         gtk_widget_set_vexpand(scrolled, TRUE);
 
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_box_append(GTK_BOX(box), createButtonGroup(
-            sceneBridge.getButtonGroup("CREATION_GEOMETRY"), false));
-        gtk_box_append(GTK_BOX(box), createButtonGroup(
-            sceneBridge.getButtonGroup("CREATION_OTHER"), false));
+        gtk_box_append(GTK_BOX(box), createCollapsibleSection(
+            "IDM_CREATION_GEOMETRY_SECTION",
+            createButtonGroup(sceneBridge.getButtonGroup("CREATION_GEOMETRY"), false)));
+        gtk_box_append(GTK_BOX(box), createCollapsibleSection(
+            "IDM_CREATION_OTHER_SECTION",
+            createButtonGroup(sceneBridge.getButtonGroup("CREATION_OTHER"), false)));
         gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), box);
         return scrolled;
     }
@@ -1101,7 +1135,18 @@ private:
                 gtk_box_append(GTK_BOX(box), gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
                 continue;
             }
-            GtkWidget* button = gtk_button_new_with_label(items[i].label.c_str());
+            // As the menus of the other ports: flat entries, the projection
+            // location and render modes in use checked
+            GtkWidget* entry = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+            GtkWidget* mark = gtk_label_new(items[i].current ? "\u2713" : "");
+            gtk_widget_set_size_request(mark, 16, -1);
+            gtk_box_append(GTK_BOX(entry), mark);
+            GtkWidget* label = gtk_label_new(items[i].label.c_str());
+            gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+            gtk_box_append(GTK_BOX(entry), label);
+            GtkWidget* button = gtk_button_new();
+            gtk_button_set_child(GTK_BUTTON(button), entry);
+            gtk_widget_add_css_class(button, "flat");
             g_object_set_data_full(G_OBJECT(button), "command",
                 g_strdup(items[i].command.c_str()), g_free);
             g_signal_connect(button, "clicked", G_CALLBACK(menuCommandThunk), this);
@@ -1147,9 +1192,9 @@ private:
             raytracingRequested();
         }
         else {
-            GuiEventExecutor::CommandResult result =
+            CommandResult result =
                 sceneBridge.executeCommand(command);
-            if ( result == GuiEventExecutor::CommandResult::NOT_HANDLED ) {
+            if ( result == CommandResult::NOT_HANDLED ) {
                 setStatus(command + " is not implemented in the GTK4 example yet");
             }
         }
@@ -1297,8 +1342,11 @@ private:
             controllerState(GTK_EVENT_CONTROLLER(gesture)));
         event.setClicks(nPress);
         self->buttonDown = true;
+        self->pressMoved = false;
+        self->pressX = x;
+        self->pressY = y;
+        self->pressCount = nPress;
         self->sceneBridge.mousePressed(event);
-        self->sceneBridge.mouseClicked(event);
         gtk_widget_queue_draw(self->glArea);
     }
 
@@ -1312,7 +1360,14 @@ private:
             x, y, button,
             controllerState(GTK_EVENT_CONTROLLER(gesture)));
         self->buttonDown = false;
+        // The release may request the viewport menu. The click comes after
+        // it, as in AWT and the Xt ports: a click before the release would
+        // disarm the press on the title of the viewport
         self->sceneBridge.mouseReleased(event);
+        if ( !self->pressMoved ) {
+            event.setClicks(self->pressCount);
+            self->sceneBridge.mouseClicked(event);
+        }
         gtk_widget_queue_draw(self->glArea);
     }
 
@@ -1322,7 +1377,10 @@ private:
         Gtk4SceneEditor* self = static_cast<Gtk4SceneEditor*>(data);
         MouseEvent event = Gtk4System::mouseEvent(
             x, y, 0, controllerState(GTK_EVENT_CONTROLLER(motion)));
-        if ( self->buttonDown ) self->sceneBridge.mouseDragged(event);
+        if ( self->buttonDown ) {
+            if ( x != self->pressX || y != self->pressY ) self->pressMoved = true;
+            self->sceneBridge.mouseDragged(event);
+        }
         else self->sceneBridge.mouseMoved(event);
         gtk_widget_queue_draw(self->glArea);
     }

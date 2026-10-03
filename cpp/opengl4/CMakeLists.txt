@@ -15,6 +15,13 @@ add_library(vitral_opengl4 SHARED
     src/main/vsdk/toolkit/render/opengl4/OpenGL4Renderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4ColoredPrimitiveRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4VoxelVolumeRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4SimpleMaterialRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4ShaderProgramUtil.cpp
+    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/polyhedralBoundedSolid/OpenGL4PolyhedralBoundedSolidDebugHUDRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl4/OpenGL4LabelCanvas.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4MeshRenderer.cpp
     src/main/vsdk/toolkit/render/opengl4/OpenGL4RendererConfigurationShaderSelector.cpp

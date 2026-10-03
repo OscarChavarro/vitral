@@ -138,6 +138,10 @@ endif()
 if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
     set(SCENE_EDITOR_OPENGL_SOURCES
         src/application/XtOpenGL4GuiEventExecutor.cpp
+        src/application/mcp/MCPJson.cpp
+        src/application/mcp/MCPSceneTools.cpp
+        src/application/mcp/MCPViewportTools.cpp
+        src/application/mcp/XtOpenGL4MCPApplicationTools.cpp
         src/application/mcp/XtOpenGL4VitralEditorMCP.cpp
         src/application/mcp/XtOpenGL4VitralEditorMCPProtocol.cpp
         src/render/opengl4/OpenGL4DrawingAreaRenderer.cpp
@@ -158,6 +162,10 @@ if(SCENE_EDITOR_OPENGL STREQUAL "opengl4")
 else()
     set(SCENE_EDITOR_OPENGL_SOURCES
         src/application/XtOpenGL1GuiEventExecutor.cpp
+        src/application/mcp/MCPJson.cpp
+        src/application/mcp/MCPSceneTools.cpp
+        src/application/mcp/MCPViewportTools.cpp
+        src/application/mcp/XtOpenGL1MCPApplicationTools.cpp
         src/application/mcp/XtOpenGL1VitralEditorMCP.cpp
         src/application/mcp/XtOpenGL1VitralEditorMCPProtocol.cpp
         src/render/opengl1/OpenGL1DrawingAreaRenderer.cpp
@@ -176,7 +184,8 @@ endif()
 # (vitral_opengl4 or vitral_opengl1).
 set(SCENE_EDITOR_SHARED_SOURCES
     src/SceneEditorApplication.cpp
-    src/application/GuiEventExecutor.cpp
+    src/application/commands/GeometryCreationCommandsExecutor.cpp
+    src/application/commands/GuiEventExecutor.cpp
     src/gui/DrawingAreaInteractionTechniques.cpp
     src/gui/PointerCursor.cpp
     src/gui/PopupDismissClickFilter.cpp
@@ -184,6 +193,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/gui/history/InteractionEditRecorder.cpp
     src/gui/history/UndoRedoInteractionTechnique.cpp
     src/gui/xt/XlibLabelImageProvider.cpp
+    src/gui/xt/XtCollapsibleSection.cpp
     src/gui/xt/XtImageControlWindow.cpp
     src/gui/xt/XtSelectorDialog.cpp
     src/gui/xt/XtModifyPanel.cpp
@@ -227,7 +237,8 @@ set(SCENE_EDITOR_SHARED_SOURCES
 if(SCENE_EDITOR_IS_GTK4)
     add_executable(SceneEditorApplication
         src/application/gtk4/Gtk4OpenGL4SceneEditorApplication.cpp
-        src/application/GuiEventExecutor.cpp
+        src/application/commands/GeometryCreationCommandsExecutor.cpp
+        src/application/commands/GuiEventExecutor.cpp
         src/gui/DrawingAreaInteractionTechniques.cpp
         src/gui/PointerCursor.cpp
         src/gui/SelectedBodyMapToggles.cpp

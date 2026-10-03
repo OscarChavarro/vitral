@@ -9,6 +9,8 @@ public:
     static const int WARNING = 1;
     static const int ERROR = 2;
     static const int FATAL_ERROR = 3;
+    static const int DEBUG = 4;
+    static const int VERBOSE = 5;
 
     static void setWithSystemExit(bool flag);
     static void setWithFatalExceptions(bool flag);

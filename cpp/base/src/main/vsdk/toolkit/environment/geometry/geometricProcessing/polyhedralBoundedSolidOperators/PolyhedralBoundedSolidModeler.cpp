@@ -1,3 +1,4 @@
+#include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
 #include <cmath>
 
 #include "java/util/ArrayList.txx"
@@ -5,6 +6,8 @@
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperator.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/slicing/_PolyhedralBoundedSolidSplitter.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
@@ -484,4 +487,27 @@ PolyhedralBoundedSolidModeler::createBrepFromParametricCurve(
     PolyhedralBoundedSolidValidationEngine::validateIntermediate(
         state.solid);
     return state.solid;
+}
+
+void PolyhedralBoundedSolidModeler::split(
+    PolyhedralBoundedSolid* inSolid,
+    const InfinitePlane& inSplittingPlane,
+    java::ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
+    java::ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow)
+{
+    _PolyhedralBoundedSolidSplitter::split(inSolid, inSplittingPlane,
+                                           outSolidsAbove, outSolidsBelow);
+}
+
+PolyhedralBoundedSolid* PolyhedralBoundedSolidModeler::setOp(
+    PolyhedralBoundedSolid* inSolidA,
+    PolyhedralBoundedSolid* inSolidB,
+    int op,
+    bool withDebug,
+    bool maximizeResultFaces,
+    bool doStrictValidation)
+{
+    PolyhedralBoundedSolidStatistics::recordSetOpCall(op);
+    return _PolyhedralBoundedSolidSetOperator::setOp(inSolidA, inSolidB, op,
+        withDebug, maximizeResultFaces, doStrictValidation);
 }

@@ -183,3 +183,28 @@ long long Long::parseLong(const java::String& text)
 }
 
 }
+
+int java::Double::compare(double d1, double d2)
+{
+    if ( d1 < d2 ) {
+        return -1;
+    }
+    if ( d1 > d2 ) {
+        return 1;
+    }
+
+    // Values are equal or some of them is NaN: compare as Java
+    // `doubleToLongBits`, where NaN is canonical and sorts last, and -0.0
+    // sorts before 0.0
+    bool nan1 = std::isnan(d1);
+    bool nan2 = std::isnan(d2);
+    if ( nan1 || nan2 ) {
+        return nan1 == nan2 ? 0 : (nan1 ? 1 : -1);
+    }
+    bool negative1 = std::signbit(d1);
+    bool negative2 = std::signbit(d2);
+    if ( negative1 == negative2 ) {
+        return 0;
+    }
+    return negative1 ? -1 : 1;
+}

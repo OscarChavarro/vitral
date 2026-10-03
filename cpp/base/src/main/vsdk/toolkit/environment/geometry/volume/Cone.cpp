@@ -4,7 +4,15 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
+#include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.h"
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidEulerOperators.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
+#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 Cone::Cone(double bottomRadius, double topRadius, double height) :
     bottomRadius(bottomRadius), topRadius(topRadius), height(height) {
     addControlSpecification("double;bottomRadius;(0, INFINITE)",
@@ -171,9 +179,173 @@ void Cone::doExtraInformation(const Ray& inRay, double, RayHit* outData) {
     }
 }
 
+/**
+Check the general interface contract in superclass method
+Geometry.doContainmentTest. The cone (or truncated cone, or cylinder)
+has its axis along Z, its base of radius `bottomRadius` at z = 0 and its
+top of radius `topRadius` at z = `height`. The distance to the side is
+measured perpendicular to the side, so the tolerance is the same for the
+side and for the caps.
+@param p point to classify, in the space of the cone
+@param distanceTolerance distance to the surface of the cone under which
+the point is classified as `LIMIT`
+@return INSIDE, OUTSIDE or LIMIT constant value
+*/
+int Cone::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
+{
+    if ( height <= 0 ) {
+        return OUTSIDE;
+    }
+    double z = p.z();
+    double radialDistance = std::sqrt(p.x() * p.x() + p.y() * p.y());
+    double radiusAtZ = bottomRadius + (topRadius - bottomRadius) * (z / height);
+    double radiusChange = bottomRadius - topRadius;
+    double sideCosine = height / std::sqrt(height * height + radiusChange * radiusChange);
+    double sideDistance = (radialDistance - radiusAtZ) * sideCosine;
+
+    if ( z < -distanceTolerance || z > height + distanceTolerance ||
+         sideDistance > distanceTolerance ) {
+        return OUTSIDE;
+    }
+    if ( z > distanceTolerance && z < height - distanceTolerance &&
+         sideDistance < -distanceTolerance ) {
+        return INSIDE;
+    }
+    return LIMIT;
+}
+
 double* Cone::getMinMax() {
     double* m = new double[6];
     double r = (bottomRadius > topRadius) ? bottomRadius : topRadius;
     m[0]=-r; m[1]=-r; m[2]=0; m[3]=r; m[4]=r; m[5]=height;
     return m;
+}
+
+PolyhedralBoundedSolid* Cone::exportToPolyhedralBoundedSolid()
+{
+    return buildPolyhedralBoundedSolid(
+        DEFAULT_CIRCUMFERENCE_DIVISIONS, DEFAULT_HEIGHT_DIVISIONS);
+}
+
+PolyhedralBoundedSolid* Cone::exportToPolyhedralBoundedSolid(
+    int circumferenceDivisions, int heightDivisions)
+{
+    int normalizedCircumferenceDivisions =
+        circumferenceDivisions > MIN_CIRCUMFERENCE_DIVISIONS ?
+        circumferenceDivisions : MIN_CIRCUMFERENCE_DIVISIONS;
+    int normalizedHeightDivisions =
+        heightDivisions > MIN_HEIGHT_DIVISIONS ?
+        heightDivisions : MIN_HEIGHT_DIVISIONS;
+
+    if ( normalizedCircumferenceDivisions == DEFAULT_CIRCUMFERENCE_DIVISIONS &&
+         normalizedHeightDivisions == DEFAULT_HEIGHT_DIVISIONS ) {
+        return exportToPolyhedralBoundedSolid();
+    }
+
+    return buildPolyhedralBoundedSolid(normalizedCircumferenceDivisions,
+        normalizedHeightDivisions);
+}
+
+/**
+Current implementation of the cylinder follows the idea suggested on
+section [MANT1988].12.3.1 and program [MANT1988].12.4, where the
+cylinder is built upon a circular lamina base and an extrusion
+(translational sweep) operation. The cone case is done manually,
+*/
+void Cone::closeTopFaceToApex(PolyhedralBoundedSolid* solid, double apexZ)
+{
+    _PolyhedralBoundedSolidFace* topFace = solid->findFace(1);
+    if ( topFace == 0 || topFace->boundariesList.size() <= 0 ) {
+        return;
+    }
+
+    _PolyhedralBoundedSolidLoop* loop = topFace->boundariesList.get(0);
+    _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
+    if ( start == 0 ) {
+        return;
+    }
+
+    java::ArrayList<int> ringVertexIds;
+    _PolyhedralBoundedSolidHalfEdge* he = start;
+    do {
+        ringVertexIds.add(he->startingVertex->id);
+        he = he->next();
+    } while ( he != start );
+
+    if ( ringVertexIds.size() < 3 ) {
+        return;
+    }
+
+    int apexVertexId = solid->getMaxVertexId() + 1;
+    PolyhedralBoundedSolidEulerOperators::smev(solid, 1, ringVertexIds.get(0),
+        apexVertexId, Vector3Dd(0.0, 0.0, apexZ));
+
+    long int i;
+    for ( i = 0; i < ringVertexIds.size() - 2; i++ ) {
+        PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
+            apexVertexId,
+            ringVertexIds.get(i),
+            ringVertexIds.get(i+1),
+            ringVertexIds.get(i+2),
+            solid->getMaxFaceId() + 1);
+    }
+
+    PolyhedralBoundedSolidEulerOperators::mef(solid, 1, 1,
+        apexVertexId,
+        ringVertexIds.get(ringVertexIds.size()-2),
+        ringVertexIds.get(ringVertexIds.size()-1),
+        ringVertexIds.get(0),
+        solid->getMaxFaceId() + 1);
+}
+
+PolyhedralBoundedSolid* Cone::buildPolyhedralBoundedSolid(int nsides,
+    int heightDivisions)
+{
+    PolyhedralBoundedSolid* solid;
+    Matrix4x4d T;
+    Matrix4x4d S;
+    Matrix4x4d M;
+
+    solid = PolyhedralBoundedSolidModeler::createCircularLamina(
+        0.0, 0.0, bottomRadius, 0.0, nsides);
+
+    if ( topRadius > VSDK::EPSILON && bottomRadius > VSDK::EPSILON ) {
+        double prevRadius = bottomRadius;
+        double zStep = height / ((double)heightDivisions);
+        int i;
+        for ( i = 1; i <= heightDivisions; i++ ) {
+            double nextRadius = bottomRadius + (topRadius - bottomRadius) *
+                (((double)i) / ((double)heightDivisions));
+            double f = nextRadius / prevRadius;
+            T = Matrix4x4d();
+            T = T.translation(0.0, 0.0, zStep);
+            S = Matrix4x4d();
+            S = S.scale(f, f, 1.0);
+            M = T.multiply(S);
+            PolyhedralBoundedSolidModeler::translationalSweepExtrudeFacePlanar(
+                solid, solid->findFace(1), M);
+            prevRadius = nextRadius;
+        }
+    }
+    else if ( topRadius <= VSDK::EPSILON && bottomRadius > VSDK::EPSILON ) {
+        // Cone case, with optional vertical subdivisions.
+        double prevRadius = bottomRadius;
+        double zStep = height / ((double)heightDivisions);
+        int i;
+        for ( i = 1; i < heightDivisions; i++ ) {
+            double nextRadius = bottomRadius *
+                (1.0 - (((double)i) / ((double)heightDivisions)));
+            double f = nextRadius / prevRadius;
+            T = Matrix4x4d();
+            T = T.translation(0.0, 0.0, zStep);
+            S = Matrix4x4d();
+            S = S.scale(f, f, 1.0);
+            M = T.multiply(S);
+            PolyhedralBoundedSolidModeler::translationalSweepExtrudeFacePlanar(
+                solid, solid->findFace(1), M);
+            prevRadius = nextRadius;
+        }
+        closeTopFaceToApex(solid, height);
+    }
+    return solid;
 }

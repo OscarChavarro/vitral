@@ -1,6 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_EDGE__
 #define __POLYHEDRAL_BOUNDED_SOLID_EDGE__
 
+#include "java/lang/String.h"
+
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 class _PolyhedralBoundedSolidHalfEdge;
 
@@ -14,6 +16,11 @@ public:
     _PolyhedralBoundedSolidEdge();
     int getEndingVertexId() const;
     int getStartingVertexId() const;
+
+    /**
+    @return a description of the node, as Java `toString`
+    */
+    java::String toString() const;
 };
 
 #endif

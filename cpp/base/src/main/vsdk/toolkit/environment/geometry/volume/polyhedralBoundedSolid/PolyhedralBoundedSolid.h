@@ -88,9 +88,16 @@ public:
         int faceIndex,
         double pad);
 
+    virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
     virtual int computeQuantitativeInvisibility(const Vector3Dd& origin, const Vector3Dd& p) override;
     static int compareValue(double a, double b, double tolerance);
     void revert();
+
+    /**
+    @return a textual dump of the vertices, edges, faces and loops of the
+    solid, as Java `toString`
+    */
+    java::String toString();
 
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
 };

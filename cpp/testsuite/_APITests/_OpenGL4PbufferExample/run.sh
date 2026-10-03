@@ -1,12 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="$SCRIPT_DIR/build"
-
-if [ ! -x "$BUILD_DIR/_OpenGL4PbufferExample" ]; then
-  cmake -S "$SCRIPT_DIR" -B "$BUILD_DIR"
-  cmake --build "$BUILD_DIR" --target _OpenGL4PbufferExample
-fi
-
-"$BUILD_DIR/_OpenGL4PbufferExample"
+exec "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
+  _OpenGL4PbufferExample ./build/_OpenGL4PbufferExample "$@"

@@ -1,6 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_FACE__
 #define __POLYHEDRAL_BOUNDED_SOLID_FACE__
 
+#include "java/lang/String.h"
+
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class PolyhedralBoundedSolid;
@@ -63,6 +65,11 @@ public:
         double tolerance,
         InfinitePlane* plane);
     void revert();
+
+    /**
+    @return a description of the node, as Java `toString`
+    */
+    java::String toString() const;
 
 private:
     static double boundaryLoopAreaMagnitude(_PolyhedralBoundedSolidLoop* loop);
