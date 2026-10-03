@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 #include "java/io/File.h"
-#include "application/GuiEventExecutor.h"
+#include "application/commands/GuiEventExecutor.h"
 #include "application/XtOpenGL4GuiEventExecutor.h"
 #include "gui/xt/XtApplicationHost.h"
 #include "gui/xt/XtUiFactory.h"
@@ -39,13 +39,13 @@ XtOpenGL4GuiEventExecutor::XtOpenGL4GuiEventExecutor(XtApplicationHost* parent)
 bool XtOpenGL4GuiEventExecutor::executeCommand(const java::String& command)
 {
     std::string label(command.c_str());
-    GuiEventExecutor::CommandResult result =
+    CommandResult result =
         parent->getSceneBridge()->executeCommand(label);
 
-    if ( result == GuiEventExecutor::CommandResult::FAILED ) {
+    if ( result == CommandResult::FAILED ) {
         return false;
     }
-    if ( result == GuiEventExecutor::CommandResult::NOT_HANDLED &&
+    if ( result == CommandResult::NOT_HANDLED &&
          !executeXtCommand(label) ) {
         return false;
     }
@@ -92,10 +92,10 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
     else if ( label == "IDC_EXPORT_OBJECTS_TO_OBJ" ||
               label == "IDC_EXPORT_OBJECTS_TO_GTS" ||
               label == "IDC_EXPORT_OBJECTS_TO_VTK" ) {
-        GuiEventExecutor::ExportFormat format =
-            label == "IDC_EXPORT_OBJECTS_TO_OBJ" ? GuiEventExecutor::ExportFormat::OBJ :
-            label == "IDC_EXPORT_OBJECTS_TO_GTS" ? GuiEventExecutor::ExportFormat::GTS :
-            GuiEventExecutor::ExportFormat::VTK;
+        ExportFormat format =
+            label == "IDC_EXPORT_OBJECTS_TO_OBJ" ? ExportFormat::OBJ :
+            label == "IDC_EXPORT_OBJECTS_TO_GTS" ? ExportFormat::GTS :
+            ExportFormat::VTK;
 
         if ( parent->getUiFactory()->showFileDialog(parent, "Save",
                  guiState->getWriteFolder().c_str(),

@@ -48,14 +48,17 @@ class Math {
     static float scalb(float a, int scaleFactor);
 };
 
+// As Java 9+ (the reference JDK): a single multiplication by the rounded
+// conversion constant, not `angdeg / 180.0 * PI` (Java 8)
 inline double
 Math::toRadians(double angdeg) {
-    return angdeg / 180.0 * PI;
+    return angdeg * 0.017453292519943295;
 }
 
 inline double
 Math::toDegrees(double angrad) {
-    return angrad * 180.0 / PI;
+    // As Java 9+: multiplication by the rounded conversion constant
+    return angrad * 57.29577951308232;
 }
 
 inline double

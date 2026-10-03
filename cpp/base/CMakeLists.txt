@@ -13,6 +13,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 # Optional image format support
 option(WITH_JPEG "Enable JPEG image format support" OFF)
 option(WITH_PNG "Enable PNG image format support" ON)
+option(WITH_FREETYPE "Enable TrueType font reading through FreeType 2" ON)
 option(WITH_POSIX_THREADS "Enable POSIX thread based java.util.concurrent emulation" ON)
 
 # Try to find JPEG library if requested
@@ -33,10 +34,20 @@ if(WITH_PNG)
     endif()
 endif()
 
+# Try to find FreeType 2 library if requested
+if(WITH_FREETYPE)
+    find_package(Freetype)
+    if(NOT FREETYPE_FOUND)
+        message(WARNING "FreeType 2 library not found. Font reading will be disabled.")
+        set(WITH_FREETYPE OFF)
+    endif()
+endif()
+
 # Print configuration summary
 message(STATUS "Vitral C++ Base Configuration:")
 message(STATUS "  JPEG Support: ${WITH_JPEG}")
 message(STATUS "  PNG Support:  ${WITH_PNG}")
+message(STATUS "  FreeType Support: ${WITH_FREETYPE}")
 message(STATUS "  POSIX Threads: ${WITH_POSIX_THREADS}")
 
 # Source files for the base library
@@ -133,6 +144,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/surface/FunctionalExplicitSurface.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/Md2Mesh.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.cpp
+    src/main/vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/TriangleStripMesh.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/TriangleMesh.cpp
     src/main/vsdk/toolkit/environment/geometry/surface/QuadMesh.cpp
@@ -174,10 +186,15 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidValidationEngine.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologyEditing.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidBooleanTopologyPredicates.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidValidationStrategies.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.cpp
     src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.cpp
+    src/main/vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidNodesToString.cpp
     src/main/vsdk/toolkit/gui/CameraControllerAquynza.cpp
     src/main/vsdk/toolkit/gui/CameraControllerOrbiter.cpp
     src/main/vsdk/toolkit/gui/CameraControllerBlender.cpp
@@ -249,6 +266,31 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/environment/background/CubemapBackground.cpp
     src/main/vsdk/toolkit/environment/background/FixedBackground.cpp
     src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/PolyhedralBoundedSolidModeler.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidIdNamespace.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidFallbackGeometry.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidAxisAlignedCellFallback.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidOffsetCylinderFallback.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidProfileDifferenceFallback.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/slicing/_PolyhedralBoundedSolidSplitter.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_SetOperationTrace.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetOperatorNullEdge.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetNullEdgesConnector.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetFinisher.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersectionCurveBuilder.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetIntersector.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperator.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorSectorClassification.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetVertexFaceClassifier.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetVertexVertexClassifier.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetClassifier.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.cpp
+    src/main/vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/SimpleTestGeometryLibrary.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fixtures/CsgKurlanderBowlFixture.cpp
+    src/main/vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/validation/_PolyhedralBoundedSolidFaceValidator.cpp
     src/main/vsdk/toolkit/io/geometry/ParametricCurvePersistence.cpp
     src/main/vsdk/toolkit/io/geometry/ParametricBiCubicPatchPersistence.cpp
     src/main/vsdk/toolkit/io/image/RGBColorPalettePersistence.cpp
@@ -280,6 +322,11 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.cpp
 )
 
+if(WITH_FREETYPE)
+    list(APPEND VITRAL_BASE_SOURCES
+        src/main/vsdk/toolkit/io/geometry/Freetype2FontReader.cpp)
+endif()
+
 add_library(vitral_base SHARED ${VITRAL_BASE_SOURCES})
 
 # java::Thread runs over std::thread
@@ -288,12 +335,28 @@ target_link_libraries(vitral_base PUBLIC Threads::Threads)
 
 target_include_directories(vitral_base PUBLIC src src/main)
 
+# Floating point parity with the Java port: Java never fuses a*b+c into a
+# single fused multiply-add, while compilers do by default on some targets
+# (e.g. clang on arm64). A fused operation rounds differently in the last
+# bits, which changes exact comparisons (e.g. the null edges sort of the
+# boolean set operations). PUBLIC because inline header math (Vector3Dd)
+# is compiled in the client targets too.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(vitral_base PUBLIC -ffp-contract=off)
+endif()
+
 # Link optional libraries and set compile definitions
 if(WITH_JPEG)
     target_include_directories(vitral_base PRIVATE ${JPEG_INCLUDE_DIR})
     target_link_libraries(vitral_base PRIVATE ${JPEG_LIBRARIES})
     target_compile_definitions(vitral_base PRIVATE VITRAL_WITH_JPEG)
     message(STATUS "JPEG support enabled: ${JPEG_LIBRARIES}")
+endif()
+
+if(WITH_FREETYPE)
+    target_link_libraries(vitral_base PRIVATE Freetype::Freetype)
+    target_compile_definitions(vitral_base PUBLIC VITRAL_WITH_FREETYPE)
+    message(STATUS "FreeType support enabled: ${FREETYPE_LIBRARIES}")
 endif()
 
 if(WITH_PNG)
@@ -342,8 +405,23 @@ if(VITRAL_BUILD_TESTS)
     src/test/java_emulation_tests.cpp
     src/test/image_persistence_tests.cpp
     src/test/sphere_polyhedral_cache_tests.cpp
+    src/test/box_cone_containment_tests.cpp
+    src/test/voxel_volume_tests.cpp
+    src/test/polyhedral_bounded_solid_containment_tests.cpp
+    src/test/parametric_bicubic_patch_tests.cpp
+    src/test/polyhedral_bounded_solid_splitter_tests.cpp
+    src/test/polyhedral_bounded_solid_set_intersector_tests.cpp
+    src/test/polyhedral_bounded_solid_topology_editing_tests.cpp
+    src/test/polyhedral_bounded_solid_non_intersecting_classifier_tests.cpp
+    src/test/polyhedral_bounded_solid_set_connect_finish_tests.cpp
+    src/test/polyhedral_bounded_solid_booleans_reference_pairs_tests.cpp
+    src/test/polyhedral_bounded_solid_kurlander_bowl_tests.cpp
+    src/test/freetype2_font_reader_tests.cpp
   )
   target_link_libraries(vitral_base_tests PRIVATE vitral_base GTest::gtest_main)
+  # Repository root, for the test data under `etc/` (fonts)
+  target_compile_definitions(vitral_base_tests PRIVATE
+      VITRAL_REPOSITORY_ROOT="${CMAKE_CURRENT_LIST_DIR}/../..")
   include(GoogleTest)
   gtest_discover_tests(vitral_base_tests DISCOVERY_TIMEOUT 60)
 endif()

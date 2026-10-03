@@ -1,9 +1,14 @@
 #include <cfloat>
 #include <cmath>
+#include <sstream>
+#include <string>
 
 #include "java/util/ArrayList.txx"
 #include <algorithm>
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
+#include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
+#include "vsdk/toolkit/processing/ComputationalGeometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
@@ -14,6 +19,127 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+namespace {
+
+const char* const SOLID_WITH_MESSAGE = "Solid with ";
+
+Vector3Dd dropCoordinate(const Vector3Dd& in, int coordinate)
+{
+    switch ( coordinate ) {
+      case 1:
+        return Vector3Dd(in.y(), in.z(), 0);
+      case 2:
+        return Vector3Dd(in.x(), in.z(), 0);
+      default:
+        return Vector3Dd(in.x(), in.y(), 0);
+    }
+}
+
+int dominantCoordinateForPlane(const InfinitePlane* plane)
+{
+    Vector3Dd n = plane->getNormal();
+
+    if ( std::fabs(n.x()) >= std::fabs(n.y()) &&
+         std::fabs(n.x()) >= std::fabs(n.z()) ) {
+        return 1;
+    }
+    if ( std::fabs(n.y()) >= std::fabs(n.x()) &&
+         std::fabs(n.y()) >= std::fabs(n.z()) ) {
+        return 2;
+    }
+    return 3;
+}
+
+/**
+Point in face test used by ray intersection: each loop is classified with
+`PolygonProcessor::isPointInsidePolygon2D` in the dominant projection plane,
+and the point is inside when it is inside an odd number of loops.
+@param face face to test
+@param plane containing plane of `face`
+@param point point over the containing plane
+@param tolerance distance under which the point is at the face border
+@return Geometry::INSIDE, Geometry::LIMIT or Geometry::OUTSIDE
+*/
+int testPointInsideForRayIntersection(
+    _PolyhedralBoundedSolidFace* face,
+    const InfinitePlane* plane,
+    const Vector3Dd& point,
+    double tolerance)
+{
+    int dominantCoordinate;
+    int insideLoopCount;
+    long int i;
+    Vector3Dd projectedPoint;
+
+    if ( face == 0 || plane == 0 ) {
+        return Geometry::OUTSIDE;
+    }
+
+    dominantCoordinate = dominantCoordinateForPlane(plane);
+    projectedPoint = dropCoordinate(point, dominantCoordinate);
+    Vertex2D projectedPoint2D(projectedPoint.x(), projectedPoint.y());
+    insideLoopCount = 0;
+
+    for ( i = 0; i < face->boundariesList.size(); i++ ) {
+        _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
+        _PolyhedralBoundedSolidHalfEdge* he = loop->boundaryStartHalfEdge;
+        _PolyhedralBoundedSolidHalfEdge* start;
+        java::ArrayList<Vertex2D> projectedLoopVertices;
+        signed char loopStatus;
+
+        if ( he == 0 ) {
+            return Geometry::OUTSIDE;
+        }
+        start = he;
+
+        do {
+            if ( point.subtract(he->startingVertex->position).length()
+                 < 2 * tolerance ) {
+                return Geometry::LIMIT;
+            }
+            if ( ComputationalGeometry::lineSegmentContainmentTest(
+                     he->startingVertex->position,
+                     he->next()->startingVertex->position,
+                     point, tolerance) == Geometry::LIMIT ) {
+                return Geometry::LIMIT;
+            }
+
+            projectedPoint = dropCoordinate(he->startingVertex->position,
+                dominantCoordinate);
+            projectedLoopVertices.add(
+                Vertex2D(projectedPoint.x(), projectedPoint.y()));
+            he = he->next();
+        } while ( he != start );
+
+        loopStatus = PolygonProcessor::isPointInsidePolygon2D(
+            projectedPoint2D, projectedLoopVertices);
+        if ( loopStatus == 0 ) {
+            return Geometry::LIMIT;
+        }
+        if ( loopStatus > 0 ) {
+            insideLoopCount++;
+        }
+    }
+
+    return ((insideLoopCount % 2) == 1) ?
+        Geometry::INSIDE : Geometry::OUTSIDE;
+}
+
+java::String intPreSpaces(int val, int fieldSize)
+{
+    std::string cad = std::to_string(val);
+    std::string sb;
+    int remain = fieldSize - (int)cad.length();
+
+    for ( ; remain > 0; remain-- ) {
+        sb += " ";
+    }
+    sb += cad;
+    return java::String(sb.c_str());
+}
+
+} // namespace
+
 PolyhedralBoundedSolid::PolyhedralBoundedSolid()
     : maxVertexId(-1),
       maxFaceId(-1),
@@ -137,10 +263,8 @@ bool PolyhedralBoundedSolid::doIntersectionFirstHit(const Ray& inRay, RayHit* ou
             Ray hit = *(planeHit.getRay());
             hit = hit.withDirection(hit.getDirection().normalized());
             Vector3Dd p = hit.getOrigin().add(hit.getDirection().multiply(hit.getT()));
-            int pos = face->testPointInside(
-                p,
-                numericContext.bigEpsilon(),
-                containingPlane);
+            int pos = testPointInsideForRayIntersection(
+                face, containingPlane, p, numericContext.bigEpsilon());
             if (pos == Geometry::INSIDE || pos == Geometry::LIMIT) {
                 minT = hit.getT();
                 bestInfo = planeHit;
@@ -188,17 +312,16 @@ double* PolyhedralBoundedSolid::getMinMax()
         if (v == 0) {
             continue;
         }
-        const Vector3Dd& p = v->position;
-        minX = std::min(minX, p.x());
-        minY = std::min(minY, p.y());
-        minZ = std::min(minZ, p.z());
-        maxX = std::max(maxX, p.x());
-        maxY = std::max(maxY, p.y());
-        maxZ = std::max(maxZ, p.z());
-    }
+        double x = v->position.x();
+        double y = v->position.y();
+        double z = v->position.z();
 
-    if (verticesList.size() == 0) {
-        minX = minY = minZ = maxX = maxY = maxZ = 0.0;
+        if ( x < minX ) minX = x;
+        if ( y < minY ) minY = y;
+        if ( z < minZ ) minZ = z;
+        if ( x > maxX ) maxX = x;
+        if ( y > maxY ) maxY = y;
+        if ( z > maxZ ) maxZ = z;
     }
 
     minMax[0] = minX;
@@ -222,6 +345,10 @@ void PolyhedralBoundedSolid::merge(PolyhedralBoundedSolid* other)
     while (other->getPolygonsList().size() != 0) {
         _PolyhedralBoundedSolidFace* f = other->getPolygonsList()[0];
         f->id += offsetFacesId;
+        // C++ port note: the merged face now belongs to this solid. Java
+        // keeps `parentSolid` pointing to the drained `other` (kept alive by
+        // the garbage collector); in C++ `other` may be deleted by its owner
+        f->parentSolid = this;
         if (f->id > maxFaceId) maxFaceId = f->id;
         polygonsList.add(f);
         other->getPolygonsList().remove(0L);
@@ -449,6 +576,26 @@ bool PolyhedralBoundedSolid::queryPointNearFace(
         point.z() <= queryFaceAabb[o + 5] + pad;
 }
 
+/**
+Check the general interface contract in superclass method
+Geometry.doContainmentTest. Delegated to the robust predicate layer
+(`PolyhedralBoundedSolidPredicates::classifyPoint`): a point on a face is
+`LIMIT`, any other is classified by a ray-cast parity test.
+
+C++ port note: the point is a reference, so the Java check for a null
+point is not needed.
+@param p point to classify, in the space of the solid
+@param distanceTolerance distance to the faces under which the point is
+classified as `LIMIT`
+@return INSIDE, OUTSIDE or LIMIT constant value
+*/
+int PolyhedralBoundedSolid::doContainmentTest(const Vector3Dd& p,
+                                              double distanceTolerance)
+{
+    return PolyhedralBoundedSolidPredicates::classifyPoint(this, p,
+        distanceTolerance);
+}
+
 int PolyhedralBoundedSolid::computeQuantitativeInvisibility(
     const Vector3Dd& origin,
     const Vector3Dd& p)
@@ -471,6 +618,87 @@ void PolyhedralBoundedSolid::revert()
             polygonsList[i]->revert();
         }
     }
+}
+
+java::String PolyhedralBoundedSolid::toString()
+{
+    std::ostringstream msg;
+    long int i;
+    long int j;
+
+    msg << "= POLYHEDRAL BOUNDED SOLID STRUCTURE ==========================================\n";
+    msg << SOLID_WITH_MESSAGE << verticesList.size() << " vertices:\n";
+    for ( i = 0; i < verticesList.size(); i++ ) {
+        msg << "  - " << verticesList.get(i)->toString().c_str() << "\n";
+    }
+
+    msg << SOLID_WITH_MESSAGE << edgesList.size() << " edges:\n";
+    for ( i = 0; i < edgesList.size(); i++ ) {
+        msg << "  - " << edgesList.get(i)->toString().c_str() << "\n";
+    }
+    msg << SOLID_WITH_MESSAGE << polygonsList.size() << " faces:\n";
+
+    for ( i = 0; i < polygonsList.size(); i++ ) {
+        _PolyhedralBoundedSolidFace* face = polygonsList.get(i);
+        msg << "  - " << face->toString().c_str() << "\n";
+        for ( j = 0; j < face->boundariesList.size(); j++ ) {
+            _PolyhedralBoundedSolidLoop* loop;
+            _PolyhedralBoundedSolidHalfEdge* he;
+            _PolyhedralBoundedSolidHalfEdge* heStart;
+
+            msg << "    . Loop " << j << ", with half-edges: \n";
+            loop = face->boundariesList.get(j);
+
+            msg << "      | HeID  | StartVertex | End Vertex | nccw He | pccw He | parentEdge | mirror He | neighbor face\n";
+            msg << "      +-------+-------------+------------+---------+---------+------------+-----------+-------------+\n";
+
+            he = loop->boundaryStartHalfEdge;
+            if ( he == 0 ) {
+                msg << "<Loop without starting half-edge!>\n";
+                continue;
+            }
+            heStart = he;
+            do {
+                he = he->next();
+                if ( he == 0 ) {
+                    // Loop is not closed!
+                    msg << "      |  - (not closed loop)\n";
+                    break;
+                }
+
+                msg << "      | "
+                    << intPreSpaces(he->id, 4).c_str()
+                    << ((he == loop->boundaryStartHalfEdge) ? "*" : " ")
+                    << " | "
+                    << intPreSpaces(he->startingVertex->id, 11).c_str()
+                    << " | "
+                    << intPreSpaces(he->next()->startingVertex->id, 10).c_str()
+                    << " | "
+                    << intPreSpaces(he->next()->id, 7).c_str()
+                    << " | "
+                    << intPreSpaces(he->previous()->id, 7).c_str()
+                    << " | ";
+                msg << ((he->parentEdge != 0) ?
+                    intPreSpaces(he->parentEdge->id, 10) :
+                    java::String("    <null>")).c_str();
+                msg << " | ";
+                if ( he->mirrorHalfEdge() != 0 ) {
+                    msg << intPreSpaces(he->mirrorHalfEdge()->id, 9).c_str()
+                        << " | "
+                        << intPreSpaces(he->mirrorHalfEdge()->parentLoop->parentFace->id, 11).c_str()
+                        << " | ";
+                }
+                else {
+                    msg << " No Mirror Half Edge!   | ";
+                }
+
+                msg << "\n";
+
+            } while ( he != heStart );
+        }
+    }
+    msg << "= END OF POLYHEDRAL BOUNDED SOLID STRUCTURE ===================================\n";
+    return java::String(msg.str().c_str());
 }
 
 PolyhedralBoundedSolid* PolyhedralBoundedSolid::exportToPolyhedralBoundedSolid()

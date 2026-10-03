@@ -126,6 +126,33 @@ int Box::classifyHitPlane(double x, double y, double z) const {
     if(dzMinus<min){min=dzMinus;plane=2;} if(dyPlus<min){min=dyPlus;plane=3;} if(dyMinus<min){min=dyMinus;plane=4;} if(dxPlus<min){min=dxPlus;plane=5;} if(dxMinus<min){plane=6;} return plane;
 }
 
+/**
+Check the general interface contract in superclass method
+Geometry.doContainmentTest. The box is centered at the origin, with its
+faces perpendicular to the axes.
+@param p point to classify, in the space of the box
+@param distanceTolerance distance to the faces of the box under which
+the point is classified as `LIMIT`
+@return INSIDE, OUTSIDE or LIMIT constant value
+*/
+int Box::doContainmentTest(const Vector3Dd& p, double distanceTolerance)
+{
+    double half[3] = { size.x() / 2, size.y() / 2, size.z() / 2 };
+    double coordinates[3] = { p.x(), p.y(), p.z() };
+    bool inside = true;
+
+    for ( int i = 0; i < 3; i++ ) {
+        double distance = std::abs(coordinates[i]);
+        if ( distance > half[i] + distanceTolerance ) {
+            return OUTSIDE;
+        }
+        if ( distance >= half[i] - distanceTolerance ) {
+            inside = false;
+        }
+    }
+    return inside ? INSIDE : LIMIT;
+}
+
 double* Box::getMinMax() { double* m=new double[6]; m[0]=-size.x()/2; m[1]=-size.y()/2; m[2]=-size.z()/2; m[3]=size.x()/2; m[4]=size.y()/2; m[5]=size.z()/2; return m; }
 Vector3Dd Box::getSize() const { return size; }
 void Box::setSize(double dx,double dy,double dz){ setSize(Vector3Dd(dx,dy,dz)); }

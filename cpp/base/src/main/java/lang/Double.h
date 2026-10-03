@@ -28,6 +28,16 @@ class Double {
     @return the text of the number
     */
     static java::String toString(double value);
+
+    /**
+    Emulation of `Double.compare`: a total order where -0.0 is smaller than
+    0.0, and NaN is equal to itself and greater than any other value.
+    @param d1 first value
+    @param d2 second value
+    @return negative, zero or positive as `d1` is less than, equal to or
+    greater than `d2`
+    */
+    static int compare(double d1, double d2);
 };
 
 }

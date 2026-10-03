@@ -1,13 +1,7 @@
 #include <glad/gl.h>
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
-#else
-#include <GL/glu.h>
-#endif
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
-#include <deque>
 #include <map>
 #include <set>
 #include <string>
@@ -30,11 +24,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/Cone.h"
 #include "vsdk/toolkit/environment/geometry/volume/Sphere.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidFace.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
-#include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/light/PointLight.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
@@ -43,16 +33,11 @@
 #include "vsdk/toolkit/render/opengl4/OpenGL4GeometryRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LineRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MeshBuilder.h"
-
-#ifdef __APPLE__
-#define VITRAL_GLU_CALLBACK(f) reinterpret_cast<GLvoid (*)()>(f)
-#else
-#define VITRAL_GLU_CALLBACK(f) reinterpret_cast<_GLUfuncptr>(f)
-#endif
 #include "vsdk/toolkit/render/opengl4/OpenGL4MeshRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4MinMaxRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SelectionCornersRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SphereRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4VoxelVolumeRenderer.h"
 
 /*
 Geometries other than spheres and curves are presented as triangle meshes
@@ -498,176 +483,6 @@ void calculateInfinitePlaneShownMinMax(const InfinitePlane& plane,
     }
 }
 
-//= Boundary representations ==============================================
-
-/**
-Triangles produced by the GLU tessellator for the faces of a boundary
-representation, as `Jogl4PolyhedralBoundedSolidRenderer` does in Java: its
-faces are planar polygons, maybe with holes (several loops).
-*/
-struct SolidTessellation {
-    std::vector<Vector3Dd> triangles;
-    /// Vertices given to GLU, and the ones it creates at intersections
-    std::deque<Vector3Dd> vertices;
-};
-
-void GLAPIENTRY tessVertex(void* vertex, void* data)
-{
-    ((SolidTessellation*)data)->triangles.push_back(*(const Vector3Dd*)vertex);
-}
-
-// With an edge flag callback, GLU gives only separate triangles
-void GLAPIENTRY tessEdgeFlag(GLboolean, void*)
-{
-}
-
-void GLAPIENTRY tessCombine(GLdouble coords[3], void*[4], GLfloat[4],
-                            void** out, void* data)
-{
-    SolidTessellation* t = (SolidTessellation*)data;
-    t->vertices.push_back(Vector3Dd(coords[0], coords[1], coords[2]));
-    *out = &t->vertices.back();
-}
-
-/**
-@return the key of a position, quantized so vertices shared by faces match
-*/
-std::string vertexKey(const Vector3Dd& p)
-{
-    const double q = 1.0e6;
-    return format("%lld/%lld/%lld", (long long)std::llround(p.x() * q),
-                  (long long)std::llround(p.y() * q), (long long)std::llround(p.z() * q));
-}
-
-/**
-Normal of a vertex of a face: the normal of the face, or (smooth shading)
-the average of the normals of the faces sharing the vertex that are within
-the smoothing threshold of it.
-*/
-Vector3Dd resolveVertexNormal(
-    const std::map<std::string, std::vector<Vector3Dd> >* incident,
-    const Vector3Dd& position, const Vector3Dd& faceNormal,
-    double thresholdDegrees)
-{
-    if ( incident == nullptr ) {
-        return faceNormal;
-    }
-    std::map<std::string, std::vector<Vector3Dd> >::const_iterator normals =
-        incident->find(vertexKey(position));
-    if ( normals == incident->end() ) {
-        return faceNormal;
-    }
-    double minimumCosine = std::cos(thresholdDegrees * M_PI / 180.0);
-    Vector3Dd sum;
-    for ( size_t i = 0; i < normals->second.size(); i++ ) {
-        if ( normals->second[i].dotProduct(faceNormal) >= minimumCosine - 1e-9 ) {
-            sum = sum.add(normals->second[i]);
-        }
-    }
-    return sum.length() > 1e-12 ? sum.normalized() : faceNormal;
-}
-
-OpenGL4MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
-    PolyhedralBoundedSolid& solid, const RendererConfiguration* quality,
-    bool doubleSided)
-{
-    java::ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid.getPolygonsList();
-    bool smoothNormals =
-        quality->getShadingType() != RendererConfiguration::SHADING_TYPE_FLAT &&
-        quality->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT;
-
-    //- Normals of the faces incident to each vertex ----------------------
-    std::map<std::string, std::vector<Vector3Dd> > incident;
-    std::vector<Vector3Dd> faceNormals((size_t)faces.size());
-    for ( long f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
-        InfinitePlane* plane = face != nullptr ? face->getContainingPlane() : nullptr;
-        if ( plane == nullptr || !(plane->getNormal().length() > 1e-12) ) {
-            continue;
-        }
-        faceNormals[(size_t)f] = plane->getNormal().normalized();
-        if ( !smoothNormals ) {
-            continue;
-        }
-        for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
-            if ( loop == nullptr || loop->boundaryStartHalfEdge == nullptr ) {
-                continue;
-            }
-            _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
-            _PolyhedralBoundedSolidHalfEdge* he = start;
-            do {
-                if ( he->startingVertex != nullptr ) {
-                    incident[vertexKey(he->startingVertex->position)]
-                        .push_back(faceNormals[(size_t)f]);
-                }
-                he = he->next();
-            } while ( he != nullptr && he != start );
-        }
-    }
-
-    //- Tessellation of each face -----------------------------------------
-    GLUtesselator* tess = gluNewTess();
-    if ( tess == nullptr ) {
-        return nullptr;
-    }
-    gluTessCallback(tess, GLU_TESS_VERTEX_DATA,
-                    VITRAL_GLU_CALLBACK(tessVertex));
-    gluTessCallback(tess, GLU_TESS_EDGE_FLAG_DATA,
-                    VITRAL_GLU_CALLBACK(tessEdgeFlag));
-    gluTessCallback(tess, GLU_TESS_COMBINE_DATA,
-                    VITRAL_GLU_CALLBACK(tessCombine));
-
-    OpenGL4MeshBuilder builder(maxAbsExtent(solid.getMinMax()));
-    builder.setDoubleSided(doubleSided);
-    for ( long f = 0; f < faces.size(); f++ ) {
-        _PolyhedralBoundedSolidFace* face = faces[f];
-        const Vector3Dd& normal = faceNormals[(size_t)f];
-        if ( face == nullptr || !(normal.length() > 1e-12) ) {
-            continue;
-        }
-        SolidTessellation t;
-        // Triangles counterclockwise seen from the outside of the face
-        gluTessNormal(tess, normal.x(), normal.y(), normal.z());
-        gluTessBeginPolygon(tess, &t);
-        for ( long l = 0; l < face->boundariesList.size(); l++ ) {
-            _PolyhedralBoundedSolidLoop* loop = face->boundariesList[l];
-            if ( loop == nullptr || loop->boundaryStartHalfEdge == nullptr ) {
-                continue;
-            }
-            gluTessBeginContour(tess);
-            _PolyhedralBoundedSolidHalfEdge* start = loop->boundaryStartHalfEdge;
-            _PolyhedralBoundedSolidHalfEdge* he = start;
-            do {
-                he = he->next();
-                if ( he == nullptr || he->startingVertex == nullptr ) {
-                    break;
-                }
-                t.vertices.push_back(he->startingVertex->position);
-                GLdouble c[3] = { t.vertices.back().x(), t.vertices.back().y(),
-                                  t.vertices.back().z() };
-                gluTessVertex(tess, c, &t.vertices.back());
-            } while ( he != start );
-            gluTessEndContour(tess);
-        }
-        gluTessEndPolygon(tess);
-
-        for ( size_t i = 0; i + 2 < t.triangles.size(); i += 3 ) {
-            Vector3Dd n[3];
-            for ( int k = 0; k < 3; k++ ) {
-                n[k] = resolveVertexNormal(smoothNormals ? &incident : nullptr,
-                    t.triangles[i + k], normal,
-                    quality->getVertexNormalSmoothingThresholdDegrees());
-            }
-            builder.addTriangle(t.triangles[i], n[0], 0, 0,
-                                t.triangles[i + 1], n[1], 0, 0,
-                                t.triangles[i + 2], n[2], 0, 0);
-        }
-    }
-    gluDeleteTess(tess);
-    return builder.build();
-}
-
 //= Cache =================================================================
 
 /**
@@ -722,6 +537,9 @@ std::string keyOf(Geometry* geometry)
         return format("infiniteplane/%.17g/%.17g/%.17g/%.17g", p->getA(),
             p->getB(), p->getC(), p->getD());
     }
+    if ( VoxelVolume* v = dynamic_cast<VoxelVolume*>(geometry) ) {
+        return OpenGL4VoxelVolumeRenderer::meshKey(*v);
+    }
     if ( TriangleMeshGroup* g = dynamic_cast<TriangleMeshGroup*>(geometry) ) {
         return format("trianglemeshgroup/%p/%ld", (void*)g,
             (long)g->getMeshes().size());
@@ -749,6 +567,9 @@ OpenGL4MeshRenderer::Mesh* buildMesh(Geometry* geometry)
     }
     if ( InfinitePlane* p = dynamic_cast<InfinitePlane*>(geometry) ) {
         return buildInfinitePlane(*p);
+    }
+    if ( VoxelVolume* v = dynamic_cast<VoxelVolume*>(geometry) ) {
+        return OpenGL4VoxelVolumeRenderer::buildMesh(*v);
     }
     return buildTriangulatedGeometry(geometry);
 }
@@ -830,20 +651,6 @@ void OpenGL4GeometryRenderer::draw(Geometry* geometry, Camera* camera,
             textureMap, normalMap, local, 32, 16);
         if(quality->isBoundingVolumeSet())OpenGL4MinMaxRenderer::draw(geometry,camera,local);
         if(quality->isSelectionCornersSet())OpenGL4SelectionCornersRenderer::draw(geometry,camera,local);
-        return;
-    }
-
-    // Boundary representations are tessellated at each frame, as in Java
-    PolyhedralBoundedSolid* solid = dynamic_cast<PolyhedralBoundedSolid*>(geometry);
-    if ( solid != 0 ) {
-        OpenGL4MeshRenderer::Mesh* mesh = buildPolyhedralBoundedSolid(*solid,
-            quality, material != 0 && material->isDoubleSided());
-        if ( mesh != 0 ) {
-            OpenGL4MeshRenderer::draw(mesh, geometry, camera, lights, material,
-                quality, textureMap, normalMap, local);
-            OpenGL4MeshRenderer::release(mesh);
-            delete mesh;
-        }
         return;
     }
 

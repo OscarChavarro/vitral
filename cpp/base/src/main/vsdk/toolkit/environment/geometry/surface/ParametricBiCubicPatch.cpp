@@ -7,6 +7,7 @@
 //=            ples and practice" - second edition, Addison Wesley, 1992.   =
 
 #include <cstdio>
+#include <mutex>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
@@ -15,7 +16,7 @@
 #include "vsdk/toolkit/environment/geometry/surface/ParametricBiCubicPatch.h"
 ParametricBiCubicPatch::ParametricBiCubicPatch()
     : contourCurve(nullptr), hasControlMeshPoints(false),
-      approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)
+      hasCoefficientMatrices(false), approximationSteps(INITIAL_APPROXIMATION_STEPS), type(ParametricCurve::HERMITE)
 {
 }
 
@@ -63,6 +64,59 @@ void ParametricBiCubicPatch::calculateMatrices()
     tParameterMatrix = Matrix4x4d();
     sDerivativeParameterMatrix = Matrix4x4d();
     tDerivativeParameterMatrix = Matrix4x4d();
+    hasCoefficientMatrices = true;
+    std::atomic_store(&rayIntersector,
+        std::shared_ptr<const _ParametricBiCubicPatchIntersector>());
+}
+
+namespace {
+/**
+Serializes the lazy creation of the intersectors of the patches, as the
+synchronized block of the Java version.
+*/
+std::mutex& rayIntersectorCreation()
+{
+    static std::mutex mutex;
+    return mutex;
+}
+}
+
+/**
+Returns the ray intersection structures for current patch, building them
+on first use.
+@return intersector, or null if the patch has not been built yet
+*/
+std::shared_ptr<const _ParametricBiCubicPatchIntersector>
+ParametricBiCubicPatch::getRayIntersector() const
+{
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        std::atomic_load(&rayIntersector);
+    if ( intersector ) {
+        return intersector;
+    }
+    std::lock_guard<std::mutex> lock(rayIntersectorCreation());
+    intersector = std::atomic_load(&rayIntersector);
+    if ( !intersector ) {
+        if ( !hasCoefficientMatrices ) {
+            return intersector;
+        }
+        intersector = std::make_shared<const _ParametricBiCubicPatchIntersector>(
+            coefficientMatrixX, coefficientMatrixY, coefficientMatrixZ);
+        std::atomic_store(&rayIntersector, intersector);
+    }
+    return intersector;
+}
+
+bool ParametricBiCubicPatch::getBezierControlPoint(int i, int j,
+                                                   Vector3Dd& outPoint) const
+{
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        getRayIntersector();
+    if ( !intersector ) {
+        return false;
+    }
+    outPoint = intersector->getBezierControlPoint(i, j);
+    return true;
 }
 
 int ParametricBiCubicPatch::getApproximationSteps() const { return approximationSteps; }
@@ -219,23 +273,155 @@ Vector3Dd ParametricBiCubicPatch::evaluateNormal(double s, double t)
     return dQds.crossProduct(dQdt).normalized();
 }
 
-Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray&)
+/**
+Check the general interface contract in superclass method
+Geometry.doIntersectionFirstHit.
+
+Check the discusion in [WAYN1990] about solving this problem. This
+implementation follows the subdivision strategy of POV-Ray's
+bicubic_patch (as replicated on povCpp): the patch is converted to Bezier
+form and recursively subdivided into nearly flat sub-patches, organized on
+a tree of bounding spheres. Hits against the flat sub-patches are then
+refined with Newton iterations over the exact surface.
+@param r ray to test
+@return a new copy of given ray with its t set at the nearest intersection,
+or null if the ray misses the patch
+*/
+Ray* ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& r)
 {
-    return nullptr;
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        getRayIntersector();
+    _ParametricBiCubicPatchIntersector::PatchHit hit;
+    if ( !intersector || !intersector->intersect(r, hit) ) {
+        return nullptr;
+    }
+    return new Ray(r.withT(hit.t));
 }
 
-bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray&, RayHit*)
+bool ParametricBiCubicPatch::doIntersectionFirstHit(const Ray& inRay,
+                                                    RayHit* outHit)
 {
-    return false;
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        getRayIntersector();
+    _ParametricBiCubicPatchIntersector::PatchHit hit;
+    if ( !intersector || !intersector->intersect(inRay, hit) ) {
+        return false;
+    }
+
+    if ( outHit != nullptr ) {
+        if ( outHit->shouldStoreRay() || outHit->needsAnySurfaceData() ) {
+            Ray hitRay = inRay.withT(hit.t);
+            outHit->setRay(hitRay);
+            if ( outHit->needsAnySurfaceData() ) {
+                fillHitInformation(*intersector, hit, inRay, outHit);
+            }
+        }
+        else {
+            outHit->setHitDistance(hit.t);
+        }
+    }
+    return true;
 }
 
-void ParametricBiCubicPatch::doExtraInformation(const Ray&, double, RayHit*)
+/**
+Check the general interface contract in superclass method
+Geometry.doExtraInformation.
+
+Since a patch surface point can not be mapped back to its (s, t)
+parameters in closed form, the ray is intersected again and the
+information reported is the one for the nearest hit.
+@param inRay ray that intersects current patch
+@param intT ray parameter at the intersection point
+@param outData receives the intersection details
+*/
+void ParametricBiCubicPatch::doExtraInformation(const Ray& inRay, double intT,
+                                                RayHit* outData)
 {
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        getRayIntersector();
+    if ( outData == nullptr || !intersector ) {
+        return;
+    }
+    _ParametricBiCubicPatchIntersector::PatchHit hit;
+    if ( !intersector->intersect(inRay, hit) ) {
+        if ( outData->needsPoint() ) {
+            outData->point = Vector3Dd(
+                inRay.getOrigin().x() + intT*inRay.getDirection().x(),
+                inRay.getOrigin().y() + intT*inRay.getDirection().y(),
+                inRay.getOrigin().z() + intT*inRay.getDirection().z());
+        }
+        return;
+    }
+    fillHitInformation(*intersector, hit, inRay, outData);
 }
 
+/**
+Fills point, normal, tangent and (s, t) texture coordinates for a hit.
+The normal is oriented against the ray direction, as the patch is an
+open surface.
+*/
+void ParametricBiCubicPatch::fillHitInformation(
+    const _ParametricBiCubicPatchIntersector& intersector,
+    const _ParametricBiCubicPatchIntersector::PatchHit& hit,
+    const Ray& inRay, RayHit* outData)
+{
+    if ( outData->needsPoint() ) {
+        outData->point = Vector3Dd(hit.px, hit.py, hit.pz);
+    }
+    if ( !outData->needsNormal() && !outData->needsTangent() &&
+         !outData->needsTextureCoordinates() ) {
+        return;
+    }
+
+    double derivatives[9];
+    intersector.evaluate(hit.u, hit.v, derivatives);
+    Vector3Dd dQds(derivatives[3], derivatives[4], derivatives[5]);
+    Vector3Dd dQdt(derivatives[6], derivatives[7], derivatives[8]);
+    Vector3Dd triangleNormal(hit.triangleNx, hit.triangleNy, hit.triangleNz);
+
+    Vector3Dd normal = dQds.crossProduct(dQdt);
+    if ( normal.length() <= VSDK::EPSILON * VSDK::EPSILON ) {
+        // Degenerated parameterization (i.e. collapsed patch border)
+        normal = triangleNormal;
+    }
+    normal = normal.normalized();
+    if ( normal.dotProduct(inRay.getDirection()) > 0 ) {
+        normal = normal.multiply(-1);
+    }
+
+    if ( outData->needsNormal() ) {
+        outData->normal = normal;
+    }
+    if ( outData->needsTangent() ) {
+        Vector3Dd tangent = dQds;
+        if ( tangent.length() <= VSDK::EPSILON * VSDK::EPSILON ) {
+            tangent = dQdt;
+        }
+        outData->tangent = tangent.normalized();
+    }
+    if ( outData->needsTextureCoordinates() ) {
+        outData->u = hit.u;
+        outData->v = hit.v;
+    }
+}
+
+/**
+Returns a bounding volume minmax for current patch. When the patch has
+been built, this is the minmax of its equivalent Bezier control net, which
+contains the whole patch by the convex hull property.
+@return a new 6 valued double array containing the coordinates of a min-max
+bounding box for current geometry.
+*/
 double* ParametricBiCubicPatch::getMinMax()
 {
-    if (contourCurve != nullptr) {
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> intersector =
+        getRayIntersector();
+    if ( intersector ) {
+        double* minMax = new double[6];
+        intersector->getMinMax(minMax);
+        return minMax;
+    }
+    else if (contourCurve != nullptr) {
         return contourCurve->getMinMax();
     }
 

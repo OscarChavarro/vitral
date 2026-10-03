@@ -4,6 +4,9 @@
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
+#include "java/util/ArrayList.h"
+
+class InfinitePlane;
 class ParametricCurve;
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidFace;
@@ -15,9 +18,9 @@ Utility class with static modeling and boolean operations specific to
 This class contains creation/sweep/split/set-op helpers and centralizes the
 polyhedral B-Rep operations previously exposed through `GeometricModeler`.
 
-C++ port note: the `split` and `setOp` wrappers are not ported yet, as the
-boolean pipeline of [MANT1988] chapters 14 and 15 (splitter, set operator)
-is not available in the C++ port.
+C++ port note: `setOp` returns a new solid owned by the caller; the
+operands are consumed (modified) but stay owned by the caller, see
+`_PolyhedralBoundedSolidSetOperator::setOp`.
 */
 class PolyhedralBoundedSolidModeler : public ProcessingElement {
 public:
@@ -101,6 +104,45 @@ public:
     */
     static PolyhedralBoundedSolid* createBrepFromParametricCurve(
         ParametricCurve* curve);
+
+    /**
+    Convenience wrapper over `_PolyhedralBoundedSolidSplitter::split`.
+
+    Splits `inSolid` by `inSplittingPlane` and appends resulting pieces to
+    `outSolidsAbove` and `outSolidsBelow` (owned by the caller; see
+    `_PolyhedralBoundedSolidSplitter::split`).
+    */
+    static void split(PolyhedralBoundedSolid* inSolid,
+                      const InfinitePlane& inSplittingPlane,
+                      java::ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
+                      java::ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow);
+
+    /**
+    Convenience wrapper over `_PolyhedralBoundedSolidSetOperator::setOp`
+    with configurable debug mode, final face maximization and strict result
+    validation (enabled by default).
+
+    Strict validation performs global shell/Euler analysis and an
+    all-face-pairs intersection scan; callers can pass false for an explicit
+    performance/legacy-compatibility opt-out.
+
+    @param inSolidA first operand (consumed, still owned by the caller)
+    @param inSolidB second operand (consumed, still owned by the caller)
+    @param op UNION, INTERSECTION or SUBTRACT
+    @param withDebug true to dump the pipeline state
+    @param maximizeResultFaces true to maximize the result faces
+    @param doStrictValidation true to validate the result strictly
+    @return the result, owned by the caller
+    @throws std::logic_error (Java IllegalStateException) when a completed
+    boolean result fails the strict B-Rep postcondition
+    */
+    static PolyhedralBoundedSolid* setOp(
+        PolyhedralBoundedSolid* inSolidA,
+        PolyhedralBoundedSolid* inSolidB,
+        int op,
+        bool withDebug = false,
+        bool maximizeResultFaces = true,
+        bool doStrictValidation = true);
 };
 
 #endif

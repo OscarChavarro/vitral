@@ -1,5 +1,5 @@
 #include "java/util/ArrayList.txx"
-#include "application/GuiEventExecutor.h"
+#include "application/commands/GuiEventExecutor.h"
 #include "gui/DrawingAreaInteractionListener.h"
 #include "gui/DrawingAreaInteractionTechniques.h"
 #include "io/GuiI18nContextBuilder.h"
@@ -40,7 +40,7 @@ class XtOpenGL4SceneBridge::Impl :
     public DrawingAreaHost,
     public DrawingAreaInteractionListener,
     public ViewportSetInteractionListener,
-    public GuiEventExecutor::Presenter {
+    public Presenter {
 public:
     XtOpenGL4SceneBridge::Listener* listener;
     ApplicationModel* model;
@@ -336,7 +336,7 @@ GuiEventExecutor* XtOpenGL4SceneBridge::getCommands()
     return impl->executor;
 }
 
-GuiEventExecutor::CommandResult XtOpenGL4SceneBridge::executeCommand(
+CommandResult XtOpenGL4SceneBridge::executeCommand(
     const std::string& command)
 {
     return impl->executor->execute(command.c_str());

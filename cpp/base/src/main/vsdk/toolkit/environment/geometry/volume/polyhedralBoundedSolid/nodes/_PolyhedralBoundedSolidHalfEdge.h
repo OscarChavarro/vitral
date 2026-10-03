@@ -1,6 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_HALF_EDGE__
 #define __POLYHEDRAL_BOUNDED_SOLID_HALF_EDGE__
 
+#include "java/lang/String.h"
+
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class _PolyhedralBoundedSolidLoop;
 class _PolyhedralBoundedSolidEdge;
@@ -23,6 +25,11 @@ public:
     _PolyhedralBoundedSolidHalfEdge* next();
     _PolyhedralBoundedSolidHalfEdge* mirrorHalfEdge();
     bool vertexPositionMatch(_PolyhedralBoundedSolidHalfEdge* other, double tolerance);
+
+    /**
+    @return a description of the node, as Java `toString`
+    */
+    java::String toString();
 };
 
 #endif

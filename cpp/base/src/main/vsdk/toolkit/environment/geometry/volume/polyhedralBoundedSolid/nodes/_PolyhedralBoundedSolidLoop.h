@@ -1,6 +1,8 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_LOOP__
 #define __POLYHEDRAL_BOUNDED_SOLID_LOOP__
 
+#include "java/lang/String.h"
+
 #include "java/util/ArrayList.h"
 class _PolyhedralBoundedSolidFace;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -22,6 +24,11 @@ public:
 
     _PolyhedralBoundedSolidHalfEdge* previousOf(_PolyhedralBoundedSolidHalfEdge* he) const;
     _PolyhedralBoundedSolidHalfEdge* nextOf(_PolyhedralBoundedSolidHalfEdge* he) const;
+
+    /**
+    @return a description of the node, as Java `toString`
+    */
+    java::String toString() const;
 };
 
 #endif

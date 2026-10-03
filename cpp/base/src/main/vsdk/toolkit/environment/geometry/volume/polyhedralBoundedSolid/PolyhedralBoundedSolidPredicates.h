@@ -11,6 +11,24 @@ public:
         PolyhedralBoundedSolid* solid,
         const Vector3Dd& point);
 
+    /**
+    Classifies a point against the solid, as `Geometry::doContainmentTest`:
+    `LIMIT` if it lies on a face (closer than the tolerance to the plane of
+    the face, and inside the face polygon with that tolerance), otherwise
+    `INSIDE` or `OUTSIDE` as decided by the robust `isPointInside`.
+
+    @param solid the solid to test against (object-space geometry)
+    @param point the query point, in the solid's object space
+    @param distanceTolerance distance to the boundary under which the point
+    is classified as `LIMIT` (the numeric tolerance of the solid is used if
+    it is larger)
+    @return Geometry::INSIDE, Geometry::OUTSIDE or Geometry::LIMIT
+    */
+    static int classifyPoint(
+        PolyhedralBoundedSolid* solid,
+        const Vector3Dd& point,
+        double distanceTolerance);
+
     static int quantitativeInvisibility(
         PolyhedralBoundedSolid* solid,
         const Vector3Dd& eye,

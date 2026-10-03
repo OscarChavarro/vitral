@@ -21,6 +21,7 @@ public:
     Ray* doIntersectionFirstHit(const Ray& inOutRay);
     virtual bool doIntersectionFirstHit(const Ray& inRay, RayHit* outHit) override;
     virtual void doExtraInformation(const Ray& inRay, double inT, RayHit* outData) override;
+    virtual int doContainmentTest(const Vector3Dd& p, double distanceTolerance) override;
     virtual double* getMinMax() override;
     virtual PolyhedralBoundedSolid* exportToPolyhedralBoundedSolid() override;
 

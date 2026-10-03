@@ -26,23 +26,12 @@ public:
 
     static bool lringmv(PolyhedralBoundedSolid* solid, _PolyhedralBoundedSolidLoop* l, _PolyhedralBoundedSolidFace* toFace, bool setAsOuterLoop);
 
-    static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int newVertexId, const Vector3Dd& p);
-    static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int newVertexId, const Vector3Dd& p);
+    static bool smev(PolyhedralBoundedSolid* solid, int f1, int v1, int v4, const Vector3Dd& p);
+    static bool mev(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, const Vector3Dd& p);
+    static bool smef(PolyhedralBoundedSolid* solid, int f1, int v1, int v3, int newFaceId);
+    static bool mef(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4, int newFaceId);
     static bool kemr(PolyhedralBoundedSolid* solid, int f1, int f2, int v1, int v2, int v3, int v4);
     static bool kfmrh(PolyhedralBoundedSolid* solid, int f1, int f2);
-
-    // compatibility overloads already used by existing C++ code
-    static bool smev(PolyhedralBoundedSolid* solid, int seedSolidId, int fromVertexId, int toVertexId, const Vector3Dd& pos);
-    static bool mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
-                    int startHalfEdge1, int endHalfEdge1,
-                    int startHalfEdge2, int endHalfEdge2,
-                    int newFaceId);
-    static bool mef(PolyhedralBoundedSolid* solid, int seedSolidId, int seedFaceId,
-                    int startHalfEdge1, int endHalfEdge1,
-                    int startHalfEdge2, int endHalfEdge2);
-    static bool smef(PolyhedralBoundedSolid* solid, int seedFaceId,
-                     int startVertexId, int endVertexId,
-                     int newFaceId);
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "application/GuiEventExecutor.h"
+#include "application/commands/GuiEventExecutor.h"
 #include "gui/PointerCursor.h"
 #include "java/io/File.h"
 
@@ -168,7 +168,7 @@ public:
     it changes in the scene history (see `GuiEventExecutor`).
     @return whether the command was executed, failed, or needs the GUI
     */
-    GuiEventExecutor::CommandResult executeCommand(const std::string& command);
+    CommandResult executeCommand(const std::string& command);
 
     /**
     Ray traces the scene from its active camera into the raytraced image of

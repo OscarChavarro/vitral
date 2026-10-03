@@ -13,7 +13,7 @@
 
 #include <glad/gl.h>
 
-#include "application/GuiEventExecutor.h"
+#include "application/commands/GuiEventExecutor.h"
 #include "java/io/File.h"
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
@@ -1147,9 +1147,9 @@ private:
             raytracingRequested();
         }
         else {
-            GuiEventExecutor::CommandResult result =
+            CommandResult result =
                 sceneBridge.executeCommand(command);
-            if ( result == GuiEventExecutor::CommandResult::NOT_HANDLED ) {
+            if ( result == CommandResult::NOT_HANDLED ) {
                 setStatus(command + " is not implemented in the GTK4 example yet");
             }
         }

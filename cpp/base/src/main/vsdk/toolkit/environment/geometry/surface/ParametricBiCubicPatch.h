@@ -1,9 +1,12 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH__
 #define __PARAMETRIC_BI_CUBIC_PATCH__
 
+#include <memory>
+
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
+#include "vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.h"
 class ParametricCurve;
 class Ray;
 class RayHit;
@@ -33,8 +36,22 @@ private:
 
     Vector3Dd controlMeshPoints[4][4];
     bool hasControlMeshPoints;
+    /// C++ port note: the coefficient matrices are values, so this tells
+    /// when they were built (Java checks for null matrices)
+    bool hasCoefficientMatrices;
 
     int approximationSteps;
+
+    // Lazily built ray intersection structures, discarded each time the
+    // patch matrices are rebuilt. Shared by the copies of the patch, as it
+    // is immutable
+    mutable std::shared_ptr<const _ParametricBiCubicPatchIntersector> rayIntersector;
+
+    std::shared_ptr<const _ParametricBiCubicPatchIntersector> getRayIntersector() const;
+    static void fillHitInformation(
+        const _ParametricBiCubicPatchIntersector& intersector,
+        const _ParametricBiCubicPatchIntersector::PatchHit& hit,
+        const Ray& inRay, RayHit* outData);
 
 public:
     int type;
@@ -43,6 +60,18 @@ public:
 
     void buildFergusonPatch(ParametricCurve* curve);
     void buildBezierPatch(const Vector3Dd controlMeshPoints[4][4]);
+
+    /**
+    Returns the control point of the Bezier patch equivalent to current
+    patch (for Bezier patches, this is the original control mesh point).
+    PRE: Some of the "build*Patch" methods should be called before calling
+    this method.
+    @param i control point index on the s direction, in [0, 3]
+    @param j control point index on the t direction, in [0, 3]
+    @param outPoint receives the Bezier control point (i, j)
+    @return false if the patch has not been built (Java returns null)
+    */
+    bool getBezierControlPoint(int i, int j, Vector3Dd& outPoint) const;
 
     int getApproximationSteps() const;
     void setApproximationSteps(int n);

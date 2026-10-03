@@ -8,11 +8,35 @@ class RayHit;
 class Matrix4x4d;
 
 class VoxelVolume : public Solid {
+public:
+    /** Default lowest value of a voxel considered part of the solid */
+    static const int DEFAULT_THRESHOLD = 127;
+
 private:
+    /** Smallest ray direction component not considered parallel to an axis */
+    static const double PARALLEL_EPSILON;
+
     IndexedColorImageUncompressed** data;
     int xSize;
     int ySize;
     int zSize;
+    int threshold;
+
+    /**
+    Face of a voxel entered by a ray.
+    */
+    struct VoxelFaceHit {
+        /** Distance along the ray to the face */
+        double t;
+        /** Axis perpendicular to the face (0: x, 1: y, 2: z) */
+        int axis;
+        /** Sign of the outer normal of the face along its axis */
+        int side;
+    };
+
+    bool traceFirstFilledVoxel(const Ray& ray, VoxelFaceHit& outHit) const;
+    static void fillSurfaceData(const Ray& hitRay, const VoxelFaceHit& hit,
+                                RayHit* outData);
 
 public:
     VoxelVolume();
@@ -21,6 +45,26 @@ public:
     int getXSize() const;
     int getYSize() const;
     int getZSize() const;
+
+    /**
+    @return lowest value of a voxel considered part of the solid (by the ray
+    intersection and by the renderers)
+    */
+    int getThreshold() const;
+
+    /**
+    @param threshold lowest value of a voxel considered part of the solid
+    */
+    void setThreshold(int threshold);
+
+    /**
+    @param x voxel index along X
+    @param y voxel index along Y
+    @param z voxel index along Z
+    @return true if the voxel is inside the volume and its value reaches the
+    threshold
+    */
+    bool isFilled(int x, int y, int z) const;
 
     bool init(int xSize, int ySize, int zSize);
 
