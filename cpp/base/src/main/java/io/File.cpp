@@ -3,8 +3,10 @@
 #include <cstring>
 
 #include "java/io/File.h"
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "java/util/ArrayList.txx"
 namespace java {
 
 bool
@@ -96,18 +98,18 @@ File::getPath() const {
 
 java::String
 File::getAbsolutePath() const {
-    if ( path.startsWith("/") ) {
+    if ( path.length() > 0 && path.charAt(0) == '/' ) {
         return path;
     }
     char buffer[4096];
     if ( getcwd(buffer, sizeof(buffer)) == nullptr ) {
         return path;
     }
-    java::String directory(buffer);
-    if ( path.isEmpty() ) {
-        return directory;
+    java::String cwd(buffer);
+    if ( path.length() == 0 ) {
+        return cwd;
     }
-    return directory + "/" + path;
+    return cwd + "/" + path;
 }
 
 java::String
@@ -211,6 +213,44 @@ File::mkdirs() const {
     delete[] tmp;
 
     return created || isDirectoryByReadProbe(rawPath);
+}
+
+java::ArrayList<java::String>
+File::list() const {
+    java::ArrayList<java::String> names;
+    const char *rawPath = path.toCString();
+    if ( !isValidPath(rawPath) ) {
+        return names;
+    }
+    DIR *dir = opendir(rawPath);
+    if ( dir == nullptr ) {
+        return names;
+    }
+    struct dirent *entry;
+    while ( (entry = readdir(dir)) != nullptr ) {
+        if ( std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0 ) {
+            continue;
+        }
+        names.add(java::String(entry->d_name));
+    }
+    closedir(dir);
+    return names;
+}
+
+java::ArrayList<java::File*>
+File::listFiles() const {
+    java::ArrayList<java::File*> files;
+    java::ArrayList<java::String> names = list();
+    const java::String base = path;
+    const bool needsSlash = base.length() > 0 && base.charAt(base.length() - 1) != '/';
+    for ( long int i = 0; i < names.size(); i++ ) {
+        std::size_t total = std::strlen(base.c_str()) + std::strlen(names[i].c_str()) + 2;
+        char *full = new char[total];
+        std::snprintf(full, total, "%s%s%s", base.c_str(), needsSlash ? "/" : "", names[i].c_str());
+        files.add(new File(full));
+        delete[] full;
+    }
+    return files;
 }
 
 }

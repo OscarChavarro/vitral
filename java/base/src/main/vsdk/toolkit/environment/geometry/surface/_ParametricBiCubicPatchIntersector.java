@@ -67,30 +67,30 @@ final class _ParametricBiCubicPatchIntersector
     */
     private static final class PatchNode
     {
-        private final double cx;
-        private final double cy;
-        private final double cz;
+        private final double centerX;
+        private final double centerY;
+        private final double centerZ;
         private final double radiusSquared;
         private final PatchNode[] children;
         private final double[] corners;
-        private final double u0;
-        private final double u1;
-        private final double v0;
-        private final double v1;
+        private final double uMin;
+        private final double uMax;
+        private final double vMin;
+        private final double vMax;
 
         private PatchNode(double[] net, PatchNode[] children,
                           double u0, double u1, double v0, double v1)
         {
             double[] sphere = boundingSphere(net);
-            this.cx = sphere[0];
-            this.cy = sphere[1];
-            this.cz = sphere[2];
+            this.centerX = sphere[0];
+            this.centerY = sphere[1];
+            this.centerZ = sphere[2];
             this.radiusSquared = sphere[3];
             this.children = children;
-            this.u0 = u0;
-            this.u1 = u1;
-            this.v0 = v0;
-            this.v1 = v1;
+            this.uMin = u0;
+            this.uMax = u1;
+            this.vMin = v0;
+            this.vMax = v1;
             if ( children == null ) {
                 // Corners (u0, v0), (u0, v1), (u1, v1) and (u1, v0)
                 corners = new double[12];
@@ -113,9 +113,9 @@ final class _ParametricBiCubicPatchIntersector
         double t;
         double u;
         double v;
-        double px;
-        double py;
-        double pz;
+        double pointX;
+        double pointY;
+        double pointZ;
         double triangleNx;
         double triangleNy;
         double triangleNz;
@@ -511,14 +511,14 @@ final class _ParametricBiCubicPatchIntersector
         double[] result = new double[3];
         if ( intersectTriangle(o, d, c, 0, 1, 2, result) &&
              result[0] < best.t ) {
-            double u = node.u0 + result[2] * (node.u1 - node.u0);
-            double v = node.v0 + (result[1] + result[2]) * (node.v1 - node.v0);
+            double u = node.uMin + result[2] * (node.uMax - node.uMin);
+            double v = node.vMin + (result[1] + result[2]) * (node.vMax - node.vMin);
             acceptHit(node, o, d, c, 0, 1, 2, result[0], u, v, best);
         }
         if ( intersectTriangle(o, d, c, 0, 2, 3, result) &&
              result[0] < best.t ) {
-            double u = node.u0 + (result[1] + result[2]) * (node.u1 - node.u0);
-            double v = node.v0 + result[1] * (node.v1 - node.v0);
+            double u = node.uMin + (result[1] + result[2]) * (node.uMax - node.uMin);
+            double v = node.vMin + result[1] * (node.vMax - node.vMin);
             acceptHit(node, o, d, c, 0, 2, 3, result[0], u, v, best);
         }
     }
@@ -530,9 +530,9 @@ final class _ParametricBiCubicPatchIntersector
     private static boolean sphericalBoundsCheck(PatchNode node, double[] o,
         double[] d, double directionLengthSquared, double maxT)
     {
-        double x = node.cx - o[0];
-        double y = node.cy - o[1];
-        double z = node.cz - o[2];
+        double x = node.centerX - o[0];
+        double y = node.centerY - o[1];
+        double z = node.centerZ - o[2];
         double distanceSquared = x*x + y*y + z*z;
         if ( distanceSquared < node.radiusSquared ) {
             // Ray starts inside sphere - assume it intersects
@@ -618,11 +618,11 @@ final class _ParametricBiCubicPatchIntersector
         double t, double u, double v, PatchHit best)
     {
         double[] refined = { u, v, t };
-        double du = node.u1 - node.u0;
-        double dv = node.v1 - node.v0;
+        double du = node.uMax - node.uMin;
+        double dv = node.vMax - node.vMin;
         if ( refineOnSurface(o, d, refined) &&
-             refined[0] >= node.u0 - du && refined[0] <= node.u1 + du &&
-             refined[1] >= node.v0 - dv && refined[1] <= node.v1 + dv ) {
+             refined[0] >= node.uMin - du && refined[0] <= node.uMax + du &&
+             refined[1] >= node.vMin - dv && refined[1] <= node.vMax + dv ) {
             if ( refined[2] <= VSDK.EPSILON ) {
                 // The exact surface root is the ray origin itself (i.e. a
                 // shadow or reflected ray leaving the patch): the triangle
@@ -640,9 +640,9 @@ final class _ParametricBiCubicPatchIntersector
         best.t = t;
         best.u = clamp01(u);
         best.v = clamp01(v);
-        best.px = o[0] + t * d[0];
-        best.py = o[1] + t * d[1];
-        best.pz = o[2] + t * d[2];
+        best.pointX = o[0] + t * d[0];
+        best.pointY = o[1] + t * d[1];
+        best.pointZ = o[2] + t * d[2];
 
         double e1x = corners[3*b] - corners[3*a];
         double e1y = corners[3*b + 1] - corners[3*a + 1];

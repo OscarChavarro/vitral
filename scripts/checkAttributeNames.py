@@ -74,6 +74,7 @@ NOTATION_EXEMPTIONS = {
     "InfinitePlane:a", "InfinitePlane:b", "InfinitePlane:c", "InfinitePlane:d",
     # Ray parameter: point = origin + t * direction (getT / withT API).
     "Ray:t", "Intersection:t",
+    "_ParametricBiCubicPatchIntersector:t", "VoxelVolume:t",
     # Diffuse/specular weights Kd, Ks: also the columns of the material
     # files and the shader uniforms (cookKd, cookKs).
     "MicroFacetedMaterial:kd", "MicroFacetedMaterial:ks",
@@ -163,6 +164,8 @@ ACCESSOR_EXEMPTIONS = {
     "InfinitePlaneGizmo:getPlane", "InfinitePlaneGizmo:getPoint", "InfinitePlaneGizmo:getNormal",
     "WidgetDialog:getChildren", "ZBuffer:getZBuffer", "ImagePersistenceTarga:getTexture",
     "StopWatch:getElapsedRealTime",
+    # AWT ActionEvent API: getID() returns the event id.
+    "HtmlActionListener:getID",
     # Testsuites: interface accessors, derived values and legacy servlet code.
     "BodyTransformState:getEntity", "CameraState:getEntity", "LightTransformState:getEntity",
     "UndoQueue:getUndoCount", "CsgSampleNames:getDisplayIndex", "PolygonModel:getImageHeight",

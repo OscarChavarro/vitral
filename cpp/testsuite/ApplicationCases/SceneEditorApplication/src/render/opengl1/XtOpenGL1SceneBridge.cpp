@@ -26,7 +26,7 @@
 #include "vsdk/toolkit/media/ZBuffer.h"
 #include "vsdk/toolkit/processing/ImageProcessing.h"
 #include "java/io/File.h"
-#include "java/io/FileInputStream.h"
+#include "java/io/FileReader.h"
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/io/image/RGBColorPalettePersistence.h"
@@ -106,7 +106,7 @@ public:
             throw VSDKFatalException(
                 java::String("Can not read palette file ") + PALETTE_FILE);
         }
-        java::FileInputStream paletteStream(PALETTE_FILE);
+        java::FileReader paletteStream(PALETTE_FILE);
         model->setPalette(
             RGBColorPalettePersistence::importGimpPalette(paletteStream));
 

@@ -669,7 +669,7 @@ public class ParametricBiCubicPatch extends Surface {
         RayHit outData)
     {
         if ( outData.needsPoint() ) {
-            outData.point = new Vector3Dd(hit.px, hit.py, hit.pz);
+            outData.point = new Vector3Dd(hit.pointX, hit.pointY, hit.pointZ);
         }
         if ( !outData.needsNormal() && !outData.needsTangent() &&
              !outData.needsTextureCoordinates() ) {

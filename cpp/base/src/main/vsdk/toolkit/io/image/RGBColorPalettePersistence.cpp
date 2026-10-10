@@ -1,101 +1,79 @@
-#include <cstdlib>
-
-#include "vsdk/toolkit/io/image/RGBColorPalettePersistence.h"
+#include "java/io/StreamTokenizer.h"
+#include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
+#include "vsdk/toolkit/io/image/RGBColorPalettePersistence.h"
 
-namespace {
-
-bool isWordChar(int c)
+RGBColorPalette*
+RGBColorPalettePersistence::importGimpPalette(java::Reader& source)
 {
-    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
-}
-
-bool isNumberStart(int c)
-{
-    return (c >= '0' && c <= '9') || c == '.' || c == '-';
-}
-
-}
-
-RGBColorPalette* RGBColorPalettePersistence::importGimpPalette(
-    java::InputStream& source)
-{
-    // Tokenization follows java.io.StreamTokenizer as configured by the Java
-    // version: '#' comments, significant end of lines, ' ', ',' and '\t'
-    // as white space, and parsed numbers.
     RGBColorPalette* p = new RGBColorPalette();
     p->init(0);
 
+    java::StreamTokenizer parser(source);
+
+    parser.resetSyntax();
+    parser.eolIsSignificant(true);
+    parser.slashSlashComments(false);
+    parser.slashStarComments(false);
+    parser.commentChar('#');
+    parser.whitespaceChars(' ', ' ');
+    parser.whitespaceChars(',', ',');
+    parser.whitespaceChars('\t', '\t');
+    parser.wordChars('A', 'Z');
+    parser.wordChars('a', 'z');
+    parser.wordChars('0', '9');
+    parser.wordChars('_', '_');
+    parser.parseNumbers();
+
+    int tokenType;
     int startline = 0;
     double r = 0.0;
     double g = 0.0;
-    int c = source.read();
 
-    while ( c >= 0 ) {
-        if ( c == '\n' || c == '\r' ) {
+    do {
+        tokenType = parser.nextToken();
+        switch ( tokenType ) {
+          case java::StreamTokenizer::TT_EOL:
             startline = 0;
-            c = source.read();
-        }
-        else if ( c == '#' ) {
-            while ( c >= 0 && c != '\n' && c != '\r' ) {
-                c = source.read();
-            }
-        }
-        else if ( isNumberStart(c) ) {
-            char buffer[64];
-            int n = 0;
-            do {
-                if ( n < 63 ) {
-                    buffer[n++] = (char)c;
-                }
-                c = source.read();
-            } while ( (c >= '0' && c <= '9') || c == '.' );
-            buffer[n] = '\0';
-            double nval = std::atof(buffer);
+            break;
+          case java::StreamTokenizer::TT_NUMBER:
             switch ( startline ) {
               case 0:
-                r = nval / 255.0;
+                r = (parser.nval)/255.0;
                 break;
               case 1:
-                g = nval / 255.0;
+                g = (parser.nval)/255.0;
                 break;
               case 2:
-                p->addColor(r, g, nval / 255.0);
-                break;
-              default:
+                p->addColor(r, g, (parser.nval)/255.0);
                 break;
             }
             startline++;
+            break;
+          default:
+            break;
         }
-        else if ( isWordChar(c) ) {
-            while ( c >= 0 && (isWordChar(c) || (c >= '0' && c <= '9')) ) {
-                c = source.read();
-            }
-        }
-        else {
-            c = source.read();
-        }
-    }
+    } while ( tokenType != java::StreamTokenizer::TT_EOF );
 
     return p;
 }
 
-RGBColorPalette* RGBColorPalettePersistence::importRawPalette(
-    java::InputStream& dis)
+RGBColorPalette*
+RGBColorPalettePersistence::importRawPalette(java::InputStream& source)
 {
     RGBColorPalette* p = new RGBColorPalette();
     p->init(0);
 
-    while ( true ) {
-        int nr = dis.read();
-        int ng = dis.read();
-        int nb = dis.read();
+    for ( ;; ) {
+        int nr = source.read();
+        int ng = source.read();
+        int nb = source.read();
         if ( nr < 0 || ng < 0 || nb < 0 ) {
             break;
         }
-        p->addColor(nr, ng, nb);
+        p->addColor((double)nr, (double)ng, (double)nb);
     }
 
-    dis.close();
+    source.close();
     return p;
 }

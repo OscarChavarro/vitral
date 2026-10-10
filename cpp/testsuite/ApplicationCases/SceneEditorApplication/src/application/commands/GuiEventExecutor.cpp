@@ -1,4 +1,4 @@
-#include "java/io/FileInputStream.h"
+#include "java/io/FileReader.h"
 #include "java/io/FileOutputStream.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -194,7 +194,7 @@ bool GuiEventExecutor::loadPalette(const java::File& file)
     if ( !file.canRead() ) {
         return false;
     }
-    java::FileInputStream source(file.getPath().c_str());
+    java::FileReader source(file);
     model->setPalette(RGBColorPalettePersistence::importGimpPalette(source));
     source.close();
     return true;

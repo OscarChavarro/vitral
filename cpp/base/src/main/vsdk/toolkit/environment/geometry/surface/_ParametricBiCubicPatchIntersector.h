@@ -54,9 +54,9 @@ public:
         double t;
         double u;
         double v;
-        double px;
-        double py;
-        double pz;
+        double pointX;
+        double pointY;
+        double pointZ;
         double triangleNx;
         double triangleNy;
         double triangleNz;

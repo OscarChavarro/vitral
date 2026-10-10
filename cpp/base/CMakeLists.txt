@@ -93,6 +93,10 @@ set(VITRAL_BASE_SOURCES
     src/main/java/io/PrintStream.cpp
     src/main/java/io/BufferedReader.cpp
     src/main/java/io/PrintWriter.cpp
+    src/main/java/io/Reader.cpp
+    src/main/java/io/InputStreamReader.cpp
+    src/main/java/io/FileReader.cpp
+    src/main/java/io/StreamTokenizer.cpp
     src/main/java/net/ServerSocket.cpp
     src/main/java/net/SocketInputStream.cpp
     src/main/java/net/SocketOutputStream.cpp

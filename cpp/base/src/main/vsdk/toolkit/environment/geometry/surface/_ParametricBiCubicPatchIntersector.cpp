@@ -33,27 +33,27 @@ leaves have the four corner points of the sub-patch and its parametric
 range.
 */
 struct _ParametricBiCubicPatchIntersector::PatchNode {
-    double cx;
-    double cy;
-    double cz;
+    double centerX;
+    double centerY;
+    double centerZ;
     double radiusSquared;
     /// Empty for leaves
     std::vector<std::unique_ptr<PatchNode> > children;
     double corners[12];
-    double u0;
-    double u1;
-    double v0;
-    double v1;
+    double uMin;
+    double uMax;
+    double vMin;
+    double vMax;
 
     PatchNode(const double net[48], bool leaf,
               double u0, double u1, double v0, double v1)
-        : u0(u0), u1(u1), v0(v0), v1(v1)
+        : uMin(u0), uMax(u1), vMin(v0), vMax(v1)
     {
         double sphere[4];
         boundingSphere(net, sphere);
-        cx = sphere[0];
-        cy = sphere[1];
-        cz = sphere[2];
+        centerX = sphere[0];
+        centerY = sphere[1];
+        centerZ = sphere[2];
         radiusSquared = sphere[3];
         if ( leaf ) {
             // Corners (u0, v0), (u0, v1), (u1, v1) and (u1, v0)
@@ -71,7 +71,7 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
 };
 
 _ParametricBiCubicPatchIntersector::PatchHit::PatchHit()
-    : t(DBL_MAX), u(0), v(0), px(0), py(0), pz(0),
+    : t(DBL_MAX), u(0), v(0), pointX(0), pointY(0), pointZ(0),
       triangleNx(0), triangleNy(0), triangleNz(0)
 {
 }
@@ -454,14 +454,14 @@ void _ParametricBiCubicPatchIntersector::walkTree(
     double result[3];
     if ( intersectTriangle(o, d, c, 0, 1, 2, result) &&
          result[0] < best.t ) {
-        double u = node->u0 + result[2] * (node->u1 - node->u0);
-        double v = node->v0 + (result[1] + result[2]) * (node->v1 - node->v0);
+        double u = node->uMin + result[2] * (node->uMax - node->uMin);
+        double v = node->vMin + (result[1] + result[2]) * (node->vMax - node->vMin);
         acceptHit(node, o, d, c, 0, 1, 2, result[0], u, v, best);
     }
     if ( intersectTriangle(o, d, c, 0, 2, 3, result) &&
          result[0] < best.t ) {
-        double u = node->u0 + (result[1] + result[2]) * (node->u1 - node->u0);
-        double v = node->v0 + result[1] * (node->v1 - node->v0);
+        double u = node->uMin + (result[1] + result[2]) * (node->uMax - node->uMin);
+        double v = node->vMin + result[1] * (node->vMax - node->vMin);
         acceptHit(node, o, d, c, 0, 2, 3, result[0], u, v, best);
     }
 }
@@ -474,9 +474,9 @@ bool _ParametricBiCubicPatchIntersector::sphericalBoundsCheck(
     const PatchNode* node, const double o[3], const double d[3],
     double directionLengthSquared, double maxT)
 {
-    double x = node->cx - o[0];
-    double y = node->cy - o[1];
-    double z = node->cz - o[2];
+    double x = node->centerX - o[0];
+    double y = node->centerY - o[1];
+    double z = node->centerZ - o[2];
     double distanceSquared = x*x + y*y + z*z;
     if ( distanceSquared < node->radiusSquared ) {
         // Ray starts inside sphere - assume it intersects
@@ -564,11 +564,11 @@ void _ParametricBiCubicPatchIntersector::acceptHit(
     double t, double u, double v, PatchHit& best) const
 {
     double refined[3] = { u, v, t };
-    double du = node->u1 - node->u0;
-    double dv = node->v1 - node->v0;
+    double du = node->uMax - node->uMin;
+    double dv = node->vMax - node->vMin;
     if ( refineOnSurface(o, d, refined) &&
-         refined[0] >= node->u0 - du && refined[0] <= node->u1 + du &&
-         refined[1] >= node->v0 - dv && refined[1] <= node->v1 + dv ) {
+         refined[0] >= node->uMin - du && refined[0] <= node->uMax + du &&
+         refined[1] >= node->vMin - dv && refined[1] <= node->vMax + dv ) {
         if ( refined[2] <= VSDK::EPSILON ) {
             // The exact surface root is the ray origin itself (i.e. a
             // shadow or reflected ray leaving the patch): the triangle
@@ -586,9 +586,9 @@ void _ParametricBiCubicPatchIntersector::acceptHit(
     best.t = t;
     best.u = clamp01(u);
     best.v = clamp01(v);
-    best.px = o[0] + t * d[0];
-    best.py = o[1] + t * d[1];
-    best.pz = o[2] + t * d[2];
+    best.pointX = o[0] + t * d[0];
+    best.pointY = o[1] + t * d[1];
+    best.pointZ = o[2] + t * d[2];
 
     double e1x = corners[3*b] - corners[3*a];
     double e1y = corners[3*b + 1] - corners[3*a + 1];
