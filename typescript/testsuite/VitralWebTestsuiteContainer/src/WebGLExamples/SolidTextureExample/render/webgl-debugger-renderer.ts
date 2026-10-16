@@ -1,4 +1,11 @@
-import { InfinitePlane, Light, LightGizmoStyle } from '@vitral/base';
+import {
+  InfinitePlane,
+  Light,
+  LightGizmoStyle,
+  RayGizmo,
+  Viewport,
+  ViewportSet,
+} from '@vitral/base';
 import {
   WebGLCameraRenderer,
   WebGLInfinitePlaneGizmoRenderer,
@@ -6,6 +13,8 @@ import {
   WebGLRayGizmoRenderer,
   WebGLRendererConfigurationShaderSelector,
   WebGLSolidTextureRenderer,
+  WebGLViewportWindow,
+  type WebGLLabelImageProvider,
 } from '@vitral/webgl';
 import { OperationMode } from '../model/operation-mode';
 import type { SolidTextureModel } from '../model/solid-texture-model';
@@ -44,11 +53,36 @@ export class WebGLDebuggerRenderer {
   private readonly hudRenderer: WebGLSolidTextureHudRenderer;
   private readonly planesRenderer: WebGLSolidTexturePlanesRenderer;
   private readonly solidTextureRenderer: WebGLSolidTextureRenderer;
+  // A single viewport covering the whole canvas, used to draw the input
+  // gizmo of the ray gizmo (numeric boxes) at its lower right corner
+  private readonly viewportSet: ViewportSet;
+  private readonly viewport: Viewport;
+  private readonly viewportWindow: WebGLViewportWindow;
 
-  constructor(private readonly model: SolidTextureModel) {
+  constructor(
+    private readonly model: SolidTextureModel,
+    labelImageProvider: WebGLLabelImageProvider,
+  ) {
+    this.viewportSet = new ViewportSet();
+    this.viewport = new Viewport();
+    this.viewport.setBorder(0);
+    this.viewportSet.addViewport(this.viewport);
+    this.viewportWindow = new WebGLViewportWindow(
+      this.viewportSet,
+      this.viewport,
+      labelImageProvider,
+    );
     this.hudRenderer = new WebGLSolidTextureHudRenderer(model);
     this.planesRenderer = new WebGLSolidTexturePlanesRenderer();
     this.solidTextureRenderer = new WebGLSolidTextureRenderer();
+  }
+
+  /**
+   * @returns the viewport set where the overlays are drawn, so its element
+   * scaler can be configured with the resolution of the screen
+   */
+  getViewportSet(): ViewportSet {
+    return this.viewportSet;
   }
 
   /**
@@ -92,6 +126,7 @@ export class WebGLDebuggerRenderer {
   reshape(gl: WebGL2RenderingContext, x: number, y: number, width: number, height: number): void {
     gl.viewport(x, y, width, height);
     this.model.getCamera().updateViewportResize(width, height);
+    this.viewportSet.resize(width, height);
   }
 
   dispose(gl: WebGL2RenderingContext): void {
@@ -102,6 +137,7 @@ export class WebGLDebuggerRenderer {
     this.hudRenderer.dispose(gl);
     this.planesRenderer.dispose(gl);
     this.solidTextureRenderer.dispose(gl);
+    this.viewportWindow.disposeGlResources(gl);
   }
 
   private async drawMeshModel(gl: WebGL2RenderingContext): Promise<void> {
@@ -119,6 +155,7 @@ export class WebGLDebuggerRenderer {
       this.model.getSolidTextureSize(),
       this.model.getSolidTextureRevision(),
       this.activeClippingPlane(),
+      this.model.getQualitySelection(),
     );
 
     for (const light of activeLights) {
@@ -134,12 +171,11 @@ export class WebGLDebuggerRenderer {
   private async drawGizmos(gl: WebGL2RenderingContext): Promise<void> {
     const activeLights: Light[] = this.model.getLights();
 
-    await WebGLRayGizmoRenderer.draw(
-      gl,
-      this.model.getRayGizmo(),
-      this.model.getCamera(),
-      activeLights,
-    );
+    const rayGizmo: RayGizmo = this.model.getRayGizmo();
+    await WebGLRayGizmoRenderer.draw(gl, rayGizmo, this.model.getCamera(), activeLights);
+    if (rayGizmo.isVisible()) {
+      await this.viewportWindow.drawInputGizmo(gl, rayGizmo.getInputGizmo());
+    }
 
     await WebGLInfinitePlaneGizmoRenderer.draw(
       gl,

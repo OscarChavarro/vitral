@@ -18,6 +18,13 @@ const double RayGizmo::ARROW_BASE_RADIUS = 0.15;
 const double RayGizmo::ARROW_HEAD_RADIUS = 0.40;
 const ColorRgb RayGizmo::DEFAULT_RAY_COLOR = ColorRgb(1, 0.8, 0.8);
 const ColorRgb RayGizmo::DEFAULT_NORMAL_COLOR = ColorRgb(1, 1, 0.8);
+const ColorRgb RayGizmo::INPUT_FIELD_COLORS[RayGizmo::NUMBER_OF_INPUT_FIELDS] = {
+    ColorRgb(1, 0, 0),
+    ColorRgb(0, 1, 0),
+    ColorRgb(0, 0, 1),
+    ColorRgb(1, 1, 0),
+    ColorRgb(0, 1, 1)
+};
 
 RayGizmo::RaySnapshot::RaySnapshot()
     : rotationAngleInRadians(0.0)
@@ -107,6 +114,10 @@ RayGizmo::RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback
     *mat = mat->withSpecular(ColorRgb(1.0, 1.0, 1.0));
     *mat = mat->withPhongExponent(32.0);
     body->setMaterial(mat);
+
+    for ( int i = 0; i < NUMBER_OF_INPUT_FIELDS; i++ ) {
+        inputGizmo.setFieldColor(i, INPUT_FIELD_COLORS[i]);
+    }
 
     currentPosition = Vector3Dd(0, 0, 0);
     currentDirection = Vector3Dd(0, 0, 1);

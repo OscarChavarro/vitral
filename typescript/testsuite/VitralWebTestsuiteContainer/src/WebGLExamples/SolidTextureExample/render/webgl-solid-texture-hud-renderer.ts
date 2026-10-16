@@ -1,4 +1,4 @@
-import { RGBImageUncompressed } from '@vitral/base';
+import { RGBImageUncompressed, ShadingType, type RendererConfiguration } from '@vitral/base';
 import { WebGLImageRenderer } from '@vitral/webgl';
 import type { SolidTextureModel } from '../model/solid-texture-model';
 
@@ -25,12 +25,13 @@ import type { SolidTextureModel } from '../model/solid-texture-model';
  * exactly as Java does.
  */
 export class WebGLSolidTextureHudRenderer {
-  private static readonly HUD_HEIGHT = 122;
+  private static readonly HUD_HEIGHT = 148;
   private static readonly HUD_LEFT = 16;
   private static readonly HUD_BASELINE_1 = 28;
   private static readonly HUD_BASELINE_2 = 54;
   private static readonly HUD_BASELINE_3 = 80;
   private static readonly HUD_BASELINE_4 = 106;
+  private static readonly HUD_BASELINE_5 = 132;
   private static readonly HUD_FONT = 'bold 18px sans-serif';
 
   private hudImage: RGBImageUncompressed | null = null;
@@ -74,9 +75,14 @@ export class WebGLSolidTextureHudRenderer {
       WebGLSolidTextureHudRenderer.HUD_BASELINE_3,
     );
     g.fillText(
-      'Animation [r]: ' + (this.model.isAnimationEnabled() ? 'PLAY' : 'STOP'),
+      'Animation [a]: ' + (this.model.isAnimationEnabled() ? 'PLAY' : 'STOP'),
       WebGLSolidTextureHudRenderer.HUD_LEFT,
       WebGLSolidTextureHudRenderer.HUD_BASELINE_4,
+    );
+    g.fillText(
+      'Render [F1-F3, F8, F7]: ' + this.renderModeDescription(),
+      WebGLSolidTextureHudRenderer.HUD_LEFT,
+      WebGLSolidTextureHudRenderer.HUD_BASELINE_5,
     );
 
     const rendered: Uint8ClampedArray = g.getImageData(0, 0, this.hudWidth, this.hudHeight).data;
@@ -106,6 +112,18 @@ export class WebGLSolidTextureHudRenderer {
    */
   async prepare(gl: WebGL2RenderingContext): Promise<void> {
     await WebGLImageRenderer.prepare(gl);
+  }
+
+  private renderModeDescription(): string {
+    const quality: RendererConfiguration = this.model.getQualitySelection();
+    let description = '';
+
+    description += quality.isPointsSet() ? 'POINTS ' : 'points ';
+    description += quality.isWiresSet() ? 'WIRES ' : 'wires ';
+    description += quality.isSurfacesSet() ? 'SURFACES ' : 'surfaces ';
+    description += quality.isTextureSet() ? 'TEXTURE ' : 'texture ';
+    description += '/ ' + ShadingType[quality.getShadingTypeEnum()];
+    return description;
   }
 
   dispose(gl: WebGL2RenderingContext): void {

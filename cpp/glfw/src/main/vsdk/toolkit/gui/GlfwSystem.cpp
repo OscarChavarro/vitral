@@ -1,5 +1,14 @@
 #include "GlfwSystem.h"
+#include <algorithm>
+#include <cstdio>
+#include <vector>
 #include <GLFW/glfw3.h>
+#ifdef VITRAL_GLFW_WITH_FREETYPE
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#endif
+#include "vsdk/toolkit/common/color/ColorRgb.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
 #endif
@@ -342,4 +351,158 @@ MouseEvent GlfwSystem::glfw2vsdkWheelEvent(double xoffset, double yoffset) {
     MouseEvent event;
     event.setClicks((int)yoffset);
     return event;
+}
+
+//===========================================================================
+//= Text labels                                                             =
+//===========================================================================
+
+#ifdef VITRAL_GLFW_WITH_FREETYPE
+namespace {
+
+/**
+Sans serif fonts tried in order: Java asks AWT for "Arial", so its metric
+compatible substitutes come first, and the font distributed with VitralSDK
+(seen from the testsuite and application folders) is the last resort.
+*/
+const char* const LABEL_FONT_FILES[] = {
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+    "../../../../etc/fonts/notoSansLight.ttf",
+    "../../../etc/fonts/notoSansLight.ttf",
+    "../../etc/fonts/notoSansLight.ttf",
+    "../etc/fonts/notoSansLight.ttf",
+    "etc/fonts/notoSansLight.ttf"
+};
+
+/**
+@return the FreeType face used for every label, loaded on first use, or
+null when FreeType could not start or no font file was found
+*/
+FT_Face labelFace()
+{
+    static bool initialized = false;
+    static FT_Library library = 0;
+    static FT_Face face = 0;
+
+    if ( initialized ) {
+        return face;
+    }
+    initialized = true;
+    if ( FT_Init_FreeType(&library) != 0 ) {
+        library = 0;
+        return 0;
+    }
+    const int n = sizeof(LABEL_FONT_FILES) / sizeof(LABEL_FONT_FILES[0]);
+    for ( int i = 0; i < n && face == 0; i++ ) {
+        if ( FT_New_Face(library, LABEL_FONT_FILES[i], 0, &face) != 0 ) {
+            face = 0;
+        }
+    }
+    if ( face == 0 ) {
+        std::fprintf(stderr, "GlfwSystem: no font found for text labels\n");
+    }
+    return face;
+}
+
+/** Decodes an UTF-8 text into its code points (malformed bytes are kept). */
+std::vector<unsigned long> decodeUtf8(const char* text)
+{
+    std::vector<unsigned long> codePoints;
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(text);
+    while ( p != 0 && *p != 0 ) {
+        unsigned long c = *p;
+        int extra = 0;
+        if ( (c & 0xE0) == 0xC0 ) { c &= 0x1F; extra = 1; }
+        else if ( (c & 0xF0) == 0xE0 ) { c &= 0x0F; extra = 2; }
+        else if ( (c & 0xF8) == 0xF0 ) { c &= 0x07; extra = 3; }
+        p++;
+        for ( ; extra > 0 && (*p & 0xC0) == 0x80; extra--, p++ ) {
+            c = (c << 6) | (*p & 0x3F);
+        }
+        codePoints.push_back(c);
+    }
+    return codePoints;
+}
+
+} // namespace
+#endif
+
+RGBAImageUncompressed* GlfwSystem::calculateLabelImage(
+    const char* text, const ColorRgb& color, int fontSize)
+{
+    RGBAImageUncompressed* image = new RGBAImageUncompressed();
+    const char r = static_cast<char>(color.r() * 255.0);
+    const char g = static_cast<char>(color.g() * 255.0);
+    const char b = static_cast<char>(color.b() * 255.0);
+
+#ifdef VITRAL_GLFW_WITH_FREETYPE
+    FT_Face face = labelFace();
+    if ( face != 0 &&
+         FT_Set_Pixel_Sizes(face, 0, std::max(1, fontSize)) == 0 ) {
+        const int margin = 2;
+        const std::vector<unsigned long> codePoints = decodeUtf8(text);
+        const int ascender = static_cast<int>((face->size->metrics.ascender + 63) >> 6);
+        const int descender = static_cast<int>(-(face->size->metrics.descender >> 6));
+
+        // First pass measures the text, second one draws its glyphs
+        int textWidth = 0;
+        for ( size_t i = 0; i < codePoints.size(); i++ ) {
+            if ( FT_Load_Char(face, codePoints[i], FT_LOAD_DEFAULT) == 0 ) {
+                textWidth += static_cast<int>((face->glyph->advance.x + 63) >> 6);
+            }
+        }
+        const int width = std::max(1, textWidth + 2 * margin);
+        const int height = std::max(1, ascender + descender + 2 * margin);
+        std::vector<unsigned char> alpha(width * height, 0);
+
+        int penX = margin;
+        const int baseline = margin + ascender;
+        for ( size_t i = 0; i < codePoints.size(); i++ ) {
+            if ( FT_Load_Char(face, codePoints[i], FT_LOAD_RENDER) != 0 ) {
+                continue;
+            }
+            const FT_GlyphSlot glyph = face->glyph;
+            const FT_Bitmap& bitmap = glyph->bitmap;
+            for ( int y = 0; y < static_cast<int>(bitmap.rows); y++ ) {
+                const int ty = baseline - glyph->bitmap_top + y;
+                if ( ty < 0 || ty >= height ) continue;
+                for ( int x = 0; x < static_cast<int>(bitmap.width); x++ ) {
+                    const int tx = penX + glyph->bitmap_left + x;
+                    if ( tx < 0 || tx >= width ) continue;
+                    unsigned char a = bitmap.buffer[y * bitmap.pitch + x];
+                    unsigned char& target = alpha[ty * width + tx];
+                    target = std::max(target, a);
+                }
+            }
+            penX += static_cast<int>((glyph->advance.x + 63) >> 6);
+        }
+
+        std::vector<char> rgba(width * height * 4);
+        for ( int y = 0; y < height; y++ ) {
+            for ( int x = 0; x < width; x++ ) {
+                const int out = ((height - 1 - y) * width + x) * 4;
+                rgba[out + 0] = r;
+                rgba[out + 1] = g;
+                rgba[out + 2] = b;
+                rgba[out + 3] = static_cast<char>(alpha[y * width + x]);
+            }
+        }
+        image->setRawImage(width, height, rgba.data());
+        return image;
+    }
+#else
+    (void)text;
+    (void)fontSize;
+#endif
+
+    char transparent[4] = { r, g, b, 0 };
+    image->setRawImage(1, 1, transparent);
+    return image;
 }

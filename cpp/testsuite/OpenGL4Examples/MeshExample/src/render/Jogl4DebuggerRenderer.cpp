@@ -12,10 +12,14 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
+#include "vsdk/toolkit/gui/viewport/Viewport.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ViewportWindow.h"
 #include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.h"
 #include "model/MeshModel.h"
 #include "render/Jogl4DebuggerRenderer.h"
@@ -136,12 +140,29 @@ static void setUniform1f(unsigned int program, const char* name, float v)
     if ( loc >= 0 ) glUniform1f(loc, v);
 }
 
-Jogl4DebuggerRenderer::Jogl4DebuggerRenderer(MeshModel* model)
+Jogl4DebuggerRenderer::Jogl4DebuggerRenderer(
+    MeshModel* model, OpenGL4LabelImageProvider* labelImageProvider)
     : model(model),
       vaoId(0), positionVboId(0), normalVboId(0), uvVboId(0), vertexCount(0),
       constantProgram(0), constantTexturedProgram(0), flatProgram(0), flatTexturedProgram(0),
       gouraudProgram(0), phongProgram(0), phongBumpProgram(0), cookProgram(0), cookBumpProgram(0)
 {
+    viewportSet = new ViewportSet();
+    viewport = new Viewport();
+    viewport->setBorder(0);
+    viewportSet->addViewport(viewport);
+    viewportWindow = new OpenGL4ViewportWindow(viewportSet, viewport, labelImageProvider);
+}
+
+Jogl4DebuggerRenderer::~Jogl4DebuggerRenderer()
+{
+    delete viewportWindow;
+    delete viewportSet;
+}
+
+ViewportSet* Jogl4DebuggerRenderer::getViewportSet()
+{
+    return viewportSet;
 }
 
 bool Jogl4DebuggerRenderer::init()
@@ -195,13 +216,18 @@ void Jogl4DebuggerRenderer::display()
     }
 
     model->getRayGizmo()->acquireSnapshot();
-    OpenGL4RayGizmoRenderer::draw(model->getRayGizmo(), model->getCamera(), activeLights);
+    RayGizmo* rayGizmo = model->getRayGizmo();
+    OpenGL4RayGizmoRenderer::draw(rayGizmo, model->getCamera(), activeLights);
+    if ( rayGizmo->isVisible() ) {
+        viewportWindow->drawInputGizmo(rayGizmo->getInputGizmo());
+    }
 }
 
 void Jogl4DebuggerRenderer::reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
     model->getCamera()->updateViewportResize(width, height);
+    viewportSet->resize(width, height);
 }
 
 void Jogl4DebuggerRenderer::dispose()
@@ -220,6 +246,7 @@ void Jogl4DebuggerRenderer::dispose()
     }
     OpenGL4CameraRenderer::dispose();
     OpenGL4RayGizmoRenderer::dispose();
+    viewportWindow->disposeGlResources();
     OpenGL4LightRenderer::dispose();
     OpenGL4ImageRenderer::dispose();
 }

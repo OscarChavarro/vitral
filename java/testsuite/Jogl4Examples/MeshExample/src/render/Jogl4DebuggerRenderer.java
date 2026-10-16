@@ -22,6 +22,9 @@ import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.material.SimpleMaterial;
 import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.gui.gizmo.LightGizmoStyle;
+import vsdk.toolkit.gui.gizmo.RayGizmo;
+import vsdk.toolkit.gui.viewport.Viewport;
+import vsdk.toolkit.gui.viewport.ViewportSet;
 import vsdk.toolkit.media.Image;
 import vsdk.toolkit.render.jogl.Jogl4CameraRenderer;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
@@ -29,6 +32,8 @@ import vsdk.toolkit.render.jogl.Jogl4LightRenderer;
 import vsdk.toolkit.render.jogl.Jogl4MatrixRenderer;
 import vsdk.toolkit.render.jogl.gizmo.Jogl4RayGizmoRenderer;
 import vsdk.toolkit.render.jogl.Jogl4RendererConfigurationShaderSelector;
+import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
+import vsdk.toolkit.render.jogl.viewport.Jogl4ViewportWindow;
 
 public class Jogl4DebuggerRenderer implements GLEventListener {
     private static final float SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
@@ -37,6 +42,11 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
     private static final float LINE_POLYGON_OFFSET_UNITS = -1.0f;
 
     private final MeshModel model;
+    // A single viewport covering the whole canvas, used to draw the input
+    // gizmo of the ray gizmo (numeric boxes) at its lower right corner
+    private final ViewportSet viewportSet;
+    private final Viewport viewport;
+    private final Jogl4ViewportWindow viewportWindow;
 
     private int vaoId;
     private int positionVboId;
@@ -44,8 +54,22 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
     private int uvVboId;
     private int vertexCount;
 
-    public Jogl4DebuggerRenderer(MeshModel model) {
+    public Jogl4DebuggerRenderer(MeshModel model,
+                                 Jogl4LabelImageProvider labelImageProvider) {
         this.model = model;
+        viewportSet = new ViewportSet();
+        viewport = new Viewport();
+        viewport.setBorder(0);
+        viewportSet.addViewport(viewport);
+        viewportWindow = new Jogl4ViewportWindow(viewportSet, viewport, labelImageProvider);
+    }
+
+    /**
+    @return the viewport set where the overlays are drawn, so its element
+    scaler can be configured with the resolution of the screen
+    */
+    public ViewportSet getViewportSet() {
+        return viewportSet;
     }
 
     @Override
@@ -91,7 +115,11 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         // Apply any pending network update before drawing the ray gizmo so the
         // body state is stable for the entire frame.
         model.getRayGizmo().acquireSnapshot();
-        Jogl4RayGizmoRenderer.draw(gl, model.getRayGizmo(), model.getCamera(), activeLights);
+        RayGizmo rayGizmo = model.getRayGizmo();
+        Jogl4RayGizmoRenderer.draw(gl, rayGizmo, model.getCamera(), activeLights);
+        if ( rayGizmo.isVisible() ) {
+            viewportWindow.drawInputGizmo(gl, rayGizmo.getInputGizmo());
+        }
     }
 
     @Override
@@ -99,6 +127,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         GL4 gl = drawable.getGL().getGL4();
         gl.glViewport(0, 0, width, height);
         model.getCamera().updateViewportResize(width, height);
+        viewportSet.resize(width, height);
     }
 
     @Override
@@ -109,6 +138,7 @@ public class Jogl4DebuggerRenderer implements GLEventListener {
         Jogl4RendererConfigurationShaderSelector.dispose(gl);
         Jogl4CameraRenderer.dispose(gl);
         Jogl4RayGizmoRenderer.dispose(gl);
+        viewportWindow.disposeGlResources(gl);
 
         if ( positionVboId != 0 ) {
             ids[0] = positionVboId;

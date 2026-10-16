@@ -8,6 +8,7 @@
 class Camera;
 class InfinitePlane;
 class Light;
+class RendererConfiguration;
 class SimpleBody;
 class SimpleScene;
 class TriangleMesh;
@@ -18,6 +19,13 @@ using an RGB 3D texture sampled in object-space bounding-box coordinates.
 */
 class OpenGL4SolidTextureRenderer {
 private:
+    static const float SURFACE_POLYGON_OFFSET_FACTOR;
+    static const float SURFACE_POLYGON_OFFSET_UNITS;
+    static const float LINE_POLYGON_OFFSET_FACTOR;
+    static const float LINE_POLYGON_OFFSET_UNITS;
+    static const float POINT_SIZE;
+    static const class ColorRgb POINT_COLOR;
+
     unsigned int vaoId;
     unsigned int positionVboId;
     unsigned int normalVboId;
@@ -32,7 +40,9 @@ private:
     void ensureProgram();
     void ensureSolidTexture(const std::vector<unsigned char>& volume,
                             int size, long revision);
-    void drawBody(SimpleBody* body, Camera* camera);
+    void drawBody(SimpleBody* body, Camera* camera,
+                  RendererConfiguration* quality);
+    void drawMesh(RendererConfiguration* quality);
     void uploadFrame(const std::vector<float>& positions,
                      const std::vector<float>& normals);
     bool buildFrame(TriangleMesh* mesh, std::vector<float>& positions,
@@ -64,6 +74,11 @@ public:
               const std::vector<unsigned char>& solidTextureVolumeRgb8,
               int solidTextureSize, long solidTextureRevision,
               InfinitePlane* clippingPlane);
+    void draw(SimpleScene* scene, Camera* camera,
+              const java::ArrayList<Light*>& lights,
+              const std::vector<unsigned char>& solidTextureVolumeRgb8,
+              int solidTextureSize, long solidTextureRevision,
+              InfinitePlane* clippingPlane, RendererConfiguration* quality);
     void dispose();
 };
 

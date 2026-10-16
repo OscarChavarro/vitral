@@ -10,6 +10,7 @@ import {
   IndexedColorImageHDRUncompressed,
   InfinitePlaneGizmo,
   Intersection,
+  JavaMath,
   Light,
   Matrix4x4d,
   PointLight,
@@ -63,6 +64,9 @@ export class SolidTextureModel {
   private static readonly MIN_SOLID_TEXTURE_SIZE = 1;
   private static readonly MAX_SOLID_TEXTURE_SIZE = 256;
   private static readonly SMALL_TOLERANCE = 1.0e-6;
+  private static readonly INITIAL_RAY_ORIGIN = new Vector3Dd(0, -7, 3);
+  private static readonly INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+  private static readonly INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
 
   private readonly camera: Camera;
   private readonly lights: Light[];
@@ -87,6 +91,14 @@ export class SolidTextureModel {
     this.camera = new Camera();
     this.qualitySelection = new RendererConfiguration();
     this.rayGizmo = new RayGizmo(this.makeIntersectionCallback(), 1);
+    this.rayGizmo.setRay(
+      new Ray(SolidTextureModel.INITIAL_RAY_ORIGIN, SolidTextureModel.initialRayDirection()),
+      0.0,
+    );
+    // Applied right away (rendering has not started), so the keyboard
+    // interaction reads this ray as its starting state
+    this.rayGizmo.acquireSnapshot();
+    this.rayGizmo.setVisible(false);
     this.infinitePlaneGizmo = new InfinitePlaneGizmo();
     this.texture2DStack = [];
     const textureUtils = new TextureUtils();
@@ -109,6 +121,14 @@ export class SolidTextureModel {
     light1.setId(1);
     this.lights.push(light0);
     this.lights.push(light1);
+  }
+
+  private static initialRayDirection(): Vector3Dd {
+    const yaw: number = JavaMath.toRadians(SolidTextureModel.INITIAL_RAY_YAW_IN_DEGREES);
+    const pitch: number = JavaMath.toRadians(SolidTextureModel.INITIAL_RAY_PITCH_IN_DEGREES);
+    const cp: number = Math.cos(pitch);
+
+    return new Vector3Dd(cp * Math.cos(yaw), cp * Math.sin(yaw), Math.sin(pitch));
   }
 
   getCamera(): Camera {

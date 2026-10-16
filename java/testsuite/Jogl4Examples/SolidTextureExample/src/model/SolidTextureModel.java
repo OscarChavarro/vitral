@@ -37,6 +37,9 @@ public class SolidTextureModel {
     private static final int MIN_SOLID_TEXTURE_SIZE = 1;
     private static final int MAX_SOLID_TEXTURE_SIZE = 256;
     private static final double SMALL_TOLERANCE = 1.0e-6;
+    private static final Vector3Dd INITIAL_RAY_ORIGIN = new Vector3Dd(0, -7, 3);
+    private static final double INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+    private static final double INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
 
     private final Camera camera;
     private final List<Light> lights;
@@ -61,6 +64,10 @@ public class SolidTextureModel {
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
         rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
+        rayGizmo.setRay(new Ray(INITIAL_RAY_ORIGIN, initialRayDirection()), 0.0);
+        // Applied right away (rendering has not started), so the keyboard
+        // interaction reads this ray as its starting state
+        rayGizmo.acquireSnapshot();
         rayGizmo.setVisible(false);
         infinitePlaneGizmo = new InfinitePlaneGizmo();
         texture2DStack = new ArrayList<>();
@@ -84,6 +91,14 @@ public class SolidTextureModel {
         light1.setId(1);
         lights.add(light0);
         lights.add(light1);
+    }
+
+    private static Vector3Dd initialRayDirection() {
+        double yaw = Math.toRadians(INITIAL_RAY_YAW_IN_DEGREES);
+        double pitch = Math.toRadians(INITIAL_RAY_PITCH_IN_DEGREES);
+        double cp = Math.cos(pitch);
+
+        return new Vector3Dd(cp * Math.cos(yaw), cp * Math.sin(yaw), Math.sin(pitch));
     }
 
     public Camera getCamera() {

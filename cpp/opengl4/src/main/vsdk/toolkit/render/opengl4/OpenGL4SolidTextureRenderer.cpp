@@ -14,10 +14,18 @@
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMesh.h"
 #include "vsdk/toolkit/environment/geometry/surface/TriangleMeshGroup.h"
 #include "vsdk/toolkit/environment/light/Light.h"
+#include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4SolidTextureRenderer.h"
+
+const float OpenGL4SolidTextureRenderer::SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
+const float OpenGL4SolidTextureRenderer::SURFACE_POLYGON_OFFSET_UNITS = 1.0f;
+const float OpenGL4SolidTextureRenderer::LINE_POLYGON_OFFSET_FACTOR = -1.0f;
+const float OpenGL4SolidTextureRenderer::LINE_POLYGON_OFFSET_UNITS = -1.0f;
+const float OpenGL4SolidTextureRenderer::POINT_SIZE = 4.0f;
+const ColorRgb OpenGL4SolidTextureRenderer::POINT_COLOR = ColorRgb(1, 0, 0);
 
 OpenGL4SolidTextureRenderer::OpenGL4SolidTextureRenderer(
     const java::String& shaderDirectory)
@@ -37,28 +45,41 @@ void OpenGL4SolidTextureRenderer::draw(
     int solidTextureSize, long solidTextureRevision,
     InfinitePlane* clippingPlane)
 {
-    if ( scene == 0 || camera == 0 ) {
+    RendererConfiguration quality;
+    quality.setShadingType(RendererConfiguration::SHADING_TYPE_PHONG);
+    draw(scene, camera, lights, solidTextureVolumeRgb8, solidTextureSize,
+         solidTextureRevision, clippingPlane, &quality);
+}
+
+void OpenGL4SolidTextureRenderer::draw(
+    SimpleScene* scene, Camera* camera, const java::ArrayList<Light*>& lights,
+    const std::vector<unsigned char>& solidTextureVolumeRgb8,
+    int solidTextureSize, long solidTextureRevision,
+    InfinitePlane* clippingPlane, RendererConfiguration* quality)
+{
+    if ( scene == 0 || camera == 0 || quality == 0 ) {
         return;
     }
     ensureBuffers();
     ensureProgram();
     ensureSolidTexture(solidTextureVolumeRgb8, solidTextureSize,
                        solidTextureRevision);
-    if ( programId == 0 || solidTextureId == 0 ) {
+    if ( programId == 0 ) {
         return;
     }
 
     glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glDepthFunc(GL_LESS);
     glDisable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glUseProgram(programId);
     configureClippingPlane(clippingPlane);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D, solidTextureId);
     setInt(programId, "sSolidTexture", 0);
+    setInt(programId, "solidTextureDisabled",
+           quality->isTextureSet() && solidTextureId != 0 ? 0 : 1);
+    setInt(programId, "shadingTypeSelected", 1);
+    setInt(programId, "shadingType", quality->getShadingType());
     setInt(programId, "numberOfLights", (int)(lights.size() < 8 ? lights.size() : 8));
     setFloat(programId, "phongExponent", 24.0f);
     for ( long i = 0; i < lights.size() && i < 8; i++ ) {
@@ -75,10 +96,13 @@ void OpenGL4SolidTextureRenderer::draw(
 
     java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
     for ( long i = 0; i < bodies.size(); i++ ) {
-        drawBody(bodies.get(i), camera);
+        drawBody(bodies.get(i), camera, quality);
     }
 
     glBindVertexArray(0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
     glBindTexture(GL_TEXTURE_3D, 0);
     glDisable(GL_CLIP_DISTANCE0);
     glUseProgram(0);
@@ -98,7 +122,8 @@ void OpenGL4SolidTextureRenderer::dispose()
     programId = 0;
 }
 
-void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera)
+void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera,
+                                           RendererConfiguration* quality)
 {
     if ( body == 0 || body->getGeometry() == 0 ) {
         return;
@@ -129,7 +154,7 @@ void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera)
         if ( buildFrame(mesh, p, n) ) {
             uploadFrame(p, n);
             glBindVertexArray(vaoId);
-            glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+            drawMesh(quality);
         }
     }
     else if ( group != 0 ) {
@@ -139,10 +164,54 @@ void OpenGL4SolidTextureRenderer::drawBody(SimpleBody* body, Camera* camera)
             if ( buildFrame(&meshes[i], p, n) ) {
                 uploadFrame(p, n);
                 glBindVertexArray(vaoId);
-                glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+                drawMesh(quality);
             }
         }
     }
+}
+
+/**
+Draws the currently uploaded mesh once per primitive kind enabled in the
+given configuration: shaded surfaces, wires and points.
+*/
+void OpenGL4SolidTextureRenderer::drawMesh(RendererConfiguration* quality)
+{
+    if ( quality->isSurfacesSet() ) {
+        setInt(programId, "constantColorEnabled", 0);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(SURFACE_POLYGON_OFFSET_FACTOR, SURFACE_POLYGON_OFFSET_UNITS);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+    }
+
+    if ( quality->isWiresSet() ) {
+        setInt(programId, "constantColorEnabled", 1);
+        setColor(programId, "constantColor", quality->getWireColor());
+        glEnable(GL_POLYGON_OFFSET_LINE);
+        glPolygonOffset(LINE_POLYGON_OFFSET_FACTOR, LINE_POLYGON_OFFSET_UNITS);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glLineWidth(1.0f);
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDisable(GL_POLYGON_OFFSET_LINE);
+    }
+
+    if ( quality->isPointsSet() ) {
+        setInt(programId, "constantColorEnabled", 1);
+        setColor(programId, "constantColor", POINT_COLOR);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPointSize(POINT_SIZE);
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glDrawArrays(GL_POINTS, 0, vertexCount);
+    }
+
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
 }
 
 bool OpenGL4SolidTextureRenderer::buildFrame(

@@ -2,6 +2,10 @@
 #define __JOGL_4_DEBUGGER_RENDERER__
 
 class MeshModel;
+class OpenGL4LabelImageProvider;
+class OpenGL4ViewportWindow;
+class Viewport;
+class ViewportSet;
 class Camera;
 class Light;
 class RendererConfiguration;
@@ -22,6 +26,11 @@ private:
     static const float LINE_POLYGON_OFFSET_UNITS;
 
     MeshModel* model;
+    // A single viewport covering the whole canvas, used to draw the input
+    // gizmo of the ray gizmo (numeric boxes) at its lower right corner
+    ViewportSet* viewportSet;
+    Viewport* viewport;
+    OpenGL4ViewportWindow* viewportWindow;
 
     unsigned int vaoId;
     unsigned int positionVboId;
@@ -59,7 +68,15 @@ private:
     static SimpleMaterial redPointMaterial();
 
 public:
-    explicit Jogl4DebuggerRenderer(MeshModel* model);
+    Jogl4DebuggerRenderer(MeshModel* model,
+                          OpenGL4LabelImageProvider* labelImageProvider);
+    ~Jogl4DebuggerRenderer();
+
+    /**
+    @return the viewport set where the overlays are drawn, so its element
+    scaler can be configured with the resolution of the screen
+    */
+    ViewportSet* getViewportSet();
     bool init();
     void display();
     void reshape(int width, int height);

@@ -8,6 +8,10 @@ uniform vec3 boundingBoxMinObject;
 uniform vec3 boundingBoxMaxObject;
 uniform int clippingPlaneEnabled;
 uniform vec4 clippingPlaneGlobal;
+uniform int numberOfLights;
+uniform vec3 lightColorsGlobal[8];
+uniform vec3 lightPositionsGlobal[8];
+uniform float phongExponent;
 
 layout(location = 0) in vec4 PObject;
 layout(location = 1) in vec3 NObject;
@@ -16,6 +20,9 @@ out vec3 PGlobal;
 out vec3 N;
 out vec3 V;
 out vec3 textureCoordinate3D;
+// Lighting terms evaluated per vertex, used by Gouraud shading
+out vec3 vertexDiffuseTerm;
+out vec3 vertexSpecularTerm;
 
 void main()
 {
@@ -25,6 +32,17 @@ void main()
     N = normalize((modelViewITLocal * vec4(NObject, 0.0)).xyz);
     V = normalize(cameraPositionGlobal - PGlobal);
     textureCoordinate3D = clamp((PObject.xyz - boundingBoxMinObject) / extent, 0.0, 1.0);
+
+    vertexDiffuseTerm = vec3(0.0);
+    vertexSpecularTerm = vec3(0.0);
+    for ( int i = 0; i < numberOfLights; i++ ) {
+        vec3 L = normalize(lightPositionsGlobal[i] - PGlobal);
+        vec3 R = reflect(-L, N);
+        vertexDiffuseTerm += lightColorsGlobal[i] * max(dot(N, L), 0.0);
+        vertexSpecularTerm += lightColorsGlobal[i] * vec3(0.18) *
+            pow(max(dot(R, V), 0.0), phongExponent);
+    }
+
     gl_ClipDistance[0] = clippingPlaneEnabled != 0
         ? dot(clippingPlaneGlobal, vec4(PGlobal, 1.0))
         : 1.0;

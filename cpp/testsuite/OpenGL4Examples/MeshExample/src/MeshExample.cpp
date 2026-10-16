@@ -7,10 +7,13 @@
 
 #include "java/io/File.h"
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
+#include "vsdk/toolkit/gui/GlfwLabelImageProvider.h"
 #include "vsdk/toolkit/gui/GlfwSystem.h"
 #include "vsdk/toolkit/gui/MouseEvent.h"
 #include "vsdk/toolkit/gui/RendererConfigurationController.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceNetworkClient.h"
+#include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/io/geometry/EnvironmentPersistence.h"
 #include "animation/AnimationController.h"
 #include "gui/MeshKeyboardInteractionTechniques.h"
@@ -34,7 +37,7 @@ public:
           keyboardInteractionTechniques(0),
           tangibleInterfaceClient(0),
           tangibleInteractionTechniques(0),
-          renderer(&model),
+          renderer(&model, &labelImageProvider),
           shouldClose(false)
     {
     }
@@ -55,6 +58,9 @@ public:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        // A normal window covering the whole usable area of the desktop (not
+        // full screen: menu bars, docks and task bars stay visible)
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
         window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "VITRAL mesh test - OpenGL4", 0, 0);
         if ( window == 0 ) {
@@ -63,6 +69,7 @@ public:
             return false;
         }
 
+        requestKeyboardFocus();
         glfwMakeContextCurrent(window);
         glfwSetWindowUserPointer(window, this);
         glfwSwapInterval(1);
@@ -83,7 +90,6 @@ public:
         }
 
         commandLineOptions.processArguments(argc, argv);
-        model.getCamera()->updateViewportResize(WINDOW_WIDTH, WINDOW_HEIGHT);
         cameraController = new CameraControllerOrbiter(model.getCamera());
         qualityController = new RendererConfigurationController(model.getQualitySelection());
         mouseInteractionTechniques = new MeshMouseInteractionTechniques(cameraController);
@@ -94,6 +100,13 @@ public:
             std::fprintf(stderr, "Failed to initialize mesh renderer\n");
             return false;
         }
+        configureOverlayScreenResolution();
+        // The window is maximized when created, so its framebuffer size is
+        // only known now
+        int framebufferWidth = 0;
+        int framebufferHeight = 0;
+        glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+        renderer.reshape(framebufferWidth, framebufferHeight);
 
         animationController.start(&model, [this]() { requestRepaint(); });
 
@@ -126,6 +139,7 @@ private:
     MeshKeyboardInteractionTechniques* keyboardInteractionTechniques;
     TangibleInterfaceNetworkClient* tangibleInterfaceClient;
     TangibleInterfaceInteractionTechniques* tangibleInteractionTechniques;
+    GlfwLabelImageProvider labelImageProvider;
     Jogl4DebuggerRenderer renderer;
     AnimationController animationController;
     bool shouldClose;
@@ -153,6 +167,37 @@ private:
         }
 
         return true;
+    }
+
+    /**
+    Asks the window manager to make this application the foreground one and
+    gives it the keyboard focus, so key presses reach it without the user
+    having to select the window first (i.e. when launched from a terminal,
+    which otherwise keeps the focus).
+    */
+    void requestKeyboardFocus()
+    {
+        glfwShowWindow(window);
+        glfwFocusWindow(window);
+    }
+
+    /**
+    Overlay texts (input gizmo boxes) follow the screen resolution, in
+    pixels (not in screen coordinates).
+    */
+    void configureOverlayScreenResolution()
+    {
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = monitor != 0 ? glfwGetVideoMode(monitor) : 0;
+        if ( mode == 0 ) {
+            return;
+        }
+        float scaleX = 1.0f;
+        float scaleY = 1.0f;
+        glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
+        renderer.getViewportSet()->getElementScaler()->setScreenResolution(
+            (int)(mode->width * scaleX + 0.5f),
+            (int)(mode->height * scaleY + 0.5f));
     }
 
     void draw()

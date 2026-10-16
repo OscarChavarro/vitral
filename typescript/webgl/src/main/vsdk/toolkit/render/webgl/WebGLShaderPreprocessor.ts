@@ -14,6 +14,12 @@ export class WebGLShaderPreprocessor {
 
         if (shaderKind === "fragment") {
             header.push("precision highp float;");
+            // GLSL ES 3.00 defaults `int` to `highp` in the vertex stage but
+            // to `mediump` in the fragment one, and a uniform declared in both
+            // stages (i.e. `numberOfLights` of the solid texture shaders) must
+            // agree on precision or the program fails to link. Desktop GLSL
+            // has a single integer precision, so the fragment stage is raised.
+            header.push("precision highp int;");
         }
         // GLSL ES 3.00 gives `sampler2D` and `samplerCube` a default precision
         // but gives `sampler3D` none, so a shader that declares one fails to

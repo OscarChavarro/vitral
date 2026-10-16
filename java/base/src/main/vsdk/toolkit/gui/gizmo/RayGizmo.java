@@ -54,6 +54,15 @@ public class RayGizmo extends Gizmo {
     public static final ColorRgb DEFAULT_RAY_COLOR    = new ColorRgb(1, 0.8, 0.8);
     public static final ColorRgb DEFAULT_NORMAL_COLOR = new ColorRgb(1, 1, 0.8);
 
+    // Colors of the boxes of the input gizmo: x, y, z, yaw and pitch
+    private static final ColorRgb[] INPUT_FIELD_COLORS = {
+        new ColorRgb(1, 0, 0),
+        new ColorRgb(0, 1, 0),
+        new ColorRgb(0, 0, 1),
+        new ColorRgb(1, 1, 0),
+        new ColorRgb(0, 1, 1)
+    };
+
     public record RaySnapshot(double rotationAngleInRadians, List<Ray> rays, List<Intersection> intersections) {
         public RaySnapshot(double rotationAngleInRadians, List<Ray> rays, List<Intersection> intersections) {
             if ( rays.size() != intersections.size() ) {
@@ -112,6 +121,9 @@ public class RayGizmo extends Gizmo {
         this.intersectionCallback = intersectionCallback;
         this.maxNumOfReflections = maxNumOfReflections;
         inputGizmo = new InputGizmo(5, 3, 3);
+        for ( int i = 0; i < INPUT_FIELD_COLORS.length; i++ ) {
+            inputGizmo.setFieldColor(i, INPUT_FIELD_COLORS[i]);
+        }
 
         currentPosition = new Vector3Dd(0, 0, 0);
         currentDirection = new Vector3Dd(0, 0, 1);

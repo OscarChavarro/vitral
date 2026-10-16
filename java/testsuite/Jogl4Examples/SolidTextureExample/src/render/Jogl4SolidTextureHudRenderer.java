@@ -9,16 +9,18 @@ import java.awt.image.BufferedImage;
 import com.jogamp.opengl.GL4;
 
 import model.SolidTextureModel;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.render.jogl.Jogl4ImageRenderer;
 
 public class Jogl4SolidTextureHudRenderer {
-    private static final int HUD_HEIGHT = 122;
+    private static final int HUD_HEIGHT = 148;
     private static final int HUD_LEFT = 16;
     private static final int HUD_BASELINE_1 = 28;
     private static final int HUD_BASELINE_2 = 54;
     private static final int HUD_BASELINE_3 = 80;
     private static final int HUD_BASELINE_4 = 106;
+    private static final int HUD_BASELINE_5 = 132;
 
     private final SolidTextureModel model;
     private final Font hudFont;
@@ -61,8 +63,10 @@ public class Jogl4SolidTextureHudRenderer {
             HUD_LEFT, HUD_BASELINE_2);
         g.drawString("Selected texture [4, 5]: " + model.getSelectedSolidTexture().name(),
             HUD_LEFT, HUD_BASELINE_3);
-        g.drawString("Animation [r]: " + (model.isAnimationEnabled() ? "PLAY" : "STOP"),
+        g.drawString("Animation [a]: " + (model.isAnimationEnabled() ? "PLAY" : "STOP"),
             HUD_LEFT, HUD_BASELINE_4);
+        g.drawString("Render [F1-F3, F8, F7]: " + renderModeDescription(),
+            HUD_LEFT, HUD_BASELINE_5);
         g.dispose();
 
         for ( int y = 0; y < hudHeight; y++ ) {
@@ -81,6 +85,19 @@ public class Jogl4SolidTextureHudRenderer {
             hudWidth, hudHeight);
         Jogl4ImageRenderer.draw(gl, hudImage);
         gl.glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    }
+
+    private String renderModeDescription()
+    {
+        RendererConfiguration quality = model.getQualitySelection();
+        StringBuilder description = new StringBuilder();
+
+        description.append(quality.isPointsSet() ? "POINTS " : "points ");
+        description.append(quality.isWiresSet() ? "WIRES " : "wires ");
+        description.append(quality.isSurfacesSet() ? "SURFACES " : "surfaces ");
+        description.append(quality.isTextureSet() ? "TEXTURE " : "texture ");
+        description.append("/ ").append(quality.getShadingTypeEnum().name());
+        return description.toString();
     }
 
     public void dispose(GL4 gl)

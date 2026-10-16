@@ -4,12 +4,15 @@ import {
   Light,
   LightGizmoStyle,
   Matrix4x4d,
+  RayGizmo,
   RendererConfiguration,
   SimpleBody,
   SimpleMaterial,
   TriangleMesh,
   TriangleMeshGroup,
   Vector3Dd,
+  Viewport,
+  ViewportSet,
   type Geometry,
   type Image,
 } from '@vitral/base';
@@ -19,6 +22,8 @@ import {
   WebGLLightRenderer,
   WebGLRayGizmoRenderer,
   WebGLRendererConfigurationShaderSelector,
+  WebGLViewportWindow,
+  type WebGLLabelImageProvider,
 } from '@vitral/webgl';
 import { MeshModel } from '../model/mesh-model';
 
@@ -66,8 +71,34 @@ export class WebGLDebuggerRenderer {
   private wireBuffers: MeshBuffers | null = null;
   private vertexCount = 0;
   private wireVertexCount = 0;
+  // A single viewport covering the whole canvas, used to draw the input
+  // gizmo of the ray gizmo (numeric boxes) at its lower right corner
+  private readonly viewportSet: ViewportSet;
+  private readonly viewport: Viewport;
+  private readonly viewportWindow: WebGLViewportWindow;
 
-  constructor(private readonly model: MeshModel) {}
+  constructor(
+    private readonly model: MeshModel,
+    labelImageProvider: WebGLLabelImageProvider,
+  ) {
+    this.viewportSet = new ViewportSet();
+    this.viewport = new Viewport();
+    this.viewport.setBorder(0);
+    this.viewportSet.addViewport(this.viewport);
+    this.viewportWindow = new WebGLViewportWindow(
+      this.viewportSet,
+      this.viewport,
+      labelImageProvider,
+    );
+  }
+
+  /**
+   * @returns the viewport set where the overlays are drawn, so its element
+   * scaler can be configured with the resolution of the screen
+   */
+  getViewportSet(): ViewportSet {
+    return this.viewportSet;
+  }
 
   init(gl: WebGL2RenderingContext): void {
     this.surfaceBuffers = WebGLDebuggerRenderer.createBuffers(gl);
@@ -111,23 +142,24 @@ export class WebGLDebuggerRenderer {
     // Apply any pending network update before drawing the ray gizmo so the
     // body state is stable for the entire frame.
     this.model.getRayGizmo().acquireSnapshot();
-    await WebGLRayGizmoRenderer.draw(
-      gl,
-      this.model.getRayGizmo(),
-      this.model.getCamera(),
-      activeLights,
-    );
+    const rayGizmo: RayGizmo = this.model.getRayGizmo();
+    await WebGLRayGizmoRenderer.draw(gl, rayGizmo, this.model.getCamera(), activeLights);
+    if (rayGizmo.isVisible()) {
+      await this.viewportWindow.drawInputGizmo(gl, rayGizmo.getInputGizmo());
+    }
   }
 
   reshape(gl: WebGL2RenderingContext, x: number, y: number, width: number, height: number): void {
     gl.viewport(x, y, width, height);
     this.model.getCamera().updateViewportResize(width, height);
+    this.viewportSet.resize(width, height);
   }
 
   dispose(gl: WebGL2RenderingContext): void {
     WebGLRendererConfigurationShaderSelector.dispose(gl);
     WebGLCameraRenderer.dispose(gl);
     WebGLRayGizmoRenderer.dispose(gl);
+    this.viewportWindow.disposeGlResources(gl);
 
     WebGLDebuggerRenderer.deleteBuffers(gl, this.surfaceBuffers);
     WebGLDebuggerRenderer.deleteBuffers(gl, this.wireBuffers);

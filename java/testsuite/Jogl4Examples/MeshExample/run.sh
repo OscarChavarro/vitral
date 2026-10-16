@@ -38,7 +38,7 @@ fi
 
 MEMORY_MIB="$MIN_MEMORY_MIB"
 if [ -f "$stat_file" ]; then
-    file_bytes=$(stat -c '%s' "$stat_file")
+    file_bytes=$(wc -c < "$stat_file" | tr -d ' ')
     computed_mib=$(( (file_bytes * 2 + 1048575) / 1048576 ))
     if [ "$computed_mib" -gt "$MEMORY_MIB" ]; then
         MEMORY_MIB="$computed_mib"

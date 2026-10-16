@@ -46,7 +46,12 @@ private:
     OperationMode operationMode;
     java::String tangibleServiceUrl;
 
+    static const Vector3Dd INITIAL_RAY_ORIGIN;
+    static const double INITIAL_RAY_YAW_IN_DEGREES;
+    static const double INITIAL_RAY_PITCH_IN_DEGREES;
+
     Intersection* makeIntersectionCallback(const Ray& ray);
+    static Vector3Dd initialRayDirection();
     void clearTexture2DStack();
     void rebuildTexture2DStack();
     Image* generateTextureSlice(int sliceIndex);

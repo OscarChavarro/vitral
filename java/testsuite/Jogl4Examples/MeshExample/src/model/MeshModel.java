@@ -19,6 +19,10 @@ import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.gui.gizmo.RayGizmo;
 
 public class MeshModel {
+    private static final Vector3Dd INITIAL_RAY_ORIGIN = new Vector3Dd(0, -7, 3);
+    private static final double INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+    private static final double INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
+
     private final Camera camera;
     private final List<Light> lights;
     private final SimpleScene scene;
@@ -31,6 +35,10 @@ public class MeshModel {
         camera = new Camera();
         qualitySelection = new RendererConfiguration();
         rayGizmo = new RayGizmo(makeIntersectionCallback(), 1);
+        rayGizmo.setRay(new Ray(INITIAL_RAY_ORIGIN, initialRayDirection()), 0.0);
+        // Applied right away (rendering has not started), so the keyboard
+        // interaction reads this ray as its starting state
+        rayGizmo.acquireSnapshot();
         rayGizmo.setVisible(false);
         lights = new ArrayList<>();
         Light light0 = new PointLight(new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
@@ -39,6 +47,14 @@ public class MeshModel {
         light1.setId(1);
         lights.add(light0);
         lights.add(light1);
+    }
+
+    private static Vector3Dd initialRayDirection() {
+        double yaw = Math.toRadians(INITIAL_RAY_YAW_IN_DEGREES);
+        double pitch = Math.toRadians(INITIAL_RAY_PITCH_IN_DEGREES);
+        double cp = Math.cos(pitch);
+
+        return new Vector3Dd(cp * Math.cos(yaw), cp * Math.sin(yaw), Math.sin(pitch));
     }
 
     public Camera getCamera() {

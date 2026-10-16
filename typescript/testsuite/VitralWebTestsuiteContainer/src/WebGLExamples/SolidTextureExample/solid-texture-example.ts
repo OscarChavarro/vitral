@@ -10,8 +10,14 @@ import {
   ViewChild,
   signal,
 } from '@angular/core';
-import { SimpleScene, TangibleInterfaceNetworkClient } from '@vitral/base';
-import { WebEnvironmentPersistence, WebSystem } from '@vitral/webgl';
+import {
+  JavaMath,
+  SimpleScene,
+  TangibleInterfaceNetworkClient,
+  type ColorRgb,
+  type RGBAImageUncompressed,
+} from '@vitral/base';
+import { WebEnvironmentPersistence, WebSystem, type WebGLLabelImageProvider } from '@vitral/webgl';
 import { ExampleCameraInteraction } from '../_shared/example-camera-interaction';
 import { ExampleRendererConfigurationInteraction } from '../_shared/example-renderer-configuration-interaction';
 import { AnimationController } from './animation/animation-controller';
@@ -96,7 +102,11 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
     this.cameraController,
     this.qualityController,
   );
-  private readonly renderer = new WebGLDebuggerRenderer(this.model);
+  private readonly labelImageProvider: WebGLLabelImageProvider = {
+    createLabelImage: (text: string, color: ColorRgb, fontSize: number): RGBAImageUncompressed =>
+      WebSystem.calculateLabelImage(text, color, fontSize),
+  };
+  private readonly renderer = new WebGLDebuggerRenderer(this.model, this.labelImageProvider);
   private readonly animationController = new AnimationController();
 
   private tangibleInterfaceClient: TangibleInterfaceNetworkClient | null = null;
@@ -267,7 +277,19 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
       return;
     }
 
-    if (!this.keyboardInteractionTechniques.processKeyPressedEvent(vitralEvent)) {
+    // Java's `AwtSystem.enableKeyboardInteraction`: TAB and SHIFT+TAB are
+    // commands of the canvas (i.e. to cycle input gizmo boxes), never moves of
+    // the browser focus to another element.
+    if (vitralEvent.keycode === 'KEY_TAB') {
+      event.preventDefault();
+    }
+
+    if (
+      !this.keyboardInteractionTechniques.processKeyPressedEvent(
+        vitralEvent,
+        WebSystem.toVitralKeyEvent(event),
+      )
+    ) {
       return;
     }
 
@@ -303,6 +325,16 @@ export class SolidTextureExample implements OnChanges, OnDestroy {
 
     this.gl = gl;
     await this.renderer.init(gl);
+    // Overlay texts (input gizmo boxes) follow the screen resolution, in
+    // physical pixels as the canvas is sized
+    const ratio: number = window.devicePixelRatio || 1;
+    this.renderer
+      .getViewportSet()
+      .getElementScaler()
+      .setScreenResolution(
+        JavaMath.round(window.screen.width * ratio),
+        JavaMath.round(window.screen.height * ratio),
+      );
     this.resizeObserver = new ResizeObserver(() => this.draw());
     this.resizeObserver.observe(canvas);
   }

@@ -13,6 +13,11 @@ class ShadingTypeUtil {
 public:
     static ShadingType fromCode(int code);
     static ShadingType next(ShadingType value);
+    /**
+    @return the name of the Java enum constant (i.e. "PHONG"), as Java's
+    `ShadingType.name()`
+    */
+    static const char* name(ShadingType value);
 };
 
 #endif

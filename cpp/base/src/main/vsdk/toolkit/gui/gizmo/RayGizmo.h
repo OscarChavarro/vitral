@@ -78,6 +78,9 @@ private:
     static const double ARROW_HEAD_LENGTH;
     static const double ARROW_BASE_RADIUS;
     static const double ARROW_HEAD_RADIUS;
+    // Colors of the boxes of the input gizmo: x, y, z, yaw and pitch
+    static const int NUMBER_OF_INPUT_FIELDS = 5;
+    static const ColorRgb INPUT_FIELD_COLORS[NUMBER_OF_INPUT_FIELDS];
 
     Arrow* arrow;
     Sphere* dotSphere;

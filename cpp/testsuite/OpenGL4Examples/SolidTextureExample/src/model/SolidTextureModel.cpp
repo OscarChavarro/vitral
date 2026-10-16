@@ -24,6 +24,10 @@
 
 const double SolidTextureModel::SMALL_TOLERANCE = 1.0e-6;
 
+const Vector3Dd SolidTextureModel::INITIAL_RAY_ORIGIN = Vector3Dd(0, -7, 3);
+const double SolidTextureModel::INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+const double SolidTextureModel::INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
+
 SolidTextureModel::SolidTextureModel()
     : rayGizmo([this](const Ray& ray) { return makeIntersectionCallback(ray); }, 1),
       colorTextureFixture(0), solidTextureSize(32), solidTextureRevision(0),
@@ -32,6 +36,10 @@ SolidTextureModel::SolidTextureModel()
       operationMode(OperationMode::MESH_MODEL),
       tangibleServiceUrl("ws://localhost:8090/v1/values")
 {
+    rayGizmo.setRay(Ray(INITIAL_RAY_ORIGIN, initialRayDirection()), 0.0);
+    // Applied right away (rendering has not started), so the keyboard
+    // interaction reads this ray as its starting state
+    rayGizmo.acquireSnapshot();
     rayGizmo.setVisible(false);
     textureUtils.initialize(nullptr);
     textureUtils.getProceduralNoise().initialize();
@@ -59,6 +67,15 @@ Camera* SolidTextureModel::getCamera() { return &camera; }
 java::ArrayList<Light*>& SolidTextureModel::getLights() { return lights; }
 SimpleScene* SolidTextureModel::getScene() { return &scene; }
 RendererConfiguration* SolidTextureModel::getQualitySelection() { return &qualitySelection; }
+Vector3Dd SolidTextureModel::initialRayDirection()
+{
+    double yaw = java::Math::toRadians(INITIAL_RAY_YAW_IN_DEGREES);
+    double pitch = java::Math::toRadians(INITIAL_RAY_PITCH_IN_DEGREES);
+    double cp = std::cos(pitch);
+
+    return Vector3Dd(cp * std::cos(yaw), cp * std::sin(yaw), std::sin(pitch));
+}
+
 RayGizmo* SolidTextureModel::getRayGizmo() { return &rayGizmo; }
 InfinitePlaneGizmo* SolidTextureModel::getInfinitePlaneGizmo() { return &infinitePlaneGizmo; }
 java::ArrayList<Image*>& SolidTextureModel::getTexture2DStack() { return texture2DStack; }

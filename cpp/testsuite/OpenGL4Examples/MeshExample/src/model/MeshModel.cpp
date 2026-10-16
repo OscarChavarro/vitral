@@ -10,10 +10,18 @@
 #include "vsdk/toolkit/environment/scene/SimpleBodyGroup.h"
 #include "model/MeshModel.h"
 
+const Vector3Dd MeshModel::INITIAL_RAY_ORIGIN = Vector3Dd(0, -7, 3);
+const double MeshModel::INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+const double MeshModel::INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
+
 MeshModel::MeshModel()
     : rayGizmo([this](const Ray& ray) { return this->makeIntersectionCallback(ray); }, 1),
       tangibleServiceUrl("ws://localhost:8090/v1/values")
 {
+    rayGizmo.setRay(Ray(INITIAL_RAY_ORIGIN, initialRayDirection()), 0.0);
+    // Applied right away (rendering has not started), so the keyboard
+    // interaction reads this ray as its starting state
+    rayGizmo.acquireSnapshot();
     rayGizmo.setVisible(false);
 
     Light* light0 = new PointLight(Vector3Dd(10, -20, 50), ColorRgb(1, 1, 1));
@@ -30,6 +38,15 @@ MeshModel::~MeshModel()
         delete lights.get(i);
     }
     lights.clear();
+}
+
+Vector3Dd MeshModel::initialRayDirection()
+{
+    double yaw = java::Math::toRadians(INITIAL_RAY_YAW_IN_DEGREES);
+    double pitch = java::Math::toRadians(INITIAL_RAY_PITCH_IN_DEGREES);
+    double cp = std::cos(pitch);
+
+    return Vector3Dd(cp * std::cos(yaw), cp * std::sin(yaw), std::sin(pitch));
 }
 
 Camera* MeshModel::getCamera()

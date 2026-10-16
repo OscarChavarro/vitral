@@ -3,7 +3,12 @@ import java.io.File;
 
 // AWT GUI java classes
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -11,6 +16,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 // Swing GUI java classes
 import javax.swing.JFrame;
@@ -26,6 +33,7 @@ import vsdk.toolkit.gui.CameraController;
 import vsdk.toolkit.gui.CameraControllerOrbiter;
 import vsdk.toolkit.gui.RendererConfigurationController;
 import vsdk.toolkit.gui.AwtSystem;
+import vsdk.toolkit.render.jogl.viewport.Jogl4LabelImageProvider;
 import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient;
 
 // Application classes
@@ -91,6 +99,7 @@ public class MeshExample
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
         canvas.addKeyListener(this);
+        AwtSystem.enableKeyboardInteraction(canvas);
 
         this.add(canvas, BorderLayout.CENTER);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -101,7 +110,17 @@ public class MeshExample
         keyboardInteractionTechniques =
             new MeshKeyboardInteractionTechniques(model, cameraController, qualityController);
 
-        renderer = new Jogl4DebuggerRenderer(model);
+        Jogl4LabelImageProvider labelImageProvider = AwtSystem::calculateLabelImage;
+        renderer = new Jogl4DebuggerRenderer(model, labelImageProvider);
+        // Overlay texts (input gizmo boxes) follow the screen resolution
+        GraphicsConfiguration configuration = GraphicsEnvironment
+            .getLocalGraphicsEnvironment().getDefaultScreenDevice()
+            .getDefaultConfiguration();
+        Rectangle bounds = configuration.getBounds();
+        AffineTransform transform = configuration.getDefaultTransform();
+        renderer.getViewportSet().getElementScaler().setScreenResolution(
+            (int)Math.round(bounds.width * transform.getScaleX()),
+            (int)Math.round(bounds.height * transform.getScaleY()));
         canvas.addGLEventListener(renderer);
 
         AnimationController animationController = new AnimationController();
@@ -136,8 +155,34 @@ public class MeshExample
 
         f = app;
 
+        f.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                app.requestKeyboardFocus();
+            }
+        });
         f.pack();
+        // A normal window covering the whole usable area of the desktop (not
+        // full screen: menu bars, docks and task bars stay visible)
+        f.setBounds(GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .getMaximumWindowBounds());
         f.setVisible(true);
+    }
+
+    /**
+    Asks the window manager to make this application the foreground one and
+    gives the keyboard focus to the canvas, so key presses reach it without
+    the user having to select the window first (i.e. when launched from a
+    terminal, which otherwise keeps the focus).
+    */
+    private void requestKeyboardFocus() {
+        if ( Desktop.isDesktopSupported() &&
+             Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND) ) {
+            Desktop.getDesktop().requestForeground(true);
+        }
+        toFront();
+        requestFocus();
+        canvas.requestFocusInWindow();
     }
 
     private static String extractFileName(String[] args) {

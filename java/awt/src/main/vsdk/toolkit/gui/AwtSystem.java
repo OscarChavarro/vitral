@@ -4,6 +4,7 @@ package vsdk.toolkit.gui;
 //import java.awt.event.KeyEvent; // Do not import!
 //import java.awt.event.MouseEvent; // Do not import!
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
@@ -25,6 +26,18 @@ events.
 public class AwtSystem extends PresentationElement
 {
     private static Font font = null;
+
+    /**
+    Makes a component deliver every key press to its key listeners as
+    VitralSDK commands. AWT uses TAB and SHIFT+TAB to move the focus between
+    components and consumes them before key listeners see them, so input
+    gizmos (see `InputGizmo`) could not cycle their boxes.
+    @param component component that receives keyboard interaction
+    */
+    public static void enableKeyboardInteraction(Component component)
+    {
+        component.setFocusTraversalKeysEnabled(false);
+    }
 
     public static MouseEvent awt2vsdkEvent(java.awt.event.MouseEvent eawt)
     {

@@ -4,17 +4,38 @@
 #include "vsdk/toolkit/environment/geometry/surface/InfinitePlane.h"
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/gui/gizmo/LightGizmoStyle.h"
+#include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
+#include "vsdk/toolkit/gui/viewport/Viewport.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4CameraRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4LightRenderer.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4RendererConfigurationShaderSelector.h"
+#include "vsdk/toolkit/render/opengl4/OpenGL4ViewportWindow.h"
 #include "vsdk/toolkit/render/opengl4/gizmo/OpenGL4RayGizmoRenderer.h"
 #include "model/SolidTextureModel.h"
 #include "render/Jogl4DebuggerRenderer.h"
 
-Jogl4DebuggerRenderer::Jogl4DebuggerRenderer(SolidTextureModel* model)
+Jogl4DebuggerRenderer::Jogl4DebuggerRenderer(
+    SolidTextureModel* model, OpenGL4LabelImageProvider* labelImageProvider)
     : model(model), solidTextureRenderer("../../../../etc/glslShaders")
 {
+    viewportSet = new ViewportSet();
+    viewport = new Viewport();
+    viewport->setBorder(0);
+    viewportSet->addViewport(viewport);
+    viewportWindow = new OpenGL4ViewportWindow(viewportSet, viewport, labelImageProvider);
+}
+
+Jogl4DebuggerRenderer::~Jogl4DebuggerRenderer()
+{
+    delete viewportWindow;
+    delete viewportSet;
+}
+
+ViewportSet* Jogl4DebuggerRenderer::getViewportSet()
+{
+    return viewportSet;
 }
 
 bool Jogl4DebuggerRenderer::init()
@@ -49,6 +70,7 @@ void Jogl4DebuggerRenderer::reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
     model->getCamera()->updateViewportResize(width, height);
+    viewportSet->resize(width, height);
 }
 
 void Jogl4DebuggerRenderer::dispose()
@@ -58,6 +80,7 @@ void Jogl4DebuggerRenderer::dispose()
     OpenGL4RayGizmoRenderer::dispose();
     planesRenderer.dispose();
     solidTextureRenderer.dispose();
+    viewportWindow->disposeGlResources();
     OpenGL4LightRenderer::dispose();
     OpenGL4ImageRenderer::dispose();
 }
@@ -69,7 +92,8 @@ void Jogl4DebuggerRenderer::drawMeshModel(InfinitePlane* clippingPlane)
     solidTextureRenderer.draw(
         model->getScene(), model->getCamera(), activeLights,
         model->getSolidTextureVolumeRgb8(), model->getSolidTextureSize(),
-        model->getSolidTextureRevision(), clippingPlane);
+        model->getSolidTextureRevision(), clippingPlane,
+        model->getQualitySelection());
     for ( long i = 0; i < activeLights.size(); i++ ) {
         if ( activeLights.get(i) != 0 ) {
             OpenGL4LightRenderer::draw(
@@ -82,7 +106,11 @@ void Jogl4DebuggerRenderer::drawMeshModel(InfinitePlane* clippingPlane)
 void Jogl4DebuggerRenderer::drawGizmos()
 {
     java::ArrayList<Light*>& activeLights = model->getLights();
-    OpenGL4RayGizmoRenderer::draw(model->getRayGizmo(), model->getCamera(), activeLights);
+    RayGizmo* rayGizmo = model->getRayGizmo();
+    OpenGL4RayGizmoRenderer::draw(rayGizmo, model->getCamera(), activeLights);
+    if ( rayGizmo->isVisible() ) {
+        viewportWindow->drawInputGizmo(rayGizmo->getInputGizmo());
+    }
 }
 
 void Jogl4DebuggerRenderer::acquireGizmoSnapshots()

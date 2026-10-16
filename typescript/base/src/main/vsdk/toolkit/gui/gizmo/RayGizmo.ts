@@ -100,6 +100,15 @@ export class RayGizmo extends Gizmo {
     public static readonly DEFAULT_RAY_COLOR = new ColorRgb(1, 0.8, 0.8);
     public static readonly DEFAULT_NORMAL_COLOR = new ColorRgb(1, 1, 0.8);
 
+    // Colors of the boxes of the input gizmo: x, y, z, yaw and pitch
+    private static readonly INPUT_FIELD_COLORS: readonly ColorRgb[] = [
+        new ColorRgb(1, 0, 0),
+        new ColorRgb(0, 1, 0),
+        new ColorRgb(0, 0, 1),
+        new ColorRgb(1, 1, 0),
+        new ColorRgb(0, 1, 1),
+    ];
+
     private readonly arrow: Arrow;
     private readonly dotSphere: Sphere;
     private readonly body: SimpleBody;
@@ -150,6 +159,9 @@ export class RayGizmo extends Gizmo {
         this.intersectionCallback = intersectionCallback;
         this.maxNumOfReflections = maxNumOfReflections;
         this.inputGizmo = new InputGizmo(5, 3, 3);
+        for (let i = 0; i < RayGizmo.INPUT_FIELD_COLORS.length; i++) {
+            this.inputGizmo.setFieldColor(i, RayGizmo.INPUT_FIELD_COLORS[i]!);
+        }
 
         this.currentPosition = new Vector3Dd(0, 0, 0);
         this.currentDirection = new Vector3Dd(0, 0, 1);

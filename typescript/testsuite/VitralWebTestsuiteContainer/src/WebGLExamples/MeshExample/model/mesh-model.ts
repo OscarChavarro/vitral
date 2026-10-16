@@ -2,6 +2,7 @@ import {
   Camera,
   ColorRgb,
   Intersection,
+  JavaMath,
   Light,
   PointLight,
   Ray,
@@ -18,6 +19,10 @@ import {
  * Port of `java/testsuite/Jogl4Examples/MeshExample/src/model/MeshModel.java`.
  */
 export class MeshModel {
+  private static readonly INITIAL_RAY_ORIGIN = new Vector3Dd(0, -7, 3);
+  private static readonly INITIAL_RAY_YAW_IN_DEGREES = 80.0;
+  private static readonly INITIAL_RAY_PITCH_IN_DEGREES = -26.0;
+
   private readonly camera: Camera;
   private readonly lights: Light[];
   private readonly scene: SimpleScene;
@@ -30,6 +35,14 @@ export class MeshModel {
     this.camera = new Camera();
     this.qualitySelection = new RendererConfiguration();
     this.rayGizmo = new RayGizmo(this.makeIntersectionCallback(), 1);
+    this.rayGizmo.setRay(
+      new Ray(MeshModel.INITIAL_RAY_ORIGIN, MeshModel.initialRayDirection()),
+      0.0,
+    );
+    // Applied right away (rendering has not started), so the keyboard
+    // interaction reads this ray as its starting state
+    this.rayGizmo.acquireSnapshot();
+    this.rayGizmo.setVisible(false);
     this.lights = [];
     const light0: Light = new PointLight(new Vector3Dd(10, -20, 50), new ColorRgb(1, 1, 1));
     light0.setId(0);
@@ -37,6 +50,14 @@ export class MeshModel {
     light1.setId(1);
     this.lights.push(light0);
     this.lights.push(light1);
+  }
+
+  private static initialRayDirection(): Vector3Dd {
+    const yaw: number = JavaMath.toRadians(MeshModel.INITIAL_RAY_YAW_IN_DEGREES);
+    const pitch: number = JavaMath.toRadians(MeshModel.INITIAL_RAY_PITCH_IN_DEGREES);
+    const cp: number = Math.cos(pitch);
+
+    return new Vector3Dd(cp * Math.cos(yaw), cp * Math.sin(yaw), Math.sin(pitch));
   }
 
   getCamera(): Camera {

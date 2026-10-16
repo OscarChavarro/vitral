@@ -22,10 +22,18 @@ import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.light.Light;
+import vsdk.toolkit.environment.material.RendererConfiguration;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleBody;
 
 public final class Jogl4SolidTextureRenderer {
+    private static final float SURFACE_POLYGON_OFFSET_FACTOR = 1.0f;
+    private static final float SURFACE_POLYGON_OFFSET_UNITS = 1.0f;
+    private static final float LINE_POLYGON_OFFSET_FACTOR = -1.0f;
+    private static final float LINE_POLYGON_OFFSET_UNITS = -1.0f;
+    private static final float POINT_SIZE = 4.0f;
+    private static final ColorRgb POINT_COLOR = new ColorRgb(1, 0, 0);
+
     private int vaoId;
     private int positionVboId;
     private int normalVboId;
@@ -67,28 +75,43 @@ public final class Jogl4SolidTextureRenderer {
         long solidTextureRevision,
         InfinitePlane clippingPlane)
     {
-        if ( gl == null || scene == null || camera == null || lights == null ) {
+        RendererConfiguration quality = new RendererConfiguration();
+        quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+        draw(gl, scene, camera, lights, solidTextureVolumeRgb8, solidTextureSize,
+            solidTextureRevision, clippingPlane, quality);
+    }
+
+    public void draw(
+        GL4 gl,
+        SimpleScene scene,
+        Camera camera,
+        List<Light> lights,
+        byte[] solidTextureVolumeRgb8,
+        int solidTextureSize,
+        long solidTextureRevision,
+        InfinitePlane clippingPlane,
+        RendererConfiguration quality)
+    {
+        if ( gl == null || scene == null || camera == null || lights == null ||
+             quality == null ) {
             return;
         }
         ensureBuffers(gl);
         ensureProgram(gl);
         ensureSolidTexture(gl, solidTextureVolumeRgb8, solidTextureSize, solidTextureRevision);
 
-        if ( solidTextureId <= 0 ) {
-            return;
-        }
-
         gl.glEnable(GL.GL_DEPTH_TEST);
-        gl.glDepthMask(true);
-        gl.glDepthFunc(GL.GL_LESS);
         gl.glDisable(GL.GL_CULL_FACE);
-        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
 
         gl.glUseProgram(programId);
         configureClippingPlane(gl, clippingPlane);
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glBindTexture(GL2ES2.GL_TEXTURE_3D, solidTextureId);
         setInt(gl, programId, "sSolidTexture", 0);
+        setInt(gl, programId, "solidTextureDisabled",
+            quality.isTextureSet() && solidTextureId > 0 ? 0 : 1);
+        setInt(gl, programId, "shadingTypeSelected", 1);
+        setInt(gl, programId, "shadingType", quality.getShadingType());
         setInt(gl, programId, "numberOfLights", Math.min(lights.size(), 8));
         setFloat(gl, programId, "phongExponent", 24.0f);
 
@@ -103,10 +126,13 @@ public final class Jogl4SolidTextureRenderer {
         setVector3(gl, programId, "cameraPositionGlobal", camera.getPosition());
 
         for ( SimpleBody body : scene.getSimpleBodies() ) {
-            drawBody(gl, body, camera);
+            drawBody(gl, body, camera, quality);
         }
 
         gl.glBindVertexArray(0);
+        gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+        gl.glDepthMask(true);
+        gl.glDepthFunc(GL.GL_LESS);
         gl.glBindTexture(GL2ES2.GL_TEXTURE_3D, 0);
         gl.glDisable(GL4.GL_CLIP_DISTANCE0);
         gl.glUseProgram(0);
@@ -147,7 +173,8 @@ public final class Jogl4SolidTextureRenderer {
         normalUploadBuffer = null;
     }
 
-    private void drawBody(GL4 gl, SimpleBody body, Camera camera)
+    private void drawBody(GL4 gl, SimpleBody body, Camera camera,
+                          RendererConfiguration quality)
     {
         Geometry geometry = body.getGeometry();
         if ( geometry == null ) {
@@ -178,8 +205,52 @@ public final class Jogl4SolidTextureRenderer {
             }
             uploadFrame(gl, frame);
             gl.glBindVertexArray(vaoId);
-            gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertexCount);
+            drawMesh(gl, quality);
         }
+    }
+
+    /**
+    Draws the currently uploaded mesh once per primitive kind enabled in the
+    given configuration: shaded surfaces, wires and points.
+    */
+    private void drawMesh(GL4 gl, RendererConfiguration quality)
+    {
+        if ( quality.isSurfacesSet() ) {
+            setInt(gl, programId, "constantColorEnabled", 0);
+            gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
+            gl.glPolygonOffset(SURFACE_POLYGON_OFFSET_FACTOR, SURFACE_POLYGON_OFFSET_UNITS);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glDepthMask(true);
+            gl.glDepthFunc(GL.GL_LESS);
+            gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertexCount);
+            gl.glDisable(GL.GL_POLYGON_OFFSET_FILL);
+        }
+
+        if ( quality.isWiresSet() ) {
+            setInt(gl, programId, "constantColorEnabled", 1);
+            setColor(gl, programId, "constantColor", quality.getWireColor());
+            gl.glEnable(GL2GL3.GL_POLYGON_OFFSET_LINE);
+            gl.glPolygonOffset(LINE_POLYGON_OFFSET_FACTOR, LINE_POLYGON_OFFSET_UNITS);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_LINE);
+            gl.glLineWidth(1.0f);
+            gl.glDepthMask(false);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDrawArrays(GL.GL_TRIANGLES, 0, vertexCount);
+            gl.glDisable(GL2GL3.GL_POLYGON_OFFSET_LINE);
+        }
+
+        if ( quality.isPointsSet() ) {
+            setInt(gl, programId, "constantColorEnabled", 1);
+            setColor(gl, programId, "constantColor", POINT_COLOR);
+            gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+            gl.glPointSize(POINT_SIZE);
+            gl.glDepthMask(false);
+            gl.glDepthFunc(GL.GL_LEQUAL);
+            gl.glDrawArrays(GL.GL_POINTS, 0, vertexCount);
+        }
+
+        gl.glDepthMask(true);
+        gl.glDepthFunc(GL.GL_LESS);
     }
 
     private List<TriangleMesh> meshesOf(Geometry geometry)

@@ -16,3 +16,12 @@ target_include_directories(vitral_glfw PUBLIC src/main)
 target_include_directories(vitral_glfw PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../base/src/main)
 target_link_libraries(vitral_glfw PUBLIC glfw)
 target_link_libraries(vitral_glfw PRIVATE vitral_base)
+
+# Text labels (GlfwSystem::calculateLabelImage) are rasterized with FreeType 2
+find_package(Freetype)
+if(FREETYPE_FOUND)
+    target_link_libraries(vitral_glfw PRIVATE Freetype::Freetype)
+    target_compile_definitions(vitral_glfw PRIVATE VITRAL_GLFW_WITH_FREETYPE)
+else()
+    message(WARNING "FreeType 2 library not found. GLFW text labels will be empty.")
+endif()

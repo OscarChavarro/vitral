@@ -4,6 +4,7 @@ import {
     InfinitePlane,
     Light,
     Matrix4x4d,
+    RendererConfiguration,
     SimpleBody,
     SimpleScene,
     TriangleMesh,
@@ -46,6 +47,11 @@ Four runtime boundaries are crossed:
     vertex shader's clip-distance write into a varying the fragment shader
     discards on; the enable and disable calls have nothing to map onto and are
     gone.
+  - `glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)`, `GL_POLYGON_OFFSET_LINE`,
+    `glLineWidth` and `glPointSize` have no WebGL counterparts. The wire pass
+    draws the three edges of every triangle as `LINES` (with the depth state
+    Java also sets for that pass), and the point size travels to the vertex
+    shader as the `pointSizeLocal` uniform `WebGLShaderPreprocessor` installs.
   - A WebGL texture is an object rather than an `int`, so Java's
     `solidTextureId <= 0` guard is a `null` check, and the upload needs no
     intermediate direct `ByteBuffer` — a `Uint8Array` is what `texImage3D`
@@ -55,11 +61,19 @@ export class WebGLSolidTextureRenderer {
     private static readonly VERTEX_SHADER_FILE = "solidTextureVertexShader.glsl";
     private static readonly FRAGMENT_SHADER_FILE = "solidTexturePixelShader.glsl";
     private static readonly MAX_LIGHTS = 8;
+    private static readonly SURFACE_POLYGON_OFFSET_FACTOR = 1.0;
+    private static readonly SURFACE_POLYGON_OFFSET_UNITS = 1.0;
+    private static readonly POINT_SIZE = 4.0;
+    private static readonly POINT_COLOR = new ColorRgb(1, 0, 0);
 
     private vertexArray: WebGLVertexArrayObject | null = null;
     private positionBuffer: WebGLBuffer | null = null;
     private normalBuffer: WebGLBuffer | null = null;
     private vertexCount = 0;
+    private wireVertexArray: WebGLVertexArrayObject | null = null;
+    private wirePositionBuffer: WebGLBuffer | null = null;
+    private wireNormalBuffer: WebGLBuffer | null = null;
+    private wireVertexCount = 0;
     private program: WebGLProgram | null = null;
     private solidTexture: WebGLTexture | null = null;
     private uploadedTextureRevision = Number.NEGATIVE_INFINITY;
@@ -72,6 +86,12 @@ export class WebGLSolidTextureRenderer {
         await this.ensureProgram(gl);
     }
 
+    /**
+    Java's three `draw` overloads are one method with optional trailing
+    arguments: without `quality`, the scene is drawn as Java's overloads
+    without a `RendererConfiguration` do, as textured surfaces with Phong
+    shading.
+    */
     public async draw(
         gl: WebGL2RenderingContext,
         scene: SimpleScene | null,
@@ -81,7 +101,12 @@ export class WebGLSolidTextureRenderer {
         solidTextureSize: number,
         solidTextureRevision: number,
         clippingPlane: InfinitePlane | null = null,
+        quality: RendererConfiguration | null = null,
     ): Promise<void> {
+        if (quality === null) {
+            quality = new RendererConfiguration();
+            quality.setShadingType(RendererConfiguration.SHADING_TYPE_PHONG);
+        }
         if (scene === null || camera === null || lights === null) {
             return;
         }
@@ -89,22 +114,22 @@ export class WebGLSolidTextureRenderer {
         const program: WebGLProgram = await this.ensureProgram(gl);
         this.ensureSolidTexture(gl, solidTextureVolumeRgb8, solidTextureSize, solidTextureRevision);
 
-        if (this.solidTexture === null) {
-            return;
-        }
-
         gl.enable(gl.DEPTH_TEST);
-        gl.depthMask(true);
-        gl.depthFunc(gl.LESS);
         gl.disable(gl.CULL_FACE);
-        // Java also calls glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); WebGL
-        // rasterizes filled polygons only and has no polygon-mode entry point.
 
         gl.useProgram(program);
         WebGLSolidTextureRenderer.configureClippingPlane(gl, program, clippingPlane);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_3D, this.solidTexture);
         WebGLSolidTextureRenderer.setInt(gl, program, "sSolidTexture", 0);
+        WebGLSolidTextureRenderer.setInt(
+            gl,
+            program,
+            "solidTextureDisabled",
+            quality.isTextureSet() && this.solidTexture !== null ? 0 : 1,
+        );
+        WebGLSolidTextureRenderer.setInt(gl, program, "shadingTypeSelected", 1);
+        WebGLSolidTextureRenderer.setInt(gl, program, "shadingType", quality.getShadingType());
         WebGLSolidTextureRenderer.setInt(
             gl,
             program,
@@ -123,10 +148,12 @@ export class WebGLSolidTextureRenderer {
 
         const bodies = scene.getSimpleBodies();
         for (let i = 0; i < bodies.size(); i++) {
-            this.drawBody(gl, program, bodies.get(i), camera);
+            this.drawBody(gl, program, bodies.get(i), camera, quality);
         }
 
         gl.bindVertexArray(null);
+        gl.depthMask(true);
+        gl.depthFunc(gl.LESS);
         gl.bindTexture(gl.TEXTURE_3D, null);
         gl.useProgram(null);
     }
@@ -148,6 +175,18 @@ export class WebGLSolidTextureRenderer {
             gl.deleteVertexArray(this.vertexArray);
             this.vertexArray = null;
         }
+        if (this.wirePositionBuffer !== null) {
+            gl.deleteBuffer(this.wirePositionBuffer);
+            this.wirePositionBuffer = null;
+        }
+        if (this.wireNormalBuffer !== null) {
+            gl.deleteBuffer(this.wireNormalBuffer);
+            this.wireNormalBuffer = null;
+        }
+        if (this.wireVertexArray !== null) {
+            gl.deleteVertexArray(this.wireVertexArray);
+            this.wireVertexArray = null;
+        }
         if (this.program !== null) {
             gl.deleteProgram(this.program);
             this.program = null;
@@ -156,7 +195,13 @@ export class WebGLSolidTextureRenderer {
         this.uploadedTextureSize = 0;
     }
 
-    private drawBody(gl: WebGL2RenderingContext, program: WebGLProgram, body: SimpleBody, camera: Camera): void {
+    private drawBody(
+        gl: WebGL2RenderingContext,
+        program: WebGLProgram,
+        body: SimpleBody,
+        camera: Camera,
+        quality: RendererConfiguration,
+    ): void {
         const geometry: Geometry | null = body.getGeometry();
         if (geometry === null) {
             return;
@@ -184,10 +229,87 @@ export class WebGLSolidTextureRenderer {
             if (frame === null || frame.positions.length === 0) {
                 continue;
             }
-            this.uploadFrame(gl, frame);
+            this.uploadFrame(gl, frame, quality.isWiresSet());
+            this.drawMesh(gl, program, quality);
+        }
+    }
+
+    /**
+    Draws the currently uploaded mesh once per primitive kind enabled in the
+    given configuration: shaded surfaces, wires and points.
+    */
+    private drawMesh(gl: WebGL2RenderingContext, program: WebGLProgram, quality: RendererConfiguration): void {
+        if (quality.isSurfacesSet()) {
+            WebGLSolidTextureRenderer.setInt(gl, program, "constantColorEnabled", 0);
+            gl.enable(gl.POLYGON_OFFSET_FILL);
+            gl.polygonOffset(
+                WebGLSolidTextureRenderer.SURFACE_POLYGON_OFFSET_FACTOR,
+                WebGLSolidTextureRenderer.SURFACE_POLYGON_OFFSET_UNITS,
+            );
+            gl.depthMask(true);
+            gl.depthFunc(gl.LESS);
             gl.bindVertexArray(this.vertexArray);
             gl.drawArrays(gl.TRIANGLES, 0, this.vertexCount);
+            gl.disable(gl.POLYGON_OFFSET_FILL);
         }
+
+        if (quality.isWiresSet()) {
+            WebGLSolidTextureRenderer.setInt(gl, program, "constantColorEnabled", 1);
+            WebGLSolidTextureRenderer.setColor(gl, program, "constantColor", quality.getWireColor());
+            // Java outlines the filled triangles with glPolygonMode(GL_LINE),
+            // biased by POLYGON_OFFSET_LINE; see the class documentation.
+            gl.depthMask(false);
+            gl.depthFunc(gl.LEQUAL);
+            gl.bindVertexArray(this.wireVertexArray);
+            gl.drawArrays(gl.LINES, 0, this.wireVertexCount);
+        }
+
+        if (quality.isPointsSet()) {
+            WebGLSolidTextureRenderer.setInt(gl, program, "constantColorEnabled", 1);
+            WebGLSolidTextureRenderer.setColor(gl, program, "constantColor", WebGLSolidTextureRenderer.POINT_COLOR);
+            WebGLSolidTextureRenderer.setFloat(gl, program, "pointSizeLocal", WebGLSolidTextureRenderer.POINT_SIZE);
+            gl.depthMask(false);
+            gl.depthFunc(gl.LEQUAL);
+            gl.bindVertexArray(this.vertexArray);
+            gl.drawArrays(gl.POINTS, 0, this.vertexCount);
+            WebGLSolidTextureRenderer.setFloat(gl, program, "pointSizeLocal", 0.0);
+        }
+
+        gl.depthMask(true);
+        gl.depthFunc(gl.LESS);
+    }
+
+    /**
+    The edge list that stands in for `glPolygonMode(..., GL_LINE)`: every
+    triangle of the frame becomes its three edges, so the wire pass can draw
+    `LINES` over exactly the geometry the surface pass filled.
+    */
+    private static buildWireFrame(frame: SolidTextureMeshFrame): SolidTextureMeshFrame {
+        const triangleCount: number = Math.trunc(frame.positions.length / 9);
+        const positions = new Float32Array(triangleCount * 6 * 3);
+        const normals = new Float32Array(triangleCount * 6 * 3);
+        const edges: readonly (readonly number[])[] = [
+            [0, 1],
+            [1, 2],
+            [2, 0],
+        ];
+
+        let p = 0;
+        for (let triangle = 0; triangle < triangleCount; triangle++) {
+            for (const edge of edges) {
+                for (const corner of edge) {
+                    const vertex: number = (triangle * 3 + corner) * 3;
+                    positions[p] = frame.positions[vertex]!;
+                    positions[p + 1] = frame.positions[vertex + 1]!;
+                    positions[p + 2] = frame.positions[vertex + 2]!;
+                    normals[p] = frame.normals[vertex]!;
+                    normals[p + 1] = frame.normals[vertex + 1]!;
+                    normals[p + 2] = frame.normals[vertex + 2]!;
+                    p += 3;
+                }
+            }
+        }
+        return { positions, normals };
     }
 
     private static meshesOf(geometry: Geometry): TriangleMesh[] {
@@ -237,16 +359,41 @@ export class WebGLSolidTextureRenderer {
         return { positions: outPositions, normals: outNormals };
     }
 
-    private uploadFrame(gl: WebGL2RenderingContext, frame: SolidTextureMeshFrame): void {
+    /**
+    @param withWires whether to also upload the edge list of the wire pass,
+    which Java does not need (see the class documentation)
+    */
+    private uploadFrame(gl: WebGL2RenderingContext, frame: SolidTextureMeshFrame, withWires: boolean): void {
         this.vertexCount = Math.trunc(frame.positions.length / 3);
-        gl.bindVertexArray(this.vertexArray);
+        WebGLSolidTextureRenderer.uploadInto(gl, this.vertexArray, this.positionBuffer, this.normalBuffer, frame);
+        if (withWires) {
+            const wireFrame: SolidTextureMeshFrame = WebGLSolidTextureRenderer.buildWireFrame(frame);
+            this.wireVertexCount = Math.trunc(wireFrame.positions.length / 3);
+            WebGLSolidTextureRenderer.uploadInto(
+                gl,
+                this.wireVertexArray,
+                this.wirePositionBuffer,
+                this.wireNormalBuffer,
+                wireFrame,
+            );
+        }
+    }
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+    private static uploadInto(
+        gl: WebGL2RenderingContext,
+        vertexArray: WebGLVertexArrayObject | null,
+        positionBuffer: WebGLBuffer | null,
+        normalBuffer: WebGLBuffer | null,
+        frame: SolidTextureMeshFrame,
+    ): void {
+        gl.bindVertexArray(vertexArray);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, frame.positions, gl.STREAM_DRAW);
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, frame.normals, gl.STREAM_DRAW);
         gl.enableVertexAttribArray(1);
         gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
@@ -262,12 +409,25 @@ export class WebGLSolidTextureRenderer {
         const vertexArray = gl.createVertexArray();
         const positionBuffer = gl.createBuffer();
         const normalBuffer = gl.createBuffer();
-        if (vertexArray === null || positionBuffer === null || normalBuffer === null) {
+        const wireVertexArray = gl.createVertexArray();
+        const wirePositionBuffer = gl.createBuffer();
+        const wireNormalBuffer = gl.createBuffer();
+        if (
+            vertexArray === null ||
+            positionBuffer === null ||
+            normalBuffer === null ||
+            wireVertexArray === null ||
+            wirePositionBuffer === null ||
+            wireNormalBuffer === null
+        ) {
             throw new Error("Failed to create solid texture renderer buffers");
         }
         this.vertexArray = vertexArray;
         this.positionBuffer = positionBuffer;
         this.normalBuffer = normalBuffer;
+        this.wireVertexArray = wireVertexArray;
+        this.wirePositionBuffer = wirePositionBuffer;
+        this.wireNormalBuffer = wireNormalBuffer;
     }
 
     private async ensureProgram(gl: WebGL2RenderingContext): Promise<WebGLProgram> {
