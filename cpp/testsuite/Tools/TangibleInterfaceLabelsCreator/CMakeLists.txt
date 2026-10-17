@@ -46,8 +46,8 @@ if(BUILD_LABELS_CREATOR)
   endif()
 endif()
 
-set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
 if(NOT TARGET vitral_base)
+  set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
   add_subdirectory(../../../base base)
 endif()
 

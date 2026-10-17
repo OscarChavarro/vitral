@@ -51,7 +51,12 @@ if(WITH_APRILTAG)
 endif()
 
 if(WITH_OPENCV)
+  # OpenCV 4.x ships calib3d; OpenCV 5.x split it into calib, geometry and stereo
+  # (opencv2/calib3d.hpp remains as a compatibility header including those three).
   find_package(OpenCV QUIET COMPONENTS core imgproc videoio calib3d highgui)
+  if(NOT OpenCV_FOUND)
+    find_package(OpenCV QUIET COMPONENTS core imgproc videoio calib geometry stereo highgui)
+  endif()
   if(NOT OpenCV_FOUND)
     message(WARNING
       "OpenCV library not found. TangibleInterfaceMarkersDetectorServer will be skipped.\n"
@@ -64,8 +69,8 @@ if(WITH_OPENCV)
   endif()
 endif()
 
-set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
 if(NOT TARGET vitral_base)
+  set(VITRAL_BUILD_TESTS OFF CACHE BOOL "Build Vitral tests" FORCE)
   add_subdirectory(../../../base base)
 endif()
 

@@ -8,12 +8,12 @@ class View {
     double y(double canvasY) const;
 
   private:
-    double sx;
-    double sy;
-    double ox;
-    double oy;
-    double bx;
-    double by;
+    double scaleX;
+    double scaleY;
+    double screenCenterX;
+    double screenCenterY;
+    double boxCenterX;
+    double boxCenterY;
 };
 
 #endif

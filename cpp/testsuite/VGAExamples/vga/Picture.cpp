@@ -9,8 +9,8 @@
 Picture::Picture(const VgaModes::Screen &screen)
     : graphics(!screen.text), width(screen.width), height(screen.height), colors(screen.colors),
       bitsPerPixel(screen.bitsPerPixel), white(screen.colors - 1), square(screen.width >= 800) {
-    cx = width / 2;
-    cy = height / 2;
+    centerX = width / 2;
+    centerY = height / 2;
     radius = 3 * width / 8 - 2;
     if (graphics) {
         int space = height - legendHeight() - 4;
@@ -19,7 +19,7 @@ Picture::Picture(const VgaModes::Screen &screen)
         if (fit < radius) {
             radius = fit;
         }
-        cy = space / 2;
+        centerY = space / 2;
     }
 }
 
@@ -48,14 +48,14 @@ Picture::rows(int v) const {
 
 void
 Picture::plot8(int x, int y, const HudPatch *patch) const {
-    plot(cx + x, cy + rows(y), patch);
-    plot(cx - x, cy + rows(y), patch);
-    plot(cx + x, cy - rows(y), patch);
-    plot(cx - x, cy - rows(y), patch);
-    plot(cx + y, cy + rows(x), patch);
-    plot(cx - y, cy + rows(x), patch);
-    plot(cx + y, cy - rows(x), patch);
-    plot(cx - y, cy - rows(x), patch);
+    plot(centerX + x, centerY + rows(y), patch);
+    plot(centerX - x, centerY + rows(y), patch);
+    plot(centerX + x, centerY - rows(y), patch);
+    plot(centerX - x, centerY - rows(y), patch);
+    plot(centerX + y, centerY + rows(x), patch);
+    plot(centerX - y, centerY + rows(x), patch);
+    plot(centerX + y, centerY - rows(x), patch);
+    plot(centerX - y, centerY - rows(x), patch);
 }
 
 void
@@ -98,8 +98,8 @@ Picture::covers(int px, int py) const {
 
 bool
 Picture::hits8(int x, int y, int px, int py) const {
-    bool steep = (px == cx + x || px == cx - x) && (py == cy + rows(y) || py == cy - rows(y));
-    bool flat = (px == cx + y || px == cx - y) && (py == cy + rows(x) || py == cy - rows(x));
+    bool steep = (px == centerX + x || px == centerX - x) && (py == centerY + rows(y) || py == centerY - rows(y));
+    bool flat = (px == centerX + y || px == centerX - y) && (py == centerY + rows(x) || py == centerY - rows(x));
     return steep || flat;
 }
 

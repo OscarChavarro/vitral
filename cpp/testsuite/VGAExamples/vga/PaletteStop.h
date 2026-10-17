@@ -3,10 +3,10 @@
 
 class PaletteStop {
   public:
-    int at;
-    int r;
-    int g;
-    int b;
+    int index;
+    int red;
+    int green;
+    int blue;
 };
 
 #endif

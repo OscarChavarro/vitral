@@ -206,7 +206,8 @@ void OpenGL1InputGizmoRenderer::drawRectangles(
     java::ArrayList<float> colors;
 
     for ( long i = 0; i < rectangles.size(); i++ ) {
-        const float* r = rectangles.get(i).values;
+        Rectangle rectangle = rectangles.get(i);
+        const float* r = rectangle.values;
         float x0 = viewport->getPixelStartX() + r[0];
         float y0 = viewport->getPixelStartY() + r[1];
         float x1 = viewport->getPixelStartX() + r[2];

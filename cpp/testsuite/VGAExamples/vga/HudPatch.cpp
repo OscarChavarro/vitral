@@ -11,15 +11,15 @@ HudPatch::set(const Hud *hud, const char *before, const char *after, int top, in
     this->after = after;
     left = HUD_MARGIN;
     this->top = top;
-    x0 = left + first * GLYPH_WIDTH;
-    x1 = left + (last + 1) * GLYPH_WIDTH;
-    y0 = top;
-    y1 = top + glyphHeight;
+    xMin = left + first * GLYPH_WIDTH;
+    xMax = left + (last + 1) * GLYPH_WIDTH;
+    yMin = top;
+    yMax = top + glyphHeight;
 }
 
 int
 HudPatch::uncovers(int x, int y) const {
-    if (x < x0 || x > x1 || y < y0 || y > y1) {
+    if (x < xMin || x > xMax || y < yMin || y > yMax) {
         return 0;
     }
     return hud->pixel(before, x - left, y - top) != HUD_EMPTY && hud->pixel(after, x - left, y - top) == HUD_EMPTY;
@@ -28,8 +28,8 @@ HudPatch::uncovers(int x, int y) const {
 void
 HudPatch::draw(const Picture &picture) const {
     int color = -1;
-    for (int y = y0; y <= y1; y++) {
-        for (int x = x0; x <= x1; x++) {
+    for (int y = yMin; y <= yMax; y++) {
+        for (int x = xMin; x <= xMax; x++) {
             int was = hud->pixel(before, x - left, y - top);
             int now = hud->pixel(after, x - left, y - top);
             if (was == now) {

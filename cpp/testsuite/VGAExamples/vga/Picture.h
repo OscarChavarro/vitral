@@ -27,8 +27,8 @@ class Picture {
     int bitsPerPixel;
     int white;
     int square;
-    int cx;
-    int cy;
+    int centerX;
+    int centerY;
     int radius;
 
     void plot(int x, int y, const HudPatch *patch) const;

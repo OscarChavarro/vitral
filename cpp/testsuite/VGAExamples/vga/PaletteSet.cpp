@@ -38,14 +38,14 @@ PaletteSet::makePalette(unsigned which, int *pal) {
         case 3: b = v; break;
         case 4: {
             int s = 1;
-            while (STOPS[s].at < (int)i) {
+            while (STOPS[s].index < (int)i) {
                 s++;
             }
-            int span = STOPS[s].at - STOPS[s - 1].at;
-            int t = (int)i - STOPS[s - 1].at;
-            r = mix(STOPS[s - 1].r, STOPS[s].r, span, t);
-            g = mix(STOPS[s - 1].g, STOPS[s].g, span, t);
-            b = mix(STOPS[s - 1].b, STOPS[s].b, span, t);
+            int span = STOPS[s].index - STOPS[s - 1].index;
+            int t = (int)i - STOPS[s - 1].index;
+            r = mix(STOPS[s - 1].red, STOPS[s].red, span, t);
+            g = mix(STOPS[s - 1].green, STOPS[s].green, span, t);
+            b = mix(STOPS[s - 1].blue, STOPS[s].blue, span, t);
             break;
         }
         default: {
