@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.swing.Timer;
 
+import gui.awt.AwtCommandExecutor;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
@@ -39,6 +40,24 @@ class AwtJogl4MCPApplicationTools
     void repaint()
     {
         parent.getJogl4Controller().repaint();
+    }
+
+    /**
+    Opens the same native Swing file chooser as File > Import.  This is kept
+    in the application tools because it needs the editor JFrame as its owner,
+    unlike model-only GUI commands.
+    @return whether the command was recognized
+    */
+    String showImportDialog()
+    {
+        AwtCommandExecutor executor = parent.getAwtModel().getExecutor();
+
+        if ( executor == null || parent.getAwtModel().getMainWindowWidget() == null ) {
+            throw new IllegalStateException("The windowed editor GUI has not been created");
+        }
+        boolean handled = executor.executeCommand("IDC_IMPORT_OBJECTS_FROM_FILE",
+            parent.getAwtModel().getMainWindowWidget());
+        return "{\"ok\":" + handled + "}";
     }
 
     private AwtJogl4ApplicationController getDrawingAreaController()

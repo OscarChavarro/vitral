@@ -63,8 +63,9 @@ here independently of any implementation.
 
 ### Files and images
 
-- Import of objects from 3ds, vtk, gts, obj and ply files; export to obj, gts
-  and vtk.
+- Import of objects from 3ds, vtk, gts, obj and ply files; complete MIT `.ray`
+  scenes (including their camera, lights, materials and background) can be
+  loaded from `../../../../etc/geometry/mitscenes`; export to obj, gts and vtk.
 - Raytraced image of the scene (`F10`).
 - Color and depth images of the rasterized view, with selectable palettes,
   and contour images.

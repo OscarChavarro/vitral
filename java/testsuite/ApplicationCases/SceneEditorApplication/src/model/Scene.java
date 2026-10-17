@@ -1,6 +1,7 @@
 package model;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import vsdk.toolkit.environment.scene.SimpleBody;
 import vsdk.toolkit.environment.scene.SimpleBodyGroup;
 import vsdk.toolkit.environment.scene.SimpleScene;
 import vsdk.toolkit.environment.scene.SimpleSceneSnapshot;
+import vsdk.toolkit.io.geometry.ReaderMitScene;
 import vsdk.toolkit.render.raytracing.DepthBufferMode;
 import vsdk.toolkit.render.raytracing.ParallelRaytracer;
 import model.selection.SelectionSet;
@@ -58,6 +60,10 @@ public class Scene
 
     // Others
     public RendererConfiguration qualityTemplate;
+    /** True when this scene was read from a MIT .ray file. */
+    private boolean importedMitScene;
+    /** True while the background was supplied by an imported MIT .ray scene. */
+    private boolean importedSceneBackground;
     private int acumObject = 1;
     /// Size factor of light gizmos, shared by rendering and picking
     private double lightGizmoScale = 1.0;
@@ -96,6 +102,8 @@ public class Scene
         qualityTemplate = new RendererConfiguration();
         qualityTemplate.setSurfaces(true);
         qualityTemplate.setWires(false);
+        importedMitScene = false;
+        importedSceneBackground = false;
     }
 
     /**
@@ -242,6 +250,8 @@ public class Scene
     */
     public void rotateBackground()
     {
+        // An explicit background choice takes precedence over the .ray one.
+        importedSceneBackground = false;
         selectedBackground++;
         if ( selectedBackground > 2 ) {
             selectedBackground = 0;
@@ -251,6 +261,10 @@ public class Scene
     public void activateSelectedBackground()
     {
         Background currentBackground;
+
+        if ( importedSceneBackground && !scene.getBackgrounds().isEmpty() ) {
+            return;
+        }
 
         currentBackground = simpleBackground;
         switch ( selectedBackground ) {
@@ -283,6 +297,74 @@ public class Scene
             list.add(0, currentBackground);
         }
         scene.setActiveBackgroundIndex(0);
+    }
+
+    /**
+    Replaces the contents of this editor scene with the complete scene
+    described by a MIT raytracing file.  It deliberately keeps this `Scene`
+    instance: OpenGL renderers and selection editors retain a reference to
+    it, so CPU and GPU always use exactly the same scene.
+
+    Unlike the mesh importers, this preserves the camera, lights, materials
+    and background, which are all part of a .ray scene.
+    @param file MIT scene description file
+    @throws Exception if the scene cannot be read
+    */
+    public void importMitScene(File file) throws Exception
+    {
+        SimpleScene imported = new SimpleScene();
+        try (FileInputStream input = new FileInputStream(file)) {
+            new ReaderMitScene().importEnvironment(input, imported);
+        }
+
+        // Do not assign `scene = imported`: the JOGL renderer owns this
+        // Scene instance for its lifetime.  Replacing it makes CPU rendering
+        // use the new scene while GPU rendering continues to draw the old
+        // (now empty) one.
+        scene.getSimpleBodies().clear();
+        scene.getSimpleBodies().addAll(imported.getSimpleBodies());
+        scene.getLights().clear();
+        scene.getLights().addAll(imported.getLights());
+        scene.getBackgrounds().clear();
+        scene.getBackgrounds().addAll(imported.getBackgrounds());
+        scene.getCameras().clear();
+        scene.getCameras().addAll(imported.getCameras());
+        scene.setActiveCameraIndex(imported.getActiveCameraIndex());
+        scene.setActiveBackgroundIndex(imported.getActiveBackgroundIndex());
+
+        camera = scene.getActiveCamera();
+        activeCamera = camera;
+        cubemapBackground = null;
+        fixedBackground = null;
+        importedMitScene = true;
+        importedSceneBackground = !imported.getBackgrounds().isEmpty();
+        selectedBackground = 0;
+        debugThingGroups.clear();
+        selectedThings.sync();
+        selectedThings.unselectAll();
+        selectedLights.sync();
+        selectedLights.unselectAll();
+        selectedDebugThingGroups.sync();
+        selectedDebugThingGroups.unselectAll();
+        acumObject = scene.getSimpleBodies().size() + 1;
+        optimizeRendererConfigurationForImportedScene();
+    }
+
+    /** Enables the material features that the offline MIT example enables. */
+    private void optimizeRendererConfigurationForImportedScene()
+    {
+        boolean hasTextures = false;
+        boolean hasNormalMaps = false;
+
+        for ( SimpleBody body : scene.getSimpleBodies() ) {
+            hasTextures |= body.getTexture() != null;
+            hasNormalMaps |= body.getNormalMap() != null;
+            if ( hasTextures && hasNormalMaps ) {
+                break;
+            }
+        }
+        qualityTemplate.setTexture(hasTextures);
+        qualityTemplate.setBumpMap(hasNormalMaps);
     }
 
     public void print()
@@ -348,13 +430,21 @@ public class Scene
 
         originalWidth = (int)activeCamera.getViewportXSize();
         originalHeight = (int)activeCamera.getViewportYSize();
+        if ( importedMitScene ) {
+            // Match the offline MIT example: materials in a .ray file decide
+            // whether texturing and normal maps participate in raytracing.
+            optimizeRendererConfigurationForImportedScene();
+        }
         CameraSnapshot cameraSnapshot = activeCamera.exportToCameraSnapshot(
             out_Viewport.getXSize(), out_Viewport.getYSize());
 
         //-----------------------------------------------------------------
 
         Background activeBackground;
-        switch ( selectedBackground ) {
+        if ( importedSceneBackground && !scene.getBackgrounds().isEmpty() ) {
+            activeBackground = scene.getActiveBackground();
+        }
+        else switch ( selectedBackground ) {
           case 2:
             if ( cubemapBackground == null ) {
                 buildCubemap();

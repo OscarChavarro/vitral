@@ -87,8 +87,13 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
             jfc.addChoosableFileFilter(new AwtSuffixFileFilter("gts", "gts Gts mesh ASCII file"));
             jfc.addChoosableFileFilter(new AwtSuffixFileFilter("obj", "obj Alias/Wavefront text mesh"));
             jfc.addChoosableFileFilter(new AwtSuffixFileFilter("ply", "ply Ply mesh"));
+            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("ray", "ray MIT raytracing scene"));
 
-            int opc = jfc.showOpenDialog(new JPanel());
+            // The chooser must belong to the editor window.  An invisible
+            // JPanel parent can make the native macOS dialog appear behind
+            // the heavyweight OpenGL window, which makes File > Import look
+            // as if it did nothing.
+            int opc = jfc.showOpenDialog(mainWindowWidget);
             if (opc == JFileChooser.APPROVE_OPTION) {
                 try {
                     File file = jfc.getSelectedFile();

@@ -175,6 +175,9 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
                 applicationTools.injectKey(request);
                 return sceneTools.describeScene();
             }
+            case "gui.import_scene_dialog" -> {
+                return applicationTools.showImportDialog();
+            }
             case "viewport.project" -> {
                 return applicationTools.projectSelectedBody(request);
             }
@@ -217,6 +220,7 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             + "," + MCPJson.tool("gui.set_mode", "Set the interaction mode. Arguments: mode (camera|select|translate|rotate|scale).")
             + "," + MCPJson.tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
             + "," + MCPJson.tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|delete|escape|left|right|up|down|pageup|pagedown|num0..num9|num/|num*|num-|num+|num.|numenter), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
+            + "," + MCPJson.tool("gui.import_scene_dialog", "Open the native File > Import scene chooser. The call returns after the user selects a file or cancels it.")
             + "," + MCPJson.tool("gui.command", "Execute a command of the GUI that works only over the model, as its menu item or button does (i.e. IDC_CREATE_SPHERE, IDC_CREATE_FUNCTIONALEXPLICITSURFACE, IDC_CREATE_OMNILIGHT, IDC_TOOLS_RAY, IDC_OTHERS_CYCLE_BACKGROUND). Arguments: command. Returns result (DONE, FAILED or NOT_HANDLED for commands that need the GUI, i.e. file dialogs) and the status message.")
             + "," + MCPJson.tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
             + "," + MCPJson.tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")

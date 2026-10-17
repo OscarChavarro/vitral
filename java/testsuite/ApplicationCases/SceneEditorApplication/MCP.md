@@ -106,6 +106,9 @@ recorded in the scene history, so they can be undone as the ones of the user
   `command`. Returns `result` (`DONE`, `FAILED`, or `NOT_HANDLED` for commands
   that need the user interface, i.e. file dialogs) and the status `message`.
   Scene changes are recorded in the scene history.
+- `gui.import_scene_dialog`: opens the native Swing selector used by **File →
+  Import**. The MCP request remains pending while the dialog is open and
+  returns after the user selects a file or cancels it.
 
 ### Edition history
 

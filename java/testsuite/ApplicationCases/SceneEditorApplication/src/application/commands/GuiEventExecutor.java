@@ -18,6 +18,7 @@ import model.ApplicationModel;
 import model.InteractionMode;
 import model.Scene;
 import model.history.SceneHistory;
+import io.FileSuffixFilter;
 
 /**
 Executes the commands of the GUI of the editor (identified by the `IDC_*`
@@ -177,12 +178,18 @@ public class GuiEventExecutor extends CommandListener
     }
 
     /**
-    Adds the objects of a file to the scene.
-    @param file 3ds, vtk, gts, obj or ply file
+    Adds the objects of a file to the scene, or replaces it with a complete
+    MIT raytracing scene for `.ray` files.
+    @param file 3ds, vtk, gts, obj, ply or MIT .ray file
     @throws Exception if the file can not be read
     */
     public void importObjects(File file) throws Exception
     {
+        if ( "ray".equals(FileSuffixFilter.getSuffix(file.getName())) ) {
+            importMitScene(file);
+            return;
+        }
+
         SceneHistory history = model.getEditHistory().getSceneHistory();
 
         history.begin();
@@ -192,6 +199,17 @@ public class GuiEventExecutor extends CommandListener
         finally {
             history.end("Import of " + file.getName(), false);
         }
+    }
+
+    private void importMitScene(File file) throws Exception
+    {
+        scene().importMitScene(file);
+        // A complete scene replaces cameras, backgrounds and every scene
+        // element, which are not all representable by the incremental undo
+        // records used for ordinary mesh imports.
+        model.getEditHistory().getSceneHistory().clear();
+        model.useImportedSceneCameraInViewports();
+        model.setWithVisualDebugRay(false);
     }
 
     /**

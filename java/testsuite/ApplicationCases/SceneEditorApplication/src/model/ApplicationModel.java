@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.gui.viewport.ViewportSet;
+import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.widget.Widget;
 import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Intersection;
@@ -143,6 +144,31 @@ public class ApplicationModel
         this.scene = scene;
         this.rayGizmo = new RayGizmo(makeRayGizmoIntersectionCallback(), 2);
         editHistory.getSceneHistory().clear();
+    }
+
+    /**
+    Copies the camera imported with a complete scene into each viewport's
+    perspective camera.  Orthographic view definitions (Top, Bottom, Left
+    and Front) and the active view of every viewport are deliberately kept.
+    The copy is resized to the actual viewport so the GPU projection uses the
+    same aspect ratio as the CPU raytracer.
+    */
+    public void useImportedSceneCameraInViewports()
+    {
+        Camera importedCamera = scene.activeCamera;
+        for ( ViewportSet viewportSet : viewportSets ) {
+            for ( Viewport viewport : viewportSet.getViewports() ) {
+                Camera perspectiveCamera = viewport.getPerspectiveCamera();
+                perspectiveCamera.clone(importedCamera);
+                perspectiveCamera.setName("Perspective");
+
+                int width = viewport.getPixelSizeX();
+                int height = viewport.getPixelSizeY();
+                if ( width > 0 && height > 0 ) {
+                    perspectiveCamera.updateViewportResize(width, height);
+                }
+            }
+        }
     }
 
     /**
