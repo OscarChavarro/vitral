@@ -1044,6 +1044,15 @@
     "IDM_ROTATION_MODE": "Modo de interacción de rotación - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para rotar el objeto.",
     "IDM_SCALE_MODE": "Modo de interacción de escalamiento - pulse el ratón para seleccionar objetos, las teclas X, Y y Z o el modificador para escalar el objeto.",
     "IDM_OPERATION_CANCELLED_BY_USER": "Operación cancelada por el usuario.",
+    "IDM_SELECTOR_TITLE": "Selector de escena",
+    "IDM_SELECTOR_LIGHTS": "Luces",
+    "IDM_SELECTOR_CAMERAS": "Cámaras",
+    "IDM_SELECTOR_OBJECTS": "Objetos geométricos",
+    "IDM_SELECTOR_HIDDEN": "oculto",
+    "IDM_SELECTOR_HIDE": "Ocultar objetos",
+    "IDM_SELECTOR_SHOW": "Mostrar objetos",
+    "IDM_SELECTOR_DELETE": "Eliminar selección",
+    "IDM_SELECTOR_SELECTION": "Seleccionar elementos de escena",
     "IDM_INTRO_MESSAGE": "Ejemplo de editor 3D VSDK"
   }
 }

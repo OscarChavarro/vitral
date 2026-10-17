@@ -169,6 +169,12 @@ has not been created`).
   the current technology: `gpu`/`cpu` with `opengl4`, `hidden_lines`/`cpu`
   with `awt`). Returns the new configuration. These changes are not
   recorded in the view histories.
+- `viewport.set_rendering`: atomically requests a canvas technology and an
+  algorithm for the selected viewport (or the `viewport` argument). Arguments
+  are `technology` (`opengl4` or `awt`) and `algorithm` (`gpu`,
+  `hidden_lines` or `raytracing`). A request for `opengl4` rebuilds an AWT
+  drawing canvas as JOGL before applying the algorithm. GPU is available only
+  with OpenGL; hidden lines only with AWT; raytracing works with both.
 - `render.set_technology`: presents the viewport set with other technology,
   rebuilding the GUI (wait about a second before the next call). Arguments:
   `technology` (`opengl4` or `awt`). With `awt` no OpenGL is used: viewports

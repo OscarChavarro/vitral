@@ -60,6 +60,7 @@ public class ScenePicker
         List<SimpleBody> things = scene.scene.getSimpleBodies();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
+            if ( scene.isHidden(gi) ) continue;
             Ray hit = gi.doIntersectionFirstHit(r);
             if ( hit != null && hit.getT() < nearestDistance ) {
                 nearestDistance = hit.getT();

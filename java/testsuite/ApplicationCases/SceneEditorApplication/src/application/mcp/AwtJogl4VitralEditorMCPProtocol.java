@@ -166,6 +166,13 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
                 viewportTools.setRendererConfiguration(request);
                 return viewportTools.describeRendererConfigurations(request);
             }
+            case "viewport.set_rendering" -> {
+                String technology = MCPJson.stringProperty(request, "technology", "");
+                if ( !technology.isEmpty() ) {
+                    applicationTools.setRenderTechnology(request);
+                }
+                return viewportTools.setSelectedRendering(request);
+            }
             //- Application -----------------------------------------------
             case "gui.mouse" -> {
                 applicationTools.injectMouse(request);
@@ -226,6 +233,7 @@ class AwtJogl4VitralEditorMCPProtocol implements Runnable
             + "," + MCPJson.tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
             + "," + MCPJson.tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
             + "," + MCPJson.tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu|hidden_lines; only the ones available in the render technology: gpu|cpu with opengl4, hidden_lines|cpu with awt).")
+            + "," + MCPJson.tool("viewport.set_rendering", "Set the canvas technology and rendering algorithm of the selected viewport (or viewport index). Arguments: technology (opengl4|awt, optional) and algorithm (gpu|hidden_lines|raytracing). Technology changes rebuild the canvas; gpu requires opengl4, hidden_lines requires awt, raytracing works with either.")
             + "," + MCPJson.tool("render.set_technology", "Present the viewport set with other technology, rebuilding the GUI (wait about 1 s before the next call). Arguments: technology (opengl4|awt). AWT draws only with 2D operations: its viewports are hidden lines (wireframe, or Appel hidden line removal when surfaces are on) or raytraced.")
             + "," + MCPJson.tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
             + "," + MCPJson.tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")

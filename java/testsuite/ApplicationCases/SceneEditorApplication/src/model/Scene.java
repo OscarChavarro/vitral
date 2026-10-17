@@ -3,7 +3,10 @@ package model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Set;
 
 import vsdk.toolkit.common.color.ColorRgb;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -57,6 +60,9 @@ public class Scene
     public SelectionSet selectedThings;
     public SelectionSet selectedLights;
     public SelectionSet selectedDebugThingGroups;
+    /** Bodies deliberately hidden through the scene selector. */
+    private final Set<SimpleBody> hiddenBodies =
+        Collections.newSetFromMap(new IdentityHashMap<SimpleBody, Boolean>());
 
     // Others
     public RendererConfiguration qualityTemplate;
@@ -219,6 +225,21 @@ public class Scene
         return thing;
     }
 
+    public boolean isHidden(SimpleBody body)
+    {
+        return hiddenBodies.contains(body);
+    }
+
+    public void setHidden(SimpleBody body, boolean hidden)
+    {
+        if ( hidden ) {
+            hiddenBodies.add(body);
+        }
+        else {
+            hiddenBodies.remove(body);
+        }
+    }
+
     public boolean doIntersectionFirstHit(Ray r, RayHit info)
     {
         int i;
@@ -229,6 +250,7 @@ public class Scene
         RayHit ii = new RayHit();
         for ( i = 0; i < things.size(); i++ ) {
             gi = things.get(i);
+            if ( isHidden(gi) ) continue;
             RayHit hit = new RayHit();
             if ( gi.doIntersectionFirstHit(r, hit) && hit.getRay().getT() < nearestDistance ) {
                 ii.clone(hit);
@@ -331,6 +353,7 @@ public class Scene
         scene.getCameras().addAll(imported.getCameras());
         scene.setActiveCameraIndex(imported.getActiveCameraIndex());
         scene.setActiveBackgroundIndex(imported.getActiveBackgroundIndex());
+        hiddenBodies.clear();
 
         camera = scene.getActiveCamera();
         activeCamera = camera;
@@ -472,8 +495,14 @@ public class Scene
             break;
         }
 
-        SimpleSceneSnapshot sceneSnapshot =
-            scene.exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
+        ArrayList<SimpleBody> visibleBodies = new ArrayList<SimpleBody>();
+        for ( SimpleBody body : scene.getSimpleBodies() ) {
+            if ( !isHidden(body) ) {
+                visibleBodies.add(body);
+            }
+        }
+        SimpleSceneSnapshot sceneSnapshot = new SimpleSceneSnapshot(visibleBodies,
+            scene.getLights(), activeBackground, cameraSnapshot);
         long initialTime = System.currentTimeMillis();
         RAYTRACER.execute(out_Viewport, out_Depth,
             out_Depth != null ? DepthBufferMode.OPENGL_DEPTH : DepthBufferMode.NONE,

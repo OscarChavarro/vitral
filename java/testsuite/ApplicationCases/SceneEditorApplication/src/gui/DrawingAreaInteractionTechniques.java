@@ -82,6 +82,10 @@ public class DrawingAreaInteractionTechniques
     private final UndoRedoInteractionTechnique undoRedoTechnique;
 
     private RendererConfiguration qualitySelection;
+    /** A title press belongs to the viewport HUD, never to camera control. */
+    private boolean viewportTitleGesture;
+    /** Suppresses the synthetic click after a title press/release. */
+    private boolean viewportTitleClickConsumed;
 
     /**
     @param model application model, providing the scene to interact with
@@ -391,6 +395,7 @@ public class DrawingAreaInteractionTechniques
 
     public void processMousePressedEvent(MouseEvent event)
     {
+        viewportTitleClickConsumed = false;
         Viewport mouseView = getViewportAtPointer(event);
         InteractionMode mode = drawingArea.getInteractionMode();
 
@@ -401,6 +406,17 @@ public class DrawingAreaInteractionTechniques
         editRecorder.beginGesture(sceneOperationName(mode));
         viewportSetTechniques.processMousePressedEvent(drawingArea.toSurfaceEvent(event));
         activateViewport(mouseView);
+        viewportTitleGesture = viewportSetTechniques.isPointerOverTitle(
+            drawingArea.toSurfaceEvent(event));
+
+        // The viewport HUD has priority over every interaction mode.  In
+        // camera mode especially, the camera controller may warp or capture
+        // the pointer before the release that opens the projection menu.
+        if ( viewportTitleGesture ) {
+            requestCursorForPointer(event, PointerCursor.VIEWPORT_TITLE);
+            listener.repaintRequested();
+            return;
+        }
 
         //-----------------------------------------------------------------
         // WARNING / TODO
@@ -494,6 +510,8 @@ public class DrawingAreaInteractionTechniques
 
     public void processMouseReleasedEvent(MouseEvent event)
     {
+        boolean titleGesture = viewportTitleGesture;
+        viewportTitleGesture = false;
         Viewport mouseView = getInteractionViewportAtPointer(event);
         boolean confinedGesture = isTranslationGestureConfined();
         InteractionMode mode = drawingArea.getInteractionMode();
@@ -502,6 +520,14 @@ public class DrawingAreaInteractionTechniques
             viewportSetTechniques.processMouseReleasedEvent(drawingArea.toSurfaceEvent(event));
         }
         activateViewport(mouseView);
+
+        if ( titleGesture ) {
+            viewportTitleClickConsumed = true;
+            updateModeCursor(event);
+            editRecorder.endGesture();
+            listener.repaintRequested();
+            return;
+        }
 
         // WARNING / TODO
         // There should be a cameraController.getFutureAction(e) that calculates
@@ -533,6 +559,10 @@ public class DrawingAreaInteractionTechniques
 
     public void processMouseClickedEvent(MouseEvent event)
     {
+        if ( viewportTitleClickConsumed ) {
+            viewportTitleClickConsumed = false;
+            return;
+        }
         InteractionMode mode = drawingArea.getInteractionMode();
 
         editRecorder.record(sceneOperationName(mode),

@@ -1445,6 +1445,15 @@
     "IDM_ROTATION_MODE": "Rotation mode interaction - click mouse to select objects, X, Y, Z keys and gizmo to rotate it.",
     "IDM_SCALE_MODE": "Scale mode interaction - click mouse to select objects, X, Y, Z/ARROWS keys and gizmo to scale it.",
     "IDM_OPERATION_CANCELLED_BY_USER": "Operation cancelled by user.",
+    "IDM_SELECTOR_TITLE": "Scene selector",
+    "IDM_SELECTOR_LIGHTS": "Lights",
+    "IDM_SELECTOR_CAMERAS": "Cameras",
+    "IDM_SELECTOR_OBJECTS": "Geometry objects",
+    "IDM_SELECTOR_HIDDEN": "hidden",
+    "IDM_SELECTOR_HIDE": "Hide objects",
+    "IDM_SELECTOR_SHOW": "Show objects",
+    "IDM_SELECTOR_DELETE": "Delete selected",
+    "IDM_SELECTOR_SELECTION": "Select scene elements",
     "IDM_INTRO_MESSAGE": "VSDK 3D Editor"
   }
 }

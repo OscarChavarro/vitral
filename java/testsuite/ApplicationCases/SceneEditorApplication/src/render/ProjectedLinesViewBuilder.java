@@ -165,6 +165,9 @@ public class ProjectedLinesViewBuilder
             ProjectedLineLayer.Style.POINTS);
 
         for ( SimpleBody body : bodies ) {
+            if ( scene.isHidden(body) ) {
+                continue;
+            }
             Geometry geometry = body.getGeometry();
             if ( geometry == null ) {
                 continue;
@@ -397,6 +400,9 @@ public class ProjectedLinesViewBuilder
         scene.selectedThings.sync();
         for ( i = 0; i < bodies.size(); i++ ) {
             SimpleBody body = bodies.get(i);
+            if ( scene.isHidden(body) ) {
+                continue;
+            }
             Geometry geometry = body.getGeometry();
             if ( geometry == null ) {
                 continue;

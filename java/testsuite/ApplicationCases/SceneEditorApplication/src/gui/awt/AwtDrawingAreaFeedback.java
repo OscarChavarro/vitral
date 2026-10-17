@@ -194,8 +194,11 @@ public class AwtDrawingAreaFeedback implements DrawingAreaInteractionListener,
         AwtApplicationModel awtModel = application.getAwtModel();
 
         if ( awtModel.getSelectorDialog() == null ) {
-            awtModel.setSelectorDialog(new AwtSelectorDialog());
+            awtModel.setSelectorDialog(new AwtSelectorDialog(
+                awtModel.getMainWindowWidget(), application.getApplicationModel(),
+                application.getApplicationModel().getI18nContext(), canvas::repaint));
         }
+        awtModel.getSelectorDialog().rebuild();
         awtModel.getSelectorDialog().setVisible(true);
         awtModel.getSelectorDialog().repaint();
     }

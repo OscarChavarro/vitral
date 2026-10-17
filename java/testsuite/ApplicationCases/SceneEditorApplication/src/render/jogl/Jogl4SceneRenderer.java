@@ -69,6 +69,10 @@ public class Jogl4SceneRenderer
             quality.setSelectionCorners(s.selectedThings.isSelected(i));
             gi = s.scene.getSimpleBodies().get(i);
 
+            if ( s.isHidden(gi) ) {
+                continue;
+            }
+
             drawBody(gl, gi, s.activeCamera, lights, quality);
             if ( editor != null && editor.getTarget() == gi ) {
                 Jogl4RenderPrimitiveRenderer.draw(gl, editor.buildEditFeedback(),
@@ -233,6 +237,10 @@ public class Jogl4SceneRenderer
             quality.setPoints(false);
             quality.setSelectionCorners(s.selectedThings.isSelected(i));
             gi = s.scene.getSimpleBodies().get(i);
+
+            if ( s.isHidden(gi) ) {
+                continue;
+            }
 
             if ( quality.isSelectionCornersSet() || quality.isBoundingVolumeSet() ||
                  quality.isNormalsSet() || quality.isTrianglesNormalsSet() ) {

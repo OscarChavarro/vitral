@@ -120,6 +120,39 @@ class MCPViewportTools
     }
 
     /**
+    Sets the rendering algorithm of the selected viewport (or `viewport` when
+    supplied).  The drawing technology must already make that algorithm
+    available; the protocol changes the canvas before calling this method.
+    */
+    String setSelectedRendering(String request)
+    {
+        ViewportSet set = model.getActiveViewportSet();
+        int index = (int)MCPJson.numberProperty(request, "viewport",
+            set.getViewports().indexOf(set.getSelectedViewport()));
+        if ( index < 0 || index >= set.getViewportCount() ) {
+            throw new IllegalArgumentException("Viewport index out of range: " + index);
+        }
+        String algorithm = MCPJson.stringProperty(request, "algorithm", "");
+        if ( algorithm.isEmpty() ) {
+            throw new IllegalArgumentException(
+                "algorithm must be gpu, hidden_lines or raytracing");
+        }
+        int mode = switch ( algorithm.toLowerCase() ) {
+            case "gpu" -> Viewport.RENDER_MODE_Z_BUFFER;
+            case "hidden_lines", "hidden-line" -> Viewport.RENDER_MODE_HIDDEN_LINES;
+            case "raytracing", "raytrace", "cpu" -> Viewport.RENDER_MODE_RAYTRACING;
+            default -> throw new IllegalArgumentException(
+                "algorithm must be gpu, hidden_lines or raytracing");
+        };
+        if ( !set.isRenderModeAvailable(mode) ) {
+            throw new IllegalArgumentException("algorithm " + algorithm +
+                " is not available with " + model.getDrawingArea().getRenderTechnology());
+        }
+        set.getViewport(index).setRenderMode(mode);
+        return describeRendererConfigurations("{\"viewport\":" + index + "}");
+    }
+
+    /**
     @param request request with the argument viewport (index; default all)
     @return the rendering configuration of the viewports as JSON (tool
     `render.get_configuration`)
