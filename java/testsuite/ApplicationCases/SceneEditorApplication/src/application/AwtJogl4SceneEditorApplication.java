@@ -2,6 +2,7 @@ package application;
 
 // Java classes
 import java.util.List;
+import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 
 // VSDK Classes
@@ -11,6 +12,9 @@ import vsdk.toolkit.media.RGBImageUncompressed;
 import vsdk.toolkit.media.ZBuffer;
 import vsdk.toolkit.io.image.RGBColorPalettePersistence;
 import vsdk.toolkit.processing.ImageProcessing;
+import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceEvent;
+import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceEvent2RayGizmoMapper;
+import vsdk.toolkit.gui.tangibleInterfaces.TangibleInterfaceNetworkClient;
 
 // Application classes
 import model.GuiState;
@@ -29,6 +33,10 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
     private AwtApplicationModel awtModel;
     private AwtJogl4GuiController awtGuiController;
     private AwtJogl4ApplicationController jogl4Controller;
+    private static final String DEFAULT_TANGIBLE_SERVICE_URL = "ws://127.0.0.1:8090/v1/values";
+    private static final String RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube1";
+    private String tangibleServiceUrl = DEFAULT_TANGIBLE_SERVICE_URL;
+    private TangibleInterfaceNetworkClient tangibleInterfaceClient;
 
     void setLookAndFeel(String lookAndFeel)
     {
@@ -103,15 +111,58 @@ public class AwtJogl4SceneEditorApplication implements AwtApplicationHost {
 
     AwtJogl4SceneEditorApplication(String[] args) {
         createModel();
+        processArguments(args);
         createGUI();
 
-        int i;
-        for ( i = 0; i < args.length; i++ ) {
+        for ( int i = 0; i < args.length; i++ ) {
             if ( args[i].equals("-s") ) {
                 // Starts its own listener thread, which keeps it alive
                 new AwtJogl4VitralEditorMCP(this);
             }
         }
+    }
+
+    private void processArguments(String[] args) {
+        if ( args == null ) {
+            return;
+        }
+        for ( int i = 0; i < args.length; i++ ) {
+            if ( "-tangibleServer".equals(args[i]) && i + 1 < args.length ) {
+                setTangibleServiceUrl(args[++i]);
+            }
+        }
+    }
+
+    public String getTangibleServiceUrl() {
+        return tangibleServiceUrl;
+    }
+
+    public void connectTangibleInterface(String serviceUrl,
+        Consumer<Boolean> connectionListener) {
+        setTangibleServiceUrl(serviceUrl);
+        if ( tangibleInterfaceClient != null ) {
+            tangibleInterfaceClient.disconnect();
+        }
+        tangibleInterfaceClient = new TangibleInterfaceNetworkClient(tangibleServiceUrl);
+        tangibleInterfaceClient.addListener(this::tangibleInterfaceEventReceived);
+        tangibleInterfaceClient.run(connectionListener);
+    }
+
+    private void setTangibleServiceUrl(String serviceUrl) {
+        if ( serviceUrl != null && !serviceUrl.trim().isEmpty() ) {
+            tangibleServiceUrl = serviceUrl.trim();
+        }
+    }
+
+    private void tangibleInterfaceEventReceived(TangibleInterfaceEvent event) {
+        if ( event == null || !RAY_CUBE_TANGIBLE_ELEMENT_ID.equals(event.getId()) ) {
+            return;
+        }
+        applicationModel.setWithVisualDebugRay(true);
+        applicationModel.getRayGizmo().setRollIndicatorEnabled(true);
+        new TangibleInterfaceEvent2RayGizmoMapper(applicationModel.getActiveCamera())
+            .map(event, applicationModel.getRayGizmo());
+        SwingUtilities.invokeLater(this::repaintDrawingArea);
     }
 
     private void prepareRaytracedImage()

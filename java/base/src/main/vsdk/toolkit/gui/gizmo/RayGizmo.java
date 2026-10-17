@@ -11,6 +11,7 @@ import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.linealAlgebra.Matrix4x4d;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.common.color.ColorRgb;
+import vsdk.toolkit.environment.camera.Camera;
 import vsdk.toolkit.environment.geometry.element.Intersection;
 import vsdk.toolkit.environment.geometry.element.Ray;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
@@ -48,8 +49,16 @@ public class RayGizmo extends Gizmo {
 
     private static final double ARROW_BASE_LENGTH = 3.0;
     private static final double ARROW_HEAD_LENGTH = 1.0;
-    private static final double ARROW_BASE_RADIUS = 0.15;
-    private static final double ARROW_HEAD_RADIUS = 0.40;
+    /** Global visual weight for ray shafts, heads and miss markers. */
+    private static final double RAY_THICKNESS_FACTOR = 0.50;
+    private static final double ARROW_BASE_RADIUS = 0.15 * RAY_THICKNESS_FACTOR;
+    private static final double ARROW_HEAD_RADIUS = 0.40 * RAY_THICKNESS_FACTOR;
+
+    /** The FOV at which the original, unscaled ray thickness is preserved. */
+    private static final double REFERENCE_VERTICAL_FOV_DEGREES = 60.0;
+
+    /** Fraction of the viewport height used by a surface-normal arrow. */
+    private static final double NORMAL_VIEWPORT_HEIGHT_FRACTION = 0.20;
 
     public static final ColorRgb DEFAULT_RAY_COLOR    = new ColorRgb(1, 0.8, 0.8);
     public static final ColorRgb DEFAULT_NORMAL_COLOR = new ColorRgb(1, 1, 0.8);
@@ -92,6 +101,7 @@ public class RayGizmo extends Gizmo {
     private Date lastDataTime;
     private Date previousDataTime;
     private boolean visible;
+    private boolean rollIndicatorEnabled;
     private double disableAfterElapsedSeconds;
 
     private ColorRgb sourceRayColor;
@@ -134,6 +144,7 @@ public class RayGizmo extends Gizmo {
         lastDataTime = new Date();
         previousDataTime = new Date();
         visible = true;
+        rollIndicatorEnabled = false;
         disableAfterElapsedSeconds = DEFAULT_DISABLE_TIME;
 
         sourceRayColor = DEFAULT_RAY_COLOR;
@@ -215,6 +226,19 @@ public class RayGizmo extends Gizmo {
         this.visible = visible;
     }
 
+    /**
+     * Whether the visual marker of rotation around the ray's own axis is
+     * rendered. It is disabled by default because most ray input methods do
+     * not provide a meaningful roll angle.
+     */
+    public boolean isRollIndicatorEnabled() {
+        return rollIndicatorEnabled;
+    }
+
+    public void setRollIndicatorEnabled(boolean rollIndicatorEnabled) {
+        this.rollIndicatorEnabled = rollIndicatorEnabled;
+    }
+
     public double getDisableAfterElapsedSeconds() {
         return disableAfterElapsedSeconds;
     }
@@ -277,13 +301,32 @@ public class RayGizmo extends Gizmo {
      * @return a new scene; empty only if the gizmo has no snapshot yet
      */
     public SimpleScene buildScene() {
+        return buildScene(null);
+    }
+
+    /**
+     * Builds the visualization scene with a thickness normalized to the
+     * active view.  Only dimensions perpendicular to each ray are scaled:
+     * its length continues to represent the intersection distance exactly.
+     *
+     * <p>For a perspective camera the scale follows the vertical view angle;
+     * for an orthographic camera it follows its visible world height.  Thus a
+     * narrow (zoomed-in) view produces thinner rays and a wide (zoomed-out)
+     * view produces thicker ones, preserving their apparent thickness.
+     *
+     * @param camera active camera, or {@code null} to retain legacy size
+     * @return a renderer-independent scene describing the ray visualization
+     */
+    public SimpleScene buildScene(Camera camera) {
         SimpleScene scene = new SimpleScene();
         double arrowTotalLength = ARROW_BASE_LENGTH + ARROW_HEAD_LENGTH;
+        double thicknessScale = calculateViewThicknessScale(camera);
 
         if ( currentSnapshot == null || currentSnapshot.rays().isEmpty() ) {
+            double missingRayLength = calculateMissingRayLength(camera, currentPosition);
             scene.addBody(buildRayBody(
                 new Ray(currentPosition, currentDirection), null,
-                sourceRayColor, arrowTotalLength));
+                sourceRayColor, arrowTotalLength, missingRayLength, thicknessScale));
             return scene;
         }
 
@@ -292,12 +335,17 @@ public class RayGizmo extends Gizmo {
         // Source ray (index 0)
         Ray sourceRay = currentSnapshot.rays().get(0);
         Intersection sourceIntersection = currentSnapshot.intersections().get(0);
-        scene.addBody(buildRayBody(sourceRay, sourceIntersection, sourceRayColor, arrowTotalLength));
+        double sourceRayLength = sourceIntersection == null ?
+            calculateMissingRayLength(camera, sourceRay.getOrigin()) : arrowTotalLength;
+        scene.addBody(buildRayBody(sourceRay, sourceIntersection, sourceRayColor,
+            arrowTotalLength, sourceRayLength, thicknessScale));
 
         if ( sourceIntersection == null ) {
-            addDotBodies(scene, sourceRay, arrowTotalLength);
+            addDotBodies(scene, sourceRay, camera, sourceRayLength,
+                calculateVisibleNormalLength(camera, sourceRay.getOrigin()), sourceRayColor);
         } else {
-            addNormalBody(scene, sourceIntersection, normalColors.get(0 % normalColors.size()));
+            addNormalBody(scene, sourceIntersection, normalColors.get(0 % normalColors.size()),
+                camera, thicknessScale);
         }
 
         // Reflection bounces (index 1+)
@@ -305,12 +353,17 @@ public class RayGizmo extends Gizmo {
             Ray reflRay = currentSnapshot.rays().get(i);
             Intersection reflIntersection = currentSnapshot.intersections().get(i);
             ColorRgb reflColor = reflectedRayColors.get((i - 1) % reflectedRayColors.size());
-            scene.addBody(buildRayBody(reflRay, reflIntersection, reflColor, arrowTotalLength));
+            double reflectedRayLength = reflIntersection == null ?
+                calculateMissingRayLength(camera, reflRay.getOrigin()) : arrowTotalLength;
+            scene.addBody(buildRayBody(reflRay, reflIntersection, reflColor,
+                arrowTotalLength, reflectedRayLength, thicknessScale));
 
             if ( reflIntersection == null ) {
-                addDotBodies(scene, reflRay, arrowTotalLength);
+                addDotBodies(scene, reflRay, camera, reflectedRayLength,
+                    calculateVisibleNormalLength(camera, reflRay.getOrigin()), reflColor);
             } else {
-                addNormalBody(scene, reflIntersection, normalColors.get(i % normalColors.size()));
+                addNormalBody(scene, reflIntersection, normalColors.get(i % normalColors.size()),
+                    camera, thicknessScale);
             }
         }
 
@@ -318,25 +371,39 @@ public class RayGizmo extends Gizmo {
     }
 
     private SimpleBody buildRayBody(
-        Ray ray, Intersection intersection, ColorRgb color, double arrowTotalLength)
+        Ray ray, Intersection intersection, ColorRgb color, double arrowTotalLength,
+        double displayedLength, double thicknessScale)
     {
-        double scaleZ = 1.0;
+        double rayLength = displayedLength;
         if ( intersection != null ) {
             double hitT = intersection.getT();
             if ( hitT > 1e-6 && arrowTotalLength > 1e-6 ) {
-                scaleZ = hitT / arrowTotalLength;
+                rayLength = hitT;
             }
         }
         SimpleBody b = new SimpleBody();
-        b.setGeometry(arrow);
+        b.setGeometry(buildRayArrow(rayLength));
         b.setPosition(ray.getOrigin());
         b.setRotation(rotationFromZToDirection(ray.getDirection()));
-        b.setScale(new Vector3Dd(1.0, 1.0, scaleZ));
+        b.setScale(new Vector3Dd(thicknessScale, thicknessScale, 1.0));
         b.setMaterial(materialFromColor(color));
         return b;
     }
 
-    private void addNormalBody(SimpleScene scene, Intersection intersection, ColorRgb color) {
+    /**
+     * Creates a ray arrow with a fixed-size head.  Only the shaft changes to
+     * reach the requested length, so all non-normal ray tips retain both the
+     * same length and the same shaft/head radius ratio.
+     */
+    private static Arrow buildRayArrow(double requestedLength) {
+        double totalLength = Math.max(requestedLength, ARROW_HEAD_LENGTH);
+        double shaftLength = Math.max(0.0, totalLength - ARROW_HEAD_LENGTH);
+        return new Arrow(shaftLength, ARROW_HEAD_LENGTH,
+            ARROW_BASE_RADIUS, ARROW_HEAD_RADIUS);
+    }
+
+    private void addNormalBody(SimpleScene scene, Intersection intersection, ColorRgb color,
+        Camera camera, double thicknessScale) {
         Vector3Dd hitPoint = intersection.getPoint();
         Vector3Dd normal = intersection.getNormal();
         if ( hitPoint == null || normal == null ) {
@@ -346,28 +413,112 @@ public class RayGizmo extends Gizmo {
         b.setGeometry(arrow);
         b.setPosition(hitPoint);
         b.setRotation(rotationFromZToDirection(normal));
-        b.setScale(new Vector3Dd(0.5, 0.5, 1.0));
+        double normalLength = calculateVisibleNormalLength(camera, hitPoint);
+        double arrowTotalLength = ARROW_BASE_LENGTH + ARROW_HEAD_LENGTH;
+        b.setScale(new Vector3Dd(0.5 * thicknessScale, 0.5 * thicknessScale,
+            normalLength / arrowTotalLength));
         b.setMaterial(materialFromColor(color));
         scene.addBody(b);
     }
 
-    private void addDotBodies(SimpleScene scene, Ray ray, double arrowTotalLength) {
+    private void addDotBodies(SimpleScene scene, Ray ray, Camera camera,
+        double rayLength, double normalLength, ColorRgb rayColor) {
         double len = ray.getDirection().length();
         if ( len < VSDK.EPSILON ) {
             return;
         }
         Vector3Dd dir = ray.getDirection().multiply(1.0 / len);
         Vector3Dd origin = ray.getOrigin();
-        SimpleMaterial dotMat = materialFromColor(new ColorRgb(1.0, 1.0, 0.0));
-        double[] factors = { 1.25, 1.50, 1.75 };
-        for ( double factor : factors ) {
-            Vector3Dd dotPos = origin.add(dir.multiply(arrowTotalLength * factor));
+        SimpleMaterial dotMat = materialFromColor(rayColor);
+        double sphereRadius = (camera == null ? ARROW_BASE_RADIUS : normalLength * 0.05) / 3.0;
+        double sphereScale = sphereRadius / ARROW_BASE_RADIUS;
+        double firstDotOffset = camera == null ? rayLength * 0.25 : 2.5 * sphereRadius;
+        double dotSpacing = camera == null ? rayLength * 0.25 : 3.0 * sphereRadius;
+        for ( int i = 0; i < 3; i++ ) {
+            double dotDistance = rayLength + firstDotOffset + i * dotSpacing;
+            Vector3Dd dotPos = origin.add(dir.multiply(dotDistance));
             SimpleBody b = new SimpleBody();
             b.setGeometry(dotSphere);
             b.setPosition(dotPos);
+            b.setScale(new Vector3Dd(sphereScale, sphereScale, sphereScale));
             b.setMaterial(dotMat);
             scene.addBody(b);
         }
+    }
+
+    /**
+     * Returns the scale to apply to dimensions perpendicular to a ray.
+     * The reference perspective FOV is 60 degrees, so existing callers that
+     * use the default camera retain their former world-space thickness.
+     */
+    public static double calculateViewThicknessScale(Camera camera) {
+        if ( camera == null ) {
+            return 1.0;
+        }
+        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
+            return 1.0 / Math.max(camera.getOrthogonalZoom(), VSDK.EPSILON);
+        }
+
+        double halfFovRadians = Math.toRadians(camera.getFov()) / 2.0;
+        double referenceHalfFovRadians = Math.toRadians(REFERENCE_VERTICAL_FOV_DEGREES) / 2.0;
+        return Math.max(Math.tan(halfFovRadians), VSDK.EPSILON)
+            / Math.tan(referenceHalfFovRadians);
+    }
+
+    /**
+     * Calculates a normal-arrow length that occupies a stable, modest part
+     * of the viewport height at its hit point.  This keeps normals visible
+     * without allowing the former fixed world-space length to overwhelm a
+     * zoomed-in view.
+     *
+     * @param camera active camera, or {@code null} to retain the legacy length
+     * @param position surface point where the normal starts
+     * @return normal-arrow length in world units
+     */
+    public static double calculateVisibleNormalLength(Camera camera, Vector3Dd position) {
+        double legacyLength = ARROW_BASE_LENGTH + ARROW_HEAD_LENGTH;
+        if ( camera == null || position == null ) {
+            return legacyLength;
+        }
+
+        double viewportHeight = Math.max(camera.getViewportYSize(), 1.0);
+        double targetPixels = NORMAL_VIEWPORT_HEIGHT_FRACTION * viewportHeight;
+        double worldPerPixel;
+
+        if ( camera.getProjectionMode() == Camera.PROJECTION_MODE_ORTHOGONAL ) {
+            double worldViewHeight = 2.0 / Math.max(
+                Math.abs(camera.getOrthogonalZoom()), VSDK.EPSILON);
+            worldPerPixel = worldViewHeight / viewportHeight;
+        } else {
+            Vector3Dd toPoint = position.subtract(camera.getPosition());
+            double depth = Math.max(Math.abs(toPoint.dotProduct(camera.getFront())),
+                camera.getNearPlaneDistance());
+            double halfFovRadians = Math.toRadians(camera.getFov()) / 2.0;
+            double worldViewHeight = 2.0 * depth * Math.max(
+                Math.tan(halfFovRadians), VSDK.EPSILON);
+            worldPerPixel = worldViewHeight / viewportHeight;
+        }
+        return targetPixels * worldPerPixel;
+    }
+
+    /**
+     * Length of a ray that has no further intersection.  Its endpoint is
+     * deliberately tied to the visible normal at the ray origin so an open
+     * ray remains readable at every zoom level.
+     */
+    public static double calculateMissingRayLength(Camera camera, Vector3Dd origin) {
+        return 2.0 * calculateVisibleNormalLength(camera, origin);
+    }
+
+    /**
+     * Model matrix for the roll indicator, with the same view-normalized
+     * radial scale used by {@link #buildScene(Camera)}.
+     */
+    public Matrix4x4d getRollIndicatorModelMatrix(Camera camera) {
+        double thicknessScale = calculateViewThicknessScale(camera);
+        Matrix4x4d thickness = new Matrix4x4d().scale(
+            thicknessScale, thicknessScale, 1.0);
+        return body.getTransformationMatrix().multiply(thickness);
     }
 
     private static SimpleMaterial materialFromColor(ColorRgb color) {
@@ -411,14 +562,14 @@ public class RayGizmo extends Gizmo {
         this.refractedRayColors = new ArrayList<>(refractedRayColors);
     }
 
-    /// Outer radius of the roll indicator fin (see `buildIndicatorMesh`)
-    private static final float INDICATOR_OUTER_RADIUS = 0.65f;
+    /// Outer radius of the roll indicator fin (see `buildRollIndicatorMesh`)
+    private static final float ROLL_INDICATOR_OUTER_RADIUS = 0.65f;
     /// Inner radius of the roll indicator fin
-    private static final float INDICATOR_INNER_RADIUS = 0.17f;
+    private static final float ROLL_INDICATOR_INNER_RADIUS = 0.17f;
     /// Half width of the roll indicator fin, at its base
-    private static final float INDICATOR_HALF_WIDTH = 0.12f;
+    private static final float ROLL_INDICATOR_HALF_WIDTH = 0.12f;
     /// Distance of the tip of the roll indicator fin, along +Z
-    private static final float INDICATOR_TIP_Z = 0.30f;
+    private static final float ROLL_INDICATOR_TIP_Z = 0.30f;
 
     /**
     Geometry of a single triangle, used to mark the current roll angle around
@@ -432,27 +583,27 @@ public class RayGizmo extends Gizmo {
     @param normals one repeated flat normal, 3 floats each
     @param uvs 3 texture coordinates, 2 floats each
     */
-    public record IndicatorMesh(float[] positions, float[] normals, float[] uvs) {
+    public record RollIndicatorMesh(float[] positions, float[] normals, float[] uvs) {
     }
 
     /**
     @return the geometry of the roll indicator fin, in the local space of the
-    arrow (see {@link IndicatorMesh})
+    arrow (see {@link RollIndicatorMesh})
     */
-    public static IndicatorMesh buildIndicatorMesh() {
+    public static RollIndicatorMesh buildRollIndicatorMesh() {
         // P0=tip, P1=base-left, P2=base-right.
         float[] positions = {
-            INDICATOR_OUTER_RADIUS,  0.0f,                 INDICATOR_TIP_Z,
-            INDICATOR_INNER_RADIUS, -INDICATOR_HALF_WIDTH,  0.0f,
-            INDICATOR_INNER_RADIUS,  INDICATOR_HALF_WIDTH,  0.0f
+            ROLL_INDICATOR_OUTER_RADIUS,  0.0f,                 ROLL_INDICATOR_TIP_Z,
+            ROLL_INDICATOR_INNER_RADIUS, -ROLL_INDICATOR_HALF_WIDTH,  0.0f,
+            ROLL_INDICATOR_INNER_RADIUS,  ROLL_INDICATOR_HALF_WIDTH,  0.0f
         };
         float[] uvs = { 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };
-        float ax = INDICATOR_INNER_RADIUS - INDICATOR_OUTER_RADIUS;
-        float ay = -INDICATOR_HALF_WIDTH;
-        float az = -INDICATOR_TIP_Z;
-        float bx = INDICATOR_INNER_RADIUS - INDICATOR_OUTER_RADIUS;
-        float by = INDICATOR_HALF_WIDTH;
-        float bz = -INDICATOR_TIP_Z;
+        float ax = ROLL_INDICATOR_INNER_RADIUS - ROLL_INDICATOR_OUTER_RADIUS;
+        float ay = -ROLL_INDICATOR_HALF_WIDTH;
+        float az = -ROLL_INDICATOR_TIP_Z;
+        float bx = ROLL_INDICATOR_INNER_RADIUS - ROLL_INDICATOR_OUTER_RADIUS;
+        float by = ROLL_INDICATOR_HALF_WIDTH;
+        float bz = -ROLL_INDICATOR_TIP_Z;
         float nx = ay*bz - az*by;
         float ny = az*bx - ax*bz;
         float nz = ax*by - ay*bx;
@@ -464,7 +615,7 @@ public class RayGizmo extends Gizmo {
 
         float[] normals = { nx, ny, nz, nx, ny, nz, nx, ny, nz };
 
-        return new IndicatorMesh(positions, normals, uvs);
+        return new RollIndicatorMesh(positions, normals, uvs);
     }
 
     private void recordDataArrival() {

@@ -52,3 +52,5 @@ hs_err_pid*.log
 
 # Generated example outputs
 output*
+._.DS_Store
+.DS_Store

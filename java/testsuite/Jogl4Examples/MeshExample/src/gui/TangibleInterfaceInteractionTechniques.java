@@ -28,6 +28,7 @@ public class TangibleInterfaceInteractionTechniques implements TangibleInterface
             return;
         }
 
+        model.getRayGizmo().setRollIndicatorEnabled(true);
         mapper.map(event, model.getRayGizmo());
         repaintCallback.run();
     }

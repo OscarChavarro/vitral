@@ -45,8 +45,8 @@ When the gizmo has a current {@link RayGizmo.RaySnapshot}:
   - Reflection bounces (index >= 1) are drawn in a distinct blue material.
 
 Arrow and sphere rendering are delegated to {@link Jogl4ArrowRenderer} and
-{@link Jogl4SphereRenderer} respectively.  This class only owns the indicator
-fin mesh and the frame-level orchestration.
+{@link Jogl4SphereRenderer} respectively.  This class only owns the roll
+indicator fin mesh and the frame-level orchestration.
 
 Usage (render thread, once per frame):
 <pre>
@@ -55,11 +55,11 @@ Usage (render thread, once per frame):
 </pre>
 */
 public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
-    private static int indicatorVaoId;
-    private static int indicatorPositionVboId;
-    private static int indicatorNormalVboId;
-    private static int indicatorUvVboId;
-    private static boolean initialized;
+    private static int rollIndicatorVaoId;
+    private static int rollIndicatorPositionVboId;
+    private static int rollIndicatorNormalVboId;
+    private static int rollIndicatorUvVboId;
+    private static boolean rollIndicatorMeshInitialized;
 
     /**
      * Draws the ray gizmo for the current frame.  Must be called after
@@ -81,13 +81,10 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
             List.of(new PointLight(camera.getPosition(), new ColorRgb(1, 1, 1))) :
             lights;
 
-        ensureMesh(gl);
-
         RendererConfiguration quality = buildSurfaceQuality();
-        Matrix4x4d primaryModelMatrix = gizmo.getBody().getTransformationMatrix();
         Matrix4x4d projection = Jogl4CameraRenderer.activate(gl, camera);
 
-        SimpleScene scene = gizmo.buildScene();
+        SimpleScene scene = gizmo.buildScene(camera);
 
         for ( SimpleBody body : scene.getSimpleBodies() ) {
             Geometry geom = body.getGeometry();
@@ -103,8 +100,12 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
             }
         }
 
-        drawIndicator(gl, gizmo.getRotationAngleInRadians(), primaryModelMatrix,
-                projection, camera, activeLights, quality);
+        if ( gizmo.isRollIndicatorEnabled() ) {
+            ensureRollIndicatorMesh(gl);
+            drawRollIndicator(gl, gizmo.getRotationAngleInRadians(),
+                gizmo.getRollIndicatorModelMatrix(camera), projection, camera,
+                activeLights, quality);
+        }
 
         gl.glDepthMask(true);
         gl.glDepthFunc(GL.GL_LESS);
@@ -115,28 +116,28 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
 
         Jogl4ArrowRenderer.dispose(gl);
 
-        if ( indicatorPositionVboId != 0 ) {
-            tmp[0] = indicatorPositionVboId;
+        if ( rollIndicatorPositionVboId != 0 ) {
+            tmp[0] = rollIndicatorPositionVboId;
             gl.glDeleteBuffers(1, tmp, 0);
-            indicatorPositionVboId = 0;
+            rollIndicatorPositionVboId = 0;
         }
-        if ( indicatorNormalVboId != 0 ) {
-            tmp[0] = indicatorNormalVboId;
+        if ( rollIndicatorNormalVboId != 0 ) {
+            tmp[0] = rollIndicatorNormalVboId;
             gl.glDeleteBuffers(1, tmp, 0);
-            indicatorNormalVboId = 0;
+            rollIndicatorNormalVboId = 0;
         }
-        if ( indicatorUvVboId != 0 ) {
-            tmp[0] = indicatorUvVboId;
+        if ( rollIndicatorUvVboId != 0 ) {
+            tmp[0] = rollIndicatorUvVboId;
             gl.glDeleteBuffers(1, tmp, 0);
-            indicatorUvVboId = 0;
+            rollIndicatorUvVboId = 0;
         }
-        if ( indicatorVaoId != 0 ) {
-            tmp[0] = indicatorVaoId;
+        if ( rollIndicatorVaoId != 0 ) {
+            tmp[0] = rollIndicatorVaoId;
             gl.glDeleteVertexArrays(1, tmp, 0);
-            indicatorVaoId = 0;
+            rollIndicatorVaoId = 0;
         }
 
-        initialized = false;
+        rollIndicatorMeshInitialized = false;
     }
 
     private static RendererConfiguration buildSurfaceQuality() {
@@ -149,7 +150,7 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
         return quality;
     }
 
-    private static void drawIndicator(
+    private static void drawRollIndicator(
         GL4 gl,
         double rollAngleRadians,
         Matrix4x4d arrowModelMatrix,
@@ -160,57 +161,57 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
     {
         Matrix4x4d rollRotation = new Matrix4x4d().axisRotation(
             rollAngleRadians, 0, 0, 1);
-        Matrix4x4d indicatorModelMatrix = arrowModelMatrix.multiply(rollRotation);
-        Matrix4x4d indicatorMvp         = projection.multiply(indicatorModelMatrix);
-        Matrix4x4d indicatorModelIt     = indicatorModelMatrix.invert().transpose();
+        Matrix4x4d rollIndicatorModelMatrix = arrowModelMatrix.multiply(rollRotation);
+        Matrix4x4d rollIndicatorMvp = projection.multiply(rollIndicatorModelMatrix);
+        Matrix4x4d rollIndicatorModelIt = rollIndicatorModelMatrix.invert().transpose();
 
         int program = Jogl4RendererConfigurationShaderSelector.selectSurfaceShaderProgram(
             gl, quality, false, false);
 
-        configureProgram(gl, program, indicatorMvp, indicatorModelMatrix, indicatorModelIt,
-            camera, lights, indicatorMaterial(), quality);
+        configureProgram(gl, program, rollIndicatorMvp, rollIndicatorModelMatrix,
+            rollIndicatorModelIt, camera, lights, rollIndicatorMaterial(), quality);
 
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glDepthMask(true);
         gl.glDepthFunc(GL.GL_LESS);
         gl.glDisable(GL.GL_CULL_FACE);
 
-        gl.glBindVertexArray(indicatorVaoId);
+        gl.glBindVertexArray(rollIndicatorVaoId);
         gl.glDrawArrays(GL.GL_TRIANGLES, 0, 3);
         gl.glBindVertexArray(0);
 
         Jogl4RendererConfigurationShaderSelector.deactivateShader(gl);
     }
 
-    private static void ensureMesh(GL4 gl) {
-        if ( initialized ) {
+    private static void ensureRollIndicatorMesh(GL4 gl) {
+        if ( rollIndicatorMeshInitialized ) {
             return;
         }
 
-        uploadIndicatorMesh(gl);
-        initialized = true;
+        uploadRollIndicatorMesh(gl);
+        rollIndicatorMeshInitialized = true;
     }
 
-    private static void uploadIndicatorMesh(GL4 gl) {
-        RayGizmo.IndicatorMesh mesh = RayGizmo.buildIndicatorMesh();
+    private static void uploadRollIndicatorMesh(GL4 gl) {
+        RayGizmo.RollIndicatorMesh mesh = RayGizmo.buildRollIndicatorMesh();
         int[] tmp = new int[1];
 
         gl.glGenVertexArrays(1, tmp, 0);
-        indicatorVaoId = tmp[0];
+        rollIndicatorVaoId = tmp[0];
 
         gl.glGenBuffers(1, tmp, 0);
-        indicatorPositionVboId = tmp[0];
+        rollIndicatorPositionVboId = tmp[0];
 
         gl.glGenBuffers(1, tmp, 0);
-        indicatorNormalVboId = tmp[0];
+        rollIndicatorNormalVboId = tmp[0];
 
         gl.glGenBuffers(1, tmp, 0);
-        indicatorUvVboId = tmp[0];
+        rollIndicatorUvVboId = tmp[0];
 
-        gl.glBindVertexArray(indicatorVaoId);
-        uploadBuffer(gl, indicatorPositionVboId, 0, 3, mesh.positions());
-        uploadBuffer(gl, indicatorNormalVboId,   1, 3, mesh.normals());
-        uploadBuffer(gl, indicatorUvVboId,       2, 2, mesh.uvs());
+        gl.glBindVertexArray(rollIndicatorVaoId);
+        uploadBuffer(gl, rollIndicatorPositionVboId, 0, 3, mesh.positions());
+        uploadBuffer(gl, rollIndicatorNormalVboId,   1, 3, mesh.normals());
+        uploadBuffer(gl, rollIndicatorUvVboId,       2, 2, mesh.uvs());
         gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
         gl.glBindVertexArray(0);
     }
@@ -255,7 +256,7 @@ public class Jogl4RayGizmoRenderer extends Jogl4Renderer {
         setInt(gl, programId, "withBumpMap", 0);
     }
 
-    private static SimpleMaterial indicatorMaterial() {
+    private static SimpleMaterial rollIndicatorMaterial() {
         SimpleMaterial m = new SimpleMaterial();
         m = m.withAmbient(new ColorRgb(0.3, 0.3, 0.0));
         m = m.withDiffuse(new ColorRgb(1.0, 0.9, 0.0));

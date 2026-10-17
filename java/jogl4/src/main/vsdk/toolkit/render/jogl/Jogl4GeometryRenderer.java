@@ -20,6 +20,7 @@ import vsdk.toolkit.environment.geometry.surface.FunctionalExplicitSurface;
 import vsdk.toolkit.environment.geometry.surface.InfinitePlane;
 import vsdk.toolkit.environment.geometry.surface.ParametricBiCubicPatch;
 import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
+import vsdk.toolkit.environment.geometry.surface.TriangleMeshGroup;
 import vsdk.toolkit.environment.geometry.volume.Arrow;
 import vsdk.toolkit.environment.geometry.volume.Box;
 import vsdk.toolkit.environment.geometry.volume.Cone;
@@ -39,7 +40,7 @@ tessellated once into a mesh (cached by its parameters) that is drawn by
 bounding volume, texture, bump map and shading).
 
 Supported geometries: `Sphere`, `Cone` (also cylinders and truncated cones),
-`Arrow`, `Box`, `Torus`, `TriangleMesh`, `VoxelVolume` (as the cubes of its
+`Arrow`, `Box`, `Torus`, `TriangleMesh`, `TriangleMeshGroup`, `VoxelVolume` (as the cubes of its
 voxels, tessellated by `Jogl4VoxelVolumeRenderer`), and the open surfaces
 `FunctionalExplicitSurface`, `ParametricBiCubicPatch` and `InfinitePlane`
 (tessellated by their `Jogl4*Renderer`, visible from both sides). A
@@ -67,6 +68,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         return geometry instanceof Sphere || geometry instanceof Cone ||
             geometry instanceof Arrow || geometry instanceof Box ||
             geometry instanceof Torus || geometry instanceof TriangleMesh ||
+            geometry instanceof TriangleMeshGroup ||
             geometry instanceof FunctionalExplicitSurface ||
             geometry instanceof ParametricBiCubicPatch ||
             geometry instanceof InfinitePlane ||
@@ -145,6 +147,11 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
             Jogl4ParametricCurveRenderer.draw(gl, curve, camera, quality, localTransform);
             return;
         }
+        if ( geometry instanceof TriangleMeshGroup group ) {
+            drawTriangleMeshGroup(gl, group, camera, lights, material, quality,
+                textureMap, normalMap, localTransform);
+            return;
+        }
         Jogl4MeshRenderer.Mesh mesh = obtainMesh(geometry);
         if ( mesh == null ) {
             return;
@@ -156,6 +163,48 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
         }
         Jogl4MeshRenderer.draw(gl, mesh, geometry, camera, lights, material, quality,
             textureMap, normalMap, localTransform);
+    }
+
+    /**
+     * OBJ imports are represented as a group of meshes (normally one per
+     * material).  Raytracing already traverses this geometry, so rasterizing
+     * every member here keeps the two rendering paths equivalent.
+     */
+    private static void drawTriangleMeshGroup(
+        GL4 gl,
+        TriangleMeshGroup group,
+        Camera camera,
+        List<Light> lights,
+        SimpleMaterial material,
+        RendererConfiguration quality,
+        RGBImageUncompressed textureMap,
+        RGBImageUncompressed normalMap,
+        Matrix4x4d localTransform)
+    {
+        if ( quality == null ) {
+            return;
+        }
+        RendererConfiguration meshQuality;
+        try {
+            meshQuality = quality.clone();
+        }
+        catch ( CloneNotSupportedException e ) {
+            return;
+        }
+        meshQuality.setBoundingVolume(false);
+        meshQuality.setSelectionCorners(false);
+
+        for ( TriangleMesh mesh : group.getMeshes() ) {
+            draw(gl, mesh, camera, lights, material, meshQuality,
+                textureMap, normalMap, localTransform);
+        }
+
+        if ( quality.isBoundingVolumeSet() ) {
+            Jogl4MinMaxRenderer.draw(gl, group, camera, localTransform);
+        }
+        if ( quality.isSelectionCornersSet() ) {
+            Jogl4SelectionCornersRenderer.draw(gl, group, camera, localTransform);
+        }
     }
 
     /**
@@ -460,6 +509,7 @@ public class Jogl4GeometryRenderer extends Jogl4Renderer {
                 Math.max(Math.abs(minmax[4] - minmax[1]), Math.abs(minmax[5] - minmax[2])));
         }
         Jogl4MeshBuilder builder = new Jogl4MeshBuilder(size);
+        builder.setDoubleSided(mesh.isDoubleSided());
 
         for ( int t = 0; t + 2 < idx.length; t += 3 ) {
             Vector3Dd[] pos = new Vector3Dd[3];

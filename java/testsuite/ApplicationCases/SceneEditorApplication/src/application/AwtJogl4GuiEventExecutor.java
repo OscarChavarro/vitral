@@ -2,11 +2,18 @@ package application;
 
 // Java basic classes
 import java.io.File;
+import java.awt.BorderLayout;
+import java.awt.Color;
 
 // Java AWT/Swing classes
 import javax.swing.JFileChooser;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
@@ -75,7 +82,10 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
     private boolean executeSwingCommand(String label, JFrame mainWindowWidget)
     {
         //- FILE ----------------------------------------------------------
-        if ( label.equals("IDC_FILE_QUIT") ) {
+        if ( label.equals("IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT") ) {
+            showTangibleInterfaceDialog(mainWindowWidget);
+        }
+        else if ( label.equals("IDC_FILE_QUIT") ) {
             System.exit(0);
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
@@ -231,6 +241,56 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
             parent.setGuiLanguage(GuiState.languageFile("spanish"));
         }
         return true;
+    }
+
+    private void showTangibleInterfaceDialog(JFrame mainWindowWidget)
+    {
+        JTextField serverField = new JTextField(parent.getTangibleServiceUrl(), 36);
+        JPanel panel = new JPanel(new BorderLayout(8, 8));
+        panel.add(new JLabel(parent.getApplicationModel().getI18nContext().getMessage(
+            "IDM_TANGIBLE_INTERFACE_SERVER_PROMPT")), BorderLayout.NORTH);
+        panel.add(serverField, BorderLayout.CENTER);
+
+        String connect = parent.getApplicationModel().getI18nContext().getMessage(
+            "IDM_TANGIBLE_INTERFACE_CONNECT");
+        String cancel = parent.getApplicationModel().getI18nContext().getMessage(
+            "IDM_TANGIBLE_INTERFACE_CANCEL");
+        JButton connectButton = new JButton(connect);
+        JButton cancelButton = new JButton(cancel);
+        JPanel buttons = new JPanel();
+        buttons.add(connectButton);
+        buttons.add(cancelButton);
+
+        JDialog dialog = new JDialog(mainWindowWidget,
+            parent.getApplicationModel().getI18nContext().getMessage(
+                "IDM_TANGIBLE_INTERFACE_TITLE"), true);
+        dialog.setLayout(new BorderLayout(8, 8));
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.add(buttons, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(mainWindowWidget);
+
+        cancelButton.addActionListener(event -> dialog.dispose());
+        connectButton.addActionListener(event -> {
+            String serviceUrl = serverField.getText().trim();
+            if ( serviceUrl.isEmpty() ) {
+                return;
+            }
+            connectButton.setBackground(null);
+            connectButton.setText(connect);
+            parent.connectTangibleInterface(serviceUrl, connected ->
+                SwingUtilities.invokeLater(() -> {
+                    if ( connected ) {
+                        dialog.dispose();
+                    }
+                    else {
+                        connectButton.setBackground(Color.RED);
+                        connectButton.setText(parent.getApplicationModel().getI18nContext()
+                            .getMessage("IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY"));
+                    }
+                }));
+        });
+        dialog.setVisible(true);
     }
 
     @Override

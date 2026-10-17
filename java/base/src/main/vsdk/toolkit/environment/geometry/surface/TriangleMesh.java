@@ -62,6 +62,13 @@ public class TriangleMesh extends Surface {
     // Basic mesh data model
     private String name = "default";
 
+    /**
+     * Whether raster renderers must draw both windings of this surface.
+     * MIT .ray scenes use two-sided triangle intersection, so their imported
+     * meshes set this flag to keep the GPU result consistent with raytracing.
+     */
+    private boolean doubleSided;
+
     // Consecutive triads of x/y/z point coordinates
     private double[] vertexPositions;
 
@@ -124,6 +131,7 @@ public class TriangleMesh extends Surface {
 //= Basic class management methods ==========================================
 
     public TriangleMesh() {
+        doubleSided = false;
         vertexPositions = null;
         vertexNormals = null;
         vertexBinormals = null;
@@ -134,6 +142,14 @@ public class TriangleMesh extends Surface {
         triangleIndexes = null;
         triangleNormals = null;
         incidentTrianglesPerVertexArray = null;
+    }
+
+    public boolean isDoubleSided() {
+        return doubleSided;
+    }
+
+    public void setDoubleSided(boolean doubleSided) {
+        this.doubleSided = doubleSided;
     }
 
     private double[] cloneDoubleArray(double in[])
@@ -193,6 +209,7 @@ public class TriangleMesh extends Surface {
         TriangleMesh other = new TriangleMesh();
 
         other.name = this.name;
+        other.doubleSided = this.doubleSided;
         other.vertexPositions = cloneDoubleArray(this.vertexPositions);
         other.vertexPositions = cloneDoubleArray(this.vertexPositions);
         other.vertexNormals = cloneDoubleArray(this.vertexNormals);

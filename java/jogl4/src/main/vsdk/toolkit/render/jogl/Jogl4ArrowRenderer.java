@@ -28,6 +28,10 @@ public class Jogl4ArrowRenderer extends Jogl4Renderer {
     private static int uvVboId;
     private static int vertexCount;
     private static boolean initialized;
+    private static double meshBaseRadius = Double.NaN;
+    private static double meshHeadRadius = Double.NaN;
+    private static double meshBaseLength = Double.NaN;
+    private static double meshHeadLength = Double.NaN;
 
     /**
      * Draws a single arrow instance.
@@ -112,12 +116,20 @@ public class Jogl4ArrowRenderer extends Jogl4Renderer {
         }
 
         vertexCount = 0;
+        meshBaseRadius = Double.NaN;
+        meshHeadRadius = Double.NaN;
+        meshBaseLength = Double.NaN;
+        meshHeadLength = Double.NaN;
         initialized = false;
     }
 
     static void ensureMesh(GL4 gl, Arrow arrow) {
-        if ( initialized ) {
+        if ( initialized && matchesMesh(arrow) ) {
             return;
+        }
+
+        if ( initialized ) {
+            dispose(gl);
         }
 
         ArrowMesh mesh = buildArrowMesh(
@@ -128,7 +140,18 @@ public class Jogl4ArrowRenderer extends Jogl4Renderer {
                 SLICES);
 
         uploadMesh(gl, mesh);
+        meshBaseRadius = arrow.getBaseRadius();
+        meshHeadRadius = arrow.getHeadRadius();
+        meshBaseLength = arrow.getBaseLength();
+        meshHeadLength = arrow.getHeadLength();
         initialized = true;
+    }
+
+    private static boolean matchesMesh(Arrow arrow) {
+        return Double.compare(meshBaseRadius, arrow.getBaseRadius()) == 0 &&
+            Double.compare(meshHeadRadius, arrow.getHeadRadius()) == 0 &&
+            Double.compare(meshBaseLength, arrow.getBaseLength()) == 0 &&
+            Double.compare(meshHeadLength, arrow.getHeadLength()) == 0;
     }
 
     private static void configureProgram(

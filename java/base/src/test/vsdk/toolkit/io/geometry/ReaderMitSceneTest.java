@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 import vsdk.toolkit.environment.camera.Camera;
+import vsdk.toolkit.environment.geometry.surface.TriangleMesh;
 import vsdk.toolkit.environment.scene.SimpleScene;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +35,28 @@ class ReaderMitSceneTest
         assertThat(firstCamera.getViewportYSize()).isEqualTo(45.0);
         assertThat(secondCamera.getViewportXSize()).isEqualTo(640.0);
         assertThat(secondCamera.getViewportYSize()).isEqualTo(480.0);
+    }
+
+    @Test
+    void givenMitTriangleScene_whenImported_thenMeshesAreDoubleSidedForRasterRendering()
+        throws Exception
+    {
+        String sceneDescription =
+            "triangles\n" +
+            "v 0 0 0\n" +
+            "v 1 0 0\n" +
+            "v 0 1 0\n" +
+            "f 0 1 2\n" +
+            "end\n";
+        SimpleScene scene = new SimpleScene();
+
+        try (InputStream is = new ByteArrayInputStream(
+                 sceneDescription.getBytes(StandardCharsets.UTF_8))) {
+            new ReaderMitScene().importEnvironment(is, scene);
+        }
+
+        TriangleMesh mesh = (TriangleMesh)scene.getSimpleBodies().get(0).getGeometry();
+        assertThat(mesh.isDoubleSided()).isTrue();
     }
 
     private SimpleScene importScene(ReaderMitScene reader, int width, int height)

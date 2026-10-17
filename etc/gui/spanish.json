@@ -734,6 +734,24 @@
       "iconTransparency": "./etc/icons/3dsmax7Icons/3dsmaxIcon1060Mask.png"
     },
     {
+      "id": "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT",
+      "name": "Cliente de interfaz tangible",
+      "brief": "Conectar un cliente websocket de interfaz tangible",
+      "icon": "./etc/icons/marker72.png"
+    },
+    {
+      "id": "IDM_TANGIBLE_INTERFACE_SERVER_PROMPT",
+      "name": "Ingrese el servidor websocket de interfaz tangible; consulte el programa cpp/testsuite/Tools/TangibleInterfaceMarkersDetectorServer para más información"
+    },
+    {
+      "id": "IDM_TANGIBLE_INTERFACE_CONNECT",
+      "name": "Conectar"
+    },
+    {
+      "id": "IDM_TANGIBLE_INTERFACE_CANCEL",
+      "name": "Cancelar"
+    },
+    {
       "id": "IDC_CREATE_SPHERE",
       "name": "Crear Esfera"
     },
@@ -931,7 +949,8 @@
         "IDC_TOOLS_ROTATE",
         "IDC_TOOLS_SCALE",
         "IDC_TOOLS_CAMERA",
-        "IDC_TOOLS_RAY"
+        "IDC_TOOLS_RAY",
+        "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT"
       ]
     },
     {
@@ -1053,6 +1072,11 @@
     "IDM_SELECTOR_SHOW": "Mostrar objetos",
     "IDM_SELECTOR_DELETE": "Eliminar selección",
     "IDM_SELECTOR_SELECTION": "Seleccionar elementos de escena",
-    "IDM_INTRO_MESSAGE": "Ejemplo de editor 3D VSDK"
+    "IDM_INTRO_MESSAGE": "Ejemplo de editor 3D VSDK",
+    "IDM_TANGIBLE_INTERFACE_TITLE": "Cliente de interfaz tangible",
+    "IDM_TANGIBLE_INTERFACE_SERVER_PROMPT": "Ingrese el servidor websocket de interfaz tangible; consulte el programa cpp/testsuite/Tools/TangibleInterfaceMarkersDetectorServer para más información",
+    "IDM_TANGIBLE_INTERFACE_CONNECT": "Conectar",
+    "IDM_TANGIBLE_INTERFACE_CANCEL": "Cancelar",
+    "IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY": "No se pudo conectar, reintente"
   }
 }

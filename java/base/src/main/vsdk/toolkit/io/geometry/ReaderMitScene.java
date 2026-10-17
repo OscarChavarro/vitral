@@ -207,6 +207,9 @@ public class ReaderMitScene extends PersistenceElement
         }
 
         TriangleMesh mesh = new TriangleMesh();
+        // MIT raytracing scenes intersect triangle surfaces from both sides.
+        // Preserve that behavior when the same scene is rasterized.
+        mesh.setDoubleSided(true);
         mesh.setVertexes(vertices.toArray(new Vertex[0]), false, false, false, false);
         mesh.setTriangles(triangles.toArray(new Triangle[0]));
         mesh.calculateNormals();

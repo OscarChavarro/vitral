@@ -30,6 +30,7 @@ public class TangibleInterfaceInteractionTechniques implements TangibleInterface
         }
 
         if ( RAY_CUBE_TANGIBLE_ELEMENT_ID.equals(event.getId()) ) {
+            model.getRayGizmo().setRollIndicatorEnabled(true);
             toRayGizmoMapper.map(event, model.getRayGizmo());
         } else if ( CUTTING_PLANE_CUBE_TANGIBLE_ELEMENT_ID.equals(event.getId()) ) {
             toInfinitePlaneGizmoMapper.map(event, model.getInfinitePlaneGizmo());

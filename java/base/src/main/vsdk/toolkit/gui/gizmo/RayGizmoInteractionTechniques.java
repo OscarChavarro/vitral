@@ -86,6 +86,7 @@ public class RayGizmoInteractionTechniques {
         origin = ray.getOrigin();
         updateAnglesFromDirection(ray.getDirection());
         updateInputGizmo();
+        gizmo.setRollIndicatorEnabled(false);
         gizmo.setRay(ray, 0.0);
     }
 
@@ -149,6 +150,7 @@ public class RayGizmoInteractionTechniques {
 
     private void applyRay() {
         updateInputGizmo();
+        gizmo.setRollIndicatorEnabled(false);
         gizmo.setRay(new Ray(origin, direction()), 0.0);
     }
 

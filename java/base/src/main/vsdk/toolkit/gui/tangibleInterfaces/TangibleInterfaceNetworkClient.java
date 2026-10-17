@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.function.Consumer;
 
 import vsdk.toolkit.common.linealAlgebra.Quaterniond;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
@@ -86,7 +87,19 @@ public class TangibleInterfaceNetworkClient implements Runnable {
     without raising an exception.
     */
     public void run() {
-        Thread connectionThread = new Thread(this::connectAndListen, "TangibleInterfaceNetworkClient");
+        run(null);
+    }
+
+    /**
+     * Starts the client and reports whether the websocket handshake succeeds.
+     * The callback, if supplied, runs in the connection thread.
+     *
+     * @param connectionListener receives {@code true} once the client is
+     *     ready to receive websocket messages, or {@code false} on failure
+     */
+    public void run(Consumer<Boolean> connectionListener) {
+        Thread connectionThread = new Thread(
+            () -> connectAndListen(connectionListener), "TangibleInterfaceNetworkClient");
         connectionThread.setDaemon(true);
         connectionThread.start();
     }
@@ -100,16 +113,22 @@ public class TangibleInterfaceNetworkClient implements Runnable {
         }
     }
 
-    private void connectAndListen() {
+    private void connectAndListen(Consumer<Boolean> connectionListener) {
         HttpClient httpClient = HttpClient.newHttpClient();
 
         try {
             webSocket = httpClient.newWebSocketBuilder()
                 .buildAsync(URI.create(serviceUrl), new FrameListener())
                 .get();
+            if ( connectionListener != null ) {
+                connectionListener.accept(true);
+            }
         }
         catch ( Exception e ) {
             System.out.println("Tangible interface server not found at " + serviceUrl + ": " + e.getMessage());
+            if ( connectionListener != null ) {
+                connectionListener.accept(false);
+            }
         }
     }
 
