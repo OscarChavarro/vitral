@@ -1,10 +1,18 @@
 package application.mcp;
 
 import java.io.File;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Window;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import javax.swing.Timer;
 
 import gui.awt.AwtCommandExecutor;
+import gui.awt.AwtSelectorDialog;
 import vsdk.toolkit.common.linealAlgebra.Vector3Dd;
 import vsdk.toolkit.gui.viewport.Viewport;
 import vsdk.toolkit.gui.viewport.ViewportSet;
@@ -58,6 +66,90 @@ class AwtJogl4MCPApplicationTools
         boolean handled = executor.executeCommand("IDC_IMPORT_OBJECTS_FROM_FILE",
             parent.getAwtModel().getMainWindowWidget());
         return "{\"ok\":" + handled + "}";
+    }
+
+    void openSelector() {
+        var awt = parent.getAwtModel();
+        if (awt.getSelectorDialog() == null) awt.setSelectorDialog(new AwtSelectorDialog(
+            awt.getMainWindowWidget(), parent.getApplicationModel(),
+            parent.getApplicationModel().getI18nContext(), this::repaint));
+        awt.getSelectorDialog().rebuild();
+        awt.getSelectorDialog().setVisible(true);
+    }
+
+    String selectBodyInDialog(String request) {
+        AwtSelectorDialog selector = parent.getAwtModel().getSelectorDialog();
+        if (selector == null || !selector.isVisible()) throw new IllegalStateException("Selector is not open");
+        selector.selectBody((int)MCPJson.numberProperty(request, "index", -1));
+        return "{\"ok\":true,\"selectedBody\":" +
+            parent.getApplicationModel().getScene().selectedThings.firstSelected() + "}";
+    }
+
+    String selectorAction(String request) {
+        AwtSelectorDialog selector = parent.getAwtModel().getSelectorDialog();
+        if (selector == null || !selector.isVisible()) throw new IllegalStateException("Selector is not open");
+        selector.performAction(MCPJson.stringProperty(request, "action", ""));
+        return "{\"ok\":true}";
+    }
+
+    void openTangibleDialog() {
+        SwingUtilities.invokeLater(() -> parent.getAwtModel().getExecutor().executeCommand(
+            "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT", parent.getAwtModel().getMainWindowWidget()));
+    }
+
+    String dialogState() {
+        StringBuilder out = new StringBuilder("{\"dialogs\":[");
+        boolean first = true;
+        for (Window window : Window.getWindows()) {
+            if (!window.isVisible() || window.getName() == null) continue;
+            if (!window.getName().equals("scene.selector") && !window.getName().equals("tangible.connect")) continue;
+            if (!first) out.append(','); first = false;
+            out.append("{\"id\":\"").append(window.getName()).append("\"");
+            JTextField field = find(window, "serviceUrl", JTextField.class);
+            if (field != null) out.append(",\"serviceUrl\":\"").append(MCPJson.escape(field.getText())).append('"');
+            JButton connect = find(window, "connect", JButton.class);
+            if (connect != null) out.append(",\"connectLabel\":\"").append(MCPJson.escape(connect.getText())).append('"');
+            out.append('}');
+        }
+        out.append("]}");
+        return out.toString();
+    }
+
+    String chooseImportFile(String request) {
+        JFileChooser chooser = null;
+        for (Window window : Window.getWindows()) if (window.isVisible()) {
+            chooser = find(window, "scene.import", JFileChooser.class);
+            if (chooser != null) break;
+        }
+        if (chooser == null) throw new IllegalStateException("Import chooser is not open");
+        String path = MCPJson.stringProperty(request, "path", "");
+        if (path.isBlank()) chooser.cancelSelection();
+        else { chooser.setSelectedFile(new File(path)); chooser.approveSelection(); }
+        return "{\"ok\":true}";
+    }
+
+    String tangibleAction(String request) {
+        Window dialog = null;
+        for (Window window : Window.getWindows())
+            if (window.isVisible() && "tangible.connect".equals(window.getName())) { dialog = window; break; }
+        if (dialog == null) throw new IllegalStateException("Tangible dialog is not open");
+        String action = MCPJson.stringProperty(request, "action", "cancel");
+        JTextField field = find(dialog, "serviceUrl", JTextField.class);
+        JButton button = find(dialog, action, JButton.class);
+        if (button == null) throw new IllegalArgumentException("Unknown dialog action: " + action);
+        if ("connect".equals(action) && MCPJson.hasProperty(request, "serviceUrl"))
+            field.setText(MCPJson.stringProperty(request, "serviceUrl", ""));
+        button.doClick();
+        return dialogState();
+    }
+
+    private static <T extends Component> T find(Component component, String name, Class<T> type) {
+        if (type.isInstance(component) && name.equals(component.getName())) return type.cast(component);
+        if (component instanceof Container container) for (Component child : container.getComponents()) {
+            T result = find(child, name, type);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     private AwtJogl4ApplicationController getDrawingAreaController()

@@ -136,6 +136,13 @@ public class Widget extends PresentationElement {
         dialogList.add(dialog);
     }
 
+    public WidgetDialog getDialogById(String id) {
+        for (WidgetDialog dialog : dialogList) {
+            if (id.equals(dialog.getId())) return dialog;
+        }
+        return null;
+    }
+
     public void addVariable(WidgetVariable variable) {
         variableList.add(variable);
     }

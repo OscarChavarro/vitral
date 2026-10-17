@@ -109,6 +109,18 @@ recorded in the scene history, so they can be undone as the ones of the user
 - `gui.import_scene_dialog`: opens the native Swing selector used by **File →
   Import**. The MCP request remains pending while the dialog is open and
   returns after the user selects a file or cancels it.
+- `gui.dialog.choose_file`: on a second MCP connection, selects `path` in the
+  open import chooser. An empty path cancels it. This completes the pending
+  `gui.import_scene_dialog` request.
+- `gui.selector.open`: opens or refreshes the modeless scene hierarchy dialog.
+- `gui.selector.select_body`: selects a body through that dialog by `index`;
+  `-1` clears the tree selection. The normal selection history is recorded.
+- `gui.selector.action`: runs `deleteSelected` or `toggleVisibility` on the
+  current tree selection.
+- `gui.tangible.open`: opens the connection form without waiting for it to
+  close. `gui.tangible.action` invokes `connect` (with `serviceUrl`) or
+  `cancel`. `gui.dialog.state` reports the open dialog IDs and connection form
+  contents, including the retry label after a failed attempt.
 
 ### Edition history
 

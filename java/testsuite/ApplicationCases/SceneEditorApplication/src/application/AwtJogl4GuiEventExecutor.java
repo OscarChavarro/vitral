@@ -2,23 +2,20 @@ package application;
 
 // Java basic classes
 import java.io.File;
-import java.awt.BorderLayout;
 import java.awt.Color;
 
 // Java AWT/Swing classes
 import javax.swing.JFileChooser;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 // VSDK classes
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.gui.CommandListener;
+import vsdk.toolkit.render.swing.SwingDialogHost;
 
 // Application classes
 import gui.awt.AwtCommandExecutor;
@@ -90,14 +87,8 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
         }
         else if ( label.equals("IDC_IMPORT_OBJECTS_FROM_FILE") ) {
             JFileChooser jfc;
-            jfc = new JFileChooser(guiState().getReadFolder());
-            jfc.removeChoosableFileFilter(jfc.getFileFilter());
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("vtk", "vtk Kitware vtk legacy binary file (mesh only)"));
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("gts", "gts Gts mesh ASCII file"));
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("obj", "obj Alias/Wavefront text mesh"));
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("ply", "ply Ply mesh"));
-            jfc.addChoosableFileFilter(new AwtSuffixFileFilter("ray", "ray MIT raytracing scene"));
+            jfc = SwingDialogHost.fileChooser(parent.getApplicationModel().getI18nContext()
+                .getDialogById("scene.import"), guiState().getReadFolder());
 
             // The chooser must belong to the editor window.  An invisible
             // JPanel parent can make the native macOS dialog appear behind
@@ -245,52 +236,34 @@ public class AwtJogl4GuiEventExecutor extends CommandListener
 
     private void showTangibleInterfaceDialog(JFrame mainWindowWidget)
     {
-        JTextField serverField = new JTextField(parent.getTangibleServiceUrl(), 36);
-        JPanel panel = new JPanel(new BorderLayout(8, 8));
-        panel.add(new JLabel(parent.getApplicationModel().getI18nContext().getMessage(
-            "IDM_TANGIBLE_INTERFACE_SERVER_PROMPT")), BorderLayout.NORTH);
-        panel.add(serverField, BorderLayout.CENTER);
-
-        String connect = parent.getApplicationModel().getI18nContext().getMessage(
-            "IDM_TANGIBLE_INTERFACE_CONNECT");
-        String cancel = parent.getApplicationModel().getI18nContext().getMessage(
-            "IDM_TANGIBLE_INTERFACE_CANCEL");
-        JButton connectButton = new JButton(connect);
-        JButton cancelButton = new JButton(cancel);
-        JPanel buttons = new JPanel();
-        buttons.add(connectButton);
-        buttons.add(cancelButton);
-
-        JDialog dialog = new JDialog(mainWindowWidget,
-            parent.getApplicationModel().getI18nContext().getMessage(
-                "IDM_TANGIBLE_INTERFACE_TITLE"), true);
-        dialog.setLayout(new BorderLayout(8, 8));
-        dialog.add(panel, BorderLayout.CENTER);
-        dialog.add(buttons, BorderLayout.SOUTH);
-        dialog.pack();
-        dialog.setLocationRelativeTo(mainWindowWidget);
-
-        cancelButton.addActionListener(event -> dialog.dispose());
-        connectButton.addActionListener(event -> {
-            String serviceUrl = serverField.getText().trim();
-            if ( serviceUrl.isEmpty() ) {
-                return;
-            }
-            connectButton.setBackground(null);
-            connectButton.setText(connect);
-            parent.connectTangibleInterface(serviceUrl, connected ->
-                SwingUtilities.invokeLater(() -> {
-                    if ( connected ) {
-                        dialog.dispose();
-                    }
-                    else {
-                        connectButton.setBackground(Color.RED);
-                        connectButton.setText(parent.getApplicationModel().getI18nContext()
-                            .getMessage("IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY"));
-                    }
-                }));
-        });
-        dialog.setVisible(true);
+        var messages = parent.getApplicationModel().getI18nContext();
+        SwingDialogHost.Form[] holder = new SwingDialogHost.Form[1];
+        holder[0] = SwingDialogHost.form(mainWindowWidget, messages,
+            messages.getDialogById("tangible.connect"), action -> {
+                SwingDialogHost.Form form = holder[0];
+                if ("cancel".equals(action)) { form.dialog().dispose(); return; }
+                if (!"connect".equals(action)) return;
+                String serviceUrl = form.field("serviceUrl").getText().trim();
+                form.session().setDraft("serviceUrl", serviceUrl);
+                if (serviceUrl.isEmpty()) return;
+                long request = form.session().beginAction();
+                if (request < 0) return;
+                JButton button = form.action("connect");
+                button.setBackground(null);
+                button.setText(messages.getMessage("IDM_TANGIBLE_INTERFACE_CONNECT"));
+                parent.connectTangibleInterface(serviceUrl, connected ->
+                    SwingUtilities.invokeLater(() -> {
+                        if (!form.session().completeAction(request)) return;
+                        if (connected) form.dialog().dispose();
+                        else {
+                            button.setBackground(Color.RED);
+                            button.setText(messages.getMessage(
+                                "IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY"));
+                        }
+                    }));
+            });
+        holder[0].field("serviceUrl").setText(parent.getTangibleServiceUrl());
+        holder[0].dialog().setVisible(true);
     }
 
     @Override

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "dialogs": [
+    {
+      "id": "scene.selector",
+      "titleKey": "IDM_SELECTOR_TITLE",
+      "modal": false,
+      "content": [
+        { "kind": "tree", "id": "sceneHierarchy", "binding": "sceneHierarchy" },
+        { "kind": "action", "id": "delete", "action": "deleteSelected", "labelKey": "IDM_SELECTOR_DELETE" },
+        { "kind": "action", "id": "visibility", "action": "toggleVisibility", "labelKey": "IDM_SELECTOR_HIDE" }
+      ]
+    },
+    {
+      "id": "scene.import",
+      "titleKey": "IDC_IMPORT_OBJECTS_FROM_FILE",
+      "modal": true,
+      "content": [
+        {
+          "kind": "fileChooser", "id": "sceneFile", "binding": "sceneFile",
+          "children": [
+            { "kind": "fileFilter", "binding": "3ds", "labelKey": "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file" },
+            { "kind": "fileFilter", "binding": "vtk", "labelKey": "vtk Kitware vtk legacy binary file (mesh only)" },
+            { "kind": "fileFilter", "binding": "gts", "labelKey": "gts Gts mesh ASCII file" },
+            { "kind": "fileFilter", "binding": "obj", "labelKey": "obj Alias/Wavefront text mesh" },
+            { "kind": "fileFilter", "binding": "ply", "labelKey": "ply Ply mesh" },
+            { "kind": "fileFilter", "binding": "ray", "labelKey": "ray MIT raytracing scene" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tangible.connect",
+      "titleKey": "IDM_TANGIBLE_INTERFACE_TITLE",
+      "modal": true,
+      "content": [
+        { "kind": "textInput", "id": "endpoint", "binding": "serviceUrl", "labelKey": "IDM_TANGIBLE_INTERFACE_SERVER_PROMPT" },
+        { "kind": "row", "children": [
+          { "kind": "button", "id": "connect", "action": "connect", "labelKey": "IDM_TANGIBLE_INTERFACE_CONNECT" },
+          { "kind": "button", "id": "cancel", "action": "cancel", "labelKey": "IDM_TANGIBLE_INTERFACE_CANCEL" }
+        ] }
+      ]
+    }
+  ]
+}

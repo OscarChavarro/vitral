@@ -1,6 +1,8 @@
 package vsdk.toolkit.gui.widget;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
@@ -29,6 +31,57 @@ public class WidgetDialog extends WidgetElement {
     private ArrayList<String> pendingDialogNames;
     private ArrayList<String> pendingDialogRefNames;
     private boolean collapsable;
+    private String titleKey;
+    private boolean modal;
+    private final ArrayList<Element> elements = new ArrayList<Element>();
+
+    /** Ordered, toolkit-independent content of a dialog. */
+    public static final class Element {
+        private final String kind;
+        private final String id;
+        private final String labelKey;
+        private final String binding;
+        private final String action;
+        private final ArrayList<Element> children;
+
+        public Element(String kind, String id, String labelKey, String binding,
+                       String action, List<Element> children) {
+            this.kind = kind;
+            this.id = id;
+            this.labelKey = labelKey;
+            this.binding = binding;
+            this.action = action;
+            this.children = new ArrayList<Element>(children);
+        }
+        public String getKind() { return kind; }
+        public String getId() { return id; }
+        public String getLabelKey() { return labelKey; }
+        public String getBinding() { return binding; }
+        public String getAction() { return action; }
+        public List<Element> getChildren() { return Collections.unmodifiableList(children); }
+    }
+
+    public String getTitleKey() { return titleKey; }
+    public void setTitleKey(String titleKey) { this.titleKey = titleKey; }
+    public boolean isModal() { return modal; }
+    public void setModal(boolean modal) { this.modal = modal; }
+    public List<Element> getElements() { return Collections.unmodifiableList(elements); }
+    public void addElement(Element element) { elements.add(element); }
+    public Element getElementByAction(String action) {
+        for (Element element : elements) {
+            Element found = findAction(element, action);
+            if (found != null) return found;
+        }
+        return null;
+    }
+    private static Element findAction(Element element, String action) {
+        if (action.equals(element.getAction())) return element;
+        for (Element child : element.getChildren()) {
+            Element found = findAction(child, action);
+            if (found != null) return found;
+        }
+        return null;
+    }
 
     public WidgetDialog() {
         widgetElementList = new ArrayList<WidgetElement>();

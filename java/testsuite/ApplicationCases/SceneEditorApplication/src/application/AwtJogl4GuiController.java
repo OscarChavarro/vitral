@@ -25,6 +25,7 @@ import javax.swing.border.Border;
 import vsdk.toolkit.common.VSDK;
 import vsdk.toolkit.common.logging.Logger;
 import vsdk.toolkit.io.gui.GuiPersistence;
+import vsdk.toolkit.io.gui.DialogPersistence;
 import vsdk.toolkit.render.swing.SwingGuiRenderer;
 import gui.awt.AwtApplicationModel;
 import model.GuiState;
@@ -134,8 +135,12 @@ public class AwtJogl4GuiController
             // The presentation of the viewport sets follows the language.
             // The paths of the icons (./etc/icons/...) are relative to the
             // VITRAL root folder, whose etc folder is shared by all the ports
-            parent.getApplicationModel().setI18nContext(GuiPersistence.importAquynzaGui(
-                new FileInputStream(guiState().getLanguageGuiFile()), "../../../.."));
+            Widget definitions = GuiPersistence.importAquynzaGui(
+                new FileInputStream(guiState().getLanguageGuiFile()), "../../../..");
+            try (FileInputStream dialogs = new FileInputStream("../../../../etc/gui/dialogs.json")) {
+                DialogPersistence.importDialogs(dialogs, definitions);
+            }
+            parent.getApplicationModel().setI18nContext(definitions);
         }
         catch ( Exception e ) {
             System.err.println("Fatal error: can not open GUI file");
