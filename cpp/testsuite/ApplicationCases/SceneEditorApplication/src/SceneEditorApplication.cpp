@@ -1682,6 +1682,12 @@ private:
         if (sceneBridge != nullptr) sceneBridge->doRaytracingImage();
     }
 
+    bool showImportSceneDialog() override
+    {
+        return executor != nullptr &&
+            executor->executeCommand("IDC_IMPORT_OBJECTS_FROM_FILE");
+    }
+
     void closeApplication() override
     {
         requestClose();

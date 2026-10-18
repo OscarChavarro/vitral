@@ -12,7 +12,9 @@ The C++ port includes:
   mechanical port of `opengl4/` without Phong / Cook-Torrance shading nor
   bump mapping), GLFW, GLUT, and others
 - **Testsuite** (`testsuite/`): Examples and benchmarks
-- **Native library integration**: Direct bindings for image processing (libpng, libjpeg)
+- **Native library integration**: Direct bindings for image processing (libpng,
+  libjpeg), computer vision (OpenCV), and CAD/B-Rep interoperability
+  (Open CASCADE Technology, OCCT)
 
 ## Build
 
@@ -126,6 +128,49 @@ sudo apt-get install libglfw3-dev libglu1-mesa-dev freeglut3-dev
 ```bash
 brew install glfw3
 ```
+
+### Optional: GTK 4 frontend
+
+The native GTK 4 frontend (`vitral_gtk4`) and the GTK variant of
+`SceneEditorApplication` use GTK development headers and `pkg-config`.
+On Ubuntu 22.04, install the available GTK 4.6 development package with:
+
+```bash
+sudo apt-get update
+sudo apt-get install libgtk-4-dev pkg-config
+```
+
+The current GTK target supports GTK 4.6 or newer.  Newer GTK APIs must remain
+behind version checks so the Ubuntu 22.04 baseline (GTK 4.6.9) keeps working.
+
+### Optional: OpenCV and OCCT
+
+Some testsuite tools use native libraries outside the core toolkit:
+
+- **OpenCV** is used by `TangibleInterfaceMarkersDetectorServer` for camera
+  capture, calibration, image processing, and preview.  It is optional; CMake
+  skips that tool when OpenCV is absent.
+- **Open CASCADE Technology (OCCT)** is used by the optional
+  `booleanSetOperator` API test for CAD/B-Rep boolean-operation comparison.
+  It is not a core dependency.
+
+For Ubuntu/Debian systems, OpenCV can be installed with:
+
+```bash
+sudo apt-get install libopencv-dev
+```
+
+Ubuntu packages OCCT by component; the following development packages provide
+the usual foundation, modeling and data-exchange modules:
+
+```bash
+sudo apt-get install libocct-foundation-dev libocct-modeling-data-dev \
+  libocct-modeling-algorithms-dev libocct-data-exchange-dev
+```
+
+The OCCT comparison target also accepts a self-built OCCT installation through
+`-DOCCT_ROOT=/path/to/occt` (or the `OCCT_ROOT` environment variable), which
+is the recommended route when its CMake package configuration is needed.
 
 ### Optional: Xt GUI with Motif or Athena (Linux only)
 

@@ -24,6 +24,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/environment/scene/SimpleSceneSnapshot.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
+#include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
@@ -64,7 +65,8 @@ ParallelRaytracer* Scene::getRaytracer()
     return &raytracer;
 }
 
-Scene::Scene() : acumObject(1), lightGizmoScale(1.0)
+Scene::Scene() : acumObject(1), importedMitScene(false),
+    importedSceneBackground(false), lightGizmoScale(1.0)
 {
     scene = new SimpleScene();
 
@@ -267,6 +269,8 @@ bool Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
 
 void Scene::rotateBackground()
 {
+    // An explicit editor background choice takes precedence over `.ray`.
+    importedSceneBackground = false;
     selectedBackground++;
     if ( selectedBackground > 2 ) {
         selectedBackground = 0;
@@ -276,6 +280,10 @@ void Scene::rotateBackground()
 void Scene::activateSelectedBackground()
 {
     Background* currentBackground;
+
+    if ( importedSceneBackground && scene->getBackgrounds().size() > 0 ) {
+        return;
+    }
 
     currentBackground = simpleBackground;
     switch ( selectedBackground ) {
@@ -307,6 +315,64 @@ void Scene::activateSelectedBackground()
         list.add((long)0, currentBackground);
     }
     scene->setActiveBackgroundIndex(0);
+}
+
+void Scene::importMitScene(const java::File& file)
+{
+    SimpleScene imported;
+    ReaderMitScene reader;
+    reader.importEnvironment(file.getPath().c_str(), &imported);
+
+    // Do not replace `scene`: OpenGL renderers own a reference to this
+    // instance for their complete lifetime.  Transfer the imported elements
+    // instead, carefully detaching them from the temporary owner.
+    scene->clearOwnedElements();
+    java::ArrayList<SimpleBody*>& bodies = imported.getSimpleBodies();
+    java::ArrayList<Light*>& lights = imported.getLights();
+    java::ArrayList<Background*>& backgrounds = imported.getBackgrounds();
+    java::ArrayList<Camera*>& cameras = imported.getCameras();
+    for ( long i = 0; i < bodies.size(); i++ ) scene->getSimpleBodies().add(bodies.get(i));
+    for ( long i = 0; i < lights.size(); i++ ) scene->getLights().add(lights.get(i));
+    for ( long i = 0; i < backgrounds.size(); i++ ) scene->getBackgrounds().add(backgrounds.get(i));
+    for ( long i = 0; i < cameras.size(); i++ ) scene->getCameras().add(cameras.get(i));
+    scene->setActiveCameraIndex(imported.getActiveCameraIndex());
+    scene->setActiveBackgroundIndex(imported.getActiveBackgroundIndex());
+    bodies.clear(); lights.clear(); backgrounds.clear(); cameras.clear();
+
+    activeCamera = scene->getActiveCamera();
+    cubemapBackground = nullptr;
+    fixedBackground = nullptr;
+    importedMitScene = true;
+    importedSceneBackground = scene->getBackgrounds().size() > 0;
+    selectedBackground = 0;
+    // Debug groups are editor-owned, unlike bodies owned by SimpleScene.
+    // Release them before replacing their selection domain.
+    for ( long i = 0; i < debugThingGroups.size(); i++ ) {
+        java::ArrayList<SimpleBody*>& debugBodies =
+            debugThingGroups.get(i)->getBodies();
+        for ( long j = 0; j < debugBodies.size(); j++ ) delete debugBodies.get(j);
+        delete debugThingGroups.get(i);
+    }
+    debugThingGroups.clear();
+    selectedThings->sync(); selectedThings->unselectAll();
+    selectedLights->sync(); selectedLights->unselectAll();
+    selectedDebugThingGroups->sync(); selectedDebugThingGroups->unselectAll();
+    acumObject = scene->getSimpleBodies().size() + 1;
+    optimizeRendererConfigurationForImportedScene();
+}
+
+void Scene::optimizeRendererConfigurationForImportedScene()
+{
+    bool hasTextures = false;
+    bool hasNormalMaps = false;
+    java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
+    for ( long i = 0; i < bodies.size(); i++ ) {
+        hasTextures = hasTextures || bodies.get(i)->getTexture() != nullptr;
+        hasNormalMaps = hasNormalMaps || bodies.get(i)->getNormalMap() != nullptr;
+        if ( hasTextures && hasNormalMaps ) break;
+    }
+    qualityTemplate->setTexture(hasTextures);
+    qualityTemplate->setBumpMap(hasNormalMaps);
 }
 
 void Scene::print()
@@ -353,13 +419,17 @@ void Scene::raytrace(RGBImageUncompressed* outViewport, ZBuffer* outDepth,
 
     originalWidth = (int)activeCamera->getViewportXSize();
     originalHeight = (int)activeCamera->getViewportYSize();
+    if ( importedMitScene ) optimizeRendererConfigurationForImportedScene();
     CameraSnapshot* cameraSnapshot = activeCamera->exportToCameraSnapshot(
         outViewport->getXSize(), outViewport->getYSize());
 
     //-----------------------------------------------------------------
 
     Background* activeBackground;
-    switch ( selectedBackground ) {
+    if ( importedSceneBackground && scene->getBackgrounds().size() > 0 ) {
+        activeBackground = scene->getActiveBackground();
+    }
+    else switch ( selectedBackground ) {
       case 2:
         if ( cubemapBackground == nullptr ) {
             buildCubemap();

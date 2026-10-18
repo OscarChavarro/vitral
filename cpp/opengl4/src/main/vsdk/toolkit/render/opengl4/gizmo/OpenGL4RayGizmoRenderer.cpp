@@ -48,10 +48,6 @@ void OpenGL4RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::
         fallbackLights.add(&fallbackLight);
         activeLights = &fallbackLights;
     }
-    if ( !ensureIndicatorProgram() || !ensureIndicatorMesh() ) {
-        return;
-    }
-
     RendererConfiguration quality = buildSurfaceQuality();
     Matrix4x4d primaryModelMatrix = gizmo->getBody()->getTransformationMatrix();
     Matrix4x4d projection = OpenGL4CameraRenderer::activate(camera);
@@ -82,7 +78,11 @@ void OpenGL4RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::
         }
     }
 
-    drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix, projection, camera, *activeLights, &quality);
+    if ( gizmo->isRollIndicatorEnabled() && ensureIndicatorProgram() &&
+         ensureIndicatorMesh() ) {
+        drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix,
+            projection, camera, *activeLights, &quality);
+    }
     delete scene;
 
     glDepthMask(GL_TRUE);

@@ -44,6 +44,7 @@ private:
     ViewportElementScaler* ownedElementScaler;
     ViewportElementScaler* elementScaler;
     Widget* i18nContext;
+    java::ArrayList<int> availableRenderModes;
 
     java::String findMenuItemName(const java::String& popupName,
                                   const java::String& command) const;
@@ -51,6 +52,7 @@ private:
     void showOnlySelectedViewport();
     void applyAreas(const double areas[][4], int n);
     void clampSelection();
+    void coerceRenderMode(Viewport* viewport);
 
     ViewportSet(const ViewportSet& other);
     ViewportSet& operator=(const ViewportSet& other);
@@ -83,6 +85,12 @@ public:
     the layout.
     */
     void addViewport(Viewport* viewport);
+
+    java::ArrayList<int> getAvailableRenderModes() const;
+    void setAvailableRenderModes(const java::ArrayList<int>& modes);
+    void enforceAvailableRenderModes();
+    bool isRenderModeAvailable(int renderMode) const;
+    void cycleRenderMode(Viewport* viewport);
 
     /**
     Removes the viewport at the given index (if any) and updates the layout.

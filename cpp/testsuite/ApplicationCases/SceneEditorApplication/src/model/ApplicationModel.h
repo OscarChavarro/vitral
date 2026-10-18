@@ -111,6 +111,9 @@ public:
     */
     void setScene(Scene* scene);
 
+    /** Copies an imported scene camera to each viewport perspective camera. */
+    void useImportedSceneCameraInViewports();
+
     /**
     @return undo/redo history of the scene and of the views of the viewports
     */

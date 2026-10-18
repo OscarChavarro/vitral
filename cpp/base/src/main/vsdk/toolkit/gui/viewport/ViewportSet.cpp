@@ -17,6 +17,7 @@ constexpr const char* ViewportSetCommands::IDV_PROJECTION_LOCATION_FRONT;
 constexpr const char* ViewportSetCommands::POPUP_RENDER_MODE;
 constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_GPU;
 constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_CPU;
+constexpr const char* ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES;
 
 namespace {
 
@@ -62,6 +63,8 @@ ViewportSet::ViewportSet()
       elementScaler(nullptr), i18nContext(nullptr)
 {
     elementScaler = ownedElementScaler;
+    availableRenderModes.add(Viewport::RENDER_MODE_Z_BUFFER);
+    availableRenderModes.add(Viewport::RENDER_MODE_RAYTRACING);
 }
 
 ViewportSet::~ViewportSet()
@@ -121,8 +124,21 @@ void ViewportSet::addViewport(Viewport* viewport)
         return;
     }
     viewports.add(viewport);
+    coerceRenderMode(viewport);
     updateLayout();
 }
+
+java::ArrayList<int> ViewportSet::getAvailableRenderModes() const { return availableRenderModes; }
+void ViewportSet::setAvailableRenderModes(const java::ArrayList<int>& modes)
+{ if (modes.size() > 0) { availableRenderModes = modes; enforceAvailableRenderModes(); } }
+bool ViewportSet::isRenderModeAvailable(int mode) const
+{ for (long i=0;i<availableRenderModes.size();i++) if (availableRenderModes.get(i)==mode) return true; return false; }
+void ViewportSet::coerceRenderMode(Viewport* v)
+{ if (v != nullptr && availableRenderModes.size()>0 && !isRenderModeAvailable(v->getRenderMode())) v->setRenderMode(availableRenderModes.get(0)); }
+void ViewportSet::enforceAvailableRenderModes()
+{ for (long i=0;i<viewports.size();i++) coerceRenderMode(viewports.get(i)); }
+void ViewportSet::cycleRenderMode(Viewport* v)
+{ if (v == nullptr || availableRenderModes.size()==0) return; int next=availableRenderModes.get(0); for(long i=0;i<availableRenderModes.size();i++) if(availableRenderModes.get(i)==v->getRenderMode()){next=availableRenderModes.get((i+1)%availableRenderModes.size());break;} v->setRenderMode(next); }
 
 Viewport* ViewportSet::removeViewport(int index)
 {

@@ -424,23 +424,34 @@ java::String Viewport::getProjectionLocationCommand() const
 
 java::String Viewport::getRenderModeCommand() const
 {
+    return commandForRenderMode(renderMode);
+}
+
+java::String Viewport::commandForRenderMode(int renderMode)
+{
     if ( renderMode == RENDER_MODE_RAYTRACING ) {
         return ViewportSetCommands::IDV_RENDER_MODE_CPU;
+    }
+    if ( renderMode == RENDER_MODE_HIDDEN_LINES ) {
+        return ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES;
     }
     return ViewportSetCommands::IDV_RENDER_MODE_GPU;
 }
 
+int Viewport::renderModeForCommand(const java::String& command)
+{
+    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_GPU) ) return RENDER_MODE_Z_BUFFER;
+    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU) ) return RENDER_MODE_RAYTRACING;
+    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES) ) return RENDER_MODE_HIDDEN_LINES;
+    return 0;
+}
+
 bool Viewport::selectRenderMode(const java::String& command)
 {
-    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_GPU) ) {
-        renderMode = RENDER_MODE_Z_BUFFER;
-        return true;
-    }
-    if ( command.equals(ViewportSetCommands::IDV_RENDER_MODE_CPU) ) {
-        renderMode = RENDER_MODE_RAYTRACING;
-        return true;
-    }
-    return false;
+    int mode = renderModeForCommand(command);
+    if ( mode == 0 ) return false;
+    renderMode = mode;
+    return true;
 }
 
 bool Viewport::selectProjectionLocation(const java::String& command)

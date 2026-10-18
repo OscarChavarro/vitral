@@ -30,6 +30,7 @@ class Viewport {
 public:
     static const int RENDER_MODE_Z_BUFFER = 1;
     static const int RENDER_MODE_RAYTRACING = 2;
+    static const int RENDER_MODE_HIDDEN_LINES = 3;
 
 private:
     int requestedSizeXInPixels;
@@ -181,6 +182,8 @@ public:
     the render mode of this viewport (see `ViewportSetCommands`)
     */
     java::String getRenderModeCommand() const;
+    static java::String commandForRenderMode(int renderMode);
+    static int renderModeForCommand(const java::String& command);
 
     /**
     Selects the render mode given by one of the standard commands of the

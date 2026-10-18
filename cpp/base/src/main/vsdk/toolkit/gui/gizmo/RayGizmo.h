@@ -53,6 +53,9 @@ public:
     void update();
     bool isVisible() const;
     void setVisible(bool visible);
+    /// The roll marker is opt-in: most ray sources do not provide roll.
+    bool isRollIndicatorEnabled() const;
+    void setRollIndicatorEnabled(bool enabled);
     double getDisableAfterElapsedSeconds() const;
     void setDisableAfterElapsedSeconds(double disableAfterElapsedSeconds);
     std::time_t getLastDataTime() const;
@@ -99,6 +102,7 @@ private:
     std::time_t lastDataTime;
     std::time_t previousDataTime;
     bool visible;
+    bool rollIndicatorEnabled;
     double disableAfterElapsedSeconds;
 
     ColorRgb sourceRayColor;

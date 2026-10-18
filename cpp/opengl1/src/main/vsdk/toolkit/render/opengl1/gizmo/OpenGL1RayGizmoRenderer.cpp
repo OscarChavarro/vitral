@@ -72,7 +72,10 @@ void OpenGL1RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const java::
         }
     }
 
-    drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix, projection, camera, *activeLights, &quality);
+    if ( gizmo->isRollIndicatorEnabled() ) {
+        drawIndicator(gizmo->getRotationAngleInRadians(), primaryModelMatrix,
+            projection, camera, *activeLights, &quality);
+    }
     delete scene;
 
     glDepthMask(GL_TRUE);

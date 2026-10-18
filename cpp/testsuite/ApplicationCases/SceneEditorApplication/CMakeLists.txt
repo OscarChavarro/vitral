@@ -244,6 +244,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/gui/SelectedBodyMapToggles.cpp
         src/gui/history/InteractionEditRecorder.cpp
         src/gui/history/UndoRedoInteractionTechnique.cpp
+        src/io/FileSuffixFilter.cpp
         src/io/GuiI18nContextBuilder.cpp
         src/io/GuiJsonReader.cpp
         src/model/ApplicationModel.cpp

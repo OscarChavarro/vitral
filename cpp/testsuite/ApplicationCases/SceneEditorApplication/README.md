@@ -3,6 +3,11 @@
 C++ port of the Vitral **scene editor**: an Xt (X11) GUI with an OpenGL
 drawing area, ported from the Java `SceneEditorApplication`.
 
+The File → Import dialog accepts 3ds, vtk, gts, obj and ply meshes, plus MIT
+`.ray` scenes.  A `.ray` import replaces the complete editor scene (camera,
+lights, materials and background); its perspective camera is copied into the
+viewports so CPU raytracing and the interactive view use the same aspect.
+
 ## Variants
 
 Each executable is built for one **widget set** and one **OpenGL version**:

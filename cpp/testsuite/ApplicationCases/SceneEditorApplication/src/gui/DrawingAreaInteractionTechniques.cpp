@@ -52,6 +52,8 @@ DrawingAreaInteractionTechniques::DrawingAreaInteractionTechniques(
                                                viewportSet);
     undoRedoTechnique = new UndoRedoInteractionTechnique(
         model->getEditHistory());
+    viewportTitleGesture = false;
+    viewportTitleClickConsumed = false;
 }
 
 DrawingAreaInteractionTechniques::~DrawingAreaInteractionTechniques()
@@ -309,6 +311,7 @@ void DrawingAreaInteractionTechniques::processMouseEnteredEvent(
 void DrawingAreaInteractionTechniques::processMousePressedEvent(
     const MouseEvent& event)
 {
+    viewportTitleClickConsumed = false;
     Viewport* mouseView = getViewportAtPointer(event);
     InteractionMode mode = drawingArea->getInteractionMode();
 
@@ -320,6 +323,13 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
     viewportSetTechniques->processMousePressedEvent(
         drawingArea->toSurfaceEvent(event));
     activateViewport(mouseView);
+    viewportTitleGesture = viewportSetTechniques->isPointerOverTitle(
+        drawingArea->toSurfaceEvent(event));
+    if ( viewportTitleGesture ) {
+        requestCursorForPointer(event, PointerCursor::VIEWPORT_TITLE);
+        listener->repaintRequested();
+        return;
+    }
 
     //-----------------------------------------------------------------
     // WARNING / TODO
@@ -420,6 +430,8 @@ void DrawingAreaInteractionTechniques::processMousePressedEvent(
 void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
     const MouseEvent& event)
 {
+    bool titleGesture = viewportTitleGesture;
+    viewportTitleGesture = false;
     Viewport* mouseView = getInteractionViewportAtPointer(event);
     bool confinedGesture = isTranslationGestureConfined();
     InteractionMode mode = drawingArea->getInteractionMode();
@@ -429,6 +441,14 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
             drawingArea->toSurfaceEvent(event));
     }
     activateViewport(mouseView);
+
+    if ( titleGesture ) {
+        viewportTitleClickConsumed = true;
+        updateModeCursor(event);
+        editRecorder->endGesture();
+        listener->repaintRequested();
+        return;
+    }
 
     // WARNING / TODO
     // There should be a cameraController.getFutureAction(e) that calculates
@@ -471,6 +491,10 @@ void DrawingAreaInteractionTechniques::processMouseReleasedEvent(
 void DrawingAreaInteractionTechniques::processMouseClickedEvent(
     const MouseEvent& event)
 {
+    if ( viewportTitleClickConsumed ) {
+        viewportTitleClickConsumed = false;
+        return;
+    }
     InteractionMode mode = drawingArea->getInteractionMode();
 
     editRecorder->record(sceneOperationName(mode),

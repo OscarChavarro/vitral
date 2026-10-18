@@ -118,14 +118,14 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
 
         if ( MCPJson::booleanProperty(request, "grid", value) ) viewport->setShowGrid(value);
         java::String renderMode = MCPJson::stringProperty(request, "renderMode", "");
-        if ( renderMode.equalsIgnoreCase("gpu") ) {
-            viewport->setRenderMode(Viewport::RENDER_MODE_Z_BUFFER);
-        }
-        else if ( renderMode.equalsIgnoreCase("cpu") ) {
-            viewport->setRenderMode(Viewport::RENDER_MODE_RAYTRACING);
-        }
-        else if ( !renderMode.isEmpty() ) {
-            throw std::invalid_argument("renderMode must be gpu or cpu");
+        if ( !renderMode.isEmpty() ) {
+            int mode = renderMode.equalsIgnoreCase("gpu") ? Viewport::RENDER_MODE_Z_BUFFER :
+                renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
+                renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
+            if ( mode == 0 ) throw std::invalid_argument("renderMode must be gpu, cpu or hidden_lines");
+            if ( !model->getActiveViewportSet()->isRenderModeAvailable(mode) )
+                throw std::invalid_argument("renderMode is not available with this rendering technology");
+            viewport->setRenderMode(mode);
         }
     }
 }
@@ -168,7 +168,8 @@ java::String MCPViewportTools::describeRendererConfigurations(
             .append(",\"shading\":\"").append(shadingTypeName(q->getShadingTypeEnum())).append('"')
             .append(",\"grid\":").append(viewport->isShowGrid())
             .append(",\"renderMode\":\"")
-            .append(viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ? "cpu" : "gpu")
+            .append(viewport->getRenderMode() == Viewport::RENDER_MODE_RAYTRACING ? "cpu" :
+                    viewport->getRenderMode() == Viewport::RENDER_MODE_HIDDEN_LINES ? "hidden_lines" : "gpu")
             .append("\"}");
     }
     sb.append("]}");

@@ -32,8 +32,11 @@ bool ViewportSetInteractionTechniques::processCommand(
     if ( viewport == nullptr ) {
         return false;
     }
-    return viewport->selectProjectionLocation(command) ||
-        viewport->selectRenderMode(command);
+    if ( viewport->selectProjectionLocation(command) ) return true;
+    int mode = Viewport::renderModeForCommand(command);
+    if ( mode == 0 || !viewportSet->isRenderModeAvailable(mode) ) return false;
+    viewport->setRenderMode(mode);
+    return true;
 }
 
 bool ViewportSetInteractionTechniques::processKeyPressedEvent(

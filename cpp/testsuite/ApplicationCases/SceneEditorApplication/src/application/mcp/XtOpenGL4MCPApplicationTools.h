@@ -46,6 +46,9 @@ public:
     */
     void injectKey(const java::String& request);
 
+    /** Opens the same native dialog as File > Import (gui.import_scene_dialog). */
+    java::String showImportDialog();
+
     /**
     @param request request with the argument viewport (index, default 0)
     @return the drawing area pixels of the origin of the first selected body

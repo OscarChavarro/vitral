@@ -85,6 +85,10 @@ private:
     UndoRedoInteractionTechnique* undoRedoTechnique;
 
     RendererConfiguration* qualitySelection;
+    /// A viewport title belongs to the HUD, never to the camera controller.
+    bool viewportTitleGesture;
+    /// Suppresses the synthetic click following a title press/release.
+    bool viewportTitleClickConsumed;
 
     //= Pointer shape =====================================================
     PointerCursor::Value getModeCursor();

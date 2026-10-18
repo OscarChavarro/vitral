@@ -101,6 +101,7 @@ RayGizmo::RayGizmo(std::function<Intersection*(const Ray&)> intersectionCallback
       lastDataTime(std::time(0)),
       previousDataTime(std::time(0)),
       visible(true),
+      rollIndicatorEnabled(false),
       disableAfterElapsedSeconds(DEFAULT_DISABLE_TIME),
       sourceRayColor(DEFAULT_RAY_COLOR)
 {
@@ -228,6 +229,16 @@ bool RayGizmo::isVisible() const
 void RayGizmo::setVisible(bool visible)
 {
     this->visible = visible;
+}
+
+bool RayGizmo::isRollIndicatorEnabled() const
+{
+    return rollIndicatorEnabled;
+}
+
+void RayGizmo::setRollIndicatorEnabled(bool enabled)
+{
+    rollIndicatorEnabled = enabled;
 }
 
 double RayGizmo::getDisableAfterElapsedSeconds() const

@@ -47,6 +47,8 @@ public:
         "IDV_VIEWPORT_SET_RENDER_MODE_GPU";
     static constexpr const char* IDV_RENDER_MODE_CPU =
         "IDV_VIEWPORT_SET_RENDER_MODE_CPU";
+    static constexpr const char* IDV_RENDER_MODE_CPU_HIDDEN_LINES =
+        "IDV_VIEWPORT_SET_RENDER_MODE_CPU_HIDDEN_LINES";
 
 private:
     ViewportSetCommands() {}

@@ -1,5 +1,6 @@
 #include "vsdk/toolkit/common/VSDK.h"
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/environment/geometry/element/Intersection.h"
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/light/PointLight.h"
@@ -7,6 +8,7 @@
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
+#include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
 #include "vsdk/toolkit/media/RGBColorPalette.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -121,6 +123,24 @@ void ApplicationModel::setScene(Scene* scene)
     delete rayGizmo;
     rayGizmo = new RayGizmo(
         [this](const Ray& ray) { return makeRayGizmoIntersection(ray); }, 2);
+}
+
+void ApplicationModel::useImportedSceneCameraInViewports()
+{
+    Camera* imported = scene->activeCamera;
+    for ( long i = 0; i < viewportSets.size(); i++ ) {
+        const java::ArrayList<Viewport*>& viewports = viewportSets.get(i)->getViewports();
+        for ( long j = 0; j < viewports.size(); j++ ) {
+            Viewport* viewport = viewports.get(j);
+            Camera* perspective = viewport->getPerspectiveCamera();
+            *perspective = *imported;
+            perspective->setName("Perspective");
+            if ( viewport->getPixelSizeX() > 0 && viewport->getPixelSizeY() > 0 ) {
+                perspective->updateViewportResize(viewport->getPixelSizeX(),
+                                                  viewport->getPixelSizeY());
+            }
+        }
+    }
 }
 
 EditHistory* ApplicationModel::getEditHistory()

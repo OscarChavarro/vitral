@@ -77,6 +77,7 @@ bool XtOpenGL4GuiEventExecutor::executeXtCommand(const std::string& label)
         filters.push_back(FileSuffixFilter("gts", "gts Gts mesh ASCII file"));
         filters.push_back(FileSuffixFilter("obj", "obj Alias/Wavefront text mesh"));
         filters.push_back(FileSuffixFilter("ply", "ply Ply mesh"));
+        filters.push_back(FileSuffixFilter("ray", "ray MIT raytracing scene"));
 
         if ( parent->getUiFactory()->showFileDialog(parent, "Open",
                  guiState->getReadFolder().c_str(), filters, path) ) {

@@ -16,6 +16,7 @@
 #include "model/history/EditHistory.h"
 #include "model/history/SceneHistory.h"
 #include "application/commands/GuiEventExecutor.h"
+#include "io/FileSuffixFilter.h"
 
 GuiEventExecutor::GuiEventExecutor(ApplicationModel* model,
                                    Presenter* presenter)
@@ -150,6 +151,13 @@ bool GuiEventExecutor::importObjects(const java::File& file)
 {
     if ( !file.canRead() ) {
         return false;
+    }
+    if ( FileSuffixFilter::getSuffix(file.getName()).equals("ray") ) {
+        scene()->importMitScene(file);
+        model->getEditHistory()->getSceneHistory()->clear();
+        model->useImportedSceneCameraInViewports();
+        model->setWithVisualDebugRay(false);
+        return true;
     }
     SceneHistory* history = model->getEditHistory()->getSceneHistory();
 

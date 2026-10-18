@@ -7,10 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/build")
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK4 QUIET IMPORTED_TARGET gtk4>=4.22)
+pkg_check_modules(GTK4 QUIET IMPORTED_TARGET gtk4>=4.6)
 if(NOT GTK4_FOUND)
     message(FATAL_ERROR
-        "vitral_gtk4 requires GTK 4.22 development files. On macOS with "
+        "vitral_gtk4 requires GTK 4.6 development files. On macOS with "
         "Homebrew, install them with `brew install gtk4 pkg-config` and "
         "ensure pkg-config can see /opt/homebrew/lib/pkgconfig and "
         "/opt/homebrew/share/pkgconfig.")

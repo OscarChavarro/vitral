@@ -2,6 +2,7 @@
 #define __SCENE_EDITOR_SCENE__
 
 #include "java/util/ArrayList.h"
+#include "java/io/File.h"
 
 class Camera;
 class CubemapBackground;
@@ -32,6 +33,10 @@ history, which can put them back) are not deleted.
 class Scene {
 private:
     int acumObject;
+    /// True when the contents were replaced by a MIT ray tracing scene.
+    bool importedMitScene;
+    /// An imported scene background takes precedence until the user cycles it.
+    bool importedSceneBackground;
     /// Size factor of light gizmos, shared by rendering and picking
     double lightGizmoScale;
 
@@ -97,6 +102,13 @@ public:
     */
     void rotateBackground();
     void activateSelectedBackground();
+
+    /**
+    Replaces the contents of this editor scene with a complete MIT `.ray`
+    scene.  The `SimpleScene` object itself deliberately remains the same:
+    renderers and selection editors retain references to it.
+    */
+    void importMitScene(const java::File& file);
     void print();
 
     /**
@@ -123,6 +135,9 @@ public:
     */
     void raytraceViewport(RGBImageUncompressed* outViewport,
                           ZBuffer* outDepth);
+
+private:
+    void optimizeRendererConfigurationForImportedScene();
 };
 
 #endif

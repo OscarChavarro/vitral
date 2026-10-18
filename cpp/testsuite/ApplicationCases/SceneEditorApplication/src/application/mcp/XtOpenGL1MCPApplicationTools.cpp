@@ -99,6 +99,14 @@ void XtOpenGL1MCPApplicationTools::injectKey(const java::String& request)
     drawingArea->injectKeyEvent(key, shift, ctrl);
 }
 
+java::String XtOpenGL1MCPApplicationTools::showImportDialog()
+{
+    if ( parent->getApplicationModel() == nullptr ) {
+        throw std::logic_error("The windowed editor GUI has not been created");
+    }
+    return parent->showImportSceneDialog() ? "{\"ok\":true}" : "{\"ok\":false}";
+}
+
 java::String XtOpenGL1MCPApplicationTools::projectSelectedBody(
     const java::String& request)
 {

@@ -58,6 +58,9 @@ public:
     */
     virtual void doRaytracingImage() = 0;
 
+    /** Opens the native File > Import dialog, owned by the editor window. */
+    virtual bool showImportSceneDialog() = 0;
+
     /**
     Ends the application.
     */

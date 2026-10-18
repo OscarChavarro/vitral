@@ -654,7 +654,9 @@ private:
         GtkWidget* button = gtk_button_new();
         GtkWidget* picture = gtk_picture_new_for_paintable(GDK_PAINTABLE(texture));
         gtk_picture_set_can_shrink(GTK_PICTURE(picture), TRUE);
+#if GTK_CHECK_VERSION(4, 8, 0)
         gtk_picture_set_content_fit(GTK_PICTURE(picture), GTK_CONTENT_FIT_CONTAIN);
+#endif
         gtk_widget_set_size_request(picture, 24, 24);
         gtk_button_set_child(GTK_BUTTON(button), picture);
         gtk_widget_set_size_request(button, 42, 36);
@@ -1188,6 +1190,10 @@ private:
         else if ( command == "IDC_FILE_QUIT" ) {
             closeRequested();
         }
+        else if ( command == "IDC_IMPORT_OBJECTS_FROM_FILE" ) {
+            showImportDialog();
+            return;
+        }
         else if ( command == "IDC_RENDERING_RAYTRACING" ) {
             raytracingRequested();
         }
@@ -1202,6 +1208,52 @@ private:
             gtk_widget_grab_focus(glArea);
             gtk_widget_queue_draw(glArea);
         }
+    }
+
+    void showImportDialog()
+    {
+        // GtkFileChooserNative gives GTK's platform-native dialog an actual
+        // editor-window parent, equivalent to the JFrame parent supplied by
+        // AWT/Swing.  This matters on compositing window managers too.
+        GtkFileChooserNative* chooser = gtk_file_chooser_native_new(
+            "Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
+            "Open", "Cancel");
+        const char* suffixes[] = { "3ds", "vtk", "gts", "obj", "ply", "ray" };
+        for ( unsigned int i = 0; i < sizeof(suffixes) / sizeof(suffixes[0]); i++ ) {
+            GtkFileFilter* filter = gtk_file_filter_new();
+            std::string name = std::string("*.") + suffixes[i];
+            gtk_file_filter_set_name(filter, name.c_str());
+            gtk_file_filter_add_pattern(filter, name.c_str());
+            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser), filter);
+        }
+        g_signal_connect(chooser, "response", G_CALLBACK(importDialogResponseThunk), this);
+        gtk_native_dialog_show(GTK_NATIVE_DIALOG(chooser));
+    }
+
+    void importDialogResponse(GtkNativeDialog* dialog, int response)
+    {
+        if ( response == GTK_RESPONSE_ACCEPT ) {
+            GFile* selected = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(dialog));
+            char* path = selected != nullptr ? g_file_get_path(selected) : nullptr;
+            if ( path != nullptr ) {
+                try {
+                    if ( !sceneBridge.getCommands()->importObjects(java::File(path)) ) {
+                        setStatus("Failed to read file");
+                    }
+                    else {
+                        size_t slash = std::string(path).rfind('/');
+                        sceneBridge.getGuiState()->setReadFolder(
+                            (slash == std::string::npos ? "." :
+                             std::string(path).substr(0, slash)).c_str());
+                        repaintRequested();
+                    }
+                }
+                catch ( const std::exception& e ) { setStatus(e.what()); }
+                g_free(path);
+            }
+            if ( selected != nullptr ) g_object_unref(selected);
+        }
+        g_object_unref(dialog);
     }
 
     static bool isLanguageCommand(const std::string& command)
@@ -1437,6 +1489,12 @@ private:
         static_cast<Gtk4SceneEditor*>(data)->applicationCommand(parameter);
     }
 
+    static void importDialogResponseThunk(GtkNativeDialog* dialog, int response,
+                                          gpointer data)
+    {
+        static_cast<Gtk4SceneEditor*>(data)->importDialogResponse(dialog, response);
+    }
+
     void repaintRequested() override
     {
         if ( isLiveWidget(glArea) ) gtk_widget_queue_draw(glArea);
@@ -1521,7 +1579,7 @@ static void activate(GtkApplication* app, gpointer)
 int main(int argc, char** argv)
 {
     GtkApplication* app = gtk_application_new(
-        "org.vitral.SceneEditorApplication.Gtk4", G_APPLICATION_DEFAULT_FLAGS);
+        "org.vitral.SceneEditorApplication.Gtk4", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), nullptr);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
