@@ -1,5 +1,5 @@
-import { Logger, VSDK } from '@vitral/base';
-import { HtmlFileChooser, HtmlFileFilter, type HtmlChosenFile } from '@vitral/webgl';
+import { DialogSession, Logger, VSDK } from '@vitral/base';
+import { HtmlFileChooser, HtmlFileFilter, HtmlWindow, type HtmlChosenFile } from '@vitral/webgl';
 import { HtmlImageControlWindow } from '../gui/html/html-image-control-window';
 import type { HtmlCommandExecutor } from '../gui/html/html-command-executor';
 import { GuiState } from '../model/gui-state';
@@ -63,7 +63,9 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
    */
   private async executeHtmlCommand(label: string, _mainWindowWidget: HTMLElement | null): Promise<boolean> {
     //- FILE ----------------------------------------------------------
-    if (label === 'IDC_FILE_QUIT') {
+    if (label === 'IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT') {
+      this.showTangibleInterfaceDialog();
+    } else if (label === 'IDC_FILE_QUIT') {
       this.parent.closeApplication();
     } else if (label === 'IDC_IMPORT_OBJECTS_FROM_FILE') {
       const jfc: HtmlFileChooser = new HtmlFileChooser(this.guiState().getReadFolder());
@@ -139,6 +141,45 @@ export class HtmlWebGLGuiEventExecutor implements HtmlCommandExecutor {
       await this.parent.setGuiLanguage(GuiState.languageFile('spanish'));
     }
     return true;
+  }
+
+  /** HTML counterpart of SwingDialogHost.form for the shared tangible.connect definition. */
+  private showTangibleInterfaceDialog(): void {
+    const messages = this.parent.getApplicationModel().getI18nContext()!;
+    const definition = messages.getDialogById('tangible.connect');
+    if (definition === null) throw new Error('Missing tangible.connect dialog');
+    const session = new DialogSession(definition);
+    const dialog = new HtmlWindow(messages.getMessage(definition.getTitleKey() ?? definition.getId() ?? 'Connect'));
+    const form = document.createElement('form');
+    form.className = 'scene-editor-tangible-dialog';
+    const label = document.createElement('label');
+    label.textContent = messages.getMessage(definition.getElements()[0]?.labelKey ?? 'IDM_TANGIBLE_INTERFACE_SERVER_PROMPT');
+    const input = document.createElement('input');
+    input.type = 'url'; input.required = true; input.value = this.parent.getTangibleServiceUrl();
+    label.appendChild(input);
+    const buttons = document.createElement('div');
+    for (const element of definition.getElements().flatMap((entry) => entry.children)) {
+      if (element.kind !== 'button' || element.action === null) continue;
+      const button = document.createElement('button');
+      button.type = element.action === 'connect' ? 'submit' : 'button';
+      button.textContent = messages.getMessage(element.labelKey ?? element.action);
+      if (element.action === 'cancel') button.onclick = () => { session.close(); dialog.dispose(); };
+      buttons.appendChild(button);
+    }
+    form.append(label, buttons); dialog.content.appendChild(form); dialog.setVisible(true);
+    form.onsubmit = (event): void => {
+      event.preventDefault();
+      const endpoint = input.value.trim(); session.setDraft('serviceUrl', endpoint);
+      const request = session.beginAction(); if (request < 0 || endpoint === '') return;
+      const connect = buttons.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      connect.disabled = true;
+      this.parent.connectTangibleInterface(endpoint, (connected): void => {
+        if (!session.completeAction(request)) return;
+        if (connected) { dialog.dispose(); return; }
+        connect.disabled = false;
+        connect.textContent = messages.getMessage('IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY');
+      });
+    };
   }
 
   private async exportObjects(format: ExportFormat): Promise<boolean> {

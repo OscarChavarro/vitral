@@ -86,6 +86,7 @@ export class RayGizmoInteractionTechniques {
         this.origin = ray.getOrigin();
         this.updateAnglesFromDirection(ray.getDirection());
         this.updateInputGizmo();
+        this.gizmo.setRollIndicatorEnabled(false);
         this.gizmo.setRay(ray, 0.0);
     }
 
@@ -152,6 +153,7 @@ export class RayGizmoInteractionTechniques {
 
     private applyRay(): void {
         this.updateInputGizmo();
+        this.gizmo.setRollIndicatorEnabled(false);
         this.gizmo.setRay(new Ray(this.origin, this.direction()), 0.0);
     }
 

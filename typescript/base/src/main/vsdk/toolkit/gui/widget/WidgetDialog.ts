@@ -2,6 +2,22 @@ import { VSDK } from "../../common/VSDK.js";
 import { Logger } from "../../common/logging/Logger.js";
 import { WidgetElement } from "./WidgetElement.js";
 
+/** Ordered, renderer-independent content of a dialog. */
+export class WidgetDialogElement {
+    public constructor(
+        public readonly kind: string,
+        public readonly id: string | null,
+        public readonly labelKey: string | null,
+        public readonly binding: string | null,
+        public readonly action: string | null,
+        children: readonly WidgetDialogElement[] = [],
+    ) {
+        this.children = Object.freeze([...children]);
+    }
+
+    public readonly children: readonly WidgetDialogElement[];
+}
+
 /**
 This class plays a role of internal node on an n-ary tree in the composite
 design pattern.
@@ -25,6 +41,9 @@ export class WidgetDialog extends WidgetElement {
     private pendingDialogNames: string[];
     private pendingDialogRefNames: string[];
     private collapsable: boolean;
+    private titleKey: string | null = null;
+    private modal = false;
+    private readonly elements: WidgetDialogElement[] = [];
 
     public constructor() {
         super();
@@ -43,6 +62,46 @@ export class WidgetDialog extends WidgetElement {
 
     public setCollapsable(collapsable: boolean): void {
         this.collapsable = collapsable;
+    }
+
+    public getTitleKey(): string | null {
+        return this.titleKey;
+    }
+
+    public setTitleKey(titleKey: string | null): void {
+        this.titleKey = titleKey;
+    }
+
+    public isModal(): boolean {
+        return this.modal;
+    }
+
+    public setModal(modal: boolean): void {
+        this.modal = modal;
+    }
+
+    public getElements(): readonly WidgetDialogElement[] {
+        return this.elements;
+    }
+
+    public addElement(element: WidgetDialogElement): void {
+        this.elements.push(element);
+    }
+
+    public getElementByAction(action: string): WidgetDialogElement | null {
+        const find = (element: WidgetDialogElement): WidgetDialogElement | null => {
+            if (element.action === action) return element;
+            for (const child of element.children) {
+                const found = find(child);
+                if (found !== null) return found;
+            }
+            return null;
+        };
+        for (const element of this.elements) {
+            const found = find(element);
+            if (found !== null) return found;
+        }
+        return null;
     }
 
     public getPendingCommandNames(): string[] {

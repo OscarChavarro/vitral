@@ -153,7 +153,7 @@ export class HtmlDrawingAreaFeedback implements DrawingAreaInteractionListener, 
     const htmlModel: HtmlApplicationModel = this.application.getHtmlModel();
 
     if (htmlModel.getSelectorDialog() === null) {
-      htmlModel.setSelectorDialog(new HtmlSelectorDialog());
+      htmlModel.setSelectorDialog(new HtmlSelectorDialog(this.application.getApplicationModel(), () => this.application.repaintDrawingArea()));
     }
     htmlModel.getSelectorDialog()!.setVisible(true);
     htmlModel.getSelectorDialog()!.repaint();

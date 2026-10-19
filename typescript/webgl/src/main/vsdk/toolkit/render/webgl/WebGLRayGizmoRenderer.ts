@@ -12,7 +12,7 @@ import {
     Sphere,
     Vector3Dd,
     type Geometry,
-    type IndicatorMesh,
+    type RollIndicatorMesh,
 } from "@vitral/base";
 import { WebGLArrowRenderer } from "./WebGLArrowRenderer.js";
 import { WebGLCameraRenderer } from "./WebGLCameraRenderer.js";
@@ -95,10 +95,10 @@ export class WebGLRayGizmoRenderer {
         const indicator: IndicatorResources = WebGLRayGizmoRenderer.ensureMesh(gl);
 
         const quality: RendererConfiguration = WebGLRayGizmoRenderer.buildSurfaceQuality();
-        const primaryModelMatrix: Matrix4x4d = gizmo.getBody().getTransformationMatrix();
+        const primaryModelMatrix: Matrix4x4d = gizmo.getRollIndicatorModelMatrix(camera);
         const projection: Matrix4x4d = WebGLCameraRenderer.activate(gl, camera);
 
-        const scene: SimpleScene = gizmo.buildScene();
+        const scene: SimpleScene = gizmo.buildScene(camera);
 
         const bodies = scene.getSimpleBodies();
         for (let i = 0; i < bodies.size(); i++) {
@@ -126,16 +126,12 @@ export class WebGLRayGizmoRenderer {
             }
         }
 
-        await WebGLRayGizmoRenderer.drawIndicator(
-            gl,
-            indicator,
-            gizmo.getRotationAngleInRadians(),
-            primaryModelMatrix,
-            projection,
-            camera,
-            activeLights,
-            quality,
-        );
+        if (gizmo.isRollIndicatorEnabled()) {
+            await WebGLRayGizmoRenderer.drawIndicator(
+                gl, indicator, gizmo.getRotationAngleInRadians(), primaryModelMatrix,
+                projection, camera, activeLights, quality,
+            );
+        }
 
         gl.depthMask(true);
         gl.depthFunc(gl.LESS);
@@ -223,7 +219,7 @@ export class WebGLRayGizmoRenderer {
     }
 
     private static uploadIndicatorMesh(gl: WebGL2RenderingContext): IndicatorResources {
-        const mesh: IndicatorMesh = RayGizmo.buildIndicatorMesh();
+        const mesh: RollIndicatorMesh = RayGizmo.buildRollIndicatorMesh();
 
         const vertexArray = gl.createVertexArray();
         const positionBuffer = gl.createBuffer();

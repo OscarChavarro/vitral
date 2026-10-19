@@ -11,7 +11,9 @@ export class FrameListener implements Partial<WebSocketListener> {
     public constructor(
         private readonly onMessage: (message: string) => void,
         private readonly onFailure: (event: Event) => void,
+        private readonly onConnected?: () => void,
     ) {}
+    onOpen(_socket: WebSocket): void { this.onConnected?.(); }
     public onText(_socket: WebSocket, data: string): void {
         this.onMessage(data);
     }
@@ -34,18 +36,26 @@ export class TangibleInterfaceNetworkClient {
         const index = this.listeners.indexOf(listener);
         if (index >= 0) this.listeners.splice(index, 1);
     }
-    /** Starts asynchronous WebSocket connection setup; browser WebSocket replaces Java's connection thread. */
-    public run(): void {
+    /**
+     * Starts WebSocket connection setup. The optional callback mirrors Java's
+     * handshake notification and runs on the browser event loop.
+     */
+    public run(connectionListener?: (connected: boolean) => void): void {
         try {
             this.webSocket = new WebSocket(
                 this.serviceUrl,
                 new FrameListener(
                     (message) => this.processMessage(message),
-                    (event) => this.reportError(event),
+                    (event) => {
+                        this.reportError(event);
+                        connectionListener?.(false);
+                    },
+                    () => connectionListener?.(true),
                 ),
             );
         } catch (error) {
             console.log(`Tangible interface server not found at ${this.serviceUrl}: ${this.errorMessage(error)}`);
+            connectionListener?.(false);
         }
     }
     public disconnect(): void {

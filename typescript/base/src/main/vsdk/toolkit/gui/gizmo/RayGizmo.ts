@@ -4,6 +4,7 @@ import { VSDK } from "../../common/VSDK.js";
 import { ColorRgb } from "../../common/color/ColorRgb.js";
 import { Matrix4x4d } from "../../common/linealAlgebra/Matrix4x4d.js";
 import { Vector3Dd } from "../../common/linealAlgebra/Vector3Dd.js";
+import { Camera } from "../../environment/camera/Camera.js";
 import { Intersection } from "../../environment/geometry/element/Intersection.js";
 import { Ray } from "../../environment/geometry/element/Ray.js";
 import { Arrow } from "../../environment/geometry/volume/Arrow.js";
@@ -46,7 +47,7 @@ generated once around the local +Z axis; the renderer rotates it by the roll
 angle of the gizmo (see `getRotationAngleInRadians`) and transforms it with the
 body of the arrow.
 */
-export class IndicatorMesh {
+export class RollIndicatorMesh {
     /**
     @param positions 3 vertexes (tip, base-left, base-right), 3 floats each
     @param normals one repeated flat normal, 3 floats each
@@ -94,8 +95,11 @@ export class RayGizmo extends Gizmo {
 
     private static readonly ARROW_BASE_LENGTH = 3.0;
     private static readonly ARROW_HEAD_LENGTH = 1.0;
-    private static readonly ARROW_BASE_RADIUS = 0.15;
-    private static readonly ARROW_HEAD_RADIUS = 0.4;
+    private static readonly RAY_THICKNESS_FACTOR = 0.5;
+    private static readonly ARROW_BASE_RADIUS = 0.15 * RayGizmo.RAY_THICKNESS_FACTOR;
+    private static readonly ARROW_HEAD_RADIUS = 0.4 * RayGizmo.RAY_THICKNESS_FACTOR;
+    private static readonly REFERENCE_VERTICAL_FOV_DEGREES = 60.0;
+    private static readonly NORMAL_VIEWPORT_HEIGHT_FRACTION = 0.2;
 
     public static readonly DEFAULT_RAY_COLOR = new ColorRgb(1, 0.8, 0.8);
     public static readonly DEFAULT_NORMAL_COLOR = new ColorRgb(1, 1, 0.8);
@@ -125,6 +129,7 @@ export class RayGizmo extends Gizmo {
     private lastDataTime: JavaDate;
     private previousDataTime: JavaDate;
     private visible: boolean;
+    private rollIndicatorEnabled: boolean;
     private disableAfterElapsedSeconds: number;
 
     private sourceRayColor: ColorRgb;
@@ -172,6 +177,7 @@ export class RayGizmo extends Gizmo {
         this.lastDataTime = new JavaDate();
         this.previousDataTime = new JavaDate();
         this.visible = true;
+        this.rollIndicatorEnabled = false;
         this.disableAfterElapsedSeconds = RayGizmo.DEFAULT_DISABLE_TIME;
 
         this.sourceRayColor = RayGizmo.DEFAULT_RAY_COLOR;
@@ -253,6 +259,9 @@ export class RayGizmo extends Gizmo {
         this.visible = visible;
     }
 
+    public isRollIndicatorEnabled(): boolean { return this.rollIndicatorEnabled; }
+    public setRollIndicatorEnabled(rollIndicatorEnabled: boolean): void { this.rollIndicatorEnabled = rollIndicatorEnabled; }
+
     public getDisableAfterElapsedSeconds(): number {
         return this.disableAfterElapsedSeconds;
     }
@@ -315,9 +324,10 @@ export class RayGizmo extends Gizmo {
 
     @return a new scene; empty only if the gizmo has no snapshot yet
     */
-    public buildScene(): SimpleScene {
+    public buildScene(camera: Camera | null = null): SimpleScene {
         const scene = new SimpleScene();
         const arrowTotalLength: number = RayGizmo.ARROW_BASE_LENGTH + RayGizmo.ARROW_HEAD_LENGTH;
+        const thicknessScale = RayGizmo.calculateViewThicknessScale(camera);
 
         if (this.currentSnapshot === null || this.currentSnapshot.rays.length === 0) {
             scene.addBody(
@@ -326,6 +336,8 @@ export class RayGizmo extends Gizmo {
                     null,
                     this.sourceRayColor,
                     arrowTotalLength,
+                    RayGizmo.calculateMissingRayLength(camera, this.currentPosition),
+                    thicknessScale,
                 ),
             );
             return scene;
@@ -336,12 +348,13 @@ export class RayGizmo extends Gizmo {
         // Source ray (index 0)
         const sourceRay: Ray = this.currentSnapshot.rays[0]!;
         const sourceIntersection: Intersection | null = this.currentSnapshot.intersections[0]!;
-        scene.addBody(this.buildRayBody(sourceRay, sourceIntersection, this.sourceRayColor, arrowTotalLength));
+        const sourceLength = sourceIntersection === null ? RayGizmo.calculateMissingRayLength(camera, sourceRay.getOrigin()) : arrowTotalLength;
+        scene.addBody(this.buildRayBody(sourceRay, sourceIntersection, this.sourceRayColor, arrowTotalLength, sourceLength, thicknessScale));
 
         if (sourceIntersection === null) {
-            this.addDotBodies(scene, sourceRay, arrowTotalLength);
+            this.addDotBodies(scene, sourceRay, camera, sourceLength, RayGizmo.calculateVisibleNormalLength(camera, sourceRay.getOrigin()), this.sourceRayColor);
         } else {
-            this.addNormalBody(scene, sourceIntersection, normalColors[0 % normalColors.length]!);
+            this.addNormalBody(scene, sourceIntersection, normalColors[0 % normalColors.length]!, camera, thicknessScale);
         }
 
         // Reflection bounces (index 1+)
@@ -349,12 +362,13 @@ export class RayGizmo extends Gizmo {
             const reflRay: Ray = this.currentSnapshot.rays[i]!;
             const reflIntersection: Intersection | null = this.currentSnapshot.intersections[i]!;
             const reflColor: ColorRgb = this.reflectedRayColors[(i - 1) % this.reflectedRayColors.length]!;
-            scene.addBody(this.buildRayBody(reflRay, reflIntersection, reflColor, arrowTotalLength));
+            const reflectedLength = reflIntersection === null ? RayGizmo.calculateMissingRayLength(camera, reflRay.getOrigin()) : arrowTotalLength;
+            scene.addBody(this.buildRayBody(reflRay, reflIntersection, reflColor, arrowTotalLength, reflectedLength, thicknessScale));
 
             if (reflIntersection === null) {
-                this.addDotBodies(scene, reflRay, arrowTotalLength);
+                this.addDotBodies(scene, reflRay, camera, reflectedLength, RayGizmo.calculateVisibleNormalLength(camera, reflRay.getOrigin()), reflColor);
             } else {
-                this.addNormalBody(scene, reflIntersection, normalColors[i % normalColors.length]!);
+                this.addNormalBody(scene, reflIntersection, normalColors[i % normalColors.length]!, camera, thicknessScale);
             }
         }
 
@@ -366,24 +380,32 @@ export class RayGizmo extends Gizmo {
         intersection: Intersection | null,
         color: ColorRgb,
         arrowTotalLength: number,
+        displayedLength: number,
+        thicknessScale: number,
     ): SimpleBody {
-        let scaleZ = 1.0;
+        let rayLength = displayedLength;
         if (intersection !== null) {
             const hitT: number = intersection.getT();
             if (hitT > 1e-6 && arrowTotalLength > 1e-6) {
-                scaleZ = hitT / arrowTotalLength;
+                rayLength = hitT;
             }
         }
         const b = new SimpleBody();
-        b.setGeometry(this.arrow);
+        b.setGeometry(RayGizmo.buildRayArrow(rayLength));
         b.setPosition(ray.getOrigin());
         b.setRotation(RayGizmo.rotationFromZToDirection(ray.getDirection()));
-        b.setScale(new Vector3Dd(1.0, 1.0, scaleZ));
+        b.setScale(new Vector3Dd(thicknessScale, thicknessScale, 1.0));
         b.setMaterial(RayGizmo.materialFromColor(color));
         return b;
     }
 
-    private addNormalBody(scene: SimpleScene, intersection: Intersection, color: ColorRgb): void {
+    private static buildRayArrow(requestedLength: number): Arrow {
+        const totalLength = Math.max(requestedLength, RayGizmo.ARROW_HEAD_LENGTH);
+        return new Arrow(Math.max(0, totalLength - RayGizmo.ARROW_HEAD_LENGTH), RayGizmo.ARROW_HEAD_LENGTH,
+            RayGizmo.ARROW_BASE_RADIUS, RayGizmo.ARROW_HEAD_RADIUS);
+    }
+
+    private addNormalBody(scene: SimpleScene, intersection: Intersection, color: ColorRgb, camera: Camera | null, thicknessScale: number): void {
         // Java returns early when either accessor answers null. `Intersection`
         // declares both non-nullable in TypeScript, so that guard is
         // unreachable here and is left out rather than written as dead code.
@@ -393,28 +415,63 @@ export class RayGizmo extends Gizmo {
         b.setGeometry(this.arrow);
         b.setPosition(hitPoint);
         b.setRotation(RayGizmo.rotationFromZToDirection(normal));
-        b.setScale(new Vector3Dd(0.5, 0.5, 1.0));
+        b.setScale(new Vector3Dd(0.5 * thicknessScale, 0.5 * thicknessScale,
+            RayGizmo.calculateVisibleNormalLength(camera, hitPoint) / (RayGizmo.ARROW_BASE_LENGTH + RayGizmo.ARROW_HEAD_LENGTH)));
         b.setMaterial(RayGizmo.materialFromColor(color));
         scene.addBody(b);
     }
 
-    private addDotBodies(scene: SimpleScene, ray: Ray, arrowTotalLength: number): void {
+    private addDotBodies(scene: SimpleScene, ray: Ray, camera: Camera | null, rayLength: number, normalLength: number, rayColor: ColorRgb): void {
         const len: number = ray.getDirection().length();
         if (len < VSDK.EPSILON) {
             return;
         }
         const dir: Vector3Dd = ray.getDirection().multiply(1.0 / len);
         const origin: Vector3Dd = ray.getOrigin();
-        const dotMat: SimpleMaterial = RayGizmo.materialFromColor(new ColorRgb(1.0, 1.0, 0.0));
-        const factors: number[] = [1.25, 1.5, 1.75];
-        for (const factor of factors) {
-            const dotPos: Vector3Dd = origin.add(dir.multiply(arrowTotalLength * factor));
+        const dotMat: SimpleMaterial = RayGizmo.materialFromColor(rayColor);
+        const radius = (camera === null ? RayGizmo.ARROW_BASE_RADIUS : normalLength * 0.05) / 3.0;
+        const sphereScale = radius / RayGizmo.ARROW_BASE_RADIUS;
+        const firstOffset = camera === null ? rayLength * 0.25 : 2.5 * radius;
+        const spacing = camera === null ? rayLength * 0.25 : 3.0 * radius;
+        for (let i = 0; i < 3; i++) {
+            const dotPos: Vector3Dd = origin.add(dir.multiply(rayLength + firstOffset + i * spacing));
             const b = new SimpleBody();
             b.setGeometry(this.dotSphere);
             b.setPosition(dotPos);
+            b.setScale(new Vector3Dd(sphereScale, sphereScale, sphereScale));
             b.setMaterial(dotMat);
             scene.addBody(b);
         }
+    }
+
+    public static calculateViewThicknessScale(camera: Camera | null): number {
+        if (camera === null) return 1.0;
+        if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL) return 1.0 / Math.max(camera.getOrthogonalZoom(), VSDK.EPSILON);
+        return Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON) /
+            Math.tan(JavaMath.toRadians(RayGizmo.REFERENCE_VERTICAL_FOV_DEGREES) / 2.0);
+    }
+
+    public static calculateVisibleNormalLength(camera: Camera | null, position: Vector3Dd | null): number {
+        const legacy = RayGizmo.ARROW_BASE_LENGTH + RayGizmo.ARROW_HEAD_LENGTH;
+        if (camera === null || position === null) return legacy;
+        const viewportHeight = Math.max(camera.getViewportYSize(), 1.0);
+        let worldPerPixel: number;
+        if (camera.getProjectionMode() === Camera.PROJECTION_MODE_ORTHOGONAL) {
+            worldPerPixel = 2.0 / Math.max(Math.abs(camera.getOrthogonalZoom()), VSDK.EPSILON) / viewportHeight;
+        } else {
+            const depth = Math.max(Math.abs(position.subtract(camera.getPosition()).dotProduct(camera.getFront())), camera.getNearPlaneDistance());
+            worldPerPixel = 2.0 * depth * Math.max(Math.tan(JavaMath.toRadians(camera.getFov()) / 2.0), VSDK.EPSILON) / viewportHeight;
+        }
+        return RayGizmo.NORMAL_VIEWPORT_HEIGHT_FRACTION * viewportHeight * worldPerPixel;
+    }
+
+    public static calculateMissingRayLength(camera: Camera | null, origin: Vector3Dd): number {
+        return 2.0 * RayGizmo.calculateVisibleNormalLength(camera, origin);
+    }
+
+    public getRollIndicatorModelMatrix(camera: Camera | null): Matrix4x4d {
+        const scale = RayGizmo.calculateViewThicknessScale(camera);
+        return this.body.getTransformationMatrix().multiply(new Matrix4x4d().scale(scale, scale, 1.0));
     }
 
     private static materialFromColor(color: ColorRgb): SimpleMaterial {
@@ -459,23 +516,23 @@ export class RayGizmo extends Gizmo {
     }
 
     /// Outer radius of the roll indicator fin (see `buildIndicatorMesh`)
-    private static readonly INDICATOR_OUTER_RADIUS = Math.fround(0.65);
+    private static readonly ROLL_INDICATOR_OUTER_RADIUS = Math.fround(0.65);
     /// Inner radius of the roll indicator fin
-    private static readonly INDICATOR_INNER_RADIUS = Math.fround(0.17);
+    private static readonly ROLL_INDICATOR_INNER_RADIUS = Math.fround(0.17);
     /// Half width of the roll indicator fin, at its base
-    private static readonly INDICATOR_HALF_WIDTH = Math.fround(0.12);
+    private static readonly ROLL_INDICATOR_HALF_WIDTH = Math.fround(0.12);
     /// Distance of the tip of the roll indicator fin, along +Z
-    private static readonly INDICATOR_TIP_Z = Math.fround(0.3);
+    private static readonly ROLL_INDICATOR_TIP_Z = Math.fround(0.3);
 
     /**
     @return the geometry of the roll indicator fin, in the local space of the
     arrow (see {@link IndicatorMesh})
     */
-    public static buildIndicatorMesh(): IndicatorMesh {
-        const outer: number = RayGizmo.INDICATOR_OUTER_RADIUS;
-        const inner: number = RayGizmo.INDICATOR_INNER_RADIUS;
-        const halfWidth: number = RayGizmo.INDICATOR_HALF_WIDTH;
-        const tipZ: number = RayGizmo.INDICATOR_TIP_Z;
+    public static buildRollIndicatorMesh(): RollIndicatorMesh {
+        const outer: number = RayGizmo.ROLL_INDICATOR_OUTER_RADIUS;
+        const inner: number = RayGizmo.ROLL_INDICATOR_INNER_RADIUS;
+        const halfWidth: number = RayGizmo.ROLL_INDICATOR_HALF_WIDTH;
+        const tipZ: number = RayGizmo.ROLL_INDICATOR_TIP_Z;
         // P0=tip, P1=base-left, P2=base-right.
         const positions = new Float32Array([outer, 0.0, tipZ, inner, -halfWidth, 0.0, inner, halfWidth, 0.0]);
         const uvs = new Float32Array([0.5, 1.0, 0.0, 0.0, 1.0, 0.0]);
@@ -498,7 +555,7 @@ export class RayGizmo extends Gizmo {
 
         const normals = new Float32Array([nx, ny, nz, nx, ny, nz, nx, ny, nz]);
 
-        return new IndicatorMesh(positions, normals, uvs);
+        return new RollIndicatorMesh(positions, normals, uvs);
     }
 
     private recordDataArrival(): void {

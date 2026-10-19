@@ -95,6 +95,7 @@ export class Scene {
   private acumObject = 1;
   /// Size factor of light gizmos, shared by rendering and picking
   private lightGizmoScale = 1.0;
+  private readonly hiddenBodies = new Set<SimpleBody>();
 
   /**
    * @param raytracer how scenes are raytraced (the application installs it)
@@ -229,6 +230,12 @@ export class Scene {
     return thing;
   }
 
+  isHidden(body: SimpleBody): boolean { return this.hiddenBodies.has(body); }
+  setHidden(body: SimpleBody, hidden: boolean): void {
+    if (hidden) this.hiddenBodies.add(body);
+    else this.hiddenBodies.delete(body);
+  }
+
   doIntersectionFirstHit(r: Ray, info: RayHit): boolean {
     // Java's Float.MAX_VALUE
     let nearestDistance = 3.4028234663852886e38;
@@ -237,6 +244,7 @@ export class Scene {
     const ii: RayHit = new RayHit();
     for (let i = 0; i < things.size(); i++) {
       const gi: SimpleBody = things.get(i);
+      if (this.isHidden(gi)) continue;
       const hit: RayHit = new RayHit();
       if (gi.doIntersectionFirstHit(r, hit) && hit.getRay()!.getT() < nearestDistance) {
         ii.clone(hit);

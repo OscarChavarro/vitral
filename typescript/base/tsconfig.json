@@ -87,6 +87,7 @@
         "src/main/vsdk/toolkit/gui/CameraControllerAquynza.ts",
         "src/main/vsdk/toolkit/gui/RendererConfigurationController.ts",
         "src/main/vsdk/toolkit/gui/widget/**/*.ts",
+        "src/main/vsdk/toolkit/gui/dialog/**/*.ts",
         "src/main/vsdk/toolkit/gui/viewport/**/*.ts",
         "src/main/vsdk/toolkit/gui/editor/**/*.ts",
         "src/main/vsdk/toolkit/io/gui/**/*.ts",

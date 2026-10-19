@@ -1,4 +1,4 @@
-import { GuiPersistence, Logger, VSDK, type RGBAImageUncompressed, type RGBImageUncompressed, type Widget } from '@vitral/base';
+import { DialogPersistence, GuiPersistence, Logger, VSDK, type RGBAImageUncompressed, type RGBImageUncompressed, type Widget } from '@vitral/base';
 import { HtmlGuiRenderer, HtmlSplitPane, HtmlTabbedPane, type HtmlMenuBar } from '@vitral/webgl';
 import { HtmlApplicationModel } from '../gui/html/html-application-model';
 import { HtmlButtonsPanel } from '../gui/html/html-buttons-panel';
@@ -116,13 +116,15 @@ export class HtmlWebGLGuiController {
     }
     const files = ImageFiles.get();
     // The presentation of the viewport sets follows the language
-    this.parent.getApplicationModel().setI18nContext(
-      await GuiPersistence.importAquynzaGui(await response.text(), '.', {
+    const context = await GuiPersistence.importAquynzaGui(await response.text(), '.', {
         importRGBA: (path: string): Promise<RGBAImageUncompressed> => files.importRGBA(path),
         importRGB: async (path: string): Promise<RGBImageUncompressed> =>
           (await files.importRGB(path)) as RGBImageUncompressed,
-      }),
-    );
+      });
+    const dialogsResponse = await fetch('./etc/gui/dialogs.json');
+    if (!dialogsResponse.ok) throw new Error('Fatal error: can not open GUI dialog definitions');
+    DialogPersistence.importDialogs(await dialogsResponse.text(), context);
+    this.parent.getApplicationModel().setI18nContext(context);
   }
 
   private async createGUIFullScreen(): Promise<void> {

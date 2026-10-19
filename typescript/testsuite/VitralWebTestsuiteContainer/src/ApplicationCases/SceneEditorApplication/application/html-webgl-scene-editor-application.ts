@@ -1,5 +1,7 @@
 import {
   GenericEditor,
+  TangibleInterfaceEvent2RayGizmoMapper,
+  TangibleInterfaceNetworkClient,
   ImageProcessing,
   Ray,
   RGBColorPalettePersistence,
@@ -49,7 +51,9 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
   private webglController!: HtmlWebGLApplicationController;
   private raytracingBackend: WebSceneRaytracingBackend | null = null;
   private mcp: HtmlWebGLVitralEditorMCP | null = null;
+  private tangibleInterfaceClient: TangibleInterfaceNetworkClient | null = null;
   private closed = false;
+  private tangibleServiceUrl = 'ws://127.0.0.1:8090/v1/values';
 
   private constructor(
     private readonly root: HTMLElement,
@@ -171,6 +175,30 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     await this.htmlGuiController.createGUI();
   }
 
+  getTangibleServiceUrl(): string { return this.tangibleServiceUrl; }
+
+  /** Connects the browser-native WebSocket client used by the tangible dialog. */
+  connectTangibleInterface(serviceUrl: string, connectionListener: (connected: boolean) => void): void {
+    const endpoint = serviceUrl.trim();
+    if (endpoint !== '') this.tangibleServiceUrl = endpoint;
+    this.tangibleInterfaceClient?.disconnect();
+    const client = new TangibleInterfaceNetworkClient(this.tangibleServiceUrl);
+    client.addListener({
+      tangibleInterfaceEventReceived: (event): void => {
+        if (event.getId() !== 'rayCube1') return;
+        const model = this.applicationModel;
+        model.setWithVisualDebugRay(true);
+        const gizmo = model.getRayGizmo();
+        if (gizmo === null) return;
+        gizmo.setRollIndicatorEnabled(true);
+        new TangibleInterfaceEvent2RayGizmoMapper(model.getActiveCamera()).map(event, gizmo);
+        this.repaintDrawingArea();
+      },
+    });
+    this.tangibleInterfaceClient = client;
+    client.run(connectionListener);
+  }
+
   destroyGUI(): void {
     this.htmlGuiController.destroyGUI();
   }
@@ -212,6 +240,8 @@ export class HtmlWebGLSceneEditorApplication implements HtmlApplicationHost {
     this.webglController.dispose();
     this.raytracingBackend?.dispose();
     this.mcp?.dispose();
+    this.tangibleInterfaceClient?.disconnect();
+    this.tangibleInterfaceClient = null;
     this.onClose();
   }
 

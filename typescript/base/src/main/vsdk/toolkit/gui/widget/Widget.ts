@@ -132,6 +132,16 @@ export class Widget extends PresentationElement {
         this.dialogList.push(dialog);
     }
 
+    /** Returns a dialog definition by its stable, shared identifier. */
+    public getDialogById(id: string): WidgetDialog | null {
+        for (const dialog of this.dialogList) {
+            if (dialog.getId() === id) {
+                return dialog;
+            }
+        }
+        return null;
+    }
+
     public addVariable(variable: WidgetVariable): void {
         this.variableList.push(variable);
     }
