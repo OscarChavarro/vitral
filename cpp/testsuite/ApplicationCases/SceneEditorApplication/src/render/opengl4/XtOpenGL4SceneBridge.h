@@ -19,6 +19,7 @@ class SimpleBody;
 class Vector3Dd;
 class Viewport;
 class WidgetButtonGroup;
+class WidgetDialog;
 class WidgetMenu;
 
 /**
@@ -137,6 +138,12 @@ public:
     @return the group, or null
     */
     WidgetButtonGroup* getButtonGroup(const char* name);
+
+    /**
+    @param id identifier of a dialog of `etc/gui/dialogs.json`
+    @return its definition in the GUI context, or null
+    */
+    WidgetDialog* getDialogById(const char* id);
 
     void init();
     void dispose();

@@ -18,6 +18,7 @@
 #include "vsdk/toolkit/gui/viewport/ViewportSetInteractionTechniques.h"
 #include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
+#include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenu.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
 #include "vsdk/toolkit/environment/background/FixedBackground.h"
@@ -297,6 +298,12 @@ WidgetButtonGroup* XtOpenGL4SceneBridge::getButtonGroup(const char* name)
 {
     Widget* context = impl->model->getI18nContext();
     return context != nullptr ? context->getButtonGroup(name) : nullptr;
+}
+
+WidgetDialog* XtOpenGL4SceneBridge::getDialogById(const char* id)
+{
+    Widget* context = impl->model->getI18nContext();
+    return context != nullptr ? context->getDialogById(id) : nullptr;
 }
 
 void XtOpenGL4SceneBridge::init() { impl->renderer->init(); }

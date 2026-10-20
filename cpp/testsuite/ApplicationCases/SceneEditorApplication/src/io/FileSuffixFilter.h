@@ -1,8 +1,12 @@
 #ifndef __FILE_SUFFIX_FILTER__
 #define __FILE_SUFFIX_FILTER__
 
+#include <vector>
+
 #include "java/io/File.h"
 #include "java/lang/String.h"
+
+class WidgetDialog;
 
 /**
 Accepts the files with a given suffix (extension), and the folders so the
@@ -28,6 +32,15 @@ public:
     or an empty string if it has none
     */
     static java::String getSuffix(const java::String& path);
+
+    /**
+    @param definition dialog definition with a `fileChooser` element (i.e.
+    `scene.import` of `etc/gui/dialogs.json`), or null
+    @return the filters of its `fileFilter` elements, in order (none for a
+    null definition)
+    */
+    static std::vector<FileSuffixFilter> fromDialog(
+        const WidgetDialog* definition);
 
     /**
     @param file file or folder

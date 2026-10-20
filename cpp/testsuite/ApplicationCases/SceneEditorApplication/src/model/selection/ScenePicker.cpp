@@ -39,6 +39,7 @@ Ray ScenePicker::selectObjectWithMouse(int x, int y, bool composite)
     java::ArrayList<SimpleBody*>& things = scene->scene->getSimpleBodies();
     for ( i = 0; i < things.size(); i++ ) {
         gi = things.get(i);
+        if ( scene->isHidden(gi) ) continue;
         Ray* hit = gi->doIntersectionFirstHit(r);
         if ( hit != nullptr && hit->getT() < nearestDistance ) {
             nearestDistance = hit->getT();

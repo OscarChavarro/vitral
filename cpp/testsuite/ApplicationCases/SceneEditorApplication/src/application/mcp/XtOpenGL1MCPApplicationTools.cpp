@@ -195,6 +195,85 @@ java::String XtOpenGL1MCPApplicationTools::exportWorkspaceJpg(
     return MCPJson::writtenFile(out.getAbsolutePath());
 }
 
+//= Dialogs ===============================================================
+
+void XtOpenGL1MCPApplicationTools::openSelector()
+{
+    parent->openSelectorDialog();
+}
+
+java::String XtOpenGL1MCPApplicationTools::selectBodyInDialog(
+    const java::String& request)
+{
+    if ( !parent->isSelectorDialogVisible() ) {
+        throw std::logic_error("Selector is not open");
+    }
+    parent->selectorSelectBody(
+        (int)MCPJson::numberProperty(request, "index", -1));
+    return java::String("{\"ok\":true,\"selectedBody\":") +
+        java::String::valueOf(parent->getApplicationModel()->getScene()
+                              ->selectedThings->firstSelected()) + "}";
+}
+
+java::String XtOpenGL1MCPApplicationTools::selectorAction(
+    const java::String& request)
+{
+    if ( !parent->isSelectorDialogVisible() ) {
+        throw std::logic_error("Selector is not open");
+    }
+    parent->selectorAction(MCPJson::stringProperty(request, "action", ""));
+    return "{\"ok\":true}";
+}
+
+void XtOpenGL1MCPApplicationTools::openTangibleDialog()
+{
+    parent->openTangibleInterfaceDialog();
+}
+
+java::String XtOpenGL1MCPApplicationTools::dialogState()
+{
+    java::StringBuilder sb;
+    sb.append("{\"dialogs\":[");
+    bool first = true;
+    if ( parent->isSelectorDialogVisible() ) {
+        sb.append("{\"id\":\"scene.selector\"}");
+        first = false;
+    }
+    if ( parent->isTangibleInterfaceDialogVisible() ) {
+        if ( !first ) {
+            sb.append(',');
+        }
+        sb.append("{\"id\":\"tangible.connect\",\"serviceUrl\":\"")
+            .append(MCPJson::escape(parent->getTangibleInterfaceDialogServiceUrl()))
+            .append("\",\"connectLabel\":\"")
+            .append(MCPJson::escape(parent->getTangibleInterfaceDialogConnectLabel()))
+            .append("\"}");
+    }
+    sb.append("]}");
+    return sb.toString();
+}
+
+java::String XtOpenGL1MCPApplicationTools::tangibleAction(
+    const java::String& request)
+{
+    if ( !parent->isTangibleInterfaceDialogVisible() ) {
+        throw std::logic_error("Tangible dialog is not open");
+    }
+    java::String action = MCPJson::stringProperty(request, "action", "cancel");
+    java::String serviceUrl;
+    bool withServiceUrl = action.equals("connect") &&
+        MCPJson::hasProperty(request, "serviceUrl");
+    if ( withServiceUrl ) {
+        serviceUrl = MCPJson::stringProperty(request, "serviceUrl", "");
+    }
+    if ( !parent->tangibleInterfaceDialogAction(action,
+             withServiceUrl ? &serviceUrl : nullptr) ) {
+        throw std::invalid_argument(
+            (java::String("Unknown dialog action: ") + action).c_str());
+    }
+    return dialogState();
+}
+
 //= Application ===========================================================
 
 java::String XtOpenGL1MCPApplicationTools::listLanguages()

@@ -223,6 +223,7 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/render/shaders/ShaderSelector.cpp
     src/main/vsdk/toolkit/io/PersistenceElement.cpp
     src/main/vsdk/toolkit/io/FileLocator.cpp
+    src/main/vsdk/toolkit/io/gui/DialogPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/EnvironmentPersistence.cpp
     src/main/vsdk/toolkit/io/geometry/WriterObj.cpp
     src/main/vsdk/toolkit/io/geometry/WriterGts.cpp
@@ -305,6 +306,10 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/widget/WidgetButtonGroup.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetCommand.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetDialog.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetDialogElement.cpp
+    src/main/vsdk/toolkit/gui/dialog/components/DialogFileFilter.cpp
+    src/main/vsdk/toolkit/gui/dialog/components/DialogTreeNode.cpp
+    src/main/vsdk/toolkit/gui/dialog/runtime/DialogSession.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenu.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenuElement.cpp
     src/main/vsdk/toolkit/gui/widget/WidgetMenuItem.cpp
@@ -406,6 +411,7 @@ if(VITRAL_BUILD_TESTS)
     src/test/raytracer_depth_buffer_tests.cpp
     src/test/entity_tests.cpp
     src/test/generic_editor_tests.cpp
+    src/test/dialog_persistence_tests.cpp
     src/test/java_emulation_tests.cpp
     src/test/image_persistence_tests.cpp
     src/test/sphere_polyhedral_cache_tests.cpp

@@ -195,6 +195,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/SceneEditorApplication.cpp
     src/application/commands/GeometryCreationCommandsExecutor.cpp
     src/application/commands/GuiEventExecutor.cpp
+    src/application/TangibleInterfaceConnection.cpp
     src/gui/DrawingAreaInteractionTechniques.cpp
     src/gui/PointerCursor.cpp
     src/gui/PopupDismissClickFilter.cpp
@@ -205,6 +206,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/gui/xt/XtCollapsibleSection.cpp
     src/gui/xt/XtImageControlWindow.cpp
     src/gui/xt/XtSelectorDialog.cpp
+    src/gui/xt/XtTangibleInterfaceDialog.cpp
     src/gui/xt/XtModifyPanel.cpp
     src/gui/xt/editor/XtModifyPanelForFunctionalExplicitSurface.cpp
     src/io/FileSuffixFilter.cpp
@@ -218,6 +220,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/model/ProjectedViewsDebugPlan.cpp
     src/model/Scene.cpp
     src/model/SceneLightFactory.cpp
+    src/model/dialog/SceneHierarchyPresenter.cpp
     src/model/editor/FunctionalExplicitSurfaceEditor.cpp
     src/model/history/BodyTransformState.cpp
     src/model/history/CameraState.cpp
@@ -226,6 +229,7 @@ set(SCENE_EDITOR_SHARED_SOURCES
     src/model/history/SceneElementKind.cpp
     src/model/history/SceneHistory.cpp
     src/model/history/SceneMembershipOperation.cpp
+    src/model/history/SceneSelectionOperation.cpp
     src/model/history/SceneSnapshot.cpp
     src/model/history/SceneTransformationOperation.cpp
     src/model/history/UndoQueue.cpp
@@ -248,6 +252,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/application/gtk4/Gtk4OpenGL4SceneEditorApplication.cpp
         src/application/commands/GeometryCreationCommandsExecutor.cpp
         src/application/commands/GuiEventExecutor.cpp
+        src/application/TangibleInterfaceConnection.cpp
         src/gui/DrawingAreaInteractionTechniques.cpp
         src/gui/PointerCursor.cpp
         src/gui/SelectedBodyMapToggles.cpp
@@ -262,6 +267,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/model/ProjectedViewsDebugPlan.cpp
         src/model/Scene.cpp
         src/model/SceneLightFactory.cpp
+        src/model/dialog/SceneHierarchyPresenter.cpp
         src/model/editor/FunctionalExplicitSurfaceEditor.cpp
         src/model/history/BodyTransformState.cpp
         src/model/history/CameraState.cpp
@@ -270,6 +276,7 @@ if(SCENE_EDITOR_IS_GTK4)
         src/model/history/SceneElementKind.cpp
         src/model/history/SceneHistory.cpp
         src/model/history/SceneMembershipOperation.cpp
+        src/model/history/SceneSelectionOperation.cpp
         src/model/history/SceneSnapshot.cpp
         src/model/history/SceneTransformationOperation.cpp
         src/model/history/UndoQueue.cpp

@@ -20,6 +20,8 @@ add_library(vitral_gtk4 SHARED
     src/main/vsdk/toolkit/gui/editor/Gtk4GenericEditor.cpp
     src/main/vsdk/toolkit/gui/Gtk4LabelImageProvider.cpp
     src/main/vsdk/toolkit/gui/Gtk4System.cpp
+    src/main/vsdk/toolkit/render/gtk4/Gtk4DialogHost.cpp
+    src/main/vsdk/toolkit/render/gtk4/Gtk4TreeView.cpp
 )
 
 target_include_directories(vitral_gtk4 PUBLIC src/main)

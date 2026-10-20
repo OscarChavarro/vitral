@@ -61,6 +61,11 @@ public:
     void addCommand(WidgetCommand* c);
     void addButtonGroup(WidgetButtonGroup* b);
     void addDialog(WidgetDialog* dialog);
+
+    /**
+    @return the dialog with the given identifier, or null
+    */
+    WidgetDialog* getDialogById(const java::String& id) const;
     void addVariable(WidgetVariable* variable);
     WidgetVariable* getVariableByName(const java::String& name) const;
     java::String toString() const;

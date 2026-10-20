@@ -39,6 +39,19 @@ Each launcher configures, builds and runs its fixed variant:
 
 The `-s` option starts the MCP automation service on TCP port 1234.
 
+The last button of the command bar (**Tools → Tangible interface client**)
+opens the dialog to connect with a tangible interface websocket service (see
+`cpp/testsuite/Tools/TangibleInterfaceMarkersDetectorServer`); the poses of
+its `rayCube1` marker group move the ray gizmo, as in the Java port. The
+option `-tangibleServer <url>` changes the URL the dialog proposes (by
+default `ws://127.0.0.1:8090/v1/values`), in every variant, GTK4 included.
+
+The dialogs are built from the definitions shared by every port
+(`etc/gui/dialogs.json`, read by `DialogPersistence`): the tangible
+interface connection form and the scene selector (`h` key in the drawing
+area), whose tree selects lights and geometry objects (undoable), deletes
+them with the Delete key and hides or shows them from its context menu.
+
 To configure and build every variant without running it:
 
 ```sh

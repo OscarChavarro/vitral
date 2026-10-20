@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
+
+#include "vsdk/toolkit/gui/XtWidget.h"
 
 class XtGuiRenderer;
 class XtPanelWidgets;
@@ -19,6 +21,9 @@ focus, the close requests of the window manager, context menus).
 Each widget set module (`vitral_xaw`, `vitral_xm`) implements it, and an
 application is built with exactly one of them: the choice is made when
 building, never at run time, so Athena and Motif never share a process.
+Its widgets are `XtWidget`s (the Xt `Widget` type, see
+"vsdk/toolkit/gui/XtWidget.h"), so it can be used along with the vitral
+`Widget` class.
 */
 class XtWidgetSet {
 public:
@@ -56,7 +61,7 @@ public:
     Creates the widget where an application draws (i.e. with OpenGL),
     which receives the keys typed in its shell (see `setKeyboardFocus`).
     */
-    virtual Widget createDrawingArea(Widget parent, const char* name,
+    virtual XtWidget createDrawingArea(XtWidget parent, const char* name,
                                      int x, int y, int width,
                                      int height) = 0;
 
@@ -64,13 +69,13 @@ public:
     Sends the keys typed in a shell (anywhere over it) to one of its
     widgets, i.e. its drawing area.
     */
-    virtual void setKeyboardFocus(Widget shell, Widget target) = 0;
+    virtual void setKeyboardFocus(XtWidget shell, XtWidget target) = 0;
 
     /**
     Calls a procedure, instead of destroying the shell, when the window
     manager asks to close its window (`WM_DELETE_WINDOW`).
     */
-    virtual void setWindowCloseHandler(Widget shell, NotifyProc close,
+    virtual void setWindowCloseHandler(XtWidget shell, NotifyProc close,
                                        void* clientData) = 0;
 
     /**
@@ -81,7 +86,7 @@ public:
     @param fontSet font set of the texts
     @param choose called with the index of the chosen item
     */
-    virtual Widget createChoiceMenu(Widget owner,
+    virtual XtWidget createChoiceMenu(XtWidget owner,
                                     const std::vector<MenuChoice>& items,
                                     XFontSet fontSet, ChoiceProc choose,
                                     void* clientData) = 0;
@@ -92,7 +97,7 @@ public:
     @param poppedDown called when the menu is closed, after choosing an
     item or not
     */
-    virtual void popupChoiceMenu(Widget menu, int rootX, int rootY,
+    virtual void popupChoiceMenu(XtWidget menu, int rootX, int rootY,
                                  NotifyProc poppedDown,
                                  void* clientData) = 0;
 };

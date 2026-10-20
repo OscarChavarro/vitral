@@ -1,6 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 #define __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 
+#include <functional>
 #include <pthread.h>
 
 #include "java/lang/String.h"
@@ -18,6 +19,7 @@ private:
     bool threadStarted;
     bool stopRequested;
     java::net::WebSocket* webSocket;
+    std::function<void(bool)> connectionListener;
 
     static void* threadEntry(void* arg);
     void connectAndListen();
@@ -34,6 +36,15 @@ public:
     void addListener(TangibleInterfaceListener* listener);
     void removeListener(TangibleInterfaceListener* listener);
     void run();
+
+    /**
+    Starts the client and reports whether the websocket handshake succeeds,
+    as `run(Consumer<Boolean>)` does in the Java port. The listener, if
+    given, runs in the connection thread.
+    @param connectionListener receives true once the client is ready to
+    receive websocket messages, or false on failure
+    */
+    void run(const std::function<void(bool)>& connectionListener);
     void disconnect();
 };
 

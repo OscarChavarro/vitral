@@ -1,6 +1,8 @@
 #ifndef __SCENE_EDITOR_SCENE__
 #define __SCENE_EDITOR_SCENE__
 
+#include <set>
+
 #include "java/util/ArrayList.h"
 #include "java/io/File.h"
 
@@ -44,6 +46,9 @@ private:
     static ParallelRaytracer* getRaytracer();
     void raytrace(RGBImageUncompressed* outViewport, ZBuffer* outDepth,
                   bool interactiveReport);
+    /// Bodies hidden by the user (i.e. from the scene selector): they are
+    /// neither drawn, picked nor raytraced
+    std::set<SimpleBody*> hiddenBodies;
 
     Scene(const Scene& other);
     Scene& operator=(const Scene& other);
@@ -95,6 +100,16 @@ public:
     @return the new body, owned by the scene
     */
     SimpleBody* addThing(Geometry* g);
+
+    /**
+    @return true if the body was hidden by the user
+    */
+    bool isHidden(SimpleBody* body) const;
+
+    /**
+    Hides a body (it is neither drawn, picked nor raytraced) or shows it.
+    */
+    void setHidden(SimpleBody* body, bool hidden);
     bool doIntersectionFirstHit(const Ray& r, RayHit* info);
 
     /**

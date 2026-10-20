@@ -181,6 +181,17 @@ void Widget::addDialog(WidgetDialog* dialog)
     dialogList.add(dialog);
 }
 
+WidgetDialog* Widget::getDialogById(const java::String& id) const
+{
+    for ( long i = 0; i < dialogList.size(); i++ ) {
+        WidgetDialog* dialog = dialogList.get(i);
+        if ( dialog != nullptr && id.equals(dialog->getId()) ) {
+            return dialog;
+        }
+    }
+    return nullptr;
+}
+
 void Widget::addVariable(WidgetVariable* variable)
 {
     variableList.add(variable);

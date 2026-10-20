@@ -3,8 +3,51 @@
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 
 WidgetDialog::WidgetDialog()
-    : id(""), name(""), orientation(ORIENTATION_VERTICAL), collapsable(false)
+    : id(""), name(""), orientation(ORIENTATION_VERTICAL), collapsable(false),
+      titleKey(""), modal(false)
 {
+}
+
+const java::String& WidgetDialog::getTitleKey() const
+{
+    return titleKey;
+}
+
+void WidgetDialog::setTitleKey(const java::String& titleKey)
+{
+    this->titleKey = titleKey;
+}
+
+bool WidgetDialog::isModal() const
+{
+    return modal;
+}
+
+void WidgetDialog::setModal(bool modal)
+{
+    this->modal = modal;
+}
+
+const std::vector<WidgetDialogElement>& WidgetDialog::getElements() const
+{
+    return elements;
+}
+
+void WidgetDialog::addElement(const WidgetDialogElement& element)
+{
+    elements.push_back(element);
+}
+
+const WidgetDialogElement* WidgetDialog::getElementByAction(
+    const java::String& action) const
+{
+    for ( size_t i = 0; i < elements.size(); i++ ) {
+        const WidgetDialogElement* found = elements[i].findAction(action);
+        if ( found != nullptr ) {
+            return found;
+        }
+    }
+    return nullptr;
 }
 
 bool WidgetDialog::isCollapsable() const

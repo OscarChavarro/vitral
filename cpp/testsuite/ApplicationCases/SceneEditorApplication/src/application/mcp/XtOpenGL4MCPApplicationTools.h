@@ -80,6 +80,47 @@ public:
     */
     java::String exportWorkspaceJpg(const java::String& request);
 
+    //= Dialogs ===========================================================
+
+    /**
+    Opens or refreshes the scene selector dialog (tool `gui.selector.open`).
+    */
+    void openSelector();
+
+    /**
+    Selects a body through the open scene selector (tool
+    `gui.selector.select_body`).
+    @param request request with the argument index (-1 clears)
+    @return the first selected body, as JSON
+    */
+    java::String selectBodyInDialog(const java::String& request);
+
+    /**
+    Runs an action of the open scene selector (tool `gui.selector.action`).
+    @param request request with the argument action
+    */
+    java::String selectorAction(const java::String& request);
+
+    /**
+    Opens the tangible interface connection dialog (tool
+    `gui.tangible.open`).
+    */
+    void openTangibleDialog();
+
+    /**
+    @return the open dialogs and the state of the tangible connection form,
+    as JSON (tool `gui.dialog.state`)
+    */
+    java::String dialogState();
+
+    /**
+    Acts on the tangible connection dialog (tool `gui.tangible.action`).
+    @param request request with the arguments action (connect|cancel) and
+    serviceUrl
+    @return the state of the dialogs, as `dialogState`
+    */
+    java::String tangibleAction(const java::String& request);
+
     //= Application =======================================================
 
     /**

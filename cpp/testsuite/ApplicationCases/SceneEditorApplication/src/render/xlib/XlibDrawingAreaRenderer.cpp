@@ -259,7 +259,7 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         java::ArrayList<SimpleBody*> solids, wires;
         for (long i = 0; i < bodies.size(); ++i) {
             SimpleBody* body = bodies[i];
-            if (!body || !body->getGeometry()) continue;
+            if (!body || !body->getGeometry() || scene->isHidden(body)) continue;
             if (dynamic_cast<Volume*>(body->getGeometry()))
                 solids.add(body);
             else

@@ -1,4 +1,7 @@
 #include <cstdio>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 #include <map>
 #include <vector>
 
@@ -9,6 +12,8 @@
 #include "vsdk/toolkit/gui/widget/WidgetCommand.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenu.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
+#include "vsdk/toolkit/common/VSDKFatalException.h"
+#include "vsdk/toolkit/io/gui/DialogPersistence.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -164,6 +169,24 @@ Widget* GuiI18nContextBuilder::build(const std::string& json,
     std::map<std::string, std::string>::const_iterator message;
     for ( message = messages.begin(); message != messages.end(); ++message ) {
         context->addMessage(message->first.c_str(), message->second.c_str());
+    }
+
+    // The dialogs, shared by every language and port
+    std::string dialogsPath = globalDataPath + "/etc/gui/dialogs.json";
+    std::ifstream dialogs(dialogsPath.c_str());
+    if ( !dialogs ) {
+        delete context;
+        throw VSDKFatalException(
+            ("Could not open dialog definitions: " + dialogsPath).c_str());
+    }
+    std::stringstream dialogsJson;
+    dialogsJson << dialogs.rdbuf();
+    try {
+        DialogPersistence::importDialogs(dialogsJson.str().c_str(), context);
+    }
+    catch ( const std::invalid_argument& e ) {
+        delete context;
+        throw VSDKFatalException(e.what());
     }
     return context;
 }

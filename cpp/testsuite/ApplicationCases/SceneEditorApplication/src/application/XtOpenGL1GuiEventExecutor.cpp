@@ -67,17 +67,16 @@ bool XtOpenGL1GuiEventExecutor::executeXtCommand(const std::string& label)
     std::string path;
 
     //- FILE ----------------------------------------------------------
-    if ( label == "IDC_FILE_QUIT" ) {
+    if ( label == "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT" ) {
+        parent->showTangibleInterfaceDialog();
+    }
+    else if ( label == "IDC_FILE_QUIT" ) {
         parent->closeApplication();
     }
     else if ( label == "IDC_IMPORT_OBJECTS_FROM_FILE" ) {
-        std::vector<FileSuffixFilter> filters;
-        filters.push_back(FileSuffixFilter("3ds", "3ds Kinetix/Discreet 3DStudio/3DStudioMax binary scene file"));
-        filters.push_back(FileSuffixFilter("vtk", "vtk Kitware vtk legacy binary file (mesh only)"));
-        filters.push_back(FileSuffixFilter("gts", "gts Gts mesh ASCII file"));
-        filters.push_back(FileSuffixFilter("obj", "obj Alias/Wavefront text mesh"));
-        filters.push_back(FileSuffixFilter("ply", "ply Ply mesh"));
-        filters.push_back(FileSuffixFilter("ray", "ray MIT raytracing scene"));
+        // The filters of the scene.import dialog of etc/gui/dialogs.json
+        std::vector<FileSuffixFilter> filters =
+            FileSuffixFilter::fromDialog(bridge->getDialogById("scene.import"));
 
         if ( parent->getUiFactory()->showFileDialog(parent, "Open",
                  guiState->getReadFolder().c_str(), filters, path) ) {

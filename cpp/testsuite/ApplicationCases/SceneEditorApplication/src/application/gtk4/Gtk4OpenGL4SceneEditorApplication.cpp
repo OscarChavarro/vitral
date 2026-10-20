@@ -13,12 +13,14 @@
 
 #include <glad/gl.h>
 
+#include "application/TangibleInterfaceConnection.h"
 #include "application/commands/GuiEventExecutor.h"
 #include "java/io/File.h"
 #include "java/lang/NumberFormatException.h"
 #include "java/util/ArrayList.txx"
 #include "model/ApplicationModel.h"
 #include "model/GuiState.h"
+#include "model/dialog/SceneHierarchyPresenter.h"
 #include "model/editor/FunctionalExplicitSurfaceEditor.h"
 #include "render/BodyEditFeedbackProvider.h"
 #include "render/opengl4/XtOpenGL4SceneBridge.h"
@@ -31,11 +33,15 @@
 #include "vsdk/toolkit/gui/Gtk4LabelImageProvider.h"
 #include "vsdk/toolkit/gui/Gtk4System.h"
 #include "vsdk/toolkit/gui/widget/Widget.h"
+#include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 #include "vsdk/toolkit/gui/widget/WidgetButtonGroup.h"
 #include "vsdk/toolkit/gui/widget/WidgetCommand.h"
+#include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenu.h"
 #include "vsdk/toolkit/gui/widget/WidgetMenuItem.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/render/gtk4/Gtk4DialogHost.h"
+#include "vsdk/toolkit/render/gtk4/Gtk4TreeView.h"
 #include "vsdk/toolkit/render/opengl4/OpenGL4Loader.h"
 
 namespace {
@@ -64,6 +70,10 @@ static GLADapiproc gtk4GetProcAddress(const char* name)
     }
     return reinterpret_cast<GLADapiproc>(symbol);
 }
+
+/// Arguments of the editor that GApplication does not know
+/// (`-tangibleServer <url>`), taken out of its command line by `main`
+static std::vector<char*> editorArguments;
 
 static const int INITIAL_SIDE_PANEL_WIDTH = 260;
 static const int MIN_SIDE_PANEL_WIDTH = 220;
@@ -395,6 +405,196 @@ public:
     }
 };
 
+/**
+Dialog to select objects of the scene (`h` key), as `AwtSelectorDialog`:
+a GTK 4 adapter of the `scene.selector` definition of
+`etc/gui/dialogs.json` (built by `Gtk4DialogHost`) for the
+`SceneHierarchyPresenter`. Its tree shows the lights, cameras and geometry
+objects of the scene; selecting rows selects their elements (undoable),
+the Delete key runs the `deleteSelected` action and the context menu of the
+selected bodies runs `toggleVisibility`. It is not modal, and closing it
+only hides it.
+*/
+class Gtk4SelectorDialog {
+private:
+    static constexpr const char* TREE_BINDING = "sceneHierarchy";
+
+    SceneHierarchyPresenter presenter;
+    Gtk4DialogHost::Form* form;
+    DialogTreeNode hierarchy;
+    bool updating;
+    GtkWidget* popover;
+    GtkWidget* popoverButton;
+
+    Gtk4SelectorDialog(const Gtk4SelectorDialog& other);
+    Gtk4SelectorDialog& operator=(const Gtk4SelectorDialog& other);
+
+    Gtk4TreeView* tree() const
+    {
+        return form != nullptr ? form->tree(TREE_BINDING) : nullptr;
+    }
+
+    void collectSelected(const DialogTreeNode* node,
+                         std::vector<const DialogTreeNode*>& selected)
+    {
+        if ( presenter.isSelected(node) ) selected.push_back(node);
+        for ( size_t i = 0; i < node->getChildren().size(); i++ ) {
+            collectSelected(&node->getChildren()[i], selected);
+        }
+    }
+
+    void applyTreeSelection()
+    {
+        if ( !updating && tree() != nullptr ) {
+            presenter.select(tree()->getSelection());
+        }
+    }
+
+    void showPopup(GtkWidget* list, double x, double y)
+    {
+        std::vector<SimpleBody*> bodies =
+            presenter.selectedBodies(tree()->getSelection());
+        if ( bodies.empty() ) return;
+        bool anyHidden = presenter.anyHidden(bodies);
+        if ( popover == nullptr ) {
+            popover = gtk_popover_new();
+            popoverButton = gtk_button_new_with_label("");
+            gtk_button_set_has_frame(GTK_BUTTON(popoverButton), FALSE);
+            g_signal_connect(popoverButton, "clicked",
+                             G_CALLBACK(popupChosenThunk), this);
+            gtk_popover_set_child(GTK_POPOVER(popover), popoverButton);
+            gtk_widget_set_parent(popover, list);
+            // A popover must be unparented before its parent goes
+            g_signal_connect(list, "destroy", G_CALLBACK(listDestroyedThunk), this);
+        }
+        gtk_button_set_label(GTK_BUTTON(popoverButton),
+            presenter.text(anyHidden ? "IDM_SELECTOR_SHOW" : "IDM_SELECTOR_HIDE",
+                           anyHidden ? "Show objects" : "Hide objects").c_str());
+        GdkRectangle pointer = { static_cast<int>(x), static_cast<int>(y), 1, 1 };
+        gtk_popover_set_pointing_to(GTK_POPOVER(popover), &pointer);
+        gtk_popover_popup(GTK_POPOVER(popover));
+    }
+
+    static void popupChosenThunk(GtkButton*, gpointer data)
+    {
+        Gtk4SelectorDialog* self = static_cast<Gtk4SelectorDialog*>(data);
+        gtk_popover_popdown(GTK_POPOVER(self->popover));
+        self->performAction("toggleVisibility");
+    }
+
+    static void listDestroyedThunk(GtkWidget*, gpointer data)
+    {
+        Gtk4SelectorDialog* self = static_cast<Gtk4SelectorDialog*>(data);
+        if ( self->popover != nullptr ) {
+            gtk_widget_unparent(self->popover);
+            self->popover = nullptr;
+            self->popoverButton = nullptr;
+        }
+    }
+
+    static void windowDestroyedThunk(GtkWidget*, gpointer data)
+    {
+        static_cast<Gtk4SelectorDialog*>(data)->form = nullptr;
+    }
+
+public:
+    Gtk4SelectorDialog(GtkWindow* owner, ApplicationModel* model,
+                       const std::function<void()>& repaint)
+        : presenter(model, repaint),
+          form(nullptr),
+          hierarchy("Scene", nullptr),
+          updating(false),
+          popover(nullptr),
+          popoverButton(nullptr)
+    {
+        Widget* messages = model->getI18nContext();
+        const WidgetDialog* definition = messages != nullptr ?
+            messages->getDialogById("scene.selector") : nullptr;
+        if ( definition == nullptr ) {
+            throw std::logic_error("Missing scene.selector dialog");
+        }
+        form = Gtk4DialogHost::form(owner, messages, definition,
+                                    [](const std::string&) {});
+        if ( tree() == nullptr ) {
+            form->close();
+            form = nullptr;
+            throw std::logic_error("The scene.selector dialog has no tree");
+        }
+        gtk_window_set_hide_on_close(GTK_WINDOW(form->dialog()), TRUE);
+        g_signal_connect(form->dialog(), "destroy",
+                         G_CALLBACK(windowDestroyedThunk), this);
+        tree()->setSelectionListener([this]() { applyTreeSelection(); });
+        tree()->setDeleteListener([this]() { performAction("deleteSelected"); });
+        tree()->setContextMenuListener([this](GtkWidget* list, double x, double y) {
+            showPopup(list, x, y);
+        });
+        rebuild();
+    }
+
+    ~Gtk4SelectorDialog()
+    {
+        if ( form != nullptr ) {
+            g_signal_handlers_disconnect_by_data(form->dialog(), this);
+            form->close();
+        }
+    }
+
+    void rebuild()
+    {
+        if ( tree() == nullptr ) return;
+        updating = true;
+        tree()->setRoot(nullptr);
+        hierarchy = presenter.hierarchy();
+        tree()->setRoot(&hierarchy);
+        std::vector<const DialogTreeNode*> selected;
+        collectSelected(&hierarchy, selected);
+        tree()->setSelection(selected);
+        updating = false;
+    }
+
+    void setVisible(bool visible)
+    {
+        if ( form == nullptr ) return;
+        if ( visible ) form->present();
+        else gtk_widget_set_visible(form->dialog(), FALSE);
+    }
+
+    bool isVisible() const
+    {
+        return form != nullptr && gtk_widget_get_visible(form->dialog());
+    }
+
+    void selectBody(int index)
+    {
+        if ( tree() == nullptr ) return;
+        if ( index < 0 ) {
+            tree()->selectOnly(nullptr);
+            return;
+        }
+        // The geometry objects are the third group, as in the Java selector
+        tree()->selectOnly(&hierarchy.getChildren().at(2).getChildren().at(index));
+    }
+
+    void performAction(const std::string& action)
+    {
+        if ( form == nullptr || !form->hasAction(action) ) {
+            throw std::invalid_argument("Unknown selector action: " + action);
+        }
+        if ( action == "deleteSelected" ) {
+            presenter.deleteSelected();
+            rebuild();
+        }
+        else if ( action == "toggleVisibility" ) {
+            std::vector<SimpleBody*> bodies =
+                presenter.selectedBodies(tree()->getSelection());
+            if ( !bodies.empty() ) {
+                presenter.setHidden(bodies, !presenter.anyHidden(bodies));
+                rebuild();
+            }
+        }
+    }
+};
+
 class Gtk4SceneEditor :
     private XtOpenGL4SceneBridge::Listener,
     private Gtk4ModifyPanelHost {
@@ -423,6 +623,12 @@ private:
     double pressX;
     double pressY;
     gint pressCount;
+    TangibleInterfaceConnection tangibleConnection;
+    // Form of the tangible interface connection dialog, while it exists,
+    // and the serial identifying it (answers for older forms are ignored)
+    Gtk4DialogHost::Form* tangibleForm;
+    long tangibleFormSerial;
+    Gtk4SelectorDialog* selectorDialog;
 
 public:
     explicit Gtk4SceneEditor(GtkApplication* app)
@@ -447,12 +653,23 @@ public:
           pressMoved(false),
           pressX(0.0),
           pressY(0.0),
-          pressCount(0)
+          pressCount(0),
+          tangibleConnection([this]() {
+              // From the thread of the network client
+              g_idle_add(tangibleInterfaceEventThunk, this);
+          }),
+          tangibleForm(nullptr),
+          tangibleFormSerial(0),
+          selectorDialog(nullptr)
     {
+        tangibleConnection.processArguments(
+            static_cast<int>(editorArguments.size()), editorArguments.data());
     }
 
     ~Gtk4SceneEditor()
     {
+        delete selectorDialog;
+        selectorDialog = nullptr;
         if ( modifyUpdateSource != 0 ) {
             g_source_remove(modifyUpdateSource);
             modifyUpdateSource = 0;
@@ -688,6 +905,9 @@ private:
 
     void rebuildLocalizedGui()
     {
+        // Its definition and messages belong to the replaced GUI context
+        delete selectorDialog;
+        selectorDialog = nullptr;
         if ( modifyUpdateSource != 0 ) {
             g_source_remove(modifyUpdateSource);
             modifyUpdateSource = 0;
@@ -1194,6 +1414,10 @@ private:
             showImportDialog();
             return;
         }
+        else if ( command == "IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT" ) {
+            showTangibleInterfaceDialog();
+            return;
+        }
         else if ( command == "IDC_RENDERING_RAYTRACING" ) {
             raytracingRequested();
         }
@@ -1218,13 +1442,23 @@ private:
         GtkFileChooserNative* chooser = gtk_file_chooser_native_new(
             "Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN,
             "Open", "Cancel");
-        const char* suffixes[] = { "3ds", "vtk", "gts", "obj", "ply", "ray" };
-        for ( unsigned int i = 0; i < sizeof(suffixes) / sizeof(suffixes[0]); i++ ) {
-            GtkFileFilter* filter = gtk_file_filter_new();
-            std::string name = std::string("*.") + suffixes[i];
-            gtk_file_filter_set_name(filter, name.c_str());
-            gtk_file_filter_add_pattern(filter, name.c_str());
-            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser), filter);
+        // The filters of the scene.import dialog of etc/gui/dialogs.json
+        Widget* context = i18nContext();
+        const WidgetDialog* definition = context != nullptr ?
+            context->getDialogById("scene.import") : nullptr;
+        for ( size_t i = 0; definition != nullptr &&
+                            i < definition->getElements().size(); i++ ) {
+            const WidgetDialogElement& chooserElement = definition->getElements()[i];
+            if ( !chooserElement.getKind().equals("fileChooser") ) continue;
+            for ( size_t j = 0; j < chooserElement.getChildren().size(); j++ ) {
+                const WidgetDialogElement& element = chooserElement.getChildren()[j];
+                if ( !element.getKind().equals("fileFilter") ) continue;
+                DialogFileFilter policy(element.getBinding(), element.getLabelKey());
+                GtkFileFilter* filter = gtk_file_filter_new();
+                gtk_file_filter_set_name(filter, policy.description().c_str());
+                gtk_file_filter_add_suffix(filter, policy.getSuffix().c_str());
+                gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(chooser), filter);
+            }
         }
         g_signal_connect(chooser, "response", G_CALLBACK(importDialogResponseThunk), this);
         gtk_native_dialog_show(GTK_NATIVE_DIALOG(chooser));
@@ -1254,6 +1488,144 @@ private:
             if ( selected != nullptr ) g_object_unref(selected);
         }
         g_object_unref(dialog);
+    }
+
+    //= Tangible interface ================================================
+
+    Widget* i18nContext()
+    {
+        ApplicationModel* model = sceneBridge.getApplicationModel();
+        return model != nullptr ? model->getI18nContext() : nullptr;
+    }
+
+    /**
+    Shows the `tangible.connect` dialog of `etc/gui/dialogs.json`, built by
+    `Gtk4DialogHost`, as `AwtJogl4GuiEventExecutor` does: it closes when
+    the connection succeeds; otherwise its connect button turns red and
+    asks to retry.
+    */
+    void showTangibleInterfaceDialog()
+    {
+        Widget* context = i18nContext();
+        const WidgetDialog* definition = context != nullptr ?
+            context->getDialogById("tangible.connect") : nullptr;
+        if ( definition == nullptr ) {
+            setStatus("Dialog not defined: tangible.connect");
+            return;
+        }
+        if ( tangibleForm != nullptr ) tangibleForm->close();
+        installTangibleDialogStyle();
+        tangibleForm = Gtk4DialogHost::form(GTK_WINDOW(window), context,
+            definition, [this](const std::string& action) {
+                tangibleAction(action);
+            });
+        ++tangibleFormSerial;
+        g_signal_connect(tangibleForm->dialog(), "destroy",
+                         G_CALLBACK(tangibleDialogDestroyedThunk), this);
+        gtk_editable_set_text(GTK_EDITABLE(tangibleForm->field("serviceUrl")),
+                              tangibleConnection.getServiceUrl().c_str());
+        tangibleForm->present();
+    }
+
+    static void installTangibleDialogStyle()
+    {
+        static bool installed = false;
+        if ( installed ) return;
+        installed = true;
+        GtkCssProvider* provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_string(provider,
+            "button.tangible-retry { background: #ff0000; color: #ffffff; }");
+        gtk_style_context_add_provider_for_display(gdk_display_get_default(),
+            GTK_STYLE_PROVIDER(provider),
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        g_object_unref(provider);
+    }
+
+    void tangibleAction(const std::string& action)
+    {
+        Gtk4DialogHost::Form* form = tangibleForm;
+        if ( form == nullptr ) return;
+        if ( action == "cancel" ) {
+            form->close();
+            return;
+        }
+        if ( action != "connect" ) return;
+        std::string serviceUrl = gtk_editable_get_text(
+            GTK_EDITABLE(form->field("serviceUrl")));
+        size_t start = serviceUrl.find_first_not_of(" \t");
+        serviceUrl = start == std::string::npos ? std::string() :
+            serviceUrl.substr(start, serviceUrl.find_last_not_of(" \t") - start + 1);
+        form->session()->setDraft("serviceUrl", serviceUrl.c_str());
+        if ( serviceUrl.empty() ) return;
+        long request = form->session()->beginAction();
+        if ( request < 0 ) return;
+
+        GtkWidget* button = form->action("connect");
+        gtk_widget_remove_css_class(button, "tangible-retry");
+        gtk_button_set_label(GTK_BUTTON(button),
+                             message("IDM_TANGIBLE_INTERFACE_CONNECT").c_str());
+        long serial = tangibleFormSerial;
+        tangibleConnection.connect(serviceUrl, [this, serial, request](bool connected) {
+            // From the thread of the network client
+            TangibleConnectionResult* result = new TangibleConnectionResult;
+            result->editor = this;
+            result->serial = serial;
+            result->request = request;
+            result->connected = connected;
+            g_idle_add(tangibleConnectionFinishedThunk, result);
+        });
+    }
+
+    void tangibleConnectionFinished(long serial, long request, bool connected)
+    {
+        if ( tangibleForm == nullptr || serial != tangibleFormSerial ||
+             !tangibleForm->session()->completeAction(request) ) {
+            return;
+        }
+        if ( connected ) {
+            tangibleForm->close();
+            return;
+        }
+        GtkWidget* button = tangibleForm->action("connect");
+        gtk_widget_add_css_class(button, "tangible-retry");
+        gtk_button_set_label(GTK_BUTTON(button),
+            message("IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY").c_str());
+    }
+
+    struct TangibleConnectionResult {
+        Gtk4SceneEditor* editor;
+        long serial;
+        long request;
+        bool connected;
+    };
+
+    static void tangibleDialogDestroyedThunk(GtkWidget* dialog, gpointer data)
+    {
+        Gtk4SceneEditor* self = static_cast<Gtk4SceneEditor*>(data);
+        if ( g_object_get_data(G_OBJECT(dialog), "vitral-dialog-form") ==
+             self->tangibleForm ) {
+            self->tangibleForm = nullptr;
+        }
+    }
+
+    static gboolean tangibleConnectionFinishedThunk(gpointer data)
+    {
+        TangibleConnectionResult* result =
+            static_cast<TangibleConnectionResult*>(data);
+        result->editor->tangibleConnectionFinished(
+            result->serial, result->request, result->connected);
+        delete result;
+        return G_SOURCE_REMOVE;
+    }
+
+    static gboolean tangibleInterfaceEventThunk(gpointer data)
+    {
+        Gtk4SceneEditor* self = static_cast<Gtk4SceneEditor*>(data);
+        if ( self->tangibleConnection.applyPendingEvent(
+                 self->sceneBridge.getApplicationModel()) ) {
+            self->repaintRequested();
+        }
+        return G_SOURCE_REMOVE;
     }
 
     static bool isLanguageCommand(const std::string& command)
@@ -1549,7 +1921,18 @@ private:
 
     void selectorDialogRequested() override
     {
-        setStatus("Selector dialog is not implemented in the GTK4 example yet");
+        try {
+            if ( selectorDialog == nullptr ) {
+                selectorDialog = new Gtk4SelectorDialog(GTK_WINDOW(window),
+                    sceneBridge.getApplicationModel(),
+                    [this]() { repaintRequested(); });
+            }
+            selectorDialog->rebuild();
+            selectorDialog->setVisible(true);
+        }
+        catch ( const std::exception& e ) {
+            setStatus(e.what());
+        }
     }
 
     void imageRequested(RGBImageUncompressed*) override
@@ -1578,6 +1961,23 @@ static void activate(GtkApplication* app, gpointer)
 
 int main(int argc, char** argv)
 {
+    // GApplication rejects the options it does not know
+    std::vector<char*> gtkArguments;
+    editorArguments.push_back(argv[0]);
+    gtkArguments.push_back(argv[0]);
+    for ( int i = 1; i < argc; i++ ) {
+        if ( std::strcmp(argv[i], "-tangibleServer") == 0 && i + 1 < argc ) {
+            editorArguments.push_back(argv[i]);
+            editorArguments.push_back(argv[++i]);
+        }
+        else {
+            gtkArguments.push_back(argv[i]);
+        }
+    }
+    argc = static_cast<int>(gtkArguments.size());
+    gtkArguments.push_back(nullptr);
+    argv = gtkArguments.data();
+
     GtkApplication* app = gtk_application_new(
         "org.vitral.SceneEditorApplication.Gtk4", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), nullptr);

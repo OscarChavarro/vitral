@@ -236,6 +236,21 @@ SimpleBody* Scene::addThing(Geometry* g)
     return thing;
 }
 
+bool Scene::isHidden(SimpleBody* body) const
+{
+    return hiddenBodies.find(body) != hiddenBodies.end();
+}
+
+void Scene::setHidden(SimpleBody* body, bool hidden)
+{
+    if ( hidden ) {
+        hiddenBodies.insert(body);
+    }
+    else {
+        hiddenBodies.erase(body);
+    }
+}
+
 bool Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
 {
     int i;
@@ -248,6 +263,7 @@ bool Scene::doIntersectionFirstHit(const Ray& inRay, RayHit* info)
 
     for ( i = 0; i < things.size(); i++ ) {
         gi = things.get(i);
+        if ( isHidden(gi) ) continue;
         RayHit hit;
         hit.setStoreRay(true);
         if ( gi->doIntersectionFirstHit(r, &hit) ) {
@@ -338,6 +354,7 @@ void Scene::importMitScene(const java::File& file)
     scene->setActiveCameraIndex(imported.getActiveCameraIndex());
     scene->setActiveBackgroundIndex(imported.getActiveBackgroundIndex());
     bodies.clear(); lights.clear(); backgrounds.clear(); cameras.clear();
+    hiddenBodies.clear();
 
     activeCamera = scene->getActiveCamera();
     cubemapBackground = nullptr;
@@ -458,8 +475,15 @@ void Scene::raytrace(RGBImageUncompressed* outViewport, ZBuffer* outDepth,
     }
 
     // The snapshot owns the camera snapshot
-    SimpleSceneSnapshot* sceneSnapshot =
-        scene->exportToSimpleSceneSnapshot(cameraSnapshot, activeBackground);
+    java::ArrayList<SimpleBody*> visibleBodies;
+    java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
+    for ( long i = 0; i < bodies.size(); i++ ) {
+        if ( !isHidden(bodies.get(i)) ) {
+            visibleBodies.add(bodies.get(i));
+        }
+    }
+    SimpleSceneSnapshot* sceneSnapshot = new SimpleSceneSnapshot(
+        visibleBodies, scene->getLights(), activeBackground, cameraSnapshot);
     long long initialTime = java::System::currentTimeMillis();
     getRaytracer()->execute(outViewport, outDepth,
         outDepth != nullptr ? DepthBufferMode::OPENGL_DEPTH :

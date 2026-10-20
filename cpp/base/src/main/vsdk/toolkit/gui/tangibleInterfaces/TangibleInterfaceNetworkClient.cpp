@@ -52,9 +52,16 @@ void TangibleInterfaceNetworkClient::removeListener(TangibleInterfaceListener* l
 
 void TangibleInterfaceNetworkClient::run()
 {
+    run(std::function<void(bool)>());
+}
+
+void TangibleInterfaceNetworkClient::run(
+    const std::function<void(bool)>& connectionListener)
+{
     if ( threadStarted ) {
         return;
     }
+    this->connectionListener = connectionListener;
     threadStarted = pthread_create(&connectionThread, 0, threadEntry, this) == 0;
 }
 
@@ -86,7 +93,17 @@ void TangibleInterfaceNetworkClient::connectAndListen()
     webSocket = java::net::WebSocket::connect(serviceUrl);
     if ( webSocket == 0 ) {
         std::printf("Tangible interface server not found at %s\n", serviceUrl.c_str());
+        if ( connectionListener ) {
+            connectionListener(false);
+        }
         return;
+    }
+    if ( stopRequested ) {
+        webSocket->close();
+        return;
+    }
+    if ( connectionListener ) {
+        connectionListener(true);
     }
 
     while ( !stopRequested ) {

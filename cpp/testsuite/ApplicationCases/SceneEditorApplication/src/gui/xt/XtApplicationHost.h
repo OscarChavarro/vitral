@@ -1,6 +1,7 @@
 #ifndef __XT_APPLICATION_HOST__
 #define __XT_APPLICATION_HOST__
 
+#include <functional>
 #include <string>
 
 #include <X11/Intrinsic.h>
@@ -8,7 +9,9 @@
 #include "application/XtSceneEditorOpenGLVariant.h"
 #include "gui/xt/XtModifyPanelHost.h"
 
+class ApplicationModel;
 class RGBImageUncompressed;
+class WidgetDialog;
 class XtUiFactory;
 
 /**
@@ -24,6 +27,11 @@ public:
     @return the scene model, its commands and its drawing area
     */
     virtual XtOpenGLSceneBridge* getSceneBridge() = 0;
+
+    /**
+    @return technology independent model of the application
+    */
+    virtual ApplicationModel* getApplicationModel() = 0;
 
     /**
     @return the widget set of the GUI and its file dialog
@@ -63,6 +71,32 @@ public:
     @param language identifier of a language (i.e. "spanish")
     */
     virtual void setGuiLanguage(const std::string& language) = 0;
+
+    /**
+    Shows the dialog to connect with a tangible interface service.
+    */
+    virtual void showTangibleInterfaceDialog() = 0;
+
+    /**
+    @return the URL of the tangible interface service last used
+    */
+    virtual std::string getTangibleServiceUrl() = 0;
+
+    /**
+    Connects with a tangible interface service, replacing the current
+    connection.
+    @param serviceUrl websocket URL of the service
+    @param connectionListener receives, in the thread of the Xt event loop,
+    whether the connection succeeded
+    */
+    virtual void connectTangibleInterface(const std::string& serviceUrl,
+        const std::function<void(bool)>& connectionListener) = 0;
+
+    /**
+    @param id identifier of a dialog of `etc/gui/dialogs.json`
+    @return its definition in the GUI context, or null
+    */
+    virtual const WidgetDialog* getDialogById(const char* id) = 0;
 
     /**
     Ray traces the scene into the raytraced image of the application model.

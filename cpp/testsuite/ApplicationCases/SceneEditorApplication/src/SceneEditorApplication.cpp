@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <functional>
 #include <clocale>
 #include <fstream>
 #include <map>
@@ -41,6 +42,7 @@
 #include "application/mcp/XtOpenGL4VitralEditorMCP.h"
 #include "render/opengl4/XtOpenGL4SceneBridge.h"
 #endif
+#include "application/TangibleInterfaceConnection.h"
 #include "application/XtSceneEditorOpenGLVariant.h"
 #include "gui/PopupDismissClickFilter.h"
 #include "gui/xt/XtApplicationHost.h"
@@ -51,6 +53,7 @@
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "gui/xt/XtSelectorDialog.h"
+#include "gui/xt/XtTangibleInterfaceDialog.h"
 #include "gui/xt/XtUiFactory.h"
 #include "vsdk/toolkit/render/xt/XtGuiRenderer.h"
 #include "model/GuiState.h"
@@ -104,6 +107,23 @@ static GLADapiproc glxGetProcAddress(const char* name)
 typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
 
 class SceneEditorApplication;
+
+/**
+A task for `XtEventQueue`, given as a function.
+*/
+class FunctionTask : public java::Runnable {
+private:
+    std::function<void()> function;
+
+public:
+    explicit FunctionTask(const std::function<void()>& function)
+        : function(function) {}
+
+    virtual void run() override
+    {
+        function();
+    }
+};
 
 struct TabBinding {
     SceneEditorApplication* application;
@@ -162,6 +182,13 @@ public:
         , executor(nullptr)
         , imageControlWindow(nullptr)
         , selectorDialog(nullptr)
+        , tangibleDialog(nullptr)
+        , tangibleConnection([this]() {
+              // From the thread of the network client
+              XtEventQueue::invokeLater(new FunctionTask([this]() {
+                  applyTangibleInterfaceEvent();
+              }));
+          })
         , automationService(nullptr)
         , viewportMenu(nullptr)
         , labelProvider(nullptr)
@@ -204,6 +231,8 @@ public:
         imageControlWindow = nullptr;
         delete selectorDialog;
         selectorDialog = nullptr;
+        delete tangibleDialog;
+        tangibleDialog = nullptr;
         cleanupOpenGL();
         // The editors stop listening to the entities before the scene goes
         if (sceneBridge != nullptr) sceneBridge->setBodyEditFeedbackProvider(nullptr);
@@ -261,6 +290,7 @@ public:
         bool withAutomationService = false;
         for (int i = 1; i < argc; ++i)
             if (std::string(argv[i]) == "-s") withAutomationService = true;
+        tangibleConnection.processArguments(argc, argv);
         try {
             createWindow(argc, argv);
             createContext();
@@ -314,6 +344,8 @@ private:
     XtOpenGLGuiEventExecutor* executor;
     XtImageControlWindow* imageControlWindow;
     XtSelectorDialog* selectorDialog;
+    XtTangibleInterfaceDialog* tangibleDialog;
+    TangibleInterfaceConnection tangibleConnection;
     XtOpenGLVitralEditorMCP* automationService;
     Widget viewportMenu;
     /// Commands of the items of the viewport menu shown
@@ -684,6 +716,8 @@ private:
         imageControlWindow = nullptr;
         delete selectorDialog;
         selectorDialog = nullptr;
+        // Its form uses the font set: built again when shown
+        if (tangibleDialog != nullptr) tangibleDialog->discard();
         applyFullScreenGuiMode();
         requestRedraw();
     }
@@ -851,6 +885,7 @@ private:
         imageControlWindow = nullptr;
         delete selectorDialog;
         selectorDialog = nullptr;
+        if (tangibleDialog != nullptr) tangibleDialog->discard();
         if (shell != nullptr) XtDestroyWidget(shell);
         XSync(display, False);
         shell = workspace = menuBar = drawingCanvas = nullptr;
@@ -1632,12 +1667,21 @@ private:
     void selectorDialogRequested() override
     {
         if (selectorDialog == nullptr) selectorDialog = new XtSelectorDialog(this);
+        selectorDialog->rebuild();
         selectorDialog->setVisible(true);
     }
 
     void imageRequested(RGBImageUncompressed* image) override
     {
         showImage(image);
+    }
+
+    //= Tangible interface ================================================
+
+    void applyTangibleInterfaceEvent()
+    {
+        if (tangibleConnection.applyPendingEvent(getApplicationModel()))
+            requestRedraw();
     }
 
     //= XtApplicationHost =================================================
@@ -1687,6 +1731,34 @@ private:
         scheduleMenuRebuild(language);
     }
 
+    void showTangibleInterfaceDialog() override
+    {
+        if (tangibleDialog == nullptr)
+            tangibleDialog = new XtTangibleInterfaceDialog(this);
+        tangibleDialog->show();
+    }
+
+    std::string getTangibleServiceUrl() override
+    {
+        return tangibleConnection.getServiceUrl();
+    }
+
+    void connectTangibleInterface(const std::string& serviceUrl,
+        const std::function<void(bool)>& connectionListener) override
+    {
+        tangibleConnection.connect(serviceUrl, [connectionListener](bool connected) {
+            // From the thread of the network client
+            XtEventQueue::invokeLater(new FunctionTask([connectionListener, connected]() {
+                connectionListener(connected);
+            }));
+        });
+    }
+
+    const WidgetDialog* getDialogById(const char* id) override
+    {
+        return sceneBridge != nullptr ? sceneBridge->getDialogById(id) : nullptr;
+    }
+
     //= XtOpenGLSceneEditorApplication ====================================
 
     ApplicationModel* getApplicationModel() override
@@ -1734,6 +1806,58 @@ private:
     {
         return executor != nullptr &&
             executor->executeCommand("IDC_IMPORT_OBJECTS_FROM_FILE");
+    }
+
+    void openSelectorDialog() override
+    {
+        selectorDialogRequested();
+    }
+
+    bool isSelectorDialogVisible() override
+    {
+        return selectorDialog != nullptr && selectorDialog->isVisible();
+    }
+
+    void selectorSelectBody(int index) override
+    {
+        if (selectorDialog != nullptr) selectorDialog->selectBody(index);
+    }
+
+    void selectorAction(const java::String& action) override
+    {
+        if (selectorDialog != nullptr) selectorDialog->performAction(action.c_str());
+    }
+
+    void openTangibleInterfaceDialog() override
+    {
+        if (executor != nullptr)
+            executor->executeCommand("IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT");
+    }
+
+    bool isTangibleInterfaceDialogVisible() override
+    {
+        return tangibleDialog != nullptr && tangibleDialog->isVisible();
+    }
+
+    java::String getTangibleInterfaceDialogServiceUrl() override
+    {
+        return tangibleDialog != nullptr ?
+            tangibleDialog->getServiceUrl().c_str() : "";
+    }
+
+    java::String getTangibleInterfaceDialogConnectLabel() override
+    {
+        return tangibleDialog != nullptr ?
+            tangibleDialog->getConnectLabel().c_str() : "";
+    }
+
+    bool tangibleInterfaceDialogAction(const java::String& action,
+                                       const java::String* serviceUrl) override
+    {
+        if (tangibleDialog == nullptr) return false;
+        std::string url = serviceUrl != nullptr ? serviceUrl->c_str() : "";
+        return tangibleDialog->performAction(action.c_str(),
+                                             serviceUrl != nullptr ? &url : nullptr);
     }
 
     void closeApplication() override

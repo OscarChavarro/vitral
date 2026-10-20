@@ -183,6 +183,26 @@ java::String XtOpenGL4VitralEditorMCPProtocol::executeTool(
     if ( tool.equals("gui.import_scene_dialog") ) {
         return applicationTools.showImportDialog();
     }
+    if ( tool.equals("gui.dialog.state") ) {
+        return applicationTools.dialogState();
+    }
+    if ( tool.equals("gui.selector.open") ) {
+        applicationTools.openSelector();
+        return applicationTools.dialogState();
+    }
+    if ( tool.equals("gui.selector.select_body") ) {
+        return applicationTools.selectBodyInDialog(request);
+    }
+    if ( tool.equals("gui.selector.action") ) {
+        return applicationTools.selectorAction(request);
+    }
+    if ( tool.equals("gui.tangible.open") ) {
+        applicationTools.openTangibleDialog();
+        return "{\"ok\":true}";
+    }
+    if ( tool.equals("gui.tangible.action") ) {
+        return applicationTools.tangibleAction(request);
+    }
     if ( tool.equals("viewport.project") ) {
         return applicationTools.projectSelectedBody(request);
     }
@@ -223,6 +243,12 @@ java::String XtOpenGL4VitralEditorMCPProtocol::toolsJson()
         + "," + MCPJson::tool("gui.mouse", "Send a mouse event to the drawing area. Arguments: type (move|press|drag|release), x, y (logical pixels of the drawing area, as given by viewport.project), button (1 left, 2 middle, 3 right; default 1). Returns the scene state.")
         + "," + MCPJson::tool("gui.key", "Send a key press to the drawing area. Arguments: key (a single character, or tab|enter|backspace|delete|escape|left|right|up|down|pageup|pagedown|num0..num9|num/|num*|num-|num+|num.|numenter), shift (default false), ctrl (default false; i.e. key z with ctrl is undo, y with ctrl is redo, and with shift too they work over the view of the selected viewport). Returns the scene state.")
         + "," + MCPJson::tool("gui.import_scene_dialog", "Open the native File > Import scene chooser. The call returns after the user selects a file or cancels it.")
+        + "," + MCPJson::tool("gui.dialog.state", "Describe open widget dialogs and tangible connection form state.")
+        + "," + MCPJson::tool("gui.selector.open", "Open or refresh the scene hierarchy dialog.")
+        + "," + MCPJson::tool("gui.selector.select_body", "Select a geometry body through the open hierarchy dialog. Arguments: index, or -1 to clear.")
+        + "," + MCPJson::tool("gui.selector.action", "Run a selector dialog action. Arguments: action (deleteSelected|toggleVisibility).")
+        + "," + MCPJson::tool("gui.tangible.open", "Open the tangible interface connection dialog.")
+        + "," + MCPJson::tool("gui.tangible.action", "Act on the tangible connection dialog. Arguments: action (connect|cancel), serviceUrl (when connecting).")
         + "," + MCPJson::tool("gui.command", "Execute a command of the GUI that works only over the model, as its menu item or button does (i.e. IDC_CREATE_SPHERE, IDC_CREATE_FUNCTIONALEXPLICITSURFACE, IDC_CREATE_OMNILIGHT, IDC_TOOLS_RAY, IDC_OTHERS_CYCLE_BACKGROUND). Arguments: command. Returns result (DONE, FAILED or NOT_HANDLED for commands that need the GUI, i.e. file dialogs) and the status message.")
         + "," + MCPJson::tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
         + "," + MCPJson::tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")

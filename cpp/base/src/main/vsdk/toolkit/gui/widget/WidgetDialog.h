@@ -1,7 +1,10 @@
 #ifndef __WIDGET_DIALOG__
 #define __WIDGET_DIALOG__
 
+#include <vector>
+
 #include "java/util/ArrayList.h"
+#include "vsdk/toolkit/gui/widget/WidgetDialogElement.h"
 #include "vsdk/toolkit/gui/widget/WidgetElement.h"
 
 /**
@@ -26,6 +29,9 @@ private:
     java::ArrayList<java::String> pendingDialogNames;
     java::ArrayList<java::String> pendingDialogRefNames;
     bool collapsable;
+    java::String titleKey;
+    bool modal;
+    std::vector<WidgetDialogElement> elements;
 
 public:
     static const int ORIENTATION_HORIZONTAL = 0x01;
@@ -33,6 +39,26 @@ public:
 
     WidgetDialog();
     virtual ~WidgetDialog() {}
+
+    /**
+    @return key of the message of the title of the dialog
+    */
+    const java::String& getTitleKey() const;
+    void setTitleKey(const java::String& titleKey);
+    bool isModal() const;
+    void setModal(bool modal);
+
+    /**
+    @return the ordered, toolkit-independent content of the dialog
+    */
+    const std::vector<WidgetDialogElement>& getElements() const;
+    void addElement(const WidgetDialogElement& element);
+
+    /**
+    @return the first element (in depth) with the given action, or null
+    */
+    const WidgetDialogElement* getElementByAction(
+        const java::String& action) const;
 
     bool isCollapsable() const;
     void setCollapsable(bool collapsable);

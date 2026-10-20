@@ -62,6 +62,59 @@ public:
     virtual bool showImportSceneDialog() = 0;
 
     /**
+    Opens the tangible interface connection dialog, as its GUI command does
+    (`IDC_TOOLS_TANGIBLE_INTERFACE_CLIENT`).
+    */
+    virtual void openTangibleInterfaceDialog() = 0;
+
+    /**
+    @return true while the tangible interface connection dialog is shown
+    */
+    virtual bool isTangibleInterfaceDialogVisible() = 0;
+
+    /**
+    @return text of the service URL field of the tangible interface dialog
+    */
+    virtual java::String getTangibleInterfaceDialogServiceUrl() = 0;
+
+    /**
+    @return text of the connect button of the tangible interface dialog
+    */
+    virtual java::String getTangibleInterfaceDialogConnectLabel() = 0;
+
+    /**
+    Clicks a button of the tangible interface dialog.
+    @param action "connect" or "cancel"
+    @param serviceUrl if not null, typed in the field before connecting
+    @return false if the action is not a button of the dialog
+    */
+    virtual bool tangibleInterfaceDialogAction(const java::String& action,
+        const java::String* serviceUrl) = 0;
+
+    /**
+    Opens (or refreshes) the scene selector dialog, as its key does.
+    */
+    virtual void openSelectorDialog() = 0;
+
+    /**
+    @return true while the scene selector dialog is shown
+    */
+    virtual bool isSelectorDialogVisible() = 0;
+
+    /**
+    Selects a geometry object through the tree of the scene selector.
+    @param index index of the body, or negative to clear the selection
+    */
+    virtual void selectorSelectBody(int index) = 0;
+
+    /**
+    Runs an action of the scene selector (deleteSelected,
+    toggleVisibility).
+    @throws std::invalid_argument for unknown actions
+    */
+    virtual void selectorAction(const java::String& action) = 0;
+
+    /**
     Ends the application.
     */
     virtual void closeApplication() = 0;
