@@ -142,6 +142,9 @@ public:
         , workspace(nullptr)
         , menuBar(nullptr)
         , drawingCanvas(nullptr)
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        , cpuShellMode(false)
+#endif
         , visual(nullptr)
         , visualDepth(0)
         , colormap(0)
@@ -207,9 +210,10 @@ public:
         delete modifyPanel;
         modifyPanel = nullptr;
         if (sceneBridge != nullptr) {
-            if (display != nullptr && context != nullptr)
+            if (display != nullptr && context != nullptr && window != 0) {
                 glXMakeCurrent(display, window, context);
-            sceneBridge->dispose();
+                sceneBridge->dispose();
+            }
             delete sceneBridge;
             sceneBridge = nullptr;
         }
@@ -316,6 +320,9 @@ private:
     std::vector<std::string> viewportMenuCommands;
     XlibLabelImageProvider* labelProvider;
     Window window;
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    bool cpuShellMode;
+#endif
     GLXFBConfig fbConfig;
     GLXContext context;
 #ifndef VITRAL_SCENE_EDITOR_OPENGL1
@@ -350,6 +357,8 @@ private:
     unsigned int lastClickButton;
     long long lastClickTime;
     int clickCount;
+
+    Widget activeCanvas() const { return drawingCanvas; }
 
     static std::string selectedGuiLanguage()
     {
@@ -730,115 +739,140 @@ private:
         selectGuiLocale();
         XtToolkitInitialize();
         appContext = XtCreateApplicationContext();
-        // Tasks of other threads (the automation service) run in its loop
         XtEventQueue::install(appContext);
-        display = XtOpenDisplay(
-            appContext,
-            nullptr,
-            "scene-editor",
-            "SceneEditorApplication",
-            nullptr,
-            0,
-            &argc,
-            argv);
-        if (display == nullptr) {
+        display = XtOpenDisplay(appContext, nullptr, "scene-editor",
+            "SceneEditorApplication", nullptr, 0, &argc, argv);
+        if (display == nullptr)
             throw VSDKFatalException("Could not open X display. Is DISPLAY set?");
-        }
         loadResourceFile();
         const int screen = DefaultScreen(display);
-        // Request a screen-sized client area at the upper-left corner.  This
-        // keeps the window manager's title bar and borders, unlike fullscreen.
         width = DisplayWidth(display, screen);
         height = DisplayHeight(display, screen);
         createMenuFontSet();
-        XVisualInfo* visualInfo = chooseVisual();
-        visual = visualInfo->visual;
-        visualDepth = visualInfo->depth;
-        colormap = XCreateColormap(
-            display,
-            RootWindow(display, visualInfo->screen),
-            visual,
-            AllocNone);
+        buildShell(false);
+    }
+
+    void buildShell(bool cpu)
+    {
+        const int screen = DefaultScreen(display);
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        if (cpu) {
+            visual = DefaultVisual(display, screen);
+            visualDepth = DefaultDepth(display, screen);
+            colormap = DefaultColormap(display, screen);
+            fbConfig = nullptr;
+        }
+        else
+#endif
+        {
+            XVisualInfo* visualInfo = chooseVisual();
+            visual = visualInfo->visual;
+            visualDepth = visualInfo->depth;
+            colormap = XCreateColormap(display,
+                RootWindow(display, visualInfo->screen), visual, AllocNone);
+            XFree(visualInfo);
+        }
 
         Arg args[9];
         Cardinal n = 0;
-        // The shell accepts the keyboard focus from the window manager, so
-        // it can redirect it to the drawing canvas (see
-        // XtWidgetSet::setKeyboardFocus)
-        XtSetArg(args[n], XtNinput, True); n++;
-        XtSetArg(args[n], XtNvisual, visual); n++;
-        XtSetArg(args[n], XtNcolormap, colormap); n++;
-        XtSetArg(args[n], XtNdepth, visualDepth); n++;
-        XtSetArg(args[n], XtNwidth, width); n++;
-        XtSetArg(args[n], XtNheight, height); n++;
+        XtSetArg(args[n], XtNinput, True); ++n;
+        XtSetArg(args[n], XtNvisual, visual); ++n;
+        XtSetArg(args[n], XtNcolormap, colormap); ++n;
+        XtSetArg(args[n], XtNdepth, visualDepth); ++n;
+        XtSetArg(args[n], XtNwidth, width); ++n;
+        XtSetArg(args[n], XtNheight, height); ++n;
 #ifdef VITRAL_SCENE_EDITOR_OPENGL1
         const std::string title = std::string("VITRAL Scene Editor - ") +
-            widgetSet->getName() + " GLX OpenGL 1.2";
+            widgetSet->getName() + (cpu ? " Xlib CPU hidden lines" :
+                                        " GLX OpenGL 1.2");
 #else
         const std::string title = std::string("VITRAL Scene Editor - ") +
             widgetSet->getName() + " GLX OpenGL 4";
 #endif
-        XtSetArg(args[n], XtNtitle, title.c_str()); n++;
-        XtSetArg(args[n], XtNx, 0); n++;
-        XtSetArg(args[n], XtNy, 0); n++;
-
-        // An application shell: only for it Xt starts the resource path of
-        // the widgets with the application class, so the entries of the
-        // XResources file (`SceneEditorApplication*...`) apply
-        shell = XtAppCreateShell(
-            "sceneEditor",
-            "SceneEditorApplication",
-            applicationShellWidgetClass,
-            display,
-            args,
-            n);
-        if (shell == nullptr) {
-            XFree(visualInfo);
+        XtSetArg(args[n], XtNtitle, title.c_str()); ++n;
+        XtSetArg(args[n], XtNx, 0); ++n;
+        XtSetArg(args[n], XtNy, 0); ++n;
+        shell = XtAppCreateShell("sceneEditor", "SceneEditorApplication",
+                                 applicationShellWidgetClass, display, args, n);
+        if (shell == nullptr)
             throw VSDKFatalException("Could not create Xt shell");
-        }
-
         workspace = panelWidgets->createPanel(shell, "workspace", 0, 0,
                                               width, height, true);
-        widgetSet->setWindowCloseHandler(
-            shell, &SceneEditorApplication::closeRequestedByWindowManager, this);
+        widgetSet->setWindowCloseHandler(shell,
+            &SceneEditorApplication::closeRequestedByWindowManager, this);
 
-        // The model is created first: the GUI is built from its I18N context
-        labelProvider = new XlibLabelImageProvider(display);
-        sceneBridge = new XtOpenGLSceneBridge(labelProvider, this);
-        loadGuiDefinition();
-        executor = new XtOpenGLGuiEventExecutor(this);
+        if (sceneBridge == nullptr) {
+            labelProvider = new XlibLabelImageProvider(display);
+            sceneBridge = new XtOpenGLSceneBridge(labelProvider, this);
+            loadGuiDefinition();
+            executor = new XtOpenGLGuiEventExecutor(this);
+        }
         createMenuBar();
         createGlobalBar();
         createRightPanel();
         createStatusBar();
         canvasWidth = width - SIDE_PANEL_WIDTH;
         canvasHeight = height - contentTop() - STATUS_BAR_HEIGHT;
-        drawingCanvas = widgetSet->createDrawingArea(
-            workspace, "drawingCanvas", 0, contentTop(), canvasWidth,
-            canvasHeight);
-
-        // Every mouse and keyboard event of the canvas is captured and
-        // converted to a vitral event for the interaction techniques
-        XtAddEventHandler(
-            drawingCanvas,
+        drawingCanvas = widgetSet->createDrawingArea(workspace,
+            "drawingCanvas", 0, contentTop(), canvasWidth, canvasHeight);
+        XtAddEventHandler(drawingCanvas,
             ExposureMask | StructureNotifyMask |
             KeyPressMask | KeyReleaseMask |
             ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-            EnterWindowMask,
-            False,
-            &SceneEditorApplication::eventHandler,
+            EnterWindowMask, False, &SceneEditorApplication::eventHandler,
             reinterpret_cast<XtPointer>(this));
-
-        // Keys typed anywhere in the window (i.e. with the pointer over the
-        // side panel) are redirected to the canvas
         widgetSet->setKeyboardFocus(shell, drawingCanvas);
-
         XtRealizeWidget(shell);
         window = XtWindow(drawingCanvas);
         widgetSet->setKeyboardFocus(shell, drawingCanvas);
-
-        XFree(visualInfo);
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        cpuShellMode = cpu;
+#endif
     }
+
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+    void rebuildShell(bool cpu)
+    {
+        if (cpu == cpuShellMode) return;
+        ready = false;
+        if (context != nullptr) {
+            glXMakeCurrent(display, window, context);
+            sceneBridge->dispose();
+            glXMakeCurrent(display, None, nullptr);
+            glXDestroyContext(display, context);
+            context = nullptr;
+        }
+        sceneBridge->setBodyEditFeedbackProvider(nullptr);
+        delete modifyPanel;
+        modifyPanel = nullptr;
+        clearCreationSections();
+        clearSideBindings();
+        delete imageControlWindow;
+        imageControlWindow = nullptr;
+        delete selectorDialog;
+        selectorDialog = nullptr;
+        if (shell != nullptr) XtDestroyWidget(shell);
+        XSync(display, False);
+        shell = workspace = menuBar = drawingCanvas = nullptr;
+        rightPanel = creationPage = modifyPage = guiPage = nullptr;
+        othersPage = renderPage = globalBar = statusBar = nullptr;
+        viewportMenu = nullptr;
+        viewportMenuCommands.clear();
+        window = 0;
+        if (colormap != 0 && colormap != DefaultColormap(display, DefaultScreen(display)))
+            XFreeColormap(display, colormap);
+        colormap = 0;
+        buildShell(cpu);
+        if (!cpu) {
+            XSync(display, False);
+            createContext();
+            initOpenGL();
+        }
+        else {
+            ready = true;
+        }
+    }
+#endif
 
     XVisualInfo* chooseVisual()
     {
@@ -1144,9 +1178,21 @@ private:
 
     void redraw()
     {
-        if (!ready || display == nullptr || context == nullptr) {
+        if (!ready || display == nullptr) return;
+#ifdef VITRAL_SCENE_EDITOR_OPENGL1
+        if (sceneBridge != nullptr &&
+            sceneBridge->usesXlibRendering() != cpuShellMode)
+            rebuildShell(sceneBridge->usesXlibRendering());
+        if (cpuShellMode) {
+            const int screen = DefaultScreen(display);
+            sceneBridge->setScreenResolution(DisplayWidth(display, screen),
+                                             DisplayHeight(display, screen));
+            sceneBridge->displayXlib(display, window, visual, visualDepth,
+                                     canvasWidth, canvasHeight);
             return;
         }
+#endif
+        if (context == nullptr) return;
         glXMakeCurrent(display, window, context);
         glViewport(0, 0, canvasWidth, canvasHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1320,7 +1366,7 @@ private:
         }
         if (consumedByPopupDismiss(PopupDismissClickFilter::MouseEventKind::PRESS)) return;
         // Keys go back to the canvas after typing in a field of the panel
-        widgetSet->setKeyboardFocus(shell, drawingCanvas);
+        widgetSet->setKeyboardFocus(shell, activeCanvas());
         pressButton = event.xbutton.button;
         pressX = event.xbutton.x;
         pressY = event.xbutton.y;
@@ -1443,12 +1489,12 @@ private:
             viewportMenuCommands.push_back(items[i].command);
         }
         viewportMenu = widgetSet->createChoiceMenu(
-            drawingCanvas, choices, menuFontSet,
+            activeCanvas(), choices, menuFontSet,
             &SceneEditorApplication::executeViewportMenuCommand, this);
 
         Position rootX = 0;
         Position rootY = 0;
-        XtTranslateCoords(drawingCanvas, static_cast<Position>(canvasX),
+        XtTranslateCoords(activeCanvas(), static_cast<Position>(canvasX),
                           static_cast<Position>(canvasY), &rootX, &rootY);
         widgetSet->popupChoiceMenu(viewportMenu, rootX, rootY,
                                    &SceneEditorApplication::viewportMenuPoppedDown,
@@ -1530,7 +1576,7 @@ private:
     */
     void applyFullScreenGuiMode()
     {
-        if (sceneBridge == nullptr || drawingCanvas == nullptr) return;
+        if (sceneBridge == nullptr || activeCanvas() == nullptr) return;
         const bool fullScreen = sceneBridge->getGuiState()->isFullScreenGuiMode();
         Widget others[] = {
             menuBar, globalBar,
@@ -1542,15 +1588,17 @@ private:
             else XtManageChild(others[i]);
         }
         if (fullScreen) {
-            XtConfigureWidget(drawingCanvas, 0, 0, width, height, 0);
+            if (drawingCanvas != nullptr)
+                XtConfigureWidget(drawingCanvas, 0, 0, width, height, 0);
         }
         else {
-            XtConfigureWidget(drawingCanvas, 0, contentTop(),
-                              width - SIDE_PANEL_WIDTH,
-                              height - contentTop() - STATUS_BAR_HEIGHT, 0);
+            if (drawingCanvas != nullptr)
+                XtConfigureWidget(drawingCanvas, 0, contentTop(),
+                                  width - SIDE_PANEL_WIDTH,
+                                  height - contentTop() - STATUS_BAR_HEIGHT, 0);
         }
         setWindowManagerFullScreen(fullScreen);
-        widgetSet->setKeyboardFocus(shell, drawingCanvas);
+        widgetSet->setKeyboardFocus(shell, activeCanvas());
     }
 
     /**
@@ -1910,7 +1958,7 @@ private:
 
     void cleanupOpenGL()
     {
-        if (display != nullptr && context != nullptr) {
+        if (display != nullptr && context != nullptr && window != 0) {
             glXMakeCurrent(display, window, context);
         }
 #ifndef VITRAL_SCENE_EDITOR_OPENGL1

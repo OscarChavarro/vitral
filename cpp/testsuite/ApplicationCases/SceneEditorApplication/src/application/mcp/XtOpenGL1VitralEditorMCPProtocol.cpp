@@ -46,7 +46,7 @@ XtOpenGL1VitralEditorMCPProtocol::XtOpenGL1VitralEditorMCPProtocol(
     XtOpenGL1SceneEditorApplication* parent, java::net::Socket* socket)
     : socket(socket),
       sceneTools(parent->getApplicationModel()),
-      viewportTools(parent->getApplicationModel()),
+      viewportTools(parent->getApplicationModel(), true),
       applicationTools(parent)
 {
 }
@@ -169,6 +169,7 @@ java::String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     }
     if ( tool.equals("render.set_configuration") ) {
         viewportTools.setRendererConfiguration(request);
+        applicationTools.repaint();
         return viewportTools.describeRendererConfigurations(request);
     }
     //- Application ---------------------------------------------------
@@ -227,7 +228,7 @@ java::String XtOpenGL1VitralEditorMCPProtocol::toolsJson()
         + "," + MCPJson::tool("edit.history", "Return the undo/redo state of the scene history and of the view history of each viewport: operations to undo and redo, and the names of the next ones.")
         + "," + MCPJson::tool("viewport.project", "Drawing area pixels (as used by gui.mouse) of the first selected body origin and its x, y, z unit-axis tips in a viewport. Arguments: viewport (index, default 0).")
         + "," + MCPJson::tool("render.get_configuration", "Return the rendering configuration of the viewports. Arguments: viewport (index; default all).")
-        + "," + MCPJson::tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu).")
+        + "," + MCPJson::tool("render.set_configuration", "Set the rendering configuration of the viewports, only in the given values. Arguments: viewport (index; default all), and any of the booleans points,wires,surfaces,texture,bumpMap,boundingVolume,normals,trianglesNormals,selectionCorners,grid, shading (nolight|flat|gouraud|phong|cook_terrance) and renderMode (gpu|cpu|hidden_lines).")
         + "," + MCPJson::tool("render.raytrace_png", "Raytrace the scene from the camera of the last drawn viewport and export a PNG (it also writes ./output.jpg). Arguments: path, width (default 640), height (default 480).")
         + "," + MCPJson::tool("viewport.export_jpg", "Export the selected viewport, as drawn, to a JPG. Arguments: path.")
         + "," + MCPJson::tool("workspace.export_jpg", "Export the whole drawing area, with all its viewports, to a JPG. Arguments: path.")

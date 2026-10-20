@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <X11/Xlib.h>
 
 #include "application/commands/GuiEventExecutor.h"
 #include "gui/PointerCursor.h"
@@ -141,6 +142,9 @@ public:
     void init();
     void dispose();
     void display(int width, int height);
+    void displayXlib(Display* display, Window window, Visual* visual,
+                     int depth, int width, int height);
+    bool usesXlibRendering() const;
     void reshape(int width, int height);
 
     /**

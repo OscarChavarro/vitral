@@ -20,6 +20,7 @@ Java ones.
 class MCPViewportTools {
 private:
     ApplicationModel* model;
+    bool supportsXlib;
 
     java::ArrayList<Viewport*> selectedViewports(const java::String& request);
 
@@ -27,7 +28,8 @@ public:
     /**
     @param model application model the tools work over (referenced)
     */
-    explicit MCPViewportTools(ApplicationModel* model);
+    explicit MCPViewportTools(ApplicationModel* model,
+                              bool supportsXlib = false);
 
     /**
     Sets the interaction mode of the drawing area (tool `gui.set_mode`).

@@ -80,25 +80,21 @@ renders them with the Apple GPU:
    Without it, creating the context fails with `BadValue` on
    `X_GLXCreateNewContext`.
 
-2. Run the application with `LIBGL_ALWAYS_INDIRECT=1`:
+2. Run the application through its launcher, which sets
+   `LIBGL_ALWAYS_INDIRECT=1` on macOS:
 
    ```sh
-   DISPLAY=:0 LIBGL_ALWAYS_INDIRECT=1 ./build/xm_opengl1/SceneEditorApplication -s
+   DISPLAY=:0 ./runXmOpenGL1.sh -s
    ```
-
-The `runXmOpenGL1.sh` launcher sets it automatically on macOS.
 
 The editor then reports `OpenGL version string: 1.4 (2.1 Metal ...)`, enough
 for its OpenGL 1.2 pipeline.
 
 ### Homebrew libX11 locale modules
 
-The libX11 of Homebrew (checked with 1.8.13) looks for its locale modules as
-`*.so.2`, but installs them as `*.2.so`. It then supports no locale, and the
-editor stops with `Could not create the UTF-8 menu font set`. Create the
-links with the expected names (again after each `brew upgrade libx11`):
-
-```sh
-cd "$(brew --prefix libx11)/lib/X11/locale/common"
-for f in *.2.so; do ln -sf "$f" "${f%.2.so}.so.2"; done
-```
+Homebrew libX11 1.8.13 looks for locale modules as `*.so.2`, but installs
+them as `*.2.so`. Without them, the editor stops with `Could not create the
+UTF-8 menu font set`. The `runXmOpenGL1.sh` launcher creates the missing
+links in Homebrew's libX11 locale module directory. Run through the launcher
+on macOS; it recreates the links after Homebrew upgrades. The same setup is
+in `runXmOpenGL4.sh` for systems where that variant is supported.

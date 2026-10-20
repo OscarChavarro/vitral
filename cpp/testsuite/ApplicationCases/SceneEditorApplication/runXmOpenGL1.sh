@@ -11,5 +11,7 @@ cmake --build "$BUILD_DIR" --config Release
 # Homebrew Mesa uses indirect GLX with XQuartz on macOS.
 if [[ "$(uname)" == "Darwin" ]]; then
     export LIBGL_ALWAYS_INDIRECT="${LIBGL_ALWAYS_INDIRECT:-1}"
+    source "$ROOT_DIR/prepareHomebrewX11Locale.sh"
+    prepare_homebrew_x11_locale
 fi
 "$ROOT_DIR/build/$VARIANT/SceneEditorApplication" "$@"

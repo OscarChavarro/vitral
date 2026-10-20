@@ -47,8 +47,8 @@ ShadingType shadingTypeValueOf(const java::String& name)
 
 }
 
-MCPViewportTools::MCPViewportTools(ApplicationModel* model)
-    : model(model)
+MCPViewportTools::MCPViewportTools(ApplicationModel* model, bool supportsXlib)
+    : model(model), supportsXlib(supportsXlib)
 {
 }
 
@@ -95,6 +95,25 @@ java::ArrayList<Viewport*> MCPViewportTools::selectedViewports(
 void MCPViewportTools::setRendererConfiguration(const java::String& request)
 {
     java::ArrayList<Viewport*> viewports = selectedViewports(request);
+    ViewportSet* set = model->getActiveViewportSet();
+    java::String renderMode = MCPJson::stringProperty(request, "renderMode", "");
+    int mode = 0;
+    if ( !renderMode.isEmpty() ) {
+        mode = renderMode.equalsIgnoreCase("gpu") ? Viewport::RENDER_MODE_Z_BUFFER :
+            renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
+            renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
+        if ( mode == 0 )
+            throw std::invalid_argument("renderMode must be gpu, cpu or hidden_lines");
+        if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
+                              mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
+            java::ArrayList<int> modes;
+            modes.add(mode);
+            modes.add(Viewport::RENDER_MODE_RAYTRACING);
+            set->setAvailableRenderModes(modes);
+        }
+        if ( !set->isRenderModeAvailable(mode) )
+            throw std::invalid_argument("renderMode is not available with this rendering technology");
+    }
 
     for ( long i = 0; i < viewports.size(); i++ ) {
         Viewport* viewport = viewports.get(i);
@@ -117,14 +136,7 @@ void MCPViewportTools::setRendererConfiguration(const java::String& request)
         }
 
         if ( MCPJson::booleanProperty(request, "grid", value) ) viewport->setShowGrid(value);
-        java::String renderMode = MCPJson::stringProperty(request, "renderMode", "");
-        if ( !renderMode.isEmpty() ) {
-            int mode = renderMode.equalsIgnoreCase("gpu") ? Viewport::RENDER_MODE_Z_BUFFER :
-                renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
-                renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
-            if ( mode == 0 ) throw std::invalid_argument("renderMode must be gpu, cpu or hidden_lines");
-            if ( !model->getActiveViewportSet()->isRenderModeAvailable(mode) )
-                throw std::invalid_argument("renderMode is not available with this rendering technology");
+        if ( mode != 0 ) {
             viewport->setRenderMode(mode);
         }
     }

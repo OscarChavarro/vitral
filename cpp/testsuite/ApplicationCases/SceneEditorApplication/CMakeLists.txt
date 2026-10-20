@@ -45,9 +45,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 # crash without the CGL context that only the GLX of XQuartz makes current.
 # Athena comes from XQuartz (Homebrew has no libXaw); Motif only from
 # Homebrew, with its libX11 and its Mesa (libGL and mesa-glu).
-# The libX11 of Homebrew looks for its locale modules as `*.so.2`, but
-# installs them as `*.2.so`: without links with the expected names it
-# supports no locale and no UTF-8 XFontSet can be created
+# The Homebrew libX11 locale module naming mismatch is handled by the Motif
+# launchers by creating the module names expected by libX11 in Homebrew's
+# locale module directory.
 if(APPLE AND NOT SCENE_EDITOR_IS_GTK4)
     if(VITRAL_XT_WIDGET_SET STREQUAL "xaw" AND
        EXISTS "/opt/X11/lib/libX11.dylib")
@@ -56,6 +56,14 @@ if(APPLE AND NOT SCENE_EDITOR_IS_GTK4)
         set(SCENE_EDITOR_X11_PREFIX "/opt/homebrew")
     endif()
     list(INSERT CMAKE_PREFIX_PATH 0 "${SCENE_EDITOR_X11_PREFIX}")
+    # FindX11 can retain libXt from XQuartz in an existing CMake cache even
+    # when libX11 and Motif come from Homebrew. Two libXt instances then open
+    # and inspect the same Display, causing GLX framebuffer queries to fail.
+    set(X11_Xt_LIB "${SCENE_EDITOR_X11_PREFIX}/lib/libXt.dylib"
+        CACHE FILEPATH "Xt library for this SceneEditorApplication variant" FORCE)
+    if(NOT EXISTS "${X11_Xt_LIB}")
+        message(FATAL_ERROR "libXt not found at ${X11_Xt_LIB}")
+    endif()
     find_library(OPENGL_gl_LIBRARY NAMES GL
                  PATHS "${SCENE_EDITOR_X11_PREFIX}/lib" NO_DEFAULT_PATH)
     find_library(OPENGL_glu_LIBRARY NAMES GLU
@@ -174,6 +182,7 @@ else()
         src/render/opengl1/OpenGL1RenderPrimitiveRenderer.cpp
         src/render/opengl1/OpenGL1SceneRenderer.cpp
         src/render/opengl1/XtOpenGL1SceneBridge.cpp
+        src/render/xlib/XlibDrawingAreaRenderer.cpp
     )
 endif()
 

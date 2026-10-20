@@ -206,12 +206,13 @@ XFontSet getFontSet(Display* display, int pixelSize)
         return known->second;
     }
 
-    // Closest size of a scalable or bitmap Helvetica, then any font
+    // XCreateFontSet needs a complete XLFD, including its character set.
+    // The shorter wildcard pattern previously returned null on XQuartz,
+    // leaving every OpenGL viewport label as a transparent 1x1 image.
     char pattern[256];
     snprintf(pattern, sizeof(pattern),
-        "-*-helvetica-medium-r-normal--%d-*-*-*-*-*-*-*,"
-        "-*-*-medium-r-normal--%d-*-*-*-*-*-*-*,fixed",
-        pixelSize, pixelSize);
+        "-adobe-helvetica-medium-r-normal--%d-*-*-*-*-*-iso8859-1",
+        pixelSize);
     char** missingCharsets = nullptr;
     int missingCharsetCount = 0;
     char* defaultString = nullptr;
@@ -219,6 +220,14 @@ XFontSet getFontSet(Display* display, int pixelSize)
                                       &missingCharsetCount, &defaultString);
     if ( missingCharsets != nullptr ) {
         XFreeStringList(missingCharsets);
+    }
+    if ( fontSet == nullptr ) {
+        missingCharsets = nullptr;
+        fontSet = XCreateFontSet(display, "fixed", &missingCharsets,
+                                 &missingCharsetCount, &defaultString);
+        if ( missingCharsets != nullptr ) {
+            XFreeStringList(missingCharsets);
+        }
     }
     fontSets()[key] = fontSet;
     return fontSet;

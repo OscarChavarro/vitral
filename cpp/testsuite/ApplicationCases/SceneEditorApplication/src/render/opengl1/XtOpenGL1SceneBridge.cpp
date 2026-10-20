@@ -11,6 +11,7 @@
 #include "render/DrawingAreaHost.h"
 #include "render/opengl1/OpenGL1DrawingAreaRenderer.h"
 #include "render/opengl1/XtOpenGL1SceneBridge.h"
+#include "render/xlib/XlibDrawingAreaRenderer.h"
 #include "vsdk/toolkit/gui/viewport/Viewport.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSet.h"
 #include "vsdk/toolkit/gui/viewport/ViewportSetCommands.h"
@@ -46,6 +47,7 @@ public:
     ApplicationModel* model;
     DrawingAreaInteractionTechniques* techniques;
     OpenGL1DrawingAreaRenderer* renderer;
+    XlibDrawingAreaRenderer* xlibRenderer;
     GuiEventExecutor* executor;
     /// Viewport whose title was clicked, target of the viewport menu
     Viewport* menuViewport;
@@ -57,7 +59,8 @@ public:
     Impl(OpenGL1LabelImageProvider* labels,
          XtOpenGL1SceneBridge::Listener* listener)
         : listener(listener), model(new ApplicationModel()),
-          techniques(nullptr), renderer(nullptr), executor(nullptr),
+          techniques(nullptr), renderer(nullptr), xlibRenderer(nullptr),
+          executor(nullptr),
           menuViewport(nullptr), selectionEditor(nullptr),
           editFeedbackProvider(nullptr)
     {
@@ -76,6 +79,8 @@ public:
             techniques->getTranslationGizmo(),
             techniques->getRotateGizmo(),
             techniques->getScaleGizmo());
+        xlibRenderer = new XlibDrawingAreaRenderer(model, this,
+            [t](Viewport* viewport) { t->activateViewport(viewport); });
         executor = new GuiEventExecutor(model, this);
     }
 
@@ -84,8 +89,21 @@ public:
         delete selectionEditor;
         delete executor;
         delete renderer;
+        delete xlibRenderer;
         delete techniques;
         delete model;
+    }
+
+    void useXlibRendering(bool useXlib)
+    {
+        ViewportSet* set = model->getDrawingArea()->getViewportSet();
+        if (set->isRenderModeAvailable(Viewport::RENDER_MODE_HIDDEN_LINES)
+            == useXlib) return;
+        java::ArrayList<int> modes;
+        modes.add(useXlib ? Viewport::RENDER_MODE_HIDDEN_LINES :
+                            Viewport::RENDER_MODE_Z_BUFFER);
+        modes.add(Viewport::RENDER_MODE_RAYTRACING);
+        set->setAvailableRenderModes(modes);
     }
 
     /**
@@ -308,6 +326,19 @@ void XtOpenGL1SceneBridge::display(int w, int h)
     impl->renderer->display(w, h);
 }
 
+void XtOpenGL1SceneBridge::displayXlib(Display* display, Window window,
+    Visual* visual, int depth, int width, int height)
+{
+    setCanvasSize(width, height);
+    impl->xlibRenderer->display(display, window, visual, depth, width, height);
+}
+
+bool XtOpenGL1SceneBridge::usesXlibRendering() const
+{
+    return impl->model->getDrawingArea()->getViewportSet()->isRenderModeAvailable(
+        Viewport::RENDER_MODE_HIDDEN_LINES);
+}
+
 void XtOpenGL1SceneBridge::reshape(int w, int h)
 {
     setCanvasSize(w, h);
@@ -458,6 +489,10 @@ void XtOpenGL1SceneBridge::executeViewportCommand(const std::string& command)
     if ( viewport == nullptr || !impl->isKnownViewport(viewport) ) {
         return;
     }
+    if (command == ViewportSetCommands::IDV_RENDER_MODE_CPU_HIDDEN_LINES)
+        impl->useXlibRendering(true);
+    else if (command == ViewportSetCommands::IDV_RENDER_MODE_GPU)
+        impl->useXlibRendering(false);
     impl->techniques->processViewportCommand(command.c_str(), viewport);
 }
 
