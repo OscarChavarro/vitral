@@ -1,33 +1,25 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+# Renders every MIT scene (.ray) to a .ppm image on this folder, forwarding
+# extra options (e.g. --resolution scene) to the raytracer
+set -e
 
-script_dir="$(cd "$(dirname "$0")" && pwd)"
-cd "${script_dir}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCENE_DIR="../../../../etc/geometry/mitscenes"
+OUTPUT_DIR="."
+cd "$SCRIPT_DIR"
 
-if [[ ! -x "./build/RaytracingOfflineExample" ]]; then
-  cmake -S . -B build
-  cmake --build build --target RaytracingOfflineExample
-fi
+found=0
+for scene_file in "$SCENE_DIR"/*.ray; do
+    [ -f "$scene_file" ] || continue
+    found=1
+    base_name="$(basename "$scene_file" .ray)"
+    output_file="$OUTPUT_DIR/$base_name.ppm"
 
-if [[ $# -gt 0 ]]; then
-  ./build/RaytracingOfflineExample "$@"
-else
-  scene_dir="../../../../etc/geometry/mitscenes"
-  output_dir="."
-  shopt -s nullglob
-  ray_files=( "${scene_dir}"/*.ray )
-  shopt -u nullglob
+    echo "Rendering $scene_file -> $output_file"
+    sh ./run.sh --scene "$scene_file" --output "$output_file" "$@"
+done
 
-  if [[ ${#ray_files[@]} -eq 0 ]]; then
-    echo "No se encontraron escenas .ray en ${scene_dir}" >&2
+if [ "$found" -eq 0 ]; then
+    echo "No se encontraron escenas .ray en $SCENE_DIR" >&2
     exit 1
-  fi
-
-  for scene_file in "${ray_files[@]}"; do
-    base_name="$(basename "${scene_file}" .ray)"
-    output_file="${output_dir}/${base_name}.ppm"
-
-    echo "Rendering ${scene_file} -> ${output_file}"
-    ./build/RaytracingOfflineExample --scene "${scene_file}" --output "${output_file}"
-  done
 fi

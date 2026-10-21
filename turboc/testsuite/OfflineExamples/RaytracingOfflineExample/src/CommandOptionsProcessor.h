@@ -8,24 +8,33 @@ class CommandOptionsProcessor {
 private:
     static const char* DEFAULT_SCENE_FILE;
     static const char* DEFAULT_OUTPUT_FILE_NAME;
+    static const int DEFAULT_X_RESOLUTION;
+    static const int DEFAULT_Y_RESOLUTION;
 
-    java::String sceneFile;
-    java::String outputFile;
+    String sceneFile;
+    String outputFile;
     bool save;
     bool parallel;
     bool showHelp;
+    int xResolution;
+    int yResolution;
+
+    static bool parseResolution(const String& value, int* x, int* y);
 
 public:
     CommandOptionsProcessor();
 
-    static CommandOptionsProcessor process(const java::ArrayList<java::String>& args);
+    static CommandOptionsProcessor process(const ArrayList<String>& args);
     static void printUsage();
 
-    const java::String& getSceneFile() const;
-    const java::String& getOutputFile() const;
+    const String& getSceneFile() const;
+    const String& getOutputFile() const;
     bool shouldSave() const;
     bool shouldUseParallelExecutor() const;
     bool shouldShowHelp() const;
+    bool shouldUseSceneResolution() const;
+    int getXResolution() const;
+    int getYResolution() const;
 };
 
 #endif

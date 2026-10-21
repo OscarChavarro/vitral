@@ -37,7 +37,7 @@ appendLineSet(Calligraphic2DBuffer* destination, const Calligraphic2DBuffer* sou
 }
 
 static void
-rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& outputFile)
+rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const String& outputFile)
 {
     RGBImageUncompressed outputImage;
     outputImage.init((int)camera->getViewportXSize(), (int)camera->getViewportYSize());
@@ -65,15 +65,15 @@ rasterOutput(Camera* camera, Calligraphic2DBuffer* lineSet, const java::String& 
         delete e1;
     }
 
-    ImagePersistence::exportPNG(java::File(outputFile.c_str()), &outputImage);
+    ImagePersistence::exportPNG(File(outputFile.c_str()), &outputImage);
 }
 
 int
 main(int argc, char** argv)
 {
-    java::String sceneFile = "../../../../etc/geometry/cow.obj";
-    java::String outputFile = "output.png";
-    if (argc > 1 && argv[1] != 0 && java::String(argv[1]).size() > 0) {
+    String sceneFile = "../../../../etc/geometry/cow.obj";
+    String outputFile = "output.png";
+    if (argc > 1 && argv[1] != 0 && String(argv[1]).size() > 0) {
         outputFile = argv[1];
     }
 
@@ -87,7 +87,7 @@ main(int argc, char** argv)
     camera.setRotation(R);
     camera.updateViewportResize(1024, 768);
     SimpleScene scene;
-    EnvironmentPersistence::importEnvironment(java::File(sceneFile.c_str()), &scene);
+    EnvironmentPersistence::importEnvironment(File(sceneFile.c_str()), &scene);
     if (scene.getSimpleBodies().size() == 0) {
         std::fprintf(stderr, "Failed to load scene file: %s\n", sceneFile.c_str());
         return 1;
@@ -100,8 +100,8 @@ main(int argc, char** argv)
     arrowBody->setScale(Vector3Dd(2, 2, 2));
     scene.addBody(arrowBody);
 
-    java::ArrayList<SimpleBody*> wireframeBodies;
-    java::ArrayList<SimpleBody*>& sceneBodies = scene.getSimpleBodies();
+    ArrayList<SimpleBody*> wireframeBodies;
+    ArrayList<SimpleBody*>& sceneBodies = scene.getSimpleBodies();
     for (long int i = 0; i < sceneBodies.size(); i++) {
         SimpleBody* body = sceneBodies.get(i);
         if (body != 0 && body != arrowBody) {
@@ -109,7 +109,7 @@ main(int argc, char** argv)
         }
     }
 
-    java::ArrayList<SimpleBody*> hiddenLineBodies;
+    ArrayList<SimpleBody*> hiddenLineBodies;
     hiddenLineBodies.add(arrowBody);
 
     Calligraphic2DBuffer cowWireframe;

@@ -1,24 +1,21 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-set -euo pipefail
-
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-polygon_dir="${script_dir}/../../../../etc/polygons"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+POLYGON_DIR="$SCRIPT_DIR/../../../../etc/polygons"
 status=0
 
-if [ ! -d "${polygon_dir}" ]; then
-    echo "Polygon directory not found: ${polygon_dir}" >&2
+if [ ! -d "$POLYGON_DIR" ]; then
+    echo "Polygon directory not found: $POLYGON_DIR" >&2
     exit 1
 fi
 
-shopt -s nullglob
-for polygon_file in "${polygon_dir}"/example*.polygon; do
-    echo "Running ${polygon_file}"
-    if ! "${script_dir}/run.sh" "${polygon_file}"; then
-        echo "Failed: ${polygon_file}" >&2
+for polygon_file in "$POLYGON_DIR"/example*.polygon; do
+    [ -f "$polygon_file" ] || continue
+    echo "Running $polygon_file"
+    if ! sh "$SCRIPT_DIR/run.sh" "$polygon_file"; then
+        echo "Failed: $polygon_file" >&2
         status=1
     fi
 done
-shopt -u nullglob
 
-exit "${status}"
+exit "$status"

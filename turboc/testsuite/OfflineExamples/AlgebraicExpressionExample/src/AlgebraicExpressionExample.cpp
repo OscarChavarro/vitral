@@ -16,7 +16,7 @@ int main(int argc, char** argv)
             regexp.setExpression("666.0");
         }
         else {
-            java::String joined = "";
+            String joined = "";
             int i;
             for ( i = 1; i < argc; i++ ) {
                 joined += argv[i];
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         }
         std::printf("REGEXP:\n%s\n", regexp.toString().c_str());
         std::printf("REGEXP VALUE:\n%s\n",
-                    java::Double::toString(regexp.eval()).c_str());
+                    Double::toString(regexp.eval()).c_str());
     }
     catch ( const AlgebraicExpressionException& e ) {
         // Same text as the Java version prints for the exception

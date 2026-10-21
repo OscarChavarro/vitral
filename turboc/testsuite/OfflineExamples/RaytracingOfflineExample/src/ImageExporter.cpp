@@ -6,13 +6,13 @@
 #include "ImageExporter.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
-bool ImageExporter::exportImage(const java::String& outputFileName, RGBImageUncompressed* image)
+bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompressed* image)
 {
-    java::File outFile(outputFileName.c_str());
+    File outFile(outputFileName.c_str());
     printf("Exporting result image to file \"%s\": ", outputFileName.c_str());
 
-    java::String lower = outputFileName;
-    for (size_t i = 0; i < lower.size(); i++) {
+    String lower = outputFileName;
+    for (int i = 0; i < lower.size(); i++) {
         lower[i] = std::tolower((unsigned char)lower[i]);
     }
 

@@ -7,7 +7,7 @@ class RGBImageUncompressed;
 
 class ImageExporter {
 public:
-    bool exportImage(const java::String& outputFileName, RGBImageUncompressed* image);
+    bool exportImage(const String& outputFileName, RGBImageUncompressed* image);
 };
 
 #endif

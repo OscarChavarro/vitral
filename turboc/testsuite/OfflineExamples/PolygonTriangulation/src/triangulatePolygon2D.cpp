@@ -24,7 +24,7 @@ const int DEFAULT_ZONE_HEIGHT = 512;
 const double EPSILON = 1e-9;
 const int DEFAULT_IMAGE_MARGIN = 10;
 
-static void fail(const char* method, const java::String& message)
+static void fail(const char* method, const String& message)
 {
     Logger::reportMessage("PolygonTriangulation", Logger::ERROR, method, message);
     throw VSDKFatalException(message);
@@ -32,8 +32,8 @@ static void fail(const char* method, const java::String& message)
 
 struct PolygonModel {
     Polygon2D* polygon2D;
-    java::String inputFileName;
-    java::String outputFileName;
+    String inputFileName;
+    String outputFileName;
     int zoneWidth;
     int zoneHeight;
 
@@ -50,8 +50,8 @@ struct RenderTransform {
 };
 
 struct CommandLineOptions {
-    java::String inputFileName;
-    java::String outputFileName;
+    String inputFileName;
+    String outputFileName;
     int zoneWidth;
     int zoneHeight;
     bool showHelp;
@@ -77,34 +77,34 @@ struct CommandLineOptions {
     }
 };
 
-java::String basenameOf(const java::String& path)
+String basenameOf(const String& path)
 {
     const int slash = path.find_last_of("/\\");
-    if (slash == java::String::npos) {
+    if (slash == String::npos) {
         return path;
     }
     return path.substr(slash + 1);
 }
 
-bool startsWith(const java::String& value, const java::String& prefix)
+bool startsWith(const String& value, const String& prefix)
 {
     return value.startsWith(prefix.c_str());
 }
 
-bool endsWith(const java::String& value, const java::String& suffix)
+bool endsWith(const String& value, const String& suffix)
 {
     return value.size() >= suffix.size() &&
         value.substr(value.size() - suffix.size()) == suffix;
 }
 
-java::String deriveOutputFileName(const java::String& inputFileName)
+String deriveOutputFileName(const String& inputFileName)
 {
-    const java::String inputBaseName = basenameOf(inputFileName);
-    const java::String prefix = "example";
-    const java::String suffix = ".polygon";
+    const String inputBaseName = basenameOf(inputFileName);
+    const String prefix = "example";
+    const String suffix = ".polygon";
 
     if (startsWith(inputBaseName, prefix) && endsWith(inputBaseName, suffix)) {
-        const java::String number = inputBaseName.substr(
+        const String number = inputBaseName.substr(
             prefix.size(),
             inputBaseName.size() - prefix.size() - suffix.size());
         bool allDigits = !number.empty();
@@ -115,10 +115,10 @@ java::String deriveOutputFileName(const java::String& inputFileName)
             }
         }
         if (allDigits) {
-            return java::String("output").concat(number).concat(".png");
+            return String("output").concat(number).concat(".png");
         }
     }
-    return java::String("output.png");
+    return String("output.png");
 }
 
 template <typename T>
@@ -133,23 +133,23 @@ static const T& maxValue(const T& a, const T& b)
     return (a < b) ? b : a;
 }
 
-java::String requireValue(int argc, char* argv[], int index, const java::String& option)
+String requireValue(int argc, char* argv[], int index, const String& option)
 {
     if (index >= argc) {
-        fail("requireValue", java::String("Missing value for ").concat(option));
+        fail("requireValue", String("Missing value for ").concat(option));
     }
-    return java::String(argv[index]);
+    return String(argv[index]);
 }
 
-int parsePositiveInt(const java::String& value, const java::String& option)
+int parsePositiveInt(const String& value, const String& option)
 {
     errno = 0;
-    char* endPointer = nullptr;
+    char* endPointer = 0;
     const long parsed = std::strtol(value.c_str(), &endPointer, 10);
     if (errno != 0 || endPointer == value.c_str() || *endPointer != '\0' ||
         parsed <= 0 || parsed > INT_MAX) {
         fail("parsePositiveInt",
-            java::String(option).concat(" must be a positive integer: ").concat(value));
+            String(option).concat(" must be a positive integer: ").concat(value));
     }
     return static_cast<int>(parsed);
 }
@@ -171,7 +171,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
     int positionalIndex = 0;
 
     for (int i = 1; i < argc; ++i) {
-        const java::String argument(argv[i]);
+        const String argument(argv[i]);
 
         if (argument == "--help" || argument == "-h") {
             options.showHelp = true;
@@ -201,7 +201,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         }
 
         if (!argument.empty() && argument[0] == '-') {
-            fail("parseCommandLineOptions", java::String("Unknown option: ").concat(argument));
+            fail("parseCommandLineOptions", String("Unknown option: ").concat(argument));
         }
 
         if (positionalIndex == 0) {
@@ -212,7 +212,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         }
         else {
             fail("parseCommandLineOptions",
-                java::String("Unexpected positional argument: ").concat(argument));
+                String("Unexpected positional argument: ").concat(argument));
         }
         positionalIndex++;
     }
@@ -232,19 +232,19 @@ void clearPolygonLoops(Polygon2D& polygon)
     polygon.loops.clear();
 }
 
-static void failReadPolygon(FILE* input, const java::String& fileName, const char* reason)
+static void failReadPolygon(FILE* input, const String& fileName, const char* reason)
 {
     if (input != 0) {
         fclose(input);
     }
-    fail("failReadPolygon", java::String(reason).concat(fileName));
+    fail("failReadPolygon", String(reason).concat(fileName));
 }
 
-void readPolygon(const java::String& fileName, Polygon2D& polygon)
+void readPolygon(const String& fileName, Polygon2D& polygon)
 {
     FILE* input = fopen(fileName.c_str(), "r");
     if (!input) {
-        fail("readPolygon", java::String("failed reading polygon file: ").concat(fileName));
+        fail("readPolygon", String("failed reading polygon file: ").concat(fileName));
     }
 
     int contourCount = 0;
@@ -279,7 +279,7 @@ void readPolygon(const java::String& fileName, Polygon2D& polygon)
 
 void triangulatePolygon(
     const Polygon2D& inputPolygon,
-    java::ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
+    ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
     int& triangleCount)
 {
     MonotoneDecompositionTriangulator triangulator;
@@ -287,7 +287,7 @@ void triangulatePolygon(
 }
 
 void printTriangles(
-    const java::ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
+    const ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
     int triangleCount)
 {
     for (int triangleIndex = 0; triangleIndex < triangleCount; ++triangleIndex) {
@@ -385,9 +385,9 @@ void renderPolygonBorder(RGBImageUncompressed& image, const PolygonModel& model,
     Rasterizer2D::drawPolygon(&image, projectedPolygon, borderColor);
 }
 
-java::ArrayList<Vertex2D> flattenVertices(const Polygon2D& polygon)
+ArrayList<Vertex2D> flattenVertices(const Polygon2D& polygon)
 {
-    java::ArrayList<Vertex2D> vertices;
+    ArrayList<Vertex2D> vertices;
     for (long int i = 0; i < polygon.loops.size(); ++i) {
         _Polygon2DContour* contour = polygon.loops.get(i);
         for (long int j = 0; j < contour->vertices.size(); ++j) {
@@ -464,7 +464,7 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
 
 void renderTriangulatedPolygon(RGBImageUncompressed& image,
     const PolygonModel& model,
-    const java::ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
+    const ArrayList<MonotoneDecompositionTriangulator::Triangle>& triangles,
     int triangleCount, double minX, double minY, double scale, double offsetX,
     double offsetY, const RGBPixel& borderColor)
 {
@@ -478,7 +478,7 @@ void renderTriangulatedPolygon(RGBImageUncompressed& image,
         {200, 140, 60},
         {140, 80, 200},
     };
-    const java::ArrayList<Vertex2D> polygonVertices = flattenVertices(*model.polygon2D);
+    const ArrayList<Vertex2D> polygonVertices = flattenVertices(*model.polygon2D);
 
     RGBPixel edgeColor;
     edgeColor.r = static_cast<char>(255);
@@ -534,10 +534,10 @@ RGBPixel createBorderColor()
     return borderColor;
 }
 
-void exportImage(RGBImageUncompressed& image, const java::String& outputFileName)
+void exportImage(RGBImageUncompressed& image, const String& outputFileName)
 {
-    if (!ImagePersistence::exportPNG(java::File(outputFileName.c_str()), &image)) {
-        fail("exportImage", java::String("failed writing PNG file: ").concat(outputFileName));
+    if (!ImagePersistence::exportPNG(File(outputFileName.c_str()), &image)) {
+        fail("exportImage", String("failed writing PNG file: ").concat(outputFileName));
     }
     std::printf("Image written to: %s\n", outputFileName.toCString());
 }
@@ -563,7 +563,7 @@ int run(int argc, char* argv[])
     readPolygon(commandLineOptions.inputFileName, inputPolygon);
 
     PolygonModel model = commandLineOptions.toPolygonModel(inputPolygon);
-    java::ArrayList<MonotoneDecompositionTriangulator::Triangle> triangles;
+    ArrayList<MonotoneDecompositionTriangulator::Triangle> triangles;
     int triangleCount = 0;
     triangulatePolygon(inputPolygon, triangles, triangleCount);
     printTriangles(triangles, triangleCount);

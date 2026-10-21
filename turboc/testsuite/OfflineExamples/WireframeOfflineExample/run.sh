@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+exec sh "$SCRIPT_DIR/../../../scripts/runTestsuiteProgram.sh" "$SCRIPT_DIR" \
   WireframeOfflineExample ./build/WireframeOfflineExample "$@"

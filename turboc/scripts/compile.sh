@@ -6,6 +6,9 @@
 #   - testsuite/OpenGL1Examples (CameraExample, ImageExample, MeshExample,
 #     PolygonClippingExample)
 #   - testsuite/_APITests (_OpenGL1HelloWorld, _OpenGL1PbufferExample)
+#   - testsuite/OfflineExamples (AlgebraicExpressionExample,
+#     ImageOfflineExample, PolygonTriangulation, Rasterizer2DExample,
+#     RaytracingOfflineExample, WireframeOfflineExample)
 #   - testsuite/ApplicationCases/SceneEditorApplication (xm_opengl1 and
 #     xaw_opengl1 variants)
 # Only uses commands available in legacy toolchains (CMake 2.4, no
@@ -17,7 +20,7 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 MODULES="base opengl1 glut xt xaw xm"
-TESTSUITE_GROUPS="testsuite/OpenGL1Examples testsuite/_APITests"
+TESTSUITE_GROUPS="testsuite/OpenGL1Examples testsuite/_APITests testsuite/OfflineExamples"
 SCENE_EDITOR_DIR="testsuite/ApplicationCases/SceneEditorApplication"
 SCENE_EDITOR_VARIANTS="xm_opengl1 xaw_opengl1"
 JOBS="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"

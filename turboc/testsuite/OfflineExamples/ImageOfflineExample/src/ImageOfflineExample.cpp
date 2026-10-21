@@ -22,15 +22,15 @@ static void performImageOperation1(RGBImageUncompressed* img)
 
 int main(int argc, char** argv)
 {
-    java::String imageFilename = "../../../../etc/images/render.jpg";
-    java::String outputFilename = "output.png";
-    if (argc > 1 && argv[1] != 0 && java::String(argv[1]).size() > 0) {
+    String imageFilename = "../../../../etc/images/render.jpg";
+    String outputFilename = "output.png";
+    if (argc > 1 && argv[1] != 0 && String(argv[1]).size() > 0) {
         outputFilename = argv[1];
     }
 
     RGBImageUncompressed* img = 0;
     try {
-        img = ImagePersistence::importRGB(java::File(imageFilename.c_str()));
+        img = ImagePersistence::importRGB(File(imageFilename.c_str()));
     }
     catch (...) {
         std::fprintf(stderr, "Error: could not read the image file \"%s\".\n", imageFilename.c_str());
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     }
 
     performImageOperation1(img);
-    bool ok = ImagePersistence::exportPNG(java::File(outputFilename.c_str()), img);
+    bool ok = ImagePersistence::exportPNG(File(outputFilename.c_str()), img);
     delete img;
 
     if (!ok) {

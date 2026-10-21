@@ -8,13 +8,13 @@
 #include "vsdk/toolkit/environment/geometry/surface/polygon/Polygon2D.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
-static java::String argOrDefault(int argc, char** argv, int idx, const java::String& fallback)
+static String argOrDefault(int argc, char** argv, int idx, const String& fallback)
 {
-    if (argc > idx && argv[idx] != 0 && java::String(argv[idx]).size() > 0) return java::String(argv[idx]);
+    if (argc > idx && argv[idx] != 0 && String(argv[idx]).size() > 0) return String(argv[idx]);
     return fallback;
 }
 
-static int runLineTest(const java::String& outputFileName)
+static int runLineTest(const String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -26,13 +26,13 @@ static int runLineTest(const java::String& outputFileName)
         Rasterizer2D::drawLine(&img, 320, 240, x, y, color);
     }
 
-    java::File out(outputFileName.c_str());
+    File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
     std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
 
-static int runPolygonTest(const java::String& outputFileName)
+static int runPolygonTest(const String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -52,13 +52,13 @@ static int runPolygonTest(const java::String& outputFileName)
     Rasterizer2D::fillPolygon(&img, pol, fillcolor);
     Rasterizer2D::drawPolygon(&img, pol, bordercolor);
 
-    java::File out(outputFileName.c_str());
+    File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
     std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
 
-static int runSmoothPolygonTest(const java::String& outputFileName)
+static int runSmoothPolygonTest(const String& outputFileName)
 {
     RGBImageUncompressed img;
     img.init(640, 480);
@@ -77,7 +77,7 @@ static int runSmoothPolygonTest(const java::String& outputFileName)
     Rasterizer2D::fillSmoothPolygon(&img, pol);
     Rasterizer2D::drawPolygon(&img, pol, bordercolor);
 
-    java::File out(outputFileName.c_str());
+    File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
     std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
@@ -85,8 +85,8 @@ static int runSmoothPolygonTest(const java::String& outputFileName)
 
 int main(int argc, char** argv)
 {
-    java::String mode = argOrDefault(argc, argv, 1, "line");
-    java::String outputFileName = argOrDefault(argc, argv, 2, "output1.png");
+    String mode = argOrDefault(argc, argv, 1, "line");
+    String outputFileName = argOrDefault(argc, argv, 2, "output1.png");
 
     if (mode == "line") return runLineTest(outputFileName);
     if (mode == "polygon") return runPolygonTest(outputFileName);

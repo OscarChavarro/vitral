@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
@@ -29,7 +30,7 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
 {
     bool hasTextures = false;
     bool hasNormalMaps = false;
-    java::ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
+    ArrayList<SimpleBody*>& bodies = scene->getSimpleBodies();
 
     for (long int i = 0; i < bodies.size(); i++) {
         SimpleBody* body = bodies[i];
@@ -42,10 +43,25 @@ static void optimizeRendererConfigurationForScene(SimpleScene* scene, RendererCo
     rendererConfiguration->setBumpMap(hasNormalMaps);
 }
 
-static void offlineExecution(const java::String& fileName,
+// Changes the camera viewport keeping the horizontal field of view of the
+// scene, so a different aspect ratio does not stretch the image
+static void resizeCameraViewport(Camera* camera, int xSize, int ySize)
+{
+    double oldAspect = camera->getViewportXSize() / camera->getViewportYSize();
+    double newAspect = ((double)xSize) / ((double)ySize);
+    double verticalHalfAngle = camera->getFov() * M_PI / 360.0;
+    double horizontalHalfAngle = atan(tan(verticalHalfAngle) * oldAspect);
+    verticalHalfAngle = atan(tan(horizontalHalfAngle) / newAspect);
+    camera->setFov((verticalHalfAngle * 360.0) / M_PI);
+    camera->updateViewportResize(xSize, ySize);
+}
+
+static void offlineExecution(const String& fileName,
                              bool save,
-                             const java::String& outputFileName,
-                             bool parallel)
+                             const String& outputFileName,
+                             bool parallel,
+                             int xResolution,
+                             int yResolution)
 {
     SimpleScene scene;
 
@@ -65,6 +81,9 @@ static void offlineExecution(const java::String& fileName,
 
     RGBImageUncompressed resultingImage;
     Camera* activeCamera = scene.getActiveCamera();
+    if ( xResolution > 0 && yResolution > 0 ) {
+        resizeCameraViewport(activeCamera, xResolution, yResolution);
+    }
     if ( !resultingImage.initNoFill((int)activeCamera->getViewportXSize(),
                                     (int)activeCamera->getViewportYSize()) ) {
         fprintf(stderr, "Error creating image!\n");
@@ -118,7 +137,7 @@ static void offlineExecution(const java::String& fileName,
 
 int main(int argc, char** argv)
 {
-    java::ArrayList<java::String> args;
+    ArrayList<String> args;
     for (int i = 1; i < argc; i++) {
         args.add(argv[i]);
     }
@@ -135,6 +154,8 @@ int main(int argc, char** argv)
     offlineExecution(options.getSceneFile(),
                      options.shouldSave(),
                      options.getOutputFile(),
-                     options.shouldUseParallelExecutor());
+                     options.shouldUseParallelExecutor(),
+                     options.shouldUseSceneResolution() ? 0 : options.getXResolution(),
+                     options.shouldUseSceneResolution() ? 0 : options.getYResolution());
     return 0;
 }
