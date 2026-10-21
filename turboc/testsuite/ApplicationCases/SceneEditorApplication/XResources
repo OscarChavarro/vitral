@@ -1,0 +1,37 @@
+! X resources of SceneEditorApplication: a plain black and white look,
+! without the colors of the Athena widgets (or the ones of the user's
+! defaults, since the application merges this file over them).
+!
+! Loaded at start up from the working directory (see run.sh); the
+! SCENE_EDITOR_XRESOURCES environment variable can name another file.
+
+SceneEditorApplication*background:            white
+SceneEditorApplication*foreground:            black
+SceneEditorApplication*borderColor:           black
+SceneEditorApplication*borderWidth:           1
+SceneEditorApplication*pointerColor:          black
+SceneEditorApplication*pointerColorBackground: white
+SceneEditorApplication*cursorColor:           black
+
+! Flat widgets: no 3D shadows (Xaw3d) nor rounded buttons (Xaw shapes)
+SceneEditorApplication*shadowWidth:           0
+SceneEditorApplication*Command.shapeStyle:    rectangle
+SceneEditorApplication*MenuButton.shapeStyle: rectangle
+SceneEditorApplication*Command.highlightThickness:    1
+SceneEditorApplication*MenuButton.highlightThickness: 1
+
+! Menus (menubar and viewport title popups)
+SceneEditorApplication*SimpleMenu.background:  white
+SceneEditorApplication*SimpleMenu.foreground:  black
+SceneEditorApplication*SimpleMenu.borderColor: black
+SceneEditorApplication*SimpleMenu.borderWidth: 1
+SceneEditorApplication*SmeBSB.background:      white
+SceneEditorApplication*SmeBSB.foreground:      black
+SceneEditorApplication*SmeLine.background:     white
+SceneEditorApplication*SmeLine.foreground:     black
+
+! The OpenGL canvas: white before the first frame is drawn
+SceneEditorApplication*drawingCanvas.background:  white
+SceneEditorApplication*drawingCanvas.borderWidth: 0
+SceneEditorApplication*workspace.borderWidth:     0
+SceneEditorApplication*menuBar.borderWidth:       0

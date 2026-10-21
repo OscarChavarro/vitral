@@ -1,0 +1,261 @@
+#include <algorithm>
+#include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
+
+#include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
+#include "vsdk/toolkit/gui/viewport/Viewport.h"
+#include "vsdk/toolkit/gui/viewport/ViewportElementScaler.h"
+#include "vsdk/toolkit/gui/viewport/ViewportSet.h"
+#include "vsdk/toolkit/media/RGBAImageUncompressed.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.h"
+
+static bool sameColor(const ColorRgb& a, const ColorRgb& b)
+{
+    return a.r() == b.r() && a.g() == b.g() && a.b() == b.b();
+}
+
+OpenGL1InputGizmoRenderer::OpenGL1InputGizmoRenderer(Host* host,
+    ViewportSet* viewportSet, Viewport* viewport)
+    : host(host), viewportSet(viewportSet), viewport(viewport),
+      imageFontSize(0), referenceTextWidth(0)
+{
+}
+
+OpenGL1InputGizmoRenderer::~OpenGL1InputGizmoRenderer()
+{
+    discardImages();
+}
+
+void OpenGL1InputGizmoRenderer::draw(InputGizmo* gizmo)
+{
+    if ( gizmo == NULL ) {
+        return;
+    }
+    int count = gizmo->getNumberOfFields();
+    if ( count <= 0 ) {
+        return;
+    }
+    ViewportElementScaler* scaler = viewportSet->getElementScaler();
+    int fontSize = scaler->scaleSize(BASE_FONT_SIZE);
+    int margin = scaler->scaleSize(BASE_MARGIN);
+    int gap = scaler->scaleSize(BASE_GAP);
+    int paddingX = scaler->scaleSize(BASE_PADDING_X);
+    int paddingY = scaler->scaleSize(BASE_PADDING_Y);
+    int frameThickness = std::max(1, scaler->scaleSize(BASE_FRAME_THICKNESS));
+    int underlineDistance = scaler->scaleSize(BASE_UNDERLINE_DISTANCE);
+    int underlineThickness =
+        std::max(1, scaler->scaleSize(BASE_UNDERLINE_THICKNESS));
+    int i;
+
+    if ( images.size() != count ) {
+        discardImages();
+        images.clear();
+        imageTexts.clear();
+        imageColors.clear();
+        for ( i = 0; i < count; i++ ) {
+            images.add(NULL);
+            imageTexts.add(String(""));
+            imageColors.add(ColorRgb());
+        }
+    }
+    // The frames have at least the width of the reference text of the gizmo
+    if ( fontSize != imageFontSize || referenceTextWidth == 0 ||
+         !gizmo->getReferenceText().equals(referenceText) ) {
+        // The reference image is only measured, it is never drawn
+        referenceText = gizmo->getReferenceText();
+        RGBAImageUncompressed* reference = host->createLabelImage(
+            referenceText, InputGizmo::HIGHLIGHT_COLOR, fontSize);
+        referenceTextWidth = reference != NULL ? reference->getXSize() : 0;
+        delete reference;
+    }
+
+    //-----------------------------------------------------------------
+    ArrayList<ColorRgb> colors;
+    ArrayList<int> frameWidths;
+    int totalWidth = 0;
+
+    for ( i = 0; i < count; i++ ) {
+        colors.add(gizmo->getFieldDisplayColor(i));
+        updateImage(i, gizmo->getDisplayText(i), colors.get(i), fontSize);
+        if ( images.get(i) == NULL ) {
+            return;
+        }
+        frameWidths.add(std::max(referenceTextWidth,
+            (int)images.get(i)->getXSize()) + 2*(paddingX + frameThickness));
+        totalWidth += frameWidths.get(i);
+    }
+    imageFontSize = fontSize;
+    totalWidth += (count - 1) * gap;
+
+    int frameHeight = images.get(0)->getYSize() + 2*(paddingY + frameThickness);
+    int x = viewport->getPixelSizeX() - margin - totalWidth;
+    int y = margin;
+    ArrayList<Rectangle> rectangles;
+    ArrayList<int> frameStarts;
+
+    for ( i = 0; i < count; i++ ) {
+        frameStarts.add(x);
+        addFrame(rectangles, x, y, frameWidths.get(i), frameHeight,
+            frameThickness, colors.get(i));
+        if ( i == gizmo->getSelectedField() ) {
+            int underlineY = y - underlineDistance - underlineThickness;
+
+            addRectangle(rectangles, x, underlineY, x + frameWidths.get(i),
+                underlineY + underlineThickness, colors.get(i));
+        }
+        x += frameWidths.get(i) + gap;
+    }
+    drawRectangles(rectangles);
+
+    for ( i = 0; i < count; i++ ) {
+        int textX = frameStarts.get(i) +
+            (frameWidths.get(i) - (int)images.get(i)->getXSize()) / 2;
+        int textY = y + frameThickness + paddingY;
+
+        host->drawLabelImage(images.get(i), textX, textY);
+    }
+}
+
+void OpenGL1InputGizmoRenderer::disposeGlResources()
+{
+    for ( long i = 0; i < images.size(); i++ ) {
+        if ( images.get(i) != NULL ) {
+            OpenGL1ImageRenderer::unload(images.get(i));
+            delete images.get(i);
+            images.set(i, NULL);
+            imageTexts.set(i, String(""));
+        }
+    }
+}
+
+void OpenGL1InputGizmoRenderer::discardImages()
+{
+    for ( long i = 0; i < images.size(); i++ ) {
+        if ( images.get(i) != NULL ) {
+            host->discardLabelImage(images.get(i));
+            images.set(i, NULL);
+        }
+    }
+}
+
+void OpenGL1InputGizmoRenderer::updateImage(int field, const String& text,
+    const ColorRgb& color, int fontSize)
+{
+    if ( images.get(field) != NULL && fontSize == imageFontSize &&
+         text.equals(imageTexts.get(field)) &&
+         sameColor(color, imageColors.get(field)) ) {
+        return;
+    }
+    if ( images.get(field) != NULL ) {
+        host->discardLabelImage(images.get(field));
+    }
+    // An empty text (i.e. all its characters deleted) cannot be rasterized:
+    // an empty box is drawn with a blank text
+    images.set(field, host->createLabelImage(
+        text.isEmpty() ? String(" ") : text, color, fontSize));
+    imageTexts.set(field, text);
+    imageColors.set(field, color);
+}
+
+//= Frames ============================================================
+
+void OpenGL1InputGizmoRenderer::addRectangle(
+    ArrayList<Rectangle>& rectangles, int x0, int y0, int x1, int y1,
+    const ColorRgb& c)
+{
+    Rectangle r = {{(float)x0, (float)y0, (float)x1, (float)y1,
+                    (float)c.r(), (float)c.g(), (float)c.b()}};
+
+    rectangles.add(r);
+}
+
+void OpenGL1InputGizmoRenderer::addFrame(ArrayList<Rectangle>& rectangles,
+    int x, int y, int width, int height, int thickness, const ColorRgb& c)
+{
+    addRectangle(rectangles, x, y, x + width, y + thickness, c);
+    addRectangle(rectangles, x, y + height - thickness, x + width, y + height, c);
+    addRectangle(rectangles, x, y + thickness, x + thickness,
+        y + height - thickness, c);
+    addRectangle(rectangles, x + width - thickness, y + thickness, x + width,
+        y + height - thickness, c);
+}
+
+void OpenGL1InputGizmoRenderer::drawRectangles(
+    const ArrayList<Rectangle>& rectangles)
+{
+    if ( rectangles.size() == 0 ) {
+        return;
+    }
+    GLint currentViewport[4];
+
+    glGetIntegerv(GL_VIEWPORT, currentViewport);
+
+    int surfaceWidth = viewportSet->getSizeXInPixels();
+    int surfaceHeight = viewportSet->getSizeYInPixels();
+
+    if ( surfaceWidth <= 0 || surfaceHeight <= 0 ) {
+        surfaceWidth = currentViewport[0] + currentViewport[2];
+        surfaceHeight = currentViewport[1] + currentViewport[3];
+    }
+
+    ArrayList<float> positions;
+    ArrayList<float> colors;
+
+    for ( long i = 0; i < rectangles.size(); i++ ) {
+        Rectangle rectangle = rectangles.get(i);
+        const float* r = rectangle.values;
+        float x0 = viewport->getPixelStartX() + r[0];
+        float y0 = viewport->getPixelStartY() + r[1];
+        float x1 = viewport->getPixelStartX() + r[2];
+        float y1 = viewport->getPixelStartY() + r[3];
+        float corners[] = {x0, y0,  x1, y0,  x1, y1,  x0, y0,  x1, y1,  x0, y1};
+
+        for ( int k = 0; k < 6; k++ ) {
+            positions.add(2.0f * corners[2*k] / surfaceWidth - 1.0f);
+            positions.add(2.0f * corners[2*k + 1] / surfaceHeight - 1.0f);
+            positions.add(0);
+            colors.add(r[4]);
+            colors.add(r[5]);
+            colors.add(r[6]);
+            colors.add(1.0f);
+        }
+    }
+
+    GLboolean scissorWasEnabled = glIsEnabled(GL_SCISSOR_TEST);
+    GLint previousScissor[4];
+
+    glGetIntegerv(GL_SCISSOR_BOX, previousScissor);
+
+    glViewport(0, 0, surfaceWidth, surfaceHeight);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(viewport->getPixelStartX(), viewport->getPixelStartY(),
+        viewport->getPixelSizeX(), viewport->getPixelSizeY());
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    OpenGL1ColoredPrimitiveRenderer::draw(Matrix4x4d::identityMatrix(),
+        GL_TRIANGLES, positions, colors);
+
+    glEnable(GL_DEPTH_TEST);
+    glScissor(previousScissor[0], previousScissor[1], previousScissor[2],
+        previousScissor[3]);
+    if ( !scissorWasEnabled ) {
+        glDisable(GL_SCISSOR_TEST);
+    }
+    glViewport(currentViewport[0], currentViewport[1], currentViewport[2],
+        currentViewport[3]);
+}
+
+// Integral constants bound to references (i.e. by `?:`) need a
+// definition out of the class in C++98
+const int OpenGL1InputGizmoRenderer::BASE_FONT_SIZE;
+const int OpenGL1InputGizmoRenderer::BASE_MARGIN;
+const int OpenGL1InputGizmoRenderer::BASE_GAP;
+const int OpenGL1InputGizmoRenderer::BASE_PADDING_X;
+const int OpenGL1InputGizmoRenderer::BASE_PADDING_Y;
+const int OpenGL1InputGizmoRenderer::BASE_FRAME_THICKNESS;
+const int OpenGL1InputGizmoRenderer::BASE_UNDERLINE_DISTANCE;
+const int OpenGL1InputGizmoRenderer::BASE_UNDERLINE_THICKNESS;

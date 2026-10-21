@@ -1,0 +1,26 @@
+#ifndef __RAYTRACER_CONSTANT__
+#define __RAYTRACER_CONSTANT__
+
+enum RaytracerConstant {
+    MAX_SCENES = 32,
+    MAX_PATH = 160,
+    CUBE_LEVELS = 6,
+    CUBE_COLORS = CUBE_LEVELS * CUBE_LEVELS * CUBE_LEVELS,
+    HUD_MARGIN = 5,
+    HUD_LINE_GAP = 2,
+    FONT_GLYPHS = 256,
+    FONT_SLOT = 32,
+    GLYPH_WIDTH = 8,
+    TEXT_COLUMNS = 80,
+    TEXT_ROWS = 25,
+    TEXT_RENDER_WIDTH = 160,
+    TEXT_RENDER_HEIGHT = 120,
+    KEY_ESC = 27,
+    KEY_LEFT = 256,
+    KEY_RIGHT,
+    KEY_UP,
+    KEY_DOWN,
+    KEY_OTHER
+};
+
+#endif

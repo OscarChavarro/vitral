@@ -1,0 +1,5 @@
+add_subdirectory(_APITests)
+add_subdirectory(OpenGL1Examples)
+add_subdirectory(OfflineExamples)
+add_subdirectory(ApplicationCases)
+add_subdirectory(VGAExamples)

@@ -1,0 +1,12 @@
+#ifndef __IMAGE_TO_SOLID_TEXTURE_INTERPOLATION_TYPES__
+#define __IMAGE_TO_SOLID_TEXTURE_INTERPOLATION_TYPES__
+
+enum ImageToSolidTextureInterpolationTypes {
+    NO_INTERPOLATION = 0,
+    NEAREST_NEIGHBOR = 1,
+    BI_LINEAR = 2,
+    CUBIC_SPLINE = 3,
+    NORMALIZED_DIST = 4
+};
+
+#endif

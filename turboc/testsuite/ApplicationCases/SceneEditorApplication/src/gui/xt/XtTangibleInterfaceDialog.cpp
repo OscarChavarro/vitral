@@ -1,0 +1,147 @@
+// Xt names its strings and objects as the vitral String and Object
+// classes: renamed while its headers are read (see XtIntrinsics.h)
+#define String XtString
+#define Object XtObject
+#include <X11/Shell.h>
+#include <X11/StringDefs.h>
+#undef Object
+#undef String
+
+#include "gui/xt/XtApplicationHost.h"
+#include "gui/xt/XtTangibleInterfaceDialog.h"
+#include "gui/xt/XtUiFactory.h"
+#include "vsdk/toolkit/gui/XtWidgetSet.h"
+
+const char* const XtTangibleInterfaceDialog::DIALOG_ID = "tangible.connect";
+
+static const char* SERVICE_URL = "serviceUrl";
+static const char* CONNECT = "connect";
+static const char* CANCEL = "cancel";
+
+static std::string trim(const std::string& text)
+{
+    size_t start = text.find_first_not_of(" \t");
+    if ( start == std::string::npos ) {
+        return "";
+    }
+    return text.substr(start, text.find_last_not_of(" \t") - start + 1);
+}
+
+XtTangibleInterfaceDialog::XtTangibleInterfaceDialog(XtApplicationHost* host)
+    : host(host), form(NULL), formSerial(0), connectBackground(0)
+{
+}
+
+XtTangibleInterfaceDialog::~XtTangibleInterfaceDialog()
+{
+    discard();
+    for ( size_t i = 0; i < connectionListeners.size(); i++ ) {
+        delete connectionListeners[i];
+    }
+}
+
+void XtTangibleInterfaceDialog::discard()
+{
+    delete form;
+    form = NULL;
+    ++formSerial;
+}
+
+void XtTangibleInterfaceDialog::show()
+{
+    const WidgetDialog* definition = host->getDialogById(DIALOG_ID);
+    if ( definition == NULL ) {
+        host->showStatusMessage(std::string("Dialog not defined: ") + DIALOG_ID);
+        return;
+    }
+    discard();
+    form = XtDialogHost::form(
+        host->createDialogShell("tangibleConnect", transientShellWidgetClass, ""),
+        host->getUiFactory()->getWidgetSet(), host->getPanelFontSet(),
+        this, definition, this);
+    XtVaGetValues(form->action(CONNECT), XtNbackground, &connectBackground,
+                  NULL);
+    form->setText(SERVICE_URL, host->getTangibleServiceUrl());
+    form->show();
+}
+
+std::string XtTangibleInterfaceDialog::message(const std::string& key)
+{
+    return host->getMessage(key.c_str());
+}
+
+void XtTangibleInterfaceDialog::actionPerformed(const std::string& action)
+{
+    if ( form == NULL ) {
+        return;
+    }
+    if ( action == CANCEL ) {
+        form->close();
+        return;
+    }
+    if ( action != CONNECT ) {
+        return;
+    }
+    std::string serviceUrl = trim(form->getText(SERVICE_URL));
+    form->session()->setDraft(SERVICE_URL, serviceUrl.c_str());
+    if ( serviceUrl.empty() ) {
+        return;
+    }
+    long request = form->session()->beginAction();
+    if ( request < 0 ) {
+        return;
+    }
+    XtVaSetValues(form->action(CONNECT), XtNbackground, connectBackground,
+                  NULL);
+    form->setActionLabel(CONNECT,
+                         host->getMessage("IDM_TANGIBLE_INTERFACE_CONNECT"));
+    ConnectionListener* listener =
+        new ConnectionListener(this, formSerial, request);
+    connectionListeners.push_back(listener);
+    host->connectTangibleInterface(serviceUrl, listener);
+}
+
+void XtTangibleInterfaceDialog::connectionFinished(long serial, long request,
+                                                   bool connected)
+{
+    if ( form == NULL || serial != formSerial ||
+         !form->session()->completeAction(request) ) {
+        return;
+    }
+    if ( connected ) {
+        form->close();
+        return;
+    }
+    XtVaSetValues(form->action(CONNECT), XtVaTypedArg, XtNbackground,
+                  XtRString, "red", ((int)(sizeof("red"))), NULL);
+    form->setActionLabel(CONNECT,
+        host->getMessage("IDM_TANGIBLE_INTERFACE_COULD_NOT_CONNECT_RETRY"));
+}
+
+bool XtTangibleInterfaceDialog::isVisible() const
+{
+    return form != NULL && form->isVisible();
+}
+
+std::string XtTangibleInterfaceDialog::getServiceUrl() const
+{
+    return form != NULL ? form->getText(SERVICE_URL) : std::string();
+}
+
+std::string XtTangibleInterfaceDialog::getConnectLabel() const
+{
+    return form != NULL ? form->getActionLabel(CONNECT) : std::string();
+}
+
+bool XtTangibleInterfaceDialog::performAction(const std::string& action,
+                                              const std::string* serviceUrl)
+{
+    if ( !isVisible() || form->action(action) == NULL ) {
+        return false;
+    }
+    if ( action == CONNECT && serviceUrl != NULL ) {
+        form->setText(SERVICE_URL, *serviceUrl);
+    }
+    actionPerformed(action);
+    return true;
+}
