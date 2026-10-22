@@ -3,6 +3,7 @@
 
 
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialogElement.h"
@@ -108,8 +109,10 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
     try {
         XtPanelWidgets* widgets = widgetSet->getPanelWidgets();
         String title = messages->message(definition->getTitleKey().c_str());
-        XtVaSetValues(shell, XtNtitle, title.c_str(), NULL);
-        widgetSet->setWindowCloseHandler(shell, &Form::closeRequested, form);
+        const String shownTitle = XtTextEncoding::toLocale(title);
+        XtVaSetValues(shell, XtNtitle, shownTitle.c_str(), NULL);
+        widgetSet->setWindowCloseHandler(shell,
+            &XtDialogHost::Form::closeRequested, form);
 
         // The elements, in order: rows and columns only group them (as the
         // Swing host does), and the buttons go to the bottom row
@@ -199,13 +202,16 @@ XtDialogHost::Form* XtDialogHost::form(XtWidget shell, XtWidgetSet* widgetSet,
             y += FIELD_HEIGHT + MARGIN;
         }
         for ( long i = 0; i < buttons.size(); i++ ) {
-            Form::Button* button = new Form::Button;
+            // Fully qualified (as Form::buttonPressed below): gcc 2.7.2 does
+            // not find the members of Form here
+            XtDialogHost::Form::Button* button =
+                new XtDialogHost::Form::Button;
             button->form = form;
             button->action = buttons[i]->getAction().c_str();
             button->label = messages->message(buttons[i]->getLabelKey().c_str());
             button->widget = widgets->createPushButton(frame, button->label,
                 fontSet, 0, form->buttonsY, 1, BUTTON_HEIGHT,
-                &Form::buttonPressed, button);
+                &XtDialogHost::Form::buttonPressed, button);
             form->buttons.add(button);
         }
         form->layoutButtons();

@@ -1,36 +1,13 @@
 # Makefile of the vitral base library for legacy toolchains without CMake
-# (e.g. GNU make 3.74 and gcc 2.7.2 on Debian 1.1). It mirrors the
+# (e.g. GNU make 3.75 and gcc 2.7.2 on Debian 1.1). It mirrors the
 # VITRAL_BASE_SOURCES list of CMakeLists.txt: keep both in sync.
 #
 # The library is built as a static archive in build/libvitral_base.a, with
-# the objects in buildmk/. Optional features are enabled with
+# the objects in buildmk/. The options are the ones of ../legacy.mk, i.e.
 #   make WITH_JPEG=1 WITH_PNG=1 WITH_FREETYPE=1 WITH_POSIX_THREADS=1
 
-CXX = g++
-AR = ar
-RANLIB = ranlib
-OPTIMIZATION = -O2
-EXTRA_CXXFLAGS =
-
-# gcc 2.x needs exception handling to be enabled explicitly
-GXX_VERSION := $(shell $(CXX) -dumpversion)
-ifeq ($(firstword $(subst ., ,$(GXX_VERSION))),2)
-LEGACY_CXXFLAGS = -fhandle-exceptions
-else
-LEGACY_CXXFLAGS =
-endif
-
-DEFINES =
-LIBS =
-ifdef WITH_JPEG
-DEFINES += -DVITRAL_WITH_JPEG
-endif
-ifdef WITH_PNG
-DEFINES += -DVITRAL_WITH_PNG
-endif
-ifdef WITH_POSIX_THREADS
-DEFINES += -DVITRAL_WITH_POSIX_THREADS
-endif
+VITRAL_DIR = ..
+include $(VITRAL_DIR)/legacy.mk
 
 CXXFLAGS = $(OPTIMIZATION) -Wall $(LEGACY_CXXFLAGS) $(EXTRA_CXXFLAGS) \
     -Isrc -Isrc/main $(DEFINES)
@@ -328,7 +305,6 @@ SOURCES = \
     src/main/vsdk/toolkit/gui/widget/variable/WidgetVariable.cpp
 
 ifdef WITH_FREETYPE
-DEFINES += -DVITRAL_WITH_FREETYPE -I/usr/include/freetype2
 SOURCES += src/main/vsdk/toolkit/io/geometry/Freetype2FontReader.cpp
 endif
 

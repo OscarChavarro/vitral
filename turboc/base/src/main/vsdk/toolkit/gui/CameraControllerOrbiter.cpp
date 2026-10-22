@@ -6,6 +6,9 @@
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/CameraControllerOrbiter.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#ifdef PI
+#undef PI
+#endif
 static const double PI = 3.14159265358979323846;
 
 CameraControllerOrbiter::CameraControllerOrbiter(Camera* cam)

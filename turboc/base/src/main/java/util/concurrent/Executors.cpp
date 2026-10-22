@@ -1,7 +1,7 @@
 #include "java/util/ArrayDeque.h"
 #include "java/util/ArrayList.txx"
 #include "java/util/concurrent/Executors.h"
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 class FixedThreadPoolExecutor : public ExecutorService {
 private:

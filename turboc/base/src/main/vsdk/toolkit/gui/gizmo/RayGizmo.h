@@ -2,7 +2,7 @@
 #define __RAY_GIZMO__
 
 #include <time.h>
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 #include "java/util/ArrayList.h"
 #include "java/util/function/Function.h"

@@ -1,7 +1,7 @@
 #ifndef __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 #define __TANGIBLE_INTERFACE_NETWORK_CLIENT__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"

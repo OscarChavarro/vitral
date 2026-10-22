@@ -4,7 +4,7 @@
 void OpenGL1MatrixState::load(unsigned int matrixMode, const Matrix4x4d& matrix)
 {
     double* m = matrix.exportToDoubleArrayColumnOrder();
-    glMatrixMode(matrixMode);
+    glMatrixMode((GLenum)matrixMode);
     glLoadMatrixd(m);
     delete[] m;
 }

@@ -4,8 +4,8 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
-class Vertex;
-class Triangle;
+#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 class SimpleMaterial;
 class Image;
 class Ray;

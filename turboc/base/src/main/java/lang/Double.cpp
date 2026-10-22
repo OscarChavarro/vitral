@@ -16,6 +16,37 @@ static bool isSpace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f';
 }
 
+/**
+Parses an optional sign followed by decimal digits (already validated), as
+`strtoll` (missing in old C libraries, i.e. libc 5), accumulating a negative
+value as Java's `Long.parseLong` does, so `Long.MIN_VALUE` is covered.
+@return false on overflow of `long long`
+*/
+static bool parseDecimalLongLong(const char* text, long long* outValue)
+{
+    bool negative = false;
+    if ( *text == '+' || *text == '-' ) {
+        negative = *text == '-';
+        text++;
+    }
+    long long limit = negative ? Long::MIN_VALUE : -Long::MAX_VALUE;
+    long long multiplyLimit = limit / 10;
+    long long value = 0;
+    for ( ; *text != '\0'; text++ ) {
+        int digit = *text - '0';
+        if ( value < multiplyLimit ) {
+            return false;
+        }
+        value *= 10;
+        if ( value < limit + digit ) {
+            return false;
+        }
+        value -= digit;
+    }
+    *outValue = negative ? value : -value;
+    return true;
+}
+
 double Double::parseDouble(const String& text)
 {
     const char* start = text.c_str();
@@ -23,8 +54,11 @@ double Double::parseDouble(const String& text)
         start++;
     }
     if ( *start == '\0' ) {
-        throw NumberFormatException(
-            text.isEmpty() ? String("empty String") : text);
+        String message = text;
+        if ( text.isEmpty() ) {
+            message = "empty String";
+        }
+        throw NumberFormatException(message);
     }
     char* end = NULL;
     double value = strtod(start, &end);
@@ -145,9 +179,9 @@ int Integer::parseInt(const String& text)
                 String("For input string: \"") + text + "\"");
         }
     }
-    errno = 0;
-    long long value = strtoll(start, NULL, 10);
-    if ( errno != 0 || value < MIN_VALUE || value > MAX_VALUE ) {
+    long long value = 0;
+    if ( !parseDecimalLongLong(start, &value) ||
+         value < MIN_VALUE || value > MAX_VALUE ) {
         throw NumberFormatException(
             String("For input string: \"") + text + "\"");
     }
@@ -171,9 +205,8 @@ long long Long::parseLong(const String& text)
                 String("For input string: \"") + text + "\"");
         }
     }
-    errno = 0;
-    long long value = strtoll(start, NULL, 10);
-    if ( errno != 0 ) {
+    long long value = 0;
+    if ( !parseDecimalLongLong(start, &value) ) {
         throw NumberFormatException(
             String("For input string: \"") + text + "\"");
     }

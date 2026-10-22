@@ -1,7 +1,7 @@
 #ifndef __REENTRANT_LOCK__
 #define __REENTRANT_LOCK__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 
 /**

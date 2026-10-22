@@ -3,6 +3,8 @@
 // XtIntrinsics.h)
 #define String XtString
 #define Object XtObject
+// First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
+#include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 #include <X11/Xaw/SimpleMenu.h>
@@ -12,6 +14,7 @@
 #undef String
 
 #include "vsdk/toolkit/gui/XawWidgetSet.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
 #include "java/util/ArrayList.txx"
 
@@ -201,8 +204,9 @@ Widget XawWidgetSet::createChoiceMenu(Widget owner,
                                   NULL, 0);
             continue;
         }
+        const String shownLabel = XtTextEncoding::toLocale(items[i].label);
         Arg args[6]; Cardinal n = 0;
-        XtSetArg(args[n], XtNlabel, items[i].label.c_str()); ++n;
+        XtSetArg(args[n], XtNlabel, shownLabel.c_str()); ++n;
         XtSetArg(args[n], XtNleftMargin, 16); ++n;
         if (fontSet != NULL) {
             XtSetArg(args[n], XtNinternational, True); ++n;

@@ -151,7 +151,7 @@ void OpenGL1LineRenderer::drawPrimitives(
     if ( primitiveType == GL_LINES ) {
         glLineWidth(lineWidth);
     }
-    glDrawArrays(primitiveType, 0, (GLsizei)(positions.size() / 3));
+    glDrawArrays((GLenum)primitiveType, 0, (GLsizei)(positions.size() / 3));
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);

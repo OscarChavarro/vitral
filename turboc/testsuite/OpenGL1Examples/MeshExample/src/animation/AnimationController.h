@@ -1,7 +1,7 @@
 #ifndef __ANIMATION_CONTROLLER__
 #define __ANIMATION_CONTROLLER__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 class MeshModel;
 class Runnable;

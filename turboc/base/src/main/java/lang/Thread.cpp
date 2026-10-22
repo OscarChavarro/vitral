@@ -30,8 +30,10 @@ runThreadStartup(void *data)
 }
 
 
+// `thread` is only read once `joinable` is set (gcc 2.7.2 rejects the
+// `thread()` initializer of a scalar pthread_t)
 Thread::Thread(Runnable *target) :
-    target(target), name("Thread"), thread(), joinable(false)
+    target(target), name("Thread"), joinable(false)
 {
 }
 

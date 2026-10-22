@@ -35,6 +35,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "application/XtOpenGL1ApplicationController.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "application/XtOpenGL1GuiEventExecutor.h"
 #include "application/XtOpenGL1SceneEditorApplication.h"
 #include "application/mcp/XtOpenGL1VitralEditorMCP.h"
@@ -64,6 +65,14 @@
 
 
 typedef void (*SwapIntervalEXTProc)(Display*, GLXDrawable, int);
+
+// GLX 1.2 and older (i.e. Mesa 2.2 on Debian 1.1) have no framebuffer
+// configurations: the visual chosen by glXChooseVisual takes their place
+#ifdef GLX_VERSION_1_3
+typedef GLXFBConfig SceneEditorGlxConfig;
+#else
+typedef XVisualInfo* SceneEditorGlxConfig;
+#endif
 
 class SceneEditorApplication;
 
@@ -260,6 +269,7 @@ public:
             glXDestroyContext(display, context);
             context = NULL;
         }
+        releaseGlxConfig();
         if (shell != NULL) {
             XtDestroyWidget(shell);
             shell = NULL;
@@ -363,7 +373,7 @@ private:
     XlibLabelImageProvider* labelProvider;
     Window window;
     bool cpuShellMode;
-    GLXFBConfig fbConfig;
+    SceneEditorGlxConfig fbConfig;
     GLXContext context;
     int width;
     int height;
@@ -403,14 +413,27 @@ private:
 
     static void selectGuiLocale()
     {
-        const char* overrideLocale = getenv("SCENE_EDITOR_GUI_LOCALE");
-        // UI text is UTF-8 regardless of the selected JSON language.  A
-        // neutral Unicode locale lets English labels such as "Español" and
-        // future translations share one FontSet encoding.
-        if (overrideLocale != NULL &&
-            setlocale(LC_CTYPE, overrideLocale) != NULL) return;
-        if (setlocale(LC_CTYPE, "C.UTF-8") != NULL) return;
-        setlocale(LC_CTYPE, "");
+        // UTF-8 when the system offers it, else Latin-1 (see
+        // XtTextEncoding: X11R6 has no usable UTF-8 locale)
+        XtTextEncoding::selectLocale(getenv("SCENE_EDITOR_GUI_LOCALE"));
+    }
+
+    /**
+    @return the first font set that X can create from the patterns (NULL
+    ends them), or NULL
+    */
+    XFontSet createFirstFontSet(const char* const* patterns)
+    {
+        for (int i = 0; patterns[i] != NULL; i++) {
+            char** missingCharsets = NULL;
+            int missingCharsetCount = 0;
+            char* defaultString = NULL;
+            XFontSet fontSet = XCreateFontSet(display, patterns[i],
+                &missingCharsets, &missingCharsetCount, &defaultString);
+            if (missingCharsets != NULL) XFreeStringList(missingCharsets);
+            if (fontSet != NULL) return fontSet;
+        }
+        return NULL;
     }
 
     static void selectSideTab(Widget, void* clientData)
@@ -727,31 +750,26 @@ private:
 
     void createMenuFontSet()
     {
-        char** missingCharsets = NULL;
-        int missingCharsetCount = 0;
-        char* defaultString = NULL;
-        menuFontSet = XCreateFontSet(
-            display,
+        // Helvetica, or the fixed fonts every X server has (i.e. Debian 1.1
+        // installs only the misc fonts)
+        static const char* const menuPatterns[] = {
             "-adobe-helvetica-medium-r-normal--14-*-*-*-*-*-iso8859-1",
-            &missingCharsets,
-            &missingCharsetCount,
-            &defaultString);
-        if (missingCharsets != NULL) XFreeStringList(missingCharsets);
+            "-misc-fixed-medium-r-normal--13-*-*-*-*-*-*-*",
+            "fixed",
+            NULL
+        };
+        menuFontSet = createFirstFontSet(menuPatterns);
         if (menuFontSet == NULL) {
-            throw VSDKFatalException(
-                "Could not create the UTF-8 menu font set");
+            throw VSDKFatalException("Could not create the menu font set");
         }
 
         // Headers of the sections are bold, as in `AwtCollapsibleSection`
-        missingCharsets = NULL;
-        missingCharsetCount = 0;
-        sectionFontSet = XCreateFontSet(
-            display,
+        static const char* const sectionPatterns[] = {
             "-adobe-helvetica-bold-r-normal--14-*-*-*-*-*-iso8859-1",
-            &missingCharsets,
-            &missingCharsetCount,
-            &defaultString);
-        if (missingCharsets != NULL) XFreeStringList(missingCharsets);
+            "-misc-fixed-bold-r-normal--13-*-*-*-*-*-*-*",
+            NULL
+        };
+        sectionFontSet = createFirstFontSet(sectionPatterns);
     }
 
     /**
@@ -796,7 +814,7 @@ private:
             visual = DefaultVisual(display, screen);
             visualDepth = DefaultDepth(display, screen);
             colormap = DefaultColormap(display, screen);
-            fbConfig = NULL;
+            releaseGlxConfig();
         }
         else
         {
@@ -901,6 +919,41 @@ private:
         }
     }
 
+    void releaseGlxConfig()
+    {
+#ifndef GLX_VERSION_1_3
+        if (fbConfig != NULL) {
+            XFree(fbConfig);
+        }
+#endif
+        fbConfig = NULL;
+    }
+
+#ifndef GLX_VERSION_1_3
+    XVisualInfo* chooseVisual()
+    {
+        int attributes[] = {
+            GLX_RGBA,
+            GLX_RED_SIZE, 1,
+            GLX_GREEN_SIZE, 1,
+            GLX_BLUE_SIZE, 1,
+            GLX_DEPTH_SIZE, 1,
+            GLX_DOUBLEBUFFER,
+            None
+        };
+
+        // Chosen twice: fbConfig keeps one, the caller frees the other
+        releaseGlxConfig();
+        fbConfig = glXChooseVisual(display, DefaultScreen(display),
+                                   attributes);
+        XVisualInfo* visualInfo = glXChooseVisual(display,
+            DefaultScreen(display), attributes);
+        if (fbConfig == NULL || visualInfo == NULL) {
+            throw VSDKFatalException("No suitable GLX visual found");
+        }
+        return visualInfo;
+    }
+#else
     XVisualInfo* chooseVisual()
     {
         const int fbAttributes[] = {
@@ -942,13 +995,18 @@ private:
         }
         return visualInfo;
     }
+#endif
 
     void createContext()
     {
         // A legacy context: it offers the OpenGL 1.2 fixed function
         // pipeline (as XQuartz does on macOS)
+#ifdef GLX_VERSION_1_3
         context = glXCreateNewContext(display, fbConfig, GLX_RGBA_TYPE,
                                       NULL, True);
+#else
+        context = glXCreateContext(display, fbConfig, NULL, True);
+#endif
         if (context == NULL) {
             throw VSDKFatalException("Could not create an OpenGL GLX context");
         }
@@ -962,7 +1020,9 @@ private:
         }
 
         // glXGetProcAddressARB gives an address for any name (i.e. Mesa
-        // 6.5, without GLX_EXT_swap_control): the extension is checked first
+        // 6.5, without GLX_EXT_swap_control): the extension is checked first.
+        // Older GLX libraries (i.e. Mesa 2.2) have neither.
+#ifdef GLX_ARB_get_proc_address
         if (!hasGlxExtension("GLX_EXT_swap_control")) {
             return;
         }
@@ -973,6 +1033,7 @@ private:
         if (swapInterval != NULL) {
             swapInterval(display, window, 1);
         }
+#endif
     }
 
     bool hasGlxExtension(const char* name)
@@ -999,7 +1060,7 @@ private:
         // The functions are exported by the system OpenGL library: only
         // the version of the context is checked
         if (!OpenGL1Loader::load()) {
-            throw VSDKFatalException("The context does not offer OpenGL 1.2");
+            throw VSDKFatalException("The context does not offer OpenGL 1.1");
         }
 
         checkOpenGLVersion();
@@ -1029,13 +1090,15 @@ private:
         }
         printf("OpenGL parsed version: %d.%d\n", major, minor);
 
-        if (major < 1 || (major == 1 && minor < 2)) {
+        // C++ port note: OpenGL 1.1 is accepted (i.e. Mesa 2.2 on Debian
+        // 1.1), see OpenGL1Loader
+        if (major < 1 || (major == 1 && minor < 1)) {
             Logger::reportMessage(
                 "SceneEditorApplication",
                 Logger::ERROR,
                 "checkOpenGLVersion",
                 "OpenGL version too old");
-            throw VSDKFatalException("This example requires OpenGL 1.2+");
+            throw VSDKFatalException("This example requires OpenGL 1.1+");
         }
     }
 
@@ -1537,11 +1600,12 @@ private:
     Widget createDialogShell(const char* name, WidgetClass shellClass,
                              const char* title)
     {
+        const String shownTitle = XtTextEncoding::toLocale(title);
         Arg args[4]; Cardinal n = 0;
         XtSetArg(args[n], XtNvisual, visual); ++n;
         XtSetArg(args[n], XtNdepth, visualDepth); ++n;
         XtSetArg(args[n], XtNcolormap, colormap); ++n;
-        XtSetArg(args[n], XtNtitle, title); ++n;
+        XtSetArg(args[n], XtNtitle, shownTitle.c_str()); ++n;
         return XtCreatePopupShell(name, shellClass, shell, args, n);
     }
 
@@ -1674,7 +1738,8 @@ private:
         if (tangibleDialog == NULL) return false;
         String url = serviceUrl != NULL ? serviceUrl->c_str() : "";
         return tangibleDialog->performAction(action.c_str(),
-                                             serviceUrl != NULL ? &url : NULL);
+                                             serviceUrl != NULL ? &url :
+                                                 (const String*)NULL);
     }
 
     void closeApplication()

@@ -4,6 +4,7 @@
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1ImageRenderer.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1RGBImageUncompressedRenderer.h"
 HashMap<RGBImageUncompressed*, GLuint> OpenGL1RGBImageUncompressedRenderer::compiledImages;
 static ArrayList<GLuint> compiledTextureIds;
@@ -118,8 +119,10 @@ GLuint OpenGL1RGBImageUncompressedRenderer::upload(RGBImageUncompressed* img) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGL1ImageRenderer::magFilterParam());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGL1ImageRenderer::minFilterParam());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // OpenGL 1.1 (i.e. Mesa 2.2) has no GL_CLAMP_TO_EDGE
+    GLint wrap = OpenGL1Loader::offersOpenGL12() ? GL_CLAMP_TO_EDGE : GL_CLAMP;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 

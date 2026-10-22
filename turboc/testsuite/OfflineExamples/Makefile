@@ -1,43 +1,19 @@
 # Makefile of the offline examples for legacy toolchains without CMake
-# (e.g. GNU make 3.74 and gcc 2.7.2 on Debian 1.1). It mirrors the
+# (e.g. GNU make 3.75 and gcc 2.7.2 on Debian 1.1). It mirrors the
 # CMakeLists.txt files of the examples: keep both in sync.
 #
 # Links against the static base library (../../base/build/libvitral_base.a,
-# built by `make` in ../../base). Each executable is written to the build/
-# folder of its example, so it can be run from there with run.sh.
-
-CXX = g++
-OPTIMIZATION = -O2
-EXTRA_CXXFLAGS =
-EXTRA_LIBS =
+# built by `make` in ../../base), with the options of ../../legacy.mk. Each
+# executable is written to the build/ folder of its example, so it can be
+# run from there with run.sh.
 
 VITRAL_DIR = ../..
-BASE_LIBRARY = $(VITRAL_DIR)/base/build/libvitral_base.a
+include $(VITRAL_DIR)/legacy.mk
 
-# gcc 2.x needs exception handling to be enabled explicitly
-GXX_VERSION := $(shell $(CXX) -dumpversion)
-ifeq ($(firstword $(subst ., ,$(GXX_VERSION))),2)
-LEGACY_CXXFLAGS = -fhandle-exceptions
-else
-LEGACY_CXXFLAGS =
-endif
-
-LIBS = $(BASE_LIBRARY) -lm
-ifdef WITH_JPEG
-LIBS += -ljpeg
-endif
-ifdef WITH_PNG
-LIBS += -lpng -lz
-endif
-ifdef WITH_FREETYPE
-LIBS += -lfreetype
-endif
-ifdef WITH_POSIX_THREADS
-LIBS += -lpthread
-endif
+LIBS = $(BASE_LIBRARY) $(SYSTEM_LIBS)
 
 CXXFLAGS = $(OPTIMIZATION) -Wall $(LEGACY_CXXFLAGS) $(EXTRA_CXXFLAGS) \
-    -I$(VITRAL_DIR)/base/src -I$(VITRAL_DIR)/base/src/main
+    $(BASE_INCLUDES) $(DEFINES)
 
 PROGRAMS = \
     AlgebraicExpressionExample/build/AlgebraicExpressionExample \

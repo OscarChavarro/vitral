@@ -61,7 +61,7 @@ void RayGizmoInteractionTechniques::setActive(bool active)
     }
     gizmo->setVisible(active);
     gizmo->setDisableAfterElapsedSeconds(
-        active ? INFINITY : RayGizmo::DEFAULT_DISABLE_TIME);
+        active ? HUGE_VAL : RayGizmo::DEFAULT_DISABLE_TIME);
     if ( active ) {
         applyRay();
     }

@@ -2,7 +2,10 @@
 # Builds (incrementally) a variant of the application and runs it from this
 # folder (its resources are read from ../../../../etc), forwarding the
 # arguments. The libraries of the turboc port are built first if missing.
-# Only uses commands available in legacy toolchains (CMake 2.4).
+# Only uses commands available in legacy toolchains (CMake 2.4). On legacy
+# systems without CMake (i.e. Debian 1.1), the Athena variant is built with
+# make by scripts/compileWithMake.sh instead (GL_DIR as there; the Motif
+# variant when Motif, i.e. LessTif, is installed).
 #
 # Usage: runVariant.sh <variant> [args...]   (xm_opengl1 or xaw_opengl1)
 #        runVariant.sh --build-only <variant>
@@ -33,6 +36,24 @@ case "$VARIANT" in
         exit 2
         ;;
 esac
+
+if ! type cmake > /dev/null 2>&1; then
+    sh "$ROOT_DIR/scripts/compileWithMake.sh" > /dev/null
+    if [ ! -f "$APP_DIR/build/$VARIANT/SceneEditorApplication" ]; then
+        echo "$VARIANT was not built by compileWithMake.sh" >&2
+        exit 2
+    fi
+    if [ "$BUILD_ONLY" = 1 ]; then
+        exit 0
+    fi
+    GL_DIR="$(sh "$ROOT_DIR/scripts/findLegacyGlDir.sh")"
+    if [ -n "$GL_DIR" ]; then
+        LD_LIBRARY_PATH="$GL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH
+    fi
+    cd "$APP_DIR"
+    exec "$APP_DIR/build/$VARIANT/SceneEditorApplication" "$@"
+fi
 
 for library in base/build/libvitral_base.so opengl1/build/libvitral_opengl1.so \
                xt/build/libvitral_xt.so $WIDGET_SET/build/libvitral_$WIDGET_SET.so; do

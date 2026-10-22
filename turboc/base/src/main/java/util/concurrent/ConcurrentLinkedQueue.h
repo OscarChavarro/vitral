@@ -3,7 +3,7 @@
 
 #include "java/util/ArrayDeque.h"
 #include "java/util/ArrayList.h"
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 template<class T>
 class ConcurrentLinkedQueue {

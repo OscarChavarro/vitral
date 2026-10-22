@@ -16,12 +16,27 @@ bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompress
         lower[i] = tolower((unsigned char)lower[i]);
     }
 
+    // C++ port note: the extensions are taken into locals, as gcc 2.7.2
+    // crashes on String temporaries inside && / || operands
+    bool isPng = false;
+    bool isJpeg = false;
+    if ( lower.size() >= 4 ) {
+        String extension = lower.substr(lower.size()-4);
+        isPng = extension == ".png";
+        isJpeg = extension == ".jpg";
+    }
+    if ( lower.size() >= 5 ) {
+        String extension = lower.substr(lower.size()-5);
+        if ( extension == ".jpeg" ) {
+            isJpeg = true;
+        }
+    }
+
     bool ok = false;
-    if ( lower.size() >= 4 && lower.substr(lower.size()-4) == ".png" ) {
+    if ( isPng ) {
         ok = ImagePersistence::exportPNG(outFile, image);
     }
-    else if ( (lower.size() >= 4 && lower.substr(lower.size()-4) == ".jpg") ||
-              (lower.size() >= 5 && lower.substr(lower.size()-5) == ".jpeg") ) {
+    else if ( isJpeg ) {
         ok = ImagePersistence::exportJPEG(outFile, image);
     }
     else {

@@ -4,6 +4,8 @@
 // classes: renamed while its headers are read (see XtIntrinsics.h)
 #define String XtString
 #define Object XtObject
+// First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
+#include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #undef Object
 #undef String

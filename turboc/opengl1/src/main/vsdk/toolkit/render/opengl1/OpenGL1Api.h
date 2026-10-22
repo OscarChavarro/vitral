@@ -24,23 +24,33 @@ The counterpart of `glad/gl.h` in the OpenGL 4 port.
 #include <GL/glu.h>
 #endif
 
+// Cast: GLenum is an enumeration in old headers (i.e. Mesa 2.2)
 #ifndef GL_CLAMP_TO_EDGE
-#define GL_CLAMP_TO_EDGE 0x812F
+#define GL_CLAMP_TO_EDGE ((GLenum)0x812F)
 #endif
 #ifndef GL_BGRA
-#define GL_BGRA 0x80E1
+#define GL_BGRA ((GLenum)0x80E1)
 #endif
 #ifndef GL_LIGHT_MODEL_COLOR_CONTROL
-#define GL_LIGHT_MODEL_COLOR_CONTROL 0x81F8
+#define GL_LIGHT_MODEL_COLOR_CONTROL ((GLenum)0x81F8)
 #endif
 #ifndef GL_SINGLE_COLOR
-#define GL_SINGLE_COLOR 0x81F9
+#define GL_SINGLE_COLOR ((GLenum)0x81F9)
 #endif
 #ifndef GL_SEPARATE_SPECULAR_COLOR
-#define GL_SEPARATE_SPECULAR_COLOR 0x81FA
+#define GL_SEPARATE_SPECULAR_COLOR ((GLenum)0x81FA)
 #endif
 #ifndef GL_RESCALE_NORMAL
-#define GL_RESCALE_NORMAL 0x803A
+#define GL_RESCALE_NORMAL ((GLenum)0x803A)
+#endif
+
+// Mesa 2.x exports the OpenGL 1.1 client state functions, but its <GL/gl.h>
+// does not declare them
+#if !defined(GL_VERSION_1_2) && !defined(_WIN32) && !defined(__APPLE__)
+extern "C" {
+void glEnableClientState(GLenum array);
+void glDisableClientState(GLenum array);
+}
 #endif
 
 // Calling convention of GL/GLU callbacks: defined by Mesa and Windows
@@ -56,5 +66,10 @@ The counterpart of `glad/gl.h` in the OpenGL 4 port.
 /// Type of the callbacks given to `gluTessCallback` (`_GLUfuncptr` in Mesa,
 /// `GLvoid (*)()` in macOS)
 typedef void (GLAPIENTRY *OpenGL1GluCallback)();
+
+// The GLU 1.2 tessellator over older GLU libraries (i.e. Mesa 2.2)
+#ifndef GLU_VERSION_1_2
+#include "vsdk/toolkit/render/opengl1/OpenGL1GluTessellator.h"
+#endif
 
 #endif

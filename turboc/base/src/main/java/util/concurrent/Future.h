@@ -3,7 +3,7 @@
 
 #include "java/lang/String.h"
 #include "java/util/concurrent/ExecutionException.h"
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 
 /**
@@ -22,7 +22,9 @@ public:
     String errorMessage;
     T value;
 
-    FutureState() : done(false), failed(false), errorMessage(), value() {
+    // `value` is only read once `done` is set (gcc 2.7.2 rejects a `value()`
+    // initializer when T is a pointer or a class without constructors)
+    FutureState() : done(false), failed(false), errorMessage() {
         pthread_mutex_init(&mutex, 0);
         pthread_cond_init(&cond, 0);
     }

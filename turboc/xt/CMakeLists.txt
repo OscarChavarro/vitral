@@ -39,6 +39,7 @@ endif(NOT XT_LIBRARY)
 set(VITRAL_XT_SOURCES
     src/main/vsdk/toolkit/gui/XtEventQueue.cpp
     src/main/vsdk/toolkit/gui/XtSystem.cpp
+    src/main/vsdk/toolkit/gui/XtTextEncoding.cpp
     src/main/vsdk/toolkit/gui/XtWidgetSupport.cpp
     src/main/vsdk/toolkit/gui/editor/XtGenericEditor.cpp
     src/main/vsdk/toolkit/render/xt/XtDialogHost.cpp

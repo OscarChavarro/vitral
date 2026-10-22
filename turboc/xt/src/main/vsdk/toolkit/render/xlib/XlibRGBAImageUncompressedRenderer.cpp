@@ -1,3 +1,5 @@
+// First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
+#include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"

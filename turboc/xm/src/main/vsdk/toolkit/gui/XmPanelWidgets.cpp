@@ -16,6 +16,7 @@
 
 #include "vsdk/toolkit/gui/XmPanelWidgets.h"
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
 #include "java/util/ArrayList.txx"
 
@@ -132,8 +133,9 @@ Widget XmPanelWidgets::createTextField(Widget parent, const String& text,
                                        void* clientData)
 {
     XmRenderTable fonts = XmWidgetSupport::createRenderTable(parent, fontSet);
+    const String localeText = XtTextEncoding::toLocale(text);
     Arg args[9]; Cardinal n = 0;
-    XtSetArg(args[n], XmNvalue, text.c_str()); ++n;
+    XtSetArg(args[n], XmNvalue, localeText.c_str()); ++n;
     XtSetArg(args[n], XmNx, x); ++n;
     XtSetArg(args[n], XmNy, y); ++n;
     XtSetArg(args[n], XmNwidth, width); ++n;
@@ -156,14 +158,16 @@ Widget XmPanelWidgets::createTextField(Widget parent, const String& text,
 String XmPanelWidgets::getText(Widget field)
 {
     char* value = XmTextFieldGetString(field);
-    String text = value != NULL ? value : "";
+    String text = value != NULL ? XtTextEncoding::fromLocale(value) :
+        String("");
     XtFree(value);
     return text;
 }
 
 void XmPanelWidgets::setText(Widget field, const String& text)
 {
-    XmTextFieldSetString(field, ((char*)(text.c_str())));
+    const String localeText = XtTextEncoding::toLocale(text);
+    XmTextFieldSetString(field, ((char*)(localeText.c_str())));
     setInvalid(field, false);
 }
 

@@ -148,7 +148,7 @@ private:
 
     V get(const T &entity) const
     {
-        if ( constGetter != NULL ) {
+        if ( constGetter != 0 ) {
             return (entity.*constGetter)();
         }
         return (((T &)(entity)).*getter)();
@@ -160,10 +160,10 @@ public:
     */
     MemberEntityControlAccessor(ConstGetter getter, Setter setter)
         : EntityControlAccessor(), constGetter(getter),
-          getter(NULL), setter(setter) {}
+          getter(0), setter(setter) {}
 
     MemberEntityControlAccessor(Getter getter, Setter setter)
-        : EntityControlAccessor(), constGetter(NULL),
+        : EntityControlAccessor(), constGetter(0),
           getter(getter), setter(setter) {}
 
     virtual EntityControlAccessor *clone() const

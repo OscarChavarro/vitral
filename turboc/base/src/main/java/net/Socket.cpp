@@ -2,37 +2,39 @@
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
 
 int Socket::connectToHost(const String& host, int port)
 {
-    char portText[32];
-    snprintf(portText, sizeof(portText), "%d", port);
-
-    addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-
-    addrinfo* result = 0;
-    if ( getaddrinfo(host.c_str(), portText, &hints, &result) != 0 ) {
+    // gethostbyname instead of getaddrinfo, which old C libraries (i.e.
+    // libc 5 on Debian 1.1) do not have: IPv4 only
+    struct hostent* hostEntry = gethostbyname(host.c_str());
+    if ( hostEntry == 0 || hostEntry->h_addrtype != AF_INET ) {
         return -1;
     }
 
     int fd = -1;
-    for ( addrinfo* rp = result; rp != 0; rp = rp->ai_next ) {
-        fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    for ( int i = 0; hostEntry->h_addr_list[i] != 0; i++ ) {
+        struct sockaddr_in address;
+        memset(&address, 0, sizeof(address));
+        address.sin_family = AF_INET;
+        address.sin_port = htons((unsigned short)port);
+        memcpy(&address.sin_addr, hostEntry->h_addr_list[i],
+            hostEntry->h_length);
+
+        fd = ::socket(AF_INET, SOCK_STREAM, 0);
         if ( fd < 0 ) {
             continue;
         }
-        if ( ::connect(fd, rp->ai_addr, rp->ai_addrlen) == 0 ) {
+        if ( ::connect(fd, (struct sockaddr*)&address, sizeof(address)) == 0 ) {
             break;
         }
         ::close(fd);
         fd = -1;
     }
-    freeaddrinfo(result);
     return fd;
 }
 
@@ -43,7 +45,7 @@ Socket::Socket(const String& host, int port)
 
 void Socket::close() {
     if (fd_ >= 0) {
-        ::shutdown(fd_, SHUT_RDWR);
+        ::shutdown(fd_, 2); // SHUT_RDWR
         ::close(fd_);
         fd_ = -1;
     }

@@ -676,9 +676,12 @@ String PolyhedralBoundedSolid::toString()
                     .append(" | ")
                     .append(intPreSpaces(he->previous()->id, 7).c_str())
                     .append(" | ");
-                msg.append(((he->parentEdge != 0) ?
-                    intPreSpaces(he->parentEdge->id, 10) :
-                    String("    <null>")).c_str());
+                if ( he->parentEdge != 0 ) {
+                    msg.append(intPreSpaces(he->parentEdge->id, 10).c_str());
+                }
+                else {
+                    msg.append("    <null>");
+                }
                 msg.append(" | ");
                 if ( he->mirrorHalfEdge() != 0 ) {
                     msg.append(intPreSpaces(he->mirrorHalfEdge()->id, 9).c_str())

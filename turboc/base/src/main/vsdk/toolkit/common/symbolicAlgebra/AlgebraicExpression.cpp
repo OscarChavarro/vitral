@@ -40,10 +40,58 @@ static bool isAlphaClass(char c)
         (c >= '0' && c <= '9') || c == '_';
 }
 
+/**
+@return the value of a constant token, as `Double.parseDouble`
+@throws AlgebraicExpressionException when it is not a number
+
+C++ port note: out of `buildExpressionTree`, as gcc 2.7.2 crashes on the
+try blocks there.
+*/
+static double parseConstant(const String& token)
+{
+    try {
+        return Double::parseDouble(token);
+    }
+    catch ( const NumberFormatException& e ) {
+        throw AlgebraicExpressionException(e.getMessage());
+    }
+    return 0.0;
+}
+
 static void deleteNode(_AlgebraicExpressionNode* node)
 {
     delete node;
 }
+
+/**
+Deletes a node under construction when an exception leaves its scope,
+unless it was released. C++ port note: `buildExpressionTree` uses it instead
+of try/catch blocks, which gcc 2.7.2 fails to compile there.
+*/
+class _AlgebraicExpressionNodeGuard {
+  private:
+    _AlgebraicExpressionNode* node;
+
+    _AlgebraicExpressionNodeGuard(const _AlgebraicExpressionNodeGuard& other);
+    _AlgebraicExpressionNodeGuard& operator=(
+        const _AlgebraicExpressionNodeGuard& other);
+
+  public:
+    explicit _AlgebraicExpressionNodeGuard(_AlgebraicExpressionNode* inNode) :
+        node(inNode)
+    {
+    }
+
+    ~_AlgebraicExpressionNodeGuard()
+    {
+        deleteNode(node);
+    }
+
+    void release()
+    {
+        node = NULL;
+    }
+};
 
 
 AlgebraicExpression::AlgebraicExpression() : root(NULL)
@@ -184,6 +232,11 @@ ArrayList<String> AlgebraicExpression::tokenize(
     return tokens;
 }
 
+/**
+C++ port note: the tokens are read with `operator[]` (a reference) instead
+of `get` (a copy), as gcc 2.7.2 fails to compile this function with so many
+`String` temporaries.
+*/
 _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     ArrayList<String>& tokens) const
 {
@@ -198,13 +251,13 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     }
 
     //- Trim out embracing parenthesis from expression ----------------
-    while ( tokens.get(0).equals("(") &&
-            tokens.get(tokens.size()-1).equals(")") ) {
+    while ( tokens[0].equals("(") &&
+            tokens[tokens.size()-1].equals(")") ) {
         level = 0;
         bool trim = true;
 
         for ( i = 0; i < tokens.size(); i++ ) {
-            c = tokens.get(i).charAt(0);
+            c = tokens[i].charAt(0);
             if ( c == '(' ) {
                 level++;
             }
@@ -228,7 +281,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
 
     //- Trivial case: if I am a single token, I create myself here ----
     if ( tokens.size() == 1 ) {
-        String token = tokens.get(0);
+        String token = tokens[0];
         if ( isOperator(token) ) {
             throw AlgebraicExpressionException(
                 String("Parse error, invalid placement for operator \'") +
@@ -236,13 +289,8 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
         }
         else if ( (token.charAt(0) >= '0' && token.charAt(0) <= '9') ||
                   token.charAt(0) == '-' ) {
-            try {
-                return new _AlgebraicExpressionConstantNode(
-                    Double::parseDouble(token));
-            }
-            catch ( const NumberFormatException& e ) {
-                throw AlgebraicExpressionException(e.getMessage());
-            }
+            return new _AlgebraicExpressionConstantNode(
+                parseConstant(token));
         }
         else {
             return new _AlgebraicExpressionVariableNode(this, token);
@@ -255,7 +303,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     // Search for top level connector operators
     level = 0;
     for ( i = 0; i < tokens.size(); i++ ) {
-        c = tokens.get(i).charAt(0);
+        c = tokens[i].charAt(0);
         if ( c == '(' ) {
             level++;
             continue;
@@ -264,7 +312,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
             level--;
             continue;
         }
-        if ( level == 0 && isOperator(tokens.get(i)) ) {
+        if ( level == 0 && isOperator(tokens[i]) ) {
             topLevelConnectorIndexes.add(i);
         }
     }
@@ -273,15 +321,11 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     if ( topLevelConnectorIndexes.size() <= 0 ) {
         // Try a funcional form expression
         _AlgebraicExpressionUnaryOperatorNode* uo;
-        uo = new _AlgebraicExpressionUnaryOperatorNode(this, tokens.get(0));
+        uo = new _AlgebraicExpressionUnaryOperatorNode(this, tokens[0]);
         tokens.remove((long)0);
-        try {
-            uo->setOperand(buildExpressionTree(tokens));
-        }
-        catch ( ... ) {
-            delete uo;
-            throw;
-        }
+        _AlgebraicExpressionNodeGuard guard(uo);
+        uo->setOperand(buildExpressionTree(tokens));
+        guard.release();
         return uo;
     }
 
@@ -290,7 +334,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
     // '^' goes with lower priority, will be overwritten if lower
     // precedent operator is later founded
     for ( i = 0; i < topLevelConnectorIndexes.size(); i++ ) {
-        c = tokens.get(topLevelConnectorIndexes.get(i)).charAt(0);
+        c = tokens[topLevelConnectorIndexes.get(i)].charAt(0);
         if ( c == '^' ) {
             mainConnector = topLevelConnectorIndexes.get(i);
             break;
@@ -299,7 +343,7 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
 
     // '*' y '/' goes before `^`
     for ( i = 0; i < topLevelConnectorIndexes.size(); i++ ) {
-        c = tokens.get(topLevelConnectorIndexes.get(i)).charAt(0);
+        c = tokens[topLevelConnectorIndexes.get(i)].charAt(0);
         if ( c == '*' || c == '/' ) {
             mainConnector = topLevelConnectorIndexes.get(i);
             break;
@@ -308,49 +352,41 @@ _AlgebraicExpressionNode* AlgebraicExpression::buildExpressionTree(
 
     // '+' y '-' goes before the others
     for ( i = 0; i < topLevelConnectorIndexes.size(); i++ ) {
-        c = tokens.get(topLevelConnectorIndexes.get(i)).charAt(0);
+        c = tokens[topLevelConnectorIndexes.get(i)].charAt(0);
         if ( c == '+' || c == '-' ) {
             mainConnector = topLevelConnectorIndexes.get(i);
             break;
         }
     }
 
-    char op = tokens.get(mainConnector).charAt(0);
+    char op = tokens[mainConnector].charAt(0);
 
     if ( op == '-' && mainConnector == 0 ) {
         _AlgebraicExpressionUnaryOperatorNode* uo;
         uo = new _AlgebraicExpressionUnaryOperatorNode(this, "-");
         tokens.remove((long)0);
-        try {
-            uo->setOperand(buildExpressionTree(tokens));
-        }
-        catch ( ... ) {
-            delete uo;
-            throw;
-        }
+        _AlgebraicExpressionNodeGuard guard(uo);
+        uo->setOperand(buildExpressionTree(tokens));
+        guard.release();
         return uo;
     }
 
     ArrayList<String> leftTokens;
     for ( i = 0; i < mainConnector && i < tokens.size(); i++ ) {
-        leftTokens.add(tokens.get(i));
+        leftTokens.add(tokens[i]);
     }
 
     ArrayList<String> rightTokens;
     for ( i = mainConnector + 1; i < tokens.size(); i++ ) {
-        rightTokens.add(tokens.get(i));
+        rightTokens.add(tokens[i]);
     }
 
     _AlgebraicExpressionBinaryOperatorNode* bo;
     bo = new _AlgebraicExpressionBinaryOperatorNode(this, op);
-    try {
-        bo->setLeftOperand(buildExpressionTree(leftTokens));
-        bo->setRightOperand(buildExpressionTree(rightTokens));
-    }
-    catch ( ... ) {
-        delete bo;
-        throw;
-    }
+    _AlgebraicExpressionNodeGuard guard(bo);
+    bo->setLeftOperand(buildExpressionTree(leftTokens));
+    bo->setRightOperand(buildExpressionTree(rightTokens));
+    guard.release();
     return bo;
 }
 

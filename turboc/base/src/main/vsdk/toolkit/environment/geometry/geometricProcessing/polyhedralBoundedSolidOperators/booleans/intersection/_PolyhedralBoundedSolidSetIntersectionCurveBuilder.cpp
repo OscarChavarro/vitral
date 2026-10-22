@@ -56,9 +56,11 @@ public:
 /**
 Orders cycles by their minimum node index.
 */
-class Builder::CycleMinimumOrder : public Comparator<IndexList> {
+class Builder::CycleMinimumOrder : public Comparator<ArrayList<int> > {
 public:
-    int compare(const IndexList& a, const IndexList& b) const
+    // C++ port note: ArrayList<int> instead of the IndexList typedef, which
+    // gcc 2.7.2 takes as another Comparator instantiation
+    int compare(const ArrayList<int>& a, const ArrayList<int>& b) const
     {
         int minA = minOf(a);
         int minB = minOf(b);

@@ -4,6 +4,7 @@
 #include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/CommandListener.h"
 #include "vsdk/toolkit/gui/widget/WidgetButtonGroup.h"
 #include "vsdk/toolkit/gui/widget/WidgetCommand.h"
@@ -71,8 +72,9 @@ static XtWidget createPopupShell(XtWidget owner)
 static XtWidget addMenuEntry(XtWidget menu, const String& label,
                       XFontSet fontSet)
 {
+    const String shownLabel = XtTextEncoding::toLocale(label);
     Arg args[3]; Cardinal n = 0;
-    XtSetArg(args[n], XtNlabel, label.c_str()); ++n;
+    XtSetArg(args[n], XtNlabel, shownLabel.c_str()); ++n;
     XtSetArg(args[n], XtNinternational, True); ++n;
     XtSetArg(args[n], XtNfontSet, fontSet); ++n;
     return XtCreateManagedWidget("menuItem", smeBSBObjectClass, menu, args, n);
@@ -142,8 +144,9 @@ XtWidget XawGuiRenderer::buildMenubar(XtWidget parent, WidgetMenu* menubar,
     for ( int i = 0; i < count; i++ ) {
         String title = menubar != NULL ?
             menus.get(i)->getName() : String("No menubar in GUI!");
+        const String shownTitle = XtTextEncoding::toLocale(title);
         Arg buttonArgs[8]; Cardinal buttonN = 0;
-        XtSetArg(buttonArgs[buttonN], XtNlabel, title.c_str()); ++buttonN;
+        XtSetArg(buttonArgs[buttonN], XtNlabel, shownTitle.c_str()); ++buttonN;
         XtSetArg(buttonArgs[buttonN], XtNinternational, True); ++buttonN;
         XtSetArg(buttonArgs[buttonN], XtNfontSet, fontSet); ++buttonN;
         XtSetArg(buttonArgs[buttonN], XtNx, i * buttonWidth); ++buttonN;
@@ -210,8 +213,9 @@ XtWidget XawGuiRenderer::buildButtonGroup(XtWidget parent,
         String text = !withIcon || group->isShowTextSet() ?
             element->getName() : String("");
 
+        const String shownText = XtTextEncoding::toLocale(text);
         Arg buttonArgs[10]; Cardinal buttonN = 0;
-        XtSetArg(buttonArgs[buttonN], XtNlabel, text.c_str()); ++buttonN;
+        XtSetArg(buttonArgs[buttonN], XtNlabel, shownText.c_str()); ++buttonN;
         XtSetArg(buttonArgs[buttonN], XtNinternational, True); ++buttonN;
         XtSetArg(buttonArgs[buttonN], XtNfontSet, fontSet); ++buttonN;
         if ( horizontal ) {

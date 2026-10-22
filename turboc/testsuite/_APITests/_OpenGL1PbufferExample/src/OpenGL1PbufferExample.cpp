@@ -94,7 +94,14 @@ static void writeRgbaToPpm(const char* outFile, const unsigned char* rgba, int w
 int main()
 {
     unsigned char* rgba = new unsigned char[(size_t)WIDTH * (size_t)HEIGHT * 4u];
+#if OSMESA_MAJOR_VERSION > 3 || \
+    (OSMESA_MAJOR_VERSION == 3 && OSMESA_MINOR_VERSION >= 5)
     OSMesaContext context = OSMesaCreateContextExt(OSMESA_RGBA, 16, 0, 0, NULL);
+#else
+    // Older OSMesa (i.e. Mesa 3.0 on Debian 1.1) has no
+    // OSMesaCreateContextExt: its contexts always have a depth buffer
+    OSMesaContext context = OSMesaCreateContext(OSMESA_RGBA, NULL);
+#endif
     if (context == NULL ||
         !OSMesaMakeCurrent(context, rgba, GL_UNSIGNED_BYTE, WIDTH, HEIGHT)) {
         fprintf(stderr, "OSMesa context creation failed\n");

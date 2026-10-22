@@ -31,18 +31,74 @@ cmake --build .
 
 The turboc port targets legacy compilers (gcc 4.1 on Ubuntu 7.04, gcc 2.7.2
 on Debian 1.1 and, eventually, Turbo C++ 3.0 for DOS). On systems without
-CMake, the base library and the offline examples are built with plain
-Makefiles, from the `turboc/` directory:
+CMake, the base library and the offline examples (the testsuite programs
+that need no window system) are built with plain Makefiles:
 
 ```bash
-make                         # base/build/libvitral_base.a and the examples
-make WITH_POSIX_THREADS=1    # optional: WITH_JPEG=1, WITH_PNG=1, WITH_FREETYPE=1
-make clean
+./scripts/compileWithMake.sh                       # library and examples
+./scripts/compileWithMake.sh WITH_POSIX_THREADS=1  # also WITH_JPEG=1, WITH_PNG=1, WITH_FREETYPE=1
+./scripts/compileWithMake.sh clean
 ```
 
-The objects go to `buildmk/` folders; the Makefiles do not track header
-dependencies, so run `make clean` after changing headers. Each example is
-then run from its folder (i.e. `./build/RaytracingOfflineExample`).
+The library goes to `base/build/libvitral_base.a` and each example to the
+`build/` folder of its project, so `./run.sh` works from there (without
+CMake, `run.sh` rebuilds through `compileWithMake.sh`). The objects go to
+`buildmk/` folders; the Makefiles do not track header dependencies, so clean
+after changing headers. With gcc 2.x the Makefiles compile with
+`-O0 -fhandle-exceptions -frtti -fno-inline` and force
+`vsdk/toolkit/common/Gcc2TypeInfo.h` into every file: gcc 2.7.2 only
+catches exceptions by a base class with RTTI (which needs `<typeinfo>`),
+crashes when inlining, and its optimized exception tables refer to deleted
+labels.
+
+When OpenGL is found (`<GL/gl.h>` in `/usr/include`, `/usr/X11R6/include`
+or `$GL_DIR/include`), `compileWithMake.sh` also builds the opengl1, xt and
+xaw libraries and the Athena variant of SceneEditorApplication, run with
+`./runXawOpenGL1.sh` from its folder; with Motif (`<Xm/Xm.h>`, i.e. LessTif
+0.76 on Debian 1.1) the xm library and the Motif variant
+(`./runXmOpenGL1.sh`); and with GLUT (`<GL/glut.h>`, i.e. the one of Mesa
+3.0) the glut library and the programs of `testsuite/OpenGL1Examples` and
+`testsuite/_APITests`. Only `testsuite/VGAExamples` needs CMake.
+
+LessTif 0.76 implements Motif 1.2: `XmWidgetSupport.h` maps the Motif 2
+render tables, toggle states and popup values the port uses to their Motif
+1.2 counterparts (font lists, Booleans) when `XmVersion < 2000`. On Debian 1.1 OpenGL is Mesa, built
+from its sources in `/usr/local/src` (i.e. `/usr/local/src/Mesa-3.0`, found
+by `scripts/findLegacyGlDir.sh`) or given as `GL_DIR` (i.e. Mesa 2.2, the
+`mesa2` and `mesa-dev` packages of Debian 1.3, unpacked in a folder):
+
+```bash
+./scripts/compileWithMake.sh               # Mesa in /usr/local/src/Mesa-*
+GL_DIR=$HOME/mesa/usr ./scripts/compileWithMake.sh
+cd testsuite/ApplicationCases/SceneEditorApplication && ./runXawOpenGL1.sh
+```
+
+The Makefiles do not track headers: after changing the OpenGL
+implementation, `./scripts/compileWithMake.sh clean` first.
+
+Mesa 2.2 offers OpenGL 1.1 and GLU 1.1 (Mesa 3.0, OpenGL 1.2 and GLU 1.1):
+`OpenGL1Loader` accepts OpenGL 1.1 (the toolkit then avoids its few OpenGL
+1.2 enumerants), `OpenGL1GluTessellator.h` implements the GLU 1.2 tessellator over the GLU
+1.1 one (without `GLU_TESS_COMBINE`), and the scene editor chooses its
+visual with `glXChooseVisual` when GLX 1.3 is missing. Mesa 3.0 restores
+texture bindings in `glPopAttrib` without their reference counts, so the
+toolkit binds no texture while the texture attributes are saved or
+restored.
+
+X11R6.1 (XFree86 3.2) has no usable Unicode: no `Xutf8*` functions, no ISO
+10646 fonts, and its `en_US.utf` locale does not decode UTF-8. The GUI texts
+are UTF-8, so `XtTextEncoding` selects a UTF-8 locale when the system has
+one and ISO 8859-1 otherwise, converting the texts given to X (labels,
+titles, text fields, `XlibUtf8Text.h` drawing) to Latin-1. Its Xlib keeps
+its own locale (`X_LOCALE`): `legacy.mk` detects it (`_Xsetlocale` in
+libX11) and defines `VITRAL_X_LOCALE`. The menus use Helvetica, or the
+`fixed` fonts when it is missing (Debian 1.1 installs only the misc fonts).
+
+Without `WITH_POSIX_THREADS=1` the Makefiles define `VITRAL_WITHOUT_PTHREADS`
+for the library and the examples: `java/lang/PosixThreads.h` then replaces
+pthreads with a single threaded subset (no-op mutexes and conditions, and a
+`pthread_create` that fails), for systems without a usable pthreads library
+such as Debian 1.1.
 
 To keep the code compatible with those compilers, the port follows these
 rules:
@@ -58,6 +114,41 @@ rules:
   `java/lang/Class`.
 - No member templates, no `template <>` specializations, no `typename`
   and no static data members in class templates.
+- `#include "java/lang/PosixThreads.h"` instead of `<pthread.h>`.
+- No member functions of class templates that store the result of
+  `new T[]` and then test it (gcc 2.7.2 crashes on them with
+  `-fhandle-exceptions`): allocate through a function template, as
+  `ArrayList::init` does. No `return new ...` inside a `try` block either;
+  the Makefiles also compile with `-fno-inline` on gcc 2.x, as its inlining
+  of functions with exception cleanups crashes. No conditional operator
+  with `String` (or other class) temporaries as operands inside a larger
+  expression, i.e. `f((c ? a.toString() : String("x")).c_str())` or
+  `throw E(c ? String("x") : text)`: use `if` / `else` and a local. In
+  long functions with exceptions, prefer `list[i]` (a reference) to
+  `list.get(i)` (a `String` copy) to keep the temporaries few.
+- Constructors, assignment and destructor of the container templates
+  defined in the class body (calling out of class members): gcc 2.7.2 does
+  not instantiate out of class members that are only used by the copy
+  constructors and assignments it synthesizes.
+- Template arguments spelled out in base classes, not through a typedef
+  (gcc 2.7.2 takes `Comparator<IndexList>` as a type other than
+  `Comparator<ArrayList<int> >`).
+- Complete element types for the containers: gcc 2.7.2 instantiates every
+  member of a class template where the class is named, even through a
+  pointer, so a forward declaration of the element type is not enough, and
+  a type cannot hold containers of itself (hold pointers instead).
+- No identifier `PI` without an `#undef PI` first (libc 5 defines it as a
+  macro in `<math.h>`), no `getaddrinfo` (use `gethostbyname`), no
+  `uint16_t` and similar `<stdint.h>` types, no C99 `INFINITY` / `NAN`
+  (use `HUGE_VAL`).
+- `NULL` may be `((void *)0)`: cast it when its type matters, as in
+  `cond ? new A() : (A *)NULL` or as a template argument.
+- X11R6 headers do not include their prerequisites: `<X11/Intrinsic.h>`
+  before `<X11/StringDefs.h>`, `<X11/Shell.h>` and the Xaw / Xmu headers,
+  `<X11/Xlib.h>` before `<X11/Xutil.h>`.
+- Classes nested in nested classes named from their full path
+  (`XtDialogHost::Form::Button`), and no `T x(U(), ...)` declarations
+  (gcc 2.7.2 reads them as function declarations: name the `U` first).
 
 ### Build Options
 

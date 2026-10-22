@@ -130,7 +130,7 @@ void _PolyhedralBoundedSolidLoop::revert()
     //-----------------------------------------------------------------
     _PolyhedralBoundedSolidHalfEdge* he;
     ArrayList<_PolyhedralBoundedSolidEdge*> edges(
-        Collections<_PolyhedralBoundedSolidEdge*>::nCopies(n, NULL));
+        Collections<_PolyhedralBoundedSolidEdge*>::nCopies(n, (_PolyhedralBoundedSolidEdge*)NULL));
     ArrayList<bool> sides(Collections<bool>::nCopies(n, false));
     long int i;
 

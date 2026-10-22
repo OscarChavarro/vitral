@@ -54,8 +54,10 @@ public:
                                        const Matrix4x4d& transform,
                                        const SimpleMaterial& material)
     {
-        RenderPrimitive primitive(SharedPointer<Geometry>(), transform,
-                                  material);
+        // A named empty pointer: gcc 2.7.2 takes the declaration with
+        // SharedPointer<Geometry>() as a function declaration
+        SharedPointer<Geometry> noGeometry;
+        RenderPrimitive primitive(noGeometry, transform, material);
         primitive.referencedGeometry = geometry;
         return primitive;
     }

@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -132,7 +133,18 @@ Cpp98Support::hypot(double x, double y)
 int
 Cpp98Support::ilogb(double value)
 {
-    return ::ilogb(value);
+    // Through frexp, as old C libraries (i.e. libc 5) have no ilogb; the
+    // special values are the ones of the x86 C libraries (FP_ILOGB0 and
+    // FP_ILOGBNAN are INT_MIN)
+    if ( isNaN(value) || value == 0.0 ) {
+        return INT_MIN;
+    }
+    if ( isInfinite(value) ) {
+        return INT_MAX;
+    }
+    int exponent = 0;
+    frexp(value, &exponent);
+    return exponent - 1;
 }
 
 bool

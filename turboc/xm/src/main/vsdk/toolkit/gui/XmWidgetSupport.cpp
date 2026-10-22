@@ -5,7 +5,9 @@
 #include <stdlib.h>
 
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
+#include "java/util/ArrayList.txx"
 
 
 /**
@@ -37,7 +39,8 @@ void XmWidgetSupport::requireMotifShell(XtWidget shell)
 
 XmString XmWidgetSupport::createString(const String& text)
 {
-    return XmStringCreateLocalized(((char*)(text.c_str())));
+    const String localeText = XtTextEncoding::toLocale(text);
+    return XmStringCreateLocalized(((char*)(localeText.c_str())));
 }
 
 String XmWidgetSupport::toText(XmString string)
@@ -45,10 +48,20 @@ String XmWidgetSupport::toText(XmString string)
     if ( string == NULL ) {
         return String();
     }
+#if XmVersion >= 2000
     char* text = ((char*)(XmStringUnparse(
         string, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0,
         XmOUTPUT_ALL)));
-    String result = text != NULL ? text : "";
+#else
+    // Motif 1.2: the text of its default charset segments
+    char* text = NULL;
+    if ( !XmStringGetLtoR(string, ((char*)(XmFONTLIST_DEFAULT_TAG)),
+                          &text) ) {
+        text = NULL;
+    }
+#endif
+    String result = text != NULL ? XtTextEncoding::fromLocale(text) :
+        String("");
     XtFree(text);
     return result;
 }
@@ -59,6 +72,7 @@ XmRenderTable XmWidgetSupport::createRenderTable(XtWidget widget,
     if ( fontSet == NULL ) {
         return NULL;
     }
+#if XmVersion >= 2000
     Arg args[3]; Cardinal n = 0;
     XtSetArg(args[n], XmNfontType, XmFONT_IS_FONTSET); ++n;
     XtSetArg(args[n], XmNfont, fontSet); ++n;
@@ -69,6 +83,25 @@ XmRenderTable XmWidgetSupport::createRenderTable(XtWidget widget,
                                                      XmMERGE_REPLACE);
     XmRenditionFree(rendition);
     return table;
+#else
+    // Motif 1.2: a font list with the font set as its default entry,
+    // shared by the widgets of the font set (see XmWidgetSupport.h)
+    (void)widget;
+    static ArrayList<XFontSet> fontSets;
+    static ArrayList<XmFontList> fontLists;
+    for ( long i = 0; i < fontSets.size(); i++ ) {
+        if ( fontSets[i] == fontSet ) {
+            return fontLists[i];
+        }
+    }
+    XmFontListEntry entry = XmFontListEntryCreate(
+        ((char*)(XmFONTLIST_DEFAULT_TAG)), XmFONT_IS_FONTSET,
+        ((XtPointer)(fontSet)));
+    XmFontList list = XmFontListAppendEntry(NULL, entry);
+    fontSets.add(fontSet);
+    fontLists.add(list);
+    return list;
+#endif
 }
 
 void XmWidgetSupport::setLabelString(XtWidget widget, const String& text)

@@ -3,21 +3,39 @@
 
 #include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 
-bool OpenGL1Loader::load()
+/**
+@return false if there is no current context
+*/
+static bool contextVersion(int* major, int* minor)
 {
     const char* version = ((const char*)(glGetString(GL_VERSION)));
+    *major = 0;
+    *minor = 0;
+    return version != NULL && sscanf(version, "%d.%d", major, minor) == 2;
+}
+
+bool OpenGL1Loader::load()
+{
     int major = 0;
     int minor = 0;
-    if ( version == NULL || sscanf(version, "%d.%d", &major, &minor) != 2 ) {
+    if ( !contextVersion(&major, &minor) ) {
         fprintf(stderr, "OpenGL1Loader: no current OpenGL context\n");
         return false;
     }
-    if ( major < 1 || (major == 1 && minor < 2) ) {
-        fprintf(stderr, "OpenGL1Loader: OpenGL %d.%d found, 1.2 required\n",
+    if ( major < 1 || (major == 1 && minor < 1) ) {
+        fprintf(stderr, "OpenGL1Loader: OpenGL %d.%d found, 1.1 required\n",
                 major, minor);
         return false;
     }
     return true;
+}
+
+bool OpenGL1Loader::offersOpenGL12()
+{
+    int major = 0;
+    int minor = 0;
+    return contextVersion(&major, &minor) &&
+        (major > 1 || (major == 1 && minor >= 2));
 }
 
 bool OpenGL1Loader::isExtensionSupported(const char* name)

@@ -19,7 +19,7 @@ ServerSocket::ServerSocket(int port) : listenFd_(-1), port_(port) {
     memset(&addr, 0, sizeof(addr));
     addr.sin_family      = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port        = htons(((uint16_t)(port)));
+    addr.sin_port        = htons(((unsigned short)(port)));
 
     if (::bind(listenFd_, ((struct sockaddr*)(&addr)), sizeof(addr)) < 0) {
         perror("ServerSocket: bind");

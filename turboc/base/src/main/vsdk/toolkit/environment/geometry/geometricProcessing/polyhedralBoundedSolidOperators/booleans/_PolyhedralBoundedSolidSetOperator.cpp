@@ -312,8 +312,16 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
     //-----------------------------------------------------------------
     if ( trace ) {
         printf("      SEPARATEEDGESEQUENCE %d\n", type);
-        printf("        From: %s\n", from != 0 ? from->toString().c_str() : "null");
-        printf("        To: %s\n", to != 0 ? to->toString().c_str() : "null");
+        String fromText("null");
+        if ( from != 0 ) {
+            fromText = from->toString();
+        }
+        String toText("null");
+        if ( to != 0 ) {
+            toText = to->toString();
+        }
+        printf("        From: %s\n", fromText.c_str());
+        printf("        To: %s\n", toText.c_str());
     }
 
     if ( from == 0 || to == 0 ) {
@@ -754,7 +762,7 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
                 _PolyhedralBoundedSolidHalfEdge* nhe =
                     new _PolyhedralBoundedSolidHalfEdge(
                         he->startingVertex != 0 ?
-                            vertexMap.getOrDefault(he->startingVertex, NULL) :
+                            vertexMap.getOrDefault(he->startingVertex, (_PolyhedralBoundedSolidVertex*)NULL) :
                             0,
                         nl);
                 nhe->id = he->id;
@@ -776,7 +784,7 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
                 halfEdgeMap.put(he, nhe);
             }
             nl->boundaryStartHalfEdge = l->boundaryStartHalfEdge != 0 ?
-                halfEdgeMap.getOrDefault(l->boundaryStartHalfEdge, NULL) : 0;
+                halfEdgeMap.getOrDefault(l->boundaryStartHalfEdge, (_PolyhedralBoundedSolidHalfEdge*)NULL) : 0;
         }
     }
 
@@ -791,7 +799,7 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
     }
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
         _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
-        _PolyhedralBoundedSolidVertex* nv = vertexMap.getOrDefault(v, NULL);
+        _PolyhedralBoundedSolidVertex* nv = vertexMap.getOrDefault(v, (_PolyhedralBoundedSolidVertex*)NULL);
         nv->emanatingHalfEdge = (v->emanatingHalfEdge != 0 &&
             halfEdgeMap.containsKey(v->emanatingHalfEdge)) ?
             *halfEdgeMap.get(v->emanatingHalfEdge) : 0;

@@ -6,6 +6,9 @@
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/CameraControllerAquynza.h"
+#ifdef PI
+#undef PI
+#endif
 static const double PI = 3.14159265358979323846;
 
 static inline double degreesToRadians(double degrees) {

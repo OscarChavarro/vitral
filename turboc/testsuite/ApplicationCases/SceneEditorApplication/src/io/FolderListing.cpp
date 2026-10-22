@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
+// realpath, which old C libraries (i.e. libc 5) declare there
+#include <unistd.h>
 
 #include "io/FolderListing.h"
 #include "java/util/ArrayList.txx"

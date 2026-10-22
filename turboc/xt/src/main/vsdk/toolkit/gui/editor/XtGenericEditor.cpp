@@ -64,7 +64,7 @@ void XtGenericEditor::endBuild()
     widgets->setForeground(messageLabel, MESSAGE_COLOR);
     nextY += ROW_HEIGHT + ROW_SPACING;
     // The message given while building was shown before the label existed
-    showValidationMessage(pendingMessage.isEmpty() ? NULL :
+    showValidationMessage(pendingMessage.isEmpty() ? (const char*)NULL :
                           pendingMessage.c_str());
 }
 

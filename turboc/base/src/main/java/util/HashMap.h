@@ -58,14 +58,54 @@ class HashMap: public Object {
     void initialize(long initialBucketCount);
     void rehash(long newBucketCount);
     long bucketIndexFor(const K &key) const;
+    void copyFrom(const HashMap &other);
 
   public:
-    HashMap();
-    explicit HashMap(long initialCapacity);
-    HashMap(const HashMap &other);
-    ~HashMap();
+    // C++ port note: the constructors, the assignment and the destructor
+    // are defined in the class body, calling members defined out of it: gcc
+    // 2.7.2 does not instantiate the out of class ones when they are only
+    // used by the members it synthesizes (as ArrayList)
+    HashMap():
+        buckets(NULL),
+        bucketCount(0),
+        elementCount(0),
+        maxLoadFactor(0.75F)
+    {
+        initialize(16);
+    }
 
-    HashMap &operator=(const HashMap &other);
+    explicit HashMap(long initialCapacity):
+        buckets(NULL),
+        bucketCount(0),
+        elementCount(0),
+        maxLoadFactor(0.75F)
+    {
+        initialize(initialCapacity <= 0 ? 16 : initialCapacity);
+    }
+
+    HashMap(const HashMap &other):
+        buckets(NULL),
+        bucketCount(0),
+        elementCount(0),
+        maxLoadFactor(other.maxLoadFactor)
+    {
+        copyFrom(other);
+    }
+
+    ~HashMap()
+    {
+        clear();
+    }
+
+    HashMap &operator=(const HashMap &other)
+    {
+        if ( this != &other ) {
+            clear();
+            maxLoadFactor = other.maxLoadFactor;
+            copyFrom(other);
+        }
+        return *this;
+    }
 
     void clear();
     long size() const;

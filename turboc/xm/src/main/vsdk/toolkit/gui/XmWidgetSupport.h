@@ -12,6 +12,24 @@
 #undef Object
 #undef String
 
+// Motif 1.2 (i.e. LessTif 0.76 on Debian 1.1) names for the Motif 2
+// resources and values used by the port: font lists instead of render
+// tables (createRenderTable creates either), Boolean toggle states and
+// popup menus. LessTif 0.76 keeps the font list given to a widget without
+// copying it: createRenderTable shares one font list per font set, never
+// freed, so XmRenderTableFree does nothing.
+#if XmVersion < 2000
+typedef XmFontList XmRenderTable;
+#define XmNrenderTable XmNfontList
+#define XmNbuttonRenderTable XmNbuttonFontList
+#define XmNlabelRenderTable XmNlabelFontList
+#define XmNtextRenderTable XmNtextFontList
+#define XmRenderTableFree(table) ((void)(table))
+#define XmSET True
+#define XmUNSET False
+#define XmPOPUP_DISABLED False
+#endif
+
 #include "vsdk/toolkit/gui/XtWidget.h"
 
 /**

@@ -2,6 +2,8 @@
 // classes: renamed while its headers are read (see XtIntrinsics.h)
 #define String XtString
 #define Object XtObject
+// First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
+#include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #include <Xm/Xm.h>
 #include <Xm/FileSB.h>
@@ -87,8 +89,12 @@ void XmFileDialog::create(XtApplicationHost* host, const String& title,
     XtSetArg(args[n], XmNfileSearchProc, &XmFileDialog::searchFiles); ++n;
     // The search procedure finds the dialog here
     XtSetArg(args[n], XmNuserData, this); ++n;
+#if XmVersion >= 2000
+    // Motif 1.2 (i.e. LessTif 0.76) has neither: it shows the hidden files
+    // and absolute paths
     XtSetArg(args[n], XmNfileFilterStyle, XmFILTER_HIDDEN_FILES); ++n;
     XtSetArg(args[n], XmNpathMode, XmPATH_MODE_RELATIVE); ++n;
+#endif
     if ( fonts != NULL ) {
         XtSetArg(args[n], XmNbuttonRenderTable, fonts); ++n;
         XtSetArg(args[n], XmNlabelRenderTable, fonts); ++n;
@@ -126,8 +132,11 @@ void XmFileDialog::searchFiles(Widget box, XtPointer callData)
         XmWidgetSupport::toText(search->dir));
     ArrayList<String> folders;
     ArrayList<String> files;
-    FolderListing::list(folder, self != NULL ? self->filters :
-                        ArrayList<FileSuffixFilter>(), folders, files);
+    // No temporary list in the conditional: gcc 2.7.2 crashes on it
+    ArrayList<FileSuffixFilter> noFilters;
+    const ArrayList<FileSuffixFilter>& filters =
+        self != NULL ? self->filters : noFilters;
+    FolderListing::list(folder, filters, folders, files);
 
     ArrayList<XmString> items;
     for ( long i = 0; i < files.size(); i++ ) {

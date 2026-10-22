@@ -5,34 +5,6 @@
 #include "java/util/TreeMap.h"
 
 template <class K, class V>
-TreeMap<K, V>::TreeMap()
-{
-}
-
-template <class K, class V>
-TreeMap<K, V>::TreeMap(const TreeMap<K, V> &other) : Object()
-{
-    copyFrom(other);
-}
-
-template <class K, class V>
-TreeMap<K, V>::~TreeMap()
-{
-    clear();
-}
-
-template <class K, class V>
-TreeMap<K, V> &
-TreeMap<K, V>::operator=(const TreeMap<K, V> &other)
-{
-    if ( this != &other ) {
-        clear();
-        copyFrom(other);
-    }
-    return *this;
-}
-
-template <class K, class V>
 void
 TreeMap<K, V>::copyFrom(const TreeMap<K, V> &other)
 {

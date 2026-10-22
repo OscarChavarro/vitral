@@ -4,6 +4,9 @@
 # group (e.g. testsuite/OpenGL1Examples) is the parent of the program
 # directory; it is built in <group>/buildtc, with CMake 2.4 compatible calls.
 # The libraries (base, opengl1, glut) are built first if missing.
+# On legacy systems without CMake (i.e. Debian 1.1), the program is built
+# with make by compileWithMake.sh instead (all the groups but VGAExamples),
+# with the OpenGL of findLegacyGlDir.sh.
 #
 # Usage: runTestsuiteProgram.sh <programDir> <cmakeTarget> <executable> [args...]
 #   programDir  directory used as working directory (usually the run.sh dir)
@@ -36,6 +39,24 @@ quiet() {
     fi
     rm -f "$LOG"
 }
+
+if ! type cmake > /dev/null 2>&1; then
+    if [ ! -f "$ROOT_DIR/base/build/libvitral_base.a" ]; then
+        echo "Building with make (compileWithMake.sh), it takes a while..." >&2
+    fi
+    quiet sh "$ROOT_DIR/scripts/compileWithMake.sh"
+    GL_DIR="$(sh "$ROOT_DIR/scripts/findLegacyGlDir.sh")"
+    if [ -n "$GL_DIR" ]; then
+        LD_LIBRARY_PATH="$GL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH
+    fi
+    cd "$PROGRAM_DIR"
+    if [ ! -f "$EXECUTABLE" ]; then
+        echo "$EXECUTABLE is not built by compileWithMake.sh (it needs CMake)" >&2
+        exit 1
+    fi
+    exec "$EXECUTABLE" "$@"
+fi
 
 for library in base/build/libvitral_base.so opengl1/build/libvitral_opengl1.so \
                glut/build/libvitral_glut.so; do

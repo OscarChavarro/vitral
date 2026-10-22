@@ -1,7 +1,7 @@
 #ifndef __PROGRESS_MONITOR_CONSOLE__
 #define __PROGRESS_MONITOR_CONSOLE__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 class ProgressMonitorConsole : public ProgressMonitor {
 private:

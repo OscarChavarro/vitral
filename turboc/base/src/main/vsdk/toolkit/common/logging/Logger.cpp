@@ -18,7 +18,7 @@ void Logger::processFatalError(const String& method, const String& message, cons
     if ( !withFatalExceptions ) {
         return;
     }
-    String m = method.empty() ? "VSDK fatal error" : ("VSDK fatal error at " + method);
+    String m = method.empty() ? String("VSDK fatal error") : ("VSDK fatal error at " + method);
     if ( !message.empty() ) {
         m += ": " + message;
     }

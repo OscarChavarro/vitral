@@ -152,9 +152,13 @@ void OpenGL1InputGizmoRenderer::updateImage(int field, const String& text,
         host->discardLabelImage(images.get(field));
     }
     // An empty text (i.e. all its characters deleted) cannot be rasterized:
-    // an empty box is drawn with a blank text
-    images.set(field, host->createLabelImage(
-        text.isEmpty() ? String(" ") : text, color, fontSize));
+    // an empty box is drawn with a blank text (in a local: gcc 2.7.2 crashes
+    // on String temporaries in a conditional expression)
+    String shownText = text;
+    if ( text.isEmpty() ) {
+        shownText = " ";
+    }
+    images.set(field, host->createLabelImage(shownText, color, fontSize));
     imageTexts.set(field, text);
     imageColors.set(field, color);
 }

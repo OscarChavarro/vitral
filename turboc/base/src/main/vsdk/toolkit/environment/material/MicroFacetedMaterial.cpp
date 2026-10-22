@@ -25,6 +25,35 @@ struct MicrofacetConfig {
     int fresnelModel;
     int ndfModel;
     int geometryModel;
+
+    // C++ port note: an explicit copy constructor, as gcc 2.7.2 crashes on
+    // the implicit one
+    MicrofacetConfig()
+    {
+    }
+
+    MicrofacetConfig(const MicrofacetConfig& other) :
+        name(other.name),
+        ambient(other.ambient),
+        diffuse(other.diffuse),
+        specular(other.specular),
+        doubleSided(other.doubleSided),
+        reflectionCoefficient(other.reflectionCoefficient),
+        refractionCoefficient(other.refractionCoefficient),
+        opacity(other.opacity),
+        phongExponent(other.phongExponent),
+        roughness(other.roughness),
+        alpha(other.alpha),
+        fresnelF0(other.fresnelF0),
+        eta(other.eta),
+        kappa(other.kappa),
+        kd(other.kd),
+        ks(other.ks),
+        fresnelModel(other.fresnelModel),
+        ndfModel(other.ndfModel),
+        geometryModel(other.geometryModel)
+    {
+    }
 };
 
 static String trim(const String& s)

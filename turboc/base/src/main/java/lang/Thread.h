@@ -1,7 +1,7 @@
 #ifndef __THREAD__
 #define __THREAD__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 #include "java/lang/Runnable.h"
 #include "java/lang/String.h"

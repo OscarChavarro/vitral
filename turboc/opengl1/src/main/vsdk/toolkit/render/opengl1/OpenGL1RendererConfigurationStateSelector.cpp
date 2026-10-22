@@ -8,6 +8,7 @@
 #include "vsdk/toolkit/environment/light/Light.h"
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
+#include "vsdk/toolkit/render/opengl1/OpenGL1Loader.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1MatrixState.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1RendererConfigurationStateSelector.h"
 
@@ -66,6 +67,9 @@ bool OpenGL1RendererConfigurationStateSelector::reportUnsupportedFeatures(
 
 void OpenGL1RendererConfigurationStateSelector::pushState()
 {
+    // No texture bound while the texture attributes are saved (see
+    // deactivateState)
+    glBindTexture(GL_TEXTURE_2D, 0);
     glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT |
                  GL_CURRENT_BIT);
 }
@@ -140,6 +144,9 @@ void OpenGL1RendererConfigurationStateSelector::activateConstantState(
 void OpenGL1RendererConfigurationStateSelector::deactivateState()
 {
     OpenGL1MatrixState::pop();
+    // Unbound before the texture attributes are restored: Mesa 3.0 restores
+    // the binding without its reference count
+    glBindTexture(GL_TEXTURE_2D, 0);
     glPopAttrib();
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -154,8 +161,11 @@ void OpenGL1RendererConfigurationStateSelector::activateLights(
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, white);
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-    // Specular modulated by the texture, as in the shaders
-    glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR);
+    // Specular modulated by the texture, as in the shaders (the only mode
+    // of OpenGL 1.1, which has no GL_LIGHT_MODEL_COLOR_CONTROL)
+    if ( OpenGL1Loader::offersOpenGL12() ) {
+        glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SINGLE_COLOR);
+    }
 
     int lightCount = 0;
     for ( long i = 0; i < lights.size(); i++ ) {

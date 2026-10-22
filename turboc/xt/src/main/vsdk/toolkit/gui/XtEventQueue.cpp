@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "java/util/ArrayDeque.h"
 #include <fcntl.h>
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 #include <unistd.h>
 
 // Xt names its strings and objects as the vitral String and Object

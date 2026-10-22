@@ -48,6 +48,7 @@ set(VITRAL_OPENGL1_SOURCES
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1RotateGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/gizmo/OpenGL1ScaleGizmoRenderer.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1Polygon2DRenderer.cpp
+    src/main/vsdk/toolkit/render/opengl1/OpenGL1GluTessellator.cpp
     src/main/vsdk/toolkit/fixtures/OpenGL1SimpleCorridorSample.cpp
     src/main/vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.cpp
 )

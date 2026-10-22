@@ -269,7 +269,7 @@ String XtOpenGL1MCPApplicationTools::tangibleAction(
         serviceUrl = MCPJson::stringProperty(request, "serviceUrl", "");
     }
     if ( !parent->tangibleInterfaceDialogAction(action,
-             withServiceUrl ? &serviceUrl : NULL) ) {
+             withServiceUrl ? &serviceUrl : (const String*)NULL) ) {
         throw IllegalArgumentException(
             (String("Unknown dialog action: ") + action).c_str());
     }

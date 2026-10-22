@@ -16,7 +16,7 @@ void OpenGL1ColoredPrimitiveRenderer::draw(
     glEnableClientState(GL_COLOR_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, positions.data());
     glColorPointer(4, GL_FLOAT, 0, colors.data());
-    glDrawArrays(primitiveType, 0, (GLsizei)(positions.size()/3));
+    glDrawArrays((GLenum)primitiveType, 0, (GLsizei)(positions.size()/3));
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     OpenGL1MatrixState::pop();

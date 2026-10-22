@@ -157,9 +157,14 @@ String SceneSelectionEditor::describeSelection()
     else if ( n == 1 ) {
         int f = scene->selectedThings->firstSelected();
         Geometry* g = scene->scene->getSimpleBodies().get(f)->getGeometry();
+        // In a local: gcc 2.7.2 crashes on String temporaries in a
+        // conditional expression
+        String className("null");
+        if ( g != NULL ) {
+            className = g->getClassSimpleName();
+        }
         msg = String("Thing [") + String::valueOf(f) +
-            "] selected, which is a [" +
-            (g != NULL ? g->getClassSimpleName() : String("null")) + "]";
+            "] selected, which is a [" + className + "]";
     }
     else {
         msg += String::valueOf(n) + " things selected";

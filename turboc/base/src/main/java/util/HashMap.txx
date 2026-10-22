@@ -1,33 +1,13 @@
 #include <stddef.h>
 #include "java/util/HashMap.h"
 
+/**
+Initializes the storage (empty) with the bucket count of `other` and copies
+its entries.
+*/
 template <class K, class V>
-HashMap<K, V>::HashMap():
-    buckets(NULL),
-    bucketCount(0),
-    elementCount(0),
-    maxLoadFactor(0.75F)
-{
-    initialize(16);
-}
-
-template <class K, class V>
-HashMap<K, V>::HashMap(long initialCapacity):
-    buckets(NULL),
-    bucketCount(0),
-    elementCount(0),
-    maxLoadFactor(0.75F)
-{
-    initialize(initialCapacity <= 0 ? 16 : initialCapacity);
-}
-
-template <class K, class V>
-HashMap<K, V>::HashMap(const HashMap &other):
-    buckets(NULL),
-    bucketCount(0),
-    elementCount(0),
-    maxLoadFactor(other.maxLoadFactor)
-{
+void
+HashMap<K, V>::copyFrom(const HashMap &other) {
     initialize(other.bucketCount <= 0 ? 16 : other.bucketCount);
     for ( long i = 0; i < other.bucketCount; i++ ) {
         Entry *current = other.buckets[i];
@@ -36,30 +16,6 @@ HashMap<K, V>::HashMap(const HashMap &other):
             current = current->next;
         }
     }
-}
-
-template <class K, class V>
-HashMap<K, V>::~HashMap() {
-    clear();
-}
-
-template <class K, class V>
-HashMap<K, V> &
-HashMap<K, V>::operator=(const HashMap &other) {
-    if ( this == &other ) {
-        return *this;
-    }
-    clear();
-    maxLoadFactor = other.maxLoadFactor;
-    initialize(other.bucketCount <= 0 ? 16 : other.bucketCount);
-    for ( long i = 0; i < other.bucketCount; i++ ) {
-        Entry *current = other.buckets[i];
-        while ( current != NULL ) {
-            put(current->key, current->value);
-            current = current->next;
-        }
-    }
-    return *this;
 }
 
 template <class K, class V>

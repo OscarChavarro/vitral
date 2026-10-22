@@ -24,11 +24,31 @@ class TreeMap : public Object {
     void copyFrom(const TreeMap &other);
 
   public:
-    TreeMap();
-    TreeMap(const TreeMap &other);
-    ~TreeMap();
+    // C++ port note: defined in the class body, calling members defined out
+    // of it, as gcc 2.7.2 does not instantiate the out of class ones when
+    // they are only used by the members it synthesizes
+    TreeMap()
+    {
+    }
 
-    TreeMap &operator=(const TreeMap &other);
+    TreeMap(const TreeMap &other) : Object()
+    {
+        copyFrom(other);
+    }
+
+    ~TreeMap()
+    {
+        clear();
+    }
+
+    TreeMap &operator=(const TreeMap &other)
+    {
+        if ( this != &other ) {
+            clear();
+            copyFrom(other);
+        }
+        return *this;
+    }
 
     void clear();
     long size() const;

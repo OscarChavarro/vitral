@@ -8,7 +8,7 @@
 #include "java/util/concurrent/FutureTask.h"
 #include "java/util/concurrent/Future.h"
 #include "java/util/concurrent/Void.h"
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 #include <unistd.h>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"

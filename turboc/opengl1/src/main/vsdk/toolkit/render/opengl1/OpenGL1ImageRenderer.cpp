@@ -149,6 +149,10 @@ void OpenGL1ImageRenderer::drawTexturedQuad(
         return;
     }
 
+    // No texture bound while the texture attributes are saved: Mesa 3.0
+    // restores the binding without its reference count, and then fails
+    // when the texture is deleted
+    glBindTexture(GL_TEXTURE_2D, 0);
     glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();

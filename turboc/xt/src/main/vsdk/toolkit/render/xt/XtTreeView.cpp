@@ -1,5 +1,6 @@
 // Before any other header that could include the Xt ones
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
+#include "vsdk/toolkit/gui/XtTextEncoding.h"
 
 #include "java/lang/String.h"
 
@@ -266,7 +267,7 @@ void XtTreeView::redraw()
         int y = MARGIN / 2 + i * rowHeight;
         int x = MARGIN + row.depth * INDENT;
         bool isSelected = selected.contains(row.node);
-        String label = row.node->getLabel().c_str();
+        String label = XtTextEncoding::toLocale(row.node->getLabel());
         int labelX = x + INDENT;
         if ( isSelected ) {
             int labelWidth = fontSet != NULL ?

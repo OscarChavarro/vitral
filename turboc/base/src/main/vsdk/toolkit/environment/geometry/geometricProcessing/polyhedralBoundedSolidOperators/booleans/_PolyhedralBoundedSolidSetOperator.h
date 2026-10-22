@@ -23,7 +23,7 @@ class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidHalfEdge;
 class _SetOperationContext;
 class _PolyhedralBoundedSolidIdNamespace;
-class _PolyhedralBoundedSolidSetOperatorVertexFace;
+#include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
 class _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex;
 
 /**

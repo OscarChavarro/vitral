@@ -2,6 +2,10 @@
 #define VITRAL_JAVA_LANG_MATH_H
 
 #include <math.h>
+
+#ifdef PI
+#undef PI
+#endif
 #include "vsdk/toolkit/common/Cpp98Support.h"
 class Math {
   public:

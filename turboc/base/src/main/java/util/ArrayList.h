@@ -16,21 +16,24 @@ private:
     void mergeSort(T *buffer, long int from, long int to,
                    const Comparator<T> &comparator);
 
-    void init()
-    {
-        if (maxSize > 0) {
-            Data = new T[maxSize];
-            if (!Data) {
-                maxSize = 0;
-            }
-        } else {
-            Data = NULL;
-        }
-        currentSize = 0;
-    }
+    void init();
+    void copyFrom(const ArrayList& other);
+    void assignFrom(const ArrayList& other);
 
 public:
-    ArrayList();
+    // C++ port note: the constructors, the assignment and the destructor are
+    // defined in the class body, calling members defined out of it: gcc
+    // 2.7.2 does not instantiate the out of class ones when they are only
+    // used by the copy constructors and assignments it synthesizes
+    ArrayList()
+    {
+        // Storage is allocated on the first insertion, as many lists of the
+        // port stay empty (saves memory on 16 bit targets)
+        currentSize = 0;
+        increaseChunk = 100;
+        maxSize = 0;
+        init();
+    }
     explicit ArrayList(long i)
     {
         currentSize = 0;
@@ -38,9 +41,21 @@ public:
         maxSize = increaseChunk;
         init();
     }
-    ArrayList(const ArrayList& other);
-    ArrayList& operator=(const ArrayList& other);
-    ~ArrayList();
+    ArrayList(const ArrayList& other) : Data(NULL)
+    {
+        copyFrom(other);
+    }
+
+    ArrayList& operator=(const ArrayList& other)
+    {
+        assignFrom(other);
+        return *this;
+    }
+
+    ~ArrayList()
+    {
+        dispose();
+    }
 
     void dispose();
 

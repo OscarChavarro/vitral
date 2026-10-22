@@ -5,7 +5,7 @@
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 #include "java/lang/String.h"
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"

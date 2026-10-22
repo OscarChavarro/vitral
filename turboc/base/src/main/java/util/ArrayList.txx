@@ -4,19 +4,34 @@
 #include <stddef.h>
 #include "java/util/ArrayList.h"
 
+/**
+@return a new array of `n` elements, or NULL when `n` is not positive. The
+first argument only selects `T` (legacy compilers lack explicit template
+arguments for functions).
+
+C++ port note: gcc 2.7.2 with -fhandle-exceptions crashes when a member
+function of a class template stores the result of `new T[]` and then
+tests it, so `ArrayList::init` allocates through this function.
+*/
 template <class T>
-ArrayList<T>::ArrayList() {
-    // Storage is allocated on the first insertion, as many lists of the
-    // port stay empty (saves memory on 16 bit targets)
-    currentSize = 0;
-    increaseChunk = 100;
-    maxSize = 0;
-    init();
+T *
+newArrayListStorage(T *, long int n)
+{
+    if (n > 0) {
+        return new T[n];
+    }
+    return NULL;
 }
 
 template <class T>
-ArrayList<T>::~ArrayList() {
-    dispose();
+void
+ArrayList<T>::init()
+{
+    Data = newArrayListStorage((T *)NULL, maxSize);
+    if (maxSize > 0 && !Data) {
+        maxSize = 0;
+    }
+    currentSize = 0;
 }
 
 template <class T>
@@ -31,25 +46,9 @@ ArrayList<T>::dispose() {
 }
 
 template <class T>
-ArrayList<T>::ArrayList(const ArrayList<T>& other)
-    : increaseChunk(other.increaseChunk)
-    , currentSize(other.currentSize)
-    , maxSize(other.maxSize)
-    , Data(NULL)
+void
+ArrayList<T>::copyFrom(const ArrayList<T>& other)
 {
-    if (maxSize > 0) {
-        Data = new T[maxSize];
-        for (long int i = 0; i < currentSize; i++) {
-            Data[i] = other.Data[i];
-        }
-    }
-}
-
-template <class T> ArrayList<T>&
-ArrayList<T>::operator=(const ArrayList<T>& other)
-{
-    if (this == &other) return *this;
-    delete[] Data;
     increaseChunk = other.increaseChunk;
     currentSize = other.currentSize;
     maxSize = other.maxSize;
@@ -60,7 +59,15 @@ ArrayList<T>::operator=(const ArrayList<T>& other)
             Data[i] = other.Data[i];
         }
     }
-    return *this;
+}
+
+template <class T>
+void
+ArrayList<T>::assignFrom(const ArrayList<T>& other)
+{
+    if (this == &other) return;
+    delete[] Data;
+    copyFrom(other);
 }
 
 template <class T> bool

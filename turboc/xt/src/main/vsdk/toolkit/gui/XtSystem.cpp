@@ -1,3 +1,5 @@
+// First: the X11R6 headers (i.e. Debian 1.1) do not include it themselves
+#include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
@@ -6,6 +8,7 @@
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/gui/XtSystem.h"
+#include "vsdk/toolkit/gui/XlibUtf8Text.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 
 int XtSystem::buttonMaskFor(unsigned int button)

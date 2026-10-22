@@ -4,7 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/environment/geometry/surface/Surface.h"
-class Vertex;
+#include "vsdk/toolkit/environment/geometry/element/Vertex.h"
 class Ray;
 class RayHit;
 class TriangleMeshGroup;

@@ -4,7 +4,7 @@
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
-class Triangle;
+#include "vsdk/toolkit/environment/geometry/element/Triangle.h"
 
 /**
 A vertex is a basic data pack for tipically used operations in computer

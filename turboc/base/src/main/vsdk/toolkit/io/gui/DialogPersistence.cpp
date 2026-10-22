@@ -15,6 +15,10 @@
 
 /**
 JSON value, as read by `JsonReader`.
+
+C++ port note: the items and members are owned pointers, as legacy
+compilers (gcc 2.7.2) instantiate the containers of a recursive type
+before the type is complete.
 */
 struct JsonValue {
     enum Type { NUL, BOOLEAN, NUMBER, STRING, ARRAY, OBJECT };
@@ -23,10 +27,20 @@ struct JsonValue {
     bool booleanValue;
     double numberValue;
     String stringValue;
-    ArrayList<JsonValue> items;
-    TreeMap<String, JsonValue> members;
+    ArrayList<JsonValue*> items;
+    TreeMap<String, JsonValue*> members;
 
     JsonValue() : type(NUL), booleanValue(false), numberValue(0) {}
+
+    ~JsonValue()
+    {
+        for ( long i = 0; i < items.size(); i++ ) {
+            delete items[i];
+        }
+        for ( long i = 0; i < members.size(); i++ ) {
+            delete members.getValue(i);
+        }
+    }
 
     /**
     @return the member with the name, or null if this is not an object or
@@ -37,8 +51,13 @@ struct JsonValue {
         if ( type != OBJECT ) {
             return NULL;
         }
-        return members.get(name);
+        JsonValue* const* member = members.get(name);
+        return member != NULL ? *member : (const JsonValue*)NULL;
     }
+
+  private:
+    JsonValue(const JsonValue& other);
+    JsonValue& operator=(const JsonValue& other);
 };
 
 /**
@@ -182,25 +201,36 @@ private:
         }
     }
 
-    JsonValue readValue()
+    /**
+    Reads into an empty value: the values read are owned by `value` as soon
+    as they are created, so none leaks when `fail` throws.
+    */
+    void readValue(JsonValue& value)
     {
         skipBlanks();
         if ( position >= length ) {
             fail("unexpected end");
         }
-        JsonValue value;
         char c = text[position];
         if ( c == '{' ) {
             position++;
             value.type = JsonValue::OBJECT;
             if ( consume('}') ) {
-                return value;
+                return;
             }
             do {
                 skipBlanks();
                 String name = readString();
                 expect(':');
-                value.members.put(name, readValue());
+                // A repeated name keeps the last value, as Map.put
+                JsonValue** previous = value.members.get(name);
+                if ( previous != NULL ) {
+                    delete *previous;
+                    *previous = NULL;
+                }
+                JsonValue* member = new JsonValue();
+                value.members.put(name, member);
+                readValue(*member);
             } while ( consume(',') );
             expect('}');
         }
@@ -208,10 +238,12 @@ private:
             position++;
             value.type = JsonValue::ARRAY;
             if ( consume(']') ) {
-                return value;
+                return;
             }
             do {
-                value.items.add(readValue());
+                JsonValue* item = new JsonValue();
+                value.items.add(item);
+                readValue(*item);
             } while ( consume(',') );
             expect(']');
         }
@@ -239,21 +271,19 @@ private:
             value.type = JsonValue::NUMBER;
             position += ((long)(end - start));
         }
-        return value;
     }
 
 public:
     explicit JsonReader(const String& source) :
         text(source.c_str()), length(source.length()), position(0) {}
 
-    JsonValue readDocument()
+    void readDocument(JsonValue& value)
     {
-        JsonValue value = readValue();
+        readValue(value);
         skipBlanks();
         if ( position != length ) {
             fail("unexpected content after the document");
         }
-        return value;
     }
 };
 
@@ -335,7 +365,7 @@ static WidgetDialogElement element(const JsonValue& node, const String& path,
     const JsonValue* childNodes = node.get("children");
     if ( childNodes != NULL && childNodes->type == JsonValue::ARRAY ) {
         for ( long i = 0; i < childNodes->items.size(); i++ ) {
-            children.add(element(childNodes->items[i],
+            children.add(element(*childNodes->items[i],
                 path + ".children[" + Cpp98Support::toString(i) + "]", ids));
         }
     }
@@ -347,7 +377,8 @@ static WidgetDialogElement element(const JsonValue& node, const String& path,
 void DialogPersistence::importDialogs(const String& source,
                                       Widget* widget)
 {
-    JsonValue root = JsonReader(source).readDocument();
+    JsonValue root;
+    JsonReader(source).readDocument(root);
     const JsonValue* version = root.get("schemaVersion");
     if ( version == NULL || version->type != JsonValue::NUMBER ||
          version->numberValue != 1 ) {
@@ -361,7 +392,7 @@ void DialogPersistence::importDialogs(const String& source,
     TreeSet<String> ids;
     for ( long i = 0; i < dialogs->items.size(); i++ ) {
         String path = "dialogs[" + Cpp98Support::toString(i) + "]";
-        const JsonValue& node = dialogs->items[i];
+        const JsonValue& node = *dialogs->items[i];
         String id = required(node, "id", path);
         if ( !ids.add(id) ||
              widget->getDialogById(id) != NULL ) {
@@ -376,7 +407,7 @@ void DialogPersistence::importDialogs(const String& source,
         TreeSet<String> elementIds;
         ArrayList<WidgetDialogElement> elements;
         for ( long j = 0; j < content->items.size(); j++ ) {
-            elements.add(element(content->items[j],
+            elements.add(element(*content->items[j],
                 path + ".content[" + Cpp98Support::toString(j) + "]", elementIds));
         }
 

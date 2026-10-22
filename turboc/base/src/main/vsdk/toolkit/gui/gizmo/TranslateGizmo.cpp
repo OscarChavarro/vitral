@@ -264,7 +264,7 @@ ArrayList<SimpleBody*>& TranslateGizmo::getElements3dsmax()
         o = elements.get(i);
 
         r->setMaterial(o->getMaterial() != NULL ?
-            new SimpleMaterial(*o->getMaterial()) : NULL);
+            new SimpleMaterial(*o->getMaterial()) : (SimpleMaterial *)NULL);
         r->setRotation(o->getRotation());
         r->setRotationInverse(o->getRotationInverse());
 
@@ -312,7 +312,7 @@ ArrayList<SimpleBody*>& TranslateGizmo::getElements3dsmax()
 
             r2 = elementInstances3dsmax.get(i+12);
             r2->setMaterial(o->getMaterial() != NULL ?
-                new SimpleMaterial(*o->getMaterial()) : NULL);
+                new SimpleMaterial(*o->getMaterial()) : (SimpleMaterial *)NULL);
             r2->setRotation(o->getRotation());
             r2->setRotationInverse(o->getRotationInverse());
             r2->setPosition(o->getPosition());

@@ -1,7 +1,7 @@
 #ifndef __FUTURE_TASK__
 #define __FUTURE_TASK__
 
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 #include "java/lang/Exception.h"
 #include "java/lang/Runnable.h"

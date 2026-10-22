@@ -2,7 +2,7 @@
 #define __INFINITE_PLANE_GIZMO__
 
 #include <time.h>
-#include <pthread.h>
+#include "java/lang/PosixThreads.h"
 
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
