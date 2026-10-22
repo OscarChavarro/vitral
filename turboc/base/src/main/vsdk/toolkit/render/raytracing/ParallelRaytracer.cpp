@@ -5,6 +5,7 @@
 #include "java/util/concurrent/ConcurrentLinkedQueue.h"
 #include "java/util/concurrent/ExecutorService.h"
 #include "java/util/concurrent/Executors.h"
+#include "java/util/concurrent/FutureTask.h"
 #include "java/util/concurrent/Future.h"
 #include "java/util/concurrent/Void.h"
 #include <pthread.h>
@@ -25,6 +26,7 @@
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerationStrategy.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileGenerator.h"
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "java/lang/Exception.h"
 
 struct ParallelRaytracerConsumerThreadData {
     ParallelProgressMonitorConsumer* consumer;
@@ -283,7 +285,8 @@ void ParallelRaytracer::executeWithEncoder(
 
     ArrayList<Future<Void> > futures;
     for ( int i = 0; i < numberOfThreads; i++ ) {
-        futures.add(getExecutorService()->submit(new ParallelRaytracerTileWorker(
+        futures.add(FutureTask<Void>::submit(getExecutorService(),
+            new ParallelRaytracerTileWorker(
             &pendingTiles,
             resultingImage,
             depthEncoder != 0 ? outDepth : 0,
@@ -299,10 +302,10 @@ void ParallelRaytracer::executeWithEncoder(
         try {
             futures[i].get();
         }
-        catch ( const std::exception& e ) {
+        catch ( const Exception& e ) {
             if ( !failed ) {
                 failed = true;
-                failure = String("Parallel raytracing failed: ").concat(e.what());
+                failure = String("Parallel raytracing failed: ").concat(e.getMessage().c_str());
             }
         }
     }

@@ -1,26 +1,25 @@
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/surface/polygon/_Polygon2DContour.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/monotoneDecomposition/_ContourAwarePolygonTriangulator.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 const double EPSILON = 1.0e-9;
 
-template <typename T>
+template <class T>
 static const T& minValue(const T& a, const T& b)
 {
     return (b < a) ? b : a;
 }
 
-template <typename T>
+template <class T>
 static const T& maxValue(const T& a, const T& b)
 {
     return (a < b) ? b : a;
 }
 
-template <typename T>
+template <class T>
 static void reverseArray(T* values, size_t count)
 {
     if (count < 2) {
@@ -244,7 +243,7 @@ ArrayList<ContourData> flattenContours(const Polygon2D &input)
 {
     ArrayList<ContourData> contours;
     int flattenedIndex = 0;
-    Polygon2D &mutableInput = const_cast<Polygon2D &>(input);
+    Polygon2D &mutableInput = ((Polygon2D &)(input));
 
     for (long contourIndex = 0; contourIndex < mutableInput.loops.size();
          contourIndex++) {

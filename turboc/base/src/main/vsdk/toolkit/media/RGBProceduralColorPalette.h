@@ -26,6 +26,9 @@ protected:
     bool pure;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     RGBProceduralColorPalette();
     virtual ~RGBProceduralColorPalette();
 

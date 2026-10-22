@@ -5,7 +5,7 @@
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
-#include <string>
+#include "java/lang/String.h"
 
 // Xt names its strings and objects as the vitral String and Object
 // classes: renamed while its headers are read (see XtIntrinsics.h)
@@ -51,12 +51,12 @@ public:
     @param id identifier of a message of the I18N file (`IDM_*`)
     @return its text in the language of the GUI, or the identifier
     */
-    virtual std::string getMessage(const char* id) = 0;
+    virtual String getMessage(const char* id) = 0;
 
     /**
     @param message text for the status bar
     */
-    virtual void showStatusMessage(const std::string& message) = 0;
+    virtual void showStatusMessage(const String& message) = 0;
 
     /**
     Shows an image (i.e. the raytraced one) in the image control window.
@@ -79,7 +79,7 @@ public:
     is processed (it may come from a widget that is destroyed).
     @param language identifier of a language (i.e. "spanish")
     */
-    virtual void setGuiLanguage(const std::string& language) = 0;
+    virtual void setGuiLanguage(const String& language) = 0;
 
     /**
     Shows the dialog to connect with a tangible interface service.
@@ -89,7 +89,7 @@ public:
     /**
     @return the URL of the tangible interface service last used
     */
-    virtual std::string getTangibleServiceUrl() = 0;
+    virtual String getTangibleServiceUrl() = 0;
 
     /**
     Connects with a tangible interface service, replacing the current
@@ -98,7 +98,7 @@ public:
     @param connectionListener receives, in the thread of the Xt event loop,
     whether the connection succeeded (not owned: it must live until then)
     */
-    virtual void connectTangibleInterface(const std::string& serviceUrl,
+    virtual void connectTangibleInterface(const String& serviceUrl,
         Consumer<bool>* connectionListener) = 0;
 
     /**

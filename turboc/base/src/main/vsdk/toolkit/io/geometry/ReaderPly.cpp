@@ -8,6 +8,7 @@
 #include "java/util/concurrent/Callable.h"
 #include "java/util/concurrent/ExecutorService.h"
 #include "java/util/concurrent/Executors.h"
+#include "java/util/concurrent/FutureTask.h"
 #include "java/util/concurrent/Future.h"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -536,9 +537,11 @@ static TriangleMesh* buildTriangleMesh(
 
     ExecutorService* executorService = Executors::newFixedThreadPool(2);
     Future< ArrayList<Vertex>* > vertexFuture =
-        executorService->submit(new ReaderPlyVertexBuildTask(&vertices));
+        FutureTask< ArrayList<Vertex>* >::submit(executorService,
+            new ReaderPlyVertexBuildTask(&vertices));
     Future< ArrayList<Triangle>* > triangleFuture =
-        executorService->submit(new ReaderPlyTriangleBuildTask(&triangles, (int)vertices.size()));
+        FutureTask< ArrayList<Triangle>* >::submit(executorService,
+            new ReaderPlyTriangleBuildTask(&triangles, (int)vertices.size()));
 
     ArrayList<Vertex>* meshVertices = vertexFuture.get();
     ArrayList<Triangle>* meshTriangles = triangleFuture.get();

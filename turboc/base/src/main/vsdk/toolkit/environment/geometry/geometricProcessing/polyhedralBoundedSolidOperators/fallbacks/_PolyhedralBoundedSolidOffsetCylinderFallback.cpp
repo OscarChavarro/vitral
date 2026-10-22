@@ -1,8 +1,5 @@
-#include <algorithm>
 #include <math.h>
-#include <exception>
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -15,20 +12,22 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Exception.h"
+#include "java/lang/Math.h"
 
 typedef _PolyhedralBoundedSolidOffsetCylinderFallback CylinderFallback;
 typedef _PolyhedralBoundedSolidFallbackGeometry FallbackGeometry;
 
 
-static void addUniqueXy(std::vector<Vector3Dd>& values, const Vector3Dd& point)
+static void addUniqueXy(ArrayList<Vector3Dd>& values, const Vector3Dd& point)
 {
-    for ( size_t i = 0; i < values.size(); i++ ) {
+    for ( long i = 0; i < values.size(); i++ ) {
         if ( FallbackGeometry::sameCoordinate(values[i].x(), point.x()) &&
              FallbackGeometry::sameCoordinate(values[i].y(), point.y()) ) {
             return;
         }
     }
-    values.push_back(point);
+    values.add(point);
 }
 
 
@@ -38,8 +37,8 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     double centerX;
     double centerY;
     double radius;
-    std::vector<double> zs;
-    std::vector<Vector3Dd> xy;
+    ArrayList<double> zs;
+    ArrayList<Vector3Dd> xy;
     long int i;
 
     if ( solid == 0 || solid->getVerticesList().size() < 6 ) {
@@ -85,7 +84,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
             (p.y() - centerY) * (p.y() - centerY));
 
         if ( fabs(radialDistance - radius) >
-             std::max(numericContext.bigEpsilon(), radius * 1.0e-6) ) {
+             Math::max(numericContext.bigEpsilon(), radius * 1.0e-6) ) {
             return false;
         }
     }
@@ -96,7 +95,7 @@ bool CylinderFallback::describeVerticalCylinder(PolyhedralBoundedSolid* solid,
     outSpec.radius = radius;
     outSpec.height = b[5] - b[2];
     outSpec.radialDivisions = (int)xy.size();
-    outSpec.heightDivisions = std::max(1, (int)zs.size() - 1);
+    outSpec.heightDivisions = Math::max(1, (int)zs.size() - 1);
     return true;
 }
 
@@ -174,9 +173,9 @@ PolyhedralBoundedSolid* CylinderFallback::buildOffsetCylinderDifferenceFallback(
         return 0;
     }
 
-    int radialDivisions = std::max(spec->operandA.radialDivisions,
+    int radialDivisions = Math::max(spec->operandA.radialDivisions,
         spec->operandB.radialDivisions);
-    int heightDivisions = std::max(spec->operandA.heightDivisions,
+    int heightDivisions = Math::max(spec->operandA.heightDivisions,
         spec->operandB.heightDivisions);
     PolyhedralBoundedSolid* fallbackA = createFallbackCylinder(spec->operandA,
         radialDivisions, heightDivisions);
@@ -187,9 +186,9 @@ PolyhedralBoundedSolid* CylinderFallback::buildOffsetCylinderDifferenceFallback(
         result = _PolyhedralBoundedSolidSetOperator::setOp(fallbackA, fallbackB,
             SUBTRACT, false, true);
     }
-    catch ( const std::exception& e ) {
+    catch ( const Exception& e ) {
         _SetOperationTrace::tracePipelineSummary(
-            (std::string("offset cylinder fallback failed: ") + e.what()).c_str());
+            (String("offset cylinder fallback failed: ") + e.getMessage().c_str()).c_str());
         result = 0;
     }
     delete fallbackA;

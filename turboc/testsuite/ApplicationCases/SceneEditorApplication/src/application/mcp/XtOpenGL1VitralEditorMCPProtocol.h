@@ -6,6 +6,7 @@
 #include "application/mcp/MCPSceneTools.h"
 #include "application/mcp/MCPViewportTools.h"
 #include "application/mcp/XtOpenGL1MCPApplicationTools.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class Socket;
 class XtOpenGL1SceneEditorApplication;
@@ -21,7 +22,7 @@ delegated to the tool group that owns it:
   images, language, exit).
 
 C++ port note: failures inside the tools are C++ exceptions (i.e.
-`std::invalid_argument` where Java throws `IllegalArgumentException`), with
+`IllegalArgumentException` where Java throws `IllegalArgumentException`), with
 the same messages as the Java ones.
 */
 class XtOpenGL1VitralEditorMCPProtocol : public Runnable {

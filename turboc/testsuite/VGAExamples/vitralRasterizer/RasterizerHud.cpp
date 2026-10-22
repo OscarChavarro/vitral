@@ -50,7 +50,7 @@ RasterizerHud::selectColor(const Dithering::Palette *palette, int red, int green
 }
 
 const char *
-RasterizerHud::ditheringName(const RasterizerShown *shown, ColorMode colorMode) {
+RasterizerHud::ditheringName(const RasterizerShown *shown, ColorMode::Value colorMode) {
     if (!shown->dithered) {
         return "NONE";
     }
@@ -76,7 +76,7 @@ RasterizerHud::drawText(int x, int y, const char *text) const {
 }
 
 void
-RasterizerHud::draw(const RasterizerShown *shown, ColorMode colorMode, int width, int height, bool text) const {
+RasterizerHud::draw(const RasterizerShown *shown, ColorMode::Value colorMode, int width, int height, bool text) const {
     if (!visible) {
         return;
     }

@@ -1,8 +1,6 @@
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
-#include <algorithm>
-#include <vector>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -27,10 +25,12 @@
 class AppelEdgeSegment;
 
 /**
-Orders segments by line parameter, with an `VSDK::EPSILON` tolerance.
+Orders segments by line parameter, with an `VSDK::EPSILON` tolerance (the
+`compareTo` of the Java `_AppelEdgeSegment`).
 */
-struct AppelEdgeSegmentOrder {
-    bool operator()(const AppelEdgeSegment& a, const AppelEdgeSegment& b) const;
+class AppelEdgeSegmentOrder : public Comparator<AppelEdgeSegment> {
+public:
+    int compare(const AppelEdgeSegment& a, const AppelEdgeSegment& b) const;
 };
 
 class AppelEdgeSegment {
@@ -46,12 +46,12 @@ public:
     }
 };
 
-bool AppelEdgeSegmentOrder::operator()(const AppelEdgeSegment& a,
+int AppelEdgeSegmentOrder::compare(const AppelEdgeSegment& a,
     const AppelEdgeSegment& b) const
 {
-    if (a.lineParameter < b.lineParameter - VSDK::EPSILON) return true;
-    if (a.lineParameter > b.lineParameter + VSDK::EPSILON) return false;
-    return false;
+    if (a.lineParameter < b.lineParameter - VSDK::EPSILON) return -1;
+    if (a.lineParameter > b.lineParameter + VSDK::EPSILON) return 1;
+    return 0;
 }
 
 class AppelEdgeCache {
@@ -420,8 +420,8 @@ static void processLineToBeDrawn(
     Vector3Dd sp1c = inCamera->getPosition();
     Vector3Dd sp2c = inCamera->getPosition();
 
-    std::vector<AppelEdgeSegment> segments;
-    segments.push_back(AppelEdgeSegment());
+    ArrayList<AppelEdgeSegment> segments;
+    segments.add(AppelEdgeSegment());
 
     for (long int i = 0; i < contourCache.size(); ++i) {
         AppelEdgeCache* cl = contourCache[i];
@@ -444,7 +444,7 @@ static void processLineToBeDrawn(
                 AppelEdgeSegment segment;
                 segment.lineParameter = planeHit->getT() / inEdge.direction.length();
                 if (isUnitInterval(segment.lineParameter)) {
-                    segments.push_back(segment);
+                    segments.add(segment);
                 }
                 delete planeHit;
             }
@@ -454,21 +454,21 @@ static void processLineToBeDrawn(
 
     AppelEdgeSegment endSegment;
     endSegment.lineParameter = 1.0;
-    segments.push_back(endSegment);
+    segments.add(endSegment);
 
-    std::sort(segments.begin(), segments.end(), AppelEdgeSegmentOrder());
+    segments.sort(AppelEdgeSegmentOrder());
 
-    for (size_t i = 0; i + 1 < segments.size(); ) {
+    for (long i = 0; i + 1 < segments.size(); ) {
         if (segments[i].samePosition(segments[i + 1])) {
             segments[i + 1].deltaQI += segments[i].deltaQI;
-            segments.erase(segments.begin() + ((long)(i)));
+            segments.remove(i);
         }
         else {
             ++i;
         }
     }
 
-    for (size_t i = 0; i + 1 < segments.size(); ++i) {
+    for (long i = 0; i + 1 < segments.size(); ++i) {
         double t1 = segments[i].lineParameter;
         double t2 = segments[i + 1].lineParameter;
         Vector3Dd pos1 = inEdge.start.add(inEdge.direction.multiply(t1));
@@ -567,7 +567,7 @@ void HiddenLineRenderer::executeAppelAlgorithm(
         if (body == 0 || body->getGeometry() == 0) {
             continue;
         }
-        Volume* volume = dynamic_cast<Volume*>(body->getGeometry());
+        Volume* volume = (body->getGeometry() != NULL && body->getGeometry()->instanceOf(Volume::CLASS) ? (Volume*)body->getGeometry() : NULL);
         if (volume == 0) {
             continue;
         }

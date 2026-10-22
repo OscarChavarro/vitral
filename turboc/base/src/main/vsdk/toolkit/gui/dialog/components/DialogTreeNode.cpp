@@ -1,4 +1,10 @@
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
+#include "java/util/ArrayList.txx"
+
+DialogTreeNode::DialogTreeNode()
+    : label(""), identity(NULL)
+{
+}
 
 DialogTreeNode::DialogTreeNode(const String& label, const void* identity)
     : label(label), identity(identity)
@@ -15,15 +21,15 @@ const void* DialogTreeNode::getIdentity() const
     return identity;
 }
 
-const std::vector<DialogTreeNode>& DialogTreeNode::getChildren() const
+const ArrayList<DialogTreeNode>& DialogTreeNode::getChildren() const
 {
     return children;
 }
 
 DialogTreeNode& DialogTreeNode::add(const DialogTreeNode& child)
 {
-    children.push_back(child);
-    return children.back();
+    children.add(child);
+    return children[children.size() - 1];
 }
 
 String DialogTreeNode::toString() const

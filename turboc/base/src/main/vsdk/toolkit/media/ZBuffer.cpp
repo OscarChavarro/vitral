@@ -135,3 +135,11 @@ RGBAImageUncompressed* ZBuffer::exportRGBAImage(const RGBColorPalette* p) const
     }
     return image;
 }
+
+const Class ZBuffer::CLASS = { "ZBuffer", &MediaEntity::CLASS };
+
+const Class *
+ZBuffer::getClass() const
+{
+    return &CLASS;
+}

@@ -17,6 +17,9 @@ private:
     double* computeMinMaxPositions();
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     TriangleMeshGroup();
     TriangleMeshGroup(const ArrayList<TriangleMesh>& meshes);
     TriangleMeshGroup(const TriangleMeshGroup& group);

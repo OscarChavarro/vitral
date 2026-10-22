@@ -14,6 +14,9 @@ private:
     static const int numberOfElements = 16;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     PrimitiveCountShapeDescriptor(const String* label);
     virtual ~PrimitiveCountShapeDescriptor();
 

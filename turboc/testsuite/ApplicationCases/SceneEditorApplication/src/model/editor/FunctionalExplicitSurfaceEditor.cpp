@@ -64,7 +64,7 @@ ArrayList<String> FunctionalExplicitSurfaceEditor::getPresets()
 
 FunctionalExplicitSurface* FunctionalExplicitSurfaceEditor::surface() const
 {
-    return dynamic_cast<FunctionalExplicitSurface*>(target->getGeometry());
+    return (target->getGeometry() != NULL && target->getGeometry()->instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)target->getGeometry() : NULL);
 }
 
 String FunctionalExplicitSurfaceEditor::getValue(

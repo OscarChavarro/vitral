@@ -6,6 +6,9 @@ class Camera;
 
 class CameraControllerAquynza : public CameraController {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit CameraControllerAquynza(Camera* camera);
     virtual ~CameraControllerAquynza() {}
 

@@ -2,9 +2,10 @@
 #define __CONCURRENT_LINKED_QUEUE__
 
 #include "java/util/ArrayDeque.h"
+#include "java/util/ArrayList.h"
 #include <pthread.h>
 
-template<typename T>
+template<class T>
 class ConcurrentLinkedQueue {
 private:
     ArrayDeque<T> data_;
@@ -13,11 +14,10 @@ private:
 public:
     ConcurrentLinkedQueue() { pthread_mutex_init(&mutex_, 0); }
 
-    template<typename Container>
-    explicit ConcurrentLinkedQueue(Container& initial)
+    explicit ConcurrentLinkedQueue(const ArrayList<T>& initial)
     {
         pthread_mutex_init(&mutex_, 0);
-        for (long int i = 0; i < (long int)initial.size(); ++i) {
+        for (long int i = 0; i < initial.size(); ++i) {
             data_.addLast(initial[i]);
         }
     }

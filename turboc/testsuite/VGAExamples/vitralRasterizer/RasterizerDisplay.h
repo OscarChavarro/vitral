@@ -7,11 +7,11 @@
 
 class RasterizerDisplay {
   public:
-    static int showExample(int which, int width, int height, const Dithering::Palette *standard, ColorMode colorMode,
+    static int showExample(int which, int width, int height, const Dithering::Palette *standard, ColorMode::Value colorMode,
                            RasterizerShown *shown);
 
   private:
-    static void drawTrueColor(const uint8_t *rgb, int width, int height);
+    static void drawTrueColor(const unsigned char *rgb, int width, int height);
 };
 
 #endif

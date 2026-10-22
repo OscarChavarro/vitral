@@ -1,5 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
@@ -30,10 +30,10 @@ bool CommandOptionsProcessor::parseResolution(const String& value, int* x, int* 
 
     const char* text = value.c_str();
     char* end = 0;
-    long w = std::strtol(text, &end, 10);
+    long w = strtol(text, &end, 10);
     if ( end == text || (*end != 'x' && *end != 'X') ) return false;
     const char* heightText = end + 1;
-    long h = std::strtol(heightText, &end, 10);
+    long h = strtol(heightText, &end, 10);
     if ( end == heightText || *end != '\0' || w <= 0 || h <= 0 ) return false;
     *x = (int)w;
     *y = (int)h;

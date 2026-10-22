@@ -40,12 +40,12 @@ RasterizerPalette::makePalette(int colors, Dithering::Palette *pal) {
 }
 
 int
-RasterizerPalette::usesOptimizedPalette(ColorMode colorMode) {
+RasterizerPalette::usesOptimizedPalette(ColorMode::Value colorMode) {
     return colorMode == ColorMode::ORDERED_DITHERED_OPTIMIZED_PALETTE || colorMode == ColorMode::FLOYD_STEINBERG_OPTIMIZED_PALETTE;
 }
 
 Dithering::Method
-RasterizerPalette::methodOf(ColorMode colorMode) {
+RasterizerPalette::methodOf(ColorMode::Value colorMode) {
     switch (colorMode) {
     case ColorMode::NEAREST: return Dithering::Method::Nearest;
     case ColorMode::ORDERED_DITHERED_STANDARD_PALETTE:
@@ -54,10 +54,10 @@ RasterizerPalette::methodOf(ColorMode colorMode) {
     }
 }
 
-ColorMode
-RasterizerPalette::nextColorMode(ColorMode colorMode, const Dithering::Palette *standard) {
+ColorMode::Value
+RasterizerPalette::nextColorMode(ColorMode::Value colorMode, const Dithering::Palette *standard) {
     do {
-        colorMode = static_cast<ColorMode>((static_cast<int>(colorMode) + 1) % static_cast<int>(ColorMode::COLOR_MODES));
+        colorMode = ((ColorMode::Value)((((int)(colorMode)) + 1) % ((int)(ColorMode::COLOR_MODES))));
     } while (usesOptimizedPalette(colorMode) && standard->count != 256);
     return colorMode;
 }

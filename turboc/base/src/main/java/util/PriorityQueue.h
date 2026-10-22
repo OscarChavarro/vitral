@@ -2,6 +2,8 @@
 #define __PRIORITY_QUEUE__
 
 #include "java/lang/Object.h"
+#include "java/util/function/Consumer.h"
+#include "java/util/function/Predicate.h"
 
 template <class T>
 class PriorityQueueAccess;
@@ -9,7 +11,7 @@ class PriorityQueueAccess;
 template <class T>
 class PriorityQueue : public Object {
   private:
-    static const int DEFAULT_CAPACITY = 11;
+    enum { DEFAULT_CAPACITY = 11 };
 
     int currentSize;
     int maxSize;
@@ -59,10 +61,13 @@ class PriorityQueue : public Object {
     int size() const;
     void clear();
 
-    Iterator iterator() const;
+    Iterator iterator() const
+    {
+        return Iterator(this, 1);
+    }
 
-    template <class Predicate> bool removeIf(Predicate p);
-    template <class Consumer> void forEach(Consumer action) const;
+    bool removeIf(Predicate<T>& p);
+    void forEach(Consumer<T>& action) const;
 
     bool contains(const T& elem) const;
     bool remove(const T& elem);

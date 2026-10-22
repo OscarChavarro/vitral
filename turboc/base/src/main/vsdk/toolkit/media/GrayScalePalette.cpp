@@ -16,3 +16,11 @@ int GrayScalePalette::selectNearestIndexToRgb(const ColorRgb& c) const {
 
     return (int)(gray * ((double)(colors.size() - 1)));
 }
+
+const Class GrayScalePalette::CLASS = { "GrayScalePalette", &RGBProceduralColorPalette::CLASS };
+
+const Class *
+GrayScalePalette::getClass() const
+{
+    return &CLASS;
+}

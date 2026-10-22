@@ -1,7 +1,7 @@
 #ifndef __SPHERE_POLYHEDRAL_CACHE__
 #define __SPHERE_POLYHEDRAL_CACHE__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 class Sphere;
 class PolyhedralBoundedSolid;
@@ -54,15 +54,15 @@ public:
         PolyhedralBoundedSolid* getSolid() const;
         int getVertexCount() const;
         /// x, y, z of each vertex of the triangles
-        const std::vector<float>& getPositions() const;
+        const ArrayList<float>& getPositions() const;
         /// x, y, z of the normal of the sphere at each vertex
-        const std::vector<float>& getNormals() const;
+        const ArrayList<float>& getNormals() const;
         /// u, v texture coordinates of each vertex
-        const std::vector<float>& getUvs() const;
+        const ArrayList<float>& getUvs() const;
         /// x, y, z of the tangent of the sphere at each vertex
-        const std::vector<float>& getTangents() const;
+        const ArrayList<float>& getTangents() const;
         /// x, y, z of the binormal of the sphere at each vertex
-        const std::vector<float>& getBiNormals() const;
+        const ArrayList<float>& getBiNormals() const;
 
     private:
         friend class SpherePolyhedralCache;
@@ -71,11 +71,11 @@ public:
         int meridians;
         int parallels;
         PolyhedralBoundedSolid* solid;
-        std::vector<float> positions;
-        std::vector<float> normals;
-        std::vector<float> uvs;
-        std::vector<float> tangents;
-        std::vector<float> biNormals;
+        ArrayList<float> positions;
+        ArrayList<float> normals;
+        ArrayList<float> uvs;
+        ArrayList<float> tangents;
+        ArrayList<float> biNormals;
 
         Entry(const Entry&);
         Entry& operator=(const Entry&);

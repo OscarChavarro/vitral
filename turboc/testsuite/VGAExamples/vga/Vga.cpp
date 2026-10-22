@@ -1,4 +1,3 @@
-#include <new>
 #include <stdio.h>
 
 #include <vga.h>
@@ -92,7 +91,7 @@ int
 Vga::start(int argc, char *argv[]) {
     vga_setmousesupport(1);
     vga_init();
-    Vga *vga = new (std::nothrow) Vga();
+    Vga *vga = new Vga();
     if (!vga) {
         printf("vga: out of memory\n");
         return 1;

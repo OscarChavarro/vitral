@@ -2,49 +2,6 @@
 #include "java/util/HashMap.h"
 
 template <class K, class V>
-inline size_t
-HashMap<K, V>::hashFNV1a(const unsigned char *bytes, size_t length) {
-    const size_t offset = ((size_t)(1469598103934665603ULL));
-    const size_t prime = ((size_t)(1099511628211ULL));
-    size_t hash = offset;
-    for ( size_t i = 0; i < length; i++ ) {
-        hash ^= ((size_t)(bytes[i]));
-        hash *= prime;
-    }
-    return hash;
-}
-
-template <class K, class V>
-template <class T>
-inline size_t
-HashMap<K, V>::hashKeyValue(const T &value) {
-    return HashMap<K, V>::hashFNV1a(((const unsigned char *)(&value)), sizeof(T));
-}
-
-template <class K, class V>
-template <class T>
-inline size_t
-HashMap<K, V>::hashKeyValue(T *const &value) {
-    return ((size_t)(value));
-}
-
-template <class K, class V>
-template <class T>
-inline size_t
-HashMap<K, V>::hashKeyValue(const T *const &value) {
-    return ((size_t)(value));
-}
-
-template <class K, class V>
-inline size_t
-HashMap<K, V>::hashKeyValue(const String &value) {
-    const char *text = value.c_str();
-    return hashFNV1a(
-        ((const unsigned char *)(text)),
-        strlen(text));
-}
-
-template <class K, class V>
 HashMap<K, V>::HashMap():
     buckets(NULL),
     bucketCount(0),
@@ -163,7 +120,7 @@ HashMap<K, V>::bucketIndexFor(const K &key) const {
     if ( bucketCount <= 0 ) {
         return 0;
     }
-    const size_t hashValue = hashKeyValue(key);
+    const size_t hashValue = hashMapKey(key);
     return ((long)(hashValue % ((size_t)(bucketCount))));
 }
 
@@ -262,7 +219,7 @@ HashMap<K, V>::rehash(long newBucketCount) {
         Entry *current = buckets[i];
         while ( current != NULL ) {
             Entry *next = current->next;
-            const size_t hashValue = hashKeyValue(current->key);
+            const size_t hashValue = hashMapKey(current->key);
             const long newIndex = ((long)(hashValue % ((size_t)(newBucketCount))));
             current->next = newBuckets[newIndex];
             newBuckets[newIndex] = current;

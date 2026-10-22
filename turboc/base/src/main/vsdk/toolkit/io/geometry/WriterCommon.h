@@ -13,11 +13,11 @@ for a geometry, or null if it has none.
 inline TriangleMesh* writerMeshOf(Geometry* g)
 {
     FunctionalExplicitSurface* surface =
-        dynamic_cast<FunctionalExplicitSurface*>(g);
+        (g != NULL && g->instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)g : NULL);
     if ( surface != NULL ) {
         return surface->getInternalTriangleMesh();
     }
-    return dynamic_cast<TriangleMesh*>(g);
+    return (g != NULL && g->instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)g : NULL);
 }
 
 #endif

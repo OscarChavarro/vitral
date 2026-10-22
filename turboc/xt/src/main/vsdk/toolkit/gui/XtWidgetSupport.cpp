@@ -2,7 +2,7 @@
 #include "vsdk/toolkit/gui/XtIntrinsics.h"
 
 #include <string.h>
-#include <vector>
+#include "java/util/ArrayList.txx"
 
 #include "vsdk/toolkit/common/Cpp98Support.h"
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -132,8 +132,11 @@ void XtWidgetSupport::removeAll(XtWidget container)
     XtVaGetValues(container, XtNchildren, &children,
                   XtNnumChildren, &count, NULL);
     // Destroying changes the list of children: work over a copy
-    std::vector<XtWidget> copy(children, children + count);
-    for ( size_t i = 0; i < copy.size(); i++ ) {
+    ArrayList<XtWidget> copy;
+    for ( Cardinal c = 0; c < count; c++ ) {
+        copy.add(children[c]);
+    }
+    for ( long i = 0; i < copy.size(); i++ ) {
         XtDestroyWidget(copy[i]);
     }
 }
@@ -145,7 +148,7 @@ void XtWidgetSupport::setColor(XtWidget widget, const char* resource,
                   ((int)(strlen(colorName) + 1)), NULL);
 }
 
-std::string XtWidgetSupport::uniqueName(const char* prefix)
+String XtWidgetSupport::uniqueName(const char* prefix)
 {
     static unsigned int sequence = 0;
     return prefix + Cpp98Support::toString(sequence++);

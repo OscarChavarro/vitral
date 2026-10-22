@@ -241,7 +241,7 @@ void PolyhedralBoundedSolidModeler::addArcToExistingFace(
         // Snap trig values to 1e-10 grid so that equal angular positions on
         // two separately constructed circles always produce bit-identical
         // coordinates, preventing near-coincident vertices downstream.
-        // std::floor(v + 0.5) mimics Java's Math.round.
+        // floor(v + 0.5) mimics Java's Math.round.
         x = floor((cx + radius * cos(angle)) * 1.0e10 + 0.5) / 1.0e10;
         y = floor((cy + radius * sin(angle)) * 1.0e10 + 0.5) / 1.0e10;
         nextVertexId = solid->getMaxVertexId() + 1;

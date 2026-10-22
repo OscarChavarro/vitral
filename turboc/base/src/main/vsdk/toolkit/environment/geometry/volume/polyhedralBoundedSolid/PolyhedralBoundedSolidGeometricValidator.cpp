@@ -1,7 +1,6 @@
-#include <algorithm>
 #include <math.h>
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Vector2Dd.h"
@@ -14,20 +13,21 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 
 
 typedef PolyhedralBoundedSolidNumericPolicy::ToleranceContext ToleranceContext;
 
 static const double INVERTED_FACE_THRESHOLD = 0.5;
 
-static void append(String* msg, const std::string& text)
+static void append(String* msg, const String& text)
 {
     if ( msg != 0 ) {
         *msg += text.c_str();
     }
 }
 
-static std::string str(int value)
+static String str(int value)
 {
     return Cpp98Support::toString(value);
 }
@@ -75,10 +75,10 @@ static bool pointOnSegment2D(const Vector2Dd& p, const Vector2Dd& a, const Vecto
     if ( fabs(orientation2D(a, b, p)) > orientationTolerance ) {
         return false;
     }
-    double minX = std::min(a.x, b.x) - linearTolerance;
-    double maxX = std::max(a.x, b.x) + linearTolerance;
-    double minY = std::min(a.y, b.y) - linearTolerance;
-    double maxY = std::max(a.y, b.y) + linearTolerance;
+    double minX = Math::min(a.x, b.x) - linearTolerance;
+    double maxX = Math::max(a.x, b.x) + linearTolerance;
+    double minY = Math::min(a.y, b.y) - linearTolerance;
+    double maxY = Math::max(a.y, b.y) + linearTolerance;
     return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
 }
 
@@ -93,13 +93,13 @@ static bool segmentsIntersect2D(const Vector2Dd& a1, const Vector2Dd& a2,
 
     double orientationTolerance = PolyhedralBoundedSolidNumericPolicy
         ::orientationTolerance2D(a1, a2, b1, numericContext);
-    orientationTolerance = std::max(orientationTolerance,
+    orientationTolerance = Math::max(orientationTolerance,
         PolyhedralBoundedSolidNumericPolicy
             ::orientationTolerance2D(a1, a2, b2, numericContext));
-    orientationTolerance = std::max(orientationTolerance,
+    orientationTolerance = Math::max(orientationTolerance,
         PolyhedralBoundedSolidNumericPolicy
             ::orientationTolerance2D(b1, b2, a1, numericContext));
-    orientationTolerance = std::max(orientationTolerance,
+    orientationTolerance = Math::max(orientationTolerance,
         PolyhedralBoundedSolidNumericPolicy
             ::orientationTolerance2D(b1, b2, a2, numericContext));
     double linearTolerance =

@@ -4,6 +4,9 @@
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class KeyEvent : public PresentationElement {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int MASK_CTRL = 0x0001;
     static const int MASK_LCTRL = 0x0002;
     static const int MASK_RCTRL = 0x0004;

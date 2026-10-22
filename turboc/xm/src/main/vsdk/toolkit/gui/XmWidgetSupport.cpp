@@ -35,20 +35,20 @@ void XmWidgetSupport::requireMotifShell(XtWidget shell)
     }
 }
 
-XmString XmWidgetSupport::createString(const std::string& text)
+XmString XmWidgetSupport::createString(const String& text)
 {
-    return XmStringCreateLocalized(const_cast<char*>(text.c_str()));
+    return XmStringCreateLocalized(((char*)(text.c_str())));
 }
 
-std::string XmWidgetSupport::toText(XmString string)
+String XmWidgetSupport::toText(XmString string)
 {
     if ( string == NULL ) {
-        return std::string();
+        return String();
     }
     char* text = ((char*)(XmStringUnparse(
         string, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0,
         XmOUTPUT_ALL)));
-    std::string result = text != NULL ? text : "";
+    String result = text != NULL ? text : "";
     XtFree(text);
     return result;
 }
@@ -64,14 +64,14 @@ XmRenderTable XmWidgetSupport::createRenderTable(XtWidget widget,
     XtSetArg(args[n], XmNfont, fontSet); ++n;
     XtSetArg(args[n], XmNloadModel, XmLOAD_IMMEDIATE); ++n;
     XmRendition rendition = XmRenditionCreate(
-        widget, const_cast<char*>(XmFONTLIST_DEFAULT_TAG), args, n);
+        widget, ((char*)(XmFONTLIST_DEFAULT_TAG)), args, n);
     XmRenderTable table = XmRenderTableAddRenditions(NULL, &rendition, 1,
                                                      XmMERGE_REPLACE);
     XmRenditionFree(rendition);
     return table;
 }
 
-void XmWidgetSupport::setLabelString(XtWidget widget, const std::string& text)
+void XmWidgetSupport::setLabelString(XtWidget widget, const String& text)
 {
     XmString string = createString(text);
     XtVaSetValues(widget, XmNlabelString, string, NULL);
@@ -92,7 +92,7 @@ XtWidget XmWidgetSupport::createPulldownMenu(XtWidget parent, const char* name)
 {
     Arg args[3];
     Cardinal n = setShellVisualArgs(parent, args);
-    return XmCreatePulldownMenu(parent, const_cast<char*>(name), args, n);
+    return XmCreatePulldownMenu(parent, ((char*)(name)), args, n);
 }
 
 XtWidget XmWidgetSupport::createPopupMenu(XtWidget owner, const char* name)
@@ -101,11 +101,11 @@ XtWidget XmWidgetSupport::createPopupMenu(XtWidget owner, const char* name)
     Cardinal n = setShellVisualArgs(owner, args);
     // Posted by the application only (not by the third button of the owner)
     XtSetArg(args[n], XmNpopupEnabled, XmPOPUP_DISABLED); ++n;
-    return XmCreatePopupMenu(owner, const_cast<char*>(name), args, n);
+    return XmCreatePopupMenu(owner, ((char*)(name)), args, n);
 }
 
 XtWidget XmWidgetSupport::createMenuItem(XtWidget menu,
-                                         const std::string& text,
+                                         const String& text,
                                          XFontSet fontSet)
 {
     XmString label = createString(text);

@@ -9,3 +9,11 @@ const int MouseEvent::CTRL_DOWN_MASK;
 const int MouseEvent::BUTTON1_DOWN_MASK;
 const int MouseEvent::BUTTON2_DOWN_MASK;
 const int MouseEvent::BUTTON3_DOWN_MASK;
+
+const Class MouseEvent::CLASS = { "MouseEvent", &PresentationElement::CLASS };
+
+const Class *
+MouseEvent::getClass() const
+{
+    return &CLASS;
+}

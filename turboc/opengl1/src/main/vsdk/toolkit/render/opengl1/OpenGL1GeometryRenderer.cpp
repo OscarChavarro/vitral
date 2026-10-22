@@ -2,12 +2,10 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <deque>
-#include <map>
-#include <set>
-#include <string>
-#include <typeinfo>
-#include <vector>
+#include "java/util/ArrayDeque.h"
+#include "java/util/TreeMap.h"
+#include "java/util/TreeSet.h"
+#include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/color/ColorRgb.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
@@ -43,6 +41,7 @@
 #include "vsdk/toolkit/render/opengl1/OpenGL1SelectionCornersRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1SphereRenderer.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/util/Collections.h"
 
 /*
 Geometries other than spheres and curves are presented as triangle meshes
@@ -55,29 +54,28 @@ the ones that are not edited while shown), and built again when it changes.
 static const int SLICES = 32;
 static const int TORUS_MAJOR_SEGMENTS = 48;
 static const int TORUS_MINOR_SEGMENTS = 24;
-static const size_t MAX_CACHED_MESHES = 256;
+static const long MAX_CACHED_MESHES = 256;
 /// Side of the square shown for an infinite plane
 static const double INFINITE_PLANE_SIZE = 20.0;
 /// Cells along each side of the square shown for an infinite plane
 static const int INFINITE_PLANE_TILES = 10;
 
-static std::map<std::string, OpenGL1MeshRenderer::Mesh*> meshes;
-static std::set<std::string> reportedUnsupported;
+static TreeMap<String, OpenGL1MeshRenderer::Mesh*> meshes;
+static TreeSet<String> reportedUnsupported;
 
 static void releaseMeshes()
 {
-    std::map<std::string, OpenGL1MeshRenderer::Mesh*>::iterator i;
-    for ( i = meshes.begin(); i != meshes.end(); ++i ) {
-        OpenGL1MeshRenderer::release(i->second);
-        delete i->second;
+    for ( long i = 0; i < meshes.size(); i++ ) {
+        OpenGL1MeshRenderer::release(meshes.getValue(i));
+        delete meshes.getValue(i);
     }
     meshes.clear();
 }
 
-static std::string format(const char* pattern, ...)
+static String format(const char* pattern, ...)
     __attribute__((format(printf, 1, 2)));
 
-static std::string format(const char* pattern, ...)
+static String format(const char* pattern, ...)
 {
     char buffer[512];
     va_list args;
@@ -362,15 +360,15 @@ static OpenGL1MeshRenderer::Mesh* buildBiCubicPatch(ParametricBiCubicPatch& patc
 {
     int steps = patch.getApproximationSteps() > 1 ? patch.getApproximationSteps() : 1;
     int n = steps + 1;
-    std::vector<Vector3Dd> points((size_t)n * n);
-    std::vector<Vector3Dd> normals((size_t)n * n);
+    ArrayList<Vector3Dd> points(Collections<Vector3Dd>::nCopies(n * n, Vector3Dd()));
+    ArrayList<Vector3Dd> normals(Collections<Vector3Dd>::nCopies(n * n, Vector3Dd()));
 
     for ( int i = 0; i < n; i++ ) {
         double s = (double)i / steps;
         for ( int j = 0; j < n; j++ ) {
             double t = (double)j / steps;
-            patch.evaluate(points[(size_t)i * n + j], s, t);
-            normals[(size_t)i * n + j] = patch.evaluateNormal(s, t);
+            patch.evaluate(points[(long)i * n + j], s, t);
+            normals[(long)i * n + j] = patch.evaluateNormal(s, t);
         }
     }
 
@@ -378,18 +376,18 @@ static OpenGL1MeshRenderer::Mesh* buildBiCubicPatch(ParametricBiCubicPatch& patc
     builder.setDoubleSided(true);
     for ( int i = 0; i < steps; i++ ) {
         for ( int j = 0; j < steps; j++ ) {
-            const Vector3Dd& p00 = points[(size_t)i * n + j];
-            const Vector3Dd& p10 = points[(size_t)(i + 1) * n + j];
-            const Vector3Dd& p11 = points[(size_t)(i + 1) * n + j + 1];
-            const Vector3Dd& p01 = points[(size_t)i * n + j + 1];
+            const Vector3Dd& p00 = points[(long)i * n + j];
+            const Vector3Dd& p10 = points[(long)(i + 1) * n + j];
+            const Vector3Dd& p11 = points[(long)(i + 1) * n + j + 1];
+            const Vector3Dd& p01 = points[(long)i * n + j + 1];
             Vector3Dd face = p11.subtract(p00).crossProduct(p01.subtract(p10));
             if ( !(face.length() > 1e-15) ) {
                 continue;
             }
-            Vector3Dd n00 = validNormal(normals[(size_t)i * n + j], face);
-            Vector3Dd n10 = validNormal(normals[(size_t)(i + 1) * n + j], face);
-            Vector3Dd n11 = validNormal(normals[(size_t)(i + 1) * n + j + 1], face);
-            Vector3Dd n01 = validNormal(normals[(size_t)i * n + j + 1], face);
+            Vector3Dd n00 = validNormal(normals[(long)i * n + j], face);
+            Vector3Dd n10 = validNormal(normals[(long)(i + 1) * n + j], face);
+            Vector3Dd n11 = validNormal(normals[(long)(i + 1) * n + j + 1], face);
+            Vector3Dd n01 = validNormal(normals[(long)i * n + j + 1], face);
             double u0 = (double)i / steps, u1 = (double)(i + 1) / steps;
             double v0 = (double)j / steps, v1 = (double)(j + 1) / steps;
 
@@ -495,14 +493,29 @@ representation, as `Jogl2PolyhedralBoundedSolidRenderer` does in Java: its
 faces are planar polygons, maybe with holes (several loops).
 */
 struct SolidTessellation {
-    std::vector<Vector3Dd> triangles;
-    /// Vertices given to GLU, and the ones it creates at intersections
-    std::deque<Vector3Dd> vertices;
+    ArrayList<Vector3Dd> triangles;
+    /// Vertices given to GLU, and the ones it creates at intersections.
+    /// GLU keeps pointers to them, so each one is allocated on its own (a
+    ArrayList<Vector3Dd*> vertices;
+
+    ~SolidTessellation()
+    {
+        for ( long i = 0; i < vertices.size(); i++ ) {
+            delete vertices[i];
+        }
+    }
+
+    Vector3Dd* addVertex(const Vector3Dd& position)
+    {
+        Vector3Dd* vertex = new Vector3Dd(position);
+        vertices.add(vertex);
+        return vertex;
+    }
 };
 
 static void GLAPIENTRY tessVertex(void* vertex, void* data)
 {
-    ((SolidTessellation*)data)->triangles.push_back(*(const Vector3Dd*)vertex);
+    ((SolidTessellation*)data)->triangles.add(*(const Vector3Dd*)vertex);
 }
 
 // With an edge flag callback, GLU gives only separate triangles
@@ -514,14 +527,13 @@ static void GLAPIENTRY tessCombine(GLdouble coords[3], void*[4], GLfloat[4],
                             void** out, void* data)
 {
     SolidTessellation* t = (SolidTessellation*)data;
-    t->vertices.push_back(Vector3Dd(coords[0], coords[1], coords[2]));
-    *out = &t->vertices.back();
+    *out = t->addVertex(Vector3Dd(coords[0], coords[1], coords[2]));
 }
 
 /**
 @return the key of a position, quantized so vertices shared by faces match
 */
-static std::string vertexKey(const Vector3Dd& p)
+static String vertexKey(const Vector3Dd& p)
 {
     const double q = 1.0e6;
     return format("%lld/%lld/%lld", (long long)Cpp98Support::llround(p.x() * q),
@@ -534,23 +546,22 @@ the average of the normals of the faces sharing the vertex that are within
 the smoothing threshold of it.
 */
 static Vector3Dd resolveVertexNormal(
-    const std::map<std::string, std::vector<Vector3Dd> >* incident,
+    const TreeMap<String, ArrayList<Vector3Dd> >* incident,
     const Vector3Dd& position, const Vector3Dd& faceNormal,
     double thresholdDegrees)
 {
     if ( incident == NULL ) {
         return faceNormal;
     }
-    std::map<std::string, std::vector<Vector3Dd> >::const_iterator normals =
-        incident->find(vertexKey(position));
-    if ( normals == incident->end() ) {
+    const ArrayList<Vector3Dd>* normals = incident->get(vertexKey(position));
+    if ( normals == NULL ) {
         return faceNormal;
     }
     double minimumCosine = cos(thresholdDegrees * M_PI / 180.0);
     Vector3Dd sum;
-    for ( size_t i = 0; i < normals->second.size(); i++ ) {
-        if ( normals->second[i].dotProduct(faceNormal) >= minimumCosine - 1e-9 ) {
-            sum = sum.add(normals->second[i]);
+    for ( long i = 0; i < normals->size(); i++ ) {
+        if ( (*normals)[i].dotProduct(faceNormal) >= minimumCosine - 1e-9 ) {
+            sum = sum.add((*normals)[i]);
         }
     }
     return sum.length() > 1e-12 ? sum.normalized() : faceNormal;
@@ -566,15 +577,15 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
         quality->getShadingType() != RendererConfiguration::SHADING_TYPE_NOLIGHT;
 
     //- Normals of the faces incident to each vertex ----------------------
-    std::map<std::string, std::vector<Vector3Dd> > incident;
-    std::vector<Vector3Dd> faceNormals((size_t)faces.size());
+    TreeMap<String, ArrayList<Vector3Dd> > incident;
+    ArrayList<Vector3Dd> faceNormals(Collections<Vector3Dd>::nCopies(faces.size(), Vector3Dd()));
     for ( long f = 0; f < faces.size(); f++ ) {
         _PolyhedralBoundedSolidFace* face = faces[f];
         InfinitePlane* plane = face != NULL ? face->getContainingPlane() : NULL;
         if ( plane == NULL || !(plane->getNormal().length() > 1e-12) ) {
             continue;
         }
-        faceNormals[(size_t)f] = plane->getNormal().normalized();
+        faceNormals[(long)f] = plane->getNormal().normalized();
         if ( !smoothNormals ) {
             continue;
         }
@@ -587,8 +598,9 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
             _PolyhedralBoundedSolidHalfEdge* he = start;
             do {
                 if ( he->startingVertex != NULL ) {
-                    incident[vertexKey(he->startingVertex->position)]
-                        .push_back(faceNormals[(size_t)f]);
+                    incident.putIfAbsent(
+                        vertexKey(he->startingVertex->position),
+                        ArrayList<Vector3Dd>()).add(faceNormals[f]);
                 }
                 he = he->next();
             } while ( he != NULL && he != start );
@@ -608,7 +620,7 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
     builder.setDoubleSided(doubleSided);
     for ( long f = 0; f < faces.size(); f++ ) {
         _PolyhedralBoundedSolidFace* face = faces[f];
-        const Vector3Dd& normal = faceNormals[(size_t)f];
+        const Vector3Dd& normal = faceNormals[f];
         if ( face == NULL || !(normal.length() > 1e-12) ) {
             continue;
         }
@@ -629,16 +641,15 @@ static OpenGL1MeshRenderer::Mesh* buildPolyhedralBoundedSolid(
                 if ( he == NULL || he->startingVertex == NULL ) {
                     break;
                 }
-                t.vertices.push_back(he->startingVertex->position);
-                GLdouble c[3] = { t.vertices.back().x(), t.vertices.back().y(),
-                                  t.vertices.back().z() };
-                gluTessVertex(tess, c, &t.vertices.back());
+                Vector3Dd* vertex = t.addVertex(he->startingVertex->position);
+                GLdouble c[3] = { vertex->x(), vertex->y(), vertex->z() };
+                gluTessVertex(tess, c, vertex);
             } while ( he != start );
             gluTessEndContour(tess);
         }
         gluTessEndPolygon(tess);
 
-        for ( size_t i = 0; i + 2 < t.triangles.size(); i += 3 ) {
+        for ( long i = 0; i + 2 < t.triangles.size(); i += 3 ) {
             Vector3Dd n[3];
             for ( int k = 0; k < 3; k++ ) {
                 n[k] = resolveVertexNormal(smoothNormals ? &incident : NULL,
@@ -662,28 +673,28 @@ if the geometry is not supported. Parametric geometries are identified by
 their parameters; triangle meshes by identity, as they are not edited while
 shown.
 */
-static std::string keyOf(Geometry* geometry)
+static String keyOf(Geometry* geometry)
 {
-    if ( Arrow* a = dynamic_cast<Arrow*>(geometry) ) {
+    if ( Arrow* a = (geometry != NULL && geometry->instanceOf(Arrow::CLASS) ? (Arrow*)geometry : NULL) ) {
         return format("arrow/%.17g/%.17g/%.17g/%.17g", a->getBaseLength(),
             a->getHeadLength(), a->getBaseRadius(), a->getHeadRadius());
     }
-    if ( Cone* c = dynamic_cast<Cone*>(geometry) ) {
+    if ( Cone* c = (geometry != NULL && geometry->instanceOf(Cone::CLASS) ? (Cone*)geometry : NULL) ) {
         return format("cone/%.17g/%.17g/%.17g", c->getBottomRadius(),
             c->getTopRadius(), c->getHeight());
     }
-    if ( Box* b = dynamic_cast<Box*>(geometry) ) {
+    if ( Box* b = (geometry != NULL && geometry->instanceOf(Box::CLASS) ? (Box*)geometry : NULL) ) {
         Vector3Dd s = b->getSize();
         return format("box/%.17g/%.17g/%.17g", s.x(), s.y(), s.z());
     }
-    if ( Torus* t = dynamic_cast<Torus*>(geometry) ) {
+    if ( Torus* t = (geometry != NULL && geometry->instanceOf(Torus::CLASS) ? (Torus*)geometry : NULL) ) {
         return format("torus/%.17g/%.17g", t->getMajorRadius(), t->getMinorRadius());
     }
-    if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
+    if ( TriangleMesh* m = (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)geometry : NULL) ) {
         return format("trianglemesh/%p/%d/%d", (void*)m, m->getNumVertices(),
             m->getNumTriangles());
     }
-    if ( FunctionalExplicitSurface* f = dynamic_cast<FunctionalExplicitSurface*>(geometry) ) {
+    if ( FunctionalExplicitSurface* f = (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)geometry : NULL) ) {
         // Keyed by content, not by address: editors replace the surface of
         // a body with a new one, which the allocator may place at the
         // address of the deleted one (and its mesh at the old mesh one)
@@ -693,7 +704,7 @@ static std::string keyOf(Geometry* geometry)
             f->getMaxZBound(), f->getTesselationHintX(),
             f->getTesselationHintY()) + f->getFunctionExpression().c_str();
     }
-    if ( ParametricBiCubicPatch* p = dynamic_cast<ParametricBiCubicPatch*>(geometry) ) {
+    if ( ParametricBiCubicPatch* p = (geometry != NULL && geometry->instanceOf(ParametricBiCubicPatch::CLASS) ? (ParametricBiCubicPatch*)geometry : NULL) ) {
         double hash = 0;
         for ( int i = 0; i < 4; i++ ) {
             for ( int j = 0; j < 4; j++ ) {
@@ -704,36 +715,36 @@ static std::string keyOf(Geometry* geometry)
         return format("parametricbicubicpatch/%p/%d/%d/%.17g", (void*)p,
             p->getType(), p->getApproximationSteps(), hash);
     }
-    if ( InfinitePlane* p = dynamic_cast<InfinitePlane*>(geometry) ) {
+    if ( InfinitePlane* p = (geometry != NULL && geometry->instanceOf(InfinitePlane::CLASS) ? (InfinitePlane*)geometry : NULL) ) {
         return format("infiniteplane/%.17g/%.17g/%.17g/%.17g", p->getA(),
             p->getB(), p->getC(), p->getD());
     }
-    if ( TriangleMeshGroup* g = dynamic_cast<TriangleMeshGroup*>(geometry) ) {
+    if ( TriangleMeshGroup* g = (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS) ? (TriangleMeshGroup*)geometry : NULL) ) {
         return format("trianglemeshgroup/%p/%ld", (void*)g,
             (long)g->getMeshes().size());
     }
-    if ( QuadMesh* q = dynamic_cast<QuadMesh*>(geometry) ) {
+    if ( QuadMesh* q = (geometry != NULL && geometry->instanceOf(QuadMesh::CLASS) ? (QuadMesh*)geometry : NULL) ) {
         return format("quadmesh/%p", (void*)q);
     }
-    return std::string();
+    return String();
 }
 
 static OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
 {
-    if ( Arrow* a = dynamic_cast<Arrow*>(geometry) ) return buildArrow(*a);
-    if ( Cone* c = dynamic_cast<Cone*>(geometry) ) return buildCone(*c);
-    if ( Box* b = dynamic_cast<Box*>(geometry) ) return buildBox(*b);
-    if ( Torus* t = dynamic_cast<Torus*>(geometry) ) return buildTorus(*t);
-    if ( TriangleMesh* m = dynamic_cast<TriangleMesh*>(geometry) ) {
+    if ( Arrow* a = (geometry != NULL && geometry->instanceOf(Arrow::CLASS) ? (Arrow*)geometry : NULL) ) return buildArrow(*a);
+    if ( Cone* c = (geometry != NULL && geometry->instanceOf(Cone::CLASS) ? (Cone*)geometry : NULL) ) return buildCone(*c);
+    if ( Box* b = (geometry != NULL && geometry->instanceOf(Box::CLASS) ? (Box*)geometry : NULL) ) return buildBox(*b);
+    if ( Torus* t = (geometry != NULL && geometry->instanceOf(Torus::CLASS) ? (Torus*)geometry : NULL) ) return buildTorus(*t);
+    if ( TriangleMesh* m = (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)geometry : NULL) ) {
         return buildTriangleMesh(*m);
     }
-    if ( FunctionalExplicitSurface* f = dynamic_cast<FunctionalExplicitSurface*>(geometry) ) {
+    if ( FunctionalExplicitSurface* f = (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)geometry : NULL) ) {
         return buildFunctionalExplicitSurface(*f);
     }
-    if ( ParametricBiCubicPatch* p = dynamic_cast<ParametricBiCubicPatch*>(geometry) ) {
+    if ( ParametricBiCubicPatch* p = (geometry != NULL && geometry->instanceOf(ParametricBiCubicPatch::CLASS) ? (ParametricBiCubicPatch*)geometry : NULL) ) {
         return buildBiCubicPatch(*p);
     }
-    if ( InfinitePlane* p = dynamic_cast<InfinitePlane*>(geometry) ) {
+    if ( InfinitePlane* p = (geometry != NULL && geometry->instanceOf(InfinitePlane::CLASS) ? (InfinitePlane*)geometry : NULL) ) {
         return buildInfinitePlane(*p);
     }
     return buildTriangulatedGeometry(geometry);
@@ -741,14 +752,13 @@ static OpenGL1MeshRenderer::Mesh* buildMesh(Geometry* geometry)
 
 static OpenGL1MeshRenderer::Mesh* obtainMesh(Geometry* geometry)
 {
-    std::string key = keyOf(geometry);
-    if ( key.empty() ) {
+    String key = keyOf(geometry);
+    if ( key.isEmpty() ) {
         return NULL;
     }
-    std::map<std::string, OpenGL1MeshRenderer::Mesh*>::iterator known =
-        meshes.find(key);
-    if ( known != meshes.end() ) {
-        return known->second;
+    OpenGL1MeshRenderer::Mesh** known = meshes.get(key);
+    if ( known != NULL ) {
+        return (*known);
     }
     OpenGL1MeshRenderer::Mesh* mesh = buildMesh(geometry);
     if ( mesh == NULL ) {
@@ -759,16 +769,16 @@ static OpenGL1MeshRenderer::Mesh* obtainMesh(Geometry* geometry)
         // recreated on demand
         releaseMeshes();
     }
-    meshes[key] = mesh;
+    meshes.put(key, mesh);
     return mesh;
 }
 
 static void reportUnsupported(Geometry* geometry)
 {
-    const char* name = typeid(*geometry).name();
-    if ( reportedUnsupported.insert(name).second ) {
+    String name = geometry->getClassSimpleName();
+    if ( reportedUnsupported.add(name) ) {
         fprintf(stderr, "OpenGL1GeometryRenderer: geometry not supported by "
-                "the OpenGL 1.2 pipeline yet: %s\n", name);
+                "the OpenGL 1.2 pipeline yet: %s\n", name.c_str());
     }
 }
 
@@ -780,7 +790,7 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
     const Matrix4x4d& local)
 {
     if(!geometry||!camera||!quality)return;
-    ParametricCurve* curve = dynamic_cast<ParametricCurve*>(geometry);
+    ParametricCurve* curve = (geometry != NULL && geometry->instanceOf(ParametricCurve::CLASS) ? (ParametricCurve*)geometry : NULL);
     if ( curve != 0 ) {
         ArrayList<float> positions, colors;
         ColorRgb wire = quality->getWireColor();
@@ -804,7 +814,7 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
         if(quality->isSelectionCornersSet())OpenGL1SelectionCornersRenderer::draw(geometry,camera,local);
         return;
     }
-    Sphere* sphere = dynamic_cast<Sphere*>(geometry);
+    Sphere* sphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS) ? (Sphere*)geometry : NULL);
     if ( sphere != 0 ) {
         // As in Java, without lights the scene is lit from the camera
         PointLight cameraLight(camera->getPosition(), ColorRgb(1, 1, 1));
@@ -819,7 +829,7 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
     }
 
     // Boundary representations are tessellated at each frame, as in Java
-    PolyhedralBoundedSolid* solid = dynamic_cast<PolyhedralBoundedSolid*>(geometry);
+    PolyhedralBoundedSolid* solid = (geometry != NULL && geometry->instanceOf(PolyhedralBoundedSolid::CLASS) ? (PolyhedralBoundedSolid*)geometry : NULL);
     if ( solid != 0 ) {
         OpenGL1MeshRenderer::Mesh* mesh = buildPolyhedralBoundedSolid(*solid,
             quality, material != 0 && material->isDoubleSided());
@@ -837,7 +847,7 @@ void OpenGL1GeometryRenderer::draw(Geometry* geometry, Camera* camera,
         reportUnsupported(geometry);
         return;
     }
-    InfinitePlane* plane = dynamic_cast<InfinitePlane*>(geometry);
+    InfinitePlane* plane = (geometry != NULL && geometry->instanceOf(InfinitePlane::CLASS) ? (InfinitePlane*)geometry : NULL);
     if ( plane == 0 ) {
         OpenGL1MeshRenderer::draw(mesh, geometry, camera, lights, material,
             quality, textureMap, normalMap, local);

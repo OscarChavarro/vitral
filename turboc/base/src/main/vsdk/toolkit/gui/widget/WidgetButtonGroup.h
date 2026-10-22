@@ -20,6 +20,9 @@ private:
     int direction;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int HORIZONTAL = 1;
     static const int VERTICAL = 2;
 

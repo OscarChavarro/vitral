@@ -102,3 +102,11 @@ double* SimpleBodyGroup::getMinMax()
     MinMax[3] = maxX; MinMax[4] = maxY; MinMax[5] = maxZ;
     return MinMax;
 }
+
+const Class SimpleBodyGroup::CLASS = { "SimpleBodyGroup", &Entity::CLASS };
+
+const Class *
+SimpleBodyGroup::getClass() const
+{
+    return &CLASS;
+}

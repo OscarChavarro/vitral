@@ -14,11 +14,12 @@
 #include "io/FolderListing.h"
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
+#include "java/util/ArrayList.txx"
 
 static const int DIALOG_WIDTH = 520;
 static const int DIALOG_HEIGHT = 420;
 
-static std::string withoutTrailingSlash(const std::string& folder)
+static String withoutTrailingSlash(const String& folder)
 {
     if ( folder.size() > 1 && folder[folder.size() - 1] == '/' ) {
         return folder.substr(0, folder.size() - 1);
@@ -26,7 +27,7 @@ static std::string withoutTrailingSlash(const std::string& folder)
     return folder;
 }
 
-XmFileDialog::XmFileDialog(const std::vector<FileSuffixFilter>& filters)
+XmFileDialog::XmFileDialog(const ArrayList<FileSuffixFilter>& filters)
     : filters(filters), shell(NULL), box(NULL), done(false),
       approved(false)
 {
@@ -40,14 +41,14 @@ XmFileDialog::~XmFileDialog()
 }
 
 bool XmFileDialog::showDialog(XtApplicationHost* host,
-                              const std::string& title,
-                              const std::string& folder,
-                              const std::vector<FileSuffixFilter>& filters,
-                              std::string& outPath)
+                              const String& title,
+                              const String& folder,
+                              const ArrayList<FileSuffixFilter>& filters,
+                              String& outPath)
 {
     XmFileDialog dialog(filters);
     dialog.create(host, title, FolderListing::isFolder(folder) ? folder :
-                  std::string("."));
+                  String("."));
 
     XtPopup(dialog.shell, XtGrabExclusive);
     XmProcessTraversal(XmFileSelectionBoxGetChild(dialog.box, XmDIALOG_TEXT),
@@ -65,8 +66,8 @@ bool XmFileDialog::showDialog(XtApplicationHost* host,
     return dialog.approved;
 }
 
-void XmFileDialog::create(XtApplicationHost* host, const std::string& title,
-                          const std::string& folder)
+void XmFileDialog::create(XtApplicationHost* host, const String& title,
+                          const String& folder)
 {
     shell = host->createDialogShell("fileDialog", transientShellWidgetClass,
                                     title.c_str());
@@ -93,7 +94,7 @@ void XmFileDialog::create(XtApplicationHost* host, const std::string& title,
         XtSetArg(args[n], XmNlabelRenderTable, fonts); ++n;
         XtSetArg(args[n], XmNtextRenderTable, fonts); ++n;
     }
-    box = XmCreateFileSelectionBox(shell, const_cast<char*>("fileSelection"),
+    box = XmCreateFileSelectionBox(shell, ((char*)("fileSelection")),
                                    args, n);
     XmStringFree(directory);
     XmStringFree(okLabel);
@@ -121,23 +122,23 @@ void XmFileDialog::searchFiles(Widget box, XtPointer callData)
     XtVaGetValues(box, XmNuserData, &userData, NULL);
     XmFileDialog* self = ((XmFileDialog*)(userData));
 
-    std::string folder = withoutTrailingSlash(
+    String folder = withoutTrailingSlash(
         XmWidgetSupport::toText(search->dir));
-    std::vector<std::string> folders;
-    std::vector<std::string> files;
+    ArrayList<String> folders;
+    ArrayList<String> files;
     FolderListing::list(folder, self != NULL ? self->filters :
-                        std::vector<FileSuffixFilter>(), folders, files);
+                        ArrayList<FileSuffixFilter>(), folders, files);
 
-    std::vector<XmString> items;
-    for ( size_t i = 0; i < files.size(); i++ ) {
+    ArrayList<XmString> items;
+    for ( long i = 0; i < files.size(); i++ ) {
         // Relative to the folder, as the path mode of the box asks
-        items.push_back(XmWidgetSupport::createString(files[i]));
+        items.add(XmWidgetSupport::createString(files[i]));
     }
     XtVaSetValues(box,
-                  XmNfileListItems, items.empty() ? NULL : items.data(),
+                  XmNfileListItems, items.isEmpty() ? NULL : items.data(),
                   XmNfileListItemCount, ((int)(items.size())),
                   XmNlistUpdated, True, NULL);
-    for ( size_t i = 0; i < items.size(); i++ ) {
+    for ( long i = 0; i < items.size(); i++ ) {
         XmStringFree(items[i]);
     }
 }
@@ -147,8 +148,8 @@ void XmFileDialog::approve(Widget, XtPointer clientData, XtPointer callData)
     XmFileDialog* self = ((XmFileDialog*)(clientData));
     XmFileSelectionBoxCallbackStruct* selection =
         ((XmFileSelectionBoxCallbackStruct*)(callData));
-    std::string chosen = XmWidgetSupport::toText(selection->value);
-    if ( chosen.empty() ) {
+    String chosen = XmWidgetSupport::toText(selection->value);
+    if ( chosen.isEmpty() ) {
         return;
     }
     if ( chosen[0] != '/' ) {

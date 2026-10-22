@@ -128,7 +128,7 @@ static MicrofacetParams resolveMicrofacetParams(SimpleMaterial* material)
     p.fresnelF0 = material->getSpecularReference();
     p.kd = 1.0;
     p.ks = 1.0;
-    MicroFacetedMaterial* mf = dynamic_cast<MicroFacetedMaterial*>(material);
+    MicroFacetedMaterial* mf = (material != NULL && material->instanceOf(MicroFacetedMaterial::CLASS) ? (MicroFacetedMaterial*)material : NULL);
     if ( mf != 0 ) {
         p.roughness = mf->getRoughness();
         p.alpha = mf->getAlpha();

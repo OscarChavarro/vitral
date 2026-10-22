@@ -22,6 +22,9 @@ private:
     int ySize;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     Constructs a Z buffer with the specified parameters; the depth data is
     initialized to value 0.0

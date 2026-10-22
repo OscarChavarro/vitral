@@ -6,6 +6,9 @@ class Camera;
 
 class CameraControllerGoogleEarth : public CameraController {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit CameraControllerGoogleEarth(Camera* camera);
     virtual ~CameraControllerGoogleEarth() {}
 

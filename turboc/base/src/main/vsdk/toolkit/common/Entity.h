@@ -1,6 +1,7 @@
 #ifndef __ENTITY__
 #define __ENTITY__
 
+#include "java/lang/Class.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/EntityControlAccessor.h"
@@ -93,32 +94,18 @@ public:
     it from the constructor of the entity class, i.e.
     <pre>
     addControlSpecification("double;radius;(0, INFINITE)",
-        &Sphere::getRadius, &Sphere::setRadius);
+        new MemberEntityControlAccessor<Sphere, double>(
+            &Sphere::getRadius, &Sphere::setRadius));
     </pre>
+    C++ port note: the accessors are created by the caller, as legacy
+    compilers (gcc 2.7, Turbo C++ 3.0) have no member templates.
     @param specification control specification in "type;name;interval"
     format; its type must be the one of the accessors
-    @param getter member function returning the attribute (const or not)
-    @param setter member function changing the attribute
+    @param accessor getter (const or not) and setter of the attribute, owned
+    by this entity from now on; its name is taken from the specification
     */
-    template <class T, class V>
     void addControlSpecification(const String &specification,
-                                 V (T::*getter)() const,
-                                 void (T::*setter)(V))
-    {
-        getControlSpecifications().add(specification);
-        addControlAccessor(new MemberEntityControlAccessor<T, V>(
-            controlNameOf(specification), getter, setter));
-    }
-
-    template <class T, class V>
-    void addControlSpecification(const String &specification,
-                                 V (T::*getter)(),
-                                 void (T::*setter)(V))
-    {
-        getControlSpecifications().add(specification);
-        addControlAccessor(new MemberEntityControlAccessor<T, V>(
-            controlNameOf(specification), getter, setter));
-    }
+                                 EntityControlAccessor *accessor);
 
     /**
     @param name attribute name, as in the control specification (i.e.
@@ -128,6 +115,20 @@ public:
     */
     const EntityControlAccessor *getControlAccessor(
         const String &name) const;
+
+    /// Run time class descriptor (see `Class`)
+    static const Class CLASS;
+
+    /**
+    @return the descriptor of the class of this object (Java `getClass()`)
+    */
+    virtual const Class *getClass() const;
+
+    /**
+    @return true if this object is an instance of the class or of one of
+    its subclasses (Java `instanceof`)
+    */
+    bool instanceOf(const Class &type) const;
 
     /**
     @return the name of the class of this entity, without namespaces (as

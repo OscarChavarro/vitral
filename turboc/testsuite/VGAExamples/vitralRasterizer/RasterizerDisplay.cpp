@@ -7,11 +7,11 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 
 void
-RasterizerDisplay::drawTrueColor(const uint8_t *rgb, int width, int height) {
+RasterizerDisplay::drawTrueColor(const unsigned char *rgb, int width, int height) {
     long last = -1;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            const uint8_t *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
+            const unsigned char *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
             long key = (long)p[0] << 16 | (long)p[1] << 8 | p[2];
             if (key != last) {
                 vga_setrgbcolor(p[0], p[1], p[2]);
@@ -23,7 +23,7 @@ RasterizerDisplay::drawTrueColor(const uint8_t *rgb, int width, int height) {
 }
 
 int
-RasterizerDisplay::showExample(int which, int width, int height, const Dithering::Palette *standard, ColorMode colorMode,
+RasterizerDisplay::showExample(int which, int width, int height, const Dithering::Palette *standard, ColorMode::Value colorMode,
                                RasterizerShown *shown) {
     shown->palette = *standard;
     shown->dithered = 0;
@@ -34,18 +34,18 @@ RasterizerDisplay::showExample(int which, int width, int height, const Dithering
     }
     RasterizerExamples::draw(which, &img, width, height);
     unsigned pixels = (unsigned)width * (unsigned)height;
-    uint8_t *rgb = (uint8_t *)malloc(pixels * 3);
-    uint8_t *indices = (uint8_t *)malloc(pixels);
+    unsigned char *rgb = (unsigned char *)malloc(pixels * 3);
+    unsigned char *indices = (unsigned char *)malloc(pixels);
     int ok = rgb && indices;
     if (ok) {
         RGBPixel p;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 img.getPixelRgb(x, y, &p);
-                uint8_t *dst = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
-                dst[0] = (uint8_t)p.r;
-                dst[1] = (uint8_t)p.g;
-                dst[2] = (uint8_t)p.b;
+                unsigned char *dst = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
+                dst[0] = (unsigned char)p.r;
+                dst[1] = (unsigned char)p.g;
+                dst[2] = (unsigned char)p.b;
             }
         }
         if (standard->count > 256) {

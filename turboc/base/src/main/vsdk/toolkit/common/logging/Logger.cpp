@@ -10,7 +10,7 @@ bool Logger::withFatalExceptions = true;
 void Logger::setWithSystemExit(bool flag) { withSystemExit = flag; }
 void Logger::setWithFatalExceptions(bool flag) { withFatalExceptions = flag; }
 
-void Logger::processFatalError(const String& method, const String& message, const std::exception* cause)
+void Logger::processFatalError(const String& method, const String& message, const Throwable* cause)
 {
     if ( withSystemExit ) {
         exit(1);
@@ -24,7 +24,7 @@ void Logger::processFatalError(const String& method, const String& message, cons
     }
     if ( cause != NULL ) {
         m += " | cause: ";
-        m += cause->what();
+        m += cause->getMessage().c_str();
     }
     throw VSDKFatalException(m);
 }
@@ -37,10 +37,10 @@ void Logger::reportMessage(const String& className, int level, const String& met
     }
 }
 
-void Logger::reportMessageWithException(const String& className, int level, const String& method, const String& message, const std::exception* cause)
+void Logger::reportMessageWithException(const String& className, int level, const String& method, const String& message, const Throwable* cause)
 {
     if ( cause != NULL ) {
-        fprintf(stderr, "%s | exception: %s\n", message.c_str(), cause->what());
+        fprintf(stderr, "%s | exception: %s\n", message.c_str(), cause->getMessage().c_str());
     } else {
         fprintf(stderr, "%s\n", message.c_str());
     }

@@ -7,6 +7,9 @@
 #include "vsdk/toolkit/environment/geometry/curve/Curve.h"
 class ParametricCurve : public Curve {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int BREAK = 1;
     static const int CORNER = 2;
     static const int QUAD = 3;

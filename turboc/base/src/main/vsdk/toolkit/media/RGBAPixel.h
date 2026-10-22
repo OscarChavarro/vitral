@@ -18,6 +18,9 @@ Nevertheless, get and set methods are provided.
 class RGBAPixel : public MediaEntity {
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     char r;
     char g;
     char b;

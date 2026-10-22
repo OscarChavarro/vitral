@@ -14,7 +14,6 @@
 #include "vsdk/toolkit/media/RGBPixel.h"
 #include "vsdk/toolkit/media/ZBuffer.h"
 #include "vsdk/toolkit/render/raytracing/DepthBufferEncoder.h"
-#include <limits>
 #include "vsdk/toolkit/environment/material/RendererConfiguration.h"
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"

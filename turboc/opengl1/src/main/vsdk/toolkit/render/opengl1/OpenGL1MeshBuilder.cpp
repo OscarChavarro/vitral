@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "vsdk/toolkit/render/opengl1/OpenGL1MeshBuilder.h"
+#include "java/util/Collections.h"
 
 OpenGL1MeshBuilder::OpenGL1MeshBuilder(double characteristicSize)
     : characteristicSize(characteristicSize), doubleSided(false)
@@ -125,11 +126,11 @@ OpenGL1MeshRenderer::Mesh* OpenGL1MeshBuilder::build()
     OpenGL1MeshRenderer::Mesh* mesh =
         new OpenGL1MeshRenderer::Mesh(characteristicSize);
 
-    mesh->positions.resize((size_t)count * 3);
-    mesh->normals.resize((size_t)count * 3);
-    mesh->uvs.resize((size_t)count * 2);
+    mesh->positions = Collections<float>::nCopies(count * 3, 0.0f);
+    mesh->normals = Collections<float>::nCopies(count * 3, 0.0f);
+    mesh->uvs = Collections<float>::nCopies(count * 2, 0.0f);
     for ( int i = 0; i < count; i++ ) {
-        const float* v = &vertices[(size_t)i * VERTEX_SIZE];
+        const float* v = &vertices[(long)i * VERTEX_SIZE];
         for ( int c = 0; c < 3; c++ ) {
             mesh->positions[i * 3 + c] = v[c];
             mesh->normals[i * 3 + c] = v[3 + c];
@@ -151,7 +152,9 @@ void OpenGL1MeshBuilder::addVertex(const Vector3Dd& p, const Vector3Dd& n,
         (float)normal.x(), (float)normal.y(), (float)normal.z(),
         (float)u, (float)v
     };
-    vertices.insert(vertices.end(), vertex, vertex + VERTEX_SIZE);
+    for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+        vertices.add(vertex[c]);
+    }
 }
 
 /**
@@ -163,7 +166,7 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
     vertices.reserve(vertices.size() * 2);
     for ( int t = 0; t + 2 < frontCount; t += 3 ) {
         for ( int k = 2; k >= 0; k-- ) {
-            size_t start = (size_t)(t + k) * VERTEX_SIZE;
+            long start = (long)(t + k) * VERTEX_SIZE;
             float v[VERTEX_SIZE];
             for ( int c = 0; c < VERTEX_SIZE; c++ ) {
                 v[c] = vertices[start + c];
@@ -171,7 +174,9 @@ void OpenGL1MeshBuilder::addBackSides(int frontCount)
             for ( int c = 3; c < 6; c++ ) {
                 v[c] = -v[c];
             }
-            vertices.insert(vertices.end(), v, v + VERTEX_SIZE);
+            for ( int c = 0; c < VERTEX_SIZE; c++ ) {
+                vertices.add(v[c]);
+            }
         }
     }
 }

@@ -17,6 +17,9 @@ class RGBAColorPalette : public MediaEntity {
     ArrayList<double>     positions; // empty = uniform spacing
 
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     RGBAColorPalette();
     virtual ~RGBAColorPalette();
 

@@ -2,6 +2,7 @@
 #define __ENTITY_CONTROL_ACCESSOR__
 
 #include <stddef.h>
+#include "java/lang/Class.h"
 #include "java/lang/String.h"
 
 class Entity;
@@ -28,6 +29,7 @@ public:
     @param name attribute name, as in the control specification (i.e.
     "radius")
     */
+    EntityControlAccessor() : name("") {}
     explicit EntityControlAccessor(const String &name) : name(name) {}
     virtual ~EntityControlAccessor() {}
 
@@ -35,6 +37,12 @@ public:
     @return the attribute name, as in the control specification
     */
     const String &getName() const { return name; }
+
+    /**
+    @param name attribute name, as in the control specification (set by
+    `Entity::addControlSpecification`)
+    */
+    void setName(const String &name) { this->name = name; }
 
     /**
     @return a copy of this accessor, for the copies of the entity
@@ -78,49 +86,47 @@ public:
     */
     virtual bool writeValue(Entity &entity,
                             const String &text) const = 0;
+
+protected:
+    /**
+    @return true if the entity is an instance of the class (Java
+    `instanceof`; defined where `Entity` is complete)
+    */
+    static bool isInstance(const Entity &entity, const Class &type);
 };
 
 /**
 Conversions between text and the value types supported by control
-specifications. Only the specializations below exist, so registering
-accessors of other types does not compile.
+specifications. Only the overloads below exist, so registering accessors
+of other types does not compile.
+
+C++ port note: overloads selected by the type of the value (or of a
+pointer to it) replace the specializations of a class template, which
+legacy compilers (gcc 2.7, Turbo C++ 3.0) do not have.
 */
-template <class V> class EntityControlValue;
-
-template <> class EntityControlValue<double> {
+class EntityControlValue {
 public:
-    static const char *getType() { return "double"; }
-    static double parse(const String &text);
+    static const char *getType(const double *) { return "double"; }
+    static const char *getType(const float *) { return "float"; }
+    static const char *getType(const int *) { return "int"; }
+    /// Java long is 64 bits: C++ `long long` (and `long` on LP64 platforms)
+    static const char *getType(const long long *) { return "long"; }
+    static const char *getType(const long *) { return "long"; }
+
+    static void parse(const String &text, double *outValue);
+    static void parse(const String &text, float *outValue);
+    static void parse(const String &text, int *outValue);
+    static void parse(const String &text, long long *outValue);
+    static void parse(const String &text, long *outValue);
+
     static String toString(double value);
-};
-
-template <> class EntityControlValue<float> {
-public:
-    static const char *getType() { return "float"; }
-    static float parse(const String &text);
     static String toString(float value);
-};
-
-template <> class EntityControlValue<int> {
-public:
-    static const char *getType() { return "int"; }
-    static int parse(const String &text);
     static String toString(int value);
-};
-
-/// Java long is 64 bits: C++ `long long` (and `long` on LP64 platforms)
-template <> class EntityControlValue<long long> {
-public:
-    static const char *getType() { return "long"; }
-    static long long parse(const String &text);
     static String toString(long long value);
-};
-
-template <> class EntityControlValue<long> {
-public:
-    static const char *getType() { return "long"; }
-    static long parse(const String &text);
     static String toString(long value);
+
+private:
+    EntityControlValue();
 };
 
 /**
@@ -145,18 +151,19 @@ private:
         if ( constGetter != NULL ) {
             return (entity.*constGetter)();
         }
-        return (const_cast<T &>(entity).*getter)();
+        return (((T &)(entity)).*getter)();
     }
 
 public:
-    MemberEntityControlAccessor(const String &name,
-                                ConstGetter getter, Setter setter)
-        : EntityControlAccessor(name), constGetter(getter),
+    /**
+    The name is given by `Entity::addControlSpecification`.
+    */
+    MemberEntityControlAccessor(ConstGetter getter, Setter setter)
+        : EntityControlAccessor(), constGetter(getter),
           getter(NULL), setter(setter) {}
 
-    MemberEntityControlAccessor(const String &name,
-                                Getter getter, Setter setter)
-        : EntityControlAccessor(name), constGetter(NULL),
+    MemberEntityControlAccessor(Getter getter, Setter setter)
+        : EntityControlAccessor(), constGetter(NULL),
           getter(getter), setter(setter) {}
 
     virtual EntityControlAccessor *clone() const
@@ -166,33 +173,36 @@ public:
 
     virtual const char *getType() const
     {
-        return EntityControlValue<V>::getType();
+        return EntityControlValue::getType((const V *)NULL);
     }
 
     virtual bool readValue(const Entity &entity,
                            String &outText) const
     {
-        const T *target = dynamic_cast<const T *>(&entity);
-        if ( target == NULL ) {
+        if ( !isInstance(entity, T::CLASS) ) {
             return false;
         }
-        outText = EntityControlValue<V>::toString(get(*target));
+        const T *target = (const T *)&entity;
+        outText = EntityControlValue::toString(get(*target));
         return true;
     }
 
     virtual double parseValue(const String &text) const
     {
-        return ((double)(EntityControlValue<V>::parse(text)));
+        V value;
+        EntityControlValue::parse(text, &value);
+        return ((double)(value));
     }
 
     virtual bool writeValue(Entity &entity,
                             const String &text) const
     {
-        T *target = dynamic_cast<T *>(&entity);
-        if ( target == NULL ) {
+        if ( !isInstance(entity, T::CLASS) ) {
             return false;
         }
-        V value = EntityControlValue<V>::parse(text);
+        T *target = (T *)&entity;
+        V value;
+        EntityControlValue::parse(text, &value);
         (target->*setter)(value);
         return true;
     }

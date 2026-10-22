@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <exception>
 
 #ifdef VITRAL_WITH_OSMESA
 #include <GL/osmesa.h>
@@ -16,6 +15,7 @@
 
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
+#include "java/lang/Exception.h"
 
 /**
 Offscreen rendering with OpenGL 1.2: draws a white line and exports the
@@ -111,8 +111,8 @@ int main()
         writeRgbaToPpm("./output.ppm", rgba, WIDTH, HEIGHT);
         printf("OpenGL1PbufferExample: exported ./output.ppm\n");
     }
-    catch (const std::exception& e) {
-        fprintf(stderr, "%s\n", e.what());
+    catch (const Exception& e) {
+        fprintf(stderr, "%s\n", e.getMessage().c_str());
         OSMesaDestroyContext(context);
         delete[] rgba;
         return 1;
@@ -138,8 +138,8 @@ static void displayCallback()
         delete[] rgba;
         printf("OpenGL1PbufferExample: exported ./output.ppm\n");
     }
-    catch (const std::exception& e) {
-        fprintf(stderr, "%s\n", e.what());
+    catch (const Exception& e) {
+        fprintf(stderr, "%s\n", e.getMessage().c_str());
         status = 1;
     }
     // Classic GLUT never returns from its main loop

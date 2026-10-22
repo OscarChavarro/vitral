@@ -1,6 +1,6 @@
 #include <math.h>
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/lang/Math.h"
 #include "java/util/ArrayList.txx"
@@ -96,7 +96,7 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createCylinder(double radius,
 }
 
 PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createExtrudedPolygon(
-    const std::vector<Vector3Dd>& points, double thickness)
+    const ArrayList<Vector3Dd>& points, double thickness)
 {
     int i;
     int n = (int)points.size();
@@ -121,12 +121,12 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createStar()
     double outerR = scale(2.0);
     double innerR = scale(0.77);
     double start = toRadians(-90.0);
-    std::vector<Vector3Dd> points;
+    ArrayList<Vector3Dd> points;
 
     for ( i = 0; i < n; i++ ) {
         double a = start + i * M_PI / 5.0;
         double r = (i % 2 == 0) ? outerR : innerR;
-        points.push_back(Vector3Dd(r * cos(a), r * sin(a), 0.0));
+        points.add(Vector3Dd(r * cos(a), r * sin(a), 0.0));
     }
 
     return createExtrudedPolygon(points, scale(5.5));
@@ -246,7 +246,7 @@ String CsgKurlanderBowlFixture::describeSingleMotif(int motifIndex)
     int normalizedIndex = normalizeSingleMotifIndex(motifIndex);
     int lastIndex = getSingleMotifCount() - 1;
     int typeIndex;
-    std::string text;
+    String text;
 
     if ( normalizedIndex < STAR_COUNT ) {
         typeIndex = normalizedIndex + 1;
@@ -310,15 +310,15 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::createAllMotifsUnion()
     return result;
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands()
+ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands()
 {
     return createBowlAndFirstStarOperands(0);
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(
+ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirstStarOperands(
     int motifIndex)
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    ArrayList<PolyhedralBoundedSolid*> operands;
     PolyhedralBoundedSolid* outer = createSphere(
         scale(10.0), Vector3Dd(0, 0, scale(10.0)));
     PolyhedralBoundedSolid* inner = createSphere(
@@ -329,8 +329,8 @@ std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createBowlAndFirst
         createCylinder(scale(10.5), scale(16.5), Vector3Dd(0, 0, 0)),
         Modeler::INTERSECTION);
 
-    operands.push_back(bowl);
-    operands.push_back(createSingleMotif(motifIndex));
+    operands.add(bowl);
+    operands.add(createSingleMotif(motifIndex));
     return operands;
 }
 
@@ -389,16 +389,16 @@ double CsgKurlanderBowlFixture::getMotifAzimuthDeg(int motifTypeIndex,
     return base + offsets[positionIndex];
 }
 
-std::vector<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createShellAndFirstMoonOperands()
+ArrayList<PolyhedralBoundedSolid*> CsgKurlanderBowlFixture::createShellAndFirstMoonOperands()
 {
-    std::vector<PolyhedralBoundedSolid*> operands;
+    ArrayList<PolyhedralBoundedSolid*> operands;
     PolyhedralBoundedSolid* outer = createSphere(
         scale(10.0), Vector3Dd(0, 0, scale(10.0)));
     PolyhedralBoundedSolid* inner = createSphere(
         scale(9.5), Vector3Dd(0, 0, scale(10.0)));
 
-    operands.push_back(booleanOp(outer, inner, Modeler::SUBTRACT));
-    operands.push_back(placeMoon(createMoon(), 4.0, -90.0));
+    operands.add(booleanOp(outer, inner, Modeler::SUBTRACT));
+    operands.add(placeMoon(createMoon(), 4.0, -90.0));
     return operands;
 }
 
@@ -454,7 +454,7 @@ PolyhedralBoundedSolid* CsgKurlanderBowlFixture::create()
 void CsgKurlanderBowlFixture::printMotifProgress(const char* motifType,
     int typeIndex, int typeCount, int motifIndex, int motifCount)
 {
-    printProgressMessage(("Processing " + std::string(motifType) + " " +
+    printProgressMessage(("Processing " + String(motifType) + " " +
         Cpp98Support::toString(typeIndex) + "/" + Cpp98Support::toString(typeCount) +
         ", motif " + Cpp98Support::toString(motifIndex) + "/" +
         Cpp98Support::toString(motifCount)).c_str());

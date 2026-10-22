@@ -33,6 +33,9 @@ renderers, and using the numbers accepted is up to the owner.
 */
 class InputGizmo : public Gizmo {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int DECIMALS = 3;
     static const ColorRgb HIGHLIGHT_COLOR;
 

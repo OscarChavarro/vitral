@@ -230,3 +230,11 @@ TriangleMeshGroup* TriangleMeshGroup::exportToTriangleMeshGroup()
 {
     return this;
 }
+
+const Class TriangleMeshGroup::CLASS = { "TriangleMeshGroup", &Surface::CLASS };
+
+const Class *
+TriangleMeshGroup::getClass() const
+{
+    return &CLASS;
+}

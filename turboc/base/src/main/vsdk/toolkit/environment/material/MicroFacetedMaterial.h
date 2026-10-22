@@ -5,6 +5,9 @@
 #include "vsdk/toolkit/environment/material/SimpleMaterial.h"
 class MicroFacetedMaterial : public SimpleMaterial {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int FRESNEL_MODEL_SCHLICK = 0;
     static const int FRESNEL_MODEL_CONDUCTOR = 1;
     static const int NDF_MODEL_BECKMANN = 0;

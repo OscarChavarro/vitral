@@ -5,7 +5,7 @@ class RGBImageUncompressed;
 
 class RasterizerExamples {
   public:
-    static constexpr int COUNT = 3;
+    enum { COUNT = 3 };
     static void draw(int which, RGBImageUncompressed *img, int width, int height);
 
   private:

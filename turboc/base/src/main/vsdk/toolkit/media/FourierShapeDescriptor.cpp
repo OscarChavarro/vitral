@@ -66,3 +66,11 @@ String* FourierShapeDescriptor::toString() const {
 // definition out of the class in C++98
 const int FourierShapeDescriptor::numberOfElements;
 const int FourierShapeDescriptor::numberOfHarmonics;
+
+const Class FourierShapeDescriptor::CLASS = { "FourierShapeDescriptor", &ShapeDescriptor::CLASS };
+
+const Class *
+FourierShapeDescriptor::getClass() const
+{
+    return &CLASS;
+}

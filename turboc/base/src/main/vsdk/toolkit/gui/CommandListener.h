@@ -10,6 +10,9 @@ This class represents the concept of event language as explained in section
 */
 class CommandListener : public PresentationElement {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~CommandListener() {}
     virtual bool executeCommand(const String& commandId) = 0;
 };

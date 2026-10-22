@@ -52,7 +52,7 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
         FunctionalExplicitSurfaceEditor::getPresets();
     presets.clear();
     for (long i = 0; i < presetNames.size(); ++i)
-        presets.push_back(presetNames.get(i).c_str());
+        presets.add(presetNames.get(i).c_str());
     widgets->createOptionButton(
         parentPanel, FunctionalExplicitSurfaceEditor::NO_PRESET, presets,
         fontSet, MARGIN, y, fullWidth, ROW_HEIGHT,
@@ -63,9 +63,9 @@ void XtModifyPanelForFunctionalExplicitSurface::notifyTargetBeginEdit(
     for (int i = 0; i < FunctionalExplicitSurfaceEditor::PARAMETER_COUNT; ++i) {
         FunctionalExplicitSurfaceEditor::Parameter parameter =
             ((FunctionalExplicitSurfaceEditor::Parameter)(i));
-        const std::string label =
+        const String label =
             FunctionalExplicitSurfaceEditor::getLabel(parameter).c_str();
-        const std::string value = editor->getValue(parameter).c_str();
+        const String value = editor->getValue(parameter).c_str();
 
         if (parameter == FunctionalExplicitSurfaceEditor::FUNCTION) {
             // The function is long: its label goes above it
@@ -101,7 +101,7 @@ void XtModifyPanelForFunctionalExplicitSurface::refreshFields()
 }
 
 void XtModifyPanelForFunctionalExplicitSurface::presetSelected(
-    const std::string& preset)
+    const String& preset)
 {
     if (editor == NULL) return;
     try {

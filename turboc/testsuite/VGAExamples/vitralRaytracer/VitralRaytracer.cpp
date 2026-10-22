@@ -1,4 +1,3 @@
-#include <new>
 #include <stdio.h>
 #include <unistd.h>
 #include <vga.h>
@@ -131,7 +130,7 @@ VitralRaytracer::run(int mode, const char *scene) {
 
 int
 VitralRaytracer::start(int argc, char *argv[]) {
-    const char *scene = DEFAULT_SCENE;
+    const char *scene = VITRAL_RAYTRACER_DEFAULT_SCENE;
     int first = 1;
     vga_init();
     VgaModes modes;
@@ -146,7 +145,7 @@ VitralRaytracer::start(int argc, char *argv[]) {
     case VgaModes::Selection::Unknown: return 1;
     case VgaModes::Selection::Chosen: break;
     }
-    VitralRaytracer *raytracer = new (std::nothrow) VitralRaytracer(&modes);
+    VitralRaytracer *raytracer = new VitralRaytracer(&modes);
     if (!raytracer) {
         return 1;
     }

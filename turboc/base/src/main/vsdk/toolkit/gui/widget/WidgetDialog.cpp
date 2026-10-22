@@ -29,20 +29,20 @@ void WidgetDialog::setModal(bool modal)
     this->modal = modal;
 }
 
-const std::vector<WidgetDialogElement>& WidgetDialog::getElements() const
+const ArrayList<WidgetDialogElement>& WidgetDialog::getElements() const
 {
     return elements;
 }
 
 void WidgetDialog::addElement(const WidgetDialogElement& element)
 {
-    elements.push_back(element);
+    elements.add(element);
 }
 
 const WidgetDialogElement* WidgetDialog::getElementByAction(
     const String& action) const
 {
-    for ( size_t i = 0; i < elements.size(); i++ ) {
+    for ( long i = 0; i < elements.size(); i++ ) {
         const WidgetDialogElement* found = elements[i].findAction(action);
         if ( found != NULL ) {
             return found;
@@ -190,3 +190,11 @@ String WidgetDialog::toString() const
 // definition out of the class in C++98
 const int WidgetDialog::ORIENTATION_HORIZONTAL;
 const int WidgetDialog::ORIENTATION_VERTICAL;
+
+const Class WidgetDialog::CLASS = { "WidgetDialog", &WidgetElement::CLASS };
+
+const Class *
+WidgetDialog::getClass() const
+{
+    return &CLASS;
+}

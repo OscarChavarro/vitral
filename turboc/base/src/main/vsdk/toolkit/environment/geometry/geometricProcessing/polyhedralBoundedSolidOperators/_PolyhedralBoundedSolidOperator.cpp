@@ -1,7 +1,6 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
-#include <string>
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"

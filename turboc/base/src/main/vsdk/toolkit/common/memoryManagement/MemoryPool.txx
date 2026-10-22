@@ -24,7 +24,7 @@ MemoryPool<T>::~MemoryPool() {
 }
 
 template <class T>
-typename MemoryPool<T>::Block *
+MemoryPoolBlock *
 MemoryPool<T>::createBlock(long int capacityElements) {
     if ( capacityElements <= 0 ) {
         return NULL;

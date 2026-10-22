@@ -11,12 +11,13 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetNonIntersectingClassifier.h"
+#include "java/lang/IllegalStateException.h"
 
 class PolyhedralBoundedSolid;
 class _PolyhedralBoundedSolidHalfEdge;
@@ -45,7 +46,7 @@ C++ port notes:
   result), but before returning, every node used by the result is unlisted
   from the operands, so the caller can delete the operands and the result
   independently.
-- Java `IllegalStateException` is thrown as `std::logic_error`.
+- Java `IllegalStateException` is thrown as `IllegalStateException`.
 
 C++ counterpart of Java's `_PolyhedralBoundedSolidSetOperator`.
 */
@@ -123,7 +124,7 @@ public:
     @param maximizeResultFaces true to maximize the faces of the result
     @param doStrictValidation true to enforce strict validation of the result
     @return the result solid, owned by the caller
-    @throws std::logic_error (Java IllegalStateException) when
+    @throws IllegalStateException (Java IllegalStateException) when
     `doStrictValidation` is true and the result fails strict validation
     */
     static PolyhedralBoundedSolid* setOp(
@@ -147,7 +148,7 @@ private:
     static int debugFlags;
     static DebugSolidExporter debugSolidExporter;
 
-    /** Namespace installed by the most recent setOp (owned here). */
+    /** Identifier range installed by the most recent setOp (owned here). */
     static _PolyhedralBoundedSolidIdNamespace* ownedNamespace;
 
     static int nextVertexId(PolyhedralBoundedSolid* current,
@@ -157,7 +158,7 @@ private:
     static void weldIntersectionVertices(_SetOperationContext& ctx,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static void pruneStaleVertexFaceEntries(
-        std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
+        ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
         PolyhedralBoundedSolid* solid);
     static bool sectoroverlap(
         const _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex& na,

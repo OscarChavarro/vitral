@@ -90,3 +90,11 @@ const int WidgetButtonGroup::VERTICAL;
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int WidgetButtonGroup::HORIZONTAL;
+
+const Class WidgetButtonGroup::CLASS = { "WidgetButtonGroup", &WidgetElement::CLASS };
+
+const Class *
+WidgetButtonGroup::getClass() const
+{
+    return &CLASS;
+}

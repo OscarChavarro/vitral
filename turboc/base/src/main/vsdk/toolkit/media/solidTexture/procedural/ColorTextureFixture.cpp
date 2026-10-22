@@ -426,7 +426,7 @@ ColorTextureFixture::onion(
     }
 
     // Alternative ramp 0-1,1-0,0-1,1-0...:
-    // noise = (std::fmod(sqrt(x*x+y*y+z*z), 2.0) - 1.0);
+    // noise = (fmod(sqrt(x*x+y*y+z*z), 2.0) - 1.0);
     // if (noise < 0.0) { noise = 0.0 - noise; }
 
     // This ramp goes 0-1,0-1,0-1,0-1...

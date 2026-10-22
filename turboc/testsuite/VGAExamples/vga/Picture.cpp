@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 
 #include <vga.h>
@@ -158,7 +159,7 @@ Picture::draw() const {
     } else {
         fputs("\033[1m", stdout);
     }
-    circle(nullptr);
+    circle(NULL);
     if (graphics) {
         drawLegend();
     }

@@ -2,21 +2,15 @@
 #define __VSDK_FATAL_EXCEPTION__
 
 
+#include "java/lang/RuntimeException.h"
 #include "java/lang/String.h"
-#include <exception>
-class VSDKFatalException : public std::exception {
-private:
-    String message;
 
+class VSDKFatalException : public RuntimeException {
 public:
-    explicit VSDKFatalException(const String& message) : message(message) {}
+    explicit VSDKFatalException(const String& message) :
+        RuntimeException(message) {}
 
-    virtual ~VSDKFatalException() throw() {}
-
-    const char* what() const throw()
-    {
-        return message.c_str();
-    }
+    virtual ~VSDKFatalException() {}
 };
 
 

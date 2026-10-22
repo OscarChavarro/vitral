@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <math.h>
 
 #include "vsdk/toolkit/common/VSDK.h"
@@ -7,6 +6,7 @@
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2RayGizmoMapper.h"
+#include "java/lang/Math.h"
 
 const Vector3Dd TangibleInterfaceEvent2RayGizmoMapper::MARKER_INTO_SCENE = Vector3Dd(0, -1, 0);
 const double TangibleInterfaceEvent2RayGizmoMapper::DISTANCE_FACTOR = 4;
@@ -40,9 +40,9 @@ void TangibleInterfaceEvent2RayGizmoMapper::map(const TangibleInterfaceEvent& ev
     double netZRef = 0.5;
     double depthScale = midDepth / netZRef;
 
-    double safeNetZ = std::max(netPosition.z(), 0.05);
-    double gizmoZ = std::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
-        std::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
+    double safeNetZ = Math::max(netPosition.z(), 0.05);
+    double gizmoZ = Math::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
+        Math::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
 
     Vector3Dd worldPosition =
         camPos

@@ -1,6 +1,5 @@
-#include <algorithm>
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
@@ -16,6 +15,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/util/Collections.h"
 
 typedef _PolyhedralBoundedSolidSetVertexFaceClassifier Classifier;
 typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector OnSector;
@@ -34,7 +34,7 @@ static bool isCoplanarTangentialTraceEnabled()
     return Boolean::getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
 }
 
-static void traceCoplanarTangential(const std::string& message)
+static void traceCoplanarTangential(const String& message)
 {
     if ( !isCoplanarTangentialTraceEnabled() ) {
         return;
@@ -78,7 +78,7 @@ int Classifier::compareToZero(double value)
 }
 
 void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
-    std::vector<SectorOnFace>& nbr,
+    ArrayList<SectorOnFace>& nbr,
     _PolyhedralBoundedSolidFace* referenceFace,
     InfinitePlane* referencePlane,
     int BvsA,
@@ -89,11 +89,11 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
     _PolyhedralBoundedSolidFace* localFace;
     Vector3Dd c;
     double d;
-    size_t i;
-    size_t nnbr;
+    long i;
+    long nnbr;
 
     nnbr = nbr.size();
-    std::vector<SectorOnFace> backup(nbr);
+    ArrayList<SectorOnFace> backup(nbr);
 
     for ( i = 0; i < nnbr; i++ ) {
         he = nbr[i].sector;
@@ -148,8 +148,8 @@ void Classifier::applyCoplanarRulesToVertexFaceNeighborhood(
             " class=" + Cpp98Support::toString(nbr[i].cl));
     }
 
-    size_t ins = 0;
-    size_t outs = 0;
+    long ins = 0;
+    long outs = 0;
     for ( i = 0; i < nnbr; i++ ) {
         if ( nbr[i].cl == OnSector::OUT ) {
             outs++;
@@ -216,7 +216,7 @@ section [MANT1988].14.5.2 and program [MANT1988].14.4, but biased towards
 the set operator classifier as proposed on section [MANT1988].15.6.1 and
 problem [MANT1988].15.4.
 */
-std::vector<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
+ArrayList<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
     _PolyhedralBoundedSolidVertex* vtx,
     InfinitePlane* referencePlane,
     int /*BvsA*/)
@@ -224,7 +224,7 @@ std::vector<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
     _PolyhedralBoundedSolidHalfEdge* he;
     Vector3Dd bisect;
     double d;
-    std::vector<SectorOnFace> neighborSectorsInfo;
+    ArrayList<SectorOnFace> neighborSectorsInfo;
 
     he = vtx->emanatingHalfEdge;
     do {
@@ -239,7 +239,7 @@ std::vector<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
         if ( checkWideness(he) ) {
             bisect = inside(he).add(vtx->position);
             c.situation = SectorOnFace::CROSSING_EDGE;
-            neighborSectorsInfo.push_back(c);
+            neighborSectorsInfo.add(c);
 
             SectorOnFace wide;
             wide.sector = he;
@@ -249,15 +249,15 @@ std::vector<Classifier::SectorOnFace> Classifier::vertexFaceGetNeighborhood(
             wide.position = bisect;
             wide.situation = SectorOnFace::CROSSING_EDGE;
             wide.referencePlane = referencePlane;
-            neighborSectorsInfo.push_back(wide);
+            neighborSectorsInfo.add(wide);
         }
         else {
-            neighborSectorsInfo.push_back(c);
+            neighborSectorsInfo.add(c);
         }
         he = (he->mirrorHalfEdge())->next();
     } while ( he != vtx->emanatingHalfEdge );
 
-    size_t i;
+    long i;
 
     for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
         SectorOnFace& c = neighborSectorsInfo[i];
@@ -276,7 +276,7 @@ as proposed in section 15.6.1 and problem 15.4. The `useMirrorFace`
 flag of the underlying processor is always `false` here.
 */
 void Classifier::vertexFaceReclassifyOnSectors(
-    std::vector<SectorOnFace>& nbr,
+    ArrayList<SectorOnFace>& nbr,
     _PolyhedralBoundedSolidFace* referenceFace,
     InfinitePlane* referencePlane,
     int BvsA,
@@ -286,18 +286,18 @@ void Classifier::vertexFaceReclassifyOnSectors(
         nbr, referenceFace, referencePlane, BvsA, op, false);
 }
 
-void Classifier::printNbr(const std::vector<SectorOnFace>& neighborSectorsInfo)
+void Classifier::printNbr(const ArrayList<SectorOnFace>& neighborSectorsInfo)
 {
-    size_t i;
+    long i;
 
     for ( i = 0; i < neighborSectorsInfo.size(); i++ ) {
         printf("    . %s\n", neighborSectorsInfo[i].toString().c_str());
     }
 }
 
-bool Classifier::inplaneEdgesOn(const std::vector<SectorOnFace>& nbr)
+bool Classifier::inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr)
 {
-    size_t i;
+    long i;
 
     for ( i = 0; i < nbr.size(); i++ ) {
         if ( nbr[i].situation == SectorOnFace::INPLANE_EDGE ) {
@@ -311,10 +311,10 @@ bool Classifier::inplaneEdgesOn(const std::vector<SectorOnFace>& nbr)
 Current method implements the set of changes from table [MANT1988].15.3
 for the edge reclassification rules.
 */
-void Classifier::vertexFaceReclassifyOnEdges(std::vector<SectorOnFace>& nbr,
+void Classifier::vertexFaceReclassifyOnEdges(ArrayList<SectorOnFace>& nbr,
                                              int op)
 {
-    size_t i;
+    long i;
 
     for ( i = 0; i < nbr.size(); i++ ) {
         nbr[i].applyRules(op);
@@ -343,19 +343,19 @@ sequence. This follows section [MANT1988].14.6.2 and program
 [MANT1988].14.7, biased for set operations as indicated by
 [MANT1988].15.6.1.
 */
-void Classifier::vertexFaceInsertNullEdges(std::vector<SectorOnFace>& nbr,
+void Classifier::vertexFaceInsertNullEdges(ArrayList<SectorOnFace>& nbr,
                                            _PolyhedralBoundedSolidFace* f,
                                            _PolyhedralBoundedSolidVertex* v,
                                            int BvsA,
                                            PolyhedralBoundedSolid* inSolidA,
                                            PolyhedralBoundedSolid* inSolidB)
 {
-    size_t start;
-    size_t i;
+    long start;
+    long i;
     _PolyhedralBoundedSolidHalfEdge* head;
     _PolyhedralBoundedSolidHalfEdge* tail;
     PolyhedralBoundedSolid* solida;
-    size_t nnbr = nbr.size();
+    long nnbr = nbr.size();
     NullEdgeList* sone = NULL;
 
     solida = v->emanatingHalfEdge->parentLoop->parentFace->parentSolid;
@@ -383,8 +383,8 @@ void Classifier::vertexFaceInsertNullEdges(std::vector<SectorOnFace>& nbr,
         if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 &&
              (debugFlags & DEBUG_99_SHOW_OPERATIONS) != 0x00 ) {
             printf("       -> LMEV (Vertex/face split):\n");
-            printf("          . (%zu) H1: %s\n", start, head->toString().c_str());
-            printf("          . (%zu) H2: %s\n", i, tail->toString().c_str());
+            printf("          . (%ld) H1: %s\n", (long)start, head->toString().c_str());
+            printf("          . (%ld) H2: %s\n", (long)i, tail->toString().c_str());
         }
 
         PolyhedralBoundedSolidEulerOperators::lmev(solida, head, tail,
@@ -401,7 +401,7 @@ void Classifier::vertexFaceInsertNullEdges(std::vector<SectorOnFace>& nbr,
         else {
             sone = sonea;
         }
-        sone->push_back(_PolyhedralBoundedSolidSetOperatorNullEdge(
+        sone->add(_PolyhedralBoundedSolidSetOperatorNullEdge(
             head->previous()->parentEdge));
 
         makeRing(f, v, BvsA, inSolidA, inSolidB);
@@ -422,7 +422,7 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
                                     PolyhedralBoundedSolid* inSolidA,
                                     PolyhedralBoundedSolid* inSolidB)
 {
-    std::vector<SectorOnFace> nbr;
+    ArrayList<SectorOnFace> nbr;
 
     if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
         if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 ) {
@@ -436,7 +436,7 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
 
     nbr = vertexFaceGetNeighborhood(v, f->getContainingPlane(), BvsA);
     if ( inplaneEdgesOn(nbr) ) {
-        std::reverse(nbr.begin(), nbr.end());
+        Collections<SectorOnFace>::reverse(nbr);
     }
 
     if ( (debugFlags & DEBUG_03_VERTEX_FACE_CLASSIFIER) != 0x00 ) {
@@ -446,7 +446,7 @@ void Classifier::vertexFaceClassify(_PolyhedralBoundedSolidVertex* v,
 
     vertexFaceReclassifyOnSectors(nbr, f, f->getContainingPlane(), BvsA, op);
 
-    size_t i;
+    long i;
     for ( i = 0; i < nbr.size(); i++ ) {
         nbr[i].updateLabel(BvsA);
     }
@@ -510,5 +510,5 @@ void Classifier::makeRing(_PolyhedralBoundedSolidFace* f,
     else {
         sone = soneb;
     }
-    sone->push_back(_PolyhedralBoundedSolidSetOperatorNullEdge(he->parentEdge));
+    sone->add(_PolyhedralBoundedSolidSetOperatorNullEdge(he->parentEdge));
 }

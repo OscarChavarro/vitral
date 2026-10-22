@@ -7,6 +7,9 @@ private:
     ColorRgb color;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     SimpleBackground();
     virtual ~SimpleBackground() {}
 

@@ -15,12 +15,13 @@
 #include "io/FolderListing.h"
 #include "vsdk/toolkit/gui/XtPanelWidgets.h"
 #include "vsdk/toolkit/gui/XtWidgetSet.h"
+#include "java/util/ArrayList.txx"
 
 static const int DIALOG_WIDTH = 520;
 static const int DIALOG_HEIGHT = 420;
 
 XawFileDialog::XawFileDialog(XtApplicationHost* host,
-                             const std::vector<FileSuffixFilter>& filters)
+                             const ArrayList<FileSuffixFilter>& filters)
     : host(host), widgets(host->getPanelWidgets()), filters(filters),
       shell(NULL), folderLabel(NULL), list(NULL), pathField(NULL),
       done(false), approved(false)
@@ -35,15 +36,15 @@ XawFileDialog::~XawFileDialog()
 }
 
 bool XawFileDialog::showDialog(XtApplicationHost* host,
-                               const std::string& title,
-                               const std::string& folder,
-                               const std::vector<FileSuffixFilter>& filters,
-                               std::string& outPath)
+                               const String& title,
+                               const String& folder,
+                               const ArrayList<FileSuffixFilter>& filters,
+                               String& outPath)
 {
     XawFileDialog dialog(host, filters);
     dialog.create(title);
     dialog.showFolder(FolderListing::isFolder(folder) ? folder :
-                      std::string("."));
+                      String("."));
 
     XtPopup(dialog.shell, XtGrabExclusive);
     XtSetKeyboardFocus(dialog.shell, dialog.pathField);
@@ -55,8 +56,8 @@ bool XawFileDialog::showDialog(XtApplicationHost* host,
     XtPopdown(dialog.shell);
 
     if ( dialog.approved ) {
-        std::string path = dialog.widgets->getText(dialog.pathField);
-        if ( path.empty() ) {
+        String path = dialog.widgets->getText(dialog.pathField);
+        if ( path.isEmpty() ) {
             return false;
         }
         if ( path[0] != '/' ) {
@@ -67,7 +68,7 @@ bool XawFileDialog::showDialog(XtApplicationHost* host,
     return dialog.approved;
 }
 
-void XawFileDialog::create(const std::string& title)
+void XawFileDialog::create(const String& title)
 {
     XFontSet fontSet = host->getPanelFontSet();
     shell = host->createDialogShell("fileDialog", transientShellWidgetClass,
@@ -116,24 +117,24 @@ void XawFileDialog::create(const std::string& title)
     }
 }
 
-void XawFileDialog::showFolder(const std::string& newFolder)
+void XawFileDialog::showFolder(const String& newFolder)
 {
     folder = FolderListing::normalizeFolder(newFolder);
     widgets->setLabel(folderLabel, folder);
 
-    std::vector<std::string> folders;
-    std::vector<std::string> files;
+    ArrayList<String> folders;
+    ArrayList<String> files;
     FolderListing::list(folder, filters, folders, files);
 
     entries.clear();
-    entries.push_back("../");
-    for ( size_t i = 0; i < folders.size(); i++ ) {
-        entries.push_back(folders[i] + "/");
+    entries.add("../");
+    for ( long i = 0; i < folders.size(); i++ ) {
+        entries.add(folders[i] + "/");
     }
-    entries.insert(entries.end(), files.begin(), files.end());
+    entries.addAll(files);
     entryTexts.clear();
-    for ( size_t i = 0; i < entries.size(); i++ ) {
-        entryTexts.push_back(entries[i].c_str());
+    for ( long i = 0; i < entries.size(); i++ ) {
+        entryTexts.add(entries[i].c_str());
     }
     // Older Xaw (i.e. 1.0.3, XawVersion 6700002, of Ubuntu 7.04 and
     // XQuartz) declares String* (XtString* here), whereas current Xaw uses
@@ -162,8 +163,8 @@ void XawFileDialog::entrySelected(Widget, XtPointer clientData,
          selected->list_index >= ((int)(self->entries.size())) ) {
         return;
     }
-    std::string name = self->entries[selected->list_index];
-    if ( !name.empty() && name[name.size() - 1] == '/' ) {
+    String name = self->entries[selected->list_index];
+    if ( !name.isEmpty() && name[name.size() - 1] == '/' ) {
         // Changing the list inside its own callback is allowed by Xaw
         self->showFolder(self->folder + "/" + name.substr(0, name.size() - 1));
         self->widgets->setText(self->pathField, "");
@@ -186,11 +187,11 @@ void XawFileDialog::cancel(Widget, void* clientData)
 void XawFileDialog::pathActivated(Widget, void* clientData)
 {
     XawFileDialog* self = ((XawFileDialog*)(clientData));
-    std::string path = self->widgets->getText(self->pathField);
-    std::string full = !path.empty() && path[0] == '/' ? path :
+    String path = self->widgets->getText(self->pathField);
+    String full = !path.isEmpty() && path[0] == '/' ? path :
         self->folder + "/" + path;
     // A folder typed in the field is opened, as JFileChooser does
-    if ( !path.empty() && FolderListing::isFolder(full) ) {
+    if ( !path.isEmpty() && FolderListing::isFolder(full) ) {
         self->showFolder(full);
         self->widgets->setText(self->pathField, "");
         return;

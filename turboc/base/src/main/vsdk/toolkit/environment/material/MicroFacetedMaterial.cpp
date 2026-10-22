@@ -283,3 +283,11 @@ const int MicroFacetedMaterial::GEOMETRY_MODEL_IMPLICIT;
 const int MicroFacetedMaterial::FRESNEL_MODEL_SCHLICK;
 const int MicroFacetedMaterial::NDF_MODEL_BECKMANN;
 const int MicroFacetedMaterial::GEOMETRY_MODEL_SMITH;
+
+const Class MicroFacetedMaterial::CLASS = { "MicroFacetedMaterial", &SimpleMaterial::CLASS };
+
+const Class *
+MicroFacetedMaterial::getClass() const
+{
+    return &CLASS;
+}

@@ -1,7 +1,6 @@
 #include "render/xlib/XlibDrawingAreaRenderer.h"
 
 #include <X11/Xutil.h>
-#include <algorithm>
 #include <math.h>
 #include <stdio.h>
 
@@ -30,14 +29,15 @@
 #include "vsdk/toolkit/render/hiddenLine/HiddenLineRenderer.h"
 #include "vsdk/toolkit/render/hiddenLine/WireframeRenderer.h"
 #include "vsdk/toolkit/render/xlib/XlibRGBImageUncompressedRenderer.h"
+#include "java/lang/Math.h"
 
 
 static unsigned long pixel(Visual* visual, const ColorRgb& color)
 {
     return XlibRGBImageUncompressedRenderer::rgbToPixel(visual,
-        ((int)(std::max(0.0, std::min(1.0, color.r())) * 255)),
-        ((int)(std::max(0.0, std::min(1.0, color.g())) * 255)),
-        ((int)(std::max(0.0, std::min(1.0, color.b())) * 255)));
+        ((int)(Math::max(0.0, Math::min(1.0, color.r())) * 255)),
+        ((int)(Math::max(0.0, Math::min(1.0, color.g())) * 255)),
+        ((int)(Math::max(0.0, Math::min(1.0, color.b())) * 255)));
 }
 
 static int channel(unsigned long value, unsigned long mask)
@@ -258,7 +258,8 @@ void XlibDrawingAreaRenderer::drawView(Display* display, Drawable frame,
         for (long i = 0; i < bodies.size(); ++i) {
             SimpleBody* body = bodies[i];
             if (!body || !body->getGeometry() || scene->isHidden(body)) continue;
-            if (dynamic_cast<Volume*>(body->getGeometry()))
+            if (body->getGeometry() != NULL &&
+                body->getGeometry()->instanceOf(Volume::CLASS))
                 solids.add(body);
             else
                 wires.add(body);

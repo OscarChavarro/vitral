@@ -1,8 +1,8 @@
 #ifndef __XT_TANGIBLE_INTERFACE_DIALOG__
 #define __XT_TANGIBLE_INTERFACE_DIALOG__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "java/util/function/Consumer.h"
 
@@ -61,12 +61,12 @@ public:
     /**
     @return text of the field of the service URL
     */
-    std::string getServiceUrl() const;
+    String getServiceUrl() const;
 
     /**
     @return text shown by the connect button
     */
-    std::string getConnectLabel() const;
+    String getConnectLabel() const;
 
     /**
     Acts as a click on a button of the form (automation service).
@@ -74,8 +74,8 @@ public:
     @param serviceUrl if not null, typed in the field before connecting
     @return false if the form is not shown or has no such button
     */
-    bool performAction(const std::string& action,
-                       const std::string* serviceUrl);
+    bool performAction(const String& action,
+                       const String* serviceUrl);
 
 private:
     /**
@@ -101,7 +101,7 @@ private:
 
     XtApplicationHost* host;
     /// Listeners of the requests made (they may be answered at any time)
-    std::vector<ConnectionListener*> connectionListeners;
+    ArrayList<ConnectionListener*> connectionListeners;
     XtDialogHost::Form* form;
     /// Identifies the form shown, so answers for discarded ones are ignored
     long formSerial;
@@ -109,8 +109,8 @@ private:
 
     // XtDialogHost::MessageSource and XtDialogHost::ActionListener (lambdas
     // in the C++11 port)
-    virtual std::string message(const std::string& key);
-    virtual void actionPerformed(const std::string& action);
+    virtual String message(const String& key);
+    virtual void actionPerformed(const String& action);
     void connectionFinished(long serial, long request, bool connected);
 
     XtTangibleInterfaceDialog(const XtTangibleInterfaceDialog& other);

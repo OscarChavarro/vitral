@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <exception>
+#include "java/lang/Exception.h"
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitor.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -24,7 +24,7 @@ RaytracerRenderer::optimizeRendererConfigurationForScene(SimpleScene *scene,
                                                          RendererConfiguration *rendererConfiguration) {
     bool hasTextures = false;
     bool hasNormalMaps = false;
-    java::ArrayList<SimpleBody *> &bodies = scene->getSimpleBodies();
+    ArrayList<SimpleBody *> &bodies = scene->getSimpleBodies();
     for (long int i = 0; i < bodies.size(); i++) {
         if (bodies[i]->getTexture() != 0) {
             hasTextures = true;
@@ -47,15 +47,15 @@ RaytracerRenderer::fitCameraToImage(Camera *camera, int width, int height) {
 }
 
 int
-RaytracerRenderer::render(const char *path, int width, int height, int parallel, uint8_t *rgb,
+RaytracerRenderer::render(const char *path, int width, int height, int parallel, unsigned char *rgb,
                           ProgressMonitor *reporter, double *seconds, char *error, unsigned errorSize) {
     int ok = 0;
     SimpleScene *scene = new SimpleScene;
     try {
         ReaderMitScene reader;
         reader.importEnvironment(path, scene);
-    } catch (const std::exception &e) {
-        snprintf(error, errorSize, "cannot read %s: %s", path, e.what());
+    } catch (const Exception &e) {
+        snprintf(error, errorSize, "cannot read %s: %s", path, e.getMessage().c_str());
         delete scene;
         return 0;
     } catch (...) {
@@ -92,10 +92,10 @@ RaytracerRenderer::render(const char *path, int width, int height, int parallel,
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 img->getPixelRgb(x, y, &p);
-                uint8_t *dst = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
-                dst[0] = (uint8_t)p.r;
-                dst[1] = (uint8_t)p.g;
-                dst[2] = (uint8_t)p.b;
+                unsigned char *dst = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
+                dst[0] = (unsigned char)p.r;
+                dst[1] = (unsigned char)p.g;
+                dst[2] = (unsigned char)p.b;
             }
         }
         delete snapshot;

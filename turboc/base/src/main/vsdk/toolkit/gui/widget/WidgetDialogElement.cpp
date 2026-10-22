@@ -1,11 +1,17 @@
 #include <stddef.h>
 #include "vsdk/toolkit/gui/widget/WidgetDialogElement.h"
+#include "java/util/ArrayList.txx"
+
+WidgetDialogElement::WidgetDialogElement()
+    : kind(""), id(""), labelKey(""), binding(""), action(""), children()
+{
+}
 
 WidgetDialogElement::WidgetDialogElement(
     const String& kind, const String& id,
     const String& labelKey, const String& binding,
     const String& action,
-    const std::vector<WidgetDialogElement>& children)
+    const ArrayList<WidgetDialogElement>& children)
     : kind(kind), id(id), labelKey(labelKey), binding(binding),
       action(action), children(children)
 {
@@ -36,7 +42,7 @@ const String& WidgetDialogElement::getAction() const
     return action;
 }
 
-const std::vector<WidgetDialogElement>& WidgetDialogElement::getChildren() const
+const ArrayList<WidgetDialogElement>& WidgetDialogElement::getChildren() const
 {
     return children;
 }
@@ -47,7 +53,7 @@ const WidgetDialogElement* WidgetDialogElement::findAction(
     if ( !action.isEmpty() && this->action.equals(action) ) {
         return this;
     }
-    for ( size_t i = 0; i < children.size(); i++ ) {
+    for ( long i = 0; i < children.size(); i++ ) {
         const WidgetDialogElement* found = children[i].findAction(action);
         if ( found != NULL ) {
             return found;

@@ -162,3 +162,11 @@ ColorRgba* RGBAColorPalette::evalLinear(double t) const {
         a->getA() + (b->getA() - a->getA()) * p);
     return result;
 }
+
+const Class RGBAColorPalette::CLASS = { "RGBAColorPalette", &MediaEntity::CLASS };
+
+const Class *
+RGBAColorPalette::getClass() const
+{
+    return &CLASS;
+}

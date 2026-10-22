@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -118,7 +119,7 @@ Hud::drawText(const Picture &picture, char lines[HUD_LINES][HUD_TEXT + 1]) {
     }
     if (cleared) {
         fputs("\033[1m", stdout);
-        picture.circle(nullptr);
+        picture.circle(NULL);
         fputs("\033[0m", stdout);
     }
     for (int i = 0; i < HUD_LINES; i++) {

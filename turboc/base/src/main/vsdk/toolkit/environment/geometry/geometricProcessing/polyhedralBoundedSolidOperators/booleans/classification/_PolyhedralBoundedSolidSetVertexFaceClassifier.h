@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_FACE_CLASSIFIER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_FACE_CLASSIFIER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -29,7 +29,7 @@ class _PolyhedralBoundedSolidSetVertexFaceClassifier
     : public _PolyhedralBoundedSolidOperator {
 public:
     typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace SectorOnFace;
-    typedef std::vector<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
+    typedef ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
 
     _PolyhedralBoundedSolidSetVertexFaceClassifier();
 
@@ -56,7 +56,7 @@ private:
 
     static int compareToZero(double value);
     static void applyCoplanarRulesToVertexFaceNeighborhood(
-        std::vector<SectorOnFace>& nbr,
+        ArrayList<SectorOnFace>& nbr,
         _PolyhedralBoundedSolidFace* referenceFace,
         InfinitePlane* referencePlane,
         int BvsA,
@@ -65,21 +65,21 @@ private:
     static int nextVertexId(PolyhedralBoundedSolid* current,
                             PolyhedralBoundedSolid* other);
     static Vector3Dd inside(_PolyhedralBoundedSolidHalfEdge* he);
-    static std::vector<SectorOnFace> vertexFaceGetNeighborhood(
+    static ArrayList<SectorOnFace> vertexFaceGetNeighborhood(
         _PolyhedralBoundedSolidVertex* vtx,
         InfinitePlane* referencePlane,
         int BvsA);
     static void vertexFaceReclassifyOnSectors(
-        std::vector<SectorOnFace>& nbr,
+        ArrayList<SectorOnFace>& nbr,
         _PolyhedralBoundedSolidFace* referenceFace,
         InfinitePlane* referencePlane,
         int BvsA,
         int op);
-    static void printNbr(const std::vector<SectorOnFace>& neighborSectorsInfo);
-    static bool inplaneEdgesOn(const std::vector<SectorOnFace>& nbr);
-    static void vertexFaceReclassifyOnEdges(std::vector<SectorOnFace>& nbr,
+    static void printNbr(const ArrayList<SectorOnFace>& neighborSectorsInfo);
+    static bool inplaneEdgesOn(const ArrayList<SectorOnFace>& nbr);
+    static void vertexFaceReclassifyOnEdges(ArrayList<SectorOnFace>& nbr,
                                             int op);
-    void vertexFaceInsertNullEdges(std::vector<SectorOnFace>& nbr,
+    void vertexFaceInsertNullEdges(ArrayList<SectorOnFace>& nbr,
                                    _PolyhedralBoundedSolidFace* f,
                                    _PolyhedralBoundedSolidVertex* v,
                                    int BvsA,

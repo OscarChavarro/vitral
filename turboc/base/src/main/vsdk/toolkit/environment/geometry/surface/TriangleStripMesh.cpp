@@ -107,3 +107,11 @@ void TriangleStripMesh::doExtraInformation(const Ray& inRay, double inT, RayHit*
     if (outData == NULL) return;
     outData->point = inRay.getOrigin().add(inRay.getDirection().multiply(inT));
 }
+
+const Class TriangleStripMesh::CLASS = { "TriangleStripMesh", &Surface::CLASS };
+
+const Class *
+TriangleStripMesh::getClass() const
+{
+    return &CLASS;
+}

@@ -39,3 +39,11 @@ double ParallelProgressMonitorProducer::getCurrentPercent()
     }
     return 100.0 * ((double)(processedElements.get())) / ((double)(total));
 }
+
+const Class ParallelProgressMonitorProducer::CLASS = { "ParallelProgressMonitorProducer", &ProgressMonitor::CLASS };
+
+const Class *
+ParallelProgressMonitorProducer::getClass() const
+{
+    return &CLASS;
+}

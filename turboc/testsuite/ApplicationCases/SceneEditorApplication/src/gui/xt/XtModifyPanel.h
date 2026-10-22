@@ -66,7 +66,7 @@ public:
     void notifyTargetEndEdit();
 
     /**
-    Editors for specific geometries override this method to present their
+    Editors for specific geometries implement this method to present their
     feedback (handles, bounds...) over the target. This one delegates to the
     editor of the current target.
     @return the feedback geometry to present over the target, in world

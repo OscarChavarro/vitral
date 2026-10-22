@@ -12,8 +12,8 @@ class VitralRasterizer {
 
   private:
     explicit VitralRasterizer(VgaModes *modes);
-    VitralRasterizer(const VitralRasterizer &) = delete;
-    VitralRasterizer &operator=(const VitralRasterizer &) = delete;
+    VitralRasterizer(const VitralRasterizer &);
+    VitralRasterizer &operator=(const VitralRasterizer &);
 
     int run(int mode);
     static int waitCommand();
@@ -21,7 +21,7 @@ class VitralRasterizer {
     VgaModes *modes;
     Dithering::Palette palette;
     RasterizerHud hud;
-    ColorMode colorMode;
+    ColorMode::Value colorMode;
     int example;
 };
 

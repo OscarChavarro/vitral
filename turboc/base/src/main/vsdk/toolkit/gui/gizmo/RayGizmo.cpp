@@ -1,7 +1,5 @@
 #include <math.h>
 #include <stddef.h>
-#include <algorithm>
-#include <stdexcept>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -11,6 +9,8 @@
 #include "vsdk/toolkit/environment/scene/SimpleBody.h"
 #include "vsdk/toolkit/environment/scene/SimpleScene.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
+#include "java/lang/Math.h"
+#include "java/lang/RuntimeException.h"
 
 const double RayGizmo::DEFAULT_DISABLE_TIME = 2.0;
 const double RayGizmo::ARROW_BASE_LENGTH = 3.0;
@@ -39,7 +39,7 @@ RayGizmo::RaySnapshot::RaySnapshot(
     : rotationAngleInRadians(rotationAngleInRadians)
 {
     if ( rays.size() != intersections.size() ) {
-        throw std::runtime_error("rays and intersections must be the same size");
+        throw RuntimeException("rays and intersections must be the same size");
     }
     for ( long i = 0; i < rays.size(); i++ ) {
         this->rays.add(rays.get(i));
@@ -493,7 +493,7 @@ void RayGizmo::syncInputGizmo(const Vector3Dd& position, const Vector3Dd& direct
     Vector3Dd d = direction.length() > VSDK::EPSILON ?
         direction.normalized() : Vector3Dd(0, 0, 1);
     double yaw = atan2(d.y(), d.x());
-    double pitch = asin(std::max(-1.0, std::min(1.0, d.z())));
+    double pitch = asin(Math::max(-1.0, Math::min(1.0, d.z())));
 
     inputGizmo.setValue(0, position.x());
     inputGizmo.setValue(1, position.y());

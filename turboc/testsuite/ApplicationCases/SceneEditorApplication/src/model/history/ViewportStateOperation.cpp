@@ -40,7 +40,7 @@ String ViewportStateOperation::getName() const
 bool ViewportStateOperation::absorb(UndoableOperation* next)
 {
     ViewportStateOperation* other =
-        dynamic_cast<ViewportStateOperation*>(next);
+        (next != NULL && next->instanceOf(ViewportStateOperation::CLASS) ? (ViewportStateOperation*)next : NULL);
 
     if ( other == NULL ||
          !mergeable || !other->mergeable || !name.equals(other->name) ||
@@ -60,3 +60,11 @@ bool ViewportStateOperation::absorb(UndoableOperation* next)
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const long long ViewportStateOperation::MERGE_INTERVAL_MILLISECONDS;
+
+const Class ViewportStateOperation::CLASS = { "ViewportStateOperation", &UndoableOperation::CLASS };
+
+const Class *
+ViewportStateOperation::getClass() const
+{
+    return &CLASS;
+}

@@ -144,3 +144,11 @@ Material *SimpleMaterial::copy() const { return new SimpleMaterial(*this); }
 Material *SimpleMaterial::translate(Vector3Dd *vector) { return this; }
 Material *SimpleMaterial::rotate(Vector3Dd *vector) { return this; }
 Material *SimpleMaterial::scale(Vector3Dd *vector) { return this; }
+
+const Class SimpleMaterial::CLASS = { "SimpleMaterial", &Entity::CLASS };
+
+const Class *
+SimpleMaterial::getClass() const
+{
+    return &CLASS;
+}

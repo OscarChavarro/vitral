@@ -30,6 +30,9 @@ protected:
     String initialvalue;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     WidgetVariable() : name(""), validRange(""), initialvalue("") {}
     virtual ~WidgetVariable() {}
 

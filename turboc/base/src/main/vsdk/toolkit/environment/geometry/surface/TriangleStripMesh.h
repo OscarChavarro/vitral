@@ -18,6 +18,9 @@ private:
     double* calculateMinMaxPositions();
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     TriangleStripMesh();
 
     virtual double* getMinMax();

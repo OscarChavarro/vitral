@@ -1,12 +1,11 @@
 #ifndef __SCENE_HIERARCHY_PRESENTER__
 #define __SCENE_HIERARCHY_PRESENTER__
 
-#include <deque>
 #include "java/lang/Runnable.h"
 #include "java/util/function/Consumer.h"
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
@@ -43,12 +42,17 @@ private:
 
     ApplicationModel* model;
     Runnable* repaint;
-    /// Identities of the rows of the last hierarchy (stable addresses)
-    std::deque<Entry> entries;
+    /// Identities of the rows of the last hierarchy: each one is allocated
+    /// on its own, so their addresses are stable.
+    ArrayList<Entry*> entries;
 
+    SceneHierarchyPresenter(const SceneHierarchyPresenter& other);
+    SceneHierarchyPresenter& operator=(const SceneHierarchyPresenter& other);
+
+    void clearEntries();
     const Entry* entryOf(const DialogTreeNode* node) const;
     void addEntries(DialogTreeNode& parent, Kind kind,
-                    const std::vector<Entity*>& elements);
+                    const ArrayList<Entity*>& elements);
 
 public:
     /**
@@ -57,6 +61,7 @@ public:
     null for none)
     */
     SceneHierarchyPresenter(ApplicationModel* model, Runnable* repaint);
+    ~SceneHierarchyPresenter();
 
     /**
     @return the message of the key, or the fallback if there is none
@@ -77,7 +82,7 @@ public:
     Selects in the scene the elements of the rows (and only them), recording
     the change in the scene history, and repaints.
     */
-    void select(const std::vector<const DialogTreeNode*>& nodes);
+    void select(const ArrayList<const DialogTreeNode*>& nodes);
 
     /**
     Deletes the selected elements of the scene (undoable) and repaints.
@@ -87,14 +92,14 @@ public:
     /**
     @return the bodies of the rows
     */
-    std::vector<SimpleBody*> selectedBodies(
-        const std::vector<const DialogTreeNode*>& nodes) const;
-    bool anyHidden(const std::vector<SimpleBody*>& bodies) const;
+    ArrayList<SimpleBody*> selectedBodies(
+        const ArrayList<const DialogTreeNode*>& nodes) const;
+    bool anyHidden(const ArrayList<SimpleBody*>& bodies) const;
 
     /**
     Hides or shows the bodies, and repaints.
     */
-    void setHidden(const std::vector<SimpleBody*>& bodies, bool hidden);
+    void setHidden(const ArrayList<SimpleBody*>& bodies, bool hidden);
 };
 
 #endif

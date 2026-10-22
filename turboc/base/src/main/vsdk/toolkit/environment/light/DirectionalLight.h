@@ -5,6 +5,9 @@
 
 class DirectionalLight : public Light {
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     DirectionalLight(const Vector3Dd &direction, const ColorRgb &emission);
     DirectionalLight(const DirectionalLight &other);
 

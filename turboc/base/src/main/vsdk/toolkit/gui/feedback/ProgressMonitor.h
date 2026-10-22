@@ -4,6 +4,9 @@
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class ProgressMonitor : public PresentationElement {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~ProgressMonitor() {}
     virtual void begin() = 0;
     virtual void end() = 0;

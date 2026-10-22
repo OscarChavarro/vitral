@@ -46,7 +46,7 @@ void CameraState::restore() const
 
 bool CameraState::isSameState(const EntityTransformState* other) const
 {
-    const CameraState* state = dynamic_cast<const CameraState*>(other);
+    const CameraState* state = (other != NULL && other->instanceOf(CameraState::CLASS) ? (const CameraState*)other : NULL);
     if ( state == NULL ) {
         return false;
     }
@@ -73,4 +73,12 @@ bool CameraState::sameVector(const Vector3Dd& a, const Vector3Dd& b)
     double scale = Cpp98Support::fmax(1.0, Cpp98Support::fmax(a.length(), b.length()));
 
     return a.subtract(b).length() <= VECTOR_TOLERANCE * scale;
+}
+
+const Class CameraState::CLASS = { "CameraState", &EntityTransformState::CLASS };
+
+const Class *
+CameraState::getClass() const
+{
+    return &CLASS;
 }

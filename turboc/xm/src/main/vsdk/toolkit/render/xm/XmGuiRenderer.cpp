@@ -1,7 +1,7 @@
 // Before any other header that could include the Xt ones
 #include "vsdk/toolkit/gui/XmIntrinsics.h"
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -61,7 +61,7 @@ static void fillMenu(XtWidget pane, WidgetMenu* menu, CommandListener* executor,
 {
     ArrayList<WidgetMenuElement*>& children = menu->getChildren();
     for ( long i = 0; i < children.size(); i++ ) {
-        WidgetMenu* submenu = dynamic_cast<WidgetMenu*>(children.get(i));
+        WidgetMenu* submenu = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenu::CLASS) ? (WidgetMenu*)children.get(i) : NULL);
         if ( submenu != NULL ) {
             XtWidget submenuPane =
                 XmWidgetSupport::createPulldownMenu(pane, "submenu");
@@ -69,7 +69,7 @@ static void fillMenu(XtWidget pane, WidgetMenu* menu, CommandListener* executor,
             addCascade(pane, submenu->getName(), submenuPane, fontSet);
             continue;
         }
-        WidgetMenuItem* option = dynamic_cast<WidgetMenuItem*>(children.get(i));
+        WidgetMenuItem* option = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenuItem::CLASS) ? (WidgetMenuItem*)children.get(i) : NULL);
         if ( option == NULL ) {
             continue;
         }
@@ -113,7 +113,7 @@ XtWidget XmGuiRenderer::buildMenubar(XtWidget parent, WidgetMenu* menubar,
     XtSetArg(args[n], XmNresizeHeight, False); ++n;
     XtSetArg(args[n], XmNmarginHeight, 0); ++n;
     XtSetArg(args[n], XmNshadowThickness, 1); ++n;
-    XtWidget bar = XmCreateMenuBar(parent, const_cast<char*>("menuBar"),
+    XtWidget bar = XmCreateMenuBar(parent, ((char*)("menuBar")),
                                    args, n);
 
     if ( menubar == NULL ) {
@@ -127,7 +127,7 @@ XtWidget XmGuiRenderer::buildMenubar(XtWidget parent, WidgetMenu* menubar,
     else {
         ArrayList<WidgetMenuElement*>& children = menubar->getChildren();
         for ( long i = 0; i < children.size(); i++ ) {
-            WidgetMenu* menu = dynamic_cast<WidgetMenu*>(children.get(i));
+            WidgetMenu* menu = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenu::CLASS) ? (WidgetMenu*)children.get(i) : NULL);
             if ( menu == NULL ) {
                 continue;
             }

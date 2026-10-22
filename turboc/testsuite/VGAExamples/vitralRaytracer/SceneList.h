@@ -5,7 +5,7 @@
 
 class SceneList {
 public:
-    static constexpr size_t PATH_SIZE = MAX_PATH + 48;
+    enum { PATH_SIZE = MAX_PATH + 48 };
 
     static int endsWithRay(const char *name);
     void list(const char *path);

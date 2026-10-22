@@ -308,3 +308,11 @@ RGBAImageUncompressed* NormalMap::exportToRgbaImageGradient() const
     }
     return output;
 }
+
+const Class NormalMap::CLASS = { "NormalMap", &MediaEntity::CLASS };
+
+const Class *
+NormalMap::getClass() const
+{
+    return &CLASS;
+}

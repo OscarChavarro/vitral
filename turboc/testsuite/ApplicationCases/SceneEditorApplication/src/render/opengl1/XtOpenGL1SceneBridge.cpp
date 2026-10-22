@@ -44,7 +44,7 @@ class XtOpenGL1SceneBridge::Impl :
 public:
     /**
     Activates in the interaction techniques the viewport the renderers
-    present as selected (a lambda in the C++11 port).
+    present as selected.
     */
     class ViewportActivator : public Consumer<Viewport*> {
     public:
@@ -191,7 +191,7 @@ public:
         return false;
     }
 
-    void addMenuItems(std::vector<ViewportMenuItem>& items,
+    void addMenuItems(ArrayList<ViewportMenuItem>& items,
                       const char* popupName,
                       const String& currentCommand) const
     {
@@ -203,7 +203,9 @@ public:
         }
         for ( long i = 0; i < popup->getChildren().size(); i++ ) {
             WidgetMenuItem* definition =
-                dynamic_cast<WidgetMenuItem*>(popup->getChildren().get(i));
+                popup->getChildren().get(i) != NULL &&
+                popup->getChildren().get(i)->instanceOf(WidgetMenuItem::CLASS) ?
+                (WidgetMenuItem*)popup->getChildren().get(i) : NULL;
             if ( definition == NULL ) {
                 continue;
             }
@@ -216,7 +218,7 @@ public:
                 item.current = definition->getCommandName().equals(
                     currentCommand);
             }
-            items.push_back(item);
+            items.add(item);
         }
     }
 
@@ -314,7 +316,7 @@ XtOpenGL1SceneBridge::XtOpenGL1SceneBridge(
 
 XtOpenGL1SceneBridge::~XtOpenGL1SceneBridge() { delete impl; }
 
-void XtOpenGL1SceneBridge::setGuiDefinition(const std::string& json)
+void XtOpenGL1SceneBridge::setGuiDefinition(const String& json)
 {
     impl->model->setI18nContext(GuiI18nContextBuilder::build(
         json, GuiState::APPLICATION_DATA_FOLDER));
@@ -382,7 +384,7 @@ GuiEventExecutor* XtOpenGL1SceneBridge::getCommands()
 }
 
 CommandResult XtOpenGL1SceneBridge::executeCommand(
-    const std::string& command)
+    const String& command)
 {
     return impl->executor->execute(command.c_str());
 }
@@ -481,30 +483,30 @@ void XtOpenGL1SceneBridge::keyReleased(const KeyEvent& event)
     impl->techniques->processKeyReleasedEvent(event);
 }
 
-std::vector<XtOpenGL1SceneBridge::ViewportMenuItem>
+ArrayList<XtOpenGL1SceneBridge::ViewportMenuItem>
 XtOpenGL1SceneBridge::getViewportMenuItems() const
 {
-    std::vector<ViewportMenuItem> items;
+    ArrayList<ViewportMenuItem> items;
     Viewport* viewport = impl->menuViewport;
     if ( viewport == NULL || !impl->isKnownViewport(viewport) ) {
         return items;
     }
     impl->addMenuItems(items, ViewportSetCommands::POPUP_PROJECTION_LOCATION,
                        viewport->getProjectionLocationCommand());
-    std::vector<ViewportMenuItem> renderModes;
+    ArrayList<ViewportMenuItem> renderModes;
     impl->addMenuItems(renderModes, ViewportSetCommands::POPUP_RENDER_MODE,
                        viewport->getRenderModeCommand());
-    if ( !items.empty() && !renderModes.empty() ) {
+    if ( !items.isEmpty() && !renderModes.isEmpty() ) {
         ViewportMenuItem separator;
         separator.separator = true;
         separator.current = false;
-        items.push_back(separator);
+        items.add(separator);
     }
-    items.insert(items.end(), renderModes.begin(), renderModes.end());
+    items.addAll(renderModes);
     return items;
 }
 
-void XtOpenGL1SceneBridge::executeViewportCommand(const std::string& command)
+void XtOpenGL1SceneBridge::executeViewportCommand(const String& command)
 {
     Viewport* viewport = impl->menuViewport;
     if ( viewport == NULL || !impl->isKnownViewport(viewport) ) {

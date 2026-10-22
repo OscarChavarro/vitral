@@ -2,6 +2,7 @@
 
 #include "gui/xaw/XawFileDialog.h"
 #include "gui/xaw/XawUiFactory.h"
+#include "java/util/ArrayList.txx"
 
 XtUiFactory* createUiFactory()
 {
@@ -20,10 +21,10 @@ const char* XawUiFactory::getResourceFile()
 }
 
 bool XawUiFactory::showFileDialog(XtApplicationHost* host,
-                                  const std::string& title,
-                                  const std::string& folder,
-                                  const std::vector<FileSuffixFilter>& filters,
-                                  std::string& outPath)
+                                  const String& title,
+                                  const String& folder,
+                                  const ArrayList<FileSuffixFilter>& filters,
+                                  String& outPath)
 {
     return XawFileDialog::showDialog(host, title, folder, filters, outPath);
 }

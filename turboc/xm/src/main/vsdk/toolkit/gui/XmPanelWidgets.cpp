@@ -17,6 +17,7 @@
 #include "vsdk/toolkit/gui/XmPanelWidgets.h"
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
+#include "java/util/ArrayList.txx"
 
 
 static const char* const INVALID_BACKGROUND = "#ffc8c8";
@@ -29,7 +30,7 @@ An option of an option button. Freed with its menu item.
 */
 struct XmOptionBinding {
     Widget button;
-    std::string label;
+    String label;
     int index;
     XtPanelWidgets::OptionProc choose;
     void* clientData;
@@ -92,7 +93,7 @@ Widget XmPanelWidgets::createPanel(Widget parent, const char* name, int x,
         XtCreateWidget(name, xmBulletinBoardWidgetClass, parent, args, n);
 }
 
-Widget XmPanelWidgets::createLabel(Widget parent, const std::string& text,
+Widget XmPanelWidgets::createLabel(Widget parent, const String& text,
                                    XFontSet fontSet, Justify justify,
                                    int x, int y, int width, int height)
 {
@@ -118,13 +119,13 @@ Widget XmPanelWidgets::createLabel(Widget parent, const std::string& text,
     return widget;
 }
 
-void XmPanelWidgets::setLabel(Widget label, const std::string& text)
+void XmPanelWidgets::setLabel(Widget label, const String& text)
 {
     // The label does not recompute its size: its geometry stays
     XmWidgetSupport::setLabelString(label, text);
 }
 
-Widget XmPanelWidgets::createTextField(Widget parent, const std::string& text,
+Widget XmPanelWidgets::createTextField(Widget parent, const String& text,
                                        XFontSet fontSet,
                                        int x, int y, int width, int height,
                                        ActivateProc activate,
@@ -152,17 +153,17 @@ Widget XmPanelWidgets::createTextField(Widget parent, const std::string& text,
     return field;
 }
 
-std::string XmPanelWidgets::getText(Widget field)
+String XmPanelWidgets::getText(Widget field)
 {
     char* value = XmTextFieldGetString(field);
-    std::string text = value != NULL ? value : "";
+    String text = value != NULL ? value : "";
     XtFree(value);
     return text;
 }
 
-void XmPanelWidgets::setText(Widget field, const std::string& text)
+void XmPanelWidgets::setText(Widget field, const String& text)
 {
-    XmTextFieldSetString(field, const_cast<char*>(text.c_str()));
+    XmTextFieldSetString(field, ((char*)(text.c_str())));
     setInvalid(field, false);
 }
 
@@ -179,7 +180,7 @@ void XmPanelWidgets::setForeground(Widget widget, const char* colorName)
 }
 
 Widget XmPanelWidgets::createPushButton(Widget parent,
-                                        const std::string& label,
+                                        const String& label,
                                         XFontSet fontSet,
                                         int x, int y, int width, int height,
                                         ActivateProc activate,
@@ -208,8 +209,8 @@ Widget XmPanelWidgets::createPushButton(Widget parent,
 }
 
 Widget XmPanelWidgets::createOptionButton(
-    Widget parent, const std::string& placeholder,
-    const std::vector<std::string>& options, XFontSet fontSet,
+    Widget parent, const String& placeholder,
+    const ArrayList<String>& options, XFontSet fontSet,
     int x, int y, int width, int height, OptionProc choose, void* clientData)
 {
     // A button of the given size showing the choice, as the Athena one: a
@@ -235,7 +236,7 @@ Widget XmPanelWidgets::createOptionButton(
 
     // A popup child of the button, destroyed with it
     Widget menu = XmWidgetSupport::createPopupMenu(button, "optionMenu");
-    for (size_t i = 0; i < options.size(); ++i) {
+    for ( long i = 0; i < options.size(); ++i) {
         Widget item = XmWidgetSupport::createMenuItem(menu, options[i],
                                                       fontSet);
         XmOptionBinding* binding = new XmOptionBinding;

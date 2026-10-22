@@ -1,14 +1,15 @@
 #ifndef __XT_DIALOG_HOST__
 #define __XT_DIALOG_HOST__
 
-#include <map>
-#include <string>
-#include <vector>
+#include "java/util/TreeMap.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Xlib.h>
 
 #include "vsdk/toolkit/gui/XtWidget.h"
 #include "vsdk/toolkit/gui/dialog/runtime/DialogSession.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class WidgetDialog;
 class XtTreeView;
@@ -28,9 +29,8 @@ Java application does.
 It only uses the `XtPanelWidgets` of the widget set, so it serves both
 Athena and Motif applications.
 
-C++ port note: the vitral `Widget` class and the Xt `Widget` type collide,
-so the messages of the GUI context are given as an interface (a function in
-the C++11 port), and Xt widgets are `XtWidget`s (the same type).
+The vitral `Widget` class and the Xt `Widget` type collide, so GUI context
+messages use an interface and Xt widgets are named `XtWidget`.
 */
 class XtDialogHost {
 public:
@@ -43,7 +43,7 @@ public:
         /**
         @return the text of a message of the GUI context, from its key
         */
-        virtual std::string message(const std::string& key) = 0;
+        virtual String message(const String& key) = 0;
     };
 
     /**
@@ -52,7 +52,7 @@ public:
     class ActionListener {
     public:
         virtual ~ActionListener() {}
-        virtual void actionPerformed(const std::string& action) = 0;
+        virtual void actionPerformed(const String& action) = 0;
     };
 
     /**
@@ -68,39 +68,39 @@ public:
         /**
         @return the text field of a binding, or null
         */
-        XtWidget field(const std::string& binding) const;
+        XtWidget field(const String& binding) const;
 
         /**
         @return the button of an action, or null
         */
-        XtWidget action(const std::string& action) const;
+        XtWidget action(const String& action) const;
 
         /**
         @return the tree of a binding, or null
         */
-        XtTreeView* tree(const std::string& binding) const;
+        XtTreeView* tree(const String& binding) const;
 
         /**
         @return true if the definition has an element (a button or an
         `action` element) with the action
         */
-        bool hasAction(const std::string& action) const;
+        bool hasAction(const String& action) const;
         DialogSession* session();
 
-        std::string getText(const std::string& binding) const;
-        void setText(const std::string& binding, const std::string& text);
+        String getText(const String& binding) const;
+        void setText(const String& binding, const String& text);
 
         /**
         @return the text shown by the button of an action
         */
-        std::string getActionLabel(const std::string& action) const;
+        String getActionLabel(const String& action) const;
 
         /**
         Replaces the text of the button of an action, resizing the buttons
         row to fit it (as a Swing `FlowLayout` does).
         */
-        void setActionLabel(const std::string& action,
-                            const std::string& label);
+        void setActionLabel(const String& action,
+                            const String& label);
 
         /**
         Shows the dialog over the application: modal dialogs take its input
@@ -130,14 +130,14 @@ public:
         int buttonsY;
         DialogSession dialogSession;
         ActionListener* onAction;
-        std::map<std::string, XtWidget> fields;
-        std::map<std::string, XtTreeView*> trees;
-        std::vector<Button*> buttons;
+        TreeMap<String, XtWidget> fields;
+        TreeMap<String, XtTreeView*> trees;
+        ArrayList<Button*> buttons;
 
         Form(XtWidgetSet* widgetSet, XFontSet fontSet, XtWidget shell,
              const WidgetDialog* definition, ActionListener* onAction);
         void layoutButtons();
-        Button* findButton(const std::string& action) const;
+        Button* findButton(const String& action) const;
 
         static void buttonPressed(XtWidget, void* clientData);
         static void closeRequested(void* clientData);
@@ -160,7 +160,7 @@ public:
     @param onAction called with the action of each button clicked (not
     owned: it must outlive the form; null for none)
     @return the form, owned by the caller
-    @throws std::invalid_argument for elements that are not text inputs,
+    @throws IllegalArgumentException for elements that are not text inputs,
     trees, buttons, actions, rows or columns
     */
     static Form* form(XtWidget shell, XtWidgetSet* widgetSet,

@@ -28,7 +28,7 @@ void BodyTransformState::restore() const
 bool BodyTransformState::isSameState(const EntityTransformState* other) const
 {
     const BodyTransformState* state =
-        dynamic_cast<const BodyTransformState*>(other);
+        (other != NULL && other->instanceOf(BodyTransformState::CLASS) ? (const BodyTransformState*)other : NULL);
     if ( state == NULL ) {
         return false;
     }
@@ -41,4 +41,12 @@ bool BodyTransformState::isSameState(const EntityTransformState* other) const
 EntityTransformState* BodyTransformState::clone() const
 {
     return new BodyTransformState(*this);
+}
+
+const Class BodyTransformState::CLASS = { "BodyTransformState", &EntityTransformState::CLASS };
+
+const Class *
+BodyTransformState::getClass() const
+{
+    return &CLASS;
 }

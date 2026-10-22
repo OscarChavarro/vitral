@@ -34,6 +34,8 @@ class Math {
     static float abs(float a);
     static int min(int a, int b);
     static int max(int a, int b);
+    static long min(long a, long b);
+    static long max(long a, long b);
     static float min(float a, float b);
     static float max(float a, float b);
     static double min(double a, double b);
@@ -188,6 +190,16 @@ Math::min(int a, int b) {
 
 inline int
 Math::max(int a, int b) {
+    return a > b ? a : b;
+}
+
+inline long
+Math::min(long a, long b) {
+    return a < b ? a : b;
+}
+
+inline long
+Math::max(long a, long b) {
     return a > b ? a : b;
 }
 

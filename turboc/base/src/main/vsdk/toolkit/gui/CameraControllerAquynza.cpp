@@ -339,3 +339,11 @@ Camera* CameraControllerAquynza::getCamera() {
 void CameraControllerAquynza::setCamera(Camera* cam) {
     camera = cam;
 }
+
+const Class CameraControllerAquynza::CLASS = { "CameraControllerAquynza", &CameraController::CLASS };
+
+const Class *
+CameraControllerAquynza::getClass() const
+{
+    return &CLASS;
+}

@@ -1,10 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
-#include <map>
-#include <string>
 #include <sys/time.h>
 
 #include "java/util/concurrent/locks/ReentrantLock.h"
+#include "java/util/TreeMap.h"
 
 #include "java/lang/System.h"
 
@@ -34,9 +33,9 @@ System::currentTimeMillis() {
 }
 
 
-static std::map<std::string, std::string>& properties()
+static TreeMap<String, String>& properties()
 {
-    static std::map<std::string, std::string> table;
+    static TreeMap<String, String> table;
     return table;
 }
 
@@ -55,18 +54,17 @@ System::getProperty(const String& key) {
 String
 System::getProperty(const String& key, const String& defaultValue) {
     ReentrantLockGuard guard(propertiesLock());
-    std::map<std::string, std::string>::const_iterator found =
-        properties().find(key.c_str());
-    if ( found == properties().end() ) {
+    const String *found = properties().get(key);
+    if ( found == NULL ) {
         return defaultValue;
     }
-    return String(found->second.c_str());
+    return *found;
 }
 
 void
 System::setProperty(const String& key, const String& value) {
     ReentrantLockGuard guard(propertiesLock());
-    properties()[key.c_str()] = value.c_str();
+    properties().put(key, value);
 }
 
 void
@@ -75,14 +73,14 @@ System::setPropertiesFromArguments(int argc, char* argv[]) {
         if ( argv[i] == NULL || strncmp(argv[i], "-D", 2) != 0 ) {
             continue;
         }
-        std::string definition(argv[i] + 2);
-        std::string::size_type equals = definition.find('=');
-        if ( equals == std::string::npos ) {
-            setProperty(definition.c_str(), "true");
+        String definition(argv[i] + 2);
+        int equals = definition.indexOf('=');
+        if ( equals < 0 ) {
+            setProperty(definition, "true");
         }
         else {
-            setProperty(definition.substr(0, equals).c_str(),
-                        definition.substr(equals + 1).c_str());
+            setProperty(definition.substring(0, equals),
+                        definition.substring(equals + 1));
         }
     }
 }

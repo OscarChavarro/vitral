@@ -1,7 +1,7 @@
 #ifndef __GUI_I18N_CONTEXT_BUILDER__
 #define __GUI_I18N_CONTEXT_BUILDER__
 
-#include <string>
+#include "java/lang/String.h"
 
 class Widget;
 
@@ -26,8 +26,8 @@ public:
     @return a new context, owned by the caller
     @throws VSDKFatalException if the dialog definitions can not be read
     */
-    static Widget* build(const std::string& json,
-                         const std::string& globalDataPath);
+    static Widget* build(const String& json,
+                         const String& globalDataPath);
 
 private:
     GuiI18nContextBuilder() {}

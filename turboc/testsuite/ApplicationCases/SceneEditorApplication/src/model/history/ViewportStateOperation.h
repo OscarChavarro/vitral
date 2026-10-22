@@ -17,6 +17,9 @@ be merged (see `absorb`), so an auto-repeated camera key is a single step.
 */
 class ViewportStateOperation : public UndoableOperation {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /// Maximum time between two mergeable operations to be merged
     static const long long MERGE_INTERVAL_MILLISECONDS = 1000;
 

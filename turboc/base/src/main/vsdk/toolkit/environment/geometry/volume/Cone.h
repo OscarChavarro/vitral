@@ -29,6 +29,9 @@ private:
         int heightDivisions);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Cone(double bottomRadius, double topRadius, double height);
     virtual ~Cone() {}
 

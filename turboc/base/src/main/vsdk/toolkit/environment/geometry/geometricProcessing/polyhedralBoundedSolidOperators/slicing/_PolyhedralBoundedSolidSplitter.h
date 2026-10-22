@@ -5,7 +5,6 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SPLITTER__
 
-#include <vector>
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
@@ -59,7 +58,9 @@ private:
 public:
     _PolyhedralBoundedSolidEdge* e;
 
-    explicit _PolyhedralBoundedSolidSplitterNullEdge(_PolyhedralBoundedSolidEdge* e);
+    /// The default (null edge) is needed by the storage of `ArrayList`
+    explicit _PolyhedralBoundedSolidSplitterNullEdge(
+        _PolyhedralBoundedSolidEdge* e = NULL);
 
     static void setNumericContext(
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext* context);
@@ -110,46 +111,46 @@ private:
     /**
     Following variable `soov` ("set of ON-vertices") from program [MANT1988].14.1.
     */
-    static std::vector<_PolyhedralBoundedSolidVertex*> soov;
+    static ArrayList<_PolyhedralBoundedSolidVertex*> soov;
 
     /**
     Following variable `sone` ("set of null edges") from program [MANT1988].14.1.
     */
-    static std::vector<_PolyhedralBoundedSolidSplitterNullEdge> sone;
+    static ArrayList<_PolyhedralBoundedSolidSplitterNullEdge> sone;
 
     /**
     Following variable `sonf` ("set of null faces") from program [MANT1988].14.1.
     */
-    static std::vector<_PolyhedralBoundedSolidFace*> sonf;
+    static ArrayList<_PolyhedralBoundedSolidFace*> sonf;
 
-    static std::vector<_PolyhedralBoundedSolidFace*> facesToFixAbove;
-    static std::vector<_PolyhedralBoundedSolidFace*> facesToFixBelow;
+    static ArrayList<_PolyhedralBoundedSolidFace*> facesToFixAbove;
+    static ArrayList<_PolyhedralBoundedSolidFace*> facesToFixBelow;
 
     /**
     Following variable `ends` from program [MANT1988].14.9.
     */
-    static std::vector<_PolyhedralBoundedSolidHalfEdge*> ends;
-    static std::vector<_PolyhedralBoundedSolidHalfEdge*> tieds;
+    static ArrayList<_PolyhedralBoundedSolidHalfEdge*> ends;
+    static ArrayList<_PolyhedralBoundedSolidHalfEdge*> tieds;
 
     static int compareToZero(double value);
     static void addsoov(_PolyhedralBoundedSolidVertex* v);
     static void splitGenerate(PolyhedralBoundedSolid* inSolid,
                               const InfinitePlane& inSplittingPlane);
-    static std::vector<SectorClassification> getNeighborhood(
+    static ArrayList<SectorClassification> getNeighborhood(
         _PolyhedralBoundedSolidVertex* vtx,
         const InfinitePlane& inSplittingPlane);
     static bool checkSplitterSectorWideness(_PolyhedralBoundedSolidHalfEdge* he);
-    static bool inplaneEdgesOn(const std::vector<SectorClassification>& nbr);
-    static void reclassifyOnSectors(std::vector<SectorClassification>& nbr,
+    static bool inplaneEdgesOn(const ArrayList<SectorClassification>& nbr);
+    static void reclassifyOnSectors(ArrayList<SectorClassification>& nbr,
                                     const InfinitePlane& inSplittingPlane);
-    static void reclassifyOnEdges(std::vector<SectorClassification>& nbr);
-    static void insertNullEdges(std::vector<SectorClassification>& nbr,
+    static void reclassifyOnEdges(ArrayList<SectorClassification>& nbr);
+    static void insertNullEdges(ArrayList<SectorClassification>& nbr,
                                 PolyhedralBoundedSolid* inSolid,
                                 const InfinitePlane& inSplittingPlane);
     static void splitClassify(PolyhedralBoundedSolid* inSolid,
                               const InfinitePlane& inSplittingPlane);
     static _PolyhedralBoundedSolidHalfEdge* canJoin(_PolyhedralBoundedSolidHalfEdge* he);
-    static void printNbr(const std::vector<SectorClassification>& neighborSectorsInfo);
+    static void printNbr(const ArrayList<SectorClassification>& neighborSectorsInfo);
     static void printEnds();
     static void cut(_PolyhedralBoundedSolidHalfEdge* he);
     static bool isLoose(_PolyhedralBoundedSolidHalfEdge* he);
@@ -161,7 +162,7 @@ private:
     static void destroy(PolyhedralBoundedSolid* inSolid);
     static bool faceInsideFace(_PolyhedralBoundedSolidFace* a,
                                _PolyhedralBoundedSolidFace* b);
-    static void fixNullFaces(std::vector<_PolyhedralBoundedSolidFace*>& l);
+    static void fixNullFaces(ArrayList<_PolyhedralBoundedSolidFace*>& l);
     static void splitFinish(PolyhedralBoundedSolid* inSolid,
                             ArrayList<PolyhedralBoundedSolid*>& outSolidsAbove,
                             ArrayList<PolyhedralBoundedSolid*>& outSolidsBelow);

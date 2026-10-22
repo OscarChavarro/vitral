@@ -26,6 +26,9 @@ private:
     double* calculateMinMaxPositions();
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     QuadMesh();
 
     String getName() const;

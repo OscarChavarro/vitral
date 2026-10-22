@@ -1,10 +1,8 @@
 #include <float.h>
 #include <math.h>
-#include <sstream>
-#include <string>
+#include "java/lang/StringBuilder.h"
 
 #include "java/util/ArrayList.txx"
-#include <algorithm>
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/element/Vertex2D.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonClipper/PolygonProcessor.h"
@@ -20,6 +18,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 
 static const char* const SOLID_WITH_MESSAGE = "Solid with ";
 
@@ -127,8 +126,8 @@ static int testPointInsideForRayIntersection(
 
 static String intPreSpaces(int val, int fieldSize)
 {
-    std::string cad = Cpp98Support::toString(val);
-    std::string sb;
+    String cad = Cpp98Support::toString(val);
+    String sb;
     int remain = fieldSize - (int)cad.length();
 
     for ( ; remain > 0; remain-- ) {
@@ -388,12 +387,12 @@ void PolyhedralBoundedSolid::computeFaceAabb(
             do {
                 if (he->startingVertex != 0) {
                     Vector3Dd q = he->startingVertex->position;
-                    minX = std::min(minX, q.x());
-                    minY = std::min(minY, q.y());
-                    minZ = std::min(minZ, q.z());
-                    maxX = std::max(maxX, q.x());
-                    maxY = std::max(maxY, q.y());
-                    maxZ = std::max(maxZ, q.z());
+                    minX = Math::min(minX, q.x());
+                    minY = Math::min(minY, q.y());
+                    minZ = Math::min(minZ, q.z());
+                    maxX = Math::max(maxX, q.x());
+                    maxY = Math::max(maxY, q.y());
+                    maxZ = Math::max(maxZ, q.z());
                 }
                 he = he->next();
             } while (he != 0 && he != start);
@@ -435,7 +434,7 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
     else {
         double t1 = (queryFaceAabb[o] - pad - origin.x()) / dirX;
         double t2 = (queryFaceAabb[o + 3] + pad - origin.x()) / dirX;
-        if (t1 > t2) std::swap(t1, t2);
+        if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
         if (tMin > tMax) return false;
@@ -450,7 +449,7 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
     else {
         double t1 = (queryFaceAabb[o + 1] - pad - origin.y()) / dirY;
         double t2 = (queryFaceAabb[o + 4] + pad - origin.y()) / dirY;
-        if (t1 > t2) std::swap(t1, t2);
+        if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
         if (tMin > tMax) return false;
@@ -465,7 +464,7 @@ bool PolyhedralBoundedSolid::rayReachesFaceAabb(
     else {
         double t1 = (queryFaceAabb[o + 2] - pad - origin.z()) / dirZ;
         double t2 = (queryFaceAabb[o + 5] + pad - origin.z()) / dirZ;
-        if (t1 > t2) std::swap(t1, t2);
+        if (t1 > t2) { double t = t1; t1 = t2; t2 = t; }
         if (t1 > tMin) tMin = t1;
         if (t2 < tMax) tMax = t2;
         if (tMin > tMax) return false;
@@ -621,39 +620,39 @@ void PolyhedralBoundedSolid::revert()
 
 String PolyhedralBoundedSolid::toString()
 {
-    std::ostringstream msg;
+    StringBuilder msg;
     long int i;
     long int j;
 
-    msg << "= POLYHEDRAL BOUNDED SOLID STRUCTURE ==========================================\n";
-    msg << SOLID_WITH_MESSAGE << verticesList.size() << " vertices:\n";
+    msg.append("= POLYHEDRAL BOUNDED SOLID STRUCTURE ==========================================\n");
+    msg.append(SOLID_WITH_MESSAGE).append(verticesList.size()).append(" vertices:\n");
     for ( i = 0; i < verticesList.size(); i++ ) {
-        msg << "  - " << verticesList.get(i)->toString().c_str() << "\n";
+        msg.append("  - ").append(verticesList.get(i)->toString().c_str()).append("\n");
     }
 
-    msg << SOLID_WITH_MESSAGE << edgesList.size() << " edges:\n";
+    msg.append(SOLID_WITH_MESSAGE).append(edgesList.size()).append(" edges:\n");
     for ( i = 0; i < edgesList.size(); i++ ) {
-        msg << "  - " << edgesList.get(i)->toString().c_str() << "\n";
+        msg.append("  - ").append(edgesList.get(i)->toString().c_str()).append("\n");
     }
-    msg << SOLID_WITH_MESSAGE << polygonsList.size() << " faces:\n";
+    msg.append(SOLID_WITH_MESSAGE).append(polygonsList.size()).append(" faces:\n");
 
     for ( i = 0; i < polygonsList.size(); i++ ) {
         _PolyhedralBoundedSolidFace* face = polygonsList.get(i);
-        msg << "  - " << face->toString().c_str() << "\n";
+        msg.append("  - ").append(face->toString().c_str()).append("\n");
         for ( j = 0; j < face->boundariesList.size(); j++ ) {
             _PolyhedralBoundedSolidLoop* loop;
             _PolyhedralBoundedSolidHalfEdge* he;
             _PolyhedralBoundedSolidHalfEdge* heStart;
 
-            msg << "    . Loop " << j << ", with half-edges: \n";
+            msg.append("    . Loop ").append(j).append(", with half-edges: \n");
             loop = face->boundariesList.get(j);
 
-            msg << "      | HeID  | StartVertex | End Vertex | nccw He | pccw He | parentEdge | mirror He | neighbor face\n";
-            msg << "      +-------+-------------+------------+---------+---------+------------+-----------+-------------+\n";
+            msg.append("      | HeID  | StartVertex | End Vertex | nccw He | pccw He | parentEdge | mirror He | neighbor face\n");
+            msg.append("      +-------+-------------+------------+---------+---------+------------+-----------+-------------+\n");
 
             he = loop->boundaryStartHalfEdge;
             if ( he == 0 ) {
-                msg << "<Loop without starting half-edge!>\n";
+                msg.append("<Loop without starting half-edge!>\n");
                 continue;
             }
             heStart = he;
@@ -661,43 +660,43 @@ String PolyhedralBoundedSolid::toString()
                 he = he->next();
                 if ( he == 0 ) {
                     // Loop is not closed!
-                    msg << "      |  - (not closed loop)\n";
+                    msg.append("      |  - (not closed loop)\n");
                     break;
                 }
 
-                msg << "      | "
-                    << intPreSpaces(he->id, 4).c_str()
-                    << ((he == loop->boundaryStartHalfEdge) ? "*" : " ")
-                    << " | "
-                    << intPreSpaces(he->startingVertex->id, 11).c_str()
-                    << " | "
-                    << intPreSpaces(he->next()->startingVertex->id, 10).c_str()
-                    << " | "
-                    << intPreSpaces(he->next()->id, 7).c_str()
-                    << " | "
-                    << intPreSpaces(he->previous()->id, 7).c_str()
-                    << " | ";
-                msg << ((he->parentEdge != 0) ?
+                msg.append("      | ")
+                    .append(intPreSpaces(he->id, 4).c_str())
+                    .append(((he == loop->boundaryStartHalfEdge) ? "*" : " "))
+                    .append(" | ")
+                    .append(intPreSpaces(he->startingVertex->id, 11).c_str())
+                    .append(" | ")
+                    .append(intPreSpaces(he->next()->startingVertex->id, 10).c_str())
+                    .append(" | ")
+                    .append(intPreSpaces(he->next()->id, 7).c_str())
+                    .append(" | ")
+                    .append(intPreSpaces(he->previous()->id, 7).c_str())
+                    .append(" | ");
+                msg.append(((he->parentEdge != 0) ?
                     intPreSpaces(he->parentEdge->id, 10) :
-                    String("    <null>")).c_str();
-                msg << " | ";
+                    String("    <null>")).c_str());
+                msg.append(" | ");
                 if ( he->mirrorHalfEdge() != 0 ) {
-                    msg << intPreSpaces(he->mirrorHalfEdge()->id, 9).c_str()
-                        << " | "
-                        << intPreSpaces(he->mirrorHalfEdge()->parentLoop->parentFace->id, 11).c_str()
-                        << " | ";
+                    msg.append(intPreSpaces(he->mirrorHalfEdge()->id, 9).c_str())
+                        .append(" | ")
+                        .append(intPreSpaces(he->mirrorHalfEdge()->parentLoop->parentFace->id, 11).c_str())
+                        .append(" | ");
                 }
                 else {
-                    msg << " No Mirror Half Edge!   | ";
+                    msg.append(" No Mirror Half Edge!   | ");
                 }
 
-                msg << "\n";
+                msg.append("\n");
 
             } while ( he != heStart );
         }
     }
-    msg << "= END OF POLYHEDRAL BOUNDED SOLID STRUCTURE ===================================\n";
-    return String(msg.str().c_str());
+    msg.append("= END OF POLYHEDRAL BOUNDED SOLID STRUCTURE ===================================\n");
+    return msg.toString();
 }
 
 PolyhedralBoundedSolid* PolyhedralBoundedSolid::exportToPolyhedralBoundedSolid()
@@ -709,3 +708,11 @@ PolyhedralBoundedSolid* PolyhedralBoundedSolid::exportToPolyhedralBoundedSolid()
 // definition out of the class in C++98
 const int PolyhedralBoundedSolid::PLUS;
 const int PolyhedralBoundedSolid::MINUS;
+
+const Class PolyhedralBoundedSolid::CLASS = { "PolyhedralBoundedSolid", &Solid::CLASS };
+
+const Class *
+PolyhedralBoundedSolid::getClass() const
+{
+    return &CLASS;
+}

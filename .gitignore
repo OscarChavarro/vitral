@@ -17,6 +17,7 @@ typescript/**/tsconfig.tsbuildinfo
 **/build/
 build-*/
 **/build-*/
+**/buildmk/
 output*
 screenshot*
 

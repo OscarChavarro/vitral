@@ -1,6 +1,6 @@
-#include <vector>
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_PolyhedralBoundedSolidTopologicalValidator.h"
@@ -42,7 +42,7 @@ bool _PolyhedralBoundedSolidTopologicalValidator::validateTopologicalIntegrity(
         }
     }
 
-    std::vector<int> edgeCount((size_t)solid->getEdgesList().size(), 0);
+    ArrayList<int> edgeCount(Collections<int>::nCopies(solid->getEdgesList().size(), 0));
 
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         f = solid->getPolygonsList().get(i);

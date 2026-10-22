@@ -163,3 +163,11 @@ const int RGBAImageCompressed::COMPRESSION_UNKNOWN;
 const int RGBAImageCompressed::COMPRESSION_DXT1;
 const int RGBAImageCompressed::COMPRESSION_DXT3;
 const int RGBAImageCompressed::COMPRESSION_DXT5;
+
+const Class RGBAImageCompressed::CLASS = { "RGBAImageCompressed", &Image::CLASS };
+
+const Class *
+RGBAImageCompressed::getClass() const
+{
+    return &CLASS;
+}

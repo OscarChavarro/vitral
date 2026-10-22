@@ -57,3 +57,11 @@ double ProgressMonitorConsoleLongFormat::getCurrentPercent()
 {
     return currentPercent;
 }
+
+const Class ProgressMonitorConsoleLongFormat::CLASS = { "ProgressMonitorConsoleLongFormat", &ProgressMonitor::CLASS };
+
+const Class *
+ProgressMonitorConsoleLongFormat::getClass() const
+{
+    return &CLASS;
+}

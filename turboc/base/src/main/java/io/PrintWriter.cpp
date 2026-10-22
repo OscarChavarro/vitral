@@ -1,6 +1,5 @@
-#include <exception>
-
 #include "java/io/PrintWriter.h"
+#include "java/lang/Exception.h"
 
 
 PrintWriter::PrintWriter(OutputStream *out, bool autoFlush) :
@@ -15,7 +14,7 @@ PrintWriter::print(const String &text)
         out->write(((const unsigned char *)(text.c_str())), 0,
                    text.length());
     }
-    catch ( const std::exception & ) {
+    catch ( const Exception & ) {
         error = true;
     }
 }
@@ -36,7 +35,7 @@ PrintWriter::flush()
     try {
         out->flush();
     }
-    catch ( const std::exception & ) {
+    catch ( const Exception & ) {
         error = true;
     }
 }

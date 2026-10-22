@@ -24,9 +24,9 @@ void XmlManager::exportXml(Geometry* object,
         //- 2. Create an Element from the specified object ----------------
         Element* xmlElement = NULL;
 
-        ParametricCurve* curve = dynamic_cast<ParametricCurve*>(object);
+        ParametricCurve* curve = (object != NULL && object->instanceOf(ParametricCurve::CLASS) ? (ParametricCurve*)object : NULL);
         ParametricBiCubicPatch* patch =
-            dynamic_cast<ParametricBiCubicPatch*>(object);
+            (object != NULL && object->instanceOf(ParametricBiCubicPatch::CLASS) ? (ParametricBiCubicPatch*)object : NULL);
         if ( curve != NULL ) {
             xmlElement = ParametricCurvePersistence::toElement(curve,
                                                               document);

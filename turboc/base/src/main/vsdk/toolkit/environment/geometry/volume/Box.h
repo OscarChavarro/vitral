@@ -14,6 +14,9 @@ private:
     int classifyHitPlane(double x, double y, double z) const;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Box(double dx, double dy, double dz);
     explicit Box(const Vector3Dd& s);
     virtual ~Box() {}

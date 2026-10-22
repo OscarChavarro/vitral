@@ -16,6 +16,9 @@ private:
     String accelerator;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit WidgetMenu(Widget* c);
     virtual ~WidgetMenu() {}
 

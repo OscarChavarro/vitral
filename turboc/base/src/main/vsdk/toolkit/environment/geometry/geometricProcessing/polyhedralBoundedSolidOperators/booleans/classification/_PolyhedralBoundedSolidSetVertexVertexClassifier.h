@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_VERTEX_CLASSIFIER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_VERTEX_VERTEX_CLASSIFIER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -32,13 +32,13 @@ public:
     */
     class VertexVertexClassificationData {
     public:
-        std::vector<SectorOnVertex> nba;
-        std::vector<SectorOnVertex> nbb;
-        std::vector<SectorOnSector> sectors;
+        ArrayList<SectorOnVertex> nba;
+        ArrayList<SectorOnVertex> nbb;
+        ArrayList<SectorOnSector> sectors;
 
-        VertexVertexClassificationData(const std::vector<SectorOnVertex>& inNba,
-                                       const std::vector<SectorOnVertex>& inNbb,
-                                       const std::vector<SectorOnSector>& inSectors)
+        VertexVertexClassificationData(const ArrayList<SectorOnVertex>& inNba,
+                                       const ArrayList<SectorOnVertex>& inNbb,
+                                       const ArrayList<SectorOnSector>& inSectors)
             : nba(inNba), nbb(inNbb), sectors(inSectors) {}
     };
 
@@ -54,16 +54,16 @@ public:
 
 private:
     static int debugFlags;
-    std::vector<SectorOnVertex> nba;
-    std::vector<SectorOnVertex> nbb;
-    std::vector<SectorOnSector> sectors;
+    ArrayList<SectorOnVertex> nba;
+    ArrayList<SectorOnVertex> nbb;
+    ArrayList<SectorOnSector> sectors;
 
     /**
     @return 1 (same orientation), 0 (opposite) or -1 (not coplanar or not
     computable; Java returns null)
     */
     int coplanarSameOrientationForSectorPair(int secta, int sectb);
-    static std::vector<SectorOnVertex> nbrpreproc(_PolyhedralBoundedSolidVertex* v);
+    static ArrayList<SectorOnVertex> nbrpreproc(_PolyhedralBoundedSolidVertex* v);
     static bool sectoroverlap(const SectorOnVertex& na, const SectorOnVertex& nb);
     static bool sctrwitthin(const Vector3Dd& dir, const Vector3Dd& ref1,
                             const Vector3Dd& ref2, const Vector3Dd& ref12);

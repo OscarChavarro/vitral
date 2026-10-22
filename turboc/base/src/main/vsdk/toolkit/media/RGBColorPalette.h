@@ -14,6 +14,9 @@ protected:
     ArrayList<ColorRgb*> colors;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     RGBColorPalette();
     virtual ~RGBColorPalette();
 

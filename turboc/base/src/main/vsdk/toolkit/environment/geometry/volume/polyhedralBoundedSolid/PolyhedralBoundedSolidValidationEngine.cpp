@@ -1,9 +1,8 @@
 #include <math.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidGeometricValidator.h"
@@ -17,6 +16,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/_TopologicalIntegrityStrategy.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/IllegalArgumentException.h"
 
 AtomicLong PolyhedralBoundedSolidValidationEngine::strictValidationInvocationCount(0L);
 
@@ -28,13 +28,13 @@ Runs the strategies in order, stopping at the first failure.
 @return true when all strategies succeed
 */
 static bool runStrategies(
-    std::vector<_PolyhedralBoundedSolidValidationStrategy*>& strategies,
+    ArrayList<_PolyhedralBoundedSolidValidationStrategy*>& strategies,
     PolyhedralBoundedSolid* solid,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext,
     String* msg)
 {
     bool ok = true;
-    size_t i;
+    long i;
 
     for ( i = 0; i < strategies.size(); i++ ) {
         if ( !strategies[i]->validate(solid, numericContext, msg) ) {
@@ -62,10 +62,10 @@ bool PolyhedralBoundedSolidValidationEngine::validateIntermediate(PolyhedralBoun
     bool ok;
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
-    std::vector<_PolyhedralBoundedSolidValidationStrategy*> strategies;
+    ArrayList<_PolyhedralBoundedSolidValidationStrategy*> strategies;
 
-    strategies.push_back(new _GeometricPlanarityStrategy());
-    strategies.push_back(new _TopologicalIntegrityStrategy());
+    strategies.add(new _GeometricPlanarityStrategy());
+    strategies.add(new _TopologicalIntegrityStrategy());
     ok = runStrategies(strategies, solid, numericContext, &msg);
 
     solid->setValidationState(ok);
@@ -114,7 +114,7 @@ bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
             Cpp98Support::toString(welded).c_str() + " pair(s)\n");
         if ( !validateIntermediate(solidA) ) {
             append(msg, "solidA failed validateIntermediate after weld\n");
-            throw std::invalid_argument(std::string(
+            throw IllegalArgumentException(String(
                 "solidA is topologically invalid after coincident-vertex weld:\n") +
                 (msg != 0 ? msg->c_str() : ""));
         }
@@ -129,7 +129,7 @@ bool PolyhedralBoundedSolidValidationEngine::validateBooleanInputs(
             Cpp98Support::toString(welded).c_str() + " pair(s)\n");
         if ( !validateIntermediate(solidB) ) {
             append(msg, "solidB failed validateIntermediate after weld\n");
-            throw std::invalid_argument(std::string(
+            throw IllegalArgumentException(String(
                 "solidB is topologically invalid after coincident-vertex weld:\n") +
                 (msg != 0 ? msg->c_str() : ""));
         }
@@ -172,12 +172,12 @@ bool PolyhedralBoundedSolidValidationEngine::validateStrict(
 
     PolyhedralBoundedSolidNumericPolicy::ToleranceContext numericContext =
         PolyhedralBoundedSolidNumericPolicy::forSolid(solid);
-    std::vector<_PolyhedralBoundedSolidValidationStrategy*> strategies;
+    ArrayList<_PolyhedralBoundedSolidValidationStrategy*> strategies;
 
-    strategies.push_back(new _GeometricPlanarityStrategy());
-    strategies.push_back(new _TopologicalIntegrityStrategy());
-    strategies.push_back(new _GeometricStrictLoopsStrategy());
-    strategies.push_back(new _GeometricStrictFaceIntersectionsStrategy());
+    strategies.add(new _GeometricPlanarityStrategy());
+    strategies.add(new _TopologicalIntegrityStrategy());
+    strategies.add(new _GeometricStrictLoopsStrategy());
+    strategies.add(new _GeometricStrictFaceIntersectionsStrategy());
     ok = runStrategies(strategies, solid, numericContext, msg);
 
     if ( ok ) {
@@ -244,7 +244,7 @@ bool PolyhedralBoundedSolidValidationEngine::areGeometricallyIdentical(
     // one matching counterpart in B (and by cardinality this implies
     // a bijection). O(n^2) on vertex count.
     long int n = a->getVerticesList().size();
-    std::vector<bool> matched((size_t)n, false);
+    ArrayList<bool> matched(Collections<bool>::nCopies(n, false));
     for ( long int i = 0; i < n; i++ ) {
         Vector3Dd pa = a->getVerticesList().get(i)->position;
         bool found = false;

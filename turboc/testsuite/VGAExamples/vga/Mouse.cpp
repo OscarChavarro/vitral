@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -10,7 +11,7 @@
 #include "programs/vga/VgaConstant.h"
 #include "programs/vga/VgaKeyboard.h"
 
-Mouse::Mouse() : connected(false), picture(nullptr), hud(nullptr) {}
+Mouse::Mouse() : connected(false), picture(NULL), hud(NULL) {}
 
 // vga_init() opens the mouse configured for svgalib (Vga::start asks for mouse support); it has capabilities only
 // when that worked.
@@ -35,7 +36,7 @@ Mouse::waitInput() {
         if (key) {
             return key;
         }
-        int events = vga_waitevent(VGA_KEYEVENT | (connected ? VGA_MOUSEEVENT : 0), nullptr, nullptr, nullptr, nullptr);
+        int events = vga_waitevent(VGA_KEYEVENT | (connected ? VGA_MOUSEEVENT : 0), NULL, NULL, NULL, NULL);
         if (events < 0) {
             usleep(20000);
         } else if (events & VGA_MOUSEEVENT) {
@@ -80,7 +81,7 @@ Mouse::describe(char *position, char *state, size_t size) const {
     }
     int buttons = mouse_getbutton();
     int wheel = 0;
-    mouse_getposition_6d(nullptr, nullptr, nullptr, &wheel, nullptr, nullptr);
+    mouse_getposition_6d(NULL, NULL, NULL, &wheel, NULL, NULL);
     snprintf(position, size, "Mouse (x, y): (%d, %d)", pointer.x(), pointer.y());
     snprintf(state, size, "Buttons: %c %c %c  Wheel: %d", buttons & MOUSE_LEFTBUTTON ? 'L' : '-',
              buttons & MOUSE_MIDDLEBUTTON ? 'M' : '-', buttons & MOUSE_RIGHTBUTTON ? 'R' : '-', wheel);

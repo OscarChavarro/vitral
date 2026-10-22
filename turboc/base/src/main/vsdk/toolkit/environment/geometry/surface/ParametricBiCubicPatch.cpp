@@ -448,3 +448,11 @@ double* ParametricBiCubicPatch::getMinMax()
 // definition out of the class in C++98
 const int ParametricBiCubicPatch::FERGUSON;
 const int ParametricBiCubicPatch::INITIAL_APPROXIMATION_STEPS;
+
+const Class ParametricBiCubicPatch::CLASS = { "ParametricBiCubicPatch", &Surface::CLASS };
+
+const Class *
+ParametricBiCubicPatch::getClass() const
+{
+    return &CLASS;
+}

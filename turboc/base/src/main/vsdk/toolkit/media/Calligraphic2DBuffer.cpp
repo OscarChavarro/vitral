@@ -70,3 +70,11 @@ void Calligraphic2DBuffer::exportRgbImage(RGBImageUncompressed* inOutRasterViewp
         delete e1;
     }
 }
+
+const Class Calligraphic2DBuffer::CLASS = { "Calligraphic2DBuffer", &MediaEntity::CLASS };
+
+const Class *
+Calligraphic2DBuffer::getClass() const
+{
+    return &CLASS;
+}

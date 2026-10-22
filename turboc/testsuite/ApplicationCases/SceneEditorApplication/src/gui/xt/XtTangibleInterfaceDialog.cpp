@@ -18,13 +18,18 @@ static const char* SERVICE_URL = "serviceUrl";
 static const char* CONNECT = "connect";
 static const char* CANCEL = "cancel";
 
-static std::string trim(const std::string& text)
+static String trim(const String& text)
 {
-    size_t start = text.find_first_not_of(" \t");
-    if ( start == std::string::npos ) {
-        return "";
+    int start = 0;
+    int end = text.size();
+    while ( start < end && (text[start] == ' ' || text[start] == '\t') ) {
+        start++;
     }
-    return text.substr(start, text.find_last_not_of(" \t") - start + 1);
+    while ( end > start &&
+            (text[end - 1] == ' ' || text[end - 1] == '\t') ) {
+        end--;
+    }
+    return text.substring(start, end);
 }
 
 XtTangibleInterfaceDialog::XtTangibleInterfaceDialog(XtApplicationHost* host)
@@ -35,7 +40,7 @@ XtTangibleInterfaceDialog::XtTangibleInterfaceDialog(XtApplicationHost* host)
 XtTangibleInterfaceDialog::~XtTangibleInterfaceDialog()
 {
     discard();
-    for ( size_t i = 0; i < connectionListeners.size(); i++ ) {
+    for ( long i = 0; i < connectionListeners.size(); i++ ) {
         delete connectionListeners[i];
     }
 }
@@ -51,7 +56,7 @@ void XtTangibleInterfaceDialog::show()
 {
     const WidgetDialog* definition = host->getDialogById(DIALOG_ID);
     if ( definition == NULL ) {
-        host->showStatusMessage(std::string("Dialog not defined: ") + DIALOG_ID);
+        host->showStatusMessage(String("Dialog not defined: ") + DIALOG_ID);
         return;
     }
     discard();
@@ -65,12 +70,12 @@ void XtTangibleInterfaceDialog::show()
     form->show();
 }
 
-std::string XtTangibleInterfaceDialog::message(const std::string& key)
+String XtTangibleInterfaceDialog::message(const String& key)
 {
     return host->getMessage(key.c_str());
 }
 
-void XtTangibleInterfaceDialog::actionPerformed(const std::string& action)
+void XtTangibleInterfaceDialog::actionPerformed(const String& action)
 {
     if ( form == NULL ) {
         return;
@@ -82,9 +87,9 @@ void XtTangibleInterfaceDialog::actionPerformed(const std::string& action)
     if ( action != CONNECT ) {
         return;
     }
-    std::string serviceUrl = trim(form->getText(SERVICE_URL));
+    String serviceUrl = trim(form->getText(SERVICE_URL));
     form->session()->setDraft(SERVICE_URL, serviceUrl.c_str());
-    if ( serviceUrl.empty() ) {
+    if ( serviceUrl.isEmpty() ) {
         return;
     }
     long request = form->session()->beginAction();
@@ -97,7 +102,7 @@ void XtTangibleInterfaceDialog::actionPerformed(const std::string& action)
                          host->getMessage("IDM_TANGIBLE_INTERFACE_CONNECT"));
     ConnectionListener* listener =
         new ConnectionListener(this, formSerial, request);
-    connectionListeners.push_back(listener);
+    connectionListeners.add(listener);
     host->connectTangibleInterface(serviceUrl, listener);
 }
 
@@ -123,18 +128,18 @@ bool XtTangibleInterfaceDialog::isVisible() const
     return form != NULL && form->isVisible();
 }
 
-std::string XtTangibleInterfaceDialog::getServiceUrl() const
+String XtTangibleInterfaceDialog::getServiceUrl() const
 {
-    return form != NULL ? form->getText(SERVICE_URL) : std::string();
+    return form != NULL ? form->getText(SERVICE_URL) : String();
 }
 
-std::string XtTangibleInterfaceDialog::getConnectLabel() const
+String XtTangibleInterfaceDialog::getConnectLabel() const
 {
-    return form != NULL ? form->getActionLabel(CONNECT) : std::string();
+    return form != NULL ? form->getActionLabel(CONNECT) : String();
 }
 
-bool XtTangibleInterfaceDialog::performAction(const std::string& action,
-                                              const std::string* serviceUrl)
+bool XtTangibleInterfaceDialog::performAction(const String& action,
+                                              const String* serviceUrl)
 {
     if ( !isVisible() || form->action(action) == NULL ) {
         return false;

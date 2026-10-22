@@ -179,3 +179,11 @@ const int ReferenceFrameGizmo::DEFAULT_SIZE_IN_PIXELS;
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int ReferenceFrameGizmo::NUMBER_OF_AXES;
+
+const Class ReferenceFrameGizmo::CLASS = { "ReferenceFrameGizmo", &Gizmo::CLASS };
+
+const Class *
+ReferenceFrameGizmo::getClass() const
+{
+    return &CLASS;
+}

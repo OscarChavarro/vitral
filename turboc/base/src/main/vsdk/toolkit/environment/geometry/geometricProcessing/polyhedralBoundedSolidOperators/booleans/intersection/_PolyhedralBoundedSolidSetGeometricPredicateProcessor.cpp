@@ -1,7 +1,6 @@
-#include <algorithm>
 #include <math.h>
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
@@ -15,13 +14,14 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 
 typedef _PolyhedralBoundedSolidSetGeometricPredicateProcessor Processor;
 typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector OnSector;
 typedef _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace OnFace;
 typedef PolyhedralBoundedSolidNumericPolicy::ToleranceContext ToleranceContext;
 
-std::vector<Processor::SectoroverlapTraceEntry>* Processor::sectoroverlapTrace = NULL;
+ArrayList<Processor::SectoroverlapTraceEntry>* Processor::sectoroverlapTrace = NULL;
 int Processor::sectoroverlapCallCounter = 0;
 
 
@@ -91,7 +91,7 @@ static bool isCoplanarTangentialTraceEnabled()
     return Boolean::getBoolean(TRACE_COPLANAR_TANGENTIAL_PROPERTY);
 }
 
-static void traceCoplanarTangential(const std::string& message)
+static void traceCoplanarTangential(const String& message)
 {
     if ( !isCoplanarTangentialTraceEnabled() ) {
         return;
@@ -331,8 +331,8 @@ static int classifyCoplanarIntervalRelation(const CoplanarAngularInterval& a,
     }
 
     alignedB = alignCoplanarInterval(b, a.interior);
-    overlap = std::min(a.end, alignedB.end) -
-        std::max(a.start, alignedB.start);
+    overlap = Math::min(a.end, alignedB.end) -
+        Math::max(a.start, alignedB.start);
 
     if ( overlap > context.angleTolerance() ) {
         return OnFace::COPLANAR_OVERLAP;
@@ -465,7 +465,7 @@ static int classifySectorAgainstReferenceVertex(
     return bestRelation;
 }
 
-static void registerCoplanarRelation(std::vector<OnFace>& nbr, size_t index,
+static void registerCoplanarRelation(ArrayList<OnFace>& nbr, size_t index,
                               int relation)
 {
     OnFace& n = nbr[index];
@@ -505,7 +505,7 @@ const ToleranceContext& Processor::context()
 void Processor::enableSectoroverlapTrace()
 {
     delete sectoroverlapTrace;
-    sectoroverlapTrace = new std::vector<SectoroverlapTraceEntry>();
+    sectoroverlapTrace = new ArrayList<SectoroverlapTraceEntry>();
     sectoroverlapCallCounter = 0;
 }
 
@@ -515,7 +515,7 @@ void Processor::disableSectoroverlapTrace()
     sectoroverlapTrace = NULL;
 }
 
-const std::vector<Processor::SectoroverlapTraceEntry>*
+const ArrayList<Processor::SectoroverlapTraceEntry>*
 Processor::getSectoroverlapTrace()
 {
     return sectoroverlapTrace;
@@ -558,7 +558,7 @@ void Processor::recordSectoroverlapCall(const SectorOnVertex& na,
     entry.boundaryRayContact = Cpp98Support::abs(entry.diffA2B1) < 1.0e-12
         || Cpp98Support::abs(entry.diffB2A1) < 1.0e-12;
     entry.decision = decision;
-    sectoroverlapTrace->push_back(entry);
+    sectoroverlapTrace->add(entry);
 }
 
 int Processor::compareToZero(double value)
@@ -713,7 +713,7 @@ int Processor::resolveCoplanarVertexVertexClass(int op, bool sameOrientation,
 }
 
 void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
-    std::vector<SectorOnFace>& nbr,
+    ArrayList<SectorOnFace>& nbr,
     _PolyhedralBoundedSolidFace* referenceFace,
     InfinitePlane* referencePlane,
     int BvsA, int op,
@@ -723,8 +723,8 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
     _PolyhedralBoundedSolidFace* localFace;
     Vector3Dd c;
     double d;
-    size_t i;
-    size_t nnbr = nbr.size();
+    long i;
+    long nnbr = nbr.size();
     int relation;
     int resolvedClass;
     bool sameOrientation;
@@ -778,7 +778,7 @@ void Processor::applyCoplanarRulesToVertexFaceNeighborhood(
             resolvedClass = resolveCoplanarSectorClass(op, BvsA,
                 sameOrientation);
             traceCoplanarTangential(
-                std::string("  resolved vertexFace coplanar overlap sameOrientation=") +
+                String("  resolved vertexFace coplanar overlap sameOrientation=") +
                 booleanName(sameOrientation) + " class=" +
                 Cpp98Support::toString(resolvedClass));
             nbr[i].cl = resolvedClass;

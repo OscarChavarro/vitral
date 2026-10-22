@@ -8,6 +8,9 @@ class Camera;
 
 class CameraController : public Controller {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~CameraController() {}
 
     virtual bool processKeyPressedEvent(const KeyEvent& keyEvent) = 0;

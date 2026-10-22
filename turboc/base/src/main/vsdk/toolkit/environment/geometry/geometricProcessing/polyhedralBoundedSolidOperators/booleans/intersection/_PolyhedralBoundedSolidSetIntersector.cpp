@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -15,8 +14,9 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "java/lang/Math.h"
 
-std::vector<String> _PolyhedralBoundedSolidSetIntersector::intersectionTrace;
+ArrayList<String> _PolyhedralBoundedSolidSetIntersector::intersectionTrace;
 
 
 static String format(const char* pattern, ...) __attribute__((format(printf, 1, 2)));
@@ -59,7 +59,7 @@ _PolyhedralBoundedSolidSetIntersector::findNearbyBoundaryHit(
         return BoundaryHit();
     }
 
-    tolerance = std::max(numericContext.bigEpsilon() * 10.0, 1.0e-7);
+    tolerance = Math::max(numericContext.bigEpsilon() * 10.0, 1.0e-7);
     for ( i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidHalfEdge* start;
         _PolyhedralBoundedSolidHalfEdge* current;
@@ -156,7 +156,7 @@ void _PolyhedralBoundedSolidSetIntersector::addsovf(
     int BvsA, VertexFaceList& sonva, VertexFaceList& sonvb)
 {
     VertexFaceList& sonv = (BvsA == 0) ? sonva : sonvb;
-    size_t i;
+    long i;
 
     for ( i = 0; i < sonv.size(); i++ ) {
         if ( sonv[i].v == he->startingVertex && sonv[i].f == f ) {
@@ -167,7 +167,7 @@ void _PolyhedralBoundedSolidSetIntersector::addsovf(
     _PolyhedralBoundedSolidSetOperatorVertexFace elem;
     elem.v = he->startingVertex;
     elem.f = f;
-    sonv.push_back(elem);
+    sonv.add(elem);
 }
 
 /**
@@ -178,7 +178,7 @@ void _PolyhedralBoundedSolidSetIntersector::addsovv(
     _PolyhedralBoundedSolidVertex* a, _PolyhedralBoundedSolidVertex* b,
     int BvsA, VertexVertexList& sonvv)
 {
-    size_t i;
+    long i;
 
     for ( i = 0; i < sonvv.size(); i++ ) {
         const _PolyhedralBoundedSolidSetOperatorVertexVertex& elem = sonvv[i];
@@ -197,7 +197,7 @@ void _PolyhedralBoundedSolidSetIntersector::addsovv(
         elem.va = b;
         elem.vb = a;
     }
-    sonvv.push_back(elem);
+    sonvv.add(elem);
 }
 
 /**
@@ -245,7 +245,7 @@ void _PolyhedralBoundedSolidSetIntersector::doVertexOnFace(
             const char* fLabelVof = (BvsA == 0) ? "B" : "A";
             int bv1Vof = intersectedHalfedge->startingVertex->id;
             int bv2Vof = intersectedHalfedge->next()->startingVertex->id;
-            intersectionTrace.push_back(format(
+            intersectionTrace.add(format(
                 "Vertex %s:%d created splitting %s:<%d, %d> boundary edge (at coincidence with %s vertex %d).",
                 fLabelVof, newVIdVof, fLabelVof, bv1Vof, bv2Vof, eLabelVof, v->id));
             PolyhedralBoundedSolidEulerOperators::lmev(faceSolid,
@@ -374,7 +374,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
                 const char* eLabel = (BvsA == 0) ? "A" : "B";
                 const char* fLabel = (BvsA == 0) ? "B" : "A";
                 int newVId = nextVertexId(edgeSolid, faceSolid);
-                intersectionTrace.push_back(format(
+                intersectionTrace.add(format(
                     "Vertex %s:%d created after intersection between %s:%d face and %s:<%d, %d> edge.",
                     eLabel, newVId, fLabel, f->id, eLabel, v1->id, v2->id));
                 PolyhedralBoundedSolidEulerOperators::lmev(edgeSolid,
@@ -394,7 +394,7 @@ _PolyhedralBoundedSolidEdge* _PolyhedralBoundedSolidSetIntersector::doSetOpGener
                     int newVIdBoundary = nextVertexId(edgeSolid, faceSolid);
                     int bv1 = intersectedHalfedge->startingVertex->id;
                     int bv2 = intersectedHalfedge->next()->startingVertex->id;
-                    intersectionTrace.push_back(format(
+                    intersectionTrace.add(format(
                         "Vertex %s:%d created splitting %s:<%d, %d> boundary edge (intersection on %s:%d face boundary).",
                         fLabel, newVIdBoundary, fLabel, bv1, bv2, fLabel, f->id));
                     PolyhedralBoundedSolidEulerOperators::lmev(faceSolid,

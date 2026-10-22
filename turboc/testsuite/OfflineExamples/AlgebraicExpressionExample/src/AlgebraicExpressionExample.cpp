@@ -1,6 +1,6 @@
 //= This example serves as a testbed for AlgebraicExpression class.           =
 
-#include <cstdio>
+#include <stdio.h>
 
 #include "java/lang/Double.h"
 #include "java/lang/String.h"
@@ -24,19 +24,19 @@ int main(int argc, char** argv)
                     joined += " ";
                 }
             }
-            std::printf("Parsing from %d parameters with regexp \"%s\"\n",
+            printf("Parsing from %d parameters with regexp \"%s\"\n",
                         argc - 1, joined.c_str());
             regexp.setExpression(joined);
         }
-        std::printf("REGEXP:\n%s\n", regexp.toString().c_str());
-        std::printf("REGEXP VALUE:\n%s\n",
+        printf("REGEXP:\n%s\n", regexp.toString().c_str());
+        printf("REGEXP VALUE:\n%s\n",
                     Double::toString(regexp.eval()).c_str());
     }
     catch ( const AlgebraicExpressionException& e ) {
         // Same text as the Java version prints for the exception
-        std::printf("Error processing regular expression."
+        printf("Error processing regular expression."
                     "vsdk.toolkit.common.symbolicAlgebra.AlgebraicExpressionException: %s\n",
-                    e.what());
+                    e.getMessage().c_str());
     }
     return 0;
 }

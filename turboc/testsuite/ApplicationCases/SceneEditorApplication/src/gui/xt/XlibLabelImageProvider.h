@@ -1,9 +1,8 @@
 #ifndef __XLIB_LABEL_IMAGE_PROVIDER__
 #define __XLIB_LABEL_IMAGE_PROVIDER__
 
-#include <map>
-#include <string>
-#include <utility>
+#include "java/util/TreeMap.h"
+#include "java/lang/String.h"
 
 #include <X11/Xlib.h>
 
@@ -11,6 +10,29 @@
 #include "application/XtSceneEditorOpenGLVariant.h"
 
 class RGBAImageUncompressed;
+
+/**
+Key of a cached label: its text, font size and color, ordered
+lexicographically.
+*/
+class XlibLabelImageKey {
+public:
+    String text;
+    int fontSize;
+    unsigned long rgb;
+
+    XlibLabelImageKey() : text(""), fontSize(0), rgb(0) {}
+    XlibLabelImageKey(const String& text, int fontSize, unsigned long rgb)
+        : text(text), fontSize(fontSize), rgb(rgb) {}
+
+    bool operator<(const XlibLabelImageKey& other) const
+    {
+        if ( text < other.text ) return true;
+        if ( other.text < text ) return false;
+        if ( fontSize != other.fontSize ) return fontSize < other.fontSize;
+        return rgb < other.rgb;
+    }
+};
 
 /**
 Gives the OpenGL 1.2 renderers the images of the labels of the viewports (titles, HUD, gizmo labels),
@@ -21,10 +43,10 @@ same labels every frame.
 */
 class XlibLabelImageProvider : public XtOpenGLLabelImageProvider {
 private:
-    typedef std::pair<std::pair<std::string, int>, unsigned long> Key;
+    typedef XlibLabelImageKey Key;
 
     Display* display;
-    std::map<Key, RGBAImageUncompressed*> cache;
+    TreeMap<Key, RGBAImageUncompressed*> cache;
 
     XlibLabelImageProvider(const XlibLabelImageProvider& other);
     XlibLabelImageProvider& operator=(const XlibLabelImageProvider& other);

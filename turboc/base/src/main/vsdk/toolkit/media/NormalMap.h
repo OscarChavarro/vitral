@@ -22,6 +22,9 @@ private:
     Vector3Dd* bumpMapScale;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     NormalMap();
     NormalMap(const NormalMap& other);
     virtual ~NormalMap();

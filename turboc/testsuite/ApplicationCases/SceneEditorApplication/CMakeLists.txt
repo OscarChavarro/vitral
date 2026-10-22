@@ -138,6 +138,7 @@ set(SCENE_EDITOR_SOURCES
     src/model/history/BodyTransformState.cpp
     src/model/history/CameraState.cpp
     src/model/history/CompositeOperation.cpp
+    src/model/history/EntityTransformState.cpp
     src/model/history/LightTransformState.cpp
     src/model/history/SceneElementKind.cpp
     src/model/history/SceneHistory.cpp
@@ -146,12 +147,14 @@ set(SCENE_EDITOR_SOURCES
     src/model/history/SceneSnapshot.cpp
     src/model/history/SceneTransformationOperation.cpp
     src/model/history/UndoQueue.cpp
+    src/model/history/UndoableOperation.cpp
     src/model/history/ViewportHistory.cpp
     src/model/history/ViewportState.cpp
     src/model/history/ViewportStateOperation.cpp
     src/model/selection/LightPicker.cpp
     src/model/selection/ScenePicker.cpp
     src/model/selection/SceneSelectionEditor.cpp
+    src/model/selection/EntityListView.cpp
     src/model/selection/SelectionSet.cpp
     src/render/DrawingAreaGizmoPresenter.cpp
     src/render/FrameCaptureService.cpp

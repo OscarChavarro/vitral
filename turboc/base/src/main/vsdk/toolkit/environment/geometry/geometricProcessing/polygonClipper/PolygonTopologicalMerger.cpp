@@ -1,6 +1,5 @@
 #include <math.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #include "java/util/ArrayList.txx"
 #include "java/util/HashMap.h"

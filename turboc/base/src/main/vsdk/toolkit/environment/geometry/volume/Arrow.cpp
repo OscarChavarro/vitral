@@ -352,3 +352,11 @@ const int Arrow::DEFAULT_CIRCUMFERENCE_DIVISIONS;
 const int Arrow::DEFAULT_HEIGHT_DIVISIONS;
 const int Arrow::MIN_CIRCUMFERENCE_DIVISIONS;
 const int Arrow::MIN_HEIGHT_DIVISIONS;
+
+const Class Arrow::CLASS = { "Arrow", &Solid::CLASS };
+
+const Class *
+Arrow::getClass() const
+{
+    return &CLASS;
+}

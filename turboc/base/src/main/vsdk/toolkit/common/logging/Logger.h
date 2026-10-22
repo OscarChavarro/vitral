@@ -3,7 +3,7 @@
 
 
 #include "java/lang/String.h"
-#include <exception>
+#include "java/lang/Throwable.h"
 class Logger {
 public:
     static const int WARNING = 1;
@@ -16,12 +16,12 @@ public:
     static void setWithFatalExceptions(bool flag);
 
     static void reportMessage(const String& className, int level, const String& method, const String& message);
-    static void reportMessageWithException(const String& className, int level, const String& method, const String& message, const std::exception* cause);
+    static void reportMessageWithException(const String& className, int level, const String& method, const String& message, const Throwable* cause);
 
 private:
     static bool withSystemExit;
     static bool withFatalExceptions;
-    static void processFatalError(const String& method, const String& message, const std::exception* cause);
+    static void processFatalError(const String& method, const String& message, const Throwable* cause);
 };
 
 

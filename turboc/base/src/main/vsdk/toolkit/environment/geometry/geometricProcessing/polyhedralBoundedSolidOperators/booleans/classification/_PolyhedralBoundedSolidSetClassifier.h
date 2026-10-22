@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_CLASSIFIER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_CLASSIFIER__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -49,20 +49,20 @@ private:
     static int debugFlags;
 
     static int compareToZero(double value);
-    static std::string summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
-    static std::string summarizeNullEdge(const _PolyhedralBoundedSolidSetOperatorNullEdge* edge);
-    static std::string formatVertexVertexTraceContext(int op, int cursor,
-        const std::string& caseName, const std::string& action, int type);
-    static std::string labelSectorState(int state);
-    static std::string summarizeSector(const VertexVertexClassificationData& data,
+    static String summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he);
+    static String summarizeNullEdge(const _PolyhedralBoundedSolidSetOperatorNullEdge* edge);
+    static String formatVertexVertexTraceContext(int op, int cursor,
+        const String& caseName, const String& action, int type);
+    static String labelSectorState(int state);
+    static String summarizeSector(const VertexVertexClassificationData& data,
                                        int index);
     static void traceVertexVertexDecisionStep(
         const VertexVertexClassificationData& data, int op,
-        const std::string& phase, int index,
+        const String& phase, int index,
         _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
         _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2);
     static void traceVertexVertexDecisionReason(int op, int cursor,
-        const std::string& caseName, const std::string& reason,
+        const String& caseName, const String& reason,
         _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
         _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2);
     static _PolyhedralBoundedSolidHalfEdge* selectAlternativeBHalfEdge(
@@ -86,11 +86,11 @@ private:
     static void separateEdgeSequence(_SetOperationContext& ctx,
         _PolyhedralBoundedSolidHalfEdge* from,
         _PolyhedralBoundedSolidHalfEdge* to,
-        int type, const std::string& traceContext,
+        int type, const String& traceContext,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static void flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
         _PolyhedralBoundedSolidHalfEdge* he, int type, bool orient,
-        const std::string& traceContext,
+        const String& traceContext,
         PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB);
     static bool nulledge(_PolyhedralBoundedSolidHalfEdge* he);
     static bool strutnulledge(_PolyhedralBoundedSolidHalfEdge* he);

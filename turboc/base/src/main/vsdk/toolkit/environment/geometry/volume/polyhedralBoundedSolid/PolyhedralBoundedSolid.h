@@ -14,6 +14,9 @@ class _PolyhedralBoundedSolidVertex;
 
 class PolyhedralBoundedSolid : public Solid {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int PLUS = 1;
     static const int MINUS = 0;
 

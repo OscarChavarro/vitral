@@ -1,7 +1,7 @@
 // Before any other header that could include the Xt ones
 #include "vsdk/toolkit/gui/XawIntrinsics.h"
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/CommandListener.h"
@@ -52,7 +52,7 @@ static void popupSubmenu(XtWidget entry, XtPointer clientData, XtPointer)
 static XtWidget createPopupShell(XtWidget owner)
 {
     // Unique names: menu buttons find their popup by name
-    std::string name = XtWidgetSupport::uniqueName("vitralMenu");
+    String name = XtWidgetSupport::uniqueName("vitralMenu");
     XtWidgetSupport::ShellVisual shellVisual =
         XtWidgetSupport::shellVisualOf(owner);
     Arg args[4]; Cardinal n = 0;
@@ -91,7 +91,7 @@ XtWidget XawGuiRenderer::buildPopupMenu(XtWidget owner, WidgetMenu* menu,
 
     ArrayList<WidgetMenuElement*>& children = menu->getChildren();
     for ( long i = 0; i < children.size(); i++ ) {
-        WidgetMenu* submenu = dynamic_cast<WidgetMenu*>(children.get(i));
+        WidgetMenu* submenu = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenu::CLASS) ? (WidgetMenu*)children.get(i) : NULL);
         if ( submenu != NULL ) {
             XtWidget entry = addMenuEntry(popup, submenu->getName(), fontSet);
             XtWidget submenuPopup =
@@ -99,7 +99,7 @@ XtWidget XawGuiRenderer::buildPopupMenu(XtWidget owner, WidgetMenu* menu,
             XtAddCallback(entry, XtNcallback, &popupSubmenu, submenuPopup);
             continue;
         }
-        WidgetMenuItem* option = dynamic_cast<WidgetMenuItem*>(children.get(i));
+        WidgetMenuItem* option = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenuItem::CLASS) ? (WidgetMenuItem*)children.get(i) : NULL);
         if ( option == NULL ) {
             continue;
         }
@@ -131,7 +131,7 @@ XtWidget XawGuiRenderer::buildMenubar(XtWidget parent, WidgetMenu* menubar,
     if ( menubar != NULL ) {
         ArrayList<WidgetMenuElement*>& children = menubar->getChildren();
         for ( long i = 0; i < children.size(); i++ ) {
-            WidgetMenu* menu = dynamic_cast<WidgetMenu*>(children.get(i));
+            WidgetMenu* menu = (children.get(i) != NULL && children.get(i)->instanceOf(WidgetMenu::CLASS) ? (WidgetMenu*)children.get(i) : NULL);
             if ( menu != NULL ) {
                 menus.add(menu);
             }

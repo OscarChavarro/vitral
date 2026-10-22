@@ -16,6 +16,9 @@ private:
     CameraSnapshot* cameraSnapshot;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     SimpleSceneSnapshot(
         ArrayList<SimpleBody*>& simpleBodies,
         ArrayList<Light*>& lights,

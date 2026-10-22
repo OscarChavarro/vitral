@@ -12,8 +12,6 @@ class Mouse : private MouseCursor::TextScreen {
   public:
     Mouse();
     ~Mouse() { close(); }
-    Mouse(const Mouse &) = delete;
-    Mouse &operator=(const Mouse &) = delete;
 
     void open();
     void close();
@@ -26,15 +24,17 @@ class Mouse : private MouseCursor::TextScreen {
 
   private:
     // Mouse counts per text cell (svgalib's scale), and how far the wheel may turn either way.
-    static constexpr int TEXT_SCALE = 8;
-    static constexpr int WHEEL_RANGE = 1 << 20;
+    enum { TEXT_SCALE = 8, WHEEL_RANGE = 1 << 20 };
+
+    Mouse(const Mouse &);
+    Mouse &operator=(const Mouse &);
 
     bool connected;
     const Picture *picture;
     const Hud *hud;
     MouseCursor pointer;
 
-    char cellAt(int column, int row, bool &bold, bool &inverse) const override;
+    char cellAt(int column, int row, bool &bold, bool &inverse) const;
 };
 
 #endif

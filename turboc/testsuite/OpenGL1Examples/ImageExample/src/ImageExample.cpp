@@ -319,7 +319,7 @@ public:
         };
 
         glDisable(GL_CULL_FACE);
-        RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(image);
+        RGBAImageUncompressed* rgbaUncomp = (image != NULL && image->instanceOf(RGBAImageUncompressed::CLASS) ? (RGBAImageUncompressed*)image : NULL);
         if (rgbaUncomp != NULL) {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

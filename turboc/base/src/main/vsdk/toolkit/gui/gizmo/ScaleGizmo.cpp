@@ -750,3 +750,11 @@ const int ScaleGizmo::DEFAULT_APPARENT_SIZE_IN_PIXELS;
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int ScaleGizmo::NULL_GROUP;
+
+const Class ScaleGizmo::CLASS = { "ScaleGizmo", &Gizmo::CLASS };
+
+const Class *
+ScaleGizmo::getClass() const
+{
+    return &CLASS;
+}

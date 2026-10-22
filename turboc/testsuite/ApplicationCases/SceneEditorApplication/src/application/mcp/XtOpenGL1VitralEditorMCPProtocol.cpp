@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <exception>
 #include "java/lang/Runnable.h"
-#include <stdexcept>
 
 #include "java/io/BufferedReader.h"
 #include "java/io/PrintWriter.h"
@@ -10,6 +8,8 @@
 #include "application/XtOpenGL1SceneEditorApplication.h"
 #include "application/mcp/MCPJson.h"
 #include "application/mcp/XtOpenGL1VitralEditorMCPProtocol.h"
+#include "java/lang/Exception.h"
+#include "java/lang/IllegalArgumentException.h"
 
 
 /**
@@ -35,9 +35,9 @@ public:
         try {
             result = protocol->executeTool(tool, request);
         }
-        catch ( const std::exception& e ) {
+        catch ( const Exception& e ) {
             failed = true;
-            failure = e.what();
+            failure = e.getMessage().c_str();
         }
     }
 };
@@ -66,9 +66,9 @@ void XtOpenGL1VitralEditorMCPProtocol::run()
             }
         }
     }
-    catch ( const std::exception& e ) {
+    catch ( const Exception& e ) {
         fprintf(stderr, "Error on XtOpenGL1VitralEditorMCPProtocol!\n%s\n",
-                e.what());
+                e.getMessage().c_str());
     }
 }
 
@@ -92,8 +92,8 @@ String XtOpenGL1VitralEditorMCPProtocol::handle(
         }
         return MCPJson::error(id, -32601, String("Unknown method: ") + method);
     }
-    catch ( const std::exception& e ) {
-        return MCPJson::error(id, -32000, e.what());
+    catch ( const Exception& e ) {
+        return MCPJson::error(id, -32000, e.getMessage().c_str());
     }
 }
 
@@ -224,7 +224,7 @@ String XtOpenGL1VitralEditorMCPProtocol::executeTool(
     if ( tool.equals("app.exit") ) {
         return applicationTools.exitApplication();
     }
-    throw std::invalid_argument(
+    throw IllegalArgumentException(
         (String("Unknown tool: ") + tool).c_str());
 }
 

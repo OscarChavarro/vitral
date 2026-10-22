@@ -16,6 +16,9 @@ private:
     Camera* camera;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     FixedBackground(Camera* camera, RGBAImageUncompressed* image);
     virtual ~FixedBackground() {}
 

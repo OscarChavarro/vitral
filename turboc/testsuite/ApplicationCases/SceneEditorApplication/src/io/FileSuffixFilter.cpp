@@ -3,6 +3,12 @@
 #include "vsdk/toolkit/gui/dialog/components/DialogFileFilter.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialog.h"
 #include "io/FileSuffixFilter.h"
+#include "java/util/ArrayList.txx"
+
+FileSuffixFilter::FileSuffixFilter()
+    : suffix(""), description("")
+{
+}
 
 FileSuffixFilter::FileSuffixFilter(const String& suffix,
                                    const String& description)
@@ -25,28 +31,28 @@ String FileSuffixFilter::getSuffix(const String& path)
     return suffix;
 }
 
-std::vector<FileSuffixFilter> FileSuffixFilter::fromDialog(
+ArrayList<FileSuffixFilter> FileSuffixFilter::fromDialog(
     const WidgetDialog* definition)
 {
-    std::vector<FileSuffixFilter> filters;
+    ArrayList<FileSuffixFilter> filters;
     if ( definition == NULL ) {
         return filters;
     }
-    const std::vector<WidgetDialogElement>& elements = definition->getElements();
-    for ( size_t i = 0; i < elements.size(); i++ ) {
+    const ArrayList<WidgetDialogElement>& elements = definition->getElements();
+    for ( long i = 0; i < elements.size(); i++ ) {
         if ( !elements[i].getKind().equals("fileChooser") ) {
             continue;
         }
-        const std::vector<WidgetDialogElement>& children =
+        const ArrayList<WidgetDialogElement>& children =
             elements[i].getChildren();
-        for ( size_t j = 0; j < children.size(); j++ ) {
+        for ( long j = 0; j < children.size(); j++ ) {
             if ( !children[j].getKind().equals("fileFilter") ) {
                 continue;
             }
             // The label of a filter is its description, as in Java
             DialogFileFilter policy(children[j].getBinding(),
                                     children[j].getLabelKey());
-            filters.push_back(FileSuffixFilter(policy.getSuffix(),
+            filters.add(FileSuffixFilter(policy.getSuffix(),
                                                children[j].getLabelKey()));
         }
     }

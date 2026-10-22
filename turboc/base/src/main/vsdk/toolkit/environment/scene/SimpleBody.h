@@ -51,6 +51,9 @@ private:
     bool doIntersectionWithTranslationOnlySphereFastPath(const Ray& inOutRay, RayHit* outHit) const;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     SimpleBody();
     virtual ~SimpleBody();
 

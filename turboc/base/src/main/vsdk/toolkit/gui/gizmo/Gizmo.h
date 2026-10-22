@@ -13,6 +13,9 @@ style classes. This serves two purposes:
 */
 class Gizmo : public PresentationElement {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~Gizmo() {}
 };
 

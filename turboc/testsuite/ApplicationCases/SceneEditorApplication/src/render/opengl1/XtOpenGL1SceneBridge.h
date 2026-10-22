@@ -1,8 +1,8 @@
 #ifndef __XT_OPENGL1_SCENE_BRIDGE__
 #define __XT_OPENGL1_SCENE_BRIDGE__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 #include <X11/Xlib.h>
 
 #include "application/commands/GuiEventExecutor.h"
@@ -51,7 +51,7 @@ public:
         @param canvasY vertical position, in canvas pixels
         */
         virtual void cursorWarpRequested(int canvasX, int canvasY) = 0;
-        virtual void statusMessageRequested(const std::string& message) = 0;
+        virtual void statusMessageRequested(const String& message) = 0;
         virtual void closeRequested() = 0;
 
         /**
@@ -98,8 +98,8 @@ public:
     mode commands, as defined by the I18N context.
     */
     struct ViewportMenuItem {
-        std::string label;
-        std::string command;
+        String label;
+        String command;
         bool separator;
         /** true for the projection location / render mode in use */
         bool current;
@@ -127,7 +127,7 @@ public:
     viewports, the entries of their menus and the interaction modes shown
     in their HUDs.
     */
-    void setGuiDefinition(const std::string& json);
+    void setGuiDefinition(const String& json);
 
     /**
     @return the menubar of the I18N context, or null
@@ -179,7 +179,7 @@ public:
     it changes in the scene history (see `GuiEventExecutor`).
     @return whether the command was executed, failed, or needs the GUI
     */
-    CommandResult executeCommand(const std::string& command);
+    CommandResult executeCommand(const String& command);
 
     /**
     Ray traces the scene from its active camera into the raytraced image of
@@ -241,13 +241,13 @@ public:
     @return the entries of the menu of the viewport whose title was last
     clicked (see `Listener::viewportMenuRequested`)
     */
-    std::vector<ViewportMenuItem> getViewportMenuItems() const;
+    ArrayList<ViewportMenuItem> getViewportMenuItems() const;
 
     /**
     Executes a command of the viewport menu over the viewport whose title
     was clicked, recording the change of its view.
     */
-    void executeViewportCommand(const std::string& command);
+    void executeViewportCommand(const String& command);
 
     //= Modify panel ======================================================
 

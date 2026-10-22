@@ -87,3 +87,11 @@ bool RendererConfigurationController::processKeyReleasedEvent(const KeyEvent&)
 {
     return false;
 }
+
+const Class RendererConfigurationController::CLASS = { "RendererConfigurationController", &Controller::CLASS };
+
+const Class *
+RendererConfigurationController::getClass() const
+{
+    return &CLASS;
+}

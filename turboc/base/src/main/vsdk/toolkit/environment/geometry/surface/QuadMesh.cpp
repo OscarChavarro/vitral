@@ -279,7 +279,7 @@ static String intToStr(int val) {
 String QuadMesh::toString() const
 {
     String msg;
-    QuadMesh* self = const_cast<QuadMesh*>(this);
+    QuadMesh* self = ((QuadMesh*)(this));
     double* mm = self->getMinMax();
     msg += "- QuadMesh ------------------------------------------------------------\n";
     msg += "  - Number of quads:";
@@ -304,4 +304,12 @@ String QuadMesh::toString() const
     msg += "---------------------------------------------------------------------------\n";
     delete [] mm;
     return msg;
+}
+
+const Class QuadMesh::CLASS = { "QuadMesh", &Surface::CLASS };
+
+const Class *
+QuadMesh::getClass() const
+{
+    return &CLASS;
 }

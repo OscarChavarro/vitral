@@ -1,7 +1,7 @@
 #ifndef __WIDGET_DIALOG_ELEMENT__
 #define __WIDGET_DIALOG_ELEMENT__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 
@@ -24,21 +24,26 @@ private:
     String labelKey;
     String binding;
     String action;
-    std::vector<WidgetDialogElement> children;
+    ArrayList<WidgetDialogElement> children;
 
 public:
+    /**
+    Empty element, needed by the storage of `ArrayList`
+    */
+    WidgetDialogElement();
+
     WidgetDialogElement(const String& kind, const String& id,
                         const String& labelKey,
                         const String& binding,
                         const String& action,
-                        const std::vector<WidgetDialogElement>& children);
+                        const ArrayList<WidgetDialogElement>& children);
 
     const String& getKind() const;
     const String& getId() const;
     const String& getLabelKey() const;
     const String& getBinding() const;
     const String& getAction() const;
-    const std::vector<WidgetDialogElement>& getChildren() const;
+    const ArrayList<WidgetDialogElement>& getChildren() const;
 
     /**
     @return this element or the first of its descendants with the given

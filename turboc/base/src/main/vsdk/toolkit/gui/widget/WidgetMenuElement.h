@@ -32,6 +32,9 @@ protected:
     static String processAccelerator(const String& codedName);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~WidgetMenuElement() {}
 
     virtual String toString(int level) const = 0;

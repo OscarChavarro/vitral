@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include <deque>
-#include <exception>
+#include "java/util/ArrayDeque.h"
 #include <fcntl.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -15,6 +14,7 @@
 #undef String
 
 #include "vsdk/toolkit/gui/XtEventQueue.h"
+#include "java/lang/Exception.h"
 
 
 struct XtEventQueueTask {
@@ -36,7 +36,7 @@ struct XtEventQueueState {
     bool installed;
     pthread_mutex_t mutex;
     pthread_cond_t finished;
-    std::deque<XtEventQueueTask> tasks;
+    ArrayDeque<XtEventQueueTask> tasks;
 
     XtEventQueueState() : appContext(NULL), installed(false)
     {
@@ -48,8 +48,7 @@ struct XtEventQueueState {
 };
 
 /**
-Holds the mutex of the queue in a scope (C++98 replacement for
-`std::lock_guard`).
+Holds the mutex of the queue in a scope.
 */
 class XtEventQueueLock {
 public:
@@ -76,8 +75,8 @@ static void runTask(Runnable* runnable)
     try {
         runnable->run();
     }
-    catch ( const std::exception& e ) {
-        fprintf(stderr, "XtEventQueue: task failed: %s\n", e.what());
+    catch ( const Exception& e ) {
+        fprintf(stderr, "XtEventQueue: task failed: %s\n", e.getMessage().c_str());
     }
 }
 
@@ -115,11 +114,10 @@ static void dispatchTasks(XtPointer, int* fd, XtInputId*)
         XtEventQueueTask task;
         {
             XtEventQueueLock lock(&queue->mutex);
-            if ( queue->tasks.empty() ) {
+            if ( queue->tasks.isEmpty() ) {
                 break;
             }
-            task = queue->tasks.front();
-            queue->tasks.pop_front();
+            task = queue->tasks.removeFirst();
         }
         if ( task.delayMillis > 0 ) {
             XtAppAddTimeOut(queue->appContext, task.delayMillis,
@@ -136,7 +134,7 @@ static void post(const XtEventQueueTask& task)
     XtEventQueueState* queue = state();
     {
         XtEventQueueLock lock(&queue->mutex);
-        queue->tasks.push_back(task);
+        queue->tasks.addLast(task);
     }
     char wakeUp = 1;
     if ( write(queue->pipeFds[1], &wakeUp, 1) < 0 ) {

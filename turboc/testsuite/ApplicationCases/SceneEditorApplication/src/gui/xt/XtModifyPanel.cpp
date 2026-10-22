@@ -34,7 +34,7 @@ void XtModifyPanel::notifyTargetBeginEdit(SimpleBody* target)
     XtWidgetSupport::removeAll(container);
     activeEditor = NULL;
 
-    if (dynamic_cast<FunctionalExplicitSurface*>(target->getGeometry()) != NULL) {
+    if ((target->getGeometry() != NULL && target->getGeometry()->instanceOf(FunctionalExplicitSurface::CLASS))) {
         if (genericEditor != NULL) {
             genericEditor->detach();
         }

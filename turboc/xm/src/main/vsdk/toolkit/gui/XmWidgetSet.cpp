@@ -16,6 +16,7 @@
 
 #include "vsdk/toolkit/gui/XmWidgetSet.h"
 #include "vsdk/toolkit/gui/XmWidgetSupport.h"
+#include "java/util/ArrayList.txx"
 
 
 struct XmNotifyBinding {
@@ -127,19 +128,19 @@ void XmWidgetSet::setWindowCloseHandler(Widget shell, NotifyProc close,
     binding->clientData = clientData;
     XtVaSetValues(shell, XmNdeleteResponse, XmDO_NOTHING, NULL);
     Atom wmDeleteWindow = XmInternAtom(XtDisplay(shell),
-        const_cast<char*>("WM_DELETE_WINDOW"), False);
+        ((char*)("WM_DELETE_WINDOW")), False);
     XmAddWMProtocolCallback(shell, wmDeleteWindow, notify, binding);
     XtAddCallback(shell, XmNdestroyCallback, freeNotifyBinding, binding);
 }
 
 Widget XmWidgetSet::createChoiceMenu(Widget owner,
-                                     const std::vector<MenuChoice>& items,
+                                     const ArrayList<MenuChoice>& items,
                                      XFontSet fontSet, ChoiceProc choose,
                                      void* clientData)
 {
     Widget menu = XmWidgetSupport::createPopupMenu(owner, "choiceMenu");
     XmRenderTable fonts = XmWidgetSupport::createRenderTable(owner, fontSet);
-    for (size_t i = 0; i < items.size(); ++i) {
+    for ( long i = 0; i < items.size(); ++i) {
         if (items[i].separator) {
             XtCreateManagedWidget("separator", xmSeparatorWidgetClass, menu,
                                   NULL, 0);

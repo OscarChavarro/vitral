@@ -3,6 +3,7 @@
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class ApplicationModel;
 class XtOpenGL1ApplicationController;
@@ -110,7 +111,7 @@ public:
     /**
     Runs an action of the scene selector (deleteSelected,
     toggleVisibility).
-    @throws std::invalid_argument for unknown actions
+    @throws IllegalArgumentException for unknown actions
     */
     virtual void selectorAction(const String& action) = 0;
 

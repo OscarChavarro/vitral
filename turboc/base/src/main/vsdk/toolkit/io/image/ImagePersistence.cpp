@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vector>
 
 #include "java/io/BufferedInputStream.h"
 #include "java/io/BufferedOutputStream.h"
@@ -603,18 +602,21 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
         }
         png_read_update_info(png_ptr, info_ptr);
 
-        std::vector<unsigned char> pixels((size_t)width * (size_t)height * 4);
-        std::vector<png_bytep> rows((size_t)height);
+        unsigned char* pixels =
+            new unsigned char[(size_t)width * (size_t)height * 4];
+        png_bytep* rows = new png_bytep[(size_t)height];
         for (int y = 0; y < height; y++) {
-            rows[(size_t)y] = &pixels[(size_t)y * (size_t)width * 4];
+            rows[y] = &pixels[(size_t)y * (size_t)width * 4];
         }
-        png_read_image(png_ptr, rows.data());
+        png_read_image(png_ptr, rows);
         png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fp);
+        delete[] rows;
 
         RGBAImageUncompressed* retImage = new RGBAImageUncompressed();
         if (!retImage->init(width, height)) {
             delete retImage;
+            delete[] pixels;
             return NULL;
         }
         size_t pos = 0;
@@ -625,6 +627,7 @@ RGBAImageUncompressed* ImagePersistence::importRGBA(const File& inImageFd) {
                 pos += 4;
             }
         }
+        delete[] pixels;
         return retImage;
     }
 #endif

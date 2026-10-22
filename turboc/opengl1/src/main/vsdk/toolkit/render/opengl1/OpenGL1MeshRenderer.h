@@ -1,7 +1,6 @@
 #ifndef __OPEN_GL_1_MESH_RENDERER__
 #define __OPEN_GL_1_MESH_RENDERER__
 
-#include <vector>
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -39,9 +38,9 @@ public:
     class Mesh {
     public:
         /// x,y,z of each vertex; three consecutive vertices make a triangle
-        std::vector<float> positions;
-        std::vector<float> normals;
-        std::vector<float> uvs;
+        ArrayList<float> positions;
+        ArrayList<float> normals;
+        ArrayList<float> uvs;
         int vertexCount;
         /// Vertices of the sides the geometry defines; the rest (if any) are
         /// back sides added to see open surfaces from both sides

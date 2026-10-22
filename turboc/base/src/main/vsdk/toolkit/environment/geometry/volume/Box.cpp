@@ -197,3 +197,11 @@ PolyhedralBoundedSolid* Box::buildPolyhedralBoundedSolid()
         solid, 1, 1, 5, 6, 8, 4, 6);
     return solid;
 }
+
+const Class Box::CLASS = { "Box", &Solid::CLASS };
+
+const Class *
+Box::getClass() const
+{
+    return &CLASS;
+}

@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include <algorithm>
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
@@ -9,6 +8,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/Torus.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 Torus::Torus(double inMajorRadius, double inMinorRadius)
     : majorRadius(inMajorRadius), minorRadius(inMinorRadius) {}
 
@@ -103,7 +103,7 @@ ArrayList<double> Torus::findRealRoots(
     double bound = 0;
 
     for ( int k = 0; k < degree; k++ ) {
-        bound = std::max(bound, fabs(polynomial.get(k) / polynomial.get(degree)));
+        bound = Math::max(bound, fabs(polynomial.get(k) / polynomial.get(degree)));
     }
     bound += 1;
 
@@ -111,7 +111,7 @@ ArrayList<double> Torus::findRealRoots(
 
     limits.add(-bound);
     for ( long k = 0; k < critical.size(); k++ ) {
-        limits.add(std::max(-bound, std::min(bound, critical.get(k))));
+        limits.add(Math::max(-bound, Math::min(bound, critical.get(k))));
     }
     limits.add(bound);
 
@@ -165,7 +165,7 @@ bool Torus::isOnSurface(const Vector3Dd& origin, const Vector3Dd& direction,
 {
     Vector3Dd hit = origin.add(direction.multiply(t));
     double distanceToCircle = Cpp98Support::hypot(Cpp98Support::hypot(hit.x(), hit.y()) - majorRadius, hit.z());
-    double tolerance = ROOT_VALIDATION_TOLERANCE * std::max(majorRadius, minorRadius);
+    double tolerance = ROOT_VALIDATION_TOLERANCE * Math::max(majorRadius, minorRadius);
 
     return fabs(distanceToCircle - minorRadius) <= tolerance;
 }
@@ -222,4 +222,12 @@ double* Torus::getMinMax() {
     m[0] = -ext; m[1] = -ext; m[2] = -minorRadius;
     m[3] =  ext; m[4] =  ext; m[5] =  minorRadius;
     return m;
+}
+
+const Class Torus::CLASS = { "Torus", &Solid::CLASS };
+
+const Class *
+Torus::getClass() const
+{
+    return &CLASS;
 }

@@ -1,7 +1,7 @@
 #ifndef __XT_SELECTOR_DIALOG__
 #define __XT_SELECTOR_DIALOG__
 
-#include <string>
+#include "java/lang/String.h"
 
 // Xt names its strings and objects as the vitral String and Object
 // classes: renamed while its headers are read (see XtIntrinsics.h)
@@ -15,6 +15,7 @@
 #include "vsdk/toolkit/gui/dialog/components/DialogTreeNode.h"
 #include "vsdk/toolkit/render/xt/XtDialogHost.h"
 #include "vsdk/toolkit/render/xt/XtTreeView.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class XtApplicationHost;
 
@@ -56,12 +57,12 @@ public:
     /**
     Runs an action of the definition: `deleteSelected` or
     `toggleVisibility`.
-    @throws std::invalid_argument for actions not in the definition
+    @throws IllegalArgumentException for actions not in the definition
     */
-    void performAction(const std::string& action);
+    void performAction(const String& action);
 
 private:
-    // Callbacks of the presenter and of the tree (lambdas in the C++11 port)
+    // Callbacks of the presenter and of the tree.
     class RepaintRequest : public Runnable {
     public:
         explicit RepaintRequest(XtApplicationHost* host) : host(host) {}
@@ -110,11 +111,11 @@ private:
     Widget popupMenu;
 
     // XtDialogHost::MessageSource
-    virtual std::string message(const std::string& key);
+    virtual String message(const String& key);
     void applyTreeSelection();
     void showPopup(int rootX, int rootY);
     void collectSelected(const DialogTreeNode* node,
-                         std::vector<const DialogTreeNode*>& selected);
+                         ArrayList<const DialogTreeNode*>& selected);
 
     static void popupChosen(int index, void* clientData);
 

@@ -398,3 +398,11 @@ void CameraControllerOrbiter::setCamera(Camera* cam)
 {
     camera = cam;
 }
+
+const Class CameraControllerOrbiter::CLASS = { "CameraControllerOrbiter", &CameraController::CLASS };
+
+const Class *
+CameraControllerOrbiter::getClass() const
+{
+    return &CLASS;
+}

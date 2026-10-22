@@ -1,8 +1,7 @@
 #ifndef __VSDK_EXCEPTION__
 #define __VSDK_EXCEPTION__
 
-#include <exception>
-
+#include "java/lang/Exception.h"
 #include "java/lang/String.h"
 
 /**
@@ -13,29 +12,13 @@ style classes inside the Vitral SDK. This serves two purposes:
   - To provide a place to locate possible future operations, common to
     all exceptions (but none of these as been detected yet)
 */
-class VSDKException : public std::exception {
-private:
-    String message;
-
+class VSDKException : public Exception {
 protected:
-    VSDKException() : message("") {}
-    explicit VSDKException(const String& message) : message(message) {}
+    VSDKException() : Exception() {}
+    explicit VSDKException(const String& message) : Exception(message) {}
 
 public:
-    virtual ~VSDKException() throw() {}
-
-    /**
-    @return the message given at construction time
-    */
-    const String& getMessage() const
-    {
-        return message;
-    }
-
-    const char* what() const throw()
-    {
-        return message.c_str();
-    }
+    virtual ~VSDKException() {}
 };
 
 #endif

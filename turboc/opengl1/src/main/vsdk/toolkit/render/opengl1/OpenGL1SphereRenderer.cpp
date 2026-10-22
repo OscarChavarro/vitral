@@ -69,7 +69,7 @@ void OpenGL1SphereRenderer::draw(
     Matrix4x4d viewProjection = camera->calculateProjectionMatrix();
     Matrix4x4d modelViewProjection = viewProjection.multiply(localTransform);
     ArrayList<Light*> lights;
-    lights.add(const_cast<Light*>(light));
+    lights.add(((Light*)(light)));
 
     if (quality->isSurfacesSet()) {
         OpenGL1RendererConfigurationStateSelector::activateState(

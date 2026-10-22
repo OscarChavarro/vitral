@@ -5,7 +5,6 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -326,7 +325,7 @@ static void removeEdgeRecord(
     }
 }
 
-template <typename T>
+template <class T>
 static void removeFirst(ArrayList<T>& list, T elem)
 {
     for ( long int i = 0; i < list.size(); i++ ) {

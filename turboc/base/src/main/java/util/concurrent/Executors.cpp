@@ -9,7 +9,7 @@ private:
         FixedThreadPoolExecutor* owner;
     };
 
-    ArrayDeque<TaskBase*> queue_;
+    ArrayDeque<Runnable*> queue_;
     pthread_mutex_t mutex_;
     pthread_cond_t hasWorkCond_;
     bool shutdown_;
@@ -25,7 +25,7 @@ private:
         delete ctx;
 
         while ( true ) {
-            TaskBase* task = 0;
+            Runnable* task = 0;
             pthread_mutex_lock(&self->mutex_);
             while ( self->queue_.isEmpty() && !self->shutdown_ ) {
                 pthread_cond_wait(&self->hasWorkCond_, &self->mutex_);
@@ -97,15 +97,14 @@ public:
 
         pthread_mutex_lock(&mutex_);
         while ( !queue_.isEmpty() ) {
-            TaskBase* task = queue_.peekFirst();
+            Runnable* task = queue_.peekFirst();
             queue_.removeFirst();
             delete task;
         }
         pthread_mutex_unlock(&mutex_);
     }
 
-protected:
-    virtual bool enqueue(TaskBase* task)
+    virtual bool execute(Runnable* task)
     {
         pthread_mutex_lock(&mutex_);
         if ( shutdown_ ) {

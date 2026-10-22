@@ -21,12 +21,11 @@ private:
 
 public:
     /**
-    @param externalList list whose elements are selected; it must outlive
-    this selection set
+    @param elements view of the list whose elements are selected; the list
+    must outlive this selection set
     */
-    template <class T>
-    explicit SelectionSet(ArrayList<T*>* externalList)
-        : elements(externalList)
+    explicit SelectionSet(const EntityListView& elements)
+        : elements(elements)
     {
         sync();
     }

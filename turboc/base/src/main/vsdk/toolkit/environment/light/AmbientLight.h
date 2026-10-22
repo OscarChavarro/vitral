@@ -5,6 +5,9 @@
 
 class AmbientLight : public Light {
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit AmbientLight(const ColorRgb &emission);
     AmbientLight(const AmbientLight &other);
 

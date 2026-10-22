@@ -259,3 +259,11 @@ const int KeyEvent::KEY_PERIOD;
 const int KeyEvent::KEY_NUMPERIOD;
 const int KeyEvent::KEY_EQUALS;
 const int KeyEvent::KEY_MINUS;
+
+const Class KeyEvent::CLASS = { "KeyEvent", &PresentationElement::CLASS };
+
+const Class *
+KeyEvent::getClass() const
+{
+    return &CLASS;
+}

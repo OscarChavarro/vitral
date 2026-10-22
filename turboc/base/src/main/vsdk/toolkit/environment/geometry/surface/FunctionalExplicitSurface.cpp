@@ -192,3 +192,11 @@ int FunctionalExplicitSurface::doContainmentTest(const Vector3Dd& p, double dist
 {
     return internalTriangleMesh ? internalTriangleMesh->doContainmentTest(p, distanceTolerance) : OUTSIDE;
 }
+
+const Class FunctionalExplicitSurface::CLASS = { "FunctionalExplicitSurface", &Surface::CLASS };
+
+const Class *
+FunctionalExplicitSurface::getClass() const
+{
+    return &CLASS;
+}

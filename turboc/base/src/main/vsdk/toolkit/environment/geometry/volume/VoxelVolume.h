@@ -9,6 +9,9 @@ class Matrix4x4d;
 
 class VoxelVolume : public Solid {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /** Default lowest value of a voxel considered part of the solid */
     static const int DEFAULT_THRESHOLD = 127;
 

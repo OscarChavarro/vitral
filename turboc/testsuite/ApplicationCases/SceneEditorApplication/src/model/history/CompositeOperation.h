@@ -18,6 +18,9 @@ private:
     CompositeOperation& operator=(const CompositeOperation& other);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     @param name name of the user action
     @param operations operations in the order they were done; this

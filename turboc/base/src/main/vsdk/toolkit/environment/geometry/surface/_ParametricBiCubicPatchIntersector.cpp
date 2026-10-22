@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <float.h>
 #include <math.h>
 
@@ -7,6 +6,8 @@
 #include "vsdk/toolkit/environment/geometry/element/Ray.h"
 #include "vsdk/toolkit/environment/geometry/surface/_ParametricBiCubicPatchIntersector.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
+#include "java/util/ArrayList.txx"
 
 
 /// Inverse of the Bezier basis matrix [FOLE1992].11.28, used to convert
@@ -37,7 +38,7 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
     double centerZ;
     double radiusSquared;
     /// Empty for leaves (owned by this node)
-    std::vector<PatchNode*> children;
+    ArrayList<PatchNode*> children;
     double corners[12];
     double uMin;
     double uMax;
@@ -65,14 +66,14 @@ struct _ParametricBiCubicPatchIntersector::PatchNode {
 
     ~PatchNode()
     {
-        for ( size_t i = 0; i < children.size(); i++ ) {
+        for ( long i = 0; i < children.size(); i++ ) {
             delete children[i];
         }
     }
 
     bool isLeaf() const
     {
-        return children.empty();
+        return children.isEmpty();
     }
 
   private:
@@ -273,13 +274,13 @@ _ParametricBiCubicPatchIntersector::buildTree(
     splitInFour(net, quarters);
     PatchNode* node = new PatchNode(net, false, u0, u1, v0, v1);
     node->children.reserve(4);
-    node->children.push_back(
+    node->children.add(
         buildTree(quarters[0], depth + 1, u0, um, v0, vm));
-    node->children.push_back(
+    node->children.add(
         buildTree(quarters[1], depth + 1, u0, um, vm, v1));
-    node->children.push_back(
+    node->children.add(
         buildTree(quarters[2], depth + 1, um, u1, v0, vm));
-    node->children.push_back(
+    node->children.add(
         buildTree(quarters[3], depth + 1, um, u1, vm, v1));
     return node;
 }
@@ -453,7 +454,7 @@ void _ParametricBiCubicPatchIntersector::walkTree(
         return;
     }
     if ( !node->isLeaf() ) {
-        for ( size_t i = 0; i < node->children.size(); i++ ) {
+        for ( long i = 0; i < node->children.size(); i++ ) {
             walkTree(node->children[i], o, d, directionLengthSquared,
                      best);
         }
@@ -561,8 +562,8 @@ bool _ParametricBiCubicPatchIntersector::intersectTriangle(
         return false;
     }
     result[0] = t;
-    result[1] = std::max(0.0, b1);
-    result[2] = std::max(0.0, b2);
+    result[1] = Math::max(0.0, b1);
+    result[2] = Math::max(0.0, b2);
     return true;
 }
 

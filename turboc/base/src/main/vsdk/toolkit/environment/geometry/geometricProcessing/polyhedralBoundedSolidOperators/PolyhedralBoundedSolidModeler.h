@@ -5,6 +5,7 @@
 #include "vsdk/toolkit/processing/ProcessingElement.h"
 
 #include "java/util/ArrayList.h"
+#include "java/lang/IllegalStateException.h"
 
 class InfinitePlane;
 class ParametricCurve;
@@ -133,7 +134,7 @@ public:
     @param maximizeResultFaces true to maximize the result faces
     @param doStrictValidation true to validate the result strictly
     @return the result, owned by the caller
-    @throws std::logic_error (Java IllegalStateException) when a completed
+    @throws IllegalStateException (Java IllegalStateException) when a completed
     boolean result fails the strict B-Rep postcondition
     */
     static PolyhedralBoundedSolid* setOp(

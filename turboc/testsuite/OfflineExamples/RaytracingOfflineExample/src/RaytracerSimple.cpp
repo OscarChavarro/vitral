@@ -1,11 +1,10 @@
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "java/util/ArrayList.txx"
 #include "CommandOptionsProcessor.h"
 #include "ImageExporter.h"
-#include <exception>
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/statistics/RaytraceStatistics.h"
 #include "vsdk/toolkit/gui/feedback/ProgressMonitorConsole.h"
@@ -20,6 +19,7 @@
 #include "vsdk/toolkit/io/geometry/ReaderMitScene.h"
 #include "vsdk/toolkit/render/raytracing/ParallelRaytracer.h"
 #include "vsdk/toolkit/render/raytracing/SimpleRaytracer.h"
+#include "java/lang/Exception.h"
 static const char* SCENE_SAMPLES_PATH = "../../../../etc/geometry/mitscenes/";
 static const int ELAPSED_TIME_DECIMALS = 3;
 static const int EXIT_CODE_READ_ERROR = -1;
@@ -71,10 +71,10 @@ static void offlineExecution(const String& fileName,
         ReaderMitScene readerMitScene;
         readerMitScene.importEnvironment(fileName.c_str(), &scene);
     }
-    catch (const std::exception& e) {
-        fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.what());
+    catch (const Exception& e) {
+        fprintf(stderr, "Error reading %s: %s\n", fileName.c_str(), e.getMessage().c_str());
         fprintf(stderr, "There are scene samples on %s\n", SCENE_SAMPLES_PATH);
-        std::exit(EXIT_CODE_READ_ERROR);
+        exit(EXIT_CODE_READ_ERROR);
     }
 
     printf("Scene loaded OK!\n");
@@ -87,7 +87,7 @@ static void offlineExecution(const String& fileName,
     if ( !resultingImage.initNoFill((int)activeCamera->getViewportXSize(),
                                     (int)activeCamera->getViewportYSize()) ) {
         fprintf(stderr, "Error creating image!\n");
-        std::exit(EXIT_CODE_IMAGE_ERROR);
+        exit(EXIT_CODE_IMAGE_ERROR);
     }
 
     ProgressMonitorConsole reporter;
@@ -128,7 +128,7 @@ static void offlineExecution(const String& fileName,
         ImageExporter imageExporter;
         if ( !imageExporter.exportImage(outputFileName, &resultingImage) ) {
             fprintf(stderr, "Error saving output image!\n");
-            std::exit(EXIT_CODE_IMAGE_ERROR);
+            exit(EXIT_CODE_IMAGE_ERROR);
         }
     }
 

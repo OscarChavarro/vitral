@@ -4,10 +4,11 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/lang/Boolean.h"
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetFinisher.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/topology/_PolyhedralBoundedSolidSetNullEdgesConnector.h"
@@ -30,7 +31,7 @@ typedef PolyhedralBoundedSolidNumericPolicy::ToleranceContext ToleranceContext;
 static const char* const TRACE_PIPELINE_SUMMARY_PROPERTY =
     "vsdk.setop.tracePipelineSummary";
 
-static std::string str(int value)
+static String str(int value)
 {
     return Cpp98Support::toString(value);
 }
@@ -147,7 +148,7 @@ bool Finisher::hasCompleteHalfEdgeConnectivity(_PolyhedralBoundedSolidFace* face
 
 String Finisher::integrationRingSummary(_PolyhedralBoundedSolidFace* face)
 {
-    std::string text;
+    String text;
 
     if ( face == 0 ) {
         return "null";
@@ -173,12 +174,12 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
 {
     FaceList matchedA;
     FaceList matchedB;
-    size_t i;
-    size_t j;
+    long i;
+    long j;
 
     lastLegacyFallbackCount = 0;
 
-    std::vector<bool> usedB(sonfb.size(), false);
+    ArrayList<bool> usedB(Collections<bool>::nCopies(sonfb.size(), false));
 
     for ( i = 0; i < sonfa.size(); i++ ) {
         _PolyhedralBoundedSolidFace* faceA = sonfa[i];
@@ -219,15 +220,15 @@ int Finisher::sanitizePairedFaces(FaceList& sonfa, FaceList& sonfb)
                         integrationRingSummary(faceA) + " B " +
                         integrationRingSummary(faceB));
                 }
-                matchedA.push_back(faceA);
-                matchedB.push_back(faceB);
+                matchedA.add(faceA);
+                matchedB.add(faceB);
                 usedB[j] = true;
                 break;
             }
         }
     }
 
-    if ( matchedA.empty() && !sonfa.empty() && sonfa.size() == sonfb.size() ) {
+    if ( matchedA.isEmpty() && !sonfa.isEmpty() && sonfa.size() == sonfb.size() ) {
         // Section 9.1 instrumentation: legacy ordering fallback - no
         // pairIndex matches found. Count it so tests can assert it stays 0.
         lastLegacyFallbackCount++;
@@ -564,11 +565,11 @@ void Finisher::finish(PolyhedralBoundedSolid* inSolidA,
     for ( i = 0; i < oldsize; i++ ) {
         f = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolidA,
             sonfa[i]->boundariesList.get(1), inSolidA->getMaxFaceId()+1);
-        sonfa.push_back(f);
+        sonfa.add(f);
 
         f = PolyhedralBoundedSolidEulerOperators::lmfkrh(inSolidB,
             sonfb[i]->boundariesList.get(1), inSolidB->getMaxFaceId()+1);
-        sonfb.push_back(f);
+        sonfb.add(f);
     }
 
     if ( op == SUBTRACT ) {

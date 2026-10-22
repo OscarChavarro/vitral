@@ -6,6 +6,9 @@ class Camera;
 
 class CameraControllerBlender : public CameraController {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit CameraControllerBlender(Camera* camera);
     virtual ~CameraControllerBlender() {}
 

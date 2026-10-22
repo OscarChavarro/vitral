@@ -40,3 +40,11 @@ PointLight::copy() const
 {
     return new PointLight(*this);
 }
+
+const Class PointLight::CLASS = { "PointLight", &Light::CLASS };
+
+const Class *
+PointLight::getClass() const
+{
+    return &CLASS;
+}

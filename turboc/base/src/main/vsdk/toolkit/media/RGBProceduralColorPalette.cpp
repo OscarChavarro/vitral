@@ -30,3 +30,11 @@ void RGBProceduralColorPalette::addColor(double r, double g, double b) {
     pure = false;
     RGBColorPalette::addColor(r, g, b);
 }
+
+const Class RGBProceduralColorPalette::CLASS = { "RGBProceduralColorPalette", &RGBColorPalette::CLASS };
+
+const Class *
+RGBProceduralColorPalette::getClass() const
+{
+    return &CLASS;
+}

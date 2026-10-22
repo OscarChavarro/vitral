@@ -8,7 +8,7 @@
 
 /**
 Emulation of `java.util.regex.Pattern` over POSIX extended regular
-expressions (C++98 has no `std::regex`). The Java expression is translated
+expressions. The Java expression is translated
 to the POSIX syntax: character classes, groups, non capturing groups
 `(?:...)`, alternatives, quantifiers, `\\s`, `\\S`, `\\d`, `\\D`, `\\w`,
 `\\W` and escapes are supported. Java only features (lazy and possessive
@@ -27,7 +27,7 @@ class Pattern {
   public:
     /**
     @param regex regular expression
-    @throws std::invalid_argument if the expression is not valid (Java
+    @throws IllegalArgumentException if the expression is not valid (Java
     throws PatternSyntaxException)
     */
     static Pattern

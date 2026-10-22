@@ -19,6 +19,9 @@ private:
     String name;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     SimpleBodyGroup();
     virtual ~SimpleBodyGroup() {}
 

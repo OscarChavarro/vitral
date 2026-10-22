@@ -16,15 +16,15 @@ void Voxelization::doVoxelization(
     const Matrix4x4d& M,
     ProgressMonitor* reporter)
 {
-    if ( TriangleMesh* mesh = dynamic_cast<TriangleMesh*>(&geometry) ) {
+    if ( TriangleMesh* mesh = (geometry.instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)&geometry : NULL) ) {
         TriangleMeshVoxelization::doVoxelization(*mesh, vv, M, reporter);
         return;
     }
-    if ( TriangleMeshGroup* meshGroup = dynamic_cast<TriangleMeshGroup*>(&geometry) ) {
+    if ( TriangleMeshGroup* meshGroup = (geometry.instanceOf(TriangleMeshGroup::CLASS) ? (TriangleMeshGroup*)&geometry : NULL) ) {
         TriangleMeshGroupVoxelization::doVoxelization(*meshGroup, vv, M, reporter);
         return;
     }
-    if ( FunctionalExplicitSurface* surface = dynamic_cast<FunctionalExplicitSurface*>(&geometry) ) {
+    if ( FunctionalExplicitSurface* surface = (geometry.instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)&geometry : NULL) ) {
         FunctionalExplicitSurfaceVoxelization::doVoxelization(*surface, vv, M, reporter);
         return;
     }

@@ -1,7 +1,7 @@
 #ifndef __DIALOG_SESSION__
 #define __DIALOG_SESSION__
 
-#include <map>
+#include "java/util/TreeMap.h"
 
 #include "java/lang/String.h"
 
@@ -16,7 +16,7 @@ ignored.
 class DialogSession {
 private:
     const WidgetDialog* definition;
-    std::map<String, String> drafts;
+    TreeMap<String, String> drafts;
     bool open;
     bool busy;
     long generation;

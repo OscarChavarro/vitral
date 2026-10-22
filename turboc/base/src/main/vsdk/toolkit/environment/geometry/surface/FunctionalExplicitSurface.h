@@ -27,6 +27,9 @@ private:
     void updateInternalGeometry();
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     FunctionalExplicitSurface(const String& fxy);
     virtual ~FunctionalExplicitSurface();
 

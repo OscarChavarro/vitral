@@ -13,27 +13,27 @@ class XawPanelWidgets : public XtPanelWidgets {
 public:
     virtual Widget createPanel(Widget parent, const char* name, int x, int y,
                                int width, int height, bool managed);
-    virtual Widget createLabel(Widget parent, const std::string& text,
+    virtual Widget createLabel(Widget parent, const String& text,
                                XFontSet fontSet, Justify justify,
                                int x, int y, int width, int height);
-    virtual void setLabel(Widget label, const std::string& text);
-    virtual Widget createTextField(Widget parent, const std::string& text,
+    virtual void setLabel(Widget label, const String& text);
+    virtual Widget createTextField(Widget parent, const String& text,
                                    XFontSet fontSet,
                                    int x, int y, int width, int height,
                                    ActivateProc activate,
                                    void* clientData);
-    virtual std::string getText(Widget field);
-    virtual void setText(Widget field, const std::string& text);
+    virtual String getText(Widget field);
+    virtual void setText(Widget field, const String& text);
     virtual void setInvalid(Widget field, bool invalid);
     virtual void setForeground(Widget widget, const char* colorName);
-    virtual Widget createPushButton(Widget parent, const std::string& label,
+    virtual Widget createPushButton(Widget parent, const String& label,
                                     XFontSet fontSet,
                                     int x, int y, int width, int height,
                                     ActivateProc activate,
                                     void* clientData);
     virtual Widget createOptionButton(Widget parent,
-                                      const std::string& placeholder,
-                                      const std::vector<std::string>& options,
+                                      const String& placeholder,
+                                      const ArrayList<String>& options,
                                       XFontSet fontSet,
                                       int x, int y, int width, int height,
                                       OptionProc choose,

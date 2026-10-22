@@ -1,7 +1,7 @@
 #ifndef __FILE_SUFFIX_FILTER__
 #define __FILE_SUFFIX_FILTER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -19,6 +19,11 @@ private:
     String description;
 
 public:
+    /**
+    Filter of no suffix, needed by the storage of `ArrayList`
+    */
+    FileSuffixFilter();
+
     /**
     @param suffix accepted suffix, without the dot and in lower case
     @param description text describing the kind of files
@@ -39,7 +44,7 @@ public:
     @return the filters of its `fileFilter` elements, in order (none for a
     null definition)
     */
-    static std::vector<FileSuffixFilter> fromDialog(
+    static ArrayList<FileSuffixFilter> fromDialog(
         const WidgetDialog* definition);
 
     /**

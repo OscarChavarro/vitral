@@ -2,79 +2,59 @@
 #define __ENTITY_LIST_VIEW__
 
 #include "java/util/ArrayList.h"
-#include "vsdk/toolkit/common/Entity.h"
-#include "vsdk/toolkit/common/logging/Logger.h"
+
+class Entity;
+class SimpleBody;
+class Light;
+class Camera;
+class SimpleBodyGroup;
+
+/**
+Access to a list of pointers to some `Entity` subclass, seen as a list of
+`Entity*` (implemented by a class template over the element type).
+*/
+class EntityListAccess {
+public:
+    virtual ~EntityListAccess() {}
+    virtual EntityListAccess* clone() const = 0;
+    virtual const void* getList() const = 0;
+    virtual long size() const = 0;
+    virtual Entity* get(long index) const = 0;
+    virtual bool insert(long index, Entity* element) = 0;
+    virtual Entity* remove(long index) = 0;
+};
 
 /**
 C++ port helper (no Java counterpart): a non-owning view of a list of
-pointers to some `Entity` subclass (i.e. `java::ArrayList<SimpleBody*>`),
-seen as a list of `Entity*`. Java code uses raw `ArrayList`s (or
+pointers to some `Entity` subclass (i.e. `ArrayList<SimpleBody*>`), seen as
+a list of `Entity*`. Java code uses raw `ArrayList`s (or
 `ArrayList<? extends Entity>`) for this; C++ lists of different pointer types
 are unrelated types, so this view erases the element type.
+
+C++ port note: legacy compilers (gcc 2.7, Turbo C++ 3.0) have no member
+templates, so there is a constructor for each kind of list of the scene.
 */
 class EntityListView {
 private:
-    void* list;
-    long (*sizeFunction)(void* list);
-    Entity* (*getFunction)(void* list, long index);
-    bool (*insertFunction)(void* list, long index, Entity* element);
-    Entity* (*removeFunction)(void* list, long index);
-
-    template <class T>
-    static long typedSize(void* list)
-    {
-        return ((ArrayList<T*>*)(list))->size();
-    }
-
-    template <class T>
-    static Entity* typedGet(void* list, long index)
-    {
-        return ((ArrayList<T*>*)(list))->get(index);
-    }
-
-    template <class T>
-    static bool typedInsert(void* list, long index, Entity* element)
-    {
-        T* typed = dynamic_cast<T*>(element);
-        if ( element != NULL && typed == NULL ) {
-            Logger::reportMessage("EntityListView", Logger::ERROR, "insert",
-                "Element of a wrong type for this list, not inserted.");
-            return false;
-        }
-        ((ArrayList<T*>*)(list))->add(index, typed);
-        return true;
-    }
-
-    template <class T>
-    static Entity* typedRemove(void* list, long index)
-    {
-        ArrayList<T*>* typedList = ((ArrayList<T*>*)(list));
-        T* element = typedList->get(index);
-        typedList->remove(index);
-        return element;
-    }
+    EntityListAccess* access;
 
 public:
-    EntityListView()
-        : list(NULL), sizeFunction(NULL), getFunction(NULL),
-          insertFunction(NULL), removeFunction(NULL)
-    {
-    }
+    EntityListView();
+    EntityListView(const EntityListView& other);
+    EntityListView& operator=(const EntityListView& other);
+    ~EntityListView();
 
     /**
     @param externalList list to view; it must outlive this view
     */
-    template <class T>
-    explicit EntityListView(ArrayList<T*>* externalList)
-        : list(externalList), sizeFunction(&typedSize<T>),
-          getFunction(&typedGet<T>), insertFunction(&typedInsert<T>),
-          removeFunction(&typedRemove<T>)
-    {
-    }
+    explicit EntityListView(ArrayList<SimpleBody*>* externalList);
+    explicit EntityListView(ArrayList<Light*>* externalList);
+    explicit EntityListView(ArrayList<Camera*>* externalList);
+    explicit EntityListView(ArrayList<SimpleBodyGroup*>* externalList);
 
     bool isValid() const
     {
-        return list != NULL;
+        return access != NULL;
     }
 
     /**
@@ -82,17 +62,18 @@ public:
     */
     bool isSameList(const EntityListView& other) const
     {
-        return list == other.list;
+        return (access == NULL ? NULL : access->getList()) ==
+            (other.access == NULL ? NULL : other.access->getList());
     }
 
     long size() const
     {
-        return list == NULL ? 0 : sizeFunction(list);
+        return access == NULL ? 0 : access->size();
     }
 
     Entity* get(long index) const
     {
-        return getFunction(list, index);
+        return access->get(index);
     }
 
     /**
@@ -100,7 +81,7 @@ public:
     */
     bool insert(long index, Entity* element)
     {
-        return insertFunction(list, index, element);
+        return access->insert(index, element);
     }
 
     /**
@@ -108,7 +89,7 @@ public:
     */
     Entity* remove(long index)
     {
-        return removeFunction(list, index);
+        return access->remove(index);
     }
 };
 

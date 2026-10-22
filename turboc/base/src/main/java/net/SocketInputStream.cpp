@@ -1,11 +1,10 @@
-#include <stdint.h>
 
 #include "java/net/SocketInputStream.h"
 #include <sys/socket.h>
 #include <unistd.h>
 
 int SocketInputStream::read() {
-    uint8_t b;
+    unsigned char b;
     ssize_t n = ::recv(fd_, &b, 1, 0);
     return (n <= 0) ? -1 : ((int)(b));
 }

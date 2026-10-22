@@ -165,3 +165,11 @@ double InfinitePlane::getB() const { return b; }
 void InfinitePlane::setB(double b_) { b = b_; }
 double InfinitePlane::getC() const { return c; }
 void InfinitePlane::setC(double c_) { c = c_; }
+
+const Class InfinitePlane::CLASS = { "InfinitePlane", &HalfSpace::CLASS };
+
+const Class *
+InfinitePlane::getClass() const
+{
+    return &CLASS;
+}

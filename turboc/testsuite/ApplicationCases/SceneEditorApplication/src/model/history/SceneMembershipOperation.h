@@ -23,6 +23,9 @@ C++ port note: elements are referenced, not owned (see `Scene`).
 */
 class SceneMembershipOperation : public UndoableOperation {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     An element of the list and its position and selection state.
     */

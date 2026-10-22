@@ -1,0 +1,24 @@
+CMakeFiles/vitral_base.dir/src/main/vsdk/toolkit/io/image/RGBColorPalettePersistence.o: \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/io/image/RGBColorPalettePersistence.cpp \
+ /usr/include/stdc-predef.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/io/StreamTokenizer.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/io/Reader.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/lang/String.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/common/color/ColorRgb.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/media/RGBColorPalette.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/util/ArrayList.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/lang/Object.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/util/Comparator.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/util/ArrayList.txx \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/media/MediaEntity.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/common/Entity.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/lang/Class.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/common/EntityControlAccessor.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/common/EntityEvent.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/io/image/RGBColorPalettePersistence.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/io/InputStream.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/vsdk/toolkit/io/PersistenceElement.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/io/File.h \
+ /home/jedilink/VITRAL/vitral/turboc/base/src/main/java/io/OutputStream.h

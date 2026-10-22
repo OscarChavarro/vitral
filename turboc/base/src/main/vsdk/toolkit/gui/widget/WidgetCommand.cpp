@@ -181,3 +181,11 @@ void WidgetCommand::setSecondaryIconTransparency(
     }
     this->secondaryIconTransparency = secondaryIconTransparency;
 }
+
+const Class WidgetCommand::CLASS = { "WidgetCommand", &WidgetElement::CLASS };
+
+const Class *
+WidgetCommand::getClass() const
+{
+    return &CLASS;
+}

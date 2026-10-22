@@ -1,0 +1,3 @@
+/home/jedilink/VITRAL/vitral/turboc/base/buildtc/CMakeFiles/vitral_base.dir
+/home/jedilink/VITRAL/vitral/turboc/base/buildtc/CMakeFiles/edit_cache.dir
+/home/jedilink/VITRAL/vitral/turboc/base/buildtc/CMakeFiles/rebuild_cache.dir

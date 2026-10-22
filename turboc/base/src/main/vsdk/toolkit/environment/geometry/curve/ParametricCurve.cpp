@@ -2,7 +2,6 @@
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/environment/geometry/curve/ParametricCurve.h"
 #include <float.h>
 static Matrix4x4d buildLinearMatrix()
@@ -61,7 +60,7 @@ static Matrix4x4d buildCatmullRomMatrix()
 }
 
 // Out-of-class definitions, needed when the constants are bound to
-// references (e.g. by gtest assertions) under C++11
+// references (e.g. by test assertions)
 const int ParametricCurve::BREAK;
 const int ParametricCurve::CORNER;
 const int ParametricCurve::QUAD;
@@ -117,7 +116,7 @@ void ParametricCurve::addPointAt(const ArrayList<Vector3Dd>& point, int type, in
 
 const ArrayList<Vector3Dd>& ParametricCurve::getPointVector(int pos) const
 {
-    return const_cast<ArrayList< ArrayList<Vector3Dd> >&>(points)[(long int)pos];
+    return ((ArrayList< ArrayList<Vector3Dd> >&)(points))[(long int)pos];
 }
 
 const Vector3Dd* ParametricCurve::getPoint(int idx) const
@@ -125,7 +124,7 @@ const Vector3Dd* ParametricCurve::getPoint(int idx) const
     if ( idx < 0 || idx >= (int)points.size() ) {
         return NULL;
     }
-    ArrayList<Vector3Dd>& v = const_cast<ArrayList< ArrayList<Vector3Dd> >&>(points)[(long int)idx];
+    ArrayList<Vector3Dd>& v = ((ArrayList< ArrayList<Vector3Dd> >&)(points))[(long int)idx];
     if ( v.size() == 0 ) {
         return NULL;
     }
@@ -380,3 +379,11 @@ int ParametricCurve::doContainmentTest(const Vector3Dd& p, double distanceTolera
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int ParametricCurve::INITIAL_APPROXIMATION_STEPS;
+
+const Class ParametricCurve::CLASS = { "ParametricCurve", &Curve::CLASS };
+
+const Class *
+ParametricCurve::getClass() const
+{
+    return &CLASS;
+}

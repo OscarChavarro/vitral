@@ -60,6 +60,9 @@ of the frame the rings belong to. The camera is referenced, not owned.
 */
 class RotateGizmo : public Gizmo {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int NULL_GROUP = 0;
     static const int X_RING_GROUP = 1;
     static const int Y_RING_GROUP = 2;

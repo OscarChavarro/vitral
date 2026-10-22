@@ -376,3 +376,11 @@ void CameraControllerGoogleEarth::zoomIn(double jumpValue)
         camera->setFarPlaneDistance(farPlaneDistance);
     }
 }
+
+const Class CameraControllerGoogleEarth::CLASS = { "CameraControllerGoogleEarth", &CameraController::CLASS };
+
+const Class *
+CameraControllerGoogleEarth::getClass() const
+{
+    return &CLASS;
+}

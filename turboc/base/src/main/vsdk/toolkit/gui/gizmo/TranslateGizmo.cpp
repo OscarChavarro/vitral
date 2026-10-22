@@ -269,7 +269,7 @@ ArrayList<SimpleBody*>& TranslateGizmo::getElements3dsmax()
         r->setRotationInverse(o->getRotationInverse());
 
         g = o->getGeometry();
-        if ( g != NULL && dynamic_cast<Arrow*>(g) != NULL ) {
+        if ( g != NULL && g->instanceOf(Arrow::CLASS) ) {
             r->setGeometryReference(coneModel);
             switch ( i ) {
               case 0:
@@ -318,7 +318,7 @@ ArrayList<SimpleBody*>& TranslateGizmo::getElements3dsmax()
             r2->setPosition(o->getPosition());
             r2->setGeometryReference(lineModel);
         }
-        else if ( g != NULL && dynamic_cast<Cone*>(g) != NULL ) {
+        else if ( g != NULL && g->instanceOf(Cone::CLASS) ) {
             r->setPosition(o->getPosition());
             r->setGeometryReference(segmentModel);
         }
@@ -779,3 +779,11 @@ const int TranslateGizmo::Z_AXIS_GROUP;
 const int TranslateGizmo::XY_PLANE_GROUP;
 const int TranslateGizmo::YZ_PLANE_GROUP;
 const int TranslateGizmo::XZ_PLANE_GROUP;
+
+const Class TranslateGizmo::CLASS = { "TranslateGizmo", &Gizmo::CLASS };
+
+const Class *
+TranslateGizmo::getClass() const
+{
+    return &CLASS;
+}

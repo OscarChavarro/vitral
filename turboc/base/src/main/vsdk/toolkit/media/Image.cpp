@@ -154,3 +154,11 @@ void Image::createTestPattern() {
         }
     }
 }
+
+const Class Image::CLASS = { "Image", &MediaEntity::CLASS };
+
+const Class *
+Image::getClass() const
+{
+    return &CLASS;
+}

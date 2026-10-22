@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -29,12 +29,12 @@ static const int DEBUG_01_STRUCTURE = 0x01;
 static const int DEBUG_04_VERTEX_VERTEX_CLASSIFIER = 0x08;
 static const int DEBUG_99_SHOW_OPERATIONS = 0x40;
 
-static void tracePipelineSummary(const std::string& message)
+static void tracePipelineSummary(const String& message)
 {
     _SetOperationTrace::tracePipelineSummary(String(message.c_str()));
 }
 
-static void traceCoplanarTangential(const std::string& message)
+static void traceCoplanarTangential(const String& message)
 {
     _SetOperationTrace::traceCoplanarTangential(String(message.c_str()));
 }
@@ -44,9 +44,9 @@ static const char* booleanName(bool value)
     return value ? "true" : "false";
 }
 
-static std::string halfEdgeText(_PolyhedralBoundedSolidHalfEdge* he)
+static String halfEdgeText(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    return he == NULL ? std::string("null") : std::string(he->toString().c_str());
+    return he == NULL ? String("null") : String(he->toString().c_str());
 }
 
 
@@ -72,7 +72,7 @@ int Classifier::compareToZero(double value)
     return _PolyhedralBoundedSolidSetGeometricPredicateProcessor::compareToZero(value);
 }
 
-std::string Classifier::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
+String Classifier::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
 {
     if ( he == NULL ) {
         return "null";
@@ -82,7 +82,7 @@ std::string Classifier::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
         ",f=" + Cpp98Support::toString(he->parentLoop->parentFace->id) + ")";
 }
 
-std::string Classifier::summarizeNullEdge(
+String Classifier::summarizeNullEdge(
     const _PolyhedralBoundedSolidSetOperatorNullEdge* edge)
 {
     if ( edge == NULL || edge->e == NULL ) {
@@ -92,8 +92,8 @@ std::string Classifier::summarizeNullEdge(
         summarizeHalfEdge(edge->e->leftHalf);
 }
 
-std::string Classifier::formatVertexVertexTraceContext(int op, int cursor,
-    const std::string& caseName, const std::string& action, int type)
+String Classifier::formatVertexVertexTraceContext(int op, int cursor,
+    const String& caseName, const String& action, int type)
 {
     return "op=" + Cpp98Support::toString(op) +
         " cursor=" + Cpp98Support::toString(cursor) +
@@ -102,7 +102,7 @@ std::string Classifier::formatVertexVertexTraceContext(int op, int cursor,
         " target=" + (type == 0 ? "A" : "B");
 }
 
-std::string Classifier::labelSectorState(int state)
+String Classifier::labelSectorState(int state)
 {
     switch ( state ) {
         case OnSector::ON:
@@ -116,13 +116,13 @@ std::string Classifier::labelSectorState(int state)
     }
 }
 
-std::string Classifier::summarizeSector(const VertexVertexClassificationData& data,
+String Classifier::summarizeSector(const VertexVertexClassificationData& data,
                                         int index)
 {
     if ( index < 0 || index >= (int)data.sectors.size() ) {
         return "sector[idx=" + Cpp98Support::toString(index) + "]=<out>";
     }
-    const OnSector& sector = data.sectors[(size_t)index];
+    const OnSector& sector = data.sectors[index];
     return "sector[idx=" + Cpp98Support::toString(index) +
         ",intersect=" + booleanName(sector.intersect) +
         ",sectA=" + Cpp98Support::toString(sector.secta) +
@@ -131,14 +131,14 @@ std::string Classifier::summarizeSector(const VertexVertexClassificationData& da
         ",s2a=" + labelSectorState(sector.s2a) +
         ",s1b=" + labelSectorState(sector.s1b) +
         ",s2b=" + labelSectorState(sector.s2b) +
-        ",hea=" + summarizeHalfEdge(data.nba[(size_t)sector.secta].he) +
-        ",heb=" + summarizeHalfEdge(data.nbb[(size_t)sector.sectb].he) +
+        ",hea=" + summarizeHalfEdge(data.nba[sector.secta].he) +
+        ",heb=" + summarizeHalfEdge(data.nbb[sector.sectb].he) +
         "]";
 }
 
 void Classifier::traceVertexVertexDecisionStep(
     const VertexVertexClassificationData& data, int op,
-    const std::string& phase, int index,
+    const String& phase, int index,
     _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
     _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2)
 {
@@ -153,7 +153,7 @@ void Classifier::traceVertexVertexDecisionStep(
 }
 
 void Classifier::traceVertexVertexDecisionReason(int op, int cursor,
-    const std::string& caseName, const std::string& reason,
+    const String& caseName, const String& reason,
     _PolyhedralBoundedSolidHalfEdge* ha1, _PolyhedralBoundedSolidHalfEdge* ha2,
     _PolyhedralBoundedSolidHalfEdge* hb1, _PolyhedralBoundedSolidHalfEdge* hb2)
 {
@@ -177,7 +177,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectAlternativeBHalfEdge(
     int prevsectb;
     int nbbSize = (int)data.nbb.size();
 
-    if ( data.nbb.empty() ) {
+    if ( data.nbb.isEmpty() ) {
         return NULL;
     }
     if ( sectb < 0 || sectb >= nbbSize ) {
@@ -187,12 +187,12 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectAlternativeBHalfEdge(
     nextsectb = (sectb == nbbSize - 1) ? 0 : sectb + 1;
     prevsectb = (sectb == 0) ? nbbSize - 1 : sectb - 1;
 
-    candidate = data.nbb[(size_t)nextsectb].he;
+    candidate = data.nbb[nextsectb].he;
     if ( candidate != NULL && candidate != avoid ) {
         return candidate;
     }
 
-    candidate = data.nbb[(size_t)prevsectb].he;
+    candidate = data.nbb[prevsectb].he;
     if ( candidate != NULL && candidate != avoid ) {
         return candidate;
     }
@@ -209,8 +209,8 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::resolveBEndpointCandidate(
     _PolyhedralBoundedSolidHalfEdge* avoid;
     _PolyhedralBoundedSolidHalfEdge* alternative;
 
-    const OnSector& sector = data.sectors[(size_t)sectorIndex];
-    candidate = data.nbb[(size_t)sector.sectb].he;
+    const OnSector& sector = data.sectors[sectorIndex];
+    candidate = data.nbb[sector.sectb].he;
     avoid = selectHb1 ? hb2 : hb1;
 
     if ( candidate != NULL &&
@@ -235,7 +235,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::resolveBEndpointCandidate(
 void Classifier::traceIntersectingSectorsSnapshot(
     const VertexVertexClassificationData& data, int cursor)
 {
-    size_t idx;
+    long idx;
 
     if ( !_SetOperationTrace::isCoplanarTangentialTraceEnabled() ) {
         return;
@@ -359,7 +359,7 @@ Taking in to account the updated version modifications from
 void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
     _PolyhedralBoundedSolidHalfEdge* from,
     _PolyhedralBoundedSolidHalfEdge* to,
-    int type, const std::string& traceContext,
+    int type, const String& traceContext,
     PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
 {
     //-----------------------------------------------------------------
@@ -474,10 +474,10 @@ void Classifier::separateEdgeSequence(_SetOperationContext& ctx,
 
     _PolyhedralBoundedSolidSetOperatorNullEdge edge(from->previous()->parentEdge);
     if ( type == 0 ) {
-        ctx.sonea.push_back(edge);
+        ctx.sonea.add(edge);
     }
     else {
-        ctx.soneb.push_back(edge);
+        ctx.soneb.add(edge);
     }
     tracePipelineSummary(
         "emit " + traceContext +
@@ -501,7 +501,7 @@ edge from the side that would otherwise produce an inward-facing null-edge.
 */
 void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
     _PolyhedralBoundedSolidHalfEdge* he, int type, bool orient,
-    const std::string& traceContext,
+    const String& traceContext,
     PolyhedralBoundedSolid* inSolidA, PolyhedralBoundedSolid* inSolidB)
 {
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
@@ -529,10 +529,10 @@ void Classifier::flipNullEdgeOrientationForOpenSide(_SetOperationContext& ctx,
 
     _PolyhedralBoundedSolidSetOperatorNullEdge edge(he->previous()->parentEdge);
     if ( type == 0 ) {
-        ctx.sonea.push_back(edge);
+        ctx.sonea.add(edge);
     }
     else {
-        ctx.soneb.push_back(edge);
+        ctx.soneb.add(edge);
     }
     tracePipelineSummary(
         "emit " + traceContext +
@@ -636,7 +636,7 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectMissingEndpoint(
     int wantedState, _PolyhedralBoundedSolidHalfEdge* avoid)
 {
     _PolyhedralBoundedSolidHalfEdge* fallback;
-    size_t i;
+    long i;
 
     fallback = NULL;
     for ( i = 0; i < data.sectors.size(); i++ ) {
@@ -650,11 +650,11 @@ _PolyhedralBoundedSolidHalfEdge* Classifier::selectMissingEndpoint(
 
         if ( fromSolidA ) {
             containsState = sectorContainsAState(sector, wantedState);
-            candidate = data.nba[(size_t)sector.secta].he;
+            candidate = data.nba[sector.secta].he;
         }
         else {
             containsState = sectorContainsBState(sector, wantedState);
-            candidate = data.nbb[(size_t)sector.sectb].he;
+            candidate = data.nbb[sector.sectb].he;
         }
 
         if ( !containsState ) {
@@ -718,8 +718,8 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
     _PolyhedralBoundedSolidHalfEdge* ha2 = NULL;
     _PolyhedralBoundedSolidHalfEdge* hb1 = NULL;
     _PolyhedralBoundedSolidHalfEdge* hb2 = NULL;
-    size_t i;
-    size_t n = data.sectors.size();
+    long i;
+    long n = data.sectors.size();
 
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
         printf("   - Null edges insertion:\n");
@@ -732,8 +732,8 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
     }
 
     if ( count == 0 && n > 0 ) {
-        ha1 = data.nba[(size_t)data.sectors[0].secta].he;
-        hb1 = data.nbb[(size_t)data.sectors[0].sectb].he;
+        ha1 = data.nba[data.sectors[0].secta].he;
+        hb1 = data.nbb[data.sectors[0].sectb].he;
     }
 
     traceCoplanarTangential(
@@ -742,7 +742,7 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
 
     i = 0;
     while ( true ) {
-        std::string traceContext;
+        String traceContext;
         //-------------------------------------------------------------
         if ( i >= n ) {
             return;
@@ -754,17 +754,17 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
             }
         }
         if ( data.sectors[i].s1a == OnSector::OUT ) {
-            ha1 = data.nba[(size_t)data.sectors[i].secta].he;
+            ha1 = data.nba[data.sectors[i].secta].he;
         }
         else {
-            ha2 = data.nba[(size_t)data.sectors[i].secta].he;
+            ha2 = data.nba[data.sectors[i].secta].he;
         }
         if ( data.sectors[i].s1b == OnSector::IN ) {
-            hb1 = data.nbb[(size_t)data.sectors[i].sectb].he;
+            hb1 = data.nbb[data.sectors[i].sectb].he;
             i++;
         }
         else {
-            hb2 = data.nbb[(size_t)data.sectors[i].sectb].he;
+            hb2 = data.nbb[data.sectors[i].sectb].he;
             i++;
         }
 
@@ -779,17 +779,17 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
             }
         }
         if ( data.sectors[i].s1a == OnSector::OUT ) {
-            ha1 = data.nba[(size_t)data.sectors[i].secta].he;
+            ha1 = data.nba[data.sectors[i].secta].he;
         }
         else {
-            ha2 = data.nba[(size_t)data.sectors[i].secta].he;
+            ha2 = data.nba[data.sectors[i].secta].he;
         }
         if ( data.sectors[i].s1b == OnSector::IN ) {
-            hb1 = data.nbb[(size_t)data.sectors[i].sectb].he;
+            hb1 = data.nbb[data.sectors[i].sectb].he;
             i++;
         }
         else {
-            hb2 = data.nbb[(size_t)data.sectors[i].sectb].he;
+            hb2 = data.nbb[data.sectors[i].sectb].he;
             i++;
         }
 
@@ -804,7 +804,7 @@ void Classifier::vertexVertexInsertNullEdges(_SetOperationContext& ctx,
 
         //-------------------------------------------------------------
         if ( ha1 == NULL || ha2 == NULL || hb1 == NULL || hb2 == NULL ) {
-            size_t j;
+            long j;
 
             for ( j = 0; j < n; j++ ) {
                 data.sectors[j].intersect = false;
@@ -889,11 +889,11 @@ void Classifier::setOpClassify(_SetOperationContext& ctx, int op,
                                PolyhedralBoundedSolid* inSolidA,
                                PolyhedralBoundedSolid* inSolidB)
 {
-    size_t i;
+    long i;
 
     if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
         printf("- 1.A. ----------------------------------------------------------------------------------------------------------------------------------------------------\n");
-        printf("VERTICES OF {A} TOUCHING FACES ON {B} (sonva array of %zu matches)\n", ctx.sonva.size());
+        printf("VERTICES OF {A} TOUCHING FACES ON {B} (sonva array of %ld matches)\n", (long)ctx.sonva.size());
     }
 
     for ( i = 0; i < ctx.sonva.size(); i++ ) {
@@ -904,7 +904,7 @@ void Classifier::setOpClassify(_SetOperationContext& ctx, int op,
 
     if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
         printf("- 1.B. ----------------------------------------------------------------------------------------------------------------------------------------------------\n");
-        printf("VERTICES OF {B} TOUCHING FACES ON {A} (sonvb array of %zu matches):\n", ctx.sonvb.size());
+        printf("VERTICES OF {B} TOUCHING FACES ON {A} (sonvb array of %ld matches):\n", (long)ctx.sonvb.size());
     }
 
     for ( i = 0; i < ctx.sonvb.size(); i++ ) {
@@ -915,7 +915,7 @@ void Classifier::setOpClassify(_SetOperationContext& ctx, int op,
 
     if ( (debugFlags & DEBUG_01_STRUCTURE) != 0x00 ) {
         printf("- 2. ------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-        printf("VERTEX-VERTEX PAIRS (sonvv array of %zu pairs):\n", ctx.sonvv.size());
+        printf("VERTEX-VERTEX PAIRS (sonvv array of %ld pairs):\n", (long)ctx.sonvv.size());
     }
 
     for ( i = 0; i < ctx.sonvv.size(); i++ ) {

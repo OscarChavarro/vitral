@@ -152,3 +152,11 @@ int RGBColorPalette::selectNearestIndexToRgb(const ColorRgb& c) const {
     }
     return index;
 }
+
+const Class RGBColorPalette::CLASS = { "RGBColorPalette", &MediaEntity::CLASS };
+
+const Class *
+RGBColorPalette::getClass() const
+{
+    return &CLASS;
+}

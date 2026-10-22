@@ -4,6 +4,7 @@
 #include "java/util/concurrent/atomic/AtomicLong.h"
 
 #include "java/lang/String.h"
+#include "java/lang/IllegalArgumentException.h"
 class PolyhedralBoundedSolid;
 
 /**
@@ -30,7 +31,7 @@ public:
     @param solidB second operand
     @param msg receives failure details, can be null
     @return true only when both solids pass all checks
-    @throws std::invalid_argument (Java IllegalArgumentException) when a
+    @throws IllegalArgumentException (Java IllegalArgumentException) when a
     solid remains invalid after the automated repair
     */
     static bool validateBooleanInputs(PolyhedralBoundedSolid* solidA,

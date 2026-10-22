@@ -65,13 +65,13 @@ folders of the application too.
 
 ## C++98 port notes
 
-- The lambdas and `std::function` callbacks of the cpp port are objects
+- Callbacks are objects
   implementing Java style interfaces (`Runnable`, `Consumer`, `Function`,
   `Supplier` of `java/util/function`, `XtDialogHost::MessageSource` and
   `ActionListener`, `XtTreeView::ContextMenuListener`): small named classes
   next to their users. Callbacks run from other threads (tangible interface
   client, MCP service) post `Runnable` tasks to `XtEventQueue`.
-- `std::shared_ptr` -> `SharedPointer` (`RenderPrimitive`), scoped enums ->
+- `SharedPointer` owns `RenderPrimitive` instances; enumerations use
   wrapper classes keeping the `Type::VALUE` syntax.
 - The `String` and `Object` types of Xt are renamed `XtString`/`XtObject`
   around the includes of X toolkit headers (see `XtIntrinsics.h` of the

@@ -24,7 +24,7 @@ void LightTransformState::restore() const
 bool LightTransformState::isSameState(const EntityTransformState* other) const
 {
     const LightTransformState* state =
-        dynamic_cast<const LightTransformState*>(other);
+        (other != NULL && other->instanceOf(LightTransformState::CLASS) ? (const LightTransformState*)other : NULL);
     if ( state == NULL ) {
         return false;
     }
@@ -34,4 +34,12 @@ bool LightTransformState::isSameState(const EntityTransformState* other) const
 EntityTransformState* LightTransformState::clone() const
 {
     return new LightTransformState(*this);
+}
+
+const Class LightTransformState::CLASS = { "LightTransformState", &EntityTransformState::CLASS };
+
+const Class *
+LightTransformState::getClass() const
+{
+    return &CLASS;
 }

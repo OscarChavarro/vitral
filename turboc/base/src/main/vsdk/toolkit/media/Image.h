@@ -13,6 +13,9 @@ bi-linear interpolation evaluation on Rgb space.
 class Image : public MediaEntity {
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~Image() {}
 
     /**

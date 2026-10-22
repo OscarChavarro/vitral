@@ -38,6 +38,9 @@ private:
     String message(const char* id) const;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     @param model application model the commands work over
     @param presenter presents the status messages of the commands

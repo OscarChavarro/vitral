@@ -72,3 +72,11 @@ double ProgressMonitorConsole::getCurrentPercent()
     pthread_mutex_unlock(&lock);
     return result;
 }
+
+const Class ProgressMonitorConsole::CLASS = { "ProgressMonitorConsole", &ProgressMonitor::CLASS };
+
+const Class *
+ProgressMonitorConsole::getClass() const
+{
+    return &CLASS;
+}

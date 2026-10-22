@@ -1,13 +1,14 @@
 #include <stddef.h>
-#include <stdexcept>
 
 #include "vsdk/toolkit/gui/dialog/runtime/DialogSession.h"
+#include "java/lang/IllegalArgumentException.h"
+#include "java/util/TreeMap.h"
 
 DialogSession::DialogSession(const WidgetDialog* definition)
     : definition(definition), open(true), busy(false), generation(0)
 {
     if ( definition == NULL ) {
-        throw std::invalid_argument("Missing dialog definition");
+        throw IllegalArgumentException("Missing dialog definition");
     }
 }
 
@@ -19,14 +20,12 @@ const WidgetDialog* DialogSession::getDefinition() const
 void DialogSession::setDraft(const String& binding,
                              const String& value)
 {
-    drafts[binding] = value;
+    drafts.put(binding, value);
 }
 
 String DialogSession::getDraft(const String& binding) const
 {
-    std::map<String, String>::const_iterator draft =
-        drafts.find(binding);
-    return draft != drafts.end() ? draft->second : String("");
+    return drafts.getOrDefault(binding, String(""));
 }
 
 bool DialogSession::isOpen() const

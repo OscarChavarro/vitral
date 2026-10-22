@@ -11,6 +11,9 @@ because the contents remain in GPU-ready compressed blocks.
 class RGBAImageCompressed : public Image {
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int COMPRESSION_UNKNOWN = 0;
     static const int COMPRESSION_DXT1 = 1;
     static const int COMPRESSION_DXT3 = 3;

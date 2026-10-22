@@ -13,6 +13,9 @@ private:
     bool testLabelLimit(int limit);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     ProgressMonitorConsole();
     virtual ~ProgressMonitorConsole();
 

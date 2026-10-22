@@ -6,7 +6,7 @@
 
 /**
 Emulation of `java.util.concurrent.locks.ReentrantLock` over a recursive
-POSIX mutex (C++98 replacement for `std::mutex`).
+POSIX mutex.
 */
 class ReentrantLock {
   private:
@@ -43,7 +43,7 @@ class ReentrantLock {
 
 /**
 Holds a `ReentrantLock` during its lifetime, as the `synchronized` blocks
-of Java (C++98 replacement for `std::lock_guard`).
+of Java.
 */
 class ReentrantLockGuard {
   private:

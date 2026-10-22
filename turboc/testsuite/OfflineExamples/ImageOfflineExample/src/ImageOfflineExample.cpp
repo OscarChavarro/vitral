@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <stdio.h>
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -33,13 +33,13 @@ int main(int argc, char** argv)
         img = ImagePersistence::importRGB(File(imageFilename.c_str()));
     }
     catch (...) {
-        std::fprintf(stderr, "Error: could not read the image file \"%s\".\n", imageFilename.c_str());
-        std::fprintf(stderr, "Check you have access to that file from current working directory.\n");
+        fprintf(stderr, "Error: could not read the image file \"%s\".\n", imageFilename.c_str());
+        fprintf(stderr, "Check you have access to that file from current working directory.\n");
         return 1;
     }
 
     if (img == 0) {
-        std::fprintf(stderr, "Error: image import returned null\n");
+        fprintf(stderr, "Error: image import returned null\n");
         return 1;
     }
 
@@ -48,10 +48,10 @@ int main(int argc, char** argv)
     delete img;
 
     if (!ok) {
-        std::fprintf(stderr, "Error: could not write output file \"%s\".\n", outputFilename.c_str());
+        fprintf(stderr, "Error: could not write output file \"%s\".\n", outputFilename.c_str());
         return 1;
     }
 
-    std::printf("Resulting image has been written to \"%s\"\n", outputFilename.c_str());
+    printf("Resulting image has been written to \"%s\"\n", outputFilename.c_str());
     return 0;
 }

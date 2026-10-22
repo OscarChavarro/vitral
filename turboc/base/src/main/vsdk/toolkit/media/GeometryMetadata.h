@@ -22,6 +22,9 @@ private:
     ArrayList<ShapeDescriptor*> descriptors;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     GeometryMetadata();
     virtual ~GeometryMetadata();
 

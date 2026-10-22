@@ -247,3 +247,11 @@ void CameraControllerBlender::setCamera(Camera* camera)
 void CameraControllerBlender::setDeltaMovement(double)
 {
 }
+
+const Class CameraControllerBlender::CLASS = { "CameraControllerBlender", &CameraController::CLASS };
+
+const Class *
+CameraControllerBlender::getClass() const
+{
+    return &CLASS;
+}

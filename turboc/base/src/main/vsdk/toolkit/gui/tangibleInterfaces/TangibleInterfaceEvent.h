@@ -13,6 +13,9 @@ class TangibleInterfaceEvent : public PresentationElement {
     Quaterniond rotation;
 
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     TangibleInterfaceEvent();
     TangibleInterfaceEvent(const String& id, const Vector3Dd& position, const Quaterniond& rotation);
 

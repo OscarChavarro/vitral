@@ -1,9 +1,8 @@
 #ifndef __XT_GENERIC_EDITOR__
 #define __XT_GENERIC_EDITOR__
 
-#include <string>
-#include <utility>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 // Xt names its strings and objects as the vitral String and Object
 // classes: they are renamed while its headers are read (see
@@ -36,8 +35,10 @@ private:
     int nextY;
     Widget messageLabel;
     /// Last message, kept to show it once the message label exists
-    std::string pendingMessage;
-    std::vector<std::pair<Widget, const ControlSpecification*> > fields;
+    String pendingMessage;
+    /// Text field of each control and its specification, at the same index
+    ArrayList<Widget> fieldWidgets;
+    ArrayList<const ControlSpecification*> fieldSpecifications;
 
     static void fieldActivated(Widget field, void* clientData);
 

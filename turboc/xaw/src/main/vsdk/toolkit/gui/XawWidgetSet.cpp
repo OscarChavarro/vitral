@@ -13,6 +13,7 @@
 
 #include "vsdk/toolkit/gui/XawWidgetSet.h"
 #include "vsdk/toolkit/gui/XtWidgetSupport.h"
+#include "java/util/ArrayList.txx"
 
 
 /**
@@ -165,7 +166,7 @@ void XawWidgetSet::setWindowCloseHandler(Widget shell, NotifyProc close,
 }
 
 Widget XawWidgetSet::createChoiceMenu(Widget owner,
-                                      const std::vector<MenuChoice>& items,
+                                      const ArrayList<MenuChoice>& items,
                                       XFontSet fontSet, ChoiceProc choose,
                                       void* clientData)
 {
@@ -194,7 +195,7 @@ Widget XawWidgetSet::createChoiceMenu(Widget owner,
     XtAddCallback(menu, XtNdestroyCallback, freeBitmap,
                   ((XtPointer)(checkMark)));
 
-    for (size_t i = 0; i < items.size(); ++i) {
+    for ( long i = 0; i < items.size(); ++i) {
         if (items[i].separator) {
             XtCreateManagedWidget("separator", smeLineObjectClass, menu,
                                   NULL, 0);

@@ -7,13 +7,12 @@
 class RasterizerPalette {
   public:
     static void makePalette(int colors, Dithering::Palette *pal);
-    static int usesOptimizedPalette(ColorMode colorMode);
-    static Dithering::Method methodOf(ColorMode colorMode);
-    static ColorMode nextColorMode(ColorMode colorMode, const Dithering::Palette *standard);
+    static int usesOptimizedPalette(ColorMode::Value colorMode);
+    static Dithering::Method methodOf(ColorMode::Value colorMode);
+    static ColorMode nextColorMode(ColorMode::Value colorMode, const Dithering::Palette *standard);
 
   private:
-    static constexpr int CUBE_LEVELS = 6;
-    static constexpr int CUBE_COLORS = CUBE_LEVELS * CUBE_LEVELS * CUBE_LEVELS;
+    enum { CUBE_LEVELS = 6, CUBE_COLORS = CUBE_LEVELS * CUBE_LEVELS * CUBE_LEVELS };
 };
 
 #endif

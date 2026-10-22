@@ -10,6 +10,9 @@ class CameraSnapshot;
 
 class Camera : public Entity {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int OPCODE_FAR = (0x01 << 1);
     static const int OPCODE_NEAR = (0x01 << 2);
     static const int OPCODE_RIGHT = (0x01 << 3);

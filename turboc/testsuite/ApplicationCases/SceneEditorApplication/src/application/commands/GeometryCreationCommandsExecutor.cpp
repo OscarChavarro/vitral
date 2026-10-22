@@ -120,7 +120,7 @@ void GeometryCreationCommandsExecutor::createSphericalHarmonicDebugSpheres()
         referenceGeometry = voxelBody->getGeometry();
     }
 
-    VoxelVolume* vv = dynamic_cast<VoxelVolume*>(referenceGeometry);
+    VoxelVolume* vv = (referenceGeometry != NULL && referenceGeometry->instanceOf(VoxelVolume::CLASS) ? (VoxelVolume*)referenceGeometry : NULL);
     if ( vv == NULL ) {
         presenter->showStatusMessage("ERROR: A VoxelVolume must be selected for spherical harmonic debugging sphere to be created");
     }
@@ -343,7 +343,7 @@ SimpleBody* GeometryCreationCommandsExecutor::addDebugSphere(
     double averageDistance)
 {
     double r = (((double)groupIndex) / 31.0) * (2 * averageDistance);
-    VoxelVolume* vv = dynamic_cast<VoxelVolume*>(voxelBody->getGeometry());
+    VoxelVolume* vv = (voxelBody->getGeometry() != NULL && voxelBody->getGeometry()->instanceOf(VoxelVolume::CLASS) ? (VoxelVolume*)voxelBody->getGeometry() : NULL);
     Sphere* sphere;
     RGBAImageUncompressed* texture;
     SimpleBody* body;

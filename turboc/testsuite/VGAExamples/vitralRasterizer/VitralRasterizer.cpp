@@ -1,4 +1,3 @@
-#include <new>
 #include <vga.h>
 
 #include "VitralRasterizer.h"
@@ -16,11 +15,11 @@ VitralRasterizer::waitCommand() {
     for (;;) {
         int key = RasterizerKeyboard::waitKey();
         switch (key) {
-        case static_cast<int>(RasterizerKey::Escape):
-        case static_cast<int>(RasterizerKey::Left):
-        case static_cast<int>(RasterizerKey::Right):
-        case static_cast<int>(RasterizerKey::Up):
-        case static_cast<int>(RasterizerKey::Down):
+        case ((int)(RasterizerKey::Escape)):
+        case ((int)(RasterizerKey::Left)):
+        case ((int)(RasterizerKey::Right)):
+        case ((int)(RasterizerKey::Up)):
+        case ((int)(RasterizerKey::Down)):
         case 'r':
         case 'R':
         case 'b':
@@ -47,18 +46,18 @@ VitralRasterizer::run(int mode) {
             hud.draw(&shown, colorMode, modes->screen().width, modes->screen().height, modes->screen().text);
         }
         int key = waitCommand();
-        if (key == static_cast<int>(RasterizerKey::Escape)) {
+        if (key == ((int)(RasterizerKey::Escape))) {
             break;
         }
         if (key == 'h' || key == 'H') {
             hud.toggle();
         } else if (key == ' ') {
             colorMode = RasterizerPalette::nextColorMode(colorMode, &palette);
-        } else if (key == static_cast<int>(RasterizerKey::Left) || key == static_cast<int>(RasterizerKey::Right)) {
-            int step = key == static_cast<int>(RasterizerKey::Right) ? 1 : RasterizerExamples::COUNT - 1;
+        } else if (key == ((int)(RasterizerKey::Left)) || key == ((int)(RasterizerKey::Right))) {
+            int step = key == ((int)(RasterizerKey::Right)) ? 1 : RasterizerExamples::COUNT - 1;
             example = (example + step) % RasterizerExamples::COUNT;
         } else {
-            bool down = key == 'R' || key == static_cast<int>(RasterizerKey::Down);
+            bool down = key == 'R' || key == ((int)(RasterizerKey::Down));
             VgaModes::Change change = key == 'b' || key == 'B' ? modes->nextDepth() : modes->step(down ? 1 : -1);
             if (change == VgaModes::Change::None) {
                 continue;
@@ -87,7 +86,7 @@ VitralRasterizer::start(int argc, char *argv[]) {
     case VgaModes::Selection::Unknown: return 1;
     case VgaModes::Selection::Chosen: break;
     }
-    VitralRasterizer *rasterizer = new (std::nothrow) VitralRasterizer(&modes);
+    VitralRasterizer *rasterizer = new VitralRasterizer(&modes);
     if (!rasterizer) {
         return 1;
     }

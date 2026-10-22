@@ -316,8 +316,10 @@ String ViewportSet::findMenuItemName(const String& popupName,
 
     long i;
     for ( i = 0; i < popup->getChildren().size(); i++ ) {
-        WidgetMenuItem* item =
-            dynamic_cast<WidgetMenuItem*>(popup->getChildren().get(i));
+        WidgetMenuElement* child = popup->getChildren().get(i);
+        WidgetMenuItem* item = child != NULL &&
+            child->instanceOf(WidgetMenuItem::CLASS) ?
+            (WidgetMenuItem*)child : NULL;
         if ( item != NULL && !item->isSeparator() &&
              command.equals(item->getCommandName()) ) {
             return item->getName();

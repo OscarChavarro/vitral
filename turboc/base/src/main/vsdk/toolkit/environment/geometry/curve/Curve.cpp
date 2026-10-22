@@ -24,3 +24,11 @@ bool Curve::doIntersectionFirstHit(const Ray& inRay, RayHit* outHit)
 void Curve::doExtraInformation(const Ray&, double, RayHit*)
 {
 }
+
+const Class Curve::CLASS = { "Curve", &Geometry::CLASS };
+
+const Class *
+Curve::getClass() const
+{
+    return &CLASS;
+}

@@ -489,3 +489,11 @@ void InputGizmo::deleteLastCharacterOfSelected()
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int InputGizmo::DECIMALS;
+
+const Class InputGizmo::CLASS = { "InputGizmo", &Gizmo::CLASS };
+
+const Class *
+InputGizmo::getClass() const
+{
+    return &CLASS;
+}

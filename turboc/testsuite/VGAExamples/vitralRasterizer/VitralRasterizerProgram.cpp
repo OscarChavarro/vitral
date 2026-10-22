@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "programs/vitralRasterizer/VitralRasterizerProgram.h"
 #include "kernel/ArgList.h"
 
@@ -8,10 +9,10 @@ int
 VitralRasterizerProgram::main(const ArgList &args) {
     char *argv[ArgList::MAX_ARGS + 2];
     int argc = 0;
-    argv[argc++] = const_cast<char *>("vitral_rasterizer");
+    argv[argc++] = ((char *)("vitral_rasterizer"));
     for (unsigned i = 0; i < args.count(); i++) {
-        argv[argc++] = const_cast<char *>(args.at(i));
+        argv[argc++] = ((char *)(args.at(i)));
     }
-    argv[argc] = nullptr;
+    argv[argc] = NULL;
     return vitralRasterizerMain(argc, argv);
 }

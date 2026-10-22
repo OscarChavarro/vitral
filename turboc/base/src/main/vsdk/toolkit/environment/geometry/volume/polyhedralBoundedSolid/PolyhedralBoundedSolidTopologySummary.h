@@ -1,9 +1,10 @@
 #ifndef __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_SUMMARY__
 #define __POLYHEDRAL_BOUNDED_SOLID_TOPOLOGY_SUMMARY__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class PolyhedralBoundedSolid;
 
@@ -31,6 +32,11 @@ public:
         bool closedOrientableEulerCompatible;
 
     public:
+        /**
+        Empty shell, needed by the storage of `ArrayList`
+        */
+        Shell();
+
         Shell(int faceCount, int edgeCount, int vertexCount,
               int adjustedEulerCharacteristic, bool closed);
 
@@ -44,8 +50,8 @@ public:
     };
 
     /**
-    @param solid solid to summarize (must not be null; Java throws
-    `IllegalArgumentException`, here `std::invalid_argument`)
+    @param solid solid to summarize (must not be null; throws
+    `IllegalArgumentException`, as Java)
     */
     static PolyhedralBoundedSolidTopologySummary from(PolyhedralBoundedSolid* solid);
 
@@ -56,7 +62,7 @@ public:
     int getAdjustedEulerCharacteristic() const;
     bool isEveryFaceReachedExactlyOnce() const;
     int getInvalidEdgeAdjacencyCount() const;
-    const std::vector<Shell>& getShells() const;
+    const ArrayList<Shell>& getShells() const;
     bool hasUniversalContradiction() const;
     String toString() const;
 
@@ -67,7 +73,7 @@ private:
     int adjustedEulerCharacteristic;
     bool everyFaceReachedExactlyOnce;
     int invalidEdgeAdjacencyCount;
-    std::vector<Shell> shells;
+    ArrayList<Shell> shells;
 
     explicit PolyhedralBoundedSolidTopologySummary(PolyhedralBoundedSolid* solid);
 };

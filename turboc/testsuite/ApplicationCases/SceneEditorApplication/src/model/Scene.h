@@ -1,7 +1,7 @@
 #ifndef __SCENE_EDITOR_SCENE__
 #define __SCENE_EDITOR_SCENE__
 
-#include <set>
+#include "java/util/TreeSet.h"
 
 #include "java/util/ArrayList.h"
 #include "java/io/File.h"
@@ -48,7 +48,7 @@ private:
                   bool interactiveReport);
     /// Bodies hidden by the user (i.e. from the scene selector): they are
     /// neither drawn, picked nor raytraced
-    std::set<SimpleBody*> hiddenBodies;
+    TreeSet<SimpleBody*> hiddenBodies;
 
     Scene(const Scene& other);
     Scene& operator=(const Scene& other);

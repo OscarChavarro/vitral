@@ -9,12 +9,9 @@
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
 #include <stdio.h>
-#include <exception>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <utility>
+#include "java/util/TreeMap.h"
+#include "java/util/TreeSet.h"
+#include "java/lang/String.h"
 
 #include "java/lang/Double.h"
 #include "java/util/ArrayList.txx"
@@ -46,6 +43,8 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Exception.h"
+#include "java/lang/IllegalStateException.h"
 
 typedef _PolyhedralBoundedSolidSetOperator SetOperator;
 
@@ -56,12 +55,37 @@ _PolyhedralBoundedSolidIdNamespace* SetOperator::ownedNamespace = 0;
 
 static const char* const CLASS_NAME = "_PolyhedralBoundedSolidSetOperator";
 
-static std::string str(long long value)
+/**
+(from, to) pair of half edges, ordered lexicographically by address (the
+two values stored together)
+*/
+class HalfEdgePair {
+public:
+    _PolyhedralBoundedSolidHalfEdge* from;
+    _PolyhedralBoundedSolidHalfEdge* to;
+
+    HalfEdgePair() : from(NULL), to(NULL) {}
+
+    HalfEdgePair(_PolyhedralBoundedSolidHalfEdge* from,
+                 _PolyhedralBoundedSolidHalfEdge* to) : from(from), to(to) {}
+
+    bool operator<(const HalfEdgePair& other) const
+    {
+        return from < other.from || (from == other.from && to < other.to);
+    }
+
+    bool operator==(const HalfEdgePair& other) const
+    {
+        return from == other.from && to == other.to;
+    }
+};
+
+static String str(long long value)
 {
     return Cpp98Support::toString(value);
 }
 
-static void tracePipelineSummary(const std::string& message)
+static void tracePipelineSummary(const String& message)
 {
     _SetOperationTrace::tracePipelineSummary(message.c_str());
 }
@@ -74,9 +98,9 @@ static bool isPipelineSummaryTraceEnabled()
 /**
 Emulates Java `Arrays.toString(double[])` for the six bounds values.
 */
-static std::string boundsText(const double* bounds)
+static String boundsText(const double* bounds)
 {
-    std::string text = "[";
+    String text = "[";
     for ( int i = 0; i < 6; i++ ) {
         if ( i > 0 ) {
             text += ", ";
@@ -86,18 +110,18 @@ static std::string boundsText(const double* bounds)
     return text + "]";
 }
 
-template <typename T>
+template <class T>
 static void unlistShared(ArrayList<T*>& from, const ArrayList<T*>& reference)
 {
-    std::set<T*> referenced;
+    TreeSet<T*> referenced;
     long int i;
 
     for ( i = 0; i < reference.size(); i++ ) {
-        referenced.insert(reference.get(i));
+        referenced.add(reference.get(i));
     }
     i = 0;
     while ( i < from.size() ) {
-        if ( referenced.count(from.get(i)) > 0 ) {
+        if ( referenced.contains(from.get(i)) ) {
             from.remove(i);
         }
         else {
@@ -180,20 +204,20 @@ Removes entries from `list` whose vertex is no longer present in `solid`
 solid's vertices list).
 */
 void SetOperator::pruneStaleVertexFaceEntries(
-    std::vector<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
+    ArrayList<_PolyhedralBoundedSolidSetOperatorVertexFace>& list,
     PolyhedralBoundedSolid* solid)
 {
-    std::set<_PolyhedralBoundedSolidVertex*> present;
+    TreeSet<_PolyhedralBoundedSolidVertex*> present;
     long int k;
-    size_t i;
+    long i;
 
     for ( k = 0; k < solid->getVerticesList().size(); k++ ) {
-        present.insert(solid->getVerticesList().get(k));
+        present.add(solid->getVerticesList().get(k));
     }
     i = 0;
     while ( i < list.size() ) {
-        if ( present.count(list[i].v) == 0 ) {
-            list.erase(list.begin() + i);
+        if ( !present.contains(list[i].v) ) {
+            list.remove((long)i);
         }
         else {
             i++;
@@ -313,11 +337,10 @@ SetOperator::SeparateEdgeSequenceResult SetOperator::separateEdgeSequence(
     // struts inserted previously; cases C/D/E step backwards in the loop
     // until the two starts coincide. Each iteration must produce an unseen
     // (from, to) pair - repeating a pair proves divergence.
-    std::set<std::pair<_PolyhedralBoundedSolidHalfEdge*,
-        _PolyhedralBoundedSolidHalfEdge*> > visitedConfigurations;
+    TreeSet<HalfEdgePair> visitedConfigurations;
     bool changed;
     do {
-        if ( !visitedConfigurations.insert(std::make_pair(from, to)).second ) {
+        if ( !visitedConfigurations.add(HalfEdgePair(from, to)) ) {
             Logger::reportMessage(String(), Logger::WARNING,
                 "separateEdgeSequence",
                 "Cycle detected in endpoint recovery (cases A-E "
@@ -586,7 +609,7 @@ void SetOperator::setOpFinish(_SetOperationContext& ctx,
 void SetOperator::debugSolid(PolyhedralBoundedSolid* solid, const char* pattern)
 {
     printf("**** DEBUGGING SOLID INFORMATION WRITEN TO FILES %s ****\n", pattern);
-    std::string fileName = std::string(pattern) + ".txt";
+    String fileName = String(pattern) + ".txt";
     FILE* fd = fopen(fileName.c_str(), "w");
     if ( fd == 0 ) {
         return;
@@ -624,7 +647,7 @@ PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
     bool doStrictValidation)
 {
     if ( result == 0 ) {
-        throw std::logic_error(std::string("Boolean operation returned null: op=") +
+        throw IllegalStateException(String("Boolean operation returned null: op=") +
             operationName(op).c_str() + ", path=" + resultPath);
     }
     if ( result->getPolygonsList().size() > 0 ) {
@@ -636,8 +659,8 @@ PolyhedralBoundedSolid* SetOperator::completeSetOpResult(
                  result, &strictMessage) ) {
             PolyhedralBoundedSolidTopologySummary topology =
                 PolyhedralBoundedSolidTopologySummary::from(result);
-            throw std::logic_error(
-                std::string("Strict boolean result validation failed: op=") +
+            throw IllegalStateException(
+                String("Strict boolean result validation failed: op=") +
                 operationName(op).c_str() + ", path=" + resultPath +
                 ", operandA=" + operandADiagnostics.c_str() +
                 ", operandB=" + operandBDiagnostics.c_str() +
@@ -669,7 +692,7 @@ String SetOperator::cardinalitiesAndBounds(PolyhedralBoundedSolid* solid)
         return "null";
     }
     double* bounds = solid->getMinMax();
-    std::string text = "{faces=" + str(solid->getPolygonsList().size()) +
+    String text = "{faces=" + str(solid->getPolygonsList().size()) +
         ", edges=" + str(solid->getEdgesList().size()) +
         ", vertices=" + str(solid->getVerticesList().size()) +
         ", bounds=" + boundsText(bounds) + "}";
@@ -685,9 +708,9 @@ structure (Java uses object serialization for this).
 PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* solid,
     const char* solidLabel)
 {
-    std::map<_PolyhedralBoundedSolidVertex*, _PolyhedralBoundedSolidVertex*> vertexMap;
-    std::map<_PolyhedralBoundedSolidEdge*, _PolyhedralBoundedSolidEdge*> edgeMap;
-    std::map<_PolyhedralBoundedSolidHalfEdge*, _PolyhedralBoundedSolidHalfEdge*> halfEdgeMap;
+    TreeMap<_PolyhedralBoundedSolidVertex*, _PolyhedralBoundedSolidVertex*> vertexMap;
+    TreeMap<_PolyhedralBoundedSolidEdge*, _PolyhedralBoundedSolidEdge*> edgeMap;
+    TreeMap<_PolyhedralBoundedSolidHalfEdge*, _PolyhedralBoundedSolidHalfEdge*> halfEdgeMap;
     long int i;
     long int j;
     long int k;
@@ -708,7 +731,7 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
             new _PolyhedralBoundedSolidVertex(v->position, v->id);
         nv->debugColor = v->debugColor;
         copy->getVerticesList().add(nv);
-        vertexMap[v] = nv;
+        vertexMap.put(v, nv);
     }
     for ( i = 0; i < solid->getEdgesList().size(); i++ ) {
         _PolyhedralBoundedSolidEdge* e = solid->getEdgesList().get(i);
@@ -716,7 +739,7 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
         ne->id = e->id;
         ne->debugColor = e->debugColor;
         copy->getEdgesList().add(ne);
-        edgeMap[e] = ne;
+        edgeMap.put(e, ne);
     }
     for ( i = 0; i < solid->getPolygonsList().size(); i++ ) {
         _PolyhedralBoundedSolidFace* f = solid->getPolygonsList().get(i);
@@ -730,49 +753,48 @@ PolyhedralBoundedSolid* SetOperator::deepCloneSolid(PolyhedralBoundedSolid* soli
                 _PolyhedralBoundedSolidHalfEdge* he = l->halfEdgesList.get(k);
                 _PolyhedralBoundedSolidHalfEdge* nhe =
                     new _PolyhedralBoundedSolidHalfEdge(
-                        he->startingVertex != 0 ? vertexMap[he->startingVertex] : 0,
+                        he->startingVertex != 0 ?
+                            vertexMap.getOrDefault(he->startingVertex, NULL) :
+                            0,
                         nl);
                 nhe->id = he->id;
                 if ( he->parentEdge != 0 ) {
-                    std::map<_PolyhedralBoundedSolidEdge*,
-                        _PolyhedralBoundedSolidEdge*>::iterator found =
-                        edgeMap.find(he->parentEdge);
-                    if ( found == edgeMap.end() ) {
+                    _PolyhedralBoundedSolidEdge** found = edgeMap.get(he->parentEdge);
+                    if ( found == NULL ) {
                         // Edge not listed by the solid: copy it on demand
                         _PolyhedralBoundedSolidEdge* ne = new _PolyhedralBoundedSolidEdge();
                         ne->id = he->parentEdge->id;
                         ne->debugColor = he->parentEdge->debugColor;
-                        edgeMap[he->parentEdge] = ne;
+                        edgeMap.put(he->parentEdge, ne);
                         nhe->parentEdge = ne;
                     }
                     else {
-                        nhe->parentEdge = found->second;
+                        nhe->parentEdge = (*found);
                     }
                 }
                 nl->halfEdgesList.add(nhe);
-                halfEdgeMap[he] = nhe;
+                halfEdgeMap.put(he, nhe);
             }
             nl->boundaryStartHalfEdge = l->boundaryStartHalfEdge != 0 ?
-                halfEdgeMap[l->boundaryStartHalfEdge] : 0;
+                halfEdgeMap.getOrDefault(l->boundaryStartHalfEdge, NULL) : 0;
         }
     }
 
     // Edge halves and vertex emanating references, now that half-edges exist
-    for ( std::map<_PolyhedralBoundedSolidEdge*, _PolyhedralBoundedSolidEdge*>::iterator
-              it = edgeMap.begin(); it != edgeMap.end(); ++it ) {
-        _PolyhedralBoundedSolidEdge* e = it->first;
-        _PolyhedralBoundedSolidEdge* ne = it->second;
-        ne->rightHalf = (e->rightHalf != 0 && halfEdgeMap.count(e->rightHalf)) ?
-            halfEdgeMap[e->rightHalf] : 0;
-        ne->leftHalf = (e->leftHalf != 0 && halfEdgeMap.count(e->leftHalf)) ?
-            halfEdgeMap[e->leftHalf] : 0;
+    for ( long it = 0; it < edgeMap.size(); it++ ) {
+        _PolyhedralBoundedSolidEdge* e = edgeMap.getKey(it);
+        _PolyhedralBoundedSolidEdge* ne = edgeMap.getValue(it);
+        ne->rightHalf = (e->rightHalf != 0 && halfEdgeMap.containsKey(e->rightHalf)) ?
+            *halfEdgeMap.get(e->rightHalf) : 0;
+        ne->leftHalf = (e->leftHalf != 0 && halfEdgeMap.containsKey(e->leftHalf)) ?
+            *halfEdgeMap.get(e->leftHalf) : 0;
     }
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
         _PolyhedralBoundedSolidVertex* v = solid->getVerticesList().get(i);
-        _PolyhedralBoundedSolidVertex* nv = vertexMap[v];
+        _PolyhedralBoundedSolidVertex* nv = vertexMap.getOrDefault(v, NULL);
         nv->emanatingHalfEdge = (v->emanatingHalfEdge != 0 &&
-            halfEdgeMap.count(v->emanatingHalfEdge)) ?
-            halfEdgeMap[v->emanatingHalfEdge] : 0;
+            halfEdgeMap.containsKey(v->emanatingHalfEdge)) ?
+            *halfEdgeMap.get(v->emanatingHalfEdge) : 0;
     }
     return copy;
 }
@@ -931,7 +953,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PolyhedralBoundedSolid* axisAlignedCellBooleanFallback;
     PolyhedralBoundedSolid* orthogonalProfileBooleanFallback;
     bool fallbackProvidedResult;
-    std::string resultPath;
+    String resultPath;
     String operandADiagnostics;
     String operandBDiagnostics;
 
@@ -967,7 +989,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
     PolyhedralBoundedSolidTopologyEditing::compactIds(inSolidA);
     PolyhedralBoundedSolidTopologyEditing::compactIds(inSolidB);
     updmaxnames(inSolidB, inSolidA);
-    // As Java, the namespace stays active after this operation (until the
+    // The identifier range stays active after this operation (until the
     // next setOp replaces it); the operator owns it
     _PolyhedralBoundedSolidIdNamespace* previousNamespace = ownedNamespace;
     ownedNamespace = new _PolyhedralBoundedSolidIdNamespace(inSolidA, inSolidB);
@@ -1082,7 +1104,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
         // null-edge struts (size-2 loops with coincident endpoints);
         // genuine self-touch is only meaningful after Generate.
 
-        if ( ctx.sonea.empty() && ctx.sonvv.empty() ) {
+        if ( ctx.sonea.isEmpty() && ctx.sonvv.isEmpty() ) {
             // No intersections found
             res = _PolyhedralBoundedSolidSetNonIntersectingClassifier
                 ::runSetOpNoIntersectionCase(inSolidA, inSolidB, res, op);
@@ -1147,7 +1169,7 @@ PolyhedralBoundedSolid* SetOperator::setOp(
             try {
                 setOpFinish(ctx, inSolidA, inSolidB, res, op);
             }
-            catch ( const std::exception& e ) {
+            catch ( const Exception& e ) {
                 PolyhedralBoundedSolid* offsetCylinderExceptionFallback =
                     _PolyhedralBoundedSolidOffsetCylinderFallback
                         ::buildOffsetCylinderDifferenceFallback(
@@ -1155,8 +1177,8 @@ PolyhedralBoundedSolid* SetOperator::setOp(
                 if ( isStructurallyUsableSetOpResult(
                          offsetCylinderExceptionFallback) ) {
                     tracePipelineSummary(
-                        std::string("offset cylinder fallback replacing finish exception: ") +
-                        e.what());
+                        String("offset cylinder fallback replacing finish exception: ") +
+                        e.getMessage().c_str());
                     discardIntermediateResult(res, inSolidA, inSolidB);
                     res = offsetCylinderExceptionFallback;
                     delete axisAlignedCellBooleanFallback;
@@ -1175,8 +1197,8 @@ PolyhedralBoundedSolid* SetOperator::setOp(
                     }
                     else if ( axisAlignedCellBooleanFallback != 0 ) {
                         tracePipelineSummary(
-                            std::string("axis-aligned cell fallback replacing finish exception: ") +
-                            e.what());
+                            String("axis-aligned cell fallback replacing finish exception: ") +
+                            e.getMessage().c_str());
                         discardIntermediateResult(res, inSolidA, inSolidB);
                         res = axisAlignedCellBooleanFallback;
                         axisAlignedCellBooleanFallback = 0;
@@ -1184,8 +1206,8 @@ PolyhedralBoundedSolid* SetOperator::setOp(
                     }
                     else {
                         tracePipelineSummary(
-                            std::string("orthogonal profile fallback replacing finish exception: ") +
-                            e.what());
+                            String("orthogonal profile fallback replacing finish exception: ") +
+                            e.getMessage().c_str());
                         discardIntermediateResult(res, inSolidA, inSolidB);
                         res = orthogonalProfileBooleanFallback;
                         orthogonalProfileBooleanFallback = 0;

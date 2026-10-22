@@ -115,3 +115,11 @@ SpotLight::copy() const
 {
     return new SpotLight(*this);
 }
+
+const Class SpotLight::CLASS = { "SpotLight", &Light::CLASS };
+
+const Class *
+SpotLight::getClass() const
+{
+    return &CLASS;
+}

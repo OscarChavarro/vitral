@@ -62,3 +62,11 @@ String* PrimitiveCountShapeDescriptor::toString() const {
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int PrimitiveCountShapeDescriptor::numberOfElements;
+
+const Class PrimitiveCountShapeDescriptor::CLASS = { "PrimitiveCountShapeDescriptor", &ShapeDescriptor::CLASS };
+
+const Class *
+PrimitiveCountShapeDescriptor::getClass() const
+{
+    return &CLASS;
+}

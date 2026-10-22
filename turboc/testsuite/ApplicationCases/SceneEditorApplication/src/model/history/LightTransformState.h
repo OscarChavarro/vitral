@@ -17,6 +17,9 @@ private:
     explicit LightTransformState(Light* light);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     @param light light whose placement is captured
     @return the current placement of the light, owned by the caller

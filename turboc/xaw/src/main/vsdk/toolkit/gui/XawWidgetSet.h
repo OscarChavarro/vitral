@@ -31,7 +31,7 @@ public:
     virtual void setWindowCloseHandler(Widget shell, NotifyProc close,
                                        void* clientData);
     virtual Widget createChoiceMenu(Widget owner,
-                                    const std::vector<MenuChoice>& items,
+                                    const ArrayList<MenuChoice>& items,
                                     XFontSet fontSet, ChoiceProc choose,
                                     void* clientData);
     virtual void popupChoiceMenu(Widget menu, int rootX, int rootY,

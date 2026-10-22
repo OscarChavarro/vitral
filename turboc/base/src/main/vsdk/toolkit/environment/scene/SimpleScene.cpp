@@ -108,3 +108,11 @@ SimpleSceneSnapshot* SimpleScene::exportToSimpleSceneSnapshot(CameraSnapshot* ca
 {
     return new SimpleSceneSnapshot(simpleBodies, lights, background, cameraSnapshot);
 }
+
+const Class SimpleScene::CLASS = { "SimpleScene", &Entity::CLASS };
+
+const Class *
+SimpleScene::getClass() const
+{
+    return &CLASS;
+}

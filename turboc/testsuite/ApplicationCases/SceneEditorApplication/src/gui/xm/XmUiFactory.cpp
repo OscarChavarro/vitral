@@ -1,5 +1,6 @@
 #include "gui/xm/XmFileDialog.h"
 #include "gui/xm/XmUiFactory.h"
+#include "java/util/ArrayList.txx"
 
 XtUiFactory* createUiFactory()
 {
@@ -17,10 +18,10 @@ const char* XmUiFactory::getResourceFile()
 }
 
 bool XmUiFactory::showFileDialog(XtApplicationHost* host,
-                                 const std::string& title,
-                                 const std::string& folder,
-                                 const std::vector<FileSuffixFilter>& filters,
-                                 std::string& outPath)
+                                 const String& title,
+                                 const String& folder,
+                                 const ArrayList<FileSuffixFilter>& filters,
+                                 String& outPath)
 {
     return XmFileDialog::showDialog(host, title, folder, filters, outPath);
 }

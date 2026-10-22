@@ -9,15 +9,18 @@
 static const char* DEFAULT_TANGIBLE_SERVICE_URL = "ws://127.0.0.1:8090/v1/values";
 static const char* RAY_CUBE_TANGIBLE_ELEMENT_ID = "rayCube1";
 
-static std::string trim(const std::string& text)
+static String trim(const String& text)
 {
     const char* blanks = " \t\r\n";
-    size_t start = text.find_first_not_of(blanks);
-    if ( start == std::string::npos ) {
-        return "";
+    int start = 0;
+    int end = text.size();
+    while ( start < end && strchr(blanks, text[start]) != NULL ) {
+        start++;
     }
-    size_t end = text.find_last_not_of(blanks);
-    return text.substr(start, end - start + 1);
+    while ( end > start && strchr(blanks, text[end - 1]) != NULL ) {
+        end--;
+    }
+    return text.substring(start, end);
 }
 
 TangibleInterfaceConnection::TangibleInterfaceConnection(
@@ -46,21 +49,21 @@ void TangibleInterfaceConnection::processArguments(int argc, char** argv)
     }
 }
 
-const std::string& TangibleInterfaceConnection::getServiceUrl() const
+const String& TangibleInterfaceConnection::getServiceUrl() const
 {
     return serviceUrl;
 }
 
-void TangibleInterfaceConnection::setServiceUrl(const std::string& serviceUrl)
+void TangibleInterfaceConnection::setServiceUrl(const String& serviceUrl)
 {
-    std::string url = trim(serviceUrl);
-    if ( !url.empty() ) {
+    String url = trim(serviceUrl);
+    if ( !url.isEmpty() ) {
         this->serviceUrl = url;
     }
 }
 
 void TangibleInterfaceConnection::connect(
-    const std::string& serviceUrl,
+    const String& serviceUrl,
     Consumer<bool>* connectionListener)
 {
     setServiceUrl(serviceUrl);

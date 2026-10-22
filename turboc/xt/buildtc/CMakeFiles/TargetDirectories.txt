@@ -1,0 +1,3 @@
+/home/jedilink/VITRAL/vitral/turboc/xt/buildtc/CMakeFiles/vitral_xt.dir
+/home/jedilink/VITRAL/vitral/turboc/xt/buildtc/CMakeFiles/edit_cache.dir
+/home/jedilink/VITRAL/vitral/turboc/xt/buildtc/CMakeFiles/rebuild_cache.dir

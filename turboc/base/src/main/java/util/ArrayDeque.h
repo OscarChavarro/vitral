@@ -9,7 +9,7 @@ private:
     long head;
     long tail;
     long capacity;
-    static const long MIN_INITIAL_CAPACITY = 16;
+    enum { MIN_INITIAL_CAPACITY = 16 };
 
     void doubleCapacity();
     long mask() const;

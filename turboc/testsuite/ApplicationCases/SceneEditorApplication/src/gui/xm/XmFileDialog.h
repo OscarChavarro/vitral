@@ -1,8 +1,8 @@
 #ifndef __XM_FILE_DIALOG__
 #define __XM_FILE_DIALOG__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 // Xt names its strings and objects as the vitral String and Object
 // classes: renamed while its headers are read (see XtIntrinsics.h)
@@ -36,23 +36,23 @@ public:
     @param outPath the chosen file, when approved
     @return true if the user approved a file (`APPROVE_OPTION`)
     */
-    static bool showDialog(XtApplicationHost* host, const std::string& title,
-                           const std::string& folder,
-                           const std::vector<FileSuffixFilter>& filters,
-                           std::string& outPath);
+    static bool showDialog(XtApplicationHost* host, const String& title,
+                           const String& folder,
+                           const ArrayList<FileSuffixFilter>& filters,
+                           String& outPath);
 
 private:
-    std::vector<FileSuffixFilter> filters;
+    ArrayList<FileSuffixFilter> filters;
     Widget shell;
     Widget box;
     bool done;
     bool approved;
-    std::string path;
+    String path;
 
-    explicit XmFileDialog(const std::vector<FileSuffixFilter>& filters);
+    explicit XmFileDialog(const ArrayList<FileSuffixFilter>& filters);
     ~XmFileDialog();
-    void create(XtApplicationHost* host, const std::string& title,
-                const std::string& folder);
+    void create(XtApplicationHost* host, const String& title,
+                const String& folder);
 
     static void searchFiles(Widget box, XtPointer callData);
     static void approve(Widget, XtPointer clientData, XtPointer callData);

@@ -214,3 +214,11 @@ RGBAImageUncompressed* IndexedColorImageUncompressed::exportToRgbaImage() const
 
     return copy;
 }
+
+const Class IndexedColorImageUncompressed::CLASS = { "IndexedColorImageUncompressed", &Image::CLASS };
+
+const Class *
+IndexedColorImageUncompressed::getClass() const
+{
+    return &CLASS;
+}

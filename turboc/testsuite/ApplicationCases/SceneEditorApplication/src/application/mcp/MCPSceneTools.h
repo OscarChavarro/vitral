@@ -4,6 +4,7 @@
 #include "java/lang/Runnable.h"
 
 #include "java/lang/String.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class ApplicationModel;
 class Geometry;
@@ -18,7 +19,7 @@ in the scene history (named after the tool), so they can be undone. It does not
 depend on any GUI or rendering technology: repainting after a change is up to
 the caller.
 
-C++ port note: failures are C++ exceptions (i.e. `std::invalid_argument`
+C++ port note: failures are C++ exceptions (i.e. `IllegalArgumentException`
 where Java throws `IllegalArgumentException`), with the same messages as the
 Java ones.
 */

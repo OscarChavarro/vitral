@@ -191,3 +191,11 @@ void RGBAImageUncompressed::dispose() {
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int RGBAImageUncompressed::BYTES_PER_PIXEL;
+
+const Class RGBAImageUncompressed::CLASS = { "RGBAImageUncompressed", &Image::CLASS };
+
+const Class *
+RGBAImageUncompressed::getClass() const
+{
+    return &CLASS;
+}

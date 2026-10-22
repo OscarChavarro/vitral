@@ -15,6 +15,9 @@ private:
     double d;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     InfinitePlane(const InfinitePlane& other);
     InfinitePlane(double a, double b, double c, double d);
     InfinitePlane(const Vector3Dd& normal, const Vector3Dd& pointInPlane);

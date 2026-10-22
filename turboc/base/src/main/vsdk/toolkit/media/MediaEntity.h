@@ -19,6 +19,9 @@ classes NOT related with 3D geometry. This serves two purposes:
 class MediaEntity : public Entity {
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~MediaEntity() {}
 
 };

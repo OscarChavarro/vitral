@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <math.h>
 
 #include "java/lang/Double.h"
@@ -9,13 +8,15 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "java/util/Comparator.h"
 
 
 /** Natural order of Java `Double.compareTo` */
-struct FallbackGeometryJavaDoubleOrder {
-    bool operator()(double x, double y) const
+class FallbackGeometryJavaDoubleOrder : public Comparator<double> {
+public:
+    int compare(const double& x, const double& y) const
     {
-        return Double::compare(x, y) < 0;
+        return Double::compare(x, y);
     }
 };
 
@@ -53,25 +54,25 @@ bool FallbackGeometry::boundsMatch(const double* a, const double* b)
     return true;
 }
 
-void FallbackGeometry::addUniqueCoordinate(std::vector<double>& values,
+void FallbackGeometry::addUniqueCoordinate(ArrayList<double>& values,
     double value)
 {
-    size_t i;
+    long i;
 
     for ( i = 0; i < values.size(); i++ ) {
         if ( sameCoordinate(values[i], value) ) {
             return;
         }
     }
-    values.push_back(value);
+    values.add(value);
     // As Java `Collections.sort` over `Double`
-    std::stable_sort(values.begin(), values.end(), FallbackGeometryJavaDoubleOrder());
+    values.sort(FallbackGeometryJavaDoubleOrder());
 }
 
-std::vector<double> FallbackGeometry::uniqueVertexCoordinates(
+ArrayList<double> FallbackGeometry::uniqueVertexCoordinates(
     PolyhedralBoundedSolid* solid, int axis)
 {
-    std::vector<double> values;
+    ArrayList<double> values;
     long int i;
 
     for ( i = 0; i < solid->getVerticesList().size(); i++ ) {
@@ -84,7 +85,7 @@ std::vector<double> FallbackGeometry::uniqueVertexCoordinates(
 double FallbackGeometry::signedAreaOnYZ(const Profile& profile)
 {
     double area;
-    size_t i;
+    long i;
 
     area = 0.0;
     for ( i = 0; i < profile.size(); i++ ) {
@@ -124,7 +125,7 @@ FallbackGeometry::Profile FallbackGeometry::extractProfileAtX(
                     onPlane = false;
                     break;
                 }
-                profile.push_back(p);
+                profile.add(p);
             }
             if ( !onPlane ) {
                 continue;
@@ -148,10 +149,10 @@ bool FallbackGeometry::sameProfilePoint(const Vector3Dd& a, const Vector3Dd& b)
 
 void FallbackGeometry::appendProfilePoint(Profile& profile, const Vector3Dd& point)
 {
-    if ( !profile.empty() && sameProfilePoint(profile.back(), point) ) {
+    if ( !profile.isEmpty() && sameProfilePoint(profile[profile.size() - 1], point) ) {
         return;
     }
-    profile.push_back(point);
+    profile.add(point);
 }
 
 Vector3Dd FallbackGeometry::projectProfilePoint(const Vector3Dd& point,
@@ -186,13 +187,13 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
     Profile clipped;
     Vector3Dd previous;
     bool previousInside;
-    size_t i;
+    long i;
 
     if ( profile.size() < 3 ) {
         return clipped;
     }
 
-    previous = profile.back();
+    previous = profile[profile.size() - 1];
     previousInside = previous.z() + numericContext.bigEpsilon() >= zCut;
     for ( i = 0; i < profile.size(); i++ ) {
         Vector3Dd current = profile[i];
@@ -214,8 +215,8 @@ FallbackGeometry::Profile FallbackGeometry::clipProfileAboveZ(
         previousInside = currentInside;
     }
 
-    if ( clipped.size() > 1 && sameProfilePoint(clipped.front(), clipped.back()) ) {
-        clipped.pop_back();
+    if ( clipped.size() > 1 && sameProfilePoint(clipped[0], clipped[clipped.size() - 1]) ) {
+        clipped.remove(clipped.size() - 1);
     }
     return clipped;
 }

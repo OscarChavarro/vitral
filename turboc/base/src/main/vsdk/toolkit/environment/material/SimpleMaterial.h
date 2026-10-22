@@ -23,6 +23,15 @@ class SimpleMaterial : public Entity, public Material {
     double phongExponent;
 
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
+    /// Resolves the `instanceOf` inherited from both `Entity` and `Material`
+    bool instanceOf(const Class &type) const
+    {
+        return Entity::instanceOf(type);
+    }
+
     SimpleMaterial();
     SimpleMaterial(const SimpleMaterial& m);
     SimpleMaterial(

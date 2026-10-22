@@ -1,5 +1,4 @@
-#include <stdexcept>
-#include <string>
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 #include "java/lang/StringBuilder.h"
@@ -27,6 +26,7 @@
 #include "model/history/UndoQueue.h"
 #include "model/history/ViewportHistory.h"
 #include "model/selection/SelectionSet.h"
+#include "java/lang/IllegalArgumentException.h"
 
 
 /**
@@ -81,7 +81,7 @@ String MCPSceneTools::describeScene()
             .append(",\"geometry\":\"").append(geometry->getClassSimpleName()).append('"')
             .append(",\"position\":").append(MCPJson::vector(position))
             .append(",\"scale\":").append(MCPJson::vector(scale));
-        Sphere* sphere = dynamic_cast<Sphere*>(geometry);
+        Sphere* sphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS) ? (Sphere*)geometry : NULL);
         if ( sphere != NULL ) {
             sb.append(",\"radius\":").append(sphere->getRadius());
         }
@@ -205,7 +205,7 @@ void MCPSceneTools::setBodyPosition(Geometry* /*unused*/,
                                              (double)(bodies.size() - 1));
 
     if ( index < 0 || index >= bodies.size() ) {
-        throw std::invalid_argument(
+        throw IllegalArgumentException(
             "Body index out of range: " + Cpp98Support::toString(index));
     }
     SimpleBody* body = bodies.get(index);
@@ -225,7 +225,7 @@ void MCPSceneTools::selectBody(const String& request)
     scene->selectedThings->unselectAll();
     if ( index >= 0 ) {
         if ( index >= scene->scene->getSimpleBodies().size() ) {
-            throw std::invalid_argument(
+            throw IllegalArgumentException(
                 "Body index out of range: " + Cpp98Support::toString(index));
         }
         scene->selectedThings->select(index);

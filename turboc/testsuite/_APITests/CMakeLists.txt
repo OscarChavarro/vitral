@@ -5,8 +5,6 @@ project(vitral_api_tests C CXX)
 # Legacy C++98 port: must build with old toolchains (e.g. CMake 2.4 and
 # g++ 4.1 on Ubuntu 7.04), so only CMake 2.4 commands are used here.
 # Requires the base, opengl1 and glut libraries (see scripts/compile.sh).
-# _occtPolyhedralBoundedSolidBooleansTool (OpenCascade, C++11) is not part
-# of this port.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wall")
 
 set(VITRAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")

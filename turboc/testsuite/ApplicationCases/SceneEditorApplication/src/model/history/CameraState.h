@@ -36,6 +36,9 @@ private:
     static bool sameVector(const Vector3Dd& a, const Vector3Dd& b);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     @param camera camera whose state is captured
     @return the current state of the camera, owned by the caller

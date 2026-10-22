@@ -91,3 +91,11 @@ const String& WidgetMenuItem::getAccelerator() const
 {
     return accelerator;
 }
+
+const Class WidgetMenuItem::CLASS = { "WidgetMenuItem", &WidgetMenuElement::CLASS };
+
+const Class *
+WidgetMenuItem::getClass() const
+{
+    return &CLASS;
+}

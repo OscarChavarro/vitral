@@ -12,11 +12,11 @@ elapsedSeconds(const timespec &started, const timespec &finished) {
 }
 
 void
-RaytracerDisplay::drawTrueColor(const uint8_t *rgb, int width, int height) {
+RaytracerDisplay::drawTrueColor(const unsigned char *rgb, int width, int height) {
     long last = -1;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            const uint8_t *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
+            const unsigned char *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
             long key = (long)p[0] << 16 | (long)p[1] << 8 | p[2];
             if (key != last) {
                 vga_setrgbcolor(p[0], p[1], p[2]);
@@ -28,7 +28,7 @@ RaytracerDisplay::drawTrueColor(const uint8_t *rgb, int width, int height) {
 }
 
 void
-RaytracerDisplay::drawText(const uint8_t *rgb, int width, int height) {
+RaytracerDisplay::drawText(const unsigned char *rgb, int width, int height) {
     static const char RAMP[] = " .:-=+*#%@";
     const int steps = (int)sizeof(RAMP) - 1;
     for (int row = 0; row < TEXT_ROWS; row++) {
@@ -46,7 +46,7 @@ RaytracerDisplay::drawText(const uint8_t *rgb, int width, int height) {
             long count = 0;
             for (int y = y0; y < y1; y++) {
                 for (int x = x0; x < x1; x++) {
-                    const uint8_t *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
+                    const unsigned char *p = rgb + ((unsigned)y * (unsigned)width + (unsigned)x) * 3;
                     sum += 299 * p[0] + 587 * p[1] + 114 * p[2];
                     count++;
                 }
@@ -65,7 +65,7 @@ RaytracerDisplay::drawText(const uint8_t *rgb, int width, int height) {
 }
 
 int
-RaytracerDisplay::showImage(const uint8_t *rgb, int width, int height, int text, const Dithering::Palette *standard,
+RaytracerDisplay::showImage(const unsigned char *rgb, int width, int height, int text, const Dithering::Palette *standard,
                             RaytracerColorMode colorMode, Shown *shown, double *vgaSeconds) {
     *vgaSeconds = 0;
     shown->palette = *standard;
@@ -90,7 +90,7 @@ RaytracerDisplay::showImage(const uint8_t *rgb, int width, int height, int text,
         return 1;
     }
     unsigned pixels = (unsigned)width * (unsigned)height;
-    uint8_t *indices = (uint8_t *)malloc(pixels);
+    unsigned char *indices = (unsigned char *)malloc(pixels);
     int ok = indices != 0;
     if (ok) {
         Dithering::Palette optimized;

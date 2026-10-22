@@ -29,3 +29,11 @@ String* RGBPixel::toString() const {
     snprintf(buffer, sizeof(buffer), "<%d, %d, %d>", ur, ug, ub);
     return new String(buffer);
 }
+
+const Class RGBPixel::CLASS = { "RGBPixel", &MediaEntity::CLASS };
+
+const Class *
+RGBPixel::getClass() const
+{
+    return &CLASS;
+}

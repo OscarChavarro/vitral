@@ -13,6 +13,9 @@ class SpotLight : public Light {
     static double cubicSpline(double low, double high, double pos);
 
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     SpotLight(const Vector3Dd &position, const Vector3Dd &pointsAt,
         const ColorRgb &emission, double coefficient, double radius, double falloff);
     SpotLight(const SpotLight &other);

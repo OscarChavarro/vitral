@@ -9,6 +9,9 @@ private:
     double currentPercent;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     ProgressMonitorConsoleLongFormat();
     virtual ~ProgressMonitorConsoleLongFormat() {}
 

@@ -1,6 +1,7 @@
 #ifndef __MATERIAL__
 #define __MATERIAL__
 
+#include "java/lang/Class.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 
 class Material {
@@ -11,6 +12,21 @@ class Material {
     virtual Material *translate(Vector3Dd *vector) = 0;
     virtual Material *rotate(Vector3Dd *vector) = 0;
     virtual Material *scale(Vector3Dd *vector) = 0;
+
+    /**
+    @return the descriptor of the class of this material (Java
+    `getClass()`, implemented by the material classes)
+    */
+    virtual const Class *getClass() const = 0;
+
+    /**
+    @return true if this material is an instance of the class or of one of
+    its subclasses (Java `instanceof`)
+    */
+    bool instanceOf(const Class &type) const
+    {
+        return type.isAssignableFrom(getClass());
+    }
 };
 
 #endif

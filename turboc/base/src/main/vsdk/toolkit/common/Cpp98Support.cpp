@@ -3,75 +3,75 @@
 
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
-std::string
+String
 Cpp98Support::toString(int value)
 {
     char buffer[32];
     sprintf(buffer, "%d", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(unsigned int value)
 {
     char buffer[32];
     sprintf(buffer, "%u", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(long value)
 {
     char buffer[32];
     sprintf(buffer, "%ld", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(unsigned long value)
 {
     char buffer[32];
     sprintf(buffer, "%lu", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(long long value)
 {
     char buffer[32];
     sprintf(buffer, "%lld", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(unsigned long long value)
 {
     char buffer[32];
     sprintf(buffer, "%llu", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(float value)
 {
     return toString((double)value);
 }
 
-std::string
+String
 Cpp98Support::toString(double value)
 {
     // "%f" of the largest double needs 309 digits plus sign and decimals
     char buffer[512];
     sprintf(buffer, "%f", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
-std::string
+String
 Cpp98Support::toString(long double value)
 {
     char buffer[5120];
     sprintf(buffer, "%Lf", value);
-    return std::string(buffer);
+    return String(buffer);
 }
 
 double

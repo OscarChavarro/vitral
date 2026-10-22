@@ -136,12 +136,12 @@ void OpenGL1DebuggerRenderer::drawSimpleBody(SimpleBody* body, Camera* camera, c
     if ( geometry == 0 ) return;
 
     ArrayList<TriangleMesh*> meshes;
-    TriangleMesh* tm = dynamic_cast<TriangleMesh*>(geometry);
+    TriangleMesh* tm = (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)geometry : NULL);
     if ( tm != 0 ) {
         meshes.add(tm);
     }
     else {
-        TriangleMeshGroup* group = dynamic_cast<TriangleMeshGroup*>(geometry);
+        TriangleMeshGroup* group = (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS) ? (TriangleMeshGroup*)geometry : NULL);
         if ( group == 0 ) return;
         ArrayList<TriangleMesh>& groupMeshes = group->getMeshes();
         for ( long i = 0; i < groupMeshes.size(); i++ ) {

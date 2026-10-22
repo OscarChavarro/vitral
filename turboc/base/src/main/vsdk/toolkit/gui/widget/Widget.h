@@ -40,6 +40,9 @@ private:
     Widget& operator=(const Widget& other);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Widget();
     virtual ~Widget();
 

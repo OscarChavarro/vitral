@@ -2,16 +2,16 @@
 //= [MANT1988] Mantyla Martti. "An Introduction To Solid Modeling",         =
 //=     Computer Science Press, 1988.                                       =
 
-#include <algorithm>
 #include <math.h>
 #include <stdio.h>
-#include <set>
-#include <string>
+#include "java/util/TreeSet.h"
+#include "java/lang/String.h"
 #include <strings.h>
 
 #include "java/lang/Boolean.h"
 #include "java/lang/System.h"
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/common/statistics/PolyhedralBoundedSolidStatistics.h"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/intersection/_PolyhedralBoundedSolidSetGeometricPredicateProcessor.h"
@@ -26,6 +26,9 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
+#include "java/util/TreeMap.h"
+#include "java/util/Comparator.h"
 
 typedef _PolyhedralBoundedSolidSetNullEdgesConnector Connector;
 
@@ -35,15 +38,15 @@ static const char* const TRACE_PIPELINE_SUMMARY_PROPERTY =
 static const char* const KEEP_INSERTION_ORDER_PROPERTY =
     "vsdk.setop.connect.keepInsertionOrder";
 
-static std::string str(int value)
+static String str(int value)
 {
     return Cpp98Support::toString(value);
 }
 
-static std::string positionString(const Vector3Dd& p)
+static String positionString(const Vector3Dd& p)
 {
     String* text = p.toString();
-    std::string result(text->c_str());
+    String result(text->c_str());
     delete text;
     return result;
 }
@@ -53,8 +56,8 @@ int Connector::debugFlags = 0;
 int Connector::operation = 0;
 Connector::HalfEdgeList Connector::endsa;
 Connector::HalfEdgeList Connector::endsb;
-std::map<int, int> Connector::sonfaPairIndexByFaceId;
-std::map<int, int> Connector::sonfbPairIndexByFaceId;
+TreeMap<int, int> Connector::sonfaPairIndexByFaceId;
+TreeMap<int, int> Connector::sonfbPairIndexByFaceId;
 bool Connector::hasPairIndexMaps = false;
 int Connector::lastLooseACount = 0;
 int Connector::lastLooseBCount = 0;
@@ -64,11 +67,11 @@ int Connector::lastPairCount = 0;
 int Connector::currentConnectPairIndex = 0;
 int Connector::nextSyntheticPairIndex = 0;
 _PolyhedralBoundedSolidSetIntersectionCurveBuilder::Report Connector::lastCurveReport;
-std::vector<int> Connector::testOnlyForcedConnectOrder;
+ArrayList<int> Connector::testOnlyForcedConnectOrder;
 bool Connector::hasTestOnlyForcedConnectOrder = false;
 bool Connector::curveOrientationApplied = false;
-std::vector<std::vector<int> > Connector::curveNeighborPositions;
-std::vector<int> Connector::endsPairIndex;
+ArrayList<ArrayList<int> > Connector::curveNeighborPositions;
+ArrayList<int> Connector::endsPairIndex;
 
 //= Results =========================================================
 
@@ -122,9 +125,9 @@ String Connector::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
         return "null";
     }
 
-    std::string from = "?";
-    std::string to = "?";
-    std::string face = "?";
+    String from = "?";
+    String to = "?";
+    String face = "?";
 
     if ( he->startingVertex != 0 ) {
         from = str(he->startingVertex->id);
@@ -138,8 +141,8 @@ String Connector::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
             face = str(he->parentLoop->parentFace->id);
         }
     }
-    std::string fromPoint = "?";
-    std::string toPoint = "?";
+    String fromPoint = "?";
+    String toPoint = "?";
 
     if ( he->startingVertex != 0 ) {
         fromPoint = positionString(he->startingVertex->position);
@@ -150,7 +153,7 @@ String Connector::summarizeHalfEdge(_PolyhedralBoundedSolidHalfEdge* he)
             toPoint = positionString(next->startingVertex->position);
         }
     }
-    std::string text = "he(v=" + from + "->" + to + ",f=" + face +
+    String text = "he(v=" + from + "->" + to + ",f=" + face +
         ",p=" + fromPoint + "->" + toPoint + ")";
     return String(text.c_str());
 }
@@ -184,8 +187,8 @@ int Connector::getSonfaPairIndex(_PolyhedralBoundedSolidFace* face)
     if ( face == 0 || !hasPairIndexMaps ) {
         return -1;
     }
-    std::map<int, int>::iterator found = sonfaPairIndexByFaceId.find(face->id);
-    return found != sonfaPairIndexByFaceId.end() ? found->second : -1;
+    int* found = sonfaPairIndexByFaceId.get(face->id);
+    return found != NULL ? (*found) : -1;
 }
 
 int Connector::getSonfbPairIndex(_PolyhedralBoundedSolidFace* face)
@@ -193,15 +196,15 @@ int Connector::getSonfbPairIndex(_PolyhedralBoundedSolidFace* face)
     if ( face == 0 || !hasPairIndexMaps ) {
         return -1;
     }
-    std::map<int, int>::iterator found = sonfbPairIndexByFaceId.find(face->id);
-    return found != sonfbPairIndexByFaceId.end() ? found->second : -1;
+    int* found = sonfbPairIndexByFaceId.get(face->id);
+    return found != NULL ? (*found) : -1;
 }
 
 String Connector::summarizeLooseEnds(const HalfEdgeList& endsA,
     const HalfEdgeList& endsB)
 {
     String out;
-    size_t i;
+    long i;
 
     out += ("pairs=" + str((int)endsA.size()) + " [").c_str();
     for ( i = 0; i < endsA.size() && i < endsB.size(); i++ ) {
@@ -308,7 +311,7 @@ _PolyhedralBoundedSolidFace* Connector::registerCoincidentCutFace(
     if ( face == 0 || face->boundariesList.size() <= 1 ) {
         return 0;
     }
-    target.push_back(face);
+    target.add(face);
     return face;
 }
 
@@ -364,8 +367,8 @@ void Connector::finalizeCoincidentLooseB(_PolyhedralBoundedSolidHalfEdge* he)
 
 void Connector::removeLoosePair(int index)
 {
-    endsa.erase(endsa.begin() + index);
-    endsb.erase(endsb.begin() + index);
+    endsa.remove((long)index);
+    endsb.remove((long)index);
 }
 
 int Connector::getLastLooseACount()
@@ -442,9 +445,9 @@ _PolyhedralBoundedSolidFace* Connector::findUniqueClassicRebindTargetFace(
     const HalfEdgeList& referenceEnds)
 {
     _PolyhedralBoundedSolidFace* candidateFace = 0;
-    size_t i;
-    size_t j;
-    size_t pairCount;
+    long i;
+    long j;
+    long pairCount;
 
     if ( !isLiveHalfEdge(currentTargetFirst) ||
          !isLiveHalfEdge(currentTargetSecond) ||
@@ -453,7 +456,7 @@ _PolyhedralBoundedSolidFace* Connector::findUniqueClassicRebindTargetFace(
         return 0;
     }
 
-    pairCount = std::min(targetEnds.size(), referenceEnds.size());
+    pairCount = Math::min(targetEnds.size(), referenceEnds.size());
     for ( i = 0; i < pairCount; i++ ) {
         _PolyhedralBoundedSolidHalfEdge* looseTargetFirst;
         _PolyhedralBoundedSolidHalfEdge* looseReferenceFirst;
@@ -568,13 +571,13 @@ void Connector::rebindClassicCurrentNullEdgeIfNeeded(
     solid = currentTargetFirst->parentLoop->parentFace->parentSolid;
     if ( !PolyhedralBoundedSolidEulerOperators::lringmv(
              solid, sourceLoop, targetFace, false) ) {
-        tracePipelineSummary(String(("connect rebind" + std::string(label) +
+        tracePipelineSummary(String(("connect rebind" + String(label) +
             " failed sourceFace=" + str(sourceFace->id) + " targetFace=" +
             str(targetFace->id) + " edge=").c_str()) +
             summarizeHalfEdge(currentTargetFirst));
         return;
     }
-    tracePipelineSummary(String(("connect rebind" + std::string(label) +
+    tracePipelineSummary(String(("connect rebind" + String(label) +
         " sourceFace=" + str(sourceFace->id) + " targetFace=" +
         str(targetFace->id) + " edge=").c_str()) +
         summarizeHalfEdge(currentTargetFirst));
@@ -605,7 +608,7 @@ Connector::ConnectResult Connector::connect(int op, int flags,
     debugFlags = flags;
     sonea = &inSonea;
     soneb = &inSoneb;
-    lastPairCount = (int)std::min(sonea->size(), soneb->size());
+    lastPairCount = (int)Math::min(sonea->size(), soneb->size());
     lastLooseACount = 0;
     lastLooseBCount = 0;
     lastSonfaCount = 0;
@@ -651,13 +654,13 @@ void Connector::sortNullEdges()
 
     // Geometric sort within each ring, enabled only when keepInsertionOrder
     // is explicitly disabled via the system property.
-    std::stable_sort(sonea->begin(), sonea->end());
-    std::stable_sort(soneb->begin(), soneb->end());
+    sonea->sort(NaturalOrderComparator<_PolyhedralBoundedSolidSetOperatorNullEdge>());
+    soneb->sort(NaturalOrderComparator<_PolyhedralBoundedSolidSetOperatorNullEdge>());
 }
 
 void Connector::dbgDumpNullEdges(const char* label, const NullEdgeList& sone)
 {
-    size_t k;
+    long k;
     for ( k = 0; k < sone.size(); k++ ) {
         const _PolyhedralBoundedSolidSetOperatorNullEdge& ne = sone[k];
         _PolyhedralBoundedSolidHalfEdge* rh = ne.e->rightHalf;
@@ -681,21 +684,21 @@ Reorders sonea/soneb in lockstep by the given permutation
 (`position -> originalIndex`).
 @param order permutation covering every index exactly once
 */
-void Connector::applyOrderPermutation(const std::vector<int>& order)
+void Connector::applyOrderPermutation(const ArrayList<int>& order)
 {
     NullEdgeList orderedA;
     NullEdgeList orderedB;
-    size_t i;
+    long i;
 
     for ( i = 0; i < order.size(); i++ ) {
-        orderedA.push_back((*sonea)[order[i]]);
-        orderedB.push_back((*soneb)[order[i]]);
+        orderedA.add((*sonea)[order[i]]);
+        orderedB.add((*soneb)[order[i]]);
     }
     *sonea = orderedA;
     *soneb = orderedB;
 }
 
-int Connector::curveComponentFind(std::vector<int>& parent, int x)
+int Connector::curveComponentFind(ArrayList<int>& parent, int x)
 {
     while ( parent[x] != x ) {
         parent[x] = parent[parent[x]];
@@ -741,7 +744,7 @@ void Connector::groupNullEdgesByRing()
                 .unitVectorTolerance());
     tracePipelineSummary(String("connect ") + lastCurveReport.summarize());
 
-    int n = (int)std::min(sonea->size(), soneb->size());
+    int n = (int)Math::min(sonea->size(), soneb->size());
     if ( n != (int)sonea->size() || n != (int)soneb->size() || n < 2 ) {
         return;
     }
@@ -751,7 +754,7 @@ void Connector::groupNullEdgesByRing()
     // consistently with the traversal. On any anomaly fall through to the
     // legacy ordering below.
     if ( lastCurveReport.isCleanlyClosed() ) {
-        std::vector<int> curveOrder;
+        ArrayList<int> curveOrder;
         if ( _PolyhedralBoundedSolidSetIntersectionCurveBuilder
                  ::orderAndOrientAlongCurves(lastCurveReport.cycles, n,
                      *sonea, *soneb, curveOrder) ) {
@@ -770,15 +773,15 @@ void Connector::groupNullEdgesByRing()
     // strut), there is no ring structure to separate, and a spatial
     // signature sort only scrambles the classifier's already-valid emission
     // order. Preserve insertion order in that case.
-    std::vector<long long> faceIdsA((size_t)n * 2);
-    std::vector<long long> faceIdsB((size_t)n * 2);
+    ArrayList<long long> faceIdsA(Collections<long long>::nCopies(n * 2, 0));
+    ArrayList<long long> faceIdsB(Collections<long long>::nCopies(n * 2, 0));
     int k;
     for ( k = 0; k < n; k++ ) {
         nullEdgeFaceIds((*sonea)[k], &faceIdsA[2*k]);
         nullEdgeFaceIds((*soneb)[k], &faceIdsB[2*k]);
     }
 
-    std::vector<int> parent((size_t)n);
+    ArrayList<int> parent(Collections<int>::nCopies(n, 0));
     for ( k = 0; k < n; k++ ) {
         parent[k] = k;
     }
@@ -795,9 +798,9 @@ void Connector::groupNullEdgesByRing()
     }
 
     // Count distinct curve components.
-    std::set<int> roots;
+    TreeSet<int> roots;
     for ( k = 0; k < n; k++ ) {
-        roots.insert(curveComponentFind(parent, k));
+        roots.add(curveComponentFind(parent, k));
     }
     int componentCount = (int)roots.size();
 
@@ -806,23 +809,23 @@ void Connector::groupNullEdgesByRing()
     // curves must be kept contiguous. Vertex ids (not positions) are used
     // because after weldCoincidentVertices the coincident pairs are already
     // merged.
-    std::set<int> vidsA;
+    TreeSet<int> vidsA;
     bool hasSharedA = false;
     int ki;
     for ( ki = 0; ki < n && !hasSharedA; ki++ ) {
         int v1 = (*sonea)[ki].e->rightHalf->startingVertex->id;
         int v2 = (*sonea)[ki].e->leftHalf->startingVertex->id;
-        if ( !vidsA.insert(v1).second || (v1 != v2 && !vidsA.insert(v2).second) ) {
+        if ( !vidsA.add(v1) || (v1 != v2 && !vidsA.add(v2)) ) {
             hasSharedA = true;
         }
     }
     bool hasSharedB = false;
     if ( !hasSharedA ) {
-        std::set<int> vidsB;
+        TreeSet<int> vidsB;
         for ( ki = 0; ki < n && !hasSharedB; ki++ ) {
             int v1 = (*soneb)[ki].e->rightHalf->startingVertex->id;
             int v2 = (*soneb)[ki].e->leftHalf->startingVertex->id;
-            if ( !vidsB.insert(v1).second || (v1 != v2 && !vidsB.insert(v2).second) ) {
+            if ( !vidsB.add(v1) || (v1 != v2 && !vidsB.add(v2)) ) {
                 hasSharedB = true;
             }
         }
@@ -835,30 +838,30 @@ void Connector::groupNullEdgesByRing()
 
     // Multiple pairs share face-adjacency: reconstruct curve order, with
     // components in order of first appearance (as Java `LinkedHashMap`).
-    std::vector<int> componentRoots;
-    std::vector<std::vector<int> > components;
+    ArrayList<int> componentRoots;
+    ArrayList<ArrayList<int> > components;
     for ( k = 0; k < n; k++ ) {
         int root = curveComponentFind(parent, k);
-        size_t c;
+        long c;
         for ( c = 0; c < componentRoots.size(); c++ ) {
             if ( componentRoots[c] == root ) {
                 break;
             }
         }
         if ( c == componentRoots.size() ) {
-            componentRoots.push_back(root);
-            components.push_back(std::vector<int>());
+            componentRoots.add(root);
+            components.add(ArrayList<int>());
         }
-        components[c].push_back(k);
+        components[c].add(k);
     }
 
     NullEdgeList orderedA;
     NullEdgeList orderedB;
-    for ( size_t c = 0; c < components.size(); c++ ) {
-        for ( size_t m = 0; m < components[c].size(); m++ ) {
+    for ( long c = 0; c < components.size(); c++ ) {
+        for ( long m = 0; m < components[c].size(); m++ ) {
             int idx = components[c][m];
-            orderedA.push_back((*sonea)[idx]);
-            orderedB.push_back((*soneb)[idx]);
+            orderedA.add((*sonea)[idx]);
+            orderedB.add((*soneb)[idx]);
         }
     }
     *sonea = orderedA;
@@ -897,7 +900,7 @@ bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
     _PolyhedralBoundedSolidHalfEdge** outA,
     _PolyhedralBoundedSolidHalfEdge** outB)
 {
-    size_t i;
+    long i;
     bool condition1;
     bool condition2;
 
@@ -927,10 +930,10 @@ bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
         if ( condition1 && condition2 ) {
             *outA = endsa[i];
             *outB = endsb[i];
-            endsa.erase(endsa.begin() + i);
-            endsb.erase(endsb.begin() + i);
+            endsa.remove((long)i);
+            endsb.remove((long)i);
             if ( i < endsPairIndex.size() ) {
-                endsPairIndex.erase(endsPairIndex.begin() + i);
+                endsPairIndex.remove((long)i);
             }
             return true;
         }
@@ -945,9 +948,9 @@ bool Connector::scanjoin(_PolyhedralBoundedSolidHalfEdge* hea,
         }
     }
 
-    endsa.push_back(hea);
-    endsb.push_back(heb);
-    endsPairIndex.push_back(currentConnectPairIndex);
+    endsa.add(hea);
+    endsb.add(heb);
+    endsPairIndex.add(currentConnectPairIndex);
     return false;
 }
 
@@ -994,14 +997,14 @@ bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
 {
     int candidate = -1;
     bool mismatchOnA = false;
-    size_t i;
+    long i;
 
     for ( i = 0; i < endsa.size(); i++ ) {
         // Only true curve neighbors of the current pair may be rescued.
-        if ( curveNeighborPositions.empty() ||
+        if ( curveNeighborPositions.isEmpty() ||
              currentConnectPairIndex < 0 ||
              currentConnectPairIndex >= (int)curveNeighborPositions.size() ||
-             curveNeighborPositions[currentConnectPairIndex].empty() ||
+             curveNeighborPositions[currentConnectPairIndex].isEmpty() ||
              i >= endsPairIndex.size() ) {
             continue;
         }
@@ -1060,27 +1063,27 @@ bool Connector::rescueRingFaceNearMiss(_PolyhedralBoundedSolidHalfEdge* hea,
         return false;
     }
     tracePipelineSummary(("connect ring-rescue applied: ring v=" +
-        (ringSide->startingVertex == 0 ? std::string("?") :
+        (ringSide->startingVertex == 0 ? String("?") :
          str(ringSide->startingVertex->id)) +
         " -> face " + str(targetFace->id)).c_str());
     *outA = endsa[candidate];
     *outB = endsb[candidate];
-    endsa.erase(endsa.begin() + candidate);
-    endsb.erase(endsb.begin() + candidate);
+    endsa.remove((long)candidate);
+    endsb.remove((long)candidate);
     if ( candidate < (int)endsPairIndex.size() ) {
-        endsPairIndex.erase(endsPairIndex.begin() + candidate);
+        endsPairIndex.remove((long)candidate);
     }
     return true;
 }
 
 bool Connector::isLooseA(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    return std::find(endsa.begin(), endsa.end(), he) != endsa.end();
+    return endsa.contains(he);
 }
 
 bool Connector::isLooseB(_PolyhedralBoundedSolidHalfEdge* he)
 {
-    return std::find(endsb.begin(), endsb.end(), he) != endsb.end();
+    return endsb.contains(he);
 }
 
 //= Cuts ============================================================
@@ -1104,9 +1107,9 @@ _PolyhedralBoundedSolidFace* Connector::cutA(_PolyhedralBoundedSolidHalfEdge* he
         PolyhedralBoundedSolidEulerOperators::lkemr(s,
             he->parentEdge->rightHalf, he->parentEdge->leftHalf);
         if ( addedFace->boundariesList.size() >= 2 ) {
-            sonfa.push_back(addedFace);
+            sonfa.add(addedFace);
             if ( hasPairIndexMaps ) {
-                sonfaPairIndexByFaceId[addedFace->id] = currentConnectPairIndex;
+                sonfaPairIndexByFaceId.put(addedFace->id, currentConnectPairIndex);
             }
         }
         else {
@@ -1139,9 +1142,9 @@ _PolyhedralBoundedSolidFace* Connector::cutB(_PolyhedralBoundedSolidHalfEdge* he
         PolyhedralBoundedSolidEulerOperators::lkemr(s,
             he->parentEdge->rightHalf, he->parentEdge->leftHalf);
         if ( addedFace->boundariesList.size() >= 2 ) {
-            sonfb.push_back(addedFace);
+            sonfb.add(addedFace);
             if ( hasPairIndexMaps ) {
-                sonfbPairIndexByFaceId[addedFace->id] = currentConnectPairIndex;
+                sonfbPairIndexByFaceId.put(addedFace->id, currentConnectPairIndex);
             }
         }
         else {
@@ -1158,11 +1161,11 @@ _PolyhedralBoundedSolidFace* Connector::cutB(_PolyhedralBoundedSolidHalfEdge* he
 void Connector::removeLastCutFaceIfSame(FaceList& faces,
     _PolyhedralBoundedSolidFace* face)
 {
-    if ( face == 0 || faces.empty() ) {
+    if ( face == 0 || faces.isEmpty() ) {
         return;
     }
-    if ( faces.back() == face ) {
-        faces.pop_back();
+    if ( faces[faces.size() - 1] == face ) {
+        faces.remove(faces.size() - 1);
     }
 }
 
@@ -1192,7 +1195,7 @@ void Connector::setOpConnect()
     if ( isPipelineSummaryTraceEnabled() ) {
         int sameLoopA = 0;
         int diffLoopA = 0;
-        for ( size_t k = 0; k < sonea->size(); k++ ) {
+        for ( long k = 0; k < sonea->size(); k++ ) {
             _PolyhedralBoundedSolidEdge* e = (*sonea)[k].e;
             if ( e->rightHalf != 0 && e->leftHalf != 0 &&
                  e->rightHalf->parentLoop == e->leftHalf->parentLoop ) {
@@ -1204,7 +1207,7 @@ void Connector::setOpConnect()
         }
         int sameLoopB = 0;
         int diffLoopB = 0;
-        for ( size_t k = 0; k < soneb->size(); k++ ) {
+        for ( long k = 0; k < soneb->size(); k++ ) {
             _PolyhedralBoundedSolidEdge* e = (*soneb)[k].e;
             if ( e->rightHalf != 0 && e->leftHalf != 0 &&
                  e->rightHalf->parentLoop == e->leftHalf->parentLoop ) {
@@ -1242,7 +1245,7 @@ void Connector::setOpConnect()
     sonfbPairIndexByFaceId.clear();
     hasPairIndexMaps = true;
     setCurrentConnectContext(-1);
-    size_t j;
+    long j;
 
     if ( sonea->size() != soneb->size() ) {
         PolyhedralBoundedSolidStatistics::recordOperationFailureCase();

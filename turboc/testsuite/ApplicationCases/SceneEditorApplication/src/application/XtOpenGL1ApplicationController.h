@@ -3,6 +3,7 @@
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
+#include "java/lang/IllegalArgumentException.h"
 
 class Vector3Dd;
 class Viewport;
@@ -64,7 +65,7 @@ public:
     @param x canvas x coordinate
     @param y canvas y coordinate
     @param button button number (1 = left, 2 = middle, 3 = right)
-    @throws std::invalid_argument for an unknown type (Java throws
+    @throws IllegalArgumentException for an unknown type (Java throws
     IllegalArgumentException)
     */
     virtual void injectMouseEvent(const String& type, int x, int y,
@@ -81,7 +82,7 @@ public:
     "num.", "numenter"
     @param shift true to press it with the SHIFT key down
     @param ctrl true to press it with the CTRL key down
-    @throws std::invalid_argument for an unknown key (Java throws
+    @throws IllegalArgumentException for an unknown key (Java throws
     IllegalArgumentException)
     */
     virtual void injectKeyEvent(const String& key, bool shift,

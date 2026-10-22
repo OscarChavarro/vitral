@@ -97,7 +97,7 @@ double InputGizmoValueChangeRules::applyStep(double currentValue,
     double result = currentValue + step;
 
     if ( gridRestrictionEnabled ) {
-        // std::floor(v + 0.5) mimics Java's Math.round
+        // floor(v + 0.5) mimics Java's Math.round
         result = floor(result / gridSize + 0.5) * gridSize;
     }
     if ( circular ) {

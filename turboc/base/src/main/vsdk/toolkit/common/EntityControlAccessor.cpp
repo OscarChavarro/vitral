@@ -1,63 +1,69 @@
-#include <limits>
 
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
 #include "java/lang/Integer.h"
 #include "java/lang/Long.h"
 #include "java/lang/NumberFormatException.h"
+#include "vsdk/toolkit/common/Entity.h"
 #include "vsdk/toolkit/common/EntityControlAccessor.h"
 #include <limits.h>
 
-double
-EntityControlValue<double>::parse(const String &text)
+bool
+EntityControlAccessor::isInstance(const Entity &entity, const Class &type)
 {
-    return Double::parseDouble(text);
+    return entity.instanceOf(type);
+}
+
+void
+EntityControlValue::parse(const String &text, double *outValue)
+{
+    *outValue = Double::parseDouble(text);
 }
 
 String
-EntityControlValue<double>::toString(double value)
+EntityControlValue::toString(double value)
 {
     return Double::toString(value);
 }
 
-float
-EntityControlValue<float>::parse(const String &text)
+void
+EntityControlValue::parse(const String &text, float *outValue)
 {
-    return Float::parseFloat(text);
+    *outValue = Float::parseFloat(text);
 }
 
 String
-EntityControlValue<float>::toString(float value)
+EntityControlValue::toString(float value)
 {
     return Float::toString(value);
 }
 
-int
-EntityControlValue<int>::parse(const String &text)
+void
+EntityControlValue::parse(const String &text, int *outValue)
 {
-    return Integer::parseInt(text);
+    *outValue = Integer::parseInt(text);
 }
 
 String
-EntityControlValue<int>::toString(int value)
+EntityControlValue::toString(int value)
 {
     return String::valueOf(value);
 }
 
-long long
-EntityControlValue<long long>::parse(const String &text)
+void
+EntityControlValue::parse(const String &text, long long *outValue)
 {
-    return Long::parseLong(text);
+    *outValue = Long::parseLong(text);
 }
 
 String
-EntityControlValue<long long>::toString(long long value)
+EntityControlValue::toString(long long value)
 {
     return String::valueOf(value);
 }
 
-long
-EntityControlValue<long>::parse(const String &text)
+void
+EntityControlValue::parse(const String &text, long *outValue)
 {
     long long value = Long::parseLong(text);
     if ( value < LONG_MIN ||
@@ -65,11 +71,11 @@ EntityControlValue<long>::parse(const String &text)
         throw NumberFormatException(
             String("For input string: \"") + text + "\"");
     }
-    return ((long)(value));
+    *outValue = ((long)(value));
 }
 
 String
-EntityControlValue<long>::toString(long value)
+EntityControlValue::toString(long value)
 {
     return String::valueOf(value);
 }

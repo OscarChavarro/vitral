@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTION_CURVE_BUILDER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_INTERSECTION_CURVE_BUILDER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -36,8 +36,8 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidSetIntersectionCurveBuilder`.
 */
 class _PolyhedralBoundedSolidSetIntersectionCurveBuilder {
 public:
-    typedef std::vector<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
-    typedef std::vector<int> IndexList;
+    typedef ArrayList<_PolyhedralBoundedSolidSetOperatorNullEdge> NullEdgeList;
+    typedef ArrayList<int> IndexList;
 
     /**
     Result of `build`. Node indexes refer to positions in the index-aligned
@@ -46,9 +46,9 @@ public:
     class Report {
     public:
         /** Closed curves; each list holds node indexes in traversal order. */
-        std::vector<IndexList> cycles;
+        ArrayList<IndexList> cycles;
         /** Open curve fragments (defect: the curve should close). */
-        std::vector<IndexList> openChains;
+        ArrayList<IndexList> openChains;
         /** Nodes with no curve neighbor (tangential strut candidates). */
         IndexList isolatedNodes;
         /** Nodes with more than two curve neighbors (cusp / figure-8). */
@@ -79,7 +79,7 @@ public:
     result, the two processing positions of its cycle-adjacent pairs. Empty
     (Java null) until an order is computed.
     */
-    static std::vector<IndexList> lastTraversalNeighborPositions;
+    static ArrayList<IndexList> lastTraversalNeighborPositions;
 
     /**
     Builds the intersection-curve report for the given index-aligned
@@ -102,7 +102,7 @@ public:
     @return false (Java null) when the cycles do not cover the index range
     exactly
     */
-    static bool computeTraversalOrder(const std::vector<IndexList>& cycles,
+    static bool computeTraversalOrder(const ArrayList<IndexList>& cycles,
         int nodeCount, IndexList& outPermutation);
 
     /**
@@ -118,7 +118,7 @@ public:
     @return false (Java null) when the cycles do not cover the index range
     exactly, in which case nothing is mutated
     */
-    static bool orderAndOrientAlongCurves(const std::vector<IndexList>& cycles,
+    static bool orderAndOrientAlongCurves(const ArrayList<IndexList>& cycles,
         int nodeCount, NullEdgeList& sonea, NullEdgeList& soneb,
         IndexList& outPermutation);
 
@@ -128,12 +128,12 @@ private:
     static _PolyhedralBoundedSolidFace* halfEdgeFace(
         _PolyhedralBoundedSolidHalfEdge* he);
     static void collectFaces(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
-        std::vector<_PolyhedralBoundedSolidFace*>& outFaces);
+        ArrayList<_PolyhedralBoundedSolidFace*>& outFaces);
     static bool nodePosition(const _PolyhedralBoundedSolidSetOperatorNullEdge& ne,
         Vector3Dd& outPosition);
     static bool faceNormal(_PolyhedralBoundedSolidFace* face,
         Vector3Dd& outNormal);
-    static void link(std::vector<IndexList>& neighbors, int i, int j);
+    static void link(ArrayList<IndexList>& neighbors, int i, int j);
 
     /**
     @return 1 (true) / 0 (false) for an unambiguous two-face strut whose half
@@ -149,10 +149,10 @@ private:
     static int minOf(const IndexList& values);
 
     // Sorting criteria (C++98 has no lambdas)
-    struct NodeDirectionOrder;
-    struct CycleMinimumOrder;
-    friend struct NodeDirectionOrder;
-    friend struct CycleMinimumOrder;
+    class NodeDirectionOrder;
+    class CycleMinimumOrder;
+    friend class NodeDirectionOrder;
+    friend class CycleMinimumOrder;
 };
 
 #endif

@@ -1,10 +1,10 @@
-#include <algorithm>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/environment/camera/Camera.h"
 #include "vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent2InfinitePlaneGizmoMapper.h"
+#include "java/lang/Math.h"
 
 const Vector3Dd TangibleInterfaceEvent2InfinitePlaneGizmoMapper::MARKER_INTO_SCENE = Vector3Dd(0, -1, 0);
 const Vector3Dd TangibleInterfaceEvent2InfinitePlaneGizmoMapper::MARKER_PLANE_NORMAL = Vector3Dd(0, 0, 1);
@@ -39,9 +39,9 @@ void TangibleInterfaceEvent2InfinitePlaneGizmoMapper::map(const TangibleInterfac
     double netZRef = 0.5;
     double depthScale = midDepth / netZRef;
 
-    double safeNetZ = std::max(netPosition.z(), 0.05);
-    double gizmoZ = std::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
-        std::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
+    double safeNetZ = Math::max(netPosition.z(), 0.05);
+    double gizmoZ = Math::min(depthScale * MAX_GIZMO_DEPTH_FACTOR,
+        Math::max(nearPlane * 1.5, depthScale * netZRef * netZRef / safeNetZ)) - 14;
 
     Vector3Dd worldPosition =
         camPos

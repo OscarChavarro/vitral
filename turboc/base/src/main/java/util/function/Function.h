@@ -4,9 +4,9 @@
 
 /**
 Emulation of `java.util.function.Function`: C++98 has neither lambdas nor
-`std::function`, so callbacks are objects implementing this interface.
+callbacks are objects implementing this interface.
 */
-template<typename T, typename R>
+template<class T, class R>
 class Function {
   public:
     virtual ~Function() {}

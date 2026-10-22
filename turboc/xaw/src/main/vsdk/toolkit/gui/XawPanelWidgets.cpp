@@ -1,6 +1,6 @@
-#include <map>
-#include <string>
-#include <vector>
+#include "java/util/TreeMap.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.txx"
 
 // Xt names its strings and objects as the vitral String and Object
 // classes: they are renamed while its headers are read (see
@@ -28,9 +28,9 @@ struct XawTextFieldBinding {
     void* clientData;
 };
 
-static std::map<Widget, XawTextFieldBinding>& textFieldBindings()
+static TreeMap<Widget, XawTextFieldBinding>& textFieldBindings()
 {
-    static std::map<Widget, XawTextFieldBinding> bindings;
+    static TreeMap<Widget, XawTextFieldBinding> bindings;
     return bindings;
 }
 
@@ -39,10 +39,9 @@ static const char* const NORMAL_BACKGROUND = "white";
 
 static void activateAction(Widget w, XEvent*, XtString*, Cardinal*)
 {
-    std::map<Widget, XawTextFieldBinding>::iterator it =
-        textFieldBindings().find(w);
-    if (it != textFieldBindings().end() && it->second.activate != NULL)
-        it->second.activate(w, it->second.clientData);
+    XawTextFieldBinding* binding = textFieldBindings().get(w);
+    if (binding != NULL && binding->activate != NULL)
+        binding->activate(w, binding->clientData);
 }
 
 static void focusAction(Widget w, XEvent*, XtString*, Cardinal*)
@@ -54,20 +53,20 @@ static void focusAction(Widget w, XEvent*, XtString*, Cardinal*)
 
 static void textFieldDestroyed(Widget w, XtPointer, XtPointer)
 {
-    textFieldBindings().erase(w);
+    textFieldBindings().remove(w);
 }
 
 static void registerActions(XtAppContext appContext)
 {
-    static std::vector<XtAppContext> registered;
-    for (size_t i = 0; i < registered.size(); ++i)
+    static ArrayList<XtAppContext> registered;
+    for ( long i = 0; i < registered.size(); ++i)
         if (registered[i] == appContext) return;
     static XtActionsRec actions[] = {
-        { const_cast<char*>("vitralTextFieldActivate"), activateAction },
-        { const_cast<char*>("vitralTextFieldFocus"), focusAction }
+        { ((char*)("vitralTextFieldActivate")), activateAction },
+        { ((char*)("vitralTextFieldFocus")), focusAction }
     };
     XtAppAddActions(appContext, actions, XtNumber(actions));
-    registered.push_back(appContext);
+    registered.add(appContext);
 }
 
 /**
@@ -75,7 +74,7 @@ An option of an option button. Freed with its entry.
 */
 struct XawOptionBinding {
     Widget button;
-    std::string label;
+    String label;
     int index;
     XtPanelWidgets::OptionProc choose;
     void* clientData;
@@ -114,7 +113,7 @@ Widget XawPanelWidgets::createPanel(Widget parent, const char* name, int x,
         XtCreateWidget(name, compositeWidgetClass, parent, args, n);
 }
 
-Widget XawPanelWidgets::createLabel(Widget parent, const std::string& text,
+Widget XawPanelWidgets::createLabel(Widget parent, const String& text,
                                     XFontSet fontSet, Justify justify,
                                     int x, int y, int width, int height)
 {
@@ -136,7 +135,7 @@ Widget XawPanelWidgets::createLabel(Widget parent, const std::string& text,
                                  args, n);
 }
 
-void XawPanelWidgets::setLabel(Widget label, const std::string& text)
+void XawPanelWidgets::setLabel(Widget label, const String& text)
 {
     // Label asks its parent to resize to the new text: keep its geometry
     Dimension width = 0;
@@ -146,7 +145,7 @@ void XawPanelWidgets::setLabel(Widget label, const std::string& text)
                   XtNheight, height, NULL);
 }
 
-Widget XawPanelWidgets::createTextField(Widget parent, const std::string& text,
+Widget XawPanelWidgets::createTextField(Widget parent, const String& text,
                                         XFontSet fontSet,
                                         int x, int y, int width, int height,
                                         ActivateProc activate,
@@ -174,19 +173,19 @@ Widget XawPanelWidgets::createTextField(Widget parent, const std::string& text,
         "<Key>KP_Enter: vitralTextFieldActivate()\n"
         "<Btn1Down>: vitralTextFieldFocus() select-start()"));
     XawTextFieldBinding binding = { activate, clientData };
-    textFieldBindings()[field] = binding;
+    textFieldBindings().put(field, binding);
     XtAddCallback(field, XtNdestroyCallback, textFieldDestroyed, NULL);
     return field;
 }
 
-std::string XawPanelWidgets::getText(Widget field)
+String XawPanelWidgets::getText(Widget field)
 {
     XtString value = NULL;
     XtVaGetValues(field, XtNstring, &value, NULL);
-    return value != NULL ? std::string(value) : std::string();
+    return value != NULL ? String(value) : String();
 }
 
-void XawPanelWidgets::setText(Widget field, const std::string& text)
+void XawPanelWidgets::setText(Widget field, const String& text)
 {
     XtVaSetValues(field, XtNstring, text.c_str(), NULL);
     setInvalid(field, false);
@@ -204,7 +203,7 @@ void XawPanelWidgets::setForeground(Widget widget, const char* colorName)
 }
 
 Widget XawPanelWidgets::createPushButton(Widget parent,
-                                         const std::string& label,
+                                         const String& label,
                                          XFontSet fontSet,
                                          int x, int y, int width, int height,
                                          ActivateProc activate,
@@ -227,12 +226,12 @@ Widget XawPanelWidgets::createPushButton(Widget parent,
 }
 
 Widget XawPanelWidgets::createOptionButton(
-    Widget parent, const std::string& placeholder,
-    const std::vector<std::string>& options, XFontSet fontSet,
+    Widget parent, const String& placeholder,
+    const ArrayList<String>& options, XFontSet fontSet,
     int x, int y, int width, int height, OptionProc choose, void* clientData)
 {
     // Menu buttons find their popup by name
-    const std::string menuName = XtWidgetSupport::uniqueName("vitralOptions");
+    const String menuName = XtWidgetSupport::uniqueName("vitralOptions");
     Arg args[10]; Cardinal n = 0;
     XtSetArg(args[n], XtNlabel, placeholder.c_str()); ++n;
     XtSetArg(args[n], XtNmenuName, menuName.c_str()); ++n;
@@ -260,7 +259,7 @@ Widget XawPanelWidgets::createOptionButton(
     }
     Widget menu = XtCreatePopupShell(menuName.c_str(), simpleMenuWidgetClass,
                                      button, menuArgs, menuN);
-    for (size_t i = 0; i < options.size(); ++i) {
+    for ( long i = 0; i < options.size(); ++i) {
         Arg itemArgs[3]; Cardinal itemN = 0;
         XtSetArg(itemArgs[itemN], XtNlabel, options[i].c_str()); ++itemN;
         if (fontSet != NULL) {

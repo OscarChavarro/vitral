@@ -1,4 +1,3 @@
-#include <typeinfo>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/Geometry.h"
@@ -15,7 +14,7 @@ static void disposeRemoved(const ArrayList<Entity*>& removed)
     long i;
     for ( i = 0; i < removed.size(); i++ ) {
         Entity* element = removed.get(i);
-        SimpleBody* body = dynamic_cast<SimpleBody*>(element);
+        SimpleBody* body = (element != NULL && element->instanceOf(SimpleBody::CLASS) ? (SimpleBody*)element : NULL);
         if ( body != NULL && body->getGeometry() != NULL ) {
             body->getGeometry()->dispose();
         }
@@ -160,7 +159,7 @@ String SceneSelectionEditor::describeSelection()
         Geometry* g = scene->scene->getSimpleBodies().get(f)->getGeometry();
         msg = String("Thing [") + String::valueOf(f) +
             "] selected, which is a [" +
-            (g != NULL ? typeid(*g).name() : "null") + "]";
+            (g != NULL ? g->getClassSimpleName() : String("null")) + "]";
     }
     else {
         msg += String::valueOf(n) + " things selected";

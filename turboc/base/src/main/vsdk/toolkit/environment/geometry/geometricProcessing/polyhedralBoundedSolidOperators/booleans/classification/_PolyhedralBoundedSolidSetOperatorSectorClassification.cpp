@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <math.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/_PolyhedralBoundedSolidSetOperator.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace.h"
@@ -14,10 +14,10 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 
-static std::string vectorText(const Vector3Dd& v)
+static String vectorText(const Vector3Dd& v)
 {
     String* text = v.toString();
-    std::string result(text->c_str());
+    String result(text->c_str());
     delete text;
     return result;
 }
@@ -65,7 +65,7 @@ double _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex::getAngle(
 
 String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnVertex::toString() const
 {
-    std::string msg = "R1: " + vectorText(ref1) + " R2: " + vectorText(ref2) +
+    String msg = "R1: " + vectorText(ref1) + " R2: " + vectorText(ref2) +
         " HE " + Cpp98Support::toString(he->startingVertex->id) + "/" +
         Cpp98Support::toString(he->next()->startingVertex->id) + (wide ? "(W)" : "(nw)");
     return String(msg.c_str());
@@ -134,7 +134,7 @@ void _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::fillCases()
 
 String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::toString() const
 {
-    std::string msg = "Sector pair ";
+    String msg = "Sector pair ";
 
     msg += "A[" + Cpp98Support::toString(secta+1) + "] / B[" + Cpp98Support::toString(sectb+1) + "]: ";
 
@@ -143,7 +143,7 @@ String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnSector::toString(
         Cpp98Support::toString(hea->next()->startingVertex->id) + (wa ? "(W)" : "(nw)") + " / " +
         Cpp98Support::toString(heb->startingVertex->id) + "-" +
         Cpp98Support::toString(heb->next()->startingVertex->id) + (wb ? "(W)" : "(nw)") + " ) - ";
-    msg += std::string("[") + label(s1a) + "/" + label(s2a) + ", " + label(s1b) +
+    msg += String("[") + label(s1a) + "/" + label(s2a) + ", " + label(s1b) +
         "/" + label(s2b) + "] ";
     if ( intersect ) {
         msg += "intersecting";
@@ -240,8 +240,8 @@ void _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::updateLabel(i
 
 String _PolyhedralBoundedSolidSetOperatorSectorClassificationOnFace::toString() const
 {
-    std::string msg = "Sector(";
-    msg += std::string(sector->toString().c_str()) + " | ";
+    String msg = "Sector(";
+    msg += String(sector->toString().c_str()) + " | ";
     switch ( cl ) {
       case ABOVE: msg += " ABOVE"; break;
       case BELOW: msg += " BELOW"; break;

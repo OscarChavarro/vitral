@@ -35,7 +35,7 @@ void OpenGL1TranslateGizmoRenderer::draw(TranslateGizmo* gizmo, Camera* camera)
     drawLines(gizmo, mvp);
     for ( i = 0; i < elements.size(); i++ ) {
         SimpleBody* element = elements.get(i);
-        Cone* cone = dynamic_cast<Cone*>(element->getGeometry());
+        Cone* cone = (element->getGeometry() != NULL && element->getGeometry()->instanceOf(Cone::CLASS) ? (Cone*)element->getGeometry() : NULL);
 
         if ( cone != NULL ) {
             drawCone(mvp, element, cone);
@@ -48,7 +48,7 @@ void OpenGL1TranslateGizmoRenderer::draw(TranslateGizmo* gizmo, Camera* camera)
     glDepthMask(GL_FALSE);
     for ( i = 0; i < elements.size(); i++ ) {
         SimpleBody* element = elements.get(i);
-        Box* box = dynamic_cast<Box*>(element->getGeometry());
+        Box* box = (element->getGeometry() != NULL && element->getGeometry()->instanceOf(Box::CLASS) ? (Box*)element->getGeometry() : NULL);
 
         if ( box != NULL ) {
             drawPlaneHandle(mvp, element, box);

@@ -92,6 +92,7 @@ add_executable(vitral_raytracer
     vitralRaytracer/RaytracerPalette.cpp
     vitralRaytracer/RaytracerRenderer.cpp
     vitralRaytracer/SceneList.cpp
+    vitralRaytracer/ScreenProgress.cpp
     vitralRaytracer/VitralRaytracer.cpp
 )
 target_compile_definitions(vitral_raytracer PRIVATE

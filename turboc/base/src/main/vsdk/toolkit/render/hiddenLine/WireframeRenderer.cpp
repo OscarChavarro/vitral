@@ -145,7 +145,7 @@ static void processTriangleMeshGroup(TriangleMeshGroup* mg,
 static void processBrep(SimpleBody* body, const Matrix4x4d& proj,
                         Calligraphic2DBuffer* lineSet, const Camera* camera)
 {
-    Volume* volume = dynamic_cast<Volume*>(body->getGeometry());
+    Volume* volume = (body->getGeometry() != NULL && body->getGeometry()->instanceOf(Volume::CLASS) ? (Volume*)body->getGeometry() : NULL);
     if ( volume == 0 ) return;
 
     PolyhedralBoundedSolid* brep = volume->exportToPolyhedralBoundedSolid();
@@ -180,7 +180,7 @@ void WireframeRenderer::execute(Calligraphic2DBuffer* outLineSet,
         SimpleBody* body = simpleBodies[i];
         if ( body == 0 || body->getGeometry() == 0 ) continue;
         Geometry* g = body->getGeometry();
-        if ( dynamic_cast<Solid*>(g) != 0 ) {
+        if ( (g != NULL && g->instanceOf(Solid::CLASS)) ) {
             processBrep(body, proj, outLineSet, camera);
         }
         else {

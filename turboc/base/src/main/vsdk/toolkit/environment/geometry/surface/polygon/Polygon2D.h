@@ -12,6 +12,9 @@ template <class T> class BinaryTreeNode;
 class Polygon2D : public Surface
 {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     ArrayList<_Polygon2DContour*> loops;
 
 private:

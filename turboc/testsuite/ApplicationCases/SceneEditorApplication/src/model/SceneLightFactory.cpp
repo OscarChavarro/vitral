@@ -122,7 +122,7 @@ Vector3Dd SceneLightFactory::pointInFrustum(Camera* camera, double u,
 
     double width = camera->getViewportXSize();
     double height = camera->getViewportYSize();
-    // std::floor(v + 0.5) mimics Java's Math.round
+    // floor(v + 0.5) mimics Java's Math.round
     int x = (int)floor(width * (0.5 + u) + 0.5);
     int y = (int)floor(height * (0.5 - v) - 1 + 0.5);
     Ray ray = camera->generateRay(x, y);

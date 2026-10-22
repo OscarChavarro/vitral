@@ -60,6 +60,9 @@ private:
                            const Vector3Dd& p1, const Vector3Dd& p2, const Vector3Dd& p3);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     TriangleMesh();
     TriangleMesh(const TriangleMesh& other);
     ~TriangleMesh();

@@ -18,11 +18,9 @@ public:
     static int start(int argc, char *argv[]);
 
 private:
-    static constexpr const char *DEFAULT_SCENE = VITRAL_RAYTRACER_DEFAULT_SCENE;
-
     explicit VitralRaytracer(VgaModes *modes);
-    VitralRaytracer(const VitralRaytracer &) = delete;
-    VitralRaytracer &operator=(const VitralRaytracer &) = delete;
+    VitralRaytracer(const VitralRaytracer &);
+    VitralRaytracer &operator=(const VitralRaytracer &);
 
     int run(int mode, const char *scene);
     void useScreen();

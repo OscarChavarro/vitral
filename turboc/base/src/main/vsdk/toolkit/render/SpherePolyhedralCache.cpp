@@ -1,9 +1,8 @@
 #include <stddef.h>
 #include <math.h>
-#include <map>
+#include "java/util/TreeMap.h"
 #include "java/util/concurrent/locks/ReentrantLock.h"
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
@@ -17,7 +16,7 @@
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 /// Maximum number of entries kept; when reached, the cache is emptied
-static const size_t MAX_CACHED_ENTRIES = 256;
+static const long MAX_CACHED_ENTRIES = 256;
 /// Relative distance to a pole under which a vertex is taken as a pole
 static const double POLE_TOLERANCE = 1.0e-9;
 
@@ -27,17 +26,16 @@ static ReentrantLock& cacheLock()
     return lock;
 }
 
-static std::map<std::string, SpherePolyhedralCache::Entry*>& entries()
+static TreeMap<String, SpherePolyhedralCache::Entry*>& entries()
 {
-    static std::map<std::string, SpherePolyhedralCache::Entry*> map;
+    static TreeMap<String, SpherePolyhedralCache::Entry*> map;
     return map;
 }
 
-static void releaseAll(std::map<std::string, SpherePolyhedralCache::Entry*>& map)
+static void releaseAll(TreeMap<String, SpherePolyhedralCache::Entry*>& map)
 {
-    for (std::map<std::string, SpherePolyhedralCache::Entry*>::iterator it = map.begin();
-         it != map.end(); ++it) {
-        delete it->second;
+    for (long i = 0; i < map.size(); i++) {
+        delete map.getValue(i);
     }
     map.clear();
 }
@@ -88,9 +86,9 @@ static void makeContinuous(double theta[3], const bool pole[3])
 face, from its outer loop), three consecutive per triangle, each one
 counterclockwise seen from outside the sphere
 */
-static std::vector<Vector3Dd> collectTriangles(PolyhedralBoundedSolid* solid)
+static ArrayList<Vector3Dd> collectTriangles(PolyhedralBoundedSolid* solid)
 {
-    std::vector<Vector3Dd> triangles;
+    ArrayList<Vector3Dd> triangles;
     ArrayList<_PolyhedralBoundedSolidFace*>& faces = solid->getPolygonsList();
 
     for (long int f = 0; f < faces.size(); f++) {
@@ -102,39 +100,51 @@ static std::vector<Vector3Dd> collectTriangles(PolyhedralBoundedSolid* solid)
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(0);
         _PolyhedralBoundedSolidHalfEdge* start =
             loop != NULL ? loop->boundaryStartHalfEdge : NULL;
-        std::vector<Vector3Dd> polygon;
+        ArrayList<Vector3Dd> polygon;
 
         if (start == NULL) {
             continue;
         }
         _PolyhedralBoundedSolidHalfEdge* he = start;
         do {
-            polygon.push_back(he->startingVertex->position);
+            polygon.add(he->startingVertex->position);
             he = he->next();
         } while (he != start && he != NULL);
 
-        for (size_t i = 1; i + 1 < polygon.size(); i++) {
+        for (long i = 1; i + 1 < polygon.size(); i++) {
             const Vector3Dd& a = polygon[0];
             const Vector3Dd& b = polygon[i];
             const Vector3Dd& c = polygon[i + 1];
             Vector3Dd normal = b.subtract(a).crossProduct(c.subtract(a));
             Vector3Dd center = a.add(b).add(c);
 
-            triangles.push_back(a);
+            triangles.add(a);
             if (normal.dotProduct(center) >= 0) {
-                triangles.push_back(b);
-                triangles.push_back(c);
+                triangles.add(b);
+                triangles.add(c);
             }
             else {
-                triangles.push_back(c);
-                triangles.push_back(b);
+                triangles.add(c);
+                triangles.add(b);
             }
         }
     }
     return triangles;
 }
 
-static void put(std::vector<float>& array, size_t index, const Vector3Dd& v)
+/**
+Sets the size of the array to `size` zeros.
+*/
+static void fill(ArrayList<float>& array, long size)
+{
+    array.clear();
+    array.reserve(size);
+    for (long i = 0; i < size; i++) {
+        array.add(0.0f);
+    }
+}
+
+static void put(ArrayList<float>& array, long index, const Vector3Dd& v)
 {
     array[3 * index] = (float)v.x();
     array[3 * index + 1] = (float)v.y();
@@ -157,29 +167,29 @@ int SpherePolyhedralCache::Entry::getMeridians() const { return meridians; }
 int SpherePolyhedralCache::Entry::getParallels() const { return parallels; }
 PolyhedralBoundedSolid* SpherePolyhedralCache::Entry::getSolid() const { return solid; }
 int SpherePolyhedralCache::Entry::getVertexCount() const { return (int)(positions.size() / 3); }
-const std::vector<float>& SpherePolyhedralCache::Entry::getPositions() const { return positions; }
-const std::vector<float>& SpherePolyhedralCache::Entry::getNormals() const { return normals; }
-const std::vector<float>& SpherePolyhedralCache::Entry::getUvs() const { return uvs; }
-const std::vector<float>& SpherePolyhedralCache::Entry::getTangents() const { return tangents; }
-const std::vector<float>& SpherePolyhedralCache::Entry::getBiNormals() const { return biNormals; }
+const ArrayList<float>& SpherePolyhedralCache::Entry::getPositions() const { return positions; }
+const ArrayList<float>& SpherePolyhedralCache::Entry::getNormals() const { return normals; }
+const ArrayList<float>& SpherePolyhedralCache::Entry::getUvs() const { return uvs; }
+const ArrayList<float>& SpherePolyhedralCache::Entry::getTangents() const { return tangents; }
+const ArrayList<float>& SpherePolyhedralCache::Entry::getBiNormals() const { return biNormals; }
 
 const SpherePolyhedralCache::Entry* SpherePolyhedralCache::obtain(
     const Sphere* sphere, int meridians, int parallels)
 {
     ReentrantLockGuard guard(cacheLock());
-    std::map<std::string, Entry*>& map = entries();
-    std::string key = Cpp98Support::toString(sphere->getRadius()) + "/" +
+    TreeMap<String, Entry*>& map = entries();
+    String key = Cpp98Support::toString(sphere->getRadius()) + "/" +
         Cpp98Support::toString(meridians) + "/" + Cpp98Support::toString(parallels);
-    std::map<std::string, Entry*>::iterator it = map.find(key);
+    Entry** known = map.get(key);
 
-    if (it != map.end()) {
-        return it->second;
+    if (known != NULL) {
+        return *known;
     }
     Entry* entry = build(sphere, meridians, parallels);
     if (map.size() >= MAX_CACHED_ENTRIES) {
         releaseAll(map);
     }
-    map[key] = entry;
+    map.put(key, entry);
     return entry;
 }
 
@@ -196,18 +206,18 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
     Sphere parametric(sphere->getRadius());
     PolyhedralBoundedSolid* solid =
         parametric.exportToPolyhedralBoundedSolid(meridians, parallels);
-    std::vector<Vector3Dd> triangles = collectTriangles(solid);
-    size_t vertexCount = triangles.size();
+    ArrayList<Vector3Dd> triangles = collectTriangles(solid);
+    long vertexCount = triangles.size();
     double radius = sphere->getRadius();
     Entry* entry = new Entry(radius, meridians, parallels, solid);
 
-    entry->positions.resize(vertexCount * 3);
-    entry->normals.resize(vertexCount * 3);
-    entry->uvs.resize(vertexCount * 2);
-    entry->tangents.resize(vertexCount * 3);
-    entry->biNormals.resize(vertexCount * 3);
+    fill(entry->positions, vertexCount * 3);
+    fill(entry->normals, vertexCount * 3);
+    fill(entry->uvs, vertexCount * 2);
+    fill(entry->tangents, vertexCount * 3);
+    fill(entry->biNormals, vertexCount * 3);
 
-    for (size_t t = 0; t + 2 < vertexCount; t += 3) {
+    for (long t = 0; t + 2 < vertexCount; t += 3) {
         double theta[3];
         double phi[3];
         bool pole[3];
@@ -226,7 +236,7 @@ SpherePolyhedralCache::Entry* SpherePolyhedralCache::build(
         makeContinuous(theta, pole);
 
         for (int k = 0; k < 3; k++) {
-            size_t i = t + k;
+            long i = t + k;
 
             put(entry->positions, i, triangles[i]);
             put(entry->normals, i, parametric.sphereNormal(theta[k], phi[k]));

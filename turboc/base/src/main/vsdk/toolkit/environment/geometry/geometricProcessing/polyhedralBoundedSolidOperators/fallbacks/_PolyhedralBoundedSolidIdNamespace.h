@@ -29,7 +29,7 @@ private:
 
 public:
     /**
-    Initialises the namespace from the current maxima of both operands.
+    Initialises the identifier range from the current maxima of both operands.
     Must be called after `updmaxnames` so that the IDs of solidB have
     already been offset past solidA.
     @param solidA first boolean operand.
@@ -90,12 +90,12 @@ public:
                             PolyhedralBoundedSolid* referenceSolid);
 
     /**
-    Resolves the next vertex ID through the given namespace when available,
+    Resolves the next vertex ID through the given identifier range when available,
     falling back to the legacy `max(maxVertexId)+1` policy when no
-    namespace is active.
+    identifier range is active.
     @param current first operand.
     @param other second operand.
-    @param ns active namespace, or null to use the fallback.
+    @param ns active identifier range, or null to use the fallback.
     @return a vertex ID unique within the current pipeline invocation.
     */
     static int nextVertexId(PolyhedralBoundedSolid* current,

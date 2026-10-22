@@ -248,7 +248,7 @@ void OpenGL1MeshRenderer::drawNormalOverlays(
     Mesh* mesh, const RendererConfiguration* quality,
     const Matrix4x4d& modelViewProjection)
 {
-    if ( mesh->positions.empty() || mesh->normals.empty() ) {
+    if ( mesh->positions.isEmpty() || mesh->normals.isEmpty() ) {
         return;
     }
     double size = mesh->characteristicSize > 1e-6 ? mesh->characteristicSize : 1e-6;

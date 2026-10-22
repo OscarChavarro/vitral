@@ -1,8 +1,8 @@
 #ifndef __XT_WIDGET_SET__
 #define __XT_WIDGET_SET__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Xlib.h>
 
@@ -31,7 +31,7 @@ public:
     An item of a context menu: an option, checked or not, or a separator.
     */
     struct MenuChoice {
-        std::string label;
+        String label;
         bool checked;
         bool separator;
     };
@@ -87,7 +87,7 @@ public:
     @param choose called with the index of the chosen item
     */
     virtual XtWidget createChoiceMenu(XtWidget owner,
-                                    const std::vector<MenuChoice>& items,
+                                    const ArrayList<MenuChoice>& items,
                                     XFontSet fontSet, ChoiceProc choose,
                                     void* clientData) = 0;
 

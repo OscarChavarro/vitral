@@ -1,10 +1,5 @@
 #include <ctype.h>
 #include <stdlib.h>
-#include <string>
-#include <typeinfo>
-#if defined(__GNUC__) || defined(__clang__)
-#include <cxxabi.h>
-#endif
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/Entity.h"
@@ -77,6 +72,15 @@ Entity::deleteControlAccessors()
 }
 
 void
+Entity::addControlSpecification(const String &specification,
+                                EntityControlAccessor *accessor)
+{
+    getControlSpecifications().add(specification);
+    accessor->setName(controlNameOf(specification));
+    addControlAccessor(accessor);
+}
+
+void
 Entity::addControlAccessor(EntityControlAccessor *accessor)
 {
     if ( controlAccessors == NULL ) {
@@ -93,23 +97,22 @@ report malformed specifications when they parse them)
 String
 Entity::controlNameOf(const String &specification)
 {
-    std::string text(specification.c_str());
-    size_t begin = text.find(';');
-    if ( begin == std::string::npos ) {
+    int begin = specification.indexOf(';');
+    if ( begin < 0 ) {
         return String();
     }
     begin++;
-    size_t end = text.find(';', begin);
-    if ( end == std::string::npos ) {
-        end = text.size();
+    int end = specification.indexOf(';', begin);
+    if ( end < 0 ) {
+        end = specification.size();
     }
-    while ( begin < end && isspace((unsigned char)text[begin]) ) {
+    while ( begin < end && isspace((unsigned char)specification[begin]) ) {
         begin++;
     }
-    while ( end > begin && isspace((unsigned char)text[end - 1]) ) {
+    while ( end > begin && isspace((unsigned char)specification[end - 1]) ) {
         end--;
     }
-    return String(text.substr(begin, end - begin).c_str());
+    return specification.substring(begin, end);
 }
 
 const EntityControlAccessor *
@@ -201,30 +204,24 @@ Entity::fireEntityEvent(EntityEvent::Type type)
     }
 }
 
+const Class Entity::CLASS = { "Entity", NULL };
+
+const Class *
+Entity::getClass() const
+{
+    return &CLASS;
+}
+
+bool
+Entity::instanceOf(const Class &type) const
+{
+    return type.isAssignableFrom(getClass());
+}
+
 String
 Entity::getClassSimpleName() const
 {
-    const char *mangled = typeid(*this).name();
-    std::string name(mangled);
-#if defined(__GNUC__) || defined(__clang__)
-    int status = 0;
-    char *demangled = abi::__cxa_demangle(mangled, NULL, NULL, &status);
-    if ( status == 0 && demangled != NULL ) {
-        name = demangled;
-    }
-    free(demangled);
-#else
-    // MSVC names are "class Sphere"
-    size_t space = name.rfind(' ');
-    if ( space != std::string::npos ) {
-        name = name.substr(space + 1);
-    }
-#endif
-    size_t scope = name.rfind("::");
-    if ( scope != std::string::npos ) {
-        name = name.substr(scope + 2);
-    }
-    return String(name.c_str());
+    return String(getClass()->getSimpleName());
 }
 
 // Integral constants bound to references (i.e. by `?:`) need a

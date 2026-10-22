@@ -1,11 +1,10 @@
 #include <stddef.h>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include "java/util/TreeMap.h"
+#include "java/util/TreeSet.h"
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolid.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidTopologySummary.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
@@ -14,6 +13,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/IllegalArgumentException.h"
 
 
 static _PolyhedralBoundedSolidFace* faceOf(_PolyhedralBoundedSolidHalfEdge* halfEdge)
@@ -25,15 +25,15 @@ static _PolyhedralBoundedSolidFace* faceOf(_PolyhedralBoundedSolidHalfEdge* half
 }
 
 static void collectVertex(_PolyhedralBoundedSolidHalfEdge* halfEdge,
-                   std::set<_PolyhedralBoundedSolidVertex*>& vertices)
+                   TreeSet<_PolyhedralBoundedSolidVertex*>& vertices)
 {
     if ( halfEdge != NULL && halfEdge->startingVertex != NULL ) {
-        vertices.insert(halfEdge->startingVertex);
+        vertices.add(halfEdge->startingVertex);
     }
 }
 
 static void collectFaceVertices(_PolyhedralBoundedSolidFace* face,
-                         std::set<_PolyhedralBoundedSolidVertex*>& vertices)
+                         TreeSet<_PolyhedralBoundedSolidVertex*>& vertices)
 {
     long i;
     long j;
@@ -61,24 +61,25 @@ static const char* booleanName(bool value)
 
 class DisjointSet {
 private:
-    std::vector<int> parent;
-    std::vector<unsigned char> rank;
+    ArrayList<int> parent;
+    ArrayList<unsigned char> rank;
 
 public:
     explicit DisjointSet(int size)
-        : parent((size_t)size), rank((size_t)size, 0)
+        : parent(Collections<int>::nCopies(size, 0)),
+          rank(Collections<unsigned char>::nCopies(size, 0))
     {
         for ( int i = 0; i < size; i++ ) {
-            parent[(size_t)i] = i;
+            parent[i] = i;
         }
     }
 
     int find(int value)
     {
-        if ( parent[(size_t)value] != value ) {
-            parent[(size_t)value] = find(parent[(size_t)value]);
+        if ( parent[value] != value ) {
+            parent[value] = find(parent[value]);
         }
-        return parent[(size_t)value];
+        return parent[value];
     }
 
     void unite(int first, int second)
@@ -88,21 +89,28 @@ public:
         if ( firstRoot == secondRoot ) {
             return;
         }
-        if ( rank[(size_t)firstRoot] < rank[(size_t)secondRoot] ) {
-            parent[(size_t)firstRoot] = secondRoot;
+        if ( rank[firstRoot] < rank[secondRoot] ) {
+            parent[firstRoot] = secondRoot;
         }
-        else if ( rank[(size_t)firstRoot] > rank[(size_t)secondRoot] ) {
-            parent[(size_t)secondRoot] = firstRoot;
+        else if ( rank[firstRoot] > rank[secondRoot] ) {
+            parent[secondRoot] = firstRoot;
         }
         else {
-            parent[(size_t)secondRoot] = firstRoot;
-            rank[(size_t)firstRoot]++;
+            parent[secondRoot] = firstRoot;
+            rank[firstRoot]++;
         }
     }
 };
 
 
 //= Shell =================================================================
+
+PolyhedralBoundedSolidTopologySummary::Shell::Shell()
+    : faceCount(0), edgeCount(0), vertexCount(0),
+      adjustedEulerCharacteristic(0), closed(false),
+      closedOrientableEulerCompatible(false)
+{
+}
 
 PolyhedralBoundedSolidTopologySummary::Shell::Shell(int faceCount,
     int edgeCount, int vertexCount, int adjustedEulerCharacteristic,
@@ -125,7 +133,7 @@ bool PolyhedralBoundedSolidTopologySummary::Shell::isClosedOrientableEulerCompat
 
 String PolyhedralBoundedSolidTopologySummary::Shell::toString() const
 {
-    std::string msg = "Shell{faces=" + Cpp98Support::toString(faceCount) +
+    String msg = "Shell{faces=" + Cpp98Support::toString(faceCount) +
         ", edges=" + Cpp98Support::toString(edgeCount) +
         ", vertices=" + Cpp98Support::toString(vertexCount) +
         ", adjustedEuler=" + Cpp98Support::toString(adjustedEulerCharacteristic) +
@@ -144,56 +152,59 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
     edgeCount = (int)solid->getEdgesList().size();
     vertexCount = (int)solid->getVerticesList().size();
 
-    std::map<_PolyhedralBoundedSolidFace*, int> faceIndexes;
+    TreeMap<_PolyhedralBoundedSolidFace*, int> faceIndexes;
     int i;
     for ( i = 0; i < faceCount; i++ ) {
-        faceIndexes[solid->getPolygonsList().get(i)] = i;
+        faceIndexes.put(solid->getPolygonsList().get(i), i);
     }
 
     DisjointSet components(faceCount);
     int invalidAdjacencies = 0;
     for ( i = 0; i < edgeCount; i++ ) {
         _PolyhedralBoundedSolidEdge* edge = solid->getEdgesList().get(i);
-        std::map<_PolyhedralBoundedSolidFace*, int>::const_iterator leftIndex =
-            faceIndexes.find(faceOf(edge->leftHalf));
-        std::map<_PolyhedralBoundedSolidFace*, int>::const_iterator rightIndex =
-            faceIndexes.find(faceOf(edge->rightHalf));
-        if ( leftIndex == faceIndexes.end() ||
-             rightIndex == faceIndexes.end() ) {
+        const int* leftIndex = faceIndexes.get(faceOf(edge->leftHalf));
+        const int* rightIndex = faceIndexes.get(faceOf(edge->rightHalf));
+        if ( leftIndex == NULL || rightIndex == NULL ) {
             invalidAdjacencies++;
             continue;
         }
-        components.unite(leftIndex->second, rightIndex->second);
+        components.unite(*leftIndex, *rightIndex);
     }
     invalidEdgeAdjacencyCount = invalidAdjacencies;
 
     // Ordered by component root, as the Java `TreeMap`
-    std::map<int, std::vector<_PolyhedralBoundedSolidFace*> > componentFaces;
+    TreeMap<int, ArrayList<_PolyhedralBoundedSolidFace*> > componentFaces;
     int reachedFaces = 0;
     for ( i = 0; i < faceCount; i++ ) {
         int root = components.find(i);
-        componentFaces[root].push_back(solid->getPolygonsList().get(i));
+        componentFaces.putIfAbsent(root,
+            ArrayList<_PolyhedralBoundedSolidFace*>()).add(
+                solid->getPolygonsList().get(i));
         reachedFaces++;
     }
     int componentFaceTotal = 0;
-    std::map<int, std::vector<_PolyhedralBoundedSolidFace*> >::const_iterator c;
-    for ( c = componentFaces.begin(); c != componentFaces.end(); ++c ) {
-        componentFaceTotal += (int)c->second.size();
+    long c;
+    for ( c = 0; c < componentFaces.size(); c++ ) {
+        componentFaceTotal += (int)componentFaces.getValue(c).size();
     }
     everyFaceReachedExactlyOnce =
         (int)faceIndexes.size() == faceCount &&
         reachedFaces == faceCount && componentFaceTotal == faceCount;
 
     int totalAdjustedFaceTerm = 0;
-    for ( c = componentFaces.begin(); c != componentFaces.end(); ++c ) {
-        const std::vector<_PolyhedralBoundedSolidFace*>& faces = c->second;
-        std::set<_PolyhedralBoundedSolidFace*> faceSet(faces.begin(), faces.end());
-        std::set<_PolyhedralBoundedSolidEdge*> shellEdges;
-        std::set<_PolyhedralBoundedSolidVertex*> shellVertices;
+    for ( c = 0; c < componentFaces.size(); c++ ) {
+        const ArrayList<_PolyhedralBoundedSolidFace*>& faces =
+            componentFaces.getValue(c);
+        TreeSet<_PolyhedralBoundedSolidFace*> faceSet;
+        for ( long f = 0; f < faces.size(); f++ ) {
+            faceSet.add(faces[f]);
+        }
+        TreeSet<_PolyhedralBoundedSolidEdge*> shellEdges;
+        TreeSet<_PolyhedralBoundedSolidVertex*> shellVertices;
         int adjustedFaceTerm = 0;
         bool closed = true;
 
-        for ( size_t f = 0; f < faces.size(); f++ ) {
+        for ( long f = 0; f < faces.size(); f++ ) {
             adjustedFaceTerm += 2 - (int)faces[f]->boundariesList.size();
             collectFaceVertices(faces[f], shellVertices);
         }
@@ -203,15 +214,15 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
             _PolyhedralBoundedSolidEdge* edge = solid->getEdgesList().get(i);
             _PolyhedralBoundedSolidFace* leftFace = faceOf(edge->leftHalf);
             _PolyhedralBoundedSolidFace* rightFace = faceOf(edge->rightHalf);
-            bool touchesShell = faceSet.count(leftFace) > 0 ||
-                faceSet.count(rightFace) > 0;
+            bool touchesShell = faceSet.contains(leftFace) ||
+                faceSet.contains(rightFace);
             if ( !touchesShell ) {
                 continue;
             }
-            shellEdges.insert(edge);
+            shellEdges.add(edge);
             if ( leftFace == NULL || rightFace == NULL ||
-                 faceSet.count(leftFace) == 0 ||
-                 faceSet.count(rightFace) == 0 ) {
+                 !faceSet.contains(leftFace) ||
+                 !faceSet.contains(rightFace) ) {
                 closed = false;
             }
             collectVertex(edge->leftHalf, shellVertices);
@@ -220,7 +231,7 @@ PolyhedralBoundedSolidTopologySummary::PolyhedralBoundedSolidTopologySummary(
 
         int chi = (int)shellVertices.size() - (int)shellEdges.size() +
             adjustedFaceTerm;
-        shells.push_back(Shell((int)faces.size(), (int)shellEdges.size(),
+        shells.add(Shell((int)faces.size(), (int)shellEdges.size(),
             (int)shellVertices.size(), chi, closed));
     }
     adjustedEulerCharacteristic =
@@ -231,7 +242,7 @@ PolyhedralBoundedSolidTopologySummary PolyhedralBoundedSolidTopologySummary::fro
     PolyhedralBoundedSolid* solid)
 {
     if ( solid == NULL ) {
-        throw std::invalid_argument("solid must not be null");
+        throw IllegalArgumentException("solid must not be null");
     }
     return PolyhedralBoundedSolidTopologySummary(solid);
 }
@@ -244,7 +255,7 @@ int PolyhedralBoundedSolidTopologySummary::getAdjustedEulerCharacteristic() cons
 bool PolyhedralBoundedSolidTopologySummary::isEveryFaceReachedExactlyOnce() const { return everyFaceReachedExactlyOnce; }
 int PolyhedralBoundedSolidTopologySummary::getInvalidEdgeAdjacencyCount() const { return invalidEdgeAdjacencyCount; }
 
-const std::vector<PolyhedralBoundedSolidTopologySummary::Shell>&
+const ArrayList<PolyhedralBoundedSolidTopologySummary::Shell>&
 PolyhedralBoundedSolidTopologySummary::getShells() const
 {
     return shells;
@@ -255,7 +266,7 @@ bool PolyhedralBoundedSolidTopologySummary::hasUniversalContradiction() const
     if ( !everyFaceReachedExactlyOnce || invalidEdgeAdjacencyCount > 0 ) {
         return true;
     }
-    for ( size_t i = 0; i < shells.size(); i++ ) {
+    for ( long i = 0; i < shells.size(); i++ ) {
         if ( !shells[i].isClosedOrientableEulerCompatible() ) {
             return true;
         }
@@ -265,15 +276,15 @@ bool PolyhedralBoundedSolidTopologySummary::hasUniversalContradiction() const
 
 String PolyhedralBoundedSolidTopologySummary::toString() const
 {
-    std::string perShell = "[";
-    for ( size_t i = 0; i < shells.size(); i++ ) {
+    String perShell = "[";
+    for ( long i = 0; i < shells.size(); i++ ) {
         if ( i > 0 ) {
             perShell += ", ";
         }
         perShell += shells[i].toString().c_str();
     }
     perShell += "]";
-    std::string msg = "TopologySummary{faces=" + Cpp98Support::toString(faceCount) +
+    String msg = "TopologySummary{faces=" + Cpp98Support::toString(faceCount) +
         ", edges=" + Cpp98Support::toString(edgeCount) +
         ", vertices=" + Cpp98Support::toString(vertexCount) +
         ", shells=" + Cpp98Support::toString(shells.size()) +

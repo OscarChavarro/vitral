@@ -27,3 +27,11 @@ double ProgressMonitorInRam::getCurrentPercent()
 {
     return currentPercent;
 }
+
+const Class ProgressMonitorInRam::CLASS = { "ProgressMonitorInRam", &ProgressMonitor::CLASS };
+
+const Class *
+ProgressMonitorInRam::getClass() const
+{
+    return &CLASS;
+}

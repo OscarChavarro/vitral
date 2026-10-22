@@ -1,6 +1,5 @@
 #include <float.h>
 #include <math.h>
-#include <typeinfo>
 
 #include "java/io/File.h"
 #include "java/lang/System.h"
@@ -77,9 +76,11 @@ Scene::Scene() : acumObject(1), importedMitScene(false),
     camera->setRotation(R);
 
     activeCamera = camera;
-    selectedThings = new SelectionSet(&scene->getSimpleBodies());
-    selectedLights = new SelectionSet(&scene->getLights());
-    selectedDebugThingGroups = new SelectionSet(&debugThingGroups);
+    selectedThings = new SelectionSet(
+        EntityListView(&scene->getSimpleBodies()));
+    selectedLights = new SelectionSet(EntityListView(&scene->getLights()));
+    selectedDebugThingGroups = new SelectionSet(
+        EntityListView(&debugThingGroups));
 
     //-----------------------------------------------------------------
     simpleBackground = new SimpleBackground();
@@ -236,16 +237,16 @@ SimpleBody* Scene::addThing(Geometry* g)
 
 bool Scene::isHidden(SimpleBody* body) const
 {
-    return hiddenBodies.find(body) != hiddenBodies.end();
+    return hiddenBodies.contains(body);
 }
 
 void Scene::setHidden(SimpleBody* body, bool hidden)
 {
     if ( hidden ) {
-        hiddenBodies.insert(body);
+        hiddenBodies.add(body);
     }
     else {
-        hiddenBodies.erase(body);
+        hiddenBodies.remove(body);
     }
 }
 
@@ -404,7 +405,7 @@ void Scene::print()
         Geometry* g = things.get(i)->getGeometry();
         String msg = String("  - Thing[") +
             String::valueOf(i) + "]: " +
-            (g != NULL ? typeid(*g).name() : "null");
+            (g != NULL ? g->getClassSimpleName() : String("null"));
         System::out.println(msg.c_str());
     }
     System::out.println("= END OF REPORT ===========================================================");

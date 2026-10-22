@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++98 -Wall -rdynamic CMakeFiles/ImageOfflineExample.dir/src/ImageOfflineExample.o -o ../../ImageOfflineExample/build/ImageOfflineExample   -L/home/jedilink/VITRAL/vitral/turboc/testsuite/OfflineExamples/../../base/build  -Wl,-rpath,/home/jedilink/VITRAL/vitral/turboc/testsuite/OfflineExamples/../../base/build -lvitral_base -lpthread 

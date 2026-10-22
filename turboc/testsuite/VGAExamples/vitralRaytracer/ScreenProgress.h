@@ -14,24 +14,27 @@ class ScreenProgress : public ProgressMonitor {
     double percent;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     ScreenProgress(int width, int height, int color, int text)
         : width(width), row(height - 1), color(color), filled(0), text(text), percent(0) {}
-    virtual void begin() override {
+    virtual void begin() {
         filled = 0;
         percent = 0;
     }
-    virtual void end() override {
+    virtual void end() {
         percent = 100.0;
         advance(width);
     }
-    virtual void update(double minValue, double maxValue, double currentValue) override {
+    virtual void update(double minValue, double maxValue, double currentValue) {
         if (maxValue - minValue < 1e-9) {
             return;
         }
         percent = 100.0 * (currentValue - minValue) / (maxValue - minValue);
         advance((int)(percent * width / 100.0));
     }
-    virtual double getCurrentPercent() override { return percent; }
+    virtual double getCurrentPercent() { return percent; }
 
 private:
     void advance(int to) {

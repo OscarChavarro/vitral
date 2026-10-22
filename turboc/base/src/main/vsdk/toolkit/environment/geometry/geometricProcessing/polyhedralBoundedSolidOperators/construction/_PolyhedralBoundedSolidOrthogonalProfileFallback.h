@@ -1,9 +1,9 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
 #define ___POLYHEDRAL_BOUNDED_SOLID_ORTHOGONAL_PROFILE_FALLBACK__
 
-#include <map>
-#include <string>
-#include <vector>
+#include "java/util/TreeMap.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -40,9 +40,9 @@ private:
     public:
         int type;
         double bounds[6];
-        std::vector<Vector3Dd> yzProfile;
-        std::vector<double> rightBoundaryZ;
-        std::vector<double> rightBoundaryX;
+        ArrayList<Vector3Dd> yzProfile;
+        ArrayList<double> rightBoundaryZ;
+        ArrayList<double> rightBoundaryX;
 
         bool contains(double x, double y, double z) const;
         double rightXAtZ(double z) const;
@@ -55,8 +55,8 @@ private:
         OrthogonalProfileOperandSpec yExtruded;
         double xMin;
         double xMax;
-        std::vector<double> yCoordinates;
-        std::vector<double> zCoordinates;
+        ArrayList<double> yCoordinates;
+        ArrayList<double> zCoordinates;
 
         double xAtBoundary(int boundary, double z) const;
         Vector3Dd point(int boundary, int iy, int iz) const;
@@ -69,15 +69,15 @@ private:
         PolyhedralBoundedSolid* result();
     private:
         PolyhedralBoundedSolid* solid;
-        std::map<std::string, _PolyhedralBoundedSolidVertex*> vertices;
-        std::map<std::string, _PolyhedralBoundedSolidEdge*> edges;
+        TreeMap<String, _PolyhedralBoundedSolidVertex*> vertices;
+        TreeMap<String, _PolyhedralBoundedSolidEdge*> edges;
         int nextVertexId;
         int nextFaceId;
 
         static long long coordinateKey(double value);
-        static std::string vertexKey(const Vector3Dd& point);
+        static String vertexKey(const Vector3Dd& point);
         _PolyhedralBoundedSolidVertex* vertexAt(const Vector3Dd& point);
-        static std::string edgeKey(_PolyhedralBoundedSolidVertex* a,
+        static String edgeKey(_PolyhedralBoundedSolidVertex* a,
             _PolyhedralBoundedSolidVertex* b);
         void attachEdge(_PolyhedralBoundedSolidHalfEdge* he,
             _PolyhedralBoundedSolidVertex* a,
@@ -86,17 +86,17 @@ private:
     };
 
     _PolyhedralBoundedSolidOrthogonalProfileFallback();
-    static bool pointInsideYZProfile(const std::vector<Vector3Dd>& profile,
+    static bool pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
         double y, double z);
     static bool createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
-        const std::vector<double>& xCoordinates,
-        const std::vector<double>& yCoordinates,
-        const std::vector<double>& zCoordinates,
+        const ArrayList<double>& xCoordinates,
+        const ArrayList<double>& yCoordinates,
+        const ArrayList<double>& zCoordinates,
         OrthogonalProfileOperandSpec& outSpec);
     static bool createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
-        const std::vector<double>& xCoordinates,
-        const std::vector<double>& yCoordinates,
-        const std::vector<double>& zCoordinates,
+        const ArrayList<double>& xCoordinates,
+        const ArrayList<double>& yCoordinates,
+        const ArrayList<double>& zCoordinates,
         OrthogonalProfileOperandSpec& outSpec);
     static bool createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
         OrthogonalProfileOperandSpec& outSpec);

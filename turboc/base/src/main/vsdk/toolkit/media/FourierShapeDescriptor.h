@@ -15,6 +15,9 @@ private:
     static const int numberOfHarmonics = 16;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     FourierShapeDescriptor(const String* label);
     virtual ~FourierShapeDescriptor();
 

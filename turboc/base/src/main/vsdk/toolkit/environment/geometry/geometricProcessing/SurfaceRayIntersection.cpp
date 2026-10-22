@@ -33,9 +33,9 @@ bool SurfaceRayIntersection::doIntersectionFirstHit(Geometry* geometry, const Ra
         return false;
     }
 
-    if ( dynamic_cast<TriangleMesh*>(geometry) != 0 ||
-         dynamic_cast<TriangleMeshGroup*>(geometry) != 0 ||
-         dynamic_cast<FunctionalExplicitSurface*>(geometry) != 0 ) {
+    if ( (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS)) ||
+         (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS)) ||
+         (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS)) ) {
         if ( !rayIntersectsGeometryBounds(geometry, inRay) ) {
             return false;
         }

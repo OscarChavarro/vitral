@@ -1,6 +1,6 @@
-#include <cctype>
-#include <cstdio>
-#include <cstring>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "java/io/File.h"
 #include "ImageExporter.h"
@@ -13,7 +13,7 @@ bool ImageExporter::exportImage(const String& outputFileName, RGBImageUncompress
 
     String lower = outputFileName;
     for (int i = 0; i < lower.size(); i++) {
-        lower[i] = std::tolower((unsigned char)lower[i]);
+        lower[i] = tolower((unsigned char)lower[i]);
     }
 
     bool ok = false;

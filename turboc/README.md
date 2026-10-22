@@ -27,6 +27,38 @@ cmake ..
 cmake --build .
 ```
 
+### Legacy toolchains (GNU make only)
+
+The turboc port targets legacy compilers (gcc 4.1 on Ubuntu 7.04, gcc 2.7.2
+on Debian 1.1 and, eventually, Turbo C++ 3.0 for DOS). On systems without
+CMake, the base library and the offline examples are built with plain
+Makefiles, from the `turboc/` directory:
+
+```bash
+make                         # base/build/libvitral_base.a and the examples
+make WITH_POSIX_THREADS=1    # optional: WITH_JPEG=1, WITH_PNG=1, WITH_FREETYPE=1
+make clean
+```
+
+The objects go to `buildmk/` folders; the Makefiles do not track header
+dependencies, so run `make clean` after changing headers. Each example is
+then run from its folder (i.e. `./build/RaytracingOfflineExample`).
+
+To keep the code compatible with those compilers, the port follows these
+rules:
+
+- No C++ standard library containers, algorithms, strings, streams or
+  exceptions: the Java-like classes of `base/src/main/java` replace them
+  (`String`, `StringBuilder`, `ArrayList` with `sort(Comparator)`,
+  `TreeMap`, `TreeSet`, `ArrayDeque`, `HashMap`, `Collections<T>`,
+  `Files::readString`, and the `Throwable` / `Exception` /
+  `RuntimeException` / `IllegalArgumentException`... hierarchy).
+- C library headers in their C form (`<stdio.h>`, not `<cstdio>`).
+- Conventional casts and runtime type descriptions supplied by
+  `java/lang/Class`.
+- No member templates, no `template <>` specializations, no `typename`
+  and no static data members in class templates.
+
 ### Build Options
 
 The following CMake options are available:
@@ -45,7 +77,7 @@ The C++ port requires the following dependencies:
 
 ### Core Requirements
 
-- **C++ compiler** with C++11 support (GCC, Clang, MSVC, or Apple Clang)
+- **C++ compiler** compatible with the port's legacy language subset
 - **CMake** 3.16 or higher
 
 ### Optional: Image Format Support
@@ -247,7 +279,7 @@ This allows you to defer building optional dependencies until needed.
 ## Legacy C++98 Build (turboc port)
 
 This is a legacy C++ port of the `cpp/` tree, aimed to build with old
-toolchains without C++11 or newer features. The `base`, `opengl1`, `glut`,
+older toolchains. The `base`, `opengl1`, `glut`,
 `xt`, `xaw` and `xm` libraries are known to build on Ubuntu 7.04 (i686) with
 CMake 2.4.6, g++ 4.1.2, Mesa 6.5.2, freeglut 2.4.0, libXt 1.0.5, libXaw7
 1.0.3 and Motif 2.2.3:
@@ -276,80 +308,16 @@ extensions, no function loader, no 3D textures and no compressed textures:
 DXT images are decoded in the CPU and uploaded as 2D RGBA textures. Solid
 textures stay in `base`, evaluated in the CPU by the software renderers.
 
-### C++ Feature Changes (cpp -> turboc)
+### Implementation notes
 
-Following the same migration mechanism as the rpkCpp turboc port:
-
-1. `enum class` -> C++98 wrapper classes (`Containment`, `StreamOpenMode`,
-   `RasterTileGenerationStrategy`, `DepthBufferMode`, `LightGizmoStyle`)
-   with a nested plain `Value` enum, so `Type::VALUE` syntax keeps working;
-   qualified access to plain enums (`ImageToSolidTexture*::X`) removed
-2. `nullptr` -> `NULL` (with `<stddef.h>`)
-3. `override`/`final` removed; `noexcept` -> `throw()`
-4. `constexpr` -> `static const` for integral constants; non integral
-   constants (`double`, `const char*`) are declared in the class and
-   defined in the `.cpp` (new `java/lang/Math.cpp`)
-5. C++ casts (`static_cast`, `reinterpret_cast`) -> C-style casts
-6. C++11 initialization replaced with explicit C++98 forms: delegating
-   constructors, default member initializers, brace initializers,
-   `= default` / `= delete`, `using` aliases (-> `typedef`), `auto`,
-   `[[noreturn]]`, rvalue references (move operations of `ArrayList`)
-7. Lambdas -> named functor structs (sort criteria) or static functions;
-   `std::function` -> Java style interfaces `Function<T, R>`,
-   `Consumer<T>` and `Supplier<T>` (`java/util/function`), used by `RayGizmo` and
-   `TangibleInterfaceNetworkClient`
-8. C++11 library replacements:
-   - `std::thread`, `std::mutex`, `std::lock_guard` -> POSIX threads,
-     `ReentrantLock` / `ReentrantLockGuard`
-     (`java/util/concurrent/locks`)
-   - `std::atomic` -> `AtomicLong` over a lock
-   - `std::shared_ptr` -> `SharedPointer<T>`, `std::unique_ptr` -> owned
-     raw pointers (`vsdk/toolkit/common/memoryManagement`)
-   - `std::chrono` -> `gettimeofday` / `nanosleep`
-   - `std::regex` -> POSIX `<regex.h>`, translating the Java syntax
-     (`java/util/regex/Pattern`)
-   - `std::to_string`, `std::fmax`, `std::fmin`, `std::round`,
-     `std::lround`, `std::llround`, `std::hypot`, `std::ilogb`, `va_copy`
-     -> `Cpp98Support` (`vsdk/toolkit/common/Cpp98Support.h`)
-   - `std::numeric_limits<T>::lowest()` -> `-max()`, `INT64_C` -> `LL`
-9. Integral `static const` members initialized in their class get an out
-   of class definition (in the `.cpp` of the class, or in
-   `java/lang/IntegralConstants.cpp`), as C++98 requires when they are
-   bound to references (i.e. by `?:`)
-10. Remove uses of namespaces, as in the rpkCpp turboc port:
-    - The Java compatibility layer (`java::`, `java::net::`,
-      `java::util::regex::`, `org::w3c::dom::`, `javax::xml::`,
-      `jackson::databind::`) lives in the global scope; class names are
-      used unqualified (`String`, `ArrayList`, `Math`, ...)
-    - Anonymous namespaces -> `static` functions and variables; helper
-      types are given file specific names when needed to stay unique
-    - C library calls drop the `std::` prefix and use the C headers
-      (`<math.h>`, `<stdio.h>`, `<stdlib.h>`, `<string.h>`, ...).
-      Inside classes with a method of the same name (`Math`, `Complex`,
-      `System`) the global scope operator is used (`::sqrt`, `::exit`)
-    - `std::abs`, `std::isnan`, `std::isinf`, `std::isfinite`,
-      `std::signbit` -> `Cpp98Support` (the C `abs` only takes `int`)
-    - `std::numeric_limits` -> `<float.h>` / `<limits.h>` / `HUGE_VAL`
-    - Only the standard C++ library containers, algorithms and exceptions
-      (`std::vector`, `std::string`, `std::map`, `std::set`, `std::sort`,
-      `std::max`, `std::exception`, ...) remain in the `std` namespace
-11. g++ 4.1 `-Wall` signed/unsigned comparison warnings are silenced with
-    explicit casts (`i < (size_t)list.size()`, as `ArrayList::size()`
-    returns `long`); C99 `%zu` given a `long` -> `%ld`
-
-Pending, compared with the rpkCpp turboc port: the use of the standard
-C++ library (`std::` containers, algorithms and exceptions) is still
-present, and the rest of the `testsuite` (`OfflineExamples`,
-`VGAExamples`) is not migrated yet. The `Tools` of the cpp port (tangible
-interface markers and server) are not part of this port.
+The port keeps source code in a conservative language subset. Collections,
+callbacks, exceptions and runtime type information use the Java-like layer in
+`base/src/main/java`; platform services use C and POSIX facilities.
 
 ### Xt layer (`xt`, `xaw`, `xm`)
 
-Besides the C++98 changes above (`std::function` callbacks -> interfaces in
-`XtTreeView` and `XtDialogHost`, `std::thread`/`mutex`/`condition_variable`
--> POSIX threads in `XtEventQueue`, `unique_ptr` -> owned pointers):
-- Without the `java::` namespace, the `String` and `Object` types of Xt
-  collide with the vitral classes: they are renamed `XtString` and
+The `String` and `Object` types of Xt collide with the vitral classes: they
+are renamed `XtString` and
   `XtObject` (as `Widget` already was `XtIntrinsicWidget`) with `#define`s
   around every include of Xt, Athena and Motif headers (see
   `XtIntrinsics.h`). The modules are compiled with `XTSTRINGDEFINES` and
@@ -407,9 +375,7 @@ testsuite/ApplicationCases/SceneEditorApplication/runXawOpenGL1.sh
 testsuite/ApplicationCases/SceneEditorApplication/compileAllVariants.sh
 ```
 
-See its `README.md` for the C++98 changes (lambdas and `std::function`
-callbacks as Java style interface objects, threads posting `Runnable` tasks
-to `XtEventQueue`).
+See its `README.md` for build and usage details.
 
 ### OpenGL 1.2 API tests (`testsuite/_APITests`)
 
@@ -435,8 +401,7 @@ hidden windows nor pbuffers, so two ways were compared on Ubuntu 7.04 (Mesa
   offscreen parts of the window are undefined (pixel ownership test).
 
 A GLX pbuffer (GLX 1.3) also works there, but is slower and still needs a
-display. `_occtPolyhedralBoundedSolidBooleansTool` (OpenCascade, C++11) is
-not part of this port.
+display.
 
 ## Porting Notes
 
@@ -444,9 +409,8 @@ not part of this port.
 
 1. **Image I/O**: Uses native `libpng` and `libjpeg` instead of Java AWT or JNI bindings
 2. **Memory management**: Explicit `new`/`delete` (no garbage collection)
-3. **Namespaces**: Avoid introducing project-specific C++ namespaces; preserve only `java::` where needed for the Java-compatibility layer
 4. **Build system**: CMake instead of Gradle
-5. **Standard library**: C++11 STL instead of Java Collections
+5. **Collections**: Java-like collections are used throughout the port
 
 ### Design Principles
 

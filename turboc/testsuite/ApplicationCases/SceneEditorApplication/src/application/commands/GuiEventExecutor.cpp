@@ -207,3 +207,11 @@ bool GuiEventExecutor::loadPalette(const File& file)
     source.close();
     return true;
 }
+
+const Class GuiEventExecutor::CLASS = { "GuiEventExecutor", &CommandListener::CLASS };
+
+const Class *
+GuiEventExecutor::getClass() const
+{
+    return &CLASS;
+}

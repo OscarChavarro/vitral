@@ -552,3 +552,11 @@ const int Camera::OPCODE_RIGHT;
 const int Camera::OPCODE_LEFT;
 const int Camera::OPCODE_UP;
 const int Camera::OPCODE_DOWN;
+
+const Class Camera::CLASS = { "Camera", &Entity::CLASS };
+
+const Class *
+Camera::getClass() const
+{
+    return &CLASS;
+}

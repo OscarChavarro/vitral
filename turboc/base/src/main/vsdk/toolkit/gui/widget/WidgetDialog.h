@@ -1,7 +1,7 @@
 #ifndef __WIDGET_DIALOG__
 #define __WIDGET_DIALOG__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/util/ArrayList.h"
 #include "vsdk/toolkit/gui/widget/WidgetDialogElement.h"
@@ -31,9 +31,12 @@ private:
     bool collapsable;
     String titleKey;
     bool modal;
-    std::vector<WidgetDialogElement> elements;
+    ArrayList<WidgetDialogElement> elements;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int ORIENTATION_HORIZONTAL = 0x01;
     static const int ORIENTATION_VERTICAL = 0x02;
 
@@ -51,7 +54,7 @@ public:
     /**
     @return the ordered, toolkit-independent content of the dialog
     */
-    const std::vector<WidgetDialogElement>& getElements() const;
+    const ArrayList<WidgetDialogElement>& getElements() const;
     void addElement(const WidgetDialogElement& element);
 
     /**

@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include <algorithm>
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
@@ -10,6 +9,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 
 
 // Same value as VSDK::EPSILON, spelled as a literal so that it is constant
@@ -186,7 +186,7 @@ PolyhedralBoundedSolidNumericPolicy::ToleranceContext
 PolyhedralBoundedSolidNumericPolicy::forSolids(PolyhedralBoundedSolid* a,
                                                PolyhedralBoundedSolid* b)
 {
-    return fromScale(std::max(estimateSolidScale(a), estimateSolidScale(b)));
+    return fromScale(Math::max(estimateSolidScale(a), estimateSolidScale(b)));
 }
 
 PolyhedralBoundedSolidNumericPolicy::ToleranceContext
@@ -260,7 +260,7 @@ int PolyhedralBoundedSolidNumericPolicy::testPointInside(
 bool PolyhedralBoundedSolidNumericPolicy::vectorsColinear(const Vector3Dd& a,
     const Vector3Dd& b, const ToleranceContext& context)
 {
-    double scale = std::max(1.0, std::max(a.length(), b.length()));
+    double scale = Math::max(1.0, Math::max(a.length(), b.length()));
     return a.crossProduct(b).length() <= context.bigEpsilon() * scale;
 }
 
@@ -288,13 +288,13 @@ double PolyhedralBoundedSolidNumericPolicy::orientationTolerance2D(
     const Vector2Dd& a, const Vector2Dd& b, const Vector2Dd& c,
     const ToleranceContext& context)
 {
-    double lx = std::max(std::max(Cpp98Support::abs(a.x - b.x),
+    double lx = Math::max(Math::max(Cpp98Support::abs(a.x - b.x),
                                   Cpp98Support::abs(a.x - c.x)),
                          Cpp98Support::abs(b.x - c.x));
-    double ly = std::max(std::max(Cpp98Support::abs(a.y - b.y),
+    double ly = Math::max(Math::max(Cpp98Support::abs(a.y - b.y),
                                   Cpp98Support::abs(a.y - c.y)),
                          Cpp98Support::abs(b.y - c.y));
-    double span = std::max(1.0, std::max(lx, ly));
+    double span = Math::max(1.0, Math::max(lx, ly));
     return context.bigEpsilon() * span;
 }
 

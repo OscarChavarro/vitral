@@ -755,7 +755,7 @@ String TriangleMesh::toString() const
     msg += intToStr(getNumVertices());
     msg += "\n";
 
-    TriangleMesh* self = const_cast<TriangleMesh*>(this);
+    TriangleMesh* self = ((TriangleMesh*)(this));
     double* mm = self->getMinMax();
     msg += "  - MINMAX: (";
     msg += doubleToStr(mm[0]);
@@ -822,4 +822,12 @@ String TriangleMesh::toString() const
 
     msg += "---------------------------------------------------------------------------\n";
     return msg;
+}
+
+const Class TriangleMesh::CLASS = { "TriangleMesh", &Surface::CLASS };
+
+const Class *
+TriangleMesh::getClass() const
+{
+    return &CLASS;
 }

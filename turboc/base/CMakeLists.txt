@@ -95,6 +95,7 @@ set(VITRAL_BASE_SOURCES
     src/main/java/io/InputStreamReader.cpp
     src/main/java/io/FileReader.cpp
     src/main/java/io/StreamTokenizer.cpp
+    src/main/java/nio/file/Files.cpp
     src/main/java/net/ServerSocket.cpp
     src/main/java/net/SocketInputStream.cpp
     src/main/java/net/SocketOutputStream.cpp
@@ -326,6 +327,16 @@ set(VITRAL_BASE_SOURCES
     src/main/vsdk/toolkit/gui/gizmo/RotateGizmoInteractionTechnique.cpp
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmo.cpp
     src/main/vsdk/toolkit/gui/gizmo/ScaleGizmoInteractionTechnique.cpp
+    src/main/vsdk/toolkit/gui/PresentationElement.cpp
+    src/main/vsdk/toolkit/environment/background/Background.cpp
+    src/main/vsdk/toolkit/media/MediaEntity.cpp
+    src/main/vsdk/toolkit/gui/CameraController.cpp
+    src/main/vsdk/toolkit/gui/CommandListener.cpp
+    src/main/vsdk/toolkit/gui/Controller.cpp
+    src/main/vsdk/toolkit/gui/gizmo/Gizmo.cpp
+    src/main/vsdk/toolkit/gui/feedback/ProgressMonitor.cpp
+    src/main/vsdk/toolkit/gui/widget/WidgetElement.cpp
+    src/main/vsdk/toolkit/gui/widget/variable/WidgetVariable.cpp
 )
 
 if(WITH_FREETYPE)

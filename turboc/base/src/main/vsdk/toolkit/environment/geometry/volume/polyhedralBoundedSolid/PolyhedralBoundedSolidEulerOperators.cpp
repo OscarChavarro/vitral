@@ -5,7 +5,6 @@
 //=     containing the C programs from [MANT1988]. Available at             =
 //=     http://www.cs.hut.fi/~mam . Last visited April 12 / 2008.           =
 
-#include <string>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/logging/Logger.h"
@@ -47,7 +46,7 @@ Emulates `CircularDoubleLinkedList.locateWindowAtElem`.
 @param elem element to locate
 @return element index, or -1 when it is not in the list
 */
-template <typename T>
+template <class T>
 static long indexOf(const ArrayList<T>& list, T elem)
 {
     for ( long i = 0; i < list.size(); ++i ) {
@@ -65,7 +64,7 @@ the list or is its head, `elem` becomes the new head.
 @param elem element to insert
 @param pivot element before which `elem` is inserted
 */
-template <typename T>
+template <class T>
 static void insertBefore(ArrayList<T>& list, T elem, T pivot)
 {
     long pos = indexOf(list, pivot);
@@ -81,7 +80,7 @@ Emulates `locateWindowAtElem` followed by `removeElemAtWindow`.
 @param elem element to remove
 @return true if the element was found and removed
 */
-template <typename T>
+template <class T>
 static bool removeElem(ArrayList<T>& list, T elem)
 {
     long pos = indexOf(list, elem);
@@ -98,7 +97,7 @@ Emulates `CircularDoubleLinkedList.swapElements`.
 @param a first element
 @param b second element
 */
-template <typename T>
+template <class T>
 static void swapElems(ArrayList<T>& list, T a, T b)
 {
     long ia = indexOf(list, a);

@@ -137,3 +137,11 @@ String WidgetMenuElement::processAccelerator(
 
     return accelerator;
 }
+
+const Class WidgetMenuElement::CLASS = { "WidgetMenuElement", &WidgetElement::CLASS };
+
+const Class *
+WidgetMenuElement::getClass() const
+{
+    return &CLASS;
+}

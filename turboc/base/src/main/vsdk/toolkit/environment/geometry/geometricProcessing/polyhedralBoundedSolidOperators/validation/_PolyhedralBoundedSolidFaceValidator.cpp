@@ -1,7 +1,5 @@
 #include <stddef.h>
-#include <algorithm>
 #include <math.h>
-#include <vector>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -12,11 +10,15 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidHalfEdge.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
+#include "java/lang/Math.h"
 
 
 struct FaceSegment {
     Vector3Dd start;
     Vector3Dd end;
+
+    /// Needed by the storage of `ArrayList`
+    FaceSegment() : start(), end() {}
 
     FaceSegment(const Vector3Dd& start, const Vector3Dd& end)
         : start(start), end(end) {}
@@ -41,9 +43,9 @@ static double clamp(double value, double min, double max)
     return value;
 }
 
-static std::vector<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace* face)
+static ArrayList<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace* face)
 {
-    std::vector<FaceSegment> segments;
+    ArrayList<FaceSegment> segments;
     for ( long i = 0; i < face->boundariesList.size(); i++ ) {
         _PolyhedralBoundedSolidLoop* loop = face->boundariesList.get(i);
         _PolyhedralBoundedSolidHalfEdge* he = loop->boundaryStartHalfEdge;
@@ -56,7 +58,7 @@ static std::vector<FaceSegment> collectFaceSegments(_PolyhedralBoundedSolidFace*
             if ( next == NULL ) {
                 break;
             }
-            segments.push_back(FaceSegment(he->startingVertex->position,
+            segments.add(FaceSegment(he->startingVertex->position,
                 next->startingVertex->position));
             he = next;
         } while ( he != start );
@@ -164,11 +166,11 @@ bool _PolyhedralBoundedSolidFaceValidator::hasCloseNonAdjacentEdges(
     _PolyhedralBoundedSolidFace* face,
     const PolyhedralBoundedSolidNumericPolicy::ToleranceContext& numericContext)
 {
-    std::vector<FaceSegment> segments = collectFaceSegments(face);
-    double tolerance = std::max(numericContext.bigEpsilon() * 10.0,
+    ArrayList<FaceSegment> segments = collectFaceSegments(face);
+    double tolerance = Math::max(numericContext.bigEpsilon() * 10.0,
         numericContext.modelScale() * 1.0e-5);
-    for ( size_t i = 0; i < segments.size(); i++ ) {
-        for ( size_t j = i + 1; j < segments.size(); j++ ) {
+    for ( long i = 0; i < segments.size(); i++ ) {
+        for ( long j = i + 1; j < segments.size(); j++ ) {
             const FaceSegment& a = segments[i];
             const FaceSegment& b = segments[j];
             if ( a.sharesEndpointWith(b, numericContext.bigEpsilon()) ) {

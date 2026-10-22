@@ -6,34 +6,41 @@
 #include <pthread.h>
 #include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
 
-template<typename T>
+/**
+State shared by a `Future` and the `FutureTask` that computes its value.
+
+C++ port note: it is not nested in `Future`, so other templates can name it
+without `typename` (unknown to legacy compilers).
+*/
+template<class T>
+class FutureState {
+public:
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    bool done;
+    bool failed;
+    String errorMessage;
+    T value;
+
+    FutureState() : done(false), failed(false), errorMessage(), value() {
+        pthread_mutex_init(&mutex, 0);
+        pthread_cond_init(&cond, 0);
+    }
+
+    ~FutureState() {
+        pthread_cond_destroy(&cond);
+        pthread_mutex_destroy(&mutex);
+    }
+};
+
+template<class T>
 class Future {
-public:
-    struct SharedState {
-        pthread_mutex_t mutex;
-        pthread_cond_t cond;
-        bool done;
-        bool failed;
-        String errorMessage;
-        T value;
-
-        SharedState() : done(false), failed(false), errorMessage(), value() {
-            pthread_mutex_init(&mutex, 0);
-            pthread_cond_init(&cond, 0);
-        }
-
-        ~SharedState() {
-            pthread_cond_destroy(&cond);
-            pthread_mutex_destroy(&mutex);
-        }
-    };
-
 private:
-    SharedPointer<SharedState> state_;
+    SharedPointer<FutureState<T> > state_;
 
 public:
-    Future() : state_(new SharedState()) {}
-    explicit Future(const SharedPointer<SharedState>& state) : state_(state) {}
+    Future() : state_(new FutureState<T>()) {}
+    explicit Future(const SharedPointer<FutureState<T> >& state) : state_(state) {}
 
     T get()
     {
@@ -47,7 +54,7 @@ public:
         pthread_mutex_unlock(&state_->mutex);
 
         if ( failed ) {
-            throw ExecutionException(message.empty() ? String("Task execution failed") : message);
+            throw ExecutionException(message.isEmpty() ? String("Task execution failed") : message);
         }
         return value;
     }

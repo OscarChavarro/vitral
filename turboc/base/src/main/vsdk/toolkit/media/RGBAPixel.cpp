@@ -12,3 +12,11 @@ String* RGBAPixel::toString() const {
     snprintf(buffer, sizeof(buffer), "<%d, %d, %d / (%d)>", ur, ug, ub, ua);
     return new String(buffer);
 }
+
+const Class RGBAPixel::CLASS = { "RGBAPixel", &MediaEntity::CLASS };
+
+const Class *
+RGBAPixel::getClass() const
+{
+    return &CLASS;
+}

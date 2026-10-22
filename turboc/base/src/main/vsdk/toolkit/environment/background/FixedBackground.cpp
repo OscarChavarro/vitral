@@ -24,3 +24,11 @@ Camera* FixedBackground::getCamera() const
 {
     return camera;
 }
+
+const Class FixedBackground::CLASS = { "FixedBackground", &Background::CLASS };
+
+const Class *
+FixedBackground::getClass() const
+{
+    return &CLASS;
+}

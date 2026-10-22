@@ -1,65 +1,64 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <math.h>
-#include <limits>
-#include <string>
-#include <vector>
+#include <string.h>
 
 #include "java/lang/Double.h"
 #include "java/lang/NumberFormatException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/gui/editor/ControlSpecification.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/util/ArrayList.txx"
 
 const char *const ControlSpecification::INFINITE = "INFINITE";
 
 
-static std::string trim(const std::string &text)
+static String trim(const String &text)
 {
-    size_t begin = 0;
-    size_t end = text.size();
+    int begin = 0;
+    int end = text.size();
     while ( begin < end && isspace((unsigned char)text[begin]) ) {
         begin++;
     }
     while ( end > begin && isspace((unsigned char)text[end - 1]) ) {
         end--;
     }
-    return text.substr(begin, end - begin);
+    return text.substring(begin, end);
 }
 
 /**
 Splits as Java `String.split` does with a one character pattern: trailing
 empty fields are dropped.
 */
-static std::vector<std::string> split(const std::string &text, char separator)
+static ArrayList<String> split(const String &text, char separator)
 {
-    std::vector<std::string> parts;
-    size_t begin = 0;
+    ArrayList<String> parts;
+    int begin = 0;
     for ( ;; ) {
-        size_t end = text.find(separator, begin);
-        if ( end == std::string::npos ) {
-            parts.push_back(text.substr(begin));
+        int end = text.indexOf(separator, begin);
+        if ( end < 0 ) {
+            parts.add(text.substring(begin));
             break;
         }
-        parts.push_back(text.substr(begin, end - begin));
+        parts.add(text.substring(begin, end));
         begin = end + 1;
     }
-    while ( !parts.empty() && parts.back().empty() ) {
-        parts.pop_back();
+    while ( !parts.isEmpty() && parts[parts.size() - 1].isEmpty() ) {
+        parts.remove(parts.size() - 1);
     }
     return parts;
 }
 
-static double parseLimit(const std::string &limit)
+static double parseLimit(const String &limit)
 {
-    const std::string infinite(ControlSpecification::INFINITE);
+    const String infinite(ControlSpecification::INFINITE);
     if ( limit == infinite || limit == "+" + infinite ) {
         return HUGE_VAL;
     }
     if ( limit == "-" + infinite ) {
         return -HUGE_VAL;
     }
-    return Double::parseDouble(String(limit.c_str()));
+    return Double::parseDouble(limit);
 }
 
 
@@ -76,27 +75,27 @@ ControlSpecification::ControlSpecification(const String &type,
 ControlSpecification *
 ControlSpecification::parse(const String &specification)
 {
-    std::vector<std::string> parts = split(specification.c_str(), ';');
+    ArrayList<String> parts = split(specification, ';');
     if ( parts.size() < 2 || parts.size() > 3 ) {
         reportMalformed(specification,
             "expected \"type;name\" or \"type;name;interval\"");
         return NULL;
     }
 
-    std::string type = trim(parts[0]);
-    std::string name = trim(parts[1]);
-    if ( type.empty() || name.empty() ) {
+    String type = trim(parts[0]);
+    String name = trim(parts[1]);
+    if ( type.isEmpty() || name.isEmpty() ) {
         reportMalformed(specification, "empty type or name");
         return NULL;
     }
 
-    if ( parts.size() == 2 || trim(parts[2]).empty() ) {
-        return new ControlSpecification(type.c_str(), name.c_str(), "",
+    if ( parts.size() == 2 || trim(parts[2]).isEmpty() ) {
+        return new ControlSpecification(type, name, "",
             -HUGE_VAL,
             HUGE_VAL, false, false);
     }
 
-    std::string interval = trim(parts[2]);
+    String interval = trim(parts[2]);
     char open = interval[0];
     char close = interval[interval.size() - 1];
     if ( (open != '[' && open != '(') || (close != ']' && close != ')') ) {
@@ -105,8 +104,8 @@ ControlSpecification::parse(const String &specification)
         return NULL;
     }
 
-    std::vector<std::string> limits =
-        split(interval.substr(1, interval.size() - 2), ',');
+    ArrayList<String> limits =
+        split(interval.substring(1, interval.size() - 1), ',');
     if ( limits.size() != 2 ) {
         reportMalformed(specification,
             "interval must have two limits separated by ','");
@@ -129,8 +128,8 @@ ControlSpecification::parse(const String &specification)
         return NULL;
     }
 
-    return new ControlSpecification(type.c_str(), name.c_str(),
-        interval.c_str(), lower, upper, open == '[', close == ']');
+    return new ControlSpecification(type, name,
+        interval, lower, upper, open == '[', close == ']');
 }
 
 void
@@ -148,11 +147,11 @@ ControlSpecification::reportMalformed(const String &specification,
 String
 ControlSpecification::getLabel() const
 {
-    std::string label(name.c_str());
-    if ( !label.empty() ) {
+    String label(name);
+    if ( !label.isEmpty() ) {
         label[0] = (char)toupper((unsigned char)label[0]);
     }
-    return String(label.c_str());
+    return label;
 }
 
 bool

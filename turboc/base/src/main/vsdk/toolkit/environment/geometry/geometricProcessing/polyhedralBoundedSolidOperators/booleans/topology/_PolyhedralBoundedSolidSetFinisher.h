@@ -5,7 +5,7 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_FINISHER__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_FINISHER__
 
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/_PolyhedralBoundedSolidOperator.h"
@@ -24,7 +24,7 @@ C++ counterpart of Java's `_PolyhedralBoundedSolidSetFinisher`.
 */
 class _PolyhedralBoundedSolidSetFinisher : public _PolyhedralBoundedSolidOperator {
 public:
-    typedef std::vector<_PolyhedralBoundedSolidFace*> FaceList;
+    typedef ArrayList<_PolyhedralBoundedSolidFace*> FaceList;
 
     /**
     @return times the legacy-ordering fallback was taken in the most recent

@@ -92,7 +92,7 @@ void SimpleBody::setGeometry(Geometry* g)
     }
     geometry = g;
     ownsGeometry = true;
-    geometryIsSphere = dynamic_cast<Sphere*>(geometry) != 0;
+    geometryIsSphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS));
     markModified();
 }
 
@@ -103,7 +103,7 @@ void SimpleBody::setGeometryReference(Geometry* g)
     }
     geometry = g;
     ownsGeometry = false;
-    geometryIsSphere = dynamic_cast<Sphere*>(geometry) != 0;
+    geometryIsSphere = (geometry != NULL && geometry->instanceOf(Sphere::CLASS));
     markModified();
 }
 
@@ -493,4 +493,12 @@ void SimpleBody::doExtraInformation(const Ray&, double, RayHit* outData) const
     outData->texture = texture;
     outData->normalMap = normalMap;
     outData->setRay(worldRay.withT(worldT));
+}
+
+const Class SimpleBody::CLASS = { "SimpleBody", &Entity::CLASS };
+
+const Class *
+SimpleBody::getClass() const
+{
+    return &CLASS;
 }

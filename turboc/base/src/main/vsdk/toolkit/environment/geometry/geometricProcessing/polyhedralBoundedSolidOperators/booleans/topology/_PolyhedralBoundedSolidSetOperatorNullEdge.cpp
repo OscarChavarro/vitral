@@ -1,6 +1,5 @@
-#include <stdint.h>
 #include <string.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/booleans/classification/_PolyhedralBoundedSolidSetOperatorVertexFace.h"
@@ -24,16 +23,16 @@ static int javaDoubleCompare(double a, double b)
     if ( a > b ) {
         return 1;
     }
-    int64_t aBits;
-    int64_t bBits;
+    long long aBits;
+    long long bBits;
     if ( a != a ) {
-        aBits = ((int64_t)0x7ff8000000000000LL);
+        aBits = ((long long)0x7ff8000000000000LL);
     }
     else {
         memcpy(&aBits, &a, sizeof(aBits));
     }
     if ( b != b ) {
-        bBits = ((int64_t)0x7ff8000000000000LL);
+        bBits = ((long long)0x7ff8000000000000LL);
     }
     else {
         memcpy(&bBits, &b, sizeof(bBits));
@@ -94,10 +93,10 @@ static Vector3Dd canonicalSecondEndpoint(_PolyhedralBoundedSolidEdge* edge)
     return right;
 }
 
-static std::string vectorText(const Vector3Dd& v)
+static String vectorText(const Vector3Dd& v)
 {
     String* text = v.toString();
-    std::string result(text->c_str());
+    String result(text->c_str());
     delete text;
     return result;
 }
@@ -150,7 +149,7 @@ bool _PolyhedralBoundedSolidSetOperatorNullEdge::operator<(
 
 String _PolyhedralBoundedSolidSetOperatorNullEdge::toString() const
 {
-    std::string msg = std::string(e->toString().c_str()) +
+    String msg = String(e->toString().c_str()) +
         " (sorted with respect to segment " +
         vectorText(canonicalFirstEndpoint(this->e)) + " -> " +
         vectorText(canonicalSecondEndpoint(this->e)) + ")";
@@ -161,14 +160,14 @@ String _PolyhedralBoundedSolidSetOperatorNullEdge::toString() const
 
 String _PolyhedralBoundedSolidSetOperatorVertexFace::toString() const
 {
-    std::string msg = "{" + std::string(v->toString().c_str()) + " / " +
+    String msg = "{" + String(v->toString().c_str()) + " / " +
         f->toString().c_str() + "}";
     return String(msg.c_str());
 }
 
 String _PolyhedralBoundedSolidSetOperatorVertexVertex::toString() const
 {
-    std::string msg = "(" + std::string(va->toString().c_str()) + ") / (" +
+    String msg = "(" + String(va->toString().c_str()) + ") / (" +
         vb->toString().c_str() + "}";
     return String(msg.c_str());
 }

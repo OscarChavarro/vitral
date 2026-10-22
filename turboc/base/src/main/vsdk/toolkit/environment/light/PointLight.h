@@ -5,6 +5,9 @@
 
 class PointLight : public Light {
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     PointLight(const Vector3Dd &position, const ColorRgb &emission);
     PointLight(const PointLight &other);
 

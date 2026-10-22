@@ -38,3 +38,11 @@ String CompositeOperation::getName() const
 {
     return name;
 }
+
+const Class CompositeOperation::CLASS = { "CompositeOperation", &UndoableOperation::CLASS };
+
+const Class *
+CompositeOperation::getClass() const
+{
+    return &CLASS;
+}

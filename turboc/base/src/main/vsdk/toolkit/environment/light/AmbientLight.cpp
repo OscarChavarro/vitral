@@ -39,3 +39,11 @@ AmbientLight::copy() const
 {
     return new AmbientLight(*this);
 }
+
+const Class AmbientLight::CLASS = { "AmbientLight", &Light::CLASS };
+
+const Class *
+AmbientLight::getClass() const
+{
+    return &CLASS;
+}

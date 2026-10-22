@@ -862,3 +862,11 @@ const int RotateGizmo::RING_SEGMENTS;
 // definition out of the class in C++98
 const int RotateGizmo::NULL_GROUP;
 const int RotateGizmo::RING_COUNT;
+
+const Class RotateGizmo::CLASS = { "RotateGizmo", &Gizmo::CLASS };
+
+const Class *
+RotateGizmo::getClass() const
+{
+    return &CLASS;
+}

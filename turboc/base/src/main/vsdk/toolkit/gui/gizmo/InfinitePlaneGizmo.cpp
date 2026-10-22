@@ -1,7 +1,7 @@
-#include <stdexcept>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/gui/gizmo/InfinitePlaneGizmo.h"
+#include "java/lang/RuntimeException.h"
 
 const double InfinitePlaneGizmo::DEFAULT_DISABLE_TIME = 2.0;
 const ColorRgb InfinitePlaneGizmo::DEFAULT_FRAME_COLOR = ColorRgb(1, 1, 1);
@@ -20,7 +20,7 @@ InfinitePlaneGizmo::PlaneSnapshot::PlaneSnapshot(
       normal(normal.normalized())
 {
     if ( normal.length() < VSDK::EPSILON ) {
-        throw std::runtime_error("normal cannot be null or zero");
+        throw RuntimeException("normal cannot be null or zero");
     }
 }
 

@@ -28,14 +28,14 @@ static void collect(ArrayList<WidgetElement*>& owned, WidgetElement* element)
     }
     owned.add(element);
 
-    WidgetMenu* menu = dynamic_cast<WidgetMenu*>(element);
+    WidgetMenu* menu = (element != NULL && element->instanceOf(WidgetMenu::CLASS) ? (WidgetMenu*)element : NULL);
     if ( menu != NULL ) {
         long i;
         for ( i = 0; i < menu->getChildren().size(); i++ ) {
             collect(owned, menu->getChildren().get(i));
         }
     }
-    WidgetDialog* dialog = dynamic_cast<WidgetDialog*>(element);
+    WidgetDialog* dialog = (element != NULL && element->instanceOf(WidgetDialog::CLASS) ? (WidgetDialog*)element : NULL);
     if ( dialog != NULL ) {
         long i;
         for ( i = 0; i < dialog->getChildren().size(); i++ ) {
@@ -244,4 +244,12 @@ String Widget::toString() const
     msg = msg + "===========================================================================\n";
 
     return msg;
+}
+
+const Class Widget::CLASS = { "Widget", &PresentationElement::CLASS };
+
+const Class *
+Widget::getClass() const
+{
+    return &CLASS;
 }

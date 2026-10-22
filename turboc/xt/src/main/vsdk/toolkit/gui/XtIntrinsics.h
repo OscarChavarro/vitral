@@ -14,7 +14,7 @@ applies the same renaming to them.
 
 The `String` and `Object` types of Xt are named `XtString` and `XtObject`
 as well, since the vitral `String` and `Object` classes are global in this
-port (no `java::` namespace). Every source that includes Xt, Athena or
+port. Every source that includes Xt, Athena or
 Motif headers directly renames them in the same way around its includes.
 
 The functions of Xt have C linkage, so renaming the type of their

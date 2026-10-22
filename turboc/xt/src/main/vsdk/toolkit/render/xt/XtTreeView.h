@@ -1,8 +1,8 @@
 #ifndef __XT_TREE_VIEW__
 #define __XT_TREE_VIEW__
 
-#include <set>
-#include <vector>
+#include "java/util/TreeSet.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Xlib.h>
 
@@ -30,8 +30,7 @@ set.
 */
 class XtTreeView {
 public:
-    /// Called on selection changes and on delete requests (a
-    /// `std::function` in the C++11 port)
+    /// Called on selection changes and on delete requests.
     typedef Runnable Listener;
 
     /**
@@ -65,12 +64,12 @@ public:
     Selects the rows, without notifying the selection listener (as the
     model updates of a `JTree`).
     */
-    void setSelection(const std::vector<const DialogTreeNode*>& nodes);
+    void setSelection(const ArrayList<const DialogTreeNode*>& nodes);
 
     /**
     @return the selected rows, in display order
     */
-    std::vector<const DialogTreeNode*> getSelection() const;
+    ArrayList<const DialogTreeNode*> getSelection() const;
 
     /**
     Selects only a row (or none, for null), as a click does: the selection
@@ -99,9 +98,9 @@ private:
     int scrollTop;
     int anchor;
     const DialogTreeNode* root;
-    std::set<const DialogTreeNode*> expanded;
-    std::set<const DialogTreeNode*> selected;
-    std::vector<Row> rows;
+    TreeSet<const DialogTreeNode*> expanded;
+    TreeSet<const DialogTreeNode*> selected;
+    ArrayList<Row> rows;
     Listener* selectionListener;
     Listener* deleteListener;
     ContextMenuListener* contextMenuListener;

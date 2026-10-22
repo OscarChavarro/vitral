@@ -37,3 +37,11 @@ String TangibleInterfaceEvent::toString() const
         rotation.magnitude(), rotation.direction().x(), rotation.direction().y(), rotation.direction().z());
     return String(buffer);
 }
+
+const Class TangibleInterfaceEvent::CLASS = { "TangibleInterfaceEvent", &PresentationElement::CLASS };
+
+const Class *
+TangibleInterfaceEvent::getClass() const
+{
+    return &CLASS;
+}

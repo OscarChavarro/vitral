@@ -21,6 +21,9 @@ private:
     explicit BodyTransformState(SimpleBody* body);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /**
     @param body body whose placement is captured
     @return the current placement of the body, owned by the caller

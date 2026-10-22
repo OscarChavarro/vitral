@@ -12,6 +12,9 @@ protected:
     Widget* context;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     WidgetElement() : context(NULL) {}
     virtual ~WidgetElement() {}
 

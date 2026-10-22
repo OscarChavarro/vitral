@@ -52,6 +52,9 @@ private:
         int nsides, int heightDivisions);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Arrow(double baseLength, double headLength, double baseRadius, double headRadius);
     virtual ~Arrow();
 

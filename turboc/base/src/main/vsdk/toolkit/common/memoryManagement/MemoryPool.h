@@ -2,16 +2,23 @@
 #define __MEMORY_POOL__
 
 #include "java/lang/Object.h"
+
+/**
+Storage block of a `MemoryPool` (not nested in it, so it can be named
+without `typename`, unknown to legacy compilers).
+*/
+struct MemoryPoolBlock {
+    char *buffer;
+    long int capacityElements;
+    long int usedElements;
+    MemoryPoolBlock *prev;
+    MemoryPoolBlock *next;
+};
+
 template <class T>
 class MemoryPool : public Object {
   private:
-    struct Block {
-        char *buffer;
-        long int capacityElements;
-        long int usedElements;
-        Block *prev;
-        Block *next;
-    };
+    typedef MemoryPoolBlock Block;
 
     Block *head;
     Block *tail;

@@ -1,5 +1,5 @@
-#include <cmath>
-#include <cstdio>
+#include <math.h>
+#include <stdio.h>
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -79,7 +79,7 @@ main(int argc, char** argv)
 
     Camera camera;
     Matrix4x4d R;
-    const double pi = std::acos(-1.0);
+    const double pi = acos(-1.0);
     camera.setPosition(Vector3Dd(7, -4, 4));
     R = R.eulerAnglesRotation(140.0 * pi / 180.0, -30.0 * pi / 180.0, 0);
     camera.setNearPlaneDistance(0.001);
@@ -89,7 +89,7 @@ main(int argc, char** argv)
     SimpleScene scene;
     EnvironmentPersistence::importEnvironment(File(sceneFile.c_str()), &scene);
     if (scene.getSimpleBodies().size() == 0) {
-        std::fprintf(stderr, "Failed to load scene file: %s\n", sceneFile.c_str());
+        fprintf(stderr, "Failed to load scene file: %s\n", sceneFile.c_str());
         return 1;
     }
 
@@ -131,6 +131,6 @@ main(int argc, char** argv)
     appendLineSet(&finalLineSet, &arrowVisibleNonContour);
     rasterOutput(&camera, &finalLineSet, outputFile);
 
-    std::printf("Resulting image has been written to \"%s\"\n", outputFile.c_str());
+    printf("Resulting image has been written to \"%s\"\n", outputFile.c_str());
     return 0;
 }

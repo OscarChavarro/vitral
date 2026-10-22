@@ -82,7 +82,7 @@ double ViewportElementScaler::getScale() const
         ((double)referenceHeightInPixels);
     double scale = Cpp98Support::fmin(widthRatio, heightRatio);
 
-    // std::floor(v + 0.5) mimics Java's Math.round
+    // floor(v + 0.5) mimics Java's Math.round
     scale = floor(scale / scaleStep + 0.5) * scaleStep;
     return Cpp98Support::fmax(1.0, Cpp98Support::fmin(maximumScale, scale));
 }

@@ -6,7 +6,7 @@
 #include "java/util/function/Function.h"
 #include "java/util/function/Supplier.h"
 #include <pthread.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceEvent.h"
 #include "vsdk/toolkit/gui/tangibleInterfaces/TangibleInterfaceListener.h"
@@ -28,14 +28,14 @@ event loop, as the Java application repaints with `invokeLater`.
 */
 class TangibleInterfaceConnection : private TangibleInterfaceListener {
 private:
-    std::string serviceUrl;
+    String serviceUrl;
     TangibleInterfaceNetworkClient* client;
     Runnable* eventArrived;
     pthread_mutex_t pendingMutex;
     bool hasPendingEvent;
     TangibleInterfaceEvent pendingEvent;
 
-    void setServiceUrl(const std::string& serviceUrl);
+    void setServiceUrl(const String& serviceUrl);
     virtual void tangibleInterfaceEventReceived(
         const TangibleInterfaceEvent& event);
 
@@ -60,7 +60,7 @@ public:
     /**
     @return websocket URL of the service last used (or the default one)
     */
-    const std::string& getServiceUrl() const;
+    const String& getServiceUrl() const;
 
     /**
     Connects to a service, replacing the current connection.
@@ -69,7 +69,7 @@ public:
     client, whether the connection succeeded (not owned: it must live
     until the next `connect`, or the destruction of this object)
     */
-    void connect(const std::string& serviceUrl,
+    void connect(const String& serviceUrl,
                  Consumer<bool>* connectionListener);
 
     /**

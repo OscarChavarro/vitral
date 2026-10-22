@@ -1,10 +1,10 @@
 #include <math.h>
-#include <algorithm>
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/gui/gizmo/InputGizmo.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmo.h"
 #include "vsdk/toolkit/gui/gizmo/RayGizmoInteractionTechniques.h"
+#include "java/lang/Math.h"
 
 const double RayGizmoInteractionTechniques::ORIGIN_STEP = 0.1;
 const double RayGizmoInteractionTechniques::ANGLE_STEP_DEGREES = 5.0;
@@ -213,7 +213,7 @@ void RayGizmoInteractionTechniques::updateAnglesFromDirection(
         direction.normalized() : Vector3Dd(0, 0, 1);
 
     yawInDegrees = atan2(d.y(), d.x()) * 180.0 / M_PI;
-    pitchInDegrees = asin(std::max(-1.0, std::min(1.0, d.z()))) *
+    pitchInDegrees = asin(Math::max(-1.0, Math::min(1.0, d.z()))) *
         180.0 / M_PI;
     clampPitch();
 }

@@ -9,7 +9,7 @@
 
 void OpenGL1BackgroundRenderer::draw(Background* background)
 {
-    SimpleBackground* simple = dynamic_cast<SimpleBackground*>(background);
+    SimpleBackground* simple = (background != NULL && background->instanceOf(SimpleBackground::CLASS) ? (SimpleBackground*)background : NULL);
     if ( simple == 0 ) return;
     ColorRgb color = simple->colorInDireccion(Vector3Dd(1, 0, 0));
     const float coordinates[] = {-1,-1,0, 1,-1,0, -1,1,0, 1,1,0};

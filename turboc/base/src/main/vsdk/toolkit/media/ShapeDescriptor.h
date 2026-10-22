@@ -10,6 +10,9 @@ protected:
     String* label;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     ShapeDescriptor(const String* label_);
     virtual ~ShapeDescriptor();
 

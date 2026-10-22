@@ -1,5 +1,4 @@
-#include <stdexcept>
-#include <string>
+#include "java/lang/String.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
 
 #include "java/lang/StringBuilder.h"
@@ -12,6 +11,7 @@
 #include "model/ApplicationModel.h"
 #include "model/DrawingArea.h"
 #include "model/InteractionMode.h"
+#include "java/lang/IllegalArgumentException.h"
 
 
 static const char* shadingTypeName(ShadingType type)
@@ -27,7 +27,7 @@ static const char* shadingTypeName(ShadingType type)
 
 /**
 As Java `ShadingType.valueOf`.
-@throws std::invalid_argument if there is no type with that name
+@throws IllegalArgumentException if there is no type with that name
 */
 static ShadingType shadingTypeValueOf(const String& name)
 {
@@ -40,7 +40,7 @@ static ShadingType shadingTypeValueOf(const String& name)
             return types[i];
         }
     }
-    throw std::invalid_argument((String(
+    throw IllegalArgumentException((String(
         "No enum constant vsdk.toolkit.environment.material.ShadingType.") +
         name).c_str());
 }
@@ -62,7 +62,7 @@ String MCPViewportTools::setInteractionMode(const String& request)
     else if ( mode.equals("rotate") ) value = InteractionMode::ROTATE;
     else if ( mode.equals("scale") ) value = InteractionMode::SCALE;
     else {
-        throw std::invalid_argument((String("Unknown mode \"") + mode +
+        throw IllegalArgumentException((String("Unknown mode \"") + mode +
             "\". Use camera, select, translate, rotate or scale").c_str());
     }
     model->getDrawingArea()->setInteractionMode(value);
@@ -85,7 +85,7 @@ ArrayList<Viewport*> MCPViewportTools::selectedViewports(
         out.add(set->getViewport((int)index));
     }
     else {
-        throw std::invalid_argument(
+        throw IllegalArgumentException(
             "Viewport index out of range: " + Cpp98Support::toString((int)index));
     }
     return out;
@@ -102,7 +102,7 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
             renderMode.equalsIgnoreCase("cpu") ? Viewport::RENDER_MODE_RAYTRACING :
             renderMode.equalsIgnoreCase("hidden_lines") ? Viewport::RENDER_MODE_HIDDEN_LINES : 0;
         if ( mode == 0 )
-            throw std::invalid_argument("renderMode must be gpu, cpu or hidden_lines");
+            throw IllegalArgumentException("renderMode must be gpu, cpu or hidden_lines");
         if ( supportsXlib && (mode == Viewport::RENDER_MODE_HIDDEN_LINES ||
                               mode == Viewport::RENDER_MODE_Z_BUFFER) ) {
             ArrayList<int> modes;
@@ -111,7 +111,7 @@ void MCPViewportTools::setRendererConfiguration(const String& request)
             set->setAvailableRenderModes(modes);
         }
         if ( !set->isRenderModeAvailable(mode) )
-            throw std::invalid_argument("renderMode is not available with this rendering technology");
+            throw IllegalArgumentException("renderMode is not available with this rendering technology");
     }
 
     for ( long i = 0; i < viewports.size(); i++ ) {

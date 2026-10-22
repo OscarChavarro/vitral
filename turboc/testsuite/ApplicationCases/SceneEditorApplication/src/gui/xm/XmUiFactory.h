@@ -22,10 +22,10 @@ public:
     virtual const char* getResourceFile();
 
     virtual bool showFileDialog(XtApplicationHost* host,
-                                const std::string& title,
-                                const std::string& folder,
-                                const std::vector<FileSuffixFilter>& filters,
-                                std::string& outPath);
+                                const String& title,
+                                const String& folder,
+                                const ArrayList<FileSuffixFilter>& filters,
+                                String& outPath);
 };
 
 #endif

@@ -19,6 +19,9 @@ class Light : public Entity {
     Light(const Light &other);
 
   public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     virtual ~Light() {}
 
     const String &getName() const;

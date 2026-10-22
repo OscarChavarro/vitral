@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidEdge.h"
@@ -14,7 +14,7 @@
 
 String _PolyhedralBoundedSolidEdge::toString() const
 {
-    std::string msg = "Edge id " + Cpp98Support::toString(id) + ". Half1: ";
+    String msg = "Edge id " + Cpp98Support::toString(id) + ". Half1: ";
     if ( leftHalf == NULL ) {
         msg += "null. ";
     }
@@ -35,14 +35,14 @@ String _PolyhedralBoundedSolidEdge::toString() const
 
 String _PolyhedralBoundedSolidFace::toString() const
 {
-    std::string msg = "Face id [" + Cpp98Support::toString(id) + "], " +
+    String msg = "Face id [" + Cpp98Support::toString(id) + "], " +
         Cpp98Support::toString(boundariesList.size()) + " loops.";
     return String(msg.c_str());
 }
 
 String _PolyhedralBoundedSolidHalfEdge::toString()
 {
-    std::string msg = "HalfEdge id " + Cpp98Support::toString(id) + ". ";
+    String msg = "HalfEdge id " + Cpp98Support::toString(id) + ". ";
 
     msg += "From vertex [" + Cpp98Support::toString(startingVertex->id) + "] ";
     msg += "to vertex [" + Cpp98Support::toString(next()->startingVertex->id) + "]. ";
@@ -70,15 +70,15 @@ String _PolyhedralBoundedSolidHalfEdge::toString()
 
 String _PolyhedralBoundedSolidLoop::toString() const
 {
-    std::string msg = "Loop, parent face " + Cpp98Support::toString(parentFace->id);
+    String msg = "Loop, parent face " + Cpp98Support::toString(parentFace->id);
     return String(msg.c_str());
 }
 
 String _PolyhedralBoundedSolidVertex::toString() const
 {
     String* p = position.toString();
-    std::string msg = "vertex id " + Cpp98Support::toString(id) + ". Position " +
-        std::string(p->c_str()) + ". ";
+    String msg = "vertex id " + Cpp98Support::toString(id) + ". Position " +
+        String(p->c_str()) + ". ";
     delete p;
     if ( emanatingHalfEdge == NULL ) {
         msg += "No associated half-edge.";

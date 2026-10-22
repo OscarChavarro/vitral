@@ -38,6 +38,9 @@ private:
                      double t) const;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Torus(double inMajorRadius, double inMinorRadius);
     virtual ~Torus() {}
 

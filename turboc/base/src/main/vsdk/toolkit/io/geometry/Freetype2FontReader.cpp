@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <vector>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -26,7 +25,7 @@ struct OutlineSegment {
 };
 
 struct DecomposeState {
-    std::vector<OutlineSegment>* segments;
+    ArrayList<OutlineSegment>* segments;
     bool open;
 };
 
@@ -41,7 +40,7 @@ static void closeIfOpen(DecomposeState* state)
 {
     if ( state->open ) {
         OutlineSegment close = { SEG_CLOSE, { 0, 0, 0, 0, 0, 0 } };
-        state->segments->push_back(close);
+        state->segments->add(close);
         state->open = false;
     }
 }
@@ -52,7 +51,7 @@ static int moveTo(const FT_Vector* to, void* user)
     closeIfOpen(state);
     OutlineSegment segment = { SEG_MOVETO, { 0, 0, 0, 0, 0, 0 } };
     setCoordinates(segment, 0, to);
-    state->segments->push_back(segment);
+    state->segments->add(segment);
     state->open = true;
     return 0;
 }
@@ -62,7 +61,7 @@ static int lineTo(const FT_Vector* to, void* user)
     DecomposeState* state = (DecomposeState*)user;
     OutlineSegment segment = { SEG_LINETO, { 0, 0, 0, 0, 0, 0 } };
     setCoordinates(segment, 0, to);
-    state->segments->push_back(segment);
+    state->segments->add(segment);
     return 0;
 }
 
@@ -72,7 +71,7 @@ static int conicTo(const FT_Vector* control, const FT_Vector* to, void* user)
     OutlineSegment segment = { SEG_QUADTO, { 0, 0, 0, 0, 0, 0 } };
     setCoordinates(segment, 0, control);
     setCoordinates(segment, 2, to);
-    state->segments->push_back(segment);
+    state->segments->add(segment);
     return 0;
 }
 
@@ -84,7 +83,7 @@ static int cubicTo(const FT_Vector* control1, const FT_Vector* control2,
     setCoordinates(segment, 0, control1);
     setCoordinates(segment, 2, control2);
     setCoordinates(segment, 4, to);
-    state->segments->push_back(segment);
+    state->segments->add(segment);
     return 0;
 }
 
@@ -213,7 +212,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
         return 0;
     }
 
-    std::vector<OutlineSegment> p;
+    ArrayList<OutlineSegment> p;
     DecomposeState state;
     state.segments = &p;
     state.open = false;
@@ -237,7 +236,7 @@ ParametricCurve* Freetype2FontReader::extractGlyph(const String& fontFile,
     bool hasLastAddedEndpoint = false;
     Vector3Dd lastAddedEndpoint;
 
-    for ( size_t s = 0; s < p.size(); s++ ) {
+    for ( long s = 0; s < p.size(); s++ ) {
         const double* coords = p[s].coords;
         int type = p[s].type;
         ArrayList<Vector3Dd> pointParameters;

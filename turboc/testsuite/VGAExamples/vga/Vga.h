@@ -12,8 +12,8 @@ class Vga {
 
   private:
     Vga() {}
-    Vga(const Vga &) = delete;
-    Vga &operator=(const Vga &) = delete;
+    Vga(const Vga &);
+    Vga &operator=(const Vga &);
 
     int run(int argc, char *argv[]);
     int showPicture(int mode);

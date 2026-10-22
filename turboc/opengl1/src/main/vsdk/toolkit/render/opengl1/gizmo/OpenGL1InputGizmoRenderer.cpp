@@ -1,4 +1,3 @@
-#include <algorithm>
 #include "vsdk/toolkit/render/opengl1/OpenGL1Api.h"
 
 #include "java/util/ArrayList.txx"
@@ -10,6 +9,7 @@
 #include "vsdk/toolkit/render/opengl1/OpenGL1ColoredPrimitiveRenderer.h"
 #include "vsdk/toolkit/render/opengl1/OpenGL1ImageRenderer.h"
 #include "vsdk/toolkit/render/opengl1/gizmo/OpenGL1InputGizmoRenderer.h"
+#include "java/lang/Math.h"
 
 static bool sameColor(const ColorRgb& a, const ColorRgb& b)
 {
@@ -43,10 +43,10 @@ void OpenGL1InputGizmoRenderer::draw(InputGizmo* gizmo)
     int gap = scaler->scaleSize(BASE_GAP);
     int paddingX = scaler->scaleSize(BASE_PADDING_X);
     int paddingY = scaler->scaleSize(BASE_PADDING_Y);
-    int frameThickness = std::max(1, scaler->scaleSize(BASE_FRAME_THICKNESS));
+    int frameThickness = Math::max(1, scaler->scaleSize(BASE_FRAME_THICKNESS));
     int underlineDistance = scaler->scaleSize(BASE_UNDERLINE_DISTANCE);
     int underlineThickness =
-        std::max(1, scaler->scaleSize(BASE_UNDERLINE_THICKNESS));
+        Math::max(1, scaler->scaleSize(BASE_UNDERLINE_THICKNESS));
     int i;
 
     if ( images.size() != count ) {
@@ -82,7 +82,7 @@ void OpenGL1InputGizmoRenderer::draw(InputGizmo* gizmo)
         if ( images.get(i) == NULL ) {
             return;
         }
-        frameWidths.add(std::max(referenceTextWidth,
+        frameWidths.add(Math::max(referenceTextWidth,
             (int)images.get(i)->getXSize()) + 2*(paddingX + frameThickness));
         totalWidth += frameWidths.get(i);
     }

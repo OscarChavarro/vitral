@@ -13,7 +13,7 @@
 
 XtCollapsibleSection::XtCollapsibleSection(XtPanelWidgets* widgets,
                                            Widget parent,
-                                           const std::string& title,
+                                           const String& title,
                                            XFontSet fontSet, int y,
                                            int width, bool expanded)
     : widgets(widgets)

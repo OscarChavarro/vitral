@@ -12,6 +12,9 @@ private:
     volatile long long totalElements;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit ParallelProgressMonitorProducer(
         ConcurrentLinkedQueue<ParallelProgressMonitorEvent>* sharedEventQueue);
     virtual ~ParallelProgressMonitorProducer() {}

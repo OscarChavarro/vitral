@@ -11,18 +11,18 @@ bool GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, Triangl
         return false;
     }
 
-    if ( TriangleMeshGroup* group = dynamic_cast<TriangleMeshGroup*>(geometry) ) {
+    if ( TriangleMeshGroup* group = (geometry != NULL && geometry->instanceOf(TriangleMeshGroup::CLASS) ? (TriangleMeshGroup*)geometry : NULL) ) {
         outGroup = *group;
         return true;
     }
 
-    if ( TriangleMesh* mesh = dynamic_cast<TriangleMesh*>(geometry) ) {
+    if ( TriangleMesh* mesh = (geometry != NULL && geometry->instanceOf(TriangleMesh::CLASS) ? (TriangleMesh*)geometry : NULL) ) {
         outGroup.getMeshes().clear();
         outGroup.addMesh(*mesh);
         return true;
     }
 
-    if ( QuadMesh* quadMesh = dynamic_cast<QuadMesh*>(geometry) ) {
+    if ( QuadMesh* quadMesh = (geometry != NULL && geometry->instanceOf(QuadMesh::CLASS) ? (QuadMesh*)geometry : NULL) ) {
         TriangleMeshGroup* tmp = quadMesh->exportToTriangleMeshGroup();
         if ( tmp == 0 ) return false;
         outGroup = *tmp;
@@ -30,7 +30,7 @@ bool GeometryTriangulator::exportToTriangleMeshGroup(Geometry* geometry, Triangl
         return true;
     }
 
-    if ( FunctionalExplicitSurface* surface = dynamic_cast<FunctionalExplicitSurface*>(geometry) ) {
+    if ( FunctionalExplicitSurface* surface = (geometry != NULL && geometry->instanceOf(FunctionalExplicitSurface::CLASS) ? (FunctionalExplicitSurface*)geometry : NULL) ) {
         TriangleMesh* mesh = surface->getInternalTriangleMesh();
         if ( mesh == 0 ) return false;
         outGroup.getMeshes().clear();

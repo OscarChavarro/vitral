@@ -2,6 +2,7 @@
 #include "vsdk/toolkit/gui/XtSystem.h"
 #include "vsdk/toolkit/media/RGBAImageUncompressed.h"
 #include "gui/xt/XlibLabelImageProvider.h"
+#include "java/util/TreeMap.h"
 
 XlibLabelImageProvider::XlibLabelImageProvider(Display* display)
     : display(display)
@@ -10,9 +11,8 @@ XlibLabelImageProvider::XlibLabelImageProvider(Display* display)
 
 XlibLabelImageProvider::~XlibLabelImageProvider()
 {
-    std::map<Key, RGBAImageUncompressed*>::iterator i;
-    for ( i = cache.begin(); i != cache.end(); ++i ) {
-        delete i->second;
+    for ( long i = 0; i < cache.size(); i++ ) {
+        delete cache.getValue(i);
     }
     XtSystem::releaseResources(display);
 }
@@ -24,14 +24,14 @@ RGBAImageUncompressed* XlibLabelImageProvider::createLabelImage(
         (((unsigned long)(color.r() * 255.0)) << 16) |
         (((unsigned long)(color.g() * 255.0)) << 8) |
         ((unsigned long)(color.b() * 255.0));
-    Key key(std::make_pair(std::string(text.c_str()), fontSize), rgb);
-    std::map<Key, RGBAImageUncompressed*>::iterator known = cache.find(key);
-    if ( known == cache.end() ) {
-        known = cache.insert(std::make_pair(key,
-            XtSystem::calculateLabelImage(display, text, color, fontSize))).first;
+    Key key(text, fontSize, rgb);
+    RGBAImageUncompressed** known = cache.get(key);
+    if ( known == NULL ) {
+        known = &cache.putIfAbsent(key,
+            XtSystem::calculateLabelImage(display, text, color, fontSize));
     }
     // The renderers own the images they ask for
-    const RGBAImageUncompressed* prototype = known->second;
+    const RGBAImageUncompressed* prototype = (*known);
     RGBAImageUncompressed* label = new RGBAImageUncompressed();
     // Both copy the pixels, as the Java raw image accessors
     char* pixels = prototype->getRawImage();

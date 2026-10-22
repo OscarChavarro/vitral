@@ -10,6 +10,9 @@ private:
     RendererConfiguration* qualitySelection;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     RendererConfigurationController();
     explicit RendererConfigurationController(RendererConfiguration* qualitySelection);
     virtual ~RendererConfigurationController() {}

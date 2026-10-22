@@ -1,43 +1,42 @@
 #ifndef __GUI_JSON_READER__
 #define __GUI_JSON_READER__
 
-#include <map>
-#include <string>
-#include <vector>
+#include "java/util/TreeMap.h"
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 /**
 Node of a menu tree of the GUI definition (menubar or popup).
 */
 struct GuiNode {
-    std::string type;
-    std::string name;
-    std::vector<std::string> modifiers;
-    std::vector<GuiNode> children;
+    String type;
+    String name;
+    ArrayList<String> modifiers;
+    ArrayList<GuiNode> children;
 };
 
 /**
 Command of the GUI definition: its identifier, texts and images.
 */
 struct GuiCommand {
-    std::string id;
+    String id;
     /// String properties: name, brief, icon, iconTransparency...
-    std::map<std::string, std::string> properties;
+    TreeMap<String, String> properties;
     /// Lines of its help (a string or an array of them in the JSON)
-    std::vector<std::string> help;
+    ArrayList<String> help;
 
     /**
     @return the value of a string property, or an empty string
     */
-    std::string get(const std::string& property) const
+    String get(const String& property) const
     {
-        std::map<std::string, std::string>::const_iterator value =
-            properties.find(property);
-        return value != properties.end() ? value->second : std::string();
+        const String* value = properties.get(property);
+        return value != NULL ? (*value) : String();
     }
 
-    bool has(const std::string& property) const
+    bool has(const String& property) const
     {
-        return properties.find(property) != properties.end();
+        return properties.containsKey(property);
     }
 };
 
@@ -47,13 +46,13 @@ the side panel).
 */
 struct GuiButtonGroup {
     bool found;
-    std::string name;
-    std::string title;
+    String name;
+    String title;
     bool horizontal;
     bool showTitle;
     bool showIcons;
     bool showText;
-    std::vector<std::string> commands;
+    ArrayList<String> commands;
 
     GuiButtonGroup()
         : found(false), horizontal(false), showTitle(false),
@@ -71,7 +70,7 @@ public:
     /**
     @param text JSON document, referenced (it must outlive the reader)
     */
-    explicit GuiJsonReader(const std::string& text) : text(text), position(0) {}
+    explicit GuiJsonReader(const String& text);
 
     GuiNode readMenuBar();
 
@@ -79,63 +78,78 @@ public:
     @return the popup menus of the definition (i.e. the standard
     `VIEWPORT_SET_...` ones), or none
     */
-    std::vector<GuiNode> readPopups();
+    ArrayList<GuiNode> readPopups();
 
     /**
     @return command id -> command name
     */
-    std::map<std::string, std::string> readCommandLabels();
+    TreeMap<String, String> readCommandLabels();
 
     /**
     @return command id -> path of its icon, for the commands with one
     (relative to the folder of the Java application)
     */
-    std::map<std::string, std::string> readCommandIcons();
+    TreeMap<String, String> readCommandIcons();
 
     /**
     @return the commands of the definition, in order
     */
-    std::vector<GuiCommand> readCommands();
+    ArrayList<GuiCommand> readCommands();
 
     /**
     @return the button groups of the definition, in order
     */
-    std::vector<GuiButtonGroup> readButtonGroups();
+    ArrayList<GuiButtonGroup> readButtonGroups();
 
     /**
     @return message id -> message text
     */
-    std::map<std::string, std::string> readMessages();
+    TreeMap<String, String> readMessages();
 
     /**
     @param name name of a button group (i.e. `CREATION`)
     @return the ids of its commands, in order, or none
     */
-    std::vector<std::string> readButtonGroupCommands(const std::string& name);
+    ArrayList<String> readButtonGroupCommands(const String& name);
 
     /**
     @param name name of a button group (i.e. `GLOBAL`)
     @return the group, not `found` if there is none with that name
     */
-    GuiButtonGroup readButtonGroup(const std::string& name);
+    GuiButtonGroup readButtonGroup(const String& name);
 
 private:
-    const std::string& text;
-    size_t position;
+    const String& text;
+    // The characters and the length of the text are cached, as
+    // `String::size` counts them on each call
+    const char* data;
+    long length;
+    long position;
+
+    /**
+    @return the index of the first occurrence of the token, or -1
+    */
+    long indexOf(const char* token) const;
+
+    /**
+    @return the index of the first occurrence of the character at or after
+    `from`, or -1
+    */
+    long indexOf(char token, long from) const;
 
     void whitespace();
     bool consume(char c);
-    std::string stringValue();
+    String stringValue();
     bool booleanValue();
     void skipValueStart();
     void skipValue();
-    std::vector<std::string> readStrings();
-    std::vector<GuiNode> readNodes();
-    std::map<std::string, std::string> readCommandProperty(
-        const std::string& property);
-    std::map<std::string, std::string> readCommandArray(
-        const std::string& property);
-    std::map<std::string, std::string> readStringMap();
+    ArrayList<String> readStrings();
+    ArrayList<GuiNode> readNodes();
+    TreeMap<String, String> readCommandProperty(
+        const String& property);
+    TreeMap<String, String> readCommandArray(
+        const String& property);
+    TreeMap<String, String> readStringMap();
     GuiNode readNode();
 };
 

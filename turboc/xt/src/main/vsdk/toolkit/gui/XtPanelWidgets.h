@@ -1,8 +1,8 @@
 #ifndef __XT_PANEL_WIDGETS__
 #define __XT_PANEL_WIDGETS__
 
-#include <string>
-#include <vector>
+#include "java/lang/String.h"
+#include "java/util/ArrayList.h"
 
 #include <X11/Xlib.h>
 
@@ -54,27 +54,27 @@ public:
     virtual XtWidget createPanel(XtWidget parent, const char* name, int x, int y,
                                int width, int height, bool managed) = 0;
 
-    virtual XtWidget createLabel(XtWidget parent, const std::string& text,
+    virtual XtWidget createLabel(XtWidget parent, const String& text,
                                XFontSet fontSet, Justify justify,
                                int x, int y, int width, int height) = 0;
 
     /**
     Replaces the text of a label, keeping its geometry.
     */
-    virtual void setLabel(XtWidget label, const std::string& text) = 0;
+    virtual void setLabel(XtWidget label, const String& text) = 0;
 
-    virtual XtWidget createTextField(XtWidget parent, const std::string& text,
+    virtual XtWidget createTextField(XtWidget parent, const String& text,
                                    XFontSet fontSet,
                                    int x, int y, int width, int height,
                                    ActivateProc activate,
                                    void* clientData) = 0;
 
-    virtual std::string getText(XtWidget field) = 0;
+    virtual String getText(XtWidget field) = 0;
 
     /**
     Replaces the text of a field, also restoring its normal background.
     */
-    virtual void setText(XtWidget field, const std::string& text) = 0;
+    virtual void setText(XtWidget field, const String& text) = 0;
 
     /**
     @param field text field to mark
@@ -93,7 +93,7 @@ public:
     Creates a push button. Clicking it does not take the keyboard focus
     from the drawing canvas.
     */
-    virtual XtWidget createPushButton(XtWidget parent, const std::string& label,
+    virtual XtWidget createPushButton(XtWidget parent, const String& label,
                                     XFontSet fontSet,
                                     int x, int y, int width, int height,
                                     ActivateProc activate,
@@ -107,8 +107,8 @@ public:
     @param choose called when an option is chosen
     */
     virtual XtWidget createOptionButton(XtWidget parent,
-                                      const std::string& placeholder,
-                                      const std::vector<std::string>& options,
+                                      const String& placeholder,
+                                      const ArrayList<String>& options,
                                       XFontSet fontSet,
                                       int x, int y, int width, int height,
                                       OptionProc choose,

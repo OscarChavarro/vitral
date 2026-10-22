@@ -20,6 +20,9 @@ private:
     PolyhedralBoundedSolid* buildPolyhedralBoundedSolid(int nmeridians, int nparalels);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit Sphere(double r);
     virtual ~Sphere() {}
 

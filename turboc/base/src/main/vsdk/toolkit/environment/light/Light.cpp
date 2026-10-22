@@ -70,3 +70,11 @@ Light::isAmbient() const
 {
     return false;
 }
+
+const Class Light::CLASS = { "Light", &Entity::CLASS };
+
+const Class *
+Light::getClass() const
+{
+    return &CLASS;
+}

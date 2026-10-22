@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "java/util/ArrayList.txx"
+#include "java/util/Collections.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/construction/_PolyhedralBoundedSolidOrthogonalProfileFallback.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidAxisAlignedCellFallback.h"
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polyhedralBoundedSolidOperators/fallbacks/_PolyhedralBoundedSolidFallbackGeometry.h"
@@ -12,6 +13,7 @@
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidLoop.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/nodes/_PolyhedralBoundedSolidVertex.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/util/TreeMap.h"
 
 typedef _PolyhedralBoundedSolidOrthogonalProfileFallback ProfileFallback;
 typedef _PolyhedralBoundedSolidFallbackGeometry FallbackGeometry;
@@ -39,10 +41,10 @@ bool ProfileFallback::OrthogonalProfileOperandSpec::contains(
 
 double ProfileFallback::OrthogonalProfileOperandSpec::rightXAtZ(double z) const
 {
-    size_t i;
+    long i;
     double eps = numericContext.bigEpsilon();
 
-    if ( rightBoundaryZ.empty() ) {
+    if ( rightBoundaryZ.isEmpty() ) {
         return bounds[3];
     }
     if ( z <= rightBoundaryZ[0] + eps ) {
@@ -61,7 +63,7 @@ double ProfileFallback::OrthogonalProfileOperandSpec::rightXAtZ(double z) const
             return x0 + (x1 - x0) * t;
         }
     }
-    return rightBoundaryX.back();
+    return rightBoundaryX[rightBoundaryX.size() - 1];
 }
 
 //= Boolean spec ====================================================
@@ -98,7 +100,7 @@ long long ProfileFallback::ProfileCellBooleanBuilder::coordinateKey(double value
     return (long long)floor(value * 1000000000000.0 + 0.5);
 }
 
-std::string ProfileFallback::ProfileCellBooleanBuilder::vertexKey(
+String ProfileFallback::ProfileCellBooleanBuilder::vertexKey(
     const Vector3Dd& point)
 {
     return Cpp98Support::toString(coordinateKey(point.x())) + ":" +
@@ -109,11 +111,10 @@ std::string ProfileFallback::ProfileCellBooleanBuilder::vertexKey(
 _PolyhedralBoundedSolidVertex* ProfileFallback::ProfileCellBooleanBuilder::vertexAt(
     const Vector3Dd& point)
 {
-    std::string key = vertexKey(point);
-    std::map<std::string, _PolyhedralBoundedSolidVertex*>::iterator found =
-        vertices.find(key);
-    if ( found != vertices.end() ) {
-        return found->second;
+    String key = vertexKey(point);
+    _PolyhedralBoundedSolidVertex** found = vertices.get(key);
+    if ( found != NULL ) {
+        return (*found);
     }
 
     _PolyhedralBoundedSolidVertex* vertex =
@@ -121,11 +122,11 @@ _PolyhedralBoundedSolidVertex* ProfileFallback::ProfileCellBooleanBuilder::verte
     solid->getVerticesList().add(vertex);
     solid->setMaxVertexId(nextVertexId);
     nextVertexId++;
-    vertices[key] = vertex;
+    vertices.put(key, vertex);
     return vertex;
 }
 
-std::string ProfileFallback::ProfileCellBooleanBuilder::edgeKey(
+String ProfileFallback::ProfileCellBooleanBuilder::edgeKey(
     _PolyhedralBoundedSolidVertex* a, _PolyhedralBoundedSolidVertex* b)
 {
     if ( a->id < b->id ) {
@@ -139,19 +140,18 @@ void ProfileFallback::ProfileCellBooleanBuilder::attachEdge(
     _PolyhedralBoundedSolidVertex* a,
     _PolyhedralBoundedSolidVertex* b)
 {
-    std::string key = edgeKey(a, b);
+    String key = edgeKey(a, b);
     _PolyhedralBoundedSolidEdge* edge;
-    std::map<std::string, _PolyhedralBoundedSolidEdge*>::iterator found =
-        edges.find(key);
+    _PolyhedralBoundedSolidEdge** found = edges.get(key);
 
-    if ( found == edges.end() ) {
+    if ( found == NULL ) {
         edge = new _PolyhedralBoundedSolidEdge();
         solid->getEdgesList().add(edge);
         edge->rightHalf = he;
-        edges[key] = edge;
+        edges.put(key, edge);
     }
     else {
-        edge = found->second;
+        edge = (*found);
         if ( edge->leftHalf == 0 ) {
             edge->leftHalf = he;
         }
@@ -212,12 +212,12 @@ PolyhedralBoundedSolid* ProfileFallback::ProfileCellBooleanBuilder::result()
 
 //= Fallback ========================================================
 
-bool ProfileFallback::pointInsideYZProfile(const std::vector<Vector3Dd>& profile,
+bool ProfileFallback::pointInsideYZProfile(const ArrayList<Vector3Dd>& profile,
     double y, double z)
 {
     bool inside;
-    size_t i;
-    size_t j;
+    long i;
+    long j;
 
     if ( profile.size() < 3 ) {
         return false;
@@ -240,9 +240,9 @@ bool ProfileFallback::pointInsideYZProfile(const std::vector<Vector3Dd>& profile
 }
 
 bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
-    const std::vector<double>& xCoordinates,
-    const std::vector<double>& yCoordinates,
-    const std::vector<double>& zCoordinates,
+    const ArrayList<double>& xCoordinates,
+    const ArrayList<double>& yCoordinates,
+    const ArrayList<double>& zCoordinates,
     OrthogonalProfileOperandSpec& outSpec)
 {
     if ( xCoordinates.size() != 2 || yCoordinates.size() != 4 ||
@@ -250,7 +250,7 @@ bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
         return false;
     }
     double* bounds = solid->getMinMax();
-    std::vector<Vector3Dd> profile =
+    ArrayList<Vector3Dd> profile =
         FallbackGeometry::extractProfileAtX(solid, bounds[0]);
     if ( profile.size() < 3 ) {
         profile = FallbackGeometry::extractProfileAtX(solid, bounds[3]);
@@ -271,14 +271,14 @@ bool ProfileFallback::createXExtrudedYZSpec(PolyhedralBoundedSolid* solid,
 }
 
 bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
-    const std::vector<double>& xCoordinates,
-    const std::vector<double>& yCoordinates,
-    const std::vector<double>& zCoordinates,
+    const ArrayList<double>& xCoordinates,
+    const ArrayList<double>& yCoordinates,
+    const ArrayList<double>& zCoordinates,
     OrthogonalProfileOperandSpec& outSpec)
 {
-    std::vector<double> rightZ;
-    std::vector<double> rightX;
-    size_t i;
+    ArrayList<double> rightZ;
+    ArrayList<double> rightX;
+    long i;
 
     if ( xCoordinates.size() != 3 || yCoordinates.size() != 2 ||
          zCoordinates.size() != 3 || solid->getVerticesList().size() != 10 ) {
@@ -299,8 +299,8 @@ bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
         if ( maxX <= -DBL_MAX / 2.0 ) {
             return false;
         }
-        rightZ.push_back(z);
-        rightX.push_back(maxX);
+        rightZ.add(z);
+        rightX.add(maxX);
     }
 
     double* bounds = solid->getMinMax();
@@ -318,11 +318,11 @@ bool ProfileFallback::createYExtrudedXZSpec(PolyhedralBoundedSolid* solid,
 bool ProfileFallback::createOrthogonalProfileSpec(PolyhedralBoundedSolid* solid,
     OrthogonalProfileOperandSpec& outSpec)
 {
-    std::vector<double> xCoordinates =
+    ArrayList<double> xCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(solid, 0);
-    std::vector<double> yCoordinates =
+    ArrayList<double> yCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(solid, 1);
-    std::vector<double> zCoordinates =
+    ArrayList<double> zCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(solid, 2);
 
     if ( createYExtrudedXZSpec(solid, xCoordinates, yCoordinates, zCoordinates,
@@ -361,9 +361,9 @@ bool ProfileFallback::prepareOrthogonalProfileBooleanFallbackSpec(
         return false;
     }
 
-    std::vector<double> yCoordinates =
+    ArrayList<double> yCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(inSolidA, 1);
-    std::vector<double> zCoordinates =
+    ArrayList<double> zCoordinates =
         FallbackGeometry::uniqueVertexCoordinates(inSolidA, 2);
     for ( i = 0; i < inSolidB->getVerticesList().size(); i++ ) {
         Vector3Dd p = inSolidB->getVerticesList().get(i)->position;
@@ -464,7 +464,7 @@ PolyhedralBoundedSolid* ProfileFallback::buildOrthogonalProfileBooleanFallback(
 
     int ny = (int)spec.yCoordinates.size() - 1;
     int nz = (int)spec.zCoordinates.size() - 1;
-    std::vector<bool> occupied((size_t)2 * ny * nz, false);
+    ArrayList<bool> occupied(Collections<bool>::nCopies(2 * ny * nz, false));
 #define OCC(z0, y0, w0) occupied[((size_t)(z0)*ny + (y0))*nz + (w0)]
     for ( zone = 0; zone < 2; zone++ ) {
         for ( iy = 0; iy < ny; iy++ ) {

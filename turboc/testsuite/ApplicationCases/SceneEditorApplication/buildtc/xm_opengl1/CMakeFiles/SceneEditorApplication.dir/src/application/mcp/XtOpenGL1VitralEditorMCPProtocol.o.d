@@ -1,0 +1,50 @@
+CMakeFiles/SceneEditorApplication.dir/src/application/mcp/XtOpenGL1VitralEditorMCPProtocol.o: \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/XtOpenGL1VitralEditorMCPProtocol.cpp \
+ /usr/include/stdc-predef.h /usr/include/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/features.h /usr/include/features-time64.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/long-double.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/Runnable.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/io/BufferedReader.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/io/InputStream.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/String.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/io/PrintWriter.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/io/OutputStream.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/net/Socket.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/net/SocketInputStream.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/net/SocketOutputStream.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../xt/src/main/vsdk/toolkit/gui/XtEventQueue.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/XtOpenGL1SceneEditorApplication.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/util/ArrayList.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/Object.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/util/Comparator.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/util/ArrayList.txx \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/IllegalArgumentException.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/RuntimeException.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/Exception.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/../../../base/src/main/java/lang/Throwable.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/MCPJson.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/XtOpenGL1VitralEditorMCPProtocol.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/MCPSceneTools.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/MCPViewportTools.h \
+ /home/jedilink/VITRAL/vitral/turboc/testsuite/ApplicationCases/SceneEditorApplication/src/application/mcp/XtOpenGL1MCPApplicationTools.h

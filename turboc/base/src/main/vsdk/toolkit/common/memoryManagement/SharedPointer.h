@@ -6,13 +6,13 @@
 #include "java/util/concurrent/locks/ReentrantLock.h"
 
 /**
-Reference counted pointer, C++98 replacement for `std::shared_ptr`: the
+Reference counted pointer: the
 pointed object is deleted when the last `SharedPointer` referencing it is
 destroyed or reset. The reference counter is thread safe, but (as for
-`std::shared_ptr`) a single `SharedPointer` object must not be modified by
+one owner object must not be modified by
 one thread while other threads access it.
 */
-template<typename T>
+template<class T>
 class SharedPointer {
   private:
     struct ControlBlock {

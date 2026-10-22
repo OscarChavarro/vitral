@@ -26,6 +26,9 @@ visible axes have length `getAxisLength()` (the area covers the range
 */
 class ReferenceFrameGizmo : public Gizmo {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int AXIS_X = 0;
     static const int AXIS_Y = 1;
     static const int AXIS_Z = 2;

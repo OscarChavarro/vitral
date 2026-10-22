@@ -12,7 +12,8 @@
 
 Sphere::Sphere(double r) : radius(r), radiusSquared(r * r) {
     addControlSpecification("double;radius;(0, INFINITE)",
-        &Sphere::getRadius, &Sphere::setRadius);
+        new MemberEntityControlAccessor<Sphere, double>(
+            &Sphere::getRadius, &Sphere::setRadius));
 }
 
 Ray*
@@ -314,3 +315,11 @@ const int Sphere::DEFAULT_PARALLELS;
 const int Sphere::DEFAULT_MERIDIANS;
 const int Sphere::MIN_PARALLELS;
 const int Sphere::MIN_MERIDIANS;
+
+const Class Sphere::CLASS = { "Sphere", &Solid::CLASS };
+
+const Class *
+Sphere::getClass() const
+{
+    return &CLASS;
+}

@@ -23,6 +23,9 @@ private:
     CubemapBackground& operator=(const CubemapBackground& other);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     CubemapBackground(Camera* camera,
                       RGBAImageUncompressed* front,
                       RGBAImageUncompressed* right,

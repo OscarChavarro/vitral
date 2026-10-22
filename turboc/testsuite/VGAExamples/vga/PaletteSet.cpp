@@ -98,8 +98,8 @@ void
 PaletteSet::scan() {
     count = 0;
     current = 0;
-    java::File directory(PALETTE_DIR);
-    java::ArrayList<java::String> names = directory.list();
+    File directory(VGA_PALETTE_DIR);
+    ArrayList<String> names = directory.list();
     for (long i = 0; i < names.size() && count < MAX_FILES; i++) {
         const char *name = names[i].toCString();
         if (!endsWithGpl(name) || strlen(name) >= FILE_NAME) {
@@ -134,8 +134,8 @@ PaletteSet::currentName(char *out, size_t size) const {
 int
 PaletteSet::loadFile(const char *name, int *pal) {
     char path[192];
-    snprintf(path, sizeof(path), "%s/%s", PALETTE_DIR, name);
-    java::FileReader reader(path);
+    snprintf(path, sizeof(path), "%s/%s", VGA_PALETTE_DIR, name);
+    FileReader reader(path);
     RGBColorPalette *palette = RGBColorPalettePersistence::importGimpPalette(reader);
     reader.close();
     if (!palette) {
@@ -169,5 +169,5 @@ PaletteSet::printLine() const {
     char name[FILE_NAME];
     currentName(name, sizeof(name));
     printf("256-colour palette: %s (%u of %u: %d computed, %d from %s). Left / Right change it in a picture.",
-           name, current + 1, total(), PALETTES, count, PALETTE_DIR);
+           name, current + 1, total(), PALETTES, count, VGA_PALETTE_DIR);
 }

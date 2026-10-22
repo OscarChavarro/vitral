@@ -18,11 +18,14 @@
 Cone::Cone(double bottomRadius, double topRadius, double height) :
     bottomRadius(bottomRadius), topRadius(topRadius), height(height) {
     addControlSpecification("double;bottomRadius;(0, INFINITE)",
-        &Cone::getBottomRadius, &Cone::setBottomRadius);
+        new MemberEntityControlAccessor<Cone, double>(
+            &Cone::getBottomRadius, &Cone::setBottomRadius));
     addControlSpecification("double;topRadius;[0, INFINITE)",
-        &Cone::getTopRadius, &Cone::setTopRadius);
+        new MemberEntityControlAccessor<Cone, double>(
+            &Cone::getTopRadius, &Cone::setTopRadius));
     addControlSpecification("double;height;(0, INFINITE)",
-        &Cone::getHeight, &Cone::setHeight);
+        new MemberEntityControlAccessor<Cone, double>(
+            &Cone::getHeight, &Cone::setHeight));
 }
 
 double Cone::sq(double v){ return v*v; }
@@ -358,3 +361,11 @@ const int Cone::DEFAULT_CIRCUMFERENCE_DIVISIONS;
 const int Cone::DEFAULT_HEIGHT_DIVISIONS;
 const int Cone::MIN_CIRCUMFERENCE_DIVISIONS;
 const int Cone::MIN_HEIGHT_DIVISIONS;
+
+const Class Cone::CLASS = { "Cone", &Solid::CLASS };
+
+const Class *
+Cone::getClass() const
+{
+    return &CLASS;
+}

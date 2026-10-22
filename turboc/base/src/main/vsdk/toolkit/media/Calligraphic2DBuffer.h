@@ -29,6 +29,9 @@ private:
     ArrayList<double> lineData;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Calligraphic2DBuffer();
     virtual ~Calligraphic2DBuffer() {}
 

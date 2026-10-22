@@ -9,6 +9,9 @@ class RayHit;
 
 class Geometry : public Entity {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int INSIDE = ((int)(Containment::INSIDE));
     static const int LIMIT = ((int)(Containment::LIMIT));
     static const int OUTSIDE = ((int)(Containment::OUTSIDE));

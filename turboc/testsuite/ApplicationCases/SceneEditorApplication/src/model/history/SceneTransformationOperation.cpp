@@ -69,7 +69,7 @@ int SceneTransformationOperation::getEntityCount() const
 bool SceneTransformationOperation::absorb(UndoableOperation* next)
 {
     SceneTransformationOperation* other =
-        dynamic_cast<SceneTransformationOperation*>(next);
+        (next != NULL && next->instanceOf(SceneTransformationOperation::CLASS) ? (SceneTransformationOperation*)next : NULL);
 
     if ( other == NULL ||
          !mergeable || !other->mergeable || !name.equals(other->name) ||
@@ -79,7 +79,7 @@ bool SceneTransformationOperation::absorb(UndoableOperation* next)
     }
     // Takes the placements after the other operation; the old ones go to
     // the other operation, deleted by the caller
-    Collections::swap(after, other->after);
+    Collections<EntityTransformState*>::swap(after, other->after);
     lastChangeTime = other->lastChangeTime;
     return true;
 }
@@ -104,3 +104,11 @@ bool SceneTransformationOperation::sameElements(
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const long long SceneTransformationOperation::MERGE_INTERVAL_MILLISECONDS;
+
+const Class SceneTransformationOperation::CLASS = { "SceneTransformationOperation", &UndoableOperation::CLASS };
+
+const Class *
+SceneTransformationOperation::getClass() const
+{
+    return &CLASS;
+}

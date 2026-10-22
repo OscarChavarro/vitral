@@ -7,6 +7,44 @@
 #include "java/lang/Object.h"
 #include "java/lang/String.h"
 #include "java/util/HashMapEntry.h"
+
+/**
+FNV-1a hash of a sequence of bytes, used by `HashMap` to place its keys.
+*/
+inline size_t
+hashMapFnv1a(const unsigned char *bytes, size_t length) {
+    const size_t offset = ((size_t)(1469598103934665603ULL));
+    const size_t prime = ((size_t)(1099511628211ULL));
+    size_t hash = offset;
+    for ( size_t i = 0; i < length; i++ ) {
+        hash ^= ((size_t)(bytes[i]));
+        hash *= prime;
+    }
+    return hash;
+}
+
+/**
+Hash of a `HashMap` key from its bytes: numbers, pointers and plain
+structures (whose equal values have equal bytes).
+
+C++ port note: these hash functions are not members of `HashMap`, as
+legacy compilers (gcc 2.7, Turbo C++ 3.0) have no member templates.
+*/
+template <class T>
+inline size_t
+hashMapKey(const T &value) {
+    return hashMapFnv1a(((const unsigned char *)(&value)), sizeof(T));
+}
+
+/**
+Hash of a text `HashMap` key, from its characters.
+*/
+inline size_t
+hashMapKey(const String &value) {
+    const char *text = value.c_str();
+    return hashMapFnv1a(((const unsigned char *)(text)), strlen(text));
+}
+
 template <class K, class V>
 class HashMap: public Object {
   private:
@@ -20,18 +58,6 @@ class HashMap: public Object {
     void initialize(long initialBucketCount);
     void rehash(long newBucketCount);
     long bucketIndexFor(const K &key) const;
-    static size_t hashFNV1a(const unsigned char *bytes, size_t length);
-
-    template <class T>
-    static size_t hashKeyValue(const T &value);
-
-    static size_t hashKeyValue(const String &value);
-
-    template <class T>
-    static size_t hashKeyValue(T *const &value);
-
-    template <class T>
-    static size_t hashKeyValue(const T *const &value);
 
   public:
     HashMap();

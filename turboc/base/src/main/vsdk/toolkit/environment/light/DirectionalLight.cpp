@@ -32,3 +32,11 @@ DirectionalLight::copy() const
 {
     return new DirectionalLight(*this);
 }
+
+const Class DirectionalLight::CLASS = { "DirectionalLight", &Light::CLASS };
+
+const Class *
+DirectionalLight::getClass() const
+{
+    return &CLASS;
+}

@@ -109,3 +109,11 @@ void CubemapBackground::setCamera(Camera* camera)
 {
     this->camera = camera;
 }
+
+const Class CubemapBackground::CLASS = { "CubemapBackground", &Background::CLASS };
+
+const Class *
+CubemapBackground::getClass() const
+{
+    return &CLASS;
+}

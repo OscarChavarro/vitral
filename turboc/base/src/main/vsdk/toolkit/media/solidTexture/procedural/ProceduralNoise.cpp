@@ -10,6 +10,7 @@ References:
 */
 
 #include <stddef.h>
+#include <stdlib.h>
 #include "java/lang/Math.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/media/solidTexture/procedural/ProceduralNoise.h"

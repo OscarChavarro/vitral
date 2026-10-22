@@ -201,13 +201,6 @@ PriorityQueue<T>::clear()
 }
 
 template <class T>
-typename PriorityQueue<T>::Iterator
-PriorityQueue<T>::iterator() const
-{
-    return Iterator(this, 1);
-}
-
-template <class T>
 const T*
 PriorityQueue<T>::begin() const
 {
@@ -236,14 +229,13 @@ PriorityQueue<T>::end()
 }
 
 template <class T>
-template <class Predicate>
 bool
-PriorityQueue<T>::removeIf(Predicate p)
+PriorityQueue<T>::removeIf(Predicate<T>& p)
 {
     bool removed = false;
     int w = 1;
     for (int r = 1; r <= currentSize; r++) {
-        if (p(data[r])) {
+        if (p.test(data[r])) {
             removed = true;
         } else {
             data[w++] = data[r];
@@ -259,12 +251,11 @@ PriorityQueue<T>::removeIf(Predicate p)
 }
 
 template <class T>
-template <class Consumer>
 void
-PriorityQueue<T>::forEach(Consumer action) const
+PriorityQueue<T>::forEach(Consumer<T>& action) const
 {
     for (int i = 1; i <= currentSize; i++) {
-        action(data[i]);
+        action.accept(data[i]);
     }
 }
 

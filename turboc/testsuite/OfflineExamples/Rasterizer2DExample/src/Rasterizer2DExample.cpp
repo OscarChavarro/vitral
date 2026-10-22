@@ -1,5 +1,5 @@
-#include <cmath>
-#include <cstdio>
+#include <math.h>
+#include <stdio.h>
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
@@ -21,14 +21,14 @@ static int runLineTest(const String& outputFileName)
     RGBPixel color((char)0xFF, 0, 0);
 
     for (double a = 0; a < 360.0; a += 15.0) {
-        int x = 320 + (int)(200.0 * std::cos(a * M_PI / 180.0));
-        int y = 240 + (int)(200.0 * std::sin(a * M_PI / 180.0));
+        int x = 320 + (int)(200.0 * cos(a * M_PI / 180.0));
+        int y = 240 + (int)(200.0 * sin(a * M_PI / 180.0));
         Rasterizer2D::drawLine(&img, 320, 240, x, y, color);
     }
 
     File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
-    std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
+    printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
 
@@ -54,7 +54,7 @@ static int runPolygonTest(const String& outputFileName)
 
     File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
-    std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
+    printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
 
@@ -79,7 +79,7 @@ static int runSmoothPolygonTest(const String& outputFileName)
 
     File out(outputFileName.c_str());
     bool ok = ImagePersistence::exportPNG(out, &img);
-    std::printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
+    printf("Resulting image has been written to \"%s\"\n", outputFileName.c_str());
     return ok ? 0 : 1;
 }
 
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     if (mode == "polygon") return runPolygonTest(outputFileName);
     if (mode == "smooth") return runSmoothPolygonTest(outputFileName);
 
-    std::fprintf(stderr, "Unknown mode: %s\n", mode.c_str());
-    std::fprintf(stderr, "Usage: Rasterizer2DExample [line|polygon|smooth] [output.png]\n");
+    fprintf(stderr, "Unknown mode: %s\n", mode.c_str());
+    fprintf(stderr, "Usage: Rasterizer2DExample [line|polygon|smooth] [output.png]\n");
     return 1;
 }

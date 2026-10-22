@@ -54,3 +54,11 @@ int SceneMembershipOperation::getInsertedCount() const
 {
     return (int)inserted.size();
 }
+
+const Class SceneMembershipOperation::CLASS = { "SceneMembershipOperation", &UndoableOperation::CLASS };
+
+const Class *
+SceneMembershipOperation::getClass() const
+{
+    return &CLASS;
+}

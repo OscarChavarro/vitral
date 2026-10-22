@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string>
+#include "java/lang/String.h"
 
 #include "java/util/ArrayList.txx"
 #include "vsdk/toolkit/common/VSDK.h"
@@ -41,8 +41,8 @@ int Classifier::coplanarSameOrientationForSectorPair(int secta, int sectb)
         return -1;
     }
 
-    ha = nba[(size_t)secta].he;
-    hb = nbb[(size_t)sectb].he;
+    ha = nba[secta].he;
+    hb = nbb[sectb].he;
     if ( ha == NULL || hb == NULL ||
          ha->parentLoop == NULL || hb->parentLoop == NULL ||
          ha->parentLoop->parentFace == NULL ||
@@ -89,7 +89,7 @@ Classifier::VertexVertexClassificationData Classifier::classify(
 
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
         printf("   - Initial sector/sector intersection candidates:\n");
-        for ( size_t i = 0; i < sectors.size(); i++ ) {
+        for ( long i = 0; i < sectors.size(); i++ ) {
             printf("    . %s\n", sectors[i].toString().c_str());
         }
     }
@@ -98,7 +98,7 @@ Classifier::VertexVertexClassificationData Classifier::classify(
 
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
         printf("   - On sector reclassified:\n");
-        for ( size_t i = 0; i < sectors.size(); i++ ) {
+        for ( long i = 0; i < sectors.size(); i++ ) {
             printf("    . %s\n", sectors[i].toString().c_str());
         }
     }
@@ -107,7 +107,7 @@ Classifier::VertexVertexClassificationData Classifier::classify(
 
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0x00 ) {
         printf("   - On edges reclassified:\n");
-        for ( size_t i = 0; i < sectors.size(); i++ ) {
+        for ( long i = 0; i < sectors.size(); i++ ) {
             printf("    . %s\n", sectors[i].toString().c_str());
         }
     }
@@ -118,12 +118,12 @@ Classifier::VertexVertexClassificationData Classifier::classify(
 /**
 Following program [MANT1988].15.8.
 */
-std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
+ArrayList<Classifier::SectorOnVertex> Classifier::nbrpreproc(
     _PolyhedralBoundedSolidVertex* v)
 {
     Vector3Dd bisec;
     _PolyhedralBoundedSolidHalfEdge* he;
-    std::vector<SectorOnVertex> nb;
+    ArrayList<SectorOnVertex> nb;
 
     he = v->emanatingHalfEdge;
     Vector3Dd oldref2;
@@ -154,7 +154,7 @@ std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
             oldref2 = n.ref2;
             n.ref2 = bisec;
             n.ref12 = n.ref1.crossProduct(n.ref2);
-            nb.push_back(n);
+            nb.add(n);
 
             n = SectorOnVertex();
             n.he = he;
@@ -164,7 +164,7 @@ std::vector<Classifier::SectorOnVertex> Classifier::nbrpreproc(
             n.wide = true;
         }
 
-        nb.push_back(n);
+        nb.add(n);
 
         he = (he->mirrorHalfEdge())->next();
     } while( he != v->emanatingHalfEdge );
@@ -208,8 +208,8 @@ bool Classifier::vertexVertexSectorIntersectionTest(int i, int j)
     bool c1;
     bool c2;
 
-    const SectorOnVertex& na = nba[(size_t)i];
-    const SectorOnVertex& nb = nbb[(size_t)j];
+    const SectorOnVertex& na = nba[i];
+    const SectorOnVertex& nb = nbb[j];
     h1 = na.he;
     h2 = nb.he;
 
@@ -264,7 +264,7 @@ lists `nba`, `nbb`, and `sectors` as explained in section
 void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                                              _PolyhedralBoundedSolidVertex* vb)
 {
-    size_t i;
+    long i;
 
     nba = nbrpreproc(va);
     nbb = nbrpreproc(vb);
@@ -273,11 +273,11 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
     if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
         printf("   - NBA list of neighbor sectors for vertex on {A}:\n");
         for ( i = 0; i < nba.size(); i++ ) {
-            printf("    . A[%zu]: %s\n", i + 1, nba[i].toString().c_str());
+            printf("    . A[%ld]: %s\n", (long)(i + 1), nba[i].toString().c_str());
         }
         printf("   - NBB list of neighbor sectors for vertex on {B}:\n");
         for ( i = 0; i < nbb.size(); i++ ) {
-            printf("    . B[%zu]: %s\n", i + 1, nbb[i].toString().c_str());
+            printf("    . B[%ld]: %s\n", (long)(i + 1), nbb[i].toString().c_str());
         }
     }
 
@@ -285,7 +285,7 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
     double d2;
     double d3;
     double d4;
-    size_t j;
+    long j;
     Vector3Dd na;
     Vector3Dd nb;
 
@@ -296,7 +296,7 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
     for ( i = 0; i < nba.size(); i++ ) {
         for ( j = 0; j < nbb.size(); j++ ) {
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
-                printf("    . A[%zu] / B[%zu]:", i + 1, j + 1);
+                printf("    . A[%ld] / B[%ld]:", (long)(i + 1), (long)(j + 1));
             }
 
             if ( vertexVertexSectorIntersectionTest((int)i, (int)j) ) {
@@ -321,7 +321,7 @@ void Classifier::vertexVertexGetNeighborhood(_PolyhedralBoundedSolidVertex* va,
                 s.s1b = compareToZero(d3);
                 s.s2b = compareToZero(d4);
                 s.intersect = true;
-                sectors.push_back(s);
+                sectors.add(s);
             }
 
             if ( (debugFlags & DEBUG_04_VERTEX_VERTEX_CLASSIFIER) != 0 ) {
@@ -338,8 +338,8 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
 {
     _PolyhedralBoundedSolidHalfEdge* ha;
     _PolyhedralBoundedSolidHalfEdge* hb;
-    size_t i;
-    size_t j;
+    long i;
+    long j;
     int newsa;
     int newsb;
     bool nonopposite;
@@ -366,8 +366,8 @@ void Classifier::vertexVertexReclassifyOnSectors(int op)
             prevsectb = (sectb == 0) ? nbbSize - 1 : sectb - 1;
             nextsecta = (secta == nbaSize - 1) ? 0 : secta + 1;
             nextsectb = (sectb == nbbSize - 1) ? 0 : sectb + 1;
-            ha = nba[(size_t)secta].he;
-            hb = nbb[(size_t)sectb].he;
+            ha = nba[secta].he;
+            hb = nbb[sectb].he;
             n1 = ha->parentLoop->parentFace->getContainingPlane()->getNormal();
             n2 = hb->parentLoop->parentFace->getContainingPlane()->getNormal();
             d = n1.subtract(n2).length();
@@ -432,8 +432,8 @@ and [MANT1988].15.12.
 */
 void Classifier::vertexVertexReclassifyOnEdges(int op)
 {
-    size_t i;
-    size_t j;
+    long i;
+    long j;
     int newsa;
     int newsb;
     int secta;

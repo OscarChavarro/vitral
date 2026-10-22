@@ -19,17 +19,17 @@ int OpenGL1ImageRenderer::activate(Image* img) {
         return -1;
     }
 
-    RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
+    RGBAImageUncompressed* rgbaUncomp = (img != NULL && img->instanceOf(RGBAImageUncompressed::CLASS) ? (RGBAImageUncompressed*)img : NULL);
     if (rgbaUncomp != NULL) {
         return OpenGL1RGBAImageUncompressedRenderer::activate(rgbaUncomp);
     }
 
-    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    RGBAImageCompressed* rgbaComp = (img != NULL && img->instanceOf(RGBAImageCompressed::CLASS) ? (RGBAImageCompressed*)img : NULL);
     if (rgbaComp != NULL) {
         return OpenGL1RGBAImageCompressedRenderer::activate(rgbaComp);
     }
 
-    RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
+    RGBImageUncompressed* rgbUncomp = (img != NULL && img->instanceOf(RGBImageUncompressed::CLASS) ? (RGBImageUncompressed*)img : NULL);
     if (rgbUncomp != NULL) {
         return OpenGL1RGBImageUncompressedRenderer::activate(rgbUncomp);
     }
@@ -42,19 +42,19 @@ void OpenGL1ImageRenderer::deactivate(Image* img) {
         return;
     }
 
-    RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
+    RGBAImageUncompressed* rgbaUncomp = (img != NULL && img->instanceOf(RGBAImageUncompressed::CLASS) ? (RGBAImageUncompressed*)img : NULL);
     if (rgbaUncomp != NULL) {
         OpenGL1RGBAImageUncompressedRenderer::deactivate(rgbaUncomp);
         return;
     }
 
-    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    RGBAImageCompressed* rgbaComp = (img != NULL && img->instanceOf(RGBAImageCompressed::CLASS) ? (RGBAImageCompressed*)img : NULL);
     if (rgbaComp != NULL) {
         OpenGL1RGBAImageCompressedRenderer::deactivate(rgbaComp);
         return;
     }
 
-    RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
+    RGBImageUncompressed* rgbUncomp = (img != NULL && img->instanceOf(RGBImageUncompressed::CLASS) ? (RGBImageUncompressed*)img : NULL);
     if (rgbUncomp != NULL) {
         OpenGL1RGBImageUncompressedRenderer::deactivate(rgbUncomp);
     }
@@ -65,19 +65,19 @@ void OpenGL1ImageRenderer::unload(Image* img) {
         return;
     }
 
-    RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
+    RGBAImageUncompressed* rgbaUncomp = (img != NULL && img->instanceOf(RGBAImageUncompressed::CLASS) ? (RGBAImageUncompressed*)img : NULL);
     if (rgbaUncomp != NULL) {
         OpenGL1RGBAImageUncompressedRenderer::unload(rgbaUncomp);
         return;
     }
 
-    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    RGBAImageCompressed* rgbaComp = (img != NULL && img->instanceOf(RGBAImageCompressed::CLASS) ? (RGBAImageCompressed*)img : NULL);
     if (rgbaComp != NULL) {
         OpenGL1RGBAImageCompressedRenderer::unload(rgbaComp);
         return;
     }
 
-    RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
+    RGBImageUncompressed* rgbUncomp = (img != NULL && img->instanceOf(RGBImageUncompressed::CLASS) ? (RGBImageUncompressed*)img : NULL);
     if (rgbUncomp != NULL) {
         OpenGL1RGBImageUncompressedRenderer::unload(rgbUncomp);
     }
@@ -88,19 +88,19 @@ void OpenGL1ImageRenderer::draw(Image* img) {
         return;
     }
 
-    RGBAImageUncompressed* rgbaUncomp = dynamic_cast<RGBAImageUncompressed*>(img);
+    RGBAImageUncompressed* rgbaUncomp = (img != NULL && img->instanceOf(RGBAImageUncompressed::CLASS) ? (RGBAImageUncompressed*)img : NULL);
     if (rgbaUncomp != NULL) {
         OpenGL1RGBAImageUncompressedRenderer::draw(rgbaUncomp);
         return;
     }
 
-    RGBAImageCompressed* rgbaComp = dynamic_cast<RGBAImageCompressed*>(img);
+    RGBAImageCompressed* rgbaComp = (img != NULL && img->instanceOf(RGBAImageCompressed::CLASS) ? (RGBAImageCompressed*)img : NULL);
     if (rgbaComp != NULL) {
         OpenGL1RGBAImageCompressedRenderer::draw(rgbaComp);
         return;
     }
 
-    RGBImageUncompressed* rgbUncomp = dynamic_cast<RGBImageUncompressed*>(img);
+    RGBImageUncompressed* rgbUncomp = (img != NULL && img->instanceOf(RGBImageUncompressed::CLASS) ? (RGBImageUncompressed*)img : NULL);
     if (rgbUncomp != NULL) {
         OpenGL1RGBImageUncompressedRenderer::draw(rgbUncomp);
     }

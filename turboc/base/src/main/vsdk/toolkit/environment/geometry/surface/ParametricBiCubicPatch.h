@@ -13,6 +13,9 @@ class RayHit;
 
 class ParametricBiCubicPatch : public Surface {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     Matrix4x4d geometryMatrixX;
     Matrix4x4d geometryMatrixY;
     Matrix4x4d geometryMatrixZ;

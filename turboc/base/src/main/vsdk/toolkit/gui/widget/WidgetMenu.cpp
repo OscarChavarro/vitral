@@ -62,3 +62,11 @@ const String& WidgetMenu::getAccelerator() const
 {
     return accelerator;
 }
+
+const Class WidgetMenu::CLASS = { "WidgetMenu", &WidgetMenuElement::CLASS };
+
+const Class *
+WidgetMenu::getClass() const
+{
+    return &CLASS;
+}

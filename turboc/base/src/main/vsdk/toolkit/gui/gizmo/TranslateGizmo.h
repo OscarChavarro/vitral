@@ -25,6 +25,9 @@ gizmo and referenced (not owned) by the element bodies (see
 */
 class TranslateGizmo : public Gizmo {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /// Internal element selection state
     static const int X_AXIS_ELEMENT = 1;
     static const int Y_AXIS_ELEMENT = 2;

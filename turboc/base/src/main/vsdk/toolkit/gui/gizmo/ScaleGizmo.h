@@ -61,6 +61,9 @@ apart (see `getScale`). The camera is referenced, not owned.
 */
 class ScaleGizmo : public Gizmo {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     /// Number of axes, and of the values of the input gizmo
     static const int AXIS_COUNT = 3;
 

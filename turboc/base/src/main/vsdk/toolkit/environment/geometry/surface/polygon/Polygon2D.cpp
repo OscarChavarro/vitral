@@ -84,7 +84,7 @@ double* Polygon2D::getMinMax()
 static bool pointInLoop(const _Polygon2DContour* loop, double x, double y)
 {
     bool inside = false;
-    ArrayList<Vertex2D>& v = const_cast<_Polygon2DContour*>(loop)->vertices;
+    ArrayList<Vertex2D>& v = ((_Polygon2DContour*)(loop))->vertices;
     long int n = v.size();
     if (n < 3) return false;
     for (long int i = 0, j = n - 1; i < n; j = i++) {
@@ -138,3 +138,11 @@ void Polygon2D::doExtraInformation(const Ray& inRay, double intT, RayHit* outDat
 
 BinaryTreeNode<_Polygon2DContour*>* Polygon2D::getHeadNode() { return headNode; }
 void Polygon2D::setHeadNode(BinaryTreeNode<_Polygon2DContour*>* node) { headNode = node; }
+
+const Class Polygon2D::CLASS = { "Polygon2D", &Surface::CLASS };
+
+const Class *
+Polygon2D::getClass() const
+{
+    return &CLASS;
+}

@@ -24,3 +24,11 @@ ArrayList<SimpleBody*>& SimpleSceneSnapshot::getSimpleBodies() { return simpleBo
 ArrayList<Light*>& SimpleSceneSnapshot::getLights() { return lights; }
 Background* SimpleSceneSnapshot::getBackground() const { return background; }
 CameraSnapshot* SimpleSceneSnapshot::getCameraSnapshot() const { return cameraSnapshot; }
+
+const Class SimpleSceneSnapshot::CLASS = { "SimpleSceneSnapshot", &Entity::CLASS };
+
+const Class *
+SimpleSceneSnapshot::getClass() const
+{
+    return &CLASS;
+}

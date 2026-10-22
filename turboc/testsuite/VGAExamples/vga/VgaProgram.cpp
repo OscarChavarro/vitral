@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "programs/vga/VgaProgram.h"
 #include "kernel/ArgList.h"
 
@@ -8,10 +9,10 @@ int
 VgaProgram::main(const ArgList &args) {
     char *argv[ArgList::MAX_ARGS + 2];
     int argc = 0;
-    argv[argc++] = const_cast<char *>("vga");
+    argv[argc++] = ((char *)("vga"));
     for (unsigned i = 0; i < args.count(); i++) {
-        argv[argc++] = const_cast<char *>(args.at(i));
+        argv[argc++] = ((char *)(args.at(i)));
     }
-    argv[argc] = nullptr;
+    argv[argc] = NULL;
     return vgaMain(argc, argv);
 }

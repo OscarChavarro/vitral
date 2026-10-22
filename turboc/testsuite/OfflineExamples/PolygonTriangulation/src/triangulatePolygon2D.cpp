@@ -1,12 +1,12 @@
-#include <cerrno>
-#include <climits>
-#include <cstdio>
-#include <cstdlib>
+#include <float.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "java/io/File.h"
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/common/VSDKFatalException.h"
 #include "vsdk/toolkit/common/logging/Logger.h"
 #include "vsdk/toolkit/media/RGBImageUncompressed.h"
@@ -17,6 +17,7 @@
 #include "vsdk/toolkit/environment/geometry/geometricProcessing/polygonTriangulation/MonotoneDecompositionTriangulator.h"
 #include "vsdk/toolkit/io/image/ImagePersistence.h"
 #include "vsdk/toolkit/render/raster/Rasterizer2D.h"
+#include "java/lang/Exception.h"
 const char* const DEFAULT_INPUT_FILE =
     "../../../../etc/polygons/example01.polygon";
 const int DEFAULT_ZONE_WIDTH = 512;
@@ -107,7 +108,7 @@ String deriveOutputFileName(const String& inputFileName)
         const String number = inputBaseName.substr(
             prefix.size(),
             inputBaseName.size() - prefix.size() - suffix.size());
-        bool allDigits = !number.empty();
+        bool allDigits = !number.isEmpty();
         for (int i = 0; allDigits && i < number.size(); ++i) {
             const char c = number[i];
             if (c < '0' || c > '9') {
@@ -121,13 +122,13 @@ String deriveOutputFileName(const String& inputFileName)
     return String("output.png");
 }
 
-template <typename T>
+template <class T>
 static const T& minValue(const T& a, const T& b)
 {
     return (b < a) ? b : a;
 }
 
-template <typename T>
+template <class T>
 static const T& maxValue(const T& a, const T& b)
 {
     return (a < b) ? b : a;
@@ -145,24 +146,24 @@ int parsePositiveInt(const String& value, const String& option)
 {
     errno = 0;
     char* endPointer = 0;
-    const long parsed = std::strtol(value.c_str(), &endPointer, 10);
+    const long parsed = strtol(value.c_str(), &endPointer, 10);
     if (errno != 0 || endPointer == value.c_str() || *endPointer != '\0' ||
         parsed <= 0 || parsed > INT_MAX) {
         fail("parsePositiveInt",
             String(option).concat(" must be a positive integer: ").concat(value));
     }
-    return static_cast<int>(parsed);
+    return ((int)(parsed));
 }
 
 void printUsage()
 {
-    std::printf("Usage: PolygonTriangulation [options] [input_file] [output_file]\n");
-    std::printf("Options:\n");
-    std::printf("  --input, -i <file>       Polygon input file (.polygon)\n");
-    std::printf("  --output, -o <file>      PNG output file\n");
-    std::printf("  --zone-width <pixels>    Width of each image zone (default 512)\n");
-    std::printf("  --zone-height <pixels>   Height of each image zone (default 512)\n");
-    std::printf("  --help, -h               Show this help\n");
+    printf("Usage: PolygonTriangulation [options] [input_file] [output_file]\n");
+    printf("Options:\n");
+    printf("  --input, -i <file>       Polygon input file (.polygon)\n");
+    printf("  --output, -o <file>      PNG output file\n");
+    printf("  --zone-width <pixels>    Width of each image zone (default 512)\n");
+    printf("  --zone-height <pixels>   Height of each image zone (default 512)\n");
+    printf("  --help, -h               Show this help\n");
 }
 
 CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
@@ -200,7 +201,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
             continue;
         }
 
-        if (!argument.empty() && argument[0] == '-') {
+        if (!argument.isEmpty() && argument[0] == '-') {
             fail("parseCommandLineOptions", String("Unknown option: ").concat(argument));
         }
 
@@ -217,7 +218,7 @@ CommandLineOptions parseCommandLineOptions(int argc, char* argv[])
         positionalIndex++;
     }
 
-    if (options.outputFileName.empty()) {
+    if (options.outputFileName.isEmpty()) {
         options.outputFileName = deriveOutputFileName(options.inputFileName);
     }
 
@@ -248,7 +249,7 @@ void readPolygon(const String& fileName, Polygon2D& polygon)
     }
 
     int contourCount = 0;
-    if (std::fscanf(input, "%d", &contourCount) != 1) {
+    if (fscanf(input, "%d", &contourCount) != 1) {
         failReadPolygon(input, fileName, "Invalid or missing contour count in polygon file: ");
     }
 
@@ -256,13 +257,13 @@ void readPolygon(const String& fileName, Polygon2D& polygon)
     for (int contourIndex = 0; contourIndex < contourCount; ++contourIndex) {
         polygon.nextLoop();
         int pointCount = 0;
-        if (std::fscanf(input, "%d", &pointCount) != 1) {
+        if (fscanf(input, "%d", &pointCount) != 1) {
             failReadPolygon(input, fileName, "Invalid or missing point count in polygon file: ");
         }
         for (int pointIndex = 0; pointIndex < pointCount; ++pointIndex) {
             double x = 0.0;
             double y = 0.0;
-            if (std::fscanf(input, "%lf %lf", &x, &y) != 2) {
+            if (fscanf(input, "%lf %lf", &x, &y) != 2) {
                 failReadPolygon(input, fileName, "Invalid or missing coordinate data in polygon file: ");
             }
             polygon.addVertex(x, y);
@@ -293,7 +294,7 @@ void printTriangles(
     for (int triangleIndex = 0; triangleIndex < triangleCount; ++triangleIndex) {
         const MonotoneDecompositionTriangulator::Triangle triangle =
             triangles.get(triangleIndex);
-        std::printf("triangle #%d: %d %d %d\n",
+        printf("triangle #%d: %d %d %d\n",
             triangleIndex,
             triangle.get(0),
             triangle.get(1),
@@ -304,10 +305,10 @@ void printTriangles(
 RenderTransform computeRenderTransform(const Polygon2D& polygon,
     const PolygonModel& model)
 {
-    double minX = std::numeric_limits<double>::max();
-    double minY = std::numeric_limits<double>::max();
-    double maxX = -std::numeric_limits<double>::max();
-    double maxY = -std::numeric_limits<double>::max();
+    double minX = DBL_MAX;
+    double minY = DBL_MAX;
+    double maxX = -DBL_MAX;
+    double maxY = -DBL_MAX;
 
     for (long int i = 0; i < polygon.loops.size(); ++i) {
         _Polygon2DContour* contour = polygon.loops.get(i);
@@ -402,14 +403,14 @@ bool isValidTriangleIndex(const MonotoneDecompositionTriangulator::Triangle& tri
 {
     return triangle.get(0) >= 0 && triangle.get(1) >= 0 &&
         triangle.get(2) >= 0 &&
-        static_cast<size_t>(triangle.get(0)) < vertexCount &&
-        static_cast<size_t>(triangle.get(1)) < vertexCount &&
-        static_cast<size_t>(triangle.get(2)) < vertexCount;
+        ((size_t)(triangle.get(0))) < vertexCount &&
+        ((size_t)(triangle.get(1))) < vertexCount &&
+        ((size_t)(triangle.get(2))) < vertexCount;
 }
 
 int projectCoordinate(double value, double minValue, double scale, double offset)
 {
-    return static_cast<int>(offset + (value - minValue) * scale);
+    return ((int)(offset + (value - minValue) * scale));
 }
 
 void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
@@ -441,9 +442,9 @@ void fillTriangle(RGBImageUncompressed& image, int x0, int y0, int x1, int y1,
             }
             else if ((ay <= y && y <= by) || (by <= y && y <= ay)) {
                 const double interpolationFactor =
-                    static_cast<double>(y - ay) / static_cast<double>(by - ay);
-                const int xIntersection = static_cast<int>(
-                    ax + interpolationFactor * (bx - ax));
+                    ((double)(y - ay)) / ((double)(by - ay));
+                const int xIntersection = ((int)(
+                    ax + interpolationFactor * (bx - ax)));
                 xMin = minValue(xMin, xIntersection);
                 xMax = maxValue(xMax, xIntersection);
             }
@@ -481,9 +482,9 @@ void renderTriangulatedPolygon(RGBImageUncompressed& image,
     const ArrayList<Vertex2D> polygonVertices = flattenVertices(*model.polygon2D);
 
     RGBPixel edgeColor;
-    edgeColor.r = static_cast<char>(255);
-    edgeColor.g = static_cast<char>(255);
-    edgeColor.b = static_cast<char>(255);
+    edgeColor.r = ((char)(255));
+    edgeColor.g = ((char)(255));
+    edgeColor.b = ((char)(255));
 
     RGBPixel fillColor;
 
@@ -505,9 +506,9 @@ void renderTriangulatedPolygon(RGBImageUncompressed& image,
         const int cy = projectCoordinate(vertexC.y, minY, scale, offsetY);
 
         const int* paletteEntry = palette[i % (sizeof(palette) / sizeof(palette[0]))];
-        fillColor.r = static_cast<char>(paletteEntry[0]);
-        fillColor.g = static_cast<char>(paletteEntry[1]);
-        fillColor.b = static_cast<char>(paletteEntry[2]);
+        fillColor.r = ((char)(paletteEntry[0]));
+        fillColor.g = ((char)(paletteEntry[1]));
+        fillColor.b = ((char)(paletteEntry[2]));
 
         fillTriangle(image, ax, ay, bx, by, cx, cy, fillColor);
         Rasterizer2D::drawLine(&image, ax, ay, bx, by, edgeColor);
@@ -528,8 +529,8 @@ void createWorkingImage(const PolygonModel& model, RGBImageUncompressed& image)
 RGBPixel createBorderColor()
 {
     RGBPixel borderColor;
-    borderColor.r = static_cast<char>(255);
-    borderColor.g = static_cast<char>(255);
+    borderColor.r = ((char)(255));
+    borderColor.g = ((char)(255));
     borderColor.b = 0;
     return borderColor;
 }
@@ -539,7 +540,7 @@ void exportImage(RGBImageUncompressed& image, const String& outputFileName)
     if (!ImagePersistence::exportPNG(File(outputFileName.c_str()), &image)) {
         fail("exportImage", String("failed writing PNG file: ").concat(outputFileName));
     }
-    std::printf("Image written to: %s\n", outputFileName.toCString());
+    printf("Image written to: %s\n", outputFileName.toCString());
 }
 
 int run(int argc, char* argv[])
@@ -548,7 +549,7 @@ int run(int argc, char* argv[])
     try {
         commandLineOptions = parseCommandLineOptions(argc, argv);
     }
-    catch (const std::exception& exception) {
+    catch (const Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "run", "invalid command line argument", &exception);
         printUsage();
         return 0;
@@ -591,7 +592,7 @@ int main(int argc, char* argv[])
     try {
         return run(argc, argv);
     }
-    catch (const std::exception& exception) {
+    catch (const Exception& exception) {
         Logger::reportMessageWithException("PolygonTriangulation", Logger::ERROR, "main", "PolygonTriangulation failed", &exception);
         return 1;
     }

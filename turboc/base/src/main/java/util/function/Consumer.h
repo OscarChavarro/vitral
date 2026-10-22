@@ -4,9 +4,9 @@
 
 /**
 Emulation of `java.util.function.Consumer`: C++98 has neither lambdas nor
-`std::function`, so callbacks are objects implementing this interface.
+callbacks are objects implementing this interface.
 */
-template<typename T>
+template<class T>
 class Consumer {
   public:
     virtual ~Consumer() {}

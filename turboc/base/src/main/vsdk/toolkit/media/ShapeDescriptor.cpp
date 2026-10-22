@@ -33,3 +33,11 @@ void ShapeDescriptor::setLabel(const String* label_) {
         label = NULL;
     }
 }
+
+const Class ShapeDescriptor::CLASS = { "ShapeDescriptor", &MediaEntity::CLASS };
+
+const Class *
+ShapeDescriptor::getClass() const
+{
+    return &CLASS;
+}

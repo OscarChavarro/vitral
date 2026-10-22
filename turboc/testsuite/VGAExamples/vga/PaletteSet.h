@@ -21,8 +21,6 @@ class PaletteSet {
     void printLine() const;
 
   private:
-    static constexpr const char *PALETTE_DIR = VGA_PALETTE_DIR;
-
     int count;
     char file[MAX_FILES][FILE_NAME];
     unsigned current;

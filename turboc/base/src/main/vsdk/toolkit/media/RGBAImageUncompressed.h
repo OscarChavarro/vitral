@@ -22,6 +22,9 @@ private:
     int pixelBaseIndex(int x, int y) const;
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     RGBAImageUncompressed();
     virtual ~RGBAImageUncompressed();
 

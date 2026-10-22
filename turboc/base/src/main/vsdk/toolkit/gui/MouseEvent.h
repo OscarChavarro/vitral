@@ -4,6 +4,9 @@
 #include "vsdk/toolkit/gui/PresentationElement.h"
 class MouseEvent : public PresentationElement {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     static const int BUTTON1 = 1;
     static const int BUTTON2 = 2;
     static const int BUTTON3 = 3;

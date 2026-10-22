@@ -10,8 +10,7 @@
 #ifndef __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 #define __PARAMETRIC_BI_CUBIC_PATCH_INTERSECTOR__
 
-#include <memory>
-#include <vector>
+#include "java/util/ArrayList.h"
 
 #include "vsdk/toolkit/common/linealAlgebra/Vector3Dd.h"
 class Matrix4x4d;

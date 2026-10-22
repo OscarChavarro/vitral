@@ -28,6 +28,9 @@ private:
     WidgetCommand& operator=(const WidgetCommand& other);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     WidgetCommand();
     virtual ~WidgetCommand();
 

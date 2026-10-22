@@ -14,7 +14,7 @@ void MonotoneDecompositionTriangulator::stage1PrepareAndOrder(
     }
     ArrayList<int> contourSizes;
     ArrayList<double> vertices;
-    Polygon2D &mutableInput = const_cast<Polygon2D &>(input);
+    Polygon2D &mutableInput = ((Polygon2D &)(input));
     for (int contourIndex = 0; contourIndex < mutableInput.loops.size();
          contourIndex++) {
         _Polygon2DContour *contour = mutableInput.loops[contourIndex];

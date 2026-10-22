@@ -3,7 +3,6 @@
 
 #include "java/lang/String.h"
 #include "java/util/ArrayList.txx"
-#include <limits>
 #include "vsdk/toolkit/media/GeometryMetadata.h"
 #include "vsdk/toolkit/media/ShapeDescriptor.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
@@ -192,4 +191,12 @@ String* GeometryMetadata::toString() const {
 
     String* msg = new String(fullBuffer);
     return msg;
+}
+
+const Class GeometryMetadata::CLASS = { "GeometryMetadata", &MediaEntity::CLASS };
+
+const Class *
+GeometryMetadata::getClass() const
+{
+    return &CLASS;
 }

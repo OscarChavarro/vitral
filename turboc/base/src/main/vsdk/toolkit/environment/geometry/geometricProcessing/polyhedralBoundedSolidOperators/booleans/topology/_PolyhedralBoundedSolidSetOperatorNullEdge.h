@@ -5,6 +5,8 @@
 #ifndef ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_NULL_EDGE__
 #define ___POLYHEDRAL_BOUNDED_SOLID_SET_OPERATOR_NULL_EDGE__
 
+#include <stddef.h>
+
 #include "java/lang/String.h"
 #include "vsdk/toolkit/environment/geometry/volume/polyhedralBoundedSolid/PolyhedralBoundedSolidNumericPolicy.h"
 
@@ -24,7 +26,9 @@ private:
 public:
     _PolyhedralBoundedSolidEdge* e;
 
-    explicit _PolyhedralBoundedSolidSetOperatorNullEdge(_PolyhedralBoundedSolidEdge* e);
+    /// The default (null edge) is needed by the storage of `ArrayList`
+    explicit _PolyhedralBoundedSolidSetOperatorNullEdge(
+        _PolyhedralBoundedSolidEdge* e = NULL);
 
     static void setNumericContext(
         const PolyhedralBoundedSolidNumericPolicy::ToleranceContext* context);
@@ -36,7 +40,8 @@ public:
     int compareTo(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
 
     /**
-    @return true if this edge goes before `other` (for `std::sort`)
+    @return true if this edge goes before `other` (natural order, for
+    `NaturalOrderComparator`)
     */
     bool operator<(const _PolyhedralBoundedSolidSetOperatorNullEdge& other) const;
 

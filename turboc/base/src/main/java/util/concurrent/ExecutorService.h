@@ -1,81 +1,29 @@
 #ifndef __EXECUTOR_SERVICE__
 #define __EXECUTOR_SERVICE__
 
-#include "java/util/concurrent/Callable.h"
-#include "java/util/concurrent/Future.h"
-#include <exception>
-#include "vsdk/toolkit/common/memoryManagement/SharedPointer.h"
+#include "java/lang/Runnable.h"
 
+/**
+Emulation of `java.util.concurrent.ExecutorService`. Tasks returning a
+value are submitted with `FutureTask<T>::submit(executor, callable)`.
+
+C++ port note: legacy compilers (gcc 2.7, Turbo C++ 3.0) have no member
+templates, so the generic `submit` of Java is a static method of the
+`FutureTask` class template.
+*/
 class ExecutorService {
-protected:
-class TaskBase {
 public:
-    virtual ~TaskBase() {}
-    virtual void run() = 0;
-};
+    virtual ~ExecutorService() {}
+    virtual void shutdownNow() = 0;
 
-virtual bool enqueue(TaskBase* task) = 0;
-
-public:
-virtual ~ExecutorService() {}
-virtual void shutdownNow() = 0;
-
-template<typename T>
-Future<T> submit(Callable<T>* callable)
-{
-    SharedPointer<typename Future<T>::SharedState> state(new typename Future<T>::SharedState());
-
-    class TaskImpl : public TaskBase {
-    private:
-        Callable<T>* callable_;
-        SharedPointer<typename Future<T>::SharedState> state_;
-    public:
-        TaskImpl(Callable<T>* callable, const SharedPointer<typename Future<T>::SharedState>& state)
-            : callable_(callable), state_(state) {}
-
-        virtual void run()
-        {
-            try {
-                T value = callable_->call();
-                pthread_mutex_lock(&state_->mutex);
-                state_->value = value;
-                state_->done = true;
-                pthread_cond_broadcast(&state_->cond);
-                pthread_mutex_unlock(&state_->mutex);
-            }
-            catch (const std::exception& e) {
-                pthread_mutex_lock(&state_->mutex);
-                state_->failed = true;
-                state_->errorMessage = e.what();
-                state_->done = true;
-                pthread_cond_broadcast(&state_->cond);
-                pthread_mutex_unlock(&state_->mutex);
-            }
-            catch (...) {
-                pthread_mutex_lock(&state_->mutex);
-                state_->failed = true;
-                state_->errorMessage = "unknown exception";
-                state_->done = true;
-                pthread_cond_broadcast(&state_->cond);
-                pthread_mutex_unlock(&state_->mutex);
-            }
-            delete callable_;
-        }
-    };
-
-    TaskBase* task = new TaskImpl(callable, state);
-    if ( !enqueue(task) ) {
-        pthread_mutex_lock(&state->mutex);
-        state->failed = true;
-        state->errorMessage = "executor rejected task";
-        state->done = true;
-        pthread_cond_broadcast(&state->cond);
-        pthread_mutex_unlock(&state->mutex);
-        delete task;
-    }
-
-    return Future<T>(state);
-}
+    /**
+    Emulation of `java.util.concurrent.Executor.execute`: runs the task in
+    a thread of the pool (or right away, without POSIX threads), and
+    deletes it after it runs.
+    @return false if the executor rejected the task (then it is not
+    deleted)
+    */
+    virtual bool execute(Runnable* task) = 0;
 };
 
 

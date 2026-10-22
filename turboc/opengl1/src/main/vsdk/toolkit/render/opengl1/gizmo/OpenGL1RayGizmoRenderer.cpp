@@ -56,13 +56,13 @@ void OpenGL1RayGizmoRenderer::draw(RayGizmo* gizmo, Camera* camera, const ArrayL
         Matrix4x4d modelMatrix = body->getTransformationMatrix();
         SimpleMaterial* material = body->getMaterial();
 
-        Arrow* arrow = dynamic_cast<Arrow*>(geom);
+        Arrow* arrow = (geom != NULL && geom->instanceOf(Arrow::CLASS) ? (Arrow*)geom : NULL);
         if ( arrow != 0 ) {
             OpenGL1ArrowRenderer::draw(arrow, modelMatrix, projection, camera, *activeLights, material, &quality);
             continue;
         }
 
-        Sphere* sphere = dynamic_cast<Sphere*>(geom);
+        Sphere* sphere = (geom != NULL && geom->instanceOf(Sphere::CLASS) ? (Sphere*)geom : NULL);
         if ( sphere != 0 ) {
             OpenGL1SphereRenderer::draw(
                 sphere, camera, activeLights->get(0), material, &quality,

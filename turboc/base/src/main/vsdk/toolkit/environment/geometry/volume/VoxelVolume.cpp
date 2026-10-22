@@ -8,9 +8,7 @@
 //=     Containing Surface Tessellations", SIGGRAPH '87, p. 119-128, 1987.  =
 
 #include <stddef.h>
-#include <algorithm>
 #include <math.h>
-#include <limits>
 
 #include "vsdk/toolkit/common/VSDK.h"
 #include "vsdk/toolkit/common/linealAlgebra/Matrix4x4d.h"
@@ -19,6 +17,7 @@
 #include "vsdk/toolkit/environment/geometry/element/RayHit.h"
 #include "vsdk/toolkit/environment/geometry/volume/VoxelVolume.h"
 #include "vsdk/toolkit/common/Cpp98Support.h"
+#include "java/lang/Math.h"
 const double VoxelVolume::PARALLEL_EPSILON = 1.0e-12;
 
 VoxelVolume::VoxelVolume()
@@ -241,15 +240,15 @@ bool VoxelVolume::traceFirstFilledVoxel(const Ray& ray,
         }
         double t1 = (-1.0 - origin[i]) / direction[i];
         double t2 = (1.0 - origin[i]) / direction[i];
-        double tNear = std::min(t1, t2);
-        double tFar = std::max(t1, t2);
+        double tNear = Math::min(t1, t2);
+        double tFar = Math::max(t1, t2);
         if ( tNear > tEnter ) {
             tEnter = tNear;
             enterAxis = i;
         }
-        tExit = std::min(tExit, tFar);
+        tExit = Math::min(tExit, tFar);
     }
-    if ( tExit < std::max(tEnter, 0.0) ) {
+    if ( tExit < Math::max(tEnter, 0.0) ) {
         return false;
     }
     bool startsInside = tEnter < 0.0;
@@ -392,3 +391,11 @@ Vector3Dd VoxelVolume::doCenterOfMass() {
 // Integral constants bound to references (i.e. by `?:`) need a
 // definition out of the class in C++98
 const int VoxelVolume::DEFAULT_THRESHOLD;
+
+const Class VoxelVolume::CLASS = { "VoxelVolume", &Solid::CLASS };
+
+const Class *
+VoxelVolume::getClass() const
+{
+    return &CLASS;
+}

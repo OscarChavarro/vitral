@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include <string>
+#include <string.h>
 
 #include "java/lang/Double.h"
 #include "java/lang/Float.h"
@@ -200,11 +200,15 @@ GenericEditor::updateValue(const ControlSpecification *specification,
         return false;
     }
 
-    std::string raw(text.c_str());
-    size_t begin = raw.find_first_not_of(" \t\n\r\f\v");
-    size_t end = raw.find_last_not_of(" \t\n\r\f\v");
-    String trimmed = begin == std::string::npos ? String("") :
-        String(raw.substr(begin, end - begin + 1).c_str());
+    int begin = 0;
+    int end = text.size();
+    while ( begin < end && strchr(" \t\n\r\f\v", text[begin]) != NULL ) {
+        begin++;
+    }
+    while ( end > begin && strchr(" \t\n\r\f\v", text[end - 1]) != NULL ) {
+        end--;
+    }
+    String trimmed = text.substring(begin, end);
 
     double numeric;
     try {

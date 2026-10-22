@@ -2,7 +2,7 @@
 #define __CALLABLE__
 
 
-template<typename T>
+template<class T>
 class Callable {
 public:
     virtual ~Callable() {}

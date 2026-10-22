@@ -7,6 +7,9 @@ class Camera;
 
 class CameraControllerOrbiter : public CameraController {
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit CameraControllerOrbiter(Camera* camera);
     virtual ~CameraControllerOrbiter() {}
 

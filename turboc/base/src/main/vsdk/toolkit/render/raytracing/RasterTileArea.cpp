@@ -1,17 +1,17 @@
 #include <stddef.h>
-#include <stdexcept>
 #include "vsdk/toolkit/media/Image.h"
 #include "vsdk/toolkit/render/raytracing/RasterTileArea.h"
+#include "java/lang/IllegalArgumentException.h"
 RasterTileArea::RasterTileArea() : image(NULL), startX(0), startY(0), width(0), height(0) {}
 
 RasterTileArea::RasterTileArea(Image* imageIn, int startXIn, int startYIn, int widthIn, int heightIn)
     : image(imageIn), startX(startXIn), startY(startYIn), width(widthIn), height(heightIn)
 {
-    if ( image == 0 ) throw std::invalid_argument("image can not be null");
-    if ( startX < 0 || startY < 0 ) throw std::invalid_argument("tile origin must be >= 0");
-    if ( width <= 0 || height <= 0 ) throw std::invalid_argument("tile size must be > 0");
+    if ( image == 0 ) throw IllegalArgumentException("image can not be null");
+    if ( startX < 0 || startY < 0 ) throw IllegalArgumentException("tile origin must be >= 0");
+    if ( width <= 0 || height <= 0 ) throw IllegalArgumentException("tile size must be > 0");
     if ( startX + width > image->getXSize() || startY + height > image->getYSize() ) {
-        throw std::invalid_argument("tile bounds must be inside target image");
+        throw IllegalArgumentException("tile bounds must be inside target image");
     }
 }
 

@@ -1,7 +1,7 @@
 #ifndef __XT_OPENGL1_GUI_EVENT_EXECUTOR__
 #define __XT_OPENGL1_GUI_EVENT_EXECUTOR__
 
-#include <string>
+#include "java/lang/String.h"
 
 #include "vsdk/toolkit/gui/CommandListener.h"
 
@@ -19,9 +19,12 @@ class XtOpenGL1GuiEventExecutor : public CommandListener {
 private:
     XtApplicationHost* parent;
 
-    bool executeXtCommand(const std::string& label);
+    bool executeXtCommand(const String& label);
 
 public:
+    static const Class CLASS;
+    virtual const Class *getClass() const;
+
     explicit XtOpenGL1GuiEventExecutor(XtApplicationHost* parent);
 
     /**
