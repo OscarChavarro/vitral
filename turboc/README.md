@@ -1,24 +1,88 @@
-# Vitral C++ Port
+# Vitral C++ Port (turboc legacy port)
 
-This directory contains the C++ port of the Vitral graphics toolkit. It follows the same architectural principles as the Java implementation while using C++ and native libraries for performance-critical operations.
+This directory contains the turboc port of the Vitral graphics toolkit: a
+legacy derivative of the C++ port (`cpp/`) that keeps the same architecture
+and the same toolkit code, written in a conservative C++ subset that builds
+with compilers from 1992 to 2007, including Borland Turbo C++ 3.0 for DOS.
 
 ## Overview
 
-The C++ port includes:
+The turboc port includes:
 
-- **Core module** (`base/`): Linear algebra, geometry, media, and IO foundations
-- **Rendering backends**: OpenGL 4.1 core with GLSL shaders (`opengl4/`),
-  OpenGL 1.2 fixed function pipeline without shaders (`opengl1/`, a
-  mechanical port of `opengl4/` without Phong / Cook-Torrance shading nor
-  bump mapping), GLFW, GLUT, and others
-- **Testsuite** (`testsuite/`): Examples and benchmarks
-- **Native library integration**: Direct bindings for image processing (libpng,
-  libjpeg), computer vision (OpenCV), and CAD/B-Rep interoperability
-  (Open CASCADE Technology, OCCT)
+- **Core module** (`base/`): Linear algebra, geometry, media, and IO
+  foundations, over the Java-like layer of `base/src/main/java` instead of
+  the C++ standard library
+- **Rendering backend**: OpenGL 1.2 fixed function pipeline without shaders
+  (`opengl1/`) and GLUT (`glut/`); unlike the cpp port there is no OpenGL
+  4.1 (`opengl4/`), GLFW nor GTK 4
+- **Xt GUI layer**: `xt/`, with the Motif (`xm/`) and Athena (`xaw/`)
+  widget sets
+- **Testsuite** (`testsuite/`): offline examples (no window system), OpenGL
+  1.2 / GLUT examples, VGA examples (SVGALIB), API tests and the Xt scene
+  editor
+- **Native library integration**: optional libpng, libjpeg and FreeType
+
+## Gradual derivation from the cpp port
+
+The port was derived from the C++ port in successive steps, each one
+targeting an older toolchain while keeping the previous ones working:
+
+1. **Copy of the cpp port (C++11).** The starting point was a copy of
+   `cpp/`, which uses C++11 and the C++ standard library.
+2. **gcc 4.1.2 (Ubuntu 7.04, 2007).** The C++11 and newer extensions were
+   removed (no `auto`, lambdas, `nullptr`, range `for`, smart pointers,
+   ...), the OpenGL 4.1 / GLFW / GTK backends were replaced by OpenGL 1.2,
+   GLUT and Xt (Motif and Athena), and the code was moved to a pre-ISO C++
+   style.
+3. **gcc 2.7.2.1 (Debian 1.1, 1996).** The C++ standard library containers,
+   strings, streams and algorithms were replaced by the Java-like classes of
+   `base/src/main/java`; the code avoids member templates, template
+   specializations and the other constructs gcc 2.7.2 does not support or
+   crashes on, and builds with plain Makefiles (no CMake), libc 5, X11R6.1,
+   LessTif 0.76 and Mesa 2.2 / 3.0, with or without POSIX threads.
+4. **Borland Turbo C++ 3.0 (DOS, 1992).** The language was reduced to the
+   subset of Turbo C++ 3.0 (no `bool`, no `mutable`, no static member
+   initializers, 32 bit `long long`, 32 character identifiers, ...) through
+   the macros of `vsdk/toolkit/common/VSDK.h`, with `#ifdef __TURBOC__`
+   alternatives for the few C library and POSIX services DOS lacks.
+
+The rules that came out of each step are listed below, in
+[Legacy toolchains](#legacy-toolchains-gnu-make-only).
+
+### Platforms and stack
+
+| Platform | Compiler | Build | Window system / graphics |
+|---|---|---|---|
+| Ubuntu 7.04 (i686) | g++ 4.1.2 | CMake 2.4.6 or Makefiles | X11, Xt, Motif 2.2.3, Athena, Mesa 6.5.2, freeglut 2.4.0, SVGALIB |
+| Debian 1.1 (i386) | gcc 2.7.2.1 | Makefiles | X11R6.1, Xt, LessTif 0.76, Athena, Mesa 2.2 / 3.0 |
+| DOS | Borland Turbo C++ 3.0 | Turbo C++ | none: `base` and the offline examples only |
+
+DOS has none of SVGALIB, X11, Xt, Xaw, Motif nor OpenGL, so only the core
+library and the programs that need no window system are built there.
+Despite that, the code base is the same for every platform: there is no
+DOS specific fork, and the same sources build and run unchanged on the
+three toolchains, with the platform differences confined to a few
+`#ifdef`s in `base`.
+
+### 32 bit CPUs
+
+The turboc port is meant to run on 32 bit CPUs (i386 and later), unlike the
+cpp port, which mainly targets 64 bit CPUs. The code does not assume 64 bit
+pointers nor a 64 bit `long`, and on Turbo C++ `long long` is a 32 bit
+`long` (see `VSDK_LL` / `VSDK_HAS_LONG_LONG` below).
+
+### No threads nor `Future` on DOS
+
+DOS has no SMP nor any equivalent (and supporting it would make no sense
+there), so the threads / `Future` model of the cpp port is not supported
+on DOS. Without POSIX threads (`VITRAL_WITHOUT_PTHREADS`, the default of
+the Makefiles) `java/lang/PosixThreads.h` supplies a single threaded subset
+(no-op mutexes and conditions, and a `pthread_create` that fails), and
+`ExecutorService::execute` runs each task right away in the calling thread.
 
 ## Build
 
-From the `cpp/` directory:
+From the `turboc/` directory (systems with CMake, i.e. Ubuntu 7.04):
 
 ```bash
 mkdir -p build
@@ -30,7 +94,8 @@ cmake --build .
 ### Legacy toolchains (GNU make only)
 
 The turboc port targets legacy compilers (gcc 4.1 on Ubuntu 7.04, gcc 2.7.2
-on Debian 1.1 and, eventually, Turbo C++ 3.0 for DOS). On systems without
+on Debian 1.1 and Turbo C++ 3.0 for DOS, see
+[Gradual derivation from the cpp port](#gradual-derivation-from-the-cpp-port)). On systems without
 CMake, the base library and the offline examples (the testsuite programs
 that need no window system) are built with plain Makefiles:
 
@@ -195,7 +260,7 @@ The C++ port requires the following dependencies:
 ### Core Requirements
 
 - **C++ compiler** compatible with the port's legacy language subset
-- **CMake** 3.16 or higher
+- **CMake** 2.4.6 or higher (Ubuntu 7.04), or GNU make alone (Debian 1.1)
 
 ### Optional: Image Format Support
 
@@ -533,7 +598,7 @@ display.
 
 - **Minimal dependencies**: Core (`base/`) avoids external libraries where possible
 - **Gradual feature enablement**: Optional features (JPEG, PNG) compile conditionally
-- **Platform compatibility**: Uses standard C++ with careful platform-specific handling
+- **Platform compatibility**: One code base for Ubuntu 7.04, Debian 1.1 and DOS, in a C++ subset common to g++ 4.1.2, gcc 2.7.2.1 and Turbo C++ 3.0, with platform-specific handling confined to a few `#ifdef`s
 - **Educational value**: Code is structured for clarity and learning
 
 ## Related Documentation

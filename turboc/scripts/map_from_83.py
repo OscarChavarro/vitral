@@ -1,0 +1,410 @@
+#!/usr/bin/env python3
+# Restores the long names of the turboc port from the DOS names given by
+# map_to_83.py, which this script inverts:
+#   1. class names back to their long names (class_renames_32.csv), changing
+#      only identifier tokens, as found by the raw lexer of clang
+#   2. quoted (and <> ones that name files of the port) #include directives
+#   3. text of the sources to Unix (LF) line endings
+#   4. files to their long names (mappings_83.csv)
+#   5. folders to their long names
+# The parts of the port that are not in the tables (i.e. the X11, OpenGL and
+# svgalib ones) are not changed.
+import argparse
+import concurrent.futures
+import csv
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+SOURCE_EXTS = {".cpp", ".h", ".txx", ".c"}
+INCLUDE_RE = re.compile(rb'^([ \t]*#[ \t]*include[ \t]*)(["<])([^">\r\n]+)([">])(.*)$', re.M)
+RAW_ID_RE = re.compile(r"^raw_identifier '([A-Za-z_$][A-Za-z0-9_$]*)'\t.*Loc=<.*:(\d+):(\d+)>$")
+
+
+def load_mappings(csv_path: Path):
+    rows = []
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        required = {"old_path", "new_path_8_3"}
+        if not required.issubset(set(reader.fieldnames or [])):
+            missing = required - set(reader.fieldnames or [])
+            raise ValueError(f"Missing columns in {csv_path.name}: " + ", ".join(sorted(missing)))
+        for row in reader:
+            rows.append((row["new_path_8_3"], row["old_path"]))
+    return rows
+
+
+def load_class_renames(csv_path: Path):
+    renames = {}
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        required = {"old_name", "new_name"}
+        if not required.issubset(set(reader.fieldnames or [])):
+            missing = required - set(reader.fieldnames or [])
+            raise ValueError(f"Missing columns in {csv_path.name}: " + ", ".join(sorted(missing)))
+        for row in reader:
+            if renames.setdefault(row["new_name"], row["old_name"]) != row["old_name"]:
+                raise ValueError(f"Two classes renamed to {row['new_name']}")
+    return renames
+
+
+def build_node_map(mappings):
+    """Maps every file and folder of the source layout to its target path"""
+    nodes = {"": ""}
+    for src_rel, dst_rel in mappings:
+        src_parts = src_rel.split("/")
+        dst_parts = dst_rel.split("/")
+        if len(src_parts) != len(dst_parts):
+            raise ValueError(f"Mapping changes the folder depth: {src_rel} -> {dst_rel}")
+        for depth in range(1, len(src_parts) + 1):
+            src = "/".join(src_parts[:depth])
+            dst = "/".join(dst_parts[:depth])
+            if nodes.setdefault(src, dst) != dst:
+                raise ValueError(f"Inconsistent mapping for {src}: {nodes[src]} and {dst}")
+    return nodes
+
+
+def make_lookup(nodes, ignore_case: bool):
+    """Path of the layout of nodes, spelled as in an include (DOS: any case)"""
+    if not ignore_case:
+        return lambda rel: rel if rel in nodes else None
+    upper = {}
+    for node in nodes:
+        if upper.setdefault(node.upper(), node) != node:
+            raise ValueError(f"Two paths differ only in case: {node} and {upper[node.upper()]}")
+    return lambda rel: upper.get(rel.upper())
+
+
+def exact_exists(root: Path, rel: str, cache) -> bool:
+    """Existence with case, also on case insensitive file systems (macOS)"""
+    cur = root
+    for part in rel.split("/"):
+        if cur not in cache:
+            cache[cur] = set(os.listdir(cur)) if cur.is_dir() else set()
+        if part not in cache[cur]:
+            return False
+        cur = cur / part
+    return True
+
+
+def find_clang(explicit):
+    candidates = [explicit, os.environ.get("CLANG"), "clang"] + [f"clang-{v}" for v in range(30, 9, -1)]
+    for name in candidates:
+        if name and shutil.which(name):
+            return shutil.which(name)
+    return None
+
+
+def raw_identifiers(clang, path: Path):
+    """(identifier, line, column) of every identifier token of the file"""
+    out = subprocess.run([clang, "-cc1", "-dump-raw-tokens", "-x", "c++", str(path)],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.PIPE).stderr
+    tokens = []
+    for line in out.decode("utf-8", "replace").splitlines():
+        match = RAW_ID_RE.match(line)
+        if match:
+            tokens.append((match.group(1), int(match.group(2)), int(match.group(3))))
+    return tokens
+
+
+def plan_class_renames(clang, project_root: Path, sources, renames):
+    """Byte edits of every file, before changing any of them"""
+    targets = set(renames.values())
+    with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as pool:
+        all_tokens = list(pool.map(lambda rel: raw_identifiers(clang, project_root / rel), sources))
+
+    edits = {}
+    clashes = []
+    for rel, tokens in zip(sources, all_tokens):
+        data = (project_root / rel).read_bytes()
+        line_starts = [0] + [m.end() for m in re.finditer(b"\n", data)]
+        file_edits = []
+        for name, line, column in tokens:
+            if name in targets:
+                clashes.append(f"{rel}:{line}:{column}: {name}")
+            if name not in renames:
+                continue
+            offset = line_starts[line - 1] + column - 1
+            if data[offset:offset + len(name)] != name.encode():
+                raise RuntimeError(f"Token {name} not found at {rel}:{line}:{column}")
+            file_edits.append((offset, offset + len(name), name, renames[name]))
+        if file_edits:
+            edits[rel] = file_edits
+    if clashes:
+        raise RuntimeError("Long class names already used in the sources (the renaming would not be reversible):\n  "
+                           + "\n  ".join(clashes))
+    return edits
+
+
+def report_class_renames(edits, dry_run: bool):
+    for rel in sorted(edits):
+        print(f"  [class] {rel}: {len(edits[rel])} identifiers")
+    action = "Would rename" if dry_run else "Renaming"
+    print(f"{action} {sum(map(len, edits.values()))} class identifiers in {len(edits)} files.")
+
+
+def rewrite_spelling(spelling: str, base: str, nodes, lookup):
+    """Maps each component of an include spelling, starting at folder base"""
+    cur = base
+    out = []
+    for piece in re.split(r"([/\\])", spelling):
+        if piece in ("/", "\\", ".", ""):
+            out.append(piece)
+        elif piece == "..":
+            if not cur:
+                return None
+            cur = cur.rsplit("/", 1)[0] if "/" in cur else ""
+            out.append(piece)
+        else:
+            cur = lookup(f"{cur}/{piece}" if cur else piece)
+            if cur is None:
+                return None
+            out.append(nodes[cur].rsplit("/", 1)[-1])
+    return "".join(out), cur
+
+
+def resolve_include(spelling: str, angle: bool, includer_dir: str, nodes, dirs, files, lookup):
+    """New spelling of an include of a file of the tables, or None. Quoted
+    includes are searched first from the folder of the includer, and then (as
+    <> ones) from every folder of the tables, that must agree"""
+    if not angle:
+        result = rewrite_spelling(spelling, includer_dir, nodes, lookup)
+        if result and result[1] in files:
+            return result[0]
+    results = set()
+    for base in dirs:
+        result = rewrite_spelling(spelling, base, nodes, lookup)
+        if result and result[1] in files:
+            results.add(result[0])
+    if len(results) > 1:
+        raise RuntimeError(f'Ambiguous include "{spelling}" from {includer_dir}: {sorted(results)}')
+    return results.pop() if results else None
+
+
+def plan_include_rewrites(project_root: Path, sources, mappings, ignore_case: bool):
+    """Include edits of every file. ignore_case: the sources have DOS names"""
+    nodes = build_node_map(mappings)
+    inverse_nodes = {dst: src for src, dst in nodes.items()}
+    files = {src for src, _dst in mappings}
+    inverse_files = {dst for _src, dst in mappings}
+    dirs = sorted(n for n in nodes if n not in files)
+    inverse_dirs = sorted(n for n in inverse_nodes if n not in inverse_files)
+    # DOS spellings may have any case, but not the <> ones: <string.h> must
+    # not find java/lang/STRING.H
+    lookups = {False: make_lookup(nodes, ignore_case), True: make_lookup(nodes, False)}
+    inverse_lookups = {False: make_lookup(inverse_nodes, not ignore_case), True: make_lookup(inverse_nodes, False)}
+    same = (lambda a, b: a.upper() == b.upper()) if ignore_case else (lambda a, b: a == b)
+
+    rewrites = {}
+    for rel in sources:
+        data = (project_root / rel).read_bytes()
+        includer_dir = rel.rsplit("/", 1)[0] if "/" in rel else ""
+        changes = []
+        for match in INCLUDE_RE.finditer(data):
+            spelling = match.group(3).decode("latin-1")
+            angle = match.group(2) == b"<"
+            replacement = resolve_include(spelling, angle, includer_dir, nodes, dirs, files, lookups[angle])
+            if replacement is None or replacement == spelling:
+                continue
+            # Rewriting it back must give the same spelling
+            back = resolve_include(replacement, angle, nodes[includer_dir], inverse_nodes,
+                                   inverse_dirs, inverse_files, inverse_lookups[angle])
+            if back is None or not same(back, spelling):
+                raise RuntimeError(f'Include "{spelling}" of {rel} is not reversible ("{replacement}" -> "{back}")')
+            changes.append((match.start(3), match.end(3), spelling, replacement))
+        if changes:
+            rewrites[rel] = changes
+    return rewrites
+
+
+def report_include_rewrites(rewrites, dry_run: bool):
+    for rel in sorted(rewrites):
+        for _start, _end, spelling, replacement in rewrites[rel]:
+            print(f'  [include] {rel}: "{spelling}" -> "{replacement}"')
+    action = "Would update" if dry_run else "Updating"
+    print(f"{action} includes in {len(rewrites)} files ({sum(map(len, rewrites.values()))} includes).")
+
+
+def apply_edits(project_root: Path, edit_sets, dry_run: bool):
+    """Applies at once the edits planned on the same contents of the files"""
+    for rel in sorted(set().union(*edit_sets)):
+        edits = sorted(e for edit_set in edit_sets for e in edit_set.get(rel, []))
+        data = (project_root / rel).read_bytes()
+        for (_s1, end, _o1, _n1), (start, _e2, _o2, _n2) in zip(edits, edits[1:]):
+            if start < end:
+                raise RuntimeError(f"Overlapping edits in {rel}")
+        for start, end, _old, new in reversed(edits):
+            data = data[:start] + new.encode("latin-1") + data[end:]
+        if not dry_run:
+            (project_root / rel).write_bytes(data)
+
+
+def convert_to_unix_text(project_root: Path, sources, dry_run: bool):
+    print(f"Phase 3: converting {len(sources)} files to Unix text")
+    for rel in sources:
+        path = project_root / rel
+        if not dry_run:
+            path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
+def rename_with_temp(src: Path, dst: Path, dry_run: bool, tag: str):
+    if src == dst:
+        return
+    # Allow case-only rename on case-insensitive filesystems by using temp names.
+    tmp = src.with_name(f"{src.name}.maptmp_{tag}")
+    idx = 1
+    while tmp.exists():
+        idx += 1
+        tmp = src.with_name(f"{src.name}.maptmp_{tag}_{idx}")
+    if not dry_run:
+        src.rename(tmp)
+        tmp.rename(dst)
+
+
+def rename_files(project_root: Path, mappings, dry_run: bool):
+    steps = []
+    for src_rel, dst_rel in mappings:
+        src = project_root / src_rel
+        dst = src.with_name(dst_rel.rsplit("/", 1)[-1])
+        if src.name != dst.name:
+            steps.append((src, dst))
+    print(f"Phase 4: renaming {len(steps)} files")
+    # All of them to temp names first, so no name of the tables is in the way
+    temps = []
+    for idx, (src, dst) in enumerate(steps, start=1):
+        tmp = src.with_name(f"{src.name}.maptmp_{idx}")
+        print(f"  {src.relative_to(project_root)} -> {dst.name}")
+        if not dry_run:
+            src.rename(tmp)
+        temps.append((tmp, dst))
+    for tmp, dst in temps:
+        if not dry_run:
+            if dst.exists():
+                raise FileExistsError(f"Destination already exists: {dst}")
+            tmp.rename(dst)
+
+
+def rename_folders(project_root: Path, mappings, dry_run: bool):
+    nodes = build_node_map(mappings)
+    files = {src for src, _dst in mappings}
+    dirs = [d for d in nodes if d and d not in files and d.rsplit("/", 1)[-1] != nodes[d].rsplit("/", 1)[-1]]
+    # Deepest first, so the parents of each folder still have their names
+    dirs.sort(key=lambda d: d.count("/"), reverse=True)
+    print(f"Phase 5: renaming {len(dirs)} folders")
+    for d in dirs:
+        src = project_root / d
+        dst = src.with_name(nodes[d].rsplit("/", 1)[-1])
+        if dst.exists() and dst.name.lower() != src.name.lower():
+            raise FileExistsError(f"Destination already exists: {dst}")
+        print(f"  {d} -> {dst.name}")
+        rename_with_temp(src, dst, dry_run, "dir")
+
+
+def run_clean(script_dir: Path, dry_run: bool):
+    """Removes the build folders with clean.sh (CLEAN.SH with 8.3 names)"""
+    clean = next((p for p in script_dir.iterdir() if p.name.lower() == "clean.sh"), None)
+    if clean is None:
+        raise FileNotFoundError(f"clean.sh not found in {script_dir}")
+    print(f"Phase 0: removing the build folders with {clean.name}", flush=True)
+    if dry_run:
+        print(f"  [dry-run] sh {clean}")
+        return
+    subprocess.run(["sh", str(clean)], check=True)
+
+
+def check_no_build_folders(project_root: Path, mappings, dry_run: bool):
+    """The build folders are not in the tables, and must not be moved with
+    the folders that are renamed"""
+    nodes = build_node_map(mappings)
+    files = {src for src, _dst in mappings}
+    left = []
+    for d in sorted(n for n in nodes if n not in files):
+        folder = project_root / d if d else project_root
+        left += [folder / e for e in sorted(os.listdir(folder))
+                 if e.lower().startswith("build") and (folder / e).is_dir()]
+    if left and not dry_run:
+        raise RuntimeError("Build folders left after the cleaning:\n  " + "\n  ".join(map(str, left)))
+
+
+def check_layout(project_root: Path, mappings, strict: bool):
+    """Mappings of the files present in the source layout; None when the tree
+    is already in the target layout"""
+    cache = {}
+    present = []
+    in_target = 0
+    missing = []
+    for src_rel, dst_rel in mappings:
+        if exact_exists(project_root, src_rel, cache):
+            present.append((src_rel, dst_rel))
+        elif exact_exists(project_root, dst_rel, cache):
+            in_target += 1
+        else:
+            missing.append(src_rel)
+    if in_target and not present:
+        return None
+    if in_target:
+        raise RuntimeError(f"Mixed layout: {len(present)} files with source names and {in_target} with target names")
+    if missing:
+        if strict:
+            raise FileNotFoundError("Sources not found:\n  " + "\n  ".join(missing))
+        for rel in missing:
+            print(f"[skip] missing source: {rel}")
+    return present
+
+
+def main():
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent
+
+    parser = argparse.ArgumentParser(description="Restore the long file and class names of the turboc port "
+                                                 "from its 8.3 names")
+    parser.add_argument("--csv", default=str(script_dir / "mappings_83.csv"), help="Path to mappings_83.csv")
+    parser.add_argument("--classes-csv", default=str(script_dir / "class_renames_32.csv"),
+                        help="Path to class_renames_32.csv")
+    parser.add_argument("--clang", help="clang executable (default: $CLANG, clang, clang-<version>)")
+    parser.add_argument("--dry-run", action="store_true", help="Print changes without applying them")
+    parser.add_argument("--strict", action="store_true", help="Fail if any source file is missing")
+    args = parser.parse_args()
+
+    csv_path = Path(args.csv).resolve()
+    classes_path = Path(args.classes_csv).resolve()
+    for path in (csv_path, classes_path):
+        if not path.exists():
+            print(f"{path.name} not found: {path}", file=sys.stderr)
+            return 2
+    clang = find_clang(args.clang)
+    if clang is None:
+        print("clang not found (install clang or llvm, or use --clang)", file=sys.stderr)
+        return 2
+
+    mappings = load_mappings(csv_path)
+    renames = load_class_renames(classes_path)
+    run_clean(script_dir, args.dry_run)
+    present = check_layout(project_root, mappings, args.strict)
+    if present is None:
+        print("The tree already has the long names, nothing to do.")
+        return 0
+    sources = [src for src, _dst in present if Path(src).suffix.lower() in SOURCE_EXTS]
+
+    check_no_build_folders(project_root, present, args.dry_run)
+
+    # Every change is planned and checked before changing any file
+    class_edits = plan_class_renames(clang, project_root, sources, renames)
+    include_rewrites = plan_include_rewrites(project_root, sources, present, True)
+
+    print(f"Phase 1: restoring class names longer than 32 characters (clang: {clang})")
+    report_class_renames(class_edits, args.dry_run)
+    print("Phase 2: updating #include directives")
+    report_include_rewrites(include_rewrites, args.dry_run)
+    apply_edits(project_root, [class_edits, include_rewrites], args.dry_run)
+    convert_to_unix_text(project_root, sources, args.dry_run)
+    rename_files(project_root, present, args.dry_run)
+    rename_folders(project_root, present, args.dry_run)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
